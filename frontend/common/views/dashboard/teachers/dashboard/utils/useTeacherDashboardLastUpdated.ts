@@ -1,30 +1,32 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function useTeacherDashboardLastUpdated(dataArrivedAt: number | null): string {
-  const t = useTranslations("dashboard.teacherDashboard");
-  const [lastUpdated, setLastUpdated] = useState(t("updatedJustNow"));
+  const t = useAppTranslation("dashboard.teacherDashboard");
+  const updatedJustNow = t.updatedJustNow as string;
+  const updatedMinutesAgo = t.updatedMinutesAgo as (minutes: number) => string;
+  const [lastUpdated, setLastUpdated] = useState(updatedJustNow);
 
   useEffect(() => {
     if (dataArrivedAt === null) {
-      setLastUpdated(t("updatedJustNow"));
+      setLastUpdated(updatedJustNow);
       return;
     }
 
     const computeLabel = () => {
       const elapsedMin = Math.floor((Date.now() - dataArrivedAt) / 60000);
       if (elapsedMin < 1) {
-        return t("updatedJustNow");
+        return updatedJustNow;
       }
-      return t("updatedMinutesAgo", { minutes: elapsedMin });
+      return updatedMinutesAgo(elapsedMin);
     };
 
     setLastUpdated(computeLabel());
     const interval = setInterval(computeLabel, 60000);
     return () => clearInterval(interval);
-  }, [dataArrivedAt, t]);
+  }, [dataArrivedAt, updatedJustNow, updatedMinutesAgo]);
 
   return lastUpdated;
 }

@@ -15,7 +15,7 @@ export namespace StudentDirectoryService {
     paginationArgs: PaginationArgs | null,
     tErrors: ErrorsLabels,
     filters?: StudentFilterArgs | null,
-    orderBy?: StudentsOrderByClause[] | null,
+    orderBy?: StudentsOrderByClause[] | null
   ): Promise<StudentDirectoryResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENTS_LIST);
     if (!hasPermission) {

@@ -1,0 +1,46 @@
+import type { RescheduleTrackingLabels } from "@/shared/locale/types/dashboard/classes";
+
+export const rescheduleTracking: RescheduleTrackingLabels = {
+  pageTitle: "Dashboard Overview",
+  sectionTitle: "Class Schedule & Tracking",
+  exportData: "Export Data",
+  filterAll: "All",
+  showingOf: (shown, total) => `Showing ${shown} of ${total} entries`,
+  noEntries: "No entries",
+  metrics: {
+    pendingRequests: "Pending Requests",
+    approvedClasses: "Approved Classes",
+    leaveRequests: "Leave Requests",
+    reScheduled: "Rescheduled",
+    cancelled: "Cancelled",
+  },
+  table: {
+    teacherName: "Teacher Name",
+    studentClass: "Student / Class",
+    scheduledDate: "Scheduled Date",
+    timeSlot: "Time Slot",
+    classStatus: "Class Status",
+    action: "Action",
+  },
+  badges: {
+    newDate: "New Date",
+    leaveRequest: "Leave Request",
+  },
+  status: {
+    rescheduled: "Regular (rescheduled)",
+    pendingLeave: "Leave Pending",
+    approved: "Approved",
+    cancelled: "Cancelled",
+  },
+  actions: {
+    viewDetails: "View Details",
+    approveLeave: "Approve Leave",
+    approveSuccess: "Leave approved successfully",
+    rejectLeave: "Reject Leave",
+  },
+  errors: {
+    missingOriginalClassId: "Cannot perform action: Original class ID missing",
+    approveFailed: "Failed to approve leave",
+  },
+  loadFailed: "Failed to load tracking data.",
+};

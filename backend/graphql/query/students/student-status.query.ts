@@ -10,11 +10,11 @@ gqlSchemaBuilder.queryField("studentUpcomingClasses", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
+      const tErrors = await ctx.t("errors");
       if (!ctx.user) {
-        const tErrors = await ctx.t("errors");
         throw new Error(tErrors.unauthorized);
       }
-      return StudentStatusService.getUpcomingClasses(ctx.user.id, args.studentId, ctx.locale);
+      return StudentStatusService.getUpcomingClasses(ctx.user.id, args.studentId, tErrors);
     },
   })
 );

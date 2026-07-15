@@ -243,7 +243,9 @@ export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
           const tErrors = await ctx.t("errors");
           throw new Error(tErrors.unauthorized);
         }
-        return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.completedInstanceId, ctx.locale);
+        const tErrors = await ctx.t("errors");
+        const tSession = await ctx.t("session");
+        return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.completedInstanceId, tSession, tErrors);
       },
     }),
     rescheduledInstance: t.field({
@@ -253,7 +255,9 @@ export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
           const tErrors = await ctx.t("errors");
           throw new Error(tErrors.unauthorized);
         }
-        return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.rescheduledInstanceId, ctx.locale);
+        const tErrors = await ctx.t("errors");
+        const tSession = await ctx.t("session");
+        return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.rescheduledInstanceId, tSession, tErrors);
       },
     }),
   }),

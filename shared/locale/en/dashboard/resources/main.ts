@@ -1,0 +1,56 @@
+import type { ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
+
+export const main: ResourcesLabels = {
+  pageTitle: "Learning Resources",
+  pageSubtitle: "Manage and distribute educational materials for teachers and students.",
+  upload: {
+    sectionTitle: "Upload New Resource",
+    documentName: "Document Name",
+    documentNamePlaceholder: "e.g. Advanced Mathematics Guide",
+    dropzoneTitle: "Drag and drop file here",
+    dropzoneHint: "or browse your computer",
+    supportedFormats: "Maximum file size: 25MB (PDF, DOCX, PPTX)",
+    submit: "Upload",
+    successMessage: "Resource uploaded successfully.",
+  },
+  guidelines: {
+    title: "Upload Guidelines",
+    items: [
+      "Ensure file names are professional",
+      "Check document for copyright compliance",
+      "Resource will be visible to all assigned managers",
+    ],
+  },
+  governance: {
+    title: "Privacy & Governance",
+    body: "Documents uploaded here are visible to Teachers only. Student and Parent access must be manually configured via the Permissions tab.",
+  },
+  library: {
+    title: "Document Library",
+    filter: "Filter",
+    sortByDate: "Date",
+    sortByName: "Name",
+    typeAll: "Type: All",
+    uploaded: "Uploaded",
+    noEntries: "No resources match your filters",
+  },
+  deleteDialog: {
+    title: "Delete Resource?",
+    body: title => `This action cannot be undone. Are you sure you want to permanently delete ${title}?`,
+    confirm: "Yes",
+    cancel: "No",
+  },
+  validation: {
+    documentNameRequired: "Please enter a document name.",
+    fileRequired: "Please select a file to upload.",
+  },
+  notification: {
+    fileTypeNotAllowed: type => `${type} is not an allowed file type`,
+    uploadPrepareFailed: "Failed to prepare upload",
+    uploadFailed: "File upload failed. Please try again.",
+    createRecordFailed: "Failed to create resource record.",
+    uploadRetryFailed: "Failed to upload resource. Please try again.",
+    deleteSuccess: "Resource deleted successfully.",
+    deleteFailed: "Failed to delete resource.",
+  },
+};

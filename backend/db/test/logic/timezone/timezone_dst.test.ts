@@ -23,7 +23,15 @@ import { DstMigrationService } from "@/backend/services/system/dst-migration.ser
 import type { ClassInstanceInsertInput, ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
 import type { UserSelectType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import { getErrorMessage } from "@/shared/utils/error";
+
+let tErrors: ErrorsLabels;
+
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 describe("Timezone Handling & DST Adjustment", () => {
   let testUser: UserSelectType | null = null;
@@ -281,13 +289,15 @@ describe("Timezone Handling & DST Adjustment", () => {
       const actorUserId = testUser.id;
 
       // Case 1: Lacks permission
-      const error = await DstMigrationService.executeBulkDstUpdate(actorUserId, 60, "DST adjustment").catch(e => e);
+      const error = await DstMigrationService.executeBulkDstUpdate(actorUserId, 60, "DST adjustment", tErrors).catch(
+        e => e
+      );
       expect(error).toBeInstanceOf(Error);
       expect(getErrorMessage(error)).toContain("Insufficient permissions");
 
       // Case 2: Has permission
       mockPermissions.set(`${actorUserId}:${AppPermission.SYSTEM_BULK_UPDATE_DST}`, true);
-      const report = await DstMigrationService.executeBulkDstUpdate(actorUserId, 60, "DST adjustment");
+      const report = await DstMigrationService.executeBulkDstUpdate(actorUserId, 60, "DST adjustment", tErrors);
       expect(report.total).toBe(0);
       expect(report.updated).toBe(0);
       expect(report.conflicts).toBe(0);

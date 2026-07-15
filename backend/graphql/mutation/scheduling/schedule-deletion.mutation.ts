@@ -9,7 +9,8 @@ gqlSchemaBuilder.mutationField("deleteRecurringClass", t =>
     authScopes: { superAdmin: true, notImpersonating: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return ScheduleDeletionService.deleteClass(userId, args.classInstanceId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return ScheduleDeletionService.deleteClass(userId, args.classInstanceId, tErrors);
     },
   })
 );
@@ -21,7 +22,8 @@ gqlSchemaBuilder.mutationField("clearWeeklySchedule", t =>
     authScopes: { superAdmin: true, notImpersonating: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return ScheduleDeletionService.clearWeeklySchedule(userId, args.teacherId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return ScheduleDeletionService.clearWeeklySchedule(userId, args.teacherId, tErrors);
     },
   })
 );

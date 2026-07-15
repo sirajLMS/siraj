@@ -1,0 +1,13 @@
+import type { ParentRulesLabels } from "@/shared/locale/types/dashboard/parents";
+
+export const rules: ParentRulesLabels = {
+  pageTitle: "القواعد والسياسات",
+  pageSubtitle: "دليل العائلة وسياسات نظام إدارة التعلم.",
+  sections: {
+    policies: "السياسات",
+  },
+  policyIntro: "يرجى مراجعة دليل أولياء الأمور والالتزام بسياسات نظام إدارة التعلم للجدولة والإجازات والفوترة.",
+  policyLeave: "يجب تقديم طلبات الإجازة قبل وقت بدء الحصة المجدولة.",
+  policyBilling: "تُصدر الفواتير شهرياً. تواصل مع الدعم لأي استفسارات عن الفوترة.",
+  downloadHandbook: "تحميل دليل أولياء الأمور",
+};

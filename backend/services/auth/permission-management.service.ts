@@ -13,6 +13,7 @@ import type {
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
+import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace PermissionManagementService {
@@ -50,15 +51,15 @@ export namespace PermissionManagementService {
     return user;
   }
 
-  async function requireGroupExists(groupId: string, tErrors: ErrorsLabels, ) {
-    const group = await PermissionManagementRepository.getGroupById(groupId, );
+  async function requireGroupExists(groupId: string, tErrors: ErrorsLabels) {
+    const group = await PermissionManagementRepository.getGroupById(groupId);
     if (!group) throw new Error(tErrors.permissionManagement.permissionGroupNotFound(groupId));
     return group;
   }
 
-  async function requireBulkGroupSetup(actorUserId: string, groupId: string, tErrors: ErrorsLabels,) {
+  async function requireBulkGroupSetup(actorUserId: string, groupId: string, tErrors: ErrorsLabels) {
     await requireAssignAccess(actorUserId, tErrors);
-    await requireGroupExists(groupId, tErrors, );
+    await requireGroupExists(groupId, tErrors);
   }
 
   async function requireUserSetup(
@@ -150,18 +151,12 @@ export namespace PermissionManagementService {
    * Creating new system permissions or converting existing custom permissions to system permissions is strictly
    * prohibited by the database schema. All system permissions are seeded and immutable.
    */
-  export async function listPermissions(
-    actorUserId: string,
-    tErrors: ErrorsLabels,
-  ): Promise<PermissionEntity[]> {
+  export async function listPermissions(actorUserId: string, tErrors: ErrorsLabels): Promise<PermissionEntity[]> {
     await requireManageAccess(actorUserId, tErrors);
     return PermissionManagementRepository.listAllPermissions();
   }
 
-  export async function listGroups(
-    actorUserId: string,
-    tErrors: ErrorsLabels,
-  ): Promise<GroupWithPermissionIds[]> {
+  export async function listGroups(actorUserId: string, tErrors: ErrorsLabels): Promise<GroupWithPermissionIds[]> {
     await requireManageAccess(actorUserId, tErrors);
     return PermissionManagementRepository.listAllGroups();
   }
@@ -169,10 +164,10 @@ export namespace PermissionManagementService {
   export async function getGroup(
     actorUserId: string,
     groupId: string,
-    tErrors: ErrorsLabels,
+    tErrors: ErrorsLabels
   ): Promise<GroupWithPermissionIds> {
     await requireManageAccess(actorUserId, tErrors);
-    return requireGroupExists(groupId, tErrors, );
+    return requireGroupExists(groupId, tErrors);
   }
 
   // ─── Write Operations ─────────────────────────────────────────────────────
@@ -180,7 +175,7 @@ export namespace PermissionManagementService {
   export async function createGroup(
     actorUserId: string,
     input: { name: LocalizedString; description?: LocalizedString | null; permissionIds: string[] },
-    tErrors: ErrorsLabels,
+    tErrors: ErrorsLabels
   ): Promise<GroupWithPermissionIds> {
     await requireManageAccess(actorUserId, tErrors);
 
@@ -199,15 +194,13 @@ export namespace PermissionManagementService {
       counter++;
     }
 
-    return PermissionManagementRepository.createGroup(
-      {
-        name: input.name,
-        slug,
-        description: input.description ?? null,
-        permissionIds: input.permissionIds,
-        createdByUserId: actorUserId,
-      },
-    );
+    return PermissionManagementRepository.createGroup({
+      name: input.name,
+      slug,
+      description: input.description ?? null,
+      permissionIds: input.permissionIds,
+      createdByUserId: actorUserId,
+    });
   }
 
   export async function updateGroup(
@@ -218,7 +211,7 @@ export namespace PermissionManagementService {
       description?: LocalizedString | null;
       permissionIds?: string[];
     },
-    tErrors: ErrorsLabels,
+    tErrors: ErrorsLabels
   ): Promise<GroupWithPermissionIds> {
     await requireManageAccess(actorUserId, tErrors);
 
@@ -229,22 +222,16 @@ export namespace PermissionManagementService {
       slug = validated.slug;
     }
 
-    return PermissionManagementRepository.updateGroup(
-      {
-        id: input.groupId,
-        name: input.name,
-        slug,
-        description: trimLocalizedString(input.description),
-        permissionIds: input.permissionIds,
-      },
-    );
+    return PermissionManagementRepository.updateGroup({
+      id: input.groupId,
+      name: input.name,
+      slug,
+      description: trimLocalizedString(input.description),
+      permissionIds: input.permissionIds,
+    });
   }
 
-  export async function deleteGroup(
-    actorUserId: string,
-    groupId: string,
-    tErrors: ErrorsLabels,
-  ): Promise<void> {
+  export async function deleteGroup(actorUserId: string, groupId: string, tErrors: ErrorsLabels): Promise<void> {
     await requireManageAccess(actorUserId, tErrors);
     await PermissionManagementRepository.deleteGroup(groupId);
   }

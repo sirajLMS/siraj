@@ -3,12 +3,12 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { currencyHedges } from "@/backend/db/schema";
 import type { CurrencyCode } from "@/backend/enum";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type {
   CurrencyHedgeInsertType,
   CurrencyHedgeReturnType,
   CurrencyHedgeUpdateInput,
 } from "@/backend/types/billing/billing.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace CurrencyHedgeRepository {
   export async function listAll(tx?: DBTransaction): Promise<CurrencyHedgeReturnType[]> {
@@ -47,8 +47,8 @@ export namespace CurrencyHedgeRepository {
   export async function update(
     id: string,
     input: CurrencyHedgeUpdateInput,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<CurrencyHedgeReturnType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -58,18 +58,24 @@ export namespace CurrencyHedgeRepository {
       .returning();
 
     if (!updated) {
-      throw new Error(tErrors?.file.recordNotFound({ tableName: "currency_hedges", entityId: id }) ?? `Currency hedge not found: ${id}`);
+      throw new Error(
+        tErrors.file.recordNotFound({ tableName: "currency_hedges", entityId: id }) ??
+          `Currency hedge not found: ${id}`
+      );
     }
 
     return updated;
   }
 
-  export async function deleteById(id: string, tx?: DBTransaction, tErrors?: ErrorsLabels): Promise<boolean> {
+  export async function deleteById(id: string,tErrors: ErrorsLabels, tx?: DBTransaction, ): Promise<boolean> {
     const client = tx ?? db;
     const [deleted] = await client.delete(currencyHedges).where(eq(currencyHedges.id, id)).returning();
 
     if (!deleted) {
-      throw new Error(tErrors?.file.recordNotFound({ tableName: "currency_hedges", entityId: id }) ?? `Currency hedge not found: ${id}`);
+      throw new Error(
+        tErrors.file.recordNotFound({ tableName: "currency_hedges", entityId: id }) ??
+          `Currency hedge not found: ${id}`
+      );
     }
 
     return true;

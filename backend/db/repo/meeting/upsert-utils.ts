@@ -1,5 +1,6 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 /**
  * Shared `upsertMany` loop used by both ClassMeetingConfigRepository and
@@ -10,10 +11,10 @@ import { db } from "@/backend/db/drizzleDb";
 export async function upsertManyWith<TInput, TResult, TExisting extends { id: string }>(
   inputs: readonly TInput[],
   findExisting: (input: TInput, t: DBTransaction) => Promise<TExisting | null>,
-  createOne: (input: TInput, t: DBTransaction, locale?: string) => Promise<TResult>,
-  updateOne: (id: string, input: TInput, t: DBTransaction, locale?: string) => Promise<TResult>,
+  createOne: (input: TInput, t: DBTransaction, tErrors: ErrorsLabels) => Promise<TResult>,
+  updateOne: (id: string, input: TInput, t: DBTransaction, tErrors: ErrorsLabels) => Promise<TResult>,
+  tErrors: ErrorsLabels,
   tx?: DBTransaction,
-  locale?: string
 ): Promise<TResult[]> {
   if (inputs.length === 0) return [];
 
@@ -24,10 +25,10 @@ export async function upsertManyWith<TInput, TResult, TExisting extends { id: st
       const existing = await findExisting(input, t);
 
       if (existing) {
-        const updated = await updateOne(existing.id, input, t, locale);
+        const updated = await updateOne(existing.id, input, t, tErrors);
         results.push(updated);
       } else {
-        results.push(await createOne(input, t, locale));
+        results.push(await createOne(input, t, tErrors));
       }
     }
 

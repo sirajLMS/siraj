@@ -1,0 +1,40 @@
+import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers";
+
+export const futureSchedule: TeacherFutureScheduleLabels = {
+  pageTitle: "جدول المعلم القادم",
+  jumpToDate: "الانتقال إلى تاريخ",
+  leaveQuota: "حصة الإجازة",
+  totalClasses: "إجمالي الحصص",
+  futureClasses: "الحصص القادمة",
+  regular: "عادي",
+  reScheduled: "مُعاد جدولته",
+  requestLeave: "طلب إجازة",
+  viewMaterials: "عرض المواد",
+  quotaReached: "تم الوصول للحد الأقصى",
+  remaining: (count, total) => `${count} / ${total} متبقي`,
+  importantNotes: "ملاحظات هامة",
+  supportContact: "جهة اتصال الدعم",
+  contactAdmin: "الآتصال بالمسؤول",
+  monthDisplay: (month, year) => `${month} ${year}`,
+  leaveQuotaDesc: () => "حصة الإجازة",
+  totalClassesDesc: () => "إجمالي الحصص",
+  available: "متاح",
+  loading: "جاري تحميل الجدول المستقبلي...",
+  defaultLeaveReason: "المعلم طلب إجازة من الجدول المستقبلي",
+  supportRequestReason: "طلب المعلم الدعم من صفحة الجدول المستقبلي",
+  students: "الطلاب",
+  errors: {
+    quotaExceeded: "لقد وصلت إلى الحد الأقصى لطلبات الإجازة لهذا الشهر.",
+    leaveRequestFailed: "فشل طلب الإجازة. يرجى المحاولة مرة أخرى.",
+    failedToLoad: "فشل تحميل الجدول المستقبلي.",
+    supportRequestFailed: "فشل إرسال طلب الدعم. يرجى المحاولة مرة أخرى.",
+  },
+  notifications: {
+    noSubjectAssigned: "لم يتم تعيين مادة لهذه الحصة.",
+    supportRequestSent: "تم إرسال طلب الدعم بنجاح.",
+    leaveRequested: "تم طلب الإجازة بنجاح.",
+  },
+  actions: {
+    joinVideo: "الانضمام للفيديو",
+  },
+};

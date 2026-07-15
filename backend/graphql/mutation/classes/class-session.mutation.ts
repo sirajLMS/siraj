@@ -10,8 +10,10 @@ import { type ClassActionFn, ClassSessionService } from "@/backend/services/sess
 
 async function handleClassAction<R>(ctx: BaseContext, classInstanceId: string, action: ClassActionFn<R>) {
   const userId = await requireAuth(ctx);
-  await action(userId, classInstanceId, ctx.locale);
-  return ClassSessionService.getClassInstanceDetail(userId, classInstanceId, ctx.locale);
+  const tErrors = await ctx.t("errors");
+  const tSession = await ctx.t("session");
+  await action(userId, classInstanceId, tErrors);
+  return ClassSessionService.getClassInstanceDetail(userId, classInstanceId, tSession, tErrors);
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
@@ -73,11 +75,12 @@ gqlSchemaBuilder.mutationField("updateSessionStatusLeave", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       const result = await ClassSessionService.updateStatusLeave(
         userId,
         args.classInstanceId,
-        args.leaveReason,
-        ctx.locale
+        tErrors,
+        args.leaveReason
       );
       return {
         id: `${result.originalId}:${result.successorId}`,
@@ -98,6 +101,8 @@ gqlSchemaBuilder.mutationField("rescheduleClass", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
+      const tSession = await ctx.t("session");
       const newInstance = await ClassSessionService.reschedule(
         userId,
         args.classInstanceId,
@@ -106,9 +111,10 @@ gqlSchemaBuilder.mutationField("rescheduleClass", t =>
           scheduledEndAt: new Date(args.input.scheduledEndAt),
           durationMinutes: args.input.durationMinutes,
         },
-        ctx.locale
+        tSession,
+        tErrors
       );
-      return ClassSessionService.getClassInstanceDetail(userId, newInstance.id, ctx.locale);
+      return ClassSessionService.getClassInstanceDetail(userId, newInstance.id, tSession, tErrors);
     },
   })
 );
@@ -120,7 +126,8 @@ gqlSchemaBuilder.mutationField("resetClass", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      await ClassSessionService.reset(userId, args.classInstanceId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      await ClassSessionService.reset(userId, args.classInstanceId, tErrors);
       return true;
     },
   })
@@ -133,7 +140,8 @@ gqlSchemaBuilder.mutationField("deleteClassInstance", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return ClassSessionService.deleteInstance(userId, args.classInstanceId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return ClassSessionService.deleteInstance(userId, args.classInstanceId, tErrors);
     },
   })
 );

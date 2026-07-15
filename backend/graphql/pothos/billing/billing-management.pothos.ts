@@ -23,6 +23,7 @@ import type {
   MarkInvoicePaidReturnType,
   SendPaymentReminderResult,
 } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 // ─── Result Flattening Helpers ──────────────────────────────────────────────
 // Services return nested { invoice: {...}, notificationSummaryUpdated } shapes.
@@ -52,11 +53,12 @@ function flattenDeleteInvoiceResult(result: DeleteInvoiceResult): DeleteInvoiceR
 // Eliminates duplicated resolver bodies across the four MarkInvoicePaid mutations.
 
 function markInvoicePaidResolver<TArgs extends Record<string, unknown>>(
-  serviceCall: (userId: string, args: TArgs, locale?: string) => Promise<MarkInvoicePaidResult>
+  serviceCall: (userId: string, args: TArgs, tErrors: ErrorsLabels) => Promise<MarkInvoicePaidResult>
 ) {
   return async (_root: unknown, args: TArgs, ctx: BaseContext): Promise<MarkInvoicePaidReturnType> => {
     const userId = await requireAuth(ctx);
-    const result = await serviceCall(userId, args, ctx.locale);
+    const tErrors = await ctx.t("errors");
+    const result = await serviceCall(userId, args, tErrors);
     return flattenMarkInvoicePaidResult(result);
   };
 }
@@ -161,6 +163,7 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       return BillingManagementService.createManualInvoice(
         userId,
         {
@@ -176,7 +179,7 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
           billingMonths: args.billingMonths?.map(m => ({ year: m.year, month: m.month })) ?? null,
           sendEmail: args.sendEmail ?? null,
         },
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -191,13 +194,13 @@ gqlSchemaBuilder.mutationField("submitPaymentProof", t =>
       proofFileId: t.arg.id({ required: true }),
       expectedVersion: t.arg.int({ required: false }),
     },
-    resolve: markInvoicePaidResolver((_userId, _args, locale) =>
+    resolve: markInvoicePaidResolver((_userId, _args, tErrors) =>
       BillingManagementService.submitPaymentProof(
         _userId,
         _args.invoiceId,
         _args.proofFileId,
-        _args.expectedVersion ?? undefined,
-        locale
+        tErrors,
+        _args.expectedVersion ?? undefined
       )
     ),
   })
@@ -211,8 +214,13 @@ gqlSchemaBuilder.mutationField("approvePaymentProof", t =>
       invoiceId: t.arg.string({ required: true }),
       expectedVersion: t.arg.int({ required: false }),
     },
-    resolve: markInvoicePaidResolver((_userId, _args, locale) =>
-      BillingManagementService.approvePaymentProof(_userId, _args.invoiceId, _args.expectedVersion ?? undefined, locale)
+    resolve: markInvoicePaidResolver((_userId, _args, tErrors) =>
+      BillingManagementService.approvePaymentProof(
+        _userId,
+        _args.invoiceId,
+        tErrors,
+        _args.expectedVersion ?? undefined
+      )
     ),
   })
 );
@@ -226,13 +234,13 @@ gqlSchemaBuilder.mutationField("rejectPaymentProof", t =>
       rejectionReason: t.arg.string({ required: false }),
       expectedVersion: t.arg.int({ required: false }),
     },
-    resolve: markInvoicePaidResolver((_userId, _args, locale) =>
+    resolve: markInvoicePaidResolver((_userId, _args, tErrors) =>
       BillingManagementService.rejectPaymentProof(
         _userId,
         _args.invoiceId,
+        tErrors,
         _args.rejectionReason ?? null,
-        _args.expectedVersion ?? undefined,
-        locale
+        _args.expectedVersion ?? undefined
       )
     ),
   })
@@ -247,13 +255,13 @@ gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
       expectedVersion: t.arg.int({ required: false }),
       proofFileId: t.arg.id({ required: true }),
     },
-    resolve: markInvoicePaidResolver((_userId, _args, locale) =>
+    resolve: markInvoicePaidResolver((_userId, _args, tErrors) =>
       BillingManagementService.markInvoicePaid(
         _userId,
         _args.invoiceId,
         _args.proofFileId,
-        _args.expectedVersion ?? undefined,
-        locale
+        tErrors,
+        _args.expectedVersion ?? undefined
       )
     ),
   })
@@ -270,7 +278,8 @@ gqlSchemaBuilder.queryField("invoicePaymentSubmission", t =>
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
       await setBillingFxDisplayCurrencyForInvoiceParent(ctx, args.invoiceId, userId);
-      return BillingManagementService.getInvoicePaymentSubmission(userId, args.invoiceId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return BillingManagementService.getInvoicePaymentSubmission(userId, args.invoiceId, tErrors);
     },
   })
 );
@@ -284,7 +293,8 @@ gqlSchemaBuilder.mutationField("deleteInvoice", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const result = await BillingManagementService.deleteInvoice(userId, args.invoiceId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      const result = await BillingManagementService.deleteInvoice(userId, args.invoiceId, tErrors);
       return flattenDeleteInvoiceResult(result);
     },
   })
@@ -308,7 +318,8 @@ gqlSchemaBuilder.mutationField("sendPaymentReminder", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return BillingManagementService.sendPaymentReminder(userId, args.studentId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return BillingManagementService.sendPaymentReminder(userId, args.studentId, tErrors);
     },
   })
 );

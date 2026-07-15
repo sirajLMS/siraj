@@ -137,8 +137,9 @@ export async function buildClassInstanceDetail(
 export async function resolveDetail(
   userId: string,
   classInstanceId: string,
-  locale?: string
+  tSession: SessionLabels,
+  tErrors: ErrorsLabels
 ): Promise<ClassInstanceDetailReturnType> {
   const { ClassSessionService } = await import("@/backend/services/session/class-session.service");
-  return ClassSessionService.getClassInstanceDetail(userId, classInstanceId, locale);
+  return ClassSessionService.getClassInstanceDetail(userId, classInstanceId, tSession, tErrors);
 }

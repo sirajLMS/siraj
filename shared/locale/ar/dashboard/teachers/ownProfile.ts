@@ -1,0 +1,16 @@
+import type { TeacherOwnProfileLabels } from "@/shared/locale/types/dashboard/teachers";
+
+export const ownProfile: TeacherOwnProfileLabels = {
+  pageTitle: "تفاصيل الراتب",
+  pageSubtitle: "اعرض ملفك الرسمي وتفاصيل التعويض.",
+  notSet: "غير محدد",
+  sections: {
+    contact: "معلومات الاتصال",
+    salary: "تفاصيل الراتب",
+  },
+  baseSalary: (amount, currency) => `الراتب الأساسي: ${amount} ${currency}`,
+  paymentMethod: method => `طريقة الدفع: ${method}`,
+  errors: {
+    failedToLoad: "فشل تحميل ملفك الشخصي.",
+  },
+};

@@ -13,11 +13,12 @@ gqlSchemaBuilder.queryField("classInstance", t =>
     args: { id: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
+      const tSession = await ctx.t("session");
+      const tErrors = await ctx.t("errors");
       if (!ctx.user) {
-        const tErrors = await ctx.t("errors");
         throw new Error(tErrors.unauthorized);
       }
-      return ClassSessionService.getClassInstanceDetail(ctx.user.id, args.id, ctx.locale);
+      return ClassSessionService.getClassInstanceDetail(ctx.user.id, args.id, tSession, tErrors);
     },
   })
 );
@@ -28,11 +29,11 @@ gqlSchemaBuilder.queryField("classStatusEvents", t =>
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
+      const tErrors = await ctx.t("errors");
       if (!ctx.user) {
-        const tErrors = await ctx.t("errors");
         throw new Error(tErrors.unauthorized);
       }
-      return ClassSessionService.getClassStatusEvents(ctx.user.id, args.classInstanceId, ctx.locale);
+      return ClassSessionService.getClassStatusEvents(ctx.user.id, args.classInstanceId, tErrors);
     },
   })
 );
@@ -45,11 +46,11 @@ gqlSchemaBuilder.queryField("teacherFutureSchedule", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
+      const tErrors = await ctx.t("errors");
       if (!ctx.user) {
-        const tErrors = await ctx.t("errors");
         throw new Error(tErrors.unauthorized);
       }
-      return ScheduleService.getTeacherFutureSchedule(ctx.user.id, args.teacherId ?? undefined, ctx.locale);
+      return ScheduleService.getTeacherFutureSchedule(ctx.user.id, tErrors, args.teacherId ?? undefined);
     },
   })
 );

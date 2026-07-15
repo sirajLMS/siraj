@@ -87,6 +87,7 @@ export namespace StudentOnboardingService {
           classesRemaining: input.classesRemaining ?? 0,
           idempotencyKey: randomUUID(),
         },
+        tErrors,
         txObj
       );
 

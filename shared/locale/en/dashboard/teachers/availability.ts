@@ -1,0 +1,60 @@
+import type { TeacherAvailabilityLabels } from "@/shared/locale/types/dashboard/teachers";
+
+export const availability: TeacherAvailabilityLabels = {
+  pageTitle: "Teacher Availability",
+  pageSubtitle: "View and manage teacher availability",
+  exportPdf: "Export to PDF",
+  exportPdfComingSoon: "Coming soon",
+  teacherSlotSelected: (name, id) => `Teacher ${id} (${name}) slot selected`,
+  searchTitle: "Search Availability",
+  from: "From",
+  to: "To",
+  gender: "Gender",
+  any: "Any",
+  male: "Male",
+  female: "Female",
+  submit: "Search",
+  breadcrumbs: {
+    teachers: "Teachers",
+    availability: "Availability",
+  },
+  errors: {
+    missingTimeRange: "Please select a time range.",
+  },
+  table: {
+    time: "Time",
+    monday: "Mon",
+    tuesday: "Tue",
+    wednesday: "Wed",
+    thursday: "Thu",
+    friday: "Fri",
+    saturday: "Sat",
+    sunday: "Sun",
+    mon: "Mon",
+    tue: "Tue",
+    wed: "Wed",
+    thu: "Thu",
+    fri: "Fri",
+    sat: "Sat",
+    sun: "Sun",
+  },
+  insights: {
+    peakLoad: "Peak Load",
+    peakLoadDesc: "Busiest times across teachers",
+    availableStaff: "Available Staff",
+    availableStaffDesc: "Available teachers during selected hours",
+    teachersCount: count => `${count} Teachers`,
+    localTimezones: "Local Timezones",
+    localTimezonesDesc: "Teachers' local timezones",
+  },
+  mobile: {
+    pageTitle: "Availability",
+    pageSubtitle: "Search and view teacher availability",
+  },
+  status: {
+    live: "Live",
+    lastUpdate: minutes =>
+      minutes === 1 ? `Last updated ${minutes} minute ago` : `Last updated ${minutes} minutes ago`,
+  },
+  availabilityGridTitle: "Available Slots",
+};

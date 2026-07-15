@@ -1,12 +1,12 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { PageContainer } from "@/frontend/common/components/ui";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { StudentHistoryDesktop } from "@/frontend/common/views/dashboard/students/history/components/StudentHistoryDesktop";
 import { StudentHistoryMobile } from "@/frontend/common/views/dashboard/students/history/components/StudentHistoryMobile";
 import type { StudentHistoryViewProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function StudentHistoryView({
   studentName,
@@ -25,7 +25,7 @@ export function StudentHistoryView({
   nowMonth,
   locale,
 }: Readonly<StudentHistoryViewProps>) {
-  const t = useTranslations("dashboard.studentHistory");
+  const t = useAppTranslation("dashboard.studentHistory");
   const { canView } = useStudentFieldAccess();
 
   const content = canView("student_history") ? (
@@ -60,7 +60,7 @@ export function StudentHistoryView({
       />
     </>
   ) : (
-    <ProfileRestrictedSection title={t("pageTitle")} />
+    <ProfileRestrictedSection title={t.pageTitle("{name}")} />
   );
 
   if (embedded) {

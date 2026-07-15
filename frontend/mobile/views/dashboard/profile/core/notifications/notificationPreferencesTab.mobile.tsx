@@ -1,9 +1,9 @@
 "use client";
 
 import { Alert, Box, Snackbar, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { PreferencesChannelTabs } from "@/frontend/common/views/dashboard/profile/core/notifications/PreferencesChannelTabs";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type NotificationPreferencesTabMobileProps = NotificationPreferencesTabVariantProps;
 
@@ -18,22 +18,20 @@ export function NotificationPreferencesTabMobile({
   onSnackbarClose,
   errorLoading,
 }: Readonly<NotificationPreferencesTabMobileProps>) {
-  const t = useTranslations("profile.notifications");
+  const t = useAppTranslation("profile").notifications;
 
   if (errorLoading) {
     return (
-      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>
-        {t("errorLoading")}
-      </Typography>
+      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>{t.errorLoading}</Typography>
     );
   }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box>
-        <Typography sx={{ typography: "titleLg", mb: 1 }}>{t("title")}</Typography>
+        <Typography sx={{ typography: "titleLg", mb: 1 }}>{t.title}</Typography>
         <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-          {t("description")}
+          {t.description}
         </Typography>
       </Box>
 

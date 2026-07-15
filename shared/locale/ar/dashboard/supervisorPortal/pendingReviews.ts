@@ -1,0 +1,27 @@
+import type { PendingReviewsLabels } from "@/shared/locale/types/dashboard/supervisorPortal/pendingReviews";
+
+export const pendingReviews: PendingReviewsLabels = {
+  pageTitle: "مراجعات الحصص المعلقة",
+  filterByTeacher: "تصفية حسب المعلم",
+  filterByStudent: "تصفية حسب الطالب",
+  allTeachers: "كل المعلمين",
+  allStudents: "كل الطلاب",
+  lessonDateColumn: "تاريخ الحصة",
+  studentColumn: "الطالب",
+  teacherColumn: "المعلم",
+  attendanceColumn: "الحضور",
+  completionColumn: "نسبة الإنجاز",
+  submittedAtColumn: "تاريخ الإرسال",
+  statusColumn: "الحالة",
+  actionsColumn: "إجراءات",
+  reviewButton: "مراجعة",
+  approveButton: "قبول",
+  rejectButton: "رفض",
+  rejectDialogTitle: "رفض تقرير الحصة",
+  rejectReasonLabel: "سبب الرفض",
+  rejectReasonPlaceholder: "يرجى ذكر سبب الرفض...",
+  rejectConfirm: "تأكيد الرفض",
+  rejectCancel: "إلغاء",
+  noPendingReviews: "لا توجد مراجعات معلقة",
+  loadingMessage: "جارٍ التحميل...",
+};

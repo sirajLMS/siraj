@@ -3,18 +3,18 @@
 import { PersonAddOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function NewStudentContainer() {
-  const t = useTranslations("dashboard.studentDirectory");
+  const t = useAppTranslation("dashboard.studentDirectory");
   const router = useRouter();
   const notifications = useNotifications();
 
   useEffect(() => {
-    notifications.show(t("registrationComingSoonNotice"), {
+    notifications.show(t.registrationComingSoonNotice, {
       severity: "info",
       autoHideDuration: 5000,
     });
@@ -26,7 +26,7 @@ export function NewStudentContainer() {
 
   return (
     <PageContainer>
-      <PageHeader title={t("addStudent")} subtitle={t("registrationComingSoon")} />
+      <PageHeader title={t.addStudent} subtitle={t.registrationComingSoon} />
 
       <Box
         sx={theme => ({
@@ -58,13 +58,13 @@ export function NewStudentContainer() {
           <PersonAddOutlined sx={{ fontSize: 40 }} />
         </Box>
         <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
-          {t("addStudent")}
+          {t.addStudent}
         </Typography>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center" })}>
-          {t("registrationComingSoonDescription")}
+          {t.registrationComingSoonDescription}
         </Typography>
         <Button variant="outlined" onClick={handleGoBack} sx={theme => ({ borderColor: theme.palette.border.main })}>
-          {t("previous")}
+          {t.previous}
         </Button>
       </Box>
     </PageContainer>

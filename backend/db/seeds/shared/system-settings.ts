@@ -4,6 +4,7 @@ import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 const createSetting = (
   key: string,
@@ -90,6 +91,7 @@ const SEED_STORAGE_DIRECTORIES = [
 ] as const;
 
 export async function seedOrGet() {
+  const tErrors = await getServerTranslations("ar", "errors");
   logger.info("Initializing storage directories...");
   try {
     const fileSeeder = await createFileSeedingService();
@@ -107,7 +109,7 @@ export async function seedOrGet() {
   const handbookPath = resolveAssetPath(`teacher_handbook/${handbookFileName}`);
   try {
     const fileBuffer = await fs.readFile(handbookPath);
-    await SystemSettingsService.uploadHandbook(null, handbookFileName, fileBuffer);
+    await SystemSettingsService.uploadHandbook(null, handbookFileName, fileBuffer, tErrors);
     logger.info("Teacher handbook seeded successfully.");
   } catch (error) {
     logger.error("Failed to seed teacher handbook:", error);
@@ -118,7 +120,7 @@ export async function seedOrGet() {
   const parentHandbookPath = resolveAssetPath("documents/sample-resource.pdf");
   try {
     const parentFileBuffer = await fs.readFile(parentHandbookPath);
-    await SystemSettingsService.uploadParentHandbook(null, parentHandbookFileName, parentFileBuffer);
+    await SystemSettingsService.uploadParentHandbook(null, parentHandbookFileName, parentFileBuffer, tErrors);
     logger.info("Parent handbook seeded successfully.");
   } catch (error) {
     logger.error("Failed to seed parent handbook:", error);

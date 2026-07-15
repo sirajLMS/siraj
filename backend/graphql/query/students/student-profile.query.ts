@@ -13,24 +13,18 @@ gqlSchemaBuilder.queryField("studentProfile", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
+      const tErrors = await ctx.t("errors");
       if (!ctx.user) {
-        const tErrors = await ctx.t("errors");
         throw new Error(tErrors.unauthorized);
       }
       let studentId = args.studentId;
       if (!studentId) {
         studentId = await StudentRepository.getStudentIdByUserId(ctx.user.id);
         if (!studentId) {
-          const tErrors = await ctx.t("errors");
           throw new Error(tErrors.studentNotFound(ctx.user.id));
         }
       }
-      return StudentProfileService.getProfile(
-        ctx.user.id,
-        studentId,
-        { year: args.year, month: args.month },
-        ctx.locale
-      );
+      return StudentProfileService.getProfile(ctx.user.id, studentId, { year: args.year, month: args.month }, tErrors);
     },
   })
 );

@@ -1,6 +1,5 @@
 import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutlined } from "@mui/icons-material";
 import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { PaginationControls, PersonProfileLink } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
@@ -8,6 +7,8 @@ import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gq
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
 
 interface TeacherCardListProps {
   readonly rows: readonly TeacherDirectoryRow[];
@@ -62,7 +63,7 @@ function TeacherCard({
   router,
 }: {
   readonly row: TeacherDirectoryRow;
-  readonly t: ReturnType<typeof useTranslations<"dashboard.teachersDirectory">>;
+  readonly t: TeachersDirectoryLabels;
   readonly router: ReturnType<typeof useRouter>;
 }) {
   return (
@@ -93,7 +94,7 @@ function TeacherCard({
         <StatusBadge
           category="studentAccount"
           status={row.status === AccountStatus.Activated ? "regular" : "deactivated"}
-          label={row.status === AccountStatus.Activated ? t("status.active") : t("status.offline")}
+          label={row.status === AccountStatus.Activated ? t.status.active : t.status.offline}
         />
       </Box>
 
@@ -115,7 +116,7 @@ function TeacherCard({
             typography: "buttonText",
           })}
         >
-          {t("actions.joinRoom")}
+          {t.actions.joinRoom}
         </Button>
         <TeacherCardActions row={row} t={t} router={router} />
       </Box>
@@ -129,7 +130,7 @@ function TeacherCardActions({
   router,
 }: {
   readonly row: TeacherDirectoryRow;
-  readonly t: ReturnType<typeof useTranslations<"dashboard.teachersDirectory">>;
+  readonly t: TeachersDirectoryLabels;
   readonly router: ReturnType<typeof useRouter>;
 }) {
   return (
@@ -171,7 +172,7 @@ export function TeacherCardList({
   totalCount,
   onPageChange,
 }: Readonly<TeacherCardListProps>) {
-  const t = useTranslations("dashboard.teachersDirectory");
+  const t = useAppTranslation("dashboard.teachersDirectory");
   const router = useRouter();
 
   const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
@@ -181,7 +182,7 @@ export function TeacherCardList({
       <TeacherSearchField
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
-        placeholder={t("placeholders.searchTeachers")}
+        placeholder="placeholders.searchTeachers"
       />
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

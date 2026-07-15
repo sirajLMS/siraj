@@ -1,11 +1,12 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
 import type { MeetingConfigDetailsForm } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type MeetingConfigFormEditInfo = {
   readonly id?: string | null;
@@ -46,7 +47,7 @@ export type UseMeetingConfigFormStateOptions = {
 };
 
 export function useMeetingConfigFormState({ open, editConfig, existingCount }: UseMeetingConfigFormStateOptions) {
-  const t = useTranslations("ui.meetingConfig.manager");
+  const t = useAppTranslation("ui").meetingConfig.manager;
   const locale = useLocale();
   const isEdit = editConfig?.id != null;
 
@@ -93,7 +94,7 @@ export function useMeetingConfigFormState({ open, editConfig, existingCount }: U
       setUrlError(null);
       return true;
     }
-    setUrlError(t("urlNotAllowed"));
+    setUrlError(t.urlNotAllowed);
     return false;
   };
 

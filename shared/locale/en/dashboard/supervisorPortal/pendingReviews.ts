@@ -1,0 +1,27 @@
+import type { PendingReviewsLabels } from "@/shared/locale/types/dashboard/supervisorPortal/pendingReviews";
+
+export const pendingReviews: PendingReviewsLabels = {
+  pageTitle: "Pending Lesson Reviews",
+  filterByTeacher: "Filter by Teacher",
+  filterByStudent: "Filter by Student",
+  allTeachers: "All Teachers",
+  allStudents: "All Students",
+  lessonDateColumn: "Lesson Date",
+  studentColumn: "Student",
+  teacherColumn: "Teacher",
+  attendanceColumn: "Attendance",
+  completionColumn: "Completion %",
+  submittedAtColumn: "Submitted",
+  statusColumn: "Status",
+  actionsColumn: "Actions",
+  reviewButton: "Review",
+  approveButton: "Approve",
+  rejectButton: "Reject",
+  rejectDialogTitle: "Reject Lesson Report",
+  rejectReasonLabel: "Rejection Reason",
+  rejectReasonPlaceholder: "Please provide a reason for rejection...",
+  rejectConfirm: "Confirm Rejection",
+  rejectCancel: "Cancel",
+  noPendingReviews: "No pending reviews",
+  loadingMessage: "Loading...",
+};

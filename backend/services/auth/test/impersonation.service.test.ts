@@ -1,17 +1,24 @@
-import { describe, expect, spyOn, test } from "bun:test";
+import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { UserRepository } from "@/backend/db/repo";
 import { AccountStatus, UserRole } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 /* Test constants */
 
 const ACTOR_ID = "11111111-1111-1111-1111-111111111111";
 const TARGET_ID = "22222222-2222-2222-2222-222222222222";
 const SUPER_TARGET_ID = "33333333-3333-3333-3333-333333333333";
-const LOCALE = "en";
+
+let tErrors: ErrorsLabels;
+
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 /* Test fixtures */
 
@@ -85,14 +92,14 @@ function restoreSpies(spies: { actorSpy: ReturnType<typeof spyOn>; targetSpy?: R
 describe("ImpersonationService.assertCanImpersonate", () => {
   test("rejects self-impersonation", async () => {
     const actorSpy = mockSuperAdminActor();
-    const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, ACTOR_ID, LOCALE));
+    const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, ACTOR_ID, tErrors));
     expect(error.message).toContain("yourself");
     actorSpy.mockRestore();
   });
 
   test("rejects non-super-admin actor", async () => {
     const actorSpy = mockNonSuperAdminActor();
-    const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, LOCALE));
+    const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, tErrors));
     expect(error.message).toContain("not allowed");
     actorSpy.mockRestore();
   });
@@ -100,7 +107,7 @@ describe("ImpersonationService.assertCanImpersonate", () => {
   test("rejects super admin target", async () => {
     const spies = mockActorAndTarget("superAdmin", { isSuperAdmin: true }, SUPER_TARGET_ID);
     const error = await expectRejection(() =>
-      ImpersonationService.assertCanImpersonate(ACTOR_ID, SUPER_TARGET_ID, LOCALE)
+      ImpersonationService.assertCanImpersonate(ACTOR_ID, SUPER_TARGET_ID, tErrors)
     );
     expect(error.message).toContain("super administrator");
     restoreSpies(spies);
@@ -108,7 +115,7 @@ describe("ImpersonationService.assertCanImpersonate", () => {
 
   test("rejects inactive target", async () => {
     const spies = mockActorAndTarget("superAdmin", { status: AccountStatus.DEACTIVATED });
-    const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, LOCALE));
+    const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, tErrors));
     expect(error.message).toContain("inactive");
     restoreSpies(spies);
   });
@@ -116,7 +123,7 @@ describe("ImpersonationService.assertCanImpersonate", () => {
   test("allows super admin to impersonate regular user", async () => {
     const actorSpy = mockSuperAdminActor();
     const targetSpy = mockTargetUser();
-    await ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, LOCALE);
+    await ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, tErrors);
     expect(actorSpy).toHaveBeenCalled();
     expect(targetSpy).toHaveBeenCalled();
     actorSpy.mockRestore();

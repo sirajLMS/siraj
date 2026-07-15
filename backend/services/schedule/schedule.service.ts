@@ -163,12 +163,12 @@ export namespace ScheduleService {
     }
   }
 
-  export async function getDailyMetrics(userId: string, targetDate: Date, teacherId?: string, tErrors?: ErrorsLabels) {
+  export async function getDailyMetrics(userId: string, targetDate: Date, teacherId?: string, tErrors: ErrorsLabels) {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
       if (!isAuthorized) {
         logger.warn("Unauthorized access to daily metrics", { userId });
-        throw new Error(tErrors?.unauthorizedViewMetrics ?? "Unauthorized to view metrics");
+        throw new Error(tErrors.unauthorizedViewMetrics ?? "Unauthorized to view metrics");
       }
 
       const viewerTimezone = await resolveViewerTimezone(userId);
@@ -190,7 +190,7 @@ export namespace ScheduleService {
     tErrors: ErrorsLabels,
     teacherId?: string,
     search?: string,
-    metricFilter?: string,
+    metricFilter?: string
   ) {
     try {
       await assertDailyScheduleListAccess(userId, { search, metricFilter }, tErrors);
@@ -335,7 +335,7 @@ export namespace ScheduleService {
   export async function getTeacherFutureSchedule(
     userId: string,
     tErrors: ErrorsLabels,
-    teacherId?: string,
+    teacherId?: string
   ): Promise<TeacherFutureScheduleReturnType> {
     const resolvedTeacherId = await resolveTeacherId(userId, teacherId ?? null, tErrors);
 

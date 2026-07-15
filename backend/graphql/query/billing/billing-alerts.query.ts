@@ -8,10 +8,11 @@ gqlSchemaBuilder.queryFields(t => ({
     type: UnpaidInvoicesSummaryPothosObject,
     authScopes: { loggedIn: true },
     resolve: async (_root, _args, ctx) => {
+      const tErrors = await ctx.t("errors");
       if (!ctx.user) {
-        throw new Error("Unauthorized");
+        throw new Error(tErrors.unauthorized);
       }
-      const result = await BillingAlertsService.getUnpaidInvoices(ctx.user.id, ctx.locale);
+      const result = await BillingAlertsService.getUnpaidInvoices(ctx.user.id, tErrors);
       await populateBillingFxDisplayCurrencyByUserId(
         ctx,
         result.items.map(item => item.userId)

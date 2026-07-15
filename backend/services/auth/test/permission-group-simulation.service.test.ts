@@ -1,12 +1,20 @@
-import { describe, expect, spyOn, test } from "bun:test";
+import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { SessionRepository } from "@/backend/db/repo";
 import { UserRole } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 const ACTOR_ID = "11111111-1111-1111-1111-111111111111";
 const SESSION_ID = "session-raw-id";
+
+let tErrors: ErrorsLabels;
+
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 function mockSuperAdminActor() {
   return spyOn(PermissionsService, "getUserContext").mockResolvedValue({
@@ -47,13 +55,11 @@ async function expectRejection(fn: () => Promise<unknown>): Promise<Error> {
 }
 
 describe("PermissionGroupSimulationService.assertCanSimulateGroup", () => {
-  const locale = "en";
-
   test("rejects non-super-admin actor", async () => {
     const actorSpy = mockNonSuperAdminActor();
     const groupSpy = mockGroupContext();
     const error = await expectRejection(() =>
-      PermissionGroupSimulationService.assertCanSimulateGroup(ACTOR_ID, "teacher", locale)
+      PermissionGroupSimulationService.assertCanSimulateGroup(ACTOR_ID, "teacher", tErrors)
     );
     expect(error.message).toContain("not allowed");
     actorSpy.mockRestore();
@@ -63,9 +69,9 @@ describe("PermissionGroupSimulationService.assertCanSimulateGroup", () => {
   test("allows super admin for valid group slug", async () => {
     const actorSpy = mockSuperAdminActor();
     const groupContextSpy = mockGroupContext();
-    await PermissionGroupSimulationService.assertCanSimulateGroup(ACTOR_ID, "teacher_default", locale);
+    await PermissionGroupSimulationService.assertCanSimulateGroup(ACTOR_ID, "teacher_default", tErrors);
     expect(actorSpy).toHaveBeenCalledWith(ACTOR_ID);
-    expect(groupContextSpy).toHaveBeenCalledWith("teacher_default", locale);
+    expect(groupContextSpy).toHaveBeenCalledWith("teacher_default");
     actorSpy.mockRestore();
     groupContextSpy.mockRestore();
   });
@@ -73,7 +79,7 @@ describe("PermissionGroupSimulationService.assertCanSimulateGroup", () => {
   test("rejects simulating a group the actor already has", async () => {
     const actorSpy = mockSuperAdminActor();
     const error = await expectRejection(() =>
-      PermissionGroupSimulationService.assertCanSimulateGroup(ACTOR_ID, "super_admin", locale)
+      PermissionGroupSimulationService.assertCanSimulateGroup(ACTOR_ID, "super_admin", tErrors)
     );
     expect(error.message).toContain("already have");
     actorSpy.mockRestore();

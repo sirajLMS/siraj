@@ -17,6 +17,7 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
         const tErrors = await ctx.t("errors");
         throw new Error(tErrors.unauthorized);
       }
+      const tErrors = await ctx.t("errors");
 
       return await RecurringClassService.createRecurringClass(
         ctx.user.id,
@@ -43,7 +44,7 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
           classType: args.input.classType as "REGULAR" | "TRIAL" | "ADVANCE" | undefined,
           generateInstancesForWeeks: args.input.generateInstancesForWeeks || undefined,
         },
-        ctx.locale
+        tErrors
       );
     },
   })

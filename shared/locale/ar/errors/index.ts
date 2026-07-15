@@ -56,6 +56,8 @@ export const errors: ErrorsLabels = {
     invalidParentId: "معرف ولي الأمر غير صالح.",
     invalidInvoiceAmount: "مبلغ الفاتورة غير صالح.",
     parentNotFound: "ولي الأمر غير موجود.",
+    invoiceVersionMismatch: ({ id, expectedVersion, gotVersion }) =>
+      `عدم تطابق في إصدار الفاتورة ${id}: المتوقع ${expectedVersion}، الفعلي ${gotVersion}.`,
   },
   credit: {
     duplicatePurchase: "تمت معالجة عملية شراء الرصيد هذه بالفعل.",
@@ -74,9 +76,20 @@ export const errors: ErrorsLabels = {
   insufficientPermissions: "ليس لديك الصلاحيات الكافية لتنفيذ هذا الإجراء.",
   unauthorized: "يجب تسجيل الدخول أولاً.",
   unauthorizedAction: "غير مصرح لك بتنفيذ هذا الإجراء.",
+  unauthorizedViewList: "غير مصرح لك بعرض هذه القائمة.",
+  unauthorizedSearch: "غير مصرح لك بالبحث.",
+  unauthorizedViewMetrics: "غير مصرح لك بعرض المقاييس.",
   notFound: "المورد المطلوب غير موجود.",
   studentNotFound: id => `الطالب غير موجود: ${id}`,
+  studentCreateFailed: "فشل في إنشاء الطالب.",
+  studentUpdateFailed: id => `فشل في تحديث الطالب (المعرف: ${id}).`,
+  studentVersionMismatch: ({ id, expectedVersion, gotVersion }) =>
+    `عدم تطابق في إصدار الطالب ${id}: المتوقع ${expectedVersion}، الفعلي ${gotVersion}.`,
+  insufficientClasses: ({ id, remaining, required }) =>
+    `رصيد الحصص غير كافٍ للطالب ${id}: متبقٍ ${remaining}، مطلوب ${required}.`,
+  invalidStatusTransition: ({ currentStatus, newStatus }) => `انتقال حالة غير صالح: ${currentStatus} -> ${newStatus}.`,
   categoryNotFound: id => `الفئة غير موجودة: ${id}`,
+  categoryCreateFailed: "فشل إنشاء فئة الحصة.",
   unknownName: "غير معروف",
   meetingProviderInactive: "موفر الاجتماعات غير نشط.",
   meetingConfigNotFound: id => `تكوين الاجتماع غير موجود: ${id}`,

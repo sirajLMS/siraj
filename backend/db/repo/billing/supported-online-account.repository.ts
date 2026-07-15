@@ -3,12 +3,12 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { supportedOnlineAccounts } from "@/backend/db/schema";
 import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type {
   SupportedOnlineAccountInsertType,
   SupportedOnlineAccountSelectType,
   UpdateSupportedOnlineAccountInput,
 } from "@/backend/types/billing/payment-method.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 type AccountRow = typeof supportedOnlineAccounts.$inferSelect;
 
@@ -99,8 +99,8 @@ export namespace SupportedOnlineAccountRepository {
   export async function update(
     id: string,
     input: UpdateSupportedOnlineAccountInput,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<SupportedOnlineAccountSelectType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -110,7 +110,9 @@ export namespace SupportedOnlineAccountRepository {
       .returning();
 
     if (!updated) {
-      throw new Error(tErrors?.file.recordNotFound({ tableName: "supported_online_accounts", entityId: id }) ?? `Supported online account not found: ${id}`);
+      throw new Error(
+        tErrors.file.recordNotFound({ tableName: "supported_online_accounts", entityId: id })
+      );
     }
 
     return toSelectType(updated);
@@ -118,10 +120,10 @@ export namespace SupportedOnlineAccountRepository {
 
   export async function deactivate(
     id: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<SupportedOnlineAccountSelectType> {
-    return update(id, { isActive: false }, tx, tErrors);
+    return update(id, { isActive: false }, tErrors, tx);
   }
 
   export async function listByIds(

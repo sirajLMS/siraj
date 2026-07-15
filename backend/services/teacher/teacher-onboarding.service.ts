@@ -91,38 +91,36 @@ export namespace TeacherOnboardingService {
   async function createInitialPayoutMethodIfProvided(
     input: TeacherOnboardingInput,
     userId: string,
-    txObj: DBTransaction,
-    locale: string | undefined
+    txObj: DBTransaction
   ): Promise<void> {
     if (!input.initialPayoutMethod) {
       return;
     }
 
-    await PaymentMethodService.createUserPaymentMethodInternal({ ...input.initialPayoutMethod, userId }, txObj, locale);
+    await PaymentMethodService.createUserPaymentMethodInternal({ ...input.initialPayoutMethod, userId }, txObj);
   }
 
   export async function createTeacher(
     actorUserId: string,
     input: TeacherOnboardingInput,
+    tErrors: ErrorsLabels,
     locale?: string,
     tx?: DBTransaction
   ): Promise<TeacherOnboardingResult> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.TEACHERS_CREATE);
     if (!hasPermission) {
-      throw new Error(t("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const emailExists = await UserRepository.existsByEmail(input.email);
     if (emailExists) {
-      throw new Error(t("user.emailAlreadyExists"));
+      throw new Error(tErrors.userEmailExists);
     }
 
     const run = async (txObj: DBTransaction) => {
       const { user, teacher } = await createUserAndTeacher(input, locale, txObj);
-      await assignTeacherPermissionGroup(user, actorUserId, t, txObj);
-      await createInitialPayoutMethodIfProvided(input, user.id, txObj, locale);
+      await assignTeacherPermissionGroup(user, actorUserId, tErrors, txObj);
+      await createInitialPayoutMethodIfProvided(input, user.id, txObj);
 
       logger.info("Teacher onboarded successfully", { teacherId: teacher.id, userId: user.id });
 

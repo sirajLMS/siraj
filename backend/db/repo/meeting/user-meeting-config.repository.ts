@@ -111,7 +111,6 @@ export namespace UserMeetingConfigRepository {
       encryptedSecret?: string | null;
     },
     tx?: DBTransaction,
-    locale?: string
   ): Promise<UserMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<UserMeetingConfigSelectType> => {
       const existing = await getByIdOrThrow(id, t, locale);
@@ -206,8 +205,8 @@ export namespace UserMeetingConfigRepository {
     return upsertManyWith(
       inputs,
       (input, t) => findByUserProviderLabel(input.userId, input.providerId, input.label, t),
-      create,
-      (id, input, t, loc) =>
+      (input, t) => create(input, t, locale),
+      (id, input, t) =>
         update(
           id,
           {
@@ -218,10 +217,9 @@ export namespace UserMeetingConfigRepository {
             providerId: input.providerId,
           },
           t,
-          loc
+          locale
         ),
-      tx,
-      locale
+      tx
     );
   }
 }

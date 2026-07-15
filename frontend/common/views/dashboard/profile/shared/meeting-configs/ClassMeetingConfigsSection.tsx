@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { Button, Stack, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar, SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigList } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
@@ -25,6 +25,8 @@ import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ClassMeetingConfigFormDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigFormDialog";
 import { ClassMeetingContextBanner } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingContextBanner";
 import { MeetingConfigDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigDeleteDialog";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { MeetingConfigClassScopeLabels, MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
 
 export type ClassMeetingConfigsSectionProps = {
   readonly classInstanceId?: string;
@@ -51,8 +53,8 @@ function ConfigsContent({
   handleSetDefault,
   onDelete,
 }: {
-  readonly t: ReturnType<typeof useTranslations>;
-  readonly tManager: ReturnType<typeof useTranslations>;
+  readonly t: MeetingConfigClassScopeLabels;
+  readonly tManager: MeetingConfigManagerLabels;
   readonly resolvedCanManage: boolean;
   readonly configs: readonly ClassMeetingConfigFieldsFragment[];
   readonly busy: boolean;
@@ -69,7 +71,7 @@ function ConfigsContent({
       {resolvedCanManage ? (
         <Stack sx={{ flexDirection: "row", justifyContent: "flex-end" }}>
           <Button variant="contained" startIcon={<AddOutlinedIcon />} onClick={handleAdd}>
-            {tManager("add")}
+            {tManager.add}
           </Button>
         </Stack>
       ) : null}
@@ -77,15 +79,15 @@ function ConfigsContent({
       <MeetingConfigList
         configs={configs}
         loading={busy}
-        title={tManager("listTitle")}
-        emptyMessage={t("noConfigs")}
+        title={tManager.listTitle}
+        emptyMessage={t.noConfigs}
         onEditAction={resolvedCanManage ? handleEdit : undefined}
         onDeleteAction={resolvedCanManage ? onDelete : undefined}
         onSetDefaultAction={resolvedCanManage ? handleSetDefault : undefined}
       />
 
       {!resolvedCanManage && configs.length === 0 ? (
-        <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{t("noConfigs")}</Typography>
+        <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{t.noConfigs}</Typography>
       ) : null}
     </Stack>
   );
@@ -148,7 +150,7 @@ function useMeetingConfigMutations(
   refetch: () => Promise<unknown>,
   setDeleteId: (id: string | null) => void,
   setErrorMessage: (msg: string | null) => void,
-  tManager: ReturnType<typeof useTranslations>
+  tManager: MeetingConfigManagerLabels
 ) {
   const [deleteConfig, { loading: deleting }] = useMutation(deleteClassMeetingConfigMutationDocument);
   const [setDefault, { loading: settingDefault }] = useMutation(setDefaultClassMeetingConfigMutationDocument);
@@ -159,7 +161,7 @@ function useMeetingConfigMutations(
         await setDefault({ variables: { id } });
         await refetch();
       } catch {
-        setErrorMessage(tManager("saveError"));
+        setErrorMessage(tManager.saveError);
       }
     },
     [setDefault, refetch, tManager, setErrorMessage]
@@ -172,7 +174,7 @@ function useMeetingConfigMutations(
       setDeleteId(null);
       await refetch();
     } catch {
-      setErrorMessage(tManager("deleteError"));
+      setErrorMessage(tManager.deleteError);
     }
   }, [deleteId, deleteConfig, refetch, tManager, setDeleteId, setErrorMessage]);
 
@@ -211,7 +213,7 @@ function ClassMeetingConfigDialogs({
   readonly classInstanceId?: string;
   readonly recurringScheduleId?: string;
   readonly configsCount: number;
-  readonly tManager: ReturnType<typeof useTranslations>;
+  readonly tManager: MeetingConfigManagerLabels;
   readonly setFormOpen: (open: boolean) => void;
   readonly setEditConfig: (config: ClassMeetingConfigFieldsFragment | null) => void;
   readonly setDeleteId: (id: string | null) => void;
@@ -250,7 +252,7 @@ function ClassMeetingConfigDialogs({
         onConfirm={handleDelete}
       />
 
-      <FormSuccessSnackbar open={showSuccess} message={tManager("saved")} onClose={() => setShowSuccess(false)} />
+      <FormSuccessSnackbar open={showSuccess} message={tManager.saved} onClose={() => setShowSuccess(false)} />
       <FormErrorSnackbar
         open={errorMessage != null}
         message={errorMessage ?? ""}
@@ -266,8 +268,8 @@ export function ClassMeetingConfigsSection({
   canManage,
   effectiveMeeting,
 }: ClassMeetingConfigsSectionProps) {
-  const t = useTranslations("ui.meetingConfig.classScope");
-  const tManager = useTranslations("ui.meetingConfig.manager");
+  const t = useAppTranslation("ui").meetingConfig.classScope;
+  const tManager = useAppTranslation("ui").meetingConfig.manager;
   const locale = useLocale();
   const { hasPermission } = useUserStore();
   const resolvedCanManage = canManage ?? hasPermission(AppPermission.MeetingConfigsManageClass);
@@ -312,10 +314,10 @@ export function ClassMeetingConfigsSection({
   if (error && configs.length === 0) {
     return (
       <ErrorSection
-        title={t("sectionTitle")}
-        subtitle={t("sectionSubtitle")}
-        errorMessage={tManager("loadError")}
-        retryLabel={tManager("retry")}
+        title={t.sectionTitle}
+        subtitle={t.sectionSubtitle}
+        errorMessage={tManager.loadError}
+        retryLabel={tManager.retry}
         onRetry={() => {
           void refetch();
         }}
@@ -326,7 +328,7 @@ export function ClassMeetingConfigsSection({
   const busy = loading || deleting || settingDefault;
 
   return (
-    <SectionPanel id="meeting-configs" title={t("sectionTitle")} subTitle={t("sectionSubtitle")}>
+    <SectionPanel id="meeting-configs" title={t.sectionTitle} subTitle={t.sectionSubtitle}>
       <ConfigsContent
         t={t}
         tManager={tManager}

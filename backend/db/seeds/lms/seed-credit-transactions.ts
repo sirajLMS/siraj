@@ -3,6 +3,7 @@ import { findAdminUserOrFallback } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import type { CreditTransactionReturnType, StudentEntity, UserSelectType } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 type CreditPurchaseSpec = {
   studentIndex: number;
@@ -52,6 +53,8 @@ export async function seedOrGet(
     return [];
   }
 
+  const tErrors = await getServerTranslations("ar", "errors");
+
   const results: (CreditTransactionReturnType | null)[] = [];
 
   for (const spec of CREDIT_PURCHASE_SPECS) {
@@ -69,7 +72,8 @@ export async function seedOrGet(
         hours: spec.hours,
         notes: `${spec.notes} [${idempotencyKey}]`,
       },
-      idempotencyKey
+      idempotencyKey,
+      tErrors
     );
 
     results.push(ledgerRow);

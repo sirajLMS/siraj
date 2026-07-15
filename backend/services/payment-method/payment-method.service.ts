@@ -60,7 +60,7 @@ async function assertCatalogActive(
   type: PaymentMethodType,
   details: PaymentMethodDetails,
   tx?: DBTransaction,
-  tErrors?: ErrorsLabels,
+  tErrors: ErrorsLabels,
   locale?: string
 ): Promise<void> {
   if (!tErrors) {
@@ -286,7 +286,7 @@ export namespace PaymentMethodService {
           ...input,
           ...(details !== undefined ? { details } : {}),
         },
-        t,
+        t
       );
 
       return buildMaskedPaymentMethod(updated, true);
@@ -306,8 +306,8 @@ export namespace PaymentMethodService {
       throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
     }
 
-    await assertActorCanManageTarget(actorUserId, existing.userId, locale);
-    await UserPaymentMethodRepository.deleteById(id, tx, locale);
+    await assertActorCanManageTarget(actorUserId, existing.userId, undefined);
+    await UserPaymentMethodRepository.deleteById(id, tx, tErrors);
   }
 
   export async function setDefaultUserPaymentMethod(
@@ -325,7 +325,7 @@ export namespace PaymentMethodService {
       actorUserId,
       id,
       { isDefault: true, direction: existing.direction as PaymentDirection },
-      tErrors,
+      tErrors
     );
   }
 
@@ -352,7 +352,7 @@ export namespace PaymentMethodService {
       throw new Error(tErrors.billing.invoiceAlreadyPaid({ id, status: "PAID" }));
     }
 
-    const verified = await UserPaymentMethodRepository.setVerified(id, actorUserId, tx, );
+    const verified = await UserPaymentMethodRepository.setVerified(id, actorUserId, tx);
     return buildMaskedPaymentMethod(verified, true);
   }
 
@@ -363,7 +363,7 @@ export namespace PaymentMethodService {
     },
     tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    locale?: string
+    _locale?: string
   ) {
     let snapshotSource:
       | { userPaymentMethodId: string }
@@ -399,14 +399,14 @@ export namespace PaymentMethodService {
         paymentMethodType: paymentMethodSnapshot.type,
         paymentMethodSnapshot,
       },
-      tx,
+      tx
     );
   }
 
   export async function recordPayout(
     input: CreateTeacherPaymentInput,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<TeacherPaymentSelectType> {
     const client = tx ?? db;
 
@@ -461,13 +461,13 @@ export namespace PaymentMethodService {
 
   export async function createUserPaymentMethodInternal(
     input: UserPaymentMethodSubmitInput,
-    tx: DBTransaction,
+    tx: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
     const parsed = userPaymentMethodSubmitInputSchema.parse(input);
     const encryptedDetails = encryptDetailsForStorage(parsed.type, parsed.details);
 
-    const tErrors = await getServerTranslations(locale ?? "en", "errors");
-    await assertCatalogActive(parsed.type, parsed.details, tx, tErrors, locale);
+    const tErrors = await getServerTranslations("en", "errors");
+    await assertCatalogActive(parsed.type, parsed.details, tx, tErrors);
 
     if (parsed.isDefault) {
       for (const slot of slotsForDirection(parsed.direction)) {
@@ -488,9 +488,9 @@ export namespace PaymentMethodService {
 
   export async function createInitialMethodForUser(
     input: UserPaymentMethodSubmitInput,
-    tx: DBTransaction,
+    tx: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
-    return createUserPaymentMethodInternal(input, tx, locale);
+    return createUserPaymentMethodInternal(input, tx);
   }
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
@@ -504,7 +504,7 @@ export namespace PaymentMethodService {
   }
 
   export async function seedDemoUserPaymentMethods(
-    usersList: readonly { id: string; email: string }[],
+    usersList: readonly { id: string; email: string }[]
   ): Promise<UserPaymentMethodReturnType[]> {
     const parentUser = usersList.find(u => u.email === "parent@siraj.local");
     const teacherUser = usersList.find(u => u.email === "teacher@siraj.local");
@@ -514,6 +514,7 @@ export namespace PaymentMethodService {
 
     const adminUser = usersList.find(u => u.email === "academy@siraj.local");
     const { PaymentCatalogService } = await import("@/backend/services/payment-method/payment-catalog.service");
+    const tErrors = await getServerTranslations("en", "errors");
 
     return db.transaction(async tx => {
       const results: UserPaymentMethodReturnType[] = [];
@@ -535,7 +536,7 @@ export namespace PaymentMethodService {
                   label: "Vodafone Cash",
                   details: { walletId: wallet.id, phone: "01012345678" },
                 },
-                tx,
+                tx
               )
             );
           } else {
@@ -555,7 +556,7 @@ export namespace PaymentMethodService {
                   label: "InstaPay",
                   details: { paymentLinkId: link.id, url: "https://instapay.com.eg/demo-parent" },
                 },
-                tx,
+                tx
               )
             );
           }
@@ -570,7 +571,12 @@ export namespace PaymentMethodService {
             adminUser &&
             existingPayout.type === PaymentMethodType.BANK_TRANSFER
           ) {
-            const verified = await UserPaymentMethodRepository.setVerified(existingPayout.id, adminUser.id, tx, locale);
+            const verified = await UserPaymentMethodRepository.setVerified(
+              existingPayout.id,
+              adminUser.id,
+              tx,
+              tErrors
+            );
             results.push(buildMaskedPaymentMethod(verified, true));
           } else {
             results.push(buildMaskedPaymentMethod(existingPayout, true));
@@ -590,10 +596,10 @@ export namespace PaymentMethodService {
               label: "Primary bank account",
               details: encryptedDetails,
             },
-            tx,
+            tx
           );
           if (adminUser) {
-            const verified = await UserPaymentMethodRepository.setVerified(created.id, adminUser.id, tx, locale);
+            const verified = await UserPaymentMethodRepository.setVerified(created.id, adminUser.id, tx, tErrors);
             results.push(buildMaskedPaymentMethod(verified, true));
           } else {
             results.push(created);

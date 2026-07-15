@@ -16,19 +16,18 @@ gqlSchemaBuilder.queryField("studentClassHistory", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
+      const tErrors = await ctx.t("errors");
       if (!ctx.user) {
-        const tErrors = await ctx.t("errors");
         throw new Error(tErrors.unauthorized);
       }
       let studentId = args.studentId;
       if (!studentId) {
         studentId = await StudentRepository.getStudentIdByUserId(ctx.user.id);
         if (!studentId) {
-          const tErrors = await ctx.t("errors");
           throw new Error(tErrors.studentNotFound(ctx.user.id));
         }
       }
-      return StudentHistoryService.getStudentClassHistory(ctx.user.id, studentId, args.year, args.month, ctx.locale);
+      return StudentHistoryService.getStudentClassHistory(ctx.user.id, studentId, args.year, args.month, tErrors);
     },
   })
 );
@@ -39,11 +38,11 @@ gqlSchemaBuilder.queryField("studentClassSessionDetail", t =>
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
+      const tErrors = await ctx.t("errors");
       if (!ctx.user) {
-        const tErrors = await ctx.t("errors");
         throw new Error(tErrors.unauthorized);
       }
-      return StudentHistoryService.getStudentClassSessionDetail(ctx.user.id, args.classInstanceId, ctx.locale);
+      return StudentHistoryService.getStudentClassSessionDetail(ctx.user.id, args.classInstanceId, tErrors);
     },
   })
 );

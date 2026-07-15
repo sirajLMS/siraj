@@ -1,0 +1,59 @@
+import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers";
+
+export const weeklySchedule: TeacherWeeklyScheduleLabels = {
+  pageTitle: name => `Weekly Schedule - ${name}`,
+  breadcrumbs: {
+    teachers: "Teachers",
+    schedule: "Schedule",
+  },
+  metrics: {
+    weeklyHoursWorked: hours => `Weekly Hours Worked: ${hours}`,
+  },
+  actions: {
+    addSlot: "Add Slot",
+    delete: "Delete",
+    clearSchedule: "Clear Schedule",
+    deleteClass: "Delete Class",
+  },
+  grid: {
+    teacherTime: "Teacher Time",
+    available: "Available",
+    lunchBreak: "Lunch",
+    bookedClass: "Booked",
+    availableSlot: "Available Slot",
+    lastUpdated: date => `Last Updated: ${date}`,
+    sessionEnded: "Session ended",
+  },
+  days: {
+    monday: "Monday",
+    tuesday: "Tuesday",
+    wednesday: "Wednesday",
+    thursday: "Thursday",
+    friday: "Friday",
+    saturday: "Saturday",
+    sunday: "Sunday",
+    mon: "Mon",
+    tue: "Tue",
+    wed: "Wed",
+    thu: "Thu",
+    fri: "Fri",
+    sat: "Sat",
+    sun: "Sun",
+  },
+  dialogs: {
+    deleteConfirm: "Are you sure you want to delete this slot?",
+    deleteConfirmClass: "Are you sure you want to delete this class?",
+    deleteClassTitle: "Confirm Deletion",
+    deleteClassMessage: "This action cannot be undone.",
+    clearScheduleTitle: "Clear Schedule",
+    clearScheduleMessage: "Are you sure you want to clear the entire schedule?",
+    confirmYes: "Yes",
+    cancel: "Cancel",
+  },
+  notifications: {
+    classDeleted: "Class deleted successfully.",
+    classDeleteFailed: "Failed to delete class.",
+    scheduleCleared: "Schedule cleared successfully.",
+    scheduleClearFailed: "Failed to clear schedule.",
+  },
+};

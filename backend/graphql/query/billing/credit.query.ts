@@ -18,7 +18,8 @@ gqlSchemaBuilder.queryField("studentCreditBalance", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return CreditService.getStudentBalance(actorUserId, args.studentId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return CreditService.getStudentBalance(actorUserId, args.studentId, tErrors);
     },
   })
 );
@@ -34,6 +35,7 @@ gqlSchemaBuilder.queryField("studentCreditTransactions", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       let pagination: PaginationArgs | null = null;
       if (args.paginationArgs) {
         pagination = new PaginationArgs({
@@ -47,7 +49,7 @@ gqlSchemaBuilder.queryField("studentCreditTransactions", t =>
         });
       }
 
-      const result = await CreditService.getStudentTransactions(actorUserId, args.studentId, pagination, ctx.locale);
+      const result = await CreditService.getStudentTransactions(actorUserId, args.studentId, pagination, tErrors);
       return result.rows;
     },
   })

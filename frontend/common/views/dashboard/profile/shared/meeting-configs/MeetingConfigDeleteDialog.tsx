@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type MeetingConfigDeleteDialogProps = {
   readonly open: boolean;
@@ -18,7 +18,7 @@ export function MeetingConfigDeleteDialog({
   onClose,
   onConfirm,
 }: MeetingConfigDeleteDialogProps) {
-  const t = useTranslations("ui.meetingConfig.manager");
+  const t = useAppTranslation("ui").meetingConfig.manager;
 
   return (
     <BaseDeleteDialog
@@ -26,10 +26,10 @@ export function MeetingConfigDeleteDialog({
       onClose={onClose}
       onConfirm={onConfirm}
       isLoading={isLoading}
-      title={t("deleteTitle")}
-      body={t("deleteBody", { name: configLabel })}
-      cancelLabel={t("cancel")}
-      confirmLabel={t("deleteConfirm")}
+      title={t.deleteTitle}
+      body={t.deleteBody(configLabel)}
+      cancelLabel={t.cancel}
+      confirmLabel={t.deleteConfirm}
     />
   );
 }

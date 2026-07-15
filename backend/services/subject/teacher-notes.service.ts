@@ -12,12 +12,12 @@ export namespace TeacherNotesService {
   export async function getActiveNotes(
     userId: string,
     teacherId?: string,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<TeacherImportantNoteReturnType[]> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_LIST);
     if (!hasPermission) {
       throw new Error(
-        tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
       );
     }
 
@@ -28,12 +28,12 @@ export namespace TeacherNotesService {
     userId: string,
     input: TeacherImportantNoteSubmitInput,
     teacherId: string | null,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<TeacherImportantNoteReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_CREATE);
     if (!hasPermission) {
       throw new Error(
-        tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
       );
     }
 
@@ -44,23 +44,23 @@ export namespace TeacherNotesService {
     userId: string,
     id: string,
     input: TeacherImportantNoteUpdateInput,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<TeacherImportantNoteReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_UPDATE);
     if (!hasPermission) {
       throw new Error(
-        tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
       );
     }
 
     return await TeacherNotesRepository.updateNote(id, input);
   }
 
-  export async function deleteNote(userId: string, id: string, tErrors?: ErrorsLabels): Promise<{ id: string }> {
+  export async function deleteNote(userId: string, id: string, tErrors: ErrorsLabels): Promise<{ id: string }> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_DELETE);
     if (!hasPermission) {
       throw new Error(
-        tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
       );
     }
 

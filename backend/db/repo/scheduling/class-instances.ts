@@ -62,7 +62,8 @@ export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
 
 export const createClassInstance = async (
   input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
-  tx?: DBTransaction
+  tx?: DBTransaction,
+  locale?: string
 ): Promise<Types.ClassInstanceEntity> => {
   const runner = async (t: DBTransaction) => {
     await acquireLocks(t, input.teacherId, input.studentId);

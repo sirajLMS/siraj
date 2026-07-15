@@ -3,11 +3,11 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { userPaymentMethods } from "@/backend/db/schema";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type {
   UserPaymentMethodInsertType,
   UserPaymentMethodSelectType,
 } from "@/backend/types/billing/payment-method.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 type DefaultSlot = "PAYIN" | "PAYOUT";
 
@@ -74,8 +74,8 @@ export namespace UserPaymentMethodRepository {
   export async function update(
     id: string,
     input: Partial<UserPaymentMethodInsertType>,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<UserPaymentMethodSelectType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -85,13 +85,15 @@ export namespace UserPaymentMethodRepository {
       .returning();
 
     if (!updated) {
-      throw new Error(tErrors?.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }) ?? `User payment method not found: ${id}`);
+      throw new Error(
+        tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id })
+      );
     }
 
     return toSelectType(updated);
   }
 
-  export async function deleteById(id: string, tx?: DBTransaction, tErrors?: ErrorsLabels): Promise<void> {
+  export async function deleteById(id: string,tErrors: ErrorsLabels, tx?: DBTransaction, ): Promise<void> {
     const client = tx ?? db;
     const [deleted] = await client
       .delete(userPaymentMethods)
@@ -99,7 +101,9 @@ export namespace UserPaymentMethodRepository {
       .returning({ id: userPaymentMethods.id });
 
     if (!deleted) {
-      throw new Error(tErrors?.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }) ?? `User payment method not found: ${id}`);
+      throw new Error(
+        tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }) 
+      );
     }
   }
 
@@ -120,8 +124,8 @@ export namespace UserPaymentMethodRepository {
   export async function setVerified(
     id: string,
     verifiedByUserId: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<UserPaymentMethodSelectType> {
     return update(
       id,
@@ -129,8 +133,8 @@ export namespace UserPaymentMethodRepository {
         verifiedAt: new Date(),
         verifiedByUserId,
       },
+      tErrors,
       tx,
-      tErrors
     );
   }
 

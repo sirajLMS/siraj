@@ -62,21 +62,15 @@ export namespace PaymentCatalogService {
     actorUserId: string,
     id: string,
     input: UpdateSupportedMobileWalletInput,
-    tErrors: ErrorsLabels,
-    locale?: string
+    tErrors: ErrorsLabels
   ) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedMobileWalletRepository.update(id, input, undefined, locale);
+    return SupportedMobileWalletRepository.update(id, input, undefined, tErrors);
   }
 
-  export async function deactivateMobileWallet(
-    actorUserId: string,
-    id: string,
-    tErrors: ErrorsLabels,
-    locale?: string
-  ) {
+  export async function deactivateMobileWallet(actorUserId: string, id: string, tErrors: ErrorsLabels) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedMobileWalletRepository.deactivate(id, undefined, locale);
+    return SupportedMobileWalletRepository.deactivate(id, undefined, tErrors);
   }
 
   // ─── Payment Links ───────────────────────────────────────────────────────
@@ -105,16 +99,15 @@ export namespace PaymentCatalogService {
     actorUserId: string,
     id: string,
     input: UpdateSupportedPaymentLinkInput,
-    tErrors: ErrorsLabels,
-    locale?: string
+    tErrors: ErrorsLabels
   ) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedPaymentLinkRepository.update(id, input, undefined, locale);
+    return SupportedPaymentLinkRepository.update(id, input, undefined, tErrors);
   }
 
-  export async function deactivatePaymentLink(actorUserId: string, id: string, tErrors: ErrorsLabels, locale?: string) {
+  export async function deactivatePaymentLink(actorUserId: string, id: string, tErrors: ErrorsLabels) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedPaymentLinkRepository.deactivate(id, undefined, locale);
+    return SupportedPaymentLinkRepository.deactivate(id, undefined, tErrors);
   }
 
   // ─── Online Accounts ─────────────────────────────────────────────────────
@@ -143,21 +136,15 @@ export namespace PaymentCatalogService {
     actorUserId: string,
     id: string,
     input: UpdateSupportedOnlineAccountInput,
-    tErrors: ErrorsLabels,
-    locale?: string
+    tErrors: ErrorsLabels
   ) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedOnlineAccountRepository.update(id, input, undefined, locale);
+    return SupportedOnlineAccountRepository.update(id, input, undefined, tErrors);
   }
 
-  export async function deactivateOnlineAccount(
-    actorUserId: string,
-    id: string,
-    tErrors: ErrorsLabels,
-    locale?: string
-  ) {
+  export async function deactivateOnlineAccount(actorUserId: string, id: string, tErrors: ErrorsLabels) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedOnlineAccountRepository.deactivate(id, undefined, locale);
+    return SupportedOnlineAccountRepository.deactivate(id, undefined, tErrors);
   }
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────

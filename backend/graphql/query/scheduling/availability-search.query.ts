@@ -13,10 +13,11 @@ gqlSchemaBuilder.queryFields(t => ({
       input: t.arg({ type: AvailabilitySearchInputPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
+      const tErrors = await ctx.t("errors");
       if (!ctx.user) {
-        throw new Error("Unauthorized");
+        throw new Error(tErrors.unauthorized);
       }
-      return AvailabilitySearchService.searchAvailability(ctx.user.id, args.input, ctx.locale);
+      return AvailabilitySearchService.searchAvailability(ctx.user.id, args.input, tErrors);
     },
   }),
 }));

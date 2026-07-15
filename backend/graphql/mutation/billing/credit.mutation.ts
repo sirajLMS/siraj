@@ -23,6 +23,7 @@ gqlSchemaBuilder.mutationField("recordCreditPurchase", t =>
         throw new Error(tErrors.insufficientPermissions);
       }
 
+      const tErrors = await ctx.t("errors");
       return CreditService.recordPurchase(
         actorUserId,
         {
@@ -30,7 +31,7 @@ gqlSchemaBuilder.mutationField("recordCreditPurchase", t =>
           hours: args.hours,
           notes: args.notes ?? undefined,
         },
-        ctx.locale
+        tErrors
       );
     },
   })

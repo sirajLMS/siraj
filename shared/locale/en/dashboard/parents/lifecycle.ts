@@ -1,0 +1,40 @@
+import type { ParentLifecycleLabels } from "@/shared/locale/types/dashboard/parents";
+
+export const lifecycle: ParentLifecycleLabels = {
+  pageTitle: "Parent Lifecycle",
+  parentId: id => `Parent ID: ${id}`,
+  breadcrumbs: {
+    parents: "Parents",
+    lifecycle: "Lifecycle",
+  },
+  sections: {
+    adminControls: "Lifecycle Controls",
+    policyOverview: "Policy Overview",
+  },
+  fields: {
+    lifecycleStatus: "Lifecycle Status",
+    reason: "Reason (optional)",
+    reasonPlaceholder: "Enter a reason for audit notes",
+  },
+  statusOptions: {
+    REGULAR: "Regular",
+    SUSPENDED: "Suspended",
+    ON_LEAVE: "On Leave",
+    ON_TRIAL: "On Trial",
+  },
+  policies: {
+    lifecycleTitle: "Lifecycle vs account status",
+    lifecycleDesc:
+      "Lifecycle status controls billing features and subscription state. It does not revoke login access — use account actions on the profile for that.",
+    accountTitle: "Account access",
+    accountDesc: "To revoke or restore login access, use Revoke/Restore Login Access on the parent profile.",
+  },
+  actions: {
+    applyChange: "Apply Lifecycle Change",
+    viewProfile: "View Profile",
+  },
+  successMessage: "Parent lifecycle status updated successfully.",
+  errors: {
+    invalidId: "Invalid parent ID.",
+  },
+};

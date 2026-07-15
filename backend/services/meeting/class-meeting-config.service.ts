@@ -70,7 +70,7 @@ export namespace ClassMeetingConfigService {
     tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType> {
     await assertCanManageClass(actorUserId, tErrors);
-    const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, undefined, tErrors);
+    const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, undefined, undefined);
 
     if (!provider.isActive) {
       throw new Error(tErrors.meetingProviderInactive);
@@ -103,7 +103,7 @@ export namespace ClassMeetingConfigService {
   ): Promise<ClassMeetingConfigReturnType> {
     const existing = await loadConfigForActor(actorUserId, id, tErrors);
     const providerId = input.providerId ?? existing.providerId;
-    const provider = await MeetingProviderRepository.getByIdOrThrow(providerId, undefined, tErrors);
+    const provider = await MeetingProviderRepository.getByIdOrThrow(providerId, undefined, undefined);
 
     const details = input.details !== undefined ? parseMeetingConfigDetails(provider, input.details) : undefined;
 

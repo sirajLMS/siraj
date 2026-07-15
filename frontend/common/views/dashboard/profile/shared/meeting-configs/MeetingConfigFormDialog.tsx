@@ -97,7 +97,7 @@ export function MeetingConfigFormDialog({
       onSaved();
       onClose();
     } catch {
-      setSaveError(t("saveError"));
+      setSaveError(t.saveError);
     }
   };
 

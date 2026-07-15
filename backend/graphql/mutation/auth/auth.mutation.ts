@@ -258,7 +258,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       const { groupSlug } = args.input;
 
       try {
-        const result = await DemoAuthService.loginWithGroupSlug(groupSlug, ctx.locale);
+        const result = await DemoAuthService.loginWithGroupSlug(groupSlug, tErrors);
         setAuthCookies(ctx, result.sessionId, result.refreshToken, result.accessToken);
         return {
           token: result.accessToken,
@@ -342,7 +342,8 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       if (ctx.isImpersonating && ctx.sessionId) {
         try {
-          await ImpersonationService.endImpersonation(sessionOwnerId, ctx.sessionId, ctx.locale, ctx.ipAddress);
+          const tErrors = await ctx.t("errors");
+          await ImpersonationService.endImpersonation(sessionOwnerId, ctx.sessionId, tErrors, ctx.ipAddress);
         } catch (error) {
           logger.warn("Failed to end impersonation during logout", { error });
         }

@@ -95,7 +95,7 @@ export namespace CreditService {
         idempotencyKey,
       });
 
-      await StudentRepository.addClasses(input.studentId, input.hours, undefined, tx);
+      await StudentRepository.addClasses(input.studentId, input.hours, undefined, undefined, tx);
       return ledgerRow;
     });
 
@@ -148,7 +148,7 @@ export namespace CreditService {
           idempotencyKey,
         });
 
-        await StudentRepository.addClasses(input.studentId, input.hours, undefined, tx);
+        await StudentRepository.addClasses(input.studentId, input.hours, undefined, undefined, tx);
 
         return ledgerRow;
       });
@@ -249,7 +249,7 @@ export namespace CreditService {
           creditedByUserId,
           idempotencyKey: ledgerKey,
         });
-        await StudentRepository.deductClasses(studentId, 1, undefined, tx);
+        await StudentRepository.deductClasses(studentId, 1, undefined, undefined, tx);
       }
 
       logger.info("Credit deducted for booking", {
@@ -289,7 +289,7 @@ export namespace CreditService {
           creditedByUserId,
           idempotencyKey: ledgerKey,
         });
-        await StudentRepository.addClasses(studentId, 1, undefined, tx);
+        await StudentRepository.addClasses(studentId, 1, undefined, undefined, tx);
       }
 
       logger.info("Credit refunded on cancel", {

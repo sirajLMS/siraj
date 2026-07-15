@@ -1,5 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { deleteEntityResolver } from "@/backend/graphql/utils";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 /**
  * Common update input fields shared by class-category and class-subject update mutations.
@@ -34,11 +35,11 @@ export function commonClassUpdateInputFields<
  * the entity-specific delete service, and returns `true`.
  *
  * @param fieldName - The GraphQL mutation field name (e.g. "deleteClassCategory")
- * @param deleteFn - The service delete function `(userId, entityId, locale?) => Promise<unknown>`
+ * @param deleteFn - The service delete function `(userId, entityId, tErrors) => Promise<unknown>`
  */
 export function registerDeleteEntityMutation(
   fieldName: string,
-  deleteFn: (userId: string, entityId: string, locale?: string) => Promise<unknown>
+  deleteFn: (userId: string, entityId: string, tErrors: ErrorsLabels) => Promise<unknown>
 ): void {
   gqlSchemaBuilder.mutationField(fieldName, t =>
     t.field({

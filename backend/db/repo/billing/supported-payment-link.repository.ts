@@ -3,12 +3,12 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { supportedPaymentLinks } from "@/backend/db/schema";
 import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type {
   SupportedPaymentLinkInsertType,
   SupportedPaymentLinkSelectType,
   UpdateSupportedPaymentLinkInput,
 } from "@/backend/types/billing/payment-method.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 type LinkRow = typeof supportedPaymentLinks.$inferSelect;
 
@@ -94,8 +94,8 @@ export namespace SupportedPaymentLinkRepository {
   export async function update(
     id: string,
     input: UpdateSupportedPaymentLinkInput,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<SupportedPaymentLinkSelectType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -105,7 +105,7 @@ export namespace SupportedPaymentLinkRepository {
       .returning();
 
     if (!updated) {
-      throw new Error(tErrors?.file.recordNotFound({ tableName: "supported_payment_links", entityId: id }) ?? `Supported payment link not found: ${id}`);
+      throw new Error(tErrors.file.recordNotFound({ tableName: "supported_payment_links", entityId: id }));
     }
 
     return toSelectType(updated);
@@ -113,10 +113,10 @@ export namespace SupportedPaymentLinkRepository {
 
   export async function deactivate(
     id: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<SupportedPaymentLinkSelectType> {
-    return update(id, { isActive: false }, tx, tErrors);
+    return update(id, { isActive: false },tErrors, tx       );
   }
 
   export async function listByIds(

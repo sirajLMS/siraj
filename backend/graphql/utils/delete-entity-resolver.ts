@@ -1,5 +1,6 @@
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 /**
  * Shared resolver body for "delete entity by id" Boolean mutations.
@@ -11,9 +12,10 @@ import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 export async function deleteEntityResolver(
   ctx: BaseContext,
   entityId: string,
-  deleteFn: (userId: string, entityId: string, locale?: string) => Promise<unknown>
+  deleteFn: (userId: string, entityId: string, tErrors: ErrorsLabels) => Promise<unknown>
 ): Promise<boolean> {
   const userId = await requireAuth(ctx);
-  await deleteFn(userId, entityId, ctx.locale);
+  const tErrors = await ctx.t("errors");
+  await deleteFn(userId, entityId, tErrors);
   return true;
 }

@@ -21,7 +21,7 @@ import type { MessageSchema } from "@/shared/locale/types/message";
  */
 export function useAppTranslation<K extends keyof MessageSchema>(namespace: K): MessageSchema[K] {
   const ctx = useLocaleContext();
-  const value = ctx[namespace];
+  const value = ctx.translations[namespace];
   if (!value) {
     throw new Error(
       `[useAppTranslation] Namespace "${String(namespace)}" was not loaded. ` +

@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { StudentRepository } from "@/backend/db/repo";
@@ -6,6 +6,13 @@ import { students } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { StudentStatus } from "@/backend/enum";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
+
+let tErrors: ErrorsLabels;
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -54,7 +61,9 @@ function testVersionMismatch(name: string, action: (tx: Tx, student: TestStudent
 describe("StudentRepository — setClassesRemaining", () => {
   test("throws studentNotFound for unknown studentId", async () => {
     await runInRollback(async tx => {
-      const error = await expectRepoError(() => StudentRepository.setClassesRemaining(randomUUID(), 5, undefined, tx));
+      const error = await expectRepoError(() =>
+        StudentRepository.setClassesRemaining(randomUUID(), 5, tErrors, undefined, tx)
+      );
       expect(error.message).toContain("not found");
     });
   });
@@ -62,7 +71,7 @@ describe("StudentRepository — setClassesRemaining", () => {
   test("successfully sets classesRemaining to a valid value", async () => {
     await runInRollback(async tx => {
       const { student } = await makeStudent(tx, "Quota", { classesTotal: 10, classesRemaining: 5 });
-      const result = await StudentRepository.setClassesRemaining(student.id, 8, student.version, tx);
+      const result = await StudentRepository.setClassesRemaining(student.id, 8, tErrors, student.version, tx);
       expect(result.classesRemaining).toBe(8);
       expect(result.version).toBe(student.version + 1);
       const [updated] = await tx
@@ -75,13 +84,13 @@ describe("StudentRepository — setClassesRemaining", () => {
   });
 
   testVersionMismatch("throws on version mismatch (optimistic locking)", (tx, student) =>
-    StudentRepository.setClassesRemaining(student.id, 3, student.version + 999, tx)
+    StudentRepository.setClassesRemaining(student.id, 3, tErrors, student.version + 999, tx)
   );
 
   test("sets classesRemaining to 0 successfully", async () => {
     await runInRollback(async tx => {
       const { student } = await makeStudent(tx, "Zero", { classesTotal: 10, classesRemaining: 5 });
-      const result = await StudentRepository.setClassesRemaining(student.id, 0, student.version, tx);
+      const result = await StudentRepository.setClassesRemaining(student.id, 0, tErrors, student.version, tx);
       expect(result.classesRemaining).toBe(0);
     });
   });
@@ -92,7 +101,7 @@ describe("StudentRepository — reassignTeacher", () => {
     await runInRollback(async tx => {
       const { student } = await makeStudent(tx, "Reassign", { status: StudentStatus.REGULAR });
       const { teacher: nt } = await makeTeacher(tx, "New");
-      const result = await StudentRepository.reassignTeacher(student.id, nt.id, undefined, tx);
+      const result = await StudentRepository.reassignTeacher(student.id, nt.id, tErrors, undefined, tx);
       expect(result.id).toBe(student.id);
       expect(result.primaryTeacherId).toBe(nt.id);
       expect(result.version).toBe(student.version + 1);
@@ -103,7 +112,7 @@ describe("StudentRepository — reassignTeacher", () => {
     await runInRollback(async tx => {
       const { teacher } = await makeTeacher(tx, "Target");
       const error = await expectRepoError(() =>
-        StudentRepository.reassignTeacher(randomUUID(), teacher.id, undefined, tx)
+        StudentRepository.reassignTeacher(randomUUID(), teacher.id, tErrors, undefined, tx)
       );
       expect(error.message).toContain("not found");
     });
@@ -111,14 +120,14 @@ describe("StudentRepository — reassignTeacher", () => {
 
   testVersionMismatch("throws on version mismatch", async (tx, student) => {
     const { teacher } = await makeTeacher(tx, "VerRT");
-    return StudentRepository.reassignTeacher(student.id, teacher.id, student.version + 999, tx);
+    return StudentRepository.reassignTeacher(student.id, teacher.id, tErrors, student.version + 999, tx);
   });
 
   test("succeeds when expectedVersion matches", async () => {
     await runInRollback(async tx => {
       const { student } = await makeStudent(tx, "MatchR");
       const { teacher: nt } = await makeTeacher(tx, "MatchRT");
-      const result = await StudentRepository.reassignTeacher(student.id, nt.id, student.version, tx);
+      const result = await StudentRepository.reassignTeacher(student.id, nt.id, tErrors, student.version, tx);
       expect(result.primaryTeacherId).toBe(nt.id);
     });
   });
@@ -128,7 +137,7 @@ describe("StudentRepository — changeStatus", () => {
   test("changes status from REGULAR to SUSPENDED", async () => {
     await runInRollback(async tx => {
       const { student } = await makeStudent(tx, "Suspend", { status: StudentStatus.REGULAR });
-      const result = await StudentRepository.changeStatus(student.id, StudentStatus.SUSPENDED, undefined, tx);
+      const result = await StudentRepository.changeStatus(student.id, StudentStatus.SUSPENDED, tErrors, undefined, tx);
       expect(result.status).toBe(StudentStatus.SUSPENDED);
       expect(result.version).toBe(student.version + 1);
     });
@@ -137,7 +146,7 @@ describe("StudentRepository — changeStatus", () => {
   test("changes status from REGULAR to ON_LEAVE", async () => {
     await runInRollback(async tx => {
       const { student } = await makeStudent(tx, "Leave", { status: StudentStatus.REGULAR });
-      const result = await StudentRepository.changeStatus(student.id, StudentStatus.ON_LEAVE, undefined, tx);
+      const result = await StudentRepository.changeStatus(student.id, StudentStatus.ON_LEAVE, tErrors, undefined, tx);
       expect(result.status).toBe(StudentStatus.ON_LEAVE);
     });
   });
@@ -145,8 +154,8 @@ describe("StudentRepository — changeStatus", () => {
   test("changes status from SUSPENDED back to REGULAR", async () => {
     await runInRollback(async tx => {
       const { student } = await makeStudent(tx, "Resume", { status: StudentStatus.REGULAR });
-      await StudentRepository.changeStatus(student.id, StudentStatus.SUSPENDED, undefined, tx);
-      const result = await StudentRepository.changeStatus(student.id, StudentStatus.REGULAR, undefined, tx);
+      await StudentRepository.changeStatus(student.id, StudentStatus.SUSPENDED, tErrors, undefined, tx);
+      const result = await StudentRepository.changeStatus(student.id, StudentStatus.REGULAR, tErrors, undefined, tx);
       expect(result.status).toBe(StudentStatus.REGULAR);
     });
   });
@@ -154,13 +163,13 @@ describe("StudentRepository — changeStatus", () => {
   test("throws studentNotFound for unknown studentId", async () => {
     await runInRollback(async tx => {
       const error = await expectRepoError(() =>
-        StudentRepository.changeStatus(randomUUID(), StudentStatus.SUSPENDED, undefined, tx)
+        StudentRepository.changeStatus(randomUUID(), StudentStatus.SUSPENDED, tErrors, undefined, tx)
       );
       expect(error.message).toContain("not found");
     });
   });
 
   testVersionMismatch("throws on version mismatch", (tx, student) =>
-    StudentRepository.changeStatus(student.id, StudentStatus.SUSPENDED, student.version + 999, tx)
+    StudentRepository.changeStatus(student.id, StudentStatus.SUSPENDED, tErrors, student.version + 999, tx)
   );
 });

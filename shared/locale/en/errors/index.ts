@@ -56,6 +56,8 @@ export const errors: ErrorsLabels = {
     invalidParentId: "Invalid parent ID.",
     invalidInvoiceAmount: "Invalid invoice amount.",
     parentNotFound: "Parent not found.",
+    invoiceVersionMismatch: ({ id, expectedVersion, gotVersion }) =>
+      `Invoice ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
   },
   credit: {
     duplicatePurchase: "This credit purchase has already been processed.",
@@ -75,9 +77,21 @@ export const errors: ErrorsLabels = {
   insufficientPermissions: "You do not have sufficient permissions to perform this action.",
   unauthorized: "You must be logged in first.",
   unauthorizedAction: "You are not authorized to perform this action.",
+  unauthorizedViewList: "You are not authorized to view this list.",
+  unauthorizedSearch: "You are not authorized to search.",
+  unauthorizedViewMetrics: "You are not authorized to view metrics.",
   notFound: "The requested resource was not found.",
   studentNotFound: id => `Student not found: ${id}`,
+  studentCreateFailed: "Failed to create student.",
+  studentUpdateFailed: id => `Failed to update student (id: ${id}).`,
+  studentVersionMismatch: ({ id, expectedVersion, gotVersion }) =>
+    `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
+  insufficientClasses: ({ id, remaining, required }) =>
+    `Insufficient classes remaining for student ${id}: ${remaining} left, ${required} required.`,
+  invalidStatusTransition: ({ currentStatus, newStatus }) =>
+    `Invalid status transition: ${currentStatus} -> ${newStatus}.`,
   categoryNotFound: id => `Category not found: ${id}`,
+  categoryCreateFailed: "Failed to create class category.",
   unknownName: "Unknown",
   meetingProviderInactive: "The meeting provider is inactive.",
   meetingConfigNotFound: id => `Meeting config not found: ${id}`,

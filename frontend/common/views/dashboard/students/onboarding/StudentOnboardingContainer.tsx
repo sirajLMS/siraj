@@ -4,7 +4,6 @@ import { useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
@@ -23,10 +22,11 @@ import {
 } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import type { TeacherOption } from "@/frontend/common/views/dashboard/students/onboarding/TeacherAssignmentSection";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function StudentOnboardingContainer() {
-  const t = useTranslations("dashboard.studentOnboarding");
-  const tc = useTranslations("common");
+  const t = useAppTranslation("dashboard.studentOnboarding");
+  const tc = useAppTranslation("common");
   const router = useRouter();
   const notifications = useNotifications();
   const searchParams = useSearchParams();
@@ -114,7 +114,7 @@ export function StudentOnboardingContainer() {
       }
     } catch (error) {
       logger.error("Failed to submit student onboarding form", { error });
-      notifications.show(tc("operationFailed"), { severity: "error", autoHideDuration: 5000 });
+      notifications.show(tc.operationFailed, { severity: "error", autoHideDuration: 5000 });
     }
   };
 
@@ -130,50 +130,50 @@ export function StudentOnboardingContainer() {
         teacherOptions={teacherOptions}
         parentLocked={Boolean(initialParentId)}
         labels={{
-          pageTitle: t("pageTitle"),
-          pageSubtitle: t("pageSubtitle"),
-          statusBanner: t("statusBanner"),
-          create: t("actions.create"),
-          processing: t("actions.processing"),
+          pageTitle: t.pageTitle,
+          pageSubtitle: t.pageSubtitle,
+          statusBanner: t.statusBanner,
+          create: t.actions.create,
+          processing: t.actions.processing,
           sections: {
-            parentAssignment: t("sections.parentAssignment"),
-            studentInfo: t("sections.studentInfo"),
-            teacherAssignment: t("sections.teacherAssignment"),
+            parentAssignment: t.sections.parentAssignment,
+            studentInfo: t.sections.studentInfo,
+            teacherAssignment: t.sections.teacherAssignment,
           },
           fields: {
-            parent: t("fields.parent"),
-            name: t("fields.name"),
-            dateOfBirth: t("fields.dateOfBirth"),
-            gender: t("fields.gender"),
-            male: t("fields.male"),
-            female: t("fields.female"),
-            language: t("fields.language"),
-            status: t("fields.status"),
-            primaryTeacher: t("fields.primaryTeacher"),
+            parent: t.fields.parent,
+            name: t.fields.name,
+            dateOfBirth: t.fields.dateOfBirth,
+            gender: t.fields.gender,
+            male: t.fields.male,
+            female: t.fields.female,
+            language: t.fields.language,
+            status: t.fields.status,
+            primaryTeacher: t.fields.primaryTeacher,
           },
           placeholders: {
-            parent: t("placeholders.parent"),
-            name: t("placeholders.name"),
-            dateOfBirth: t("placeholders.dateOfBirth"),
-            language: t("placeholders.language"),
-            primaryTeacher: t("placeholders.primaryTeacher"),
+            parent: t.placeholders.parent,
+            name: t.placeholders.name,
+            dateOfBirth: t.placeholders.dateOfBirth,
+            language: t.placeholders.language,
+            primaryTeacher: t.placeholders.primaryTeacher,
           },
           options: {
             status: {
-              onTrial: t("options.status.onTrial"),
-              regular: t("options.status.regular"),
+              onTrial: t.options.status.onTrial,
+              regular: t.options.status.regular,
             },
           },
           validation: {
-            parentRequired: t("validation.parentRequired"),
-            nameMinLength: t("validation.nameMinLength"),
+            parentRequired: t.validation.parentRequired,
+            nameMinLength: t.validation.nameMinLength,
           },
         }}
         onSubmit={onSubmit}
       />
       <FormSuccessSnackbar
         open={showSuccess}
-        message={t("actions.successMessage")}
+        message={t.actions.successMessage}
         onClose={() => setShowSuccess(false)}
       />
     </RequirePermission>

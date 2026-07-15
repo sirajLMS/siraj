@@ -1,9 +1,16 @@
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { StudentRepository } from "@/backend/db/repo";
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { StudentStatus } from "@/backend/enum";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
+
+let tErrors: ErrorsLabels;
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -39,7 +46,7 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
       test(`REGULAR → ${target}: allowed`, async () => {
         await runInRollback(async tx => {
           const student = await setupRegularStudent(tx);
-          const result = await StudentRepository.changeStatus(student.id, target, undefined, tx);
+          const result = await StudentRepository.changeStatus(student.id, target, tErrors, undefined, tx);
           expect(result.status).toBe(target);
         });
       });
@@ -51,8 +58,14 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
       test(`${from} → REGULAR: allowed`, async () => {
         await runInRollback(async tx => {
           const student = await setupRegularStudent(tx);
-          await StudentRepository.changeStatus(student.id, from, undefined, tx);
-          const result = await StudentRepository.changeStatus(student.id, StudentStatus.REGULAR, undefined, tx);
+          await StudentRepository.changeStatus(student.id, from, tErrors, undefined, tx);
+          const result = await StudentRepository.changeStatus(
+            student.id,
+            StudentStatus.REGULAR,
+            tErrors,
+            undefined,
+            tx
+          );
           expect(result.status).toBe(StudentStatus.REGULAR);
         });
       });
@@ -72,7 +85,7 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
             {},
             { status: StudentStatus.ON_TRIAL }
           );
-          const result = await StudentRepository.changeStatus(student.id, target, undefined, tx);
+          const result = await StudentRepository.changeStatus(student.id, target, tErrors, undefined, tx);
           expect(result.status).toBe(target);
         });
       });
@@ -87,8 +100,8 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
       test(`REGULAR → ${via} → ${target}: allowed`, async () => {
         await runInRollback(async tx => {
           const student = await setupRegularStudent(tx);
-          await StudentRepository.changeStatus(student.id, via, undefined, tx);
-          const result = await StudentRepository.changeStatus(student.id, target, undefined, tx);
+          await StudentRepository.changeStatus(student.id, via, tErrors, undefined, tx);
+          const result = await StudentRepository.changeStatus(student.id, target, tErrors, undefined, tx);
           expect(result.status).toBe(target);
         });
       });
@@ -100,7 +113,7 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
       await runInRollback(async tx => {
         const student = await setupRegularStudent(tx);
         const error = await expectRepoError(() =>
-          StudentRepository.changeStatus(student.id, StudentStatus.ON_TRIAL, undefined, tx)
+          StudentRepository.changeStatus(student.id, StudentStatus.ON_TRIAL, tErrors, undefined, tx)
         );
         expect(getFullErrorMessage(error)).toContain("Invalid status transition");
       });

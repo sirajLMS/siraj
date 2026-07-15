@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, desc, eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
@@ -7,7 +7,14 @@ import { currencyExchangeAuditLogs, currencyExchangeRates, invoices } from "@/ba
 import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode, InvoiceStatus, InvoiceType } from "@/backend/enum";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import { PaginationArgs } from "@/backend/types";
+
+let tErrors: ErrorsLabels;
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -239,7 +246,7 @@ describe("BillingRepository — deleteInvoice", () => {
   test("soft-deletes an UNPAID invoice by setting deletedAt", async () => {
     await runInRollback(async tx => {
       const { invoice } = await setupInvoiceTest(tx);
-      const result = await BillingRepository.deleteInvoice(invoice.id, tx);
+      const result = await BillingRepository.deleteInvoice(invoice.id, tErrors, tx);
 
       expect(result.id).toBe(invoice.id);
       expect(result.deletedAt).not.toBeNull();
@@ -250,8 +257,8 @@ describe("BillingRepository — deleteInvoice", () => {
   test("soft-deletes a PAID invoice", async () => {
     await runInRollback(async tx => {
       const { invoice } = await setupInvoiceTest(tx);
-      await BillingRepository.markInvoiceAsPaid(invoice.id, undefined, tx);
-      const result = await BillingRepository.deleteInvoice(invoice.id, tx);
+      await BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, undefined, tx);
+      const result = await BillingRepository.deleteInvoice(invoice.id, tErrors, tx);
       expect(result.deletedAt).not.toBeNull();
     });
   });
@@ -259,7 +266,7 @@ describe("BillingRepository — deleteInvoice", () => {
   test("throws when deleting a non-existent invoice", async () => {
     await runInRollback(async tx => {
       const error = await expectRepoError(() =>
-        BillingRepository.deleteInvoice("00000000-0000-0000-0000-000000000000", tx)
+        BillingRepository.deleteInvoice("00000000-0000-0000-0000-000000000000", tErrors, tx)
       );
       expect(error.message).toContain("not found");
     });
@@ -268,8 +275,8 @@ describe("BillingRepository — deleteInvoice", () => {
   test("throws when deleting an already-deleted invoice", async () => {
     await runInRollback(async tx => {
       const { invoice } = await setupInvoiceTest(tx);
-      await BillingRepository.deleteInvoice(invoice.id, tx);
-      const error = await expectRepoError(() => BillingRepository.deleteInvoice(invoice.id, tx));
+      await BillingRepository.deleteInvoice(invoice.id, tErrors, tx);
+      const error = await expectRepoError(() => BillingRepository.deleteInvoice(invoice.id, tErrors, tx));
       expect(error.message).toContain("not found");
     });
   });
@@ -277,7 +284,7 @@ describe("BillingRepository — deleteInvoice", () => {
   test("excludes soft-deleted invoices from getInvoicesForParent", async () => {
     await runInRollback(async tx => {
       const { parent, invoice } = await setupInvoiceTest(tx);
-      await BillingRepository.deleteInvoice(invoice.id, tx);
+      await BillingRepository.deleteInvoice(invoice.id, tErrors, tx);
       const result = await BillingRepository.getInvoicesForParent(parent.id, null, null, tx);
       expect(result.rows.find(inv => inv.id === invoice.id)).toBeUndefined();
     });
@@ -298,7 +305,7 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
   test("marks an UNPAID invoice as PAID and sets paidDate", async () => {
     await runInRollback(async tx => {
       const { invoice } = await setupUnpaidInvoice(tx);
-      const result = await BillingRepository.markInvoiceAsPaid(invoice.id, undefined, tx);
+      const result = await BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, undefined, tx);
 
       expect(result.id).toBe(invoice.id);
       expect(result.status).toBe(InvoiceStatus.PAID);
@@ -313,8 +320,8 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
   test("throws when marking a PAID invoice as paid again", async () => {
     await runInRollback(async tx => {
       const { invoice } = await setupUnpaidInvoice(tx);
-      await BillingRepository.markInvoiceAsPaid(invoice.id, undefined, tx);
-      const error = await expectRepoError(() => BillingRepository.markInvoiceAsPaid(invoice.id, undefined, tx));
+      await BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, undefined, tx);
+      const error = await expectRepoError(() => BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, undefined, tx));
       expect(error.message.toLowerCase()).toContain("already");
     });
   });
@@ -322,7 +329,7 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
   test("throws when invoice ID does not exist", async () => {
     await runInRollback(async tx => {
       const error = await expectRepoError(() =>
-        BillingRepository.markInvoiceAsPaid("00000000-0000-0000-0000-000000000001", undefined, tx)
+        BillingRepository.markInvoiceAsPaid("00000000-0000-0000-0000-000000000001", tErrors, undefined, tx)
       );
       expect(error.message).toContain("not found");
     });
@@ -331,8 +338,8 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
   test("throws when invoice is soft-deleted", async () => {
     await runInRollback(async tx => {
       const { invoice } = await setupUnpaidInvoice(tx);
-      await BillingRepository.deleteInvoice(invoice.id, tx);
-      const error = await expectRepoError(() => BillingRepository.markInvoiceAsPaid(invoice.id, undefined, tx));
+      await BillingRepository.deleteInvoice(invoice.id, tErrors, tx);
+      const error = await expectRepoError(() => BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, undefined, tx));
       expect(error.message).toContain("not found");
     });
   });
@@ -340,7 +347,7 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
   test("throws on version mismatch", async () => {
     await runInRollback(async tx => {
       const { invoice } = await setupUnpaidInvoice(tx);
-      const error = await expectRepoError(() => BillingRepository.markInvoiceAsPaid(invoice.id, 9999, tx));
+      const error = await expectRepoError(() => BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, 9999, tx));
       expect(error.message).toContain("Version mismatch");
     });
   });
@@ -349,7 +356,7 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
     await runInRollback(async tx => {
       const { invoice } = await setupUnpaidInvoice(tx);
       const [current] = await tx.select().from(invoices).where(eq(invoices.id, invoice.id)).limit(1);
-      const result = await BillingRepository.markInvoiceAsPaid(invoice.id, current.version, tx);
+      const result = await BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, current.version, tx);
       expect(result.status).toBe(InvoiceStatus.PAID);
     });
   });

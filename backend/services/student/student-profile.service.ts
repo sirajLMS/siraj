@@ -22,7 +22,7 @@ async function hasAnyStudentViewPermission(actorUserId: string): Promise<boolean
   return PermissionsService.hasAnyPermission(actorUserId, viewKeys);
 }
 
-async function assertCanViewStudentProfile(actorUserId: string, tErrors?: ErrorsLabels): Promise<void> {
+async function assertCanViewStudentProfile(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
   const hasLegacy = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_ASSOCIATED);
   if (hasLegacy) {
     return;
@@ -30,7 +30,7 @@ async function assertCanViewStudentProfile(actorUserId: string, tErrors?: Errors
   if (await hasAnyStudentViewPermission(actorUserId)) {
     return;
   }
-  throw new Error(tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action.");
+  throw new Error(tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action.");
 }
 
 async function resolveIsAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
@@ -117,13 +117,13 @@ export namespace StudentProfileService {
     actorUserId: string,
     studentId: string,
     options: GetProfileOptions = {},
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<StudentProfileReturnType> {
     await assertCanViewStudentProfile(actorUserId, tErrors);
 
     const row = await StudentRepository.findProfileById(studentId);
     if (!row) {
-      throw new Error(tErrors?.studentNotFound(studentId) ?? `Student not found: ${studentId}`);
+      throw new Error(tErrors.studentNotFound(studentId) ?? `Student not found: ${studentId}`);
     }
 
     const isAssociatedViewer = await resolveIsAssociatedViewer(actorUserId, studentId);

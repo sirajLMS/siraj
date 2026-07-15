@@ -201,16 +201,12 @@ gqlSchemaBuilder.queryField("statusTrackingSchedule", t =>
       viewerTimezone: t.arg({ type: IanaTimezonePothosObject, required: false }),
     },
     resolve: async (_root, args, ctx) => {
+      const tErrors = await ctx.t("errors");
       const date = new Date(args.date);
-      return ScheduleQueryService.getStatusTrackingSchedule(
-        ctx.user?.id ?? "",
-        date,
-        {
-          search: args.search ?? undefined,
-          viewerTimezone: args.viewerTimezone ?? undefined,
-        },
-        ctx.locale
-      );
+      return ScheduleQueryService.getStatusTrackingSchedule(ctx.user?.id ?? "", date, tErrors, {
+        search: args.search ?? undefined,
+        viewerTimezone: args.viewerTimezone ?? undefined,
+      });
     },
   })
 );

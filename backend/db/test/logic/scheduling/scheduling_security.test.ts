@@ -9,7 +9,15 @@ import { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ScheduleDeletionService } from "@/backend/services/schedule/schedule-deletion.service";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import { getErrorMessage } from "@/shared/utils/error";
+
+let tErrors: ErrorsLabels;
+
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 describe("Scheduling Security & Trigger Compatibility", () => {
   beforeAll(async () => {
@@ -193,13 +201,13 @@ describe("ScheduleDeletionService Permission Gating", () => {
     const classInstanceId = randomUUID();
 
     // Case 1: Lacks permission
-    const error = await ScheduleDeletionService.deleteClass(actorUserId, classInstanceId).catch(e => e);
+    const error = await ScheduleDeletionService.deleteClass(actorUserId, classInstanceId, tErrors).catch(e => e);
     expect(error).toBeInstanceOf(Error);
     expect(getErrorMessage(error)).toContain("Insufficient permissions");
 
     // Case 2: Has permission
     mockPermissions.set(`${actorUserId}:${AppPermission.SCHEDULE_DELETE_CLASS}`, true);
-    const result = await ScheduleDeletionService.deleteClass(actorUserId, classInstanceId);
+    const result = await ScheduleDeletionService.deleteClass(actorUserId, classInstanceId, tErrors);
     expect(result).toBe(false);
   });
 
@@ -208,13 +216,13 @@ describe("ScheduleDeletionService Permission Gating", () => {
     const teacherId = randomUUID();
 
     // Case 1: Lacks permission
-    const error = await ScheduleDeletionService.clearWeeklySchedule(actorUserId, teacherId).catch(e => e);
+    const error = await ScheduleDeletionService.clearWeeklySchedule(actorUserId, teacherId, tErrors).catch(e => e);
     expect(error).toBeInstanceOf(Error);
     expect(getErrorMessage(error)).toContain("Insufficient permissions");
 
     // Case 2: Has permission
     mockPermissions.set(`${actorUserId}:${AppPermission.SCHEDULE_CLEAR_WEEKLY}`, true);
-    const result = await ScheduleDeletionService.clearWeeklySchedule(actorUserId, teacherId);
+    const result = await ScheduleDeletionService.clearWeeklySchedule(actorUserId, teacherId, tErrors);
     expect(result).toBe(false);
   });
 });

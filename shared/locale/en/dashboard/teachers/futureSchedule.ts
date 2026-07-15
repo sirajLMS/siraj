@@ -1,0 +1,40 @@
+import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers";
+
+export const futureSchedule: TeacherFutureScheduleLabels = {
+  pageTitle: "Future Schedule",
+  jumpToDate: "Jump to Date",
+  leaveQuota: "Leave Quota",
+  totalClasses: "Total Classes",
+  futureClasses: "Future Classes",
+  regular: "Regular",
+  reScheduled: "Rescheduled",
+  requestLeave: "Request Leave",
+  viewMaterials: "View Materials",
+  available: "Available",
+  quotaReached: "You have reached your leave quota.",
+  remaining: (count, total) => `Remaining quota: ${count} of ${total}`,
+  importantNotes: "Important Notes",
+  supportContact: "Contact Support",
+  contactAdmin: "Contact an administrator for assistance.",
+  monthDisplay: (month, year) => `${month} ${year}`,
+  leaveQuotaDesc: count => `You can request leave for ${count} classes.`,
+  totalClassesDesc: count => `You have ${count} classes scheduled.`,
+  loading: "Loading schedule...",
+  defaultLeaveReason: "Not specified",
+  supportRequestReason: "Not specified",
+  students: "Students",
+  errors: {
+    quotaExceeded: "Cannot request leave: quota exceeded.",
+    leaveRequestFailed: "Failed to request leave.",
+    failedToLoad: "Failed to load schedule.",
+    supportRequestFailed: "Failed to submit support request.",
+  },
+  notifications: {
+    noSubjectAssigned: "This class has no subject assigned.",
+    supportRequestSent: "Support request sent.",
+    leaveRequested: "Leave request submitted.",
+  },
+  actions: {
+    joinVideo: "Join Video",
+  },
+};

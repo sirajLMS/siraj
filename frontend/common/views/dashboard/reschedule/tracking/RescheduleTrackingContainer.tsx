@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, type SxProps, type Theme } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useCallback, useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -22,6 +22,8 @@ import {
 } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.helpers";
 import type { RescheduleTrackingViewLabels } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { RescheduleTrackingLabels } from "@/shared/locale/types/dashboard/classes/rescheduleTracking";
 
 const loadingSx: SxProps<Theme> = {
   display: "flex",
@@ -44,49 +46,49 @@ function TrackingErrorState({ message }: Readonly<{ message: string }>) {
   return <Box sx={errorSx}>{message}</Box>;
 }
 
-function buildViewLabels(t: ReturnType<typeof useTranslations>): RescheduleTrackingViewLabels {
+function buildViewLabels(t: RescheduleTrackingLabels): RescheduleTrackingViewLabels {
   return {
-    pageTitle: t("pageTitle"),
-    sectionTitle: t("sectionTitle"),
-    exportData: t("exportData"),
-    filterAll: t("filterAll"),
-    teacherName: t("table.teacherName"),
-    studentName: t("table.studentClass"),
-    scheduledDate: t("table.scheduledDate"),
-    timeSlot: t("table.timeSlot"),
-    classStatus: t("table.classStatus"),
-    action: t("table.action"),
-    newDate: t("badges.newDate"),
-    leaveRequest: t("badges.leaveRequest"),
-    rescheduled: t("status.rescheduled"),
-    pendingLeave: t("status.pendingLeave"),
-    viewDetails: t("actions.viewDetails"),
-    approveLeave: t("actions.approveLeave"),
-    rejectLeave: t("actions.rejectLeave"),
-    showingOf: t.raw("showingOf") as string,
-    noEntries: t("noEntries"),
-    statusPending: t("status.pendingLeave"),
-    statusRescheduled: t("status.rescheduled"),
-    statusApproved: t("status.approved"),
-    statusCancelled: t("status.cancelled"),
+    pageTitle: t.pageTitle,
+    sectionTitle: t.sectionTitle,
+    exportData: t.exportData,
+    filterAll: t.filterAll,
+    teacherName: t.table.teacherName,
+    studentName: t.table.studentClass,
+    scheduledDate: t.table.scheduledDate,
+    timeSlot: t.table.timeSlot,
+    classStatus: t.table.classStatus,
+    action: t.table.action,
+    newDate: t.badges.newDate,
+    leaveRequest: t.badges.leaveRequest,
+    rescheduled: t.status.rescheduled,
+    pendingLeave: t.status.pendingLeave,
+    viewDetails: t.actions.viewDetails,
+    approveLeave: t.actions.approveLeave,
+    rejectLeave: t.actions.rejectLeave,
+    showingOf: t.showingOf as unknown as string,
+    noEntries: t.noEntries,
+    statusPending: t.status.pendingLeave,
+    statusRescheduled: t.status.rescheduled,
+    statusApproved: t.status.approved,
+    statusCancelled: t.status.cancelled,
   };
 }
 
-function buildExportLabels(t: ReturnType<typeof useTranslations>) {
+function buildExportLabels(t: RescheduleTrackingLabels) {
   return {
-    pageTitle: t("pageTitle"),
+    pageTitle: t.pageTitle,
     table: {
-      teacher: t("table.teacherName"),
-      student: t("table.studentClass"),
-      scheduledDate: t("table.scheduledDate"),
-      timeSlot: t("table.timeSlot"),
-      status: t("table.classStatus"),
+      teacher: t.table.teacherName,
+      student: t.table.studentClass,
+      scheduledDate: t.table.scheduledDate,
+      timeSlot: t.table.timeSlot,
+      status: t.table.classStatus,
     },
     statusLabels: {
-      [LeaveRequestStatus.Pending]: t("status.pendingLeave"),
-      [LeaveRequestStatus.Rescheduled]: t("status.rescheduled"),
-      [LeaveRequestStatus.Approved]: t("status.approved"),
-      [LeaveRequestStatus.Cancelled]: t("status.cancelled"),
+      [LeaveRequestStatus.Pending]: t.status.pendingLeave,
+      [LeaveRequestStatus.Rescheduled]: t.status.rescheduled,
+      [LeaveRequestStatus.Approved]: t.status.approved,
+      [LeaveRequestStatus.Cancelled]: t.status.cancelled,
     },
   };
 }
@@ -150,7 +152,7 @@ function useTrackingQueries(statusFilter: LeaveRequestStatus | null, pageSize: n
 
 function useTrackingHandlers(
   rows: readonly ReturnType<typeof buildTrackingRows>[number][],
-  t: ReturnType<typeof useTranslations>,
+  t: RescheduleTrackingLabels,
   router: ReturnType<typeof useRouter>,
   notifications: ReturnType<typeof useNotifications>,
   refetchRows: () => unknown,
@@ -162,21 +164,21 @@ function useTrackingHandlers(
     async (id: string) => {
       const row = rows.find(r => r.id === id);
       if (!row?.originalClassId) {
-        notifications.show(t("errors.missingOriginalClassId"), { severity: "error", autoHideDuration: 4000 });
+        notifications.show(t.errors.missingOriginalClassId, { severity: "error", autoHideDuration: 4000 });
         return;
       }
       try {
         await approveLeave({
           variables: {
             classInstanceId: row.originalClassId,
-            leaveReason: t("actions.approveLeave"),
+            leaveReason: t.actions.approveLeave,
           },
         });
-        notifications.show(t("actions.approveSuccess"), { severity: "success", autoHideDuration: 4000 });
+        notifications.show(t.actions.approveSuccess, { severity: "success", autoHideDuration: 4000 });
         await Promise.all([refetchRows(), refetchMetrics()]);
       } catch (err) {
         logger.error("Failed to approve leave request:", err);
-        notifications.show(t("errors.approveFailed"), { severity: "error", autoHideDuration: 4000 });
+        notifications.show(t.errors.approveFailed, { severity: "error", autoHideDuration: 4000 });
       }
     },
     [rows, approveLeave, notifications, t, refetchRows, refetchMetrics]
@@ -188,7 +190,7 @@ function useTrackingHandlers(
       if (row?.originalClassId) {
         router.push(`/classes/${row.originalClassId}`);
       } else {
-        notifications.show(t("errors.missingOriginalClassId"), { severity: "error", autoHideDuration: 4000 });
+        notifications.show(t.errors.missingOriginalClassId, { severity: "error", autoHideDuration: 4000 });
       }
     },
     [rows, router, notifications, t]
@@ -211,7 +213,7 @@ function useTrackingHandlers(
 }
 
 export function RescheduleTrackingContainer() {
-  const t = useTranslations("dashboard.rescheduleTracking");
+  const t = useAppTranslation("dashboard.rescheduleTracking");
   const locale = useLocale();
   const router = useRouter();
   const { page, pageSize, setPage, statusFilter, setStatusFilter } = useRescheduleTrackingStore();
@@ -255,7 +257,7 @@ export function RescheduleTrackingContainer() {
 
   if (rowsError || metricsError) {
     logger.error("Error fetching reschedule tracking data:", rowsError || metricsError);
-    return <TrackingErrorState message={t("loadFailed")} />;
+    return <TrackingErrorState message={t.loadFailed} />;
   }
 
   return (

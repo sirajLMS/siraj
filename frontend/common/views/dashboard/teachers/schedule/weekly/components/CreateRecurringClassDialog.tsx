@@ -20,7 +20,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
@@ -49,6 +48,13 @@ import {
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
 import type { CreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { TeacherCreateRecurringClassLabels } from "@/shared/locale/types/dashboard/teachers/createRecurringClass";
+import type {
+  MeetingConfigClassScopeLabels,
+  MeetingConfigManagerLabels,
+  MeetingConfigRecurringScheduleLabels,
+} from "@/shared/locale/types/ui";
 
 function buildCreateRecurringClassInput(
   studentId: string,
@@ -126,34 +132,34 @@ function useValidation(
   state: ReturnType<typeof useDialogFormState>,
   days: readonly DayScheduleConfig[],
   notifications: ReturnType<typeof useNotifications>,
-  t: ReturnType<typeof useTranslations>,
-  tClassScope: ReturnType<typeof useTranslations>,
-  tMeeting: ReturnType<typeof useTranslations>
+  t: TeacherCreateRecurringClassLabels,
+  tClassScope: MeetingConfigClassScopeLabels,
+  tMeeting: MeetingConfigManagerLabels
 ) {
   return useCallback((): boolean => {
     if (!state.studentId) {
-      notifications.show(t("errors.noStudentSelected"), { severity: "error" });
+      notifications.show(t.errors.noStudentSelected, { severity: "error" });
       return false;
     }
 
     const activeDays = days.filter(d => d.enabled);
     if (activeDays.length === 0) {
-      notifications.show(t("errors.noDaysSelected"), { severity: "error" });
+      notifications.show(t.errors.noDaysSelected, { severity: "error" });
       return false;
     }
 
     if (state.duration <= 0) {
-      notifications.show(t("errors.durationMustBePositive"), { severity: "error" });
+      notifications.show(t.errors.durationMustBePositive, { severity: "error" });
       return false;
     }
 
     if (!isRecurringMeetingConfigValid(state.meetingConfig)) {
       const errorKey = getRecurringMeetingConfigErrorKey(state.meetingConfig);
       const message = resolveRecurringMeetingConfigErrorMessage(errorKey, {
-        recurringFieldsRequired: tClassScope("recurringFieldsRequired"),
-        urlNotAllowed: tMeeting("urlNotAllowed"),
+        recurringFieldsRequired: tClassScope.recurringFieldsRequired,
+        urlNotAllowed: tMeeting.urlNotAllowed,
       });
-      notifications.show(message ?? tMeeting("urlNotAllowed"), { severity: "error" });
+      notifications.show(message ?? tMeeting.urlNotAllowed, { severity: "error" });
       return false;
     }
 
@@ -168,8 +174,8 @@ function MeetingConfigWarningAlert({
   router,
 }: {
   readonly createdClassInstanceId: string | null;
-  readonly tMeeting: ReturnType<typeof useTranslations>;
-  readonly tRecurringSchedule: ReturnType<typeof useTranslations>;
+  readonly tMeeting: MeetingConfigManagerLabels;
+  readonly tRecurringSchedule: MeetingConfigRecurringScheduleLabels;
   readonly router: ReturnType<typeof useRouter>;
 }) {
   return (
@@ -178,12 +184,12 @@ function MeetingConfigWarningAlert({
       action={
         createdClassInstanceId ? (
           <Button color="inherit" size="small" onClick={() => router.push(`/classes/${createdClassInstanceId}`)}>
-            {tRecurringSchedule("goToClass")}
+            {tRecurringSchedule.goToClass}
           </Button>
         ) : undefined
       }
     >
-      {tMeeting("postCreateFailure")}
+      {tMeeting.postCreateFailure}
     </Alert>
   );
 }
@@ -201,16 +207,16 @@ function StudentSelectField({
   readonly students: readonly { readonly id: string; readonly name: string }[];
   readonly loadingStudents: boolean;
   readonly mutationLoading: boolean;
-  readonly t: ReturnType<typeof useTranslations>;
+  readonly t: TeacherCreateRecurringClassLabels;
 }) {
   return (
     <FormControl fullWidth>
-      <InputLabel id="student-select-label">{t("fields.student")}</InputLabel>
+      <InputLabel id="student-select-label">{t.fields.student}</InputLabel>
       <Select
         labelId="student-select-label"
         id="student-select"
         value={studentId}
-        label={t("fields.student")}
+        label={t.fields.student}
         onChange={e => setStudentId(e.target.value)}
         disabled={loadingStudents || mutationLoading}
       >
@@ -237,13 +243,13 @@ function DurationTimeFields({
   readonly defaultStartTime: string;
   readonly setDefaultStartTime: (value: string) => void;
   readonly mutationLoading: boolean;
-  readonly t: ReturnType<typeof useTranslations>;
+  readonly t: TeacherCreateRecurringClassLabels;
 }) {
   return (
     <Stack direction="row" spacing={2}>
       <TextField
         fullWidth
-        label={t("fields.durationMinutes")}
+        label={t.fields.duration}
         type="number"
         value={duration}
         onChange={e => setDuration(Number(e.target.value))}
@@ -251,7 +257,7 @@ function DurationTimeFields({
       />
       <TextField
         fullWidth
-        label={t("fields.time")}
+        label={t.fields.time}
         type="time"
         value={defaultStartTime}
         onChange={e => setDefaultStartTime(e.target.value)}
@@ -279,8 +285,13 @@ function TimezoneClassTypeFields({
   readonly classType: ClassTypeEnum;
   readonly setClassType: (value: ClassTypeEnum) => void;
   readonly mutationLoading: boolean;
-  readonly t: ReturnType<typeof useTranslations>;
+  readonly t: TeacherCreateRecurringClassLabels;
 }) {
+  const classTypeLabels: Record<string, string> = {
+    REGULAR: t.classTypes.REGULAR,
+    TRIAL: t.classTypes.TRIAL,
+    ADVANCE: t.classTypes.ADVANCE,
+  };
   return (
     <Stack direction="row" spacing={2}>
       <Box sx={{ flex: 1 }}>
@@ -289,24 +300,24 @@ function TimezoneClassTypeFields({
           onChangeAction={value => {
             setTimezone(value ? fromGraphqlIanaTimezone(value) : "");
           }}
-          label={t("fields.timezone")}
+          label={t.fields.timezone}
           fullWidth
           disabled={mutationLoading}
         />
       </Box>
       <FormControl fullWidth>
-        <InputLabel id="class-type-select-label">{t("fields.classType")}</InputLabel>
+        <InputLabel id="class-type-select-label">{t.fields.classType}</InputLabel>
         <Select
           labelId="class-type-select-label"
           id="class-type-select"
           value={classType}
-          label={t("fields.classType")}
+          label={t.fields.classType}
           onChange={e => setClassType(e.target.value)}
           disabled={mutationLoading}
         >
           {CLASS_TYPE_OPTIONS.map(opt => (
             <MenuItem key={opt} value={opt}>
-              {t(`classTypes.${opt}`)}
+              {classTypeLabels[opt]}
             </MenuItem>
           ))}
         </Select>
@@ -328,9 +339,18 @@ function DayScheduleItem({
   readonly toggleTimeOverride: (day: DayOfWeek) => void;
   readonly setTimeOverride: (day: DayOfWeek, time: string) => void;
   readonly mutationLoading: boolean;
-  readonly t: ReturnType<typeof useTranslations>;
+  readonly t: TeacherCreateRecurringClassLabels;
 }) {
   const d = dayConfig;
+  const dayLabels: Record<string, string> = {
+    monday: t.days.monday,
+    tuesday: t.days.tuesday,
+    wednesday: t.days.wednesday,
+    thursday: t.days.thursday,
+    friday: t.days.friday,
+    saturday: t.days.saturday,
+    sunday: t.days.sunday,
+  };
   return (
     <Box
       key={d.day}
@@ -346,7 +366,7 @@ function DayScheduleItem({
     >
       <FormControlLabel
         control={<Checkbox checked={d.enabled} onChange={() => toggleDay(d.day)} disabled={mutationLoading} />}
-        label={t(`days.${d.day.toLowerCase()}`)}
+        label={dayLabels[d.day.toLowerCase()]}
       />
       {d.enabled && (
         <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
@@ -358,7 +378,7 @@ function DayScheduleItem({
                 disabled={mutationLoading}
               />
             }
-            label={t("timeOverride.addOverride")}
+            label={t.timeOverride.addOverride}
           />
           {d.showOverride && (
             <TextField
@@ -393,12 +413,12 @@ function DayScheduleList({
   readonly toggleTimeOverride: (day: DayOfWeek) => void;
   readonly setTimeOverride: (day: DayOfWeek, time: string) => void;
   readonly mutationLoading: boolean;
-  readonly t: ReturnType<typeof useTranslations>;
+  readonly t: TeacherCreateRecurringClassLabels;
 }) {
   return (
     <Box>
       <Typography variant="subtitle1" gutterBottom>
-        {t("fields.days")}
+        {t.fields.days}
       </Typography>
       <Stack spacing={1}>
         {days.map(d => (
@@ -445,9 +465,9 @@ function DialogFormContent({
   readonly mutationLoading: boolean;
   readonly meetingConfigWarning: boolean;
   readonly createdClassInstanceId: string | null;
-  readonly t: ReturnType<typeof useTranslations>;
-  readonly tMeeting: ReturnType<typeof useTranslations>;
-  readonly tRecurringSchedule: ReturnType<typeof useTranslations>;
+  readonly t: TeacherCreateRecurringClassLabels;
+  readonly tMeeting: MeetingConfigManagerLabels;
+  readonly tRecurringSchedule: MeetingConfigRecurringScheduleLabels;
   readonly router: ReturnType<typeof useRouter>;
 }) {
   return (
@@ -505,10 +525,10 @@ function DialogFormContent({
 }
 
 export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<CreateRecurringClassDialogProps>) {
-  const t = useTranslations("dashboard.teacherCreateRecurringClass");
-  const tMeeting = useTranslations("ui.meetingConfig.manager");
-  const tRecurringSchedule = useTranslations("ui.meetingConfig.recurringSchedule");
-  const tClassScope = useTranslations("ui.meetingConfig.classScope");
+  const t = useAppTranslation("dashboard.teacherCreateRecurringClass");
+  const tMeeting = useAppTranslation("ui").meetingConfig.manager;
+  const tRecurringSchedule = useAppTranslation("ui").meetingConfig.recurringSchedule;
+  const tClassScope = useAppTranslation("ui").meetingConfig.classScope;
   const notifications = useNotifications();
   const client = useApolloClient();
   const router = useRouter();
@@ -558,7 +578,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
         }
       }
 
-      notifications.show(t("success.description", { count: result.classInstanceCount ?? 0 }), {
+      notifications.show(t.success.description(result.classInstanceCount ?? 0), {
         severity: "success",
       });
       logger.info("Recurring class created successfully", { id: result.id });
@@ -611,13 +631,13 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       logger.error("Failed to create recurring class", { err: error });
-      notifications.show(t("errors.creationFailed"), { severity: "error" });
+      notifications.show(t.errors.creationFailed, { severity: "error" });
     }
   };
 
   return (
     <Dialog open={isDialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
-      <DialogTitle>{t("dialogTitle")}</DialogTitle>
+      <DialogTitle>{t.dialogTitle}</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogFormContent
           teacherId={teacherId}
@@ -638,11 +658,11 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
         />
         <DialogActions>
           <Button onClick={closeDialog} disabled={mutationLoading}>
-            {t("actions.cancel")}
+            {t.actions.cancel}
           </Button>
           <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
             <Button type="submit" variant="contained" color="primary" disabled={mutationLoading}>
-              {mutationLoading ? t("actions.submitting") : t("actions.create")}
+              {mutationLoading ? t.actions.submitting : t.actions.create}
             </Button>
           </RequirePermission>
         </DialogActions>

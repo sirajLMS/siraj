@@ -1,0 +1,67 @@
+import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/students";
+
+export const history: StudentHistoryLabels = {
+  breadcrumbs: {
+    archive: "Archive",
+    history: "Student History",
+  },
+  common: {
+    student: "Student",
+  },
+  pageTitle: name => `${name}'s History`,
+  pageSubtitle: month => `Classes for ${month}`,
+  exportPdf: "Export as PDF",
+  changeMonth: "Change Month",
+  metrics: {
+    totalClasses: count => `Total Classes: ${count}`,
+    attendanceRate: rate => `Attendance Rate: ${rate}%`,
+    hoursStudied: hours => `Hours Studied: ${hours}`,
+    performance: score => `Performance: ${score}%`,
+  },
+  calendar: {
+    weeklyAttendance: "Weekly Attendance",
+    week: number => `Week ${number}`,
+    days: {
+      sun: "Sun",
+      mon: "Mon",
+      tue: "Tue",
+      wed: "Wed",
+      thu: "Thu",
+      fri: "Fri",
+      sat: "Sat",
+    },
+  },
+  classDetails: {
+    title: "Class Details",
+    classDetails: date => `Details for ${date}`,
+    instructor: name => `Instructor: ${name}`,
+    timeSlot: "Time Slot",
+    roomNo: "Room",
+    contentNotes: "Content & Notes",
+    viewAssignments: "View Assignments",
+    downloadLogs: "Download Session Logs",
+    joinSession: "Join Session",
+    status: {
+      present: "Present",
+      absent: "Absent",
+      late: "Late",
+      PENDING: "Pending",
+      TAKEN: "Taken",
+      ABSENT: "Absent",
+      LEAVE: "Leave",
+      NOT_ACTIVATED: "Not Activated",
+      ACTIVATED: "Activated",
+      RUNNING: "Running",
+      COMPLETED: "Completed",
+    },
+    noSessions: "No class sessions found for this date.",
+    dayOfMonth: (day, month) => `Day ${day} of ${month}`,
+  },
+  performanceStreak: {
+    title: "Performance Streak",
+    description: count => `Student's performance trend over the last ${count} classes.`,
+  },
+  errors: {
+    loadFailed: "Failed to load student history.",
+  },
+};

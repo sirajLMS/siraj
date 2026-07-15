@@ -11,20 +11,20 @@ export namespace StudentStatusService {
   export async function getUpcomingClasses(
     actorUserId: string,
     studentId: string,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<StudentUpcomingClassesResult> {
     const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
     try {
       assertStudentFieldView(fieldCtx, "student_schedule");
     } catch {
       throw new Error(
-        tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
       );
     }
 
     const student = await StudentRepository.findById(studentId);
     if (!student) {
-      throw new Error(tErrors?.studentNotFound(studentId) ?? `Student not found: ${studentId}`);
+      throw new Error(tErrors.studentNotFound(studentId) ?? `Student not found: ${studentId}`);
     }
 
     const classes = await SchedulingRepository.getUpcomingClassesForStudent(studentId);

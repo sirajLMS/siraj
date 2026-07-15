@@ -3,11 +3,11 @@ import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository, PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export interface ParentOnboardingInput {
   readonly name: string;
@@ -41,34 +41,32 @@ export namespace ParentOnboardingService {
   export async function createParent(
     actorUserId: string,
     input: ParentOnboardingInput,
-    locale?: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<ParentOnboardingResult> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-
     // Permission check
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENTS_CREATE);
     if (!hasPermission) {
-      throw new Error(t("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     // Email uniqueness check
     const emailExists = await UserRepository.existsByEmail(input.email);
     if (emailExists) {
-      throw new Error(t("user.emailAlreadyExists"));
+      throw new Error(tErrors.userEmailExists);
     }
 
     const run = async (txObj: DBTransaction) => {
       // Step 1: Create user record
       const user = await UserRepository.create(
         { name: input.name, email: { value: input.email }, password: input.password },
-        locale,
+        undefined,
         txObj
       );
 
-      await UserRepository.updateTimezone(user.id, input.timezone ?? IanaTimezone.UTC, txObj, locale);
+      await UserRepository.updateTimezone(user.id, input.timezone ?? IanaTimezone.UTC, txObj, undefined);
       if (input.phone != null) {
-        await UserRepository.updateProfileFields(user.id, { phone: input.phone }, locale, txObj);
+        await UserRepository.updateProfileFields(user.id, { phone: input.phone }, undefined, txObj);
       }
 
       const parent = await ParentRepository.create(
@@ -87,14 +85,14 @@ export namespace ParentOnboardingService {
           updatedAt: new Date(),
         },
         txObj,
-        locale
+        undefined
       );
 
       // Step 3: Assign permission group
       const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
       const targetGroup = groups.find(g => g.slug === SystemPermissionGroupSlug.PARENT_DEFAULT);
       if (!targetGroup) {
-        throw new Error(t("permission.groupNotFound"));
+        throw new Error(tErrors.permissionGroupNotFound);
       }
 
       await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], targetGroup.id, actorUserId, txObj);
@@ -102,8 +100,7 @@ export namespace ParentOnboardingService {
       if (input.initialPayinMethod) {
         await PaymentMethodService.createUserPaymentMethodInternal(
           { ...input.initialPayinMethod, userId: user.id },
-          txObj,
-          locale
+          txObj
         );
       }
 

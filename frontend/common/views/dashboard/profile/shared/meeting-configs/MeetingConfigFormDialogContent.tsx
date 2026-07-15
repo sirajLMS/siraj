@@ -54,17 +54,17 @@ export function MeetingConfigFormDialogContent({
 
   return (
     <>
-      <DialogTitle>{isEdit ? t("editTitle") : t("addTitle")}</DialogTitle>
+      <DialogTitle>{isEdit ? t.editTitle : t.addTitle}</DialogTitle>
       <DialogContent>
         <Stack spacing={2.5} sx={{ pt: 1 }}>
-          <TextField label={t("label")} value={label} onChange={e => setLabel(e.target.value)} fullWidth size="small" />
+          <TextField label={t.label} value={label} onChange={e => setLabel(e.target.value)} fullWidth size="small" />
           <MeetingProviderSelect
             value={provider}
             onChangeAction={setProvider}
-            label={t("provider")}
+            label={t.provider}
             disabled={providerSelectDisabled}
           />
-          {providerChanged ? <Alert severity="warning">{t("providerChangeWarning")}</Alert> : null}
+          {providerChanged ? <Alert severity="warning">{t.providerChangeWarning}</Alert> : null}
           {instructions ? (
             <Alert severity="info">
               {provider?.name ? (
@@ -85,22 +85,22 @@ export function MeetingConfigFormDialogContent({
               });
               setUrlError(null);
             }}
-            passwordHelperText={hasSecretOnEdit ? t("passwordLeaveBlank") : undefined}
+            passwordHelperText={hasSecretOnEdit ? t.passwordLeaveBlank : undefined}
           />
           {urlError ? <Typography sx={{ typography: "bodySm", color: "error.main" }}>{urlError}</Typography> : null}
           {saveError ? <Alert severity="error">{saveError}</Alert> : null}
           <FormControlLabel
             control={<Checkbox checked={isDefault} onChange={event => setIsDefault(event.target.checked)} />}
-            label={t("setAsDefault")}
+            label={t.setAsDefault}
           />
         </Stack>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={saving}>
-          {t("cancel")}
+          {t.cancel}
         </Button>
         <Button variant="contained" disabled={saving || !provider || !details.meetingUrl.trim()} onClick={onSave}>
-          {t("save")}
+          {t.save}
         </Button>
       </DialogActions>
     </>

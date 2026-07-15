@@ -22,6 +22,7 @@ gqlSchemaBuilder.mutationField("createClassSubject", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       return ClassSubjectService.createSubject(
         userId,
         {
@@ -32,7 +33,7 @@ gqlSchemaBuilder.mutationField("createClassSubject", t =>
           isActive: args.input.isActive ?? undefined,
           sortOrder: args.input.sortOrder ?? undefined,
         },
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -48,6 +49,7 @@ gqlSchemaBuilder.mutationField("updateClassSubject", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       return ClassSubjectService.updateSubject(
         userId,
         args.id,
@@ -57,7 +59,7 @@ gqlSchemaBuilder.mutationField("updateClassSubject", t =>
           categoryId: args.input.categoryId ?? undefined,
           ...commonClassUpdateInputFields(args.input),
         },
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -74,6 +76,7 @@ gqlSchemaBuilder.mutationField("attachSubjectResource", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       return ClassSubjectService.attachResource(
         userId,
         {
@@ -82,7 +85,7 @@ gqlSchemaBuilder.mutationField("attachSubjectResource", t =>
           resourceType: args.input.resourceType,
           sortOrder: args.input.sortOrder ?? undefined,
         },
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -98,7 +101,8 @@ gqlSchemaBuilder.mutationField("detachSubjectResource", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      await ClassSubjectService.detachResource(userId, args.subjectId, args.learningResourceId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      await ClassSubjectService.detachResource(userId, args.subjectId, args.learningResourceId, tErrors);
       return true;
     },
   })

@@ -3,7 +3,6 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Tab, Tabs, Typography } from "@mui/material";
 import { useParams, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
@@ -26,6 +25,8 @@ import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/student
 import { StudentQuotaContainer } from "@/frontend/common/views/dashboard/students/quota/StudentQuotaContainer";
 import { StudentStatusContainer } from "@/frontend/common/views/dashboard/students/status/StudentStatusContainer";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
 
 const STATUS_BADGE_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "regular",
@@ -39,6 +40,89 @@ function getBadgeStatusKey(status: StudentStatus): string {
   return STATUS_BADGE_MAP[status] ?? "regular";
 }
 
+function buildStudentStatusLabel(tStatus: StudentStatusLabels): Record<StudentStatus, string> {
+  return {
+    [StudentStatus.Regular]: tStatus.statusOptions.REGULAR,
+    [StudentStatus.Suspended]: tStatus.statusOptions.SUSPENDED,
+    [StudentStatus.OnLeave]: tStatus.statusOptions.ON_LEAVE,
+    [StudentStatus.OnTrial]: tStatus.statusOptions.ON_TRIAL,
+    [StudentStatus.Deactivated]: tStatus.statusOptions.DEACTIVATED,
+  };
+}
+
+function resolveProfileHeader(
+  profile: StudentProfileQueryData | undefined,
+  showName: boolean,
+  restrictedIdentity: (id: string) => string,
+  fallbackTitle: string,
+  fallbackSubtitle: string,
+  genericFallback: string
+): { readonly title: string; readonly subtitle: string } {
+  if (showName && profile?.name) {
+    return { title: profile.name, subtitle: fallbackSubtitle };
+  }
+  if (profile?.id) {
+    return { title: fallbackTitle, subtitle: restrictedIdentity(profile.id) };
+  }
+  return { title: fallbackTitle, subtitle: genericFallback };
+}
+
+function renderStatusBadgeAction(
+  showStatus: boolean,
+  profile: StudentProfileQueryData | undefined,
+  studentStatusLabel: Record<StudentStatus, string>
+): React.JSX.Element | undefined {
+  if (showStatus && profile?.status) {
+    return (
+      <StatusBadge
+        category="studentAccount"
+        status={getBadgeStatusKey(profile.status)}
+        label={studentStatusLabel[profile.status]}
+      />
+    );
+  }
+  return undefined;
+}
+
+function renderProfileTabs(
+  visibleTabs: readonly StudentProfileTab[],
+  activeTab: StudentProfileTab | null,
+  handleTabChange: (event: React.SyntheticEvent, nextTab: StudentProfileTab) => void,
+  labels: { readonly status: string; readonly quota: string; readonly history: string },
+  fallbackTitle: string
+): React.JSX.Element {
+  if (visibleTabs.length === 0) {
+    return <ProfileRestrictedSection title={fallbackTitle} />;
+  }
+  return (
+    <>
+      <Tabs value={activeTab ?? visibleTabs[0]} onChange={handleTabChange} sx={{ mb: 3 }}>
+        {visibleTabs.includes("status") ? <Tab value="status" label={labels.status} /> : null}
+        {visibleTabs.includes("quota") ? <Tab value="quota" label={labels.quota} /> : null}
+        {visibleTabs.includes("history") ? <Tab value="history" label={labels.history} /> : null}
+      </Tabs>
+
+      {activeTab === "status" ? <StudentStatusContainer /> : null}
+      {activeTab === "quota" ? <StudentQuotaContainer /> : null}
+      {activeTab === "history" ? <StudentHistoryContainer /> : null}
+    </>
+  );
+}
+
+function syncTabFromParams(
+  resolvedTab: StudentProfileTab | null,
+  searchTabParam: string | null,
+  studentId: string,
+  router: ReturnType<typeof useRouter>,
+  setActiveTab: (tab: StudentProfileTab | null) => void
+): void {
+  setActiveTab(resolvedTab);
+
+  if (resolvedTab && searchTabParam !== resolvedTab) {
+    router.replace(`/students/${studentId}/profile?tab=${resolvedTab}`);
+  }
+}
+
 function StudentProfilePageContent({
   studentId,
   profile,
@@ -48,8 +132,8 @@ function StudentProfilePageContent({
   readonly profile: StudentProfileQueryData | undefined;
   readonly loading: boolean;
 }) {
-  const t = useTranslations("dashboard.studentProfile");
-  const tStatus = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentProfile");
+  const tStatus = useAppTranslation("dashboard.studentStatus");
   const searchParams = useSearchParams();
   const router = useRouter();
   const { canView, showField } = useStudentFieldAccess();
@@ -61,11 +145,7 @@ function StudentProfilePageContent({
 
   useEffect(() => {
     const nextResolved = resolveStudentProfileTab(searchParams.get("tab"), canView);
-    setActiveTab(nextResolved);
-
-    if (nextResolved && searchParams.get("tab") !== nextResolved) {
-      router.replace(`/students/${studentId}/profile?tab=${nextResolved}`);
-    }
+    syncTabFromParams(nextResolved, searchParams.get("tab"), studentId, router, setActiveTab);
   }, [searchParams, canView, studentId, router]);
 
   const handleTabChange = useCallback(
@@ -82,7 +162,7 @@ function StudentProfilePageContent({
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, py: 10 }}>
           <CircularProgress />
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {t("loading")}
+            {t.loading}
           </Typography>
         </Box>
       </PageContainer>
@@ -92,52 +172,30 @@ function StudentProfilePageContent({
   if (!profile) {
     return (
       <PageContainer>
-        <ProfileRestrictedSection title={t("notFoundTitle")} description={t("notFoundDescription")} />
+        <ProfileRestrictedSection title={t.notFoundTitle} description={t.notFoundDescription} />
       </PageContainer>
     );
   }
 
   const showName = showField(profile?.name, "student_identity");
   const showStatus = canView("student_academic") && profile?.status != null;
-  const headerTitle = showName && profile?.name ? profile.name : t("title");
-  const headerSubtitle =
-    showName && profile?.name
-      ? t("subtitle")
-      : profile?.id
-        ? t("restrictedIdentity", { id: profile.id })
-        : t("restrictedIdentityGeneric");
+  const headerValues = resolveProfileHeader(
+    profile,
+    showName,
+    t.restrictedIdentity,
+    t.title,
+    t.subtitle,
+    t.restrictedIdentityGeneric
+  );
+
+  const studentStatusLabel = buildStudentStatusLabel(tStatus);
+  const headerAction = renderStatusBadgeAction(showStatus, profile, studentStatusLabel);
+  const tabsContent = renderProfileTabs(visibleTabs, activeTab, handleTabChange, t.tabs, t.title);
 
   return (
     <PageContainer>
-      <PageHeader
-        title={headerTitle}
-        subtitle={headerSubtitle}
-        actions={
-          showStatus && profile?.status ? (
-            <StatusBadge
-              category="studentAccount"
-              status={getBadgeStatusKey(profile.status)}
-              label={tStatus(`statusOptions.${profile.status}`)}
-            />
-          ) : undefined
-        }
-      />
-
-      {visibleTabs.length === 0 ? (
-        <ProfileRestrictedSection title={t("title")} />
-      ) : (
-        <>
-          <Tabs value={activeTab ?? visibleTabs[0]} onChange={handleTabChange} sx={{ mb: 3 }}>
-            {visibleTabs.includes("status") ? <Tab value="status" label={t("tabs.status")} /> : null}
-            {visibleTabs.includes("quota") ? <Tab value="quota" label={t("tabs.quota")} /> : null}
-            {visibleTabs.includes("history") ? <Tab value="history" label={t("tabs.history")} /> : null}
-          </Tabs>
-
-          {activeTab === "status" ? <StudentStatusContainer /> : null}
-          {activeTab === "quota" ? <StudentQuotaContainer /> : null}
-          {activeTab === "history" ? <StudentHistoryContainer /> : null}
-        </>
-      )}
+      <PageHeader title={headerValues.title} subtitle={headerValues.subtitle} actions={headerAction} />
+      {tabsContent}
     </PageContainer>
   );
 }

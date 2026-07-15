@@ -12,11 +12,11 @@ import type {
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace ClassSubjectService {
-  async function assertPermission(userId: string, permission: AppPermission, tErrors?: ErrorsLabels): Promise<void> {
+  async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels): Promise<void> {
     const hasPermission = await PermissionsService.hasPermission(userId, permission);
     if (!hasPermission) {
       throw new Error(
-        tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
       );
     }
   }
@@ -24,7 +24,7 @@ export namespace ClassSubjectService {
   export async function listSubjects(
     userId: string,
     categoryId?: string,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<ClassSubjectReturnType[]> {
     await assertPermission(userId, AppPermission.SUBJECTS_LIST, tErrors);
 
@@ -34,7 +34,7 @@ export namespace ClassSubjectService {
   export async function getSubjectById(
     userId: string,
     id: string,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<ClassSubjectReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_LIST, tErrors);
 
@@ -44,7 +44,7 @@ export namespace ClassSubjectService {
   export async function createSubject(
     userId: string,
     input: ClassSubjectSubmitInput,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<ClassSubjectReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_CREATE, tErrors);
 
@@ -55,14 +55,14 @@ export namespace ClassSubjectService {
     userId: string,
     id: string,
     input: ClassSubjectUpdateInput,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<ClassSubjectReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_UPDATE, tErrors);
 
     return await ClassSubjectRepository.updateSubject(id, input);
   }
 
-  export async function deleteSubject(userId: string, id: string, tErrors?: ErrorsLabels): Promise<{ id: string }> {
+  export async function deleteSubject(userId: string, id: string, tErrors: ErrorsLabels): Promise<{ id: string }> {
     await assertPermission(userId, AppPermission.SUBJECTS_DELETE, tErrors);
 
     return await ClassSubjectRepository.deleteSubject(id);
@@ -71,7 +71,7 @@ export namespace ClassSubjectService {
   export async function getSubjectResources(
     userId: string,
     subjectId: string,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<SubjectResourceReturnType[]> {
     await assertPermission(userId, AppPermission.SUBJECTS_VIEW_RESOURCES, tErrors);
 
@@ -81,7 +81,7 @@ export namespace ClassSubjectService {
   export async function attachResource(
     userId: string,
     input: SubjectResourceAttachInput,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<SubjectResourceReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_MANAGE_RESOURCES, tErrors);
 
@@ -92,7 +92,7 @@ export namespace ClassSubjectService {
     userId: string,
     subjectId: string,
     learningResourceId: string,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<{ id: string }> {
     await assertPermission(userId, AppPermission.SUBJECTS_MANAGE_RESOURCES, tErrors);
 

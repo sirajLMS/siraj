@@ -104,7 +104,7 @@ export function ClassMeetingConfigFormDialog({
       await onSaved();
       onClose();
     } catch {
-      setSaveError(t("saveError"));
+      setSaveError(t.saveError);
     }
   };
 

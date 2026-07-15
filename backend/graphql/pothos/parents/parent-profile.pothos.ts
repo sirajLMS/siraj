@@ -193,12 +193,13 @@ gqlSchemaBuilder.mutationField("updateStudentQuota", t =>
       expectedVersion: t.arg.int({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
+      const tErrors = await ctx.t("errors");
       return StudentManagementService.editQuota(
         ctx.user?.id || "",
         args.studentId,
         args.newClassesRemaining,
         args.expectedVersion ?? undefined,
-        ctx.locale
+        tErrors
       );
     },
   })

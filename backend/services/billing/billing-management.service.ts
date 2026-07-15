@@ -105,8 +105,8 @@ async function finalizePaymentStatusChange(
   errorLabel: string,
   actorUserId: string,
   invoiceId: string,
-  locale: string | undefined,
-  txnWork: (tx: DBTransaction) => Promise<Types.InvoiceSelectType>
+  txnWork: (tx: DBTransaction) => Promise<Types.InvoiceSelectType>,
+  locale?: string
 ): Promise<Types.MarkInvoicePaidResult> {
   try {
     const updated = await db.transaction(txnWork);
@@ -166,7 +166,7 @@ async function finalizeInvoicePaid(
 
   const submittedAt = new Date();
   const proof = buildProofSnapshot(proofFileId, filePath, mimeType, submittedByUserId, submittedAt);
-  const invoice = await BillingRepository.markInvoiceAsPaid(invoiceId, expectedVersion, tx);
+  const invoice = await BillingRepository.markInvoiceAsPaid(invoiceId, tErrors, expectedVersion, tx);
   await recordProofPayment(invoice, proof, tx);
 
   logger.info("Invoice marked as paid with proof", {
@@ -183,23 +183,20 @@ export namespace BillingManagementService {
   export async function createManualInvoice(
     actorUserId: string,
     input: Types.CreateManualInvoiceInput,
-    tErrors: ErrorsLabels,
+    tErrors: ErrorsLabels
   ): Promise<Types.ManualInvoiceResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_CREATE_INVOICE, tErrors);
     await validateManualInvoiceInput(input, tErrors);
 
     try {
-      const created = await BillingRepository.createInvoice(
-        buildInvoiceInsertPayload(actorUserId, input),
-        undefined,
-      );
+      const created = await BillingRepository.createInvoice(buildInvoiceInsertPayload(actorUserId, input), undefined);
 
       const billingMonths = input.billingMonths;
       if (billingMonths?.length) {
         await BillingRepository.createInvoiceCoverageMonths(created.id, billingMonths);
       }
 
-      await syncNotificationAfterCreate(created.id, input.sendEmail, );
+      await syncNotificationAfterCreate(created.id, input.sendEmail);
 
       logger.info("Manual invoice created", { actorUserId, invoiceId: created.id });
 
@@ -215,7 +212,7 @@ export namespace BillingManagementService {
     invoiceId: string,
     proofFileId: string,
     tErrors: ErrorsLabels,
-    expectedVersion?: number,
+    expectedVersion?: number
   ): Promise<Types.MarkInvoicePaidResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_SUBMIT_PAYMENT_PROOF, tErrors);
 
@@ -230,7 +227,7 @@ export namespace BillingManagementService {
       throw new Error(tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: existingInvoice.status }));
     }
 
-    return finalizePaymentStatusChange("Failed to submit payment proof", actorUserId, invoiceId,  async tx => {
+    return finalizePaymentStatusChange("Failed to submit payment proof", actorUserId, invoiceId, async tx => {
       const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, tx);
       await linkProofToInvoice(invoiceId, proofFileId, tx);
 
@@ -265,7 +262,7 @@ export namespace BillingManagementService {
     actorUserId: string,
     invoiceId: string,
     tErrors: ErrorsLabels,
-    expectedVersion?: number,
+    expectedVersion?: number
   ): Promise<Types.MarkInvoicePaidResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, tErrors);
 
@@ -276,7 +273,7 @@ export namespace BillingManagementService {
       throw new Error(tErrors.billing.invoicePaymentProofNotFound(invoiceId));
     }
 
-    return finalizePaymentStatusChange("Failed to approve payment proof", actorUserId, invoiceId,  async tx => {
+    return finalizePaymentStatusChange("Failed to approve payment proof", actorUserId, invoiceId, async tx => {
       const invoice = await finalizeInvoicePaid(
         actorUserId,
         invoiceId,
@@ -296,13 +293,13 @@ export namespace BillingManagementService {
     invoiceId: string,
     tErrors: ErrorsLabels,
     rejectionReason?: string | null,
-    expectedVersion?: number,
+    expectedVersion?: number
   ): Promise<Types.MarkInvoicePaidResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, tErrors);
 
     await fetchInvoicePendingReview(invoiceId, tErrors);
 
-    return finalizePaymentStatusChange("Failed to reject payment proof", actorUserId, invoiceId,  async tx => {
+    return finalizePaymentStatusChange("Failed to reject payment proof", actorUserId, invoiceId, async tx => {
       await InvoicePaymentSubmissionRepository.rejectPendingForInvoice(
         invoiceId,
         actorUserId,
@@ -331,7 +328,7 @@ export namespace BillingManagementService {
     invoiceId: string,
     proofFileId: string,
     tErrors: ErrorsLabels,
-    expectedVersion?: number,
+    expectedVersion?: number
   ): Promise<Types.MarkInvoicePaidResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, tErrors);
 
@@ -356,7 +353,7 @@ export namespace BillingManagementService {
   export async function deleteInvoice(
     actorUserId: string,
     invoiceId: string,
-    tErrors: ErrorsLabels,
+    tErrors: ErrorsLabels
   ): Promise<Types.DeleteInvoiceResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_DELETE_INVOICE);
     if (!hasPermission) {
@@ -372,7 +369,7 @@ export namespace BillingManagementService {
     }
 
     try {
-      const deleted = await BillingRepository.deleteInvoice(invoiceId, undefined, );
+      const deleted = await BillingRepository.deleteInvoice(invoiceId, tErrors);
 
       logger.info("Invoice deleted", {
         actorUserId,
@@ -430,7 +427,7 @@ export namespace BillingManagementService {
   export async function sendPaymentReminder(
     actorUserId: string,
     studentId: string,
-    tErrors: ErrorsLabels,
+    tErrors: ErrorsLabels
   ): Promise<Types.SendPaymentReminderResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID);
     if (!hasPermission) {

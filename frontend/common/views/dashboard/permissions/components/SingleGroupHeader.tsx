@@ -3,10 +3,10 @@
 import { ArrowBackOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledBreadcrumbNav = styled(Box)({
   display: "flex",
@@ -103,7 +103,7 @@ interface SingleGroupHeaderProps {
 }
 
 export function SingleGroupHeader({ group, onBack, onEditGroup }: Readonly<SingleGroupHeaderProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
   const groupName = resolveLocalizedString(group.name);
   const groupDescription = resolveLocalizedString(group.description);
 
@@ -112,7 +112,7 @@ export function SingleGroupHeader({ group, onBack, onEditGroup }: Readonly<Singl
       {/* Breadcrumb Navigation */}
       <StyledBreadcrumbNav>
         <StyledBackButton onClick={onBack} size="small" variant="text" startIcon={<ArrowBackOutlined />}>
-          {t("groupsTab")}
+          {t.groupsTab}
         </StyledBackButton>
         <StyledBreadcrumbSeparator variant="bodyMd">/</StyledBreadcrumbSeparator>
         <StyledBreadcrumbName variant="bodyMd">{groupName}</StyledBreadcrumbName>
@@ -127,11 +127,11 @@ export function SingleGroupHeader({ group, onBack, onEditGroup }: Readonly<Singl
             <StatusBadge
               category="session"
               status={group.isSystem ? "active" : "pending"}
-              label={group.isSystem ? t("systemBadge") : t("customBadge")}
+              label={group.isSystem ? t.systemBadge : t.customBadge}
             />
           </StyledHeaderTitleRow>
           <StyledHeaderDescription variant="bodyMd">
-            {groupDescription || t("noDescriptionProvided")}
+            {groupDescription || t.noDescriptionProvided}
           </StyledHeaderDescription>
         </StyledHeaderInfo>
 

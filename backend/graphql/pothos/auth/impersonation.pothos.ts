@@ -115,7 +115,7 @@ gqlSchemaBuilder.mutationFields(t => ({
           ipAddress: ctx.ipAddress ?? null,
           userAgent: null,
         },
-        ctx.locale
+        tErrors
       );
 
       if (ctx.refreshToken) {
@@ -143,7 +143,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         });
       }
 
-      const result = await ImpersonationService.endImpersonation(actorUserId, ctx.sessionId, ctx.locale, ctx.ipAddress);
+      const result = await ImpersonationService.endImpersonation(actorUserId, ctx.sessionId, tErrors, ctx.ipAddress);
 
       if (ctx.refreshToken) {
         setAuthCookies(ctx.cookies, ctx.sessionId, ctx.refreshToken, result.token);

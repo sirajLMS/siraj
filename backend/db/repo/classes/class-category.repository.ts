@@ -47,7 +47,7 @@ export namespace ClassCategoryRepository {
 
   export async function getCategoryById(
     id: string,
-    locale?: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<ClassCategorySelectType> {
     try {
@@ -58,10 +58,8 @@ export namespace ClassCategoryRepository {
         .where(and(eq(classCategories.id, id), isNull(classCategories.deletedAt)))
         .limit(1);
 
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-
       if (!result) {
-        throw new Error(tFunc("categoryNotFound", { id }));
+        throw new Error(tErrors.categoryNotFound(id));
       }
 
       return result;
@@ -73,7 +71,7 @@ export namespace ClassCategoryRepository {
 
   export async function createCategory(
     input: ClassCategorySubmitInput,
-    locale?: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<ClassCategorySelectType> {
     const run = async (t: DBTransaction): Promise<ClassCategorySelectType> => {
@@ -89,8 +87,7 @@ export namespace ClassCategoryRepository {
         .returning();
 
       if (!result) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("categoryCreateFailed"));
+        throw new Error(tErrors.categoryCreateFailed);
       }
 
       logger.info("Class category created", { categoryId: result.id, slug: result.slug });
@@ -112,7 +109,7 @@ export namespace ClassCategoryRepository {
   export async function updateCategory(
     id: string,
     input: ClassCategoryUpdateInput,
-    locale?: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<ClassCategorySelectType> {
     const run = async (t: DBTransaction): Promise<ClassCategorySelectType> => {
@@ -122,10 +119,8 @@ export namespace ClassCategoryRepository {
         .where(and(eq(classCategories.id, id), isNull(classCategories.deletedAt)))
         .limit(1);
 
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-
       if (!existing) {
-        throw new Error(tFunc("categoryNotFound", { id }));
+        throw new Error(tErrors.categoryNotFound(id));
       }
 
       const now = new Date();
@@ -156,7 +151,11 @@ export namespace ClassCategoryRepository {
     }
   }
 
-  export async function deleteCategory(id: string, locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
+  export async function deleteCategory(
+    id: string,
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
+  ): Promise<{ id: string }> {
     const run = async (t: DBTransaction): Promise<{ id: string }> => {
       const [existing] = await t
         .select()
@@ -164,10 +163,8 @@ export namespace ClassCategoryRepository {
         .where(and(eq(classCategories.id, id), isNull(classCategories.deletedAt)))
         .limit(1);
 
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-
       if (!existing) {
-        throw new Error(tFunc("categoryNotFound", { id }));
+        throw new Error(tErrors.categoryNotFound(id));
       }
 
       const now = new Date();

@@ -193,13 +193,14 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
 
       await setBillingFxDisplayCurrencyForSubject(ctx, args.userId ?? null, callerUserId);
 
+      const tErrors = await ctx.t("errors");
       return BillingHistoryService.getParentInvoiceHistory(
         callerUserId,
         args.parentId ?? null,
         args.userId ?? null,
         pagination,
         args.search ?? null,
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -217,7 +218,8 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
       const userId = await requireAuth(ctx);
       const pagination = parsePaginationArgs(args.paginationArgs);
 
-      const result = await BillingHistoryService.getAdminInvoices(userId, pagination, args.search ?? null, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      const result = await BillingHistoryService.getAdminInvoices(userId, pagination, args.search ?? null, tErrors);
       await populateBillingFxDisplayCurrencyByUserId(
         ctx,
         result.rows.map(row => row.parentUserId)
@@ -233,7 +235,8 @@ gqlSchemaBuilder.queryField("adminBillingSummary", t =>
     authScopes: { permission: AppPermission.BILLING_VIEW_HISTORY },
     resolve: async (_root, _args, ctx) => {
       const userId = await requireAuth(ctx);
-      return BillingHistoryService.getAdminBillingSummary(userId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return BillingHistoryService.getAdminBillingSummary(userId, tErrors);
     },
   })
 );
@@ -244,7 +247,8 @@ gqlSchemaBuilder.queryField("studentCreditStatus", t =>
     authScopes: { loggedIn: true },
     resolve: async (_root, _args, ctx) => {
       const userId = await requireAuth(ctx);
-      return BillingHistoryService.getStudentCreditStatus(userId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return BillingHistoryService.getStudentCreditStatus(userId, tErrors);
     },
   })
 );
@@ -262,11 +266,12 @@ gqlSchemaBuilder.queryField("parentBillingSummary", t =>
 
       await setBillingFxDisplayCurrencyForSubject(ctx, args.userId ?? null, callerUserId);
 
+      const tErrors = await ctx.t("errors");
       return BillingHistoryService.getParentBillingSummary(
         callerUserId,
         args.parentId ?? null,
         args.userId ?? null,
-        ctx.locale
+        tErrors
       );
     },
   })

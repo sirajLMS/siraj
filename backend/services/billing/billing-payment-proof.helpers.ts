@@ -83,7 +83,7 @@ export function buildProofTransactionSnapshot(proof: PaymentProofSnapshot): Paym
 export async function recordProofPayment(
   invoice: Types.InvoiceSelectType,
   proof: PaymentProofSnapshot,
-  tx: DBTransaction,
+  tx: DBTransaction
 ): Promise<Types.PaymentSelectType> {
   const snapshot = buildProofTransactionSnapshot(proof);
   return BillingRepository.recordPayment(
@@ -101,7 +101,7 @@ export async function recordProofPayment(
       exchangeRateSource: invoice.exchangeRateSource,
       idempotencyKey: `proof:${invoice.id}`,
     },
-    tx,
+    tx
   );
 }
 

@@ -25,6 +25,7 @@ gqlSchemaBuilder.mutationField("createTeacherManualClassEntry", t =>
         throw new Error(tErrors.unauthorized);
       }
       const tErrors = await ctx.t("errors");
+      const tSession = await ctx.t("session");
       const created = await TeacherDashboardService.createManualEntry(
         ctx.user.id,
         {
@@ -37,7 +38,7 @@ gqlSchemaBuilder.mutationField("createTeacherManualClassEntry", t =>
         },
         tErrors
       );
-      return ClassSessionService.getClassInstanceDetail(ctx.user.id, created.id);
+      return ClassSessionService.getClassInstanceDetail(ctx.user.id, created.id, tSession, tErrors);
     },
   })
 );

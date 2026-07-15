@@ -75,7 +75,7 @@ gqlSchemaBuilder.mutationFields(t => ({
           sessionId: ctx.sessionId,
           ipAddress: ctx.ipAddress ?? null,
         },
-        ctx.locale
+        tErrors
       );
 
       if (ctx.refreshToken) {
@@ -103,7 +103,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       const result = await PermissionGroupSimulationService.endSimulation(
         actorUserId,
         ctx.sessionId,
-        ctx.locale,
+        tErrors,
         ctx.ipAddress,
         ctx.isSimulatingGroup ? ctx.simulatedGroupSlug : null
       );

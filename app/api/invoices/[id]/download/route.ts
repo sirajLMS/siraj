@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { ForbiddenError, getServerUserContext, logger, NotFoundError } from "@/backend/lib";
 import { BillingManagementService, StorageService } from "@/backend/services";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: invoiceId } = await params;
@@ -10,8 +11,11 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // todo: use locale from request headers instead of hardcoding "ar"
+  const tErrors = await getServerTranslations("ar", "errors");
+
   try {
-    await BillingManagementService.verifyInvoiceAccess(userId, invoiceId, context);
+    await BillingManagementService.verifyInvoiceAccess(userId, invoiceId, context, tErrors);
 
     const files = await StorageService.getFilesForInvoice(invoiceId, "invoice_pdf", 50);
     const pdfFile = files[0];

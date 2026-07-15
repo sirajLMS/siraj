@@ -75,7 +75,7 @@ export async function createContext({
   const effectiveRealUserId = realUserId ?? actorUserId ?? userId;
   const permissionContext =
     isSimulatingGroup && simulatedGroupSlug
-      ? await PermissionsService.getPermissionGroupContext(simulatedGroupSlug, locale)
+      ? await PermissionsService.getPermissionGroupContext(simulatedGroupSlug)
       : await PermissionsService.getUserContext(userId);
 
   const safeUser = await UserRepository.findSafeById(userId);

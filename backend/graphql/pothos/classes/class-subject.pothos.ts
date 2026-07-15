@@ -43,8 +43,10 @@ export const ClassSubjectPothosObject = ClassSubjectRef.implement({
     }),
     resources: t.field({
       type: [SubjectResourcePothosObject],
-      resolve: (parent, _args, ctx) =>
-        ClassSubjectService.getSubjectResources(ctx.user?.id ?? "", parent.id, ctx.locale),
+      resolve: async (parent, _args, ctx) => {
+        const tErrors = await ctx.t("errors");
+        return ClassSubjectService.getSubjectResources(ctx.user?.id ?? "", parent.id, tErrors);
+      },
     }),
   }),
 });

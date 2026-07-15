@@ -24,35 +24,40 @@ export namespace StudentManagementService {
     studentId: string,
     newClassesRemaining: number,
     expectedVersion?: number,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels
   ): Promise<EditQuotaResult> {
     const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
     try {
       assertStudentFieldEdit(fieldCtx, "student_quota_edit");
     } catch {
       throw new Error(
-        tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
       );
     }
 
     if (!Number.isInteger(newClassesRemaining) || newClassesRemaining < 0) {
-      throw new Error(tErrors?.invalidInput ?? "Invalid input.");
+      throw new Error(tErrors.invalidInput ?? "Invalid input.");
     }
 
     // Fetch current student to validate newValue <= classesTotal
     const current = await StudentRepository.findById(studentId);
     if (!current) {
-      throw new Error(tErrors?.studentNotFound(studentId) ?? `Student not found: ${studentId}`);
+      throw new Error(tErrors.studentNotFound(studentId) ?? `Student not found: ${studentId}`);
     }
 
     if (newClassesRemaining > current.classesTotal) {
       throw new Error(
-        tErrors?.quotaExceedsTotal({ requested: newClassesRemaining, total: current.classesTotal }) ??
+        tErrors.quotaExceedsTotal({ requested: newClassesRemaining, total: current.classesTotal }) ??
           `Quota ${newClassesRemaining} exceeds total ${current.classesTotal}`
       );
     }
 
-    const updated = await StudentRepository.setClassesRemaining(studentId, newClassesRemaining, expectedVersion);
+    const updated = await StudentRepository.setClassesRemaining(
+      studentId,
+      newClassesRemaining,
+      tErrors,
+      expectedVersion
+    );
 
     return {
       id: updated.id,

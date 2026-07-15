@@ -18,6 +18,7 @@ import type {
 } from "@/backend/types";
 import type { ClassStatusEventSelectType } from "@/backend/types/scheduling/class-status-event.types";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { SessionLabels } from "@/shared/locale/types/session";
 
 /**
  * ClassSessionService
@@ -113,13 +114,14 @@ export namespace ClassSessionService {
   export async function getClassInstanceDetail(
     userId: string,
     classInstanceId: string,
+    tSession: SessionLabels,
     tErrors: ErrorsLabels
   ): Promise<ClassInstanceDetailReturnType> {
     await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
-    await assertClassInstanceViewAccess(userId, instance);
+    await assertClassInstanceViewAccess(userId, instance, tErrors);
     const perf = await ClassPerformanceService.getPerformanceForClass(classInstanceId);
-    return buildClassInstanceDetail(instance, perf);
+    return buildClassInstanceDetail(instance, perf, tSession, tErrors);
   }
 
   export async function getClassStatusEvents(
@@ -129,7 +131,7 @@ export namespace ClassSessionService {
   ): Promise<ClassStatusEventReturnType[]> {
     await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
-    await assertClassInstanceViewAccess(userId, instance);
+    await assertClassInstanceViewAccess(userId, instance, tErrors);
     return SchedulingRepository.getClassStatusEvents(classInstanceId);
   }
 
@@ -192,12 +194,12 @@ export namespace ClassSessionService {
   export async function updateStatusLeave(
     userId: string,
     classInstanceId: string,
-    reason?: string | null,
-    tErrors?: ErrorsLabels
+    tErrors: ErrorsLabels,
+    reason?: string | null
   ) {
-    await assertPermission(userId, AppPermission.SESSION_UPDATE_STATUS_LEAVE, tErrors!);
-    const instance = await getOrThrow(classInstanceId, tErrors!);
-    await assertSessionActivated(instance, tErrors!);
+    await assertPermission(userId, AppPermission.SESSION_UPDATE_STATUS_LEAVE, tErrors);
+    const instance = await getOrThrow(classInstanceId, tErrors);
+    await assertSessionActivated(instance, tErrors);
     await SystemRulesService.assertLeaveQuotaAvailable(instance.teacherId);
 
     return db.transaction(async tx => {
@@ -217,6 +219,7 @@ export namespace ClassSessionService {
       scheduledEndAt: Date;
       durationMinutes: number;
     },
+    tSession: SessionLabels,
     tErrors: ErrorsLabels
   ) {
     await assertPermission(userId, AppPermission.SESSION_RESCHEDULE, tErrors);
@@ -235,8 +238,7 @@ export namespace ClassSessionService {
       );
 
       if (usedLeaves >= maxLeaves) {
-        const t = await getBackendTranslations({ namespace: "session" });
-        quotaNote = t("teacherQuotaExhaustedNote", { used: String(usedLeaves), max: String(maxLeaves) });
+        quotaNote = tSession.teacherQuotaExhaustedNote(usedLeaves, maxLeaves);
       }
     }
 
@@ -333,4 +335,4 @@ export namespace ClassSessionService {
   }
 }
 
-export type ClassActionFn<R> = (userId: string, classInstanceId: string) => Promise<R>;
+export type ClassActionFn<R> = (userId: string, classInstanceId: string, tErrors: ErrorsLabels) => Promise<R>;

@@ -73,7 +73,8 @@ gqlSchemaBuilder.queryField("classMeetingConfigs", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return ClassMeetingConfigService.listClassMeetingConfigs(actorUserId, args.classInstanceId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return ClassMeetingConfigService.listClassMeetingConfigs(actorUserId, args.classInstanceId, tErrors);
     },
   })
 );
@@ -87,7 +88,8 @@ gqlSchemaBuilder.queryField("recurringMeetingConfigs", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return ClassMeetingConfigService.listRecurringMeetingConfigs(actorUserId, args.recurringScheduleId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return ClassMeetingConfigService.listRecurringMeetingConfigs(actorUserId, args.recurringScheduleId, tErrors);
     },
   })
 );

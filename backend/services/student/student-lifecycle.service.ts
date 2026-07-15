@@ -31,7 +31,7 @@ export namespace StudentLifecycleService {
     }
 
     try {
-      const updated = await StudentRepository.reassignTeacher(studentId, newTeacherId, expectedVersion, undefined);
+      const updated = await StudentRepository.reassignTeacher(studentId, newTeacherId, tErrors, expectedVersion);
 
       logger.info("Student teacher reassigned", {
         actorUserId,
@@ -71,7 +71,7 @@ export namespace StudentLifecycleService {
     }
 
     try {
-      const updated = await StudentRepository.changeStatus(studentId, newStatus, expectedVersion, undefined);
+      const updated = await StudentRepository.changeStatus(studentId, newStatus, tErrors, expectedVersion);
 
       logger.info("Student status changed", {
         actorUserId,

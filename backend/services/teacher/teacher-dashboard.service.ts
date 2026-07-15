@@ -103,7 +103,7 @@ export namespace TeacherDashboardService {
       const created = await SchedulingRepository.createClassInstance(entry, tx);
 
       const creditIdempotencyKey = `credit-deduction:${created.id}`;
-      await CreditService.deductForBooking(input.studentId, created.id, userId, creditIdempotencyKey, tx);
+      await CreditService.deductForBooking(input.studentId, created.id, userId, creditIdempotencyKey, tx, tErrors);
 
       return created;
     });

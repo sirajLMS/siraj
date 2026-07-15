@@ -36,7 +36,8 @@ gqlSchemaBuilder.queryField("parentHandbookUrl", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, _args, ctx) => {
       const userId = await requireAuth(ctx);
-      const url = await SystemSettingsService.getParentHandbookDownloadUrl(userId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      const url = await SystemSettingsService.getParentHandbookDownloadUrl(userId, tErrors);
       return { id: `parent-handbook-${userId}`, url };
     },
   })

@@ -1,4 +1,4 @@
-import { describe, expect, spyOn, test } from "bun:test";
+import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode } from "@/backend/enum";
@@ -6,6 +6,14 @@ import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/paym
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
+
+let tErrors: ErrorsLabels;
+
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 describe("TeacherOnboardingService.createTeacher", () => {
   test("rejects unauthorized user", async () => {
@@ -13,12 +21,16 @@ describe("TeacherOnboardingService.createTeacher", () => {
 
     let error: unknown = null;
     try {
-      await TeacherOnboardingService.createTeacher("00000000-0000-0000-0000-000000000000", {
-        name: "Test",
-        email: "test@test.com",
-        password: "TestPassword1!",
-        timezone: "UTC",
-      });
+      await TeacherOnboardingService.createTeacher(
+        "00000000-0000-0000-0000-000000000000",
+        {
+          name: "Test",
+          email: "test@test.com",
+          password: "TestPassword1!",
+          timezone: "UTC",
+        },
+        tErrors
+      );
     } catch (e) {
       error = e;
     }
@@ -60,6 +72,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
             },
           },
         },
+        tErrors,
         "en",
         txContext
       );
@@ -81,12 +94,16 @@ describe("TeacherOnboardingService.createTeacher", () => {
 
     let error: unknown = null;
     try {
-      await TeacherOnboardingService.createTeacher("00000000-0000-0000-0000-000000000000", {
-        name: "Dup Teacher",
-        email: "existing@test.com",
-        password: "TestPassword1!",
-        timezone: "UTC",
-      });
+      await TeacherOnboardingService.createTeacher(
+        "00000000-0000-0000-0000-000000000000",
+        {
+          name: "Dup Teacher",
+          email: "existing@test.com",
+          password: "TestPassword1!",
+          timezone: "UTC",
+        },
+        tErrors
+      );
     } catch (e) {
       error = e;
     }
@@ -109,12 +126,16 @@ describe("TeacherOnboardingService.createTeacher", () => {
 
     let error: unknown = null;
     try {
-      await TeacherOnboardingService.createTeacher("00000000-0000-0000-0000-000000000000", {
-        name: "Rollback Teacher",
-        email: createdEmail,
-        password: "TestPassword1!",
-        timezone: "UTC",
-      });
+      await TeacherOnboardingService.createTeacher(
+        "00000000-0000-0000-0000-000000000000",
+        {
+          name: "Rollback Teacher",
+          email: createdEmail,
+          password: "TestPassword1!",
+          timezone: "UTC",
+        },
+        tErrors
+      );
     } catch (e) {
       error = e;
     }

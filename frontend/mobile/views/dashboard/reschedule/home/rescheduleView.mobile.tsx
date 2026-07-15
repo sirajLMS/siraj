@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, type BoxProps, Divider, Link as MuiLink, Stack, styled } from "@mui/material";
-import { useTranslations } from "next-intl";
 import {
   FormSuccessSnackbar,
   PageContainer,
@@ -20,6 +19,7 @@ import { RescheduleDateTimeSection } from "@/frontend/common/views/dashboard/res
 import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/reschedule/home/TimezoneWarningBanner";
 import type { RescheduleViewModel } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
 import { Link } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const ActionContainer = styled(Box)<BoxProps>(({ theme }) => ({
   display: "flex",
@@ -45,16 +45,16 @@ export function RescheduleViewMobile({
   onCancel,
   onDismissSuccess,
 }: Readonly<RescheduleViewModel>) {
-  const t = useTranslations("dashboard.rescheduleForm");
-  const tMeeting = useTranslations("ui.meetingConfig");
+  const t = useAppTranslation("dashboard.rescheduleForm");
+  const tMeeting = useAppTranslation("ui").meetingConfig;
 
   return (
     <PageContainer sx={{ maxWidth: 900, mx: "auto" }}>
-      <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
+      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
 
       <TimezoneWarningBanner timezone={session.teacherTimezone} />
 
-      <SectionPanel title={t("sections.classDetails")}>
+      <SectionPanel title={t.sections.classDetails}>
         <Box
           component="form"
           onSubmit={e => {
@@ -75,7 +75,7 @@ export function RescheduleViewMobile({
                   underline="hover"
                   sx={{ typography: "labelMd" }}
                 >
-                  {tMeeting("summary.manageLink")}
+                  {tMeeting.summary.manageLink}
                 </MuiLink>
               </Stack>
             </>
@@ -89,7 +89,7 @@ export function RescheduleViewMobile({
 
           <ActionContainer>
             <PrimaryPageAction type="submit" disabled={isSubmitting}>
-              {isSubmitting ? t("actions.processing") : t("actions.submitMobile")}
+              {isSubmitting ? t.actions.processing : t.actions.submitMobile}
             </PrimaryPageAction>
             <PrimaryPageAction
               type="button"
@@ -100,7 +100,7 @@ export function RescheduleViewMobile({
                 "&:hover": { color: theme.palette.error.dark },
               })}
             >
-              {t("actions.cancel")}
+              {t.actions.cancel}
             </PrimaryPageAction>
           </ActionContainer>
         </Box>
@@ -108,7 +108,7 @@ export function RescheduleViewMobile({
 
       <NotificationPolicyCard />
 
-      <FormSuccessSnackbar open={showSuccess} message={t("actions.successMessage")} onClose={onDismissSuccess} />
+      <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
     </PageContainer>
   );
 }

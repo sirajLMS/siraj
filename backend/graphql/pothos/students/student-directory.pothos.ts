@@ -61,7 +61,7 @@ gqlSchemaBuilder.queryField("studentDirectory", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const locale = ctx.locale || "en";
+      const tErrors = await ctx.t("errors");
 
       // Construct PaginationArgs from GraphQL input
       let pagination: PaginationArgs | null = null;
@@ -126,7 +126,7 @@ gqlSchemaBuilder.queryField("studentDirectory", t =>
         }));
       }
 
-      const result = await StudentDirectoryService.getStudentDirectory(userId, pagination, filters, orderBy, locale);
+      const result = await StudentDirectoryService.getStudentDirectory(userId, pagination, tErrors, filters, orderBy);
 
       return {
         id: "student-directory",

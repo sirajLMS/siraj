@@ -40,12 +40,13 @@ gqlSchemaBuilder.mutationField("reassignStudentTeacher", t =>
       expectedVersion: t.arg.int({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
+      const tErrors = await ctx.t("errors");
       return StudentLifecycleService.reassignTeacher(
         ctx.user?.id || "",
         args.studentId,
         args.newTeacherId,
-        args.expectedVersion ?? undefined,
-        ctx.locale
+        tErrors,
+        args.expectedVersion ?? undefined
       );
     },
   })
@@ -61,12 +62,13 @@ gqlSchemaBuilder.mutationField("changeStudentStatus", t =>
       expectedVersion: t.arg.int({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
+      const tErrors = await ctx.t("errors");
       return StudentLifecycleService.changeStudentStatus(
         ctx.user?.id || "",
         args.studentId,
         args.newStatus,
-        args.expectedVersion ?? undefined,
-        ctx.locale
+        tErrors,
+        args.expectedVersion ?? undefined
       );
     },
   })

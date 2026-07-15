@@ -46,15 +46,12 @@ export namespace ClassMeetingConfigRepository {
 
   export async function getByIdOrThrow(
     id: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<ClassMeetingConfigSelectType> {
     const row = await getById(id, tx);
     if (!row) {
-      const msg = tErrors?.meetingConfigNotFound
-        ? tErrors.meetingConfigNotFound(id)
-        : `Meeting config not found: ${id}`;
-      throw new Error(msg);
+      throw new Error(tErrors.meetingConfigNotFound(id));
     }
     return row;
   }
@@ -105,8 +102,8 @@ export namespace ClassMeetingConfigRepository {
 
   export async function create(
     input: ClassMeetingConfigInsertType,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<ClassMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
       const scope = resolveScope(input);
@@ -132,8 +129,7 @@ export namespace ClassMeetingConfigRepository {
         .returning();
 
       if (!result) {
-        const msg = tErrors?.meetingConfigCreateFailed ?? "Failed to create meeting configuration.";
-        throw new Error(msg);
+        throw new Error(tErrors.meetingConfigCreateFailed);
       }
 
       logger.info("Class meeting config created", {
@@ -157,11 +153,11 @@ export namespace ClassMeetingConfigRepository {
       encryptedSecret?: string | null;
       providerId?: string;
     },
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<ClassMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
-      const existing = await getByIdOrThrow(id, t, tErrors);
+      const existing = await getByIdOrThrow(id, tErrors, t);
       const scope = resolveScope(existing);
 
       if (input.isDefault === true) {
@@ -182,8 +178,7 @@ export namespace ClassMeetingConfigRepository {
         .returning();
 
       if (!result) {
-        const msg = tErrors?.meetingConfigUpdateFailed ?? "Failed to update meeting configuration.";
-        throw new Error(msg);
+        throw new Error(tErrors.meetingConfigUpdateFailed);
       }
 
       return result;
@@ -197,14 +192,14 @@ export namespace ClassMeetingConfigRepository {
 
   export async function setDefault(
     id: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<ClassMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
-      const existing = await getByIdOrThrow(id, t, tErrors);
+      const existing = await getByIdOrThrow(id, tErrors, t);
       const scope = resolveScope(existing);
       await clearDefault(scope, t);
-      return update(id, { isDefault: true }, t, tErrors);
+      return update(id, { isDefault: true }, tErrors, t);
     };
 
     if (tx) {
@@ -213,9 +208,9 @@ export namespace ClassMeetingConfigRepository {
     return db.transaction(run);
   }
 
-  export async function deleteConfig(id: string, tx?: DBTransaction, tErrors?: ErrorsLabels): Promise<void> {
+  export async function deleteConfig(id: string, tErrors: ErrorsLabels, tx?: DBTransaction): Promise<void> {
     const run = async (t: DBTransaction): Promise<void> => {
-      await getByIdOrThrow(id, t, tErrors);
+      await getByIdOrThrow(id, tErrors, t);
       await t.delete(classMeetingConfigs).where(eq(classMeetingConfigs.id, id));
     };
 
@@ -247,8 +242,8 @@ export namespace ClassMeetingConfigRepository {
 
   export async function upsertMany(
     inputs: readonly ClassMeetingConfigInsertType[],
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<ClassMeetingConfigSelectType[]> {
     return upsertManyWith(
       inputs,
@@ -256,7 +251,7 @@ export namespace ClassMeetingConfigRepository {
         const scope = resolveScope(input);
         return findByScopeProviderLabel(scope, input.providerId, input.label, t);
       },
-      create,
+      (input, t) => create(input, tErrors, t),
       (id, input, t) =>
         update(
           id,
@@ -267,11 +262,11 @@ export namespace ClassMeetingConfigRepository {
             encryptedSecret: input.encryptedSecret,
             providerId: input.providerId,
           },
+          tErrors,
           t,
-          tErrors
         ),
+      tErrors,
       tx,
-      tErrors
     );
   }
 }

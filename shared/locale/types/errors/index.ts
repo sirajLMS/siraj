@@ -112,7 +112,13 @@ export interface ErrorsLabels {
   readonly unauthorizedViewMetrics: string;
   readonly notFound: string;
   readonly studentNotFound: (id: string) => string;
+  readonly studentCreateFailed: string;
+  readonly studentUpdateFailed: (id: string) => string;
+  readonly studentVersionMismatch: (params: { id: string; expectedVersion: number; gotVersion: number }) => string;
+  readonly insufficientClasses: (params: { id: string; remaining: number; required: number }) => string;
+  readonly invalidStatusTransition: (params: { currentStatus: string; newStatus: string }) => string;
   readonly categoryNotFound: (id: string) => string;
+  readonly categoryCreateFailed: string;
   readonly unknownName: string;
   readonly meetingProviderInactive: string;
   readonly meetingConfigNotFound: (id: string) => string;

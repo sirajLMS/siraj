@@ -1,4 +1,3 @@
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -13,6 +12,7 @@ import type {
 } from "@/frontend/common/views/dashboard/managers/home/types";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface ManagersViewMobileProps {
   readonly managers: readonly Manager[];
@@ -40,19 +40,19 @@ export function ManagersViewMobile({
   onRoleFilterChange,
   onStatusFilterChange,
 }: Readonly<ManagersViewMobileProps>) {
-  const t = useTranslations("dashboard.managersDirectory");
+  const t = useAppTranslation("dashboard.managersDirectory");
 
   const actions = (
     <RequirePermission permissions={[AppPermission.StaffCreate]}>
       <Link href="/managers/onboarding" style={{ textDecoration: "none" }}>
-        <PrimaryPageAction>{t("actions.addManager")}</PrimaryPageAction>
+        <PrimaryPageAction>{t.actions.addManager}</PrimaryPageAction>
       </Link>
     </RequirePermission>
   );
 
   return (
     <PageContainer>
-      <MobilePageHeader title={t("mobileTitle")} subtitle={t("pageSubtitle")} actions={actions} />
+      <MobilePageHeader title={t.mobileTitle} subtitle={t.pageSubtitle} actions={actions} />
 
       <ManagersMetrics metrics={metrics} />
 

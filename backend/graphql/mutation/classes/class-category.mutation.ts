@@ -20,6 +20,7 @@ gqlSchemaBuilder.mutationField("createClassCategory", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       return ClassCategoryService.createCategory(
         userId,
         {
@@ -29,7 +30,7 @@ gqlSchemaBuilder.mutationField("createClassCategory", t =>
           isActive: args.input.isActive ?? undefined,
           sortOrder: args.input.sortOrder ?? undefined,
         },
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -45,6 +46,7 @@ gqlSchemaBuilder.mutationField("updateClassCategory", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       return ClassCategoryService.updateCategory(
         userId,
         args.id,
@@ -53,7 +55,7 @@ gqlSchemaBuilder.mutationField("updateClassCategory", t =>
           slug: args.input.slug ?? undefined,
           ...commonClassUpdateInputFields(args.input),
         },
-        ctx.locale
+        tErrors
       );
     },
   })

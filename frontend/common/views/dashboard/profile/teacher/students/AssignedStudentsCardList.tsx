@@ -1,10 +1,10 @@
 "use client";
 
 import { Chip, Paper, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PersonProfileLink } from "@/frontend/common/components/ui";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/AssignedStudentsDataGrid";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type AssignedStudentsCardListProps = {
   readonly rows: readonly AssignedStudentsRow[];
@@ -16,10 +16,10 @@ function formatStatusLabel(status: string): string {
 }
 
 export function AssignedStudentsCardList({ rows }: AssignedStudentsCardListProps) {
-  const t = useTranslations("profile.students");
+  const t = useAppTranslation("profile").students;
 
   return (
-    <Stack spacing={1.5} aria-label={t("mobileListLabel")}>
+    <Stack spacing={1.5} aria-label={t.mobileListLabel}>
       {rows.map(row => (
         <Paper key={row.id} variant="outlined" sx={{ p: 2 }}>
           <Stack spacing={1}>
@@ -40,19 +40,19 @@ export function AssignedStudentsCardList({ rows }: AssignedStudentsCardListProps
               avatarUrl={row.parentAvatarUrl}
               name={row.parentName}
               fallbackInitial="P"
-              label={t("columns.parent")}
+              label={t.columns.parent}
               showAvatar
               avatarSize={24}
               fontWeight={400}
             />
             <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-              {t("columns.class")}: {row.className}
+              {t.columns.class}: {row.className}
             </Typography>
             <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-              {t("columns.hoursPerWeek")}: {row.hoursPerWeek}
+              {t.columns.hoursPerWeek}: {row.hoursPerWeek}
             </Typography>
             <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-              {t("columns.classes")}: {row.classesRemaining} / {row.classesTotal}
+              {t.columns.classes}: {row.classesRemaining} / {row.classesTotal}
             </Typography>
           </Stack>
         </Paper>

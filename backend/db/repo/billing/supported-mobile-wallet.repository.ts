@@ -4,12 +4,12 @@ import { db } from "@/backend/db/drizzleDb";
 import { supportedMobileWallets } from "@/backend/db/schema";
 import type { CountryCode } from "@/backend/enum";
 import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type {
   SupportedMobileWalletInsertType,
   SupportedMobileWalletSelectType,
   UpdateSupportedMobileWalletInput,
 } from "@/backend/types/billing/payment-method.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 type WalletRow = typeof supportedMobileWallets.$inferSelect;
 
@@ -100,8 +100,8 @@ export namespace SupportedMobileWalletRepository {
   export async function update(
     id: string,
     input: UpdateSupportedMobileWalletInput,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<SupportedMobileWalletSelectType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -111,7 +111,9 @@ export namespace SupportedMobileWalletRepository {
       .returning();
 
     if (!updated) {
-      throw new Error(tErrors?.file.recordNotFound({ tableName: "supported_mobile_wallets", entityId: id }) ?? `Supported mobile wallet not found: ${id}`);
+      throw new Error(
+        tErrors.file.recordNotFound({ tableName: "supported_mobile_wallets", entityId: id })
+      );
     }
 
     return toSelectType(updated);
@@ -119,10 +121,10 @@ export namespace SupportedMobileWalletRepository {
 
   export async function deactivate(
     id: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
-    tErrors?: ErrorsLabels
   ): Promise<SupportedMobileWalletSelectType> {
-    return update(id, { isActive: false }, tx, tErrors);
+    return update(id, { isActive: false }, tErrors, tx);
   }
 
   export async function listByIds(

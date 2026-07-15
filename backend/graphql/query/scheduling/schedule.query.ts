@@ -42,6 +42,7 @@ gqlSchemaBuilder.queryField("adminDashboardSchedule", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
 
       const pagination = toPaginationArgs(args.input.paginationArgs);
 
@@ -51,7 +52,7 @@ gqlSchemaBuilder.queryField("adminDashboardSchedule", t =>
           ...args.input,
           paginationArgs: pagination,
         },
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -67,10 +68,11 @@ gqlSchemaBuilder.queryField("dailyScheduleMetrics", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       const result = await ScheduleService.getAdminDashboardSchedule(
         userId,
         { date: args.date, teacherId: args.teacherId },
-        ctx.locale
+        tErrors
       );
       return result.metrics;
     },
@@ -89,6 +91,7 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       const result = await ScheduleService.getAdminDashboardSchedule(
         userId,
         {
@@ -97,7 +100,7 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
           search: args.search,
           metricFilter: args.metricFilter,
         },
-        ctx.locale
+        tErrors
       );
       return result.rows;
     },
@@ -115,6 +118,7 @@ gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
 
       const pagination = toPaginationArgs(args.paginationArgs);
 
@@ -122,7 +126,7 @@ gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
         userId,
         { search: args.search ?? null, status: args.status ?? null },
         pagination,
-        ctx.locale
+        tErrors
       );
 
       return {
@@ -139,7 +143,8 @@ gqlSchemaBuilder.queryField("rescheduleTrackingMetrics", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, _args, ctx) => {
       const userId = await requireAuth(ctx);
-      return ScheduleService.getRescheduleTrackingMetrics(userId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return ScheduleService.getRescheduleTrackingMetrics(userId, tErrors);
     },
   })
 );
@@ -154,7 +159,8 @@ gqlSchemaBuilder.queryField("teacherWeeklyScheduleGrid", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return await WeeklyScheduleService.getWeeklySchedule(userId, args.teacherId || null, args.weekDate, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return await WeeklyScheduleService.getWeeklySchedule(userId, args.teacherId || null, args.weekDate, tErrors);
     },
   })
 );
@@ -168,7 +174,8 @@ gqlSchemaBuilder.queryField("recurringSchedule", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return RecurringScheduleDetailService.getDetail(userId, args.id, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return RecurringScheduleDetailService.getDetail(userId, args.id, tErrors);
     },
   })
 );
@@ -183,7 +190,8 @@ gqlSchemaBuilder.queryField("teacherWorkloadMetrics", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return await WeeklyScheduleService.getWorkloadMetrics(userId, args.teacherId || null, args.weekDate, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return await WeeklyScheduleService.getWorkloadMetrics(userId, args.teacherId || null, args.weekDate, tErrors);
     },
   })
 );

@@ -8,6 +8,7 @@ import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { logger } from "@/frontend/common/utils/logger";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import { mapFormDataToServiceInput } from "@/frontend/common/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export async function createRecurringClass(
   data: RecurringClassFormData,
@@ -30,10 +31,11 @@ export async function createRecurringClass(
       return { success: false, message: t("atLeastOneDayRequired") };
     }
 
+    const tErrors = await getServerTranslations(locale ?? "", "errors");
     const result = await RecurringClassService.createRecurringClass(
       userId,
       { ...input, timezone: parseIanaTimezone(toGraphqlIanaTimezone(input.timezone)) },
-      locale
+      tErrors
     );
 
     return {

@@ -52,6 +52,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       return await TeacherOnboardingService.createTeacher(
         userId,
         {
@@ -71,6 +72,7 @@ gqlSchemaBuilder.mutationFields(t => ({
           rateCurrency: args.input.rateCurrency ?? null,
           initialPayoutMethod: mapInitialPaymentMethodInput(args.input.initialPayoutMethod),
         },
+        tErrors,
         ctx.locale
       );
     },
@@ -85,6 +87,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       return await ParentOnboardingService.createParent(
         userId,
         {
@@ -103,7 +106,7 @@ gqlSchemaBuilder.mutationFields(t => ({
           timezone: args.input.timezone,
           initialPayinMethod: mapInitialPaymentMethodInput(args.input.initialPayinMethod),
         },
-        ctx.locale
+        tErrors
       );
     },
   }),
@@ -117,7 +120,8 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return await StudentOnboardingService.createStudent(userId, args.input, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return await StudentOnboardingService.createStudent(userId, args.input, tErrors, ctx.locale);
     },
   }),
 

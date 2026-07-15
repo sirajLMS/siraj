@@ -31,6 +31,7 @@ gqlSchemaBuilder.mutationField("recordPayment", t =>
         throw new Error(tErrors.insufficientPermissions);
       }
 
+      const tErrors = await ctx.t("errors");
       const payment = await PaymentMethodService.recordPayin(
         {
           invoiceId: args.invoiceId,
@@ -44,8 +45,7 @@ gqlSchemaBuilder.mutationField("recordPayment", t =>
           exchangeRateSource: null,
           idempotencyKey: `payin:${args.invoiceId}:${args.userPaymentMethodId}:${Date.now()}`,
         },
-        undefined,
-        ctx.locale
+        tErrors
       );
 
       return payment;
@@ -67,6 +67,7 @@ gqlSchemaBuilder.mutationField("createTeacherPayment", t =>
     },
     resolve: async (_root, args, ctx) => {
       await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       return PaymentMethodService.recordPayout(
         {
           teacherId: args.teacherId,
@@ -76,8 +77,7 @@ gqlSchemaBuilder.mutationField("createTeacherPayment", t =>
           userPaymentMethodId: args.userPaymentMethodId,
           isTestPayment: args.isTestPayment ?? false,
         },
-        undefined,
-        ctx.locale
+        tErrors
       );
     },
   })

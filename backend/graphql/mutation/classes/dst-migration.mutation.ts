@@ -13,7 +13,8 @@ gqlSchemaBuilder.mutationField("executeDstBulkUpdate", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return DstMigrationService.executeBulkDstUpdate(userId, args.offsetMinutes, args.description, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return DstMigrationService.executeBulkDstUpdate(userId, args.offsetMinutes, args.description, tErrors);
     },
   })
 );

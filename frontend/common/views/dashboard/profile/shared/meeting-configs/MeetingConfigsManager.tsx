@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { Button, Stack } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useMemo, useState } from "react";
 import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
 import {
@@ -19,6 +19,7 @@ import {
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { MeetingConfigDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigDeleteDialog";
 import { MeetingConfigFormDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type MeetingConfigsManagerProps = {
   readonly targetUserId: string;
@@ -32,7 +33,7 @@ function configLabel(config: UserMeetingConfigFieldsFragment, locale: string): s
 }
 
 function useMeetingConfigsState(targetUserId: string) {
-  const t = useTranslations("ui.meetingConfig.manager");
+  const t = useAppTranslation("ui").meetingConfig.manager;
   const locale = useLocale();
 
   const { data, loading, error, refetch } = useQuery(userMeetingConfigsQueryDocument, {
@@ -76,7 +77,7 @@ function useMeetingConfigsState(targetUserId: string) {
       setDeleteId(null);
       await refetch();
     } catch {
-      setErrorMessage(t("deleteError"));
+      setErrorMessage(t.deleteError);
     }
   };
 
@@ -85,7 +86,7 @@ function useMeetingConfigsState(targetUserId: string) {
       await setDefault({ variables: { id } });
       await refetch();
     } catch {
-      setErrorMessage(t("saveError"));
+      setErrorMessage(t.saveError);
     }
   };
 
@@ -210,8 +211,8 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
     return (
       <ErrorState
         embedded
-        message={t("loadError")}
-        retryLabel={t("retry")}
+        message={t.loadError}
+        retryLabel={t.retry}
         onRetry={() => {
           void refetch();
         }}
@@ -223,13 +224,13 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
 
   return (
     <Stack spacing={2}>
-      {canManage ? <AddConfigButton onClick={state.openCreateForm} label={t("add")} /> : null}
+      {canManage ? <AddConfigButton onClick={state.openCreateForm} label={t.add} /> : null}
 
       <MeetingConfigList
         configs={configs}
         loading={busy}
-        title={t("listTitle")}
-        emptyMessage={loading ? undefined : t("empty")}
+        title={t.listTitle}
+        emptyMessage={loading ? undefined : t.empty}
         onEditAction={canManage ? state.openEditForm : undefined}
         onDeleteAction={canManage ? state.setDeleteId : undefined}
         onSetDefaultAction={canManage ? state.handleSetDefault : undefined}
@@ -251,7 +252,7 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
         onConfirmDelete={() => void state.handleConfirmDelete()}
         onCloseSuccess={() => state.setShowSuccess(false)}
         onCloseError={() => state.setErrorMessage(null)}
-        successMessage={t("saved")}
+        successMessage={t.saved}
       />
     </Stack>
   );

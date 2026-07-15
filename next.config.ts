@@ -1,6 +1,5 @@
 import { networkInterfaces } from "node:os";
 import type { NextConfig } from "next";
-import createNextIntlPlugin from "next-intl/plugin";
 
 function getEnv(name: string, defaultValue: string): string {
   return process.env[name] || defaultValue;
@@ -105,7 +104,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Pass the path to the request config file for the plugin
-const withNextIntl = createNextIntlPlugin("./shared/i18n/request.ts");
-
-export default withNextIntl(nextConfig);
+export default nextConfig;
