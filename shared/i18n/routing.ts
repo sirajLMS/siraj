@@ -1,15 +1,53 @@
-// import { createNavigation } from "next-intl/navigation";
-// import { defineRouting } from "next-intl/routing";
+import type { ComponentProps } from "react";
+import Link from "next/link";
+import { usePathname as useNextPathname, useRouter as useNextRouter, redirect as nextRedirect } from "next/navigation";
+import { type AppLocale, defaultLocale, locales } from "@/shared/locale/AppLocale";
 
-// export const locales = ["ar", "en"] as const;
-// export type AppLocale = (typeof locales)[number];
+export { type AppLocale, defaultLocale, locales };
+export type Locale = AppLocale;
 
-// export const routing = defineRouting({
-//   locales: locales,
-//   defaultLocale: "ar",
-//   localePrefix: "never", // This removes the locale from the URL
-// });
+export type Pathname = string;
 
-// export type Locale = (typeof routing.locales)[number];
+export interface RoutingConfig {
+  locales: readonly AppLocale[];
+  defaultLocale: AppLocale;
+  localePrefix: "never";
+}
 
-// export const { Link, redirect, usePathname, useRouter } = createNavigation(routing);
+export const routing: RoutingConfig = {
+  locales,
+  defaultLocale,
+  localePrefix: "never",
+};
+
+export type LinkProps = ComponentProps<typeof Link>;
+export { Link };
+
+export function usePathname(): Pathname {
+  return useNextPathname();
+}
+
+export interface AppRouter {
+  push(href: string, options?: { scroll?: boolean }): void;
+  replace(href: string, options?: { scroll?: boolean }): void;
+  back(): void;
+  forward(): void;
+  refresh(): void;
+  prefetch(href: string): void;
+}
+
+export function useRouter(): AppRouter {
+  return useNextRouter() as AppRouter;
+}
+
+interface RedirectOptions {
+  href: string;
+  locale?: AppLocale;
+}
+
+export function redirect(options: RedirectOptions): never;
+export function redirect(href: string): never;
+export function redirect(hrefOrOptions: string | RedirectOptions): never {
+  const href = typeof hrefOrOptions === "string" ? hrefOrOptions : hrefOrOptions.href;
+  nextRedirect(href);
+}

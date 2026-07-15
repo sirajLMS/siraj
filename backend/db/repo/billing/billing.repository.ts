@@ -447,7 +447,7 @@ export namespace BillingRepository {
 
       const results = await t.select().from(invoices).where(eq(invoices.id, invoiceId)).limit(1);
       if (results.length === 0) {
-        throw new Error(tErrors.billing.invoiceNotFound(invoiceId) ?? `Invoice not found: ${invoiceId}`);
+        throw new Error(tErrors.billing.invoiceNotFound(invoiceId));
       }
       const current = results[0];
 
@@ -457,8 +457,7 @@ export namespace BillingRepository {
             id: invoiceId,
             expectedVersion,
             gotVersion: current.version,
-          }) ?? `Invoice version mismatch: expected ${expectedVersion}, got ${current.version}`
-        );
+          }));
       }
 
       const updateData: {
@@ -1127,9 +1126,7 @@ export namespace BillingRepository {
 
       if (current.status !== "UNPAID" && current.status !== "PAYMENT_PENDING") {
         throw new Error(
-          tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: current.status }) ??
-            `Invoice ${invoiceId} is already ${current.status.toLowerCase()}.`
-        );
+          tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: current.status }));
       }
 
       if (expectedVersion !== undefined && current.version !== expectedVersion) {
@@ -1138,8 +1135,7 @@ export namespace BillingRepository {
             id: invoiceId,
             expectedVersion,
             gotVersion: current.version,
-          }) ?? `Invoice version mismatch: expected ${expectedVersion}, got ${current.version}`
-        );
+          }));
       }
 
       const paidDate = new Date();

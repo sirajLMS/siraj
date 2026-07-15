@@ -59,9 +59,7 @@ export namespace CurrencyHedgeRepository {
 
     if (!updated) {
       throw new Error(
-        tErrors.file.recordNotFound({ tableName: "currency_hedges", entityId: id }) ??
-          `Currency hedge not found: ${id}`
-      );
+        tErrors.file.recordNotFound({ tableName: "currency_hedges", entityId: id }));
     }
 
     return updated;
@@ -73,9 +71,7 @@ export namespace CurrencyHedgeRepository {
 
     if (!deleted) {
       throw new Error(
-        tErrors.file.recordNotFound({ tableName: "currency_hedges", entityId: id }) ??
-          `Currency hedge not found: ${id}`
-      );
+        tErrors.file.recordNotFound({ tableName: "currency_hedges", entityId: id }));
     }
 
     return true;

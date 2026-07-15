@@ -173,3 +173,22 @@ export async function getServerTranslations<K extends keyof MessageSchema>(
   const safeLocale: AppLocale = (locales as readonly string[]).includes(locale) ? (locale as AppLocale) : defaultLocale;
   return loadTranslation(safeLocale, namespace);
 }
+
+/**
+ * Eagerly loads ALL translation namespaces for a given locale.
+ * Use this in the root layout to populate <LocaleProvider> with every
+ * namespace so any client component can use useAppTranslation without
+ * per-namespace wiring.
+ *
+ * Returns a Partial<MessageSchema> — every key is present.
+ */
+export async function loadAllTranslations(locale: string): Promise<Partial<MessageSchema>> {
+  const safeLocale: AppLocale = (locales as readonly string[]).includes(locale) ? (locale as AppLocale) : defaultLocale;
+  const entries = await Promise.all(
+    (Object.keys(namespacePaths) as (keyof MessageSchema)[]).map(async (ns) => {
+      const value = await loadTranslation(safeLocale, ns);
+      return [ns, value] as const;
+    })
+  );
+  return Object.fromEntries(entries) as Partial<MessageSchema>;
+}

@@ -9,7 +9,7 @@ export namespace ClassCategoryService {
   export async function listCategories(userId: string, tErrors: ErrorsLabels): Promise<ClassCategoryReturnType[]> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_LIST);
     if (!hasPermission) {
-      throw new Error(tErrors.unauthorizedAction ?? "You are not authorized to perform this action.");
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     return await ClassCategoryRepository.listCategories();
@@ -22,7 +22,7 @@ export namespace ClassCategoryService {
   ): Promise<ClassCategoryReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_LIST);
     if (!hasPermission) {
-      throw new Error(tErrors.unauthorizedAction ?? "You are not authorized to perform this action.");
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     return await ClassCategoryRepository.getCategoryById(id, tErrors);
@@ -35,7 +35,7 @@ export namespace ClassCategoryService {
   ): Promise<ClassCategoryReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.CATEGORIES_CREATE);
     if (!hasPermission) {
-      throw new Error(tErrors.unauthorizedAction ?? "You are not authorized to perform this action.");
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     return await ClassCategoryRepository.createCategory(input, tErrors);
@@ -49,7 +49,7 @@ export namespace ClassCategoryService {
   ): Promise<ClassCategoryReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.CATEGORIES_UPDATE);
     if (!hasPermission) {
-      throw new Error(tErrors.unauthorizedAction ?? "You are not authorized to perform this action.");
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     return await ClassCategoryRepository.updateCategory(id, input, tErrors);
@@ -58,12 +58,12 @@ export namespace ClassCategoryService {
   export async function deleteCategory(userId: string, id: string, tErrors: ErrorsLabels): Promise<{ id: string }> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.CATEGORIES_DELETE);
     if (!hasPermission) {
-      throw new Error(tErrors.unauthorizedAction ?? "You are not authorized to perform this action.");
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     const subjects = await ClassSubjectRepository.listSubjects(id);
     if (subjects.length > 0) {
-      throw new Error(tErrors.categoryHasSubjects ?? "Category has subjects and cannot be deleted.");
+      throw new Error(tErrors.categoryHasSubjects);
     }
 
     return await ClassCategoryRepository.deleteCategory(id, tErrors);

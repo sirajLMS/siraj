@@ -11,13 +11,13 @@ import type { ErrorsLabels } from "@/shared/locale/types/errors";
 export namespace TeacherNotesService {
   export async function getActiveNotes(
     userId: string,
+    tErrors: ErrorsLabels,
     teacherId?: string,
-    tErrors: ErrorsLabels
   ): Promise<TeacherImportantNoteReturnType[]> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_LIST);
     if (!hasPermission) {
       throw new Error(
-        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions
       );
     }
 
@@ -33,7 +33,7 @@ export namespace TeacherNotesService {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_CREATE);
     if (!hasPermission) {
       throw new Error(
-        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions
       );
     }
 
@@ -49,7 +49,7 @@ export namespace TeacherNotesService {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_UPDATE);
     if (!hasPermission) {
       throw new Error(
-        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions
       );
     }
 
@@ -60,8 +60,7 @@ export namespace TeacherNotesService {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_DELETE);
     if (!hasPermission) {
       throw new Error(
-        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
-      );
+        tErrors.insufficientPermissions);
     }
 
     return await TeacherNotesRepository.deleteNote(id);

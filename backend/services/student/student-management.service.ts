@@ -22,33 +22,31 @@ export namespace StudentManagementService {
   export async function editQuota(
     actorUserId: string,
     studentId: string,
+    tErrors: ErrorsLabels,
     newClassesRemaining: number,
     expectedVersion?: number,
-    tErrors: ErrorsLabels
   ): Promise<EditQuotaResult> {
     const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
     try {
       assertStudentFieldEdit(fieldCtx, "student_quota_edit");
     } catch {
       throw new Error(
-        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
-      );
+        tErrors.insufficientPermissions);
     }
 
     if (!Number.isInteger(newClassesRemaining) || newClassesRemaining < 0) {
-      throw new Error(tErrors.invalidInput ?? "Invalid input.");
+      throw new Error(tErrors.invalidInput);
     }
 
     // Fetch current student to validate newValue <= classesTotal
     const current = await StudentRepository.findById(studentId);
     if (!current) {
-      throw new Error(tErrors.studentNotFound(studentId) ?? `Student not found: ${studentId}`);
+      throw new Error(tErrors.studentNotFound(studentId));
     }
 
     if (newClassesRemaining > current.classesTotal) {
       throw new Error(
-        tErrors.quotaExceedsTotal({ requested: newClassesRemaining, total: current.classesTotal }) ??
-          `Quota ${newClassesRemaining} exceeds total ${current.classesTotal}`
+        tErrors.quotaExceedsTotal({ requested: newClassesRemaining, total: current.classesTotal })
       );
     }
 

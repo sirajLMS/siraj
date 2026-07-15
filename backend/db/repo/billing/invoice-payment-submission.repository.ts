@@ -66,9 +66,7 @@ export namespace InvoicePaymentSubmissionRepository {
 
     if (!row) {
       throw new Error(
-        tErrors.file.recordNotFound({ tableName: "invoice_payment_submissions", entityId: submissionId }) ??
-          `Invoice payment submission not found: ${submissionId}`
-      );
+        tErrors.file.recordNotFound({ tableName: "invoice_payment_submissions", entityId: submissionId }));
     }
 
     return row;

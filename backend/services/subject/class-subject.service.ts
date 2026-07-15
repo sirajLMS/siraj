@@ -16,15 +16,15 @@ export namespace ClassSubjectService {
     const hasPermission = await PermissionsService.hasPermission(userId, permission);
     if (!hasPermission) {
       throw new Error(
-        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions
       );
     }
   }
 
   export async function listSubjects(
     userId: string,
+    tErrors: ErrorsLabels,
     categoryId?: string,
-    tErrors: ErrorsLabels
   ): Promise<ClassSubjectReturnType[]> {
     await assertPermission(userId, AppPermission.SUBJECTS_LIST, tErrors);
 

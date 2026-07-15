@@ -18,13 +18,13 @@ export namespace StudentStatusService {
       assertStudentFieldView(fieldCtx, "student_schedule");
     } catch {
       throw new Error(
-        tErrors.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+        tErrors.insufficientPermissions
       );
     }
 
     const student = await StudentRepository.findById(studentId);
     if (!student) {
-      throw new Error(tErrors.studentNotFound(studentId) ?? `Student not found: ${studentId}`);
+      throw new Error(tErrors.studentNotFound(studentId));
     }
 
     const classes = await SchedulingRepository.getUpcomingClassesForStudent(studentId);
