@@ -6,7 +6,6 @@ import { SectionPanel } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { AccountStatus, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
 import {
   type TeacherAdminData,
@@ -41,7 +40,7 @@ function formatGender(
 
 export function AdminOnlySection(props: AdminOnlySectionProps) {
   const t = useAppTranslation("profile").teacher;
-  const _locale = useAppLocale();
+  const tc = useAppTranslation("profile");
 
   if (props.mode === "edit") {
     return (
@@ -83,7 +82,6 @@ export function AdminOnlySection(props: AdminOnlySectionProps) {
   }
 
   const { adminData } = props;
-  const tc = useAppTranslation("profile");
 
   return (
     <SectionPanel title={t.sections.adminOnly}>

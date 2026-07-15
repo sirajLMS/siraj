@@ -149,7 +149,6 @@ export interface ErrorsLabels {
   readonly leaveQuotaExceeded: (params: { maxLeaves: string }) => string;
   readonly classInstanceNotFound: (params: { id: string }) => string;
   readonly originalClassNotFound: string;
-  readonly sessionNotActivated: string;
   readonly invalidTransition: string;
   // ─── Scheduling-specific errors ──────────────────────────────────────
   readonly teacherNotAssigned: (params: { teacherId: string; studentId: string; startTime: string }) => string;

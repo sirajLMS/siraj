@@ -9,7 +9,6 @@ import {
 } from "@mui/icons-material";
 import { Box, Button, Card, CardContent, Typography, useTheme } from "@mui/material";
 import { styled, type Theme } from "@mui/material/styles";
-import { useLocale } from "next-intl";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import {
@@ -21,6 +20,7 @@ import {
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useAppLocale } from "@/shared/locale/client";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, "regular" | "suspendedPending" | "onLeave" | "pendingVerification"> = {
   [SessionStatus.REGULAR]: "regular",
@@ -227,7 +227,7 @@ function StatusTrackingCard({
   readonly onVerify: (id: string) => void;
 }) {
   const theme = useTheme();
-  const locale = useLocale();
+  const locale = useAppLocale();
   const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
   const avatarStyles = getAvatarStyles(theme, sessionStatus);
   return (

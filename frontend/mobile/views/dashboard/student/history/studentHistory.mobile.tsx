@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowBackOutlined, AssignmentOutlined, SchoolOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Stack, type Theme, Typography } from "@mui/material";
 import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
@@ -9,24 +9,37 @@ import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/
 import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
 
 function StatusChip({ status }: { status: string }) {
-  const colors: Record<string, { bg: string; color: string }> = {
-    COMPLETED: { bg: "success.light", color: "onSuccessContainer" },
-    CANCELLED: { bg: "error.light", color: "onErrorContainer" },
-    SCHEDULED: { bg: "primary.light", color: "onPrimaryContainer" },
-    PENDING: { bg: "warning.light", color: "onWarningContainer" },
+  const getStatusColors = (theme: Theme, statusKey: string) => {
+    switch (statusKey.toUpperCase()) {
+      case "COMPLETED":
+        return {
+          backgroundColor: theme.palette.success.light,
+          color: theme.palette.onSuccessContainer,
+        };
+      case "CANCELLED":
+        return {
+          backgroundColor: theme.palette.error.light,
+          color: theme.palette.onErrorContainer,
+        };
+      case "SCHEDULED":
+        return {
+          backgroundColor: theme.palette.primary.light,
+          color: theme.palette.onPrimaryContainer,
+        };
+      case "PENDING":
+        return {
+          backgroundColor: theme.palette.warning.light,
+          color: theme.palette.onWarningContainer,
+        };
+      default:
+        return {
+          backgroundColor: theme.palette.surfaceVariant,
+          color: theme.palette.onSurfaceVariant,
+        };
+    }
   };
-  const c = colors[status.toUpperCase()] || { bg: "surfaceVariant", color: "onSurfaceVariant" };
-  return (
-    <Chip
-      label={status}
-      size="small"
-      sx={(theme: any) => ({
-        backgroundColor: theme.palette[c.bg as keyof typeof theme.palette],
-        color: theme.palette[c.color as keyof typeof theme.palette],
-        fontWeight: 600,
-      })}
-    />
-  );
+
+  return <Chip label={status} size="small" sx={theme => getStatusColors(theme, status)} />;
 }
 
 function MobileSessionItem({

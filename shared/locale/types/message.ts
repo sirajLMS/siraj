@@ -191,4 +191,5 @@ export type MessageSchema = {
   "ui.phoneInput": PhoneInputLabels;
   "ui.tagInput": TagInputLabels;
   "ui.timezoneSelect": TimezoneSelectLabels;
+  ui: UiLabels;
 };

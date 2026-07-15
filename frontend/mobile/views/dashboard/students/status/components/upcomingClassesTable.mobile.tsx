@@ -1,10 +1,10 @@
 import { CalendarTodayOutlined, PersonOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { PersonProfileLink } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { profileHrefForTeacher, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   UpcomingClassDisplay,
@@ -13,6 +13,7 @@ import type {
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function formatDateTime(locale: string, dateStr: string): string {
   try {
@@ -33,8 +34,8 @@ function formatTime(locale: string, dateStr: string): string {
 }
 
 export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
-  const t = useTranslations("dashboard.studentStatus");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.studentStatus");
+  const locale = useAppLocale();
   const router = useRouter();
 
   const handleViewAll = useCallback(() => {
@@ -45,7 +46,7 @@ export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<Upco
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {t("sections.upcomingClassesMobile")}
+          {t.sections.upcomingClassesMobile}
         </Typography>
         <Button
           onClick={handleViewAll}
@@ -55,7 +56,7 @@ export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<Upco
             typography: "labelMd",
           })}
         >
-          {t("actions.viewAll")}
+          {t.actions.viewAll}
         </Button>
       </Box>
       {classes.length === 0 ? (
@@ -63,7 +64,7 @@ export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<Upco
           variant="bodyMd"
           sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center", py: 4 })}
         >
-          {t("table.noUpcomingClasses")}
+          {t.table.noUpcomingClasses}
         </Typography>
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -121,7 +122,7 @@ export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<Upco
                 <StatusBadge
                   category="classInstance"
                   status={cls.executionState}
-                  label={cls.isFrozen ? t("table.frozen").toUpperCase() : cls.executionState}
+                  label={cls.isFrozen ? t.table.frozen.toUpperCase() : cls.executionState}
                 />
                 {isJoinableClassInstance(cls.executionState, cls.outcome, { isFrozen: cls.isFrozen }) ? (
                   <MeetingJoinAction
@@ -129,7 +130,7 @@ export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<Upco
                     joinUrl={cls.meetingJoinUrl}
                     meeting={cls.effectiveMeeting}
                     emptyRole="parent"
-                    label={t("table.joinSession")}
+                    label={t.table.joinSession}
                   />
                 ) : null}
               </Box>

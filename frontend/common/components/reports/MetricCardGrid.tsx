@@ -7,6 +7,7 @@ import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { MessageSchema } from "@/shared/locale/types/message";
 
 type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T | null };
 
@@ -20,7 +21,7 @@ interface MetricCardGridProps {
   readonly layout?: MetricCardGridLayout;
   /** Optional namespace for translations. If provided, uses useAppTranslation(namespace).
    * If not provided, expects metrics to have pre-resolved labels in `metric.label`. */
-  readonly translationNamespace?: string;
+  readonly translationNamespace?: keyof MessageSchema;
 }
 
 const defaultSize = { xs: 6, sm: 4, md: 3, lg: 2 };
@@ -38,9 +39,18 @@ function renderMetricCard({
   selectedKey?: string;
   onMetricClick?: (key: string) => void;
   isScroll: boolean;
-  t: ReturnType<typeof useAppTranslation> | ((key: string) => string);
+  t: unknown;
 }) {
-  const label = metric.label ?? t(metric.labelKey);
+  let label: string;
+  if (metric.label) {
+    label = metric.label;
+  } else if (typeof t === "function") {
+    label = t(metric.labelKey);
+  } else if (t && typeof t === "object" && metric.labelKey in t) {
+    label = (t as Record<string, string>)[metric.labelKey];
+  } else {
+    label = metric.labelKey;
+  }
   return (
     <MetricCard
       icon={metric.icon}
@@ -69,7 +79,8 @@ export function MetricCardGrid({
   layout = "grid",
   translationNamespace,
 }: MetricCardGridProps) {
-  const t = translationNamespace ? useAppTranslation(translationNamespace) : (key: string) => key;
+  const namespace = (translationNamespace ?? "common") as keyof MessageSchema;
+  const t = useAppTranslation(namespace);
   const isScroll = layout === "scroll";
 
   if (isScroll) {

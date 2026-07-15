@@ -15,7 +15,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
@@ -33,6 +32,7 @@ import { type FormatCurrencyMessages, formatCurrencyForDisplay } from "@/fronten
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/common/views/dashboard/components/FxConversionNote";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 import { getErrorMessage } from "@/shared/utils/error";
 
 export type InvoicePaymentDetailsDialogProps = {
@@ -601,10 +601,10 @@ export function InvoicePaymentDetailsDialog({
   billingActionsDisabled = false,
   onSuccess,
 }: InvoicePaymentDetailsDialogProps): React.ReactNode {
-  const t = useTranslations("dashboard.billing.paymentDetailsDialog");
-  const tProfile = useTranslations("profile");
-  const tErrors = useTranslations("errors");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.billing").paymentDetailsDialog;
+  const tProfile = useAppTranslation("profile");
+  const tErrors = useAppTranslation("errors");
+  const locale = useAppLocale();
   const displayCurrency = useUserStore(state => state.displayCurrency);
   const fxMessages: FxMessages = buildFxDisplayMessages(tProfile, tErrors);
 

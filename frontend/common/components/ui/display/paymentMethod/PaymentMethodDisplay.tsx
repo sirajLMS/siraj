@@ -69,7 +69,7 @@ export function PaymentMethodDisplay({
   showDirection = true,
   compact = false,
 }: PaymentMethodDisplayProps): React.ReactNode {
-  const t = useAppTranslation("ui").paymentMethod;
+  const t = useAppTranslation("ui.paymentMethod");
   const tDisplay = t.display;
   const details = method.details ?? {};
 

@@ -21,11 +21,12 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 
-function statusColor(status: string | null, theme: any): string {
+function statusColor(status: string | null, theme: Theme): string {
   if (!status) return theme.palette.onSurfaceVariant;
   switch (status.toLowerCase()) {
     case "completed":
@@ -129,7 +130,7 @@ export function StudentHistoryDesktopView({
                               size="small"
                               variant="outlined"
                               startIcon={<VisibilityOutlined />}
-                              onClick={() => window.open(row.meetingJoinUrl!, "_blank", "noopener,noreferrer")}
+                              onClick={() => window.open(row.meetingJoinUrl ?? "", "_blank", "noopener,noreferrer")}
                             >
                               {labels.viewReport}
                             </Button>

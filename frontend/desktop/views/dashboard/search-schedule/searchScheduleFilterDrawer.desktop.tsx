@@ -17,6 +17,7 @@ import { DayOfWeek, Gender } from "@/frontend/common/graphql/generated/gql/graph
 import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
 import type { SearchScheduleFilterDrawerProps } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleFilterDrawer";
 import { getClearDrawerFiltersPatch } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function DaysOfWeekSelect({
   value,
@@ -25,7 +26,7 @@ function DaysOfWeekSelect({
   readonly value: DayOfWeek[];
   readonly onChange: (event: SelectChangeEvent<string[]>) => void;
 }) {
-  const t = useAppTranslation("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
 
   return (
     <FormControl size="small" fullWidth>
@@ -39,7 +40,7 @@ function DaysOfWeekSelect({
         renderValue={selected => (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
             {selected.slice(0, 2).map(day => (
-              <Chip key={day} label={t.day[day.toLowerCase() as Lowercase<DayOfWeek>]} size="small" />
+              <Chip key={day} label={t.day[day.toLowerCase() as keyof typeof t.day]} size="small" />
             ))}
             {selected.length > 2 ? <Chip label={`+${selected.length - 2}`} size="small" /> : null}
           </Box>
@@ -47,7 +48,7 @@ function DaysOfWeekSelect({
       >
         {Object.values(DayOfWeek).map(day => (
           <MenuItem key={day} value={day}>
-            {t.day[day.toLowerCase() as Lowercase<DayOfWeek>]}
+            {t.day[day.toLowerCase() as keyof typeof t.day]}
           </MenuItem>
         ))}
       </Select>
@@ -61,7 +62,7 @@ interface FilterFieldsProps {
 }
 
 function FilterFields({ draft, onDraftChange }: Readonly<FilterFieldsProps>) {
-  const t = useAppTranslation("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
 
   const handleDaysOfWeekChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value;
@@ -137,7 +138,7 @@ interface DrawerActionsProps {
 }
 
 function DrawerActions({ onClear, onApply }: Readonly<DrawerActionsProps>) {
-  const t = useAppTranslation("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
 
   return (
     <Box
@@ -166,7 +167,7 @@ export function SearchScheduleFilterDrawerDesktop({
   onDraftChange,
   onApply,
 }: Readonly<SearchScheduleFilterDrawerProps>) {
-  const t = useAppTranslation("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
 
   const handleClear = () => {
     onDraftChange(getClearDrawerFiltersPatch());

@@ -3,15 +3,15 @@
 import { useQuery } from "@apollo/client/react";
 import { Stack, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { ErrorState, LoadingState, PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { recurringScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function RecurringScheduleDetailContainer() {
-  const t = useTranslations("ui.meetingConfig.recurringSchedule");
-  const tManager = useTranslations("ui.meetingConfig.manager");
+  const t = useAppTranslation("ui").meetingConfig.recurringSchedule;
+  const tManager = useAppTranslation("ui").meetingConfig.manager;
   const params = useParams();
   const rawId = params?.id;
   const id = typeof rawId === "string" ? rawId : "";
@@ -26,7 +26,7 @@ export function RecurringScheduleDetailContainer() {
   if (!id) {
     return (
       <PageContainer>
-        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t("invalidId")}</Typography>
+        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t.invalidId}</Typography>
       </PageContainer>
     );
   }
@@ -40,8 +40,8 @@ export function RecurringScheduleDetailContainer() {
     return (
       <PageContainer>
         <ErrorState
-          message={tManager("loadError")}
-          retryLabel={tManager("retry")}
+          message={tManager.loadError}
+          retryLabel={tManager.retry}
           onRetry={() => {
             void refetch();
           }}
@@ -50,23 +50,23 @@ export function RecurringScheduleDetailContainer() {
     );
   }
 
-  const summary = t("scheduleSummary", {
+  const summary = t.scheduleSummary({
     student: schedule.studentName ?? "",
     teacher: schedule.teacherName ?? "",
-    duration: schedule.durationMinutes ?? 0,
+    duration: String(schedule.durationMinutes ?? 0),
     timezone: schedule.timezone ?? "",
   });
 
   const breadcrumbs = [
-    { label: t("breadcrumbDashboard"), href: "/dashboard" },
-    { label: t("breadcrumbClasses"), href: "/classes" },
-    { label: t("pageTitle") },
+    { label: t.breadcrumbDashboard, href: "/dashboard" },
+    { label: t.breadcrumbClasses, href: "/classes" },
+    { label: t.pageTitle },
   ];
 
   return (
     <PageContainer>
       <Stack spacing={3}>
-        <PageHeader title={t("pageTitle")} subtitle={summary} breadcrumbs={breadcrumbs} />
+        <PageHeader title={t.pageTitle} subtitle={summary} breadcrumbs={breadcrumbs} />
         <ClassMeetingConfigsSection recurringScheduleId={schedule.id ?? id} />
       </Stack>
     </PageContainer>

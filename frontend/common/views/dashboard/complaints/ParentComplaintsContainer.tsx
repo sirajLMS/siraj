@@ -3,7 +3,6 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -25,6 +24,7 @@ import type {
   ParentStudentOption,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
@@ -98,9 +98,9 @@ function AccessDeniedView() {
 }
 
 export function ParentComplaintsContainer({ parentId }: ParentComplaintsContainerProps) {
-  const t = useTranslations("dashboard.complaints");
-  const tc = useTranslations("common");
-  const labels = buildComplaintsLabels(t);
+  const tComplaints = useAppTranslation("dashboard.complaints").parent;
+  const tCommon = useAppTranslation("common");
+  const labels = buildComplaintsLabels({ parent: tComplaints, admin: {} as any });
 
   const isSubmitting = useParentComplaintsStore(state => state.isSubmitting);
   const showSuccess = useParentComplaintsStore(state => state.showSuccess);
@@ -151,7 +151,7 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
 
   if (error) {
     logger.error("Error loading parent complaints:", { error });
-    return <ErrorView message={tc("loadFailed")} />;
+    return <ErrorView message={tCommon.loadFailed} />;
   }
 
   const handleSubmit = (formData: ComplaintFormData) => {

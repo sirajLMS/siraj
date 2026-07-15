@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Grid, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { FutureClassCard } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/FutureClassCard";
 import { ImportantNotes } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/ImportantNotes";
@@ -9,6 +8,7 @@ import { JumpToDateHeader } from "@/frontend/common/views/dashboard/teachers/fut
 import { MiniCalendar } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/MiniCalendar";
 import { SupportContact } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/SupportContact";
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function FutureScheduleViewMobile({
   classes,
@@ -22,11 +22,11 @@ export function FutureScheduleViewMobile({
   contact,
   classDates,
 }: Readonly<FutureScheduleViewModel>) {
-  const t = useTranslations("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation("dashboard.teacherFutureSchedule");
 
   return (
     <PageContainer>
-      <PageHeader title={t("pageTitle")} />
+      <PageHeader title={t.pageTitle} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
@@ -43,7 +43,7 @@ export function FutureScheduleViewMobile({
           <Stack spacing={2}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
               <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
-                {t("futureClasses")}
+                {t.futureClasses}
               </Typography>
               <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -56,7 +56,7 @@ export function FutureScheduleViewMobile({
                     })}
                   />
                   <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {t("available")}
+                    {t.available}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -69,7 +69,7 @@ export function FutureScheduleViewMobile({
                     })}
                   />
                   <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {t("reScheduled")}
+                    {t.reScheduled}
                   </Typography>
                 </Box>
               </Stack>

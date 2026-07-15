@@ -2,7 +2,6 @@
 
 import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PageContainer } from "@/frontend/common/components/ui";
 import { CurrentTeacherCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/CurrentTeacherCard";
 import { ManagementControlsCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/ManagementControlsCard";
@@ -10,6 +9,7 @@ import { ReassignmentBentoGrid } from "@/frontend/common/views/dashboard/teacher
 import { StudentContextCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/StudentContextCard";
 import type { TeacherReassignmentViewModel } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function TeacherReassignmentViewMobile({
   student,
@@ -20,11 +20,11 @@ export function TeacherReassignmentViewMobile({
   onStatusChange,
   onCancel,
 }: Readonly<TeacherReassignmentViewModel>) {
-  const t = useTranslations("dashboard.teacherReassignment");
+  const t = useAppTranslation("dashboard.teacherReassignment");
 
   return (
     <PageContainer>
-      <MobilePageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
+      <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
 
       <MobileContentStack>
         <Stack spacing={3}>
@@ -49,7 +49,7 @@ export function TeacherReassignmentViewMobile({
               fontWeight: 700,
             })}
           >
-            {t("warning")}
+            {t.warning}
           </Alert>
 
           <ManagementControlsCard

@@ -291,13 +291,13 @@ export namespace EffectiveMeetingService {
 
   export async function resolveForNewBooking(
     teacherId: string,
-    options?: {
+    options: {
       readonly recurringScheduleId?: string | null;
       readonly tErrors: ErrorsLabels;
       readonly tx?: DBTransaction;
     }
   ): Promise<EffectiveMeetingReturnType> {
-    const { recurringScheduleId, tErrors, tx } = options ?? { tErrors: undefined as any };
+    const { recurringScheduleId, tErrors, tx } = options;
 
     if (recurringScheduleId) {
       return resolveForRecurringSchedule(recurringScheduleId, teacherId, tErrors, tx);

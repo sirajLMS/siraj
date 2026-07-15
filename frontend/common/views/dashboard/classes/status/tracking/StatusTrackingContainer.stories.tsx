@@ -5,17 +5,18 @@ import {
   PendingActionsOutlined,
 } from "@mui/icons-material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { create } from "zustand";
 import {
   ClassExecutionState,
   ClassOutcome,
   StudentStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { StatusTrackingView } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusTrackingView";
 import type { RawMetric, StatusTrackingRow } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
-import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface StoryStatusTrackingState {
   readonly metrics: readonly RawMetric[];
@@ -193,7 +194,8 @@ const useStoryStatusTrackingStore = create<StoryStatusTrackingState>(set => ({
 }));
 
 function StoryStatusTrackingContainer() {
-  const t = useTranslations("dashboard.statusTracking");
+  const t = useAppTranslation("dashboard.core.statusTracking");
+  const _locale = useAppLocale();
   const router = useRouter();
   const setRescheduleSession = useRescheduleStore(state => state.setSession);
 
@@ -206,10 +208,10 @@ function StoryStatusTrackingContainer() {
   const suspendedCount = Number(rawMetrics.find(m => m.key === "suspended")?.count ?? 0);
 
   const subLabelMap: Record<string, string> = {
-    regular: t("subLabels.regular"),
-    pending: t("subLabels.pending"),
-    suspended: t("subLabels.suspended"),
-    on_leave: t("subLabels.onLeave"),
+    regular: t.subLabels.regular,
+    pending: t.subLabels.pending,
+    suspended: t.subLabels.suspended,
+    on_leave: t.subLabels.onLeave,
   };
 
   const metrics: readonly RawMetric[] = rawMetrics.map(m => ({
@@ -218,56 +220,48 @@ function StoryStatusTrackingContainer() {
   }));
 
   const labels = {
-    pageTitle: t("pageTitle"),
-    pageSubtitle: t("pageSubtitle"),
-    filters: t("filters"),
-    newReport: t("newReport"),
-    todaysClassSchedule: t("todaysClassSchedule"),
-    totalSessions: t.raw("totalSessions") as string,
-    studentClass: t("table.studentClass"),
-    teacher: t("table.teacher"),
-    schedule: t("table.schedule"),
-    status: t("table.status"),
-    actions: t("table.actions"),
-    showingOf: t.raw("showingOf") as string,
-    previous: t("previous"),
-    next: t("next"),
-    joinSession: t("actions.joinSession"),
-    activate: t("actions.activate"),
-    reschedule: t("actions.reschedule"),
-    verifyDocuments: t("actions.verifyDocuments"),
-    sessionLocked: t("actions.sessionLocked"),
-    sessionEnded: t("actions.sessionEnded"),
-    administrativeHold: t("administrativeHold"),
-    holdDescription: t("holdDescription"),
-    seeAll: t("seeAll"),
-    todaysSchedule: t("todaysSchedule"),
-    regular: t("status.regular"),
-    suspendedPending: t("status.suspendedPending"),
-    onLeave: t("status.onLeave"),
-    pendingVerification: t("status.pendingVerification"),
-    regularSubLabel: t("subLabels.regular"),
-    pendingSubLabel: t("subLabels.pending"),
-    suspendedSubLabel: t("subLabels.suspended"),
-    onLeaveSubLabel: t("subLabels.onLeave"),
-    suspensionAnalytics: t("analytics.title"),
-    analyticsNote: t("analytics.note"),
-    urgentTask: t("analytics.urgentTask"),
-    accountsLocked: t.raw("analytics.accountsLocked") as string,
-    auditDescription: t("analytics.auditDescription"),
-    openAuditLogs: t("analytics.openAuditLogs"),
-    noEntries: t("noEntries"),
-    errorNoStudentId: t("errors.noStudentId"),
-    errorAuditLogsComingSoon: t("errors.auditLogsComingSoon"),
-    days: [
-      t("days.mon"),
-      t("days.tue"),
-      t("days.wed"),
-      t("days.thu"),
-      t("days.fri"),
-      t("days.sat"),
-      t("days.sun"),
-    ] as const,
+    pageTitle: t.pageTitle,
+    pageSubtitle: t.pageSubtitle,
+    filters: t.filters,
+    newReport: t.newReport,
+    todaysClassSchedule: t.todaysClassSchedule,
+    totalSessions: t.totalSessions(totalSessions) as string,
+    studentClass: t.table.studentClass,
+    teacher: t.table.teacher,
+    schedule: t.table.schedule,
+    status: t.table.status,
+    actions: t.table.actions,
+    showingOf: t.showingOf(rows.length, totalSessions) as string,
+    previous: t.previous,
+    next: t.next,
+    joinSession: t.actions.joinSession,
+    activate: t.actions.activate,
+    reschedule: t.actions.reschedule,
+    verifyDocuments: t.actions.verifyDocuments,
+    sessionLocked: t.actions.sessionLocked,
+    sessionEnded: t.actions.sessionEnded,
+    administrativeHold: t.administrativeHold,
+    holdDescription: t.holdDescription,
+    seeAll: t.seeAll,
+    todaysSchedule: t.todaysSchedule,
+    regular: t.status.regular,
+    suspendedPending: t.status.suspendedPending,
+    onLeave: t.status.onLeave,
+    pendingVerification: t.status.pendingVerification,
+    regularSubLabel: t.subLabels.regular,
+    pendingSubLabel: t.subLabels.pending,
+    suspendedSubLabel: t.subLabels.suspended,
+    onLeaveSubLabel: t.subLabels.onLeave,
+    suspensionAnalytics: t.analytics.title,
+    analyticsNote: t.analytics.note,
+    urgentTask: t.analytics.urgentTask,
+    accountsLocked: t.analytics.accountsLocked(suspendedCount) as string,
+    auditDescription: t.analytics.auditDescription,
+    openAuditLogs: t.analytics.openAuditLogs,
+    noEntries: t.noEntries,
+    errorNoStudentId: t.errors.noStudentId,
+    errorAuditLogsComingSoon: t.errors.auditLogsComingSoon,
+    days: [t.days.mon, t.days.tue, t.days.wed, t.days.thu, t.days.fri, t.days.sat, t.days.sun] as const,
   };
 
   const handleNewReport = () => {
@@ -318,7 +312,7 @@ const meta: Meta<typeof StoryStatusTrackingContainer> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof StoryStatusTrackingContainer>;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {},

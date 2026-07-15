@@ -13,7 +13,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { UploadType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -278,8 +277,8 @@ export function SubmitPaymentProofDialog({
   onSuccess,
   onError,
 }: SubmitPaymentProofDialogProps): React.ReactNode {
-  const t = useTranslations("dashboard.billing.submitProofDialog");
-  const tErrors = useTranslations("errors");
+  const t = useAppTranslation("dashboard.billing").submitProofDialog;
+  const tErrors = useAppTranslation("errors");
   const displayCurrency = useUserStore(state => state.displayCurrency);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);

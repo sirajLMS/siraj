@@ -2,7 +2,6 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Alert, FormControlLabel, Radio, RadioGroup, Stack, TextField, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import { MeetingConfigSelect } from "@/frontend/common/components/ui/input/meetingConfigSelect/MeetingConfigSelect";
@@ -18,6 +17,7 @@ import {
   getRecurringMeetingConfigErrorKey,
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 
 export type RecurringMeetingConfigSectionProps = {
   readonly teacherId: string;
@@ -127,9 +127,9 @@ export function RecurringMeetingConfigSection({
   onChangeAction,
   disabled,
 }: RecurringMeetingConfigSectionProps) {
-  const t = useTranslations("ui.meetingConfig.classScope");
-  const tManager = useTranslations("ui.meetingConfig.manager");
-  const locale = useLocale();
+  const t = useAppTranslation("ui").meetingConfig.classScope;
+  const tManager = useAppTranslation("ui").meetingConfig.manager;
+  const locale = useAppLocale();
   const [urlError, setUrlError] = useState<string | null>(null);
   const [fieldsError, setFieldsError] = useState<string | null>(null);
   const { data, loading } = useQuery(userMeetingConfigsQueryDocument, {
@@ -152,8 +152,8 @@ export function RecurringMeetingConfigSection({
   const validateNewModeFields = (): boolean => {
     const errorKey = getRecurringMeetingConfigErrorKey(value);
     const message = resolveRecurringMeetingConfigErrorMessage(errorKey, {
-      recurringFieldsRequired: t("recurringFieldsRequired"),
-      urlNotAllowed: tManager("urlNotAllowed"),
+      recurringFieldsRequired: t.recurringFieldsRequired,
+      urlNotAllowed: tManager.urlNotAllowed,
     });
 
     if (errorKey === "urlNotAllowed") {
@@ -189,14 +189,14 @@ export function RecurringMeetingConfigSection({
       return true;
     }
 
-    setUrlError(tManager("urlNotAllowed"));
+    setUrlError(tManager.urlNotAllowed);
     return false;
   };
 
   return (
     <Stack spacing={2}>
-      <Typography sx={{ typography: "titleMd" }}>{t("recurringSectionTitle")}</Typography>
-      <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{t("recurringSectionSubtitle")}</Typography>
+      <Typography sx={{ typography: "titleMd" }}>{t.recurringSectionTitle}</Typography>
+      <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{t.recurringSectionSubtitle}</Typography>
 
       <RadioGroup
         value={mode}
@@ -214,14 +214,14 @@ export function RecurringMeetingConfigSection({
           onChangeAction({ ...value, useTeacherDefault: false, selectedConfig: null });
         }}
       >
-        <FormControlLabel value="default" control={<Radio />} label={t("useTeacherDefault")} disabled={disabled} />
+        <FormControlLabel value="default" control={<Radio />} label={t.useTeacherDefault} disabled={disabled} />
         <FormControlLabel
           value="existing"
           control={<Radio />}
-          label={t("selectLabel")}
+          label={t.selectLabel}
           disabled={disabled || options.length === 0}
         />
-        <FormControlLabel value="new" control={<Radio />} label={t("createNewConfig")} disabled={disabled} />
+        <FormControlLabel value="new" control={<Radio />} label={t.createNewConfig} disabled={disabled} />
       </RadioGroup>
 
       {mode === "existing" ? (
@@ -251,9 +251,9 @@ export function RecurringMeetingConfigSection({
           onFieldsErrorChange={setFieldsError}
           onValidateUrl={validateUrl}
           instructions={instructions}
-          selectLabel={t("selectLabel")}
-          recurringFieldsRequiredLabel={t("recurringFieldsRequired")}
-          labelFieldLabel={tManager("label")}
+          selectLabel={t.selectLabel}
+          recurringFieldsRequiredLabel={t.recurringFieldsRequired}
+          labelFieldLabel={tManager.label}
         />
       ) : null}
     </Stack>

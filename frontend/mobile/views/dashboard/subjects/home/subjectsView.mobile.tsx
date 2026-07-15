@@ -2,13 +2,14 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
 import { CategoriesSection } from "@/frontend/common/views/dashboard/subjects/home/components/CategoriesSection";
 import { SubjectCard } from "@/frontend/common/views/dashboard/subjects/home/components/SubjectCard";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function SubjectsViewMobile({
   categories,
@@ -26,7 +27,8 @@ export function SubjectsViewMobile({
   canManageSubjects,
   canManageCategories,
 }: Readonly<SubjectsViewProps>) {
-  const t = useTranslations("dashboard.subjects");
+  const t = useAppTranslation("dashboard.subjects");
+  const _locale = useAppLocale();
   const categoriesSectionOpen = useSubjectManagementStore(state => state.categoriesSectionOpen);
   const toggleCategoriesSection = useSubjectManagementStore(state => state.toggleCategoriesSection);
 
@@ -47,12 +49,12 @@ export function SubjectsViewMobile({
   return (
     <PageContainer>
       <MobilePageHeader
-        title={t("pageTitle")}
-        subtitle={t("pageSubtitle")}
+        title={t.pageTitle}
+        subtitle={t.pageSubtitle}
         actions={
           canManageSubjects ? (
             <PrimaryPageAction onClick={onAddSubject} startIcon={<AddOutlined />}>
-              {t("addSubject")}
+              {t.addSubject}
             </PrimaryPageAction>
           ) : undefined
         }
@@ -60,7 +62,7 @@ export function SubjectsViewMobile({
 
       {canManageCategories && (
         <Button variant="outlined" onClick={toggleCategoriesSection} sx={{ alignSelf: "flex-start" }}>
-          {categoriesSectionOpen ? t("hideCategories") : t("manageCategories")}
+          {categoriesSectionOpen ? t.hideCategories : t.manageCategories}
         </Button>
       )}
 
@@ -73,7 +75,7 @@ export function SubjectsViewMobile({
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab label={t("allCategories")} value={false} />
+          <Tab label={t.allCategories} value={false} />
           {categories.map(cat => (
             <Tab key={cat.id} label={cat.name ?? ""} value={cat.id ?? ""} />
           ))}
@@ -85,7 +87,7 @@ export function SubjectsViewMobile({
           return (
             <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
               <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-                {t("loading")}
+                {t.loading}
               </Typography>
             </Box>
           );
@@ -94,7 +96,7 @@ export function SubjectsViewMobile({
           return (
             <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
               <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-                {t("noSubjects")}
+                {t.noSubjects}
               </Typography>
             </Box>
           );

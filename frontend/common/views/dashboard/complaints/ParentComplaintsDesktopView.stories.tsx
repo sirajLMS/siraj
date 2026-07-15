@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Meta, StoryObj } from "@storybook/react";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import {
   AccountStatus,
@@ -19,6 +18,7 @@ import type {
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { ParentComplaintsDesktopView } from "@/frontend/desktop/views/dashboard/complaints/parentComplaints.desktop";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const MOCK_PARENT_COMPLAINTS: readonly ParentComplaintRecord[] = [
   {
@@ -85,8 +85,8 @@ function ParentComplaintsDesktopStoryRenderer({
   showSuccess,
   canSubmit,
 }: Readonly<ParentComplaintsDesktopStoryProps>) {
-  const t = useTranslations("dashboard.complaints");
-  const labels = buildComplaintsLabels(t).parent;
+  const t = useAppTranslation("dashboard.complaints").parent;
+  const labels = buildComplaintsLabels({ parent: t, admin: {} as any });
   const {
     control,
     formState: { errors },

@@ -5,6 +5,7 @@ import { PersonProfileLink } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type {
@@ -136,24 +137,24 @@ function InstructorCell({ row, minutesLabel }: Readonly<{ row: UpcomingClassDisp
 }
 
 export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
-  const t = useTranslations("dashboard.studentStatus");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.studentStatus");
+  const locale = useAppLocale();
 
   const columns: GridColDef<UpcomingClassDisplay>[] = [
     {
       field: "instructor",
-      headerName: t("table.subjectInstructor"),
+      headerName: t.table.subjectInstructor,
       flex: 1.5,
       renderCell: params => (
         <InstructorCell
           row={params.row}
-          minutesLabel={t("table.minutesShort", { minutes: params.row.durationMinutes })}
+          minutesLabel={t.table.minutesShort(params.row.durationMinutes)}
         />
       ),
     },
     {
       field: "scheduledStartAt",
-      headerName: t("table.dateTime"),
+      headerName: t.table.dateTime,
       flex: 1.2,
       renderCell: params => (
         <RenderCellWrapper
@@ -164,7 +165,7 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
     },
     {
       field: "isFrozen",
-      headerName: t("table.holdStatus"),
+      headerName: t.table.holdStatus,
       flex: 1,
       renderCell: params => (
         <Box sx={{ py: 1.5 }}>
@@ -179,7 +180,7 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
             })}
           >
             <Typography variant="labelMd" sx={{ fontWeight: 600 }}>
-              {params.row.isFrozen ? t("table.frozen") : t("table.active")}
+              {params.row.isFrozen ? t.table.frozen : t.table.active}
             </Typography>
           </Box>
         </Box>
@@ -199,10 +200,10 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
             joinUrl={params.row.meetingJoinUrl}
             meeting={params.row.effectiveMeeting}
             emptyRole="parent"
-            label={t("table.joinSession")}
+            label={t.table.joinSession}
           />
         ) : (
-          <Tooltip title={t("table.sessionEnded")}>
+          <Tooltip title={t.table.sessionEnded}>
             <Box
               sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
             >
@@ -213,14 +214,14 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
     },
     {
       field: "executionState",
-      headerName: t("table.status"),
+      headerName: t.table.status,
       flex: 1,
       renderCell: params => (
         <Box sx={{ py: 1.5 }}>
           <StatusBadge
             category="classInstance"
             status={params.row.executionState}
-            label={params.row.isFrozen ? t("table.frozen").toUpperCase() : params.row.executionState}
+            label={params.row.isFrozen ? t.table.frozen.toUpperCase() : params.row.executionState}
           />
         </Box>
       ),

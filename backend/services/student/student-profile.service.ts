@@ -137,7 +137,7 @@ export namespace StudentProfileService {
 
     let upcomingClasses: Awaited<ReturnType<typeof StudentStatusService.getUpcomingClasses>> | null;
     try {
-      upcomingClasses = await StudentStatusService.getUpcomingClasses(actorUserId, studentId, tErrors!);
+      upcomingClasses = await StudentStatusService.getUpcomingClasses(actorUserId, studentId, tErrors);
     } catch {
       upcomingClasses = null;
     }
@@ -150,7 +150,7 @@ export namespace StudentProfileService {
           studentId,
           options.year,
           options.month,
-          tErrors!
+          tErrors
         );
       } catch {
         classHistory = null;

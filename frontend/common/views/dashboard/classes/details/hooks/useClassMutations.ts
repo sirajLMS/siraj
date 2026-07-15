@@ -40,15 +40,9 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
   const t = useAppTranslation("dashboard.classDetails");
   const client = useApolloClient();
 
-  const reportMutationError = (context: string, err: unknown, fallbackKey: string) => {
+  const reportMutationError = (context: string, err: unknown, fallbackMessage: string) => {
     logger.error(context, { err });
-    // fallbackKey is now in dot notation like "actionFeedback.activateError"
-    const keys = fallbackKey.split(".");
-    let fallbackValue: any = t;
-    for (const key of keys) {
-      fallbackValue = fallbackValue[key];
-    }
-    onError?.(getGraphQLErrorMessage(err, fallbackValue));
+    onError?.(getGraphQLErrorMessage(err, fallbackMessage));
   };
 
   const [activateClass] = useMutation(activateClassMutationDocument, {
@@ -56,7 +50,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      reportMutationError("Activate class failed:", err, "actionFeedback.activateError");
+      reportMutationError("Activate class failed:", err, t.actionFeedback.activateError);
     },
   });
 
@@ -65,7 +59,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      reportMutationError("Activate override class failed:", err, "actionFeedback.forceActivateError");
+      reportMutationError("Activate override class failed:", err, t.actionFeedback.forceActivateError);
     },
   });
 
@@ -74,13 +68,13 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      reportMutationError("Stop class failed:", err, "actionFeedback.stopError");
+      reportMutationError("Stop class failed:", err, t.actionFeedback.stopError);
     },
   });
 
   const [deleteClassMutation] = useMutation(deleteClassInstanceMutationDocument, {
     onError: err => {
-      reportMutationError("Delete class failed:", err, "actionFeedback.deleteError");
+      reportMutationError("Delete class failed:", err, t.actionFeedback.deleteError);
     },
   });
 
@@ -89,7 +83,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      reportMutationError("Start session failed:", err, "actionFeedback.startError");
+      reportMutationError("Start session failed:", err, t.actionFeedback.startError);
     },
   });
 
@@ -98,7 +92,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      reportMutationError("Mark absent failed:", err, "actionFeedback.markAbsentError");
+      reportMutationError("Mark absent failed:", err, t.actionFeedback.markAbsentError);
     },
   });
 
@@ -107,7 +101,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      reportMutationError("Process leave failed:", err, "actionFeedback.leaveError");
+      reportMutationError("Process leave failed:", err, t.actionFeedback.leaveError);
     },
   });
 
@@ -116,7 +110,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      reportMutationError("Reset session failed:", err, "actionFeedback.resetError");
+      reportMutationError("Reset session failed:", err, t.actionFeedback.resetError);
     },
   });
 

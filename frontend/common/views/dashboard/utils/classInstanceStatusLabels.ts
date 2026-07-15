@@ -1,8 +1,6 @@
 import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
 
-type StatusLabelKey = keyof AdminDashboardLabels["statusLabels"];
-
 export function buildClassInstanceStatusLabels(
   t: AdminDashboardLabels["statusLabels"]
 ): Record<ClassOutcome | ClassExecutionState, string> {

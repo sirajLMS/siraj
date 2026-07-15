@@ -196,7 +196,7 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
   listAttached = false,
   showSlug = true,
 }: PaymentMethodAutocompleteProps): React.ReactNode => {
-  const t = useAppTranslation("ui").paymentMethod.select;
+  const t = useAppTranslation("ui.paymentMethod").select;
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;
 

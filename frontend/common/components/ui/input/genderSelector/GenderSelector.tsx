@@ -4,7 +4,7 @@ import { Box, Button, ButtonGroup, Typography } from "@mui/material";
 import type * as React from "react";
 import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAppTranslation } from "@/shared/locale/client";
-import type { GenderSelectorLabels } from "@/shared/locale/types/ui/gender-selector";
+import type { GenderSelectorLabels } from "@/shared/locale/types/ui";
 
 export type GenderSelectorProps = {
   readonly gender: Gender | null;
