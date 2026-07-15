@@ -14,7 +14,7 @@ export async function upsertManyWith<TInput, TResult, TExisting extends { id: st
   createOne: (input: TInput, t: DBTransaction, tErrors: ErrorsLabels) => Promise<TResult>,
   updateOne: (id: string, input: TInput, t: DBTransaction, tErrors: ErrorsLabels) => Promise<TResult>,
   tErrors: ErrorsLabels,
-  tx?: DBTransaction,
+  tx?: DBTransaction
 ): Promise<TResult[]> {
   if (inputs.length === 0) return [];
 

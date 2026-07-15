@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { ParentBillingContainer } from "@/frontend/common/views/dashboard/billing/ParentBillingContainer";
+import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({
   params,
@@ -8,8 +8,8 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "dashboard.billing" });
-  return { title: t("parentPageTitle") };
+  const t = await getTranslations(locale, "dashboard.billing");
+  return { title: t.parentPageTitle };
 }
 
 export default function ParentBillingInvoicesPage() {

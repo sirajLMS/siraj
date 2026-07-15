@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { ParentSocialContainer } from "@/frontend/common/views/dashboard/parent/social/ParentSocialContainer";
+import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({
   params,
@@ -10,8 +10,8 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "dashboard.parentSocial" });
-  return { title: t("pageTitle") };
+  const t = await getTranslations(locale, "dashboard.parentSocial");
+  return { title: t.pageTitle };
 }
 
 interface PageProps {
@@ -20,7 +20,6 @@ interface PageProps {
 
 export default async function ParentMeSocialPage({ params }: PageProps) {
   const { locale } = await params;
-  setRequestLocale(locale);
 
   const { userId } = await getServerUserContext();
   if (!userId) {

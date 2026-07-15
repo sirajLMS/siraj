@@ -185,7 +185,7 @@ export async function getServerTranslations<K extends keyof MessageSchema>(
 export async function loadAllTranslations(locale: string): Promise<Partial<MessageSchema>> {
   const safeLocale: AppLocale = (locales as readonly string[]).includes(locale) ? (locale as AppLocale) : defaultLocale;
   const entries = await Promise.all(
-    (Object.keys(namespacePaths) as (keyof MessageSchema)[]).map(async (ns) => {
+    (Object.keys(namespacePaths) as (keyof MessageSchema)[]).map(async ns => {
       const value = await loadTranslation(safeLocale, ns);
       return [ns, value] as const;
     })

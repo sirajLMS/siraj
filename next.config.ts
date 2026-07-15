@@ -34,11 +34,7 @@ const nextConfig: NextConfig = {
   distDir: getEnv("NEXT_DIST_DIR", ".next"),
   reactStrictMode: true,
   serverExternalPackages: ["pg", "@neondatabase/serverless", "drizzle-orm", "ws", "@vercel/functions"],
-  turbopack: {
-    resolveAlias: {
-      "next-intl/config": "./shared/i18n/request.ts",
-    },
-  },
+  turbopack: {},
   allowedDevOrigins: buildDevOrigins(), // NoSonar
   async headers() {
     return [

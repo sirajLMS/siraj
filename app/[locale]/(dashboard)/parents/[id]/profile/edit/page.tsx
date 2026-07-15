@@ -1,4 +1,3 @@
-import { setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib";
 import { ProfileService } from "@/backend/services";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
@@ -10,7 +9,6 @@ interface PageProps {
 
 export default async function ParentProfileEditRedirectPage({ params }: PageProps) {
   const { id, locale } = await params;
-  setRequestLocale(locale);
 
   const { userId } = await getServerUserContext();
   if (!userId) {

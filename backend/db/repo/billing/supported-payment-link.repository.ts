@@ -95,7 +95,7 @@ export namespace SupportedPaymentLinkRepository {
     id: string,
     input: UpdateSupportedPaymentLinkInput,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<SupportedPaymentLinkSelectType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -114,9 +114,9 @@ export namespace SupportedPaymentLinkRepository {
   export async function deactivate(
     id: string,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<SupportedPaymentLinkSelectType> {
-    return update(id, { isActive: false },tErrors, tx       );
+    return update(id, { isActive: false }, tErrors, tx);
   }
 
   export async function listByIds(

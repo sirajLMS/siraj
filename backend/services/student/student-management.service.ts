@@ -24,14 +24,13 @@ export namespace StudentManagementService {
     studentId: string,
     tErrors: ErrorsLabels,
     newClassesRemaining: number,
-    expectedVersion?: number,
+    expectedVersion?: number
   ): Promise<EditQuotaResult> {
     const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
     try {
       assertStudentFieldEdit(fieldCtx, "student_quota_edit");
     } catch {
-      throw new Error(
-        tErrors.insufficientPermissions);
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     if (!Number.isInteger(newClassesRemaining) || newClassesRemaining < 0) {
@@ -45,9 +44,7 @@ export namespace StudentManagementService {
     }
 
     if (newClassesRemaining > current.classesTotal) {
-      throw new Error(
-        tErrors.quotaExceedsTotal({ requested: newClassesRemaining, total: current.classesTotal })
-      );
+      throw new Error(tErrors.quotaExceedsTotal({ requested: newClassesRemaining, total: current.classesTotal }));
     }
 
     const updated = await StudentRepository.setClassesRemaining(

@@ -110,7 +110,7 @@ export namespace UserMeetingConfigRepository {
       details?: UserMeetingConfigInsertType["details"];
       encryptedSecret?: string | null;
     },
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<UserMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<UserMeetingConfigSelectType> => {
       const existing = await getByIdOrThrow(id, t, locale);

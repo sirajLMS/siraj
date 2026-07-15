@@ -17,9 +17,7 @@ export namespace StudentStatusService {
     try {
       assertStudentFieldView(fieldCtx, "student_schedule");
     } catch {
-      throw new Error(
-        tErrors.insufficientPermissions
-      );
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const student = await StudentRepository.findById(studentId);

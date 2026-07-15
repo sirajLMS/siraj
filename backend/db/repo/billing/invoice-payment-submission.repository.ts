@@ -48,7 +48,7 @@ export namespace InvoicePaymentSubmissionRepository {
     reviewedByUserId: string,
     rejectionReason: string | null,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<Types.InvoicePaymentSubmissionSelectType> {
     const queryDb = tx ?? db;
     const now = new Date();
@@ -66,7 +66,8 @@ export namespace InvoicePaymentSubmissionRepository {
 
     if (!row) {
       throw new Error(
-        tErrors.file.recordNotFound({ tableName: "invoice_payment_submissions", entityId: submissionId }));
+        tErrors.file.recordNotFound({ tableName: "invoice_payment_submissions", entityId: submissionId })
+      );
     }
 
     return row;
@@ -77,7 +78,7 @@ export namespace InvoicePaymentSubmissionRepository {
     reviewedByUserId: string,
     rejectionReason: string | null,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<Types.InvoicePaymentSubmissionSelectType | null> {
     const pending = await getPendingByInvoiceId(invoiceId, tx);
     if (!pending) {

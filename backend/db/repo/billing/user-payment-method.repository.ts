@@ -75,7 +75,7 @@ export namespace UserPaymentMethodRepository {
     id: string,
     input: Partial<UserPaymentMethodInsertType>,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<UserPaymentMethodSelectType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -85,15 +85,13 @@ export namespace UserPaymentMethodRepository {
       .returning();
 
     if (!updated) {
-      throw new Error(
-        tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id })
-      );
+      throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
     }
 
     return toSelectType(updated);
   }
 
-  export async function deleteById(id: string,tErrors: ErrorsLabels, tx?: DBTransaction, ): Promise<void> {
+  export async function deleteById(id: string, tErrors: ErrorsLabels, tx?: DBTransaction): Promise<void> {
     const client = tx ?? db;
     const [deleted] = await client
       .delete(userPaymentMethods)
@@ -101,9 +99,7 @@ export namespace UserPaymentMethodRepository {
       .returning({ id: userPaymentMethods.id });
 
     if (!deleted) {
-      throw new Error(
-        tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }) 
-      );
+      throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
     }
   }
 
@@ -125,7 +121,7 @@ export namespace UserPaymentMethodRepository {
     id: string,
     verifiedByUserId: string,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<UserPaymentMethodSelectType> {
     return update(
       id,
@@ -134,7 +130,7 @@ export namespace UserPaymentMethodRepository {
         verifiedByUserId,
       },
       tErrors,
-      tx,
+      tx
     );
   }
 

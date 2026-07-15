@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { PaymentCatalogAdminContainer } from "@/frontend/common/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminContainer";
+import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({
   params,
@@ -10,8 +10,8 @@ export async function generateMetadata({
   params: Promise<{ readonly locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "dashboard.paymentCatalogs" });
-  return { title: t("pageTitle") };
+  const t = await getTranslations(locale, "dashboard.paymentCatalogs");
+  return { title: t.pageTitle };
 }
 
 export default async function PaymentCatalogsPage({
@@ -20,7 +20,6 @@ export default async function PaymentCatalogsPage({
   readonly params: Promise<{ readonly locale: string }>;
 }) {
   const { locale } = await params;
-  setRequestLocale(locale);
 
   const { userId } = await getServerUserContext();
 

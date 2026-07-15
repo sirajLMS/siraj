@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { CreateRecurringClassContainer } from "@/frontend/common/views/dashboard/classes/recurring/CreateRecurringClassContainer";
+import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({
   params,
@@ -8,8 +8,10 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "dashboard.createRecurringClass" });
-  return { title: t("pageTitle") };
+  const t = await getTranslations(locale, "dashboard.teacherCreateRecurringClass");
+  // TODO: i18n dynamic lookup — namespace "dashboard.createRecurringClass" has no pageTitle field
+  // in the new schema; TeacherCreateRecurringClassLabels only provides dialogTitle.
+  return { title: t.dialogTitle };
 }
 
 export default function CreateRecurringClassPage() {

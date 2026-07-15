@@ -101,7 +101,7 @@ export namespace SupportedMobileWalletRepository {
     id: string,
     input: UpdateSupportedMobileWalletInput,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<SupportedMobileWalletSelectType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -111,9 +111,7 @@ export namespace SupportedMobileWalletRepository {
       .returning();
 
     if (!updated) {
-      throw new Error(
-        tErrors.file.recordNotFound({ tableName: "supported_mobile_wallets", entityId: id })
-      );
+      throw new Error(tErrors.file.recordNotFound({ tableName: "supported_mobile_wallets", entityId: id }));
     }
 
     return toSelectType(updated);
@@ -122,7 +120,7 @@ export namespace SupportedMobileWalletRepository {
   export async function deactivate(
     id: string,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<SupportedMobileWalletSelectType> {
     return update(id, { isActive: false }, tErrors, tx);
   }

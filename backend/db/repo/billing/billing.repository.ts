@@ -58,7 +58,7 @@ export namespace BillingRepository {
       return { snapshot: snapshot ?? null, source: source ?? null };
     }
 
-    const rate = await getLatestExchangeRate(currency, CurrencyCode.USD,tErrors, t as DBTransaction, );
+    const rate = await getLatestExchangeRate(currency, CurrencyCode.USD, tErrors, t as DBTransaction);
     return {
       snapshot: rate.rate,
       source: rate.source || "SYSTEM_AUTO",
@@ -107,7 +107,7 @@ export namespace BillingRepository {
     fromCurrency: CurrencyCode,
     toCurrency: CurrencyCode,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<Types.CurrencyExchangeRateSelectType> => {
     const t = tx || db;
     const results = await t
@@ -388,7 +388,7 @@ export namespace BillingRepository {
   export const createInvoice = async (
     input: InvoiceCreateInput,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType> => {
     const runner = async (t: DBTransaction) =>
       createBillingEntity<Types.InvoiceSelectType>(t, invoices, input, tErrors);
@@ -401,7 +401,7 @@ export namespace BillingRepository {
   export const recordPayment = async (
     input: PaymentRecordInput,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<Types.PaymentSelectType> => {
     const runner = async (t: DBTransaction) =>
       createBillingEntity<Types.PaymentSelectType>(t, payments, input, tErrors);
@@ -440,7 +440,7 @@ export namespace BillingRepository {
     tErrors: ErrorsLabels,
     paidDate?: Date | null,
     expectedVersion?: number,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType> => {
     const runner = async (t: DBTransaction) => {
       await acquireInvoiceLock(t, invoiceId);
@@ -457,7 +457,8 @@ export namespace BillingRepository {
             id: invoiceId,
             expectedVersion,
             gotVersion: current.version,
-          }));
+          })
+        );
       }
 
       const updateData: {
@@ -1110,9 +1111,9 @@ export namespace BillingRepository {
     invoiceId: string,
     tErrors: ErrorsLabels,
     expectedVersion?: number,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType> => {
-    return updateInvoiceStatus(invoiceId, "PAYMENT_PENDING", tErrors, null, expectedVersion, tx, );
+    return updateInvoiceStatus(invoiceId, "PAYMENT_PENDING", tErrors, null, expectedVersion, tx);
   };
 
   export const markInvoiceAsPaid = async (
@@ -1125,8 +1126,7 @@ export namespace BillingRepository {
       const current = await getExistingInvoiceOrThrow(t, invoiceId, tErrors);
 
       if (current.status !== "UNPAID" && current.status !== "PAYMENT_PENDING") {
-        throw new Error(
-          tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: current.status }));
+        throw new Error(tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: current.status }));
       }
 
       if (expectedVersion !== undefined && current.version !== expectedVersion) {
@@ -1135,7 +1135,8 @@ export namespace BillingRepository {
             id: invoiceId,
             expectedVersion,
             gotVersion: current.version,
-          }));
+          })
+        );
       }
 
       const paidDate = new Date();

@@ -151,11 +151,7 @@ export namespace ClassCategoryRepository {
     }
   }
 
-  export async function deleteCategory(
-    id: string,
-    tErrors: ErrorsLabels,
-    tx?: DBTransaction
-  ): Promise<{ id: string }> {
+  export async function deleteCategory(id: string, tErrors: ErrorsLabels, tx?: DBTransaction): Promise<{ id: string }> {
     const run = async (t: DBTransaction): Promise<{ id: string }> => {
       const [existing] = await t
         .select()

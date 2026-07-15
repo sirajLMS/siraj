@@ -1,6 +1,6 @@
-import type { ComponentProps } from "react";
 import Link from "next/link";
-import { usePathname as useNextPathname, useRouter as useNextRouter, redirect as nextRedirect } from "next/navigation";
+import { redirect as nextRedirect, usePathname as useNextPathname, useRouter as useNextRouter } from "next/navigation";
+import type { ComponentProps } from "react";
 import { type AppLocale, defaultLocale, locales } from "@/shared/locale/AppLocale";
 
 export { type AppLocale, defaultLocale, locales };
@@ -40,9 +40,9 @@ export function useRouter(): AppRouter {
   return useNextRouter() as AppRouter;
 }
 
-interface RedirectOptions {
+export interface RedirectOptions {
   href: string;
-  locale?: AppLocale;
+  locale?: string;
 }
 
 export function redirect(options: RedirectOptions): never;

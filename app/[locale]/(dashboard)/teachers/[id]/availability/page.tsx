@@ -1,8 +1,8 @@
 // cspell:disable
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { getTeacherPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { TeacherAvailabilityContainer } from "@/frontend/common/views/dashboard/teachers/availability/TeacherAvailabilityContainer";
+import { getTranslations } from "@/shared/locale/server";
 
 interface PageProps {
   readonly params: Promise<{

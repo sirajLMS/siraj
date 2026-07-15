@@ -12,13 +12,11 @@ export namespace TeacherNotesService {
   export async function getActiveNotes(
     userId: string,
     tErrors: ErrorsLabels,
-    teacherId?: string,
+    teacherId?: string
   ): Promise<TeacherImportantNoteReturnType[]> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_LIST);
     if (!hasPermission) {
-      throw new Error(
-        tErrors.insufficientPermissions
-      );
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     return await TeacherNotesRepository.getActiveNotes(teacherId);
@@ -32,9 +30,7 @@ export namespace TeacherNotesService {
   ): Promise<TeacherImportantNoteReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_CREATE);
     if (!hasPermission) {
-      throw new Error(
-        tErrors.insufficientPermissions
-      );
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     return await TeacherNotesRepository.createNote({ ...input, createdByUserId: userId, teacherId });
@@ -48,9 +44,7 @@ export namespace TeacherNotesService {
   ): Promise<TeacherImportantNoteReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_UPDATE);
     if (!hasPermission) {
-      throw new Error(
-        tErrors.insufficientPermissions
-      );
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     return await TeacherNotesRepository.updateNote(id, input);
@@ -59,8 +53,7 @@ export namespace TeacherNotesService {
   export async function deleteNote(userId: string, id: string, tErrors: ErrorsLabels): Promise<{ id: string }> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_DELETE);
     if (!hasPermission) {
-      throw new Error(
-        tErrors.insufficientPermissions);
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     return await TeacherNotesRepository.deleteNote(id);

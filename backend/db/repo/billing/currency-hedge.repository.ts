@@ -48,7 +48,7 @@ export namespace CurrencyHedgeRepository {
     id: string,
     input: CurrencyHedgeUpdateInput,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<CurrencyHedgeReturnType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -58,20 +58,18 @@ export namespace CurrencyHedgeRepository {
       .returning();
 
     if (!updated) {
-      throw new Error(
-        tErrors.file.recordNotFound({ tableName: "currency_hedges", entityId: id }));
+      throw new Error(tErrors.file.recordNotFound({ tableName: "currency_hedges", entityId: id }));
     }
 
     return updated;
   }
 
-  export async function deleteById(id: string,tErrors: ErrorsLabels, tx?: DBTransaction, ): Promise<boolean> {
+  export async function deleteById(id: string, tErrors: ErrorsLabels, tx?: DBTransaction): Promise<boolean> {
     const client = tx ?? db;
     const [deleted] = await client.delete(currencyHedges).where(eq(currencyHedges.id, id)).returning();
 
     if (!deleted) {
-      throw new Error(
-        tErrors.file.recordNotFound({ tableName: "currency_hedges", entityId: id }));
+      throw new Error(tErrors.file.recordNotFound({ tableName: "currency_hedges", entityId: id }));
     }
 
     return true;

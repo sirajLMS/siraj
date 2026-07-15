@@ -15,16 +15,14 @@ export namespace ClassSubjectService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels): Promise<void> {
     const hasPermission = await PermissionsService.hasPermission(userId, permission);
     if (!hasPermission) {
-      throw new Error(
-        tErrors.insufficientPermissions
-      );
+      throw new Error(tErrors.insufficientPermissions);
     }
   }
 
   export async function listSubjects(
     userId: string,
     tErrors: ErrorsLabels,
-    categoryId?: string,
+    categoryId?: string
   ): Promise<ClassSubjectReturnType[]> {
     await assertPermission(userId, AppPermission.SUBJECTS_LIST, tErrors);
 

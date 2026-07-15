@@ -125,7 +125,7 @@ export namespace StudentRepository {
       const [createdStudent] = await executor.insert(students).values(insertInput).returning();
       return createdStudent;
     } catch {
-      throw new Error(tErrors.studentCreateFailed );
+      throw new Error(tErrors.studentCreateFailed);
     }
   };
 
@@ -173,7 +173,7 @@ export namespace StudentRepository {
       }));
       return await db.insert(students).values(values).returning();
     } catch (error) {
-      throw new Error(tErrors.studentCreateFailed , {
+      throw new Error(tErrors.studentCreateFailed, {
         cause: error,
       });
     }
@@ -185,9 +185,7 @@ export namespace StudentRepository {
 
     return ids.map(id => {
       const s = foundStudents.find(c => c.id === id);
-      return s
-        ? (StudentUtils.mapEntityToDto(s) as Types.Student)
-        : new Error(tErrors.studentNotFound(id) );
+      return s ? (StudentUtils.mapEntityToDto(s) as Types.Student) : new Error(tErrors.studentNotFound(id));
     });
   };
 
@@ -206,8 +204,8 @@ export namespace StudentRepository {
   export const deleteById = async (id: string, tErrors: ErrorsLabels): Promise<Types.StudentEntity> => {
     const existingStudent = await findById(id);
     if (!existingStudent) {
-          throw new Error(tErrors.studentNotFound(id));
-        }
+      throw new Error(tErrors.studentNotFound(id));
+    }
     await db.transaction(async tx => {
       await tx.delete(students).where(eq(students.id, id));
     });
@@ -282,14 +280,12 @@ export namespace StudentRepository {
 
     const results = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
     if (results.length === 0) {
-      throw new Error(tErrors.studentNotFound(studentId) );
+      throw new Error(tErrors.studentNotFound(studentId));
     }
     const current = results[0];
 
     if (expectedVersion !== undefined && current.version !== expectedVersion) {
-      throw new Error(
-        tErrors.studentVersionMismatch({ id: studentId, expectedVersion, gotVersion: current.version }) 
-      );
+      throw new Error(tErrors.studentVersionMismatch({ id: studentId, expectedVersion, gotVersion: current.version }));
     }
 
     const [updated] = await t
@@ -319,7 +315,8 @@ export namespace StudentRepository {
         async current => {
           if (current.classesRemaining < amount) {
             throw new Error(
-              tErrors.insufficientClasses({ id: studentId, remaining: current.classesRemaining, required: amount })             );
+              tErrors.insufficientClasses({ id: studentId, remaining: current.classesRemaining, required: amount })
+            );
           }
           return { classesRemaining: sql`${students.classesRemaining} - ${amount}` };
         },
@@ -396,8 +393,7 @@ export namespace StudentRepository {
           const currentStatus = parseStudentStatus(current.status) ?? StudentStatus.REGULAR;
           const allowedTargets = ALLOWED_STATUS_TRANSITIONS[currentStatus] ?? [];
           if (!allowedTargets.includes(newStatus)) {
-            throw new Error(
-              tErrors.invalidStatusTransition({ currentStatus: current.status, newStatus })             );
+            throw new Error(tErrors.invalidStatusTransition({ currentStatus: current.status, newStatus }));
           }
           return { status: newStatus };
         },

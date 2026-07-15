@@ -31,9 +31,7 @@ export interface LocaleProviderProps {
  *   <LocaleProvider translations={{ auth: t }} locale={locale}>{children}</LocaleProvider>
  */
 export function LocaleProvider({ children, translations, locale }: Readonly<LocaleProviderProps>) {
-  return (
-    <LocaleContext.Provider value={{ translations, locale }}>{children}</LocaleContext.Provider>
-  );
+  return <LocaleContext.Provider value={{ translations, locale }}>{children}</LocaleContext.Provider>;
 }
 
 /**

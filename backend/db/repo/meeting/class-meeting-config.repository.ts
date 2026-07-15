@@ -47,7 +47,7 @@ export namespace ClassMeetingConfigRepository {
   export async function getByIdOrThrow(
     id: string,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType> {
     const row = await getById(id, tx);
     if (!row) {
@@ -103,7 +103,7 @@ export namespace ClassMeetingConfigRepository {
   export async function create(
     input: ClassMeetingConfigInsertType,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
       const scope = resolveScope(input);
@@ -154,7 +154,7 @@ export namespace ClassMeetingConfigRepository {
       providerId?: string;
     },
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
       const existing = await getByIdOrThrow(id, tErrors, t);
@@ -193,7 +193,7 @@ export namespace ClassMeetingConfigRepository {
   export async function setDefault(
     id: string,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
       const existing = await getByIdOrThrow(id, tErrors, t);
@@ -243,7 +243,7 @@ export namespace ClassMeetingConfigRepository {
   export async function upsertMany(
     inputs: readonly ClassMeetingConfigInsertType[],
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType[]> {
     return upsertManyWith(
       inputs,
@@ -263,10 +263,10 @@ export namespace ClassMeetingConfigRepository {
             providerId: input.providerId,
           },
           tErrors,
-          t,
+          t
         ),
       tErrors,
-      tx,
+      tx
     );
   }
 }

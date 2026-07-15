@@ -100,7 +100,7 @@ export namespace SupportedOnlineAccountRepository {
     id: string,
     input: UpdateSupportedOnlineAccountInput,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<SupportedOnlineAccountSelectType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -110,9 +110,7 @@ export namespace SupportedOnlineAccountRepository {
       .returning();
 
     if (!updated) {
-      throw new Error(
-        tErrors.file.recordNotFound({ tableName: "supported_online_accounts", entityId: id })
-      );
+      throw new Error(tErrors.file.recordNotFound({ tableName: "supported_online_accounts", entityId: id }));
     }
 
     return toSelectType(updated);
@@ -121,7 +119,7 @@ export namespace SupportedOnlineAccountRepository {
   export async function deactivate(
     id: string,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction,
+    tx?: DBTransaction
   ): Promise<SupportedOnlineAccountSelectType> {
     return update(id, { isActive: false }, tErrors, tx);
   }
