@@ -48,8 +48,6 @@ export type InvoicePaymentDetailsDialogProps = {
 type SubmissionRow = NonNullable<InvoicePaymentSubmissionQuery["invoicePaymentSubmission"]>;
 type PaymentRow = NonNullable<NonNullable<InvoicePaymentsQuery["invoicePayments"]>[number]>;
 
-type FxMessages = FormatCurrencyMessages;
-
 function formatPaymentDate(dateStr: string | null, locale: string): string {
   if (!dateStr) {
     return "—";
@@ -289,7 +287,7 @@ function PaymentRecordsSection({
   readonly locale: string;
   readonly amountLabel: string;
   readonly dateLabel: string;
-  readonly fxMessages: FxMessages;
+  readonly fxMessages: FormatCurrencyMessages;
 }): React.ReactNode {
   return (
     <Stack divider={<Divider />} spacing={2}>
@@ -363,8 +361,10 @@ type PaymentDetailsContentProps = {
   readonly onConfirmReject: () => void;
   readonly amountLabel: string;
   readonly dateLabel: string;
+  readonly submittedAtLabel: string;
+  readonly closeLabel: string;
   readonly emptyLabel: string;
-  readonly fxMessages: FxMessages;
+  readonly fxMessages: FormatCurrencyMessages;
   readonly viewerDisplayCurrency?: string | null;
 };
 
@@ -606,7 +606,15 @@ export function InvoicePaymentDetailsDialog({
   const tErrors = useAppTranslation("errors");
   const locale = useAppLocale();
   const displayCurrency = useUserStore(state => state.displayCurrency);
-  const fxMessages: FxMessages = buildFxDisplayMessages(tProfile, tErrors);
+  const fxMessages = buildFxDisplayMessages(
+    {
+      convertedAmount: tProfile.convertedAmount,
+    },
+    tErrors,
+    {
+      convertedTotalApprox: tProfile.convertedTotalApprox,
+    }
+  );
 
   const review = useInvoicePaymentReview({
     open,
@@ -636,13 +644,13 @@ export function InvoicePaymentDetailsDialog({
       fullWidth
       maxWidth="sm"
     >
-      <DialogTitle>{t("title")}</DialogTitle>
+      <DialogTitle>{t.title}</DialogTitle>
       <DialogContent>
         <PaymentDetailsDialogContent
           loading={review.loading}
           loadFailed={review.loadFailed}
-          loadFailedLabel={t("loadFailed")}
-          tryAgainLabel={t("tryAgain")}
+          loadFailedLabel={t.loadFailed}
+          tryAgainLabel={t.tryAgain}
           onRetry={review.handleRetryLoad}
           showDisplayCurrencyHint={!displayCurrency}
           subjectUserId={subjectUserId}
@@ -651,25 +659,25 @@ export function InvoicePaymentDetailsDialog({
           payments={review.payments}
           locale={locale}
           submissionLabels={{
-            pending: t("pending"),
-            rejected: t("rejected"),
-            submittedAt: t("submittedAt"),
-            noProof: t("noProof"),
-            viewProof: t("viewProof"),
-            viewProofFailed: t("viewProofFailed"),
+            pending: t.pending,
+            rejected: t.rejected,
+            submittedAt: t.submittedAt,
+            noProof: t.noProof,
+            viewProof: t.viewProof,
+            viewProofFailed: t.viewProofFailed,
           }}
           showReviewActions={review.showReviewActions}
           reviewLabels={{
-            reviewActions: t("reviewActions"),
-            rejectionReason: t("rejectionReason"),
-            rejectionReasonPlaceholder: t("rejectionReasonPlaceholder"),
-            close: t("close"),
-            reject: t("reject"),
-            rejecting: t("rejecting"),
-            approve: t("approve"),
-            approving: t("approving"),
-            confirmReject: t("confirmReject"),
-            confirmRejectMessage: t("confirmRejectMessage"),
+            reviewActions: t.reviewActions,
+            rejectionReason: t.rejectionReason,
+            rejectionReasonPlaceholder: t.rejectionReasonPlaceholder,
+            close: t.close,
+            reject: t.reject,
+            rejecting: t.rejecting,
+            approve: t.approve,
+            approving: t.approving,
+            confirmReject: t.confirmReject,
+            confirmRejectMessage: t.confirmRejectMessage,
           }}
           actionError={review.actionError}
           rejectionReason={review.rejectionReason}
@@ -695,15 +703,17 @@ export function InvoicePaymentDetailsDialog({
           onConfirmReject={() => {
             review.handleReject();
           }}
-          amountLabel={t("amount")}
-          dateLabel={t("date")}
-          emptyLabel={t("empty")}
+          amountLabel={t.amount}
+          dateLabel={t.date}
+          submittedAtLabel={t.submittedAt}
+          closeLabel={t.close}
+          emptyLabel={t.empty}
           fxMessages={fxMessages}
         />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleDialogClose} disabled={review.reviewBusy}>
-          {t("close")}
+          {t.close}
         </Button>
       </DialogActions>
     </Dialog>

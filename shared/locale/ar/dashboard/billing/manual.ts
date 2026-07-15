@@ -22,6 +22,7 @@ export const manual: BillingManualLabels = {
   createSuccess: id => `تم إنشاء الفاتورة ${id} بنجاح`,
   manualInvoiceFxNote:
     "يُخزَّن مبلغ الفاتورة بالعملة المحددة. تظهر التحويلات في صفحات الفوترة بناءً على عملة عرض كل مستخدم.",
+  unknown: "غير معروف",
   months: {
     jan: "يناير",
     feb: "فبراير",

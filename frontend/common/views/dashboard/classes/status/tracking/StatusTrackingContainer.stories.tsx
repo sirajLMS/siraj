@@ -12,7 +12,6 @@ import {
   ClassOutcome,
   StudentStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { StatusTrackingView } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusTrackingView";
 import type { RawMetric, StatusTrackingRow } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
@@ -195,7 +194,6 @@ const useStoryStatusTrackingStore = create<StoryStatusTrackingState>(set => ({
 
 function StoryStatusTrackingContainer() {
   const t = useAppTranslation("dashboard.core.statusTracking");
-  const _locale = useAppLocale();
   const router = useRouter();
   const setRescheduleSession = useRescheduleStore(state => state.setSession);
 
@@ -225,13 +223,13 @@ function StoryStatusTrackingContainer() {
     filters: t.filters,
     newReport: t.newReport,
     todaysClassSchedule: t.todaysClassSchedule,
-    totalSessions: t.totalSessions(totalSessions) as string,
+    totalSessions: t.totalSessions,
     studentClass: t.table.studentClass,
     teacher: t.table.teacher,
     schedule: t.table.schedule,
     status: t.table.status,
     actions: t.table.actions,
-    showingOf: t.showingOf(rows.length, totalSessions) as string,
+    showingOf: t.showingOf,
     previous: t.previous,
     next: t.next,
     joinSession: t.actions.joinSession,
@@ -255,12 +253,13 @@ function StoryStatusTrackingContainer() {
     suspensionAnalytics: t.analytics.title,
     analyticsNote: t.analytics.note,
     urgentTask: t.analytics.urgentTask,
-    accountsLocked: t.analytics.accountsLocked(suspendedCount) as string,
+    accountsLocked: t.analytics.accountsLocked,
     auditDescription: t.analytics.auditDescription,
     openAuditLogs: t.analytics.openAuditLogs,
     noEntries: t.noEntries,
     errorNoStudentId: t.errors.noStudentId,
     errorAuditLogsComingSoon: t.errors.auditLogsComingSoon,
+    errorFailedToLoad: t.errors.failedToLoad,
     days: [t.days.mon, t.days.tue, t.days.wed, t.days.thu, t.days.fri, t.days.sat, t.days.sun] as const,
   };
 

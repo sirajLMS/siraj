@@ -34,6 +34,7 @@ export const main: ReportsLabels = {
   },
   convertedAmount: (lockedAmount, lockedCurrency, convertedApprox, displayCurrency) =>
     `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`,
+  convertedTotalApprox: (convertedApprox, displayCurrency) => `≈ ${convertedApprox} ${displayCurrency}`,
   summary: {
     engagementRate: "Engagement rate",
     engagementGrowth: "Growth compared to last month",

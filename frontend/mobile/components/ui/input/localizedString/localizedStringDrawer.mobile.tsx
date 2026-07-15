@@ -42,15 +42,15 @@ function buildHelperText({ draft, required, resolvedRequired, uiLocale, t }: Hel
       return !(typeof v === "string" && v.trim() !== "");
     });
     if (missing.length === 1) {
-      return t.localizedString.localeRequired(getLanguageDisplayName(missing[0], uiLocale));
+      return t.localeRequired(getLanguageDisplayName(missing[0], uiLocale));
     }
     if (missing.length > 1) {
       const names = missing.map(l => getLanguageDisplayName(l, uiLocale)).join(", ");
-      return t.localizedString.localesRequired(names);
+      return t.localesRequired(names);
     }
   }
   if (required) {
-    return t.localizedString.atLeastOneTranslationRequired;
+    return t.atLeastOneTranslationRequired;
   }
   return undefined;
 }
@@ -153,7 +153,7 @@ const LocaleField: React.FC<LocaleFieldProps> = ({
     multiline={multiline}
     minRows={minRows}
     error={showError}
-    helperText={showError ? t.localizedString.localeRequiredEntry(languageName) : undefined}
+    helperText={showError ? t.localeRequiredEntry(languageName) : undefined}
     disabled={disabled}
     dir={isRtl ? "rtl" : "ltr"}
     slotProps={{

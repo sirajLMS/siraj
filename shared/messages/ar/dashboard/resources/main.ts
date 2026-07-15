@@ -46,7 +46,7 @@ export const resources: ResourcesLabels = {
   },
   deleteDialog: {
     title: "حذف المورد؟",
-    body: "لا يمكن التراجع عن هذا الإجراء. هل أنت متأكد من حذف {title} نهائياً؟",
+    body: (title: string) => `لا يمكن التراجع عن هذا الإجراء. هل أنت متأكد من حذف ${title} نهائياً؟`,
     confirm: "نعم",
     cancel: "لا",
   },
@@ -55,7 +55,7 @@ export const resources: ResourcesLabels = {
     fileRequired: "يرجى اختيار ملف للرفع.",
   },
   notification: {
-    fileTypeNotAllowed: "{type} ليس نوع ملف مسموح به",
+    fileTypeNotAllowed: (type: string) => `${type} ليس نوع ملف مسموح به`,
     uploadPrepareFailed: "فشل تحضير الرفع",
     uploadFailed: "فشل رفع الملف. يرجى المحاولة مرة أخرى.",
     createRecordFailed: "فشل إنشاء سجل المورد.",

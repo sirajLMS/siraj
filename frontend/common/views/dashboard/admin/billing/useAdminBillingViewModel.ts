@@ -127,7 +127,16 @@ export function useAdminBillingViewModel(): AdminBillingViewModel {
   const canDelete = hasPermission(AppPermission.BillingDeleteInvoice);
 
   const fxMessages = useMemo(
-    () => buildFxDisplayMessages(tProfile, tErrors, tProfileRoot),
+    () =>
+      buildFxDisplayMessages(
+        {
+          convertedAmount: tProfile.convertedAmount,
+        },
+        tErrors,
+        {
+          convertedTotalApprox: tProfileRoot.convertedTotalApprox,
+        }
+      ),
     [tProfile, tErrors, tProfileRoot]
   );
 

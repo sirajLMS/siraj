@@ -15,14 +15,13 @@ import {
   computeSessionStatus,
   formatScheduleRange,
   SessionStatus,
-  type StatusTrackingDataGridLabels,
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import { useAppLocale } from "@/shared/locale/client";
 
-const STATUS_LABEL_KEYS: Record<SessionStatus, keyof StatusTrackingDataGridLabels> = {
+const STATUS_LABEL_KEYS: Record<SessionStatus, "regular" | "suspendedPending" | "onLeave" | "pendingVerification"> = {
   [SessionStatus.REGULAR]: "regular",
   [SessionStatus.SUSPENDED_PENDING]: "suspendedPending",
   [SessionStatus.ON_LEAVE]: "onLeave",
@@ -47,7 +46,6 @@ export function StatusTrackingDataGridMobile({
   onVerify,
   loading = false,
 }: StatusTrackingDataGridProps) {
-  const t = useAppTranslation("dashboard.core.statusTracking");
   const locale = useAppLocale();
   const columns = useMemo<GridColDef<StatusTrackingRow>[]>(() => {
     const actionLabels = {
@@ -157,7 +155,7 @@ export function StatusTrackingDataGridMobile({
             );
           }
           return (
-            <Tooltip title={t.actions.sessionEnded}>
+            <Tooltip title={labels.sessionEnded}>
               <Box
                 sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
               >
@@ -186,7 +184,7 @@ export function StatusTrackingDataGridMobile({
         ),
       },
     ];
-  }, [labels, locale, onActivate, onReschedule, onVerify, t.actions.sessionEnded]);
+  }, [labels, locale, onActivate, onReschedule, onVerify]);
 
   return (
     <AppDataGrid<StatusTrackingRow>

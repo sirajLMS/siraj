@@ -1,0 +1,73 @@
+import type { ProfileTeacherLabels } from "@/shared/locale/types/profile";
+
+export const teacher: ProfileTeacherLabels = {
+  ownSubtitle: "View and update your teaching profile and contact details.",
+  subtitle: "Manage institutional credentials and administrative details for faculty.",
+  adminBanner: "Admin view: Identity, Zoom details, and status visible.",
+  sections: {
+    account: "Account",
+    contact: "Contact Information",
+    zoom: "Zoom",
+    compensation: "Compensation",
+    identity: "Identity",
+    professional: "Professional Qualifications",
+    stats: "Statistics",
+    adminOnly: "Administrative Details",
+  },
+  baseSalary: (amount, currency) => `${amount} ${currency}`,
+  paymentMethod: method => method,
+  convertedAmount: (lockedAmount, lockedCurrency, convertedApprox, displayCurrency) =>
+    `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`,
+  stats: {
+    totalClasses: "Total Classes",
+    avgEngagement: "Average Engagement",
+  },
+  fields: {
+    fullName: "Full Name",
+    primaryEmail: "Primary Email",
+    phone: "Phone",
+    address: "Address",
+    timezone: "Timezone",
+    nationalId: "National ID",
+    dateOfBirth: "Date of Birth",
+    gender: "Gender",
+    qualifications: "Qualifications",
+    hourlyRate: "Hourly Rate",
+    currency: "Currency",
+    paymentMethod: "Payment Method",
+    status: "Account Status",
+    displayCurrency: "Display Currency",
+  },
+  gender: {
+    male: "Male",
+    female: "Female",
+  },
+  status: {
+    activated: "Activated",
+    deactivated: "Deactivated",
+  },
+  shell: {
+    tabs: {
+      profile: "Profile",
+      paymentMethods: "Payment Methods",
+      meeting: "Meeting Settings",
+      students: "Students",
+      notifications: "Notifications",
+      permissions: "Permissions",
+    },
+    loading: "Loading profile...",
+    error: {
+      retry: "Retry",
+    },
+  },
+  actions: {
+    edit: "Edit Profile",
+    save: "Save Changes",
+    cancel: "Cancel",
+    retry: "Retry",
+  },
+  errors: {
+    failedToLoad: "Failed to load profile.",
+    notFound: "Profile not found.",
+  },
+};

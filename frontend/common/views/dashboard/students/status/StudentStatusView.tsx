@@ -61,6 +61,77 @@ function ReadOnlyStatusCard({ status }: Readonly<{ status: StudentStatus }>) {
   );
 }
 
+function StudentStatusViewHeader({
+  t,
+  student,
+  embedded,
+}: Readonly<{
+  t: ReturnType<typeof useAppTranslation<"dashboard.studentStatus">>;
+  student: StudentStatusViewProps["student"];
+  embedded: boolean;
+}>) {
+  if (embedded) return null;
+
+  return (
+    <PageHeader
+      title={t.pageTitle}
+      subtitle={t.studentId(student.id)}
+      breadcrumbs={[
+        { label: t.breadcrumbs.students, href: "/students" },
+        { label: t.breadcrumbs.statusHold, current: true },
+      ]}
+    />
+  );
+}
+
+function StudentStatusViewLeftColumn({
+  canEditStatus,
+  isUpdating,
+  methods,
+  handleSubmit,
+}: Readonly<{
+  canEditStatus: boolean;
+  isUpdating: boolean;
+  methods: ReturnType<typeof useForm<StatusUpdateFormData>>;
+  handleSubmit: (data: StatusUpdateFormData) => Promise<void>;
+}>) {
+  if (!canEditStatus) return null;
+
+  return (
+    <Box
+      component="form"
+      onSubmit={e => {
+        methods.handleSubmit(handleSubmit)(e);
+      }}
+      sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}
+    >
+      <FormProvider {...methods}>
+        <AdminHoldControls isUpdating={isUpdating} />
+      </FormProvider>
+      <PolicyOverviewCard />
+    </Box>
+  );
+}
+
+function StudentStatusViewRightColumn({
+  canEditStatus,
+  selectedStatus,
+  classes,
+  studentId,
+}: Readonly<{
+  canEditStatus: boolean;
+  selectedStatus: StudentStatus;
+  classes: StudentStatusViewProps["student"]["upcomingClasses"];
+  studentId: string;
+}>) {
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}>
+      {canEditStatus && selectedStatus === StudentStatus.Suspended ? <SuspensionWarningBanner /> : null}
+      <UpcomingClassesTable classes={classes} studentId={studentId} />
+    </Box>
+  );
+}
+
 export function StudentStatusView({
   student,
   isUpdating,
@@ -114,35 +185,19 @@ export function StudentStatusView({
 
   const body = (
     <>
-      {!embedded ? (
-        <PageHeader
-          title={t.pageTitle}
-          subtitle={t.studentId(student.id)}
-          breadcrumbs={[
-            { label: t.breadcrumbs.students, href: "/students" },
-            { label: t.breadcrumbs.statusHold, current: true },
-          ]}
-        />
-      ) : null}
-
+      <StudentStatusViewHeader t={t} student={student} embedded={embedded} />
       <StudentStatusHeader student={student} embedded={embedded} />
 
       <Grid container spacing="gutter">
         {hasLeftColumn ? (
           <Grid size={{ xs: 12, lg: hasRightColumn ? 4 : 12 }}>
             {canEditStatus ? (
-              <Box
-                component="form"
-                onSubmit={e => {
-                  methods.handleSubmit(handleSubmit)(e);
-                }}
-                sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}
-              >
-                <FormProvider {...methods}>
-                  <AdminHoldControls isUpdating={isUpdating} />
-                </FormProvider>
-                <PolicyOverviewCard />
-              </Box>
+              <StudentStatusViewLeftColumn
+                canEditStatus={canEditStatus}
+                isUpdating={isUpdating}
+                methods={methods}
+                handleSubmit={handleSubmit}
+              />
             ) : (
               <ReadOnlyStatusCard status={student.status} />
             )}
@@ -151,10 +206,12 @@ export function StudentStatusView({
 
         {hasRightColumn ? (
           <Grid size={{ xs: 12, lg: hasLeftColumn ? 8 : 12 }}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}>
-              {canEditStatus && selectedStatus === StudentStatus.Suspended ? <SuspensionWarningBanner /> : null}
-              <UpcomingClassesTable classes={student.upcomingClasses} studentId={student.id} />
-            </Box>
+            <StudentStatusViewRightColumn
+              canEditStatus={canEditStatus}
+              selectedStatus={selectedStatus}
+              classes={student.upcomingClasses}
+              studentId={student.id}
+            />
           </Grid>
         ) : null}
       </Grid>

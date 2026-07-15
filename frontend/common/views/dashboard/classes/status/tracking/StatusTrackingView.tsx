@@ -41,7 +41,7 @@ export function StatusTrackingView(props: Readonly<StatusTrackingViewProps>) {
     suspensionAnalytics: labels.suspensionAnalytics,
     analyticsNote: labels.analyticsNote,
     urgentTask: labels.urgentTask,
-    accountsLocked: labels.accountsLocked,
+    accountsLocked: (count: number) => labels.accountsLocked(count),
     auditDescription: labels.auditDescription,
     openAuditLogs: labels.openAuditLogs,
     suspended: labels.suspendedPending,

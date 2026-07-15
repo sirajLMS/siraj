@@ -123,79 +123,16 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
 
   const config = context.config;
 
-  if (!context.systemSettings) {
-    const settings = await step("system-settings", () => seedOrGetSystemSettings());
-    if (settings) context.systemSettings = settings;
-  }
-
-  if (!context.timezones) {
-    const timezones = await step("timezones", () => seedOrGetTimezones());
-    if (timezones) context.timezones = timezones;
-  }
-
-  await step("payment-method-permissions", () => seedOrGetPaymentMethodPermissions());
-  await step("profile-field-permissions", () => seedOrGetProfileFieldPermissions());
-  await step("meeting-permissions", () => seedOrGetMeetingPermissions());
-  await step("lms-permissions", () => seedOrGetLmsPermissions());
-
-  await step("supported-currencies", () => seedOrGetSupportedCurrencies());
-  await step("supported-mobile-wallets", () => seedOrGetSupportedMobileWallets());
-  await step("supported-payment-links", () => seedOrGetSupportedPaymentLinks());
-  await step("supported-online-accounts", () => seedOrGetSupportedOnlineAccounts());
-  await step("meeting-providers", () => seedOrGetMeetingProviders());
-
-  await step("books", () => seedOrGetBooks());
-  await step("class-categories", () => seedOrGetClassCategories());
-  await step("class-subjects", () => seedOrGetClassSubjects());
-
-  if (!context.permissionGroups) {
-    const groups = await step("permission-groups", () => ReferenceDataService.listPermissionGroups());
-    if (groups) context.permissionGroups = groups;
-  }
-
-  if (!context.users) {
-    const users = await step("users", () => seedOrGetUsers(context.permissionGroups, config));
-    if (users) context.users = users;
-  }
-
-  if (!context.actorUserId && context.users?.length) {
-    const actor = findAdminUserOrFallback(context.users);
-    if (actor) {
-      context.actorUserId = actor.id;
-    }
-  }
-
-  if (!context.teachers) {
-    const teachers = await step("teachers", () =>
-      seedOrGetTeachers(context.users ?? [], context.timezones ?? [], config)
-    );
-    if (teachers) context.teachers = teachers;
-  }
-
-  if (!context.parents) {
-    const parents = await step("parents", () => seedOrGetParents(context.users ?? [], config));
-    if (parents) context.parents = parents;
-  }
-
-  await step("user-payment-methods", () => seedOrGetUserPaymentMethods(context.users ?? [], config));
-  await step("user-meeting-configs", () => seedOrGetUserMeetingConfigs(context.teachers ?? [], config));
-  await step("teacher-important-notes", () =>
-    seedOrGetTeacherImportantNotes(context.teachers ?? [], context.users ?? [], config)
-  );
-
-  if (!context.students) {
-    const students = await step("students", () =>
-      seedOrGetStudents(context.parents ?? [], context.teachers ?? [], config, context.users ?? [])
-    );
-    if (students) context.students = students;
-  }
-
-  if (!context.creditTransactions) {
-    const credits = await step("credit-transactions", () =>
-      seedOrGetCreditTransactions(context.students ?? [], context.users ?? [], config)
-    );
-    if (credits) context.creditTransactions = credits;
-  }
+  await seedSystemSettings(context, step);
+  await seedTimezones(context, step);
+  await seedPermissions(context, step);
+  await seedReferenceData(context, step);
+  await seedBooksAndCategories(context, step);
+  await seedPermissionGroups(context, step);
+  await seedUsersAndActor(context, step, config);
+  await seedTeachersAndParents(context, step, config);
+  await seedUserConfigs(context, step, config);
+  await seedStudentsAndCredits(context, step, config);
 
   await runScheduleSeeds(context, step, config);
 
@@ -206,49 +143,16 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   );
 
   await runLmsWorkflowSeeds(context, step, config);
-
   await runGroupClassSeeds(context, step, config);
 
-  await step("teacher-availability-windows", () =>
-    seedOrGetTeacherAvailabilityWindows(context.teachers ?? [], context.users ?? [], context.timezones ?? [], config)
-  );
-  await step("teacher-recurring-unavailability", () =>
-    seedOrGetTeacherRecurringUnavailability(
-      context.teachers ?? [],
-      context.users ?? [],
-      context.timezones ?? [],
-      config
-    )
-  );
-  await step("teacher-vacation-requests", () =>
-    seedOrGetTeacherVacationRequests(context.teachers ?? [], context.users ?? [], context.timezones ?? [], config)
-  );
-
-  const leaveRequests = await step("leave-requests", () =>
-    seedOrGetLeaveRequests(
-      context.classInstances ?? [],
-      context.teachers ?? [],
-      context.users ?? [],
-      context.students ?? [],
-      context.parents ?? [],
-      config
-    )
-  );
-  if (leaveRequests) {
-    await step("leave-quota-usage", () => seedOrGetLeaveQuotaUsage(leaveRequests, context.students ?? [], config));
-  }
-
-  await step("student-progress", () => seedOrGetStudentProgress(context.classInstances ?? [], config));
-  await step("student-status-history", () =>
-    seedOrGetStudentStatusHistory(context.students ?? [], context.users ?? [], config)
-  );
-
-  const dstRuns = await step("dst-migration-runs", () => seedOrGetDstMigrationRuns(context.users ?? [], config));
-  if (dstRuns) {
-    await step("dst-migration-entries", () => seedOrGetDstMigrationEntries(dstRuns, context.classes ?? []));
-  }
-
-  await step("teacher-payments", () => seedOrGetTeacherPayments(context.teachers ?? [], context.users ?? [], config));
+  await seedTeacherAvailability(context, step, config);
+  await seedTeacherUnavailability(context, step, config);
+  await seedTeacherVacations(context, step, config);
+  await seedLeaveRequests(context, step, config);
+  await seedStudentProgress(context, step, config);
+  await seedStudentStatusHistory(context, step, config);
+  await seedDstMigrations(context, step, config);
+  await seedTeacherPayments(context, step, config);
 
   await runBillingSeeds(context, step, config);
   await runCommunicationsSeeds(context, step, config);
@@ -263,6 +167,160 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
 
   logger.log("Master seed process completed.");
   return context;
+}
+
+async function seedSystemSettings(context: SeedContext, step: RunStep): Promise<void> {
+  if (!context.systemSettings) {
+    const settings = await step("system-settings", () => seedOrGetSystemSettings());
+    if (settings) context.systemSettings = settings;
+  }
+}
+
+async function seedTimezones(context: SeedContext, step: RunStep): Promise<void> {
+  if (!context.timezones) {
+    const timezones = await step("timezones", () => seedOrGetTimezones());
+    if (timezones) context.timezones = timezones;
+  }
+}
+
+async function seedPermissions(_context: SeedContext, step: RunStep): Promise<void> {
+  await step("payment-method-permissions", () => seedOrGetPaymentMethodPermissions());
+  await step("profile-field-permissions", () => seedOrGetProfileFieldPermissions());
+  await step("meeting-permissions", () => seedOrGetMeetingPermissions());
+  await step("lms-permissions", () => seedOrGetLmsPermissions());
+}
+
+async function seedReferenceData(_context: SeedContext, step: RunStep): Promise<void> {
+  await step("supported-currencies", () => seedOrGetSupportedCurrencies());
+  await step("supported-mobile-wallets", () => seedOrGetSupportedMobileWallets());
+  await step("supported-payment-links", () => seedOrGetSupportedPaymentLinks());
+  await step("supported-online-accounts", () => seedOrGetSupportedOnlineAccounts());
+  await step("meeting-providers", () => seedOrGetMeetingProviders());
+}
+
+async function seedBooksAndCategories(_context: SeedContext, step: RunStep): Promise<void> {
+  await step("books", () => seedOrGetBooks());
+  await step("class-categories", () => seedOrGetClassCategories());
+  await step("class-subjects", () => seedOrGetClassSubjects());
+}
+
+async function seedPermissionGroups(context: SeedContext, step: RunStep): Promise<void> {
+  if (!context.permissionGroups) {
+    const groups = await step("permission-groups", () => ReferenceDataService.listPermissionGroups());
+    if (groups) context.permissionGroups = groups;
+  }
+}
+
+async function seedUsersAndActor(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  if (!context.users) {
+    const users = await step("users", () => seedOrGetUsers(context.permissionGroups, config));
+    if (users) context.users = users;
+  }
+
+  if (!context.actorUserId && context.users?.length) {
+    const actor = findAdminUserOrFallback(context.users);
+    if (actor) {
+      context.actorUserId = actor.id;
+    }
+  }
+}
+
+async function seedTeachersAndParents(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  if (!context.teachers) {
+    const teachers = await step("teachers", () =>
+      seedOrGetTeachers(context.users ?? [], context.timezones ?? [], config)
+    );
+    if (teachers) context.teachers = teachers;
+  }
+
+  if (!context.parents) {
+    const parents = await step("parents", () => seedOrGetParents(context.users ?? [], config));
+    if (parents) context.parents = parents;
+  }
+}
+
+async function seedUserConfigs(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  await step("user-payment-methods", () => seedOrGetUserPaymentMethods(context.users ?? [], config));
+  await step("user-meeting-configs", () => seedOrGetUserMeetingConfigs(context.teachers ?? [], config));
+  await step("teacher-important-notes", () =>
+    seedOrGetTeacherImportantNotes(context.teachers ?? [], context.users ?? [], config)
+  );
+}
+
+async function seedStudentsAndCredits(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  if (!context.students) {
+    const students = await step("students", () =>
+      seedOrGetStudents(context.parents ?? [], context.teachers ?? [], config, context.users ?? [])
+    );
+    if (students) context.students = students;
+  }
+
+  if (!context.creditTransactions) {
+    const credits = await step("credit-transactions", () =>
+      seedOrGetCreditTransactions(context.students ?? [], context.users ?? [], config)
+    );
+    if (credits) context.creditTransactions = credits;
+  }
+}
+
+async function seedTeacherAvailability(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  await step("teacher-availability-windows", () =>
+    seedOrGetTeacherAvailabilityWindows(context.teachers ?? [], context.users ?? [], context.timezones ?? [], config)
+  );
+}
+
+async function seedTeacherUnavailability(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  await step("teacher-recurring-unavailability", () =>
+    seedOrGetTeacherRecurringUnavailability(
+      context.teachers ?? [],
+      context.users ?? [],
+      context.timezones ?? [],
+      config
+    )
+  );
+}
+
+async function seedTeacherVacations(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  await step("teacher-vacation-requests", () =>
+    seedOrGetTeacherVacationRequests(context.teachers ?? [], context.users ?? [], context.timezones ?? [], config)
+  );
+}
+
+async function seedLeaveRequests(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  const leaveRequests = await step("leave-requests", () =>
+    seedOrGetLeaveRequests(
+      context.classInstances ?? [],
+      context.teachers ?? [],
+      context.users ?? [],
+      context.students ?? [],
+      context.parents ?? [],
+      config
+    )
+  );
+  if (leaveRequests) {
+    await step("leave-quota-usage", () => seedOrGetLeaveQuotaUsage(leaveRequests, context.students ?? [], config));
+  }
+}
+
+async function seedStudentProgress(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  await step("student-progress", () => seedOrGetStudentProgress(context.classInstances ?? [], config));
+}
+
+async function seedStudentStatusHistory(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  await step("student-status-history", () =>
+    seedOrGetStudentStatusHistory(context.students ?? [], context.users ?? [], config)
+  );
+}
+
+async function seedDstMigrations(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  const dstRuns = await step("dst-migration-runs", () => seedOrGetDstMigrationRuns(context.users ?? [], config));
+  if (dstRuns) {
+    await step("dst-migration-entries", () => seedOrGetDstMigrationEntries(dstRuns, context.classes ?? []));
+  }
+}
+
+async function seedTeacherPayments(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  await step("teacher-payments", () => seedOrGetTeacherPayments(context.teachers ?? [], context.users ?? [], config));
 }
 
 type RunStep = <T>(name: string, fn: () => Promise<T>) => Promise<T | undefined>;

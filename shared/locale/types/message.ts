@@ -10,6 +10,7 @@ import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billin
 import type { PaymentComponentLabels } from "@/shared/locale/types/dashboard/billing/payment";
 import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies";
 import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes/audit";
+import type { CreateRecurringClassLabels } from "@/shared/locale/types/dashboard/classes/createRecurringClass";
 import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details";
 import type { MainLabels as ClassesMainLabels } from "@/shared/locale/types/dashboard/classes/main";
 import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm";
@@ -20,6 +21,7 @@ import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/
 import type { DashboardCoreNotificationsLabels } from "@/shared/locale/types/dashboard/core/notifications";
 import type { ParentDashboardLabels } from "@/shared/locale/types/dashboard/core/parentDashboard";
 import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core/scheduleAlerts";
+import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule";
 import type { StatusTrackingLabels } from "@/shared/locale/types/dashboard/core/statusTracking";
 import type { CreditLabels } from "@/shared/locale/types/dashboard/lms/credit";
 import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports";
@@ -69,7 +71,13 @@ import type { TeacherStudentsLabels } from "@/shared/locale/types/dashboard/teac
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
 import type { EmailsLabels } from "@/shared/locale/types/emails";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
-import type { ProfileLabels } from "@/shared/locale/types/profile";
+import type {
+  ProfileLabels,
+  ProfileNotificationsLabels,
+  ProfileParentLabels,
+  ProfileStaffLabels,
+  ProfileTeacherLabels,
+} from "@/shared/locale/types/profile";
 import type { SessionLabels } from "@/shared/locale/types/session";
 import type { SmsLabels } from "@/shared/locale/types/sms";
 import type {
@@ -88,16 +96,21 @@ import type {
   MeetingConfigProviderSelectLabels,
   MeetingConfigRecurringScheduleLabels,
   MeetingConfigSummaryLabels,
+  PaymentMethodDefaultsEditorLabels,
+  PaymentMethodDirectionLabels,
   PaymentMethodDisplayLabels,
+  PaymentMethodIdentifierLabels,
   PaymentMethodLabels,
   PaymentMethodListLabels,
   PaymentMethodManagerLabels,
-  PaymentMethodTypeSelectorLabels,
+  PaymentMethodSelectLabels,
   PaymentMethodTypeFieldsLabels,
-  PaymentMethodDefaultsEditorLabels,
+  PaymentMethodTypeLabels,
+  PaymentMethodTypeSelectorLabels,
   PhoneInputLabels,
   TagInputLabels,
   TimezoneSelectLabels,
+  UiLabels,
 } from "@/shared/locale/types/ui";
 
 export type MessageSchema = {
@@ -142,6 +155,7 @@ export type MessageSchema = {
   "dashboard.classes.main": ClassesMainLabels;
   "dashboard.classAudit": ClassAuditLabels;
   "dashboard.classDetails": ClassDetailsLabels;
+  "dashboard.createRecurringClass": CreateRecurringClassLabels;
   "dashboard.rescheduleForm": RescheduleFormLabels;
   "dashboard.rescheduleTracking": RescheduleTrackingLabels;
   "dashboard.complaints": ComplaintsLabels;
@@ -175,6 +189,10 @@ export type MessageSchema = {
   "dashboard.supervisorPortal.teacherDues": SupervisorTeacherDuesLabels;
   emails: EmailsLabels;
   profile: ProfileLabels;
+  "profile.teacher": ProfileTeacherLabels;
+  "profile.parent": ProfileParentLabels;
+  "profile.staff": ProfileStaffLabels;
+  "profile.notifications": ProfileNotificationsLabels;
   session: SessionLabels;
   sms: SmsLabels;
   "ui.catalogImageUpload": CatalogImageUploadLabels;
@@ -193,6 +211,10 @@ export type MessageSchema = {
   "ui.meetingConfig.providerSelect": MeetingConfigProviderSelectLabels;
   "ui.meetingConfig.recurringSchedule": MeetingConfigRecurringScheduleLabels;
   "ui.paymentMethod": PaymentMethodLabels;
+  "ui.paymentMethod.type": PaymentMethodTypeLabels;
+  "ui.paymentMethod.direction": PaymentMethodDirectionLabels;
+  "ui.paymentMethod.identifier": PaymentMethodIdentifierLabels;
+  "ui.paymentMethod.select": PaymentMethodSelectLabels;
   "ui.paymentMethod.manager": PaymentMethodManagerLabels;
   "ui.paymentMethod.display": PaymentMethodDisplayLabels;
   "ui.paymentMethod.list": PaymentMethodListLabels;
@@ -202,4 +224,5 @@ export type MessageSchema = {
   "ui.phoneInput": PhoneInputLabels;
   "ui.tagInput": TagInputLabels;
   "ui.timezoneSelect": TimezoneSelectLabels;
+  ui: UiLabels;
 };

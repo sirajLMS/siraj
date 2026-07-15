@@ -49,6 +49,10 @@ export const useAdminViewLabels = (_timezone: string): AdminViewLabels => {
 
   return useMemo(
     () => ({
+      admin: {
+        pageTitle: t.pageSubtitleAdmin,
+        roleLabel: t.pageSubtitleAdmin,
+      },
       timezone: {
         title: t.timezone.title,
         prefix: t.timezone.prefix,

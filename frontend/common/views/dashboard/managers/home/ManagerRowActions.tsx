@@ -24,6 +24,7 @@ import { updateManagerProfileMutationDocument } from "@/frontend/common/graphql/
 import { logger } from "@/frontend/common/utils/logger";
 import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { ManagersDirectoryLabels } from "@/shared/locale/types/dashboard/managers/directory";
 
 interface ManagerRowActionsProps {
   readonly manager: Manager;
@@ -116,12 +117,12 @@ interface DeactivateDialogProps {
 
 function resolveSubmitLabel(
   state: { readonly updateLoading: boolean; readonly isDeactivate: boolean },
-  t: ReturnType<typeof useAppTranslation>
+  t: ManagersDirectoryLabels["actions"]
 ): string {
   if (state.updateLoading) {
-    return t.actions.processing;
+    return t.processing;
   }
-  return state.isDeactivate ? t.actions.deactivate : t.actions.activate;
+  return state.isDeactivate ? t.deactivate : t.activate;
 }
 
 function DeactivateDialog({
@@ -133,11 +134,12 @@ function DeactivateDialog({
   updateLoading,
 }: Readonly<DeactivateDialogProps>) {
   const t = useAppTranslation("dashboard.managersDirectory");
+  const actions = t.actions;
 
-  const dialogTitle = isDeactivate ? t.actions.deactivate : t.actions.activate;
+  const dialogTitle = isDeactivate ? actions.deactivate : actions.activate;
   const confirmationLabel = isDeactivate
-    ? t.actions.deactivateConfirmation({ name: manager.name })
-    : t.actions.activateConfirmation({ name: manager.name });
+    ? actions.deactivateConfirmation(manager.name)
+    : actions.activateConfirmation(manager.name);
   const submitButtonSx = (theme: Theme) => {
     const baseColor = isDeactivate ? theme.palette.error : theme.palette.success;
     return {
@@ -155,7 +157,7 @@ function DeactivateDialog({
       <DialogActions>
         <Button onClick={onClose}>{t.actions.cancel}</Button>
         <Button onClick={onSubmit} variant="contained" disabled={updateLoading} sx={submitButtonSx}>
-          {resolveSubmitLabel({ updateLoading, isDeactivate }, t)}
+          {resolveSubmitLabel({ updateLoading, isDeactivate }, t.actions)}
         </Button>
       </DialogActions>
     </Dialog>

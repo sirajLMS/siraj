@@ -3,7 +3,15 @@ import type { ParentProfileLabels } from "@/shared/locale/types/dashboard/parent
 export const profile: ParentProfileLabels = {
   pageTitle: "Parent Profile",
   status: {
-    regular: "Active",
+    regular: "Regular",
+    on_trial: "On Trial",
+    on_leave: "On Leave",
+    suspended: "Suspended",
+    deactivated: "Deactivated",
+  },
+  accountStatus: {
+    activated: "Activated",
+    deactivated: "Deactivated",
   },
   actions: {
     editPicture: "Change Profile Picture",

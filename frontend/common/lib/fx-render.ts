@@ -26,17 +26,11 @@ export function formatCurrencyForDisplay(
   const lockedCurrencyLabel = lockedCurrency;
 
   if (!displayAmount) {
-    return messages.displayCurrencyNotSet({
-      lockedAmount: lockedFormatted,
-      lockedCurrency: lockedCurrencyLabel,
-    });
+    return messages.displayCurrencyNotSet({ lockedAmount: lockedFormatted, lockedCurrency: lockedCurrencyLabel });
   }
 
   if (displayAmount.stale || !displayAmount.amount || !displayAmount.currency) {
-    return messages.displayCurrencyStale({
-      lockedAmount: lockedFormatted,
-      lockedCurrency: lockedCurrencyLabel,
-    });
+    return messages.displayCurrencyStale({ lockedAmount: lockedFormatted, lockedCurrency: lockedCurrencyLabel });
   }
 
   if (lockedCurrency === displayAmount.currency) {

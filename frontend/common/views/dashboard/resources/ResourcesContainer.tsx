@@ -133,7 +133,7 @@ export function ResourcesContainer() {
       });
 
       if (!prepData?.prepareUpload) {
-        notifications.show(t.notification.uploadPrepareFailed, { severity: "error", autoHideDuration: 4000 });
+        notifications.show(labels.notification.uploadPrepareFailed, { severity: "error", autoHideDuration: 4000 });
         return;
       }
 
@@ -163,7 +163,7 @@ export function ResourcesContainer() {
         if (!putResponse.ok) {
           const errorText = await putResponse.text().catch(() => "Upload failed");
           logger.error("File upload failed", { status: putResponse.status, errorText });
-          notifications.show(t.notification.uploadFailed, { severity: "error", autoHideDuration: 4000 });
+          notifications.show(labels.notification.uploadFailed, { severity: "error", autoHideDuration: 4000 });
           return;
         }
       }

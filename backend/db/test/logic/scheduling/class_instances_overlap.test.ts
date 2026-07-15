@@ -152,7 +152,7 @@ async function testTeacherOverlaps(tx: DBTransaction, student1Id: string, studen
     )
   );
   expect(teacherError).toBeTruthy();
-  expect(teacherError.message).toContain("Teacher is already booked for this time period");
+  expect(teacherError.message).toContain("Teacher is already booked at this time.");
 }
 
 async function testStudentOverlap(tx: DBTransaction, student1Id: string, teacher2Id: string) {
@@ -172,7 +172,7 @@ async function testStudentOverlap(tx: DBTransaction, student1Id: string, teacher
     )
   );
   expect(studentError).toBeTruthy();
-  expect(studentError.message).toContain("Student is already booked for this time period");
+  expect(studentError.message).toContain("Student is already booked at this time.");
 }
 
 async function testZoomUrlOverlap(args: {
@@ -215,7 +215,7 @@ async function testZoomUrlOverlap(args: {
     )
   );
   expect(zoomError).toBeTruthy();
-  expect(zoomError.message).toContain("Meeting URL is already in use for this time period");
+  expect(zoomError.message).toContain("Meeting URL is already in use.");
 }
 
 describe("Class Instances Overlap Prevention", () => {

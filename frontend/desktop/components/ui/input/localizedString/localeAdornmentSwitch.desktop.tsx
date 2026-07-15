@@ -36,7 +36,7 @@ function DesktopLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<Desktop
   const uiLocale = useAppLocale();
 
   return (
-    <Stack role="listbox" aria-label={ariaLabel ?? t("selectLocale")}>
+    <Stack role="listbox" aria-label={ariaLabel ?? t.selectLocale}>
       {languages.map((language, index, array) => {
         const isSelected = language.code === activeLocale;
         const isLastItem = index === array.length - 1;
@@ -116,7 +116,7 @@ export function LocaleAdornmentSwitchDesktop({
   return (
     <>
       <IconButton
-        aria-label={ariaLabel ?? t("selectLocale")}
+        aria-label={ariaLabel ?? t.selectLocale}
         aria-expanded={open}
         aria-haspopup="listbox"
         disabled={disabled}

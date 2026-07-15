@@ -130,7 +130,9 @@ function BillingViewSection({
         }
       : null,
     locale,
-    buildFxDisplayMessages(t, tErrors)
+    buildFxDisplayMessages({ convertedAmount: t.convertedAmount }, tErrors, {
+      convertedTotalApprox: tc.convertedTotalApprox,
+    })
   );
 
   const lifecycleStatus = resolveLifecycleStatus(adminData);

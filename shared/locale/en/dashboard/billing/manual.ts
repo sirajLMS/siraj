@@ -22,6 +22,7 @@ export const manual: BillingManualLabels = {
   createSuccess: id => `Invoice ${id} created successfully`,
   manualInvoiceFxNote:
     "Invoice amount is stored in the selected currency. Conversions appear on billing pages based on each user's display currency.",
+  unknown: "Unknown Student",
   months: {
     jan: "January",
     feb: "February",

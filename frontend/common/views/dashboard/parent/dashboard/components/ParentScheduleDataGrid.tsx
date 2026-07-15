@@ -30,8 +30,8 @@ function resolveBookingBadge(status: ParentBookingStatus): { category: "session"
   return { category: "session", status: "confirmed" };
 }
 
-function formatDuration(template: string, minutes: number): string {
-  return template.replace("{minutes}", String(minutes));
+function formatDuration(template: (minutes: number) => string, minutes: number): string {
+  return template(minutes);
 }
 
 function formatRowNumber(value: number): string {
@@ -172,10 +172,7 @@ export function ParentScheduleDataGrid({ rows, labels, onHistory, pagination }: 
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => (
-          <ParentClassStatusIndicator
-            status={row.liveClassStatus}
-            label={labels.liveClassStatus[row.liveClassStatus]}
-          />
+          <ParentClassStatusIndicator status={row.liveClassStatus} label={labels.liveClassStatus.startingSoon} />
         ),
       },
     ];

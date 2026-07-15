@@ -44,7 +44,7 @@ const mockLabels = {
   },
   deleteDialog: {
     title: "Delete Resource",
-    body: "Are you sure you want to permanently delete this resource? This action cannot be undone.",
+    body: (title: string) => `Are you sure you want to permanently delete ${title}? This action cannot be undone.`,
     confirm: "Delete",
     cancel: "Cancel",
   },
@@ -53,7 +53,7 @@ const mockLabels = {
     fileRequired: "File selection is required",
   },
   notification: {
-    fileTypeNotAllowed: "{type} is not an allowed file type",
+    fileTypeNotAllowed: (type: string) => `${type} is not an allowed file type`,
     uploadPrepareFailed: "Failed to prepare upload",
     uploadFailed: "File upload failed. Please try again.",
     createRecordFailed: "Failed to create resource record.",

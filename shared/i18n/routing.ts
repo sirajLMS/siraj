@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { redirect as nextRedirect, usePathname as useNextPathname, useRouter as useNextRouter } from "next/navigation";
 import type { ComponentProps } from "react";

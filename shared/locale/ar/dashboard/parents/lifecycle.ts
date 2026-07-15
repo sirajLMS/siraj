@@ -37,4 +37,15 @@ export const lifecycle: ParentLifecycleLabels = {
   errors: {
     invalidId: "معرف ولي أمر غير صالح.",
   },
+  status: {
+    regular: "عادي",
+    on_trial: "فترة تجريبية",
+    on_leave: "في إجازة",
+    suspended: "موقوف",
+    deactivated: "غير مفعّل",
+  },
+  accountStatus: {
+    activated: "مفعّل",
+    deactivated: "غير مفعّل",
+  },
 };

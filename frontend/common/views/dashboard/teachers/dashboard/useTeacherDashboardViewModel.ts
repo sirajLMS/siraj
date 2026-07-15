@@ -74,10 +74,6 @@ export interface TeacherDashboardViewModel {
 
 export type UseTeacherDashboardViewModelProps = Omit<TeacherDashboardViewModel, "pageCount" | "welcomeMobileSummary">;
 
-function formatActiveSessionsSummary(template: string, date: string, count: number): string {
-  return template.replace("{date}", date).replace("{count}", String(count));
-}
-
 function derivePageCount(totalCount: number | undefined, pageSize: number): number {
   return totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
 }
@@ -87,7 +83,7 @@ function buildWelcomeMobileSummary(
   welcomeDateSummary: string,
   activeSessionsCount: number
 ): string {
-  return formatActiveSessionsSummary(labels.activeWelcome.mobileSummary, welcomeDateSummary, activeSessionsCount);
+  return labels.activeWelcome.mobileSummary(welcomeDateSummary, activeSessionsCount);
 }
 
 function buildTeacherDashboardResult(props: UseTeacherDashboardViewModelProps): TeacherDashboardViewModel {

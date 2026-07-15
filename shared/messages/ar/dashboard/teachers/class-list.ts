@@ -1,13 +1,24 @@
 import type { TeacherClassListLabels } from "@/shared/messages/types/dashboard/teachers/class-list";
 
 export const classList: TeacherClassListLabels = {
-  pageTitle: "تفاصيل الحصة",
-  pageSubtitle: "راجع حصصك الأخيرة والقادمة.",
-  noClasses: "لم يتم العثور على حصص للفترة المحددة.",
+  pageTitle: "قائمة الحصص",
+  pageSubtitle: "عرض وإدارة حصصك المجدولة",
+  noClasses: "لم يتم العثور على حصص.",
   viewDetails: "عرض التفاصيل",
   viewClassAudit: "عرض تدقيق الحصة",
-  durationMinutes: "{minutes} دقيقة",
+  joinVideo: "انضمام للفيديو",
+  durationMinutes: (minutes: number) => `${minutes} دقيقة`,
   errors: {
     failedToLoad: "فشل تحميل الحصص.",
+  },
+  statusLabels: {
+    PENDING: "قيد الانتظار",
+    TAKEN: "مأخوذة",
+    ABSENT: "غائب",
+    LEAVE: "إجازة",
+    NOT_ACTIVATED: "غير مفعلة",
+    ACTIVATED: "مفعلة",
+    RUNNING: "جارٍ التنفيذ",
+    COMPLETED: "مكتملة",
   },
 };

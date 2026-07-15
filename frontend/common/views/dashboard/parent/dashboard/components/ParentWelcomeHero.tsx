@@ -6,13 +6,15 @@ import { alpha, Box, Typography } from "@mui/material";
 interface ParentWelcomeHeroProps {
   readonly userName: string;
   readonly welcomeBackLabel: string;
-  readonly pendingMessagesLabel: string;
+  readonly pendingMessagesLabel: (count: number) => string;
+  readonly pendingMessagesCount: number;
 }
 
 export function ParentWelcomeHero({
   userName,
   welcomeBackLabel,
   pendingMessagesLabel,
+  pendingMessagesCount,
 }: Readonly<ParentWelcomeHeroProps>) {
   return (
     <Box
@@ -54,7 +56,7 @@ export function ParentWelcomeHero({
           })}
         >
           <InfoOutlined sx={{ fontSize: 16 }} />
-          <Typography variant="labelMd">{pendingMessagesLabel}</Typography>
+          <Typography variant="labelMd">{pendingMessagesLabel(pendingMessagesCount)}</Typography>
         </Box>
       </Box>
     </Box>

@@ -20,7 +20,7 @@ import type {
   StudentHistoryMobileProps,
 } from "@/frontend/common/views/dashboard/students/history/types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 
 function deriveStreakDays(
   classes: Readonly<Partial<Record<number, ClassSession>>>,
@@ -216,7 +216,7 @@ function HistoryMobileActions({
   canGoNext: boolean;
 }>) {
   const t = useAppTranslation("dashboard.studentHistory");
-  const locale = useAppTranslation<"common">("common");
+  const locale = useAppLocale();
   const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" }).toUpperCase();
   const yearStr = currentMonth.getFullYear();
 

@@ -159,7 +159,6 @@ export function TeacherProfileContainer({
   activeTab: _activeTab = "profile",
 }: TeacherProfileContainerProps) {
   const t = useAppTranslation("profile").teacher;
-  const _locale = useAppLocale();
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const router = useRouter();

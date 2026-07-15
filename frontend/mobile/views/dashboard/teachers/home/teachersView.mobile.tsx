@@ -8,7 +8,6 @@ import type {
   TeacherDirectoryRow,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { TeacherCardList } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherCardList";
 import { TeacherMetricsRow } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherMetricsRow";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
@@ -44,7 +43,6 @@ export function TeachersMobileView({
   onPageChange,
 }: Readonly<TeachersMobileViewProps>) {
   const t = useAppTranslation("dashboard.teachersDirectory");
-  const _locale = useAppLocale();
 
   return (
     <PageContainer>

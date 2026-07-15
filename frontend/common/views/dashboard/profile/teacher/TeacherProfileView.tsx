@@ -2,7 +2,6 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { type CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { MeetingSummarySection } from "@/frontend/common/views/dashboard/profile/shared/MeetingSummarySection";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
@@ -57,7 +56,6 @@ export function TeacherProfileView({
   readonly meetingTabHref?: string;
 }) {
   const t = useAppTranslation("profile").teacher;
-  const _locale = useAppLocale();
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canView } = useProfileFieldAccess({ scope });
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;

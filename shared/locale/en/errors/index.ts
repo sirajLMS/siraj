@@ -167,6 +167,15 @@ export const errors: ErrorsLabels = {
   notFound: "The requested resource was not found.",
   unknownName: "Unknown",
   invalidInput: "Invalid input.",
+  permissionGroupNotFound: "Permission group not found.",
+
+  // ─── FX Display Currency messages (used by buildFxDisplayMessages) ────
+  displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `Display currency not set. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`,
+  displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `Display currency is stale. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`,
+  displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `Mixed display currencies detected. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`,
 
   // ─── Flattened error properties for backward compatibility ───────────
   categoryNotFound: (id: string) => `Category not found: ${id}`,

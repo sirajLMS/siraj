@@ -272,25 +272,31 @@ export interface PaymentMethodTypeFieldsLabels {
   readonly instructions: string;
 }
 
+export interface PaymentMethodTypeLabels {
+  readonly mobileWallet: string;
+  readonly paymentLink: string;
+  readonly onlineAccount: string;
+  readonly bankTransfer: string;
+  readonly cash: string;
+  readonly proofUpload: string;
+}
+
+export interface PaymentMethodDirectionLabels {
+  readonly in: string;
+  readonly out: string;
+  readonly both: string;
+}
+
+export interface PaymentMethodIdentifierLabels {
+  readonly email: string;
+  readonly handle: string;
+  readonly emailOrHandle: string;
+}
+
 export interface PaymentMethodLabels {
-  readonly type: {
-    readonly mobileWallet: string;
-    readonly paymentLink: string;
-    readonly onlineAccount: string;
-    readonly bankTransfer: string;
-    readonly cash: string;
-    readonly proofUpload: string;
-  };
-  readonly direction: {
-    readonly in: string;
-    readonly out: string;
-    readonly both: string;
-  };
-  readonly identifier: {
-    readonly email: string;
-    readonly handle: string;
-    readonly emailOrHandle: string;
-  };
+  readonly type: PaymentMethodTypeLabels;
+  readonly direction: PaymentMethodDirectionLabels;
+  readonly identifier: PaymentMethodIdentifierLabels;
   readonly typeSelector: PaymentMethodTypeSelectorLabels;
   readonly select: PaymentMethodSelectLabels;
   readonly display: PaymentMethodDisplayLabels;

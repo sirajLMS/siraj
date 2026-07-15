@@ -46,7 +46,7 @@ export interface StudentsViewLabels {
   readonly hoursPerWeek: string;
   readonly classesLeft: string;
   readonly actions: string;
-  readonly showingOf: string;
+  readonly showingOf: (shown: number, total: number) => string;
   readonly previous: string;
   readonly next: string;
   readonly viewProfile: string;
@@ -66,7 +66,7 @@ export interface StudentDirectoryDataGridLabels {
   readonly hoursPerWeek: string;
   readonly classesLeft: string;
   readonly actions: string;
-  readonly showingOf: string;
+  readonly showingOf: (shown: number, total: number) => string;
   readonly previous: string;
   readonly next: string;
   readonly viewProfile: string;

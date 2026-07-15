@@ -6,7 +6,7 @@ export const dashboard: TeacherDashboardLabels = {
   overviewTitle: "Overview",
   todayChip: "Today",
   updatedJustNow: "Updated just now",
-  updatedMinutesAgo: "Updated {minutes, plural, =1 {# minute ago} other {# minutes ago}}",
+  updatedMinutesAgo: (minutes: number) => (minutes === 1 ? "Updated 1 minute ago" : `Updated ${minutes} minutes ago`),
   metrics: {
     totalClasses: "Total Classes",
     missedSlots: "Missed Slots",
@@ -20,10 +20,10 @@ export const dashboard: TeacherDashboardLabels = {
     completed: "Completed",
   },
   activeWelcome: {
-    title: "Welcome back, {name}",
-    subtitle: "Today is {date}. You have {count} scheduled classes.",
+    title: (name: string) => `Welcome back, ${name}`,
+    subtitle: (date: string, count: number) => `Today is ${date}. You have ${count} scheduled classes.`,
     overviewLabel: "Dashboard Overview",
-    mobileSummary: "{date} • {count} active classes",
+    mobileSummary: (date: string, count: number) => `${date} • ${count} active classes`,
   },
   schedule: {
     title: "Daily Classes",
@@ -35,13 +35,13 @@ export const dashboard: TeacherDashboardLabels = {
     status: "Status",
     contact: "Contact",
     actions: "Actions",
-    showing: "Showing {shown} of {total} scheduled classes for today.",
+    showing: (shown: number, total: number) => `Showing ${shown} of ${total} scheduled classes for today.`,
     noEntries: "No classes scheduled for today",
     sessionEnded: "Session ended",
     frozen: "Frozen",
     contactAdmin: "Contact admin (hold)",
     duration: "Duration",
-    durationValue: "{minutes} min",
+    durationValue: (minutes: number) => `${minutes} min`,
     current: "Current",
     viewAll: "View All",
   },
@@ -99,7 +99,8 @@ export const dashboard: TeacherDashboardLabels = {
   },
   alert: {
     title: "Missed Class Time",
-    description: "Class {classId} was scheduled for {time}. Please contact admin to reschedule.",
+    description: (classId: string, time: string) =>
+      `Class ${classId} was scheduled for ${time}. Please contact admin to reschedule.`,
   },
   policy: {
     title: "Activation Policy",
@@ -117,7 +118,7 @@ export const dashboard: TeacherDashboardLabels = {
   support: {
     liveSupport: "Live Support",
   },
-  supportRequestSubmitted: "Support request submitted to {type}.",
+  supportRequestSubmitted: (type: string) => `Support request submitted to ${type}.`,
   errors: {
     meetingUrlNotAvailable: "Meeting URL not available.",
     handbookUrlNotFound: "Teacher handbook not found.",

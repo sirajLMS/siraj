@@ -12,6 +12,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import type { StudentProfileQueryData } from "@/frontend/common/views/dashboard/students/profile/StudentProfileContext";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/StudentProfileContext";
 import { canViewStudentProfileTab } from "@/frontend/common/views/dashboard/students/profile/studentProfileTabs";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
@@ -33,6 +34,65 @@ function resolveGenderLabel(raw: string | null | undefined): "MALE" | "FEMALE" |
     return "MALE";
   }
   return null;
+}
+
+function getStudentQuotaLoadingState(
+  useUnifiedProfile: boolean,
+  profileContext: ReturnType<typeof useStudentProfileContext>,
+  loading: boolean,
+  data: unknown,
+  queryError: unknown
+): "loading" | "missing" | "error" | "ready" {
+  const unifiedLoading = Boolean(profileContext?.loading);
+  const unifiedProfileMissing = !profileContext?.profile;
+
+  if ((useUnifiedProfile ? unifiedLoading : loading) && !data && !profileContext?.profile) {
+    return "loading";
+  }
+  if (useUnifiedProfile && !unifiedLoading && unifiedProfileMissing) {
+    return "missing";
+  }
+  if (!useUnifiedProfile && queryError) {
+    return "error";
+  }
+  return "ready";
+}
+
+function buildStudentQuotaData(
+  useUnifiedProfile: boolean,
+  profile: StudentProfileQueryData | null | undefined,
+  studentById:
+    | {
+        id: string | null;
+        name: string | null;
+        language?: string | null;
+        gender?: string | null;
+        teacherName?: string | null;
+        classesTotal?: number | null;
+        classesRemaining?: number | null;
+        updatedAt?: string | null;
+        primaryTeacherId?: string | null;
+        avatarUrl?: string | null;
+      }
+    | undefined,
+  tc: ReturnType<typeof useAppTranslation<"common">>
+): StudentProfileData | null {
+  const s = useUnifiedProfile ? profile : studentById;
+  if (!s || typeof s.id !== "string" || s.id.length === 0) return null;
+
+  return {
+    id: s.id,
+    studentName: s.name ?? tc.notSet,
+    dateOfBirth: useUnifiedProfile && profile?.dateOfBirth ? String(profile.dateOfBirth) : "",
+    language: s.language === "en" ? "en" : "ar",
+    gender: resolveGenderLabel(s.gender) ?? "",
+    teacher: s.teacherName ?? "",
+    totalClasses: s.classesTotal ?? 0,
+    classesLeft: s.classesRemaining ?? 0,
+    profileImage: useUnifiedProfile ? (profile?.avatarUrl ?? "") : "",
+    lastEditedTime: s?.updatedAt ? formatDistanceToNow(new Date(s.updatedAt), { addSuffix: true }) : "",
+    primaryTeacherId: s.primaryTeacherId ?? null,
+  };
 }
 
 export function StudentQuotaContainer() {
@@ -60,9 +120,9 @@ export function StudentQuotaContainer() {
       setIsSaved(true);
       notifications.show(t.actions.saveSuccess, { severity: "success", autoHideDuration: 4000 });
       if (useUnifiedProfile) {
-        void profileContext?.refetch({ year: null, month: null });
+        profileContext?.refetch({ year: null, month: null }).catch(() => undefined);
       } else {
-        void refetch();
+        refetch().catch(() => undefined);
       }
       setTimeout(() => {
         setIsSaved(false);
@@ -93,10 +153,9 @@ export function StudentQuotaContainer() {
     return <ProfileRestrictedSection title={t.breadcrumbs.adjustQuota} />;
   }
 
-  const unifiedLoading = Boolean(profileContext?.loading);
-  const unifiedProfileMissing = !profileContext?.profile;
+  const loadingState = getStudentQuotaLoadingState(useUnifiedProfile, profileContext, loading, data, error);
 
-  if ((useUnifiedProfile ? unifiedLoading : loading) && !data && !profileContext?.profile) {
+  if (loadingState === "loading") {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
         <CircularProgress />
@@ -104,33 +163,21 @@ export function StudentQuotaContainer() {
     );
   }
 
-  if (useUnifiedProfile && !unifiedLoading && unifiedProfileMissing) {
+  if (loadingState === "missing") {
     return <ProfileRestrictedSection title={t.breadcrumbs.adjustQuota} />;
   }
 
-  if (!useUnifiedProfile && error) {
+  if (loadingState === "error") {
     logger.error("Error loading student quota:", { error });
     return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc.loadFailed}</Typography>;
   }
 
-  const profile = profileContext?.profile;
-  const s = useUnifiedProfile ? profile : data?.studentById;
-  const studentData: StudentProfileData | null =
-    s && typeof s.id === "string" && s.id.length > 0
-      ? {
-          id: s.id,
-          studentName: s.name ?? tc.notSet,
-          dateOfBirth: useUnifiedProfile && profile?.dateOfBirth ? String(profile.dateOfBirth) : "",
-          language: s.language === "en" ? "en" : "ar",
-          gender: resolveGenderLabel(s.gender) ?? "",
-          teacher: s.teacherName ?? "",
-          totalClasses: s.classesTotal ?? 0,
-          classesLeft: s.classesRemaining ?? 0,
-          profileImage: useUnifiedProfile ? (profile?.avatarUrl ?? "") : "",
-          lastEditedTime: s.updatedAt ? formatDistanceToNow(new Date(s.updatedAt), { addSuffix: true }) : "",
-          primaryTeacherId: s.primaryTeacherId ?? null,
-        }
-      : null;
+  const studentData = buildStudentQuotaData(
+    useUnifiedProfile,
+    profileContext?.profile ?? undefined,
+    data?.studentById ?? undefined,
+    tc
+  );
 
   const handleCancel = () => {
     if (useUnifiedProfile) {
@@ -143,7 +190,7 @@ export function StudentQuotaContainer() {
   return (
     <StudentQuotaView
       studentData={studentData}
-      isLoading={useUnifiedProfile ? unifiedLoading : loading}
+      isLoading={useUnifiedProfile ? Boolean(profileContext?.loading) : loading}
       isSaving={saving}
       isSaved={isSaved}
       embedded={useUnifiedProfile}

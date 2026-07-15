@@ -16,6 +16,8 @@ import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { AuthImpersonationLabels } from "@/shared/locale/types/auth";
+import type { CommonLabels } from "@/shared/locale/types/common";
 
 export interface UserInfoSlotProps {
   readonly name: string;
@@ -86,7 +88,7 @@ function DefaultUserInfo({ name, mail, secondaryLine }: Readonly<UserInfoSlotPro
 }
 
 function DefaultLogoutButton({ onClick }: Readonly<LogoutButtonSlotProps>) {
-  const t = useAppTranslation("dashboard");
+  const t = useAppTranslation("dashboard.core.nav");
   return (
     <MenuItem
       onClick={onClick}
@@ -105,7 +107,7 @@ function DefaultLogoutButton({ onClick }: Readonly<LogoutButtonSlotProps>) {
     >
       <LogoutOutlined fontSize="small" />
       <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
-        {t.nav.logout}
+        {t.logout}
       </Typography>
     </MenuItem>
   );
@@ -163,12 +165,12 @@ interface UserMenuState {
 
 function computeSecondaryLine(
   state: Readonly<UserMenuState>,
-  tImpersonation: ReturnType<typeof useAppTranslation>
+  tImpersonation: AuthImpersonationLabels
 ): string | undefined {
   const { isImpersonating, isSimulatingGroup, impersonationStatus, simulationStatus } = state;
   if (isImpersonating) {
     const actorName = impersonationStatus?.actorUser?.name;
-    return actorName ? tImpersonation.impersonation.actorIdentity({ name: actorName }) : undefined;
+    return actorName ? tImpersonation.actorIdentity(actorName) : undefined;
   }
   if (isSimulatingGroup && simulationStatus?.groupName) {
     return simulationStatus.groupName;
@@ -275,7 +277,7 @@ function GroupSimulationMenu({
   simulatableGroups: ReadonlyArray<SimulatablePermissionGroup>;
   simulationLoading: boolean;
   onSelectGroup: (slug: string) => void;
-  tCommon: ReturnType<typeof useAppTranslation>;
+  tCommon: CommonLabels;
 }>) {
   return (
     <Menu
@@ -324,8 +326,7 @@ export function UserMenuButton({
   const router = useRouter();
   const tCommon = useAppTranslation("common");
   const tProfile = useAppTranslation("profile");
-  const tImpersonation = useAppTranslation("auth.impersonation");
-  const tGroupSimulation = useAppTranslation("auth.groupSimulation");
+  const tAuth = useAppTranslation("auth");
   const actorIsSuperAdmin = useUserStore(state => state.actorIsSuperAdmin);
   const canViewOwnProfile = useUserStore(state => state.hasPermission(AppPermission.AuthViewOwnProfile));
   const {
@@ -396,7 +397,7 @@ export function UserMenuButton({
 
   const actorSecondaryLine = computeSecondaryLine(
     { isImpersonating, isSimulatingGroup, impersonationStatus, simulationStatus },
-    tImpersonation
+    tAuth.impersonation
   );
 
   const triggerProps: Readonly<{
@@ -473,7 +474,7 @@ export function UserMenuButton({
           >
             <LoginOutlined fontSize="small" />
             <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-              {tImpersonation.returnToNormalLogin}
+              {tAuth.impersonation.returnToNormalLogin}
             </Typography>
           </MenuItem>
         ) : null}
@@ -489,7 +490,7 @@ export function UserMenuButton({
           >
             <LoginOutlined fontSize="small" />
             <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-              {tGroupSimulation.returnToNormalRole}
+              {tAuth.groupSimulation.returnToNormalRole}
             </Typography>
           </MenuItem>
         ) : null}
@@ -502,7 +503,7 @@ export function UserMenuButton({
           >
             <GroupsOutlined fontSize="small" />
             <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
-              {tGroupSimulation.switchRoleTo}
+              {tAuth.groupSimulation.switchRoleTo}
             </Typography>
           </MenuItem>
         ) : null}

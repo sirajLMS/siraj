@@ -1,4 +1,4 @@
-// Removed unused TranslateFn type
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 export type FxDisplayMessages = {
   readonly convertedAmount: (values: {
     lockedAmount: string;
@@ -21,11 +21,7 @@ export function buildFxDisplayMessages(
       displayCurrency: string
     ) => string;
   },
-  tErrors: {
-    displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) => string;
-    displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) => string;
-    displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) => string;
-  },
+  tErrors: ErrorsLabels,
   tConvertedTotal: { convertedTotalApprox: (convertedApprox: string, displayCurrency: string) => string }
 ): FxDisplayMessages {
   return {

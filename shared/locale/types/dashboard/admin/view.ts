@@ -9,6 +9,10 @@ export interface ClassDetailsPerformanceLabels {
 }
 
 export interface AdminViewLabels {
+  readonly admin: {
+    readonly pageTitle: string;
+    readonly roleLabel: string;
+  };
   readonly timezone: {
     readonly title: string;
     readonly prefix: string;

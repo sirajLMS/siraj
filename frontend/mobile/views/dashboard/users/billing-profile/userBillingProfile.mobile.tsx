@@ -32,6 +32,7 @@ export function UserBillingProfileMobileView({
   totalCount,
   onPageChange,
   isSearchPending = false,
+  userId,
 }: Readonly<UserBillingProfileViewModel>) {
   const showQuickPayFab = canSubmitProof && !billingActionsDisabled;
   const listLoading = isSearchPending || (loading && invoices.length === 0);
@@ -39,7 +40,11 @@ export function UserBillingProfileMobileView({
   return (
     <>
       <PageContainer>
-        <MobilePageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser} edgeToEdge={false} />
+        <MobilePageHeader
+          title={labels.billingProfileTitle}
+          subtitle={labels.profileForUser(userId)}
+          edgeToEdge={false}
+        />
 
         <MobileContentStack gap={3} paddingBottom={4}>
           <BillingMetricsRow metrics={metrics} compact loading={summaryLoading} />

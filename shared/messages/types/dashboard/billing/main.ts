@@ -15,16 +15,16 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly quickPay: string;
   readonly viewAllNegativeBalance: string;
   readonly requiresAttention: string;
-  readonly showingResults: string;
+  readonly showingResults: (shown: number, total: number) => string;
   readonly invalidUserId: string;
   readonly billingProfileTitle: string;
-  readonly profileForUser: string;
+  readonly profileForUser: (userId: string) => string;
   readonly reminderSent: string;
   readonly reminderFailed: string;
   readonly adminMetrics: {
     readonly totalOutstanding: string;
     readonly pendingInvoices: string;
-    readonly negativeBalance: string;
+    readonly negativeBalance: (count: number) => string;
     readonly mtdRevenue: string;
   };
   readonly parentMetrics: {
@@ -100,7 +100,7 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly deleteInvoiceSuccess: string;
   readonly deleteInvoiceDialog: {
     readonly title: string;
-    readonly body: string;
+    readonly body: (invoiceId: string) => string;
     readonly confirm: string;
   };
   readonly noUnpaidInvoices: string;
@@ -113,7 +113,7 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly selectFile: string;
     readonly fileHint: string;
     readonly invalidFileType: string;
-    readonly fileTooLarge: string;
+    readonly fileTooLarge: (maxMb: number) => string;
     readonly cancel: string;
     readonly errorGeneric: string;
     readonly invoiceNumber: string;
@@ -176,10 +176,12 @@ export interface BillingLabels extends PaymentComponentLabels {
       readonly dismiss: string;
     };
   };
-  readonly fxConversionNote: string;
-  readonly fxConversionNoteSubject: string;
+  readonly fxConversionNote: (code: string) => string;
+  readonly fxConversionNoteSubject: (code: string) => string;
   readonly adminBillingFxNote: string;
-  readonly displayCurrencyMixed: string;
+  readonly displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+  readonly displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+  readonly displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) => string;
   readonly currencyHedges: CurrencyHedgesLabels;
   readonly supportedCurrencies: SupportedCurrenciesLabels;
 }

@@ -591,16 +591,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
         closeDialog();
       }
     },
-    [
-      client,
-      state.meetingConfig,
-      state.setMeetingConfigWarning,
-      state.setCreatedClassInstanceId,
-      notifications,
-      t,
-      onRefetch,
-      closeDialog,
-    ]
+    [client, state, notifications, t, onRefetch, closeDialog]
   );
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {

@@ -29,7 +29,7 @@ export function RescheduleDateTimeSection({ control, errors }: Readonly<Props>) 
         <FieldWrapper
           label={t.fields.newDate}
           required
-          error={errors.newDate ? t(`validation.${errors.newDate.message}`) : undefined}
+          error={errors.newDate ? t.validation[errors.newDate.message as keyof typeof t.validation] : undefined}
         >
           <Controller
             name="newDate"
@@ -68,7 +68,7 @@ export function RescheduleDateTimeSection({ control, errors }: Readonly<Props>) 
         <FieldWrapper
           label={t.fields.newTime}
           required
-          error={errors.newTime ? t(`validation.${errors.newTime.message}`) : undefined}
+          error={errors.newTime ? t.validation[errors.newTime.message as keyof typeof t.validation] : undefined}
         >
           <Controller
             name="newTime"

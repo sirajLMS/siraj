@@ -50,12 +50,12 @@ export function RecurringScheduleDetailContainer() {
     );
   }
 
-  const summary = t.scheduleSummary({
-    student: schedule.studentName ?? "",
-    teacher: schedule.teacherName ?? "",
-    duration: String(schedule.durationMinutes ?? 0),
-    timezone: schedule.timezone ?? "",
-  });
+  const summary = t.scheduleSummary(
+    schedule.studentName ?? "",
+    schedule.teacherName ?? "",
+    String(schedule.durationMinutes ?? 0),
+    schedule.timezone ?? ""
+  );
 
   const breadcrumbs = [
     { label: t.breadcrumbDashboard, href: "/dashboard" },

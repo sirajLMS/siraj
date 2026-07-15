@@ -2,110 +2,111 @@ import type {
   SuggestionsAdminLabels,
   SuggestionsLabels,
   SuggestionsParentLabels,
-} from "@/shared/messages/types/dashboard/suggestions/main";
+} from "@/shared/locale/types/dashboard/suggestions";
 
-type SuggestionsTranslator = (key: string) => string;
-
-function buildParentLabels(t: SuggestionsTranslator): SuggestionsParentLabels {
+function buildParentLabels(t: SuggestionsParentLabels): SuggestionsParentLabels {
   return {
-    pageTitle: t("parent.pageTitle"),
-    heroTitle: t("parent.heroTitle"),
-    heroSubtitle: t("parent.heroSubtitle"),
-    fullName: t("parent.fullName"),
-    fullNamePlaceholder: t("parent.fullNamePlaceholder"),
-    suggestion: t("parent.suggestion"),
-    suggestionPlaceholder: t("parent.suggestionPlaceholder"),
-    submit: t("parent.submit"),
-    successMessage: t("parent.successMessage"),
-    socialProof: t("parent.socialProof"),
+    pageTitle: t.pageTitle,
+    heroTitle: t.heroTitle,
+    heroSubtitle: t.heroSubtitle,
+    fullName: t.fullName,
+    fullNamePlaceholder: t.fullNamePlaceholder,
+    suggestion: t.suggestion,
+    suggestionPlaceholder: t.suggestionPlaceholder,
+    submit: t.submit,
+    successMessage: t.successMessage,
+    socialProof: t.socialProof,
     support: {
       privacy: {
-        title: t("parent.support.privacy.title"),
-        body: t("parent.support.privacy.body"),
+        title: t.support.privacy.title,
+        body: t.support.privacy.body,
       },
       fastResponse: {
-        title: t("parent.support.fastResponse.title"),
-        body: t("parent.support.fastResponse.body"),
+        title: t.support.fastResponse.title,
+        body: t.support.fastResponse.body,
       },
       constantEvolution: {
-        title: t("parent.support.constantEvolution.title"),
-        body: t("parent.support.constantEvolution.body"),
+        title: t.support.constantEvolution.title,
+        body: t.support.constantEvolution.body,
       },
     },
     validation: {
-      fullNameRequired: t("parent.validation.fullNameRequired"),
-      suggestionRequired: t("parent.validation.suggestionRequired"),
+      fullNameRequired: t.validation.fullNameRequired,
+      suggestionRequired: t.validation.suggestionRequired,
     },
     notifications: {
-      submitSuccess: t("parent.notifications.submitSuccess"),
-      submitError: t("parent.notifications.submitError"),
+      submitSuccess: t.notifications.submitSuccess,
+      submitError: t.notifications.submitError,
     },
   };
 }
 
-function buildAdminLabels(t: SuggestionsTranslator): SuggestionsAdminLabels {
+function buildAdminLabels(t: SuggestionsAdminLabels): SuggestionsAdminLabels {
   return {
-    pageTitle: t("admin.pageTitle"),
-    pageSubtitle: t("admin.pageSubtitle"),
+    pageTitle: t.pageTitle,
+    pageSubtitle: t.pageSubtitle,
     metrics: {
-      pending: t("admin.metrics.pending"),
-      reviewed: t("admin.metrics.reviewed"),
-      duplicate: t("admin.metrics.duplicate"),
-      avgResponse: t("admin.metrics.avgResponse"),
-      efficiencyNote: t("admin.metrics.efficiencyNote"),
+      pending: t.metrics.pending,
+      reviewed: t.metrics.reviewed,
+      duplicate: t.metrics.duplicate,
+      avgResponse: t.metrics.avgResponse,
+      efficiencyNote: t.metrics.efficiencyNote,
     },
     tabs: {
-      pending: t("admin.tabs.pending"),
-      reviewed: t("admin.tabs.reviewed"),
-      duplicate: t("admin.tabs.duplicate"),
+      pending: t.tabs.pending,
+      reviewed: t.tabs.reviewed,
+      duplicate: t.tabs.duplicate,
     },
-    searchPlaceholder: t("admin.searchPlaceholder"),
+    searchPlaceholder: t.searchPlaceholder,
     table: {
-      parentName: t("admin.table.parentName"),
-      suggestion: t("admin.table.suggestion"),
-      submittedAt: t("admin.table.submittedAt"),
-      status: t("admin.table.status"),
-      actions: t("admin.table.actions"),
-      markReviewed: t("admin.table.markReviewed"),
-      respond: t("admin.table.respond"),
-      markDuplicate: t("admin.table.markDuplicate"),
-      delete: t("admin.table.delete"),
-      noEntries: t("admin.table.noEntries"),
+      parentName: t.table.parentName,
+      suggestion: t.table.suggestion,
+      submittedAt: t.table.submittedAt,
+      status: t.table.status,
+      actions: t.table.actions,
+      markReviewed: t.table.markReviewed,
+      respond: t.table.respond,
+      markDuplicate: t.table.markDuplicate,
+      delete: t.table.delete,
+      noEntries: t.table.noEntries,
     },
     statusLabels: {
-      pending: t("admin.statusLabels.pending"),
-      reviewed: t("admin.statusLabels.reviewed"),
-      duplicate: t("admin.statusLabels.duplicate"),
+      pending: t.statusLabels.pending,
+      reviewed: t.statusLabels.reviewed,
+      duplicate: t.statusLabels.duplicate,
     },
     notifications: {
-      markReviewedSuccess: t("admin.notifications.markReviewedSuccess"),
-      markReviewedError: t("admin.notifications.markReviewedError"),
-      respondSuccess: t("admin.notifications.respondSuccess"),
-      respondError: t("admin.notifications.respondError"),
-      markDuplicateSuccess: t("admin.notifications.markDuplicateSuccess"),
-      markDuplicateError: t("admin.notifications.markDuplicateError"),
-      deleteSuccess: t("admin.notifications.deleteSuccess"),
-      deleteError: t("admin.notifications.deleteError"),
+      markReviewedSuccess: t.notifications.markReviewedSuccess,
+      markReviewedError: t.notifications.markReviewedError,
+      respondSuccess: t.notifications.respondSuccess,
+      respondError: t.notifications.respondError,
+      markDuplicateSuccess: t.notifications.markDuplicateSuccess,
+      markDuplicateError: t.notifications.markDuplicateError,
+      deleteSuccess: t.notifications.deleteSuccess,
+      deleteError: t.notifications.deleteError,
     },
     dialogs: {
-      deleteConfirmTitle: t("admin.dialogs.deleteConfirmTitle"),
-      deleteConfirmBody: t("admin.dialogs.deleteConfirmBody"),
-      deleteConfirmAction: t("admin.dialogs.deleteConfirmAction"),
-      cancel: t("admin.dialogs.cancel"),
-      respondTitle: t("admin.dialogs.respondTitle"),
-      respondPlaceholder: t("admin.dialogs.respondPlaceholder"),
-      respondAction: t("admin.dialogs.respondAction"),
-      duplicateTitle: t("admin.dialogs.duplicateTitle"),
-      duplicateSearchPlaceholder: t("admin.dialogs.duplicateSearchPlaceholder"),
-      duplicateAction: t("admin.dialogs.duplicateAction"),
-      duplicateNoneFound: t("admin.dialogs.duplicateNoneFound"),
+      deleteConfirmTitle: t.dialogs.deleteConfirmTitle,
+      deleteConfirmBody: t.dialogs.deleteConfirmBody,
+      deleteConfirmAction: t.dialogs.deleteConfirmAction,
+      cancel: t.dialogs.cancel,
+      respondTitle: t.dialogs.respondTitle,
+      respondPlaceholder: t.dialogs.respondPlaceholder,
+      respondAction: t.dialogs.respondAction,
+      duplicateTitle: t.dialogs.duplicateTitle,
+      duplicateSearchPlaceholder: t.dialogs.duplicateSearchPlaceholder,
+      duplicateAction: t.dialogs.duplicateAction,
+      duplicateNoneFound: t.dialogs.duplicateNoneFound,
     },
   };
 }
 
-export function buildSuggestionsLabels(t: SuggestionsTranslator): SuggestionsLabels {
+export function buildSuggestionsLabels(t: {
+  parent: SuggestionsParentLabels;
+  admin: SuggestionsAdminLabels;
+}): SuggestionsLabels {
   return {
-    parent: buildParentLabels(t),
-    admin: buildAdminLabels(t),
+    parent: buildParentLabels(t.parent),
+    admin: buildAdminLabels(t.admin),
   };
 }

@@ -4,7 +4,7 @@ import { HistoryOutlined, ReceiptLongOutlined, SecurityOutlined } from "@mui/ico
 import { Box, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/common/components/ui";
-import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
 
 interface ManualInvoiceSupportCardsProps {
   readonly labels: BillingManualLabels;

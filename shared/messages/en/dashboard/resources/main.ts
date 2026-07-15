@@ -46,7 +46,7 @@ export const resources: ResourcesLabels = {
   },
   deleteDialog: {
     title: "Delete Resource?",
-    body: "This action cannot be undone. Are you sure you want to permanently delete {title}?",
+    body: (title: string) => `This action cannot be undone. Are you sure you want to permanently delete ${title}?`,
     confirm: "Yes",
     cancel: "No",
   },
@@ -55,7 +55,7 @@ export const resources: ResourcesLabels = {
     fileRequired: "Please select a file to upload.",
   },
   notification: {
-    fileTypeNotAllowed: "{type} is not an allowed file type",
+    fileTypeNotAllowed: (type: string) => `${type} is not an allowed file type`,
     uploadPrepareFailed: "Failed to prepare upload",
     uploadFailed: "File upload failed. Please try again.",
     createRecordFailed: "Failed to create resource record.",

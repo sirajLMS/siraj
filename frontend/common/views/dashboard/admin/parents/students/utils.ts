@@ -23,6 +23,7 @@ import {
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { useAppTranslation } from "@/shared/locale/client";
+import type { StudentDirectoryLabels } from "@/shared/locale/types/dashboard/students/directory";
 
 const MOBILE_METRIC_ICONS = {
   regular: PersonOutlined,
@@ -99,12 +100,15 @@ export function buildStatusCounts(rows: StudentDirectoryRowExtended[]): Record<S
 
 type StudentDirectoryTranslator = ReturnType<typeof useAppTranslation<"dashboard.studentDirectory">>;
 
+type StudentMetricKey = keyof StudentDirectoryLabels["metrics"];
+
 function toMetricItem(key: string, count: number, icon: SvgIconComponent, t: StudentDirectoryTranslator): MetricItem {
+  const metricKey = getMetricTranslationKey(key) as StudentMetricKey;
   return {
     key,
     count,
     labelKey: key,
-    label: t.metrics[getMetricTranslationKey(key)],
+    label: t.metrics[metricKey],
     icon,
     variant: key === "suspended" ? ("error" as const) : undefined,
   };

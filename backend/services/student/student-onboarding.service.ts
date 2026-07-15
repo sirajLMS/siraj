@@ -68,7 +68,7 @@ export namespace StudentOnboardingService {
       const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
       const studentGroup = groups.find(g => g.slug === SystemPermissionGroupSlug.STUDENT_DEFAULT);
       if (!studentGroup) {
-        throw new Error(tErrors.permissionGroupNotFound);
+        throw new Error(tErrors.permissionGroup.permissionGroupNotFound);
       }
       await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], studentGroup.id, actorUserId, txObj);
 

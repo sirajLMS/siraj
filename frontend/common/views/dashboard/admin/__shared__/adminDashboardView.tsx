@@ -9,14 +9,14 @@ import type {
   ScheduleOverviewData,
   TeacherFilterItem,
 } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
 
-type DashboardTranslator = ReturnType<typeof import("next-intl").useTranslations>;
 type DashboardHeaders = ScheduleOverviewData["headers"];
 type DashboardStatusLabels = ScheduleOverviewData["statusLabels"];
 
 /** Input shape for {@link renderAdminDashboardView}. */
 export interface AdminDashboardViewInput {
-  readonly t: DashboardTranslator;
+  readonly t: AdminDashboardLabels;
   readonly loading: boolean;
   readonly lastUpdated: string;
   readonly metrics: readonly MetricItem[];
@@ -72,35 +72,35 @@ export function renderAdminDashboardView(input: AdminDashboardViewInput) {
     onTeacherChange,
     onSubmit,
     pageSize = 10,
-    loadingLabel = t("admin.loading"),
-    emptyLabel = t("admin.noClasses"),
+    loadingLabel = t.loading,
+    emptyLabel = t.noClasses,
   } = input;
 
   return (
     <DashboardView
       loading={loading}
-      todayClassesTitle={t("admin.todayClasses")}
+      todayClassesTitle={t.todayClasses}
       lastUpdated={lastUpdated}
       metrics={metrics}
       onMetricClick={onMetricClick}
       selectedMetricKey={selectedMetricKey}
-      scheduleTitle={t("admin.scheduleOverview")}
+      scheduleTitle={t.scheduleOverview}
       selectedMetricLabel={selectedMetricLabel}
-      todayLabel={t("admin.today")}
-      previousDayLabel={t("admin.previousDay")}
-      nextDayLabel={t("admin.nextDay")}
-      searchPlaceholder={t("admin.searchPlaceholder")}
+      todayLabel={t.today}
+      previousDayLabel={t.previousDay}
+      nextDayLabel={t.nextDay}
+      searchPlaceholder={t.searchPlaceholder}
       searchValue={searchValue}
-      dateLabel={t("admin.listOfClassesOn")}
+      dateLabel={t.listOfClassesOn}
       dateValue={dateValue}
-      teacherPlaceholder={t("admin.selectTeacher")}
+      teacherPlaceholder={t.selectTeacher}
       teacherValue={teacherValue}
-      submitLabel={t("admin.submit")}
+      submitLabel={t.submit}
       teachers={teachers as readonly TeacherFilterItem[]}
       rows={rows as readonly DailyScheduleRow[]}
       headers={headers}
       statusLabels={statusLabels}
-      detailsLabel={t("admin.details")}
+      detailsLabel={t.details}
       emptyMessage={loading ? loadingLabel : emptyLabel}
       page={page}
       pageSize={pageSize}

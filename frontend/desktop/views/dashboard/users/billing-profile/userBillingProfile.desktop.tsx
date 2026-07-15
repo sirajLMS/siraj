@@ -30,12 +30,13 @@ export function UserBillingProfileDesktopView({
   onPageChange,
   loading,
   isSearchPending = false,
+  userId,
 }: Readonly<UserBillingProfileViewModel>) {
   const listLoading = isSearchPending || (loading && invoices.length === 0);
 
   return (
     <PageContainer>
-      <PageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser} />
+      <PageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser(userId)} />
       <BillingMetricsRow metrics={metrics} loading={summaryLoading} />
       <SectionPanel
         title={labels.sections.invoiceHistory}

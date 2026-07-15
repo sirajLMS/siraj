@@ -50,7 +50,7 @@ export interface AdminSuggestionsDialogHandlers {
   readonly deletingId: string;
   readonly isDeleting: boolean;
   readonly error: boolean;
-  readonly dialogLabels: ReturnType<typeof buildSuggestionsLabels>["admin"]["dialogs"];
+  readonly dialogLabels: SuggestionsAdminLabels["dialogs"];
   readonly closeDeleteDialog: () => void;
   readonly closeRespondDialog: () => void;
   readonly closeDuplicateDialog: () => void;

@@ -16,16 +16,16 @@ export const billing: BillingLabels = {
   quickPay: "دفع سريع",
   viewAllNegativeBalance: "عرض جميع الطلاب برصيد سالب",
   requiresAttention: "يتطلب اهتماماً",
-  showingResults: "عرض {shown} من {total} نتيجة",
+  showingResults: (shown: number, total: number) => `عرض ${shown} من ${total} نتيجة`,
   invalidUserId: "معرف المستخدم غير صالح",
   billingProfileTitle: "الملف المالي للمستخدم",
-  profileForUser: "تفاصيل الملف المالي للمستخدم {userId}",
+  profileForUser: (userId: string) => `تفاصيل الملف المالي للمستخدم ${userId}`,
   reminderSent: "تم إرسال تذكير الدفع",
   reminderFailed: "فشل إرسال تذكير الدفع",
   adminMetrics: {
     totalOutstanding: "إجمالي المستحقات",
     pendingInvoices: "الفواتير المعلقة",
-    negativeBalance: "الرصيد السالب",
+    negativeBalance: (count: number) => `رصيد سالب (${count})`,
     mtdRevenue: "إيرادات الشهر",
   },
   parentMetrics: {
@@ -108,13 +108,13 @@ export const billing: BillingLabels = {
   submitProofSuccess: "تم إرسال إثبات الدفع بنجاح",
   approveProofSuccess: "تمت الموافقة على إثبات الدفع",
   rejectProofSuccess: "تم رفض إثبات الدفع",
-  noUnpaidInvoices: "لا توجد فواتير غير مدفوعة للدفع",
   deleteInvoiceSuccess: "تم حذف الفاتورة بنجاح",
   deleteInvoiceDialog: {
     title: "حذف الفاتورة",
-    body: "سيؤدي هذا إلى إزالة الفاتورة {invoiceId} نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+    body: (invoiceId: string) => `سيؤدي هذا إلى إزالة الفاتورة ${invoiceId} نهائياً. لا يمكن التراجع عن هذا الإجراء.`,
     confirm: "حذف الفاتورة",
   },
+  noUnpaidInvoices: "لا توجد فواتير غير مدفوعة للدفع",
   hasPaymentProofHint: "إثبات دفع مرفق",
   submitProofDialog: {
     titleSubmit: "إرسال إثبات الدفع",
@@ -125,7 +125,7 @@ export const billing: BillingLabels = {
     selectFile: "ملف إثبات الدفع",
     fileHint: "ارفع ملف PDF أو صورة (JPEG أو PNG أو WebP) كإثبات للدفع.",
     invalidFileType: "نوع الملف غير مسموح. استخدم PDF أو JPEG أو PNG أو WebP.",
-    fileTooLarge: "الملف كبير جداً. الحد الأقصى {maxMb} ميغابايت.",
+    fileTooLarge: (maxMb: number) => `الملف كبير جداً. الحد الأقصى ${maxMb} ميغابايت.`,
     cancel: "إلغاء",
     errorGeneric: "تعذر إرسال إثبات الدفع. يرجى المحاولة مرة أخرى.",
     invoiceNumber: "الفاتورة",
@@ -187,10 +187,15 @@ export const billing: BillingLabels = {
       dismiss: "إغلاق",
     },
   },
-  fxConversionNote: "تستخدم الإجماليات المحوّلة عملة العرض الخاصة بك ({code})",
-  fxConversionNoteSubject: "تستخدم المبالغ المحوّلة عملة عرض هذا المستخدم ({code})",
+  fxConversionNote: (code: string) => `تستخدم الإجماليات المحوّلة عملة العرض الخاصة بك (${code})`,
+  fxConversionNoteSubject: (code: string) => `تستخدم المبالغ المحوّلة عملة عرض هذا المستخدم (${code})`,
   adminBillingFxNote: "تستخدم المقاييس عملة العرض الخاصة بك؛ تستخدم كل فاتورة عملة ولي الأمر",
-  displayCurrencyMixed: "تم اكتشاف عدة عملات عرض؛ عرض المبالغ المقفلة فقط: {lockedAmount}",
+  displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `تم اكتشاف عدة عملات عرض؛ عرض المبالغ المقفلة فقط: ${values.lockedAmount} ${values.lockedCurrency}`,
+  displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `${values.lockedAmount} ${values.lockedCurrency} (عملة العرض غير محددة)`,
+  displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `${values.lockedAmount} ${values.lockedCurrency} (قد تكون الأسعار قديمة)`,
   currencyHedges,
   supportedCurrencies,
 };

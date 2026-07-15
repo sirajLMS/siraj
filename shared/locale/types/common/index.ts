@@ -36,4 +36,6 @@ export interface CommonLabels {
   readonly loading: string;
   readonly notSet: string;
   readonly errors: string;
+  readonly cancel: string;
+  readonly save: string;
 }

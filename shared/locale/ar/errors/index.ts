@@ -169,6 +169,14 @@ export const errors: ErrorsLabels = {
   invalidInput: "إدخال غير صالح.",
   permissionGroupNotFound: "مجموعة الأذونات غير موجودة.",
 
+  // ─── FX Display Currency messages (used by buildFxDisplayMessages) ────
+  displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `عرض العملة غير محدد. المبلغ المقفل: ${values.lockedAmount} ${values.lockedCurrency}`,
+  displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `عرض العملة قديم. المبلغ المقفل: ${values.lockedAmount} ${values.lockedCurrency}`,
+  displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `عملات عرض مختلطة. المبلغ المقفل: ${values.lockedAmount} ${values.lockedCurrency}`,
+
   // ─── Flattened error properties for backward compatibility ───────────
   categoryNotFound: (id: string) => `الفئة غير موجودة: ${id}`,
   categoryCreateFailed: "فشل إنشاء فئة الحصة.",

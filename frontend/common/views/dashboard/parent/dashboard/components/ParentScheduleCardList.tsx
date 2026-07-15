@@ -16,12 +16,12 @@ interface ParentScheduleCardListProps {
   readonly pagination?: SchedulePagination;
 }
 
-function formatDuration(template: string, minutes: number): string {
-  return template.replace("{minutes}", String(minutes));
+function formatDuration(template: (minutes: number) => string, minutes: number): string {
+  return template(minutes);
 }
 
-function formatTeacherLabel(template: string, name: string): string {
-  return template.replace("{name}", name);
+function formatTeacherLabel(template: (name: string) => string, name: string): string {
+  return template(name);
 }
 
 function ScheduleCard({ row, labels }: { readonly row: ParentScheduleRow; readonly labels: ParentDashboardLabels }) {

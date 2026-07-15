@@ -33,11 +33,11 @@ function formatRowNumber(value: number): string {
   return String(value).padStart(2, "0");
 }
 
-function formatDuration(minutes: number | undefined, template: string): string {
+function formatDuration(minutes: number | undefined, formatFn: (minutes: number) => string): string {
   if (!minutes) {
     return "—";
   }
-  return template.replace("{minutes}", String(minutes));
+  return formatFn(minutes);
 }
 
 function TimeRangeCell({ row, labels }: { row: TeacherScheduleRow; labels: TeacherDashboardViewLabels }) {

@@ -23,6 +23,7 @@ import type {
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { ParentDashboardLabels } from "@/shared/locale/types/dashboard/core/parentDashboard";
 
 function mapExecutionStateToLiveClassStatus(
   executionState: string,
@@ -103,19 +104,14 @@ function useScheduleRows(
   }, [data]);
 }
 
-function useDashboardLabels(t: ReturnType<typeof useAppTranslation>, userName: string, pendingMessages: number) {
+function useDashboardLabels(t: ParentDashboardLabels, _userName: string) {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,
-      welcome: t.welcome(userName),
+      welcome: t.welcome,
       welcomeBack: t.welcomeBack,
-      pendingMessages: t.pendingMessages(pendingMessages),
-      metrics: {
-        totalStudents: t.metrics.totalStudents,
-        todaysClasses: t.metrics.todaysClasses,
-        pendingInvoices: t.metrics.pendingInvoices,
-        performanceAvg: t.metrics.performanceAvg,
-      },
+      pendingMessages: t.pendingMessages,
+      metrics: t.metrics,
       schedule: {
         title: t.schedule.title,
         titleMobile: t.schedule.titleMobile,
@@ -130,42 +126,25 @@ function useDashboardLabels(t: ReturnType<typeof useAppTranslation>, userName: s
         status: t.schedule.status,
         contact: t.schedule.contact,
         classStatus: t.schedule.classStatus,
-        duration: t.schedule.duration(0),
-        teacherLabel: t.schedule.teacherLabel(""),
+        duration: t.schedule.duration,
+        teacherLabel: t.schedule.teacherLabel,
         joinVideo: t.schedule.joinVideo,
         frozen: t.schedule.frozen,
         contactAdmin: t.schedule.contactAdmin,
         noEntries: t.schedule.noEntries,
       },
-      bookingStatus: {
-        confirmed: t.bookingStatus.confirmed,
-        rescheduled: t.bookingStatus.rescheduled,
-      },
-      liveClassStatus: {
-        starting_soon: t.liveClassStatus.startingSoon,
-        pending: t.liveClassStatus.pending,
-        scheduled: t.liveClassStatus.scheduled,
-      },
-      progress: {
-        title: t.progress.title,
-        subtitle: t.progress.subtitle,
-        completion: t.progress.completion(0),
-        downloadReport: t.progress.downloadReport,
-      },
-      workshop: {
-        badge: t.workshop.badge,
-        learnMore: t.workshop.learnMore,
-      },
-      support: {
-        liveSupport: t.support.liveSupport,
-      },
+      bookingStatus: t.bookingStatus,
+      liveClassStatus: t.liveClassStatus,
+      progress: t.progress,
+      workshop: t.workshop,
+      support: t.support,
     }),
-    [t, userName, pendingMessages]
+    [t]
   );
 }
 
 export function ParentDashboardContainer() {
-  const t = useAppTranslation("dashboard.parentDashboard");
+  const t = useAppTranslation("dashboard.core.parentDashboard");
   const router = useRouter();
   const userName = useUserStore(state => state.name);
   const page = useParentDashboardStore(state => state.page);
@@ -232,7 +211,7 @@ export function ParentDashboardContainer() {
 
   const scheduleRows = useScheduleRows(scheduleData);
   const totalCount = scheduleData?.parentDashboardSchedule?.totalCount ?? 0;
-  const labels = useDashboardLabels(t, userName, metrics.pendingMessages);
+  const labels = useDashboardLabels(t, userName);
 
   const handlers = useMemo(
     () => ({

@@ -7,7 +7,7 @@ import type {
   ParentInvoiceRow,
 } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
 import type { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
-import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
+import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
 
 export type { UserBillingProfileState } from "@/frontend/common/stores/userBillingProfileStore";
 export { DEFAULT_PAGE_SIZE } from "@/frontend/common/stores/userBillingProfileStore";
@@ -40,6 +40,7 @@ export interface UserBillingProfileViewProps {
   readonly totalCount: number;
   readonly onPageChange: (page: number) => void;
   readonly loading: boolean;
+  readonly userId: string;
 }
 
 export type UserBillingProfileDesktopViewProps = UserBillingProfileViewProps;

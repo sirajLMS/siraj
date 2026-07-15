@@ -2,7 +2,7 @@ import type { StudentDashboardLabels } from "@/shared/messages/types/dashboard/s
 
 export const studentDashboard: StudentDashboardLabels = {
   pageTitle: "My Dashboard",
-  welcomeMessage: "Welcome, {name}",
+  welcomeMessage: (name: string) => `Welcome, ${name}`,
   nextClass: "Next Class",
   joinNow: "Join Now",
   noUpcomingClasses: "No upcoming classes scheduled",

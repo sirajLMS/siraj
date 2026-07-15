@@ -12,11 +12,12 @@ import {
   users,
 } from "@/backend/db/schema";
 import type {
-  ClassCommunicationInsertType,
+  ClassCommunicationCreateInput,
   ClassCommunicationSelectType,
-  GroupClassEnrollmentInsertType,
+  GroupClassCreateInput,
+  GroupClassEnrollmentCreateInput,
   GroupClassEnrollmentSelectType,
-  GroupClassInsertType,
+  GroupClassEnrollmentWithStudent,
   GroupClassSelectType,
 } from "@/backend/types";
 
@@ -54,17 +55,14 @@ export namespace GroupClassRepository {
     return row ?? null;
   }
 
-  export async function create(
-    input: Omit<GroupClassInsertType, "id" | "createdAt" | "updatedAt">,
-    tx?: DBTransaction
-  ): Promise<GroupClassSelectType> {
+  export async function create(input: GroupClassCreateInput, tx?: DBTransaction): Promise<GroupClassSelectType> {
     return insertReturning<GroupClassSelectType>(groupClasses, { ...input }, tx);
   }
 
   export async function getEnrollments(
     groupClassId: string,
     tx?: DBTransaction
-  ): Promise<(GroupClassEnrollmentSelectType & { studentName: string; studentAvatarUrl: string | null })[]> {
+  ): Promise<GroupClassEnrollmentWithStudent[]> {
     const queryDb = tx ?? db;
     const rows = await queryDb
       .select({
@@ -84,7 +82,7 @@ export namespace GroupClassRepository {
   }
 
   export async function createEnrollments(
-    inputs: Omit<GroupClassEnrollmentInsertType, "id" | "createdAt" | "updatedAt">[],
+    inputs: GroupClassEnrollmentCreateInput[],
     tx?: DBTransaction
   ): Promise<GroupClassEnrollmentSelectType[]> {
     if (inputs.length === 0) return [];
@@ -109,7 +107,7 @@ export namespace GroupClassRepository {
   }
 
   export async function createCommunication(
-    input: Omit<ClassCommunicationInsertType, "id" | "createdAt">,
+    input: ClassCommunicationCreateInput,
     tx?: DBTransaction
   ): Promise<ClassCommunicationSelectType> {
     return insertReturning<ClassCommunicationSelectType>(classCommunications, { ...input }, tx);
@@ -206,7 +204,7 @@ export namespace GroupClassRepository {
   }
 
   export async function createMany(
-    inputs: Omit<GroupClassInsertType, "id" | "createdAt" | "updatedAt">[],
+    inputs: GroupClassCreateInput[],
     tx?: DBTransaction
   ): Promise<GroupClassSelectType[]> {
     if (inputs.length === 0) return [];
@@ -256,7 +254,7 @@ export namespace GroupClassRepository {
   }
 
   export async function createManyEnrollments(
-    inputs: Omit<GroupClassEnrollmentInsertType, "id" | "createdAt" | "updatedAt">[],
+    inputs: GroupClassEnrollmentCreateInput[],
     tx?: DBTransaction
   ): Promise<GroupClassEnrollmentSelectType[]> {
     if (inputs.length === 0) return [];
@@ -294,7 +292,7 @@ export namespace GroupClassRepository {
   }
 
   export async function createManyCommunications(
-    inputs: Omit<ClassCommunicationInsertType, "id" | "createdAt">[],
+    inputs: ClassCommunicationCreateInput[],
     tx?: DBTransaction
   ): Promise<ClassCommunicationSelectType[]> {
     if (inputs.length === 0) return [];

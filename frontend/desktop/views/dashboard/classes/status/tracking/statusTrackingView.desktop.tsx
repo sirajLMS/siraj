@@ -103,6 +103,9 @@ export function StatusTrackingDesktopView({
             pendingVerification: labels.pendingVerification,
             sessionEnded: labels.sessionEnded,
             noEntries: labels.noEntries,
+            showingOf: labels.showingOf,
+            previous: labels.previous,
+            next: labels.next,
           }}
           onActivate={onActivate}
           onReschedule={onReschedule}

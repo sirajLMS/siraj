@@ -108,7 +108,15 @@ export function CompensationViewSection({
         }
       : null,
     locale,
-    buildFxDisplayMessages(tProfile, tErrors)
+    buildFxDisplayMessages(
+      {
+        convertedAmount: tProfile.convertedAmount,
+      },
+      tErrors,
+      {
+        convertedTotalApprox: tProfile.convertedTotalApprox,
+      }
+    )
   );
 
   return (

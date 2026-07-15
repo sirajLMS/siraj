@@ -7,7 +7,6 @@ import { SectionPanel } from "@/frontend/common/components/ui";
 import { CountryDisplay } from "@/frontend/common/components/ui/display";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/parent/sections/InfoField";
 import {
@@ -29,7 +28,6 @@ type IdentitySectionProps =
 
 export function IdentitySection(props: IdentitySectionProps) {
   const t = useAppTranslation("profile").parent;
-  const _locale = useAppLocale();
 
   if (props.mode === "edit") {
     return (

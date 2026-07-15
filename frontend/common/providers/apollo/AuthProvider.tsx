@@ -165,12 +165,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return true;
         } else {
           logger.error({ caller: "AuthProvider.login" }, "Login failed: No token or user in response");
-          setError(t("signinFailed"));
+          setError(t.signinFailed);
           return false;
         }
       } catch (mutationError) {
         logger.error({ caller: "AuthProvider.login" }, "Login mutation error", mutationError);
-        setError(getGraphQLErrorMessage(mutationError, t("invalidLoginResponse")));
+        setError(getGraphQLErrorMessage(mutationError, t.invalidLoginResponse));
         return false;
       }
     },

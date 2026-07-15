@@ -13,7 +13,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 
 export function TeacherRulesContainer() {
   const t = useAppTranslation("dashboard.teacherDashboard");
-  const dashboardT = useAppTranslation("dashboard.core.layout");
+  const dashboardT = useAppTranslation("dashboard.admin");
   const tJoin = useAppTranslation("ui.meetingConfig").join;
   const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin.emptyTeacher);
   const [handbookRequested, setHandbookRequested] = useState(false);

@@ -16,14 +16,14 @@ export const main: BillingLabels = {
   quickPay: "Quick Pay",
   viewAllNegativeBalance: "View All Students with Negative Balance",
   requiresAttention: "Requires Attention",
-  showingResults: (shown, total) => `Showing ${shown} of ${total} results`,
+  showingResults: (shown: number, total: number) => `Showing ${shown} of ${total} results`,
   invalidUserId: "Invalid user ID",
   billingProfileTitle: "User Billing Profile",
-  profileForUser: userId => `Billing profile details for user ${userId}`,
+  profileForUser: (userId: string) => `Billing profile details for user ${userId}`,
   adminMetrics: {
     totalOutstanding: "Total Outstanding",
     pendingInvoices: "Pending Invoices",
-    negativeBalance: "Negative Balance",
+    negativeBalance: (count: number) => `Negative Balance (${count})`,
     mtdRevenue: "MTD Revenue",
   },
   parentMetrics: {
@@ -190,11 +190,10 @@ export const main: BillingLabels = {
   fxConversionNote: code => `Converted totals use your display currency (${code})`,
   fxConversionNoteSubject: code => `Converted amounts use this user's display currency (${code})`,
   adminBillingFxNote: "Metrics use your display currency; each invoice uses its parent's currency",
-  displayCurrencyMixed: lockedAmount =>
-    `Multiple display currencies detected; showing locked amounts only: ${lockedAmount}`,
-  displayCurrencyNotSet: (lockedAmount, lockedCurrency) =>
-    `${lockedAmount} ${lockedCurrency} (display currency not set)`,
-  displayCurrencyStale: (lockedAmount, lockedCurrency) => `${lockedAmount} ${lockedCurrency} (rates may be stale)`,
+  displayCurrencyMixed: values =>
+    `Multiple display currencies detected; showing locked amounts only: ${values.lockedAmount} ${values.lockedCurrency}`,
+  displayCurrencyNotSet: values => `${values.lockedAmount} ${values.lockedCurrency} (display currency not set)`,
+  displayCurrencyStale: values => `${values.lockedAmount} ${values.lockedCurrency} (rates may be stale)`,
   currencyHedges,
   supportedCurrencies,
 };

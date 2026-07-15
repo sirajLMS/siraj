@@ -44,7 +44,7 @@ const mockLabels = {
   totalsLabel: "Totals",
   ledgerTitle: "Attendance Ledger",
   ledgerLabels: {
-    studentLabel: "Student",
+    studentLabel: (name: string) => name,
     paid: "Paid",
     statusLabels: {
       active: "Active",

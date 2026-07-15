@@ -2,7 +2,7 @@ import type { StudentDashboardLabels } from "@/shared/messages/types/dashboard/s
 
 export const studentDashboard: StudentDashboardLabels = {
   pageTitle: "لوحتي",
-  welcomeMessage: "أهلًا، {name}",
+  welcomeMessage: (name: string) => `أهلًا، ${name}`,
   nextClass: "الحصة القادمة",
   joinNow: "ادخل الآن",
   noUpcomingClasses: "لا توجد حصص قادمة مجدولة",

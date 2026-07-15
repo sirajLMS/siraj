@@ -16,14 +16,14 @@ export const billing: BillingLabels = {
   quickPay: "Quick Pay",
   viewAllNegativeBalance: "View All Students with Negative Balance",
   requiresAttention: "Requires Attention",
-  showingResults: "Showing {shown} of {total} results",
+  showingResults: (shown: number, total: number) => `Showing ${shown} of ${total} results`,
   invalidUserId: "Invalid user ID",
   billingProfileTitle: "User Billing Profile",
-  profileForUser: "Billing profile details for user {userId}",
+  profileForUser: (userId: string) => `Billing profile details for user ${userId}`,
   adminMetrics: {
     totalOutstanding: "Total Outstanding",
     pendingInvoices: "Pending Invoices",
-    negativeBalance: "Negative Balance",
+    negativeBalance: (count: number) => `Negative Balance (${count})`,
     mtdRevenue: "MTD Revenue",
   },
   parentMetrics: {
@@ -109,7 +109,7 @@ export const billing: BillingLabels = {
   deleteInvoiceSuccess: "Invoice deleted successfully",
   deleteInvoiceDialog: {
     title: "Delete Invoice",
-    body: "This will permanently remove invoice {invoiceId}. This action cannot be undone.",
+    body: (invoiceId: string) => `This will permanently remove invoice ${invoiceId}. This action cannot be undone.`,
     confirm: "Delete Invoice",
   },
   reminderSent: "Payment reminder sent",
@@ -125,7 +125,7 @@ export const billing: BillingLabels = {
     selectFile: "Payment Proof File",
     fileHint: "Upload a PDF, JPEG, PNG, or WebP file as payment proof.",
     invalidFileType: "Invalid file type. Use PDF, JPEG, PNG, or WebP.",
-    fileTooLarge: "File is too large. Maximum size is {maxMb} MB.",
+    fileTooLarge: (maxMb: number) => `File is too large. Maximum size is ${maxMb} MB.`,
     cancel: "Cancel",
     errorGeneric: "Failed to submit payment proof. Please try again.",
     invoiceNumber: "Invoice",
@@ -187,10 +187,15 @@ export const billing: BillingLabels = {
       dismiss: "Dismiss",
     },
   },
-  fxConversionNote: "Converted totals use your display currency ({code})",
-  fxConversionNoteSubject: "Converted amounts use this user's display currency ({code})",
+  fxConversionNote: (code: string) => `Converted totals use your display currency (${code})`,
+  fxConversionNoteSubject: (code: string) => `Converted amounts use this user's display currency (${code})`,
   adminBillingFxNote: "Metrics use your display currency; each invoice uses its parent's currency",
-  displayCurrencyMixed: "Multiple display currencies detected; showing locked amounts only: {lockedAmount}",
+  displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `Multiple display currencies detected; showing locked amounts only: ${values.lockedAmount} ${values.lockedCurrency}`,
+  displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `${values.lockedAmount} ${values.lockedCurrency} (display currency not set)`,
+  displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `${values.lockedAmount} ${values.lockedCurrency} (rates may be stale)`,
   currencyHedges,
   supportedCurrencies,
 };

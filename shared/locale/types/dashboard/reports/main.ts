@@ -36,6 +36,7 @@ export interface ReportsLabels {
     convertedApprox: string,
     displayCurrency: string
   ) => string;
+  readonly convertedTotalApprox: (convertedApprox: string, displayCurrency: string) => string;
   readonly summary: {
     readonly engagementRate: string;
     readonly engagementGrowth: string;

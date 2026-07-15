@@ -44,5 +44,6 @@ export const main: SubjectsLabels = {
     noResources: "لا توجد موارد مرفقة بهذه المادة.",
     notFound: "لم يتم العثور على المادة.",
     untitledResource: "مورد بدون عنوان",
+    download: "تنزيل",
   },
 };

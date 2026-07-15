@@ -29,7 +29,7 @@ export interface ReportsViewLabels {
   readonly totalsLabel: string;
   readonly ledgerTitle: string;
   readonly ledgerLabels: {
-    readonly studentLabel: string;
+    readonly studentLabel: (name: string) => string;
     readonly paid: string;
     readonly statusLabels: Record<LedgerStatus, string>;
     readonly taken: string;

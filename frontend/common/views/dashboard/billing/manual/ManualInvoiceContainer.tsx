@@ -50,11 +50,11 @@ function billingMonthsToInput(months: string[], year?: number): { year: number; 
 }
 
 export function ManualInvoiceContainer() {
-  const t = useAppTranslation("dashboard.billing.manual");
+  const t = useAppTranslation("dashboard.billing");
   const tc = useAppTranslation("common");
   const tErrors = useAppTranslation("errors");
   const router = useRouter();
-  const labels = buildManualInvoiceLabels(t);
+  const labels = buildManualInvoiceLabels(t.manual);
   const { isImpersonating } = useImpersonation();
   const billingActionsDisabled = isImpersonating;
 
@@ -84,7 +84,7 @@ export function ManualInvoiceContainer() {
     onCompleted: data => {
       setShowSuccess(true);
       const invoiceId = data.createManualInvoice?.id ?? "";
-      setSnackbarMessage(t.createSuccess(invoiceId));
+      setSnackbarMessage(t.manual.createSuccess(invoiceId));
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     },
@@ -150,7 +150,7 @@ export function ManualInvoiceContainer() {
         .filter((s): s is { id: string; name: string } & typeof s => s.id != null)
         .map(s => ({
           id: s.id,
-          name: s.name ?? t.unknown,
+          name: s.name ?? t.manual.unknown,
         })),
     [studentData?.studentDirectory?.rows, t]
   );
@@ -161,7 +161,7 @@ export function ManualInvoiceContainer() {
       <BillingImpersonationNotice />
       {selectedParentUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={selectedParentUserId} /> : null}
       <Typography variant="caption" sx={theme => ({ display: "block", mb: 1, color: theme.palette.text.secondary })}>
-        {t.manualInvoiceFxNote}
+        {t.manual.manualInvoiceFxNote}
       </Typography>
       <ManualInvoiceView
         labels={labels}

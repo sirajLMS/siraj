@@ -18,19 +18,18 @@ export interface AdminDashboardViewLabels {
 }
 
 export function buildAdminDashboardViewLabels(t: TranslationObject): AdminDashboardViewLabels {
-  const admin = t.admin;
   return {
-    todayClassesTitle: admin.todayClasses,
-    scheduleTitle: admin.scheduleOverview,
-    todayLabel: admin.today,
-    previousDayLabel: admin.previousDay,
-    nextDayLabel: admin.nextDay,
-    searchPlaceholder: admin.searchPlaceholder,
-    dateLabel: admin.listOfClassesOn,
-    teacherPlaceholder: admin.selectTeacher,
-    submitLabel: admin.submit,
-    detailsLabel: admin.details,
-    emptyMessage: admin.noClasses,
-    loadingLabel: admin.loading,
+    todayClassesTitle: t.todayClasses,
+    scheduleTitle: t.scheduleOverview,
+    todayLabel: t.today,
+    previousDayLabel: t.previousDay,
+    nextDayLabel: t.nextDay,
+    searchPlaceholder: t.searchPlaceholder,
+    dateLabel: t.listOfClassesOn,
+    teacherPlaceholder: t.selectTeacher,
+    submitLabel: t.submit,
+    detailsLabel: t.details,
+    emptyMessage: t.noClasses,
+    loadingLabel: t.loading,
   };
 }

@@ -99,20 +99,14 @@ export function formatBillingCurrencyTotals(
 
     // All buckets have displayAmount but currencies differ
     const lockedPrimary = formattedBuckets.join(" · ");
-    const mixedMessage = messages.displayCurrencyMixed({
-      lockedAmount: lockedPrimary,
-      lockedCurrency: "",
-    });
+    const mixedMessage = messages.displayCurrencyMixed({ lockedAmount: lockedPrimary, lockedCurrency: "" });
     return { primary: mixedMessage, breakdown: formattedBuckets.join(" · ") };
   }
 
   // Some buckets have no displayAmount or are stale
   if (convertibleBuckets.length > 0 && convertibleBuckets.length < buckets.length) {
     const lockedPrimary = formattedBuckets.join(" · ");
-    const mixedMessage = messages.displayCurrencyMixed({
-      lockedAmount: lockedPrimary,
-      lockedCurrency: "",
-    });
+    const mixedMessage = messages.displayCurrencyMixed({ lockedAmount: lockedPrimary, lockedCurrency: "" });
     return { primary: mixedMessage, breakdown: formattedBuckets.join(" · ") };
   }
 

@@ -7,7 +7,11 @@ import {
   getClassInstanceByIdOrThrow,
   validateTeacherAssignment,
 } from "@/backend/db/repo/scheduling/shared";
-import { adjustQuotaOnUpdate, updateInstanceState } from "@/backend/db/repo/scheduling/state-changes";
+import {
+  adjustQuotaOnUpdate,
+  handleQuotaDeduction,
+  updateInstanceState,
+} from "@/backend/db/repo/scheduling/state-changes";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
@@ -83,6 +87,9 @@ export const createClassInstance = async (
       tErrors: tFuncErrors,
     });
 
+    // Use the meetingJoinUrl from input if provided, otherwise fall back to effective meeting
+    const meetingJoinUrl = input.meetingJoinUrl ?? effectiveMeeting.joinUrl;
+
     await checkOverlaps(
       t,
       {
@@ -90,21 +97,13 @@ export const createClassInstance = async (
         teacherId: input.teacherId,
         startTime: input.scheduledStartAt,
         endTime: input.scheduledEndAt,
-        meetingJoinUrl: effectiveMeeting.joinUrl,
+        meetingJoinUrl,
       },
       tFuncErrors
     );
 
     if (input.quotaDeducted) {
-      const [student] = await t
-        .select({ classesRemaining: students.classesRemaining })
-        .from(students)
-        .where(eq(students.id, input.studentId))
-        .limit(1);
-
-      if (!student || student.classesRemaining <= 0) {
-        throw new Error(tFuncErrors.outOfQuota);
-      }
+      await handleQuotaDeduction(t, input.studentId, true, tFuncErrors);
     }
 
     const [created] = await t
@@ -182,9 +181,18 @@ export const deleteClassInstance = async (
 ): Promise<Types.ClassInstanceEntity> => {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
-    await getClassInstanceByIdOrThrow(t, id, tFuncErrors);
+    const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
+    if (!existing) {
+      throw new Error(tFuncErrors.classInstanceNotFound({ id }));
+    }
 
     const { entity: deleted } = await SoftDeleteRepository.softDeleteClassInstance(id, null, t);
+
+    // Handle quota restoration if the instance was quota-deducted
+    if (existing.quotaDeducted) {
+      await adjustQuotaOnUpdate(t, existing, { deletedAt: deleted.deletedAt }, true);
+    }
+
     return deleted;
   };
 

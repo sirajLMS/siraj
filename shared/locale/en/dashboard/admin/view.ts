@@ -1,6 +1,10 @@
 import type { AdminViewLabels } from "@/shared/locale/types/dashboard/admin/view";
 
 export const view: AdminViewLabels = {
+  admin: {
+    pageTitle: "Admin Dashboard",
+    roleLabel: "Admin Role",
+  },
   timezone: {
     title: "Timezone",
     prefix: "Local time",

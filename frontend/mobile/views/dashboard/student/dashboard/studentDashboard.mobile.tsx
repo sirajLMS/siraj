@@ -142,7 +142,7 @@ export function StudentDashboardMobileView({
       <MobileContentStack>
         <Box>
           <Typography variant="headlineLg" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
-            {labels.welcomeMessage.replace("{name}", userName ?? "")}
+            {labels.welcomeMessage(userName ?? "")}
           </Typography>
         </Box>
 

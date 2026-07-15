@@ -13,7 +13,7 @@ import { formatReportPaidAmounts } from "@/frontend/common/views/dashboard/repor
 import { useAppTranslation } from "@/shared/locale/client";
 
 interface PerformanceLedgerCardLabels {
-  readonly studentLabel: string;
+  readonly studentLabel: (name: string) => string;
   readonly paid: string;
   readonly statusLabels: Record<LedgerStatus, string>;
   readonly taken: string;
@@ -71,7 +71,19 @@ export function PerformanceLedgerCard({ row, labels, onClick }: Readonly<Perform
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
-  const paidLabel = formatReportPaidAmounts(row.paidAmounts, locale, buildFxDisplayMessages(t, tErrors));
+  const paidLabel = formatReportPaidAmounts(
+    row.paidAmounts,
+    locale,
+    buildFxDisplayMessages(
+      {
+        convertedAmount: t.convertedAmount,
+      },
+      tErrors,
+      {
+        convertedTotalApprox: t.convertedTotalApprox,
+      }
+    )
+  );
 
   return (
     <BaseCard
@@ -116,7 +128,7 @@ export function PerformanceLedgerCard({ row, labels, onClick }: Readonly<Perform
               {row.name}
             </Typography>
             <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.secondary }}>
-              {labels.studentLabel}
+              {labels.studentLabel(row.name)}
             </Typography>
           </Box>
         </Box>

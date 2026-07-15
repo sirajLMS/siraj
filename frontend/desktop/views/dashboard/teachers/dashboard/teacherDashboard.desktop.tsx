@@ -51,7 +51,7 @@ export function TeacherDashboardDesktopView({
           </Alert>
         )}
 
-        <PageHeader title={labels.activeWelcome.title.replace("{name}", userName)} />
+        <PageHeader title={labels.activeWelcome.title(userName)} />
 
         <DashboardMetricsSection
           title={labels.pageTitle}

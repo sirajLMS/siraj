@@ -14,7 +14,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 import { MOCK_SCHEDULE, MOCK_TEACHERS } from "@/test/ui/components/fixtures/adminDashboardFixtures";
 
 export function MockAdminDashboardContainer() {
-  const t = useAppTranslation("dashboard").admin;
+  const t = useAppTranslation("dashboard.admin");
   const { headers, statusLabels } = useAdminDashboardLabels();
 
   const lastUpdatedKey = useDashboardStore(state => state.lastUpdated);
@@ -33,7 +33,7 @@ export function MockAdminDashboardContainer() {
   const cleanedLastUpdatedKey = lastUpdatedKey.startsWith("dashboard.")
     ? lastUpdatedKey.replace("dashboard.", "")
     : lastUpdatedKey;
-  const translatedLastUpdated = t.updatedMinutesAgo(cleanedLastUpdatedKey as Parameters<typeof t.updatedMinutesAgo>[0]);
+  const translatedLastUpdated = t.updatedMinutesAgo(Number(cleanedLastUpdatedKey));
 
   const metricFilter = resolveDailyScheduleMetricFilter(filters.selectedStatus);
 

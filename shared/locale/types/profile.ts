@@ -90,6 +90,9 @@ export interface ProfileTeacherLabels {
     readonly activated: string;
     readonly deactivated: string;
   };
+  readonly shell: ProfileShellLabels;
+  readonly actions: ProfileActionsLabels;
+  readonly errors: ProfileErrorsLabels;
 }
 
 export interface ProfileParentLabels {
@@ -133,6 +136,7 @@ export interface ProfileParentLabels {
     readonly on_trial: string;
     readonly on_leave: string;
     readonly suspended: string;
+    readonly deactivated: string;
   };
   readonly accountStatus: {
     readonly activated: string;
@@ -177,6 +181,7 @@ export interface ProfileParentLabels {
       readonly deactivated: string;
     };
   };
+  readonly notSet: string;
 }
 
 export interface ProfileStaffLabels {

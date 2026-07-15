@@ -83,7 +83,7 @@ export namespace TeacherOnboardingService {
     const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
     const targetGroup = groups.find(g => g.slug === SystemPermissionGroupSlug.TEACHER_DEFAULT);
     if (!targetGroup) {
-      throw new Error(tErrors.permissionGroupNotFound);
+      throw new Error(tErrors.permissionGroup.permissionGroupNotFound);
     }
     await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], targetGroup.id, actorUserId, txObj);
   }

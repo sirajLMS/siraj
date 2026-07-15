@@ -20,7 +20,7 @@ import type {
 import { useAppTranslation } from "@/shared/locale/client";
 
 function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) {
-  const t = useAppTranslation("dashboard.subjects.detail");
+  const t = useAppTranslation("dashboard.subjects").detail;
   const handleDownload = () => {
     if (resource.filePath) {
       window.open(`/api/storage/files/` + `${resource.filePath}`, `_blank`, "noopener,noreferrer");
@@ -32,7 +32,7 @@ function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) 
       disablePadding
       secondaryAction={
         resource.filePath ? (
-          <IconButton edge="end" onClick={handleDownload} aria-label={t.detail.download}>
+          <IconButton edge="end" onClick={handleDownload} aria-label={t.download}>
             <DownloadOutlined />
           </IconButton>
         ) : undefined

@@ -44,7 +44,19 @@ function useTotalsDisplay(rows: readonly ReportLedgerRow[]) {
         : null,
     }));
 
-    return formatBillingCurrencyTotals(buckets, locale, buildFxDisplayMessages(tProfile, tErrors));
+    return formatBillingCurrencyTotals(
+      buckets,
+      locale,
+      buildFxDisplayMessages(
+        {
+          convertedAmount: tProfile.convertedAmount,
+        },
+        tErrors,
+        {
+          convertedTotalApprox: tProfile.convertedTotalApprox,
+        }
+      )
+    );
   }, [rows, locale, tProfile, tErrors]);
 }
 

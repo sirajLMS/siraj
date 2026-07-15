@@ -1,16 +1,16 @@
 "use client";
 
 import {
+  isAdminMetricKey,
+  renderAdminDashboardView,
+} from "@/frontend/common/views/dashboard/admin/__shared__/adminDashboardView";
+import {
   ADMIN_DASHBOARD_PAGE_SIZE,
   useAdminDashboardHandlers,
   useAdminScheduleQuery,
   useLastUpdatedLabel,
   useTeachers,
-} from "@/frontend/common/views/dashboard/admin/__shared__/adminDashboardHooks";
-import {
-  isAdminMetricKey,
-  renderAdminDashboardView,
-} from "@/frontend/common/views/dashboard/admin/__shared__/adminDashboardView";
+} from "@/frontend/common/views/dashboard/admin/__shared__/useAdminDashboard";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { useAdminDashboardLabels } from "@/frontend/common/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
@@ -18,7 +18,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 
 // Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
 export function AdminDashboardContainer() {
-  const t = useAppTranslation("dashboard").admin;
+  const t = useAppTranslation("dashboard.admin");
   const { headers, statusLabels } = useAdminDashboardLabels();
 
   const { dashboardData, loading, refetch, page, setPage } = useAdminScheduleQuery();

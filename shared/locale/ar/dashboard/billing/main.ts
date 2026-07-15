@@ -16,16 +16,16 @@ export const main: BillingLabels = {
   quickPay: "دفع سريع",
   viewAllNegativeBalance: "عرض جميع الطلاب برصيد سالب",
   requiresAttention: "يتطلب اهتماماً",
-  showingResults: (shown, total) => `عرض ${shown} من ${total} نتيجة`,
+  showingResults: (shown: number, total: number) => `عرض ${shown} من ${total} نتائج`,
   invalidUserId: "معرف المستخدم غير صالح",
   billingProfileTitle: "الملف المالي للمستخدم",
-  profileForUser: userId => `تفاصيل الملف المالي للمستخدم ${userId}`,
+  profileForUser: (userId: string) => `تفاصيل الملف المالي للمستخدم ${userId}`,
   reminderSent: "تم إرسال تذكير الدفع",
   reminderFailed: "فشل إرسال تذكير الدفع",
   adminMetrics: {
     totalOutstanding: "إجمالي المستحقات",
     pendingInvoices: "الفواتير المعلقة",
-    negativeBalance: "الرصيد السالب",
+    negativeBalance: (count: number) => `رصيد سالب (${count})`,
     mtdRevenue: "إيرادات الشهر",
   },
   parentMetrics: {
@@ -190,9 +190,10 @@ export const main: BillingLabels = {
   fxConversionNote: code => `تستخدم الإجماليات المحوّلة عملة العرض الخاصة بك (${code})`,
   fxConversionNoteSubject: code => `تستخدم المبالغ المحوّلة عملة عرض هذا المستخدم (${code})`,
   adminBillingFxNote: "تستخدم المقاييس عملة العرض الخاصة بك؛ تستخدم كل فاتورة عملة ولي الأمر",
-  displayCurrencyMixed: lockedAmount => `تم اكتشاف عدة عملات عرض؛ عرض المبالغ المقفلة فقط: ${lockedAmount}`,
-  displayCurrencyNotSet: (lockedAmount, lockedCurrency) => `${lockedAmount} ${lockedCurrency} (عملة العرض غير محددة)`,
-  displayCurrencyStale: (lockedAmount, lockedCurrency) => `${lockedAmount} ${lockedCurrency} (قد تكون الأسعار قديمة)`,
+  displayCurrencyMixed: values =>
+    `تم اكتشاف عدة عملات عرض؛ عرض المبالغ المقفلة فقط: ${values.lockedAmount} ${values.lockedCurrency}`,
+  displayCurrencyNotSet: values => `${values.lockedAmount} ${values.lockedCurrency} (عملة العرض غير محددة)`,
+  displayCurrencyStale: values => `${values.lockedAmount} ${values.lockedCurrency} (قد تكون الأسعار قديمة)`,
   currencyHedges,
   supportedCurrencies,
 };

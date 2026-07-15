@@ -1,6 +1,6 @@
 export interface StudentDashboardLabels {
   readonly pageTitle: string;
-  readonly welcomeMessage: string;
+  readonly welcomeMessage: (name: string) => string;
   readonly nextClass: string;
   readonly joinNow: string;
   readonly noUpcomingClasses: string;

@@ -29,7 +29,6 @@ import {
   getPaymentMethodCatalogOptionById,
   type PaymentMethodCatalogOption,
 } from "@/frontend/common/lib/payment-method";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import {
   formDetailsToInput,
   fragmentToFormValues,
@@ -313,7 +312,6 @@ export function PaymentMethodFormDialog({
 }: PaymentMethodFormDialogProps) {
   const t = useAppTranslation("ui.paymentMethod.manager");
   const tDir = useAppTranslation("ui.paymentMethod");
-  const _locale = useAppLocale();
   const isEdit = editMethod?.id != null;
 
   const defaultDirection = slotDirection;
@@ -335,7 +333,7 @@ export function PaymentMethodFormDialog({
 
   const directionOptions = useMemo(
     () =>
-      getPaymentDirectionOptions((key: Parameters<typeof tDir>[0]) => tDir(key)).filter(option =>
+      getPaymentDirectionOptions(key => tDir.direction[key as keyof typeof tDir.direction] ?? "").filter(option =>
         allowedDirections.includes(option.value)
       ),
     [allowedDirections, tDir]

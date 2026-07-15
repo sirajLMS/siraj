@@ -10,7 +10,6 @@ import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currenc
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
@@ -53,7 +52,6 @@ type CoreIdentitySectionProps = CoreIdentityViewProps | CoreIdentityEditProps;
 
 export function CoreIdentitySection(props: CoreIdentitySectionProps) {
   const t = useAppTranslation("profile");
-  const _locale = useAppLocale();
   const { canView, showField } = useProfileFieldAccess({ scope: props.scope });
 
   if (!canView("core_identity")) {

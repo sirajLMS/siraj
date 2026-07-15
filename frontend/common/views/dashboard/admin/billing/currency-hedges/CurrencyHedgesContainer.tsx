@@ -54,6 +54,7 @@ function formatTimestamp(value: string | null | undefined, locale: string): stri
 
 export function CurrencyHedgesContainer() {
   const t = useAppTranslation("dashboard.billing.currencyHedges");
+  const tc = useAppTranslation("common");
   const locale = useAppLocale();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -261,9 +262,9 @@ export function CurrencyHedgesContainer() {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>{t.cancel}</Button>
+            <Button onClick={() => setDialogOpen(false)}>{tc.cancel}</Button>
             <Button variant="contained" onClick={() => void handleSave()} disabled={creating || updating}>
-              {t.save}
+              {tc.save}
             </Button>
           </DialogActions>
         </Dialog>
@@ -272,7 +273,7 @@ export function CurrencyHedgesContainer() {
           <DialogTitle>{t.deleteHedge}</DialogTitle>
           <DialogContent>{t.deleteConfirm}</DialogContent>
           <DialogActions>
-            <Button onClick={() => setDeleteOpen(false)}>{t.cancel}</Button>
+            <Button onClick={() => setDeleteOpen(false)}>{tc.cancel}</Button>
             <Button color="error" variant="contained" onClick={() => void handleDelete()} disabled={deleting}>
               {t.deleteHedge}
             </Button>

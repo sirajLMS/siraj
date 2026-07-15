@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Button, Stack } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ErrorState } from "@/frontend/common/components/ui";
 import {
   PaymentMethodList,
@@ -60,8 +60,8 @@ type VerifyButtonProps = {
   readonly methods: readonly PaymentMethodRow[];
   readonly verifying: boolean;
   readonly onVerify: (id: string) => Promise<void>;
-  readonly t: MeetingConfigManagerLabels;
-  readonly tType: TranslationType;
+  readonly t: PaymentMethodManagerLabels;
+  readonly tType: PaymentMethodLabels;
 };
 
 function VerifyBankTransferButtons({ methods, verifying, onVerify, t, tType }: VerifyButtonProps) {
@@ -80,7 +80,9 @@ function VerifyBankTransferButtons({ methods, verifying, onVerify, t, tType }: V
       }}
       sx={{ alignSelf: "flex-start" }}
     >
-      {t.verify(row.label ?? getPaymentMethodTypeLabel(row.type, key => tType(key as never)))}
+      {t.verify(
+        row.label ?? getPaymentMethodTypeLabel(row.type, key => tType.type[key as keyof typeof tType.type] ?? "")
+      )}
     </Button>
   ));
 }
@@ -120,8 +122,8 @@ function PaymentMethodFormDialogWrapped({
   );
 }
 
-type MeetingConfigManagerLabels = ReturnType<typeof useAppTranslation<"ui.meetingConfig.manager">>;
-type TranslationType = ReturnType<typeof useAppTranslation<"ui.meetingConfig">>;
+type PaymentMethodManagerLabels = ReturnType<typeof useAppTranslation<"ui.paymentMethod.manager">>;
+type PaymentMethodLabels = ReturnType<typeof useAppTranslation<"ui.paymentMethod">>;
 
 type PaymentMethodsManagerData = {
   readonly userPaymentMethods?: readonly UserPaymentMethodFieldsFragment[] | null;
@@ -147,12 +149,18 @@ function useMethodById(data: PaymentMethodsManagerData | undefined) {
   }, [data?.userPaymentMethods]);
 }
 
-function useDeleteLabel(deleteId: string | null, methods: readonly PaymentMethodRow[], tType: TranslationType): string {
+function useDeleteLabel(
+  deleteId: string | null,
+  methods: readonly PaymentMethodRow[],
+  tType: PaymentMethodLabels
+): string {
   return useMemo(() => {
     if (!deleteId) return "";
     const row = methods.find(m => m.id === deleteId);
     if (!row) return "";
-    return row.label?.trim() || getPaymentMethodTypeLabel(row.type, key => tType(key as never));
+    return (
+      row.label?.trim() || getPaymentMethodTypeLabel(row.type, key => tType.type[key as keyof typeof tType.type] ?? "")
+    );
   }, [deleteId, methods, tType]);
 }
 
@@ -170,23 +178,61 @@ function useMethodMutations(refetch: () => Promise<unknown>): PaymentMethodMutat
   const [setDefaultMut, { loading: settingDefault }] = useMutation(setDefaultUserPaymentMethodMutationDocument);
   const [verifyMethod, { loading: verifying }] = useMutation(verifyBankTransferPaymentMethodMutationDocument);
 
+  const confirmDelete = useCallback(
+    async (id: string) => {
+      await deleteMethod({ variables: { id } });
+      await refetch();
+    },
+    [deleteMethod, refetch]
+  );
+
+  const setDefault = useCallback(
+    async (id: string) => {
+      await setDefaultMut({ variables: { id } });
+      await refetch();
+    },
+    [setDefaultMut, refetch]
+  );
+
+  const verify = useCallback(
+    async (id: string) => {
+      await verifyMethod({ variables: { id } });
+      await refetch();
+    },
+    [verifyMethod, refetch]
+  );
+
   return {
     deleting,
     settingDefault,
     verifying,
-    confirmDelete: async (id: string) => {
-      await deleteMethod({ variables: { id } });
-      await refetch();
-    },
-    setDefault: async (id: string) => {
-      await setDefaultMut({ variables: { id } });
-      await refetch();
-    },
-    verify: async (id: string) => {
-      await verifyMethod({ variables: { id } });
-      await refetch();
-    },
+    confirmDelete,
+    setDefault,
+    verify,
   };
+}
+
+function renderEmptyState(t: PaymentMethodManagerLabels, refetch: () => Promise<unknown>) {
+  return (
+    <ErrorState
+      embedded
+      message={t.loadError}
+      retryLabel={t.retry}
+      onRetry={async () => {
+        await refetch();
+      }}
+    />
+  );
+}
+
+function renderAddButton(t: PaymentMethodManagerLabels, onClick: () => void) {
+  return (
+    <Stack sx={{ flexDirection: "row", justifyContent: "flex-end" }}>
+      <Button variant="contained" startIcon={<AddOutlinedIcon />} onClick={onClick}>
+        {t.add}
+      </Button>
+    </Stack>
+  );
 }
 
 export function PaymentMethodsManager({ targetUserId, slot, canManage }: PaymentMethodsManagerProps) {
@@ -212,57 +258,42 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
 
   const methods = usePaymentMethods(data, slot);
   const methodById = useMethodById(data);
-  const refetchData = async () => {
+  const refetchData = useCallback(async () => {
     await refetch();
-  };
+  }, [refetch]);
   const mutations = useMethodMutations(refetchData);
   const deleteLabel = useDeleteLabel(deleteId, methods, tType);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!deleteId) return;
     await mutations.confirmDelete(deleteId);
     setDeleteId(null);
-  };
+  }, [deleteId, mutations]);
 
-  const handleEdit = canManage
-    ? (id: string) => {
-        const method = methodById.get(id) ?? null;
-        setEditMethod(method);
-        setFormOpen(true);
-      }
-    : undefined;
+  const handleEdit = useCallback(
+    (id: string) => {
+      if (!canManage) return;
+      const method = methodById.get(id) ?? null;
+      setEditMethod(method);
+      setFormOpen(true);
+    },
+    [canManage, methodById]
+  );
 
   const busy = loading || mutations.deleting || mutations.settingDefault || mutations.verifying;
 
   if (error && methods.length === 0) {
-    return (
-      <ErrorState
-        embedded
-        message={t.loadError}
-        retryLabel={t.retry}
-        onRetry={async () => {
-          await refetch();
-        }}
-      />
-    );
+    return renderEmptyState(t, refetchData);
   }
 
   return (
     <Stack spacing={2}>
-      {canManage ? (
-        <Stack sx={{ flexDirection: "row", justifyContent: "flex-end" }}>
-          <Button
-            variant="contained"
-            startIcon={<AddOutlinedIcon />}
-            onClick={() => {
-              setEditMethod(null);
-              setFormOpen(true);
-            }}
-          >
-            {t.add}
-          </Button>
-        </Stack>
-      ) : null}
+      {canManage
+        ? renderAddButton(t, () => {
+            setEditMethod(null);
+            setFormOpen(true);
+          })
+        : null}
 
       <PaymentMethodList
         methods={methods}

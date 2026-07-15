@@ -29,4 +29,6 @@ export const common: CommonLabels = {
   loading: "جارٍ التحميل...",
   errors: "أخطاء",
   notSet: "غير محدد",
+  cancel: "إلغاء",
+  save: "حفظ",
 };

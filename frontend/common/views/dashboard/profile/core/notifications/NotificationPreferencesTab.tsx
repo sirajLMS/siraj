@@ -70,12 +70,12 @@ export function NotificationPreferencesTab({ isActive }: Readonly<NotificationPr
         variables: { input: pending },
       });
       pendingChangesRef.current.clear();
-      setSnackbarMessage(t("saved"));
+      setSnackbarMessage(t.saved);
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     } catch (saveError) {
       logger.error("Failed to save notification preferences", { error: saveError });
-      setSnackbarMessage(t("errorSaving"));
+      setSnackbarMessage(t.errorSaving);
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }

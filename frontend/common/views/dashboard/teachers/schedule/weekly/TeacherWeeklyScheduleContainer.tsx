@@ -101,7 +101,7 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
         schedule={{
           teacherId: schedule.teacherId || "",
           teacherName,
-          weeklyHoursWorked: workload?.weeklyHoursWorked ?? "0:00",
+          weeklyHoursWorked: workload?.weeklyHoursWorked ? Number(workload.weeklyHoursWorked) : 0,
           classes: (schedule.classes || []).map(c => ({
             id: c.id || "",
             studentName: c.studentName || "",

@@ -87,6 +87,30 @@ export const profile: ProfileLabels = {
       activated: "Activated",
       deactivated: "Deactivated",
     },
+    shell: {
+      tabs: {
+        profile: "Profile",
+        paymentMethods: "Payment Methods",
+        meeting: "Meeting Settings",
+        students: "Students",
+        notifications: "Notifications",
+        permissions: "Permissions",
+      },
+      loading: "Loading profile...",
+      error: {
+        retry: "Retry",
+      },
+    },
+    actions: {
+      edit: "Edit Profile",
+      save: "Save Changes",
+      cancel: "Cancel",
+      retry: "Retry",
+    },
+    errors: {
+      failedToLoad: "Failed to load profile.",
+      notFound: "Profile not found.",
+    },
   },
   parent: {
     ownSubtitle: "View and update your contact and communication details.",
@@ -125,6 +149,7 @@ export const profile: ProfileLabels = {
       on_trial: "On Trial",
       on_leave: "On Leave",
       suspended: "Suspended",
+      deactivated: "Deactivated",
     },
     accountStatus: {
       activated: "Activated",
@@ -171,6 +196,7 @@ export const profile: ProfileLabels = {
         deactivated: "Deactivated",
       },
     },
+    notSet: "Not set",
   },
   staff: {
     ownSubtitle: "View and update your account and contact details.",

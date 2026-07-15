@@ -87,6 +87,30 @@ export const profile: ProfileLabels = {
       activated: "مفعّل",
       deactivated: "غير مفعّل",
     },
+    shell: {
+      tabs: {
+        profile: "الملف الشخصي",
+        paymentMethods: "طرق الدفع",
+        meeting: "إعدادات الاجتماع",
+        students: "الطلاب",
+        notifications: "الإشعارات",
+        permissions: "الصلاحيات",
+      },
+      loading: "جارٍ تحميل الملف الشخصي...",
+      error: {
+        retry: "أعد المحاولة",
+      },
+    },
+    actions: {
+      edit: "تعديل الملف الشخصي",
+      save: "حفظ التغييرات",
+      cancel: "إلغاء",
+      retry: "إعادة المحاولة",
+    },
+    errors: {
+      failedToLoad: "Failed to load profile.",
+      notFound: "Profile not found.",
+    },
   },
   parent: {
     ownSubtitle: "عرض وتحديث بيانات الاتصال والتواصل الخاصة بك.",
@@ -125,6 +149,7 @@ export const profile: ProfileLabels = {
       on_trial: "فترة تجريبية",
       on_leave: "في إجازة",
       suspended: "موقوف",
+      deactivated: "غير مفعّل",
     },
     accountStatus: {
       activated: "مفعّل",
@@ -171,6 +196,7 @@ export const profile: ProfileLabels = {
         deactivated: "غير مفعّل",
       },
     },
+    notSet: "غير محدد",
   },
   staff: {
     ownSubtitle: "عرض وتحديث بيانات حسابك ومعلومات الاتصال.",

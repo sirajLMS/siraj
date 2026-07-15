@@ -6,8 +6,19 @@ export const classList: TeacherClassListLabels = {
   noClasses: "No classes found.",
   viewDetails: "View Details",
   viewClassAudit: "View Class Audit",
+  joinVideo: "Join Video",
   durationMinutes: minutes => `${minutes} min`,
   errors: {
     failedToLoad: "Failed to load classes.",
+  },
+  statusLabels: {
+    PENDING: "Pending",
+    TAKEN: "Taken",
+    ABSENT: "Absent",
+    LEAVE: "Leave",
+    NOT_ACTIVATED: "Not Activated",
+    ACTIVATED: "Activated",
+    RUNNING: "Running",
+    COMPLETED: "Completed",
   },
 };

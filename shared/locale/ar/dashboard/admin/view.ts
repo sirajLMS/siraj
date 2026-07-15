@@ -1,6 +1,10 @@
 import type { AdminViewLabels } from "@/shared/locale/types/dashboard/admin/view";
 
 export const view: AdminViewLabels = {
+  admin: {
+    pageTitle: "لوحة تحكم المسؤول",
+    roleLabel: "دور المسؤول",
+  },
   timezone: {
     title: "تم اكتشاف تعارض في المنطقة الزمنية",
     prefix: "التوقيت المحلي للطالب (",

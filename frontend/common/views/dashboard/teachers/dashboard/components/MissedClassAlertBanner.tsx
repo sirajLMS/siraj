@@ -12,7 +12,7 @@ interface MissedClassAlertBannerProps {
 }
 
 export function MissedClassAlertBanner({ alert, labels, fixed = false }: Readonly<MissedClassAlertBannerProps>) {
-  const description = labels.description.replace("{classId}", alert.classId).replace("{time}", alert.scheduledTime);
+  const description = labels.description(alert.classId, alert.scheduledTime);
 
   return (
     <Alert

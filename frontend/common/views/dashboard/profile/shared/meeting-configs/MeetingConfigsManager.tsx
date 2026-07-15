@@ -46,7 +46,7 @@ function useMeetingConfigsState(targetUserId: string) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const configs = data?.userMeetingConfigs ?? [];
+  const configs = useMemo(() => data?.userMeetingConfigs ?? [], [data?.userMeetingConfigs]);
 
   const configById = useMemo(() => {
     const map = new Map<string, UserMeetingConfigFieldsFragment>();
@@ -247,9 +247,9 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
         errorMessage={state.errorMessage}
         existingCount={configs.length}
         onCloseForm={state.closeForm}
-        onSaved={() => void state.handleSaved()}
+        onSaved={state.handleSaved}
         onCloseDelete={() => state.setDeleteId(null)}
-        onConfirmDelete={() => void state.handleConfirmDelete()}
+        onConfirmDelete={state.handleConfirmDelete}
         onCloseSuccess={() => state.setShowSuccess(false)}
         onCloseError={() => state.setErrorMessage(null)}
         successMessage={t.saved}

@@ -208,7 +208,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
 
   const openProofDialog = (invoice: MarkPaidInvoiceTarget, mode: SubmitPaymentProofDialogMode) => {
     if (billingActionsDisabled) {
-      showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
+      showFeedback(tErrors.auth.impersonationNotAllowedDuringSession, "error");
       return;
     }
     setProofMode(mode);
@@ -249,12 +249,12 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
 
   const handleQuickPay = () => {
     if (billingActionsDisabled) {
-      showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
+      showFeedback(tErrors.auth.impersonationNotAllowedDuringSession, "error");
       return;
     }
 
     if (summaryLoading) {
-      showFeedback(tc("loading"), "info");
+      showFeedback(tc.loading, "info");
       return;
     }
 
@@ -296,7 +296,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
   if (error) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, mt: 8 }}>
-        <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>
+        <StyledErrorTypography>{tc.loadFailed}</StyledErrorTypography>
         <Button variant="outlined" onClick={refreshBillingData}>
           {labels.errors.retry}
         </Button>
@@ -328,6 +328,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
     totalCount,
     onPageChange: setPage,
     loading: loading || isSearchPending,
+    userId,
   };
 
   return (
@@ -345,7 +346,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
             </Button>
           }
         >
-          {tc("loadFailed")}
+          {tc.loadFailed}
         </Alert>
       ) : null}
       <UserBillingProfileView {...viewProps} />

@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
+import { formatDistanceToNow } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type { EffectiveMeeting } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -180,7 +181,7 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
 function mapProgressFeed(
   feed: readonly RawFeedItem[] | null | undefined,
   labels: ReturnType<typeof buildTeacherDashboardLabels>["progressFeed"],
-  durationTemplate: string,
+  durationTemplate: (minutes: number) => string,
   formatRelativeTime: (value: Date) => string
 ) {
   return buildStudentProgressFeedItems(feed, labels, durationTemplate, formatRelativeTime);
@@ -188,7 +189,7 @@ function mapProgressFeed(
 
 export function TeacherDashboardContainer() {
   const t = useAppTranslation("dashboard.teacherDashboard");
-  const dashboardT = useAppTranslation("dashboard");
+  const dashboardT = useAppTranslation("dashboard.admin");
   const tJoin = useAppTranslation("ui.meetingConfig.join");
   const router = useRouter();
   const permissions = useUserStore(state => state.permissions);
@@ -311,7 +312,7 @@ export function TeacherDashboardContainer() {
       dashboardData?.teacherDashboard?.progressFeed,
       labels.progressFeed,
       labels.schedule.durationValue,
-      value => formatter.relativeTime(value, { now: dataArrivedAt })
+      value => formatDistanceToNow(new Date(value), { addSuffix: true, locale: undefined })
     );
   }, [
     dashboardData?.teacherDashboard?.progressFeed,
@@ -347,7 +348,7 @@ export function TeacherDashboardContainer() {
         },
       },
     });
-    setSnackbarMessage(lessonReportI18n("submitReport"));
+    setSnackbarMessage(lessonReportI18n.submitReport);
     setSnackbarSeverity("success");
     setSnackbarOpen(true);
     await refetch();

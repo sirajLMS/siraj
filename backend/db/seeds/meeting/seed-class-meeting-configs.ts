@@ -3,6 +3,7 @@ import logger from "@/backend/lib/logger";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import type { ClassInstanceEntity } from "@/backend/types";
+import type { MeetingProviderReturnType } from "@/backend/types/meeting/meeting-provider.types";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export async function seedOrGet(classInstancesList: ClassInstanceEntity[], config?: SeedConfig) {
@@ -14,7 +15,7 @@ export async function seedOrGet(classInstancesList: ClassInstanceEntity[], confi
   }
 
   const providers = await MeetingProviderCatalogService.listAllProviders();
-  const zoom = providers.find(provider => provider.slug === "zoom");
+  const zoom = providers.find((provider: MeetingProviderReturnType) => provider.slug === "zoom");
   if (!zoom) {
     throw new Error("Missing Zoom provider required for class meeting config seeds.");
   }

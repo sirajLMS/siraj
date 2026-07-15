@@ -11,7 +11,6 @@ import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/commo
 import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { logger } from "@/frontend/common/utils/logger";
 import { TeacherAvailabilityView } from "@/frontend/common/views/dashboard/teachers/availability/TeacherAvailabilityView";
 import type {
@@ -132,7 +131,6 @@ function computeInsights(data: AvailabilitySearchData | null | undefined): Teach
 export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId: string }>) {
   const t = useAppTranslation("dashboard.teacherAvailability");
   const tc = useAppTranslation("common");
-  const _locale = useAppLocale();
   const notifications = useNotifications();
   useDocumentTitle(null, "dashboard.teacherAvailability", "pageTitle");
 

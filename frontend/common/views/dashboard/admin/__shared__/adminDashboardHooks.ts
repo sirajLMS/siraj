@@ -1,15 +1,49 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { adminDashboardScheduleQueryDocument, teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
 import { resolveDailyScheduleMetricFilter } from "@/frontend/common/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export const ADMIN_DASHBOARD_PAGE_SIZE = 10;
+
+/** Tracks when dashboard data first arrives and computes an elapsed-time label that updates every minute. */
+export function useLastUpdatedLabel(data: unknown) {
+  const admin = useAppTranslation("dashboard.admin");
+
+  const [dataArrivedAt, setDataArrivedAt] = useState<number | null>(null);
+  const [lastUpdated, setLastUpdated] = useState(admin.updatedJustNow);
+
+  useEffect(() => {
+    if (data && dataArrivedAt === null) {
+      setDataArrivedAt(Date.now());
+    }
+  }, [data, dataArrivedAt]);
+
+  useEffect(() => {
+    if (dataArrivedAt === null) {
+      setLastUpdated(admin.updatedJustNow);
+      return;
+    }
+    const computeLabel = () => {
+      const elapsedMin = Math.floor((Date.now() - dataArrivedAt) / 60000);
+      if (elapsedMin < 1) return admin.updatedJustNow;
+      return admin.updatedMinutesAgo(elapsedMin);
+    };
+    setLastUpdated(computeLabel());
+    const interval = setInterval(() => {
+      setLastUpdated(computeLabel());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [dataArrivedAt, admin]);
+
+  return lastUpdated;
+}
 
 /** Fetches the admin dashboard schedule with pagination and filter variables derived from the dashboard store. */
 export function useAdminScheduleQuery() {

@@ -12,7 +12,6 @@ interface InitializingUIProps {
 }
 
 export function InitializingUI({ error, onRetry, t }: InitializingUIProps) {
-  const common = t;
   return (
     <Box
       sx={{
@@ -27,9 +26,9 @@ export function InitializingUI({ error, onRetry, t }: InitializingUIProps) {
       {error && t ? (
         <>
           <ErrorIcon color="error" sx={{ fontSize: 48 }} />
-          <Typography color="error">{common.serverConnectionLost}</Typography>
+          <Typography color="error">{t.serverConnectionLost}</Typography>
           <Button onClick={onRetry} variant="contained">
-            {common.retry}
+            {t.retry}
           </Button>
         </>
       ) : (

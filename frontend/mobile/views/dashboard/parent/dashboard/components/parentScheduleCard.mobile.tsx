@@ -16,14 +16,6 @@ export interface ParentScheduleMobileCardItemProps {
   readonly labels: ParentDashboardLabels;
 }
 
-function formatDuration(template: string, minutes: number): string {
-  return template.replace("{minutes}", String(minutes));
-}
-
-function formatTeacherLabel(template: string, name: string): string {
-  return template.replace("{name}", name);
-}
-
 /**
  * Parent-schedule card rendered for each row via the `renderItem` callback
  * of `MobileCardList`. Uses the shared `MobileCardListItem` shell with
@@ -32,7 +24,7 @@ function formatTeacherLabel(template: string, name: string): string {
 export function ParentScheduleCardMobile({ row, labels }: Readonly<ParentScheduleMobileCardItemProps>): ReactNode {
   const studentProfileHref = row.studentId ? studentHref(row.studentId) : undefined;
   const teacherProfileHref = profileHrefForTeacher({ teacherId: row.teacherId });
-  const teacherLabel = formatTeacherLabel(labels.schedule.teacherLabel, row.teacherName);
+  const teacherLabel = labels.schedule.teacherLabel(row.teacherName);
 
   return (
     <MobileCardListItem
@@ -57,7 +49,7 @@ export function ParentScheduleCardMobile({ row, labels }: Readonly<ParentSchedul
               {row.classTime}
             </Typography>
             <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {formatDuration(labels.schedule.duration, row.durationMinutes)}
+              {labels.schedule.duration(row.durationMinutes)}
             </Typography>
           </Box>
         </Stack>

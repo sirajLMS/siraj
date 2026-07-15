@@ -31,17 +31,51 @@ export type UserPaymentMethodAutocompleteProps = {
   readonly style?: React.CSSProperties;
 };
 
-function resolvePaymentMethodLabel(t: PaymentMethodLabels, key: string): string {
-  const parts = key.split(".");
-  let current: unknown = t;
-  for (const part of parts) {
-    if (current && typeof current === "object" && part in current) {
-      current = (current as Record<string, unknown>)[part];
-    } else {
-      return key;
+function createPaymentMethodResolver(
+  tType: PaymentMethodLabels["type"],
+  tDirection: PaymentMethodLabels["direction"],
+  tIdentifier: PaymentMethodLabels["identifier"],
+  tSelect: PaymentMethodLabels["select"],
+  tDisplay: PaymentMethodLabels["display"]
+): (key: string) => string {
+  return (key: string): string => {
+    switch (key) {
+      case "type.mobileWallet":
+        return tType.mobileWallet;
+      case "type.paymentLink":
+        return tType.paymentLink;
+      case "type.onlineAccount":
+        return tType.onlineAccount;
+      case "type.bankTransfer":
+        return tType.bankTransfer;
+      case "type.cash":
+        return tType.cash;
+      case "type.proofUpload":
+        return tType.proofUpload;
+      case "direction.in":
+        return tDirection.in;
+      case "direction.out":
+        return tDirection.out;
+      case "direction.both":
+        return tDirection.both;
+      case "identifier.email":
+        return tIdentifier.email;
+      case "identifier.handle":
+        return tIdentifier.handle;
+      case "identifier.emailOrHandle":
+        return tIdentifier.emailOrHandle;
+      case "select.selectMethod":
+        return tSelect.selectMethod;
+      case "select.searchByNameOrSlug":
+        return tSelect.searchByNameOrSlug;
+      case "select.required":
+        return tSelect.required;
+      case "display.defaultBadge":
+        return tDisplay.defaultBadge;
+      default:
+        return key;
     }
-  }
-  return typeof current === "string" ? current : key;
+  };
 }
 
 const filterOptions = createFilterOptions<UserPaymentMethodFieldsFragment>({
@@ -64,13 +98,16 @@ export function UserPaymentMethodAutocomplete({
   onBlurAction,
   style,
 }: UserPaymentMethodAutocompleteProps): React.ReactNode {
-  const tUi = useAppTranslation("ui.paymentMethod");
-  const tSelect = tUi.select;
+  const t = useAppTranslation("ui.paymentMethod");
+
+  const resolveLabel = useMemo(
+    () => createPaymentMethodResolver(t.type, t.direction, t.identifier, t.select, t.display),
+    [t]
+  );
 
   const getOptionLabel = useCallback(
-    (method: UserPaymentMethodFieldsFragment) =>
-      userPaymentMethodToOptionLabel(method, key => resolvePaymentMethodLabel(tUi, key)),
-    [tUi]
+    (method: UserPaymentMethodFieldsFragment) => userPaymentMethodToOptionLabel(method, resolveLabel),
+    [resolveLabel]
   );
 
   const normalizedOptions = useMemo(
@@ -80,7 +117,7 @@ export function UserPaymentMethodAutocomplete({
 
   const showRequiredError = Boolean(required) && !value;
   const showError = Boolean(error) || showRequiredError;
-  const resolvedHelperText = helperText ?? (showRequiredError ? tSelect.required : undefined);
+  const resolvedHelperText = helperText ?? (showRequiredError ? t.select.required : undefined);
 
   return (
     <Autocomplete<UserPaymentMethodFieldsFragment, false, false, false>
@@ -101,16 +138,14 @@ export function UserPaymentMethodAutocomplete({
       filterOptions={filterOptions}
       renderOption={(props, method) => {
         const { key, ...optionProps } = props;
-        const typeLabel = method.type
-          ? getPaymentMethodTypeLabel(method.type, key => resolvePaymentMethodLabel(tUi, key))
-          : "";
+        const typeLabel = method.type ? getPaymentMethodTypeLabel(method.type, resolveLabel) : "";
         return (
           <Box key={key} component="li" sx={{ px: 2, py: 1 }} {...optionProps}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
               <Typography variant="bodyMd" sx={{ flex: 1, minWidth: 0 }} noWrap>
-                {userPaymentMethodToOptionLabel(method, key => resolvePaymentMethodLabel(tUi, key))}
+                {userPaymentMethodToOptionLabel(method, resolveLabel)}
               </Typography>
-              {method.isDefault ? <Chip size="small" label={tUi.display.defaultBadge} /> : null}
+              {method.isDefault ? <Chip size="small" label={t.display.defaultBadge} /> : null}
               {typeLabel ? (
                 <Typography variant="labelMd" sx={{ color: "text.secondary", flexShrink: 0 }}>
                   {typeLabel}
@@ -123,8 +158,8 @@ export function UserPaymentMethodAutocomplete({
       renderInput={params => (
         <TextField
           {...params}
-          label={label ?? tSelect.selectMethod}
-          placeholder={placeholder ?? tSelect.searchByNameOrSlug}
+          label={label ?? t.select.selectMethod}
+          placeholder={placeholder ?? t.select.searchByNameOrSlug}
           required={required}
           error={showError}
           helperText={resolvedHelperText}

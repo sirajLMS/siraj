@@ -150,7 +150,7 @@ export function StudentDashboardDesktopView({
     <PageContainer>
       <Box sx={{ mb: 3 }}>
         <Typography variant="headlineLg" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
-          {labels.welcomeMessage.replace("{name}", userName ?? "")}
+          {labels.welcomeMessage(userName ?? "")}
         </Typography>
         <Button variant="text" sx={theme => ({ mt: 1, color: theme.palette.primary.main })} onClick={onEditProfile}>
           {labels.pageTitle}

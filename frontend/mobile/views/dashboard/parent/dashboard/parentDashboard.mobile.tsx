@@ -85,6 +85,7 @@ export function ParentDashboardMobileView({
           userName={userName}
           welcomeBackLabel={labels.welcomeBack}
           pendingMessagesLabel={labels.pendingMessages}
+          pendingMessagesCount={metrics.pendingMessages}
         />
 
         <Grid container spacing={2}>

@@ -83,7 +83,7 @@ export function TeacherAvailabilityCalendarGrid({
 
   return (
     <CalendarGridContainer>
-      <CalendarWeekdayHeader translateDay={day => t.calendar.days[day]} />
+      <CalendarWeekdayHeader translateDay={day => t.calendar.days[day as keyof typeof t.calendar.days]} />
 
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
         {emptyStartDays.map(day => (

@@ -156,12 +156,12 @@ export function ScheduleAlertsContainer() {
   const metrics: AlertsMetric[] = [];
   const labels = buildScheduleLabels(t);
 
-  const metricLabels = Object.fromEntries(
+  const metricLabels: Record<string, { label: string; subLabel: string }> = Object.fromEntries(
     metrics.map(metric => [
       metric.key,
       {
-        label: t[metric.labelKey.replace("dashboard.scheduleAlerts.", "") as keyof typeof t],
-        subLabel: t[metric.subLabelKey.replace("dashboard.scheduleAlerts.", "") as keyof typeof t],
+        label: String(t[metric.labelKey.replace("dashboard.scheduleAlerts.", "") as keyof typeof t]),
+        subLabel: String(t[metric.subLabelKey.replace("dashboard.scheduleAlerts.", "") as keyof typeof t]),
       },
     ])
   );

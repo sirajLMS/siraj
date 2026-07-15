@@ -6,7 +6,7 @@ export const dashboard: TeacherDashboardLabels = {
   overviewTitle: "نظرة عامة",
   todayChip: "اليوم",
   updatedJustNow: "تم التحديث الآن",
-  updatedMinutesAgo: "تم التحديث منذ {minutes, plural, =1 {دقيقة} other {# دقائق}}",
+  updatedMinutesAgo: (minutes: number) => `تم التحديث منذ ${minutes} ${minutes === 1 ? "دقيقة" : "دقائق"}`,
   metrics: {
     totalClasses: "إجمالي الحصص",
     missedSlots: "الحصص الفائتة",
@@ -20,10 +20,10 @@ export const dashboard: TeacherDashboardLabels = {
     completed: "المكتملة",
   },
   activeWelcome: {
-    title: "مرحباً بعودتك، {name}",
-    subtitle: "اليوم {date}. لديك {count} حصة مجدولة.",
+    title: (name: string) => `مرحباً بعودتك، ${name}`,
+    subtitle: (date: string, count: number) => `اليوم ${date}. لديك ${count} حصة مجدولة.`,
     overviewLabel: "نظرة عامة على لوحة التحكم",
-    mobileSummary: "{date} • {count} حصة نشطة",
+    mobileSummary: (date: string, count: number) => `${date} • ${count} حصة نشطة`,
   },
   schedule: {
     title: "الحصص اليومية",
@@ -35,13 +35,13 @@ export const dashboard: TeacherDashboardLabels = {
     status: "الحالة",
     contact: "التواصل",
     actions: "الإجراءات",
-    showing: "عرض {shown} من {total} حصة مجدولة لليوم.",
+    showing: (shown: number, total: number) => `عرض ${shown} من ${total} حصة مجدولة لليوم.`,
     noEntries: "لا توجد حصص مجدولة لليوم",
     sessionEnded: "انتهت الحصة",
     frozen: "مجمّد",
     contactAdmin: "تواصل مع المشرف (تجميد)",
     duration: "المدة",
-    durationValue: "{minutes} دقيقة",
+    durationValue: (minutes: number) => `${minutes} دقيقة`,
     current: "الحالية",
     viewAll: "عرض الكل",
   },
@@ -98,7 +98,8 @@ export const dashboard: TeacherDashboardLabels = {
   },
   alert: {
     title: "فاتتك وقت الحصة",
-    description: "كانت الحصة {classId} مجدولة الساعة {time}. يرجى التواصل مع الإدارة لإعادة الجدولة.",
+    description: (classId: string, time: string) =>
+      `كانت الحصة ${classId} مجدولة الساعة ${time}. يرجى التواصل مع الإدارة لإعادة الجدولة.`,
   },
   policy: {
     title: "سياسة التفعيل",
@@ -144,7 +145,7 @@ export const dashboard: TeacherDashboardLabels = {
     createFailed: "فشل إنشاء إدخال الحصة اليدوية.",
     teacherIdNotFound: "لم يتم العثور على معرف المعلم.",
   },
-  supportRequestSubmitted: "تم إرسال طلب الدعم إلى {type}.",
+  supportRequestSubmitted: (type: string) => `تم إرسال طلب الدعم إلى ${type}.`,
   rules: {
     pageTitle: "القواعد والسياسات",
     pageSubtitle: "سياسة التفعيل وموارد دليل المعلم.",

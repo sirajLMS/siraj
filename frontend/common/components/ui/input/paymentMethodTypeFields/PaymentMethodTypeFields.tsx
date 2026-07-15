@@ -83,7 +83,8 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
   detailsPrefix,
   catalogPrefix,
 }: PaymentMethodTypeFieldsProps<T>): React.ReactNode {
-  const t = useAppTranslation("ui.paymentMethod.typeFields");
+  const t = useAppTranslation("ui.paymentMethod");
+  const tTypeFields = t.typeFields;
 
   const renderCatalogMetadata = () => {
     if (!showCatalogMetadata) {
@@ -95,20 +96,20 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
         <LocalizedStringFormField
           name={resolveFieldName<T>(catalogPrefix, "name")}
           control={control}
-          label={t.name}
+          label={tTypeFields.name}
           disabled={disabled}
           required
         />
         <LocalizedStringFormField
           name={resolveFieldName<T>(catalogPrefix, "description")}
           control={control}
-          label={t.description}
+          label={tTypeFields.description}
           disabled={disabled}
         />
         <LocalizedStringFormField
           name={resolveFieldName<T>(catalogPrefix, "instructions")}
           control={control}
-          label={t.instructions}
+          label={tTypeFields.instructions}
           disabled={disabled}
           multiline
         />
@@ -147,7 +148,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
             control={control}
             render={({ field }) => (
               <TagInput
-                label={t.urlAllowlist}
+                label={tTypeFields.urlAllowlist}
                 initialTags={[...(field.value ?? [])]}
                 onChange={tags => field.onChange(tags)}
               />
@@ -172,7 +173,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
                 options={walletOptions}
                 setOptionAction={option => onWalletChangeAction?.(option)}
                 type={PaymentMethodType.MobileWallet}
-                label={t.wallet}
+                label={tTypeFields.wallet}
                 disabled={disabled}
                 required
                 error={Boolean(fieldState.error)}
@@ -184,7 +185,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
           <PhoneFormField
             name={resolveFieldName<T>(detailsPrefix, "phone")}
             control={control}
-            label={t.phone}
+            label={tTypeFields.phone}
             disabled={disabled}
             required
             fullWidth
@@ -204,7 +205,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
                 options={paymentLinkOptions}
                 setOptionAction={option => onPaymentLinkChangeAction?.(option)}
                 type={PaymentMethodType.PaymentLink}
-                label={t.paymentLink}
+                label={tTypeFields.paymentLink}
                 disabled={disabled}
                 required
                 error={Boolean(fieldState.error)}
@@ -218,7 +219,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
             control={control}
             render={({ field, fieldState }) => (
               <TextField
-                label={t.url}
+                label={tTypeFields.url}
                 value={field.value ?? ""}
                 disabled={disabled}
                 required
@@ -245,7 +246,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
                 options={onlineAccountOptions}
                 setOptionAction={option => onOnlineAccountChangeAction?.(option)}
                 type={PaymentMethodType.OnlineAccount}
-                label={t.onlineAccount}
+                label={tTypeFields.onlineAccount}
                 disabled={disabled}
                 required
                 error={Boolean(fieldState.error)}
@@ -259,7 +260,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
             control={control}
             render={({ field, fieldState }) => (
               <TextField
-                label={t.identifier}
+                label={tTypeFields.identifier}
                 value={field.value ?? ""}
                 disabled={disabled}
                 required
@@ -280,7 +281,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
             control={control}
             render={({ field, fieldState }) => (
               <TextField
-                label={t.beneficiaryName}
+                label={tTypeFields.beneficiaryName}
                 value={field.value ?? ""}
                 disabled={disabled}
                 fullWidth
@@ -295,7 +296,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
             control={control}
             render={({ field, fieldState }) => (
               <TextField
-                label={t.bankName}
+                label={tTypeFields.bankName}
                 value={field.value ?? ""}
                 disabled={disabled}
                 fullWidth
@@ -310,7 +311,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
             control={control}
             render={({ field, fieldState }) => (
               <TextField
-                label={t.iban}
+                label={tTypeFields.iban}
                 value={field.value ?? ""}
                 disabled={disabled}
                 fullWidth
@@ -326,7 +327,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
             control={control}
             render={({ field, fieldState }) => (
               <TextField
-                label={t.swiftBic}
+                label={tTypeFields.swiftBic}
                 value={field.value ?? ""}
                 disabled={disabled}
                 fullWidth
@@ -342,7 +343,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
             control={control}
             render={({ field, fieldState }) => (
               <TextField
-                label={t.accountNumber}
+                label={tTypeFields.accountNumber}
                 value={field.value ?? ""}
                 disabled={disabled}
                 fullWidth
@@ -358,7 +359,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
             control={control}
             render={({ field, fieldState }) => (
               <TextField
-                label={t.routingNumber}
+                label={tTypeFields.routingNumber}
                 value={field.value ?? ""}
                 disabled={disabled}
                 fullWidth
@@ -379,7 +380,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
             control={control}
             render={({ field, fieldState }) => (
               <TextField
-                label={t.note}
+                label={tTypeFields.note}
                 value={field.value ?? ""}
                 disabled={disabled}
                 fullWidth

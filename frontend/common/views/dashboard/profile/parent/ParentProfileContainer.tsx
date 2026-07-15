@@ -194,7 +194,7 @@ export function ParentProfileContainer({
 
   const parentData = buildEditSource(scope, profile);
   if (!parentData) {
-    return <ErrorState embedded message={tc("errors.notFound")} />;
+    return <ErrorState embedded message={t.errors.notFound} />;
   }
 
   const avatarUrl = profile.avatarUrl ?? ("avatarUrl" in parentData ? parentData.avatarUrl : null);

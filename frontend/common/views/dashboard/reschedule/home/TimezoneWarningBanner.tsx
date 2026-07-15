@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function TimezoneWarningBanner({ timezone }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.rescheduleForm.warning");
+  const t = useAppTranslation("dashboard.rescheduleForm");
 
   return (
     <Box
@@ -27,9 +27,9 @@ export function TimezoneWarningBanner({ timezone }: Readonly<Props>) {
     >
       <InfoOutlined sx={theme => ({ color: theme.palette.onWarningContainer })} />
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onWarningContainer })}>
-        {t.prefix}
+        {t.warning.prefix}
         <TimezoneDisplay timezone={timezone} sx={theme => ({ color: theme.palette.onWarningContainer })} />
-        {t.suffix}
+        {t.warning.suffix}
       </Typography>
     </Box>
   );

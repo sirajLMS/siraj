@@ -37,4 +37,15 @@ export const lifecycle: ParentLifecycleLabels = {
   errors: {
     invalidId: "Invalid parent ID.",
   },
+  status: {
+    regular: "Regular",
+    on_trial: "On Trial",
+    on_leave: "On Leave",
+    suspended: "Suspended",
+    deactivated: "Deactivated",
+  },
+  accountStatus: {
+    activated: "Activated",
+    deactivated: "Deactivated",
+  },
 };

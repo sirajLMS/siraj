@@ -106,7 +106,10 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
 
   if (meetingJoinUrl) {
     const meetingUrlOverlaps = await tx
-      .select({ id: classInstances.id })
+      .select({
+        id: classInstances.id,
+        meetingJoinUrl: classInstances.meetingJoinUrl,
+      })
       .from(classInstances)
       .where(
         and(
@@ -117,6 +120,11 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
       );
 
     for (const row of meetingUrlOverlaps) {
+      // Check direct meetingJoinUrl column first
+      if (row.meetingJoinUrl === meetingJoinUrl) {
+        throw new Error(tErrors.meetingUrlInUse);
+      }
+      // Also check resolved meeting URL from config service
       const resolved = await EffectiveMeetingService.resolveForClassInstance(row.id, tErrors, tx);
       if (resolved.joinUrl === meetingJoinUrl) {
         throw new Error(tErrors.meetingUrlInUse);

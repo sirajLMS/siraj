@@ -39,8 +39,7 @@ export function extractScheduleSummary(scheduleResult: ScheduleResultLike | null
 
 /** Computes the selected metric label from the active filter status. */
 export function buildSelectedMetricLabel(t: TranslationObject, selectedStatus: AdminMetricKey | null): string | null {
-  const admin = t.admin;
-  return selectedStatus ? (admin.metrics[selectedStatus] ?? null) : null;
+  return selectedStatus ? (t.metrics[selectedStatus] ?? null) : null;
 }
 
 export interface BuildAdminDashboardViewPropsParams {

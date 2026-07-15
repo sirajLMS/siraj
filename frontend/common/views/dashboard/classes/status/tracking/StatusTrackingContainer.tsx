@@ -102,7 +102,7 @@ export function StatusTrackingContainer() {
       <StatusTrackingView
         metrics={metrics}
         rows={rows}
-        totalSessions={labels.totalSessions(rows.length)}
+        totalSessions={rows.length}
         suspendedCount={suspendedCount}
         labels={labels}
         onActivate={handleActivate}

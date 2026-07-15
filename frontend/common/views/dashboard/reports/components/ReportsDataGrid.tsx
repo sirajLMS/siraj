@@ -152,7 +152,19 @@ export function ReportsDataGrid({
           sortable: false,
           renderCell: ({ row }) => (
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
-              {formatReportPaidAmounts(row.paidAmounts, locale, buildFxDisplayMessages(t, tErrors))}
+              {formatReportPaidAmounts(
+                row.paidAmounts,
+                locale,
+                buildFxDisplayMessages(
+                  {
+                    convertedAmount: t.convertedAmount,
+                  },
+                  tErrors,
+                  {
+                    convertedTotalApprox: t.convertedTotalApprox,
+                  }
+                )
+              )}
             </Typography>
           ),
         }

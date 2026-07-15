@@ -45,5 +45,6 @@ export const main: SubjectsLabels = {
     noResources: "No resources attached to this subject.",
     notFound: "Subject not found.",
     untitledResource: "Untitled Resource",
+    download: "Download",
   },
 };

@@ -4,7 +4,7 @@ export interface TeacherDashboardLabels {
   readonly overviewTitle: string;
   readonly todayChip: string;
   readonly updatedJustNow?: string;
-  readonly updatedMinutesAgo?: string;
+  readonly updatedMinutesAgo?: (minutes: number) => string;
   readonly metrics: {
     readonly totalClasses: string;
     readonly missedSlots: string;
@@ -18,10 +18,10 @@ export interface TeacherDashboardLabels {
     readonly completed: string;
   };
   readonly activeWelcome: {
-    readonly title: string;
-    readonly subtitle: string;
+    readonly title: (name: string) => string;
+    readonly subtitle: (date: string, count: number) => string;
     readonly overviewLabel: string;
-    readonly mobileSummary: string;
+    readonly mobileSummary: (date: string, count: number) => string;
   };
   readonly schedule: {
     readonly title: string;
@@ -33,13 +33,13 @@ export interface TeacherDashboardLabels {
     readonly status: string;
     readonly contact: string;
     readonly actions: string;
-    readonly showing: string;
+    readonly showing: (shown: number, total: number) => string;
     readonly noEntries: string;
     readonly sessionEnded: string;
     readonly frozen: string;
     readonly contactAdmin: string;
     readonly duration: string;
-    readonly durationValue: string;
+    readonly durationValue: (minutes: number) => string;
     readonly current: string;
     readonly viewAll: string;
   };
@@ -96,7 +96,7 @@ export interface TeacherDashboardLabels {
   };
   readonly alert: {
     readonly title: string;
-    readonly description: string;
+    readonly description: (classId: string, time: string) => string;
   };
   readonly policy: {
     readonly title: string;
@@ -140,7 +140,7 @@ export interface TeacherDashboardLabels {
     readonly createFailed: string;
     readonly teacherIdNotFound: string;
   };
-  readonly supportRequestSubmitted: string;
+  readonly supportRequestSubmitted: (type: string) => string;
   readonly rules: {
     readonly pageTitle: string;
     readonly pageSubtitle: string;

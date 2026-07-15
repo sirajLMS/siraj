@@ -8,7 +8,7 @@ import { AppPermission, InvoiceStatus } from "@/frontend/common/graphql/generate
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { UserBillingProfileViewProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { UserBillingProfileView } from "@/frontend/common/views/dashboard/users/billing-profile/userBillingProfileView";
-import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
+import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -27,16 +27,16 @@ const mockLabels: BillingLabels = {
   quickPay: "Quick Pay",
   viewAllNegativeBalance: "View All Students with Negative Balance",
   requiresAttention: "Requires Attention",
-  showingResults: "Showing {shown} of {total} results",
+  showingResults: (shown: number, total: number) => `Showing ${shown} of ${total} results`,
   invalidUserId: "Invalid User ID",
   billingProfileTitle: "User Billing Profile",
-  profileForUser: "Billing profile details for user {userId}",
+  profileForUser: (userId: string) => `Billing profile details for user ${userId}`,
   reminderSent: "Payment reminder sent",
   reminderFailed: "Failed to send payment reminder",
   adminMetrics: {
     totalOutstanding: "Total Outstanding",
     pendingInvoices: "Pending Invoices",
-    negativeBalance: "Negative Balance",
+    negativeBalance: (count: number) => `Negative Balance (${count})`,
     mtdRevenue: "MTD Revenue",
   },
   parentMetrics: {
@@ -133,8 +133,9 @@ const mockLabels: BillingLabels = {
     submit: "Submit",
     submitAndSendEmail: "Submit & Send Email",
     successMessage: "Manual invoice submitted successfully.",
-    createSuccess: "Invoice {id} created successfully",
+    createSuccess: (id: string) => `Invoice ${id} created successfully`,
     manualInvoiceFxNote: "Manual invoice totals use your display currency ({code})",
+    unknown: "Unknown",
     months: {
       jan: "January",
       feb: "February",
@@ -171,7 +172,7 @@ const mockLabels: BillingLabels = {
   deleteInvoiceSuccess: "Invoice deleted",
   deleteInvoiceDialog: {
     title: "Delete Invoice",
-    body: "Delete {invoiceId}?",
+    body: (invoiceId: string) => `Delete ${invoiceId}?`,
     confirm: "Delete",
   },
   hasPaymentProofHint: "Proof on file",
@@ -184,7 +185,7 @@ const mockLabels: BillingLabels = {
     selectFile: "Select proof file",
     fileHint: "PDF or image",
     invalidFileType: "Invalid file type",
-    fileTooLarge: "File is too large",
+    fileTooLarge: (maxMb: number) => `File is too large (max ${maxMb}MB)`,
     cancel: "Cancel",
     errorGeneric: "Failed to submit payment proof",
     invoiceNumber: "Invoice",
@@ -266,7 +267,7 @@ const mockLabels: BillingLabels = {
       subtitle: "Historical exchange rates",
       pairLabel: "Currency Pair",
       empty: "No rate history",
-      maxDays: "Showing last {days} days",
+      maxDays: (days: number) => `Showing last ${days} days`,
       daysLabel: "History range",
     },
     providerSettings: {
@@ -278,7 +279,7 @@ const mockLabels: BillingLabels = {
       confirmBody: "Continue?",
       saveSuccess: "Saved",
       saveFailed: "Failed",
-      lastChangedBy: "Last changed by {name} on {date}",
+      lastChangedBy: (name: string, date: string) => `Last changed by ${name} on ${date}`,
       cancel: "Cancel",
       save: "Save",
     },
@@ -316,10 +317,11 @@ const mockLabels: BillingLabels = {
       dismiss: "Dismiss",
     },
   },
-  fxConversionNote: "Converted totals use your display currency ({code})",
-  fxConversionNoteSubject: "Converted amounts use this user's display currency ({code})",
+  fxConversionNote: (code: string) => `Converted totals use your display currency (${code})`,
+  fxConversionNoteSubject: (code: string) => `Converted amounts use this user's display currency (${code})`,
   adminBillingFxNote: "Metrics use your display currency; each invoice uses its parent's currency",
-  displayCurrencyMixed: "Multiple display currencies detected; showing locked amounts only: {lockedAmount}",
+  displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `Multiple display currencies detected; showing locked amounts only: ${values.lockedAmount}`,
   currencyHedges: {
     pageTitle: "Currency Hedges",
     pageSubtitle: "Manage hedges",
@@ -381,6 +383,10 @@ const mockLabels: BillingLabels = {
     date: "Date",
     paymentMethod: "Payment Method",
   },
+  displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `${values.lockedAmount} ${values.lockedCurrency} (display currency not set)`,
+  displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) =>
+    `${values.lockedAmount} ${values.lockedCurrency} (rates may be stale)`,
 };
 
 const baseProps: UserBillingProfileViewProps = {
@@ -407,6 +413,7 @@ const baseProps: UserBillingProfileViewProps = {
   totalCount: 0,
   onPageChange: () => {},
   loading: false,
+  userId: "test-user-id",
 };
 
 let mediaQueryResult = false;

@@ -8,7 +8,7 @@ import { Controller } from "react-hook-form";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencySymbol } from "@/frontend/common/lib/currency";
 import type { ManualInvoiceFormData } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
-import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
 
 interface ManualInvoiceFeeFieldProps {
   readonly control: Control<ManualInvoiceFormData>;

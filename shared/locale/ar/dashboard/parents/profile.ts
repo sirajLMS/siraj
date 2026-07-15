@@ -4,6 +4,14 @@ export const profile: ParentProfileLabels = {
   pageTitle: "الملف الشخصي لولي الأمر",
   status: {
     regular: "عادي",
+    on_trial: "فترة تجريبية",
+    on_leave: "في إجازة",
+    suspended: "موقوف",
+    deactivated: "غير مفعّل",
+  },
+  accountStatus: {
+    activated: "مفعّل",
+    deactivated: "غير مفعّل",
   },
   actions: {
     editPicture: "تعديل الصورة",

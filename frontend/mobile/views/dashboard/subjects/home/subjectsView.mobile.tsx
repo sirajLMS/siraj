@@ -3,7 +3,6 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
 import { CategoriesSection } from "@/frontend/common/views/dashboard/subjects/home/components/CategoriesSection";
 import { SubjectCard } from "@/frontend/common/views/dashboard/subjects/home/components/SubjectCard";
@@ -28,7 +27,6 @@ export function SubjectsViewMobile({
   canManageCategories,
 }: Readonly<SubjectsViewProps>) {
   const t = useAppTranslation("dashboard.subjects");
-  const _locale = useAppLocale();
   const categoriesSectionOpen = useSubjectManagementStore(state => state.categoriesSectionOpen);
   const toggleCategoriesSection = useSubjectManagementStore(state => state.toggleCategoriesSection);
 

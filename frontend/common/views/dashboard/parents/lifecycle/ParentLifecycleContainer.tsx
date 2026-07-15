@@ -83,7 +83,7 @@ export function ParentLifecycleContainer() {
 
   if (error) {
     logger.error("Error loading parent lifecycle:", { error });
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc.errors.loadFailed}</Typography>;
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc.loadFailed}</Typography>;
   }
 
   if (!parent) {

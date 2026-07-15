@@ -29,6 +29,7 @@ import {
   MAX_PAYMENT_PROOF_FILE_SIZE_BYTES,
   PAYMENT_PROOF_ACCEPT,
 } from "@/shared/constants/billing/payment-proof";
+import { useAppTranslation } from "@/shared/locale/client";
 import { getErrorMessage } from "@/shared/utils/error";
 import { extToMime } from "@/shared/utils/storage.utils";
 
@@ -319,8 +320,8 @@ export function SubmitPaymentProofDialog({
     }
 
     const validation = validatePaymentProofFile(file, {
-      fileTooLarge: values => t("fileTooLarge", values),
-      invalidFileType: t("invalidFileType"),
+      fileTooLarge: values => t.fileTooLarge(values.maxMb),
+      invalidFileType: t.invalidFileType,
     });
     if (!validation.ok) {
       setSelectedFile(null);
@@ -338,7 +339,7 @@ export function SubmitPaymentProofDialog({
     }
 
     if (billingActionsDisabled) {
-      const message = tErrors("auth.impersonationNotAllowedDuringSession");
+      const message = tErrors.auth.impersonationNotAllowedDuringSession;
       setMutationError(message);
       onError?.(message);
       return;
@@ -356,9 +357,9 @@ export function SubmitPaymentProofDialog({
         submitProof: options => submitProof(options),
         markPaid: options => markPaid(options),
         labels: {
-          invalidFileType: t("invalidFileType"),
-          uploadPrepareFailed: t("uploadPrepareFailed"),
-          uploadFailed: t("uploadFailed"),
+          invalidFileType: t.invalidFileType,
+          uploadPrepareFailed: t.uploadPrepareFailed,
+          uploadFailed: t.uploadFailed,
         },
       });
 
@@ -371,7 +372,7 @@ export function SubmitPaymentProofDialog({
       onSuccess?.();
       onClose();
     } catch (error) {
-      const message = getErrorMessage(error) || t("errorGeneric");
+      const message = getErrorMessage(error) || t.errorGeneric;
       setMutationError(message);
       onError?.(message);
     } finally {
@@ -379,8 +380,8 @@ export function SubmitPaymentProofDialog({
     }
   };
 
-  const title = mode === "submit" ? t("titleSubmit") : t("titleMarkPaid");
-  const confirmLabel = mode === "markPaid" && !busy ? t("confirmMarkPaid") : busy ? t("confirming") : t("confirm");
+  const title = mode === "submit" ? t.titleSubmit : t.titleMarkPaid;
+  const confirmLabel = mode === "markPaid" && !busy ? t.confirmMarkPaid : busy ? t.confirming : t.confirm;
   const canConfirm = Boolean(invoiceId && selectedFile && !busy && !billingActionsDisabled);
 
   return (
@@ -399,7 +400,7 @@ export function SubmitPaymentProofDialog({
       <DialogContent>
         {billingActionsDisabled && open ? (
           <Alert severity="warning" sx={{ mb: 2 }}>
-            {t("impersonationBlocked")}
+            {t.impersonationBlocked}
           </Alert>
         ) : null}
         {!displayCurrency ? <DisplayCurrencyHint /> : null}
@@ -409,12 +410,12 @@ export function SubmitPaymentProofDialog({
           mutationError={mutationError}
           selectedFileName={selectedFile?.name ?? null}
           labels={{
-            invoiceNumber: t("invoiceNumber"),
-            amount: t("amount"),
-            dueDate: t("dueDate"),
-            student: t("student"),
-            selectFile: t("selectFile"),
-            fileHint: t("fileHint"),
+            invoiceNumber: t.invoiceNumber,
+            amount: t.amount,
+            dueDate: t.dueDate,
+            student: t.student,
+            selectFile: t.selectFile,
+            fileHint: t.fileHint,
           }}
           fileInputRef={fileInputRef}
           onFileChange={handleFileChange}
@@ -422,7 +423,7 @@ export function SubmitPaymentProofDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} disabled={busy}>
-          {t("cancel")}
+          {t.cancel}
         </Button>
         <Button variant="contained" onClick={() => void handleConfirm()} disabled={!canConfirm}>
           {confirmLabel}

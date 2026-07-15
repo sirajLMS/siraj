@@ -2,21 +2,21 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { complaints, notificationDeliveries } from "@/backend/db/schema";
 import { AppPermission, ComplaintStatus, NotificationDeliveryStatus } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { NotificationAlertReturnType, NotificationAlertsPaginatedReturnType } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace NotificationAlertsService {
   export async function getAlerts(userId: string, locale?: string): Promise<NotificationAlertsPaginatedReturnType> {
     try {
       const canViewAlerts = await PermissionsService.hasPermission(userId, AppPermission.NOTIFICATION_VIEW_ALERTS);
       if (!canViewAlerts) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedAction"));
+        const t = await getServerTranslations(locale ?? "en", "errors");
+        throw new Error(t.unauthorizedAction);
       }
 
-      const tNotifications = await getBackendTranslations({ locale, namespace: "dashboard.core.notifications" });
+      const tNotifications = await getServerTranslations(locale ?? "en", "dashboard.core.notifications");
 
       const unansweredComplaints = await db
         .select({
@@ -48,7 +48,7 @@ export namespace NotificationAlertsService {
         alerts.push({
           id: `complaint-${complaint.id}`,
           type: "complaint",
-          title: tNotifications("newUnansweredComplaint"),
+          title: tNotifications.newUnansweredComplaint,
           body: complaint.body.length > 100 ? `${complaint.body.substring(0, 100)}...` : complaint.body,
           createdAt: complaint.createdAt,
           severity: "warning",
@@ -59,7 +59,7 @@ export namespace NotificationAlertsService {
         alerts.push({
           id: `notification-${notification.id}`,
           type: "notification",
-          title: notification.title ?? tNotifications("defaultSystemNotification"),
+          title: notification.title ?? tNotifications.defaultSystemNotification,
           body: notification.body,
           createdAt: notification.createdAt,
           severity: notification.status === NotificationDeliveryStatus.FAILED ? "error" : "info",

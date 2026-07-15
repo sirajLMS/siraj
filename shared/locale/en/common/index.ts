@@ -29,4 +29,6 @@ export const common: CommonLabels = {
   loading: "Loading...",
   notSet: "Not set",
   errors: "Errors",
+  cancel: "Cancel",
+  save: "Save",
 };

@@ -27,14 +27,14 @@ import { TeacherScheduleCardMobile } from "@/frontend/mobile/views/dashboard/tea
 interface MobileWelcomeHeaderProps {
   readonly userName: string;
   readonly welcomeMobileSummary: string;
-  readonly welcomeTitleTemplate: string;
+  readonly welcomeTitle: (name: string) => string;
 }
 
-function MobileWelcomeHeader({ userName, welcomeMobileSummary, welcomeTitleTemplate }: MobileWelcomeHeaderProps) {
+function MobileWelcomeHeader({ userName, welcomeMobileSummary, welcomeTitle }: MobileWelcomeHeaderProps) {
   return (
     <Stack sx={mergeSx(teacherDashboardContentPaddingSx, { gap: 1 })}>
       <Typography sx={theme => ({ typography: "headlineMd", color: theme.palette.primary.main })}>
-        {welcomeTitleTemplate.replace("{name}", userName)}
+        {welcomeTitle(userName)}
       </Typography>
       <Box
         sx={{
@@ -217,7 +217,7 @@ export function TeacherDashboardMobileView({
           <MobileWelcomeHeader
             userName={userName}
             welcomeMobileSummary={welcomeMobileSummary}
-            welcomeTitleTemplate={labels.activeWelcome.title}
+            welcomeTitle={labels.activeWelcome.title}
           />
 
           <DashboardMetricsSection

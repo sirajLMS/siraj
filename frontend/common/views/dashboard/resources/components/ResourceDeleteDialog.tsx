@@ -12,7 +12,7 @@ export function ResourceDeleteDialog({
   loading = false,
 }: Readonly<ResourceDeleteDialogProps>) {
   const titleName = resourceTitle ?? "this resource";
-  const bodyText = labels.deleteDialog.body.replace("{title}", titleName);
+  const bodyText = labels.deleteDialog.body(titleName);
 
   return (
     <BaseDeleteDialog

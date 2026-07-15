@@ -9,6 +9,8 @@ export interface TeacherProfileLabels {
     readonly teacherInfo: string;
     readonly salaryDetails: string;
     readonly systemConfig: string;
+    readonly stats: string;
+    readonly compensation: string;
   };
   readonly fields: {
     readonly fullName: string;

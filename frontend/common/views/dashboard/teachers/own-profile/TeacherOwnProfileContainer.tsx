@@ -28,7 +28,15 @@ export function TeacherOwnProfileContainer() {
         profile.rateCurrency ?? CurrencyCode.Usd,
         profile.displayAmount,
         locale,
-        buildFxDisplayMessages(tProfile, tErrors)
+        buildFxDisplayMessages(
+          {
+            convertedAmount: tProfile.convertedAmount,
+          },
+          tErrors,
+          {
+            convertedTotalApprox: tProfile.convertedTotalApprox,
+          }
+        )
       )
     : "";
 

@@ -7,7 +7,7 @@ const APP_NAME = "Siraj";
 
 export function useDocumentTitle(
   title: string | null | undefined,
-  fallbackNamespace?: string,
+  fallbackNamespace?: keyof import("@/shared/locale/types/message").MessageSchema,
   fallbackKey?: string,
   values?: Record<string, string | number>
 ): void {
@@ -22,9 +22,11 @@ export function useDocumentTitle(
       const translation = t[fallbackKey as keyof typeof t];
       if (typeof translation === "function") {
         // Handle function translations (like documentTitleTemplate)
-        documentTitle = `${translation(values as never)} | ${APP_NAME}`;
-      } else {
+        documentTitle = `${(translation as (v?: Record<string, string | number>) => string)(values)} | ${APP_NAME}`;
+      } else if (typeof translation === "string") {
         documentTitle = `${translation} | ${APP_NAME}`;
+      } else {
+        return;
       }
     } else {
       return;

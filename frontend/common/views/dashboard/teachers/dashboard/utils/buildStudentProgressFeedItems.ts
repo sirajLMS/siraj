@@ -25,7 +25,7 @@ function toStudentInitials(studentName: string): string {
 function formatFeedSummary(
   item: RawProgressFeedItem,
   labels: TeacherDashboardLabels["progressFeed"],
-  durationTemplate: string
+  durationTemplate: (minutes: number) => string
 ): string {
   const eventKind = (item.eventKind ?? "other") as TeacherProgressFeedEventKind;
   const eventLabel = labels.events[eventKind] ?? labels.events.other;
@@ -35,7 +35,7 @@ function formatFeedSummary(
     parts.push(item.scheduledTimeFormatted);
   }
   if (item.durationMinutes) {
-    parts.push(durationTemplate.replace("{minutes}", String(item.durationMinutes)));
+    parts.push(durationTemplate(item.durationMinutes));
   }
 
   return parts.join(" · ");
@@ -44,7 +44,7 @@ function formatFeedSummary(
 export function buildStudentProgressFeedItems(
   feed: readonly RawProgressFeedItem[] | null | undefined,
   labels: TeacherDashboardLabels["progressFeed"],
-  durationTemplate: string,
+  durationTemplate: (minutes: number) => string,
   formatRelativeTime: (value: Date) => string
 ): StudentProgressFeedItem[] {
   return (feed ?? []).map(item => {

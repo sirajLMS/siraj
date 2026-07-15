@@ -1,10 +1,10 @@
 import { Pool as NeonPool, neonConfig } from "@neondatabase/serverless";
 import { Pool } from "pg";
 import ws from "ws";
+import { runMigrations } from "@/backend/db/scripts/migrate";
 import { getStringEnv, requireEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 import { assertDestructiveDbCommandAllowed } from "@/scripts/lib/destructiveDbGuard";
-import { runMigrations } from "./migrate";
 
 type ResetPool = Pool | NeonPool;
 

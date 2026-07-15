@@ -77,6 +77,9 @@ export interface StatusTrackingDataGridLabels {
   readonly pendingVerification: string;
   readonly sessionEnded: string;
   readonly noEntries: string;
+  readonly showingOf: (shown: number, total: number) => string;
+  readonly previous: string;
+  readonly next: string;
 }
 
 export interface CardListLabels {
@@ -98,7 +101,7 @@ export interface SuspensionAnalyticsLabels {
   readonly suspensionAnalytics: string;
   readonly analyticsNote: string;
   readonly urgentTask: string;
-  readonly accountsLocked: string;
+  readonly accountsLocked: (count: number) => string;
   readonly auditDescription: string;
   readonly openAuditLogs: string;
   readonly suspended: string;
@@ -127,6 +130,7 @@ export interface RawMetric {
   readonly labelKey: string;
   readonly icon: SvgIconComponent;
   readonly variant?: "default" | "error" | "highlight" | "danger" | "compact";
+  readonly subLabel?: string;
 }
 
 export interface StatusTrackingViewProps {
@@ -178,6 +182,7 @@ export interface StatusActionProps {
 
 export interface MobileLayoutProps extends Omit<StatusTrackingViewProps, "suspendedCount"> {
   readonly cardListLabels: CardListLabels;
+  readonly totalSessions: number;
 }
 
 export interface DesktopLayoutProps extends StatusTrackingViewProps {

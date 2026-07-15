@@ -10,7 +10,12 @@ import {
   teacherAssignments,
   users,
 } from "@/backend/db/schema";
-import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
+import {
+  createMockClassInstance,
+  createTestMeetingConfig,
+  createTestMeetingProvider,
+  setupTestEntities,
+} from "@/backend/db/test/entity-setup";
 import { testRepoError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
@@ -98,14 +103,27 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       const start = new Date(now.getTime() + 86400000);
       const end = new Date(start.getTime() + 3600000);
       const zoomUrl = "https://zoom.us/j/123456789";
+      // Create first instance with a meeting config
+      const provider = await createTestMeetingProvider(tx, { slug: `zoom-${randomUUID().slice(0, 8)}` });
+      const config = await createTestMeetingConfig(tx, teacher.userId, provider.id, {
+        details: { meetingUrl: zoomUrl },
+        isDefault: true,
+      });
       await createMockClassInstance(tx, student.id, teacher.id, {
         scheduledStartAt: start,
         scheduledEndAt: end,
+        userMeetingConfigId: config.id,
         meetingJoinUrl: zoomUrl,
       });
       const { student: s2, teacher: t2 } = await setupTestEntities(tx, "CreateZoom2");
+      // Create a meeting config for the second teacher with the same zoom URL
+      const provider2 = await createTestMeetingProvider(tx, { slug: `zoom-${randomUUID().slice(0, 8)}` });
+      const config2 = await createTestMeetingConfig(tx, t2.userId, provider2.id, {
+        details: { meetingUrl: zoomUrl },
+        isDefault: true,
+      });
       await SchedulingRepository.createClassInstance(
-        getCreatePayload(s2.id, t2.id, start, end, { meetingJoinUrl: zoomUrl }),
+        getCreatePayload(s2.id, t2.id, start, end, { userMeetingConfigId: config2.id, meetingJoinUrl: zoomUrl }),
         tx
       );
     });

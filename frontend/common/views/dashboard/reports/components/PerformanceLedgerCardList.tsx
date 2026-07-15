@@ -5,7 +5,7 @@ import { PerformanceLedgerCard } from "@/frontend/common/views/dashboard/reports
 import type { LedgerStatus, ReportLedgerRow } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 
 interface PerformanceLedgerCardListLabels {
-  readonly studentLabel: string;
+  readonly studentLabel: (name: string) => string;
   readonly paid: string;
   readonly statusLabels: Record<LedgerStatus, string>;
   readonly taken: string;

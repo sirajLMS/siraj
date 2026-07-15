@@ -126,7 +126,7 @@ export function PreferencesChannelTabs({
               value={channel}
               icon={<Icon fontSize="small" />}
               iconPosition="start"
-              label={t(`channels.${channel}`)}
+              label={t.channels[channel]}
               sx={theme => ({
                 color: isActive ? theme.palette[accent].main : theme.palette[accent].light,
                 opacity: isActive ? 1 : 0.7,
@@ -159,7 +159,7 @@ export function PreferencesChannelTabs({
                       }}
                     />
                   }
-                  label={<Typography sx={{ typography: "bodyMd" }}>{t(`events.${eventType}`)}</Typography>}
+                  label={<Typography sx={{ typography: "bodyMd" }}>{t.events[eventType]}</Typography>}
                   labelPlacement="start"
                   sx={theme => ({
                     mx: 0,

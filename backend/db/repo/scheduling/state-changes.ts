@@ -312,15 +312,84 @@ async function validateRescheduleState(
   }
 }
 
-async function handleOriginalQuotaRestoration(_t: DBTransaction, _original: Types.ClassInstanceEntity): Promise<void> {}
+async function handleOriginalQuotaRestoration(t: DBTransaction, original: Types.ClassInstanceEntity): Promise<void> {
+  // If the original class had quota deducted, refund it when rescheduling
+  if (original.quotaDeducted) {
+    await t
+      .update(students)
+      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
+      .where(eq(students.id, original.studentId));
+  }
+}
 
 export async function adjustQuotaOnUpdate(
-  _t: DBTransaction,
-  _existing: Types.ClassInstanceEntity,
-  _input: Partial<Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">>,
-  _isBeingSoftDeleted: boolean,
-  _locale?: string
-): Promise<void> {}
+  t: DBTransaction,
+  existing: Types.ClassInstanceEntity,
+  input: Partial<Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">>,
+  isBeingSoftDeleted: boolean
+): Promise<void> {
+  const newQuotaDeducted = input.quotaDeducted ?? existing.quotaDeducted;
+
+  if (isBeingSoftDeleted) {
+    if (existing.quotaDeducted) {
+      // Refund quota when soft deleting
+      await t
+        .update(students)
+        .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
+        .where(eq(students.id, existing.studentId));
+    }
+    return;
+  }
+
+  if (existing.quotaDeducted && !newQuotaDeducted) {
+    // Was deducted, now not deducted - refund
+    await t
+      .update(students)
+      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
+      .where(eq(students.id, existing.studentId));
+  } else if (!existing.quotaDeducted && newQuotaDeducted) {
+    // Was not deducted, now deducted - deduct
+    const [student] = await t
+      .select({ classesRemaining: students.classesRemaining })
+      .from(students)
+      .where(eq(students.id, existing.studentId))
+      .limit(1);
+
+    if (!student || student.classesRemaining <= 0) {
+      throw new Error("Out of quota");
+    }
+
+    await t
+      .update(students)
+      .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
+      .where(eq(students.id, existing.studentId));
+  }
+
+  // Handle student swap when quota was deducted
+  if (input.studentId && input.studentId !== existing.studentId && existing.quotaDeducted) {
+    // Refund old student
+    await t
+      .update(students)
+      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
+      .where(eq(students.id, existing.studentId));
+
+    // Deduct from new student
+    const [newStudent] = await t
+      .select({ classesRemaining: students.classesRemaining })
+      .from(students)
+      .where(eq(students.id, input.studentId))
+      .limit(1);
+
+    if (!newStudent || newStudent.classesRemaining <= 0) {
+      throw new Error("Out of quota");
+    }
+
+    await t
+      .update(students)
+      .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
+      .where(eq(students.id, input.studentId));
+  }
+}
 
 export const activateClassInstance = async (
   id: string,
@@ -472,38 +541,50 @@ export const resetClassInstance = async (
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
 ) => {
-  return runStateChange(
-    id,
-    actorUserId,
-    async () => {
-      const tFuncSession = await getServerTranslations("en", "session");
-      return {
-        state: {
-          executionState: "NOT_ACTIVATED",
-          outcome: "PENDING",
-          classType: "REGULAR",
-          actualStartAt: null,
-          actualEndAt: null,
-          activatedAt: null,
-          activatedByUserId: null,
-          forceActivated: false,
-          forceActivatedByUserId: null,
-          payrollCredited: false,
-          quotaDeducted: false,
-          isRescheduled: false,
-          remarks: null,
-          adminNotes: null,
-        },
-        event: {
-          fromState: { executionState: undefined, outcome: undefined },
-          toState: { executionState: "NOT_ACTIVATED", outcome: "PENDING" },
-          description: tFuncSession.resetDescription,
-        },
-      };
-    },
-    tx,
-    tErrors
-  );
+  const runner = async (t: DBTransaction) => {
+    await getServerTranslations("en", "errors");
+    const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
+    if (!existing) return null;
+
+    // Handle quota restoration if the instance was quota-deducted
+    if (existing.quotaDeducted) {
+      await adjustQuotaOnUpdate(t, existing, { quotaDeducted: false }, false);
+    }
+
+    return runStateChange(
+      id,
+      actorUserId,
+      async () => {
+        const tFuncSession = await getServerTranslations("en", "session");
+        return {
+          state: {
+            executionState: "NOT_ACTIVATED",
+            outcome: "PENDING",
+            classType: "REGULAR",
+            actualStartAt: null,
+            actualEndAt: null,
+            activatedAt: null,
+            activatedByUserId: null,
+            forceActivated: false,
+            forceActivatedByUserId: null,
+            payrollCredited: false,
+            quotaDeducted: false,
+            isRescheduled: false,
+            remarks: null,
+            adminNotes: null,
+          },
+          event: {
+            fromState: { executionState: undefined, outcome: undefined },
+            toState: { executionState: "NOT_ACTIVATED", outcome: "PENDING" },
+            description: tFuncSession.resetDescription,
+          },
+        };
+      },
+      t,
+      tErrors
+    );
+  };
+  return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
 
 export function buildRescheduledClassInput(

@@ -6,7 +6,7 @@ import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboar
 import type { useAppTranslation } from "@/shared/locale/client";
 
 type TeacherDashboardTranslator = ReturnType<typeof useAppTranslation<"dashboard.teacherDashboard">>;
-type DashboardTranslator = ReturnType<typeof useAppTranslation<"dashboard">>;
+type DashboardTranslator = ReturnType<typeof useAppTranslation<"dashboard.admin">>;
 
 function buildMetricsLabels(t: TeacherDashboardTranslator): TeacherDashboardViewLabels["metrics"] {
   return {
@@ -190,7 +190,7 @@ export function buildTeacherDashboardLabels(
   dashboardT: DashboardTranslator,
   joinEmptyTeacher: string
 ): TeacherDashboardViewLabels {
-  const instanceStatusLabels = buildClassInstanceStatusLabels(dashboardT);
+  const instanceStatusLabels = buildClassInstanceStatusLabels(dashboardT.statusLabels);
 
   return {
     pageTitle: t.pageTitle,

@@ -3,14 +3,13 @@ import { PageContainer } from "@/frontend/common/components/ui/container/page/Pa
 import { useAppTranslation } from "@/shared/locale/client";
 
 type ErrorStateProps = {
-  readonly t?: ReturnType<typeof useAppTranslation>;
   readonly message?: string;
   readonly onRetry?: () => void;
   readonly retryLabel?: string;
   readonly embedded?: boolean;
 };
 
-export function ErrorState({ t, message, onRetry, retryLabel, embedded = false }: ErrorStateProps) {
+export function ErrorState({ message, onRetry, retryLabel, embedded = false }: ErrorStateProps) {
   const tDefault = useAppTranslation("common");
   const displayMessage = message ?? tDefault.loadFailed ?? "";
 

@@ -1,9 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
-import Link from "next/link";
-import { useMemo } from "react";
+import { Box, Button, CircularProgress, Link, Stack, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
@@ -12,7 +10,6 @@ import { teacherAssignedClassesQueryDocument } from "@/frontend/common/graphql/s
 import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import { ClassSessionActionButton } from "@/frontend/common/views/dashboard/schedule/alerts/ClassSessionActionButton";
-import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
 import { useRouter } from "@/shared/i18n/routing";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppTranslation } from "@/shared/locale/client";
@@ -48,27 +45,14 @@ function formatClassSchedule(
 
 export function TeacherClassListContainer() {
   const t = useAppTranslation("dashboard.teacherClassList");
-  const tDashboard = useAppTranslation("dashboard");
   const locale = useAppLocale();
   const router = useRouter();
-  const instanceStatusLabels = useMemo(() => buildClassInstanceStatusLabels(tDashboard), [tDashboard]);
   const { data, loading, error } = useQuery(teacherAssignedClassesQueryDocument);
   const rows = data?.teacherAssignedClasses?.rows ?? [];
 
   const handleViewClassAudit = (id: string) => {
     router.push(`/classes/${id}/audit`);
   };
-
-  const actionLabels = useMemo(
-    () => ({
-      joinSession: "",
-      leaveClass: "",
-      leaveDisabledReason: "",
-      viewClassAudit: t.viewClassAudit,
-      contactAdmin: "",
-    }),
-    [t]
-  );
 
   return (
     <RequirePermission permissions={[AppPermission.SessionViewDetails]}>
@@ -118,7 +102,7 @@ export function TeacherClassListContainer() {
                         scheduledStartAt={row.scheduledStartAt}
                         scheduledEndAt={row.scheduledEndAt}
                         durationMinutes={row.durationMinutes}
-                        statusLabels={instanceStatusLabels}
+                        statusLabels={t.statusLabels}
                         size="small"
                       />
                     </Stack>
@@ -130,14 +114,20 @@ export function TeacherClassListContainer() {
                         joinUrl={row.meetingJoinUrl}
                         meeting={row.effectiveMeeting}
                         emptyRole="teacher"
-                        label={tDashboard.actions.joinVideo}
+                        label={t.joinVideo}
                         setupHref="/profile?tab=meeting"
                       />
                     ) : (
                       <ClassSessionActionButton
                         action="view_class_audit"
                         classId={row.id ?? ""}
-                        labels={actionLabels}
+                        labels={{
+                          joinSession: "",
+                          leaveClass: "",
+                          leaveDisabledReason: "",
+                          viewClassAudit: t.viewClassAudit,
+                          contactAdmin: "",
+                        }}
                         onLeave={() => {}}
                         onViewClassAudit={handleViewClassAudit}
                       />

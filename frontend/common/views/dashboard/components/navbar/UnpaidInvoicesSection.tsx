@@ -62,8 +62,13 @@ export function UnpaidInvoicesSection() {
 
   const items = summary.items ?? [];
   const fxMessages = buildFxDisplayMessages(
-    key => tProfile[key as keyof typeof tProfile] as string,
-    key => tErrors[key as keyof typeof tErrors] as string
+    {
+      convertedAmount: tProfile.convertedAmount,
+    },
+    tErrors,
+    {
+      convertedTotalApprox: tProfile.convertedTotalApprox,
+    }
   );
 
   const globalTotalLabel = formatBillingCurrencyTotals(

@@ -11,6 +11,8 @@ export const profile: TeacherProfileLabels = {
     teacherInfo: "معلومات المعلم",
     salaryDetails: "تفاصيل الراتب",
     systemConfig: "إعدادات النظام",
+    stats: "الإحصائيات",
+    compensation: "التعويضات",
   },
   fields: {
     fullName: "الاسم الكامل",

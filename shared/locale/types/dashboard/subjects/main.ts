@@ -5,6 +5,7 @@ export interface SubjectDetailLabels {
   readonly noResources: string;
   readonly notFound: string;
   readonly untitledResource: string;
+  readonly download: string;
 }
 
 export interface SubjectsLabels {

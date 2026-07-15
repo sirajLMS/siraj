@@ -45,13 +45,13 @@ export interface ResourcesLabels {
   };
   readonly deleteDialog: {
     readonly title: string;
-    readonly body: string;
+    readonly body: (title: string) => string;
     readonly confirm: string;
     readonly cancel: string;
   };
   readonly validation: ResourceValidationLabels;
   readonly notification: {
-    readonly fileTypeNotAllowed: string;
+    readonly fileTypeNotAllowed: (type: string) => string;
     readonly uploadPrepareFailed: string;
     readonly uploadFailed: string;
     readonly createRecordFailed: string;

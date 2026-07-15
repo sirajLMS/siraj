@@ -26,8 +26,9 @@ import {
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 import type { CreateRecurringClassLabels } from "@/shared/locale/types/dashboard/classes/createRecurringClass";
+import type { MessageSchema } from "@/shared/locale/types/message";
 
-type TranslationFn = ReturnType<typeof useAppTranslation>;
+type TranslationFn = MessageSchema["dashboard.createRecurringClass"];
 
 function useRecurringClassLabels(t: TranslationFn): CreateRecurringClassLabels {
   return useMemo(
@@ -87,9 +88,9 @@ function useRecurringClassLabels(t: TranslationFn): CreateRecurringClassLabels {
 }
 
 interface SubmitHookParams {
-  readonly t: TranslationFn;
-  readonly tMeeting: TranslationFn;
-  readonly tClassScope: TranslationFn;
+  readonly t: MessageSchema["dashboard.createRecurringClass"];
+  readonly tMeeting: MessageSchema["ui.meetingConfig.manager"];
+  readonly tClassScope: MessageSchema["ui.meetingConfig.classScope"];
   readonly client: ReturnType<typeof useApolloClient>;
   readonly router: ReturnType<typeof useRouter>;
   readonly createClassMutation: MutationTuple<
@@ -187,9 +188,9 @@ function useRecurringClassSubmit(params: SubmitHookParams) {
 
 export function CreateRecurringClassContainer() {
   const t = useAppTranslation("dashboard.createRecurringClass");
-  const tMeeting = useAppTranslation("ui.meetingConfig").manager;
-  const tClassScope = useAppTranslation("ui.meetingConfig").classScope;
-  const tRecurring = useAppTranslation("ui.meetingConfig").recurringSchedule;
+  const tMeeting = useAppTranslation("ui.meetingConfig.manager");
+  const tClassScope = useAppTranslation("ui.meetingConfig.classScope");
+  const tRecurring = useAppTranslation("ui.meetingConfig.recurringSchedule");
   const router = useRouter();
   const client = useApolloClient();
   const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);

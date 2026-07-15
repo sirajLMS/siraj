@@ -108,7 +108,7 @@ function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
 
 export function ParentLifecycleView({ parent, isUpdating, onUpdateLifecycle }: Readonly<ParentLifecycleViewProps>) {
   const t = useAppTranslation("dashboard.parentLifecycle");
-  const tp = useAppTranslation("profile.parent");
+  const tp = useAppTranslation("profile");
 
   const methods = useForm<LifecycleUpdateFormData>({
     resolver: zodResolver(lifecycleUpdateSchema),
@@ -173,11 +173,17 @@ export function ParentLifecycleView({ parent, isUpdating, onUpdateLifecycle }: R
               {parent.email}
             </Typography>
             <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
-              <StatusBadge category="studentAccount" status={lifecycleKey} label={tp.status[lifecycleKey]} />
+              <StatusBadge
+                category="studentAccount"
+                status={lifecycleKey}
+                label={
+                  tp.parent.status[lifecycleKey as "regular" | "on_trial" | "on_leave" | "suspended" | "deactivated"]
+                }
+              />
               <StatusBadge
                 category="staffAccount"
                 status={accountKey}
-                label={tp.accountStatus[accountKey as "activated" | "deactivated"]}
+                label={tp.parent.accountStatus[accountKey as "activated" | "deactivated"]}
               />
             </Stack>
           </Box>

@@ -2,12 +2,21 @@ import type { classCommunications, groupClassEnrollments, groupClasses } from "@
 import type { ClassExecutionState, ClassOutcome, GroupClassAttendanceStatus } from "@/backend/enum";
 export type GroupClassSelectType = typeof groupClasses.$inferSelect;
 export type GroupClassInsertType = typeof groupClasses.$inferInsert;
+export type GroupClassCreateInput = Omit<GroupClassInsertType, "id" | "createdAt" | "updatedAt">;
 
 export type GroupClassEnrollmentSelectType = typeof groupClassEnrollments.$inferSelect;
 export type GroupClassEnrollmentInsertType = typeof groupClassEnrollments.$inferInsert;
 
+export type GroupClassEnrollmentCreateInput = Omit<GroupClassEnrollmentInsertType, "id" | "createdAt" | "updatedAt">;
+
+export type GroupClassEnrollmentWithStudent = GroupClassEnrollmentSelectType & {
+  readonly studentName: string;
+  readonly studentAvatarUrl: string | null;
+};
+
 export type ClassCommunicationSelectType = typeof classCommunications.$inferSelect;
 export type ClassCommunicationInsertType = typeof classCommunications.$inferInsert;
+export type ClassCommunicationCreateInput = Omit<ClassCommunicationInsertType, "id" | "createdAt">;
 
 export type GroupClassAuditReturnType = {
   id: string;

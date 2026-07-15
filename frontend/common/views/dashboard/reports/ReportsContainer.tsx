@@ -426,7 +426,19 @@ export function ReportsContainer() {
   const activeFilters = useReportsStore(state => state.activeFilters);
   const setActiveFilters = useReportsStore(state => state.setActiveFilters);
 
-  const fxMessages = useMemo(() => buildFxDisplayMessages(t, tErrors), [t, tErrors]);
+  const fxMessages = useMemo(
+    () =>
+      buildFxDisplayMessages(
+        {
+          convertedAmount: t.convertedAmount,
+        },
+        tErrors,
+        {
+          convertedTotalApprox: t.convertedTotalApprox,
+        }
+      ),
+    [t, tErrors]
+  );
 
   const { reportData, reportLoading, teachers, rows, summary, refetchReport } = useReportData(
     activeFilters,

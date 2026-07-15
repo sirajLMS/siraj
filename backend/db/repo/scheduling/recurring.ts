@@ -6,6 +6,7 @@ import {
   type DBTransaction,
   validateTeacherAssignment,
 } from "@/backend/db/repo/scheduling/shared";
+import { handleQuotaDeduction } from "@/backend/db/repo/scheduling/state-changes";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
@@ -155,6 +156,11 @@ async function createSingleRecurringInstance(params: {
     },
     tFuncErrors
   );
+
+  // Handle quota deduction if quotaDeducted is true
+  if (input.quotaDeducted) {
+    await handleQuotaDeduction(t, input.studentId, true, tFuncErrors);
+  }
 
   const idempotencyKey = `recurring-${recurringScheduleId}-${day.dayOfWeek}-${scheduledStartAt.toISOString()}`;
 

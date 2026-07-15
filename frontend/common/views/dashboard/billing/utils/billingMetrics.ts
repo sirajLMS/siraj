@@ -30,7 +30,7 @@ export function buildAdminMetrics(summary: AdminBillingSummary, labels: BillingL
     },
     {
       key: "negative-balance",
-      label: labels.adminMetrics.negativeBalance,
+      label: labels.adminMetrics.negativeBalance(Number(summary.negativeBalanceCount)),
       value: summary.negativeBalanceCount,
       icon: WarningAmberOutlined,
       variant: "error",

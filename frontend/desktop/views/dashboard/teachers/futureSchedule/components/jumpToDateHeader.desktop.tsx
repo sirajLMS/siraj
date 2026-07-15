@@ -84,7 +84,7 @@ function LeaveQuotaStat({
         variant="labelUppercase"
         sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: 700, fontSize: 10 })}
       >
-        {t.leaveQuotaDesc}
+        {t.leaveQuotaDesc(leaveQuotaTotal)}
       </Typography>
       <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
         {t.remaining(leaveQuotaTotal - leaveQuotaUsed, leaveQuotaTotal)}
@@ -110,10 +110,10 @@ function TotalClassesStat({ totalClasses }: Readonly<Pick<JumpToDateHeaderProps,
         variant="labelUppercase"
         sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: 700, fontSize: 10 })}
       >
-        {t("totalClassesDesc")}
+        {t.totalClassesDesc(totalClasses)}
       </Typography>
       <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.header, fontWeight: 700 })}>
-        {totalClasses} {t("totalClasses")}
+        {totalClasses} {t.totalClasses}
       </Typography>
     </Box>
   );
@@ -133,7 +133,7 @@ export function JumpToDateHeaderDesktop({
       <Stack direction="row" spacing={3} sx={{ justifyContent: "space-between" }}>
         <Stack spacing={2}>
           <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
-            {t("jumpToDate")}
+            {t.jumpToDate}
           </Typography>
           <DateNavigator selectedDate={selectedDate} onDateChange={onDateChange} />
         </Stack>

@@ -13,9 +13,7 @@ interface InvalidIdStateProps {
 
 function InvalidIdState({ t }: InvalidIdStateProps) {
   return (
-    <Box sx={theme => ({ p: 3, textAlign: "center", color: theme.palette.onSurfaceVariant })}>
-      {t("invalidClassId")}
-    </Box>
+    <Box sx={theme => ({ p: 3, textAlign: "center", color: theme.palette.onSurfaceVariant })}>{t.invalidClassId}</Box>
   );
 }
 
@@ -31,7 +29,7 @@ export function ClassDetailsContainerMobile({ viewModel }: { readonly viewModel:
   }
 
   if (status === "error" || !viewModel.instance) {
-    return <ErrorState t={t} />;
+    return <ErrorState message={t.loadError} />;
   }
 
   return (

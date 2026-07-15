@@ -14,7 +14,7 @@ type PaymentMethodsTabProps = {
 };
 
 export function PaymentMethodsTab({ targetUserId, scope, slot }: PaymentMethodsTabProps) {
-  const t = useAppTranslation("profile.shell").tabs;
+  const t = useAppTranslation("profile");
   const { user, hasPermission } = useUserStore();
 
   const canManage =
@@ -23,7 +23,7 @@ export function PaymentMethodsTab({ targetUserId, scope, slot }: PaymentMethodsT
   return (
     <PageContainer>
       <Stack spacing={3}>
-        <PageHeader title={t.paymentMethods} />
+        <PageHeader title={t.shell.tabs.paymentMethods} />
         <PaymentMethodsManager targetUserId={targetUserId} slot={slot} canManage={canManage} />
       </Stack>
     </PageContainer>

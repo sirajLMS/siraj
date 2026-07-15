@@ -6,7 +6,7 @@ import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { BILLING_MONTH_IDS } from "@/frontend/common/views/dashboard/billing/manual/constants/billingMonths";
 import type { ManualInvoiceFormData } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
-import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
 
 interface BillingMonthSelectorProps {
   readonly control: Control<ManualInvoiceFormData>;

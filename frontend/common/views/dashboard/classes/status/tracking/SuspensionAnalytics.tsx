@@ -107,9 +107,7 @@ const Cta = ({ labels, suspendedCount, onOpenAuditLogs }: SuspensionAnalyticsPro
           <StyledUrgentTaskText>{labels.urgentTask}</StyledUrgentTaskText>
         </StyledUrgentTaskBadge>
 
-        <StyledCtaHeadline sx={{ mb: 1 }}>
-          {labels.accountsLocked.replace("{count}", String(suspendedCount))}
-        </StyledCtaHeadline>
+        <StyledCtaHeadline sx={{ mb: 1 }}>{labels.accountsLocked(suspendedCount)}</StyledCtaHeadline>
 
         <StyledCtaDescription sx={{ mb: 3 }}>{labels.auditDescription}</StyledCtaDescription>
       </Box>

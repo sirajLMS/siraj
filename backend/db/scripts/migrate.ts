@@ -2,9 +2,9 @@ import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 import { migrate as migrateNeon } from "drizzle-orm/neon-serverless/migrator";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { migrate as migratePostgres } from "drizzle-orm/node-postgres/migrator";
+import { db, getDrizzleDbPool } from "@/backend/db/drizzleDb";
 import { getEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
-import { db, getDrizzleDbPool } from "../drizzleDb";
 
 /**
  * Run migrations programmatically

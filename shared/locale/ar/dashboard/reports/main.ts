@@ -34,6 +34,7 @@ export const main: ReportsLabels = {
   },
   convertedAmount: (lockedAmount, lockedCurrency, convertedApprox, displayCurrency) =>
     `${lockedAmount} ${lockedCurrency} (تقريباً ${convertedApprox} ${displayCurrency})`,
+  convertedTotalApprox: (convertedApprox, displayCurrency) => `≈ ${convertedApprox} ${displayCurrency}`,
   summary: {
     engagementRate: "معدل المشاركة",
     engagementGrowth: "النمو مقارنة بالشهر السابق",

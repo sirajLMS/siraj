@@ -9,14 +9,14 @@ interface AcademicProgressSummaryProps {
   readonly labels: {
     readonly title: string;
     readonly subtitle: string;
-    readonly completion: string;
+    readonly completion: (percent: number) => string;
     readonly downloadReport: string;
   };
   readonly onDownloadReport: () => void;
 }
 
-function formatCompletion(template: string, percent: number): string {
-  return template.replace("{percent}", String(percent));
+function formatCompletion(template: (percent: number) => string, percent: number): string {
+  return template(percent);
 }
 
 function ProgressRow({

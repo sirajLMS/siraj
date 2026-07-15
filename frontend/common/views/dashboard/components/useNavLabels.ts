@@ -12,7 +12,10 @@ export function useNavLabels(): (labelKey: `dashboard.nav.${keyof DashboardNavig
 
   return (labelKey: `dashboard.nav.${keyof DashboardNavigationLabels}`): string => {
     const key = labelKey.replace("dashboard.nav.", "") as keyof DashboardNavigationLabels;
-    return t[key];
+    if (key === "nav") {
+      throw new Error("nav is a nested object, use specific keys like dashboard.nav.logout");
+    }
+    return t[key] as string;
   };
 }
 

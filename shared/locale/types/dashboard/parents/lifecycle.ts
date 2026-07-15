@@ -34,4 +34,15 @@ export interface ParentLifecycleLabels {
   readonly errors: {
     readonly invalidId: string;
   };
+  readonly status: {
+    readonly regular: string;
+    readonly on_trial: string;
+    readonly on_leave: string;
+    readonly suspended: string;
+    readonly deactivated: string;
+  };
+  readonly accountStatus: {
+    readonly activated: string;
+    readonly deactivated: string;
+  };
 }

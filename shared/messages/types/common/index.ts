@@ -24,4 +24,6 @@ export interface CommonLabels {
   readonly operationFailed: string;
   readonly loadFailed: string;
   readonly loading: string;
+  readonly cancel: string;
+  readonly save: string;
 }

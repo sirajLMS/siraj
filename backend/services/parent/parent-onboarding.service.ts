@@ -92,7 +92,7 @@ export namespace ParentOnboardingService {
       const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
       const targetGroup = groups.find(g => g.slug === SystemPermissionGroupSlug.PARENT_DEFAULT);
       if (!targetGroup) {
-        throw new Error(tErrors.permissionGroupNotFound);
+        throw new Error(tErrors.permissionGroup.permissionGroupNotFound);
       }
 
       await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], targetGroup.id, actorUserId, txObj);

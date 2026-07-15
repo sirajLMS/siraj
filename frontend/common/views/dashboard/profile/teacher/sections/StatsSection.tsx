@@ -20,7 +20,7 @@ export function StatsSection({ teacherData, isAdminScope }: StatsSectionProps) {
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
 
   return (
-    <SectionPanel title={t.sections.stats}>
+    <SectionPanel title={t.stats.totalClasses}>
       <Stack spacing={2}>
         <InfoField label={t.stats.totalClasses} value={String(teacherData.totalClasses ?? 0)} />
         {isAdminScope && adminData ? (

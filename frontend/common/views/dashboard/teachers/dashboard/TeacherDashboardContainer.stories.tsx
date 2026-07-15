@@ -198,12 +198,12 @@ const useTeacherDashboardStore = create<TeacherDashboardStoryState>(set => ({
 
 export function MockTeacherDashboardContainer() {
   const t = useAppTranslation("dashboard.teacherDashboard");
-  const dashboardT = useAppTranslation("dashboard");
+  const dashboardT = useAppTranslation("dashboard.admin");
   const tJoin = useAppTranslation("ui.meetingConfig.join");
   const lessonReportI18n = useAppTranslation("dashboard.lms.lessonReports");
   const userName = useUserStore(state => state.name);
   const store = useTeacherDashboardStore();
-  const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin("emptyTeacher"));
+  const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin.emptyTeacher);
   const metricItems = buildTeacherActiveMetricItems(MOCK_RAW_METRICS, labels.activeMetrics);
   const lessonReportLabels = {
     attendanceEvaluation: lessonReportI18n.attendanceEvaluation,

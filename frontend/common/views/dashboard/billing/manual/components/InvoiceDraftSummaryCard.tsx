@@ -4,7 +4,7 @@ import { InfoOutlined, ReceiptLongOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
 
 interface InvoiceDraftSummaryCardProps {
   readonly labels: BillingManualLabels;

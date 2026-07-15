@@ -140,7 +140,16 @@ export function ParentBillingContainer() {
   }, [refetch, refetchSummary]);
 
   const fxMessages = useMemo(
-    () => buildFxDisplayMessages(tProfile, tErrors, tProfileRoot),
+    () =>
+      buildFxDisplayMessages(
+        {
+          convertedAmount: tProfile.convertedAmount,
+        },
+        tErrors,
+        {
+          convertedTotalApprox: tProfileRoot.convertedTotalApprox,
+        }
+      ),
     [tProfile, tErrors, tProfileRoot]
   );
 

@@ -1,12 +1,12 @@
 "use client";
 
-import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type {
   ParentDashboardMetrics,
   ParentScheduleRow,
   StudentProgressItem,
   WorkshopPromo,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import type { ParentDashboardLabels } from "@/shared/locale/types/dashboard/core/parentDashboard";
 
 /**
  * ParentDashboard ViewModel.

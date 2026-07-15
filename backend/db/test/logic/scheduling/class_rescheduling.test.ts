@@ -227,7 +227,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
 
       await expectConstraintViolation(
         () => rescheduleTestClass(tx, original.id, student.id, teacher.id),
-        "Cannot reschedule a completed or taken class"
+        "Cannot reschedule a completed session"
       );
     });
     testLogger.info("Completed or taken class reschedule prevention test passed.");
@@ -247,7 +247,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
             scheduledStartAt: new Date("2026-06-27T10:00:00Z"),
             scheduledEndAt: new Date("2026-06-27T11:00:00Z"),
           }),
-        "Cannot reschedule a class that has already been rescheduled"
+        "Cannot reschedule a session that has already been rescheduled"
       );
     });
     testLogger.info("Double reschedule prevention test passed.");

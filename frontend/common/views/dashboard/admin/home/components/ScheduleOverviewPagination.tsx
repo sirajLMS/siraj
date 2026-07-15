@@ -159,10 +159,7 @@ export function ScheduleOverviewPaginationControls({
         </Tooltip>
 
         <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t.pageOf({
-            current: safePageCount === 0 ? 0 : page + 1,
-            total: safePageCount,
-          })}
+          {t.pageOf(safePageCount === 0 ? 0 : page + 1, safePageCount)}
         </Typography>
       </StyledPaginationActions>
     </StyledPaginationRoot>
