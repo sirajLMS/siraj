@@ -53,8 +53,6 @@ export interface PermissionManagementErrors {
   readonly permissionGroupNameTooLong: string;
   readonly permissionGroupInvalidName: string;
   readonly cannotModifySuperAdmin: string;
-  readonly cannotModifySystemPermissionGroup: string;
-  readonly cannotDeleteSystemPermissionGroup: string;
 }
 
 /**
@@ -104,6 +102,17 @@ export interface MeetingProviderErrors {
   readonly meetingProviderCreateFailed: string;
   readonly meetingProviderUpdateFailed: string;
   readonly meetingProviderInUse: string;
+}
+
+/**
+ * ParentErrors — parent specific errors.
+ * Flat-key lookups (e.g. `t("parent.alreadyExists")`) reach the nested members
+ * via the dotted key path resolved by the backend translation loader.
+ */
+export interface ParentErrors {
+  readonly alreadyExists: string;
+  readonly invalidTimezone: string;
+  readonly createFailed: string;
 }
 
 /**
@@ -193,6 +202,7 @@ export interface ErrorsLabels {
   readonly user: UserErrors;
   readonly scheduling: SchedulingErrors;
   readonly permissionGroup: PermissionGroupErrors;
+  readonly parent: ParentErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────
   readonly rateLimitExceeded: string;
   readonly duplicateRequest: string;
@@ -242,6 +252,8 @@ export interface ErrorsLabels {
   readonly userEmailExists: string;
   readonly cannotModifyBankingFields: string;
   readonly parentNotFound: string;
+  readonly parentAlreadyDeactivated: string;
+  readonly parentAlreadyActivated: string;
   readonly cannotRescheduleToSelf: string;
   readonly cannotRescheduleCompleted: string;
   readonly cannotRescheduleAlreadyRescheduled: string;
@@ -256,4 +268,7 @@ export interface ErrorsLabels {
   readonly meetingUrlInUse: string;
   readonly sessionNotActivated: string;
   readonly exchangeRateStale: (params: { fromCurrency: string; toCurrency: string }) => string;
+  readonly outsideAvailability: string;
+  readonly teacherUnavailabilityConflict: string;
+  readonly teacherOnVacation: string;
 }

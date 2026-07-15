@@ -174,7 +174,7 @@ describe("ParentRepository — deactivateParent", () => {
       const error = await expectRepoError(() =>
         ParentRepository.deactivateParent("00000000-0000-0000-0000-000000000000", tx)
       );
-      expect(error.message).toContain("was not found");
+      expect(error.message).toContain("غير موجود");
     });
   });
 
@@ -222,7 +222,7 @@ describe("ParentRepository — deactivateParent", () => {
     "Deactivated Parent",
     "dp",
     (ctx, tx) => ParentRepository.deactivateParent(ctx.parent.id, tx),
-    "already deactivated",
+    "معطل بالفعل",
     { userOverrides: { status: AccountStatus.DEACTIVATED }, parentOverrides: { status: "REGULAR" } }
   );
 });
@@ -282,7 +282,7 @@ describe("ParentRepository — create", () => {
       }
 
       expect(error).not.toBeNull();
-      expect((error as Error).message).toContain("already exists");
+      expect((error as Error).message).toContain("موجود بالفعل");
     });
   });
 
@@ -343,7 +343,7 @@ describe("ParentRepository — create", () => {
     }
 
     expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("Failed");
+    expect((error as Error).message).toContain("فشل");
   });
 });
 
@@ -468,7 +468,7 @@ describe("ParentRepository — reactivateParent", () => {
     "Active Parent",
     "ap2",
     (ctx, tx) => ParentRepository.reactivateParent(ctx.parent.id, tx),
-    "already activated"
+    "مفعّل بالفعل"
   );
 });
 

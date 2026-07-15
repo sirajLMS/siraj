@@ -45,8 +45,6 @@ export const errors: ErrorsLabels = {
     permissionGroupNameTooLong: "Permission group name is too long (max 255 characters).",
     permissionGroupInvalidName: "Invalid permission group name.",
     cannotModifySuperAdmin: "Cannot modify super admin user.",
-    cannotModifySystemPermissionGroup: "Cannot modify core properties of system permission groups",
-    cannotDeleteSystemPermissionGroup: "Cannot delete a system permission or group",
   },
   billing: {
     invoiceNotFound: (id: string) => `Invoice not found: ${id}`,
@@ -92,6 +90,11 @@ export const errors: ErrorsLabels = {
     meetingProviderCreateFailed: "Failed to create meeting provider.",
     meetingProviderUpdateFailed: "Failed to update meeting provider.",
     meetingProviderInUse: "Meeting provider is in use and cannot be deleted.",
+  },
+  parent: {
+    alreadyExists: "Parent profile for this user already exists.",
+    invalidTimezone: "Invalid timezone.",
+    createFailed: "Failed to create parent profile.",
   },
   teacher: {
     teacherNotFound: (id: string) => `Teacher not found: ${id}`,
@@ -220,6 +223,8 @@ export const errors: ErrorsLabels = {
   userEmailExists: "User with this email already exists.",
   cannotModifyBankingFields: "Cannot modify banking fields.",
   parentNotFound: "Parent not found.",
+  parentAlreadyDeactivated: "Parent account is already deactivated.",
+  parentAlreadyActivated: "Parent account is already activated.",
   cannotRescheduleToSelf: "Cannot reschedule to self.",
   cannotRescheduleCompleted: "Cannot reschedule a completed session.",
   cannotRescheduleAlreadyRescheduled: "Cannot reschedule a session that has already been rescheduled.",
@@ -242,4 +247,7 @@ export const errors: ErrorsLabels = {
   studentBooked: "Student is already booked at this time.",
   meetingUrlInUse: "Meeting URL is already in use.",
   sessionNotActivated: "Session is not activated.",
+  outsideAvailability: "Booking is outside teacher availability windows.",
+  teacherUnavailabilityConflict: "Booking blocked by recurring unavailability pattern.",
+  teacherOnVacation: "Booking blocked by approved vacation period.",
 };

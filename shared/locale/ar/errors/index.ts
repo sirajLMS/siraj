@@ -45,8 +45,6 @@ export const errors: ErrorsLabels = {
     permissionGroupNameTooLong: "اسم المجموعة طويل جداً (255 حرف كحد أقصى).",
     permissionGroupInvalidName: "اسم المجموعة غير صالح.",
     cannotModifySuperAdmin: "لا يمكن تعديل المستخدم المسؤول الأعلى.",
-    cannotModifySystemPermissionGroup: "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام",
-    cannotDeleteSystemPermissionGroup: "لا يمكن حذف صلاحية أو مجموعة تابعة للنظام",
   },
   billing: {
     invoiceNotFound: (id: string) => `الفاتورة غير موجودة: ${id}`,
@@ -92,6 +90,11 @@ export const errors: ErrorsLabels = {
     meetingProviderCreateFailed: "فشل إنشاء موفر الاجتماعات.",
     meetingProviderUpdateFailed: "فشل تحديث موفر الاجتماعات.",
     meetingProviderInUse: "موفر الاجتماعات قيد الاستخدام ولا يمكن حذفه.",
+  },
+  parent: {
+    alreadyExists: "ملف ولي الأمر لهذا المستخدم موجود بالفعل.",
+    invalidTimezone: "المنطقة الزمنية غير صالحة.",
+    createFailed: "فشل إنشاء ملف ولي الأمر.",
   },
   teacher: {
     teacherNotFound: (id: string) => `المعلم غير موجود: ${id}`,
@@ -220,6 +223,8 @@ export const errors: ErrorsLabels = {
   userEmailExists: "مستخدم بهذا البريد الإلكتروني موجود بالفعل.",
   cannotModifyBankingFields: "لا يمكن تعديل الحقول المصرفية.",
   parentNotFound: "ولي الأمر غير موجود.",
+  parentAlreadyDeactivated: "حساب ولي الأمر معطل بالفعل.",
+  parentAlreadyActivated: "حساب ولي الأمر مفعّل بالفعل.",
   cannotRescheduleToSelf: "لا يمكن إعادة الجدولة للذات.",
   cannotRescheduleCompleted: "لا يمكن إعادة جدولة جلسة مكتملة.",
   cannotRescheduleAlreadyRescheduled: "لا يمكن إعادة جدولة جلسة تم إعادة جدولتها بالفعل.",
@@ -242,4 +247,7 @@ export const errors: ErrorsLabels = {
   studentBooked: "الطالب محجوز بالفعل في هذا الوقت.",
   meetingUrlInUse: "رابط الاجتماع مستخدم بالفعل.",
   sessionNotActivated: "الجلسة غير مفعلة.",
+  outsideAvailability: "الحجز خارج نوافذ توفر المعلم.",
+  teacherUnavailabilityConflict: "الحجز محظور بسبب نمط عدم التفرغ المتكرر.",
+  teacherOnVacation: "الحجز محظور بسبب إجازة معتمدة.",
 };
