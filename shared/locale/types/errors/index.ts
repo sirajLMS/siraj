@@ -53,6 +53,8 @@ export interface PermissionManagementErrors {
   readonly permissionGroupNameTooLong: string;
   readonly permissionGroupInvalidName: string;
   readonly cannotModifySuperAdmin: string;
+  readonly cannotModifySystemPermissionGroup: string;
+  readonly cannotDeleteSystemPermissionGroup: string;
 }
 
 /**
@@ -116,9 +118,19 @@ export interface ParentErrors {
 }
 
 /**
+ * StaffErrors — staff profile specific errors.
+ * Flat-key lookups (e.g. `t("staff.alreadyExists")`) reach the nested members
+ * via the dotted key path resolved by the backend translation loader.
+ */
+export interface StaffErrors {
+  readonly alreadyExists: string;
+}
+
+/**
  * TeacherErrors — teacher specific errors.
  */
 export interface TeacherErrors {
+  readonly alreadyExists: string;
   readonly teacherNotFound: (id: string) => string;
   readonly staffProfileNotFound: string;
   readonly quotaMustBeNonNegative: string;
@@ -175,6 +187,7 @@ export interface SchedulingErrors {
   readonly studentBooked: string;
   readonly meetingUrlInUse: string;
   readonly sessionNotActivated: string;
+  readonly missedClassTime: string;
 }
 
 /**
@@ -203,6 +216,7 @@ export interface ErrorsLabels {
   readonly scheduling: SchedulingErrors;
   readonly permissionGroup: PermissionGroupErrors;
   readonly parent: ParentErrors;
+  readonly staff: StaffErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────
   readonly rateLimitExceeded: string;
   readonly duplicateRequest: string;
@@ -271,4 +285,5 @@ export interface ErrorsLabels {
   readonly outsideAvailability: string;
   readonly teacherUnavailabilityConflict: string;
   readonly teacherOnVacation: string;
+  readonly resourceNotFound: string;
 }

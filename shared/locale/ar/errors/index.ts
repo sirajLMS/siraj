@@ -45,6 +45,8 @@ export const errors: ErrorsLabels = {
     permissionGroupNameTooLong: "اسم المجموعة طويل جداً (255 حرف كحد أقصى).",
     permissionGroupInvalidName: "اسم المجموعة غير صالح.",
     cannotModifySuperAdmin: "لا يمكن تعديل المستخدم المسؤول الأعلى.",
+    cannotModifySystemPermissionGroup: "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام",
+    cannotDeleteSystemPermissionGroup: "لا يمكن حذف صلاحية أو مجموعة تابعة للنظام",
   },
   billing: {
     invoiceNotFound: (id: string) => `الفاتورة غير موجودة: ${id}`,
@@ -96,7 +98,11 @@ export const errors: ErrorsLabels = {
     invalidTimezone: "المنطقة الزمنية غير صالحة.",
     createFailed: "فشل إنشاء ملف ولي الأمر.",
   },
+  staff: {
+    alreadyExists: "ملف الموظف لهذا المستخدم موجود بالفعل.",
+  },
   teacher: {
+    alreadyExists: "ملف المعلم لهذا المستخدم موجود بالفعل.",
     teacherNotFound: (id: string) => `المعلم غير موجود: ${id}`,
     staffProfileNotFound: "ملف الموظف غير موجود.",
     quotaMustBeNonNegative: "الحصة يجب أن تكون رقمًا غير سالب.",
@@ -157,6 +163,7 @@ export const errors: ErrorsLabels = {
     studentBooked: "الطالب محجوز بالفعل في هذا الوقت.",
     meetingUrlInUse: "رابط الاجتماع مستخدم بالفعل.",
     sessionNotActivated: "الجلسة غير مفعلة.",
+    missedClassTime: "لقد فات وقت الحصة.",
   },
   permissionGroup: {
     permissionGroupNotFound: "مجموعة الأذونات غير موجودة.",
@@ -225,6 +232,8 @@ export const errors: ErrorsLabels = {
   parentNotFound: "ولي الأمر غير موجود.",
   parentAlreadyDeactivated: "حساب ولي الأمر معطل بالفعل.",
   parentAlreadyActivated: "حساب ولي الأمر مفعّل بالفعل.",
+  exchangeRateStale: ({ fromCurrency, toCurrency }: { fromCurrency: string; toCurrency: string }) =>
+    `سعر الصرف لـ ${fromCurrency} إلى ${toCurrency} قديم (أقدم من 24 ساعة)`,
   cannotRescheduleToSelf: "لا يمكن إعادة الجدولة للذات.",
   cannotRescheduleCompleted: "لا يمكن إعادة جدولة جلسة مكتملة.",
   cannotRescheduleAlreadyRescheduled: "لا يمكن إعادة جدولة جلسة تم إعادة جدولتها بالفعل.",
@@ -250,4 +259,5 @@ export const errors: ErrorsLabels = {
   outsideAvailability: "الحجز خارج نوافذ توفر المعلم.",
   teacherUnavailabilityConflict: "الحجز محظور بسبب نمط عدم التفرغ المتكرر.",
   teacherOnVacation: "الحجز محظور بسبب إجازة معتمدة.",
+  resourceNotFound: "مورد التعلم غير موجود.",
 };

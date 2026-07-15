@@ -19,7 +19,7 @@ export namespace SystemRulesService {
 
     if (now < startWindow || now > endWindow) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("missedClassTime"));
+      throw new Error(t("scheduling.missedClassTime"));
     }
   }
 
