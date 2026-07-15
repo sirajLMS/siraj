@@ -47,9 +47,9 @@ jobs:
       - name: Cache Bun & Next.js
         uses: actions/cache@v4
         with:
-          path:
-            - ~/.bun/install/cache
-            - .next/cache
+          path: |
+            ~/.bun/install/cache
+            .next/cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: |
             bun-${{ runner.os }}-
