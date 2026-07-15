@@ -2,7 +2,7 @@
 
 import { Box, Chip, Stack, Tab, Tabs } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import type { ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { getVisibleProfileTabs } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
@@ -21,8 +21,6 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Prof
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const hasPermission = useUserStore(state => state.hasPermission);
-  const currentTabRef = useRef(currentTab);
-  currentTabRef.current = currentTab;
 
   const availableTabs = useMemo(
     () => getVisibleProfileTabs({ audience, scope, hasPermission }),
@@ -30,15 +28,17 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Prof
   );
 
   // URL → state: only react to external URL changes (back/forward, deep links).
-  // Do not depend on currentTab — that caused a redirect loop with the state → URL effect.
+  // We compare against the current `currentTab` prop and call `onTabChange` only
+  // when the URL param resolves to a different tab — this avoids the redirect
+  // loop that occurred when depending on a synced ref alongside the state → URL effect.
   useEffect(() => {
     const tabParam = searchParams.get("tab");
     const nextTab = tabParam && availableTabs.some(tab => tab.id === tabParam) ? tabParam : availableTabs[0]?.id;
 
-    if (nextTab && nextTab !== currentTabRef.current) {
+    if (nextTab && nextTab !== currentTab) {
       onTabChange(nextTab);
     }
-  }, [searchParams, availableTabs, onTabChange]);
+  }, [searchParams, availableTabs, onTabChange, currentTab]);
 
   // State → URL: keep the query param in sync after tab clicks.
   useEffect(() => {

@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
 import { type CountryType, getCountryDisplayName, getCountryEmoji } from "@/frontend/common/lib/locale";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 
 export type CountryDisplayProps = {
   readonly code?: string | null;

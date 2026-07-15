@@ -16,8 +16,8 @@ import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDoc
 import { studentUpcomingClassesQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-status.documents";
 import { logger } from "@/frontend/common/utils/logger";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
-import type { StudentProfileQueryData } from "@/frontend/common/views/dashboard/students/profile/StudentProfileContext";
-import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/StudentProfileContext";
+import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
+import type { StudentProfileQueryData } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext.types";
 import { StudentStatusView } from "@/frontend/common/views/dashboard/students/status/StudentStatusView";
 import type {
   StudentStatusPageData,

@@ -110,7 +110,7 @@ async function verifyOptimisticLock(
   await firstUpdate();
 
   // Second update with stale version should fail
-  await expectRepositoryError(secondUpdate, "Version mismatch");
+  await expectRepositoryError(secondUpdate, "version mismatch");
 
   // Verify final state
   await verifyState();
@@ -191,7 +191,7 @@ describe("Concurrency Control Tests", () => {
         // Try to deduct 3 classes (should fail)
         await expectRepositoryError(
           () => StudentRepository.deductClasses(testStudent.id, 3, tErrors, undefined, tx),
-          "Insufficient classes"
+          "Insufficient class balance"
         );
 
         // Verify state unchanged

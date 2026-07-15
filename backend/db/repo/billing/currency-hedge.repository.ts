@@ -5,18 +5,18 @@ import { currencyHedges } from "@/backend/db/schema";
 import type { CurrencyCode } from "@/backend/enum";
 import type {
   CurrencyHedgeInsertType,
-  CurrencyHedgeReturnType,
+  CurrencyHedgeSelectType,
   CurrencyHedgeUpdateInput,
 } from "@/backend/types/billing/billing.types";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace CurrencyHedgeRepository {
-  export async function listAll(tx?: DBTransaction): Promise<CurrencyHedgeReturnType[]> {
+  export async function listAll(tx?: DBTransaction): Promise<CurrencyHedgeSelectType[]> {
     const client = tx ?? db;
     return client.select().from(currencyHedges).orderBy(desc(currencyHedges.updatedAt));
   }
 
-  export async function getById(id: string, tx?: DBTransaction): Promise<CurrencyHedgeReturnType | null> {
+  export async function getById(id: string, tx?: DBTransaction): Promise<CurrencyHedgeSelectType | null> {
     const client = tx ?? db;
     const [row] = await client.select().from(currencyHedges).where(eq(currencyHedges.id, id)).limit(1);
     return row ?? null;
@@ -25,7 +25,7 @@ export namespace CurrencyHedgeRepository {
   export async function create(
     input: Omit<CurrencyHedgeInsertType, "id">,
     tx?: DBTransaction
-  ): Promise<CurrencyHedgeReturnType> {
+  ): Promise<CurrencyHedgeSelectType> {
     const client = tx ?? db;
     const now = new Date();
     const [created] = await client
@@ -49,7 +49,7 @@ export namespace CurrencyHedgeRepository {
     input: CurrencyHedgeUpdateInput,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
-  ): Promise<CurrencyHedgeReturnType> {
+  ): Promise<CurrencyHedgeSelectType> {
     const client = tx ?? db;
     const [updated] = await client
       .update(currencyHedges)
@@ -78,7 +78,7 @@ export namespace CurrencyHedgeRepository {
   export async function findByCurrencies(
     currencies: readonly CurrencyCode[],
     tx?: DBTransaction
-  ): Promise<CurrencyHedgeReturnType[]> {
+  ): Promise<CurrencyHedgeSelectType[]> {
     if (currencies.length === 0) return [];
     const client = tx ?? db;
     return client
@@ -90,7 +90,7 @@ export namespace CurrencyHedgeRepository {
   export async function createMany(
     inputs: readonly CurrencyHedgeInsertType[],
     tx?: DBTransaction
-  ): Promise<CurrencyHedgeReturnType[]> {
+  ): Promise<CurrencyHedgeSelectType[]> {
     if (inputs.length === 0) return [];
     const client = tx ?? db;
     const now = new Date();

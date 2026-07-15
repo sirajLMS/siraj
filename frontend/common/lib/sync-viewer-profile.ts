@@ -36,7 +36,11 @@ export function syncViewerFromProfile(
   broadcastSubjectCurrencyChanged(currentUser.id ?? "");
 
   // Same-tab refetch for reactive consumers (e.g., FxStaleBanner, DisplayCurrencyHint)
-  void client.refetchQueries({
-    include: [meQueryDocument, fxSyncHealthQueryDocument],
-  });
+  client
+    .refetchQueries({
+      include: [meQueryDocument, fxSyncHealthQueryDocument],
+    })
+    .catch(() => {
+      // refetch failures are non-fatal for cache sync
+    });
 }

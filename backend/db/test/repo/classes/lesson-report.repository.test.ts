@@ -242,7 +242,10 @@ describe("LessonReportRepository.findPendingReviews", () => {
       const { teacher, adminUser } = await setupReportChain(tx);
 
       for (let i = 0; i < 3; i++) {
-        const e = await setupTestEntities(tx, `PendPage${i}`, { classesRemaining: 10, skipInstance: true });
+        // skipInstance defaults to false — each iteration needs a real class
+        // instance to attach the lesson report to (createTestLessonReport's
+        // classInstanceId column has an FK to class_instances.id).
+        const e = await setupTestEntities(tx, `PendPage${i}`, { classesRemaining: 10 });
         const inst = requireInstance(e.instance);
         await createTestLessonReport(tx, inst.id, e.student.id, teacher.id, adminUser.id, {
           idempotencyKey: `pend-${i}-${randomUUID()}`,
@@ -269,7 +272,10 @@ describe("LessonReportRepository.countPendingReviews", () => {
       const initialCount = await LessonReportRepository.countPendingReviews({ teacherId: teacher.id }, tx);
 
       for (let i = 0; i < 2; i++) {
-        const e = await setupTestEntities(tx, `PendCount${i}`, { classesRemaining: 10, skipInstance: true });
+        // skipInstance defaults to false — each iteration needs a real class
+        // instance to attach the lesson report to (createTestLessonReport's
+        // classInstanceId column has an FK to class_instances.id).
+        const e = await setupTestEntities(tx, `PendCount${i}`, { classesRemaining: 10 });
         const inst = requireInstance(e.instance);
         await createTestLessonReport(tx, inst.id, e.student.id, teacher.id, adminUser.id, {
           idempotencyKey: `count-${i}-${randomUUID()}`,

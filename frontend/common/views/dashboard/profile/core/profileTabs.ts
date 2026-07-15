@@ -34,7 +34,7 @@ export const profileTabs: readonly ProfileTabDefinition[] = [
 function isPermissionsTabVisible(
   audience: ProfileAudience,
   scope: ProfileScope,
-  hasPermission: (permission: AppPermission) => boolean,
+  hasPermission: (permission: AppPermission) => boolean
 ): boolean {
   const staffPermissions =
     audience === "STAFF" && scope === ProfileScope.Other
@@ -50,7 +50,7 @@ function isStudentsTabVisible(hasPermission: (permission: AppPermission) => bool
 
 function isPaymentMethodsTabVisible(
   scope: ProfileScope,
-  hasPermission: (permission: AppPermission) => boolean,
+  hasPermission: (permission: AppPermission) => boolean
 ): boolean {
   const viewPermission =
     scope === ProfileScope.Own
@@ -73,7 +73,7 @@ function isTabPermitted(
   tab: ProfileTabDefinition,
   audience: ProfileAudience,
   scope: ProfileScope,
-  hasPermission: (permission: AppPermission) => boolean,
+  hasPermission: (permission: AppPermission) => boolean
 ): boolean {
   switch (tab.id) {
     case "permissions":

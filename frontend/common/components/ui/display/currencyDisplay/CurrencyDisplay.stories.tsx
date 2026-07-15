@@ -4,7 +4,7 @@ import {
   CurrencyDisplay,
   CurrencyDisplayPart,
   DEFAULT_CURRENCY_DISPLAY_PARTS,
-} from "@/frontend/common/components/ui/display/currencyDisplay/CurrencyDisplay";
+} from "@/frontend/common/components/ui/display/currencyDisplay";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { currencies } from "@/frontend/common/lib/currency";
 

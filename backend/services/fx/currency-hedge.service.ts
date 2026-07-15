@@ -1,7 +1,7 @@
 import { CurrencyHedgeRepository } from "@/backend/db/repo/billing/currency-hedge.repository";
 import { AppPermission, type CurrencyCode } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { CurrencyHedgeReturnType, CurrencyHedgeSubmitInput, CurrencyHedgeUpdateInput } from "@/backend/types";
+import type { CurrencyHedgeSelectType, CurrencyHedgeSubmitInput, CurrencyHedgeUpdateInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 const VALID_HEDGE_TYPES = ["LONG", "SHORT"] as const;
@@ -26,7 +26,7 @@ export namespace CurrencyHedgeService {
   export async function listHedges(
     actorUserId: string,
     tErrors: ErrorsLabels
-  ): Promise<readonly CurrencyHedgeReturnType[]> {
+  ): Promise<readonly CurrencyHedgeSelectType[]> {
     await assertManagePermission(actorUserId, tErrors);
     return CurrencyHedgeRepository.listAll();
   }
@@ -35,7 +35,7 @@ export namespace CurrencyHedgeService {
     actorUserId: string,
     input: CurrencyHedgeSubmitInput,
     tErrors: ErrorsLabels
-  ): Promise<CurrencyHedgeReturnType> {
+  ): Promise<CurrencyHedgeSelectType> {
     await assertManagePermission(actorUserId, tErrors);
     await assertValidHedgeType(input.hedgeType, tErrors);
     const now = new Date();
@@ -47,7 +47,7 @@ export namespace CurrencyHedgeService {
     id: string,
     input: CurrencyHedgeUpdateInput,
     tErrors: ErrorsLabels
-  ): Promise<CurrencyHedgeReturnType> {
+  ): Promise<CurrencyHedgeSelectType> {
     await assertManagePermission(actorUserId, tErrors);
     if (input.hedgeType) {
       await assertValidHedgeType(input.hedgeType, tErrors);
@@ -64,13 +64,13 @@ export namespace CurrencyHedgeService {
 
   export async function findHedgesByCurrencies(
     currencies: readonly CurrencyCode[]
-  ): Promise<CurrencyHedgeReturnType[]> {
+  ): Promise<CurrencyHedgeSelectType[]> {
     return CurrencyHedgeRepository.findByCurrencies(currencies);
   }
 
   export async function createManyHedges(
     inputs: readonly CurrencyHedgeSubmitInput[]
-  ): Promise<CurrencyHedgeReturnType[]> {
+  ): Promise<CurrencyHedgeSelectType[]> {
     const now = new Date();
     return CurrencyHedgeRepository.createMany(
       inputs.map(input => ({

@@ -1,9 +1,4 @@
-export {
-  effectiveMeetingToDisplayData,
-  MeetingConfigDisplay,
-  type MeetingConfigDisplayData,
-  type MeetingConfigDisplayProps,
-} from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
+export { MeetingConfigDisplay } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
 export {
   MeetingConfigList,
   type MeetingConfigListItem,
@@ -13,3 +8,8 @@ export {
   MeetingJoinAction,
   type MeetingJoinActionProps,
 } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
+export {
+  effectiveMeetingToDisplayData,
+  type MeetingConfigDisplayData,
+  type MeetingConfigDisplayProps,
+} from "@/frontend/common/components/ui/display/meetingConfig/meetingConfigDisplay.types";

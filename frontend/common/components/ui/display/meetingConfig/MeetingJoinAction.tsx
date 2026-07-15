@@ -8,7 +8,7 @@ import { Alert, Avatar, alpha, Box, Button, IconButton, Stack, Tooltip, Typograp
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";

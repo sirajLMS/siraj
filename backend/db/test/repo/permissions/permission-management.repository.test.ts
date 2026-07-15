@@ -209,7 +209,7 @@ describe("PermissionManagementRepository", () => {
         errorThrown = err;
       }
       expect(errorThrown).not.toBeNull();
-      expect(tFunc(errorThrown)).toContain("not found");
+      expect(tFunc(errorThrown)).toContain("مجموعة الأذونات غير موجودة");
 
       // System group
       // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
@@ -230,7 +230,7 @@ describe("PermissionManagementRepository", () => {
         errorThrown = err;
       }
       expect(errorThrown).not.toBeNull();
-      expect(tFunc(errorThrown)).toContain("Cannot modify core properties of system permission groups");
+      expect(tFunc(errorThrown)).toContain("لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام");
     });
 
     testRepoError("updateGroup should throw on database error", () =>
@@ -273,7 +273,7 @@ describe("PermissionManagementRepository", () => {
         errorThrown = err;
       }
       expect(errorThrown).not.toBeNull();
-      expect(tFunc(errorThrown)).toContain("not found");
+      expect(tFunc(errorThrown)).toContain("مجموعة الأذونات غير موجودة");
 
       // 3. System group
       // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
@@ -287,7 +287,7 @@ describe("PermissionManagementRepository", () => {
         errorThrown = err;
       }
       expect(errorThrown).not.toBeNull();
-      expect(tFunc(errorThrown)).toContain("Cannot delete a system permission or group");
+      expect(tFunc(errorThrown)).toContain("لا يمكن حذف صلاحية أو مجموعة تابعة للنظام");
     });
 
     testRepoError("deleteGroup should throw on database error", () =>

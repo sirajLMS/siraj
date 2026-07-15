@@ -18,7 +18,7 @@ import {
   mapBillingCurrencyBuckets,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useParentBillingStore } from "@/frontend/common/stores/parentBillingStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";

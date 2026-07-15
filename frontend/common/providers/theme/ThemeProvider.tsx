@@ -6,7 +6,7 @@ import { ThemeProvider, useColorScheme } from "@mui/material/styles";
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
 import { setThemePreference } from "@/frontend/common/lib/theme-detection";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { createAppCssVarsTheme } from "@/frontend/common/providers/theme/theme";
 import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";
 

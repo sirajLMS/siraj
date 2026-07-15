@@ -181,7 +181,7 @@ describe("TeacherRepository", () => {
         }
 
         expect(error).not.toBeNull();
-        expect((error as Error).message).toContain("already exists");
+        expect((error as Error).message).toContain("موجود بالفعل");
       });
     });
 

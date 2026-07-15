@@ -156,11 +156,7 @@ function collectCoreGroups(core: Record<string, unknown>, groups: Set<string>): 
   }
 }
 
-function collectTeacherGroups(
-  teacher: Record<string, unknown>,
-  scope: ProfileScope,
-  groups: Set<string>
-): void {
+function collectTeacherGroups(teacher: Record<string, unknown>, scope: ProfileScope, groups: Set<string>): void {
   const teacherKeys = Object.keys(teacher);
 
   if (teacherKeys.some(key => ["qualifications", "hourlyRate", "rateCurrency"].includes(key))) {

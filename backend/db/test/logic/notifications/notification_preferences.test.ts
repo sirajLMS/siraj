@@ -3,7 +3,13 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { userNotificationPreferences, users } from "@/backend/db/schema";
-import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
+import {
+  createTestUser,
+  runInRollback,
+  setupRlsPolicies,
+  setupRlsRole,
+  teardownRlsRole,
+} from "@/backend/db/test/test-utils";
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import type { UserNotificationPreferenceSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
@@ -11,6 +17,13 @@ import { testLogger } from "@/shared/lib/logger/testlogger";
 describe("User Notification Preferences", () => {
   beforeAll(async () => {
     await setupRlsRole();
+    await setupRlsPolicies([
+      {
+        table: "user_notification_preferences",
+        name: "notification_preferences_access_policy",
+        definition: "FOR ALL USING (user_id = current_user_id()) WITH CHECK (user_id = current_user_id())",
+      },
+    ]);
   });
 
   afterAll(async () => {

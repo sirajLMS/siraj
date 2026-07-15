@@ -6,8 +6,8 @@ import type { TeacherAvailabilityGapItem } from "@/frontend/common/views/dashboa
 import {
   CalendarGridContainer,
   CalendarWeekdayHeader,
-  computeCalendarGridLayout,
 } from "@/frontend/common/views/dashboard/shared/CalendarGridShared";
+import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export interface TeacherAvailabilityCalendarDay {

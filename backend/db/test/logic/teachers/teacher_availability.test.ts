@@ -211,7 +211,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
         teacherId: teacher.id,
         start: "2026-06-24T14:00:00Z",
         end: "2026-06-24T15:00:00Z",
-        expectedError: "outside teacher availability windows",
+        expectedError: "خارج نوافذ توفر المعلم",
       });
     }));
 
@@ -235,7 +235,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
         teacherId: teacher.id,
         start: "2026-06-26T12:30:00Z",
         end: "2026-06-26T13:30:00Z",
-        expectedError: "recurring unavailability",
+        expectedError: "نمط عدم التفرغ المتكرر",
       });
     }));
 
@@ -278,7 +278,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
         teacherId: teacher.id,
         start: "2026-07-06T10:00:00Z",
         end: "2026-07-06T11:00:00Z",
-        expectedError: "approved vacation",
+        expectedError: "إجازة معتمدة",
       });
     }));
 

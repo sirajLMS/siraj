@@ -1,5 +1,5 @@
 import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderReturnType } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 
 export type ClassMeetingConfigScope = "class_instance" | "recurring_schedule";
 
@@ -31,7 +31,7 @@ export type ClassMeetingConfigInsertType = {
 
 export type ClassMeetingConfigReturnType = ClassMeetingConfigSelectType & {
   readonly hasSecret?: boolean;
-  readonly provider?: MeetingProviderReturnType;
+  readonly provider?: MeetingProviderSelectType;
 };
 
 export type ClassMeetingConfigSubmitInput = Omit<

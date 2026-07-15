@@ -5,7 +5,7 @@ import type { ClassMeetingConfigReturnType } from "@/backend/types/meeting/class
 import type { MeetingConfigDetails, UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import type {
   MeetingProviderFieldSchema,
-  MeetingProviderReturnType,
+  MeetingProviderSelectType,
 } from "@/backend/types/meeting/meeting-provider.types";
 
 // Extract the actual SchemaTypes from the builder instance
@@ -39,7 +39,7 @@ export const MeetingProviderFieldSchemaPothosObject = MeetingProviderFieldSchema
   }),
 });
 
-const MeetingProviderRef = gqlSchemaBuilder.objectRef<MeetingProviderReturnType>("MeetingProvider");
+const MeetingProviderRef = gqlSchemaBuilder.objectRef<MeetingProviderSelectType>("MeetingProvider");
 
 export const MeetingProviderPothosObject = MeetingProviderRef.implement({
   fields: t => ({

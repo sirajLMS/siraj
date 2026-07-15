@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { CreditRepository, StudentRepository } from "@/backend/db/repo";
 import { creditTransactions } from "@/backend/db/schema";
 import {
@@ -26,6 +27,32 @@ function requireInstance(instance: ClassInstanceEntity | null): ClassInstanceEnt
     throw new Error("setupTestEntities returned a null instance — pass skipInstance:false");
   }
   return instance;
+}
+
+/**
+ * Runs `fn` inside a PostgreSQL SAVEPOINT so a constraint violation (e.g. a
+ * duplicate idempotency key rejected by a unique index) can be caught WITHOUT
+ * poisoning the outer `runInRollback` transaction. After catching, issues
+ * `ROLLBACK TO SAVEPOINT` so subsequent queries in the test can run safely.
+ * Without this, the unique-index rejection aborts the whole transaction and
+ * every later statement fails with `25P02 "current transaction is aborted"`.
+ */
+async function expectSavepointError(fn: () => Promise<unknown>, tx: DBTransaction): Promise<Error> {
+  const sp = `sp_${randomUUID().replaceAll("-", "_")}`;
+  await tx.execute(sql.raw(`SAVEPOINT ${sp}`));
+  let errorCaught: unknown = null;
+  try {
+    await fn();
+  } catch (error) {
+    errorCaught = error;
+  }
+  if (errorCaught) {
+    await tx.execute(sql.raw(`ROLLBACK TO SAVEPOINT ${sp}`));
+  } else {
+    await tx.execute(sql.raw(`RELEASE SAVEPOINT ${sp}`));
+  }
+  expect(errorCaught).not.toBeNull();
+  return errorCaught as Error;
 }
 
 describe("Credit workflow — purchase, deduct, refund, idempotency", () => {
@@ -125,19 +152,21 @@ describe("Credit workflow — purchase, deduct, refund, idempotency", () => {
       const balanceAfterFirstDeduct = await CreditRepository.getBalance(tx, entities.student.id);
       expect(balanceAfterFirstDeduct.classesRemaining).toBe(9);
 
-      // Second call with the same idempotencyKey must be rejected by the unique index.
-      let duplicateSucceeded = true;
-      try {
-        await CreditRepository.deductForBooking(tx, {
-          studentId: entities.student.id,
-          classInstanceId: instance.id,
-          creditedByUserId,
-          idempotencyKey,
-        });
-      } catch {
-        duplicateSucceeded = false;
-      }
-      expect(duplicateSucceeded).toBe(false);
+      // Second call with the same idempotencyKey must be rejected by the unique
+      // index. Wrap in a SAVEPOINT: a unique-index violation poisons the whole
+      // transaction (subsequent statements fail with 25P02 "current transaction
+      // is aborted"), so we rollback to the savepoint before re-querying.
+      const dupError = await expectSavepointError(
+        () =>
+          CreditRepository.deductForBooking(tx, {
+            studentId: entities.student.id,
+            classInstanceId: instance.id,
+            creditedByUserId,
+            idempotencyKey,
+          }),
+        tx
+      );
+      expect(dupError).toBeDefined();
 
       // The balance is unchanged after the rejected call.
       const balanceAfterDupAttempt = await CreditRepository.getBalance(tx, entities.student.id);

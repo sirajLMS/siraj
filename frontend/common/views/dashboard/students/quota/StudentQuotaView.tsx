@@ -16,7 +16,7 @@ import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/student
 import { ContextualHelperCards } from "@/frontend/common/views/dashboard/students/quota/components/ContextualHelperCards";
 import { CourseDetailsSection } from "@/frontend/common/views/dashboard/students/quota/components/CourseDetailsSection";
 import { StudentInformationSection } from "@/frontend/common/views/dashboard/students/quota/components/StudentInformationSection";
-import { QuotaFormAccessProvider } from "@/frontend/common/views/dashboard/students/quota/QuotaFormAccessContext";
+import { QuotaFormAccessProvider } from "@/frontend/common/views/dashboard/students/quota/QuotaFormAccessProvider";
 import {
   createStudentQuotaSchema,
   type StudentQuotaFormData,

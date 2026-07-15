@@ -1,5 +1,7 @@
-import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
+import type {
+  MeetingConfigDetails,
+  MeetingProviderFieldSchema,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 
 type MeetingProviderFieldVisibility = {
@@ -46,5 +48,5 @@ export function extractMeetingId(providerSlug: string, url: string): string | nu
 }
 
 export function getMeetingJoinUrlFromDetails(details: MeetingConfigDetails): string {
-  return details.meetingUrl;
+  return details.meetingUrl ?? "";
 }

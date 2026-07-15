@@ -6,9 +6,6 @@ import type { ComponentProps } from "react";
 import { type AppLocale, defaultLocale, locales } from "@/shared/locale/AppLocale";
 
 export { type AppLocale, defaultLocale, locales };
-export type Locale = AppLocale;
-
-export type Pathname = string;
 
 export interface RoutingConfig {
   locales: readonly AppLocale[];
@@ -25,7 +22,7 @@ export const routing: RoutingConfig = {
 export type LinkProps = ComponentProps<typeof Link>;
 export { Link };
 
-export function usePathname(): Pathname {
+export function usePathname(): string {
   return useNextPathname();
 }
 

@@ -1,7 +1,7 @@
 import { afterAll, beforeAll } from "bun:test";
+import { getTestPort } from "@/frontend/common/graphql/test/testPort";
+import { startTestServer, stopTestServer } from "@/frontend/common/graphql/test/testServer";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { getTestPort } from "./testPort";
-import { startTestServer, stopTestServer } from "./testServer";
 
 let startedSuitesCount = 0;
 let stopTimeout: Timer | null = null;

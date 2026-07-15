@@ -3,7 +3,7 @@ import logger from "@/backend/lib/logger";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import type { TeacherEntity } from "@/backend/types";
-import type { MeetingProviderReturnType } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export async function seedOrGet(teachersList: TeacherEntity[], config?: SeedConfig) {
@@ -15,8 +15,8 @@ export async function seedOrGet(teachersList: TeacherEntity[], config?: SeedConf
   }
 
   const providers = await MeetingProviderCatalogService.listAllProviders();
-  const zoom = providers.find((provider: MeetingProviderReturnType) => provider.slug === "zoom");
-  const googleMeet = providers.find((provider: MeetingProviderReturnType) => provider.slug === "google_meet");
+  const zoom = providers.find((provider: MeetingProviderSelectType) => provider.slug === "zoom");
+  const googleMeet = providers.find((provider: MeetingProviderSelectType) => provider.slug === "google_meet");
 
   if (!zoom || !googleMeet) {
     throw new Error("Missing meeting providers required for user meeting config seeds.");

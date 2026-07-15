@@ -18,11 +18,7 @@ afterEach(async () => {
 });
 
 async function isVisible(
-  locator:
-    | ReturnType<Page["getByRole"]>
-    | ReturnType<Page["locator"]>
-    | ReturnType<Page["getByLabel"]>
-    | ReturnType<Page["getByRole"]>
+  locator: ReturnType<Page["getByRole"]> | ReturnType<Page["locator"]> | ReturnType<Page["getByLabel"]>
 ): Promise<boolean> {
   try {
     return await locator.isVisible();
@@ -104,12 +100,11 @@ describe("Teacher Lesson Report E2E Flow", () => {
       try {
         await successSnackbar.waitFor({ state: "visible", timeout: 5000 });
       } catch {
-        // If no snackbar, at least verify dialog closed
-        expect(true).toBe(true);
+        // If no snackbar, at least verify the dialog closed
+        await expect(dialog).not.toBeVisible();
       }
     } else {
       // No eligible classes - just verify the UI elements exist (defensive test)
-      console.log("No eligible classes to mark completed - verifying UI elements exist");
       await expect(pageTitle.first()).toBeVisible();
     }
 
@@ -173,13 +168,12 @@ describe("Teacher Lesson Report E2E Flow", () => {
         try {
           await approvedStatus.waitFor({ state: "visible", timeout: 5000 });
         } catch {
-          // At minimum, verify the approve action was attempted
-          expect(true).toBe(true);
+          // At minimum, verify the approve button is no longer visible (action was attempted)
+          await expect(approveButton).not.toBeVisible();
         }
       }
     } else {
       // No pending reports found - verify the page loads correctly (defensive)
-      console.log("No pending reports found - verifying page loads correctly");
       await expect(reviewsTitle.first()).toBeVisible();
     }
 
@@ -212,8 +206,8 @@ describe("Teacher Lesson Report E2E Flow", () => {
     try {
       await scheduleGrid.waitFor({ state: "visible", timeout: 10000 });
     } catch {
-      // Fallback: check for any schedule-related content
-      expect(true).toBe(true);
+      // Fallback: verify the dashboard heading is still visible
+      await expect(dashboardTitle.first()).toBeVisible();
     }
   });
 

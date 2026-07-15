@@ -117,5 +117,7 @@ describe("GraphQL Payment Method Integration Tests", () => {
 
   test("cleanup test entities", async () => {
     await cleanupTestEntities(superAdminToken, entityIds);
+    // verify cleanup ran against a known provisioned parent entity
+    expect(entityIds.parentUserId).not.toBe("");
   });
 });

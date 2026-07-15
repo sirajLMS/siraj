@@ -8,7 +8,7 @@ import {
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type {
-  MeetingProviderReturnType,
+  MeetingProviderSelectType,
   MeetingProviderSubmitInput,
   UpdateMeetingProviderInput,
 } from "@/backend/types/meeting/meeting-provider.types";
@@ -26,7 +26,7 @@ export namespace MeetingProviderCatalogService {
     userId: string,
     activeOnly = false,
     tErrors: ErrorsLabels
-  ): Promise<MeetingProviderReturnType[]> {
+  ): Promise<MeetingProviderSelectType[]> {
     if (activeOnly) {
       return MeetingProviderRepository.listActive();
     }
@@ -38,7 +38,7 @@ export namespace MeetingProviderCatalogService {
     userId: string,
     id: string,
     tErrors: ErrorsLabels
-  ): Promise<MeetingProviderReturnType> {
+  ): Promise<MeetingProviderSelectType> {
     const provider = await MeetingProviderRepository.getByIdOrThrow(id, tErrors);
     if (!provider.isActive) {
       await assertManageCatalog(userId, tErrors);
@@ -50,7 +50,7 @@ export namespace MeetingProviderCatalogService {
     userId: string,
     input: MeetingProviderSubmitInput,
     tErrors: ErrorsLabels
-  ): Promise<MeetingProviderReturnType> {
+  ): Promise<MeetingProviderSelectType> {
     await assertManageCatalog(userId, tErrors);
     return MeetingProviderRepository.create(parseMeetingProviderSubmitInput(input), tErrors);
   }
@@ -60,7 +60,7 @@ export namespace MeetingProviderCatalogService {
     id: string,
     input: UpdateMeetingProviderInput,
     tErrors: ErrorsLabels
-  ): Promise<MeetingProviderReturnType> {
+  ): Promise<MeetingProviderSelectType> {
     await assertManageCatalog(userId, tErrors);
     return MeetingProviderRepository.update(id, parseUpdateMeetingProviderInput(input), tErrors);
   }
@@ -72,7 +72,7 @@ export namespace MeetingProviderCatalogService {
   }
 
   /** List all providers without auth (seed / bootstrap use). */
-  export async function listAllProviders(tx?: DBTransaction): Promise<MeetingProviderReturnType[]> {
+  export async function listAllProviders(tx?: DBTransaction): Promise<MeetingProviderSelectType[]> {
     return MeetingProviderRepository.listAll(tx);
   }
 
@@ -81,14 +81,14 @@ export namespace MeetingProviderCatalogService {
     inputs: readonly MeetingProviderSubmitInput[],
     tErrors: ErrorsLabels,
     tx?: DBTransaction
-  ): Promise<MeetingProviderReturnType[]> {
+  ): Promise<MeetingProviderSelectType[]> {
     if (inputs.length === 0) return [];
 
     try {
       return await MeetingProviderRepository.upsertMany(inputs, tErrors, tx);
     } catch (error) {
       if (isDuplicateError(error)) {
-        const results: MeetingProviderReturnType[] = [];
+        const results: MeetingProviderSelectType[] = [];
         for (const input of inputs) {
           const existing = await MeetingProviderRepository.getBySlug(input.slug, tx);
           if (existing) {

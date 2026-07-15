@@ -6,7 +6,7 @@ import { useServerInsertedHTML } from "next/navigation";
 import type { ReactNode } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 
 interface EmotionCacheProviderProps {
   readonly children: ReactNode;

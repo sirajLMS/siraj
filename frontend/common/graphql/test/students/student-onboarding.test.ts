@@ -30,7 +30,7 @@ const createMinimalParentInput = (overrides?: Partial<{ name: string; email: str
 
 const createMinimalStudentInput = (
   parentId: string,
-  overrides?: Partial<{ name: string; primaryTeacherId: string }>
+  overrides?: Partial<{ name: string; primaryTeacherId: string; email: string; password: string }>
 ) => ({
   parentId,
   name: overrides?.name ?? "GraphQL Test Student",
@@ -41,8 +41,8 @@ const createMinimalStudentInput = (
   primaryTeacherId: overrides?.primaryTeacherId ?? null,
   classesTotal: null,
   classesRemaining: null,
-  email: null,
-  password: null,
+  email: overrides?.email ?? `stu_${Date.now()}_${randomUUID().slice(0, 8)}@test.com`,
+  password: overrides?.password ?? `Pwd_${randomUUID()}`,
   timezone: null,
 });
 

@@ -15,7 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import { type Control, Controller, type UseFormReturn, useForm } from "react-hook-form";
+import { type Control, Controller, type UseFormReturn, useForm, useWatch } from "react-hook-form";
 import { PaymentMethodTypeFields } from "@/frontend/common/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
 import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -320,8 +320,8 @@ export function PaymentMethodFormDialog({
     defaultValues: createEmptyPaymentMethodFormValues(defaultDirection),
   });
 
-  const watchedType = form.watch("type");
-  const watchedDirection = form.watch("direction");
+  const watchedType = useWatch({ control: form.control, name: "type" });
+  const watchedDirection = useWatch({ control: form.control, name: "direction" });
 
   const { walletOptions, paymentLinkOptions, onlineAccountOptions } = usePaymentMethodCatalogs(
     watchedDirection ?? null

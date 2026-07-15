@@ -3,9 +3,9 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { CurrencyHedgeService } from "@/backend/services/fx/currency-hedge.service";
-import type { CurrencyHedgeReturnType } from "@/backend/types";
+import type { CurrencyHedgeSelectType } from "@/backend/types";
 
-const CurrencyHedgeRef = gqlSchemaBuilder.objectRef<CurrencyHedgeReturnType>("CurrencyHedge");
+const CurrencyHedgeRef = gqlSchemaBuilder.objectRef<CurrencyHedgeSelectType>("CurrencyHedge");
 
 export const CurrencyHedgePothosObject = CurrencyHedgeRef.implement({
   fields: t => ({

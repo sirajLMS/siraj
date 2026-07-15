@@ -9,7 +9,7 @@ import { PersonProfileLink, PersonProfileLinkCell } from "@/frontend/common/comp
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import { StatusAction } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {

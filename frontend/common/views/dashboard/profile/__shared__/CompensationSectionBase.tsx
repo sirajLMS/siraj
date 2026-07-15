@@ -9,7 +9,7 @@ import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-ty
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
 import { useAppTranslation } from "@/shared/locale/client";

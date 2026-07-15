@@ -34,25 +34,34 @@ export function useFxLiveRefresh(): void {
       }
       lastFetchRef.current = now;
 
-      void client
-        .query({ query: meQueryDocument, fetchPolicy: "network-only" })
-        .then(result => {
-          const me = result.data?.me;
-          if (!me) {
-            return;
-          }
+      client.query({ query: meQueryDocument, fetchPolicy: "network-only" }).then(onMeFetched).catch(onFetchFailed);
 
-          // Only sync if displayCurrency is explicitly set (not null/undefined)
-          if (me.displayCurrency !== null && me.displayCurrency !== undefined) {
-            syncViewerFromProfile(client, { displayCurrency: me.displayCurrency });
-            if (me.displayCurrency) {
-              void refetchFxHealth();
-            }
+      function onMeFetched(result: Awaited<ReturnType<typeof client.query>>) {
+        const me = result.data?.me;
+        if (!me) {
+          return;
+        }
+
+        // Only sync if displayCurrency is explicitly set (not null/undefined)
+        if (me.displayCurrency !== null && me.displayCurrency !== undefined) {
+          syncViewerFromProfile(client, { displayCurrency: me.displayCurrency });
+          if (me.displayCurrency) {
+            refetchFxHealth().catch(onRefetchFailed);
           }
-        })
-        .catch(error => {
-          logger.warn("FX live refresh visibilitychange fetch failed", { error: error.message });
+        }
+      }
+
+      function onFetchFailed(error: unknown) {
+        logger.warn("FX live refresh visibilitychange fetch failed", {
+          error: error instanceof Error ? error.message : String(error),
         });
+      }
+
+      function onRefetchFailed(error: unknown) {
+        logger.warn("FX live refresh refetch failed", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     };
 
     const handleStorageChange = (event: StorageEvent) => {
@@ -69,9 +78,13 @@ export function useFxLiveRefresh(): void {
         return;
       }
 
-      void client.refetchQueries({
-        include: [profileByUserIdQueryDocument, userQueryDocument, meQueryDocument],
-      });
+      client
+        .refetchQueries({
+          include: [profileByUserIdQueryDocument, userQueryDocument, meQueryDocument],
+        })
+        .catch(error => {
+          logger.warn("FX live refresh refetchQueries failed", { error: error.message });
+        });
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);

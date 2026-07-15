@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { PersonProfileLink } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { profileHrefForTeacher, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   UpcomingClassDisplay,

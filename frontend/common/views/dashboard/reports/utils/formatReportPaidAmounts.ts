@@ -35,45 +35,56 @@ export function formatReportPaidAmounts(
   return paidAmounts.map(paid => formatReportPaidAmount(paid, locale, messages)).join(" · ");
 }
 
+type PaidAmountAggregate = {
+  amount: number;
+  displayAmount?: { amount: number; currency: CurrencyCode };
+};
+
+function toNumericAmount(value: string): number {
+  const numeric = Number.parseFloat(value);
+  return Number.isFinite(numeric) ? numeric : Number.NaN;
+}
+
+function mergeDisplayAmount(existing: PaidAmountAggregate, paid: ReportPaidAmount): void {
+  const display = paid.displayAmount;
+  if (!display?.amount || !display.currency || display.stale) {
+    existing.displayAmount = undefined;
+    return;
+  }
+
+  const displayNumeric = toNumericAmount(display.amount);
+  if (!Number.isFinite(displayNumeric)) {
+    existing.displayAmount = undefined;
+    return;
+  }
+
+  if (!existing.displayAmount) {
+    existing.displayAmount = { amount: displayNumeric, currency: display.currency };
+    return;
+  }
+
+  if (existing.displayAmount.currency === display.currency) {
+    existing.displayAmount.amount += displayNumeric;
+  } else {
+    existing.displayAmount = undefined;
+  }
+}
+
 export function aggregatePaidAmountTotals(
-  rows: readonly { readonly paidAmounts?: readonly ReportPaidAmount[] | null }[]
+  rows: ReadonlyArray<{ readonly paidAmounts?: ReadonlyArray<ReportPaidAmount> | null }>
 ): ReportPaidAmount[] {
-  const byCurrency = new Map<
-    CurrencyCode,
-    {
-      amount: number;
-      displayAmount?: { amount: number; currency: CurrencyCode };
-    }
-  >();
+  const byCurrency = new Map<CurrencyCode, PaidAmountAggregate>();
 
   for (const row of rows) {
     for (const paid of row.paidAmounts ?? []) {
-      const numericAmount = Number.parseFloat(paid.amount);
+      const numericAmount = toNumericAmount(paid.amount);
       if (!Number.isFinite(numericAmount)) {
         continue;
       }
 
       const existing = byCurrency.get(paid.currency) ?? { amount: 0 };
       existing.amount += numericAmount;
-
-      if (paid.displayAmount?.amount && paid.displayAmount.currency && !paid.displayAmount.stale) {
-        const displayNumeric = Number.parseFloat(paid.displayAmount.amount);
-        if (!Number.isFinite(displayNumeric)) {
-          existing.displayAmount = undefined;
-        } else if (!existing.displayAmount) {
-          existing.displayAmount = {
-            amount: displayNumeric,
-            currency: paid.displayAmount.currency,
-          };
-        } else if (existing.displayAmount.currency === paid.displayAmount.currency) {
-          existing.displayAmount.amount += displayNumeric;
-        } else {
-          existing.displayAmount = undefined;
-        }
-      } else {
-        existing.displayAmount = undefined;
-      }
-
+      mergeDisplayAmount(existing, paid);
       byCurrency.set(paid.currency, existing);
     }
   }

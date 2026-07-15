@@ -5,17 +5,16 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
+import {
+  CURRENCY_DISPLAY_PART_ORDER,
+  CurrencyDisplayPart,
+  type CurrencyDisplayPartValue,
+  resolveCurrencyDisplayParts,
+} from "@/frontend/common/components/ui/display/currencyDisplay/currencyDisplay.constants";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
-import {
-  CurrencyDisplayPart,
-  CURRENCY_DISPLAY_PART_ORDER,
-  DEFAULT_CURRENCY_DISPLAY_PARTS,
-  resolveCurrencyDisplayParts,
-  type CurrencyDisplayPartValue,
-} from "@/frontend/common/components/ui/display/currencyDisplay/currencyDisplay.constants";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 
 export type CurrencyDisplayProps = {
   readonly code?: CurrencyCode | string | null;

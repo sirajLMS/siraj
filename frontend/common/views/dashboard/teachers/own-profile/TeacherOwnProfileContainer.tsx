@@ -10,7 +10,7 @@ import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated
 import { teacherOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { useAppTranslation } from "@/shared/locale/client";
 

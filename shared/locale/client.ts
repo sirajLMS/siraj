@@ -1,6 +1,6 @@
 "use client";
 
-import { useAppLocale, useLocaleContext } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale, useLocaleContext } from "@/shared/locale/localeContext";
 import type { MessageSchema } from "@/shared/locale/types/message";
 
 /**

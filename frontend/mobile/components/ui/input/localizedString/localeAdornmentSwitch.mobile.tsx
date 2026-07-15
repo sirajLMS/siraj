@@ -6,7 +6,7 @@ import { useCallback, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
 import type { LocaleAdornmentSwitchProps } from "@/frontend/common/components/ui/input/localizedString/LocaleAdornmentSwitch";
 import { getLanguageDisplayName, getLanguageEmoji, languages } from "@/frontend/common/lib/locale";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { AppLocale } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 

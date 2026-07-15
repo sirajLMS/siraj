@@ -3,7 +3,7 @@ import type {
   UserMeetingConfigReturnType,
   UserMeetingConfigSelectType,
 } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderReturnType } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 
 export function buildMaskedMeetingConfig(
   config: UserMeetingConfigSelectType,
@@ -24,7 +24,7 @@ export function buildMaskedMeetingConfigs(
 }
 
 export function buildMeetingProviderCatalogSnapshot(
-  provider: MeetingProviderReturnType
+  provider: MeetingProviderSelectType
 ): MeetingConfigSnapshot["provider"] {
   return {
     catalogId: provider.id,

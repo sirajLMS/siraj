@@ -68,7 +68,7 @@ describe("Manager Onboarding GraphQL API", () => {
     expect(result.createManager.assignedGroupSlug).toBe("staff_default");
   });
 
-  const assertManagerCreationDeniedForRole = async (role: string) => {
+  const assertManagerCreationDeniedForRole = async (role: string): Promise<boolean> => {
     const token = await loginDemoUser(role);
     const { testClient } = await import("@/frontend/common/graphql/test/testClient");
     const result = await testClient.mutate({
@@ -78,14 +78,17 @@ describe("Manager Onboarding GraphQL API", () => {
       errorPolicy: "all",
     });
     expect(result.error).toBeDefined();
+    return true;
   };
 
   test("Admin denied creating manager", async () => {
-    await assertManagerCreationDeniedForRole("academy_admin");
+    const denied = await assertManagerCreationDeniedForRole("academy_admin");
+    expect(denied).toBe(true);
   });
 
   test("Teacher denied creating manager", async () => {
-    await assertManagerCreationDeniedForRole("teacher_default");
+    const denied = await assertManagerCreationDeniedForRole("teacher_default");
+    expect(denied).toBe(true);
   });
 
   test("Unauthenticated denied creating manager", async () => {

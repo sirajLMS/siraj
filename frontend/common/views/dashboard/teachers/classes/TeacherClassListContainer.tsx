@@ -7,7 +7,7 @@ import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { teacherAssignedClassesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import { ClassSessionActionButton } from "@/frontend/common/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import { useRouter } from "@/shared/i18n/routing";

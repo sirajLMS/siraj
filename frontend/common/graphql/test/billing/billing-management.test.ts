@@ -23,6 +23,7 @@ import {
   provisionTestSuperAdmin,
 } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+import { getTestApiUrl } from "@/frontend/common/graphql/test/testClient";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -74,7 +75,7 @@ async function uploadProofFile(token: string): Promise<string> {
     throw new Error("Failed to prepare upload");
   }
 
-  const uploadUrl = `http://localhost:3001/api/storage/upload/${prep.id}`;
+  const uploadUrl = getTestApiUrl(`/api/storage/upload/${prep.id}`);
   const response = await Bun.fetch(uploadUrl, {
     method: "PUT",
     headers: {

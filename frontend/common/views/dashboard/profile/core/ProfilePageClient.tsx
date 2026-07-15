@@ -55,7 +55,9 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
 
   const activeTab = currentTab || "profile";
 
-  // TODO: i18n dynamic lookup - audience is a bounded union matching ProfileRoleLabels keys
+  // Dynamic i18n lookup: `audience` is a bounded union (ProfileAudience) whose
+  // string values map onto keys of `t.role`, so we cast into the typed role
+  // label map. The staff cohort is handled separately (no role label).
   const roleLabel =
     audience === ProfileAudience.Staff
       ? (profile?.staffProfile?.roleName ?? profile?.staffProfile?.roleSlug ?? undefined)

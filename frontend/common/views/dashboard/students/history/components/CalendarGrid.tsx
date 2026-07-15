@@ -5,8 +5,8 @@ import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphq
 import {
   CalendarGridContainer,
   CalendarWeekdayHeader,
-  computeCalendarGridLayout,
 } from "@/frontend/common/views/dashboard/shared/CalendarGridShared";
+import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
 import type { CalendarGridProps, ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";

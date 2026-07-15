@@ -2,7 +2,7 @@
 
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/StudentProfileContext";
+import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import type { StudentFieldGroupKey } from "@/shared/constants/profile-field-groups";
 import { studentFieldGroupGraphqlPermission } from "@/shared/lib/field-group-permission-key";
 

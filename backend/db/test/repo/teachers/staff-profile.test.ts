@@ -312,7 +312,7 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
     const error = await expectRepoError(() =>
       updateProfile(tx, "00000000-0000-0000-0000-000000000000", { phone: "+1111111111", phoneIsSet: true })
     );
-    expect(error.message).toContain("not found");
+    expect(error.message).toContain("غير موجود");
   });
 
   staffTest("does not update fields when neither flag is set", async tx => {
@@ -440,7 +440,7 @@ describe("StaffProfileRepository — create", () => {
     }
 
     expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("already exists");
+    expect((error as Error).message).toContain("موجود بالفعل");
   });
 
   staffTest("rejects when create insertion fails", async () => {

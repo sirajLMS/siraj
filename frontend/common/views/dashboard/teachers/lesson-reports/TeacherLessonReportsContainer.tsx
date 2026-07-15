@@ -8,7 +8,7 @@ import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppPermission, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { pendingLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useAppTranslation } from "@/shared/locale/client";
 
 type LessonReportStatusValue = `${LessonReportStatus}`;
@@ -88,15 +88,14 @@ export function TeacherLessonReportsContainer({ teacherId }: Readonly<TeacherLes
     [t]
   );
 
-  const allRows = data?.pendingLessonReports ?? [];
-
   const filteredRows = useMemo(() => {
+    const rows = data?.pendingLessonReports ?? [];
     if (statusFilter === "ALL") {
-      return allRows;
+      return rows;
     }
-    return allRows.filter(row => row.status === (statusFilter as LessonReportStatus));
-    // The dependency on allRows covers changes; statusFilter is the active filter.
-  }, [allRows, statusFilter]);
+    return rows.filter(row => row.status === (statusFilter as LessonReportStatus));
+    // statusFilter is the active filter; rows are recomputed when `data` changes.
+  }, [data, statusFilter]);
 
   return (
     <RequirePermission permissions={[AppPermission.TeacherViewDashboard]}>
@@ -133,9 +132,9 @@ export function TeacherLessonReportsContainer({ teacherId }: Readonly<TeacherLes
 
           {!loading && !error && filteredRows.length > 0 ? (
             <Stack spacing={1}>
-              {filteredRows.map(row => (
+              {filteredRows.map((row, index) => (
                 <Box
-                  key={row.id ?? row.classInstanceId ?? Math.random()}
+                  key={row.id ?? row.classInstanceId ?? `row-${index}`}
                   sx={theme => ({
                     p: 2,
                     borderRadius: 1,

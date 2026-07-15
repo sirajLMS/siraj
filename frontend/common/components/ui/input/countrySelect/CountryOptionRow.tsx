@@ -4,13 +4,8 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import { type CountryType, getCountryDisplayName } from "@/frontend/common/lib/locale";
-
-export type CountryOptionRowProps = {
-  readonly country: CountryType;
-  readonly locale: string;
-  readonly showPhonePrefix?: boolean;
-};
+import type { CountryOptionRowProps } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.types";
+import { getCountryDisplayName } from "@/frontend/common/lib/locale";
 
 export function CountryOptionRow({ country, locale, showPhonePrefix = true }: CountryOptionRowProps): React.ReactNode {
   return (
@@ -26,12 +21,4 @@ export function CountryOptionRow({ country, locale, showPhonePrefix = true }: Co
       ) : null}
     </Box>
   );
-}
-
-export function getCountryOptionLabel(country: CountryType, locale: string, showPhonePrefix = true): string {
-  const name = getCountryDisplayName(country.code, locale);
-  if (!showPhonePrefix) {
-    return name;
-  }
-  return `${name} (+${country.phone})`;
 }

@@ -9,7 +9,7 @@ import {
   supportedPaymentLinksQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
 import { toPaymentMethodCatalogOptions } from "@/frontend/common/lib/payment-method";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { LocalizedString } from "@/shared/types/localized-string";
 
 function isPaymentMethodCatalogRow<T extends { id: string | null; slug: string | null; name: LocalizedString | null }>(

@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useEffect, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { CatalogImageUpload } from "@/frontend/common/components/ui/input/catalogImageUpload/CatalogImageUpload";
 import { CountryAutocomplete } from "@/frontend/common/components/ui/input/countrySelect/CountryAutocomplete";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
@@ -108,7 +108,6 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
     control,
     handleSubmit,
     reset,
-    watch,
     setValue,
     formState: { errors },
   } = useForm<CatalogFormValues>({
@@ -212,8 +211,8 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
     }
   });
 
-  const countryCode = watch("countryCode");
-  const currencyCode = watch("currencyCode");
+  const countryCode = useWatch({ control, name: "countryCode" });
+  const currencyCode = useWatch({ control, name: "currencyCode" });
 
   return (
     <Dialog open={open} onClose={isSaving ? undefined : onClose} fullWidth maxWidth="sm">

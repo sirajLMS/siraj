@@ -12,10 +12,8 @@ import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { useStudentHistoryStore } from "@/frontend/common/stores/studentHistoryStore";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { StudentHistoryContainer } from "@/frontend/common/views/dashboard/students/history/StudentHistoryContainer";
-import {
-  StudentProfileProvider,
-  type StudentProfileQueryData,
-} from "@/frontend/common/views/dashboard/students/profile/StudentProfileContext";
+import { StudentProfileProvider } from "@/frontend/common/views/dashboard/students/profile/StudentProfileProvider";
+import type { StudentProfileQueryData } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext.types";
 import {
   getVisibleStudentProfileTabs,
   resolveStudentProfileTab,

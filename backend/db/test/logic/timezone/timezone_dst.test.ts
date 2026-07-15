@@ -293,7 +293,7 @@ describe("Timezone Handling & DST Adjustment", () => {
         e => e
       );
       expect(error).toBeInstanceOf(Error);
-      expect(getErrorMessage(error)).toContain("Insufficient permissions");
+      expect(getErrorMessage(error)).toContain("sufficient permissions");
 
       // Case 2: Has permission
       mockPermissions.set(`${actorUserId}:${AppPermission.SYSTEM_BULK_UPDATE_DST}`, true);

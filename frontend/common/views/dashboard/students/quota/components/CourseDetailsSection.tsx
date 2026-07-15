@@ -22,7 +22,7 @@ import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/prof
 import { QuotaFormField } from "@/frontend/common/views/dashboard/students/quota/components/QuotaFormField";
 import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/components/quotaFieldStyles";
 import { SectionHeader } from "@/frontend/common/views/dashboard/students/quota/components/SectionHeader";
-import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/QuotaFormAccessContext";
+import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/quotaFormAccessContext";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import { useAppTranslation } from "@/shared/locale/client";
 

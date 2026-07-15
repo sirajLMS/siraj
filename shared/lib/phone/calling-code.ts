@@ -30,6 +30,38 @@ export function getCallingCodeForRegion(region: string): string {
   return String(util.getCountryCodeForRegion(region));
 }
 
+function pickPreferredRegionMatch(
+  matches: readonly CallingCodeEntry[],
+  preferredRegion?: string
+): CallingCodeEntry | undefined {
+  if (!preferredRegion) {
+    return undefined;
+  }
+  const resolvedPreferredRegion = resolveUiCountryCode(preferredRegion);
+  if (!resolvedPreferredRegion) {
+    return undefined;
+  }
+  return matches.find(entry => entry.region === resolvedPreferredRegion);
+}
+
+function pickDigitsDefaultMatch(
+  matches: readonly CallingCodeEntry[],
+  callingCodeDigits?: string
+): CallingCodeEntry | undefined {
+  if (!callingCodeDigits) {
+    return undefined;
+  }
+  const callingCode = Number(callingCodeDigits);
+  if (Number.isNaN(callingCode)) {
+    return undefined;
+  }
+  const defaultRegion = resolveUiCountryCode(util.getRegionCodeForCountryCode(callingCode) ?? undefined);
+  if (!defaultRegion) {
+    return undefined;
+  }
+  return matches.find(entry => entry.region === defaultRegion);
+}
+
 function pickPreferredMatch(
   matches: readonly CallingCodeEntry[],
   preferredRegion?: string,
@@ -39,27 +71,14 @@ function pickPreferredMatch(
     return undefined;
   }
 
-  if (preferredRegion) {
-    const resolvedPreferredRegion = resolveUiCountryCode(preferredRegion);
-    if (resolvedPreferredRegion) {
-      const preferred = matches.find(entry => entry.region === resolvedPreferredRegion);
-      if (preferred) {
-        return preferred;
-      }
-    }
+  const preferred = pickPreferredRegionMatch(matches, preferredRegion);
+  if (preferred) {
+    return preferred;
   }
 
-  if (callingCodeDigits) {
-    const callingCode = Number(callingCodeDigits);
-    if (!Number.isNaN(callingCode)) {
-      const defaultRegion = resolveUiCountryCode(util.getRegionCodeForCountryCode(callingCode) ?? undefined);
-      if (defaultRegion) {
-        const defaultMatch = matches.find(entry => entry.region === defaultRegion);
-        if (defaultMatch) {
-          return defaultMatch;
-        }
-      }
-    }
+  const defaultMatch = pickDigitsDefaultMatch(matches, callingCodeDigits);
+  if (defaultMatch) {
+    return defaultMatch;
   }
 
   return matches[0]

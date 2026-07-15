@@ -8,7 +8,7 @@ import { AppDataGrid, PageContainer, PageHeader } from "@/frontend/common/compon
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, currencies, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function SupportedCurrenciesContainer() {

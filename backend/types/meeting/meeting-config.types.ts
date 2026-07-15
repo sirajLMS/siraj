@@ -1,4 +1,4 @@
-import type { MeetingProviderReturnType } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
 
 // ============================================================================
@@ -62,7 +62,7 @@ export type UserMeetingConfigInsertType = {
 
 export type UserMeetingConfigReturnType = UserMeetingConfigSelectType & {
   readonly hasSecret?: boolean;
-  readonly provider?: MeetingProviderReturnType;
+  readonly provider?: MeetingProviderSelectType;
 };
 
 export type UserMeetingConfigSubmitInput = Omit<

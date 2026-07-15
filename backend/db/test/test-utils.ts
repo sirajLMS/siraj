@@ -208,12 +208,22 @@ async function installPolicy(policy: RlsPolicyDef): Promise<void> {
   }
 }
 
+async function enableRowLevelSecurity(table: string): Promise<void> {
+  const tbl = quoteIdent(table);
+  await db.execute(sql.raw(`ALTER TABLE ${tbl} ENABLE ROW LEVEL SECURITY`));
+  await db.execute(sql.raw(`ALTER TABLE ${tbl} FORCE ROW LEVEL SECURITY`));
+}
+
 export async function setupRlsPolicies(policies: RlsPolicyDef[]): Promise<void> {
   for (const policy of policies) {
     const key = `${policy.table}.${policy.name}`;
     if (installedPolicies.has(key)) continue;
     installedPolicies.add(key);
     await installPolicy(policy);
+  }
+  const tables = [...new Set(policies.map(p => p.table))];
+  for (const table of tables) {
+    await enableRowLevelSecurity(table);
   }
 }
 

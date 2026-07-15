@@ -11,7 +11,7 @@ import {
   rescheduleTrackingRowsQueryDocument,
   updateSessionStatusLeaveMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useRescheduleTrackingStore } from "@/frontend/common/stores/rescheduleTrackingStore";
 import { exportRescheduleTracking } from "@/frontend/common/utils/excel-export/tracking-export";
 import { logger } from "@/frontend/common/utils/logger";

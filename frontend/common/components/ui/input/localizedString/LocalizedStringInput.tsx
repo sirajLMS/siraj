@@ -10,7 +10,7 @@ import { useLocaleSwitchSuccess } from "@/frontend/common/components/ui/input/lo
 import { useNarrowContainer } from "@/frontend/common/components/ui/input/localizedString/useNarrowContainer";
 import { getLanguageDisplayName } from "@/frontend/common/lib/locale";
 import { pickInitialActiveLocale, setLocalizedString } from "@/frontend/common/lib/localized-string";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";

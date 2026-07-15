@@ -9,18 +9,16 @@ import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import {
-  CurrencyOptionRow,
-  getCurrencyOptionRowLabel,
-} from "@/frontend/common/components/ui/input/currencySelect/CurrencyOptionRow";
+import { CurrencyOptionRow } from "@/frontend/common/components/ui/input/currencySelect/CurrencyOptionRow";
 import {
   getCurrencyAutocompletePaperSlotProps,
   getCurrencyAutocompletePopperSlotProps,
 } from "@/frontend/common/components/ui/input/currencySelect/currencyAutocompletePopper";
+import { getCurrencyOptionRowLabel } from "@/frontend/common/components/ui/input/currencySelect/currencyOptionRow.utils";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useCurrencyCatalog } from "@/frontend/common/hooks/useCurrencyCatalog";
-import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { type CurrencyOption, getCurrencySymbol } from "@/frontend/common/lib/currency";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export type CurrencyAutocompleteProps = {
@@ -289,6 +287,3 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
     />
   );
 };
-
-export type { CurrencyCode, CurrencyOption };
-export { getCurrencyByCode };

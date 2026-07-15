@@ -309,14 +309,14 @@ describe("PermissionManagementService Business Logic", () => {
       manageContext,
       groupId =>
         PermissionManagementService.updateGroup(adminUser.id, { groupId, name: loc("New System Name") }, tErrors),
-      "Cannot modify core properties of system permission groups"
+      "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام"
     );
 
     testSystemGroupGuard(
       "deleteGroup on system group should throw cannotDeleteSystemPermissionGroup",
       manageContext,
       groupId => PermissionManagementService.deleteGroup(adminUser.id, groupId, tErrors),
-      "Cannot delete a system permission or group"
+      "لا يمكن حذف صلاحية أو مجموعة تابعة للنظام"
     );
   });
 

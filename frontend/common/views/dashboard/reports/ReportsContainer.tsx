@@ -13,7 +13,7 @@ import {
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import type { FormatCurrencyMessages } from "@/frontend/common/lib/fx-render";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { ReportsActiveFilters } from "@/frontend/common/stores/reportsStore";
 import { useReportsStore } from "@/frontend/common/stores/reportsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";

@@ -352,7 +352,7 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
     await runInRollback(async tx => {
       const { invoice } = await setupUnpaidInvoice(tx);
       const error = await expectRepoError(() => BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, 9999, tx));
-      expect(error.message).toContain("Version mismatch");
+      expect(error.message).toContain("version mismatch");
     });
   });
 

@@ -1,7 +1,6 @@
 import { appendFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { spawn, spawnSync } from "bun";
-import { testLogger } from "@/shared/lib/logger/testlogger";
 import {
   allocateTestPort,
   clearTestPort,
@@ -12,7 +11,8 @@ import {
   releaseAllocatedTestPort,
   releaseTcpPortReservation,
   setTestPort,
-} from "./testPort";
+} from "@/frontend/common/graphql/test/testPort";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 
 let serverProcess: ReturnType<typeof spawn> | undefined;
 let serverRootPid: number | undefined;

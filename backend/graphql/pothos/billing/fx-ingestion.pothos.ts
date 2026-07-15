@@ -216,7 +216,8 @@ gqlSchemaBuilder.queryField("latestFxSyncRun", t =>
       if (!syncRun) {
         return null;
       }
-      const { providerResponse, ...rest } = syncRun;
+      // eslint-disable-next-line sonarjs/no-unused-vars -- intentionally excluded from response
+      const { providerResponse: _providerResponse, ...rest } = syncRun;
       return {
         ...rest,
         provider: syncRun.provider as FxProvider,

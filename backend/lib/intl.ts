@@ -1,5 +1,5 @@
-import { getServerTranslations } from "@/shared/locale/server-graphql";
 import { logger } from "@/backend/lib/logger";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type { CommonLabels } from "@/shared/locale/types/common";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { MessageSchema } from "@/shared/locale/types/message";

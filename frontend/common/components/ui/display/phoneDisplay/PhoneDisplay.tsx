@@ -4,7 +4,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { formatPhoneDisplay, maskPhone } from "@/shared/lib/phone";
 
 export type PhoneDisplayProps = {

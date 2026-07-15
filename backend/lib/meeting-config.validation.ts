@@ -6,7 +6,7 @@ import type {
   MeetingProviderCatalogSnapshot,
   UserMeetingConfigSubmitInput,
 } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderReturnType } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 
 // ============================================================================
 // URL allowlist — host must match one of the provider patterns
@@ -24,7 +24,7 @@ export function isUrlAllowedByProvider(url: string, allowlist: readonly string[]
   }
 }
 
-function buildMeetingConfigDetailsSchema(provider: MeetingProviderReturnType): z.ZodType<MeetingConfigDetails> {
+function buildMeetingConfigDetailsSchema(provider: MeetingProviderSelectType): z.ZodType<MeetingConfigDetails> {
   const base = z.object({
     meetingUrl: z.string().url(),
     username: z.string().optional(),
@@ -56,7 +56,7 @@ function buildMeetingConfigDetailsSchema(provider: MeetingProviderReturnType): z
   }) as z.ZodType<MeetingConfigDetails>;
 }
 
-export function parseMeetingConfigDetails(provider: MeetingProviderReturnType, details: unknown): MeetingConfigDetails {
+export function parseMeetingConfigDetails(provider: MeetingProviderSelectType, details: unknown): MeetingConfigDetails {
   return buildMeetingConfigDetailsSchema(provider).parse(details);
 }
 
@@ -82,7 +82,7 @@ export const meetingConfigSnapshotSchema = z.object({
   }),
 }) as z.ZodType<MeetingConfigSnapshot>;
 
-export function buildUserMeetingConfigSubmitInputSchema(provider: MeetingProviderReturnType) {
+export function buildUserMeetingConfigSubmitInputSchema(provider: MeetingProviderSelectType) {
   return z
     .object({
       userId: z.string().uuid(),

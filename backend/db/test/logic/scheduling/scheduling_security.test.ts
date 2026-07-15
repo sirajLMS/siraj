@@ -203,7 +203,7 @@ describe("ScheduleDeletionService Permission Gating", () => {
     // Case 1: Lacks permission
     const error = await ScheduleDeletionService.deleteClass(actorUserId, classInstanceId, tErrors).catch(e => e);
     expect(error).toBeInstanceOf(Error);
-    expect(getErrorMessage(error)).toContain("Insufficient permissions");
+    expect(getErrorMessage(error)).toContain("sufficient permissions");
 
     // Case 2: Has permission
     mockPermissions.set(`${actorUserId}:${AppPermission.SCHEDULE_DELETE_CLASS}`, true);
@@ -218,7 +218,7 @@ describe("ScheduleDeletionService Permission Gating", () => {
     // Case 1: Lacks permission
     const error = await ScheduleDeletionService.clearWeeklySchedule(actorUserId, teacherId, tErrors).catch(e => e);
     expect(error).toBeInstanceOf(Error);
-    expect(getErrorMessage(error)).toContain("Insufficient permissions");
+    expect(getErrorMessage(error)).toContain("sufficient permissions");
 
     // Case 2: Has permission
     mockPermissions.set(`${actorUserId}:${AppPermission.SCHEDULE_CLEAR_WEEKLY}`, true);

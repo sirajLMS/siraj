@@ -30,8 +30,3 @@ export function CurrencyOptionRow({ currency, locale, showSymbol = true }: Curre
     </Box>
   );
 }
-
-export function getCurrencyOptionRowLabel(currency: CurrencyOption, locale: string): string {
-  const name = getCurrencyDisplayName(currency.code, locale);
-  return `${name} (${currency.code as string})`;
-}

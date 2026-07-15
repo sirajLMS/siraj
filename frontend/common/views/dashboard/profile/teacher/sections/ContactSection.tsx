@@ -1,6 +1,7 @@
 "use client";
 
 import { Stack, TextField } from "@mui/material";
+import type { ReactElement } from "react";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { PhoneFormField, SectionPanel } from "@/frontend/common/components/ui";
@@ -132,32 +133,34 @@ function TeacherIdentityFieldsEdit({
   );
 }
 
-export function ContactSection(props: ContactSectionProps) {
+function ContactSectionEdit(props: ContactSectionOwnEditProps | ContactSectionAdminEditProps): ReactElement | null {
+  const t = useAppTranslation("profile").teacher;
+  const scope = props.scope ?? ProfileScope.Own;
+  const { canView } = useProfileFieldAccess({ scope });
+
+  if (!canView("core_contact") && (!props.isAdminScope || !canView("teacher_identity"))) {
+    return null;
+  }
+
+  return (
+    <SectionPanel title={t.sections.contact}>
+      <Stack spacing={2}>
+        {canView("core_contact") ? (
+          <PhoneFormField name="phone" control={props.control} label={t.fields.phone} />
+        ) : null}
+        {props.isAdminScope ? (
+          <TeacherIdentityFieldsEdit register={props.register} control={props.control} scope={scope} />
+        ) : null}
+      </Stack>
+    </SectionPanel>
+  );
+}
+
+function ContactSectionView(props: ContactSectionViewProps): ReactElement {
   const t = useAppTranslation("profile").teacher;
   const tc = useAppTranslation("profile");
-  const scope = props.scope ?? (props.mode === "view" && props.isAdminScope ? ProfileScope.Other : ProfileScope.Own);
+  const scope = props.scope ?? (props.isAdminScope ? ProfileScope.Other : ProfileScope.Own);
   const { canView, showField } = useProfileFieldAccess({ scope });
-
-  const contactTitle = t.sections.contact;
-
-  if (props.mode === "edit") {
-    if (!canView("core_contact") && (!props.isAdminScope || !canView("teacher_identity"))) {
-      return null;
-    }
-
-    return (
-      <SectionPanel title={contactTitle}>
-        <Stack spacing={2}>
-          {canView("core_contact") ? (
-            <PhoneFormField name="phone" control={props.control} label={t.fields.phone} />
-          ) : null}
-          {props.isAdminScope ? (
-            <TeacherIdentityFieldsEdit register={props.register} control={props.control} scope={scope} />
-          ) : null}
-        </Stack>
-      </SectionPanel>
-    );
-  }
 
   const adminData = isTeacherAdminData(props.teacherData) ? props.teacherData : null;
   const showPhone = canView("core_contact") && showField(props.teacherData.phone, "core_contact");
@@ -168,11 +171,11 @@ export function ContactSection(props: ContactSectionProps) {
   const showIdentity = props.isAdminScope && adminData != null && canView("teacher_identity");
 
   if (!showPhone && !showOwnTimezone && !showIdentity) {
-    return <ProfileRestrictedSection title={contactTitle} />;
+    return <ProfileRestrictedSection title={t.sections.contact} />;
   }
 
   return (
-    <SectionPanel title={contactTitle}>
+    <SectionPanel title={t.sections.contact}>
       <Stack spacing={2}>
         {showPhone ? (
           <InfoField
@@ -192,4 +195,11 @@ export function ContactSection(props: ContactSectionProps) {
       </Stack>
     </SectionPanel>
   );
+}
+
+export function ContactSection(props: ContactSectionProps): ReactElement | null {
+  if (props.mode === "edit") {
+    return <ContactSectionEdit {...props} />;
+  }
+  return <ContactSectionView {...props} />;
 }

@@ -9,50 +9,20 @@ import {
   LocalizedStringDisplay,
   PhoneDisplay,
 } from "@/frontend/common/components/ui/display";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { type PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PaymentMethodDisplayData,
+  PaymentMethodDisplayProps,
+} from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { useAppTranslation } from "@/shared/locale/client";
-
-export type PaymentMethodDisplayData = {
-  readonly id?: string;
-  readonly type?: PaymentMethodType | null;
-  readonly direction?: PaymentDirection | null;
-  readonly label?: string | null;
-  readonly catalogName?: LocalizedString | null;
-  readonly catalogSlug?: string | null;
-  readonly logoUrl?: string | null;
-  readonly details?: {
-    readonly phone?: string | null;
-    readonly url?: string | null;
-    readonly identifier?: string | null;
-    readonly iban?: string | null;
-    readonly bankName?: string | null;
-    readonly beneficiaryName?: string | null;
-    readonly note?: string | null;
-  } | null;
-  readonly countryCode?: string | null;
-  readonly currencyCode?: CurrencyCode | string | null;
-  readonly verifiedAt?: string | null;
-  readonly isActive?: boolean | null;
-  readonly isDefault?: boolean;
-  readonly masked?: boolean;
-};
-
-export type PaymentMethodRow = PaymentMethodDisplayData & {
-  readonly id: string;
-  readonly type: PaymentMethodType;
-  readonly direction: PaymentDirection;
-  readonly isDefault: boolean;
-};
-
-export type PaymentMethodDisplayProps = {
-  readonly method: PaymentMethodDisplayData;
-  readonly showStatus?: boolean;
-  readonly showDirection?: boolean;
-  readonly compact?: boolean;
-};
+import type {
+  PaymentMethodDirectionLabels,
+  PaymentMethodDisplayLabels,
+  PaymentMethodListLabels,
+  PaymentMethodTypeFieldsLabels,
+  PaymentMethodTypeLabels,
+} from "@/shared/locale/types/ui";
 
 function DetailRow({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
   return (
@@ -63,115 +33,115 @@ function DetailRow({ label, children }: { readonly label: string; readonly child
   );
 }
 
-function getDetailRows(
+interface DetailRowSpec {
+  readonly key: string;
+  readonly label: string;
+  readonly node: React.ReactNode;
+}
+
+function textRow(key: string, label: string, value: string | null | undefined): DetailRowSpec | null {
+  if (!value?.trim()) {
+    return null;
+  }
+  return { key, label, node: <Typography sx={{ typography: "bodyMd" }}>{value}</Typography> };
+}
+
+function ltrTextRow(
+  key: string,
+  label: string,
+  value: string | null | undefined,
+  masked?: boolean
+): DetailRowSpec | null {
+  if (!value?.trim()) {
+    return null;
+  }
+  const display = masked ? "••••••••" : value;
+  return {
+    key,
+    label,
+    node: (
+      <Typography sx={{ typography: "bodyMd" }} dir="ltr">
+        {display}
+      </Typography>
+    ),
+  };
+}
+
+function buildHeaderSpecs(
   method: PaymentMethodDisplayData,
-  tDisplay: ReturnType<typeof useAppTranslation>["display"],
-  tType: Record<string, string>,
-  tDirection: Record<string, string>
-): React.ReactNode[] {
-  const details = method.details ?? {};
-  const rows: React.ReactNode[] = [];
+  showDirection: boolean,
+  tList: PaymentMethodListLabels,
+  tType: PaymentMethodTypeLabels,
+  tDirection: PaymentMethodDirectionLabels
+): DetailRowSpec[] {
+  const specs: DetailRowSpec[] = [];
 
   const typeLabel = method.type
-    ? getPaymentMethodTypeLabel(method.type, key => tType[key as keyof typeof tType] ?? "")
+    ? getPaymentMethodTypeLabel(method.type, key => tType[key as keyof PaymentMethodTypeLabels] ?? "")
     : "";
-  const directionLabel = method.direction
-    ? getPaymentMethodDirectionLabel(method.direction, key => tDirection[key as keyof typeof tDirection] ?? "")
-    : "";
-
   if (typeLabel) {
-    rows.push(
-      <DetailRow key="type" label={tDisplay.columnType}>
-        <Typography sx={{ typography: "bodyMd" }}>{typeLabel}</Typography>
-      </DetailRow>
-    );
+    specs.push({
+      key: "type",
+      label: tList.columnType,
+      node: <Typography sx={{ typography: "bodyMd" }}>{typeLabel}</Typography>,
+    });
   }
 
-  if (directionLabel) {
-    rows.push(
-      <DetailRow key="direction" label={tDisplay.columnDirection}>
-        <Typography sx={{ typography: "bodyMd" }}>{directionLabel}</Typography>
-      </DetailRow>
+  if (showDirection && method.direction) {
+    const directionLabel = getPaymentMethodDirectionLabel(
+      method.direction,
+      key => tDirection[key as keyof PaymentMethodDirectionLabels] ?? ""
     );
+    if (directionLabel) {
+      specs.push({
+        key: "direction",
+        label: tList.columnDirection,
+        node: <Typography sx={{ typography: "bodyMd" }}>{directionLabel}</Typography>,
+      });
+    }
   }
+
+  return specs;
+}
+
+function buildDetailRowSpecs(
+  method: PaymentMethodDisplayData,
+  tDisplay: PaymentMethodDisplayLabels,
+  tTypeFields: PaymentMethodTypeFieldsLabels
+): DetailRowSpec[] {
+  const details = method.details ?? {};
+  const specs: DetailRowSpec[] = [];
 
   if (method.countryCode) {
-    rows.push(
-      <DetailRow key="country" label={tDisplay.country}>
-        <CountryDisplay code={method.countryCode} />
-      </DetailRow>
-    );
+    specs.push({ key: "country", label: tTypeFields.country, node: <CountryDisplay code={method.countryCode} /> });
   }
-
   if (method.currencyCode) {
-    rows.push(
-      <DetailRow key="currency" label={tDisplay.currency}>
-        <CurrencyDisplay code={method.currencyCode} />
-      </DetailRow>
-    );
+    specs.push({ key: "currency", label: tTypeFields.currency, node: <CurrencyDisplay code={method.currencyCode} /> });
   }
-
   if (details.phone) {
-    rows.push(
-      <DetailRow key="phone" label={tDisplay.phone}>
-        <PhoneDisplay phone={details.phone} masked={method.masked} />
-      </DetailRow>
-    );
+    specs.push({
+      key: "phone",
+      label: tDisplay.phone,
+      node: <PhoneDisplay phone={details.phone} masked={method.masked} />,
+    });
   }
 
-  if (details.url) {
-    rows.push(
-      <DetailRow key="url" label={tDisplay.url}>
-        <Typography sx={{ typography: "bodyMd" }} dir="ltr">
-          {details.url}
-        </Typography>
-      </DetailRow>
-    );
+  const textRows: (DetailRowSpec | null)[] = [
+    ltrTextRow("url", tDisplay.url, details.url),
+    textRow("identifier", tDisplay.identifier, details.identifier),
+    textRow("bankName", tDisplay.bankName, details.bankName),
+    textRow("beneficiaryName", tDisplay.beneficiaryName, details.beneficiaryName),
+    ltrTextRow("iban", tDisplay.iban, details.iban, method.masked),
+    textRow("note", tDisplay.note, details.note),
+  ];
+
+  for (const row of textRows) {
+    if (row !== null) {
+      specs.push(row);
+    }
   }
 
-  if (details.identifier) {
-    rows.push(
-      <DetailRow key="identifier" label={tDisplay.identifier}>
-        <Typography sx={{ typography: "bodyMd" }}>{details.identifier}</Typography>
-      </DetailRow>
-    );
-  }
-
-  if (details.bankName) {
-    rows.push(
-      <DetailRow key="bankName" label={tDisplay.bankName}>
-        <Typography sx={{ typography: "bodyMd" }}>{details.bankName}</Typography>
-      </DetailRow>
-    );
-  }
-
-  if (details.beneficiaryName) {
-    rows.push(
-      <DetailRow key="beneficiaryName" label={tDisplay.beneficiaryName}>
-        <Typography sx={{ typography: "bodyMd" }}>{details.beneficiaryName}</Typography>
-      </DetailRow>
-    );
-  }
-
-  if (details.iban) {
-    rows.push(
-      <DetailRow key="iban" label={tDisplay.iban}>
-        <Typography sx={{ typography: "bodyMd" }} dir="ltr">
-          {method.masked ? "••••••••" : details.iban}
-        </Typography>
-      </DetailRow>
-    );
-  }
-
-  if (details.note) {
-    rows.push(
-      <DetailRow key="note" label={tDisplay.note}>
-        <Typography sx={{ typography: "bodyMd" }}>{details.note}</Typography>
-      </DetailRow>
-    );
-  }
-
-  return rows;
+  return specs;
 }
 
 export function PaymentMethodDisplay({
@@ -182,17 +152,17 @@ export function PaymentMethodDisplay({
 }: PaymentMethodDisplayProps): React.ReactNode {
   const t = useAppTranslation("ui.paymentMethod");
   const tDisplay = t.display;
-  const details = method.details ?? {};
 
   const typeLabel = method.type
     ? getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "")
     : "";
-  const directionLabel = method.direction
-    ? getPaymentMethodDirectionLabel(method.direction, key => t.direction[key as keyof typeof t.direction] ?? "")
-    : "";
 
   const verificationStatus = method.verifiedAt ? "verified" : "unverified";
   const activityStatus = method.isActive === false ? "inactive" : "active";
+
+  const headerSpecs = buildHeaderSpecs(method, showDirection, t.list, t.type, t.direction);
+  const detailSpecs = buildDetailRowSpecs(method, tDisplay, t.typeFields);
+  const rowSpecs: DetailRowSpec[] = [...headerSpecs, ...detailSpecs];
 
   return (
     <Stack spacing={compact ? 1 : 1.5}>
@@ -214,7 +184,11 @@ export function PaymentMethodDisplay({
       </Stack>
 
       <Stack spacing={0.75}>
-        {getDetailRows(method, tDisplay, t.type, t.direction)}
+        {rowSpecs.map(spec => (
+          <DetailRow key={spec.key} label={spec.label}>
+            {spec.node}
+          </DetailRow>
+        ))}
       </Stack>
     </Stack>
   );

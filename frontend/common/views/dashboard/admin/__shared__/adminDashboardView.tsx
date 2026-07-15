@@ -21,7 +21,7 @@ export interface AdminDashboardViewInput {
   readonly lastUpdated: string;
   readonly metrics: readonly MetricItem[];
   readonly onMetricClick: (key: string) => void;
-  readonly selectedMetricKey?: string | undefined;
+  readonly selectedMetricKey?: string;
   readonly selectedMetricLabel: string | null;
   readonly searchValue: string;
   readonly dateValue: string;
@@ -31,7 +31,7 @@ export interface AdminDashboardViewInput {
   readonly headers: DashboardHeaders;
   readonly statusLabels: DashboardStatusLabels;
   readonly page: number;
-  readonly totalCount?: number | undefined;
+  readonly totalCount?: number;
   readonly onPageChange: (page: number) => void;
   readonly onSearchChange: (value: string) => void;
   readonly onDateChange: (date: string) => void;

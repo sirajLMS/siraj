@@ -15,7 +15,7 @@ import {
   type TimezoneOption,
   toGraphqlIanaTimezone,
 } from "@/frontend/common/lib/timezone";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export type TimezoneSelectProps = {

@@ -3,7 +3,7 @@ import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-man
 import { CurrencyCode } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { CurrencyHedgeService } from "@/backend/services/fx/currency-hedge.service";
-import type { CurrencyHedgeReturnType } from "@/backend/types";
+import type { CurrencyHedgeSelectType } from "@/backend/types";
 
 const HEDGE_SPECS = [
   { currency: CurrencyCode.USD, amount: "10000.00", hedgeType: "LONG", notes: "USD exposure hedge" },
@@ -28,7 +28,7 @@ export async function seedOrGet(config?: SeedConfig) {
     findExisting: async currencies => {
       const existing = await CurrencyHedgeService.findHedgesByCurrencies(currencies);
       return new Map(
-        existing.map(row => [row.currency, row] as [(typeof currencies)[number], CurrencyHedgeReturnType])
+        existing.map(row => [row.currency, row] as [(typeof currencies)[number], CurrencyHedgeSelectType])
       );
     },
     createMany: async toCreate =>
@@ -43,11 +43,11 @@ export async function seedOrGet(config?: SeedConfig) {
     refetchOnRace: async currencies => {
       const existing = await CurrencyHedgeService.findHedgesByCurrencies(currencies);
       return new Map(
-        existing.map(row => [row.currency, row] as [(typeof currencies)[number], CurrencyHedgeReturnType])
+        existing.map(row => [row.currency, row] as [(typeof currencies)[number], CurrencyHedgeSelectType])
       );
     },
   });
 
   logger.info(`Currency hedges seeded (${results.length} rows).`);
-  return results as CurrencyHedgeReturnType[];
+  return results as CurrencyHedgeSelectType[];
 }

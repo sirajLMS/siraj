@@ -1,8 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { CreditRepository } from "@/backend/db/repo";
-import { creditTransactions, students } from "@/backend/db/schema";
+import { creditTransactions, invoices, payments, students } from "@/backend/db/schema";
 import {
   createTestCreditTransaction,
   createTestUser,
@@ -11,20 +12,11 @@ import {
   setupTestEntities,
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CreditReason } from "@/backend/enum";
-import type { ClassInstanceEntity } from "@/backend/types";
+import { CreditReason, CurrencyCode, PaymentMethodType } from "@/backend/enum";
+import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
+import type { ClassInstanceEntity, InvoiceInsertType, PaymentInsertType } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
-
-async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
-  let errorCaught: unknown = null;
-  try {
-    await fn();
-  } catch (error) {
-    errorCaught = error;
-  }
-  expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
-}
+import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
 
 /**
  * Resolves the nullable `instance` returned from `setupTestEntities` to a
@@ -37,6 +29,77 @@ function requireInstance(instance: ClassInstanceEntity | null): ClassInstanceEnt
     throw new Error("setupTestEntities returned a null instance — pass skipInstance:false");
   }
   return instance;
+}
+
+/**
+ * Inserts an invoice + payment row for the given parent/student and returns
+ * the new payment id. Required because `credit_transactions.source_payment_id`
+ * has an FK to `payments.id` — passing a random UUID triggers an FK violation.
+ */
+async function createTestPayment(tx: DBTransaction, parentId: string, studentId: string): Promise<string> {
+  const now = new Date();
+  const invoiceInput: InvoiceInsertType = {
+    parentId,
+    studentId,
+    issueDate: "2026-06-09",
+    dueDate: "2026-06-16",
+    amount: "100.00",
+    currency: CurrencyCode.USD,
+    status: "PAID",
+    invoiceType: "PER_CLASSES",
+    idempotencyKey: `inv-${randomUUID()}`,
+    createdAt: now,
+    updatedAt: now,
+  };
+  const [invoice] = await tx.insert(invoices).values(invoiceInput).returning();
+
+  const snapshot: PaymentMethodTransactionSnapshot = {
+    userPaymentMethodId: null,
+    type: PaymentMethodType.CASH,
+    direction: PaymentDirection.PAYIN,
+    label: "Cash payment",
+    details: { note: "Test cash payment for credit purchase" },
+    catalog: null,
+    snapshottedAt: now.toISOString(),
+  };
+  const paymentInput: PaymentInsertType = {
+    invoiceId: invoice.id,
+    amount: "100.00",
+    currency: CurrencyCode.USD,
+    paymentDate: now,
+    paymentMethodType: PaymentMethodType.CASH,
+    paymentMethodSnapshot: snapshot,
+    idempotencyKey: `pay-${randomUUID()}`,
+    createdAt: now,
+    updatedAt: now,
+  };
+  const [payment] = await tx.insert(payments).values(paymentInput).returning();
+  return payment.id;
+}
+
+/**
+ * Runs `fn` inside a PostgreSQL SAVEPOINT so that a constraint violation
+ * (e.g. a duplicate idempotency key rejected by a unique index) can be caught
+ * WITHOUT poisoning the outer `runInRollback` transaction. After catching,
+ * issues `ROLLBACK TO SAVEPOINT` to restore the transaction to a usable state
+ * so subsequent queries can run.
+ */
+async function expectSavepointError(fn: () => Promise<unknown>, tx: DBTransaction): Promise<Error> {
+  const sp = `sp_${randomUUID().replaceAll("-", "_")}`;
+  await tx.execute(sql.raw(`SAVEPOINT ${sp}`));
+  let errorCaught: unknown = null;
+  try {
+    await fn();
+  } catch (error) {
+    errorCaught = error;
+  }
+  if (errorCaught) {
+    await tx.execute(sql.raw(`ROLLBACK TO SAVEPOINT ${sp}`));
+  } else {
+    await tx.execute(sql.raw(`RELEASE SAVEPOINT ${sp}`));
+  }
+  expect(errorCaught).not.toBeNull();
+  return errorCaught as Error;
 }
 
 describe("CreditRepository.getBalance", () => {
@@ -177,9 +240,10 @@ describe("CreditRepository.createPurchase", () => {
 
   test("stores sourcePaymentId and null notes when supplied", async () => {
     await runInRollback(async tx => {
-      const { student } = await setupStudent(tx, {}, {}, { classesTotal: 0, classesRemaining: 0 });
+      const { user, parent, student } = await setupStudent(tx, {}, {}, { classesTotal: 0, classesRemaining: 0 });
       const adminUser = await createTestUser(tx, { name: "Credit Admin" });
-      const paymentId = randomUUID();
+      // source_payment_id FK references payments.id — must insert a real row.
+      const paymentId = await createTestPayment(tx, parent.id, student.id);
 
       const row = await CreditRepository.createPurchase(tx, {
         studentId: student.id,
@@ -191,6 +255,7 @@ describe("CreditRepository.createPurchase", () => {
 
       expect(row.sourcePaymentId).toBe(paymentId);
       expect(row.notes).toBeNull();
+      expect(user.id).toBeDefined();
     });
   });
 });
@@ -296,13 +361,19 @@ describe("CreditRepository.deductForBooking — idempotency", () => {
         idempotencyKey,
       });
 
-      const error = await expectRepoError(() =>
-        CreditRepository.deductForBooking(tx, {
-          studentId: entities.student.id,
-          classInstanceId: instance.id,
-          creditedByUserId: adminUser.id,
-          idempotencyKey,
-        })
+      // The second insert is rejected by the unique idempotency-key index; wrap
+      // it in a SAVEPOINT so the outer rollback transaction is not poisoned
+      // (otherwise subsequent queries fail with 25P02 "current transaction is
+      // aborted"). After the SAVEPOINT rollback, the SELECT below runs safely.
+      const error = await expectSavepointError(
+        () =>
+          CreditRepository.deductForBooking(tx, {
+            studentId: entities.student.id,
+            classInstanceId: instance.id,
+            creditedByUserId: adminUser.id,
+            idempotencyKey,
+          }),
+        tx
       );
       expect(error).toBeDefined();
 

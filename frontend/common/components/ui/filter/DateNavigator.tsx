@@ -2,8 +2,8 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { useViewport } from "@/frontend/common/hooks/useViewport";
 import type { DateNavigatorProps } from "@/frontend/common/components/ui/filter/DateNavigator.types";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 
 const lazyViews = createLazyView<DateNavigatorProps>(
   () =>

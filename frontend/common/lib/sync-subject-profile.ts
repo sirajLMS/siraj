@@ -67,9 +67,13 @@ export function syncSubjectProfileCache(
 
   broadcastSubjectCurrencyChanged(userId);
 
-  void client.refetchQueries({
-    include: [profileByUserIdQueryDocument, userQueryDocument, meQueryDocument],
-  });
+  client
+    .refetchQueries({
+      include: [profileByUserIdQueryDocument, userQueryDocument, meQueryDocument],
+    })
+    .catch(() => {
+      // refetch failures are non-fatal for cache sync
+    });
 }
 
 /**

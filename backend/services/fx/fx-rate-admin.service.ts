@@ -35,9 +35,8 @@ export namespace FxRateAdminService {
       actorUserId
     );
 
-    const { providerResponse: _unusedProviderResponse, ...rest } = rate;
-     
-    const _ = _unusedProviderResponse;
+    // eslint-disable-next-line sonarjs/no-unused-vars -- intentionally excluded from response
+    const { providerResponse: _providerResponse, ...rest } = rate;
 
     return {
       id: rate.id,

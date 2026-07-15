@@ -20,9 +20,7 @@ export const DEFAULT_CURRENCY_DISPLAY_PARTS: readonly CurrencyDisplayPartValue[]
   CurrencyDisplayPart.Symbol,
 ];
 
-function resolveCurrencyDisplayParts(
-  parts?: readonly CurrencyDisplayPartValue[]
-): Set<CurrencyDisplayPartValue> {
+function resolveCurrencyDisplayParts(parts?: readonly CurrencyDisplayPartValue[]): Set<CurrencyDisplayPartValue> {
   const resolved = parts && parts.length > 0 ? parts : DEFAULT_CURRENCY_DISPLAY_PARTS;
   return new Set(resolved);
 }

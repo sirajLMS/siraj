@@ -20,7 +20,6 @@ export type {
 export type {
   MeetingProviderFieldSchema,
   MeetingProviderInsertType,
-  MeetingProviderReturnType,
   MeetingProviderSelectType,
   MeetingProviderSubmitInput,
   UpdateMeetingProviderInput,

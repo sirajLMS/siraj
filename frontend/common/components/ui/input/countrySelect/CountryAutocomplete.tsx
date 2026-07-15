@@ -7,16 +7,14 @@ import TextField from "@mui/material/TextField";
 import type * as React from "react";
 import { useCallback, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import {
-  CountryOptionRow,
-  getCountryOptionLabel,
-} from "@/frontend/common/components/ui/input/countrySelect/CountryOptionRow";
+import { CountryOptionRow } from "@/frontend/common/components/ui/input/countrySelect/CountryOptionRow";
 import {
   getCountryAutocompletePaperSlotProps,
   getCountryAutocompletePopperSlotProps,
 } from "@/frontend/common/components/ui/input/countrySelect/countryAutocompletePopper";
+import { getCountryOptionLabel } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.utils";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export type CountryAutocompleteProps = {

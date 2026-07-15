@@ -1,20 +1,27 @@
 import { expect } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
-import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ClassType, type CreateRecurringClassInput, type ManagerAccountType } from "../generated/gql/graphql-types";
-import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocuments/auth/auth.documents";
-import { createRecurringClassMutationDocument } from "../sharedDocuments/scheduling/recurring-class.documents";
-import { teacherWeeklyScheduleGridQueryDocument } from "../sharedDocuments/scheduling/weekly-schedule.documents";
+import {
+  ClassType,
+  type CreateRecurringClassInput,
+  IanaTimezone,
+  type ManagerAccountType,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  demoLoginMutationDocument,
+  loginMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
+import { createRecurringClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-class.documents";
+import { teacherWeeklyScheduleGridQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/weekly-schedule.documents";
 import {
   cleanupTestEntitiesMutationDocument,
   cleanupTestManagerMutationDocument,
   cleanupTestSuperAdminMutationDocument,
   createTestEntitiesMutationDocument,
   createTestSuperAdminMutationDocument,
-} from "../sharedDocuments/shared/test-helper.documents";
-import { createManagerMutationDocument } from "../sharedDocuments/teachers/manager-onboarding.documents";
-import { createTeacherManualClassEntryMutationDocument } from "../sharedDocuments/teachers/teacher-dashboard.documents";
-import { testClient } from "./testClient";
+} from "@/frontend/common/graphql/sharedDocuments/shared/test-helper.documents";
+import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/manager-onboarding.documents";
+import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
+import { testClient } from "@/frontend/common/graphql/test/testClient";
 
 /** Shared test password — all provisioned test users use this value. */
 // eslint-disable-next-line sonarjs/no-hardcoded-passwords

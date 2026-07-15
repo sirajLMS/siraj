@@ -8,7 +8,7 @@ import type * as React from "react";
 import { useCallback } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import { getLanguageDisplayName, type LanguageType, languages } from "@/frontend/common/lib/locale";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export type LanguageSelectorProps = {

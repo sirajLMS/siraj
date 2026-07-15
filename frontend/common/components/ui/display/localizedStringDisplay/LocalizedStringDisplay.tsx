@@ -5,7 +5,7 @@ import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 
 export type LocalizedStringDisplayProps = {

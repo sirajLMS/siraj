@@ -250,6 +250,6 @@ describe("LearningResourceRepository — deleteResource", () => {
       await LearningResourceRepository.deleteResource(nonExistentId, undefined, tx);
     });
 
-    expect(error.message).toContain("not found");
+    expect(error.message).toContain("غير موجود");
   });
 });

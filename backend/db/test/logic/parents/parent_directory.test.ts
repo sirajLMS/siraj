@@ -49,7 +49,7 @@ describe("ParentDirectoryService Permission Gating", () => {
     // Case 1: Lacks permission
     const error = await ParentDirectoryService.getParentDirectory(actorUserId, null, null, null).catch(e => e);
     expect(error).toBeInstanceOf(Error);
-    expect(getErrorMessage(error)).toContain("Insufficient permissions");
+    expect(getErrorMessage(error)).toContain("الصلاحيات");
 
     // Case 2: Has permission
     mockPermissions.set(`${actorUserId}:${AppPermission.PARENT_VIEW_DIRECTORY}`, true);

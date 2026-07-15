@@ -7,7 +7,7 @@ import { LanguageDisplay } from "@/frontend/common/components/ui/display";
 import { useLanguageSwitch } from "@/frontend/common/hooks/useLanguageSwitch";
 import { languages } from "@/frontend/common/lib/locale";
 import { NavbarIcon } from "@/frontend/common/views/dashboard/components/navbar/NavbarIcon";
-import type { Locale } from "@/shared/i18n/routing";
+import type { AppLocale } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 
 // --- Styled Components ---
@@ -60,7 +60,7 @@ export function LanguageSwitcher() {
     setAnchorEl(null);
   };
 
-  const handleLanguageChange = (nextLocale: Locale) => {
+  const handleLanguageChange = (nextLocale: AppLocale) => {
     switchLanguage(nextLocale);
     handleClose();
   };

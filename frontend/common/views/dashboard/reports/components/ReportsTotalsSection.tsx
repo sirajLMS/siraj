@@ -8,7 +8,7 @@ import {
   type BillingCurrencyBucket,
   formatBillingCurrencyTotals,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { ReportLedgerRow, ReportsSummary } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import { aggregatePaidAmountTotals } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";

@@ -29,7 +29,9 @@ function addRequiredIssue(ctx: z.RefinementCtx, path: string): void {
   ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: [path] });
 }
 
-function validateMobileWallet(details: typeof detailsSchema._type, ctx: z.RefinementCtx): void {
+type PaymentMethodDetailsValues = z.infer<typeof detailsSchema>;
+
+function validateMobileWallet(details: PaymentMethodDetailsValues, ctx: z.RefinementCtx): void {
   if (!details.walletId?.trim()) {
     addRequiredIssue(ctx, "details.walletId");
   }
@@ -38,7 +40,7 @@ function validateMobileWallet(details: typeof detailsSchema._type, ctx: z.Refine
   }
 }
 
-function validatePaymentLink(details: typeof detailsSchema._type, ctx: z.RefinementCtx): void {
+function validatePaymentLink(details: PaymentMethodDetailsValues, ctx: z.RefinementCtx): void {
   if (!details.paymentLinkId?.trim()) {
     addRequiredIssue(ctx, "details.paymentLinkId");
   }
@@ -47,7 +49,7 @@ function validatePaymentLink(details: typeof detailsSchema._type, ctx: z.Refinem
   }
 }
 
-function validateOnlineAccount(details: typeof detailsSchema._type, ctx: z.RefinementCtx): void {
+function validateOnlineAccount(details: PaymentMethodDetailsValues, ctx: z.RefinementCtx): void {
   if (!details.onlineAccountId?.trim()) {
     addRequiredIssue(ctx, "details.onlineAccountId");
   }
@@ -56,7 +58,7 @@ function validateOnlineAccount(details: typeof detailsSchema._type, ctx: z.Refin
   }
 }
 
-function validateBankTransfer(details: typeof detailsSchema._type, ctx: z.RefinementCtx): void {
+function validateBankTransfer(details: PaymentMethodDetailsValues, ctx: z.RefinementCtx): void {
   const hasRouting =
     Boolean(details.iban?.trim()) ||
     Boolean(details.accountNumber?.trim()) ||

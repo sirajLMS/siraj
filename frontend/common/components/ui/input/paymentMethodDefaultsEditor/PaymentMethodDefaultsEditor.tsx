@@ -4,7 +4,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodDisplay";
+import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
 import { FieldWrapper } from "@/frontend/common/components/ui/form/field/FieldWrapper";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";

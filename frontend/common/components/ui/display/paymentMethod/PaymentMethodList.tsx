@@ -9,10 +9,8 @@ import { useMemo } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
-import {
-  PaymentMethodDisplay,
-  type PaymentMethodRow,
-} from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodDisplay";
+import { PaymentMethodDisplay } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodDisplay";
+import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { useAppTranslation } from "@/shared/locale/client";

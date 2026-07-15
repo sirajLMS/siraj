@@ -1,4 +1,3 @@
-// cspell:ignore: notif
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";

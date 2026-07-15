@@ -18,7 +18,7 @@ import {
   supportedOnlineAccountsQueryDocument,
   supportedPaymentLinksQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { logger } from "@/frontend/common/utils/logger";
 import { CatalogDeleteDialog } from "@/frontend/common/views/dashboard/admin/payment-catalogs/components/CatalogDeleteDialog";
 import { CatalogEditDialog } from "@/frontend/common/views/dashboard/admin/payment-catalogs/components/CatalogEditDialog";

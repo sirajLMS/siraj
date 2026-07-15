@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 
-    return NextResponse.redirect(new URL(`/api/storage/files/${pdfFile.filePath}`, _request.url));
+    return NextResponse.redirect(new URL(`/api/storage/files/${pdfFile.filePath}`, request.url));
   } catch (error) {
     if (error instanceof NotFoundError) {
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });

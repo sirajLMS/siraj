@@ -75,7 +75,7 @@ describe("StaffProfileService Permission Gating", () => {
     // Case 1: Lacks permission
     const error = await StaffProfileService.getTeacherProfileForEdit(actorUserId, teacherId).catch(e => e);
     expect(error).toBeInstanceOf(Error);
-    expect(getErrorMessage(error)).toContain("Insufficient permissions");
+    expect(getErrorMessage(error)).toContain("الصلاحيات");
 
     // Case 2: Has permission
     mockPermissions.set(`${actorUserId}:${AppPermission.STAFF_EDIT_PROFILE}`, true);
@@ -93,7 +93,7 @@ describe("StaffProfileService Permission Gating", () => {
       address: newAddress,
     }).catch(e => e);
     expect(error).toBeInstanceOf(Error);
-    expect(getErrorMessage(error)).toContain("Insufficient permissions");
+    expect(getErrorMessage(error)).toContain("الصلاحيات");
 
     // Case 2: Has permission
     mockPermissions.set(`${actorUserId}:${AppPermission.STAFF_EDIT_PROFILE}`, true);
