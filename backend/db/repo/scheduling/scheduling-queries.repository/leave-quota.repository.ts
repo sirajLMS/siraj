@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { leaveQuotaUsage, teachers } from "@/backend/db/schema";
-import { getBackendTranslations } from "@/backend/lib/intl";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 function collectErrorMessages(error: unknown): string {
   const messages: string[] = [];
@@ -56,8 +56,8 @@ export async function getTeacherLeaveQuotaUsage(
 
 export async function incrementTeacherLeaveQuota(
   teacherId: string,
-  tx?: DBTransaction,
-  locale?: string
+  tx: DBTransaction,
+  tErrors: ErrorsLabels
 ): Promise<void> {
   const now = new Date();
   const periodYear = now.getUTCFullYear();
@@ -69,8 +69,7 @@ export async function incrementTeacherLeaveQuota(
   const currentUsage = await getTeacherLeaveQuotaUsage(teacherId, periodYear, periodMonth, tx);
 
   if (currentUsage >= maxLeaves) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("leaveQuotaExceeded", { maxLeaves: String(maxLeaves) }));
+    throw new Error(tErrors.leaveQuotaExceeded({ maxLeaves: String(maxLeaves) }));
   }
 
   try {
@@ -96,8 +95,7 @@ export async function incrementTeacherLeaveQuota(
     }
   } catch (error) {
     if (isLeaveQuotaViolation(error)) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("leaveQuotaExceeded", { maxLeaves: "2" }), { cause: error });
+      throw new Error(tErrors.leaveQuotaExceeded({ maxLeaves: String(maxLeaves) }), { cause: error });
     }
     throw error;
   }

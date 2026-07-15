@@ -2,11 +2,11 @@
 
 import { Box, Chip, Stack, Tab, Tabs } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef } from "react";
 import type { ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { getVisibleProfileTabs } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type ProfileTabNavProps = {
   readonly audience: ProfileAudience;
@@ -16,7 +16,7 @@ export type ProfileTabNavProps = {
 };
 
 export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: ProfileTabNavProps) {
-  const t = useTranslations("profile");
+  const t = useAppTranslation("profile");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -77,7 +77,7 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Prof
                 role="tab"
                 tabIndex={0}
                 aria-selected={currentTab === tab.id}
-                label={t(tab.i18nKey)}
+                label={t.shell.tabs[tab.id as keyof typeof t.shell.tabs]}
                 onClick={() => onTabChange(tab.id)}
                 onKeyDown={event => {
                   if (event.key === "Enter" || event.key === " ") {
@@ -115,7 +115,7 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Prof
           <Tab
             key={tab.id}
             value={tab.id}
-            label={t(tab.i18nKey)}
+            label={t.shell.tabs[tab.id as keyof typeof t.shell.tabs]}
             sx={theme => ({
               fontSize: theme.typography.bodyMd.fontSize,
               ...(currentTab === tab.id

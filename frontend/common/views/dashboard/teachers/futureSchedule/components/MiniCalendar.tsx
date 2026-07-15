@@ -2,10 +2,10 @@
 
 import { ChevronLeftOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import { alpha, Box, Grid, IconButton, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { MiniCalendarDate } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface MiniCalendarProps {
   readonly selectedDate: string;
@@ -92,7 +92,7 @@ function CalendarHeader({
   readonly onPrev: () => void;
   readonly onNext: () => void;
 }) {
-  const t = useTranslations("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation("dashboard.teacherFutureSchedule");
   return (
     <Stack
       direction="row"
@@ -104,7 +104,7 @@ function CalendarHeader({
       }}
     >
       <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-        {t("monthDisplay", { month: monthName, year: String(year) })}
+        {t.monthDisplay(monthName, String(year))}
       </Typography>
       <Stack direction="row" spacing={0.5}>
         <IconButton size="small" onClick={onPrev}>

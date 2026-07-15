@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Grid, Input, MenuItem, Select } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
@@ -22,6 +21,7 @@ import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/commo
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 import { usePaymentMethodCatalogs } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface SectionProps {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
@@ -36,16 +36,16 @@ interface InvoiceFieldsProps {
 }
 
 function InvoiceFields({ register, control, errors }: InvoiceFieldsProps) {
-  const t = useTranslations("dashboard.parentOnboarding");
+  const t = useAppTranslation("dashboard.parentOnboarding");
   const currency = useWatch({ control, name: "currency" });
   const currencySymbol = getCurrencySymbol(currency ?? CurrencyCode.Usd);
   return (
     <>
       <Grid size={{ xs: 12, md: 6 }}>
         <FieldWrapper
-          label={t("fields.invoiceType")}
+          label={t.fields.invoiceType}
           required
-          error={errors.invoiceType ? t(`validation.${errors.invoiceType.message}`) : undefined}
+          error={errors.invoiceType ? t.validation[errors.invoiceType.message as keyof typeof t.validation] : undefined}
         >
           <Select
             {...register("invoiceType")}
@@ -55,21 +55,21 @@ function InvoiceFields({ register, control, errors }: InvoiceFieldsProps) {
             sx={standardInputSx}
             defaultValue=""
           >
-            <MenuItem value="">{t("placeholders.invoiceType")}</MenuItem>
-            <MenuItem value={InvoiceType.PerClasses}>{t("options.invoiceType.perClass")}</MenuItem>
-            <MenuItem value={InvoiceType.Monthly}>{t("options.invoiceType.monthly")}</MenuItem>
+            <MenuItem value="">{t.placeholders.invoiceType}</MenuItem>
+            <MenuItem value={InvoiceType.PerClasses}>{t.options.invoiceType.perClass}</MenuItem>
+            <MenuItem value={InvoiceType.Monthly}>{t.options.invoiceType.monthly}</MenuItem>
           </Select>
         </FieldWrapper>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <FieldWrapper
-          label={t("fields.feeAmount")}
+          label={t.fields.feeAmount}
           required
-          error={errors.feeAmount ? t(`validation.${errors.feeAmount.message}`) : undefined}
+          error={errors.feeAmount ? t.validation[errors.feeAmount.message as keyof typeof t.validation] : undefined}
         >
           <Input
             {...register("feeAmount")}
-            placeholder={t("placeholders.feeAmount")}
+            placeholder={t.placeholders.feeAmount}
             error={!!errors.feeAmount}
             fullWidth
             type="number"
@@ -95,7 +95,7 @@ function InvoiceFields({ register, control, errors }: InvoiceFieldsProps) {
 }
 
 function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "errors">) {
-  const t = useTranslations("dashboard.parentOnboarding");
+  const t = useAppTranslation("dashboard.parentOnboarding");
   const { setValue } = useFormContext<ParentOnboardingFormData>();
   const methodType = useWatch({ control, name: "payinMethod.type" }) ?? PaymentMethodType.BankTransfer;
   const { walletOptions, paymentLinkOptions, onlineAccountOptions } = usePaymentMethodCatalogs(PaymentDirection.Payin);
@@ -147,7 +147,7 @@ function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "erro
         />
         {errors.payinMethod?.type?.message ? (
           <Box sx={{ color: "error.main", typography: "bodySm", mt: 1 }}>
-            {t(`validation.${errors.payinMethod.type.message}`)}
+            {t.validation[errors.payinMethod.type.message as keyof typeof t.validation]}
           </Box>
         ) : null}
       </Grid>
@@ -164,10 +164,12 @@ function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "erro
                   field.onChange(selected.code as string);
                 }}
                 onBlurAction={field.onBlur}
-                label={t("fields.currency")}
+                label={t.fields.currency}
                 required
                 error={!!errors.currency}
-                helperText={errors.currency ? t(`validation.${errors.currency.message}`) : undefined}
+                helperText={
+                  errors.currency ? t.validation[errors.currency.message as keyof typeof t.validation] : undefined
+                }
                 fullWidth
               />
             );
@@ -185,10 +187,12 @@ function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "erro
                 field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
               }}
               onBlurAction={field.onBlur}
-              label={t("fields.timezone")}
+              label={t.fields.timezone}
               required
               error={!!errors.timezone}
-              helperText={errors.timezone ? t(`validation.${errors.timezone.message}`) : undefined}
+              helperText={
+                errors.timezone ? t.validation[errors.timezone.message as keyof typeof t.validation] : undefined
+              }
               fullWidth
             />
           )}
@@ -199,10 +203,10 @@ function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "erro
 }
 
 export function FeesContractSection({ register, control, errors }: SectionProps) {
-  const t = useTranslations("dashboard.parentOnboarding");
+  const t = useAppTranslation("dashboard.parentOnboarding");
 
   return (
-    <SectionPanel title={t("sections.feesContract")}>
+    <SectionPanel title={t.sections.feesContract}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
         <InvoiceFields register={register} control={control} errors={errors} />
         <PaymentFields control={control} errors={errors} />

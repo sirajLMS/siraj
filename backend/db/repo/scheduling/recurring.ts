@@ -10,6 +10,8 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teache
 import { classInstances, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export interface CreateRecurringScheduleInput {
   studentId: string;
@@ -85,10 +87,11 @@ async function validateRecurringScheduleAvailability(
   teacherId: string,
   scheduledStartAt: Date,
   scheduledEndAt: Date,
-  locale?: string
+  tErrors?: ErrorsLabels
 ): Promise<void> {
+  const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
   await acquireLocks(t, teacherId, studentId);
-  await validateTeacherAssignment(t, studentId, teacherId, scheduledStartAt, locale);
+  await validateTeacherAssignment(t, studentId, teacherId, scheduledStartAt, tFuncErrors);
   await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, scheduledStartAt, scheduledEndAt, t);
   await checkOverlaps(
     t,
@@ -98,7 +101,7 @@ async function validateRecurringScheduleAvailability(
       startTime: scheduledStartAt,
       endTime: scheduledEndAt,
     },
-    locale
+    tFuncErrors
   );
 }
 
@@ -111,9 +114,11 @@ async function createSingleRecurringInstance(params: {
   input: CreateRecurringScheduleInput;
   utcOffsetSnapshot: number | null;
   now: Date;
-  locale?: string;
+  tErrors?: ErrorsLabels;
 }): Promise<string> {
-  const { t, recurringScheduleId, day, weekOffset, effectiveStartDate, input, utcOffsetSnapshot, now, locale } = params;
+  const { t, recurringScheduleId, day, weekOffset, effectiveStartDate, input, utcOffsetSnapshot, now, tErrors } =
+    params;
+  const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
   const scheduledStartAt = computeScheduledStartForDay(
     day.dayOfWeek,
     day.startTime,
@@ -129,12 +134,13 @@ async function createSingleRecurringInstance(params: {
     input.teacherId,
     scheduledStartAt,
     scheduledEndAt,
-    locale
+    tFuncErrors
   );
 
   const effectiveMeeting = await EffectiveMeetingService.resolveForRecurringSchedule(
     recurringScheduleId,
     input.teacherId,
+    tFuncErrors,
     t
   );
 
@@ -147,7 +153,7 @@ async function createSingleRecurringInstance(params: {
       endTime: scheduledEndAt,
       meetingJoinUrl: effectiveMeeting.joinUrl,
     },
-    locale
+    tFuncErrors
   );
 
   const idempotencyKey = `recurring-${recurringScheduleId}-${day.dayOfWeek}-${scheduledStartAt.toISOString()}`;
@@ -287,7 +293,7 @@ export async function clearWeeklySchedule(
 export const createRecurringScheduleWithInstances = async (
   input: CreateRecurringScheduleInput,
   tx?: DBTransaction,
-  locale?: string
+  tErrors?: ErrorsLabels
 ): Promise<{ recurringScheduleId: string; classInstanceIds: string[] }> => {
   const runner = async (t: DBTransaction) => {
     const now = new Date();
@@ -349,7 +355,7 @@ export const createRecurringScheduleWithInstances = async (
           input,
           utcOffsetSnapshot,
           now,
-          locale,
+          tErrors,
         });
         classInstanceIds.push(instanceId);
       }

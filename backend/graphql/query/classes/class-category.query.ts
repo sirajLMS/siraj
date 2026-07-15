@@ -27,7 +27,7 @@ gqlSchemaBuilder.queryField("classSubjects", t =>
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
       const tErrors = await ctx.t("errors");
-      return ClassSubjectService.listSubjects(userId, args.categoryId ?? undefined, tErrors);
+      return ClassSubjectService.listSubjects(userId, tErrors, args.categoryId ?? undefined);
     },
   })
 );

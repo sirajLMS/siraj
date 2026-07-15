@@ -2,9 +2,9 @@
 
 import { CalendarTodayOutlined, ChevronLeftOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import { alpha, Box, IconButton, Stack, type SxProps, type Theme, Typography, useTheme } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { JumpToDateHeaderProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function shiftDate(selectedDate: string, delta: number): string {
   const d = new Date(selectedDate + "T00:00:00");
@@ -68,7 +68,7 @@ function LeaveQuotaStat({
   leaveQuotaUsed,
   leaveQuotaTotal,
 }: Readonly<Pick<JumpToDateHeaderProps, "leaveQuotaUsed" | "leaveQuotaTotal">>) {
-  const t = useTranslations("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation("dashboard.teacherFutureSchedule");
   return (
     <Box
       sx={theme => ({
@@ -84,10 +84,10 @@ function LeaveQuotaStat({
         variant="labelUppercase"
         sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: 700, fontSize: 10 })}
       >
-        {t("leaveQuotaDesc")}
+        {t.leaveQuotaDesc}
       </Typography>
       <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-        {t("remaining", { count: leaveQuotaTotal - leaveQuotaUsed, total: leaveQuotaTotal })}
+        {t.remaining(leaveQuotaTotal - leaveQuotaUsed, leaveQuotaTotal)}
       </Typography>
     </Box>
   );

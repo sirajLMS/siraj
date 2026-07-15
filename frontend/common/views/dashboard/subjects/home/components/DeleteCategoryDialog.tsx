@@ -1,8 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { DeleteCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function DeleteCategoryDialog({
   open,
@@ -11,7 +11,7 @@ export function DeleteCategoryDialog({
   categoryName,
   isLoading,
 }: Readonly<DeleteCategoryDialogProps>) {
-  const t = useTranslations("dashboard.subjects");
+  const t = useAppTranslation("dashboard.subjects");
 
   return (
     <BaseDeleteDialog
@@ -19,10 +19,10 @@ export function DeleteCategoryDialog({
       onClose={onClose}
       onConfirm={onConfirm}
       isLoading={isLoading}
-      title={t("deleteCategory")}
-      body={t("deleteCategoryConfirm", { name: categoryName })}
-      cancelLabel={t("cancel")}
-      confirmLabel={t("deleteCategory")}
+      title={t.deleteCategory}
+      body={t.deleteCategoryConfirm(categoryName)}
+      cancelLabel={t.cancel}
+      confirmLabel={t.deleteCategory}
     />
   );
 }

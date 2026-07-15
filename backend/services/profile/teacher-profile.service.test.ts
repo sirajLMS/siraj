@@ -6,6 +6,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 import type { TeacherProfileReturnType } from "@/backend/types/teachers/teacher.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 const baseProfile: TeacherProfileReturnType = {
   id: "teacher-1",
@@ -45,13 +46,14 @@ describe("StaffProfileService teacher profile masking", () => {
 
 describe("TeacherPortalService own profile", () => {
   test("includes totalClasses from teacher profile", async () => {
+    const tErrors = await getServerTranslations("en", "errors");
     spyOn(PermissionsService, "hasPermission").mockImplementation(
       async (_userId, permission) => permission === AppPermission.TEACHER_VIEW_OWN_PROFILE
     );
     spyOn(TeacherRepository, "findByUserId").mockResolvedValue({ id: "teacher-1", userId: "user-1" } as never);
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
 
-    const profile = await TeacherPortalService.getOwnProfile("user-1");
+    const profile = await TeacherPortalService.getOwnProfile("user-1", tErrors);
     expect(profile.totalClasses).toBe(10);
   });
 });

@@ -15,6 +15,7 @@ import { runInRollback } from "@/backend/db/test/test-utils";
 import type { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 describe("Scheduling Repository — State Changes & Leave Quota", () => {
   describe("State transitions and IDOR checks", () => {
@@ -341,7 +342,8 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         );
         expect(initialUsage).toBe(0);
 
-        await SchedulingRepository.processClassLeave(id, "Sick leave", u, tx, "en");
+        const tErrors = await getServerTranslations("en", "errors");
+        await SchedulingRepository.processClassLeave(id, "Sick leave", u, tx, tErrors);
 
         const finalUsage = await SchedulingRepository.getTeacherLeaveQuotaUsage(
           teacher.id,
@@ -369,8 +371,9 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
           usedCount: 2,
         });
 
+        const tErrors = await getServerTranslations("en", "errors");
         const quotaError = await expectRepositoryError(() =>
-          SchedulingRepository.processClassLeave(id, "Third leave", u, tx, "en")
+          SchedulingRepository.processClassLeave(id, "Third leave", u, tx, tErrors)
         );
         expect(quotaError.message).toContain("Leave quota exceeded");
       });
@@ -391,7 +394,8 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
           scheduledEndAt: new Date(now.getTime() + 86400000 + 3600000),
         });
         await SchedulingRepository.activateClassInstance(instance1.id, teacher.userId, { force: false }, tx);
-        await SchedulingRepository.processClassLeave(instance1.id, "Leave 1", teacher.userId, tx, "en");
+        const tErrors = await getServerTranslations("en", "errors");
+        await SchedulingRepository.processClassLeave(instance1.id, "Leave 1", teacher.userId, tx, tErrors);
 
         const usage1 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
         expect(usage1).toBe(1);
@@ -406,7 +410,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
           scheduledEndAt: new Date(now.getTime() + 86400000 * 20 + 3600000),
         });
         await SchedulingRepository.activateClassInstance(instance2.id, teacher.userId, { force: false }, tx);
-        await SchedulingRepository.processClassLeave(instance2.id, "Leave 2", teacher.userId, tx, "en");
+        await SchedulingRepository.processClassLeave(instance2.id, "Leave 2", teacher.userId, tx, tErrors);
 
         const usage2 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
         expect(usage2).toBe(2);

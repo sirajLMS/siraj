@@ -1,9 +1,16 @@
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SupportedOnlineAccountRepository } from "@/backend/db/repo";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { IdentifierKind, PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import { getErrorMessage } from "@/shared/utils/error";
+
+let tErrors: ErrorsLabels;
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 function loc(en: string) {
   return { en, ar: en };
@@ -39,6 +46,7 @@ describe("SupportedOnlineAccountRepository", () => {
     const updated = await SupportedOnlineAccountRepository.update(
       created.id,
       { logoUrl: "https://example.com/logo.png" },
+      tErrors,
       tx
     );
     expect(updated.logoUrl).toBe("https://example.com/logo.png");
@@ -47,7 +55,7 @@ describe("SupportedOnlineAccountRepository", () => {
   testRepo("deactivate throws when online account is missing", async tx => {
     let errorThrown: unknown = null;
     try {
-      await SupportedOnlineAccountRepository.deactivate("00000000-0000-0000-0000-000000000000", tx);
+      await SupportedOnlineAccountRepository.deactivate("00000000-0000-0000-0000-000000000000", tErrors, tx);
     } catch (error) {
       errorThrown = error;
     }

@@ -1,6 +1,5 @@
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import type {
   ClassCategoryCreateInput,
   ClassCategoryUpdateInput,
@@ -19,6 +18,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
 import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
 import { logger } from "@/frontend/common/utils/logger";
+import { useAppTranslation } from "@/shared/locale/client";
 import { getErrorMessage } from "@/shared/utils/error";
 
 interface UseSubjectMutationsOptions {
@@ -28,7 +28,7 @@ interface UseSubjectMutationsOptions {
 }
 
 export function useSubjectMutations(opts: UseSubjectMutationsOptions) {
-  const t = useTranslations("dashboard.subjects");
+  const t = useAppTranslation("dashboard.subjects");
   const notifications = useNotifications();
   const closeCreateDialog = useSubjectManagementStore(state => state.closeCreateDialog);
   const closeEditDialog = useSubjectManagementStore(state => state.closeEditDialog);
@@ -64,14 +64,14 @@ export function useSubjectMutations(opts: UseSubjectMutationsOptions) {
   };
 
   const handleCreateSubject = async (input: ClassSubjectCreateInput) => {
-    await runMutation(createSubjectMut, { input }, t("subjectCreated"), "Failed to create subject", {
+    await runMutation(createSubjectMut, { input }, t.subjectCreated, "Failed to create subject", {
       close: closeCreateDialog,
       afterSuccess: opts.refetchSubjects,
     });
   };
 
   const handleUpdateSubject = async (id: string, input: ClassSubjectUpdateInput) => {
-    await runMutation(updateSubjectMut, { id, input }, t("subjectUpdated"), "Failed to update subject", {
+    await runMutation(updateSubjectMut, { id, input }, t.subjectUpdated, "Failed to update subject", {
       close: closeEditDialog,
       afterSuccess: opts.refetchSubjects,
     });
@@ -79,27 +79,27 @@ export function useSubjectMutations(opts: UseSubjectMutationsOptions) {
 
   const handleDeleteSubject = async () => {
     if (!pendingDeleteId) return;
-    await runMutation(deleteSubjectMut, { id: pendingDeleteId }, t("subjectDeleted"), "Failed to delete subject", {
+    await runMutation(deleteSubjectMut, { id: pendingDeleteId }, t.subjectDeleted, "Failed to delete subject", {
       close: closeDeleteDialog,
       afterSuccess: opts.refetchSubjects,
     });
   };
 
   const handleCreateCategory = async (input: ClassCategoryCreateInput) => {
-    await runMutation(createCategoryMut, { input }, t("categoryCreated"), "Failed to create category", {
+    await runMutation(createCategoryMut, { input }, t.categoryCreated, "Failed to create category", {
       close: closeCreateDialog,
     });
   };
 
   const handleUpdateCategory = async (id: string, input: ClassCategoryUpdateInput) => {
-    await runMutation(updateCategoryMut, { id, input }, t("categoryUpdated"), "Failed to update category", {
+    await runMutation(updateCategoryMut, { id, input }, t.categoryUpdated, "Failed to update category", {
       close: closeEditDialog,
     });
   };
 
   const handleDeleteCategory = async () => {
     if (!pendingDeleteId) return;
-    await runMutation(deleteCategoryMut, { id: pendingDeleteId }, t("categoryDeleted"), "Failed to delete category", {
+    await runMutation(deleteCategoryMut, { id: pendingDeleteId }, t.categoryDeleted, "Failed to delete category", {
       close: closeDeleteDialog,
       afterSuccess: async () => {
         if (opts.activeCategoryId === pendingDeleteId) {

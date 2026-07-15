@@ -2,7 +2,6 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { UseFormGetValues, UseFormSetValue } from "react-hook-form";
 import type { RescheduleFormData } from "@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema";
 import {
@@ -13,6 +12,7 @@ import {
   toDateString,
   toTimeString,
 } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface Props {
   readonly setValue: UseFormSetValue<RescheduleFormData>;
@@ -39,7 +39,7 @@ function applyQuickAdjust(
 }
 
 export function QuickAdjustSection({ setValue, getValues }: Readonly<Props>) {
-  const t = useTranslations("dashboard.rescheduleForm.quickAdjust");
+  const t = useAppTranslation("dashboard.rescheduleForm").quickAdjust;
 
   return (
     <Box
@@ -51,7 +51,7 @@ export function QuickAdjustSection({ setValue, getValues }: Readonly<Props>) {
       })}
     >
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mb: 1.5, display: "block" })}>
-        {t("label")}:
+        {t.label}:
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
         {QUICK_OPTIONS.map(option => (
@@ -76,7 +76,7 @@ export function QuickAdjustSection({ setValue, getValues }: Readonly<Props>) {
               },
             })}
           >
-            {t(option.key)}
+            {t[option.key]}
           </Button>
         ))}
       </Box>

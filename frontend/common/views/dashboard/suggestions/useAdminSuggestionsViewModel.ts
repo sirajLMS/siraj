@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppPermission, SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -22,6 +21,7 @@ import type {
 import type { SuggestionsAdminLabels } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 import { filterSuggestionsByTab } from "@/frontend/common/views/dashboard/suggestions/utils/suggestionFilters";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface AdminSuggestionsViewModel {
   readonly labels: SuggestionsAdminLabels;
@@ -60,7 +60,7 @@ export interface AdminSuggestionsDialogHandlers {
 }
 
 export function useAdminSuggestionsViewModel(): AdminSuggestionsViewModel & AdminSuggestionsDialogHandlers {
-  const t = useTranslations("dashboard.suggestions");
+  const t = useAppTranslation("dashboard.suggestions");
   const labels = buildSuggestionsLabels(t);
   const notifications = useNotifications();
   const hasPermission = useUserStore(state => state.hasPermission);

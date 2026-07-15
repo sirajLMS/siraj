@@ -5,7 +5,6 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { formatDistanceToNow } from "date-fns";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   studentByIdQueryDocument,
@@ -20,6 +19,7 @@ import { StudentQuotaView } from "@/frontend/common/views/dashboard/students/quo
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import type { StudentProfileData } from "@/frontend/common/views/dashboard/students/quota/types";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function resolveGenderLabel(raw: string | null | undefined): "MALE" | "FEMALE" | null {
   if (raw == null) {
@@ -36,8 +36,8 @@ function resolveGenderLabel(raw: string | null | undefined): "MALE" | "FEMALE" |
 }
 
 export function StudentQuotaContainer() {
-  const t = useTranslations("dashboard.studentQuota");
-  const tc = useTranslations("common");
+  const t = useAppTranslation("dashboard.studentQuota");
+  const tc = useAppTranslation("common");
   const params = useParams();
   const profileContext = useStudentProfileContext();
   const studentId = profileContext?.studentId ?? (typeof params?.id === "string" ? params.id : "");
@@ -58,7 +58,7 @@ export function StudentQuotaContainer() {
   const [updateQuota, { loading: saving }] = useMutation(updateStudentQuotaMutationDocument, {
     onCompleted: () => {
       setIsSaved(true);
-      notifications.show(t("actions.saveSuccess"), { severity: "success", autoHideDuration: 4000 });
+      notifications.show(t.actions.saveSuccess, { severity: "success", autoHideDuration: 4000 });
       if (useUnifiedProfile) {
         void profileContext?.refetch({ year: null, month: null });
       } else {
@@ -70,7 +70,7 @@ export function StudentQuotaContainer() {
     },
     onError: mutationError => {
       logger.error("Update quota failed:", { mutationError });
-      notifications.show(tc("operationFailed"), { severity: "error", autoHideDuration: 5000 });
+      notifications.show(tc.operationFailed, { severity: "error", autoHideDuration: 5000 });
     },
   });
 
@@ -86,11 +86,11 @@ export function StudentQuotaContainer() {
   };
 
   if (!studentId) {
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidId")}</Typography>;
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t.errors.invalidId}</Typography>;
   }
 
   if (!hasTabAccess) {
-    return <ProfileRestrictedSection title={t("breadcrumbs.adjustQuota")} />;
+    return <ProfileRestrictedSection title={t.breadcrumbs.adjustQuota} />;
   }
 
   const unifiedLoading = Boolean(profileContext?.loading);
@@ -105,12 +105,12 @@ export function StudentQuotaContainer() {
   }
 
   if (useUnifiedProfile && !unifiedLoading && unifiedProfileMissing) {
-    return <ProfileRestrictedSection title={t("breadcrumbs.adjustQuota")} />;
+    return <ProfileRestrictedSection title={t.breadcrumbs.adjustQuota} />;
   }
 
   if (!useUnifiedProfile && error) {
     logger.error("Error loading student quota:", { error });
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc("loadFailed")}</Typography>;
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc.loadFailed}</Typography>;
   }
 
   const profile = profileContext?.profile;
@@ -119,7 +119,7 @@ export function StudentQuotaContainer() {
     s && typeof s.id === "string" && s.id.length > 0
       ? {
           id: s.id,
-          studentName: s.name ?? tc("notSet"),
+          studentName: s.name ?? tc.notSet,
           dateOfBirth: useUnifiedProfile && profile?.dateOfBirth ? String(profile.dateOfBirth) : "",
           language: s.language === "en" ? "en" : "ar",
           gender: resolveGenderLabel(s.gender) ?? "",

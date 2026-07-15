@@ -1,11 +1,11 @@
 "use client";
 
 import { Box, Button, ButtonGroup, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PAYMENT_METHOD_TYPES } from "@/frontend/common/lib/payment-method";
-import type { PaymentMethodTypeSelectorLabels } from "@/shared/messages/types/ui/payment-method";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { PaymentMethodTypeSelectorLabels } from "@/shared/locale/types/ui";
 
 export type PaymentMethodTypeSelectorProps = {
   readonly type: PaymentMethodType | null;
@@ -28,16 +28,16 @@ export const PaymentMethodTypeSelector: React.FC<PaymentMethodTypeSelectorProps>
   allowEmpty = false,
   allowedTypes,
 }): React.ReactNode => {
-  const t = useTranslations("ui.paymentMethod.typeSelector");
-  const title = labels?.title ?? t("title");
-  const ariaLabel = labels?.ariaLabel ?? t("ariaLabel");
+  const t = useAppTranslation("ui").paymentMethod.typeSelector;
+  const title = labels?.title ?? t.title;
+  const ariaLabel = labels?.ariaLabel ?? t.ariaLabel;
 
   const labelByType: Record<PaymentMethodType, string> = {
-    [PaymentMethodType.MobileWallet]: labels?.mobileWallet ?? t("mobileWallet"),
-    [PaymentMethodType.PaymentLink]: labels?.paymentLink ?? t("paymentLink"),
-    [PaymentMethodType.OnlineAccount]: labels?.onlineAccount ?? t("onlineAccount"),
-    [PaymentMethodType.BankTransfer]: labels?.bankTransfer ?? t("bankTransfer"),
-    [PaymentMethodType.Cash]: labels?.cash ?? t("cash"),
+    [PaymentMethodType.MobileWallet]: labels?.mobileWallet ?? t.mobileWallet,
+    [PaymentMethodType.PaymentLink]: labels?.paymentLink ?? t.paymentLink,
+    [PaymentMethodType.OnlineAccount]: labels?.onlineAccount ?? t.onlineAccount,
+    [PaymentMethodType.BankTransfer]: labels?.bankTransfer ?? t.bankTransfer,
+    [PaymentMethodType.Cash]: labels?.cash ?? t.cash,
     [PaymentMethodType.ProofUpload]: "Proof upload",
   };
 
@@ -101,7 +101,7 @@ export const PaymentMethodTypeSelector: React.FC<PaymentMethodTypeSelectorProps>
             variant={type === null ? "contained" : "outlined"}
             sx={{ flex: 1, minWidth: 0 }}
           >
-            {labels?.any ?? t("any")}
+            {labels?.any ?? t.any}
           </Button>
         ) : null}
       </ButtonGroup>

@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type { MeetingJoinEmptyRole } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";

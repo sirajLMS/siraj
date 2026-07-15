@@ -1,7 +1,6 @@
 "use client";
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { ErrorState } from "@/frontend/common/components/ui";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
@@ -26,6 +25,7 @@ import type {
   TeacherOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 type TeacherOwnData = NonNullable<ProfileData["teacherOwnProfile"]>;
@@ -158,7 +158,8 @@ export function TeacherProfileContainer({
   targetUserId,
   activeTab: _activeTab = "profile",
 }: TeacherProfileContainerProps) {
-  const tc = useTranslations("profile");
+  const t = useAppTranslation("profile").teacher;
+  const _locale = useAppLocale();
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const router = useRouter();
@@ -215,8 +216,8 @@ export function TeacherProfileContainer({
     return (
       <ErrorState
         embedded
-        message={tc("errors.failedToLoad")}
-        retryLabel={tc("actions.retry")}
+        message={t.errors.failedToLoad}
+        retryLabel={t.actions.retry}
         onRetry={() => {
           refetch();
         }}
@@ -226,7 +227,7 @@ export function TeacherProfileContainer({
 
   const teacherData = buildEditSource(scope, profile ?? ({} as ProfileData));
   if (!teacherData) {
-    return <ErrorState embedded message={tc("errors.notFound")} />;
+    return <ErrorState embedded message={t.errors.notFound} />;
   }
 
   const avatarUrl = profile?.avatarUrl;

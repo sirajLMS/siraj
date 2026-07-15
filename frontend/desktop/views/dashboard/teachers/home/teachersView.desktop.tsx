@@ -2,7 +2,6 @@
 
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { PrimaryPageAction } from "@/frontend/common/components/ui/button/ActionButtons";
@@ -14,6 +13,7 @@ import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { TeacherDataGrid } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherDataGrid";
 import { TeacherMetricsRow } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherMetricsRow";
 import { Link } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface TeachersDesktopViewProps {
   readonly metrics: TeacherDirectoryMetrics | null | undefined;
@@ -41,21 +41,21 @@ export function TeachersDesktopView({
   totalCount,
   onPageChange,
 }: Readonly<TeachersDesktopViewProps>) {
-  const t = useTranslations("dashboard.teachersDirectory");
+  const t = useAppTranslation("dashboard.teachersDirectory");
 
   return (
     <PageContainer>
       <PageHeader
-        title={t("pageTitle")}
-        subtitle={t("pageSubtitle")}
+        title={t.pageTitle}
+        subtitle={t.pageSubtitle}
         actions={
           <>
             <RequirePermission permissions={[AppPermission.TeachersCreate]}>
               <Link href="/teachers/onboarding" style={{ textDecoration: "none" }}>
-                <PrimaryPageAction startIcon={<PersonAddOutlined />}>{t("actions.addTeacher")}</PrimaryPageAction>
+                <PrimaryPageAction startIcon={<PersonAddOutlined />}>{t.actions.addTeacher}</PrimaryPageAction>
               </Link>
             </RequirePermission>
-            <PrimaryPageAction startIcon={<EditCalendarOutlined />}>{t("actions.updateSchedules")}</PrimaryPageAction>
+            <PrimaryPageAction startIcon={<EditCalendarOutlined />}>{t.actions.updateSchedules}</PrimaryPageAction>
           </>
         }
       />
@@ -64,7 +64,7 @@ export function TeachersDesktopView({
         <TeacherMetricsRow metrics={metrics} />
       </Box>
 
-      <SectionPanel title={t("table.showingOf", { count: rows.length, total: totalTeachers })}>
+      <SectionPanel title={t.table.showingOf(rows.length, totalTeachers)}>
         <TeacherDataGrid
           rows={rows}
           page={page}

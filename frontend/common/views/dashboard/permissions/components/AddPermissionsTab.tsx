@@ -3,12 +3,12 @@
 import { Box, Checkbox } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AddPermissionBulkBar } from "@/frontend/common/views/dashboard/permissions/components/AddPermissionBulkBar";
 import { AddPermissionFilterBar } from "@/frontend/common/views/dashboard/permissions/components/AddPermissionFilterBar";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledTabContainer = styled(Box)({
   display: "flex",
@@ -51,7 +51,7 @@ export function AddPermissionsTab({
   onCategoryChange,
   loading = false,
 }: Readonly<AddPermissionsTabProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const addPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {
     return [
@@ -68,19 +68,19 @@ export function AddPermissionsTab({
       },
       {
         field: "key",
-        headerName: t("columnKey"),
+        headerName: t.columnKey,
         flex: 1,
         minWidth: 200,
         renderCell: params => <StyledPermissionKeyCell>{params.value as string}</StyledPermissionKeyCell>,
       },
       {
         field: "category",
-        headerName: t("columnCategory"),
+        headerName: t.columnCategory,
         width: 180,
       },
       {
         field: "description",
-        headerName: t("columnDescription"),
+        headerName: t.columnDescription,
         flex: 1.5,
         minWidth: 250,
       },
@@ -109,12 +109,12 @@ export function AddPermissionsTab({
       )}
 
       {/* Permissions Grid */}
-      <SectionPanel title={t("addPermissions")}>
+      <SectionPanel title={t.addPermissions}>
         <AppDataGrid<Permission>
           rows={filteredAvailablePermissions}
           columns={addPermissionsColumns}
           getRowId={row => row.id ?? row.key ?? ""}
-          emptyMessage={t("noPermissionsFound")}
+          emptyMessage={t.noPermissionsFound}
           loading={loading}
           autoHeight
         />

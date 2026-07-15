@@ -1,18 +1,19 @@
 import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
 
-type DashboardTranslator = (key: string) => string;
+type StatusLabelKey = keyof AdminDashboardLabels["statusLabels"];
 
 export function buildClassInstanceStatusLabels(
-  t: DashboardTranslator
+  t: AdminDashboardLabels["statusLabels"]
 ): Record<ClassOutcome | ClassExecutionState, string> {
   return {
-    [ClassOutcome.Pending]: t("admin.statusLabels.PENDING"),
-    [ClassOutcome.Taken]: t("admin.statusLabels.TAKEN"),
-    [ClassOutcome.Absent]: t("admin.statusLabels.ABSENT"),
-    [ClassOutcome.Leave]: t("admin.statusLabels.LEAVE"),
-    [ClassExecutionState.NotActivated]: t("admin.statusLabels.NOT_ACTIVATED"),
-    [ClassExecutionState.Activated]: t("admin.statusLabels.ACTIVATED"),
-    [ClassExecutionState.Running]: t("admin.statusLabels.RUNNING"),
-    [ClassExecutionState.Completed]: t("admin.statusLabels.COMPLETED"),
+    [ClassOutcome.Pending]: t.PENDING,
+    [ClassOutcome.Taken]: t.TAKEN,
+    [ClassOutcome.Absent]: t.ABSENT,
+    [ClassOutcome.Leave]: t.LEAVE,
+    [ClassExecutionState.NotActivated]: t.NOT_ACTIVATED,
+    [ClassExecutionState.Activated]: t.ACTIVATED,
+    [ClassExecutionState.Running]: t.RUNNING,
+    [ClassExecutionState.Completed]: t.COMPLETED,
   };
 }

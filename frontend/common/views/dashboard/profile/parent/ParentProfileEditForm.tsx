@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
@@ -20,6 +19,7 @@ import { ContactSection } from "@/frontend/common/views/dashboard/profile/parent
 import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
 import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/sections/SocialSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 
@@ -38,7 +38,7 @@ export function ParentProfileEditForm({
   readonly isSaving: boolean;
   readonly onSubmit: (values: ParentAdminEditFormData) => Promise<void>;
 }) {
-  const tc = useTranslations("profile");
+  const t = useAppTranslation("profile");
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canEdit } = useProfileFieldAccess({ scope });
   const schema = isAdminScope ? parentAdminEditSchema : parentOwnEditSchema;
@@ -127,7 +127,7 @@ export function ParentProfileEditForm({
         </Box>
 
         <PrimaryPageAction type="submit" disabled={isSaving}>
-          {isSaving ? tc("shell.loading") : tc("actions.save")}
+          {isSaving ? t.shell.loading : t.actions.save}
         </PrimaryPageAction>
       </Stack>
     </Box>

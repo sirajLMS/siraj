@@ -4,9 +4,9 @@ import { CalendarTodayOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, Popover, TextField } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
 import { ar } from "date-fns/locale";
-import { useLocale } from "next-intl";
 import { useId, useState } from "react";
 import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 
 const DATE_STORAGE_FORMAT = "yyyy-MM-dd";
 const DATE_DISPLAY_FORMAT = "MMM d, yyyy";
@@ -58,7 +58,7 @@ export function AppDateRangePicker({
   toLabel,
   size = "small",
 }: Readonly<AppDateRangePickerProps>) {
-  const locale = useLocale();
+  const locale = useAppLocale();
   const inputId = useId();
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);

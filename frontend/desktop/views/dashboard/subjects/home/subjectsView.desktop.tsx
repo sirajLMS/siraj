@@ -2,11 +2,11 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { CategoriesSection } from "@/frontend/common/views/dashboard/subjects/home/components/CategoriesSection";
 import { SubjectCard } from "@/frontend/common/views/dashboard/subjects/home/components/SubjectCard";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function SubjectsViewDesktop({
   categories,
@@ -24,7 +24,7 @@ export function SubjectsViewDesktop({
   canManageSubjects,
   canManageCategories,
 }: Readonly<SubjectsViewProps>) {
-  const t = useTranslations("dashboard.subjects");
+  const t = useAppTranslation("dashboard.subjects");
 
   const filteredSubjects = activeCategoryId ? subjects.filter(s => s.category?.id === activeCategoryId) : subjects;
 
@@ -43,12 +43,12 @@ export function SubjectsViewDesktop({
   return (
     <PageContainer>
       <PageHeader
-        title={t("pageTitle")}
-        subtitle={t("pageSubtitle")}
+        title={t.pageTitle}
+        subtitle={t.pageSubtitle}
         actions={
           canManageSubjects ? (
             <PrimaryPageAction onClick={onAddSubject} startIcon={<AddOutlined />}>
-              {t("addSubject")}
+              {t.addSubject}
             </PrimaryPageAction>
           ) : undefined
         }
@@ -63,7 +63,7 @@ export function SubjectsViewDesktop({
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab label={t("allCategories")} value={false} />
+          <Tab label={t.allCategories} value={false} />
           {categories.map(cat => (
             <Tab key={cat.id} label={cat.name ?? ""} value={cat.id ?? ""} />
           ))}
@@ -75,7 +75,7 @@ export function SubjectsViewDesktop({
           return (
             <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
               <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-                {t("loading")}
+                {t.loading}
               </Typography>
             </Box>
           );
@@ -84,7 +84,7 @@ export function SubjectsViewDesktop({
           return (
             <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
               <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-                {t("noSubjects")}
+                {t.noSubjects}
               </Typography>
             </Box>
           );

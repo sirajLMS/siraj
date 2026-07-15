@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Box, Button } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
@@ -17,9 +16,9 @@ import {
   type ParentOnboardingFormData,
   parentOnboardingSchema,
 } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
-
 import { InvoiceType, PaymentMethodType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const defaultValues: ParentOnboardingFormData = {
   name: "",
@@ -45,9 +44,9 @@ const defaultValues: ParentOnboardingFormData = {
 };
 
 export function ParentOnboardingContainer() {
-  const t = useTranslations("dashboard.parentOnboarding");
-  const tMeeting = useTranslations("ui.meetingConfig.manager");
-  const tJoin = useTranslations("ui.meetingConfig.join");
+  const t = useAppTranslation("dashboard.parentOnboarding");
+  const tMeeting = useAppTranslation("ui.meetingConfig").manager;
+  const tJoin = useAppTranslation("ui.meetingConfig").join;
   const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateParentOnboarding();
   const createdParent = useParentOnboardingStore(state => state.result);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -92,12 +91,12 @@ export function ParentOnboardingContainer() {
             action={
               meetingSetupHref ? (
                 <Button color="inherit" size="small" onClick={() => router.push(meetingSetupHref)}>
-                  {tJoin("setupLink")}
+                  {tJoin.setupLink}
                 </Button>
               ) : undefined
             }
           >
-            {tMeeting("postCreateFailure")}
+            {tMeeting.postCreateFailure}
           </Alert>
         </Box>
       ) : null}
@@ -113,7 +112,7 @@ export function ParentOnboardingContainer() {
       </FormProvider>
       <FormSuccessSnackbar
         open={showSuccess}
-        message={t("actions.successMessage")}
+        message={t.actions.successMessage}
         onClose={() => setShowSuccess(false)}
       />
     </RequirePermission>

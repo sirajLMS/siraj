@@ -2,8 +2,8 @@
 
 import LockOutlined from "@mui/icons-material/LockOutlined";
 import { Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { SectionPanel } from "@/frontend/common/components/ui";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ProfileRestrictedSectionProps = {
   readonly title?: string;
@@ -11,10 +11,10 @@ type ProfileRestrictedSectionProps = {
 };
 
 export function ProfileRestrictedSection({ title, description }: Readonly<ProfileRestrictedSectionProps>) {
-  const t = useTranslations("profile.fieldAccess");
+  const t = useAppTranslation("profile").fieldAccess;
 
   return (
-    <SectionPanel title={title ?? t("restrictedTitle")}>
+    <SectionPanel title={title ?? t.restrictedTitle}>
       <Box
         sx={theme => ({
           display: "flex",
@@ -27,7 +27,7 @@ export function ProfileRestrictedSection({ title, description }: Readonly<Profil
         })}
       >
         <LockOutlined sx={{ fontSize: 28, opacity: 0.7 }} />
-        <Typography variant="bodyMd">{description ?? t("restrictedDescription")}</Typography>
+        <Typography variant="bodyMd">{description ?? t.restrictedDescription}</Typography>
       </Box>
     </SectionPanel>
   );

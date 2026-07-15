@@ -3,11 +3,11 @@
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];
@@ -15,13 +15,13 @@ interface Props {
 }
 
 export function UpdatedSessionsDataGrid({ sessions, loading = false }: Readonly<Props>) {
-  const t = useTranslations("dashboard.dstMigration");
+  const t = useAppTranslation("dashboard.dstMigration");
 
   const columns = useMemo<GridColDef<UpdatedSession>[]>(
     () => [
       {
         field: "studentName",
-        headerName: t("table.studentName"),
+        headerName: t.table.studentName,
         flex: 1.5,
         minWidth: 220,
         renderCell: params => (
@@ -45,7 +45,7 @@ export function UpdatedSessionsDataGrid({ sessions, loading = false }: Readonly<
       },
       {
         field: "fromTime",
-        headerName: t("table.from"),
+        headerName: t.table.from,
         width: 130,
         align: "center",
         headerAlign: "center",
@@ -65,7 +65,7 @@ export function UpdatedSessionsDataGrid({ sessions, loading = false }: Readonly<
       },
       {
         field: "toTime",
-        headerName: t("table.to"),
+        headerName: t.table.to,
         width: 130,
         align: "center",
         headerAlign: "center",
@@ -82,7 +82,7 @@ export function UpdatedSessionsDataGrid({ sessions, loading = false }: Readonly<
       getRowId={row => row.id}
       hideFooter
       ariaLabel="dst-updated-sessions-table"
-      emptyMessage={t("sections.updated")}
+      emptyMessage={t.sections.updated}
       loading={loading}
       sx={{ border: "none" }}
     />

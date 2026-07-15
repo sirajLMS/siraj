@@ -1,10 +1,10 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface PermissionCatalogCardListProps {
   readonly permissions: readonly Permission[];
@@ -12,13 +12,13 @@ export interface PermissionCatalogCardListProps {
 }
 
 export function PermissionCatalogCardList({ permissions, groups }: Readonly<PermissionCatalogCardListProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   if (permissions.length === 0) {
     return (
       <Box sx={{ p: 4, textAlign: "center" }}>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t("noPermissionsFound")}
+          {t.noPermissionsFound}
         </Typography>
       </Box>
     );
@@ -95,7 +95,7 @@ export function PermissionCatalogCardList({ permissions, groups }: Readonly<Perm
                       mb: 1,
                     })}
                   >
-                    {t("columnUsedIn")}
+                    {t.columnUsedIn}
                   </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                     {usedGroups.map(g => {

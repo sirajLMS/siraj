@@ -3,9 +3,9 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
-import { useLocale } from "next-intl";
 import type * as React from "react";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 
 export type LocalizedStringDisplayProps = {
@@ -38,7 +38,7 @@ export const LocalizedStringDisplay: React.FC<LocalizedStringDisplayProps> = ({
   sx,
   onClick,
 }): React.ReactNode => {
-  const uiLocale = useLocale();
+  const uiLocale = useAppLocale();
   const displayLocale = locale ?? uiLocale;
 
   const resolved = resolveLocalizedString(value, displayLocale);

@@ -3,7 +3,6 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -15,10 +14,11 @@ import type {
   SubjectDetailContainerProps,
   SubjectResourceItem,
 } from "@/frontend/common/views/dashboard/subjects/detail/types";
+import { useAppTranslation } from "@/shared/locale/client";
 import { getErrorMessage } from "@/shared/utils/error";
 
 export function SubjectDetailContainer({ subjectId }: Readonly<SubjectDetailContainerProps>) {
-  const t = useTranslations("dashboard.subjects");
+  const t = useAppTranslation("dashboard.subjects");
   const notifications = useNotifications();
 
   const { data, loading, error } = useQuery(classSubjectByIdQueryDocument, {
@@ -37,7 +37,7 @@ export function SubjectDetailContainer({ subjectId }: Readonly<SubjectDetailCont
 
   const breadcrumbs = useMemo(
     () => [
-      { label: t("pageTitle"), href: "/subjects" },
+      { label: t.pageTitle, href: "/subjects" },
       { label: subject?.name ?? "", current: true },
     ],
     [t, subject?.name]
@@ -59,7 +59,7 @@ export function SubjectDetailContainer({ subjectId }: Readonly<SubjectDetailCont
   if (!subject) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <Typography variant="bodyMd">{t("detail.notFound")}</Typography>
+        <Typography variant="bodyMd">{t.detail.notFound}</Typography>
       </Box>
     );
   }

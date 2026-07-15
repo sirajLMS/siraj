@@ -214,6 +214,7 @@ describe("Concurrency Control Tests", () => {
         const updatedInvoice = await BillingRepository.updateInvoiceStatus(
           testInvoice.id,
           "PAID",
+          tErrors,
           new Date(),
           undefined,
           tx
@@ -234,8 +235,10 @@ describe("Concurrency Control Tests", () => {
 
         await verifyOptimisticLock(
           testInvoice.version,
-          () => BillingRepository.updateInvoiceStatus(testInvoice.id, "PAID", new Date(), testInvoice.version, tx),
-          () => BillingRepository.updateInvoiceStatus(testInvoice.id, "OVERDUE", null, testInvoice.version, tx),
+          () =>
+            BillingRepository.updateInvoiceStatus(testInvoice.id, "PAID", tErrors, new Date(), testInvoice.version, tx),
+          () =>
+            BillingRepository.updateInvoiceStatus(testInvoice.id, "OVERDUE", tErrors, null, testInvoice.version, tx),
           async () => {
             const [finalInvoice] = await tx.select().from(invoices).where(eq(invoices.id, testInvoice.id));
             expect(finalInvoice.status).toBe("PAID"); // Only first update succeeded

@@ -3,8 +3,8 @@
 import { Search } from "@mui/icons-material";
 import { Box, Input, InputAdornment, MenuItem, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { standardInputSx } from "@/frontend/common/components/ui/form";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledFilterContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -58,7 +58,7 @@ export function PermissionFilterBar({
   selectedCount,
   isLoading,
 }: Readonly<PermissionFilterBarProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   return (
     <StyledFilterContainer>
@@ -67,7 +67,7 @@ export function PermissionFilterBar({
         <Input
           value={searchTerm}
           onChange={e => onSearchChange(e.target.value)}
-          placeholder={t("searchPermissionsPlaceholder")}
+          placeholder={t.searchPermissionsPlaceholder}
           sx={standardInputSx}
           startAdornment={
             <InputAdornment position="start">
@@ -85,7 +85,7 @@ export function PermissionFilterBar({
           sx={standardInputSx}
           disabled={isLoading}
         >
-          <MenuItem value="ALL">{t("allCategoriesOption")}</MenuItem>
+          <MenuItem value="ALL">{t.allCategoriesOption}</MenuItem>
           {categories.map(cat => (
             <MenuItem key={cat} value={cat}>
               {cat}
@@ -95,7 +95,7 @@ export function PermissionFilterBar({
       </StyledInputGroup>
 
       {/* Selected Count Badge */}
-      <StyledSelectedCountBadge>{t("itemsSelectedLabel", { count: selectedCount })}</StyledSelectedCountBadge>
+      <StyledSelectedCountBadge>{t.itemsSelectedLabel({ count: selectedCount })}</StyledSelectedCountBadge>
     </StyledFilterContainer>
   );
 }

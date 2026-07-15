@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
@@ -11,19 +10,20 @@ import type {
   BooksAndBagsClientProps,
   BooksAndBagsLabels,
 } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function BooksAndBagsClient({ initialBooks }: Readonly<BooksAndBagsClientProps>) {
-  const t = useTranslations("dashboard.booksAndBags");
+  const t = useAppTranslation("dashboard.booksAndBags");
 
   const labels: BooksAndBagsLabels = useMemo(
     () => ({
-      pageTitle: t("pageTitle"),
-      pageSubtitle: t("pageSubtitle"),
-      noEntries: t("noEntries"),
-      statusAvailable: t("statusAvailable"),
-      statusOutOfStock: t("statusOutOfStock"),
-      deleteSuccess: t("deleteSuccess"),
-      deleteFailed: t("deleteFailed"),
+      pageTitle: t.pageTitle,
+      pageSubtitle: t.pageSubtitle,
+      noEntries: t.noEntries,
+      statusAvailable: t.statusAvailable,
+      statusOutOfStock: t.statusOutOfStock,
+      deleteSuccess: t.deleteSuccess,
+      deleteFailed: t.deleteFailed,
     }),
     [t]
   );

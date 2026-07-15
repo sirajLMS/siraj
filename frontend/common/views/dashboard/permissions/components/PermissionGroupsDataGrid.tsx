@@ -3,11 +3,11 @@
 import { DeleteOutlined, EditOutlined, MoreVertOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface PermissionGroupsDataGridProps {
   readonly groups: readonly PermissionGroup[];
@@ -26,7 +26,7 @@ interface RowActionsProps {
 }
 
 function RowActions({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readonly<RowActionsProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -53,7 +53,7 @@ function RowActions({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readon
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem onClick={() => handleAction(onAssignGroup)} id={`group-action-assign-${group.id}`}>
           <PersonAddOutlined fontSize="small" sx={{ mr: 1 }} />
-          {t("actionAssign")}
+          {t.actionAssign}
         </MenuItem>
         <MenuItem
           onClick={() => handleAction(onEditGroup)}
@@ -61,7 +61,7 @@ function RowActions({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readon
           id={`group-action-edit-${group.id}`}
         >
           <EditOutlined fontSize="small" sx={{ mr: 1 }} />
-          {t("actionEdit")}
+          {t.actionEdit}
         </MenuItem>
         <MenuItem
           onClick={() => handleAction(onDeleteGroup)}
@@ -72,7 +72,7 @@ function RowActions({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readon
           })}
         >
           <DeleteOutlined fontSize="small" sx={{ mr: 1 }} />
-          {t("actionDelete")}
+          {t.actionDelete}
         </MenuItem>
       </Menu>
     </>
@@ -87,13 +87,13 @@ export function PermissionGroupsDataGrid({
   onAssignGroup,
   loading = false,
 }: Readonly<PermissionGroupsDataGridProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const columns = useMemo<GridColDef<PermissionGroup>[]>(() => {
     return [
       {
         field: "name",
-        headerName: t("columnName"),
+        headerName: t.columnName,
         flex: 1.5,
         minWidth: 200,
         renderCell: params => (
@@ -114,7 +114,7 @@ export function PermissionGroupsDataGrid({
       },
       {
         field: "slug",
-        headerName: t("columnSlug"),
+        headerName: t.columnSlug,
         flex: 1.2,
         minWidth: 150,
         renderCell: params => (
@@ -131,19 +131,19 @@ export function PermissionGroupsDataGrid({
       },
       {
         field: "isSystem",
-        headerName: t("columnType"),
+        headerName: t.columnType,
         width: 130,
         renderCell: params => (
           <StatusBadge
             category="session"
             status={params.value ? "active" : "pending"}
-            label={params.value ? t("systemBadge") : t("customBadge")}
+            label={params.value ? t.systemBadge : t.customBadge}
           />
         ),
       },
       {
         field: "permissionIds",
-        headerName: t("columnPermissionsCount"),
+        headerName: t.columnPermissionsCount,
         width: 150,
         renderCell: params => {
           const count = (params.value as string[] | null)?.length ?? 0;
@@ -174,7 +174,7 @@ export function PermissionGroupsDataGrid({
         rows={groups}
         columns={columns}
         getRowId={row => row.id ?? row.slug ?? ""}
-        emptyMessage={t("noPermissionsFound")}
+        emptyMessage={t.noPermissionsFound}
         loading={loading}
         autoHeight
       />

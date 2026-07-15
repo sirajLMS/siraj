@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { type CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
@@ -9,6 +8,7 @@ import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/staff/sections/CompensationSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/staff/sections/ContactSection";
 import type { StaffProfileData } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function StaffProfileView({
   staffData,
@@ -19,7 +19,7 @@ export function StaffProfileView({
   readonly displayCurrency: CurrencyCode | null | undefined;
   readonly isAdminScope: boolean;
 }) {
-  const t = useTranslations("profile.staff");
+  const t = useAppTranslation("profile").staff;
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canView } = useProfileFieldAccess({ scope });
 
@@ -60,7 +60,7 @@ export function StaffProfileView({
     <Stack spacing={2}>
       {isAdminScope ? (
         <Typography sx={{ typography: "labelMd", color: theme => theme.palette.primary.main }}>
-          {t("adminBanner")}
+          {t.adminBanner}
         </Typography>
       ) : null}
 

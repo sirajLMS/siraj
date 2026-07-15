@@ -3,7 +3,6 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import {
@@ -33,7 +32,8 @@ import {
 import { ManualOverrideDialog } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
 import { ProviderSettingsSection } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
-import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates";
 
 type SyncRun = {
   readonly finishedAt?: string | null;
@@ -330,8 +330,8 @@ function ExchangeRatesSyncPanel({
 }
 
 export function ExchangeRatesContainer() {
-  const t = useTranslations("dashboard.billing");
-  const labels = t.raw("exchangeRates") as ExchangeRatesLabels;
+  const t = useAppTranslation("dashboard.billing");
+  const labels = t.exchangeRates;
   const { isImpersonating } = useImpersonation();
   const billingActionsDisabled = isImpersonating;
 

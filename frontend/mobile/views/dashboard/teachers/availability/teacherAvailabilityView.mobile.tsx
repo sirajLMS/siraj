@@ -3,7 +3,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, CircularProgress } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { FormProvider, useForm } from "react-hook-form";
 import { ExportButton, PageContainer, SectionPanel } from "@/frontend/common/components/ui";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
@@ -16,6 +15,7 @@ import type {
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
 import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface TeacherAvailabilityMobileViewProps extends Omit<TeacherAvailabilityViewModel, "insights"> {
   readonly insights?: TeacherAvailabilityInsights;
@@ -38,7 +38,7 @@ export function TeacherAvailabilityMobileView({
   onBlockClick,
   tableLabels,
 }: Readonly<TeacherAvailabilityMobileViewProps>) {
-  const t = useTranslations("dashboard.teacherAvailability");
+  const t = useAppTranslation("dashboard.teacherAvailability");
   const storeFilters = useTeacherAvailabilityStore(
     (state: { readonly filters: AvailabilitySearchFormData }) => state.filters
   );
@@ -51,17 +51,17 @@ export function TeacherAvailabilityMobileView({
   return (
     <PageContainer>
       <MobilePageHeader
-        title={t("mobile.pageTitle")}
-        subtitle={t("mobile.pageSubtitle")}
+        title={t.mobile.pageTitle}
+        subtitle={t.mobile.pageSubtitle}
         breadcrumbs={[
-          { label: t("breadcrumbs.teachers"), href: "/teachers" },
-          { label: t("breadcrumbs.availability"), current: true },
+          { label: t.breadcrumbs.teachers, href: "/teachers" },
+          { label: t.breadcrumbs.availability, current: true },
         ]}
-        actions={<ExportButton onClick={onExportPdf}>{t("exportPdf")}</ExportButton>}
+        actions={<ExportButton onClick={onExportPdf}>{t.exportPdf}</ExportButton>}
       />
 
       <Box sx={{ mb: 2 }}>
-        <SectionPanel title={t("searchTitle")} edgeToEdge>
+        <SectionPanel title={t.searchTitle} edgeToEdge>
           <FormProvider {...methods}>
             <AvailabilitySearchForm onSearch={onSearch} />
           </FormProvider>

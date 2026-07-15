@@ -52,12 +52,12 @@ export namespace CurrencyHedgeService {
     if (input.hedgeType) {
       await assertValidHedgeType(input.hedgeType, tErrors);
     }
-    return CurrencyHedgeRepository.update(id, input, undefined, tErrors);
+    return CurrencyHedgeRepository.update(id, input, tErrors);
   }
 
   export async function deleteHedge(actorUserId: string, id: string, tErrors: ErrorsLabels): Promise<boolean> {
     await assertManagePermission(actorUserId, tErrors);
-    return CurrencyHedgeRepository.deleteById(id, undefined, tErrors);
+    return CurrencyHedgeRepository.deleteById(id, tErrors);
   }
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────

@@ -4,9 +4,9 @@ import { CloudUploadOutlined, DeleteOutlined, ErrorOutlined, LinkOutlined } from
 import { Box, Button, CircularProgress, Divider, InputAdornment, TextField, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 const DEFAULT_MAX_SIZE_MB = 2;
@@ -70,7 +70,7 @@ type UrlFallbackFieldProps = {
 
 function useImageUpload(params: ImageUploadHookParams) {
   const { onImageUrlChangeAction, onUploadAction, onFilePathChangeAction, maxSizeMb = DEFAULT_MAX_SIZE_MB } = params;
-  const t = useTranslations("ui.catalogImageUpload");
+  const t = useAppTranslation("ui.catalogImageUpload");
   const notifications = useNotifications();
   const objectUrlRef = useRef<string | null>(null);
 
@@ -109,14 +109,14 @@ function useImageUpload(params: ImageUploadHookParams) {
       setLocalError(null);
 
       if (!ACCEPTED_TYPES.includes(file.type as (typeof ACCEPTED_TYPES)[number])) {
-        const message = t("invalidType");
+        const message = t.invalidType;
         setLocalError(message);
         notifications.show(message, { severity: "error" });
         return;
       }
 
       if (file.size > maxBytes) {
-        const message = t("fileTooLarge", { maxMb: String(maxSizeMb) });
+        const message = t.fileTooLarge(maxSizeMb);
         setLocalError(message);
         notifications.show(message, { severity: "error" });
         return;
@@ -135,7 +135,7 @@ function useImageUpload(params: ImageUploadHookParams) {
         onFilePathChangeAction?.(result.filePath ?? null);
         setUploadState("ready");
       } catch {
-        const message = t("uploadFailed");
+        const message = t.uploadFailed;
         setLocalError(message);
         notifications.show(message, { severity: "error" });
         setUploadState("error");
@@ -321,7 +321,7 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
   error = false,
   errorMessage,
 }): React.ReactNode => {
-  const t = useTranslations("ui.catalogImageUpload");
+  const t = useAppTranslation("ui.catalogImageUpload");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const upload = useImageUpload({
     onImageUrlChangeAction,
@@ -337,7 +337,7 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
   const resolvedPreview = upload.previewUrl ?? imageUrl ?? null;
   const showError = error || upload.localError !== null;
   const resolvedError = errorMessage ?? upload.localError;
-  const resolvedHelperText = helperText ?? t("helperText", { maxMb: String(maxSizeMb) });
+  const resolvedHelperText = helperText ?? t.helperText(maxSizeMb);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -352,7 +352,7 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
           label={label}
           showError={showError}
           isUploading={upload.isUploading}
-          previewAlt={t("previewAlt")}
+          previewAlt={t.previewAlt}
         />
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <UploadButtons
@@ -361,9 +361,9 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
             disabled={disabled}
             isUploading={upload.isUploading}
             hasPreview={resolvedPreview !== null}
-            uploadLabel={t("upload")}
-            uploadingLabel={t("uploading")}
-            removeLabel={t("remove")}
+            uploadLabel={t.upload}
+            uploadingLabel={t.uploading}
+            removeLabel={t.remove}
           />
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
             {resolvedHelperText}
@@ -386,8 +386,8 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
           disabled={disabled || upload.isUploading}
           showError={showError}
           errorMessage={resolvedError}
-          label={t("logoUrlLabel")}
-          optionalLabel={t("optional")}
+          label={t.logoUrlLabel}
+          optionalLabel={t.optional}
         />
       ) : null}
     </Box>

@@ -15,7 +15,7 @@ import {
   buildExchangeRateColumns,
   type ExchangeRateRow,
 } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
-import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
+import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates";
 
 const HISTORY_DAY_OPTIONS = [7, 30, 90] as const;
 
@@ -66,7 +66,7 @@ export function ExchangeRateHistorySection({ labels, availablePairs }: Readonly<
           {labels.history.subtitle}
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          {labels.history.maxDays.replace("{days}", String(maxDays))}
+          {labels.history.maxDays(maxDays)}
         </Typography>
       </Box>
 
@@ -123,7 +123,7 @@ export function ExchangeRateHistorySection({ labels, availablePairs }: Readonly<
           >
             {HISTORY_DAY_OPTIONS.map(days => (
               <MenuItem key={days} value={days}>
-                {labels.history.maxDays.replace("{days}", String(days))}
+                {labels.history.maxDays(days)}
               </MenuItem>
             ))}
           </Select>

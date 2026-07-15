@@ -4,13 +4,14 @@ import { useQuery } from "@apollo/client/react";
 import { Alert, Button, Stack } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import { useLocale, useTranslations } from "next-intl";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { meetingProvidersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { Link } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type MeetingProviderSelectProps = {
   readonly value: MeetingProviderFieldsFragment | null;
@@ -29,8 +30,8 @@ export function MeetingProviderSelect({
   error,
   helperText,
 }: MeetingProviderSelectProps) {
-  const locale = useLocale();
-  const t = useTranslations("ui.meetingConfig.providerSelect");
+  const locale = useAppLocale();
+  const t = useAppTranslation("ui").meetingConfig.providerSelect;
   const { hasPermission } = useUserStore();
   const canManageCatalog = hasPermission(AppPermission.MeetingProvidersManageCatalog);
   const { data, loading } = useQuery(meetingProvidersQueryDocument, {
@@ -45,13 +46,13 @@ export function MeetingProviderSelect({
       {showEmptyCatalog ? (
         <Alert severity="info">
           <Stack spacing={1}>
-            <Stack sx={{ typography: "titleSm" }}>{t("emptyCatalogTitle")}</Stack>
+            <Stack sx={{ typography: "titleSm" }}>{t.emptyCatalogTitle}</Stack>
             <Stack sx={{ typography: "bodySm" }}>
-              {canManageCatalog ? t("emptyCatalogBody") : t("emptyCatalogContactAdmin")}
+              {canManageCatalog ? t.emptyCatalogBody : t.emptyCatalogContactAdmin}
             </Stack>
             {canManageCatalog ? (
               <Button component={Link} href="/meeting-providers" size="small" variant="outlined">
-                {t("emptyCatalogAdminLink")}
+                {t.emptyCatalogAdminLink}
               </Button>
             ) : null}
           </Stack>

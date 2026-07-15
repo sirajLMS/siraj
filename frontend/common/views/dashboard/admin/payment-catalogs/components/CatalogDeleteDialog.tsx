@@ -1,8 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { CatalogDeleteDialogProps } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function CatalogDeleteDialog({
   open,
@@ -11,7 +11,7 @@ export function CatalogDeleteDialog({
   onClose,
   onConfirm,
 }: Readonly<CatalogDeleteDialogProps>) {
-  const t = useTranslations("dashboard.paymentCatalogs");
+  const t = useAppTranslation("dashboard.paymentCatalogs");
 
   return (
     <BaseDeleteDialog
@@ -19,10 +19,10 @@ export function CatalogDeleteDialog({
       onClose={onClose}
       onConfirm={onConfirm}
       isLoading={isLoading}
-      title={t("deleteTitle")}
-      body={t("deleteBody", { name: entryName })}
-      cancelLabel={t("cancel")}
-      confirmLabel={t("deleteConfirm")}
+      title={t.deleteTitle}
+      body={t.deleteBody(entryName)}
+      cancelLabel={t.cancel}
+      confirmLabel={t.deleteConfirm}
     />
   );
 }

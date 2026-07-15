@@ -4,10 +4,10 @@ import Stack from "@mui/material/Stack";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
-import { useLocale } from "next-intl";
 import type * as React from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
 import { type CountryType, getCountryDisplayName, getCountryEmoji } from "@/frontend/common/lib/locale";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 
 export type CountryDisplayProps = {
   readonly code?: string | null;
@@ -28,7 +28,7 @@ export const CountryDisplay: React.FC<CountryDisplayProps> = ({
   typographyVariant,
   sx,
 }): React.ReactNode => {
-  const locale = useLocale();
+  const locale = useAppLocale();
 
   const resolvedCode = country?.code ?? code;
   if (!resolvedCode) {

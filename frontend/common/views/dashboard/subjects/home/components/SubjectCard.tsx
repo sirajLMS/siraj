@@ -2,11 +2,11 @@
 
 import { BookOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Card, CardActionArea, CardActions, CardContent, Chip, IconButton, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { SubjectCardProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function SubjectCard({ subject, onEdit, onDelete, onClick, canManage }: Readonly<SubjectCardProps>) {
-  const t = useTranslations("dashboard.subjects");
+  const t = useAppTranslation("dashboard.subjects");
 
   return (
     <Card
@@ -61,13 +61,13 @@ export function SubjectCard({ subject, onEdit, onDelete, onClick, canManage }: R
             <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 0.5 }}>
               <BookOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />
               <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.secondary }}>
-                {t("resourceCount", { count: subject.resources?.length ?? 0 })}
+                {t.resourceCount(subject.resources?.length ?? 0)}
               </Typography>
             </Stack>
 
             {subject.isActive === false && (
               <Chip
-                label={t("inactive")}
+                label={t.inactive}
                 size="small"
                 sx={theme => ({
                   backgroundColor: theme.palette.errorContainer,
@@ -82,10 +82,10 @@ export function SubjectCard({ subject, onEdit, onDelete, onClick, canManage }: R
 
       {canManage && (
         <CardActions sx={{ justifyContent: "flex-end", px: 2, pb: 1 }}>
-          <IconButton onClick={onEdit} size="small" aria-label={t("editSubject")}>
+          <IconButton onClick={onEdit} size="small" aria-label={t.editSubject}>
             <EditOutlined fontSize="small" />
           </IconButton>
-          <IconButton onClick={onDelete} size="small" aria-label={t("deleteSubject")}>
+          <IconButton onClick={onDelete} size="small" aria-label={t.deleteSubject}>
             <DeleteOutlined fontSize="small" />
           </IconButton>
         </CardActions>

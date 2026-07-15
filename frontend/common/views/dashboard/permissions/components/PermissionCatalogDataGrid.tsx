@@ -2,11 +2,11 @@
 
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface PermissionCatalogDataGridProps {
   readonly permissions: readonly Permission[];
@@ -84,20 +84,20 @@ export function PermissionCatalogDataGrid({
   groups,
   loading = false,
 }: Readonly<PermissionCatalogDataGridProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const columns = useMemo<GridColDef<Permission>[]>(() => {
     return [
       {
         field: "key",
-        headerName: t("columnKey"),
+        headerName: t.columnKey,
         flex: 1,
         minWidth: 200,
         renderCell: params => <PermissionKeyCell value={params.value as string | null} />,
       },
       {
         field: "category",
-        headerName: t("columnCategory"),
+        headerName: t.columnCategory,
         width: 180,
         renderCell: params => {
           const val = params.value as string | null;
@@ -110,7 +110,7 @@ export function PermissionCatalogDataGrid({
       },
       {
         field: "description",
-        headerName: t("columnDescription"),
+        headerName: t.columnDescription,
         flex: 2,
         minWidth: 300,
         renderCell: params => {
@@ -124,7 +124,7 @@ export function PermissionCatalogDataGrid({
       },
       {
         field: "usedIn",
-        headerName: t("columnUsedIn"),
+        headerName: t.columnUsedIn,
         flex: 1.5,
         minWidth: 220,
         renderCell: params => <UsedInCell permission={params.row} groups={groups} />,
@@ -138,7 +138,7 @@ export function PermissionCatalogDataGrid({
         rows={permissions}
         columns={columns}
         getRowId={row => row.id ?? row.key ?? ""}
-        emptyMessage={t("noPermissionsFound")}
+        emptyMessage={t.noPermissionsFound}
         loading={loading}
         autoHeight
       />

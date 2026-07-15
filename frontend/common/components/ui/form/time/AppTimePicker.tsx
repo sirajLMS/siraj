@@ -5,7 +5,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import type { PickersInputLocaleText } from "@mui/x-date-pickers/locales";
 import { TimePicker, type TimePickerProps } from "@mui/x-date-pickers/TimePicker";
 import { ar } from "date-fns/locale/ar";
-import { useLocale } from "next-intl";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 
 const ARABIC_PICKER_LOCALE_TEXT = {
   cancelButtonLabel: "إلغاء",
@@ -22,7 +22,7 @@ const ARABIC_PICKER_LOCALE_TEXT = {
 } satisfies PickersInputLocaleText;
 
 export function AppTimePicker(props: Readonly<TimePickerProps>) {
-  const locale = useLocale();
+  const locale = useAppLocale();
   const isArabicLocale = locale === "ar";
 
   return (

@@ -18,7 +18,6 @@ import {
   TextField,
 } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppDataGrid, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
@@ -32,6 +31,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { getCurrencyByCode, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { logger } from "@/frontend/common/utils/logger";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 
 const HEDGE_TYPE_LONG = "LONG";
 const HEDGE_TYPE_SHORT = "SHORT";
@@ -53,8 +53,8 @@ function formatTimestamp(value: string | null | undefined, locale: string): stri
 }
 
 export function CurrencyHedgesContainer() {
-  const t = useTranslations("dashboard.billing.currencyHedges");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.billing").currencyHedges;
+  const locale = useAppLocale();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editingRow, setEditingRow] = useState<HedgeRow | null>(null);

@@ -2,17 +2,18 @@
 
 import { Alert } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppDataGrid, PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, currencies, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function SupportedCurrenciesContainer() {
-  const t = useTranslations("dashboard.billing.supportedCurrencies");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard").billing.supportedCurrencies;
+  const locale = useAppLocale();
 
   const rows = useMemo(
     () =>
@@ -27,23 +28,23 @@ export function SupportedCurrenciesContainer() {
     () => [
       {
         field: "flagEmoji",
-        headerName: t("flag"),
+        headerName: t.flag,
         width: 80,
         sortable: false,
         renderCell: ({ row }) => <span aria-hidden>{row.flagEmoji}</span>,
       },
-      { field: "code", headerName: t("code"), flex: 1, minWidth: 100 },
-      { field: "symbol", headerName: t("symbol"), width: 120 },
+      { field: "code", headerName: t.code, flex: 1, minWidth: 100 },
+      { field: "symbol", headerName: t.symbol, width: 120 },
       {
         field: "name",
-        headerName: t("name"),
+        headerName: t.name,
         flex: 1.5,
         minWidth: 180,
         valueGetter: (_value, row) => getCurrencyDisplayName(row.code, locale),
       },
       {
         field: "countryCode",
-        headerName: t("country"),
+        headerName: t.country,
         flex: 1,
         minWidth: 140,
         valueGetter: (_value, row) => getCountryDisplayName(row.countryCode, locale),
@@ -55,10 +56,10 @@ export function SupportedCurrenciesContainer() {
   return (
     <RequirePermission permissions={AppPermission.BillingViewExchangeRates}>
       <PageContainer>
-        <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
-        <AppDataGrid rows={rows} columns={columns} emptyMessage={t("empty")} getRowId={row => row.id} autoHeight />
+        <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
+        <AppDataGrid rows={rows} columns={columns} emptyMessage={t.empty} getRowId={row => row.id} autoHeight />
         <Alert severity="info" sx={{ mt: 2 }}>
-          {t("footerNote")}
+          {t.footerNote}
         </Alert>
       </PageContainer>
     </RequirePermission>

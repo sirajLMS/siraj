@@ -2,9 +2,9 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Alert } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { userQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type FxConversionNoteMode = "viewer" | "subject";
 
@@ -15,7 +15,7 @@ interface FxConversionNoteProps {
 
 export function FxConversionNote({ mode = "viewer", subjectUserId }: Readonly<FxConversionNoteProps>): React.ReactNode {
   const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
-  const t = useTranslations("dashboard.billing");
+  const tBilling = useAppTranslation("dashboard.billing");
 
   const { data: subjectData, loading: subjectLoading } = useQuery(userQueryDocument, {
     variables: { id: subjectUserId ?? "" },
@@ -30,7 +30,7 @@ export function FxConversionNote({ mode = "viewer", subjectUserId }: Readonly<Fx
 
     return (
       <Alert severity="info" sx={{ mb: 2 }}>
-        {t("fxConversionNote", { code: viewerDisplayCurrency })}
+        {tBilling.fxConversionNote(viewerDisplayCurrency)}
       </Alert>
     );
   }
@@ -46,7 +46,7 @@ export function FxConversionNote({ mode = "viewer", subjectUserId }: Readonly<Fx
 
   return (
     <Alert severity="info" sx={{ mb: 2 }}>
-      {t("fxConversionNoteSubject", { code: subjectDisplayCurrency })}
+      {tBilling.fxConversionNoteSubject(subjectDisplayCurrency)}
     </Alert>
   );
 }

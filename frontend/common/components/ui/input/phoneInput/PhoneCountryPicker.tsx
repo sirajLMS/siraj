@@ -1,10 +1,10 @@
 "use client";
 
 import Box from "@mui/material/Box";
-import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { CountryAutocomplete } from "@/frontend/common/components/ui/input/countrySelect/CountryAutocomplete";
 import type { CountryType } from "@/frontend/common/lib/locale";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type PhoneCountryPickerProps = {
   readonly country?: CountryType;
@@ -18,7 +18,7 @@ export const PhoneCountryPicker: React.FC<PhoneCountryPickerProps> = ({
   country,
   onSelectAction,
 }: PhoneCountryPickerProps): React.ReactNode => {
-  const t = useTranslations("ui.phoneInput");
+  const t = useAppTranslation("ui").phoneInput;
 
   return (
     <Box
@@ -34,7 +34,7 @@ export const PhoneCountryPicker: React.FC<PhoneCountryPickerProps> = ({
       <CountryAutocomplete
         country={country}
         onChangeAction={onSelectAction}
-        label={t("selectCountry")}
+        label={t.selectCountry}
         fullWidth
         open
         autoFocus

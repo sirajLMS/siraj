@@ -2,13 +2,13 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Select } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface AssignGroupDialogProps {
   readonly open: boolean;
@@ -37,7 +37,7 @@ export function AssignGroupDialog({
   onClose,
   onAssign,
 }: Readonly<AssignGroupDialogProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const {
     control,
@@ -79,7 +79,7 @@ export function AssignGroupDialog({
       aria-labelledby="assign-group-dialog-title"
     >
       <DialogTitle id="assign-group-dialog-title">
-        {t("assignGroupTitle")} ({resolveLocalizedString(group.name)})
+        {t.assignGroupTitle} ({resolveLocalizedString(group.name)})
       </DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Box
@@ -93,9 +93,9 @@ export function AssignGroupDialog({
             control={control}
             render={({ field }) => (
               <FieldWrapper
-                label={t("selectUserLabel")}
+                label={t.selectUserLabel}
                 required
-                error={errors.userId ? t("selectUserPlaceholder") : undefined}
+                error={errors.userId ? t.selectUserPlaceholder : undefined}
               >
                 <Select
                   {...field}
@@ -107,7 +107,7 @@ export function AssignGroupDialog({
                   disabled={isLoading}
                 >
                   <MenuItem value="" disabled>
-                    {t("selectUserPlaceholder")}
+                    {t.selectUserPlaceholder}
                   </MenuItem>
                   {assignableUsers.map(user => (
                     <MenuItem key={user.id} value={user.id}>
@@ -131,7 +131,7 @@ export function AssignGroupDialog({
             borderRadius: 1.5,
           })}
         >
-          {t("cancel")}
+          {t.cancel}
         </Button>
         <Button
           type="submit"
@@ -148,7 +148,7 @@ export function AssignGroupDialog({
             },
           })}
         >
-          {t("assignButton")}
+          {t.assignButton}
         </Button>
       </DialogActions>
     </Dialog>

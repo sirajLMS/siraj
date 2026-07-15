@@ -3,7 +3,6 @@
 import { HistoryOutlined } from "@mui/icons-material";
 import { Box, Stack, Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import { PersonProfileLinkCell, ActionIconLink as StyledHistoryIconLink } from "@/frontend/common/components/ui";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
@@ -23,6 +22,7 @@ import {
   formatScheduleYourTime,
 } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useAppLocale } from "@/shared/locale/client";
 
 interface UseScheduleColumnsParams {
   readonly headers: {
@@ -172,7 +172,7 @@ function buildActionsColumn(
 }
 
 export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTimezones }: UseScheduleColumnsParams) {
-  const locale = useLocale();
+  const locale = useAppLocale();
 
   return useMemo<GridColDef<DailyScheduleRow>[]>(() => {
     return [

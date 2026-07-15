@@ -3,7 +3,6 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import {
   labelSx,
@@ -17,6 +16,7 @@ import type {
   AvailabilitySearchFormProps,
   TimeFieldProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function TimeField({ label, name }: Readonly<TimeFieldProps>) {
   const { control } = useFormContext<AvailabilitySearchFormData>();
@@ -48,7 +48,7 @@ function TimeField({ label, name }: Readonly<TimeFieldProps>) {
 }
 
 export function AvailabilitySearchForm({ onSearch }: Readonly<AvailabilitySearchFormProps>) {
-  const t = useTranslations("dashboard.teacherAvailability");
+  const t = useAppTranslation("dashboard.teacherAvailability");
   const { control, handleSubmit } = useFormContext<AvailabilitySearchFormData>();
 
   const onSubmit = (data: AvailabilitySearchFormData) => {
@@ -69,21 +69,21 @@ export function AvailabilitySearchForm({ onSearch }: Readonly<AvailabilitySearch
         p: 3,
       }}
     >
-      <TimeField label={t("from")} name="fromTime" />
-      <TimeField label={t("to")} name="toTime" />
+      <TimeField label={t.from} name="fromTime" />
+      <TimeField label={t.to} name="toTime" />
 
       <Box>
         <Typography variant="labelMd" sx={labelSx}>
-          {t("gender")}
+          {t.gender}
         </Typography>
         <Controller
           name="gender"
           control={control}
           render={({ field }) => (
             <Select {...field} fullWidth sx={outlinedInputSx}>
-              <MenuItem value="">{t("any")}</MenuItem>
-              <MenuItem value={Gender.Male}>{t("male")}</MenuItem>
-              <MenuItem value={Gender.Female}>{t("female")}</MenuItem>
+              <MenuItem value="">{t.any}</MenuItem>
+              <MenuItem value={Gender.Male}>{t.male}</MenuItem>
+              <MenuItem value={Gender.Female}>{t.female}</MenuItem>
             </Select>
           )}
         />
@@ -105,7 +105,7 @@ export function AvailabilitySearchForm({ onSearch }: Readonly<AvailabilitySearch
           },
         })}
       >
-        {t("submit")}
+        {t.submit}
       </Button>
     </Box>
   );

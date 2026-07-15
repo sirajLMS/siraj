@@ -3,6 +3,7 @@ import logger from "@/backend/lib/logger";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import type { ClassInstanceEntity } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export async function seedOrGet(classInstancesList: ClassInstanceEntity[], config?: SeedConfig) {
   logger.info("Seeding class meeting configs...");
@@ -31,7 +32,8 @@ export async function seedOrGet(classInstancesList: ClassInstanceEntity[], confi
     encryptedSecret: null,
   }));
 
-  const results = await MeetingConfigService.upsertManyClassMeetingConfigs(inputs);
+  const tErrors = await getServerTranslations("en", "errors");
+  const results = await MeetingConfigService.upsertManyClassMeetingConfigs(inputs, tErrors);
   logger.info(`Class meeting configs seeded (${results.length} rows).`);
   return results;
 }

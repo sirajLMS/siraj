@@ -113,4 +113,18 @@ export const errors: ErrorsLabels = {
   userEmailExists: "مستخدم بهذا البريد الإلكتروني موجود بالفعل.",
   permissionGroupNotFound: "مجموعة الأذونات غير موجودة.",
   categoryHasSubjects: "لا يمكن حذف الفئة لأن لديها مواد مرتبطة بها.",
+  cannotRescheduleToSelf: "لا يمكن إعادة الجدولة للذات.",
+  cannotRescheduleCompleted: "لا يمكن إعادة جدولة جلسة مكتملة.",
+  cannotRescheduleAlreadyRescheduled: "لا يمكن إعادة جدولة جلسة تم إعادة جدولتها بالفعل.",
+  outOfQuota: "نفدت الحصة.",
+  leaveQuotaExceeded: ({ maxLeaves }) => `تم تجاوز حصة الإجازة: الحد الأقصى ${maxLeaves} إجازات مسموح بها.`,
+  classInstanceNotFound: (params: { id: string }) => `مثيل الفصل غير موجود: ${params.id}`,
+  originalClassNotFound: "الفصل الأصلي غير موجود.",
+  invalidTransition: "انتقال غير صالح.",
+  // ─── Scheduling-specific errors ──────────────────────────────────────
+  teacherNotAssigned: ({ teacherId, studentId, startTime }) =>
+    `المعلم ${teacherId} غير معين للطالب ${studentId} في ${startTime}.`,
+  teacherBooked: "المعلم محجوز بالفعل في هذا الوقت.",
+  studentBooked: "الطالب محجوز بالفعل في هذا الوقت.",
+  meetingUrlInUse: "رابط الاجتماع مستخدم بالفعل.",
 };

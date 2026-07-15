@@ -1,11 +1,11 @@
 "use client";
 
 import { Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { MeetingConfigsManager } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type MeetingConfigsTabProps = {
   readonly targetUserId: string;
@@ -13,7 +13,7 @@ type MeetingConfigsTabProps = {
 };
 
 export function MeetingConfigsTab({ targetUserId, scope }: MeetingConfigsTabProps) {
-  const t = useTranslations("ui.meetingConfig");
+  const t = useAppTranslation("ui.meetingConfig");
   const { hasPermission } = useUserStore();
 
   const canManage =
@@ -24,7 +24,7 @@ export function MeetingConfigsTab({ targetUserId, scope }: MeetingConfigsTabProp
   return (
     <PageContainer>
       <Stack spacing={3}>
-        <PageHeader title={t("sectionTitle")} />
+        <PageHeader title={t.sectionTitle} />
         <SectionPanel>
           <MeetingConfigsManager targetUserId={targetUserId} canManage={canManage} />
         </SectionPanel>

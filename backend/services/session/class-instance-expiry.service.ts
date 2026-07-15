@@ -1,7 +1,9 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 const DEFAULT_BATCH_SIZE = 50;
 
@@ -26,7 +28,11 @@ export namespace ClassInstanceExpiryService {
     let processedCount = 0;
     for (const row of expiredRows) {
       try {
-        const updated = await SchedulingRepository.markClassMissedBySystem(row.id, undefined, options?.locale);
+        const tErrors = (await getBackendTranslations({
+          locale: options?.locale,
+          namespace: "errors",
+        })) as unknown as ErrorsLabels;
+        const updated = await SchedulingRepository.markClassMissedBySystem(row.id, undefined, tErrors);
         if (updated) {
           processedCount += 1;
         }

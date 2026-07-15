@@ -4,7 +4,6 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Alert, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import {
@@ -28,6 +27,7 @@ import type { LocalizedString } from "@/frontend/common/types/localized-string.t
 import { logger } from "@/frontend/common/utils/logger";
 import { CreateMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/CreateMeetingProviderDialog";
 import { EditMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/EditMeetingProviderDialog";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 
 type MeetingProviderLabels = {
   readonly slug: string;
@@ -120,7 +120,7 @@ function useNotificationState() {
 }
 
 type MeetingProvidersViewProps = {
-  readonly t: ReturnType<typeof useTranslations<"dashboard.meetingProviders">>;
+  readonly t: ReturnType<typeof useAppTranslation<"dashboard.meetingProviders">>;
   readonly locale: string;
   readonly rows: MeetingProviderFieldsFragment[];
   readonly columns: GridColDef<MeetingProviderFieldsFragment>[];
@@ -162,16 +162,16 @@ function MeetingProvidersView({
     <RequirePermission permissions={AppPermission.MeetingProvidersManageCatalog}>
       <PageContainer>
         <PageHeader
-          title={t("pageTitle")}
-          subtitle={t("pageSubtitle")}
+          title={t.pageTitle}
+          subtitle={t.pageSubtitle}
           actions={
             <PrimaryPageAction onClick={onCreateOpen} startIcon={<AddOutlined />}>
-              {t("addProvider")}
+              {t.addProvider}
             </PrimaryPageAction>
           }
         />
         {!loading && rows.length === 0 ? (
-          <MeetingProvidersEmptyState title={t("emptyCatalogTitle")} body={t("emptyCatalogBody")} />
+          <MeetingProvidersEmptyState title={t.emptyCatalogTitle} body={t.emptyCatalogBody} />
         ) : null}
         <Box sx={{ height: 560 }}>
           <AppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
@@ -195,13 +195,13 @@ function MeetingProvidersView({
           onClose={onDeleteClose}
           onConfirm={onDeleteConfirm}
           isLoading={deleting}
-          title={t("deleteTitle")}
-          body={`${t("deleteConfirm")} ${resolveLocalizedString(
+          title={t.deleteTitle}
+          body={`${t.deleteConfirm} ${resolveLocalizedString(
             (deleteProvider?.name as LocalizedString | null | undefined) ?? null,
             locale
           )}`}
-          cancelLabel={t("cancel")}
-          confirmLabel={t("delete")}
+          cancelLabel={t.cancel}
+          confirmLabel={t.delete}
         />
 
         <FormErrorSnackbar
@@ -220,8 +220,8 @@ function MeetingProvidersView({
 }
 
 export function MeetingProvidersContainer() {
-  const t = useTranslations("dashboard.meetingProviders");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.meetingProviders");
+  const locale = useAppLocale();
   const [createOpen, setCreateOpen] = useState(false);
   const [editProvider, setEditProvider] = useState<MeetingProviderFieldsFragment | null>(null);
   const [deleteProvider, setDeleteProvider] = useState<MeetingProviderFieldsFragment | null>(null);
@@ -241,13 +241,13 @@ export function MeetingProvidersContainer() {
 
   const labels = useMemo<MeetingProviderLabels>(
     () => ({
-      slug: t("columns.slug"),
-      name: t("columns.name"),
-      active: t("active"),
-      inactive: t("inactive"),
-      actions: t("columns.actions"),
-      edit: t("edit"),
-      delete: t("delete"),
+      slug: t.columns.slug,
+      name: t.columns.name,
+      active: t.active,
+      inactive: t.inactive,
+      actions: t.columns.actions,
+      edit: t.edit,
+      delete: t.delete,
     }),
     [t]
   );
@@ -257,13 +257,13 @@ export function MeetingProvidersContainer() {
   const handleCreateSaved = useCallback(async () => {
     setCreateOpen(false);
     await refetch();
-    notifications.showSuccess(t("createSuccess"));
+    notifications.showSuccess(t.createSuccess);
   }, [refetch, notifications, t]);
 
   const handleEditSaved = useCallback(async () => {
     setEditProvider(null);
     await refetch();
-    notifications.showSuccess(t("updateSuccess"));
+    notifications.showSuccess(t.updateSuccess);
   }, [refetch, notifications, t]);
 
   const handleDeleteConfirm = useCallback(async () => {
@@ -272,9 +272,9 @@ export function MeetingProvidersContainer() {
       await deleteMeetingProvider({ variables: { id: deleteProvider.id } });
       setDeleteProvider(null);
       await refetch();
-      notifications.showSuccess(t("deleteSuccess"));
+      notifications.showSuccess(t.deleteSuccess);
     } catch {
-      notifications.showError(t("operationFailed"));
+      notifications.showError(t.operationFailed);
     }
   }, [deleteProvider, deleteMeetingProvider, refetch, notifications, t]);
 

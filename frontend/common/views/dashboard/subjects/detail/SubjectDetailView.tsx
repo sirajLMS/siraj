@@ -12,15 +12,15 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import type {
   SubjectDetailViewProps,
   SubjectResourceItem,
 } from "@/frontend/common/views/dashboard/subjects/detail/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) {
-  const t = useTranslations("dashboard.subjects.detail");
+  const t = useAppTranslation("dashboard.subjects.detail");
   const handleDownload = () => {
     if (resource.filePath) {
       window.open(`/api/storage/files/` + `${resource.filePath}`, `_blank`, "noopener,noreferrer");
@@ -32,7 +32,7 @@ function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) 
       disablePadding
       secondaryAction={
         resource.filePath ? (
-          <IconButton edge="end" onClick={handleDownload} aria-label={t("detail.detail.download")}>
+          <IconButton edge="end" onClick={handleDownload} aria-label={t.detail.download}>
             <DownloadOutlined />
           </IconButton>
         ) : undefined
@@ -43,7 +43,7 @@ function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) 
           <FolderOutlined />
         </ListItemIcon>
         <ListItemText
-          primary={resource.displayName ?? t("untitledResource")}
+          primary={resource.displayName ?? t.untitledResource}
           secondary={resource.resourceType ?? undefined}
         />
       </ListItemButton>
@@ -52,7 +52,7 @@ function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) 
 }
 
 export function SubjectDetailView({ subject, resources, breadcrumbs }: Readonly<SubjectDetailViewProps>) {
-  const t = useTranslations("dashboard.subjects");
+  const t = useAppTranslation("dashboard.subjects");
 
   return (
     <PageContainer>
@@ -65,14 +65,14 @@ export function SubjectDetailView({ subject, resources, breadcrumbs }: Readonly<
       )}
 
       <SectionPanel
-        title={t("detail.resourcesTitle")}
-        subTitle={t("detail.resourcesSubtitle", { count: resources.length })}
+        title={t.detail.resourcesTitle}
+        subTitle={t.detail.resourcesSubtitle(resources.length)}
         sx={{ mt: 3 }}
       >
         {resources.length === 0 ? (
           <Box sx={{ py: 4, textAlign: "center" }}>
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {t("detail.noResources")}
+              {t.detail.noResources}
             </Typography>
           </Box>
         ) : (

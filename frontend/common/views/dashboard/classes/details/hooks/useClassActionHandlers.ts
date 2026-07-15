@@ -1,21 +1,21 @@
 "use client";
-import type { useTranslations } from "next-intl";
 import type { useClassMutations } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassMutations";
 import type { ActionFeedbackState, ClassActionHandlers } from "@/frontend/common/views/dashboard/classes/details/types";
 import type { useRouter } from "@/shared/i18n/routing";
+import type { useAppTranslation } from "@/shared/locale/client";
 
 export function useClassActionHandlers(
   id: string,
   mutations: ReturnType<typeof useClassMutations>,
   router: ReturnType<typeof useRouter>,
   setFeedbackState: (state: ActionFeedbackState | null) => void,
-  t: ReturnType<typeof useTranslations<"dashboard.classDetails">>
+  t: ReturnType<typeof useAppTranslation<"dashboard.classDetails">>
 ): ClassActionHandlers {
   return {
     handleForceActivate: async () => {
       try {
         await mutations.forceActivate();
-        setFeedbackState({ message: t("actionFeedback.forceActivateSuccess"), severity: "success" });
+        setFeedbackState({ message: t.actionFeedback.forceActivateSuccess, severity: "success" });
       } catch {
         // Error feedback is handled by useClassMutations onError
       }
@@ -23,7 +23,7 @@ export function useClassActionHandlers(
     handleStop: async () => {
       try {
         await mutations.stopClass();
-        setFeedbackState({ message: t("actionFeedback.stopSuccess"), severity: "success" });
+        setFeedbackState({ message: t.actionFeedback.stopSuccess, severity: "success" });
       } catch {
         // Error feedback is handled by useClassMutations onError
       }
@@ -31,7 +31,7 @@ export function useClassActionHandlers(
     handleActivate: async () => {
       try {
         await mutations.activate();
-        setFeedbackState({ message: t("actionFeedback.activateSuccess"), severity: "success" });
+        setFeedbackState({ message: t.actionFeedback.activateSuccess, severity: "success" });
       } catch {
         // Error feedback is handled by useClassMutations onError
       }
@@ -41,7 +41,7 @@ export function useClassActionHandlers(
         await mutations.deleteClass();
         router.push("/dashboard");
       } catch {
-        setFeedbackState({ message: t("actionFeedback.deleteError"), severity: "error" });
+        setFeedbackState({ message: t.actionFeedback.deleteError, severity: "error" });
       }
     },
     handleReschedule: () => {

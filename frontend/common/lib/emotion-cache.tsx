@@ -3,10 +3,10 @@
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { useServerInsertedHTML } from "next/navigation";
-import { useLocale } from "next-intl";
 import type { ReactNode } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 
 interface EmotionCacheProviderProps {
   readonly children: ReactNode;
@@ -31,7 +31,7 @@ function createRtlCache(nonce?: string) {
 }
 
 export default function EmotionCacheProvider({ children, nonce }: EmotionCacheProviderProps) {
-  const locale = useLocale();
+  const locale = useAppLocale();
   const isRtl = locale === "ar";
   const cache = isRtl ? createRtlCache(nonce) : createLtrCache(nonce);
 

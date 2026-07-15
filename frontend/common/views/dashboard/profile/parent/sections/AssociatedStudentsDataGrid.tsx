@@ -2,11 +2,11 @@
 
 import { Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssociatedStudentRow } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type AssociatedStudentsDataGridProps = {
   readonly rows: readonly AssociatedStudentRow[];
@@ -15,43 +15,43 @@ type AssociatedStudentsDataGridProps = {
 };
 
 export function AssociatedStudentsDataGrid({ rows, loading = false, emptyMessage }: AssociatedStudentsDataGridProps) {
-  const t = useTranslations("profile.parent");
-  const tc = useTranslations("profile");
+  const t = useAppTranslation("profile").parent;
+  const tProfile = useAppTranslation("profile");
 
   const columns = useMemo<GridColDef<AssociatedStudentRow>[]>(
     () => [
       {
         field: "name",
-        headerName: t("students.columns.name"),
+        headerName: t.students.columns.name,
         flex: 1.5,
         minWidth: 220,
         renderCell: params => (
           <PersonProfileLinkCell
             href={params.row.id ? studentHref(params.row.id) : undefined}
             avatarUrl={params.row.studentAvatarUrl}
-            name={params.row.name ?? tc("notSet")}
-            fallbackInitial={t("common.student.fallbackInitial")}
+            name={params.row.name ?? tProfile.notSet}
+            fallbackInitial={t.common.student.fallbackInitial}
           />
         ),
       },
       {
         field: "status",
-        headerName: t("students.columns.status"),
+        headerName: t.students.columns.status,
         flex: 1,
         minWidth: 130,
         renderCell: params => {
           const status = (params.row.status ?? "REGULAR").toLowerCase();
-          const statusLabel = t(`students.statusLabel.${status}`);
+          const statusLabel = t.students.statusLabel[status as keyof typeof t.students.statusLabel];
           return <StatusBadge category="studentAccount" status={status} label={statusLabel} />;
         },
       },
       {
         field: "teacherName",
-        headerName: t("students.columns.teacher"),
+        headerName: t.students.columns.teacher,
         flex: 1.5,
         minWidth: 220,
         renderCell: params => {
-          const teacherName = params.row.teacherName?.trim() || tc("notSet");
+          const teacherName = params.row.teacherName?.trim() || t.notSet;
           const href = params.row.teacherUserId ? profileHrefForUser(params.row.teacherUserId) : undefined;
 
           return (
@@ -59,7 +59,7 @@ export function AssociatedStudentsDataGrid({ rows, loading = false, emptyMessage
               href={href}
               avatarUrl={params.row.teacherAvatarUrl}
               name={teacherName}
-              fallbackInitial={t("common.teacher.fallbackInitial")}
+              fallbackInitial={t.common.teacher.fallbackInitial}
               emphasizeLink={Boolean(href)}
             />
           );
@@ -67,7 +67,7 @@ export function AssociatedStudentsDataGrid({ rows, loading = false, emptyMessage
       },
       {
         field: "hoursPerWeek",
-        headerName: t("students.columns.hoursPerWeek"),
+        headerName: t.students.columns.hoursPerWeek,
         flex: 1,
         minWidth: 140,
         renderCell: params => (
@@ -77,7 +77,7 @@ export function AssociatedStudentsDataGrid({ rows, loading = false, emptyMessage
         ),
       },
     ],
-    [t, tc]
+    [t, tProfile.notSet]
   );
 
   return (

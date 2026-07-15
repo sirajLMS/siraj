@@ -1,12 +1,14 @@
 "use client";
 
 import { Box, Chip, Stack, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { MeetingConfigDisplayLabels } from "@/shared/locale/types/ui";
 
 export type MeetingConfigDisplayData = {
   readonly id?: string;
@@ -43,13 +45,13 @@ function DetailRow({ label, children }: { readonly label: string; readonly child
 
 function resolveSourceLabel(
   source: EffectiveMeetingSource | string | null | undefined,
-  t: ReturnType<typeof useTranslations<"ui.meetingConfig.display">>
+  t: MeetingConfigDisplayLabels
 ): string {
   const normalized = String(source ?? "").toLowerCase();
-  if (normalized === EffectiveMeetingSource.Class) return t("sourceClass");
-  if (normalized === EffectiveMeetingSource.Recurring) return t("sourceRecurring");
-  if (normalized === EffectiveMeetingSource.Teacher) return t("sourceTeacher");
-  return t("sourceNone");
+  if (normalized === EffectiveMeetingSource.Class) return t.sourceClass;
+  if (normalized === EffectiveMeetingSource.Recurring) return t.sourceRecurring;
+  if (normalized === EffectiveMeetingSource.Teacher) return t.sourceTeacher;
+  return t.sourceNone;
 }
 
 export function effectiveMeetingToDisplayData(meeting: EffectiveMeetingFieldsFragment): MeetingConfigDisplayData {
@@ -68,15 +70,15 @@ export function MeetingConfigDisplay({
   showSource = false,
   compact = false,
 }: MeetingConfigDisplayProps): React.ReactNode {
-  const t = useTranslations("ui.meetingConfig.display");
-  const locale = useLocale();
+  const t = useAppTranslation("ui.meetingConfig");
+  const locale = useAppLocale();
   const details = config.details ?? {};
   const providerTitle = config.providerName
     ? resolveLocalizedString(config.providerName, locale)
     : (config.providerSlug ?? config.label ?? "");
 
   if (!details.meetingUrl && !providerTitle) {
-    return <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t("noMeeting")}</Typography>;
+    return <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t.display.noMeeting}</Typography>;
   }
 
   return (
@@ -87,43 +89,43 @@ export function MeetingConfigDisplay({
         ) : (
           <Typography sx={{ typography: "titleMd" }}>{providerTitle}</Typography>
         )}
-        {config.isDefault ? <Chip size="small" color="primary" label={t("defaultBadge")} /> : null}
-        {config.hasSecret ? <Chip size="small" variant="outlined" label={t("passwordProtected")} /> : null}
+        {config.isDefault ? <Chip size="small" color="primary" label={t.display.defaultBadge} /> : null}
+        {config.hasSecret ? <Chip size="small" variant="outlined" label={t.display.passwordProtected} /> : null}
       </Stack>
 
       <Stack spacing={0.75}>
         {config.label ? (
-          <DetailRow label={t("label")}>
+          <DetailRow label={t.label}>
             <Typography sx={{ typography: "bodyMd" }}>{config.label}</Typography>
           </DetailRow>
         ) : null}
         {details.meetingUrl ? (
-          <DetailRow label={t("meetingUrl")}>
+          <DetailRow label={t.display.meetingUrl}>
             <Typography sx={{ typography: "bodyMd" }} dir="ltr">
               {config.masked ? "••••••••" : details.meetingUrl}
             </Typography>
           </DetailRow>
         ) : null}
         {details.username ? (
-          <DetailRow label={t("username")}>
+          <DetailRow label={t.display.username}>
             <Typography sx={{ typography: "bodyMd" }}>{details.username}</Typography>
           </DetailRow>
         ) : null}
         {details.tenantId ? (
-          <DetailRow label={t("tenantId")}>
+          <DetailRow label={t.display.tenantId}>
             <Typography sx={{ typography: "bodyMd" }}>{details.tenantId}</Typography>
           </DetailRow>
         ) : null}
         {config.meetingId ? (
-          <DetailRow label={t("meetingId")}>
+          <DetailRow label={t.display.meetingId}>
             <Typography sx={{ typography: "bodyMd" }} dir="ltr">
               {config.meetingId}
             </Typography>
           </DetailRow>
         ) : null}
         {showSource && config.source ? (
-          <DetailRow label={t("source")}>
-            <Typography sx={{ typography: "bodyMd" }}>{resolveSourceLabel(config.source, t)}</Typography>
+          <DetailRow label={t.display.source}>
+            <Typography sx={{ typography: "bodyMd" }}>{resolveSourceLabel(config.source, t.display)}</Typography>
           </DetailRow>
         ) : null}
       </Stack>

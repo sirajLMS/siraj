@@ -8,9 +8,9 @@ export type { DBTransaction };
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, parents, students, teacherAssignments, users } from "@/backend/db/schema";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type * as Types from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export async function acquireLocks(tx: DBTransaction, teacherId: string, studentId: string) {
   await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('booking_teacher_' || ${teacherId}::text))`);
@@ -20,12 +20,11 @@ export async function acquireLocks(tx: DBTransaction, teacherId: string, student
 export async function getClassInstanceByIdOrThrow(
   t: DBTransaction,
   id: string,
-  locale?: string
+  tErrors: ErrorsLabels
 ): Promise<Types.ClassInstanceEntity> {
   const results = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
   if (results.length === 0) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("classInstanceNotFound", { id }));
+    throw new Error(tErrors.classInstanceNotFound({ id }));
   }
   return results[0];
 }
@@ -35,7 +34,7 @@ export async function validateTeacherAssignment(
   studentId: string,
   teacherId: string,
   startTime: Date,
-  locale?: string
+  tErrors: ErrorsLabels
 ) {
   const assignments = await tx
     .select({ id: teacherAssignments.id })
@@ -50,9 +49,8 @@ export async function validateTeacherAssignment(
     .limit(1);
 
   if (assignments.length === 0) {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
     throw new Error(
-      t("teacherNotAssigned", {
+      tErrors.teacherNotAssigned({
         teacherId,
         studentId,
         startTime: startTime.toISOString(),
@@ -70,7 +68,7 @@ export interface OverlapCheckParams {
   excludeId?: string;
 }
 
-export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParams, locale?: string) {
+export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParams, tErrors: ErrorsLabels) {
   const { studentId, teacherId, startTime, endTime, meetingJoinUrl, excludeId } = params;
   const overlapCondition = sql`(${classInstances.scheduledStartAt}, ${classInstances.scheduledEndAt}) OVERLAPS (${startTime}, ${endTime})`;
 
@@ -87,8 +85,7 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
     )
     .limit(1);
   if (teacherOverlaps.length > 0) {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(t("teacherBooked"));
+    throw new Error(tErrors.teacherBooked);
   }
 
   const studentOverlaps = await tx
@@ -104,8 +101,7 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
     )
     .limit(1);
   if (studentOverlaps.length > 0) {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(t("studentBooked"));
+    throw new Error(tErrors.studentBooked);
   }
 
   if (meetingJoinUrl) {
@@ -121,10 +117,9 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
       );
 
     for (const row of meetingUrlOverlaps) {
-      const resolved = await EffectiveMeetingService.resolveForClassInstance(row.id, tx);
+      const resolved = await EffectiveMeetingService.resolveForClassInstance(row.id, tErrors, tx);
       if (resolved.joinUrl === meetingJoinUrl) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("meetingUrlInUse"));
+        throw new Error(tErrors.meetingUrlInUse);
       }
     }
   }
@@ -133,10 +128,10 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
 export async function performRescheduleValidations(
   t: DBTransaction,
   input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
-  locale?: string
+  tErrors: ErrorsLabels
 ) {
   await acquireLocks(t, input.teacherId, input.studentId);
-  await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt, locale);
+  await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt, tErrors);
   await TeacherAvailabilityRepository.validateBookingAvailability(
     input.teacherId,
     input.scheduledStartAt,
@@ -152,7 +147,7 @@ export async function performRescheduleValidations(
       endTime: input.scheduledEndAt,
       meetingJoinUrl: input.meetingJoinUrl,
     },
-    locale
+    tErrors
   );
 }
 
@@ -161,7 +156,7 @@ export async function createRescheduledSuccessor(
   existing: Types.ClassInstanceEntity,
   offsetDays: number,
   remarks: string,
-  locale?: string
+  tErrors: ErrorsLabels
 ): Promise<Types.ClassInstanceEntity> {
   const offsetMs = offsetDays * 24 * 60 * 60 * 1000;
   const newScheduledStartAt = new Date(existing.scheduledStartAt.getTime() + offsetMs);
@@ -171,6 +166,7 @@ export async function createRescheduledSuccessor(
 
   const effectiveMeeting = await EffectiveMeetingService.resolveForNewBooking(existing.teacherId, {
     recurringScheduleId: existing.recurringScheduleId,
+    tErrors,
     tx: t,
   });
   const successorInput = {
@@ -198,7 +194,7 @@ export async function createRescheduledSuccessor(
     meetingJoinUrl: effectiveMeeting.joinUrl,
   };
 
-  await performRescheduleValidations(t, successorWithMeeting, locale);
+  await performRescheduleValidations(t, successorWithMeeting, tErrors);
 
   const [successor] = await t
     .insert(classInstances)

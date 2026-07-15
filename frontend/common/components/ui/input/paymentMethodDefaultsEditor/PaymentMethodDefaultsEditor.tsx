@@ -2,7 +2,6 @@
 
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodDisplay";
@@ -15,6 +14,7 @@ import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphq
 import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type PaymentMethodDefaultsEditorProps = {
   readonly methods: readonly PaymentMethodRow[];
@@ -60,8 +60,8 @@ export function PaymentMethodDefaultsEditor({
   successOpen = false,
   onSuccessCloseAction,
 }: PaymentMethodDefaultsEditorProps) {
-  const t = useTranslations("ui.paymentMethod");
-  const tDefaults = useTranslations("ui.paymentMethod.defaultsEditor");
+  const t = useAppTranslation("ui").paymentMethod;
+  const tDefaults = useAppTranslation("ui").paymentMethod.defaultsEditor;
   const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   const payinMethods = filterMethodsForDirection(methods, "payin");
@@ -81,7 +81,7 @@ export function PaymentMethodDefaultsEditor({
 
   return (
     <Stack spacing={2}>
-      <FieldWrapper label={tDefaults("payinDefault")}>
+      <FieldWrapper label={tDefaults.paynDefault}>
         <TextField
           select
           fullWidth
@@ -90,7 +90,7 @@ export function PaymentMethodDefaultsEditor({
           value={payinDefaultId ?? ""}
           onChange={event => onPayinDefaultChangeAction(event.target.value || null)}
         >
-          <MenuItem value="">{tDefaults("none")}</MenuItem>
+          <MenuItem value="">{tDefaults.none}</MenuItem>
           {payinMethods.map(method => (
             <MenuItem key={method.id} value={method.id}>
               {formatMethodLabel(method)}
@@ -99,7 +99,7 @@ export function PaymentMethodDefaultsEditor({
         </TextField>
       </FieldWrapper>
 
-      <FieldWrapper label={tDefaults("payoutDefault")}>
+      <FieldWrapper label={tDefaults.payoutDefault}>
         <TextField
           select
           fullWidth
@@ -108,7 +108,7 @@ export function PaymentMethodDefaultsEditor({
           value={payoutDefaultId ?? ""}
           onChange={event => onPayoutDefaultChangeAction(event.target.value || null)}
         >
-          <MenuItem value="">{tDefaults("none")}</MenuItem>
+          <MenuItem value="">{tDefaults.none}</MenuItem>
           {payoutMethods.map(method => (
             <MenuItem key={method.id} value={method.id}>
               {formatMethodLabel(method)}
@@ -118,10 +118,10 @@ export function PaymentMethodDefaultsEditor({
       </FieldWrapper>
 
       {onInstructionsSaveAction ? (
-        <FieldWrapper label={tDefaults("instructions")}>
+        <FieldWrapper label={tDefaults.instructions}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Typography sx={{ flex: 1, typography: "bodyMd", color: "text.secondary" }}>
-              {Object.values(instructions).find(value => value.trim() !== "") ?? tDefaults("none")}
+              {Object.values(instructions).find(value => value.trim() !== "") ?? tDefaults.none}
             </Typography>
             <Button
               variant="outlined"
@@ -130,13 +130,13 @@ export function PaymentMethodDefaultsEditor({
               startIcon={<EditOutlinedIcon />}
               onClick={() => setInstructionsOpen(true)}
             >
-              {tDefaults("editInstructions")}
+              {tDefaults.editInstructions}
             </Button>
           </Box>
           <LocalizedStringDrawer
             open={instructionsOpen}
             value={instructions}
-            title={tDefaults("editInstructions")}
+            title={tDefaults.editInstructions}
             multiline
             onSaveAction={next => {
               onInstructionsSaveAction(next);
@@ -148,7 +148,7 @@ export function PaymentMethodDefaultsEditor({
       ) : null}
 
       {onDisplayCurrencyChangeAction ? (
-        <FieldWrapper label={tDefaults("displayCurrency")}>
+        <FieldWrapper label={tDefaults.displayCurrency}>
           <CurrencySelect
             currency={displayCurrency ?? null}
             setCurrencyAction={onDisplayCurrencyChangeAction}
@@ -175,14 +175,14 @@ export function PaymentMethodDefaultsEditor({
             >
               <Typography sx={{ flex: 1, typography: "bodyMd" }}>{formatMethodLabel(method)}</Typography>
               {method.isDefault ? (
-                <StatusBadge category="paymentMethod" status="active" label={t("display.defaultBadge")} size="small" />
+                <StatusBadge category="paymentMethod" status="active" label={t.display.defaultBadge} size="small" />
               ) : null}
             </Box>
           ))}
         </Stack>
       ) : null}
 
-      <FormSuccessSnackbar open={successOpen} message={tDefaults("saved")} onClose={() => onSuccessCloseAction?.()} />
+      <FormSuccessSnackbar open={successOpen} message={tDefaults.saved} onClose={() => onSuccessCloseAction?.()} />
     </Stack>
   );
 }

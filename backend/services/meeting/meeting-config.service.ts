@@ -3,7 +3,6 @@ import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-me
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { buildMaskedMeetingConfig, buildMaskedMeetingConfigs } from "@/backend/services/meeting/meeting-config-mask";
@@ -17,12 +16,13 @@ import type {
   UserMeetingConfigSelectType,
   UserMeetingConfigSubmitInput,
 } from "@/backend/types/meeting/meeting-config.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace MeetingConfigService {
   async function assertCanManageUser(
     actorUserId: string,
     targetUserId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<{ isAdminScope: boolean }> {
     if (actorUserId === targetUserId) {
       const canManageOwn = await PermissionsService.hasPermission(
@@ -30,8 +30,7 @@ export namespace MeetingConfigService {
         AppPermission.MEETING_CONFIGS_MANAGE_OWN
       );
       if (!canManageOwn) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorizedAction"));
+        throw new Error(tErrors.unauthorizedAction);
       }
       return { isAdminScope: false };
     }
@@ -41,8 +40,7 @@ export namespace MeetingConfigService {
       AppPermission.MEETING_CONFIGS_MANAGE_OTHER
     );
     if (!canManageOther) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
     return { isAdminScope: true };
   }
@@ -50,47 +48,46 @@ export namespace MeetingConfigService {
   async function assertCanAccessConfig(
     actorUserId: string,
     configUserId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<{ isAdminScope: boolean }> {
-    return assertCanManageUser(actorUserId, configUserId, locale);
+    return assertCanManageUser(actorUserId, configUserId, tErrors);
   }
 
   export async function listUserMeetingConfigs(
     actorUserId: string,
     userId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<UserMeetingConfigReturnType[]> {
-    const { isAdminScope } = await assertCanManageUser(actorUserId, userId, locale);
+    const { isAdminScope } = await assertCanManageUser(actorUserId, userId, tErrors);
     const rows = await UserMeetingConfigRepository.listByUserId(userId);
     return buildMaskedMeetingConfigs(rows, isAdminScope);
   }
 
-  async function loadConfigForActor(actorUserId: string, id: string, locale?: string) {
-    const config = await UserMeetingConfigRepository.getByIdOrThrow(id, undefined, locale);
-    const access = await assertCanAccessConfig(actorUserId, config.userId, locale);
+  async function loadConfigForActor(actorUserId: string, id: string, tErrors: ErrorsLabels) {
+    const config = await UserMeetingConfigRepository.getByIdOrThrow(id, tErrors);
+    const access = await assertCanAccessConfig(actorUserId, config.userId, tErrors);
     return { config, ...access };
   }
 
   export async function getUserMeetingConfig(
     actorUserId: string,
     id: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<UserMeetingConfigReturnType> {
-    const { config, isAdminScope } = await loadConfigForActor(actorUserId, id, locale);
+    const { config, isAdminScope } = await loadConfigForActor(actorUserId, id, tErrors);
     return buildMaskedMeetingConfig(config, isAdminScope);
   }
 
   export async function createUserMeetingConfig(
     actorUserId: string,
     input: UserMeetingConfigSubmitInput,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<UserMeetingConfigReturnType> {
-    const { isAdminScope } = await assertCanManageUser(actorUserId, input.userId, locale);
-    const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, undefined, locale);
+    const { isAdminScope } = await assertCanManageUser(actorUserId, input.userId, tErrors);
+    const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, tErrors);
 
     if (!provider.isActive) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("meetingProviderInactive"));
+      throw new Error(tErrors.meetingProviderInactive);
     }
 
     const details = parseMeetingConfigDetails(provider, input.details);
@@ -104,8 +101,7 @@ export namespace MeetingConfigService {
         details,
         encryptedSecret: input.password ?? null,
       },
-      undefined,
-      locale
+      tErrors
     );
 
     return buildMaskedMeetingConfig(created, isAdminScope);
@@ -115,17 +111,16 @@ export namespace MeetingConfigService {
     actorUserId: string,
     id: string,
     input: UpdateUserMeetingConfigInput,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<UserMeetingConfigReturnType> {
-    const existing = await UserMeetingConfigRepository.getByIdOrThrow(id, undefined, locale);
-    const { isAdminScope } = await assertCanAccessConfig(actorUserId, existing.userId, locale);
+    const existing = await UserMeetingConfigRepository.getByIdOrThrow(id, tErrors);
+    const { isAdminScope } = await assertCanAccessConfig(actorUserId, existing.userId, tErrors);
 
     const nextProviderId = input.providerId ?? existing.providerId;
-    const provider = await MeetingProviderRepository.getByIdOrThrow(nextProviderId, undefined, locale);
+    const provider = await MeetingProviderRepository.getByIdOrThrow(nextProviderId, tErrors);
 
     if (input.providerId && input.providerId !== existing.providerId && !provider.isActive) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("meetingProviderInactive"));
+      throw new Error(tErrors.meetingProviderInactive);
     }
 
     const detailsSource = input.details ?? existing.details;
@@ -143,8 +138,7 @@ export namespace MeetingConfigService {
         details,
         encryptedSecret: input.password !== undefined ? input.password : undefined,
       },
-      undefined,
-      locale
+      tErrors
     );
 
     return buildMaskedMeetingConfig(updated, isAdminScope);
@@ -153,21 +147,21 @@ export namespace MeetingConfigService {
   export async function deleteUserMeetingConfig(
     actorUserId: string,
     id: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<{ id: string }> {
-    const existing = await UserMeetingConfigRepository.getByIdOrThrow(id, undefined, locale);
-    await assertCanAccessConfig(actorUserId, existing.userId, locale);
-    await UserMeetingConfigRepository.deleteConfig(id, undefined, locale);
+    const existing = await UserMeetingConfigRepository.getByIdOrThrow(id, tErrors);
+    await assertCanAccessConfig(actorUserId, existing.userId, tErrors);
+    await UserMeetingConfigRepository.deleteConfig(id, tErrors);
     return { id };
   }
 
   export async function setDefaultMeetingConfig(
     actorUserId: string,
     id: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<UserMeetingConfigReturnType> {
-    const { isAdminScope } = await loadConfigForActor(actorUserId, id, locale);
-    const updated = await UserMeetingConfigRepository.setDefault(id, undefined, locale);
+    const { isAdminScope } = await loadConfigForActor(actorUserId, id, tErrors);
+    const updated = await UserMeetingConfigRepository.setDefault(id, tErrors);
     return buildMaskedMeetingConfig(updated, isAdminScope);
   }
 
@@ -175,13 +169,14 @@ export namespace MeetingConfigService {
 
   export async function upsertManyUserMeetingConfigs(
     inputs: readonly UserMeetingConfigSubmitInput[],
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<UserMeetingConfigReturnType[]> {
     if (inputs.length === 0) return [];
 
     const results: UserMeetingConfigSelectType[] = [];
     for (const input of inputs) {
-      const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, tx);
+      const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, tErrors, tx);
       const details = parseMeetingConfigDetails(provider, input.details);
       const upserted = await UserMeetingConfigRepository.upsertMany(
         [
@@ -194,6 +189,7 @@ export namespace MeetingConfigService {
             encryptedSecret: input.password ?? null,
           },
         ],
+        tErrors,
         tx
       );
       results.push(...upserted);
@@ -204,13 +200,14 @@ export namespace MeetingConfigService {
 
   export async function upsertManyClassMeetingConfigs(
     inputs: readonly ClassMeetingConfigInsertType[],
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType[]> {
     if (inputs.length === 0) return [];
 
     const prepared: ClassMeetingConfigInsertType[] = [];
     for (const input of inputs) {
-      const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, tx);
+      const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, tErrors, tx);
       prepared.push({
         ...input,
         details: parseMeetingConfigDetails(provider, input.details),
@@ -218,6 +215,6 @@ export namespace MeetingConfigService {
       });
     }
 
-    return ClassMeetingConfigRepository.upsertMany(prepared, tx);
+    return ClassMeetingConfigRepository.upsertMany(prepared, tErrors, tx);
   }
 }

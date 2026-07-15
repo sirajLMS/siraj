@@ -1,13 +1,13 @@
 "use client";
 
 import { Box, Chip, InputBase, Paper, styled, Typography, useTheme } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type React from "react";
 import { type KeyboardEvent, type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   useTagInputDeletion,
   useTagInputEditing,
 } from "@/frontend/common/components/ui/input/tagInput/useTagInputEditing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type TagInputProps = {
   readonly label?: string;
@@ -116,14 +116,14 @@ function TagInputChipList({
 }
 
 export function TagInput({ label, placeholder, onChange, initialTags = [] }: TagInputProps) {
-  const t = useTranslations("ui.tagInput");
+  const t = useAppTranslation("ui").tagInput;
   const [tags, setTags] = useState<string[]>(initialTags);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const theme = useTheme();
-  const resolvedLabel = label ?? t("label");
-  const resolvedPlaceholder = placeholder ?? t("placeholder");
+  const resolvedLabel = label ?? t.label;
+  const resolvedPlaceholder = placeholder ?? t.placeholder;
 
   const editing = useTagInputEditing((index, value) => {
     setTags(prevTags => {

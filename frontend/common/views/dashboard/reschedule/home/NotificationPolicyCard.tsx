@@ -2,10 +2,10 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function NotificationPolicyCard() {
-  const t = useTranslations("dashboard.rescheduleForm.notificationPolicy");
+  const t = useAppTranslation("dashboard.rescheduleForm").notificationPolicy;
 
   return (
     <Box
@@ -21,10 +21,10 @@ export function NotificationPolicyCard() {
       <InfoOutlined sx={theme => ({ color: theme.palette.secondary.main })} />
       <Box>
         <Typography variant="labelMd" sx={theme => ({ fontWeight: 700, color: theme.palette.secondary.main, mb: 0.5 })}>
-          {t("title")}
+          {t.title}
         </Typography>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t("description")}
+          {t.description}
         </Typography>
       </Box>
     </Box>

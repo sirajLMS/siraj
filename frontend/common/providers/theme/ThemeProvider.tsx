@@ -3,10 +3,10 @@
 import { CssBaseline } from "@mui/material";
 import type { PaletteMode } from "@mui/material/styles";
 import { ThemeProvider, useColorScheme } from "@mui/material/styles";
-import { useLocale } from "next-intl";
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
 import { setThemePreference } from "@/frontend/common/lib/theme-detection";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { createAppCssVarsTheme } from "@/frontend/common/providers/theme/theme";
 import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";
 
@@ -27,7 +27,7 @@ interface AppThemeProviderProps {
 function ColorSchemeStateBridge({ children }: { readonly children: ReactNode }) {
   const { mode: schemeMode, setMode } = useColorScheme();
   const [isThemeChanging, setIsThemeChanging] = useState<boolean>(false);
-  const locale = useLocale();
+  const locale = useAppLocale();
   const direction = locale === "ar" ? "rtl" : "ltr";
 
   // `useColorScheme` returns `undefined` on first render (SSR-safe); default
@@ -82,7 +82,7 @@ function ColorSchemeStateBridge({ children }: { readonly children: ReactNode }) 
  * hydration flash.
  */
 export function AppThemeProvider({ children, initialTheme }: AppThemeProviderProps) {
-  const locale = useLocale();
+  const locale = useAppLocale();
   const direction = locale === "ar" ? "rtl" : "ltr";
   const defaultMode: PaletteMode = initialTheme ?? "dark";
 

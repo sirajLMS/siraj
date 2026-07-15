@@ -29,7 +29,7 @@ export namespace StudentStatusService {
 
     const enrichedClasses = await Promise.all(
       classes.map(async c => {
-        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(c.id);
+        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(c.id, tErrors);
         return {
           ...c,
           executionState: parseClassExecutionState(c.executionState),

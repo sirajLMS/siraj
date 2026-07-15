@@ -1,10 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import type { TeacherViewData } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type TeacherAccountFormFields = {
   name: string;
@@ -30,7 +30,7 @@ type AccountSectionProps =
     };
 
 export function AccountSection(props: AccountSectionProps) {
-  const t = useTranslations("profile.teacher");
+  const t = useAppTranslation("profile").teacher;
 
   if (props.mode === "edit") {
     return (
@@ -39,10 +39,10 @@ export function AccountSection(props: AccountSectionProps) {
         scope={props.scope}
         name={props.teacherData.name}
         avatarUrl={props.avatarUrl}
-        sectionTitle={t("sections.account")}
-        nameLabel={t("fields.fullName")}
-        emailLabel={t("fields.primaryEmail")}
-        currencyLabel={t("fields.displayCurrency")}
+        sectionTitle={t.sections.account}
+        nameLabel={t.fields.fullName}
+        emailLabel={t.fields.primaryEmail}
+        currencyLabel={t.fields.displayCurrency}
         register={props.register}
         control={props.control}
       />
@@ -57,10 +57,10 @@ export function AccountSection(props: AccountSectionProps) {
       email={props.teacherData.email}
       avatarUrl={props.avatarUrl}
       displayCurrency={props.displayCurrency}
-      sectionTitle={t("sections.account")}
-      nameLabel={t("fields.fullName")}
-      emailLabel={t("fields.primaryEmail")}
-      currencyLabel={t("fields.displayCurrency")}
+      sectionTitle={t.sections.account}
+      nameLabel={t.fields.fullName}
+      emailLabel={t.fields.primaryEmail}
+      currencyLabel={t.fields.displayCurrency}
     />
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { Alert, Box, Button } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -13,14 +12,15 @@ import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboar
 import { TeacherOnboardingView } from "@/frontend/common/views/dashboard/teachers/onboarding/TeacherOnboardingView";
 import { useTeacherOnboardingLabels } from "@/frontend/common/views/dashboard/teachers/onboarding/useTeacherOnboardingLabels";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function TeacherOnboardingContainer() {
   const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateTeacherOnboarding();
   const createdTeacher = useTeacherOnboardingStore(state => state.result);
   const [showSuccess, setShowSuccess] = useState(false);
   const labels = useTeacherOnboardingLabels();
-  const tMeeting = useTranslations("ui.meetingConfig.manager");
-  const tJoin = useTranslations("ui.meetingConfig.join");
+  const tMeeting = useAppTranslation("ui.meetingConfig.manager");
+  const tJoin = useAppTranslation("ui.meetingConfig.join");
   const router = useRouter();
 
   const meetingSetupHref = createdTeacher
@@ -51,12 +51,12 @@ export function TeacherOnboardingContainer() {
             action={
               meetingSetupHref ? (
                 <Button color="inherit" size="small" onClick={() => router.push(meetingSetupHref)}>
-                  {tJoin("setupLink")}
+                  {tJoin.setupLink}
                 </Button>
               ) : undefined
             }
           >
-            {tMeeting("postCreateFailure")}
+            {tMeeting.postCreateFailure}
           </Alert>
         </Box>
       ) : null}

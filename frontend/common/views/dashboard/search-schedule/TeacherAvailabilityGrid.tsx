@@ -3,7 +3,6 @@
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import { addDays, differenceInCalendarDays, format, parse } from "date-fns";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
@@ -12,6 +11,7 @@ import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import type { SearchScheduleResultItem } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleView";
 import { TeacherAvailabilityDayPill } from "@/frontend/common/views/dashboard/search-schedule/TeacherAvailabilityDayPill";
 import { TeacherAvailabilityMonthDrawer } from "@/frontend/common/views/dashboard/search-schedule/TeacherAvailabilityMonthDrawer";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface TeacherAvailabilityGridProps {
   readonly teacher: SearchScheduleResultItem;
@@ -28,7 +28,7 @@ function buildDateColumns(fromDate: string, toDate: string): string[] {
 }
 
 export function TeacherAvailabilityGrid({ teacher, fromDate, toDate }: Readonly<TeacherAvailabilityGridProps>) {
-  const t = useTranslations("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const dateColumns = useMemo(() => buildDateColumns(fromDate, toDate), [fromDate, toDate]);
@@ -72,19 +72,19 @@ export function TeacherAvailabilityGrid({ teacher, fromDate, toDate }: Readonly<
             {teacher.name ?? ""}
           </Typography>
           {teacher.gender ? (
-            <Chip label={teacher.gender === "MALE" ? t("male") : t("female")} size="small" variant="outlined" />
+            <Chip label={teacher.gender === "MALE" ? t.male : t.female} size="small" variant="outlined" />
           ) : null}
           <Chip
-            label={t("availableDaysCount", { count: teacher.availableDaysCount ?? 0 })}
+            label={t.availableDaysCount(teacher.availableDaysCount ?? 0)}
             size="small"
             color="primary"
             variant="outlined"
           />
           {teacher.timezone ? <TimezoneDisplay timezone={teacher.timezone} typographyVariant="bodyMd" /> : null}
           <Box sx={{ flexGrow: 1 }} />
-          <Tooltip title={t("viewMonthSchedule")}>
+          <Tooltip title={t.viewMonthSchedule}>
             <IconButton
-              aria-label={t("viewMonthSchedule")}
+              aria-label={t.viewMonthSchedule}
               size="small"
               onClick={() => setDrawerOpen(true)}
               sx={theme => ({ color: theme.palette.primary.main })}

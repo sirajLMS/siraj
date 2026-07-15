@@ -15,13 +15,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import type { LocalizedStringDrawerProps } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringDrawer";
 import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 type TranslationFn = (key: string, params?: Record<string, string>) => string;
@@ -232,8 +232,8 @@ export const LocalizedStringDrawerDesktop: React.FC<LocalizedStringDrawerProps> 
   dismissAction = "save",
   anchor = "right",
 }) => {
-  const t = useTranslations("ui.localizedString");
-  const uiLocale = useLocale();
+  const t = useAppTranslation("ui.localizedString");
+  const uiLocale = useAppLocale();
   const [draft, setDraft] = useState<LocalizedString>(value);
 
   const showFooter = useMemo(() => showActions ?? !autosave, [showActions, autosave]);

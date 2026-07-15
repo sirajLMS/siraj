@@ -3,7 +3,6 @@
 import { CalendarTodayOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { Grid, InputAdornment } from "@mui/material";
 import { format, isValid } from "date-fns";
-import { useTranslations } from "next-intl";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { AppDatePicker, AppTimePicker, FieldWrapper, timeInputStandardSx } from "@/frontend/common/components/ui/form";
@@ -14,6 +13,7 @@ import {
   RESCHEDULE_DATE_FORMAT,
   RESCHEDULE_TIME_FORMAT,
 } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface Props {
   readonly control: Control<RescheduleFormData>;
@@ -21,13 +21,13 @@ interface Props {
 }
 
 export function RescheduleDateTimeSection({ control, errors }: Readonly<Props>) {
-  const t = useTranslations("dashboard.rescheduleForm");
+  const t = useAppTranslation("dashboard.rescheduleForm");
 
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, md: 6 }}>
         <FieldWrapper
-          label={t("fields.newDate")}
+          label={t.fields.newDate}
           required
           error={errors.newDate ? t(`validation.${errors.newDate.message}`) : undefined}
         >
@@ -66,7 +66,7 @@ export function RescheduleDateTimeSection({ control, errors }: Readonly<Props>) 
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <FieldWrapper
-          label={t("fields.newTime")}
+          label={t.fields.newTime}
           required
           error={errors.newTime ? t(`validation.${errors.newTime.message}`) : undefined}
         >

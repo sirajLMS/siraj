@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import {
   AppPermission,
@@ -21,8 +20,7 @@ import type {
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import { useRouter } from "@/shared/i18n/routing";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-
-type TranslationFn = ReturnType<typeof useTranslations<"dashboard.scheduleAlerts">>;
+import { useAppTranslation } from "@/shared/locale/client";
 
 function getTodayString() {
   const today = new Date();
@@ -100,45 +98,45 @@ function mapScheduleRowsToClasses(rows: ScheduleRow[] | null | undefined): Acade
   });
 }
 
-function buildScheduleLabels(t: TranslationFn) {
+function buildScheduleLabels(t: ReturnType<typeof useAppTranslation<"dashboard.core.scheduleAlerts">>) {
   return {
-    pageTitle: t("pageTitle"),
-    pageSubtitle: t("pageSubtitle"),
+    pageTitle: t.pageTitle,
+    pageSubtitle: t.pageSubtitle,
     alertMessages: {
-      leave_quota_exceeded: t("alerts.leaveQuotaExceeded"),
-      missed_class_time: t("alerts.missedClassTime"),
+      leave_quota_exceeded: t.alerts.leaveQuotaExceeded,
+      missed_class_time: t.alerts.missedClassTime,
     },
-    reportTitle: t("report.title"),
-    reportDescription: t("report.description"),
-    reportDescriptionMobile: t("report.descriptionMobile"),
-    downloadPdf: t("report.downloadPdf"),
-    sectionTitle: t("section.title"),
-    sectionSubtitle: t("section.subtitle"),
-    filter: t("actions.filter"),
-    export: t("actions.export"),
-    className: t("table.className"),
-    instructor: t("table.instructor"),
-    time: t("table.time"),
-    room: t("table.room"),
-    status: t("table.status"),
-    joinSession: t("actions.joinSession"),
-    leaveClass: t("actions.leaveClass"),
-    leaveDisabledReason: t("actions.leaveDisabledReason"),
-    viewClassAudit: t("actions.viewClassAudit"),
-    contactAdmin: t("actions.contactAdmin"),
-    showingOf: t.raw("showingOf") as string,
-    active: t("sessionStatus.active"),
-    upcoming: t("sessionStatus.upcoming"),
-    missed: t("sessionStatus.missed"),
-    hold: t("sessionStatus.hold"),
-    endOfSchedule: t("endOfSchedule"),
-    noEntries: t("noEntries"),
-    loading: t("loading"),
+    reportTitle: t.report.title,
+    reportDescription: t.report.description,
+    reportDescriptionMobile: t.report.descriptionMobile,
+    downloadPdf: t.report.downloadPdf,
+    sectionTitle: t.section.title,
+    sectionSubtitle: t.section.subtitle,
+    filter: t.actions.filter,
+    export: t.actions.export,
+    className: t.table.className,
+    instructor: t.table.instructor,
+    time: t.table.time,
+    room: t.table.room,
+    status: t.table.status,
+    joinSession: t.actions.joinSession,
+    leaveClass: t.actions.leaveClass,
+    leaveDisabledReason: t.actions.leaveDisabledReason,
+    viewClassAudit: t.actions.viewClassAudit,
+    contactAdmin: t.actions.contactAdmin,
+    showingOf: t.showingOf as unknown as string,
+    active: t.sessionStatus.active,
+    upcoming: t.sessionStatus.upcoming,
+    missed: t.sessionStatus.missed,
+    hold: t.sessionStatus.hold,
+    endOfSchedule: t.endOfSchedule,
+    noEntries: t.noEntries,
+    loading: t.loading,
   };
 }
 
 export function ScheduleAlertsContainer() {
-  const t = useTranslations("dashboard.scheduleAlerts");
+  const t = useAppTranslation("dashboard.core.scheduleAlerts");
   const router = useRouter();
 
   const page = useScheduleAlertsStore(state => state.page);
@@ -162,8 +160,8 @@ export function ScheduleAlertsContainer() {
     metrics.map(metric => [
       metric.key,
       {
-        label: t(metric.labelKey.replace("dashboard.scheduleAlerts.", "")),
-        subLabel: t(metric.subLabelKey.replace("dashboard.scheduleAlerts.", "")),
+        label: t[metric.labelKey.replace("dashboard.scheduleAlerts.", "") as keyof typeof t],
+        subLabel: t[metric.subLabelKey.replace("dashboard.scheduleAlerts.", "") as keyof typeof t],
       },
     ])
   );

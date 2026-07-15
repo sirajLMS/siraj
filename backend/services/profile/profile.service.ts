@@ -6,7 +6,7 @@ import {
   UserRepository,
 } from "@/backend/db";
 import { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import {
   ManagerProfileService,
   ParentPortalService,
@@ -36,6 +36,7 @@ import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meetin
 import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
 import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
 import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 type ResolvedRoleIds = {
   readonly audience: ProfileAudience;
@@ -257,8 +258,9 @@ export namespace ProfileService {
     }
 
     if (scope === ProfileScope.OWN) {
+      const tErrors = (await getBackendTranslations({ locale, namespace: "errors" })) as unknown as ErrorsLabels;
       return {
-        teacherOwnProfile: await TeacherPortalService.getOwnProfile(targetUserId, locale),
+        teacherOwnProfile: await TeacherPortalService.getOwnProfile(targetUserId, tErrors),
         teacherAdminProfile: null,
         assignedStudents: null,
       };
@@ -410,7 +412,8 @@ export namespace ProfileService {
     locale?: string
   ): Promise<UserMeetingConfigReturnType[] | null> {
     try {
-      return await MeetingConfigService.listUserMeetingConfigs(actorUserId, targetUserId, locale);
+      const tErrors = (await getBackendTranslations({ locale, namespace: "errors" })) as unknown as ErrorsLabels;
+      return await MeetingConfigService.listUserMeetingConfigs(actorUserId, targetUserId, tErrors);
     } catch {
       return null;
     }
@@ -561,7 +564,8 @@ export namespace ProfileService {
     }
 
     if (scope === ProfileScope.OWN) {
-      await TeacherPortalService.updateOwnProfile(actorUserId, roleIds.teacherId, teacherInput, locale);
+      const tErrors = (await getBackendTranslations({ locale, namespace: "errors" })) as unknown as ErrorsLabels;
+      await TeacherPortalService.updateOwnProfile(actorUserId, roleIds.teacherId, teacherInput, tErrors);
       return;
     }
 

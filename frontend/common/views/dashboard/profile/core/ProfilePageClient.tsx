@@ -3,7 +3,6 @@
 import { useQuery } from "@apollo/client/react";
 import { Stack } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
@@ -17,6 +16,7 @@ import { ParentAccountActions } from "@/frontend/common/views/dashboard/profile/
 import { ParentProfileContainer } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileContainer";
 import { StaffProfileContainer } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileContainer";
 import { TeacherProfileContainer } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileContainer";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type ProfilePageClientProps = {
   readonly scope: ProfileScope;
@@ -26,7 +26,7 @@ export type ProfilePageClientProps = {
 };
 
 export function ProfilePageClient({ scope, mode, audience, targetUserId }: ProfilePageClientProps) {
-  const t = useTranslations("profile");
+  const t = useAppTranslation("profile");
   const searchParams = useSearchParams();
   const [currentTab, setCurrentTab] = useState(searchParams.get("tab") ?? "");
 
@@ -55,10 +55,11 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
 
   const activeTab = currentTab || "profile";
 
+  // TODO: i18n dynamic lookup - audience is a bounded union matching ProfileRoleLabels keys
   const roleLabel =
     audience === ProfileAudience.Staff
       ? (profile?.staffProfile?.roleName ?? profile?.staffProfile?.roleSlug ?? undefined)
-      : t(`role.${audience.toLowerCase()}`);
+      : t.role[audience.toLowerCase() as keyof typeof t.role];
 
   const showParentAccountActions =
     audience === ProfileAudience.Parent && scope === ProfileScope.Other && mode === ProfileMode.View;
@@ -110,7 +111,7 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
 
   if (error) {
     return (
-      <ProfileShell {...shellProps} error={t("errors.failedToLoad")}>
+      <ProfileShell {...shellProps} error={t.errors.failedToLoad}>
         {null}
       </ProfileShell>
     );
@@ -118,7 +119,7 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
 
   if (!profile) {
     return (
-      <ProfileShell {...shellProps} error={t("errors.notFound")}>
+      <ProfileShell {...shellProps} error={t.errors.notFound}>
         {null}
       </ProfileShell>
     );

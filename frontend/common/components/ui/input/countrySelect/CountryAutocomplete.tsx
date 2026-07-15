@@ -4,7 +4,6 @@ import Autocomplete, { type AutocompleteRenderInputParams } from "@mui/material/
 import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
@@ -17,6 +16,8 @@ import {
   getCountryAutocompletePopperSlotProps,
 } from "@/frontend/common/components/ui/input/countrySelect/countryAutocompletePopper";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type CountryAutocompleteProps = {
   readonly country?: CountryType;
@@ -146,8 +147,8 @@ export const CountryAutocomplete: React.FC<CountryAutocompleteProps> = ({
   disablePortal = false,
   listAttached = false,
 }: CountryAutocompleteProps): React.ReactNode => {
-  const t = useTranslations("ui.countrySelect");
-  const locale = useLocale();
+  const t = useAppTranslation("ui.countrySelect");
+  const locale = useAppLocale();
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;
 
@@ -158,7 +159,7 @@ export const CountryAutocomplete: React.FC<CountryAutocompleteProps> = ({
 
   const showRequiredError = Boolean(required) && !country;
   const showError = Boolean(error) || showRequiredError;
-  const resolvedHelperText = helperText ?? (showRequiredError ? t("required") : undefined);
+  const resolvedHelperText = helperText ?? (showRequiredError ? t.required : undefined);
 
   return (
     <Autocomplete
@@ -212,7 +213,7 @@ export const CountryAutocomplete: React.FC<CountryAutocompleteProps> = ({
           params,
           listAttached,
           label,
-          selectCountryLabel: t("selectCountry"),
+          selectCountryLabel: t.selectCountry,
           required,
           showError,
           helperText: resolvedHelperText,

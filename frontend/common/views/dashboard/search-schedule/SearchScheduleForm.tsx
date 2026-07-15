@@ -2,7 +2,6 @@
 
 import { FilterListOutlined, SearchOutlined } from "@mui/icons-material";
 import { Badge, Box, Button, CircularProgress, IconButton, Tooltip } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { type SyntheticEvent, useState } from "react";
 import { AppDateRangePicker, AppTimeRangePicker } from "@/frontend/common/components/ui/form";
 import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
@@ -10,6 +9,7 @@ import { SearchScheduleFilterDrawer } from "@/frontend/common/views/dashboard/se
 import { SearchScheduleSortMenu } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleSortMenu";
 import { SearchScheduleTeacherAutocomplete } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleTeacherAutocomplete";
 import { countActiveDrawerFilters } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface SearchScheduleFormProps {
   readonly draft: SearchScheduleDraftFilters;
@@ -19,7 +19,7 @@ interface SearchScheduleFormProps {
 }
 
 export function SearchScheduleForm({ draft, isSearching, onDraftChange, onSearch }: Readonly<SearchScheduleFormProps>) {
-  const t = useTranslations("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const activeFilterCount = countActiveDrawerFilters(draft);
 
@@ -56,9 +56,9 @@ export function SearchScheduleForm({ draft, isSearching, onDraftChange, onSearch
       >
         <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 200px" }, minWidth: { sm: 200 } }}>
           <AppDateRangePicker
-            label={t("dateRange")}
-            fromLabel={t("fromDate")}
-            toLabel={t("toDate")}
+            label={t.dateRange}
+            fromLabel={t.fromDate}
+            toLabel={t.toDate}
             fromDate={draft.fromDate}
             toDate={draft.toDate}
             onChange={handleDateRangeChange}
@@ -67,9 +67,9 @@ export function SearchScheduleForm({ draft, isSearching, onDraftChange, onSearch
 
         <Box sx={{ flex: { xs: "1 1 100%", sm: "0 1 160px" }, minWidth: { sm: 140 } }}>
           <AppTimeRangePicker
-            label={t("timeRange")}
-            fromLabel={t("fromTime")}
-            toLabel={t("toTime")}
+            label={t.timeRange}
+            fromLabel={t.fromTime}
+            toLabel={t.toTime}
             fromTime={draft.fromTime}
             toTime={draft.toTime}
             onChange={handleTimeRangeChange}
@@ -83,8 +83,8 @@ export function SearchScheduleForm({ draft, isSearching, onDraftChange, onSearch
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: "0 0 auto" }}>
           <SearchScheduleSortMenu sortBy={draft.sortBy} onSortChange={sortBy => onDraftChange({ sortBy })} />
 
-          <Tooltip title={t("filters")}>
-            <IconButton aria-label={t("filters")} size="small" onClick={() => setDrawerOpen(true)}>
+          <Tooltip title={t.filters}>
+            <IconButton aria-label={t.filters} size="small" onClick={() => setDrawerOpen(true)}>
               <Badge badgeContent={activeFilterCount} color="primary" invisible={activeFilterCount === 0}>
                 <FilterListOutlined fontSize="small" />
               </Badge>
@@ -98,7 +98,7 @@ export function SearchScheduleForm({ draft, isSearching, onDraftChange, onSearch
             disabled={isSearching}
             startIcon={isSearching ? <CircularProgress size={16} color="inherit" /> : <SearchOutlined />}
           >
-            {t("searchBtn")}
+            {t.searchBtn}
           </Button>
         </Box>
       </Box>

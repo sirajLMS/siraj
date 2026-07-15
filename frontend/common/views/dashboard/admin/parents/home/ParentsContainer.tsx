@@ -2,7 +2,6 @@
 
 import { useQuery } from "@apollo/client/react";
 import { BlockOutlined, EventBusyOutlined, TimerOutlined, VerifiedUserOutlined } from "@mui/icons-material";
-import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import {
@@ -21,6 +20,7 @@ import {
 import { ParentsView } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsView";
 import type { ParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function useDirectoryMetrics(
   directory: {
@@ -96,48 +96,48 @@ function useDirectoryRows(
   }));
 }
 
-function useDirectoryLabels(t: ReturnType<typeof useTranslations<"dashboard.parentsDirectory">>) {
+function useDirectoryLabels(t: ParentsDirectoryLabels) {
   const statusLabels = {
-    regular: t("metrics.regular"),
-    on_leave: t("metrics.onLeave"),
-    suspended: t("metrics.suspended"),
-    on_trial: t("metrics.onTrial"),
+    regular: t.metrics.regular,
+    on_leave: t.metrics.onLeave,
+    suspended: t.metrics.suspended,
+    on_trial: t.metrics.onTrial,
   } as Record<ParentLifecycleStatus, string>;
 
   const accountStatusLabels = {
-    activated: t("accountStatus.activated"),
-    deactivated: t("accountStatus.deactivated"),
+    activated: t.accountStatus.activated,
+    deactivated: t.accountStatus.deactivated,
   };
 
   return {
-    pageTitle: t("pageTitle"),
-    pageSubtitle: t("pageSubtitle"),
-    addParent: t("actions.addParent"),
-    records: t("records"),
-    searchPlaceholder: t("searchPlaceholder"),
-    filterLabel: t("actions.filter"),
-    clearFilters: t("actions.clearFilters"),
+    pageTitle: t.pageTitle,
+    pageSubtitle: t.pageSubtitle,
+    addParent: t.actions.addParent,
+    records: t.records,
+    searchPlaceholder: t.searchPlaceholder,
+    filterLabel: t.actions.filter,
+    clearFilters: t.actions.clearFilters,
     statusLabels,
     table: {
-      index: t("table.index"),
-      image: t("table.image"),
-      name: t("table.name"),
-      email: t("table.email"),
-      time: t("table.time"),
-      status: t("table.status"),
-      accountStatus: t("table.accountStatus"),
-      unpaidInvoices: t("table.unpaidInvoices"),
-      options: t("table.options"),
-      noEntries: t("noEntries"),
-      guardianOf: (name: string) => t("card.guardianOf", { name }),
+      index: t.table.index,
+      image: t.table.image,
+      name: t.table.name,
+      email: t.table.email,
+      time: t.table.time,
+      status: t.table.status,
+      accountStatus: t.table.accountStatus,
+      unpaidInvoices: t.table.unpaidInvoices,
+      options: t.table.options,
+      noEntries: t.noEntries,
+      guardianOf: (name: string) => t.table.guardianOf(name),
       statusLabels,
       accountStatusLabels,
-      manageLifecycle: t("actions.manageLifecycle"),
+      manageLifecycle: t.actions.manageLifecycle,
     },
     card: {
-      guardianOf: (name: string) => t("card.guardianOf", { name }),
-      unpaidCount: (count: number) => t("card.unpaidCount", { count }),
-      invoicesCleared: t("card.invoicesCleared"),
+      guardianOf: (name: string) => t.card.guardianOf(name),
+      unpaidCount: (count: number) => t.card.unpaidCount(count),
+      invoicesCleared: t.card.invoicesCleared,
       statusLabels,
       accountStatusLabels,
     },
@@ -145,7 +145,7 @@ function useDirectoryLabels(t: ReturnType<typeof useTranslations<"dashboard.pare
 }
 
 export function ParentsContainer() {
-  const t = useTranslations("dashboard.parentsDirectory");
+  const t = useAppTranslation("dashboard.parentsDirectory");
   const router = useRouter();
   const {
     searchQuery,

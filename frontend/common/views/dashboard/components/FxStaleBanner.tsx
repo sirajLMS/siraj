@@ -2,18 +2,20 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Alert, Button } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { Link, usePathname } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function FxStaleBanner(): React.ReactNode {
   const pathname = usePathname();
+  const _locale = useAppLocale();
   const displayCurrency = useUserStore(state => state.displayCurrency);
   const hasPermission = useUserStore(state => state.hasPermission);
   const isAdmin = hasPermission(AppPermission.BillingViewExchangeRates);
-  const t = useTranslations("dashboard.billing.fxStaleBanner");
+  const t = useAppTranslation("dashboard.billing").fxStaleBanner;
 
   const { data } = useQuery(fxSyncHealthQueryDocument, {
     fetchPolicy: "cache-and-network",
@@ -44,11 +46,11 @@ export function FxStaleBanner(): React.ReactNode {
           color="inherit"
           size="small"
         >
-          {isAdmin ? t("adminCta") : t("userCta")}
+          {isAdmin ? t.adminCta : t.userCta}
         </Button>
       }
     >
-      {isAdmin ? t("adminBody") : t("userBody")}
+      {isAdmin ? t.adminBody : t.userBody}
     </Alert>
   );
 }

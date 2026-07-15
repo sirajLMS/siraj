@@ -2,9 +2,9 @@
 
 import { Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type AssignedStudentsRow = {
   readonly id: string;
@@ -41,12 +41,12 @@ export function AssignedStudentsDataGrid({
   pageSize,
   onPaginationModelChange,
 }: AssignedStudentsDataGridProps) {
-  const t = useTranslations("profile.students");
+  const t = useAppTranslation("profile").students;
 
   const columns: GridColDef<AssignedStudentsRow>[] = [
     {
       field: "studentName",
-      headerName: t("columns.studentName"),
+      headerName: t.columns.studentName,
       flex: 1.5,
       minWidth: 260,
       renderCell: params => (
@@ -60,7 +60,7 @@ export function AssignedStudentsDataGrid({
     },
     {
       field: "parentName",
-      headerName: t("columns.parent"),
+      headerName: t.columns.parent,
       flex: 1.5,
       minWidth: 260,
       renderCell: params => (
@@ -77,13 +77,13 @@ export function AssignedStudentsDataGrid({
     },
     {
       field: "className",
-      headerName: t("columns.class"),
+      headerName: t.columns.class,
       flex: 1,
       minWidth: 160,
     },
     {
       field: "status",
-      headerName: t("columns.status"),
+      headerName: t.columns.status,
       flex: 1,
       minWidth: 130,
       renderCell: params => (
@@ -96,7 +96,7 @@ export function AssignedStudentsDataGrid({
     },
     {
       field: "hoursPerWeek",
-      headerName: t("columns.hoursPerWeek"),
+      headerName: t.columns.hoursPerWeek,
       flex: 1,
       minWidth: 160,
       renderCell: params => (
@@ -107,7 +107,7 @@ export function AssignedStudentsDataGrid({
     },
     {
       field: "classesRemaining",
-      headerName: t("columns.classes"),
+      headerName: t.columns.classes,
       flex: 1,
       minWidth: 140,
       renderCell: params => (
@@ -123,7 +123,7 @@ export function AssignedStudentsDataGrid({
       rows={rows}
       columns={columns}
       loading={loading}
-      emptyMessage={t("noRows")}
+      emptyMessage={t.noRows}
       paginationModel={{ page, pageSize }}
       onPaginationModelChange={onPaginationModelChange}
       pageSizeOptions={[5, 10, 25]}

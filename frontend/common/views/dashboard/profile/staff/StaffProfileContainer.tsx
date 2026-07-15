@@ -2,7 +2,6 @@
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Button } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   profileByUserIdQueryDocument,
@@ -28,6 +27,7 @@ import type {
   StaffOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type StaffProfileContainerProps = {
   readonly scope: ProfileScope;
@@ -95,7 +95,7 @@ function PermissionsTabContent({
   readonly hasProfile: boolean;
   readonly refetch: () => void;
 }) {
-  const tc = useTranslations("profile");
+  const tc = useAppTranslation("profile");
 
   if (loading && !hasProfile) {
     return <StaffProfileLoadingSkeleton />;
@@ -103,8 +103,8 @@ function PermissionsTabContent({
   if (error && !hasProfile) {
     return (
       <ProfileErrorAlert
-        message={tc("errors.failedToLoad")}
-        retryLabel={tc("actions.retry")}
+        message={tc.errors.failedToLoad}
+        retryLabel={tc.actions.retry}
         onRetry={() => void refetch()}
       />
     );
@@ -118,7 +118,7 @@ export function StaffProfileContainer({
   targetUserId,
   activeTab: _activeTab = "profile",
 }: StaffProfileContainerProps) {
-  const tc = useTranslations("profile");
+  const tc = useAppTranslation("profile");
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const router = useRouter();
@@ -185,8 +185,8 @@ export function StaffProfileContainer({
   if (error && !profile) {
     return (
       <ProfileErrorAlert
-        message={tc("errors.failedToLoad")}
-        retryLabel={tc("actions.retry")}
+        message={tc.errors.failedToLoad}
+        retryLabel={tc.actions.retry}
         onRetry={() => void refetch()}
       />
     );
@@ -197,7 +197,7 @@ export function StaffProfileContainer({
     if (!canViewIdentity) {
       return <ProfileRestrictedSection />;
     }
-    return <Alert severity="warning">{tc("errors.notFound")}</Alert>;
+    return <Alert severity="warning">{tc.errors.notFound}</Alert>;
   }
 
   const staffData = profile.staffProfile;

@@ -6,7 +6,6 @@ import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
@@ -21,6 +20,8 @@ import {
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useCurrencyCatalog } from "@/frontend/common/hooks/useCurrencyCatalog";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type CurrencyAutocompleteProps = {
   readonly currency?: CurrencyOption | null;
@@ -195,8 +196,8 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
   listAttached = false,
   showSymbol = true,
 }: CurrencyAutocompleteProps): React.ReactNode => {
-  const t = useTranslations("ui.currencySelect");
-  const locale = useLocale();
+  const t = useAppTranslation("ui.currencySelect");
+  const locale = useAppLocale();
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;
 
@@ -241,9 +242,9 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
 
   const showRequiredError = Boolean(required) && !currency;
   const showError = Boolean(error) || showRequiredError;
-  const resolvedHelperText = helperText ?? (showRequiredError ? t("required") : undefined);
-  const resolvedLabel = listAttached ? undefined : (label ?? t("selectCurrency"));
-  const resolvedPlaceholder = listAttached ? (label ?? t("selectCurrency")) : (placeholder ?? t("searchByCodeOrName"));
+  const resolvedHelperText = helperText ?? (showRequiredError ? t.required : undefined);
+  const resolvedLabel = listAttached ? undefined : (label ?? t.selectCurrency);
+  const resolvedPlaceholder = listAttached ? (label ?? t.selectCurrency) : (placeholder ?? t.searchByCodeOrName);
 
   return (
     <Autocomplete<CurrencyOption, false, false, false>

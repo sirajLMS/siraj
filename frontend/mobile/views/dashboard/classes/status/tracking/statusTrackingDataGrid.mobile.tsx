@@ -4,7 +4,6 @@ import { BlockOutlined, VideocamOffOutlined, WarningAmberOutlined } from "@mui/i
 import { Box, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import { PersonProfileLink, PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
@@ -21,6 +20,7 @@ import {
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, keyof StatusTrackingDataGridLabels> = {
   [SessionStatus.REGULAR]: "regular",
@@ -47,7 +47,8 @@ export function StatusTrackingDataGridMobile({
   onVerify,
   loading = false,
 }: StatusTrackingDataGridProps) {
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.core.statusTracking");
+  const locale = useAppLocale();
   const columns = useMemo<GridColDef<StatusTrackingRow>[]>(() => {
     const actionLabels = {
       joinSession: labels.joinSession,
@@ -156,7 +157,7 @@ export function StatusTrackingDataGridMobile({
             );
           }
           return (
-            <Tooltip title={labels.sessionEnded}>
+            <Tooltip title={t.actions.sessionEnded}>
               <Box
                 sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
               >
@@ -185,7 +186,7 @@ export function StatusTrackingDataGridMobile({
         ),
       },
     ];
-  }, [labels, locale, onActivate, onReschedule, onVerify]);
+  }, [labels, locale, onActivate, onReschedule, onVerify, t.actions.sessionEnded]);
 
   return (
     <AppDataGrid<StatusTrackingRow>

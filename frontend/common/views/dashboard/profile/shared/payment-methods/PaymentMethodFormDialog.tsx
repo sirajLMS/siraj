@@ -14,7 +14,6 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { type Control, Controller, type UseFormReturn, useForm } from "react-hook-form";
 import { PaymentMethodTypeFields } from "@/frontend/common/components/ui/input/paymentMethodTypeFields";
@@ -30,6 +29,7 @@ import {
   getPaymentMethodCatalogOptionById,
   type PaymentMethodCatalogOption,
 } from "@/frontend/common/lib/payment-method";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import {
   formDetailsToInput,
   fragmentToFormValues,
@@ -40,6 +40,7 @@ import {
   paymentMethodFormSchema,
 } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 import { usePaymentMethodCatalogs } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type PaymentMethodFormDialogProps = {
   readonly open: boolean;
@@ -125,7 +126,7 @@ function PaymentMethodFormFields({
   setSelectedPaymentLink,
   setSelectedOnlineAccount,
 }: PaymentMethodFormFieldsProps) {
-  const t = useTranslations("ui.paymentMethod.manager");
+  const t = useAppTranslation("ui").paymentMethod.manager;
 
   return (
     <Stack spacing={2.5} sx={{ pt: 1 }}>
@@ -140,13 +141,13 @@ function PaymentMethodFormFields({
         />
       ) : null}
 
-      <DirectionControllerField control={form.control} label={t("direction")} options={directionOptions} />
+      <DirectionControllerField control={form.control} label={t.direction} options={directionOptions} />
 
       <Controller
         name="label"
         control={form.control}
         render={({ field }) => (
-          <TextField {...field} label={t("label")} fullWidth size="small" value={field.value ?? ""} />
+          <TextField {...field} label={t.label} fullWidth size="small" value={field.value ?? ""} />
         )}
       />
 
@@ -156,7 +157,7 @@ function PaymentMethodFormFields({
         render={({ field }) => (
           <FormControlLabel
             control={<Checkbox checked={field.value} onChange={event => field.onChange(event.target.checked)} />}
-            label={slotDirection === PaymentDirection.Payin ? t("defaultPayin") : t("defaultPayout")}
+            label={slotDirection === PaymentDirection.Payin ? t.defaultPayin : t.defaultPayout}
           />
         )}
       />
@@ -310,8 +311,9 @@ export function PaymentMethodFormDialog({
   onClose,
   onSaved,
 }: PaymentMethodFormDialogProps) {
-  const t = useTranslations("ui.paymentMethod.manager");
-  const tDir = useTranslations("ui.paymentMethod");
+  const t = useAppTranslation("ui").paymentMethod.manager;
+  const tDir = useAppTranslation("ui").paymentMethod;
+  const _locale = useAppLocale();
   const isEdit = editMethod?.id != null;
 
   const defaultDirection = slotDirection;
@@ -363,7 +365,7 @@ export function PaymentMethodFormDialog({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? t("editTitle") : t("addTitle")}</DialogTitle>
+      <DialogTitle>{isEdit ? t.editTitle : t.addTitle}</DialogTitle>
       <DialogContent>
         <PaymentMethodFormFields
           isEdit={isEdit}
@@ -384,10 +386,10 @@ export function PaymentMethodFormDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={saving}>
-          {t("cancel")}
+          {t.cancel}
         </Button>
         <Button variant="contained" onClick={() => void onSubmit()} disabled={saving}>
-          {t("save")}
+          {t.save}
         </Button>
       </DialogActions>
     </Dialog>

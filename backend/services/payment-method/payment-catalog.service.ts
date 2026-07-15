@@ -65,12 +65,12 @@ export namespace PaymentCatalogService {
     tErrors: ErrorsLabels
   ) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedMobileWalletRepository.update(id, input, undefined, tErrors);
+    return SupportedMobileWalletRepository.update(id, input, tErrors);
   }
 
   export async function deactivateMobileWallet(actorUserId: string, id: string, tErrors: ErrorsLabels) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedMobileWalletRepository.deactivate(id, undefined, tErrors);
+    return SupportedMobileWalletRepository.deactivate(id, tErrors);
   }
 
   // ─── Payment Links ───────────────────────────────────────────────────────
@@ -81,9 +81,9 @@ export namespace PaymentCatalogService {
   ) {
     await assertCatalogAdmin(actorUserId, tErrors);
     if (filters?.activeOnly !== false) {
-      return SupportedPaymentLinkRepository.listActive({ direction: filters?.direction }, undefined);
+      return SupportedPaymentLinkRepository.listActive({ direction: filters?.direction });
     }
-    return SupportedPaymentLinkRepository.listAll(undefined);
+    return SupportedPaymentLinkRepository.listAll();
   }
 
   export async function createPaymentLink(
@@ -92,7 +92,7 @@ export namespace PaymentCatalogService {
     tErrors: ErrorsLabels
   ) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedPaymentLinkRepository.create(input, undefined);
+    return SupportedPaymentLinkRepository.create(input);
   }
 
   export async function updatePaymentLink(
@@ -102,12 +102,12 @@ export namespace PaymentCatalogService {
     tErrors: ErrorsLabels
   ) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedPaymentLinkRepository.update(id, input, undefined, tErrors);
+    return SupportedPaymentLinkRepository.update(id, input, tErrors);
   }
 
   export async function deactivatePaymentLink(actorUserId: string, id: string, tErrors: ErrorsLabels) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedPaymentLinkRepository.deactivate(id, undefined, tErrors);
+    return SupportedPaymentLinkRepository.deactivate(id, tErrors);
   }
 
   // ─── Online Accounts ─────────────────────────────────────────────────────
@@ -119,8 +119,8 @@ export namespace PaymentCatalogService {
     await assertCatalogAdmin(actorUserId, tErrors);
     const showAll = filters?.activeOnly === false;
     return showAll
-      ? SupportedOnlineAccountRepository.listAll(undefined)
-      : SupportedOnlineAccountRepository.listActive({ direction: filters?.direction }, undefined);
+      ? SupportedOnlineAccountRepository.listAll()
+      : SupportedOnlineAccountRepository.listActive({ direction: filters?.direction });
   }
 
   export async function createOnlineAccount(
@@ -129,7 +129,7 @@ export namespace PaymentCatalogService {
     tErrors: ErrorsLabels
   ) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedOnlineAccountRepository.create(input, undefined);
+    return SupportedOnlineAccountRepository.create(input);
   }
 
   export async function updateOnlineAccount(
@@ -139,12 +139,12 @@ export namespace PaymentCatalogService {
     tErrors: ErrorsLabels
   ) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedOnlineAccountRepository.update(id, input, undefined, tErrors);
+    return SupportedOnlineAccountRepository.update(id, input, tErrors);
   }
 
   export async function deactivateOnlineAccount(actorUserId: string, id: string, tErrors: ErrorsLabels) {
     await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedOnlineAccountRepository.deactivate(id, undefined, tErrors);
+    return SupportedOnlineAccountRepository.deactivate(id, tErrors);
   }
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
@@ -165,7 +165,8 @@ export namespace PaymentCatalogService {
     inputs: readonly T[],
     upsertMany: (items: readonly T[], tx?: DBTransaction) => Promise<T[]>,
     getBySlug: (slug: string, tx?: DBTransaction) => Promise<T | null>,
-    updateById: (id: string, input: Partial<T>, tx?: DBTransaction) => Promise<T>,
+    updateById: (id: string, input: Partial<T>, tErrors: ErrorsLabels, tx?: DBTransaction) => Promise<T>,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<T[]> {
     if (inputs.length === 0) return [];
@@ -179,7 +180,7 @@ export namespace PaymentCatalogService {
       for (const input of inputs) {
         const existing = await getBySlug(input.slug, tx);
         if (existing && "id" in existing) {
-          results.push(await updateById(existing.id as string, input, tx));
+          results.push(await updateById(existing.id as string, input, tErrors, tx));
         }
       }
       return results;
@@ -188,23 +189,30 @@ export namespace PaymentCatalogService {
 
   export async function upsertManyMobileWallets(
     inputs: readonly SupportedMobileWalletInsertType[],
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ) {
     return upsertWithDuplicateFallback(
       inputs,
       SupportedMobileWalletRepository.upsertMany,
       SupportedMobileWalletRepository.getBySlug,
-      (id, input, transaction) => SupportedMobileWalletRepository.update(id, input, transaction),
+      (id, input, tErrors, transaction) => SupportedMobileWalletRepository.update(id, input, tErrors, transaction),
+      tErrors,
       tx
     );
   }
 
-  export async function upsertManyPaymentLinks(inputs: readonly SupportedPaymentLinkInsertType[], tx?: DBTransaction) {
+  export async function upsertManyPaymentLinks(
+    inputs: readonly SupportedPaymentLinkInsertType[],
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
+  ) {
     return upsertWithDuplicateFallback(
       inputs,
       SupportedPaymentLinkRepository.upsertMany,
       SupportedPaymentLinkRepository.getBySlug,
-      (id, input, transaction) => SupportedPaymentLinkRepository.update(id, input, transaction),
+      (id, input, tErrors, transaction) => SupportedPaymentLinkRepository.update(id, input, tErrors, transaction),
+      tErrors,
       tx
     );
   }
@@ -219,13 +227,15 @@ export namespace PaymentCatalogService {
 
   export async function upsertManyOnlineAccounts(
     inputs: readonly SupportedOnlineAccountInsertType[],
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ) {
     return upsertWithDuplicateFallback(
       inputs,
       SupportedOnlineAccountRepository.upsertMany,
       SupportedOnlineAccountRepository.getBySlug,
-      (id, input, transaction) => SupportedOnlineAccountRepository.update(id, input, transaction),
+      (id, input, tErrors, transaction) => SupportedOnlineAccountRepository.update(id, input, tErrors, transaction),
+      tErrors,
       tx
     );
   }

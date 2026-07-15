@@ -13,7 +13,6 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { type Control, useForm, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
@@ -26,6 +25,7 @@ import {
   type PermissionGroupFormData,
   permissionGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ValidPermission = Permission & { id: string; key: string; category: string };
 
@@ -39,7 +39,7 @@ interface PermissionGroupFormProps {
 }
 
 function usePermissionFilters(permissions: readonly Permission[], searchTerm: string, selectedCategory: string) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const validPermissions = useMemo(
     () => permissions.filter((p): p is ValidPermission => !!p.id && !!p.key && !!p.category),
@@ -64,7 +64,7 @@ function usePermissionFilters(permissions: readonly Permission[], searchTerm: st
   const groupedPermissions = useMemo(
     () =>
       filteredPermissions.reduce<Record<string, ValidPermission[]>>((acc, perm) => {
-        const cat = perm.category || t("allCategoriesOption");
+        const cat = perm.category || t.allCategoriesOption;
         if (!acc[cat]) {
           acc[cat] = [];
         }
@@ -138,7 +138,7 @@ function PermissionGroupFormActions({
 }: {
   readonly isLoading: boolean;
   readonly onClose: () => void;
-  readonly t: ReturnType<typeof useTranslations>;
+  readonly t: ReturnType<typeof useAppTranslation<"dashboard.permissions">>;
 }) {
   return (
     <DialogActions sx={{ px: 3, pb: 3, pt: 2 }}>
@@ -152,7 +152,7 @@ function PermissionGroupFormActions({
           borderRadius: 1.5,
         })}
       >
-        {t("cancel")}
+        {t.cancel}
       </Button>
       <Button
         type="submit"
@@ -169,7 +169,7 @@ function PermissionGroupFormActions({
           },
         })}
       >
-        {t("save")}
+        {t.save}
       </Button>
     </DialogActions>
   );
@@ -206,7 +206,7 @@ function PermissionGroupFormContent({
   readonly handleSelectAllCategory: (perms: Array<Permission & { id: string }>, checked: boolean) => void;
   readonly handleTogglePermission: (permId: string, isSystem: boolean) => void;
   readonly handleSubmitForm: (e: React.SyntheticEvent<HTMLFormElement>) => void;
-  readonly t: ReturnType<typeof useTranslations>;
+  readonly t: ReturnType<typeof useAppTranslation<"dashboard.permissions">>;
 }) {
   return (
     <DialogContent dividers sx={{ p: 3 }}>
@@ -221,7 +221,7 @@ function PermissionGroupFormContent({
             <LocalizedStringFormField
               name="name"
               control={control}
-              label={t("groupNameLabel")}
+              label={t.groupNameLabel}
               required
               disabled={isLoading}
               fullWidth
@@ -231,7 +231,7 @@ function PermissionGroupFormContent({
             <LocalizedStringFormField
               name="description"
               control={control}
-              label={t("descriptionLabel")}
+              label={t.descriptionLabel}
               multiline
               minRows={2}
               disabled={isLoading}
@@ -240,7 +240,7 @@ function PermissionGroupFormContent({
           </Grid>
         </Grid>
 
-        <SectionPanel title={t("addPermissions")}>
+        <SectionPanel title={t.addPermissions}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <PermissionFilterBar
               searchTerm={searchTerm}
@@ -280,7 +280,7 @@ export function PermissionGroupForm({
   onClose,
   onSave,
 }: Readonly<PermissionGroupFormProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
@@ -333,7 +333,7 @@ export function PermissionGroupForm({
     >
       <DialogTitle id="permission-group-form-title">
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="titleLg">{group ? t("editGroupTitle") : t("createGroupTitle")}</Typography>
+          <Typography variant="titleLg">{group ? t.editGroupTitle : t.createGroupTitle}</Typography>
           <IconButton onClick={onClose} disabled={isLoading} size="small">
             <Close />
           </IconButton>

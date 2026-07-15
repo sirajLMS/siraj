@@ -1,7 +1,6 @@
 import { SchedulingRepository, StudentRepository, TeacherRepository } from "@/backend/db";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type {
   TeacherAssignedClassesResult,
@@ -9,38 +8,39 @@ import type {
   TeacherOwnProfileReturnType,
   TeacherOwnProfileUpdateInput,
 } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace TeacherPortalService {
-  async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
+  async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {
     const isAuthorized = await PermissionsService.hasPermission(userId, permission);
     if (!isAuthorized) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
   }
 
-  async function resolveTeacherForUser(userId: string, locale?: string) {
+  async function resolveTeacherForUser(userId: string, tErrors: ErrorsLabels) {
     const teacher = await TeacherRepository.findByUserId(userId);
     if (!teacher) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
     return teacher;
   }
 
-  export async function listAssignedStudents(userId: string, locale?: string): Promise<TeacherAssignedStudentsResult> {
-    await assertPermission(userId, AppPermission.TEACHER_VIEW_STUDENTS, locale);
-    const teacher = await resolveTeacherForUser(userId, locale);
+  export async function listAssignedStudents(
+    userId: string,
+    tErrors: ErrorsLabels
+  ): Promise<TeacherAssignedStudentsResult> {
+    await assertPermission(userId, AppPermission.TEACHER_VIEW_STUDENTS, tErrors);
+    const teacher = await resolveTeacherForUser(userId, tErrors);
     return StudentRepository.getAssignedToTeacher(teacher.id);
   }
 
-  export async function getOwnProfile(userId: string, locale?: string): Promise<TeacherOwnProfileReturnType> {
-    await assertPermission(userId, AppPermission.TEACHER_VIEW_OWN_PROFILE, locale);
-    const teacher = await resolveTeacherForUser(userId, locale);
+  export async function getOwnProfile(userId: string, tErrors: ErrorsLabels): Promise<TeacherOwnProfileReturnType> {
+    await assertPermission(userId, AppPermission.TEACHER_VIEW_OWN_PROFILE, tErrors);
+    const teacher = await resolveTeacherForUser(userId, tErrors);
     const profile = await TeacherRepository.getTeacherProfileForEdit(teacher.id);
     if (!profile) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
 
     return {
@@ -55,14 +55,17 @@ export namespace TeacherPortalService {
     };
   }
 
-  export async function listAssignedClasses(userId: string, locale?: string): Promise<TeacherAssignedClassesResult> {
-    await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, locale);
-    const teacher = await resolveTeacherForUser(userId, locale);
+  export async function listAssignedClasses(
+    userId: string,
+    tErrors: ErrorsLabels
+  ): Promise<TeacherAssignedClassesResult> {
+    await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, tErrors);
+    const teacher = await resolveTeacherForUser(userId, tErrors);
     const rows = await SchedulingRepository.getTeacherAssignedClasses(teacher.id);
 
     const enrichedRows = await Promise.all(
       rows.map(async row => {
-        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id);
+        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id, tErrors);
         return {
           id: row.id,
           studentName: row.studentName,
@@ -93,14 +96,13 @@ export namespace TeacherPortalService {
     userId: string,
     teacherId: string,
     input: TeacherOwnProfileUpdateInput,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<TeacherOwnProfileReturnType> {
-    await assertPermission(userId, AppPermission.TEACHER_EDIT_OWN_PROFILE, locale);
-    const teacher = await resolveTeacherForUser(userId, locale);
+    await assertPermission(userId, AppPermission.TEACHER_EDIT_OWN_PROFILE, tErrors);
+    const teacher = await resolveTeacherForUser(userId, tErrors);
 
     if (teacher.id !== teacherId) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     const success = await TeacherRepository.updateTeacherProfile(teacherId, {
@@ -108,10 +110,9 @@ export namespace TeacherPortalService {
     });
 
     if (!success) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
 
-    return getOwnProfile(userId, locale);
+    return getOwnProfile(userId, tErrors);
   }
 }

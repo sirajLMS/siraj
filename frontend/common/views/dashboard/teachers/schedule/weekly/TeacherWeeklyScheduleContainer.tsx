@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -20,9 +19,10 @@ import { logger } from "@/frontend/common/utils/logger";
 import { CreateRecurringClassDialog } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/CreateRecurringClassDialog";
 import TeacherWeeklyScheduleView from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";
 import type { TeacherWeeklyScheduleContainerProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<TeacherWeeklyScheduleContainerProps>) {
-  const t = useTranslations("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
   const notifications = useNotifications();
   const { selectedWeekDate } = useWeeklyScheduleStore();
   const { openDialog } = useCreateRecurringClassStore();
@@ -65,10 +65,10 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
       });
       await refetchSchedule();
       await refetchWorkload();
-      notifications.show(t("notifications.classDeleted"), { severity: "success" });
+      notifications.show(t.notifications.classDeleted, { severity: "success" });
     } catch (error) {
       logger.error("Failed to delete class instance", { error });
-      notifications.show(t("notifications.classDeleteFailed"), { severity: "error" });
+      notifications.show(t.notifications.classDeleteFailed, { severity: "error" });
     }
   };
 
@@ -79,10 +79,10 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
       });
       await refetchSchedule();
       await refetchWorkload();
-      notifications.show(t("notifications.scheduleCleared"), { severity: "success" });
+      notifications.show(t.notifications.scheduleCleared, { severity: "success" });
     } catch (error) {
       logger.error("Failed to clear weekly schedule", { error });
-      notifications.show(t("notifications.scheduleClearFailed"), { severity: "error" });
+      notifications.show(t.notifications.scheduleClearFailed, { severity: "error" });
     }
   };
 

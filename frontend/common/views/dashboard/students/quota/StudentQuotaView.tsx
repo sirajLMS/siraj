@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircleOutlined, EditOutlined, Save, ScheduleOutlined, SyncOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 import {
@@ -13,7 +12,6 @@ import {
   PrimaryPageAction,
   UserAvatar,
 } from "@/frontend/common/components/ui";
-import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import { ContextualHelperCards } from "@/frontend/common/views/dashboard/students/quota/components/ContextualHelperCards";
 import { CourseDetailsSection } from "@/frontend/common/views/dashboard/students/quota/components/CourseDetailsSection";
@@ -29,10 +27,11 @@ import type {
   MobileProfileHeaderProps,
   StudentQuotaViewProps,
 } from "@/frontend/common/views/dashboard/students/quota/types";
-import type { MessageSchema } from "@/shared/messages/types/message";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Readonly<MobileProfileHeaderProps>) {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
   return (
     <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", alignItems: "center", py: 4 }}>
       <Box sx={{ position: "relative", width: 96, height: 96, mb: 2 }}>
@@ -64,18 +63,18 @@ function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Read
         ) : null}
       </Box>
       <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-        {t("studentId", { id: formatStudentDisplayId(studentData.id) })}
+        {t.studentId(studentData.id)}
       </Typography>
     </Box>
   );
 }
 
 function DesktopBreadcrumbs(
-  t: ReturnType<typeof useTranslations<"dashboard.studentQuota">>
+  t: ReturnType<typeof useAppTranslation<"dashboard.studentQuota">>
 ): readonly PageHeaderBreadcrumb[] {
   return [
-    { label: t("breadcrumbs.students"), href: "/students" },
-    { label: t("breadcrumbs.adjustQuota"), current: true },
+    { label: t.breadcrumbs.students, href: "/students" },
+    { label: t.breadcrumbs.adjustQuota, current: true },
   ];
 }
 
@@ -87,15 +86,15 @@ function FormActions({
   readOnly = false,
   showCancel = true,
 }: Readonly<FormActionsProps>) {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
 
   let saveIcon = <Save />;
   if (isSaving) saveIcon = <SyncOutlined sx={{ animation: "spin 1s linear infinite" }} />;
   else if (isSaved) saveIcon = <CheckCircleOutlined />;
 
-  let saveText = t("actions.save");
-  if (isSaving) saveText = t("actions.saving");
-  else if (isSaved) saveText = t("actions.saved");
+  let saveText = t.actions.save;
+  if (isSaving) saveText = t.actions.saving;
+  else if (isSaved) saveText = t.actions.saved;
 
   return (
     <Box
@@ -155,7 +154,7 @@ function FormActions({
               width: { xs: "100%", md: "auto" },
             })}
           >
-            {t("actions.cancel")}
+            {t.actions.cancel}
           </PrimaryPageAction>
         ) : null}
       </Box>
@@ -170,7 +169,7 @@ function FormActions({
           })}
         >
           <ScheduleOutlined sx={{ fontSize: 14 }} />
-          <Typography variant="labelMd">{t("actions.lastEditedAt", { time: studentData.lastEditedTime })}</Typography>
+          <Typography variant="labelMd">{t.actions.lastEditedAt(studentData.lastEditedTime)}</Typography>
         </Box>
       )}
     </Box>
@@ -204,7 +203,7 @@ function QuotaFormCard({
   canViewQuota: boolean;
   canViewTeacher: boolean;
 }>) {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
   const showAvatarEdit = !embedded && !readOnly && canEditIdentity;
 
   return (
@@ -212,7 +211,7 @@ function QuotaFormCard({
       {!embedded ? <MobileProfileHeader studentData={studentData} showAvatarEdit={showAvatarEdit} /> : null}
       {!embedded ? (
         <Box sx={{ display: { xs: "none", md: "flex" }, mb: 3 }}>
-          <PageHeader title={t("breadcrumbs.adjustQuota")} titleVariant="titleLg" breadcrumbs={DesktopBreadcrumbs(t)} />
+          <PageHeader title={t.breadcrumbs.adjustQuota} titleVariant="titleLg" breadcrumbs={DesktopBreadcrumbs(t)} />
         </Box>
       ) : null}
 
@@ -280,10 +279,8 @@ function useQuotaForm(
   studentData: StudentQuotaViewProps["studentData"],
   onSave: (data: StudentQuotaFormData) => Promise<void>
 ) {
-  const validationMessages = useTranslations("dashboard.studentQuota.validation");
-  const schema = createStudentQuotaSchema(
-    validationMessages as unknown as MessageSchema["dashboard"]["studentQuota"]["validation"]
-  );
+  const validationMessages = useAppTranslation("dashboard.studentQuota").validation;
+  const schema = createStudentQuotaSchema(validationMessages as StudentQuotaLabels["validation"]);
 
   const methods = useForm<StudentQuotaFormInput, undefined, StudentQuotaFormData>({
     resolver: zodResolver(schema),

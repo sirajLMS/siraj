@@ -2,12 +2,12 @@
 
 import { AssignmentIndOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/common/components/ui";
 import type { CurrentTeacherCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function CurrentTeacherCard({ currentTeacherName, teacherId }: Readonly<CurrentTeacherCardProps>) {
-  const t = useTranslations("dashboard.teacherReassignment.currentTeacher");
+  const t = useAppTranslation("dashboard.teacherReassignment").currentTeacher;
 
   return (
     <BaseCard
@@ -36,7 +36,7 @@ export function CurrentTeacherCard({ currentTeacherName, teacherId }: Readonly<C
             color: theme.palette.onPrimary,
           })}
         >
-          {t("title")}
+          {t.title}
         </Typography>
         <Typography
           variant="headlineMd"
@@ -46,7 +46,7 @@ export function CurrentTeacherCard({ currentTeacherName, teacherId }: Readonly<C
             color: theme.palette.onPrimary,
           })}
         >
-          {currentTeacherName || t("unset")}
+          {currentTeacherName || t.unset}
         </Typography>
         <Typography
           variant="labelSm"
@@ -56,7 +56,7 @@ export function CurrentTeacherCard({ currentTeacherName, teacherId }: Readonly<C
             color: theme.palette.onPrimary,
           })}
         >
-          {t("notice")}
+          {t.notice}
         </Typography>
       </Box>
       <AssignmentIndOutlined

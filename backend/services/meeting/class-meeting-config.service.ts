@@ -51,7 +51,7 @@ export namespace ClassMeetingConfigService {
 
   async function loadConfigForActor(actorUserId: string, id: string, tErrors: ErrorsLabels) {
     await assertCanManageClass(actorUserId, tErrors);
-    const config = await ClassMeetingConfigRepository.getByIdOrThrow(id, undefined, tErrors);
+    const config = await ClassMeetingConfigRepository.getByIdOrThrow(id, tErrors);
     return config;
   }
 
@@ -70,7 +70,7 @@ export namespace ClassMeetingConfigService {
     tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType> {
     await assertCanManageClass(actorUserId, tErrors);
-    const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, undefined, undefined);
+    const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, tErrors);
 
     if (!provider.isActive) {
       throw new Error(tErrors.meetingProviderInactive);
@@ -88,7 +88,6 @@ export namespace ClassMeetingConfigService {
         details,
         encryptedSecret: input.password ?? null,
       },
-      undefined,
       tErrors
     );
 
@@ -103,7 +102,7 @@ export namespace ClassMeetingConfigService {
   ): Promise<ClassMeetingConfigReturnType> {
     const existing = await loadConfigForActor(actorUserId, id, tErrors);
     const providerId = input.providerId ?? existing.providerId;
-    const provider = await MeetingProviderRepository.getByIdOrThrow(providerId, undefined, undefined);
+    const provider = await MeetingProviderRepository.getByIdOrThrow(providerId, tErrors);
 
     const details = input.details !== undefined ? parseMeetingConfigDetails(provider, input.details) : undefined;
 
@@ -116,7 +115,6 @@ export namespace ClassMeetingConfigService {
         encryptedSecret: input.password !== undefined ? input.password : undefined,
         providerId: input.providerId,
       },
-      undefined,
       tErrors
     );
 
@@ -129,7 +127,7 @@ export namespace ClassMeetingConfigService {
     tErrors: ErrorsLabels
   ): Promise<{ id: string }> {
     await loadConfigForActor(actorUserId, id, tErrors);
-    await ClassMeetingConfigRepository.deleteConfig(id, undefined, tErrors);
+    await ClassMeetingConfigRepository.deleteConfig(id, tErrors);
     return { id };
   }
 
@@ -139,7 +137,7 @@ export namespace ClassMeetingConfigService {
     tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType> {
     await loadConfigForActor(actorUserId, id, tErrors);
-    const updated = await ClassMeetingConfigRepository.setDefault(id, undefined, tErrors);
+    const updated = await ClassMeetingConfigRepository.setDefault(id, tErrors);
     return buildMaskedClassMeetingConfig(updated, true);
   }
 }
@@ -179,13 +177,14 @@ export namespace EffectiveMeetingService {
   async function fromClassConfig(
     config: Awaited<ReturnType<typeof ClassMeetingConfigRepository.getDefaultForClassInstance>>,
     source: "class" | "recurring",
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<EffectiveMeetingReturnType> {
     if (!config) {
       return empty;
     }
 
-    const snapshot = await MeetingConfigSnapshotService.buildClassSessionSnapshot(config.id, tx);
+    const snapshot = await MeetingConfigSnapshotService.buildClassSessionSnapshot(config.id, tErrors, tx);
     return {
       joinUrl: snapshot.details.meetingUrl,
       providerSlug: snapshot.provider.catalogSlug,
@@ -200,13 +199,14 @@ export namespace EffectiveMeetingService {
 
   async function fromTeacherDefault(
     teacherDefault: Awaited<ReturnType<typeof UserMeetingConfigRepository.getDefaultForUser>>,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<EffectiveMeetingReturnType> {
     if (!teacherDefault) {
       return empty;
     }
 
-    const snapshot = await MeetingConfigSnapshotService.buildSessionSnapshot(teacherDefault.id, tx);
+    const snapshot = await MeetingConfigSnapshotService.buildSessionSnapshot(teacherDefault.id, tErrors, tx);
     return {
       joinUrl: snapshot.details.meetingUrl,
       providerSlug: snapshot.provider.catalogSlug,
@@ -219,19 +219,24 @@ export namespace EffectiveMeetingService {
     };
   }
 
-  async function resolveTeacherDefault(userId: string, tx?: DBTransaction): Promise<EffectiveMeetingReturnType> {
+  async function resolveTeacherDefault(
+    userId: string,
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
+  ): Promise<EffectiveMeetingReturnType> {
     const teacherDefault = await UserMeetingConfigRepository.getDefaultForUser(userId, tx);
-    return fromTeacherDefault(teacherDefault, tx);
+    return fromTeacherDefault(teacherDefault, tErrors, tx);
   }
 
   export async function resolveForClassInstance(
     classInstanceId: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<EffectiveMeetingReturnType> {
     const client = tx ?? db;
     const classDefault = await ClassMeetingConfigRepository.getDefaultForClassInstance(classInstanceId, tx);
     if (classDefault) {
-      return fromClassConfig(classDefault, "class", tx);
+      return fromClassConfig(classDefault, "class", tErrors, tx);
     }
 
     const [instance] = await client
@@ -253,13 +258,13 @@ export namespace EffectiveMeetingService {
         tx
       );
       if (recurringDefault) {
-        return fromClassConfig(recurringDefault, "recurring", tx);
+        return fromClassConfig(recurringDefault, "recurring", tErrors, tx);
       }
     }
 
     const userId = await getTeacherUserId(instance.teacherId, tx);
     if (userId) {
-      return resolveTeacherDefault(userId, tx);
+      return resolveTeacherDefault(userId, tErrors, tx);
     }
 
     return empty;
@@ -268,11 +273,12 @@ export namespace EffectiveMeetingService {
   export async function resolveForRecurringSchedule(
     recurringScheduleId: string,
     teacherId: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<EffectiveMeetingReturnType> {
     const recurringDefault = await ClassMeetingConfigRepository.getDefaultForRecurringSchedule(recurringScheduleId, tx);
     if (recurringDefault) {
-      return fromClassConfig(recurringDefault, "recurring", tx);
+      return fromClassConfig(recurringDefault, "recurring", tErrors, tx);
     }
 
     const userId = await getTeacherUserId(teacherId, tx);
@@ -280,22 +286,26 @@ export namespace EffectiveMeetingService {
       return empty;
     }
 
-    return resolveTeacherDefault(userId, tx);
+    return resolveTeacherDefault(userId, tErrors, tx);
   }
 
   export async function resolveForNewBooking(
     teacherId: string,
-    options?: { readonly recurringScheduleId?: string | null; readonly tx?: DBTransaction }
+    options?: {
+      readonly recurringScheduleId?: string | null;
+      readonly tErrors: ErrorsLabels;
+      readonly tx?: DBTransaction;
+    }
   ): Promise<EffectiveMeetingReturnType> {
-    const { recurringScheduleId, tx } = options ?? {};
+    const { recurringScheduleId, tErrors, tx } = options ?? { tErrors: undefined as any };
 
     if (recurringScheduleId) {
-      return resolveForRecurringSchedule(recurringScheduleId, teacherId, tx);
+      return resolveForRecurringSchedule(recurringScheduleId, teacherId, tErrors, tx);
     }
 
     const userId = await getTeacherUserId(teacherId, tx);
     if (userId) {
-      return resolveTeacherDefault(userId, tx);
+      return resolveTeacherDefault(userId, tErrors, tx);
     }
 
     return empty;

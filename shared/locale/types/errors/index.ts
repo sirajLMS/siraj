@@ -142,4 +142,18 @@ export interface ErrorsLabels {
   readonly userEmailExists: string;
   readonly permissionGroupNotFound: string;
   readonly categoryHasSubjects: string;
+  readonly cannotRescheduleToSelf: string;
+  readonly cannotRescheduleCompleted: string;
+  readonly cannotRescheduleAlreadyRescheduled: string;
+  readonly outOfQuota: string;
+  readonly leaveQuotaExceeded: (params: { maxLeaves: string }) => string;
+  readonly classInstanceNotFound: (params: { id: string }) => string;
+  readonly originalClassNotFound: string;
+  readonly sessionNotActivated: string;
+  readonly invalidTransition: string;
+  // ─── Scheduling-specific errors ──────────────────────────────────────
+  readonly teacherNotAssigned: (params: { teacherId: string; studentId: string; startTime: string }) => string;
+  readonly teacherBooked: string;
+  readonly studentBooked: string;
+  readonly meetingUrlInUse: string;
 }

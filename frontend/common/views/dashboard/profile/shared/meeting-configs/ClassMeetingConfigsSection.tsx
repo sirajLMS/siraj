@@ -3,7 +3,6 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { Button, Stack, Typography } from "@mui/material";
-import { useLocale } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar, SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigList } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
@@ -21,6 +20,7 @@ import type {
   EffectiveMeetingFieldsFragment,
 } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ClassMeetingConfigFormDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigFormDialog";
 import { ClassMeetingContextBanner } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingContextBanner";
@@ -270,7 +270,7 @@ export function ClassMeetingConfigsSection({
 }: ClassMeetingConfigsSectionProps) {
   const t = useAppTranslation("ui").meetingConfig.classScope;
   const tManager = useAppTranslation("ui").meetingConfig.manager;
-  const locale = useLocale();
+  const locale = useAppLocale();
   const { hasPermission } = useUserStore();
   const resolvedCanManage = canManage ?? hasPermission(AppPermission.MeetingConfigsManageClass);
 

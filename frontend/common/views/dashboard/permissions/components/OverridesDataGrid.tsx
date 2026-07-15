@@ -3,12 +3,12 @@
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { OverrideEditControls } from "@/frontend/common/views/dashboard/permissions/components/OverrideEditControls";
 import { OverrideEffectiveDisplay } from "@/frontend/common/views/dashboard/permissions/components/OverrideEffectiveDisplay";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type OverrideState = "GRANTED" | "DENIED" | "INHERIT";
 
@@ -52,7 +52,7 @@ export function OverridesDataGrid({
   isDialogLoading,
   handleOverrideChange,
 }: Readonly<OverridesDataGridProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const columns = useMemo<GridColDef<Permission>[]>(() => {
     return [

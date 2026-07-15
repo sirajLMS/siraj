@@ -6,6 +6,7 @@ import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository
 import { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { parseClassExecutionState, parseClassOutcome, parseClassType } from "@/backend/lib/enum";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
@@ -68,7 +69,11 @@ export namespace WeeklyScheduleService {
 
       const classes = await Promise.all(
         rows.map(async row => {
-          const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id);
+          const tErrors = (await getBackendTranslations({
+            locale: "ar",
+            namespace: "errors",
+          })) as unknown as ErrorsLabels;
+          const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id, tErrors);
           return {
             id: row.id,
             studentName: row.studentName,

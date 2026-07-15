@@ -4,6 +4,7 @@ import { BlockOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/OverridesDataGrid";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledEffectiveContainer = styled(Box)({
   display: "flex",
@@ -44,10 +45,8 @@ interface OverrideEffectiveDisplayProps {
   readonly overrideState: OverrideState;
 }
 
-import { useTranslations } from "next-intl";
-
 export function OverrideEffectiveDisplay({ effectiveState, overrideState }: Readonly<OverrideEffectiveDisplayProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   return (
     <StyledEffectiveContainer>
@@ -55,21 +54,21 @@ export function OverrideEffectiveDisplay({ effectiveState, overrideState }: Read
       {effectiveState === "allowed" && (
         <StyledAllowedIndicator>
           <CheckCircleOutlined fontSize="small" />
-          {t("statusAllowed")}
+          {t.statusAllowed}
         </StyledAllowedIndicator>
       )}
       {effectiveState === "denied" && (
         <StyledDeniedIndicator>
           <BlockOutlined fontSize="small" />
-          {t("statusDenied")}
+          {t.statusDenied}
         </StyledDeniedIndicator>
       )}
-      {effectiveState === "not_set" && <StyledNotSetText variant="bodyMd">{t("notSet")}</StyledNotSetText>}
+      {effectiveState === "not_set" && <StyledNotSetText variant="bodyMd">{t.notSet}</StyledNotSetText>}
       {/* Override Label */}
       <StyledOverrideLabel variant="caption">
-        {overrideState === "GRANTED" && t("labelExplicitGrant")}
-        {overrideState === "DENIED" && t("labelExplicitDeny")}
-        {overrideState === "INHERIT" && t("labelInherited")}
+        {overrideState === "GRANTED" && t.labelExplicitGrant}
+        {overrideState === "DENIED" && t.labelExplicitDeny}
+        {overrideState === "INHERIT" && t.labelInherited}
       </StyledOverrideLabel>
     </StyledEffectiveContainer>
   );

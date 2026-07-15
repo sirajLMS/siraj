@@ -3,13 +3,13 @@
 import { CloseOutlined } from "@mui/icons-material";
 import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { OverridesDataGrid } from "@/frontend/common/views/dashboard/permissions/components/OverridesDataGrid";
 import { OverridesDialogFooter } from "@/frontend/common/views/dashboard/permissions/components/OverridesDialogFooter";
 import { OverridesToolbar } from "@/frontend/common/views/dashboard/permissions/components/OverridesToolbar";
 import { OverridesUserSidebar } from "@/frontend/common/views/dashboard/permissions/components/OverridesUserSidebar";
 import { useManageOverridesState } from "@/frontend/common/views/dashboard/permissions/components/useManageOverridesState";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.divider}`,
@@ -63,7 +63,7 @@ export function ManageOverridesDialog({
   onClose,
   onSave,
 }: Readonly<ManageOverridesDialogProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const {
     user,

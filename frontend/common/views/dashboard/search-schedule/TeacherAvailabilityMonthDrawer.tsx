@@ -5,7 +5,6 @@ import { CalendarToday, ChevronLeft, ChevronRight, CloseOutlined } from "@mui/ic
 import { Box, CircularProgress, Drawer, IconButton, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { addMonths, parse, subMonths } from "date-fns";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import {
   type AvailabilitySearchInput,
@@ -17,6 +16,7 @@ import type { SearchScheduleResultItem } from "@/frontend/common/views/dashboard
 import { buildTeacherMonthAvailabilityInput } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
 import { TeacherAvailabilityCalendarGrid } from "@/frontend/common/views/dashboard/search-schedule/TeacherAvailabilityCalendarGrid";
 import type { TeacherAvailabilityGapItem } from "@/frontend/common/views/dashboard/search-schedule/TeacherAvailabilityDayPill";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface TeacherAvailabilityMonthDrawerProps {
   readonly open: boolean;
@@ -116,7 +116,7 @@ function useMonthDrawerQuery(
 }
 
 function DrawerHeader({ title, onClose }: { readonly title: string; readonly onClose: () => void }) {
-  const t = useTranslations("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
   return (
     <Box
       sx={{
@@ -135,7 +135,7 @@ function DrawerHeader({ title, onClose }: { readonly title: string; readonly onC
           {title}
         </Typography>
       </Box>
-      <IconButton aria-label={t("closeMonthSchedule")} onClick={onClose} size="small">
+      <IconButton aria-label={t.closeMonthSchedule} onClick={onClose} size="small">
         <CloseOutlined />
       </IconButton>
     </Box>
@@ -149,7 +149,7 @@ function MonthNavigator({
   readonly currentMonth: Date;
   readonly onMonthChange: (fn: (prev: Date) => Date) => void;
 }) {
-  const t = useTranslations("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
   const yearStr = currentMonth.getFullYear();
 
@@ -159,7 +159,7 @@ function MonthNavigator({
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, py: 2 }}>
-      <IconButton aria-label={t("previousMonth")} onClick={() => onMonthChange(prev => subMonths(prev, 1))} sx={flipSx}>
+      <IconButton aria-label={t.previousMonth} onClick={() => onMonthChange(prev => subMonths(prev, 1))} sx={flipSx}>
         <ChevronLeft />
       </IconButton>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -168,7 +168,7 @@ function MonthNavigator({
           {monthStr} {yearStr}
         </Typography>
       </Box>
-      <IconButton aria-label={t("nextMonth")} onClick={() => onMonthChange(prev => addMonths(prev, 1))} sx={flipSx}>
+      <IconButton aria-label={t.nextMonth} onClick={() => onMonthChange(prev => addMonths(prev, 1))} sx={flipSx}>
         <ChevronRight />
       </IconButton>
     </Box>
@@ -186,7 +186,7 @@ function DrawerContent({
   readonly currentMonth: Date;
   readonly daysByDate: Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>;
 }) {
-  const t = useTranslations("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
   return (
     <Box sx={{ flex: 1, overflow: "auto", px: 2, pb: 3 }}>
       {loading ? (
@@ -197,7 +197,7 @@ function DrawerContent({
 
       {error ? (
         <Typography color="error" sx={{ textAlign: "center", py: 4 }}>
-          {t("monthScheduleError")}
+          {t.monthScheduleError}
         </Typography>
       ) : null}
 
@@ -214,7 +214,7 @@ export function TeacherAvailabilityMonthDrawer({
   anchorFromDate,
   onClose,
 }: Readonly<TeacherAvailabilityMonthDrawerProps>) {
-  const t = useTranslations("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
 
   const [currentMonth, setCurrentMonth] = useState(() => parse(anchorFromDate, "yyyy-MM-dd", new Date()));
 
@@ -241,7 +241,7 @@ export function TeacherAvailabilityMonthDrawer({
       }}
     >
       <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <DrawerHeader title={t("monthScheduleTitle", { name: teacher?.name ?? "" })} onClose={onClose} />
+        <DrawerHeader title={t.monthScheduleTitle(teacher?.name ?? "")} onClose={onClose} />
         <MonthNavigator currentMonth={currentMonth} onMonthChange={setCurrentMonth} />
         <DrawerContent loading={loading} error={error} currentMonth={currentMonth} daysByDate={daysByDate} />
       </Box>

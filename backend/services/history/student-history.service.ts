@@ -70,7 +70,7 @@ export namespace StudentHistoryService {
 
     const sessions = await Promise.all(
       rawSessions.map(async session => {
-        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(session.id);
+        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(session.id, tErrors);
         return {
           ...session,
           meetingJoinUrl: effectiveMeeting.joinUrl,
@@ -101,7 +101,7 @@ export namespace StudentHistoryService {
       throw new Error(tErrors.notFound);
     }
 
-    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(classInstanceId);
+    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(classInstanceId, tErrors);
 
     return {
       ...detail,

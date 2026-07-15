@@ -2,7 +2,6 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type { AttendanceReportRow, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -14,6 +13,7 @@ import {
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import type { FormatCurrencyMessages } from "@/frontend/common/lib/fx-render";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import type { ReportsActiveFilters } from "@/frontend/common/stores/reportsStore";
 import { useReportsStore } from "@/frontend/common/stores/reportsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -35,6 +35,7 @@ import {
   formatReportPaidAmount,
 } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function formatHours(hours: number): string {
   const h = Math.floor(hours);
@@ -127,60 +128,60 @@ function ReportsMainContent({
   onPrintReport,
   onRowClick,
 }: ReportsMainContentProps) {
-  const t = useTranslations("dashboard.reports");
+  const t = useAppTranslation("dashboard.reports");
 
   const rows = useMemo(() => mapReportRows(reportData?.generateAttendanceReport?.rows), [reportData]);
 
   const labels = {
-    pageTitle: t("pageTitle"),
-    pageSubtitle: t("pageSubtitle"),
-    filtersTitle: t("filtersTitle"),
-    exportCsv: t("exportCsv"),
-    printReport: t("printReport"),
+    pageTitle: t.pageTitle,
+    pageSubtitle: t.pageSubtitle,
+    filtersTitle: t.filtersTitle,
+    exportCsv: t.exportCsv,
+    printReport: t.printReport,
     filtersLabels: {
-      fromDate: t("fromDate"),
-      toDate: t("toDate"),
-      teacher: t("teacher"),
-      allTeachers: t("allTeachers"),
-      reportType: t("reportType"),
-      submit: t("submit"),
+      fromDate: t.fromDate,
+      toDate: t.toDate,
+      teacher: t.teacher,
+      allTeachers: t.allTeachers,
+      reportType: t.reportType,
+      submit: t.submit,
       reportTypes: {
-        byTeacher: t("reportTypes.byTeacher"),
-        byStudent: t("reportTypes.byStudent"),
-        byDate: t("reportTypes.byDate"),
+        byTeacher: t.reportTypes.byTeacher,
+        byStudent: t.reportTypes.byStudent,
+        byDate: t.reportTypes.byDate,
       },
     },
     tableLabels: {
-      name: t("table.name"),
-      taken: t("table.taken"),
-      absent: t("table.absent"),
-      leave: t("table.leave"),
-      pending: t("table.pending"),
-      hours: t("table.hours"),
-      paid: t("table.paid"),
-      noEntries: t("noEntries"),
+      name: t.table.name,
+      taken: t.table.taken,
+      absent: t.table.absent,
+      leave: t.table.leave,
+      pending: t.table.pending,
+      hours: t.table.hours,
+      paid: t.table.paid,
+      noEntries: t.noEntries,
     },
     summaryLabels: {
-      engagementRate: t("summary.engagementRate"),
-      engagementGrowth: t("summary.engagementGrowth"),
-      increase: t("summary.increase"),
-      financialDistribution: t("summary.financialDistribution"),
-      financialSubtitle: t("summary.financialSubtitle"),
+      engagementRate: t.summary.engagementRate,
+      engagementGrowth: t.summary.engagementGrowth,
+      increase: t.summary.increase,
+      financialDistribution: t.summary.financialDistribution,
+      financialSubtitle: t.summary.financialSubtitle,
     },
-    totalsLabel: t("table.totals"),
-    ledgerTitle: t("ledger.title"),
+    totalsLabel: t.table.totals,
+    ledgerTitle: t.ledger.title,
     ledgerLabels: {
-      studentLabel: t.raw("ledger.studentLabel") as string,
-      paid: t("ledger.paid"),
+      studentLabel: (name: string) => t.ledger.studentLabel(name),
+      paid: t.ledger.paid,
       statusLabels: {
-        active: t("status.active"),
-        on_break: t("status.onBreak"),
+        active: t.status.active,
+        on_break: t.status.onBreak,
       },
-      taken: t("table.taken"),
-      absent: t("table.absent"),
-      leave: t("table.leave"),
-      pending: t("table.pending"),
-      hours: t("table.hours"),
+      taken: t.table.taken,
+      absent: t.table.absent,
+      leave: t.table.leave,
+      pending: t.table.pending,
+      hours: t.table.hours,
     },
   };
 
@@ -190,7 +191,7 @@ function ReportsMainContent({
       {showFinancials ? <FxConversionNote /> : null}
       {showFinancials ? (
         <Typography variant="caption" sx={theme => ({ display: "block", mb: 1, color: theme.palette.text.secondary })}>
-          {t("reportMultiCurrencyNote")}
+          {t.reportMultiCurrencyNote}
         </Typography>
       ) : null}
       <ReportsView
@@ -412,9 +413,9 @@ function useReportHandlers({
 
 export function ReportsContainer() {
   const { hasPermission } = useUserStore();
-  const locale = useLocale();
-  const t = useTranslations("dashboard.reports");
-  const tErrors = useTranslations("errors");
+  const locale = useAppLocale();
+  const t = useAppTranslation("dashboard.reports");
+  const tErrors = useAppTranslation("errors");
   const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
@@ -448,21 +449,21 @@ export function ReportsContainer() {
     setActiveFilters: setActiveFilters as (filters: ReportsActiveFilters) => void,
     locale,
     exportLabels: {
-      pageTitle: t("export.pageTitle"),
+      pageTitle: t.export.pageTitle,
       tableLabels: {
-        name: t("table.name"),
-        taken: t("table.taken"),
-        absent: t("table.absent"),
-        leave: t("table.leave"),
-        pending: t("table.pending"),
-        hours: t("table.hours"),
-        paid: t("table.paidDisplay"),
-        paidLocked: t("table.paidLocked"),
+        name: t.table.name,
+        taken: t.table.taken,
+        absent: t.table.absent,
+        leave: t.table.leave,
+        pending: t.table.pending,
+        hours: t.table.hours,
+        paid: t.table.paidDisplay,
+        paidLocked: t.table.paidLocked,
       },
-      totalsLabel: t("table.totals"),
+      totalsLabel: t.table.totals,
       summaryLabels: {
-        engagementRate: t("summary.engagementRate"),
-        financialDistribution: t("summary.financialDistribution"),
+        engagementRate: t.summary.engagementRate,
+        financialDistribution: t.summary.financialDistribution,
       },
     },
     fxMessages,

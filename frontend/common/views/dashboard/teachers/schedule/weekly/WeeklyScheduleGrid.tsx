@@ -10,7 +10,6 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
@@ -24,6 +23,7 @@ import type {
   WeeklyScheduleGridProps,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function isTerminalClassInstance(executionState?: ClassExecutionState | null, outcome?: ClassOutcome | null): boolean {
   return (
@@ -54,7 +54,8 @@ interface SlotItemProps {
 
 function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
   const [open, setOpen] = useState(false);
-  const t = useTranslations("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
+  const tMeeting = useAppTranslation("ui.meetingConfig").join;
 
   const handleDeleteClick = () => {
     setOpen(true);
@@ -102,12 +103,12 @@ function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
               joinUrl={classItem.meetingJoinUrl}
               meeting={classItem.effectiveMeeting}
               emptyRole="teacher"
-              label={t("actions.joinVideo")}
+              label={tMeeting.joinMeeting}
               setupHref="/profile?tab=meeting"
             />
           ) : isTerminal ? (
             <Typography variant="labelMd" sx={{ opacity: 0.7, color: "inherit", fontSize: 10 }}>
-              {t("grid.sessionEnded")}
+              {t.grid.sessionEnded}
             </Typography>
           ) : null}
           {showDelete ? (
@@ -130,14 +131,14 @@ function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
       </Box>
 
       <Dialog open={open} onClose={handleCancel}>
-        <DialogTitle>{t("dialogs.deleteClassTitle")}</DialogTitle>
+        <DialogTitle>{t.dialogs.deleteClassTitle}</DialogTitle>
         <DialogContent>
-          <DialogContentText>{t("dialogs.deleteClassMessage")}</DialogContentText>
+          <DialogContentText>{t.dialogs.deleteClassMessage}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel}>{t("dialogs.cancel")}</Button>
+          <Button onClick={handleCancel}>{t.dialogs.cancel}</Button>
           <Button onClick={handleConfirm} color="error" variant="contained" autoFocus>
-            {t("dialogs.confirmYes")}
+            {t.dialogs.confirmYes}
           </Button>
         </DialogActions>
       </Dialog>
@@ -146,7 +147,7 @@ function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
 }
 
 function GridHeader() {
-  const t = useTranslations("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
 
   return (
     <Box
@@ -168,7 +169,7 @@ function GridHeader() {
           justifyContent: "center",
         })}
       >
-        <Typography variant="labelUppercase">{t("grid.teacherTime")}</Typography>
+        <Typography variant="labelUppercase">{t.grid.teacherTime}</Typography>
       </Box>
       {DAYS.map(day => (
         <Box
@@ -180,7 +181,7 @@ function GridHeader() {
           })}
         >
           <Typography variant="titleLg" sx={{ color: "inherit" }}>
-            {t(`days.${day}`)}
+            {t.days[day]}
           </Typography>
         </Box>
       ))}
@@ -195,7 +196,7 @@ interface GridRowProps {
 }
 
 function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
-  const t = useTranslations("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
 
   const getClassesForSlot = (day: string) => {
     return classes.filter(c => c.day?.toLowerCase() === day && c.startTime === time);
@@ -254,7 +255,7 @@ function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
                 }}
               >
                 <Typography variant="caption" sx={{ fontStyle: "italic" }}>
-                  {t("grid.lunchBreak")}
+                  {t.grid.lunchBreak}
                 </Typography>
               </Box>
             ) : (

@@ -2,6 +2,7 @@ import { seedCatalogLogoUrls } from "@/backend/db/seeds/lib/logo-seed-helper";
 import { ONLINE_ACCOUNT_CATALOG_SEEDS } from "@/backend/db/seeds/lib/payment-catalog-factory";
 import logger from "@/backend/lib/logger";
 import { PaymentCatalogService } from "@/backend/services/payment-method/payment-catalog.service";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export async function seedOrGet() {
   logger.info("Seeding supported online accounts...");
@@ -23,7 +24,8 @@ export async function seedOrGet() {
     updatedAt: now,
   }));
 
-  const results = await PaymentCatalogService.upsertManyOnlineAccounts(inputs);
+  const tErrors = await getServerTranslations("en", "errors");
+  const results = await PaymentCatalogService.upsertManyOnlineAccounts(inputs, tErrors);
   logger.info(`Supported online accounts seeded (${results.length} rows).`);
   return results;
 }

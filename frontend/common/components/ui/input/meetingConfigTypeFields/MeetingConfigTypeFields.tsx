@@ -2,9 +2,9 @@
 
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import { useTranslations } from "next-intl";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { getVisibleMeetingConfigFields } from "@/frontend/common/lib/meeting-config";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type MeetingConfigDetailsFormValue = {
   meetingUrl: string;
@@ -30,7 +30,7 @@ export function MeetingConfigTypeFields({
   passwordHelperText,
   onMeetingUrlBlur,
 }: MeetingConfigTypeFieldsProps) {
-  const t = useTranslations("ui.meetingConfig.fields");
+  const t = useAppTranslation("ui").meetingConfig.fields;
 
   if (!provider) {
     return null;
@@ -41,7 +41,7 @@ export function MeetingConfigTypeFields({
   return (
     <Stack spacing={2}>
       <TextField
-        label={t("meetingUrl")}
+        label={t.meetingUrl}
         value={value.meetingUrl}
         disabled={disabled}
         fullWidth
@@ -52,7 +52,7 @@ export function MeetingConfigTypeFields({
       />
       {fields.showUsername ? (
         <TextField
-          label={t("username")}
+          label={t.username}
           value={value.username ?? ""}
           disabled={disabled}
           fullWidth
@@ -61,7 +61,7 @@ export function MeetingConfigTypeFields({
       ) : null}
       {fields.showPassword ? (
         <TextField
-          label={t("password")}
+          label={t.password}
           type="password"
           value={value.password ?? ""}
           disabled={disabled}
@@ -72,7 +72,7 @@ export function MeetingConfigTypeFields({
       ) : null}
       {fields.showTenantId ? (
         <TextField
-          label={t("tenantId")}
+          label={t.tenantId}
           value={value.tenantId ?? ""}
           disabled={disabled}
           fullWidth

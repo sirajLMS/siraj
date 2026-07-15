@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
 import { requireTeacherIdForPage } from "@/backend/lib/auth/require-teacher-id";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { FutureScheduleContainer } from "@/frontend/common/views/dashboard/teachers/futureSchedule/FutureScheduleContainer";
+import { getTranslations } from "@/shared/locale/server";
 
 interface PageProps {
   readonly params: Promise<{ readonly locale: string }>;
@@ -15,13 +15,12 @@ export async function generateMetadata({
   params: Promise<{ readonly locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "dashboard.teacherFutureSchedule" });
-  return { title: t("pageTitle") };
+  const t = await getTranslations(locale, "dashboard.teacherFutureSchedule");
+  return { title: t.pageTitle };
 }
 
 export default async function TeacherMeFutureSchedulePage({ params }: PageProps) {
   const { locale } = await params;
-  setRequestLocale(locale);
 
   const { userId, context } = await getServerUserContext();
   if (!userId) {

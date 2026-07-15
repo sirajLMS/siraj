@@ -2,7 +2,6 @@
 
 import { ReportProblemOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { ConflictErrorsPanel } from "@/frontend/common/views/dashboard/tools/dst-migration/components/ConflictErrorsPanel";
 import { DstMigrationMetricsRow } from "@/frontend/common/views/dashboard/tools/dst-migration/components/DstMigrationMetricsRow";
@@ -14,6 +13,7 @@ import type {
   MigrationStatus,
   UpdatedSession,
 } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface Props {
   readonly metrics: DstMigrationMetrics;
@@ -25,11 +25,11 @@ interface Props {
 }
 
 function MobileInactiveNote() {
-  const t = useTranslations("dashboard.dstMigration");
+  const t = useAppTranslation("dashboard.dstMigration");
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <SectionPanel title={t("sections.inactiveVerified")} />
+      <SectionPanel title={t.sections.inactiveVerified} />
       <Box
         sx={theme => ({
           p: 2,
@@ -42,7 +42,7 @@ function MobileInactiveNote() {
       >
         <ReportProblemOutlined sx={theme => ({ color: theme.palette.warning.main })} />
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t("checkedEmpty.inactiveNote")}
+          {t.checkedEmpty.inactiveNote}
         </Typography>
       </Box>
     </Box>
@@ -50,15 +50,15 @@ function MobileInactiveNote() {
 }
 
 function MobileConflictsHeader() {
-  const t = useTranslations("dashboard.dstMigration");
+  const t = useAppTranslation("dashboard.dstMigration");
 
-  return <SectionPanel title={t("sections.conflictsDetected")} />;
+  return <SectionPanel title={t.sections.conflictsDetected} />;
 }
 
 function MobileUpdatedHeader() {
-  const t = useTranslations("dashboard.dstMigration");
+  const t = useAppTranslation("dashboard.dstMigration");
 
-  return <SectionPanel title={t("sections.successfullyUpdated")} />;
+  return <SectionPanel title={t.sections.successfullyUpdated} />;
 }
 
 export function DstMigrationViewMobile({
@@ -69,11 +69,11 @@ export function DstMigrationViewMobile({
   onUpdate,
   dstOffsetDetected,
 }: Readonly<Props>) {
-  const t = useTranslations("dashboard.dstMigration");
+  const t = useAppTranslation("dashboard.dstMigration");
 
   return (
     <PageContainer>
-      <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
+      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
 
       <Box sx={{ mb: 3 }}>
         <UpdateSchedulesButtonMobile

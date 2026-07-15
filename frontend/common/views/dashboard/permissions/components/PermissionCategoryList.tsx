@@ -1,9 +1,9 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionCategoryGroup } from "@/frontend/common/views/dashboard/permissions/components/PermissionCategoryGroup";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ValidPermission = Permission & { id: string; key: string; category: string };
 
@@ -26,7 +26,7 @@ export function PermissionCategoryList({
   onTogglePermission,
   isLoading,
 }: Readonly<PermissionCategoryListProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -35,7 +35,7 @@ export function PermissionCategoryList({
           variant="bodyMd"
           sx={theme => ({ textAlign: "center", color: theme.palette.text.secondary, py: 4 })}
         >
-          {t("noPermissionsFound")}
+          {t.noPermissionsFound}
         </Typography>
       ) : (
         Object.entries(groupedPermissions).map(([categoryName, perms]) => (

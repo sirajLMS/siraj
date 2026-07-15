@@ -1,9 +1,9 @@
 "use client";
 
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import logger from "@/frontend/common/lib/logger";
+import { useAppTranslation } from "@/shared/locale/client";
 
 // Configuration
 const CONNECTIVITY_CHECK_URL = "/api/graphql";
@@ -20,7 +20,7 @@ const getReconnectionDelay = (attempt: number): number | null => {
 
 export const useApolloConnectivity = () => {
   const notifications = useNotifications();
-  const t = useTranslations("common");
+  const t = useAppTranslation("common");
 
   const [isConnected, setIsConnected] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
@@ -91,15 +91,15 @@ export const useApolloConnectivity = () => {
 
   const notifyIfDisconnected = useCallback(() => {
     if (!isConnectedRef.current) {
-      notifications.show(`${t("serverConnectionLost")}. ${t("checkNetworkConnection")}.`, {
+      notifications.show(`${t.errors.serverConnectionLost}. ${t.errors.checkNetworkConnection}.`, {
         severity: "error",
         autoHideDuration: 5000,
-        actionText: t("retry"),
+        actionText: t.errors.retry,
         onAction: () => {
           reconnectAttemptRef.current = 0;
           checkConnectivity().then(connected => {
             if (connected) {
-              notifications.show(t("connectionRestored"), {
+              notifications.show(t.errors.connectionRestored, {
                 severity: "success",
                 autoHideDuration: 3000,
               });

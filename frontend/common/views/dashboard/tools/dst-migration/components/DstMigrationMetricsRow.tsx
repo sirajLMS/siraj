@@ -2,25 +2,25 @@
 
 import { AnalyticsOutlined, ErrorOutlined, HistoryOutlined, VerifiedOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { DstMigrationMetrics } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface Props {
   readonly metrics: DstMigrationMetrics;
 }
 
 export function DstMigrationMetricsRow({ metrics }: Readonly<Props>) {
-  const t = useTranslations("dashboard.dstMigration.metrics");
+  const t = useAppTranslation("dashboard.dstMigration").metrics;
 
   return (
     <Grid container spacing={2} sx={{ mt: 4 }}>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <MetricCard label={t("totalAudited")} value={metrics.totalAudited} icon={AnalyticsOutlined} />
+        <MetricCard label={t.totalAudited} value={metrics.totalAudited} icon={AnalyticsOutlined} />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <MetricCard
-          label={t("successful")}
+          label={t.successful}
           value={metrics.successful}
           icon={VerifiedOutlined}
           variant="highlight"
@@ -29,7 +29,7 @@ export function DstMigrationMetricsRow({ metrics }: Readonly<Props>) {
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <MetricCard
-          label={t("conflicts")}
+          label={t.conflicts}
           value={metrics.conflicts}
           icon={ErrorOutlined}
           variant="error"
@@ -37,7 +37,7 @@ export function DstMigrationMetricsRow({ metrics }: Readonly<Props>) {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <MetricCard label={t("unchanged")} value={metrics.unchanged} icon={HistoryOutlined} animationIndex={3} />
+        <MetricCard label={t.unchanged} value={metrics.unchanged} icon={HistoryOutlined} animationIndex={3} />
       </Grid>
     </Grid>
   );

@@ -3,6 +3,7 @@ import logger from "@/backend/lib/logger";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import type { TeacherEntity } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export async function seedOrGet(teachersList: TeacherEntity[], config?: SeedConfig) {
   logger.info("Seeding user meeting configs...");
@@ -32,7 +33,8 @@ export async function seedOrGet(teachersList: TeacherEntity[], config?: SeedConf
     password: index === 0 ? "seed-zoom-pass" : null,
   }));
 
-  const results = await MeetingConfigService.upsertManyUserMeetingConfigs(inputs);
+  const tErrors = await getServerTranslations("en", "errors");
+  const results = await MeetingConfigService.upsertManyUserMeetingConfigs(inputs, tErrors);
   logger.info(`User meeting configs seeded (${results.length} rows).`);
   return results;
 }

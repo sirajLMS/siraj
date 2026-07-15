@@ -1,13 +1,13 @@
 "use client";
 
-import { useLocale } from "next-intl";
 import { useTransition } from "react";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import type { Locale } from "@/shared/i18n/routing";
 import { useRouter } from "@/shared/i18n/routing";
 
 export function useLanguageSwitch() {
   const router = useRouter();
-  const currentLocale = useLocale() as Locale;
+  const currentLocale = useAppLocale() as Locale;
   const [isPending, startTransition] = useTransition();
 
   const switchLanguage = (newLocale: Locale) => {

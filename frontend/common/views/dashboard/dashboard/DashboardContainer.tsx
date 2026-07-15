@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
@@ -11,6 +10,7 @@ import { ParentDashboardContainer } from "@/frontend/common/views/dashboard/pare
 import { StudentDashboardContainer } from "@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer";
 import { SupervisorDashboardContainer } from "@/frontend/common/views/dashboard/supervisor/dashboard/SupervisorDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
   return (
@@ -41,7 +41,7 @@ function shouldShowSupervisorDashboard(permissions: readonly AppPermission[]): b
 
 export function DashboardContainer() {
   const { user, setUser } = useUserStore();
-  const t = useTranslations("common");
+  const t = useAppTranslation("common");
 
   const { data, loading } = useQuery(meQueryDocument, {
     skip: !!user?.role,
@@ -54,7 +54,7 @@ export function DashboardContainer() {
   }, [data, setUser]);
 
   if (!user && loading) {
-    return <div>{t("loading")}</div>;
+    return <div>{t.loading}</div>;
   }
 
   const permissions = user?.permissions || [];

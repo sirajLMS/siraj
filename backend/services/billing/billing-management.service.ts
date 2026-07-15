@@ -105,11 +105,12 @@ async function finalizePaymentStatusChange(
   errorLabel: string,
   actorUserId: string,
   invoiceId: string,
-  txnWork: (tx: DBTransaction) => Promise<Types.InvoiceSelectType>,
+  txnWork: (tx: DBTransaction, tErrors: ErrorsLabels) => Promise<Types.InvoiceSelectType>,
+  tErrors: ErrorsLabels,
   locale?: string
 ): Promise<Types.MarkInvoicePaidResult> {
   try {
-    const updated = await db.transaction(txnWork);
+    const updated = await db.transaction(tx => txnWork(tx, tErrors));
     const notificationSummaryUpdated = await syncNotificationsAfterPaymentChange(locale);
     return mapMarkPaidResult(updated, notificationSummaryUpdated);
   } catch (error) {
@@ -167,7 +168,7 @@ async function finalizeInvoicePaid(
   const submittedAt = new Date();
   const proof = buildProofSnapshot(proofFileId, filePath, mimeType, submittedByUserId, submittedAt);
   const invoice = await BillingRepository.markInvoiceAsPaid(invoiceId, tErrors, expectedVersion, tx);
-  await recordProofPayment(invoice, proof, tx);
+  await recordProofPayment(invoice, proof, tErrors, tx);
 
   logger.info("Invoice marked as paid with proof", {
     actorUserId,
@@ -189,7 +190,11 @@ export namespace BillingManagementService {
     await validateManualInvoiceInput(input, tErrors);
 
     try {
-      const created = await BillingRepository.createInvoice(buildInvoiceInsertPayload(actorUserId, input), undefined);
+      const created = await BillingRepository.createInvoice(
+        buildInvoiceInsertPayload(actorUserId, input),
+        tErrors,
+        undefined
+      );
 
       const billingMonths = input.billingMonths;
       if (billingMonths?.length) {
@@ -227,35 +232,41 @@ export namespace BillingManagementService {
       throw new Error(tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: existingInvoice.status }));
     }
 
-    return finalizePaymentStatusChange("Failed to submit payment proof", actorUserId, invoiceId, async tx => {
-      const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, tx);
-      await linkProofToInvoice(invoiceId, proofFileId, tx);
+    return finalizePaymentStatusChange(
+      "Failed to submit payment proof",
+      actorUserId,
+      invoiceId,
+      async (tx, tErrors) => {
+        const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, tx);
+        await linkProofToInvoice(invoiceId, proofFileId, tx);
 
-      const submittedAt = new Date();
-      await InvoicePaymentSubmissionRepository.createSubmission(
-        {
+        const submittedAt = new Date();
+        await InvoicePaymentSubmissionRepository.createSubmission(
+          {
+            invoiceId,
+            fileId: proofFileId,
+            submittedByUserId: actorUserId,
+            submittedAt,
+            status: "pending",
+            reviewedByUserId: null,
+            reviewedAt: null,
+            rejectionReason: null,
+          },
+          tx
+        );
+
+        const invoice = await BillingRepository.setInvoicePaymentPending(invoiceId, tErrors, expectedVersion, tx);
+        logger.info("Payment proof submitted", {
+          actorUserId,
           invoiceId,
-          fileId: proofFileId,
-          submittedByUserId: actorUserId,
-          submittedAt,
-          status: "pending",
-          reviewedByUserId: null,
-          reviewedAt: null,
-          rejectionReason: null,
-        },
-        tx
-      );
-
-      const invoice = await BillingRepository.setInvoicePaymentPending(invoiceId, expectedVersion, tx);
-      logger.info("Payment proof submitted", {
-        actorUserId,
-        invoiceId,
-        proofFileId,
-        filePath,
-        mimeType,
-      });
-      return invoice;
-    });
+          proofFileId,
+          filePath,
+          mimeType,
+        });
+        return invoice;
+      },
+      tErrors
+    );
   }
 
   export async function approvePaymentProof(
@@ -273,19 +284,32 @@ export namespace BillingManagementService {
       throw new Error(tErrors.billing.invoicePaymentProofNotFound(invoiceId));
     }
 
-    return finalizePaymentStatusChange("Failed to approve payment proof", actorUserId, invoiceId, async tx => {
-      const invoice = await finalizeInvoicePaid(
-        actorUserId,
-        invoiceId,
-        pending.fileId,
-        pending.submittedByUserId,
-        expectedVersion,
-        tx,
-        tErrors
-      );
-      await InvoicePaymentSubmissionRepository.updateSubmissionStatus(pending.id, "approved", actorUserId, null, tx);
-      return invoice;
-    });
+    return finalizePaymentStatusChange(
+      "Failed to approve payment proof",
+      actorUserId,
+      invoiceId,
+      async (tx, tErrors) => {
+        const invoice = await finalizeInvoicePaid(
+          actorUserId,
+          invoiceId,
+          pending.fileId,
+          pending.submittedByUserId,
+          expectedVersion,
+          tx,
+          tErrors
+        );
+        await InvoicePaymentSubmissionRepository.updateSubmissionStatus(
+          pending.id,
+          "approved",
+          actorUserId,
+          null,
+          tErrors,
+          tx
+        );
+        return invoice;
+      },
+      tErrors
+    );
   }
 
   export async function rejectPaymentProof(
@@ -299,15 +323,22 @@ export namespace BillingManagementService {
 
     await fetchInvoicePendingReview(invoiceId, tErrors);
 
-    return finalizePaymentStatusChange("Failed to reject payment proof", actorUserId, invoiceId, async tx => {
-      await InvoicePaymentSubmissionRepository.rejectPendingForInvoice(
-        invoiceId,
-        actorUserId,
-        rejectionReason ?? null,
-        tx
-      );
-      return BillingRepository.updateInvoiceStatus(invoiceId, "UNPAID", null, expectedVersion, tx);
-    });
+    return finalizePaymentStatusChange(
+      "Failed to reject payment proof",
+      actorUserId,
+      invoiceId,
+      async (tx, tErrors) => {
+        await InvoicePaymentSubmissionRepository.rejectPendingForInvoice(
+          invoiceId,
+          actorUserId,
+          rejectionReason ?? null,
+          tErrors,
+          tx
+        );
+        return BillingRepository.updateInvoiceStatus(invoiceId, "UNPAID", tErrors, null, expectedVersion, tx);
+      },
+      tErrors
+    );
   }
 
   export async function getInvoicePaymentSubmission(
@@ -345,8 +376,13 @@ export namespace BillingManagementService {
       throw new Error(tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: existingInvoice.status }));
     }
 
-    return finalizePaymentStatusChange("Failed to mark invoice as paid", actorUserId, invoiceId, tx =>
-      finalizeInvoicePaid(actorUserId, invoiceId, proofFileId, actorUserId, expectedVersion, tx, tErrors)
+    return finalizePaymentStatusChange(
+      "Failed to mark invoice as paid",
+      actorUserId,
+      invoiceId,
+      async (tx, tErrors) =>
+        finalizeInvoicePaid(actorUserId, invoiceId, proofFileId, actorUserId, expectedVersion, tx, tErrors),
+      tErrors
     );
   }
 

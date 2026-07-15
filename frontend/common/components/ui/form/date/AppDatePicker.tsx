@@ -5,7 +5,7 @@ import { DatePicker, type DatePickerProps } from "@mui/x-date-pickers/DatePicker
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import type { PickersInputLocaleText } from "@mui/x-date-pickers/locales";
 import { ar } from "date-fns/locale/ar";
-import { useLocale } from "next-intl";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 
 const ARABIC_PICKER_LOCALE_TEXT = {
   previousMonth: "الشهر السابق",
@@ -33,7 +33,7 @@ const ARABIC_PICKER_LOCALE_TEXT = {
 } satisfies PickersInputLocaleText;
 
 export function AppDatePicker(props: Readonly<DatePickerProps>) {
-  const locale = useLocale();
+  const locale = useAppLocale();
   const isArabicLocale = locale === "ar";
 
   return (

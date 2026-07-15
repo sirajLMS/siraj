@@ -1,13 +1,13 @@
 "use client";
 
 import { Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
 import {
   isTeacherAdminData,
   type TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type StatsSectionProps = {
   readonly teacherData: TeacherViewData;
@@ -15,15 +15,16 @@ type StatsSectionProps = {
 };
 
 export function StatsSection({ teacherData, isAdminScope }: StatsSectionProps) {
-  const t = useTranslations("profile.teacher");
+  const t = useAppTranslation("dashboard.teacherProfile");
+
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
 
   return (
-    <SectionPanel title={t("sections.stats")}>
+    <SectionPanel title={t.sections.stats}>
       <Stack spacing={2}>
-        <InfoField label={t("stats.totalClasses")} value={String(teacherData.totalClasses ?? 0)} />
+        <InfoField label={t.stats.totalClasses} value={String(teacherData.totalClasses ?? 0)} />
         {isAdminScope && adminData ? (
-          <InfoField label={t("stats.avgEngagement")} value={(adminData.avgEngagementScore ?? 0).toFixed(1)} />
+          <InfoField label={t.stats.avgEngagement} value={(adminData.avgEngagementScore ?? 0).toFixed(1)} />
         ) : null}
       </Stack>
     </SectionPanel>

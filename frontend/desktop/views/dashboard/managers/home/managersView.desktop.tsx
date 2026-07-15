@@ -1,4 +1,3 @@
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -12,6 +11,7 @@ import type {
   NonNullableManagerDirectoryMetrics,
 } from "@/frontend/common/views/dashboard/managers/home/types";
 import { Link } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface ManagersViewDesktopProps {
   readonly managers: readonly Manager[];
@@ -40,19 +40,19 @@ export function ManagersViewDesktop({
   onRoleFilterChange,
   onStatusFilterChange,
 }: Readonly<ManagersViewDesktopProps>) {
-  const t = useTranslations("dashboard.managersDirectory");
+  const t = useAppTranslation("dashboard.managersDirectory");
 
   const actions = (
     <RequirePermission permissions={[AppPermission.StaffCreate]}>
       <Link href="/managers/onboarding" style={{ textDecoration: "none" }}>
-        <PrimaryPageAction>{t("actions.addManager")}</PrimaryPageAction>
+        <PrimaryPageAction>{t.actions.addManager}</PrimaryPageAction>
       </Link>
     </RequirePermission>
   );
 
   return (
     <PageContainer>
-      <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} actions={actions} />
+      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} actions={actions} />
 
       <ManagersMetrics metrics={metrics} />
 

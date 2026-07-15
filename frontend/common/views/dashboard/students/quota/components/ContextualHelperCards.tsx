@@ -1,9 +1,9 @@
 import { InfoOutlined, PublicOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function ContextualHelperCards() {
-  const t = useTranslations("dashboard.studentQuota.info");
+  const t = useAppTranslation("dashboard.studentQuota.info");
 
   return (
     <Box
@@ -54,10 +54,10 @@ export function ContextualHelperCards() {
               mb: 0.5,
             })}
           >
-            {t("quotaTitle")}
+            {t.quotaTitle}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {t("quotaDesc")}
+            {t.quotaDesc}
           </Typography>
         </Box>
       </Box>
@@ -102,10 +102,10 @@ export function ContextualHelperCards() {
               mb: 0.5,
             })}
           >
-            {t("publicTitle")}
+            {t.publicTitle}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {t("publicDesc")}
+            {t.publicDesc}
           </Typography>
         </Box>
       </Box>

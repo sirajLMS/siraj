@@ -1,5 +1,7 @@
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 const EffectiveMeetingSourceRef = gqlSchemaBuilder.enumType("EffectiveMeetingSource", {
   values: ["class", "recurring", "teacher", "none"] as const,
@@ -20,7 +22,12 @@ export const EffectiveMeetingPothosObject = EffectiveMeetingRef.implement({
   }),
 });
 
-export async function resolveEffectiveMeetingForClassInstance(classInstanceId: string) {
+export async function resolveEffectiveMeetingForClassInstance(classInstanceId: string, tErrors: ErrorsLabels) {
   const { EffectiveMeetingService } = await import("@/backend/services/meeting/class-meeting-config.service");
-  return EffectiveMeetingService.resolveForClassInstance(classInstanceId);
+  return EffectiveMeetingService.resolveForClassInstance(classInstanceId, tErrors);
+}
+
+export async function resolveEffectiveMeetingForClassInstanceFromContext(classInstanceId: string, ctx: BaseContext) {
+  const tErrors = await ctx.t("errors");
+  return resolveEffectiveMeetingForClassInstance(classInstanceId, tErrors);
 }

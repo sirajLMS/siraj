@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
@@ -11,10 +10,11 @@ import {
   resolveDailyScheduleMetricFilter,
 } from "@/frontend/common/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
+import { useAppTranslation } from "@/shared/locale/client";
 import { MOCK_SCHEDULE, MOCK_TEACHERS } from "@/test/ui/components/fixtures/adminDashboardFixtures";
 
 export function MockAdminDashboardContainer() {
-  const t = useTranslations("dashboard");
+  const t = useAppTranslation("dashboard").admin;
   const { headers, statusLabels } = useAdminDashboardLabels();
 
   const lastUpdatedKey = useDashboardStore(state => state.lastUpdated);
@@ -33,7 +33,7 @@ export function MockAdminDashboardContainer() {
   const cleanedLastUpdatedKey = lastUpdatedKey.startsWith("dashboard.")
     ? lastUpdatedKey.replace("dashboard.", "")
     : lastUpdatedKey;
-  const translatedLastUpdated = t(cleanedLastUpdatedKey as Parameters<typeof t>[0]);
+  const translatedLastUpdated = t.updatedMinutesAgo(cleanedLastUpdatedKey as Parameters<typeof t.updatedMinutesAgo>[0]);
 
   const metricFilter = resolveDailyScheduleMetricFilter(filters.selectedStatus);
 
@@ -76,9 +76,7 @@ export function MockAdminDashboardContainer() {
   const filteredRows = baseRows.filter(row => matchesDailyScheduleMetricFilter(row, metricFilter));
   const paginatedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
 
-  const selectedMetricLabel = filters.selectedStatus
-    ? (t(`admin.metrics.${filters.selectedStatus}` as `admin.metrics.${AdminMetricKey}`) as string)
-    : null;
+  const selectedMetricLabel = filters.selectedStatus ? (t.metrics[filters.selectedStatus] as string) : null;
 
   const handleMetricClick = (key: string) => {
     setPage(0);

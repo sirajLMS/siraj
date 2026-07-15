@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import {
   ClassExecutionState,
@@ -23,6 +22,7 @@ import type {
   WorkshopPromo,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function mapExecutionStateToLiveClassStatus(
   executionState: string,
@@ -103,65 +103,61 @@ function useScheduleRows(
   }, [data]);
 }
 
-function useDashboardLabels(
-  t: ReturnType<typeof useTranslations<"dashboard.parentDashboard">>,
-  userName: string,
-  pendingMessages: number
-) {
+function useDashboardLabels(t: ReturnType<typeof useAppTranslation>, userName: string, pendingMessages: number) {
   return useMemo(
     () => ({
-      pageTitle: t("pageTitle"),
-      welcome: t("welcome", { name: userName }),
-      welcomeBack: t("welcomeBack"),
-      pendingMessages: t("pendingMessages", { count: pendingMessages }),
+      pageTitle: t.pageTitle,
+      welcome: t.welcome({ name: userName }),
+      welcomeBack: t.welcomeBack,
+      pendingMessages: t.pendingMessages({ count: pendingMessages }),
       metrics: {
-        totalStudents: t("metrics.totalStudents"),
-        todaysClasses: t("metrics.todaysClasses"),
-        pendingInvoices: t("metrics.pendingInvoices"),
-        performanceAvg: t("metrics.performanceAvg"),
+        totalStudents: t.metrics.totalStudents,
+        todaysClasses: t.metrics.todaysClasses,
+        pendingInvoices: t.metrics.pendingInvoices,
+        performanceAvg: t.metrics.performanceAvg,
       },
       schedule: {
-        title: t("schedule.title"),
-        titleMobile: t("schedule.titleMobile"),
-        filter: t("schedule.filter"),
-        viewFullWeek: t("schedule.viewFullWeek"),
-        viewAll: t("schedule.viewAll"),
-        rowNumber: t("schedule.rowNumber"),
-        classTime: t("schedule.classTime"),
-        studentName: t("schedule.studentName"),
-        teacherName: t("schedule.teacherName"),
-        history: t("schedule.history"),
-        status: t("schedule.status"),
-        contact: t("schedule.contact"),
-        classStatus: t("schedule.classStatus"),
-        duration: t("schedule.duration", { minutes: "{minutes}" }),
-        teacherLabel: t("schedule.teacherLabel", { name: "{name}" }),
-        joinVideo: t("schedule.joinVideo"),
-        frozen: t("schedule.frozen"),
-        contactAdmin: t("schedule.contactAdmin"),
-        noEntries: t("schedule.noEntries"),
+        title: t.schedule.title,
+        titleMobile: t.schedule.titleMobile,
+        filter: t.schedule.filter,
+        viewFullWeek: t.schedule.viewFullWeek,
+        viewAll: t.schedule.viewAll,
+        rowNumber: t.schedule.rowNumber,
+        classTime: t.schedule.classTime,
+        studentName: t.schedule.studentName,
+        teacherName: t.schedule.teacherName,
+        history: t.schedule.history,
+        status: t.schedule.status,
+        contact: t.schedule.contact,
+        classStatus: t.schedule.classStatus,
+        duration: t.schedule.duration({ minutes: "{minutes}" }),
+        teacherLabel: t.schedule.teacherLabel({ name: "{name}" }),
+        joinVideo: t.schedule.joinVideo,
+        frozen: t.schedule.frozen,
+        contactAdmin: t.schedule.contactAdmin,
+        noEntries: t.schedule.noEntries,
       },
       bookingStatus: {
-        confirmed: t("bookingStatus.confirmed"),
-        rescheduled: t("bookingStatus.rescheduled"),
+        confirmed: t.bookingStatus.confirmed,
+        rescheduled: t.bookingStatus.rescheduled,
       },
       liveClassStatus: {
-        starting_soon: t("liveClassStatus.startingSoon"),
-        pending: t("liveClassStatus.pending"),
-        scheduled: t("liveClassStatus.scheduled"),
+        starting_soon: t.liveClassStatus.startingSoon,
+        pending: t.liveClassStatus.pending,
+        scheduled: t.liveClassStatus.scheduled,
       },
       progress: {
-        title: t("progress.title"),
-        subtitle: t("progress.subtitle"),
-        completion: t("progress.completion", { percent: "{percent}" }),
-        downloadReport: t("progress.downloadReport"),
+        title: t.progress.title,
+        subtitle: t.progress.subtitle,
+        completion: t.progress.completion({ percent: "{percent}" }),
+        downloadReport: t.progress.downloadReport,
       },
       workshop: {
-        badge: t("workshop.badge"),
-        learnMore: t("workshop.learnMore"),
+        badge: t.workshop.badge,
+        learnMore: t.workshop.learnMore,
       },
       support: {
-        liveSupport: t("support.liveSupport"),
+        liveSupport: t.support.liveSupport,
       },
     }),
     [t, userName, pendingMessages]
@@ -169,7 +165,7 @@ function useDashboardLabels(
 }
 
 export function ParentDashboardContainer() {
-  const t = useTranslations("dashboard.parentDashboard");
+  const t = useAppTranslation("dashboard.parentDashboard");
   const router = useRouter();
   const userName = useUserStore(state => state.name);
   const page = useParentDashboardStore(state => state.page);

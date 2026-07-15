@@ -4,7 +4,6 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   ClassExecutionState as GqlClassExecutionState,
@@ -24,6 +23,7 @@ import type {
   StudentStatusPageData,
   UpcomingClassDisplay,
 } from "@/frontend/common/views/dashboard/students/status/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type UpcomingClassInput = {
   readonly id?: string | null;
@@ -102,8 +102,8 @@ interface StudentStatusHookParams {
   readonly useUnifiedProfile: boolean;
   readonly profileContext: ReturnType<typeof useStudentProfileContext>;
   readonly notifications: ReturnType<typeof useNotifications>;
-  readonly t: ReturnType<typeof useTranslations>;
-  readonly tc: ReturnType<typeof useTranslations>;
+  readonly t: ReturnType<typeof useAppTranslation<"dashboard.studentStatus">>;
+  readonly tc: ReturnType<typeof useAppTranslation<"common">>;
 }
 
 interface StudentStatusHookResult {
@@ -144,7 +144,7 @@ function useStudentStatusData({
   });
 
   const handleMutationCompleted = useCallback(() => {
-    notifications.show(t("successMessage"), {
+    notifications.show(t.successMessage, {
       severity: "success",
       autoHideDuration: 5000,
     });
@@ -213,8 +213,8 @@ function useStudentStatusData({
 }
 
 export function StudentStatusContainer() {
-  const t = useTranslations("dashboard.studentStatus");
-  const tc = useTranslations("common");
+  const t = useAppTranslation("dashboard.studentStatus");
+  const tc = useAppTranslation("common");
   const params = useParams();
   const profileContext = useStudentProfileContext();
   const studentId = profileContext?.studentId ?? (typeof params?.id === "string" ? params.id : "");
@@ -225,7 +225,7 @@ export function StudentStatusContainer() {
     useStudentStatusData({ studentId, useUnifiedProfile, profileContext, notifications, t, tc });
 
   if (!studentId) {
-    return <ErrorMessage message={t("errors.invalidId")} />;
+    return <ErrorMessage message={t.errors.invalidId} />;
   }
 
   if (unifiedLoading && !hasProfile) {
@@ -244,12 +244,12 @@ export function StudentStatusContainer() {
   if (!student) {
     if (useUnifiedProfile) {
       if (!profileContext?.profile) {
-        return <ProfileRestrictedSection title={t("sections.adminHold")} />;
+        return <ProfileRestrictedSection title={t.sections.adminHold} />;
       }
       // Profile exists but missing id/name → incomplete profile
-      return <ProfileRestrictedSection title={t("errors.invalidId")} />;
+      return <ProfileRestrictedSection title={t.errors.invalidId} />;
     }
-    return <ErrorMessage message={t("errors.invalidId")} />;
+    return <ErrorMessage message={t.errors.invalidId} />;
   }
 
   return (

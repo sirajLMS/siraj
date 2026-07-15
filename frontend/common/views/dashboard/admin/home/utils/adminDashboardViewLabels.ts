@@ -1,6 +1,6 @@
-import type { useTranslations } from "next-intl";
+import type { useAppTranslation } from "@/shared/locale/client";
 
-type TranslationFunction = ReturnType<typeof useTranslations<"dashboard">>;
+type TranslationObject = ReturnType<typeof useAppTranslation<"dashboard.admin">>;
 
 export interface AdminDashboardViewLabels {
   readonly todayClassesTitle: string;
@@ -17,19 +17,20 @@ export interface AdminDashboardViewLabels {
   readonly loadingLabel: string;
 }
 
-export function buildAdminDashboardViewLabels(t: TranslationFunction): AdminDashboardViewLabels {
+export function buildAdminDashboardViewLabels(t: TranslationObject): AdminDashboardViewLabels {
+  const admin = t.admin;
   return {
-    todayClassesTitle: t("admin.todayClasses"),
-    scheduleTitle: t("admin.scheduleOverview"),
-    todayLabel: t("admin.today"),
-    previousDayLabel: t("admin.previousDay"),
-    nextDayLabel: t("admin.nextDay"),
-    searchPlaceholder: t("admin.searchPlaceholder"),
-    dateLabel: t("admin.listOfClassesOn"),
-    teacherPlaceholder: t("admin.selectTeacher"),
-    submitLabel: t("admin.submit"),
-    detailsLabel: t("admin.details"),
-    emptyMessage: t("admin.noClasses"),
-    loadingLabel: t("admin.loading"),
+    todayClassesTitle: admin.todayClasses,
+    scheduleTitle: admin.scheduleOverview,
+    todayLabel: admin.today,
+    previousDayLabel: admin.previousDay,
+    nextDayLabel: admin.nextDay,
+    searchPlaceholder: admin.searchPlaceholder,
+    dateLabel: admin.listOfClassesOn,
+    teacherPlaceholder: admin.selectTeacher,
+    submitLabel: admin.submit,
+    detailsLabel: admin.details,
+    emptyMessage: admin.noClasses,
+    loadingLabel: admin.loading,
   };
 }

@@ -2,7 +2,6 @@
 
 import { Switch, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/common/components/ui";
 import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -12,6 +11,7 @@ import {
   NOTIFICATION_EVENT_TYPES,
   type NotificationPrefRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type PreferencesMatrixProps = {
   readonly preferences: readonly NotificationPrefRow[];
@@ -69,7 +69,7 @@ export function PreferencesMatrix({
   disabled = false,
   loading = false,
 }: Readonly<PreferencesMatrixProps>) {
-  const t = useTranslations("profile.notifications");
+  const t = useAppTranslation("profile").notifications;
   const preferenceMap = buildPreferenceMap(preferences);
 
   const rows = useMemo<PreferenceMatrixRow[]>(() => {
@@ -86,7 +86,7 @@ export function PreferencesMatrix({
   const columns = useMemo<GridColDef<PreferenceMatrixRow>[]>(() => {
     const channelColumns: GridColDef<PreferenceMatrixRow>[] = NOTIFICATION_CHANNELS.map(channel => ({
       field: channel,
-      headerName: t(`channels.${channel}`),
+      headerName: t.channels[channel],
       width: 120,
       align: "center",
       headerAlign: "center",
@@ -98,8 +98,8 @@ export function PreferencesMatrix({
             row={row}
             channel={channel}
             disabled={disabled}
-            channelLabel={t(`channels.${channel}`)}
-            eventLabel={t(`events.${row.eventType}`)}
+            channelLabel={t.channels[channel]}
+            eventLabel={t.events[row.eventType]}
             onToggle={onToggle}
           />
         );
@@ -115,7 +115,7 @@ export function PreferencesMatrix({
         sortable: false,
         renderCell: params => {
           const row = params.row as PreferenceMatrixRow;
-          return <EventTypeCell label={t(`events.${row.eventType}`)} />;
+          return <EventTypeCell label={t.events[row.eventType]} />;
         },
       },
       ...channelColumns,
@@ -130,7 +130,7 @@ export function PreferencesMatrix({
       loading={loading && preferences.length === 0}
       hideFooter
       autoHeight
-      ariaLabel={t("title")}
+      ariaLabel={t.title}
     />
   );
 }

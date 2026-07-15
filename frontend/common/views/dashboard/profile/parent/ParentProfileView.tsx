@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { type CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/parent/sections/AccountSection";
@@ -18,6 +17,7 @@ import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/
 import { MeetingSummarySection } from "@/frontend/common/views/dashboard/profile/shared/MeetingSummarySection";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function hasParentSocialData(parentData: ParentViewData): boolean {
   return Boolean(parentData.facebook?.trim() || parentData.whatsapp?.trim() || parentData.twitter?.trim());
@@ -58,7 +58,7 @@ export function ParentProfileView({
   readonly parentId?: string | null;
   readonly meetingTabHref?: string;
 }) {
-  const t = useTranslations("profile.parent");
+  const t = useAppTranslation("profile").parent;
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canView } = useProfileFieldAccess({ scope });
   const adminData = isAdminScope ? (parentData as ParentAdminData) : null;
@@ -68,7 +68,7 @@ export function ParentProfileView({
       return null;
     }
     if (!hasParentSocialData(parentData)) {
-      return <ProfileRestrictedSection title={t("sections.social")} />;
+      return <ProfileRestrictedSection title={t.sections.social} />;
     }
     return <SocialSection mode="view" parentData={parentData} />;
   };
@@ -78,7 +78,7 @@ export function ParentProfileView({
       return null;
     }
     if (!hasParentIdentityData(adminData)) {
-      return <ProfileRestrictedSection title={t("sections.identity")} />;
+      return <ProfileRestrictedSection title={t.sections.identity} />;
     }
     return <IdentitySection mode="view" adminData={adminData} />;
   };
@@ -88,7 +88,7 @@ export function ParentProfileView({
       return null;
     }
     if (!hasParentBillingData(adminData)) {
-      return <ProfileRestrictedSection title={t("sections.billing")} />;
+      return <ProfileRestrictedSection title={t.sections.billing} />;
     }
     return <BillingSection mode="view" adminData={adminData} parentId={parentId ?? adminData.id} />;
   };
@@ -109,7 +109,7 @@ export function ParentProfileView({
       return null;
     }
     if (!associatedStudents) {
-      return <ProfileRestrictedSection title={t("sections.students")} />;
+      return <ProfileRestrictedSection title={t.sections.students} />;
     }
     return <AssociatedStudentsSection associatedStudents={associatedStudents} loading={studentsLoading} />;
   };
@@ -118,7 +118,7 @@ export function ParentProfileView({
     <Stack spacing={3}>
       {isAdminScope ? (
         <Typography sx={{ typography: "labelMd", color: theme => theme.palette.primary.main }}>
-          {t("adminBanner")}
+          {t.adminBanner}
         </Typography>
       ) : null}
 

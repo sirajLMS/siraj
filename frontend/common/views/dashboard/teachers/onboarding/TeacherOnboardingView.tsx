@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
@@ -21,6 +20,7 @@ import { TeacherInfoSection } from "@/frontend/common/views/dashboard/teachers/o
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import { teacherOnboardingSchema } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import { CountryCode, Gender } from "@/frontend/common/views/dashboard/teachers/onboarding/types";
+import { useAppTranslation } from "@/shared/locale/client";
 import type { MessageSchema } from "@/shared/messages/types/message";
 
 interface TeacherOnboardingViewProps {
@@ -32,7 +32,7 @@ interface TeacherOnboardingViewProps {
 }
 
 function OnboardingBanner() {
-  const t = useTranslations("dashboard.teacherOnboarding");
+  const t = useAppTranslation("dashboard.teacherOnboarding");
 
   return (
     <Box
@@ -55,9 +55,9 @@ function OnboardingBanner() {
       />
       <Box sx={theme => ({ position: "absolute", bottom: 16, left: 16, color: theme.palette.onSurface })}>
         <Typography variant="labelUppercase" sx={{ opacity: 0.9 }}>
-          {t("bannerJoinFaculty")}
+          {t.bannerJoinFaculty}
         </Typography>
-        <Typography variant="headlineMd">{t("bannerRegistrationForm")}</Typography>
+        <Typography variant="headlineMd">{t.bannerRegistrationForm}</Typography>
       </Box>
     </Box>
   );

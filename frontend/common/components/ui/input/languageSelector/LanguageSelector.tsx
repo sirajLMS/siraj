@@ -4,11 +4,12 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import { getLanguageDisplayName, type LanguageType, languages } from "@/frontend/common/lib/locale";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type LanguageSelectorProps = {
   readonly language?: LanguageType;
@@ -38,14 +39,14 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onBlurAction: onBlur,
   style,
 }: LanguageSelectorProps): React.ReactNode => {
-  const t = useTranslations("ui.languageSelector");
-  const locale = useLocale();
+  const t = useAppTranslation("ui.languageSelector");
+  const locale = useAppLocale();
 
   const getLanguageName = useCallback((code: string) => getLanguageDisplayName(code, locale), [locale]);
 
   const showRequiredError = Boolean(required) && !language;
   const showError = Boolean(error) || showRequiredError;
-  const resolvedHelperText = helperText ?? (showRequiredError ? t("required") : undefined);
+  const resolvedHelperText = helperText ?? (showRequiredError ? t.required : undefined);
 
   return (
     <Autocomplete
@@ -75,7 +76,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       renderInput={params => (
         <TextField
           {...params}
-          label={label ?? t("selectLanguage")}
+          label={label ?? t.selectLanguage}
           required={required}
           error={showError}
           helperText={resolvedHelperText}

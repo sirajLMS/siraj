@@ -16,7 +16,7 @@ export namespace NotificationAlertsService {
         throw new Error(t("unauthorizedAction"));
       }
 
-      const tNotifications = await getBackendTranslations({ locale, namespace: "dashboard.notifications" });
+      const tNotifications = await getBackendTranslations({ locale, namespace: "dashboard.core.notifications" });
 
       const unansweredComplaints = await db
         .select({

@@ -1,24 +1,26 @@
-import { useTranslations } from "next-intl";
+"use client";
+
 import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export const useAdminDashboardLabels = () => {
-  const t = useTranslations("dashboard");
+  const t = useAppTranslation("dashboard").admin;
 
   const headers = {
-    student: t("admin.student"),
-    teacher: t("admin.teacher"),
-    time: t("admin.time"),
-    yourTime: t("admin.yourTime"),
-    teacherTime: t("admin.teacherTime"),
-    studentTime: t("admin.studentTime"),
-    duration: t("admin.duration"),
-    status: t("admin.status"),
-    actions: t("admin.actions"),
-    history: t("admin.history"),
-    joinVideo: t("admin.joinVideo"),
+    student: t.student,
+    teacher: t.teacher,
+    time: t.time,
+    yourTime: t.yourTime,
+    teacherTime: t.teacherTime,
+    studentTime: t.studentTime,
+    duration: t.duration,
+    status: t.status,
+    actions: t.actions,
+    history: t.history,
+    joinVideo: t.joinVideo,
   };
 
-  const statusLabels = buildClassInstanceStatusLabels(t);
+  const statusLabels = buildClassInstanceStatusLabels(t.statusLabels);
 
   return { headers, statusLabels };
 };

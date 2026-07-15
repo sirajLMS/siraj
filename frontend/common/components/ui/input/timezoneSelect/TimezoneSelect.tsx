@@ -5,7 +5,6 @@ import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { useMemo } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
@@ -16,6 +15,8 @@ import {
   type TimezoneOption,
   toGraphqlIanaTimezone,
 } from "@/frontend/common/lib/timezone";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type TimezoneSelectProps = {
   readonly value: IanaTimezone | null;
@@ -44,8 +45,8 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({
   error,
   helperText,
 }: TimezoneSelectProps): React.ReactNode => {
-  const t = useTranslations("ui.timezoneSelect");
-  const locale = useLocale();
+  const t = useAppTranslation("ui").timezoneSelect;
+  const locale = useAppLocale();
 
   const options = useMemo(() => getTimezoneOptions(locale), [locale]);
 
@@ -59,7 +60,7 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({
 
   const showRequiredError = Boolean(required) && !value;
   const showError = Boolean(error) || showRequiredError;
-  const resolvedHelperText = helperText ?? (showRequiredError ? t("required") : undefined);
+  const resolvedHelperText = helperText ?? (showRequiredError ? t.required : undefined);
 
   return (
     <Autocomplete<TimezoneOption, false, false, false>
@@ -92,7 +93,7 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({
       renderInput={params => (
         <TextField
           {...params}
-          label={label ?? t("selectTimezone")}
+          label={label ?? t.selectTimezone}
           required={required}
           error={showError}
           helperText={resolvedHelperText}

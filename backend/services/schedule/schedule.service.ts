@@ -40,7 +40,7 @@ export namespace ScheduleService {
 
   async function mapDailyScheduleListItem(item: DailyScheduleResult, tErrors: ErrorsLabels) {
     const unknownName = tErrors.unknownName;
-    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(item.id);
+    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(item.id, tErrors);
     return {
       id: item.id,
       studentTime: item.scheduledStartAt.toISOString(),
@@ -163,7 +163,7 @@ export namespace ScheduleService {
     }
   }
 
-  export async function getDailyMetrics(userId: string, targetDate: Date, teacherId?: string, tErrors: ErrorsLabels) {
+  export async function getDailyMetrics(userId: string, targetDate: Date, tErrors: ErrorsLabels, teacherId?: string) {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
       if (!isAuthorized) {
@@ -282,7 +282,7 @@ export namespace ScheduleService {
     now: Date,
     usedLeaves: number,
     maxLeaves: number,
-    _tErrors: ErrorsLabels
+    tErrors: ErrorsLabels
   ) {
     const classStart = new Date(cls.scheduledStartAt);
     const isPast = classStart < now;
@@ -307,7 +307,7 @@ export namespace ScheduleService {
       });
 
     const resolvedClassType = parseClassTypeOrNull(cls.classType);
-    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(cls.id);
+    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(cls.id, tErrors);
 
     return {
       id: cls.id,
@@ -358,7 +358,7 @@ export namespace ScheduleService {
     );
 
     const [importantNotes, supportContact] = await Promise.all([
-      TeacherNotesService.getActiveNotes(userId, resolvedTeacherId, tErrors).catch(
+      TeacherNotesService.getActiveNotes(userId, tErrors, resolvedTeacherId).catch(
         (): TeacherImportantNoteReturnType[] => []
       ),
       resolveSupportContact(),

@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Meta, StoryObj } from "@storybook/react";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -9,6 +8,7 @@ import type { SuggestionFormData } from "@/frontend/common/views/dashboard/sugge
 import { suggestionFormSchema } from "@/frontend/common/views/dashboard/suggestions/schemas/suggestionFormSchema";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 import { ParentSuggestionsDesktopView } from "@/frontend/desktop/views/dashboard/suggestions/parentSuggestions.desktop";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const PARENT_PERMISSIONS = [AppPermission.CommunicationSubmitSuggestion];
 
@@ -27,7 +27,7 @@ function ParentSuggestionsDesktopStoryRenderer({
   isSubmitting,
   canSubmit,
 }: Readonly<ParentSuggestionsDesktopStoryProps>) {
-  const t = useTranslations("dashboard.suggestions");
+  const t = useAppTranslation("dashboard.suggestions");
   const labels = buildSuggestionsLabels(t).parent;
   const {
     control,

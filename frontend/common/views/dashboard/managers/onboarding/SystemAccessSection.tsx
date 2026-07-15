@@ -2,13 +2,13 @@
 
 import { Box, Button, Grid, Input, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import type { ManagerOnboardingFormData } from "@/frontend/common/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
 import { ManagerAccountType } from "@/frontend/common/views/dashboard/managers/onboarding/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const ACCOUNT_TYPES: readonly ManagerAccountType[] = [ManagerAccountType.Manager, ManagerAccountType.Admin];
 
@@ -36,7 +36,7 @@ const StyledAccountTypeButton = styled(Button, {
 }));
 
 function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboardingFormData> }) {
-  const t = useTranslations("dashboard.managerOnboarding");
+  const t = useAppTranslation("dashboard.managerOnboarding");
 
   return (
     <Controller
@@ -56,7 +56,7 @@ function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboa
                   field.onChange(type);
                 }}
               >
-                {t(`options.accountType.${type.toLowerCase()}`)}
+                {t.options.accountType[type.toLowerCase()]}
               </StyledAccountTypeButton>
             );
           })}
@@ -73,7 +73,7 @@ interface Props {
 }
 
 export function SystemAccessSection({ register, control, errors }: Props) {
-  const t = useTranslations("dashboard.managerOnboarding");
+  const t = useAppTranslation("dashboard.managerOnboarding");
   const accountType = useWatch({ control, name: "accountType" });
   const descriptionKey =
     accountType === ManagerAccountType.Admin
@@ -81,26 +81,26 @@ export function SystemAccessSection({ register, control, errors }: Props) {
       : "options.accountTypeDescriptions.manager";
 
   return (
-    <SectionPanel title={t("sections.systemAccess")}>
+    <SectionPanel title={t.sections.systemAccess}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper label={t("fields.accountType")}>
+          <FieldWrapper label={t.fields.accountType}>
             <AccountTypeToggle control={control} />
             <Typography variant="bodyMd" sx={theme => ({ mt: 1.5, color: theme.palette.text.secondary })}>
-              {t(descriptionKey)}
+              {t[descriptionKey]}
             </Typography>
           </FieldWrapper>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <FieldWrapper
-            label={t("fields.password")}
+            label={t.fields.password}
             required
-            error={errors.password ? t(`validation.${errors.password.message}`) : undefined}
+            error={errors.password ? t[`validation.${errors.password.message}`] : undefined}
           >
             <Input
               {...register("password")}
               type="password"
-              placeholder={t("placeholders.password")}
+              placeholder={t.placeholders.password}
               error={!!errors.password}
               fullWidth
               sx={standardInputSx}

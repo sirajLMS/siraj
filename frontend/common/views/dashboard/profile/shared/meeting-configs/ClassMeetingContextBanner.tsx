@@ -1,9 +1,9 @@
 "use client";
 
 import { Alert, Chip, Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type ClassMeetingContextBannerProps = {
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
@@ -19,13 +19,13 @@ function resolveSourceKey(source: EffectiveMeetingSource | string | null | undef
 }
 
 export function ClassMeetingContextBanner({ effectiveMeeting, hasScopeConfigs }: ClassMeetingContextBannerProps) {
-  const t = useTranslations("ui.meetingConfig.classScope");
-  const tDisplay = useTranslations("ui.meetingConfig.display");
+  const t = useAppTranslation("ui").meetingConfig.classScope;
+  const tDisplay = useAppTranslation("ui").meetingConfig.display;
 
   if (!effectiveMeeting && !hasScopeConfigs) return null;
 
   const sourceKey = resolveSourceKey(effectiveMeeting?.source);
-  const sourceLabel = tDisplay(sourceKey as "sourceClass" | "sourceRecurring" | "sourceTeacher" | "sourceNone");
+  const sourceLabel = tDisplay[sourceKey as "sourceClass" | "sourceRecurring" | "sourceTeacher" | "sourceNone"];
   const isClassOverride = effectiveMeeting?.source === EffectiveMeetingSource.Class;
   const isInherited = effectiveMeeting?.source === EffectiveMeetingSource.Teacher && !hasScopeConfigs;
 
@@ -33,13 +33,13 @@ export function ClassMeetingContextBanner({ effectiveMeeting, hasScopeConfigs }:
     <Stack spacing={1}>
       {effectiveMeeting ? (
         <Alert severity="info" sx={{ typography: "bodySm" }}>
-          {t("effectiveSourceBanner", { source: sourceLabel })}
+          {t.effectiveSourceBanner(sourceLabel)}
         </Alert>
       ) : null}
       {isClassOverride || (hasScopeConfigs && effectiveMeeting?.source === EffectiveMeetingSource.Class) ? (
-        <Chip size="small" color="warning" label={t("overrideActive")} />
+        <Chip size="small" color="warning" label={t.overrideActive} />
       ) : null}
-      {isInherited ? <Chip size="small" variant="outlined" label={t("inheritedFromTeacher")} /> : null}
+      {isInherited ? <Chip size="small" variant="outlined" label={t.inheritedFromTeacher} /> : null}
     </Stack>
   );
 }

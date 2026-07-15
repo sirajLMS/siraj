@@ -1,7 +1,6 @@
 "use client";
 
 import { Stack, TextField } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { PhoneFormField, SectionPanel } from "@/frontend/common/components/ui";
@@ -21,6 +20,7 @@ import type {
   TeacherAdminEditFormData,
   TeacherOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ContactSectionViewProps = {
   readonly mode: "view";
@@ -56,8 +56,8 @@ function TeacherIdentityFieldsView({
   readonly address: string | null | undefined;
   readonly scope: ProfileScope;
 }) {
-  const t = useTranslations("profile.teacher");
-  const tc = useTranslations("profile");
+  const t = useAppTranslation("profile").teacher;
+  const tc = useAppTranslation("profile");
   const { canView, showField } = useProfileFieldAccess({ scope });
 
   if (!canView("teacher_identity")) {
@@ -68,18 +68,15 @@ function TeacherIdentityFieldsView({
   const showAddress = showField(address, "teacher_identity");
 
   if (!showTimezone && !showAddress) {
-    return <ProfileRestrictedSection title={t("sections.contact")} />;
+    return <ProfileRestrictedSection title={t.sections.contact} />;
   }
 
   return (
     <>
       {showTimezone ? (
-        <InfoField
-          label={t("fields.timezone")}
-          value={<TimezoneDisplay timezone={timezone} fallback={tc("notSet")} />}
-        />
+        <InfoField label={t.fields.timezone} value={<TimezoneDisplay timezone={timezone} fallback={tc.notSet} />} />
       ) : null}
-      {showAddress ? <InfoField label={t("fields.address")} value={address || tc("notSet")} /> : null}
+      {showAddress ? <InfoField label={t.fields.address} value={address || tc.notSet} /> : null}
     </>
   );
 }
@@ -93,7 +90,7 @@ function TeacherIdentityFieldsEdit({
   readonly control: Control<TeacherAdminEditFormData>;
   readonly scope?: ProfileScope;
 }) {
-  const t = useTranslations("profile.teacher");
+  const t = useAppTranslation("profile").teacher;
   const { canView, canEdit } = useProfileFieldAccess({ scope });
 
   if (!canView("teacher_identity")) {
@@ -105,7 +102,7 @@ function TeacherIdentityFieldsEdit({
   return (
     <>
       <TextField
-        label={t("fields.address")}
+        label={t.fields.address}
         fullWidth
         size="small"
         multiline
@@ -123,7 +120,7 @@ function TeacherIdentityFieldsEdit({
               field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
             }}
             onBlurAction={field.onBlur}
-            label={t("fields.timezone")}
+            label={t.fields.timezone}
             error={Boolean(fieldState.error)}
             helperText={fieldState.error?.message}
             fullWidth
@@ -136,12 +133,12 @@ function TeacherIdentityFieldsEdit({
 }
 
 export function ContactSection(props: ContactSectionProps) {
-  const t = useTranslations("profile.teacher");
-  const tc = useTranslations("profile");
+  const t = useAppTranslation("profile").teacher;
+  const tc = useAppTranslation("profile");
   const scope = props.scope ?? (props.mode === "view" && props.isAdminScope ? ProfileScope.Other : ProfileScope.Own);
   const { canView, showField } = useProfileFieldAccess({ scope });
 
-  const contactTitle = t("sections.contact");
+  const contactTitle = t.sections.contact;
 
   if (props.mode === "edit") {
     if (!canView("core_contact") && (!props.isAdminScope || !canView("teacher_identity"))) {
@@ -152,7 +149,7 @@ export function ContactSection(props: ContactSectionProps) {
       <SectionPanel title={contactTitle}>
         <Stack spacing={2}>
           {canView("core_contact") ? (
-            <PhoneFormField name="phone" control={props.control} label={t("fields.phone")} />
+            <PhoneFormField name="phone" control={props.control} label={t.fields.phone} />
           ) : null}
           {props.isAdminScope ? (
             <TeacherIdentityFieldsEdit register={props.register} control={props.control} scope={scope} />
@@ -179,14 +176,14 @@ export function ContactSection(props: ContactSectionProps) {
       <Stack spacing={2}>
         {showPhone ? (
           <InfoField
-            label={t("fields.phone")}
-            value={<PhoneDisplay phone={props.teacherData.phone} fallback={tc("notSet")} />}
+            label={t.fields.phone}
+            value={<PhoneDisplay phone={props.teacherData.phone} fallback={tc.notSet} />}
           />
         ) : null}
         {showOwnTimezone ? (
           <InfoField
-            label={t("fields.timezone")}
-            value={<TimezoneDisplay timezone={props.teacherData.timezone} fallback={tc("notSet")} />}
+            label={t.fields.timezone}
+            value={<TimezoneDisplay timezone={props.teacherData.timezone} fallback={tc.notSet} />}
           />
         ) : null}
         {showIdentity && adminData ? (

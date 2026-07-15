@@ -1,9 +1,16 @@
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SupportedPaymentLinkRepository } from "@/backend/db/repo";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import { getErrorMessage } from "@/shared/utils/error";
+
+let tErrors: ErrorsLabels;
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 function loc(en: string) {
   return { en, ar: en };
@@ -35,14 +42,19 @@ describe("SupportedPaymentLinkRepository", () => {
     const active = await SupportedPaymentLinkRepository.listActive({ direction: PaymentDirection.PAYOUT }, tx);
     expect(active.some(row => row.id === created.id)).toBe(true);
 
-    const deactivated = await SupportedPaymentLinkRepository.deactivate(created.id, tx);
+    const deactivated = await SupportedPaymentLinkRepository.deactivate(created.id, tErrors, tx);
     expect(deactivated.isActive).toBe(false);
   });
 
   testRepo("update throws when payment link is missing", async tx => {
     let errorThrown: unknown = null;
     try {
-      await SupportedPaymentLinkRepository.update("00000000-0000-0000-0000-000000000000", { isActive: false }, tx);
+      await SupportedPaymentLinkRepository.update(
+        "00000000-0000-0000-0000-000000000000",
+        { isActive: false },
+        tErrors,
+        tx
+      );
     } catch (error) {
       errorThrown = error;
     }

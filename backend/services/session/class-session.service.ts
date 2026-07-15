@@ -6,6 +6,7 @@ import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { AppPermission } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
@@ -81,11 +82,12 @@ export namespace ClassSessionService {
   async function refundCreditIfDeducted(
     instance: { id: string; studentId: string; quotaDeducted: boolean | null },
     actorUserId: string,
+    tErrors: ErrorsLabels,
     tx: DBTransaction
   ): Promise<void> {
     if (!instance.quotaDeducted) return;
     const idempotencyKey = `credit-refund:${instance.id}`;
-    await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx);
+    await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, tErrors);
   }
 
   async function assertSessionActivated(
@@ -164,7 +166,7 @@ export namespace ClassSessionService {
 
       const wasDeducted = instance.quotaDeducted && instance.deletedAt === null;
       if (wasDeducted) {
-        await refundCreditIfDeducted(instance, userId, tx);
+        await refundCreditIfDeducted(instance, userId, tErrors, tx);
       }
       return true;
     });
@@ -205,7 +207,7 @@ export namespace ClassSessionService {
     return db.transaction(async tx => {
       const result = await SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId, tx);
       if (instance.quotaDeducted) {
-        await refundCreditIfDeducted(instance, userId, tx);
+        await refundCreditIfDeducted(instance, userId, tErrors, tx);
       }
       return result;
     });
@@ -277,7 +279,11 @@ export namespace ClassSessionService {
       );
 
       if (existing.quotaDeducted && existing.deletedAt === null) {
-        await refundCreditIfDeducted(existing, userId, tx);
+        const tErrors = (await getBackendTranslations({
+          locale: "ar",
+          namespace: "errors",
+        })) as unknown as ErrorsLabels;
+        await refundCreditIfDeducted(existing, userId, tErrors, tx);
       }
 
       return created;
@@ -294,7 +300,7 @@ export namespace ClassSessionService {
         throw new Error(tErrors.notFound);
       }
       if (instance.quotaDeducted) {
-        await refundCreditIfDeducted(instance, userId, tx);
+        await refundCreditIfDeducted(instance, userId, tErrors, tx);
       }
       return resetInstance;
     });

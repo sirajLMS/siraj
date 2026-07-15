@@ -141,7 +141,7 @@ gqlSchemaBuilder.mutationField("createMeetingProvider", t =>
       input: t.arg({ type: MeetingProviderCreateInputPothos, required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: withAuthResult((userId, args, _tErrors, locale) =>
+    resolve: withAuthResult((userId, args, tErrors) =>
       MeetingProviderCatalogService.createProvider(
         userId,
         {
@@ -155,7 +155,7 @@ gqlSchemaBuilder.mutationField("createMeetingProvider", t =>
           fieldSchema: normalizeFieldSchema(args.input.fieldSchema ?? { requiresMeetingUrl: false }),
           isActive: args.input.isActive ?? undefined,
         },
-        locale
+        tErrors
       )
     ),
   })
@@ -169,8 +169,8 @@ gqlSchemaBuilder.mutationField("updateMeetingProvider", t =>
       input: t.arg({ type: MeetingProviderUpdateInputPothos, required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: withAuthResult((userId, args, _tErrors, locale) =>
-      MeetingProviderCatalogService.updateProvider(userId, args.id, normalizeProviderUpdateInput(args.input), locale)
+    resolve: withAuthResult((userId, args, tErrors) =>
+      MeetingProviderCatalogService.updateProvider(userId, args.id, normalizeProviderUpdateInput(args.input), tErrors)
     ),
   })
 );
@@ -182,8 +182,8 @@ gqlSchemaBuilder.mutationField("deleteMeetingProvider", t =>
       id: t.arg.id({ required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: withAuthVoid((userId, args, _tErrors, locale) =>
-      MeetingProviderCatalogService.deleteProvider(userId, args.id, locale)
+    resolve: withAuthVoid((userId, args, tErrors) =>
+      MeetingProviderCatalogService.deleteProvider(userId, args.id, tErrors)
     ),
   })
 );
@@ -195,14 +195,14 @@ gqlSchemaBuilder.mutationField("createUserMeetingConfig", t =>
       input: t.arg({ type: UserMeetingConfigCreateInputPothos, required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: withAuthResult((actorUserId, args, _tErrors, locale) =>
+    resolve: withAuthResult((actorUserId, args, tErrors) =>
       MeetingConfigService.createUserMeetingConfig(
         actorUserId,
         {
           userId: args.input.userId,
           ...extractCommonMeetingConfigFields(args.input),
         },
-        locale
+        tErrors
       )
     ),
   })
@@ -216,8 +216,13 @@ gqlSchemaBuilder.mutationField("updateUserMeetingConfig", t =>
       input: t.arg({ type: UserMeetingConfigUpdateInputPothos, required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: withAuthResult((actorUserId, args, _tErrors, locale) =>
-      MeetingConfigService.updateUserMeetingConfig(actorUserId, args.id, normalizeConfigUpdateInput(args.input), locale)
+    resolve: withAuthResult((actorUserId, args, tErrors) =>
+      MeetingConfigService.updateUserMeetingConfig(
+        actorUserId,
+        args.id,
+        normalizeConfigUpdateInput(args.input),
+        tErrors
+      )
     ),
   })
 );
@@ -229,8 +234,8 @@ gqlSchemaBuilder.mutationField("deleteUserMeetingConfig", t =>
       id: t.arg.id({ required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: withAuthVoid((actorUserId, args, _tErrors, locale) =>
-      MeetingConfigService.deleteUserMeetingConfig(actorUserId, args.id, locale)
+    resolve: withAuthVoid((actorUserId, args, tErrors) =>
+      MeetingConfigService.deleteUserMeetingConfig(actorUserId, args.id, tErrors)
     ),
   })
 );
@@ -242,8 +247,8 @@ gqlSchemaBuilder.mutationField("setDefaultMeetingConfig", t =>
       id: t.arg.id({ required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: withAuthResult((actorUserId, args, _tErrors, locale) =>
-      MeetingConfigService.setDefaultMeetingConfig(actorUserId, args.id, locale)
+    resolve: withAuthResult((actorUserId, args, tErrors) =>
+      MeetingConfigService.setDefaultMeetingConfig(actorUserId, args.id, tErrors)
     ),
   })
 );

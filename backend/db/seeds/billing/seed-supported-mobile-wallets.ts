@@ -2,6 +2,7 @@ import { seedCatalogLogoUrls } from "@/backend/db/seeds/lib/logo-seed-helper";
 import { MOBILE_WALLET_CATALOG_SEEDS } from "@/backend/db/seeds/lib/payment-catalog-factory";
 import logger from "@/backend/lib/logger";
 import { PaymentCatalogService } from "@/backend/services/payment-method/payment-catalog.service";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export async function seedOrGet() {
   logger.info("Seeding supported mobile wallets...");
@@ -24,7 +25,8 @@ export async function seedOrGet() {
     updatedAt: now,
   }));
 
-  const results = await PaymentCatalogService.upsertManyMobileWallets(inputs);
+  const tErrors = await getServerTranslations("en", "errors");
+  const results = await PaymentCatalogService.upsertManyMobileWallets(inputs, tErrors);
   logger.info(`Supported mobile wallets seeded (${results.length} rows).`);
   return results;
 }

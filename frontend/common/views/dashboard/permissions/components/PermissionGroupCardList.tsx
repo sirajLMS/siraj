@@ -2,11 +2,11 @@
 
 import { DeleteOutlined, EditOutlined, MoreVertOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface PermissionGroupCardListProps {
   readonly groups: readonly PermissionGroup[];
@@ -25,7 +25,7 @@ interface GroupCardProps {
 }
 
 function GroupCard({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGroup }: Readonly<GroupCardProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -154,13 +154,13 @@ export function PermissionGroupCardList({
   onDeleteGroup,
   onAssignGroup,
 }: Readonly<PermissionGroupCardListProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   if (groups.length === 0) {
     return (
       <Box sx={{ p: 4, textAlign: "center" }}>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t("noPermissionsFound")}
+          {t.noPermissionsFound}
         </Typography>
       </Box>
     );

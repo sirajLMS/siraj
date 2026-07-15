@@ -3,7 +3,6 @@
 
 import { PersonSearchOutlined, PublicOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { AvatarGroup, Box, Tooltip, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { UserAvatar } from "@/frontend/common/components/ui";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display";
@@ -11,6 +10,7 @@ import type {
   AvailabilityInsightsProps,
   InsightCardProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function InsightCard({ title, value, description, icon }: Readonly<InsightCardProps>) {
   return (
@@ -114,7 +114,7 @@ function TimezoneInsight({
 }
 
 export function AvailabilityInsights({ insights }: Readonly<AvailabilityInsightsProps>) {
-  const t = useTranslations("dashboard.teacherAvailability.insights");
+  const t = useAppTranslation("dashboard.teacherAvailability").insights;
 
   return (
     <Box
@@ -126,24 +126,24 @@ export function AvailabilityInsights({ insights }: Readonly<AvailabilityInsights
       }}
     >
       <InsightCard
-        title={t("peakLoad")}
+        title={t.peakLoad}
         value={insights.peakLoad}
-        description={t("peakLoadDesc")}
+        description={t.peakLoadDesc}
         icon={<TrendingUpOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
       />
 
       <InsightCard
-        title={t("availableStaff")}
-        value={t("teachersCount", { count: insights.availableStaff })}
-        description={t("availableStaffDesc")}
+        title={t.availableStaff}
+        value={t.teachersCount(insights.availableStaff)}
+        description={t.availableStaffDesc}
         icon={<PersonSearchOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
       />
 
       <TimezoneInsight
         timezones={insights.timezones}
         labels={{
-          title: t("localTimezones"),
-          description: t("localTimezonesDesc"),
+          title: t.localTimezones,
+          description: t.localTimezonesDesc,
         }}
       />
     </Box>

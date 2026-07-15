@@ -1,9 +1,9 @@
 import { Alert, Button } from "@mui/material";
-import type { useTranslations } from "next-intl";
 import { PageContainer } from "@/frontend/common/components/ui/container/page/PageContainer";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ErrorStateProps = {
-  readonly t?: ReturnType<typeof useTranslations>;
+  readonly t?: ReturnType<typeof useAppTranslation>;
   readonly message?: string;
   readonly onRetry?: () => void;
   readonly retryLabel?: string;
@@ -11,7 +11,8 @@ type ErrorStateProps = {
 };
 
 export function ErrorState({ t, message, onRetry, retryLabel, embedded = false }: ErrorStateProps) {
-  const displayMessage = message ?? t?.("loadError") ?? "";
+  const tDefault = useAppTranslation("common");
+  const displayMessage = message ?? t?.errors?.loadError ?? tDefault.errors.loadError ?? "";
 
   const alert = (
     <Alert

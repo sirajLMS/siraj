@@ -12,20 +12,20 @@ import {
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AdminSuggestionsView } from "@/frontend/common/views/dashboard/suggestions/adminSuggestionsView";
 import { SuggestionMarkDuplicateDialog } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionMarkDuplicateDialog";
 import { SuggestionRespondDialog } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionRespondDialog";
 import { useAdminSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useAdminSuggestionsViewModel";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
 }));
 
 export function AdminSuggestionsContainer() {
-  const tc = useTranslations("common");
+  const tc = useAppTranslation("common");
   const viewModel = useAdminSuggestionsViewModel();
 
   if (viewModel.loading && viewModel.rows.length === 0) {
@@ -37,7 +37,7 @@ export function AdminSuggestionsContainer() {
   }
 
   if (viewModel.error) {
-    return <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>;
+    return <StyledErrorTypography>{tc.loadFailed}</StyledErrorTypography>;
   }
 
   const {

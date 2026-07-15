@@ -1,13 +1,13 @@
 import { Box, MenuItem, Select, TextField, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { AdminControlPanel, FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StatusUpdateFormData } from "@/frontend/common/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { AdminHoldControlsProps } from "@/frontend/common/views/dashboard/students/status/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function StatusSelectionField() {
-  const t = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentStatus");
   const { control } = useFormContext<StatusUpdateFormData>();
 
   return (
@@ -22,7 +22,7 @@ function StatusSelectionField() {
           display: "block",
         })}
       >
-        {t("fields.accountStatus")}
+        {t.fields.accountStatus}
       </Typography>
       <Controller
         name="status"
@@ -39,11 +39,11 @@ function StatusSelectionField() {
               },
             })}
           >
-            <MenuItem value={StudentStatus.Regular}>{t("statusOptions.REGULAR")}</MenuItem>
-            <MenuItem value={StudentStatus.Suspended}>{t("statusOptions.SUSPENDED")}</MenuItem>
-            <MenuItem value={StudentStatus.OnLeave}>{t("statusOptions.ON_LEAVE")}</MenuItem>
-            <MenuItem value={StudentStatus.OnTrial}>{t("statusOptions.ON_TRIAL")}</MenuItem>
-            <MenuItem value={StudentStatus.Deactivated}>{t("statusOptions.DEACTIVATED")}</MenuItem>
+            <MenuItem value={StudentStatus.Regular}>{t.statusOptions.REGULAR}</MenuItem>
+            <MenuItem value={StudentStatus.Suspended}>{t.statusOptions.SUSPENDED}</MenuItem>
+            <MenuItem value={StudentStatus.OnLeave}>{t.statusOptions.ON_LEAVE}</MenuItem>
+            <MenuItem value={StudentStatus.OnTrial}>{t.statusOptions.ON_TRIAL}</MenuItem>
+            <MenuItem value={StudentStatus.Deactivated}>{t.statusOptions.DEACTIVATED}</MenuItem>
           </Select>
         )}
       />
@@ -52,7 +52,7 @@ function StatusSelectionField() {
 }
 
 function ReasonEntryField() {
-  const t = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentStatus");
   const {
     control,
     formState: { errors },
@@ -61,16 +61,16 @@ function ReasonEntryField() {
 
   const quickReasons = [
     {
-      label: t("reasons.unpaidInvoice"),
-      text: t("reasons.unpaidInvoice"),
+      label: t.reasons.unpaidInvoice,
+      text: t.reasons.unpaidInvoice,
     },
     {
-      label: t("reasons.misconduct"),
-      text: t("reasons.misconduct"),
+      label: t.reasons.misconduct,
+      text: t.reasons.misconduct,
     },
     {
-      label: t("reasons.vacation"),
-      text: t("reasons.vacation"),
+      label: t.reasons.vacation,
+      text: t.reasons.vacation,
     },
   ];
 
@@ -86,7 +86,7 @@ function ReasonEntryField() {
           display: "block",
         })}
       >
-        {t("fields.statusReason")}
+        {t.fields.statusReason}
       </Typography>
       <Controller
         name="reason"
@@ -97,7 +97,7 @@ function ReasonEntryField() {
             multiline
             rows={4}
             fullWidth
-            placeholder={t("fields.statusReasonPlaceholder")}
+            placeholder={t.fields.statusReasonPlaceholder}
             error={!!errors.reason}
             helperText={errors.reason?.message}
             sx={theme => ({
@@ -128,7 +128,7 @@ function ReasonEntryField() {
 }
 
 function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
-  const t = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentStatus");
   const { watch } = useFormContext<StatusUpdateFormData>();
   const currentStatus = watch("status");
 
@@ -147,16 +147,16 @@ function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
         textTransform: "uppercase" as const,
       })}
     >
-      {t("actions.applyChange")}
+      {t.actions.applyChange}
     </PrimaryPageAction>
   );
 }
 
 export function AdminHoldControls({ isUpdating }: Readonly<AdminHoldControlsProps>) {
-  const t = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentStatus");
 
   return (
-    <AdminControlPanel title={t("sections.adminHold")}>
+    <AdminControlPanel title={t.sections.adminHold}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <StatusSelectionField />
         <ReasonEntryField />

@@ -1,12 +1,12 @@
 import type { Theme } from "@mui/material";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ClassSession, ClassSessionListProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { isJoinableClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 import { Link } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function formatDuration(mins: number): string {
   if (mins < 60) return `${mins}m`;
@@ -63,13 +63,12 @@ function ClassSessionCard({
   session,
   statusLabel,
   durationLabel,
-  t,
 }: Readonly<{
   session: ClassSession;
   statusLabel: string;
   durationLabel: string;
-  t: ReturnType<typeof useTranslations>;
 }>) {
+  const t = useAppTranslation("dashboard.studentHistory.classDetails");
   const [timeValue, timePeriod] = session.time.split(" ");
   const showJoin = isJoinableClassSession(session.executionState, session.outcome, { isFrozen: session.isFrozen });
 
@@ -166,18 +165,18 @@ function ClassSessionCard({
 }
 
 export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionListProps>) {
-  const t = useTranslations("dashboard.studentHistory.classDetails");
+  const t = useAppTranslation("dashboard.studentHistory.classDetails");
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <SessionListHeader title={t("title")} dateStr={dateStr} />
+      <SessionListHeader title={t.title} dateStr={dateStr} />
 
       {sessions.length === 0 ? (
         <Typography
           variant="bodyMd"
           sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center", py: 4 })}
         >
-          {t("noSessions")}
+          {t.noSessions}
         </Typography>
       ) : (
         sessions.map(session => (
@@ -186,7 +185,6 @@ export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionLis
             session={session}
             statusLabel={t(`status.${session.status}`)}
             durationLabel={formatDuration(session.duration)}
-            t={t}
           />
         ))
       )}

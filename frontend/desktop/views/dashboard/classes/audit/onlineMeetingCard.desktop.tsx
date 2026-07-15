@@ -3,12 +3,12 @@
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useLocale } from "next-intl";
 import { BaseCard } from "@/frontend/common/components/ui";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { OnlineMeetingInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppLocale } from "@/shared/locale/client";
 
 export interface OnlineMeetingCardDesktopProps {
   readonly meetingInfo: OnlineMeetingInfo | null | undefined;
@@ -124,7 +124,7 @@ export function OnlineMeetingCardDesktop({
   labels,
   showJoin = false,
 }: Readonly<OnlineMeetingCardDesktopProps>) {
-  const locale = useLocale();
+  const locale = useAppLocale();
   const providerName = resolveProviderDisplayName(meetingInfo, locale);
   const meeting = toEffectiveMeeting(meetingInfo);
 

@@ -6,7 +6,6 @@ import {
   EventAvailableOutlined,
   PendingActionsOutlined,
 } from "@mui/icons-material";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import {
   computeSessionStatus,
@@ -15,17 +14,18 @@ import {
   SessionStatus,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const METRIC_DEFINITIONS: readonly (Omit<RawMetric, "count"> & { readonly key: keyof MetricCounts })[] = [
-  { key: "regular", labelKey: "dashboard.statusTracking.metrics.regular", icon: CheckCircleOutlineOutlined },
-  { key: "pending", labelKey: "dashboard.statusTracking.metrics.pending", icon: PendingActionsOutlined },
+  { key: "regular", labelKey: "metrics.regular", icon: CheckCircleOutlineOutlined },
+  { key: "pending", labelKey: "metrics.pending", icon: PendingActionsOutlined },
   {
     key: "suspended",
-    labelKey: "dashboard.statusTracking.metrics.suspended",
+    labelKey: "metrics.suspended",
     icon: BlockOutlined,
     variant: "error",
   },
-  { key: "on_leave", labelKey: "dashboard.statusTracking.metrics.onLeave", icon: EventAvailableOutlined },
+  { key: "on_leave", labelKey: "metrics.onLeave", icon: EventAvailableOutlined },
 ];
 
 function computeMetricCounts(rows: readonly StatusTrackingRow[]): MetricCounts {
@@ -49,7 +49,7 @@ function buildMetrics(counts: MetricCounts, subLabelMap: Record<string, string>)
 }
 
 export function useStatusTrackingMetrics(rows: readonly StatusTrackingRow[]) {
-  const t = useTranslations("dashboard.statusTracking");
+  const t = useAppTranslation("dashboard.core.statusTracking");
 
   const suspendedCount = useMemo(
     () =>
@@ -63,10 +63,10 @@ export function useStatusTrackingMetrics(rows: readonly StatusTrackingRow[]) {
 
   const metrics = useMemo(() => {
     const subLabelMap: Record<string, string> = {
-      regular: t("subLabels.regular"),
-      pending: t("subLabels.pending"),
-      suspended: t("subLabels.suspended"),
-      on_leave: t("subLabels.onLeave"),
+      regular: t.subLabels.regular,
+      pending: t.subLabels.pending,
+      suspended: t.subLabels.suspended,
+      on_leave: t.subLabels.onLeave,
     };
     return buildMetrics(metricCounts, subLabelMap);
   }, [metricCounts, t]);

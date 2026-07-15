@@ -2,7 +2,6 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { FeesContractSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/FeesContractSection";
@@ -10,6 +9,7 @@ import { ParentInfoSection } from "@/frontend/common/views/dashboard/admin/paren
 import { ParentMeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentMeetingConfigOnboardingSection";
 import { SocialCommsSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/SocialCommsSection";
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface Props {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
@@ -21,13 +21,13 @@ interface Props {
 }
 
 export function ParentOnboardingView({ register, control, errors, handleSubmit, isSubmitting, onSubmit }: Props) {
-  const t = useTranslations("dashboard.parentOnboarding");
+  const t = useAppTranslation("dashboard.parentOnboarding");
 
   return (
     <PageContainer>
       <PageHeader
-        title={t("pageTitle")}
-        subtitle={t("pageSubtitle")}
+        title={t.pageTitle}
+        subtitle={t.pageSubtitle}
         actions={
           <Stack
             direction="row"
@@ -43,7 +43,7 @@ export function ParentOnboardingView({ register, control, errors, handleSubmit, 
             })}
           >
             <InfoOutlined />
-            <Typography variant="labelMd">{t("statusBanner")}</Typography>
+            <Typography variant="labelMd">{t.statusBanner}</Typography>
           </Stack>
         }
       />
@@ -58,22 +58,22 @@ export function ParentOnboardingView({ register, control, errors, handleSubmit, 
         <ParentInfoSection register={register} control={control} errors={errors} />
         <SocialCommsSection register={register} control={control} />
         <FeesContractSection register={register} control={control} errors={errors} />
-        <SectionPanel title={t("sections.meetingConfig")}>
+        <SectionPanel title={t.sections.meetingConfig}>
           <ParentMeetingConfigOnboardingSection
             register={register}
             control={control}
             errors={errors}
             labels={{
-              sectionTitle: t("sections.meetingConfig"),
-              optionalHint: t("optionalHint"),
+              sectionTitle: t.sections.meetingConfig,
+              optionalHint: t.optionalHint,
               fields: {
-                meetingProvider: t("fields.meetingProvider"),
-                meetingUrl: t("fields.meetingUrl"),
-                meetingLabel: t("fields.meetingLabel"),
+                meetingProvider: t.fields.meetingProvider,
+                meetingUrl: t.fields.meetingUrl,
+                meetingLabel: t.fields.meetingLabel,
               },
               placeholders: {
-                meetingUrl: t("placeholders.meetingUrl"),
-                meetingLabel: t("placeholders.meetingLabel"),
+                meetingUrl: t.placeholders.meetingUrl,
+                meetingLabel: t.placeholders.meetingLabel,
               },
             }}
           />
@@ -102,10 +102,10 @@ export function ParentOnboardingView({ register, control, errors, handleSubmit, 
               minWidth: 200,
             }}
           >
-            {isSubmitting ? t("actions.processing") : t("actions.signup")}
+            {isSubmitting ? t.actions.processing : t.actions.signup}
           </PrimaryPageAction>
           <Typography variant="labelMd" sx={theme => ({ fontStyle: "italic", color: theme.palette.text.secondary })}>
-            {t("privacyNote")}
+            {t.privacyNote}
           </Typography>
         </Box>
       </Box>

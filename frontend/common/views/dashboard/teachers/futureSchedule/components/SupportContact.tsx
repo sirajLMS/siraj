@@ -3,15 +3,15 @@
 import { useMutation } from "@apollo/client/react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { UserAvatar } from "@/frontend/common/components/ui";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display";
 import { logTeacherSupportRequestMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { SupportContactProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function SupportContact({ contact }: Readonly<SupportContactProps>) {
-  const t = useTranslations("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation("dashboard.teacherFutureSchedule");
   const notifications = useNotifications();
   const [logSupportRequest] = useMutation(logTeacherSupportRequestMutationDocument);
 
@@ -19,12 +19,12 @@ export function SupportContact({ contact }: Readonly<SupportContactProps>) {
     try {
       await logSupportRequest({
         variables: {
-          input: { reason: t("supportRequestReason") },
+          input: { reason: t.supportRequestReason },
         },
       });
-      notifications.show(t("notifications.supportRequestSent"), { severity: "success" });
+      notifications.show(t.notifications.supportRequestSent, { severity: "success" });
     } catch {
-      notifications.show(t("errors.supportRequestFailed"), { severity: "error" });
+      notifications.show(t.errors.supportRequestFailed, { severity: "error" });
     }
   };
 
@@ -38,7 +38,7 @@ export function SupportContact({ contact }: Readonly<SupportContactProps>) {
       })}
     >
       <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main, mb: 2 })}>
-        {t("supportContact")}
+        {t.supportContact}
       </Typography>
 
       {contact && (
@@ -85,7 +85,7 @@ export function SupportContact({ contact }: Readonly<SupportContactProps>) {
           },
         })}
       >
-        {t("contactAdmin")}
+        {t.contactAdmin}
       </Button>
     </BaseCard>
   );

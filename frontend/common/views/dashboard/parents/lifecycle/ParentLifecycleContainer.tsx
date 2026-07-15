@@ -4,19 +4,21 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AccountStatus, AppPermission, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { changeParentLifecycleStatusMutationDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-lifecycle.documents";
 import { parentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-profile.documents";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { logger } from "@/frontend/common/utils/logger";
 import { ParentLifecycleView } from "@/frontend/common/views/dashboard/parents/lifecycle/ParentLifecycleView";
 import type { ParentLifecyclePageData } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function ParentLifecycleContainer() {
-  const t = useTranslations("dashboard.parentLifecycle");
-  const tc = useTranslations("common");
+  const t = useAppTranslation("dashboard.parentLifecycle");
+  const tc = useAppTranslation("common");
+  const _locale = useAppLocale();
   const params = useParams();
   const parentId = typeof params?.id === "string" ? params.id : "";
   const notifications = useNotifications();
@@ -28,7 +30,7 @@ export function ParentLifecycleContainer() {
 
   const [changeLifecycleStatus, { loading: isUpdating }] = useMutation(changeParentLifecycleStatusMutationDocument, {
     onCompleted: () => {
-      notifications.show(t("successMessage"), {
+      notifications.show(t.successMessage, {
         severity: "success",
         autoHideDuration: 5000,
       });
@@ -36,7 +38,7 @@ export function ParentLifecycleContainer() {
     },
     onError: mutationError => {
       logger.error("Change parent lifecycle status failed:", { error: mutationError });
-      notifications.show(tc("operationFailed"), {
+      notifications.show(tc.errors.operationFailed, {
         severity: "error",
         autoHideDuration: 5000,
       });
@@ -70,7 +72,7 @@ export function ParentLifecycleContainer() {
   );
 
   if (!parentId) {
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidId")}</Typography>;
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t.errors.invalidId}</Typography>;
   }
 
   if (loading) {
@@ -83,11 +85,11 @@ export function ParentLifecycleContainer() {
 
   if (error) {
     logger.error("Error loading parent lifecycle:", { error });
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc("loadFailed")}</Typography>;
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc.errors.loadFailed}</Typography>;
   }
 
   if (!parent) {
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidId")}</Typography>;
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t.errors.invalidId}</Typography>;
   }
 
   return (

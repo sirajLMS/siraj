@@ -1,11 +1,11 @@
 "use client";
 
 import { Box, Link, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermissionGroupSimulation";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function GroupSimulationBanner() {
-  const t = useTranslations("auth.groupSimulation");
+  const t = useAppTranslation("auth").groupSimulation;
   const { isSimulatingGroup, status, endSimulation, loading } = usePermissionGroupSimulation();
 
   if (!isSimulatingGroup || !status?.groupName) {
@@ -32,7 +32,7 @@ export function GroupSimulationBanner() {
       })}
     >
       <Typography component="span" sx={{ fontWeight: 600, textAlign: "center" }}>
-        {t("bannerSimulatingAs", { name: status.groupName })}
+        {t.bannerSimulatingAs(status.groupName)}
       </Typography>
       <Link
         component="button"
@@ -49,7 +49,7 @@ export function GroupSimulationBanner() {
           typography: "bodyMd",
         })}
       >
-        {t("returnToNormalRole")}
+        {t.returnToNormalRole}
       </Link>
     </Box>
   );

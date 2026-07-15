@@ -2,7 +2,6 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -16,6 +15,7 @@ import {
   MigrationStatus,
   type UpdatedSession,
 } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function detectDstOffsetMinutes(): number | null {
   const now = new Date();
@@ -30,7 +30,7 @@ function detectDstOffsetMinutes(): number | null {
 
 export function DstMigrationContainer() {
   const notifications = useNotifications();
-  const t = useTranslations("dashboard.dstMigration");
+  const t = useAppTranslation("dashboard.dstMigration");
   const [executeDstUpdate, { loading, data }] = useMutation(executeDstBulkUpdateMutationDocument);
 
   const report = data?.executeDstBulkUpdate;
@@ -94,7 +94,7 @@ export function DstMigrationContainer() {
     try {
       const offsetMinutes = detectDstOffsetMinutes();
       if (offsetMinutes === null) {
-        notifications.show(t("errors.noDstTransitionDetected"), {
+        notifications.show(t.errors.noDstTransitionDetected, {
           severity: "warning",
           autoHideDuration: 5000,
         });
@@ -106,13 +106,13 @@ export function DstMigrationContainer() {
           description: `DST adjustment of ${offsetMinutes} minutes executed by admin`,
         },
       });
-      notifications.show(t("actions.successMessage"), {
+      notifications.show(t.actions.successMessage, {
         severity: "success",
         autoHideDuration: 5000,
       });
     } catch (error) {
       logger.error("DST bulk update failed", { error });
-      notifications.show(t("errors.mutationFailed"), {
+      notifications.show(t.errors.mutationFailed, {
         severity: "error",
         autoHideDuration: 5000,
       });

@@ -2,12 +2,12 @@
 
 import { ArrowDropDown } from "@mui/icons-material";
 import { Box, IconButton, Popover, Stack, styled, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
 import type { LocaleAdornmentSwitchProps } from "@/frontend/common/components/ui/input/localizedString/LocaleAdornmentSwitch";
 import { getLanguageDisplayName, getLanguageEmoji, languages } from "@/frontend/common/lib/locale";
 import type { AppLocale } from "@/shared/i18n/routing";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 
 type DesktopLocaleListProps = {
   readonly activeLocale: AppLocale;
@@ -32,8 +32,8 @@ const DesktopLanguageOption = styled(Box, {
 }));
 
 function DesktopLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<DesktopLocaleListProps>) {
-  const t = useTranslations("ui.localizedString");
-  const uiLocale = useLocale();
+  const t = useAppTranslation("ui.localizedString");
+  const uiLocale = useAppLocale();
 
   return (
     <Stack role="listbox" aria-label={ariaLabel ?? t("selectLocale")}>
@@ -80,8 +80,8 @@ export function LocaleAdornmentSwitchDesktop({
   successSwitch = false,
   ariaLabel,
 }: LocaleAdornmentSwitchProps) {
-  const t = useTranslations("ui.localizedString");
-  const uiLocale = useLocale();
+  const t = useAppTranslation("ui.localizedString");
+  const uiLocale = useAppLocale();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleOpen = useCallback(

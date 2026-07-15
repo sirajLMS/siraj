@@ -2,15 +2,15 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface Props {
   readonly timezone: string;
 }
 
 export function TimezoneWarningBanner({ timezone }: Readonly<Props>) {
-  const t = useTranslations("dashboard.rescheduleForm.warning");
+  const t = useAppTranslation("dashboard.rescheduleForm.warning");
 
   return (
     <Box
@@ -27,9 +27,9 @@ export function TimezoneWarningBanner({ timezone }: Readonly<Props>) {
     >
       <InfoOutlined sx={theme => ({ color: theme.palette.onWarningContainer })} />
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onWarningContainer })}>
-        {t("prefix")}
+        {t.prefix}
         <TimezoneDisplay timezone={timezone} sx={theme => ({ color: theme.palette.onWarningContainer })} />
-        {t("suffix")}
+        {t.suffix}
       </Typography>
     </Box>
   );

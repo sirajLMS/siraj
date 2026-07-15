@@ -2,7 +2,6 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Grid, Paper, Stack, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display";
@@ -11,13 +10,15 @@ import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated
 import { teacherOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function TeacherOwnProfileContainer() {
-  const t = useTranslations("dashboard.teacherOwnProfile");
-  const tProfile = useTranslations("profile");
-  const tErrors = useTranslations("errors");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.teacherOwnProfile");
+  const tProfile = useAppTranslation("profile");
+  const tErrors = useAppTranslation("errors");
+  const locale = useAppLocale();
   const { data, loading, error } = useQuery(teacherOwnProfileQueryDocument);
   const profile = data?.teacherOwnProfile;
 
@@ -34,14 +35,14 @@ export function TeacherOwnProfileContainer() {
   return (
     <RequirePermission permissions={[AppPermission.TeacherViewOwnProfile]}>
       <PageContainer>
-        <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
+        <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
             <CircularProgress />
           </Box>
         ) : null}
         {error ? (
-          <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.failedToLoad")}</Typography>
+          <Typography sx={{ color: theme => theme.palette.error.main }}>{t.errors.failedToLoad}</Typography>
         ) : null}
         {profile ? (
           <>
@@ -49,7 +50,7 @@ export function TeacherOwnProfileContainer() {
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 6 }}>
                 <Paper variant="outlined" sx={{ p: 3 }}>
-                  <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.contact")}</Typography>
+                  <Typography sx={{ typography: "titleLg", mb: 2 }}>{t.sections.contact}</Typography>
                   <Stack spacing={1}>
                     <Typography sx={{ typography: "bodyMd" }}>{profile.name}</Typography>
                     <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
@@ -57,17 +58,17 @@ export function TeacherOwnProfileContainer() {
                     </Typography>
                     <PhoneDisplay
                       phone={profile.phone}
-                      fallback={t("notSet")}
+                      fallback={t.notSet}
                       typographyVariant="bodyMd"
                       sx={theme => ({ color: theme.palette.text.secondary })}
                     />
-                    <TimezoneDisplay timezone={profile.timezone} fallback={t("notSet")} />
+                    <TimezoneDisplay timezone={profile.timezone} fallback={t.notSet} />
                   </Stack>
                 </Paper>
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
                 <Paper variant="outlined" sx={{ p: 3 }}>
-                  <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.salary")}</Typography>
+                  <Typography sx={{ typography: "titleLg", mb: 2 }}>{t.sections.salary}</Typography>
                   <Stack spacing={1}>
                     <Typography sx={{ typography: "bodyMd" }}>{salaryDisplay}</Typography>
                   </Stack>

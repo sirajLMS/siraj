@@ -4,7 +4,6 @@ import CheckCircleOutlined from "@mui/icons-material/CheckCircleOutlined";
 import ShieldOutlined from "@mui/icons-material/ShieldOutlined";
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, SectionPanel } from "@/frontend/common/components/ui";
 import { OverrideState } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -12,6 +11,7 @@ import type {
   StaffPermissionGroups,
   StaffPermissionOverrides,
 } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type PermissionsSectionProps = {
   readonly permissionGroups: StaffPermissionGroups;
@@ -26,29 +26,29 @@ interface PermissionsOverridesGridProps {
 }
 
 function PermissionsOverridesGrid({ overrides }: Readonly<PermissionsOverridesGridProps>) {
-  const tp = useTranslations("profile.staff.permissions");
+  const tp = useAppTranslation("profile.staff").permissions;
 
   const columns = useMemo<GridColDef<StaffPermissionOverride>[]>(
     () => [
       {
         field: "resource",
-        headerName: tp("columns.resource"),
+        headerName: tp.columns.resource,
         flex: 1,
         minWidth: 120,
       },
       {
         field: "action",
-        headerName: tp("columns.action"),
+        headerName: tp.columns.action,
         flex: 1,
         minWidth: 120,
       },
       {
         field: "state",
-        headerName: tp("columns.state"),
+        headerName: tp.columns.state,
         width: 120,
         renderCell: params => {
           const state = params.value as OverrideState | null;
-          return state === OverrideState.Granted ? tp("states.granted") : tp("states.denied");
+          return state === OverrideState.Granted ? tp.states.granted : tp.states.denied;
         },
       },
     ],
@@ -71,8 +71,8 @@ export function PermissionsSection({
   permissionOverrides,
   isOwnScope = false,
 }: PermissionsSectionProps) {
-  const t = useTranslations("profile.staff");
-  const tp = useTranslations("profile.staff.permissions");
+  const t = useAppTranslation("profile").staff;
+  const tp = useAppTranslation("profile.staff").permissions;
   const groups = permissionGroups ?? [];
   const overrides = permissionOverrides ?? [];
   const hasGroups = groups.length > 0;
@@ -80,7 +80,7 @@ export function PermissionsSection({
 
   if (!hasGroups && !hasOverrides) {
     return (
-      <SectionPanel title={t("sections.permissions")}>
+      <SectionPanel title={t.sections.permissions}>
         <Stack
           spacing={1}
           sx={{
@@ -91,9 +91,9 @@ export function PermissionsSection({
           }}
         >
           <ShieldOutlined sx={{ fontSize: 40, color: theme => theme.palette.text.secondary }} />
-          <Typography sx={{ typography: "titleLg" }}>{tp("empty.title")}</Typography>
+          <Typography sx={{ typography: "titleLg" }}>{tp.empty.title}</Typography>
           <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, maxWidth: 420 }}>
-            {isOwnScope ? tp("empty.ownDescription") : tp("empty.description")}
+            {isOwnScope ? tp.empty.ownDescription : tp.empty.description}
           </Typography>
         </Stack>
       </SectionPanel>
@@ -101,11 +101,11 @@ export function PermissionsSection({
   }
 
   return (
-    <SectionPanel title={t("sections.permissions")}>
+    <SectionPanel title={t.sections.permissions}>
       <Stack spacing={2}>
         {hasGroups ? (
           <Box>
-            <Typography sx={{ typography: "labelMd", mb: 1.5 }}>{tp("inheritedGroups")}</Typography>
+            <Typography sx={{ typography: "labelMd", mb: 1.5 }}>{tp.inheritedGroups}</Typography>
             <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
               {groups.map(group => (
                 <Chip
@@ -122,7 +122,7 @@ export function PermissionsSection({
 
         {hasOverrides ? (
           <Box>
-            <Typography sx={{ typography: "labelMd", mb: 1.5 }}>{tp("directOverrides")}</Typography>
+            <Typography sx={{ typography: "labelMd", mb: 1.5 }}>{tp.directOverrides}</Typography>
             <PermissionsOverridesGrid overrides={overrides} />
           </Box>
         ) : null}

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { getSubjectPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { SubjectDetailContainer } from "@/frontend/common/views/dashboard/subjects/detail/SubjectDetailContainer";
+import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({
   params,
@@ -11,12 +11,12 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly id: string; readonly locale: string }>;
 }): Promise<Metadata> {
   const { id, locale } = await params;
-  const t = await getTranslations({ locale, namespace: "dashboard.subjects" });
+  const t = await getTranslations(locale, "dashboard.subjects");
   const subjectName = await getSubjectPageTitle(id);
   if (subjectName) {
-    return { title: t("detail.pageTitle", { name: subjectName }) };
+    return { title: t.detail.pageTitle(subjectName) };
   }
-  return { title: t("pageTitle") };
+  return { title: t.pageTitle };
 }
 
 export default async function SubjectDetailPage({
@@ -25,7 +25,6 @@ export default async function SubjectDetailPage({
   readonly params: Promise<{ readonly id: string; readonly locale: string }>;
 }) {
   const { id, locale } = await params;
-  setRequestLocale(locale);
 
   const { userId } = await getServerUserContext();
 

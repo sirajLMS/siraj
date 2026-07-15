@@ -2,9 +2,9 @@
 
 import { Box, Typography } from "@mui/material";
 import { differenceInCalendarDays, parse } from "date-fns";
-import { useTranslations } from "next-intl";
 import { SearchScheduleResultsSkeleton } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleResultsSkeleton";
 import { TeacherAvailabilityGrid } from "@/frontend/common/views/dashboard/search-schedule/TeacherAvailabilityGrid";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface SearchScheduleResultItem {
   readonly id?: string | null;
@@ -58,7 +58,7 @@ function getColumnCount(fromDate: string, toDate: string): number {
 }
 
 export function SearchScheduleView({ result, fromDate, toDate, isInitialLoading }: Readonly<SearchScheduleViewProps>) {
-  const t = useTranslations("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
   const columnCount = getColumnCount(fromDate, toDate);
 
   if (isInitialLoading) {
@@ -75,7 +75,7 @@ export function SearchScheduleView({ result, fromDate, toDate, isInitialLoading 
     return (
       <Box sx={{ textAlign: "center", py: 6 }}>
         <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t("noResults")}
+          {t.noResults}
         </Typography>
       </Box>
     );
@@ -90,10 +90,7 @@ export function SearchScheduleView({ result, fromDate, toDate, isInitialLoading 
           color: theme.palette.text.secondary,
         })}
       >
-        {t("resultsCount", {
-          count: result?.totalCount ?? activeTeachers.length,
-          gaps: totalGaps,
-        })}
+        {t.resultsCount(result?.totalCount ?? activeTeachers.length, totalGaps)}
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, md: 1.5 } }}>

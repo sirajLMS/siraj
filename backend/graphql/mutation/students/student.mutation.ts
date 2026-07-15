@@ -41,9 +41,9 @@ gqlSchemaBuilder.mutationFields(t => ({
       const { status, ...restInput } = typedInput;
       if (status) {
         await requireStudentManageStatus(userId, tErrors);
-        await StudentRepository.changeStatus(typedInput.id, status, undefined, undefined);
+        await StudentRepository.changeStatus(typedInput.id, status, tErrors);
       }
-      return await StudentRepository.partiallyUpdate(restInput as Types.PartialStudentUpdateInput).then(s =>
+      return await StudentRepository.partiallyUpdate(restInput as Types.PartialStudentUpdateInput, tErrors).then(s =>
         StudentUtils.mapEntityToDto(s)
       );
     },
@@ -59,7 +59,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       const userId = await requireAuth(ctx);
       const tErrors = await ctx.t("errors");
       await requireStudentManageStatus(userId, tErrors);
-      return await StudentRepository.deleteById(args.id).then(s => StudentUtils.mapEntityToDto(s));
+      return await StudentRepository.deleteById(args.id, tErrors).then(s => StudentUtils.mapEntityToDto(s));
     },
   }),
 }));

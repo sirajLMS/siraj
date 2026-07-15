@@ -9,13 +9,13 @@ import {
   VerifiedUser,
 } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { ExportButton } from "@/frontend/common/components/ui/button";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { PageHeader } from "@/frontend/common/components/ui/container";
 import { CalendarGrid } from "@/frontend/common/views/dashboard/students/history/components/CalendarGrid";
 import type { StudentHistoryDesktopProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function StudentHistoryDesktop({
   studentName,
@@ -29,7 +29,7 @@ export function StudentHistoryDesktop({
   nowMonth,
   locale,
 }: Readonly<StudentHistoryDesktopProps>) {
-  const t = useTranslations("dashboard.studentHistory");
+  const t = useAppTranslation("dashboard.studentHistory");
   const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
   const yearStr = currentMonth.getFullYear();
 
@@ -40,13 +40,13 @@ export function StudentHistoryDesktop({
     <Box sx={{ display: { xs: "none", md: "block" } }}>
       <Box sx={{ mb: 4 }}>
         <PageHeader
-          title={t("pageTitle", { name: studentName })}
-          subtitle={t("pageSubtitle", { month: monthStr })}
+          title={t.pageTitle({ name: studentName })}
+          subtitle={t.pageSubtitle({ month: monthStr })}
           titleVariant="headlineMd"
-          breadcrumbs={[{ label: t("breadcrumbs.archive") }]}
+          breadcrumbs={[{ label: t.breadcrumbs.archive }]}
           actions={
             <ExportButton startIcon={<PictureAsPdf sx={{ fontSize: 20 }} />} onClick={onPrint}>
-              {t("exportPdf")}
+              {t.exportPdf}
             </ExportButton>
           }
         />
@@ -86,25 +86,25 @@ export function StudentHistoryDesktop({
       <Box sx={theme => ({ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: theme.layout.gutter, mb: 4 })}>
         <MetricCard
           icon={School}
-          label={t("metrics.totalClasses", { count: metrics.totalClasses })}
+          label={t.metrics.totalClasses({ count: metrics.totalClasses })}
           value={metrics.totalClasses}
           variant="default"
         />
         <MetricCard
           icon={VerifiedUser}
-          label={t("metrics.attendanceRate", { rate: metrics.attendanceRate })}
+          label={t.metrics.attendanceRate({ rate: metrics.attendanceRate })}
           value={`${metrics.attendanceRate}%`}
           variant="default"
         />
         <MetricCard
           icon={Timer}
-          label={t("metrics.hoursStudied", { hours: metrics.hoursStudied })}
+          label={t.metrics.hoursStudied({ hours: metrics.hoursStudied })}
           value={`${metrics.hoursStudied}h`}
           variant="default"
         />
         <MetricCard
           icon={TrendingUp}
-          label={t("metrics.performance", { score: metrics.performance })}
+          label={t.metrics.performance({ score: metrics.performance })}
           value={`${metrics.performance}%`}
           variant="default"
         />

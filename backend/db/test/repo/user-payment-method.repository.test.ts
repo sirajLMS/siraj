@@ -1,9 +1,16 @@
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { UserPaymentMethodRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import { getErrorMessage } from "@/shared/utils/error";
+
+let tErrors: ErrorsLabels;
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 function testRepo(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
@@ -50,10 +57,10 @@ describe("UserPaymentMethodRepository", () => {
     const fetched = await UserPaymentMethodRepository.getById(created.id, tx);
     expect(fetched?.label).toBe("Cash at office");
 
-    const updated = await UserPaymentMethodRepository.update(created.id, { label: "Updated label" }, tx);
+    const updated = await UserPaymentMethodRepository.update(created.id, { label: "Updated label" }, tErrors, tx);
     expect(updated.label).toBe("Updated label");
 
-    await UserPaymentMethodRepository.deleteById(created.id, tx);
+    await UserPaymentMethodRepository.deleteById(created.id, tErrors, tx);
     const afterDelete = await UserPaymentMethodRepository.getById(created.id, tx);
     expect(afterDelete).toBeNull();
   });
@@ -107,7 +114,7 @@ describe("UserPaymentMethodRepository", () => {
       tx
     );
 
-    const verified = await UserPaymentMethodRepository.setVerified(method.id, admin.id, tx);
+    const verified = await UserPaymentMethodRepository.setVerified(method.id, admin.id, tErrors, tx);
     expect(verified.verifiedAt).not.toBeNull();
     expect(verified.verifiedByUserId).toBe(admin.id);
   });
@@ -115,7 +122,12 @@ describe("UserPaymentMethodRepository", () => {
   testRepo("update throws when payment method is missing", async tx => {
     let errorThrown: unknown = null;
     try {
-      await UserPaymentMethodRepository.update("00000000-0000-0000-0000-000000000000", { label: "missing" }, tx);
+      await UserPaymentMethodRepository.update(
+        "00000000-0000-0000-0000-000000000000",
+        { label: "missing" },
+        tErrors,
+        tx
+      );
     } catch (error) {
       errorThrown = error;
     }

@@ -1,9 +1,9 @@
 "use client";
 
 import { Button, Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ProfileActionBarProps = {
   readonly mode?: ProfileMode;
@@ -21,19 +21,19 @@ export function ProfileActionBar({
   saving = false,
 }: ProfileActionBarProps) {
   const router = useRouter();
-  const t = useTranslations("profile");
+  const t = useAppTranslation("profile");
 
   if (mode === ProfileMode.Edit) {
     return (
       <Stack direction="row" spacing={1}>
         {cancelHref ? (
           <Button variant="outlined" onClick={() => router.push(cancelHref)} disabled={saving}>
-            {t("actions.cancel")}
+            {t.actions.cancel}
           </Button>
         ) : null}
         {onSave ? (
           <Button variant="contained" onClick={onSave} disabled={saving}>
-            {t("actions.save")}
+            {t.actions.save}
           </Button>
         ) : null}
       </Stack>
@@ -46,7 +46,7 @@ export function ProfileActionBar({
 
   return (
     <Button variant="contained" onClick={() => router.push(editHref)}>
-      {t("actions.edit")}
+      {t.actions.edit}
     </Button>
   );
 }

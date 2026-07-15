@@ -115,4 +115,18 @@ export const errors: ErrorsLabels = {
   userEmailExists: "A user with this email already exists.",
   permissionGroupNotFound: "Permission group not found.",
   categoryHasSubjects: "Cannot delete category because it has subjects.",
+  cannotRescheduleToSelf: "Cannot reschedule to self.",
+  cannotRescheduleCompleted: "Cannot reschedule completed session.",
+  cannotRescheduleAlreadyRescheduled: "Cannot reschedule already rescheduled session.",
+  outOfQuota: "Out of quota.",
+  leaveQuotaExceeded: ({ maxLeaves }) => `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`,
+  classInstanceNotFound: (params: { id: string }) => `Class instance not found: ${params.id}`,
+  originalClassNotFound: "Original class not found.",
+  invalidTransition: "Invalid transition.",
+  // ─── Scheduling-specific errors ──────────────────────────────────────
+  teacherNotAssigned: ({ teacherId, studentId, startTime }) =>
+    `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`,
+  teacherBooked: "Teacher is already booked at this time.",
+  studentBooked: "Student is already booked at this time.",
+  meetingUrlInUse: "Meeting URL is already in use.",
 };

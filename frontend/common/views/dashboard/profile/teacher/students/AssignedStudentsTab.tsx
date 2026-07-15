@@ -2,7 +2,6 @@
 
 import { Alert, Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
 import type { GridPaginationModel } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { PaginationControls } from "@/frontend/common/components/ui";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
@@ -11,6 +10,7 @@ import {
   AssignedStudentsDataGrid,
   type AssignedStudentsRow,
 } from "@/frontend/common/views/dashboard/profile/teacher/students/AssignedStudentsDataGrid";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type AssignedStudentsResult = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>["assignedStudents"];
 type AssignedStudentsItem = NonNullable<NonNullable<AssignedStudentsResult>["rows"]>[number];
@@ -24,7 +24,7 @@ type AssignedStudentsTabProps = {
 
 function toViewRow(
   student: AssignedStudentsItem,
-  t: ReturnType<typeof useTranslations<"profile.students">>
+  t: ReturnType<typeof useAppTranslation<"profile">>["students"]
 ): AssignedStudentsRow {
   const classesTotal = student.classesTotal ?? 0;
   const classesRemaining = student.classesRemaining ?? 0;
@@ -34,11 +34,11 @@ function toViewRow(
     id: student.id ?? "",
     studentName: student.name ?? "",
     studentAvatarUrl: student.studentAvatarUrl ?? null,
-    parentName: student.parentName?.trim() || t("parentUnknown"),
+    parentName: student.parentName?.trim() || t.parentUnknown,
     parentAvatarUrl: student.parentAvatarUrl ?? null,
     parentId: student.parentId ?? null,
     parentUserId: student.parentUserId ?? null,
-    className: student.className?.trim() || t("classUnknown"),
+    className: student.className?.trim() || t.classUnknown,
     status: student.status ?? "UNKNOWN",
     hoursPerWeek,
     classesRemaining,
@@ -56,7 +56,7 @@ function LoadingState() {
 }
 
 export function AssignedStudentsTab({ assignedStudents, loading, hasError, onRetry }: AssignedStudentsTabProps) {
-  const t = useTranslations("profile.students");
+  const t = useAppTranslation("profile").students;
   const [selectedClass, setSelectedClass] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -73,11 +73,11 @@ export function AssignedStudentsTab({ assignedStudents, loading, hasError, onRet
       new Set(
         rows
           .map(row => row.className)
-          .filter(className => className !== t("classUnknown"))
+          .filter(className => className !== t.classUnknown)
           .sort((a, b) => a.localeCompare(b))
       )
     );
-    return [t("allClasses"), ...options];
+    return [t.allClasses, ...options];
   }, [rows, t]);
 
   const filteredRows = useMemo(() => {
@@ -91,7 +91,7 @@ export function AssignedStudentsTab({ assignedStudents, loading, hasError, onRet
   const pagedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
 
   const handleClassChange = (className: string) => {
-    setSelectedClass(className === t("allClasses") ? "all" : className);
+    setSelectedClass(className === t.allClasses ? "all" : className);
     setPage(0);
   };
 
@@ -110,11 +110,11 @@ export function AssignedStudentsTab({ assignedStudents, loading, hasError, onRet
         severity="error"
         action={
           <Button color="inherit" size="small" onClick={onRetry}>
-            {t("errors.retry")}
+            {t.errors.retry}
           </Button>
         }
       >
-        {t("errors.failedToLoad")}
+        {t.errors.failedToLoad}
       </Alert>
     );
   }
@@ -122,9 +122,9 @@ export function AssignedStudentsTab({ assignedStudents, loading, hasError, onRet
   if (!assignedStudents || rows.length === 0) {
     return (
       <Stack spacing={1}>
-        <Typography sx={{ typography: "titleLg" }}>{t("empty.title")}</Typography>
+        <Typography sx={{ typography: "titleLg" }}>{t.empty.title}</Typography>
         <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-          {t("empty.description")}
+          {t.empty.description}
         </Typography>
       </Stack>
     );
@@ -133,15 +133,15 @@ export function AssignedStudentsTab({ assignedStudents, loading, hasError, onRet
   return (
     <Stack spacing={2}>
       <Stack spacing={0.5}>
-        <Typography sx={{ typography: "titleLg" }}>{t("title")}</Typography>
+        <Typography sx={{ typography: "titleLg" }}>{t.title}</Typography>
         <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-          {t("description")}
+          {t.description}
         </Typography>
       </Stack>
 
       <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
         {classOptions.map(className => {
-          const isActive = (className === t("allClasses") && selectedClass === "all") || selectedClass === className;
+          const isActive = (className === t.allClasses && selectedClass === "all") || selectedClass === className;
           return (
             <Chip
               key={className}

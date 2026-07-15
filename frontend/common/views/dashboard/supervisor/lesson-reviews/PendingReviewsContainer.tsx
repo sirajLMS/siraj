@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import {
   approveLessonReportMutationDocument,
@@ -14,42 +13,43 @@ import { logger } from "@/frontend/common/utils/logger";
 import { RejectReportDialog } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/components/RejectReportDialog";
 import { PendingReviewsView } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/pendingReviewsView";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type SnackbarSeverity = "success" | "error";
 
-function useLabels(t: ReturnType<typeof useTranslations<"dashboard.supervisorPortal.pendingReviews">>) {
+function useLabels(t: ReturnType<typeof useAppTranslation<"dashboard.supervisorPortal.pendingReviews">>) {
   return useMemo(
     () => ({
-      pageTitle: t("pageTitle"),
-      filterByTeacher: t("filterByTeacher"),
-      filterByStudent: t("filterByStudent"),
-      allTeachers: t("allTeachers"),
-      allStudents: t("allStudents"),
-      lessonDateColumn: t("lessonDateColumn"),
-      studentColumn: t("studentColumn"),
-      teacherColumn: t("teacherColumn"),
-      attendanceColumn: t("attendanceColumn"),
-      completionColumn: t("completionColumn"),
-      submittedAtColumn: t("submittedAtColumn"),
-      statusColumn: t("statusColumn"),
-      actionsColumn: t("actionsColumn"),
-      reviewButton: t("reviewButton"),
-      approveButton: t("approveButton"),
-      rejectButton: t("rejectButton"),
-      rejectDialogTitle: t("rejectDialogTitle"),
-      rejectReasonLabel: t("rejectReasonLabel"),
-      rejectReasonPlaceholder: t("rejectReasonPlaceholder"),
-      rejectConfirm: t("rejectConfirm"),
-      rejectCancel: t("rejectCancel"),
-      noPendingReviews: t("noPendingReviews"),
-      loadingMessage: t("loadingMessage"),
+      pageTitle: t.pageTitle,
+      filterByTeacher: t.filterByTeacher,
+      filterByStudent: t.filterByStudent,
+      allTeachers: t.allTeachers,
+      allStudents: t.allStudents,
+      lessonDateColumn: t.lessonDateColumn,
+      studentColumn: t.studentColumn,
+      teacherColumn: t.teacherColumn,
+      attendanceColumn: t.attendanceColumn,
+      completionColumn: t.completionColumn,
+      submittedAtColumn: t.submittedAtColumn,
+      statusColumn: t.statusColumn,
+      actionsColumn: t.actionsColumn,
+      reviewButton: t.reviewButton,
+      approveButton: t.approveButton,
+      rejectButton: t.rejectButton,
+      rejectDialogTitle: t.rejectDialogTitle,
+      rejectReasonLabel: t.rejectReasonLabel,
+      rejectReasonPlaceholder: t.rejectReasonPlaceholder,
+      rejectConfirm: t.rejectConfirm,
+      rejectCancel: t.rejectCancel,
+      noPendingReviews: t.noPendingReviews,
+      loadingMessage: t.loadingMessage,
     }),
     [t]
   );
 }
 
 export function PendingReviewsContainer() {
-  const t = useTranslations("dashboard.supervisorPortal.pendingReviews");
+  const t = useAppTranslation("dashboard.supervisorPortal.pendingReviews");
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -108,7 +108,7 @@ export function PendingReviewsContainer() {
     try {
       await approveReport({ variables: { reportId } });
       await refetch();
-      setSnackbarMessage(t("approveButton"));
+      setSnackbarMessage(t.approveButton);
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     } catch (err) {
@@ -131,7 +131,7 @@ export function PendingReviewsContainer() {
       await rejectReport({ variables: { reportId: selectedReportId, rejectionReason: rejectReason.trim() } });
       resetRejectDialog();
       await refetch();
-      setSnackbarMessage(t("rejectButton"));
+      setSnackbarMessage(t.rejectButton);
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     } catch (err) {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -19,6 +18,7 @@ import {
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { NotificationPreferencesTabDesktop } from "@/frontend/desktop/views/dashboard/profile/core/notifications/notificationPreferencesTab.desktop";
 import { NotificationPreferencesTabMobile } from "@/frontend/mobile/views/dashboard/profile/core/notifications/notificationPreferencesTab.mobile";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type NotificationPreferencesTabProps = {
   readonly isActive: boolean;
@@ -38,7 +38,7 @@ function buildDefaultPreferences(): NotificationPrefRow[] {
 }
 
 export function NotificationPreferencesTab({ isActive }: Readonly<NotificationPreferencesTabProps>) {
-  const t = useTranslations("profile.notifications");
+  const t = useAppTranslation("profile.notifications");
   const [localPreferences, setLocalPreferences] = useState<NotificationPrefRow[]>(buildDefaultPreferences);
   const pendingChangesRef = useRef<Map<string, PendingChange>>(new Map());
   const [snackbarOpen, setSnackbarOpen] = useState(false);

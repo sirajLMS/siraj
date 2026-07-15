@@ -1,7 +1,6 @@
 import { VideocamOffOutlined } from "@mui/icons-material";
 import { Box, Paper, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useLocale, useTranslations } from "next-intl";
 import { PersonProfileLink } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
@@ -14,6 +13,7 @@ import type {
 } from "@/frontend/common/views/dashboard/students/status/types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function formatDateTime(locale: string, dateStr: string): string {
   try {
@@ -51,7 +51,7 @@ function RenderCellWrapper({
 }
 
 function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string; pendingCount: number }>) {
-  const t = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentStatus");
   return (
     <Box
       sx={theme => ({
@@ -66,10 +66,10 @@ function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string
     >
       <Box>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {t("sections.upcomingClasses")}
+          {t.sections.upcomingClasses}
         </Typography>
         <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t("table.footerInfo", { id: formatStudentDisplayId(studentId) })}
+          {t.table.footerInfo(formatStudentDisplayId(studentId))}
         </Typography>
       </Box>
       {pendingCount > 0 ? (
@@ -83,7 +83,7 @@ function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string
           })}
         >
           <Typography variant="labelMd" sx={{ fontWeight: 700 }}>
-            {t("table.pendingHolds", { count: pendingCount })}
+            {t.table.pendingHolds(pendingCount)}
           </Typography>
         </Box>
       ) : null}
@@ -92,7 +92,7 @@ function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string
 }
 
 function DesktopFooter({ studentId }: Readonly<{ studentId: string }>) {
-  const t = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentStatus");
   return (
     <Box
       sx={theme => ({
@@ -104,7 +104,7 @@ function DesktopFooter({ studentId }: Readonly<{ studentId: string }>) {
       })}
     >
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, fontStyle: "italic" })}>
-        {t("table.footerInfo", { id: formatStudentDisplayId(studentId) })}
+        {t.table.footerInfo(formatStudentDisplayId(studentId))}
       </Typography>
     </Box>
   );

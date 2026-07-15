@@ -11,9 +11,9 @@ import {
   useGridApiContext,
   useGridSelector,
 } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { rtlFlipIconSx } from "@/frontend/common/utils/rtlFlipIconSx";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface ScheduleOverviewPaginationControlsProps {
   readonly page: number;
@@ -84,7 +84,7 @@ export function ScheduleOverviewPaginationControls({
   embedded = false,
   onPageChange,
 }: ScheduleOverviewPaginationControlsProps) {
-  const t = useTranslations("dashboard.admin");
+  const t = useAppTranslation("dashboard.admin");
   const [pageInput, setPageInput] = useState(String(page + 1));
 
   useEffect(() => {
@@ -110,11 +110,11 @@ export function ScheduleOverviewPaginationControls({
   return (
     <StyledPaginationRoot embedded={embedded}>
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-        {t("paginationRange", { from, to, total: rowCount })}
+        {t.paginationRange(from, to, rowCount)}
       </Typography>
 
       <StyledPaginationActions>
-        <Tooltip title={t("previousPage")}>
+        <Tooltip title={t.previousPage}>
           <span>
             <StyledPageNavButton
               size="small"
@@ -140,13 +140,13 @@ export function ScheduleOverviewPaginationControls({
           }}
           slotProps={{
             htmlInput: {
-              "aria-label": t("goToPage"),
+              "aria-label": t.goToPage,
               inputMode: "numeric",
             },
           }}
         />
 
-        <Tooltip title={t("nextPage")}>
+        <Tooltip title={t.nextPage}>
           <span>
             <StyledPageNavButton
               size="small"
@@ -159,7 +159,7 @@ export function ScheduleOverviewPaginationControls({
         </Tooltip>
 
         <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t("pageOf", {
+          {t.pageOf({
             current: safePageCount === 0 ? 0 : page + 1,
             total: safePageCount,
           })}

@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import {
   markTeacherDuesPaidMutationDocument,
@@ -12,32 +11,33 @@ import { useTeacherDuesStore } from "@/frontend/common/stores/teacherDuesStore";
 import { logger } from "@/frontend/common/utils/logger";
 import { TeacherDuesView } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/teacherDuesView";
 import type { TeacherDueRow } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type SnackbarSeverity = "success" | "error";
 
-function useLabels(t: ReturnType<typeof useTranslations<"dashboard.supervisorPortal.teacherDues">>) {
+function useLabels(t: ReturnType<typeof useAppTranslation<"dashboard.supervisorPortal.teacherDues">>) {
   return useMemo(
     () => ({
-      pageTitle: t("pageTitle"),
-      teacherNameColumn: t("teacherNameColumn"),
-      classDateColumn: t("classDateColumn"),
-      studentColumn: t("studentColumn"),
-      hoursColumn: t("hoursColumn"),
-      amountColumn: t("amountColumn"),
-      currencyColumn: t("currencyColumn"),
-      statusColumn: t("statusColumn"),
-      approvedDateColumn: t("approvedDateColumn"),
-      markAsPaidButton: t("markAsPaidButton"),
-      noPendingDues: t("noPendingDues"),
-      loadingMessage: t("loadingMessage"),
-      markPaidConfirm: t("markPaidConfirm"),
+      pageTitle: t.pageTitle,
+      teacherNameColumn: t.teacherNameColumn,
+      classDateColumn: t.classDateColumn,
+      studentColumn: t.studentColumn,
+      hoursColumn: t.hoursColumn,
+      amountColumn: t.amountColumn,
+      currencyColumn: t.currencyColumn,
+      statusColumn: t.statusColumn,
+      approvedDateColumn: t.approvedDateColumn,
+      markAsPaidButton: t.markAsPaidButton,
+      noPendingDues: t.noPendingDues,
+      loadingMessage: t.loadingMessage,
+      markPaidConfirm: t.markPaidConfirm,
     }),
     [t]
   );
 }
 
 export function TeacherDuesContainer() {
-  const t = useTranslations("dashboard.supervisorPortal.teacherDues");
+  const t = useAppTranslation("dashboard.supervisorPortal.teacherDues");
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -79,7 +79,7 @@ export function TeacherDuesContainer() {
     try {
       await markPaid({ variables: { dueIds, teacherPaymentId } });
       clearSelection();
-      setSnackbarMessage(t("markAsPaidButton"));
+      setSnackbarMessage(t.markAsPaidButton);
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     } catch (err) {

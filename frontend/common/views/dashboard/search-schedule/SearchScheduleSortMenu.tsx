@@ -2,11 +2,11 @@
 
 import { SortOutlined } from "@mui/icons-material";
 import { alpha, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { type MouseEvent, useState } from "react";
 import { AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
 import { isSortApplied } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface SearchScheduleSortMenuProps {
   readonly sortBy: SearchScheduleDraftFilters["sortBy"];
@@ -31,11 +31,11 @@ function getSortLabelKey(
 }
 
 export function SearchScheduleSortMenu({ sortBy, onSortChange }: Readonly<SearchScheduleSortMenuProps>) {
-  const t = useTranslations("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
   const sortActive = isSortApplied(sortBy);
-  const currentSortLabel = t(`sortOptions.${getSortLabelKey(sortBy)}`);
+  const currentSortLabel = t.sortOptions[getSortLabelKey(sortBy)];
 
   const handleOpen = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -52,9 +52,9 @@ export function SearchScheduleSortMenu({ sortBy, onSortChange }: Readonly<Search
 
   return (
     <>
-      <Tooltip title={`${t("sort")}: ${currentSortLabel}`}>
+      <Tooltip title={`${t.sort}: ${currentSortLabel}`}>
         <IconButton
-          aria-label={t("sort")}
+          aria-label={t.sort}
           aria-pressed={sortActive}
           onClick={handleOpen}
           size="small"
@@ -72,31 +72,31 @@ export function SearchScheduleSortMenu({ sortBy, onSortChange }: Readonly<Search
           selected={sortBy === AvailabilitySearchSortBy.MostAvailableDays}
           onClick={() => handleSelect(AvailabilitySearchSortBy.MostAvailableDays)}
         >
-          {t("sortOptions.mostAvailableDays")}
+          {t.sortOptions.mostAvailableDays}
         </MenuItem>
         <MenuItem
           selected={sortBy === AvailabilitySearchSortBy.MostGaps}
           onClick={() => handleSelect(AvailabilitySearchSortBy.MostGaps)}
         >
-          {t("sortOptions.mostGaps")}
+          {t.sortOptions.mostGaps}
         </MenuItem>
         <MenuItem
           selected={sortBy === AvailabilitySearchSortBy.NameAsc}
           onClick={() => handleSelect(AvailabilitySearchSortBy.NameAsc)}
         >
-          {t("sortOptions.nameAsc")}
+          {t.sortOptions.nameAsc}
         </MenuItem>
         <MenuItem
           selected={sortBy === AvailabilitySearchSortBy.NameDesc}
           onClick={() => handleSelect(AvailabilitySearchSortBy.NameDesc)}
         >
-          {t("sortOptions.nameDesc")}
+          {t.sortOptions.nameDesc}
         </MenuItem>
         <MenuItem
           selected={sortBy === AvailabilitySearchSortBy.TimezoneAsc}
           onClick={() => handleSelect(AvailabilitySearchSortBy.TimezoneAsc)}
         >
-          {t("sortOptions.timezoneAsc")}
+          {t.sortOptions.timezoneAsc}
         </MenuItem>
       </Menu>
     </>

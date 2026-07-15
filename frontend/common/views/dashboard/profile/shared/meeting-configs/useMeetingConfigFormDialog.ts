@@ -1,10 +1,10 @@
 "use client";
 
-import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import type { MeetingConfigDetailsForm } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog";
 import { useAppTranslation } from "@/shared/locale/client";
 
@@ -48,7 +48,7 @@ export type UseMeetingConfigFormStateOptions = {
 
 export function useMeetingConfigFormState({ open, editConfig, existingCount }: UseMeetingConfigFormStateOptions) {
   const t = useAppTranslation("ui").meetingConfig.manager;
-  const locale = useLocale();
+  const locale = useAppLocale();
   const isEdit = editConfig?.id != null;
 
   const [label, setLabel] = useState("");

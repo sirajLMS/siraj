@@ -1,7 +1,6 @@
 "use client";
 
 import { InputAdornment, Stack, TextField } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import type { Control, FieldPath, FieldValues, UseFormRegister } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
@@ -10,8 +9,10 @@ import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-ty
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface CompensationViewData {
   readonly hourlyRate?: string | null;
@@ -23,6 +24,8 @@ export interface CompensationViewData {
   } | null;
 }
 
+type CompensationTranslationNamespace = "profile.teacher" | "profile.staff";
+
 export function CompensationEditFields<TFormValues extends FieldValues>({
   register,
   control,
@@ -30,19 +33,19 @@ export function CompensationEditFields<TFormValues extends FieldValues>({
 }: {
   readonly register: UseFormRegister<TFormValues>;
   readonly control: Control<TFormValues>;
-  readonly translationNamespace: string;
+  readonly translationNamespace: CompensationTranslationNamespace;
 }) {
-  const t = useTranslations(translationNamespace);
+  const t = useAppTranslation(translationNamespace);
   const rateCurrency = useWatch({ control, name: "rateCurrency" as FieldPath<TFormValues> });
   const currencySymbol = getCurrencySymbol(rateCurrency ?? CurrencyCode.Usd);
 
   const rateCurrencyName = "rateCurrency" as FieldPath<TFormValues>;
 
   return (
-    <SectionPanel title={t("sections.compensation")}>
+    <SectionPanel title={t.sections.compensation}>
       <Stack spacing={2}>
         <TextField
-          label={t("fields.hourlyRate")}
+          label={t.fields.hourlyRate}
           fullWidth
           size="small"
           {...register("hourlyRate" as FieldPath<TFormValues>)}
@@ -64,7 +67,7 @@ export function CompensationEditFields<TFormValues extends FieldValues>({
                   field.onChange(selected.code);
                 }}
                 onBlurAction={field.onBlur}
-                label={t("fields.currency")}
+                label={t.fields.currency}
                 error={Boolean(fieldState.error)}
                 helperText={fieldState.error?.message}
                 fullWidth
@@ -84,12 +87,12 @@ export function CompensationViewSection({
 }: {
   readonly profileData: CompensationViewData;
   readonly subjectUserId?: string;
-  readonly translationNamespace: string;
+  readonly translationNamespace: CompensationTranslationNamespace;
 }) {
-  const t = useTranslations(translationNamespace);
-  const tProfile = useTranslations("profile");
-  const tErrors = useTranslations("errors");
-  const locale = useLocale();
+  const t = useAppTranslation(translationNamespace);
+  const tProfile = useAppTranslation("profile");
+  const tErrors = useAppTranslation("errors");
+  const locale = useAppLocale();
 
   const lockedAmount = profileData.hourlyRate ?? "0";
   const lockedCurrency = profileData.rateCurrency ?? CurrencyCode.Usd;
@@ -109,10 +112,10 @@ export function CompensationViewSection({
   );
 
   return (
-    <SectionPanel title={t("sections.compensation")}>
+    <SectionPanel title={t.sections.compensation}>
       {subjectUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={subjectUserId} /> : null}
       <Stack spacing={2}>
-        <InfoField label={t("fields.hourlyRate")} value={salaryLabel} />
+        <InfoField label={t.fields.hourlyRate} value={salaryLabel} />
       </Stack>
     </SectionPanel>
   );

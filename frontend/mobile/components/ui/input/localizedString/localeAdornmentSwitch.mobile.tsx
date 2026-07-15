@@ -2,12 +2,13 @@
 
 import { ArrowDropDown } from "@mui/icons-material";
 import { Box, IconButton, Popover, Stack, styled, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
 import type { LocaleAdornmentSwitchProps } from "@/frontend/common/components/ui/input/localizedString/LocaleAdornmentSwitch";
 import { getLanguageDisplayName, getLanguageEmoji, languages } from "@/frontend/common/lib/locale";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import type { AppLocale } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type MobileLocaleListProps = {
   readonly activeLocale: AppLocale;
@@ -33,11 +34,11 @@ const MobileLanguageOption = styled(Box, {
 }));
 
 function MobileLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<MobileLocaleListProps>) {
-  const t = useTranslations("ui.localizedString");
-  const uiLocale = useLocale();
+  const t = useAppTranslation("ui.localizedString");
+  const uiLocale = useAppLocale();
 
   return (
-    <Stack role="listbox" aria-label={ariaLabel ?? t("selectLocale")}>
+    <Stack role="listbox" aria-label={ariaLabel ?? t.selectLocale}>
       {languages.map((language, index, array) => {
         const isSelected = language.code === activeLocale;
         const isLastItem = index === array.length - 1;
@@ -81,8 +82,8 @@ export function LocaleAdornmentSwitchMobile({
   successSwitch = false,
   ariaLabel,
 }: LocaleAdornmentSwitchProps) {
-  const t = useTranslations("ui.localizedString");
-  const uiLocale = useLocale();
+  const t = useAppTranslation("ui.localizedString");
+  const uiLocale = useAppLocale();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleOpen = useCallback(
@@ -117,7 +118,7 @@ export function LocaleAdornmentSwitchMobile({
   return (
     <>
       <IconButton
-        aria-label={ariaLabel ?? t("selectLocale")}
+        aria-label={ariaLabel ?? t.selectLocale}
         aria-expanded={open}
         aria-haspopup="listbox"
         disabled={disabled}

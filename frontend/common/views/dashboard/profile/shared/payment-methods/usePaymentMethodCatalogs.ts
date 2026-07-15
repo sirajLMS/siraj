@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import type { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -10,6 +9,7 @@ import {
   supportedPaymentLinksQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
 import { toPaymentMethodCatalogOptions } from "@/frontend/common/lib/payment-method";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import type { LocalizedString } from "@/shared/types/localized-string";
 
 function isPaymentMethodCatalogRow<T extends { id: string | null; slug: string | null; name: LocalizedString | null }>(
@@ -19,7 +19,7 @@ function isPaymentMethodCatalogRow<T extends { id: string | null; slug: string |
 }
 
 export function usePaymentMethodCatalogs(direction: PaymentDirection | null) {
-  const locale = useLocale();
+  const locale = useAppLocale();
 
   const { data: walletData, loading: walletsLoading } = useQuery(supportedMobileWalletsQueryDocument, {
     variables: { activeOnly: true, countryCode: null, direction },

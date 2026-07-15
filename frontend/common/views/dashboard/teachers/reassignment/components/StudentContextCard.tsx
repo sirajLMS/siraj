@@ -1,12 +1,12 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { BaseCard, StatusBadge, UserAvatar } from "@/frontend/common/components/ui";
 import type { StudentContextCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function StudentContextCard({ student }: Readonly<StudentContextCardProps>) {
-  const t = useTranslations("dashboard.teacherReassignment.studentContext");
+  const t = useAppTranslation("dashboard.teacherReassignment").studentContext;
 
   return (
     <BaseCard>
@@ -26,7 +26,7 @@ export function StudentContextCard({ student }: Readonly<StudentContextCardProps
             {student.name}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {t("studentId", { id: student.id.replace("stu-", "SIR-") })}
+            {t.studentId(student.id.replace("stu-", "SIR-"))}
           </Typography>
         </Box>
 
@@ -47,7 +47,7 @@ export function StudentContextCard({ student }: Readonly<StudentContextCardProps
               mb: 0.5,
             })}
           >
-            {t("enrollment")}
+            {t.enrollment}
           </Typography>
           <StatusBadge category="studentAccount" status={student.accountStatus} label={student.accountStatus} />
         </Box>

@@ -5,7 +5,6 @@ import NotificationsActiveOutlined from "@mui/icons-material/NotificationsActive
 import PhoneIphoneOutlined from "@mui/icons-material/PhoneIphoneOutlined";
 import SmsOutlined from "@mui/icons-material/SmsOutlined";
 import { Box, FormControlLabel, Skeleton, Slide, Stack, Switch, Tab, Tabs, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { type SyntheticEvent, useRef, useState } from "react";
 import {
   NotificationChannel,
@@ -18,6 +17,7 @@ import {
   NOTIFICATION_EVENT_TYPES,
   type NotificationPrefRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type PreferencesChannelTabsProps = {
   readonly preferences: readonly NotificationPrefRow[];
@@ -67,7 +67,7 @@ export function PreferencesChannelTabs({
   disabled = false,
   loading = false,
 }: PreferencesChannelTabsProps) {
-  const t = useTranslations("profile.notifications");
+  const t = useAppTranslation("profile.notifications");
   const [activeChannel, setActiveChannel] = useState<ChannelId>(NOTIFICATION_CHANNELS[0]);
   const [slideDirection, setSlideDirection] = useState<"left" | "right">("left");
   const previousIndexRef = useRef(0);

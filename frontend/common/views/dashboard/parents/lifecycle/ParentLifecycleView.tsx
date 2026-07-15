@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PersonOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form";
 import {
@@ -21,9 +20,10 @@ import {
 } from "@/frontend/common/views/dashboard/parents/lifecycle/schemas/lifecycleUpdateSchema";
 import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
 import { Link } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function PolicyOverviewCard() {
-  const t = useTranslations("dashboard.parentLifecycle");
+  const t = useAppTranslation("dashboard.parentLifecycle");
 
   return (
     <Box
@@ -36,23 +36,23 @@ function PolicyOverviewCard() {
       })}
     >
       <Typography variant="titleLg" sx={{ fontWeight: 700, mb: 2 }}>
-        {t("sections.policyOverview")}
+        {t.sections.policyOverview}
       </Typography>
       <Stack spacing={2}>
         <Box>
           <Typography variant="bodyLg" sx={{ fontWeight: 700 }}>
-            {t("policies.lifecycleTitle")}
+            {t.policies.lifecycleTitle}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t("policies.lifecycleDesc")}
+            {t.policies.lifecycleDesc}
           </Typography>
         </Box>
         <Box>
           <Typography variant="bodyLg" sx={{ fontWeight: 700 }}>
-            {t("policies.accountTitle")}
+            {t.policies.accountTitle}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t("policies.accountDesc")}
+            {t.policies.accountDesc}
           </Typography>
         </Box>
       </Stack>
@@ -61,28 +61,28 @@ function PolicyOverviewCard() {
 }
 
 function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
-  const t = useTranslations("dashboard.parentLifecycle");
+  const t = useAppTranslation("dashboard.parentLifecycle");
   const { control, register } = useFormContext<LifecycleUpdateFormData>();
 
   return (
-    <AdminControlPanel title={t("sections.adminControls")}>
+    <AdminControlPanel title={t.sections.adminControls}>
       <Stack spacing={3}>
         <Box>
           <Typography
             variant="labelMd"
             sx={theme => ({ color: theme.palette.text.secondary, mb: 1, display: "block" })}
           >
-            {t("fields.lifecycleStatus")}
+            {t.fields.lifecycleStatus}
           </Typography>
           <Controller
             name="lifecycleStatus"
             control={control}
             render={({ field }) => (
               <Select {...field} fullWidth size="small">
-                <MenuItem value={ParentStatus.Regular}>{t("statusOptions.REGULAR")}</MenuItem>
-                <MenuItem value={ParentStatus.OnTrial}>{t("statusOptions.ON_TRIAL")}</MenuItem>
-                <MenuItem value={ParentStatus.OnLeave}>{t("statusOptions.ON_LEAVE")}</MenuItem>
-                <MenuItem value={ParentStatus.Suspended}>{t("statusOptions.SUSPENDED")}</MenuItem>
+                <MenuItem value={ParentStatus.Regular}>{t.statusOptions.REGULAR}</MenuItem>
+                <MenuItem value={ParentStatus.OnTrial}>{t.statusOptions.ON_TRIAL}</MenuItem>
+                <MenuItem value={ParentStatus.OnLeave}>{t.statusOptions.ON_LEAVE}</MenuItem>
+                <MenuItem value={ParentStatus.Suspended}>{t.statusOptions.SUSPENDED}</MenuItem>
               </Select>
             )}
           />
@@ -90,8 +90,8 @@ function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
 
         <TextField
           {...register("reason")}
-          label={t("fields.reason")}
-          placeholder={t("fields.reasonPlaceholder")}
+          label={t.fields.reason}
+          placeholder={t.fields.reasonPlaceholder}
           multiline
           rows={3}
           fullWidth
@@ -99,7 +99,7 @@ function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
         />
 
         <PrimaryPageAction type="submit" disabled={isUpdating}>
-          {t("actions.applyChange")}
+          {t.actions.applyChange}
         </PrimaryPageAction>
       </Stack>
     </AdminControlPanel>
@@ -107,8 +107,8 @@ function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
 }
 
 export function ParentLifecycleView({ parent, isUpdating, onUpdateLifecycle }: Readonly<ParentLifecycleViewProps>) {
-  const t = useTranslations("dashboard.parentLifecycle");
-  const tp = useTranslations("profile.parent");
+  const t = useAppTranslation("dashboard.parentLifecycle");
+  const tp = useAppTranslation("profile.parent");
 
   const methods = useForm<LifecycleUpdateFormData>({
     resolver: zodResolver(lifecycleUpdateSchema),
@@ -138,16 +138,16 @@ export function ParentLifecycleView({ parent, isUpdating, onUpdateLifecycle }: R
   return (
     <PageContainer>
       <PageHeader
-        title={t("pageTitle")}
-        subtitle={t("parentId", { id: parent.id })}
+        title={t.pageTitle}
+        subtitle={t.parentId(parent.id)}
         breadcrumbs={[
-          { label: t("breadcrumbs.parents"), href: "/parents" },
-          { label: t("breadcrumbs.lifecycle"), current: true },
+          { label: t.breadcrumbs.parents, href: "/parents" },
+          { label: t.breadcrumbs.lifecycle, current: true },
         ]}
         actions={
           profileHref ? (
             <Button component={Link} href={profileHref} variant="outlined">
-              {t("actions.viewProfile")}
+              {t.actions.viewProfile}
             </Button>
           ) : undefined
         }
@@ -173,11 +173,11 @@ export function ParentLifecycleView({ parent, isUpdating, onUpdateLifecycle }: R
               {parent.email}
             </Typography>
             <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
-              <StatusBadge category="studentAccount" status={lifecycleKey} label={tp(`status.${lifecycleKey}`)} />
+              <StatusBadge category="studentAccount" status={lifecycleKey} label={tp.status[lifecycleKey]} />
               <StatusBadge
                 category="staffAccount"
                 status={accountKey}
-                label={tp(`accountStatus.${accountKey as "activated" | "deactivated"}`)}
+                label={tp.accountStatus[accountKey as "activated" | "deactivated"]}
               />
             </Stack>
           </Box>

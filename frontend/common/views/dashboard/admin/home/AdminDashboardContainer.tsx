@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import {
   ADMIN_DASHBOARD_PAGE_SIZE,
   useAdminDashboardHandlers,
@@ -15,10 +14,11 @@ import {
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { useAdminDashboardLabels } from "@/frontend/common/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
+import { useAppTranslation } from "@/shared/locale/client";
 
 // Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
 export function AdminDashboardContainer() {
-  const t = useTranslations("dashboard");
+  const t = useAppTranslation("dashboard").admin;
   const { headers, statusLabels } = useAdminDashboardLabels();
 
   const { dashboardData, loading, refetch, page, setPage } = useAdminScheduleQuery();
@@ -38,9 +38,7 @@ export function AdminDashboardContainer() {
   const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
 
   const selectedMetricLabel =
-    filters.selectedStatus && isAdminMetricKey(filters.selectedStatus)
-      ? t(`admin.metrics.${filters.selectedStatus}`)
-      : null;
+    filters.selectedStatus && isAdminMetricKey(filters.selectedStatus) ? t.metrics[filters.selectedStatus] : null;
 
   return renderAdminDashboardView({
     t,

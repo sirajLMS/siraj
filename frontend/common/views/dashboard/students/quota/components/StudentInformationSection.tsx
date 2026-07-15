@@ -10,7 +10,6 @@ import {
   Typography,
 } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
-import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { LanguageDisplay } from "@/frontend/common/components/ui/display";
 import { AppDatePicker } from "@/frontend/common/components/ui/form";
@@ -21,6 +20,8 @@ import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/c
 import { SectionHeader } from "@/frontend/common/views/dashboard/students/quota/components/SectionHeader";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import { GENDER_OPTIONS } from "@/frontend/common/views/dashboard/students/quota/types";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 const DATE_FORMAT = "yyyy-MM-dd";
 
@@ -31,20 +32,20 @@ function parseDateValue(dateStr: string): Date | null {
 }
 
 function StudentNameField() {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
   const {
     control,
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
   return (
-    <QuotaFormField label={t("fields.studentName")}>
+    <QuotaFormField label={t.fields.studentName}>
       <Controller
         name="studentName"
         control={control}
         render={({ field }) => (
           <TextField
             {...field}
-            placeholder={t("fields.studentNamePlaceholder")}
+            placeholder={t.fields.studentNamePlaceholder}
             variant="outlined"
             fullWidth
             disabled
@@ -59,13 +60,13 @@ function StudentNameField() {
 }
 
 function DateOfBirthField() {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
   const {
     control,
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
   return (
-    <QuotaFormField label={t("fields.dateOfBirth")}>
+    <QuotaFormField label={t.fields.dateOfBirth}>
       <Controller
         name="dateOfBirth"
         control={control}
@@ -94,13 +95,13 @@ function DateOfBirthField() {
 }
 
 function LanguageField() {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
   const {
     control,
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
   return (
-    <QuotaFormField label={t("fields.language")} helperText={errors.language?.message}>
+    <QuotaFormField label={t.fields.language} helperText={errors.language?.message}>
       <Controller
         name="language"
         control={control}
@@ -115,7 +116,7 @@ function LanguageField() {
 }
 
 function GenderField() {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
   const {
     control,
     formState: { errors },
@@ -128,7 +129,7 @@ function GenderField() {
         const hasGender = field.value === "MALE" || field.value === "FEMALE";
 
         return (
-          <QuotaFormField label={t("fields.gender")}>
+          <QuotaFormField label={t.fields.gender}>
             {hasGender ? (
               <FormControl
                 error={!!errors.gender}
@@ -148,7 +149,11 @@ function GenderField() {
                           })}
                         />
                       }
-                      label={<Typography variant="bodyMd">{t(`fields.${option.labelKey}`)}</Typography>}
+                      label={
+                        <Typography variant="bodyMd">
+                          {t.fields[option.labelKey as keyof StudentQuotaLabels["fields"]]}
+                        </Typography>
+                      }
                       sx={option.value === GENDER_OPTIONS[0].value ? { mr: 4 } : undefined}
                     />
                   ))}
@@ -157,7 +162,7 @@ function GenderField() {
               </FormControl>
             ) : (
               <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, py: 1.5 })}>
-                {t("common.notSet")}
+                {t.common.notSet}
               </Typography>
             )}
           </QuotaFormField>
@@ -168,16 +173,16 @@ function GenderField() {
 }
 
 export function StudentInformationSection() {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
   const { canView } = useStudentFieldAccess();
 
   if (!canView("student_identity")) {
-    return <ProfileRestrictedSection title={t("sections.studentInfo")} />;
+    return <ProfileRestrictedSection title={t.sections.studentInfo} />;
   }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 3, md: 4 } }}>
-      <SectionHeader title={t("sections.studentInfo")} desktopIcon={BadgeOutlined} mobileIcon={PersonOutlined} />
+      <SectionHeader title={t.sections.studentInfo} desktopIcon={BadgeOutlined} mobileIcon={PersonOutlined} />
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: { xs: 2, md: 4 } }}>
         <StudentNameField />
         <DateOfBirthField />

@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import {
   studentMonthlyReportQueryDocument,
@@ -14,45 +13,46 @@ import type {
   StudentMonthlyReportData,
   TeacherMonthlyReportData,
 } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
-function useLabels(t: ReturnType<typeof useTranslations<"dashboard.supervisorPortal.monthlyReports">>) {
+function useLabels(t: ReturnType<typeof useAppTranslation<"dashboard.supervisorPortal.monthlyReports">>) {
   return useMemo(
     () => ({
-      pageTitle: t("pageTitle"),
-      reportTypeToggle: t("reportTypeToggle"),
-      teacherReport: t("teacherReport"),
-      studentReport: t("studentReport"),
-      selectYear: t("selectYear"),
-      selectMonth: t("selectMonth"),
-      selectTeacher: t("selectTeacher"),
-      selectStudent: t("selectStudent"),
-      generateReport: t("generateReport"),
-      lessonsTaught: t("lessonsTaught"),
-      approvedCount: t("approvedCount"),
-      cancelledCount: t("cancelledCount"),
-      totalAccruedHours: t("totalAccruedHours"),
-      totalDueAmount: t("totalDueAmount"),
-      totalPaidAmount: t("totalPaidAmount"),
-      totalLessons: t("totalLessons"),
-      completedLessons: t("completedLessons"),
-      cancelledLessons: t("cancelledLessons"),
-      presentCount: t("presentCount"),
-      absentCount: t("absentCount"),
-      lateCount: t("lateCount"),
-      totalHours: t("totalHours"),
-      creditsPurchased: t("creditsPurchased"),
-      creditsDeducted: t("creditsDeducted"),
-      creditsRefunded: t("creditsRefunded"),
-      creditsBalance: t("creditsBalance"),
-      noDataAvailable: t("noDataAvailable"),
-      loadingMessage: t("loadingMessage"),
+      pageTitle: t.pageTitle,
+      reportTypeToggle: t.reportTypeToggle,
+      teacherReport: t.teacherReport,
+      studentReport: t.studentReport,
+      selectYear: t.selectYear,
+      selectMonth: t.selectMonth,
+      selectTeacher: t.selectTeacher,
+      selectStudent: t.selectStudent,
+      generateReport: t.generateReport,
+      lessonsTaught: t.lessonsTaught,
+      approvedCount: t.approvedCount,
+      cancelledCount: t.cancelledCount,
+      totalAccruedHours: t.totalAccruedHours,
+      totalDueAmount: t.totalDueAmount,
+      totalPaidAmount: t.totalPaidAmount,
+      totalLessons: t.totalLessons,
+      completedLessons: t.completedLessons,
+      cancelledLessons: t.cancelledLessons,
+      presentCount: t.presentCount,
+      absentCount: t.absentCount,
+      lateCount: t.lateCount,
+      totalHours: t.totalHours,
+      creditsPurchased: t.creditsPurchased,
+      creditsDeducted: t.creditsDeducted,
+      creditsRefunded: t.creditsRefunded,
+      creditsBalance: t.creditsBalance,
+      noDataAvailable: t.noDataAvailable,
+      loadingMessage: t.loadingMessage,
     }),
     [t]
   );
 }
 
 export function MonthlyReportsContainer() {
-  const t = useTranslations("dashboard.supervisorPortal.monthlyReports");
+  const t = useAppTranslation("dashboard.supervisorPortal.monthlyReports");
 
   const reportType = useSupervisorMonthlyReportsStore(s => s.reportType);
   const year = useSupervisorMonthlyReportsStore(s => s.year);
@@ -126,24 +126,24 @@ export function MonthlyReportsContainer() {
   const metrics: MonthlyReportMetric[] = useMemo(() => {
     if (reportType === "teacher" && teacherReport) {
       return [
-        { label: t("lessonsTaught"), value: teacherReport.lessonsTaught },
-        { label: t("approvedCount"), value: teacherReport.approvedCount },
-        { label: t("cancelledCount"), value: teacherReport.cancelledCount },
-        { label: t("totalAccruedHours"), value: teacherReport.totalAccruedHours },
-        { label: t("totalDueAmount"), value: `${teacherReport.currency} ${teacherReport.totalDueAmount}` },
-        { label: t("totalPaidAmount"), value: `${teacherReport.currency} ${teacherReport.totalPaidAmount}` },
+        { label: t.lessonsTaught, value: teacherReport.lessonsTaught },
+        { label: t.approvedCount, value: teacherReport.approvedCount },
+        { label: t.cancelledCount, value: teacherReport.cancelledCount },
+        { label: t.totalAccruedHours, value: teacherReport.totalAccruedHours },
+        { label: t.totalDueAmount, value: `${teacherReport.currency} ${teacherReport.totalDueAmount}` },
+        { label: t.totalPaidAmount, value: `${teacherReport.currency} ${teacherReport.totalPaidAmount}` },
       ];
     }
     if (reportType === "student" && studentReport) {
       return [
-        { label: t("totalLessons"), value: studentReport.totalLessons },
-        { label: t("completedLessons"), value: studentReport.completedLessons },
-        { label: t("cancelledLessons"), value: studentReport.cancelledLessons },
-        { label: t("presentCount"), value: studentReport.presentCount },
-        { label: t("absentCount"), value: studentReport.absentCount },
-        { label: t("lateCount"), value: studentReport.lateCount },
-        { label: t("totalHours"), value: studentReport.totalHours },
-        { label: t("creditsBalance"), value: studentReport.creditsBalance },
+        { label: t.totalLessons, value: studentReport.totalLessons },
+        { label: t.completedLessons, value: studentReport.completedLessons },
+        { label: t.cancelledLessons, value: studentReport.cancelledLessons },
+        { label: t.presentCount, value: studentReport.presentCount },
+        { label: t.absentCount, value: studentReport.absentCount },
+        { label: t.lateCount, value: studentReport.lateCount },
+        { label: t.totalHours, value: studentReport.totalHours },
+        { label: t.creditsBalance, value: studentReport.creditsBalance },
       ];
     }
     return [];

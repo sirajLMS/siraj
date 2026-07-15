@@ -2,19 +2,21 @@
 
 import { NotificationsOutlined } from "@mui/icons-material";
 import { Badge, type IconButtonProps, Popover } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { type MouseEvent, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { NavbarIcon } from "@/frontend/common/views/dashboard/components/navbar/NavbarIcon";
 import { NotificationPanel } from "@/frontend/common/views/dashboard/components/navbar/NotificationPanel";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface NotificationButtonProps extends Omit<IconButtonProps, "children" | "title"> {
   notificationCount: number;
 }
 
 export function NotificationButton({ notificationCount, ...props }: Readonly<NotificationButtonProps>) {
-  const t = useTranslations("common");
+  const t = useAppTranslation("common");
+  const _locale = useAppLocale();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -27,7 +29,7 @@ export function NotificationButton({ notificationCount, ...props }: Readonly<Not
 
   return (
     <RequirePermission permissions={[AppPermission.NotificationViewAlerts]}>
-      <NavbarIcon tooltipTitle={t("notifications")} onClick={handleClick} {...props}>
+      <NavbarIcon tooltipTitle={t.notifications} onClick={handleClick} {...props}>
         <Badge
           badgeContent={notificationCount}
           variant="dot"

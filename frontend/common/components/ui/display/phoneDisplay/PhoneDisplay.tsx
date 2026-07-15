@@ -3,8 +3,8 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
-import { useLocale } from "next-intl";
 import type * as React from "react";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { formatPhoneDisplay, maskPhone } from "@/shared/lib/phone";
 
 export type PhoneDisplayProps = {
@@ -24,7 +24,7 @@ export const PhoneDisplay: React.FC<PhoneDisplayProps> = ({
   typographyVariant,
   sx,
 }): React.ReactNode => {
-  const locale = useLocale();
+  const locale = useAppLocale();
 
   if (!phone) {
     return fallback ?? null;

@@ -2,13 +2,13 @@
 
 import { BlockOutlined, EventBusyOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Stack, Tooltip, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { FutureClassCardProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isRescheduled: boolean }>) {
   const dateObj = new Date(date);
@@ -54,7 +54,7 @@ function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isReschedu
 }
 
 function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
-  const t = useTranslations("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation("dashboard.teacherFutureSchedule");
   const isRescheduled = item.isRescheduled === true;
 
   return (
@@ -63,7 +63,7 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
           {item.courseName}
         </Typography>
-        {isRescheduled && <StatusBadge category="trackingStatus" status="rescheduled" label={t("reScheduled")} />}
+        {isRescheduled && <StatusBadge category="trackingStatus" status="rescheduled" label={t.reScheduled} />}
       </Box>
 
       <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap", gap: 1 }}>
@@ -80,7 +80,7 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
               joinUrl={item.meetingJoinUrl}
               meeting={item.effectiveMeeting}
               emptyRole="teacher"
-              label={t("actions.joinVideo")}
+              label={t.actions.joinVideo}
               setupHref="/profile?tab=meeting"
             />
           ) : null}
@@ -91,7 +91,7 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
         <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.onSurfaceVariant })}>
           <PersonOutlined sx={{ fontSize: 16 }} />
           <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
-            {item.studentCount} {t("students")}
+            {item.studentCount} {t.students}
           </Typography>
         </Box>
       </Stack>
@@ -100,7 +100,7 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
 }
 
 function ActionButtons({ item, onRequestLeave }: Readonly<{ item: FutureClass; onRequestLeave?: () => void }>) {
-  const t = useTranslations("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation("dashboard.teacherFutureSchedule");
 
   return (
     <Stack
@@ -128,7 +128,7 @@ function ActionButtons({ item, onRequestLeave }: Readonly<{ item: FutureClass; o
             flex: 1,
           })}
         >
-          {item.leaveRequestDisabledReason === "quota" ? t("quotaReached") : t("requestLeave")}
+          {item.leaveRequestDisabledReason === "quota" ? t.quotaReached : t.requestLeave}
         </Button>
       ) : (
         <Button
@@ -149,10 +149,10 @@ function ActionButtons({ item, onRequestLeave }: Readonly<{ item: FutureClass; o
             },
           })}
         >
-          {t("requestLeave")}
+          {t.requestLeave}
         </Button>
       )}
-      <Tooltip title={t("notifications.noSubjectAssigned")}>
+      <Tooltip title={t.notifications.noSubjectAssigned}>
         <span>
           <Button
             variant="contained"
@@ -168,7 +168,7 @@ function ActionButtons({ item, onRequestLeave }: Readonly<{ item: FutureClass; o
               flex: 1,
             })}
           >
-            {t("viewMaterials")}
+            {t.viewMaterials}
           </Button>
         </span>
       </Tooltip>

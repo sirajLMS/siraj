@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { PerformanceStreakProps } from "@/frontend/common/views/dashboard/students/history/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const MAX_STREAK_HEIGHT = 48;
 const MIN_STREAK_HEIGHT = 16;
@@ -8,7 +8,7 @@ const MIN_STREAK_HEIGHT = 16;
 const WEEK_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
 export function PerformanceStreak({ streakDays }: Readonly<PerformanceStreakProps>) {
-  const t = useTranslations("dashboard.studentHistory.performanceStreak");
+  const t = useAppTranslation("dashboard.studentHistory.performanceStreak");
 
   return (
     <Box
@@ -24,10 +24,10 @@ export function PerformanceStreak({ streakDays }: Readonly<PerformanceStreakProp
     >
       <Box sx={{ position: "relative", zIndex: 10 }}>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onPrimary, mb: 1 })}>
-          {t("title")}
+          {t.title}
         </Typography>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onPrimary, opacity: 0.8, mb: 3 })}>
-          {t("description", { count: streakDays.length })}
+          {t.description({ count: streakDays.length })}
         </Typography>
 
         <Box sx={{ display: "flex", gap: 0.5, height: MAX_STREAK_HEIGHT, alignItems: "flex-end" }}>

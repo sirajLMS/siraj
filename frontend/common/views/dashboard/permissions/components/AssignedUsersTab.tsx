@@ -4,13 +4,13 @@ import { DeleteOutlined, PersonAddOutlined, PersonRemoveOutlined, SearchOutlined
 import { Avatar, Box, Button, Checkbox, InputAdornment, TextField, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { AppDataGrid, SectionPanel } from "@/frontend/common/components/ui";
 import type { GroupUser, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledTabContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -125,7 +125,7 @@ export function AssignedUsersTab({
   onAssignGroup,
   loading = false,
 }: Readonly<AssignedUsersTabProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const assignedUsersColumns = useMemo<GridColDef<GroupUser>[]>(() => {
     return [
@@ -142,7 +142,7 @@ export function AssignedUsersTab({
       },
       {
         field: "name",
-        headerName: t("columnName"),
+        headerName: t.columnName,
         flex: 1.5,
         minWidth: 200,
         renderCell: (params: { row: GroupUser }) => {
@@ -176,7 +176,7 @@ export function AssignedUsersTab({
       },
       {
         field: "assignedDate",
-        headerName: t("assignedDate"),
+        headerName: t.assignedDate,
         flex: 1.2,
         minWidth: 150,
         renderCell: () => {
@@ -190,12 +190,12 @@ export function AssignedUsersTab({
       },
       {
         field: "assignedBy",
-        headerName: t("assignedBy"),
+        headerName: t.assignedBy,
         flex: 1,
         minWidth: 120,
         renderCell: () => (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t("assignedBySystem")}
+            {t.assignedBySystem}
           </Typography>
         ),
       },
@@ -221,7 +221,7 @@ export function AssignedUsersTab({
               startIcon={<PersonRemoveOutlined fontSize="small" />}
               onClick={() => params.row.id && onRevokeUser(params.row.id)}
             >
-              {t("removeUser")}
+              {t.removeUser}
             </StyledRemoveButton>
           </Box>
         ),
@@ -235,7 +235,7 @@ export function AssignedUsersTab({
       <StyledUserToolbar>
         <TextField
           size="small"
-          placeholder={t("searchAssignedUsers")}
+          placeholder={t.searchAssignedUsers}
           value={searchQuery}
           onChange={e => onSearchChange(e.target.value)}
           slotProps={{
@@ -254,7 +254,7 @@ export function AssignedUsersTab({
           startIcon={<PersonAddOutlined />}
           onClick={() => group.id && onAssignGroup(group.id)}
         >
-          {t("assignUsers")}
+          {t.assignUsers}
         </StyledAssignUsersButton>
       </StyledUserToolbar>
 
@@ -262,7 +262,7 @@ export function AssignedUsersTab({
       {selectedAssignedUserIds.length > 0 && (
         <StyledBulkActionBar>
           <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-            {t("usersSelected", { count: selectedAssignedUserIds.length })}
+            {t.usersSelected({ count: selectedAssignedUserIds.length })}
           </Typography>
           <StyledRemoveSelectedButton
             variant="contained"
@@ -270,18 +270,18 @@ export function AssignedUsersTab({
             startIcon={<DeleteOutlined />}
             onClick={onBulkRevokeUsers}
           >
-            {t("removeSelected")}
+            {t.removeSelected}
           </StyledRemoveSelectedButton>
         </StyledBulkActionBar>
       )}
 
       {/* Users Data Grid */}
-      <SectionPanel title={t("assignedGroupMembers")}>
+      <SectionPanel title={t.assignedGroupMembers}>
         <AppDataGrid<GroupUser>
           rows={filteredAssignedUsers}
           columns={assignedUsersColumns}
           getRowId={row => row.id ?? row.email ?? ""}
-          emptyMessage={t("noAssignedUsers")}
+          emptyMessage={t.noAssignedUsers}
           loading={loading}
           autoHeight
         />

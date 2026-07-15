@@ -1,9 +1,10 @@
 "use client";
 
 import { Autocomplete, TextField } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type MeetingConfigSelectProps = {
   readonly options: readonly MeetingConfigSelectOption[];
@@ -37,11 +38,11 @@ export function MeetingConfigSelect({
   allowEmpty = false,
   emptyOptionLabel,
 }: MeetingConfigSelectProps) {
-  const t = useTranslations("ui.meetingConfig.classScope");
-  const locale = useLocale();
-  const resolvedLabel = label ?? t("selectLabel");
-  const resolvedPlaceholder = placeholder ?? t("selectPlaceholder");
-  const resolvedEmptyLabel = emptyOptionLabel ?? t("useTeacherDefault");
+  const t = useAppTranslation("ui").meetingConfig.classScope;
+  const locale = useAppLocale();
+  const resolvedLabel = label ?? t.selectLabel;
+  const resolvedPlaceholder = placeholder ?? t.selectPlaceholder;
+  const resolvedEmptyLabel = emptyOptionLabel ?? t.useTeacherDefault;
 
   const autocompleteOptions = allowEmpty
     ? [{ id: "", label: resolvedEmptyLabel, provider: null, isDefault: false }, ...options]

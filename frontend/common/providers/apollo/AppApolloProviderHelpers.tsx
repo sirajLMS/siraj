@@ -2,16 +2,17 @@
 
 import { ErrorOutlined as ErrorIcon } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
-import type { useTranslations } from "next-intl";
+import type { useAppTranslation } from "@/shared/locale/client";
 
 // Loading UI shown during initial connectivity check
 interface InitializingUIProps {
   readonly error?: boolean;
   readonly onRetry?: () => void;
-  readonly t: ReturnType<typeof useTranslations<"common">>;
+  readonly t: ReturnType<typeof useAppTranslation<"common">>;
 }
 
 export function InitializingUI({ error, onRetry, t }: InitializingUIProps) {
+  const common = t.common;
   return (
     <Box
       sx={{
@@ -26,9 +27,9 @@ export function InitializingUI({ error, onRetry, t }: InitializingUIProps) {
       {error && t ? (
         <>
           <ErrorIcon color="error" sx={{ fontSize: 48 }} />
-          <Typography color="error">{t("serverConnectionLost")}</Typography>
+          <Typography color="error">{common.serverConnectionLost}</Typography>
           <Button onClick={onRetry} variant="contained">
-            {t("retry")}
+            {common.retry}
           </Button>
         </>
       ) : (

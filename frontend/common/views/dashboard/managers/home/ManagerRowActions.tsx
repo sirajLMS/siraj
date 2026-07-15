@@ -16,7 +16,6 @@ import {
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { PhoneInput } from "@/frontend/common/components/ui/input";
@@ -24,6 +23,7 @@ import type { UpdateManagerProfileInput } from "@/frontend/common/graphql/genera
 import { updateManagerProfileMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
 import { logger } from "@/frontend/common/utils/logger";
 import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface ManagerRowActionsProps {
   readonly manager: Manager;
@@ -77,11 +77,11 @@ function EditProfileDialog({
   onPhoneChange,
   updateLoading,
 }: Readonly<EditProfileDialogProps>) {
-  const t = useTranslations("dashboard.managersDirectory");
+  const t = useAppTranslation("dashboard.managersDirectory");
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{t("actions.editProfile")}</DialogTitle>
+      <DialogTitle>{t.actions.editProfile}</DialogTitle>
       <DialogContent>
         <Typography variant="bodyMd" sx={theme => ({ mb: 2, color: theme.palette.text.secondary })}>
           {manager.name}
@@ -90,15 +90,15 @@ function EditProfileDialog({
           <PhoneInput
             value={editPhone || null}
             onChangeAction={value => onPhoneChange(value ?? "")}
-            label={t("fields.phone")}
+            label={t.fields.phone}
             fullWidth
           />
         </StyledEditField>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t("actions.cancel")}</Button>
+        <Button onClick={onClose}>{t.actions.cancel}</Button>
         <Button onClick={onSubmit} variant="contained" disabled={updateLoading}>
-          {updateLoading ? t("actions.processing") : t("actions.save")}
+          {updateLoading ? t.actions.processing : t.actions.save}
         </Button>
       </DialogActions>
     </Dialog>
@@ -114,16 +114,14 @@ interface DeactivateDialogProps {
   readonly updateLoading: boolean;
 }
 
-type TranslatorFn = ReturnType<typeof useTranslations>;
-
 function resolveSubmitLabel(
   state: { readonly updateLoading: boolean; readonly isDeactivate: boolean },
-  t: TranslatorFn
+  t: ReturnType<typeof useAppTranslation>
 ): string {
   if (state.updateLoading) {
-    return t("actions.processing");
+    return t.actions.processing;
   }
-  return state.isDeactivate ? t("actions.deactivate") : t("actions.activate");
+  return state.isDeactivate ? t.actions.deactivate : t.actions.activate;
 }
 
 function DeactivateDialog({
@@ -134,12 +132,12 @@ function DeactivateDialog({
   manager,
   updateLoading,
 }: Readonly<DeactivateDialogProps>) {
-  const t = useTranslations("dashboard.managersDirectory");
+  const t = useAppTranslation("dashboard.managersDirectory");
 
-  const dialogTitle = isDeactivate ? t("actions.deactivate") : t("actions.activate");
+  const dialogTitle = isDeactivate ? t.actions.deactivate : t.actions.activate;
   const confirmationLabel = isDeactivate
-    ? t("actions.deactivateConfirmation", { name: manager.name })
-    : t("actions.activateConfirmation", { name: manager.name });
+    ? t.actions.deactivateConfirmation({ name: manager.name })
+    : t.actions.activateConfirmation({ name: manager.name });
   const submitButtonSx = (theme: Theme) => {
     const baseColor = isDeactivate ? theme.palette.error : theme.palette.success;
     return {
@@ -155,7 +153,7 @@ function DeactivateDialog({
         <Typography variant="bodyMd">{confirmationLabel}</Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t("actions.cancel")}</Button>
+        <Button onClick={onClose}>{t.actions.cancel}</Button>
         <Button onClick={onSubmit} variant="contained" disabled={updateLoading} sx={submitButtonSx}>
           {resolveSubmitLabel({ updateLoading, isDeactivate }, t)}
         </Button>
@@ -183,7 +181,7 @@ function ActionMenu({
   manager,
   isDeactivate,
 }: Readonly<ActionMenuProps>) {
-  const t = useTranslations("dashboard.managersDirectory");
+  const t = useAppTranslation("dashboard.managersDirectory");
 
   return (
     <Menu anchorEl={anchorEl} open={menuOpen} onClose={onMenuClose}>
@@ -196,7 +194,7 @@ function ActionMenu({
       />
       <MenuItem onClick={onEditClick}>
         <EditOutlined fontSize="small" sx={theme => ({ mr: 1, color: theme.palette.text.secondary })} />
-        {t("actions.editProfile")}
+        {t.actions.editProfile}
       </MenuItem>
       <MenuItem
         onClick={onDeactivateClick}
@@ -205,14 +203,14 @@ function ActionMenu({
         })}
       >
         <DeleteOutlined fontSize="small" sx={{ mr: 1 }} />
-        {isDeactivate ? t("actions.deactivate") : t("actions.activate")}
+        {isDeactivate ? t.actions.deactivate : t.actions.activate}
       </MenuItem>
     </Menu>
   );
 }
 
 export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>) {
-  const t = useTranslations("dashboard.managersDirectory");
+  const t = useAppTranslation("dashboard.managersDirectory");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -266,7 +264,7 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
 
   return (
     <>
-      <IconButton size="small" aria-label={t("actions.options")} onClick={handleMenuOpen}>
+      <IconButton size="small" aria-label={t.actions.options} onClick={handleMenuOpen}>
         <SettingsOutlined fontSize="small" />
       </IconButton>
 

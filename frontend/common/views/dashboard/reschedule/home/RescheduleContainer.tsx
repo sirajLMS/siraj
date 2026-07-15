@@ -3,7 +3,6 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -14,11 +13,12 @@ import { RescheduleView } from "@/frontend/common/views/dashboard/reschedule/hom
 import type { RescheduleFormData } from "@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema";
 import { combineDateTime } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function RescheduleContainer() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const t = useTranslations("dashboard.rescheduleForm");
+  const t = useAppTranslation("dashboard.rescheduleForm");
   const storeSession = useRescheduleStore(state => state.session);
   const setShowSuccess = useRescheduleStore(state => state.setShowSuccess);
   const classInstanceId = searchParams.get("classInstanceId") || storeSession.sessionId || "";
@@ -69,7 +69,7 @@ export function RescheduleContainer() {
 
   if (!classInstanceId || !classInstance) {
     logger.error("Error fetching class details for rescheduling:", error);
-    return <Box sx={{ p: 3, textAlign: "center" }}>{t("classInstanceNotFound")}</Box>;
+    return <Box sx={{ p: 3, textAlign: "center" }}>{t.classInstanceNotFound}</Box>;
   }
 
   const onSubmit = async (formData: RescheduleFormData) => {

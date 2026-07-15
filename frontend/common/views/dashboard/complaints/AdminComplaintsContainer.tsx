@@ -3,7 +3,6 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -21,14 +20,15 @@ import type {
   AdminComplaintsSummary,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
 }));
 
 export function AdminComplaintsContainer() {
-  const t = useTranslations("dashboard.complaints");
-  const tc = useTranslations("common");
+  const t = useAppTranslation("dashboard.complaints");
+  const tc = useAppTranslation("common");
   const labels = buildComplaintsLabels(t);
   const hasPermission = useUserStore(state => state.hasPermission);
 
@@ -151,7 +151,7 @@ export function AdminComplaintsContainer() {
 
   if (error) {
     logger.error("Error loading complaints:", { error });
-    return <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>;
+    return <StyledErrorTypography>{tc.loadFailed}</StyledErrorTypography>;
   }
 
   return (

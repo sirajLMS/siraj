@@ -2,7 +2,6 @@
 
 import PhoneOutlined from "@mui/icons-material/PhoneOutlined";
 import { Stack, TextField } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { Control, FieldPath, UseFormRegister } from "react-hook-form";
 import { PhoneFormField, SectionPanel } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display/phoneDisplay/PhoneDisplay";
@@ -10,6 +9,7 @@ import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graph
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type CoreContactFormFields = {
   phone?: string;
@@ -47,7 +47,7 @@ type CoreContactSectionProps<T extends CoreContactFormFields = CoreContactFormFi
 export function CoreContactSection<T extends CoreContactFormFields = CoreContactFormFields>(
   props: CoreContactSectionProps<T>
 ) {
-  const tc = useTranslations("profile");
+  const t = useAppTranslation("profile");
   const { canView, showField } = useProfileFieldAccess({ scope: props.scope });
 
   if (!canView("core_contact")) {
@@ -76,7 +76,7 @@ export function CoreContactSection<T extends CoreContactFormFields = CoreContact
         <ProfileFieldRow
           icon={PhoneOutlined}
           label={props.phoneLabel}
-          value={<PhoneDisplay phone={props.phone} fallback={tc("notSet")} />}
+          value={<PhoneDisplay phone={props.phone} fallback={t.notSet} />}
         />
       </Stack>
     </SectionPanel>

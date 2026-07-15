@@ -11,7 +11,6 @@ import {
   Button as MuiButton,
   Typography,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
@@ -25,6 +24,7 @@ import type {
   ScheduledClass,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function isTerminalClassInstance(executionState?: ClassExecutionState | null, outcome?: ClassOutcome | null): boolean {
   return (
@@ -42,7 +42,8 @@ interface MobileSlotItemProps {
 
 function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) {
   const [open, setOpen] = useState(false);
-  const t = useTranslations("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
+  const tMeeting = useAppTranslation("ui.meetingConfig").join;
 
   const handleDeleteClick = () => {
     setOpen(true);
@@ -91,12 +92,12 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
               joinUrl={classItem.meetingJoinUrl}
               meeting={classItem.effectiveMeeting}
               emptyRole="teacher"
-              label={t("actions.joinVideo")}
+              label={tMeeting.joinMeeting}
               setupHref="/profile?tab=meeting"
             />
           ) : isTerminal ? (
             <Typography variant="labelMd" sx={{ opacity: 0.7, color: "inherit", fontSize: 10 }}>
-              {t("grid.sessionEnded")}
+              {t.grid.sessionEnded}
             </Typography>
           ) : null}
           {showDelete ? (
@@ -119,14 +120,14 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
       </Box>
 
       <Dialog open={open} onClose={handleCancel}>
-        <DialogTitle>{t("dialogs.deleteClassTitle")}</DialogTitle>
+        <DialogTitle>{t.dialogs.deleteClassTitle}</DialogTitle>
         <DialogContent>
-          <DialogContentText>{t("dialogs.deleteClassMessage")}</DialogContentText>
+          <DialogContentText>{t.dialogs.deleteClassMessage}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <MuiButton onClick={handleCancel}>{t("dialogs.cancel")}</MuiButton>
+          <MuiButton onClick={handleCancel}>{t.dialogs.cancel}</MuiButton>
           <MuiButton onClick={handleConfirm} color="error" variant="contained" autoFocus>
-            {t("dialogs.confirmYes")}
+            {t.dialogs.confirmYes}
           </MuiButton>
         </DialogActions>
       </Dialog>
@@ -153,7 +154,7 @@ interface DaySelectorProps {
 }
 
 function DaySelector({ selectedDay, onSelect }: Readonly<DaySelectorProps>) {
-  const t = useTranslations("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
 
   return (
     <Box
@@ -167,28 +168,31 @@ function DaySelector({ selectedDay, onSelect }: Readonly<DaySelectorProps>) {
         scrollbarWidth: "none",
       }}
     >
-      {DAYS.map(day => (
-        <Button
-          key={day}
-          variant={selectedDay === day ? "contained" : "outlined"}
-          onClick={() => {
-            onSelect(day);
-          }}
-          sx={theme => ({
-            borderRadius: 10,
-            px: 3,
-            whiteSpace: "nowrap",
-            backgroundColor: selectedDay === day ? theme.palette.primary.main : theme.palette.background.paper,
-            color: selectedDay === day ? theme.palette.onPrimary : theme.palette.text.secondary,
-            borderColor: selectedDay === day ? theme.palette.primary.main : theme.palette.border.light,
-            "&:hover": {
-              backgroundColor: selectedDay === day ? theme.palette.primary.dark : theme.palette.action.hover,
-            },
-          })}
-        >
-          {t(`days.${day.slice(0, 3)}`)}
-        </Button>
-      ))}
+      {DAYS.map(day => {
+        const dayKey = day.slice(0, 3) as keyof typeof t.days;
+        return (
+          <Button
+            key={day}
+            variant={selectedDay === day ? "contained" : "outlined"}
+            onClick={() => {
+              onSelect(day);
+            }}
+            sx={theme => ({
+              borderRadius: 10,
+              px: 3,
+              whiteSpace: "nowrap",
+              backgroundColor: selectedDay === day ? theme.palette.primary.main : theme.palette.background.paper,
+              color: selectedDay === day ? theme.palette.onPrimary : theme.palette.text.secondary,
+              borderColor: selectedDay === day ? theme.palette.primary.main : theme.palette.border.light,
+              "&:hover": {
+                backgroundColor: selectedDay === day ? theme.palette.primary.dark : theme.palette.action.hover,
+              },
+            })}
+          >
+            {t.days[dayKey]}
+          </Button>
+        );
+      })}
     </Box>
   );
 }
@@ -200,14 +204,14 @@ interface TimeSlotRowProps {
 }
 
 function TimeSlotRow({ time, slotClasses, onRemoveClass }: Readonly<TimeSlotRowProps>) {
-  const t = useTranslations("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
   const isLunch = time === "12:00 PM";
 
   let content = (
     <Typography
       sx={theme => ({ m: "auto", color: theme.palette.text.disabled, fontSize: theme.typography.bodyMd.fontSize })}
     >
-      {t("grid.available")}
+      {t.grid.available}
     </Typography>
   );
 
@@ -226,7 +230,7 @@ function TimeSlotRow({ time, slotClasses, onRemoveClass }: Readonly<TimeSlotRowP
           restaurant
         </Box>
         <Typography variant="labelUppercase" sx={{ fontStyle: "italic" }}>
-          {t("grid.lunchBreak")}
+          {t.grid.lunchBreak}
         </Typography>
       </Box>
     );

@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -23,6 +22,7 @@ import type {
 import { buildManualInvoiceLabels } from "@/frontend/common/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const MONTH_MAP: Record<string, number> = {
   jan: 1,
@@ -50,9 +50,9 @@ function billingMonthsToInput(months: string[], year?: number): { year: number; 
 }
 
 export function ManualInvoiceContainer() {
-  const t = useTranslations("dashboard.billing.manual");
-  const tc = useTranslations("common");
-  const tErrors = useTranslations("errors");
+  const t = useAppTranslation("dashboard.billing.manual");
+  const tc = useAppTranslation("common");
+  const tErrors = useAppTranslation("errors");
   const router = useRouter();
   const labels = buildManualInvoiceLabels(t);
   const { isImpersonating } = useImpersonation();
@@ -84,13 +84,13 @@ export function ManualInvoiceContainer() {
     onCompleted: data => {
       setShowSuccess(true);
       const invoiceId = data.createManualInvoice?.id ?? "";
-      setSnackbarMessage(t("createSuccess", { id: invoiceId }));
+      setSnackbarMessage(t.createSuccess(invoiceId));
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     },
     onError: error => {
       logger.error("Create manual invoice failed:", { error });
-      setSnackbarMessage(tc("operationFailed"));
+      setSnackbarMessage(tc.operationFailed);
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     },
@@ -102,7 +102,7 @@ export function ManualInvoiceContainer() {
 
   const handleSubmit = (data: ManualInvoiceFormData, sendEmail: boolean) => {
     if (billingActionsDisabled) {
-      setSnackbarMessage(tErrors("auth.impersonationNotAllowedDuringSession"));
+      setSnackbarMessage(tErrors.auth.impersonationNotAllowedDuringSession);
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
       return;
@@ -150,7 +150,7 @@ export function ManualInvoiceContainer() {
         .filter((s): s is { id: string; name: string } & typeof s => s.id != null)
         .map(s => ({
           id: s.id,
-          name: s.name ?? t("unknown"),
+          name: s.name ?? t.unknown,
         })),
     [studentData?.studentDirectory?.rows, t]
   );
@@ -161,7 +161,7 @@ export function ManualInvoiceContainer() {
       <BillingImpersonationNotice />
       {selectedParentUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={selectedParentUserId} /> : null}
       <Typography variant="caption" sx={theme => ({ display: "block", mb: 1, color: theme.palette.text.secondary })}>
-        {t("manualInvoiceFxNote")}
+        {t.manualInvoiceFxNote}
       </Typography>
       <ManualInvoiceView
         labels={labels}

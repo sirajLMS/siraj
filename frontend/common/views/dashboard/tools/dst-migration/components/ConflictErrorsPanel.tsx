@@ -2,9 +2,9 @@
 
 import { CancelOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import type { ConflictGroup } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface Props {
   readonly conflictGroups: readonly ConflictGroup[];
@@ -41,7 +41,7 @@ function ConflictCard({
 }
 
 export function ConflictErrorsPanel({ conflictGroups }: Readonly<Props>) {
-  const t = useTranslations("dashboard.dstMigration");
+  const t = useAppTranslation("dashboard.dstMigration");
 
   return (
     <Box
@@ -79,17 +79,13 @@ export function ConflictErrorsPanel({ conflictGroups }: Readonly<Props>) {
           <CancelOutlined sx={{ fontSize: 18 }} />
         </Box>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.error.main })}>
-          {t("sections.errors")}
+          {t.sections.errors}
         </Typography>
       </Box>
       <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3, maxHeight: 500, overflowY: "auto" }}>
         {conflictGroups.map(group => (
           <Box key={group.id} sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-            <StatusBadge
-              category="session"
-              status="pending"
-              label={t("conflicts.teacherLabel", { name: group.teacherName })}
-            />
+            <StatusBadge category="session" status="pending" label={t.conflicts.teacherLabel(group.teacherName)} />
             {group.conflicts.map(conflict => (
               <ConflictCard key={conflict.id} studentName={conflict.studentName} message={conflict.message} />
             ))}

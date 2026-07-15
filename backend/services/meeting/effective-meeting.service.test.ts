@@ -10,12 +10,15 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
-function resolutionTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
+function resolutionTest(name: string, fn: (tx: DBTransaction, tErrors: ErrorsLabels) => Promise<void>) {
   test(name, async () => {
     let completed = false;
     await runInRollback(async tx => {
-      await fn(tx);
+      const tErrors = (await getServerTranslations("en", "errors")) as ErrorsLabels;
+      await fn(tx, tErrors);
       completed = true;
     });
     expect(completed).toBe(true);
@@ -23,7 +26,7 @@ function resolutionTest(name: string, fn: (tx: DBTransaction) => Promise<void>) 
 }
 
 describe("EffectiveMeetingService", () => {
-  resolutionTest("resolveForClassInstance uses class default when present", async tx => {
+  resolutionTest("resolveForClassInstance uses class default when present", async (tx, tErrors) => {
     const { student } = await setupStudent(tx);
     const { teacher, user: teacherUser } = await setupTeacher(tx);
     const provider = await createTestMeetingProvider(tx);
@@ -37,13 +40,13 @@ describe("EffectiveMeetingService", () => {
       details: { meetingUrl: "https://zoom.us/j/class-override" },
     });
 
-    const resolved = await EffectiveMeetingService.resolveForClassInstance(instance.id, tx);
+    const resolved = await EffectiveMeetingService.resolveForClassInstance(instance.id, tErrors, tx);
 
     expect(resolved.source).toBe("class");
     expect(resolved.joinUrl).toBe("https://zoom.us/j/class-override");
   });
 
-  resolutionTest("resolveForClassInstance falls back to teacher default", async tx => {
+  resolutionTest("resolveForClassInstance falls back to teacher default", async (tx, tErrors) => {
     const { student } = await setupStudent(tx);
     const { teacher, user: teacherUser } = await setupTeacher(tx);
     const provider = await createTestMeetingProvider(tx);
@@ -53,16 +56,16 @@ describe("EffectiveMeetingService", () => {
     });
     const instance = await createMockClassInstance(tx, student.id, teacher.id);
 
-    const resolved = await EffectiveMeetingService.resolveForClassInstance(instance.id, tx);
+    const resolved = await EffectiveMeetingService.resolveForClassInstance(instance.id, tErrors, tx);
 
     expect(resolved.source).toBe("teacher");
     expect(resolved.joinUrl).toBe("https://zoom.us/j/teacher-only");
   });
 
-  resolutionTest("resolveForNewBooking returns none when no configs exist", async tx => {
+  resolutionTest("resolveForNewBooking returns none when no configs exist", async (tx, tErrors) => {
     const { teacher } = await setupTeacher(tx);
 
-    const resolved = await EffectiveMeetingService.resolveForNewBooking(teacher.id, { tx });
+    const resolved = await EffectiveMeetingService.resolveForNewBooking(teacher.id, { tErrors, tx });
 
     expect(resolved.source).toBe("none");
     expect(resolved.joinUrl).toBeNull();

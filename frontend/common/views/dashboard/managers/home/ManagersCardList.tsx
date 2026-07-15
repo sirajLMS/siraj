@@ -3,10 +3,10 @@
 import { MailOutlined, PhoneOutlined } from "@mui/icons-material";
 import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { BaseCard, PaginationControls, PhoneDisplay, StatusBadge } from "@/frontend/common/components/ui";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
 import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledEmptyStateBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -79,14 +79,14 @@ export function ManagersCardList({
   totalCount,
   onPageChange,
 }: Readonly<ManagersCardListProps>) {
-  const t = useTranslations("dashboard.managersDirectory");
+  const t = useAppTranslation("dashboard.managersDirectory");
 
   const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
 
   if (managers.length === 0) {
     return (
       <StyledEmptyStateBox>
-        <Typography>{t("noEntries")}</Typography>
+        <Typography>{t.noEntries}</Typography>
       </StyledEmptyStateBox>
     );
   }
@@ -118,11 +118,11 @@ export function ManagersCardList({
                   {manager.name}
                 </Typography>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }} useFlexGap>
-                  <StyledRoleChip label={t(`roles.${manager.role}`)} size="small" isStaff={isStaff} />
+                  <StyledRoleChip label={t.roles[manager.role]} size="small" isStaff={isStaff} />
                   <StatusBadge
                     category="session"
                     status={manager.status === "active" ? "active" : "blocked"}
-                    label={t(`status.${manager.status}`)}
+                    label={t.status[manager.status]}
                   />
                 </Stack>
               </Box>

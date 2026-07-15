@@ -16,7 +16,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
@@ -25,9 +24,10 @@ import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/c
 import { SectionHeader } from "@/frontend/common/views/dashboard/students/quota/components/SectionHeader";
 import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/QuotaFormAccessContext";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function TeacherField() {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
   const { canViewTeacher } = useQuotaFormAccess();
   const {
     control,
@@ -46,7 +46,7 @@ function TeacherField() {
   const teachers = data?.teachers ?? [];
 
   return (
-    <QuotaFormField label={t("fields.teacher")}>
+    <QuotaFormField label={t.fields.teacher}>
       <Controller
         name="teacher"
         control={control}
@@ -62,7 +62,7 @@ function TeacherField() {
                   <MenuItem disabled value="">
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <CircularProgress size={16} />
-                      <Typography variant="bodyMd">{t("fields.loadingTeachers")}</Typography>
+                      <Typography variant="bodyMd">{t.fields.loadingTeachers}</Typography>
                     </Box>
                   </MenuItem>
                 )}
@@ -85,7 +85,7 @@ function TeacherField() {
 }
 
 function TotalClassesField() {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
   const { canViewTeacher } = useQuotaFormAccess();
   const {
     control,
@@ -97,7 +97,7 @@ function TotalClassesField() {
   }
 
   return (
-    <QuotaFormField label={t("fields.totalClasses")}>
+    <QuotaFormField label={t.fields.totalClasses}>
       <Controller
         name="totalClasses"
         control={control}
@@ -119,7 +119,7 @@ function TotalClassesField() {
 }
 
 function ClassesLeftField() {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
   const { readOnly, canEditQuota, canViewQuota } = useQuotaFormAccess();
   const {
     control,
@@ -133,7 +133,7 @@ function ClassesLeftField() {
 
   return (
     <QuotaFormField
-      label={t("fields.classesLeft")}
+      label={t.fields.classesLeft}
       extraLabel={
         fieldDisabled ? null : (
           <Box
@@ -147,7 +147,7 @@ function ClassesLeftField() {
           >
             <SyncProblemOutlined sx={{ fontSize: 16 }} />
             <Typography variant="labelSm" sx={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              {t("fields.overrideActive")}
+              {t.fields.overrideActive}
             </Typography>
           </Box>
         )
@@ -166,7 +166,7 @@ function ClassesLeftField() {
             })}
           >
             <InfoOutlined sx={{ display: { xs: "block", md: "none" }, fontSize: 14, mt: 0.5 }} />
-            {t("fields.overrideNotice")}
+            {t.fields.overrideNotice}
           </Typography>
         )
       }
@@ -197,7 +197,7 @@ function ClassesLeftField() {
                   >
                     <EditNoteOutlined sx={{ fontSize: 20 }} />
                     <Typography variant="labelSm" sx={{ fontWeight: 700, textTransform: "uppercase" }}>
-                      {t("fields.overrideActive")}
+                      {t.fields.overrideActive}
                     </Typography>
                   </Box>
                 ),
@@ -223,16 +223,16 @@ function ClassesLeftField() {
 }
 
 export function CourseDetailsSection() {
-  const t = useTranslations("dashboard.studentQuota");
+  const t = useAppTranslation("dashboard.studentQuota");
   const { canViewTeacher, canViewQuota } = useQuotaFormAccess();
 
   if (!canViewQuota && !canViewTeacher) {
-    return <ProfileRestrictedSection title={t("sections.courseDetails")} />;
+    return <ProfileRestrictedSection title={t.sections.courseDetails} />;
   }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 3, md: 4 } }}>
-      <SectionHeader title={t("sections.courseDetails")} desktopIcon={AutoStoriesOutlined} mobileIcon={BookOutlined} />
+      <SectionHeader title={t.sections.courseDetails} desktopIcon={AutoStoriesOutlined} mobileIcon={BookOutlined} />
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: { xs: 2, md: 4 } }}>
         <TeacherField />

@@ -3,13 +3,13 @@
 import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import { IdentifierKind, PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SupportedOnlineAccountFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface OnlineAccountCatalogGridProps extends CatalogGridActionHandlers {
   readonly rows: readonly SupportedOnlineAccountFieldsFragment[];
@@ -18,17 +18,18 @@ export interface OnlineAccountCatalogGridProps extends CatalogGridActionHandlers
 
 function resolveIdentifierKindLabel(
   kind: IdentifierKind | null | undefined,
-  t: ReturnType<typeof useTranslations<"dashboard.paymentCatalogs">>
+  t: ReturnType<typeof useAppTranslation<"dashboard.paymentCatalogs">>
 ): string {
+  const pc = t;
   switch (kind) {
     case IdentifierKind.Email:
-      return t("identifierKinds.email");
+      return pc.identifierKinds.email;
     case IdentifierKind.Handle:
-      return t("identifierKinds.handle");
+      return pc.identifierKinds.handle;
     case IdentifierKind.EmailOrHandle:
-      return t("identifierKinds.emailOrHandle");
+      return pc.identifierKinds.emailOrHandle;
     default:
-      return t("notSet");
+      return pc.notSet;
   }
 }
 
@@ -38,25 +39,26 @@ export function OnlineAccountCatalogGrid({
   onEdit,
   onDelete,
 }: Readonly<OnlineAccountCatalogGridProps>) {
-  const t = useTranslations("dashboard.paymentCatalogs");
+  const t = useAppTranslation("dashboard.paymentCatalogs");
+  const pc = t;
   const columns = useMemo<GridColDef<SupportedOnlineAccountFieldsFragment>[]>(
     () => [
       {
         field: "slug",
-        headerName: t("columns.slug"),
+        headerName: pc.columns.slug,
         flex: 1,
         minWidth: 140,
       },
       {
         field: "name",
-        headerName: t("columns.name"),
+        headerName: pc.columns.name,
         flex: 1.5,
         minWidth: 180,
         renderCell: ({ row }) => <LocalizedStringDisplay value={row.name} />,
       },
       {
         field: "identifierKind",
-        headerName: t("columns.identifierKind"),
+        headerName: pc.columns.identifierKind,
         width: 180,
         renderCell: ({ row }) => (
           <Chip size="small" label={resolveIdentifierKindLabel(row.identifierKind, t)} variant="outlined" />
@@ -64,47 +66,65 @@ export function OnlineAccountCatalogGrid({
       },
       {
         field: "supportedDirections",
-        headerName: t("columns.supportedDirections"),
+        headerName: pc.columns.supportedDirections,
         width: 120,
         renderCell: ({ row }) => {
           const dir = row.supportedDirections;
-          if (!dir) return t("notSet");
-          if (dir === PaymentDirection.Payin) return t("directions.payin");
-          if (dir === PaymentDirection.Payout) return t("directions.payout");
-          return t("directions.both");
+          if (!dir) return pc.notSet;
+          if (dir === PaymentDirection.Payin) return pc.directions.payin;
+          if (dir === PaymentDirection.Payout) return pc.directions.payout;
+          return pc.directions.both;
         },
       },
       {
         field: "isActive",
-        headerName: t("columns.status"),
+        headerName: pc.columns.status,
         width: 120,
         renderCell: ({ row }) => (
           <StatusBadge
             category="paymentMethod"
             status={row.isActive ? "active" : "inactive"}
-            label={row.isActive ? t("active") : t("inactive")}
+            label={row.isActive ? pc.active : pc.inactive}
           />
         ),
       },
       {
         field: "actions",
-        headerName: t("columns.actions"),
+        headerName: pc.columns.actions,
         width: 120,
         sortable: false,
         filterable: false,
         renderCell: ({ row }) => (
           <Stack direction="row" spacing={0.5}>
-            <IconButton size="small" aria-label={t("edit")} onClick={() => onEdit(row)}>
+            <IconButton size="small" aria-label={pc.edit} onClick={() => onEdit(row)}>
               <EditOutlined fontSize="small" />
             </IconButton>
-            <IconButton size="small" aria-label={t("delete")} onClick={() => onDelete(row)}>
+            <IconButton size="small" aria-label={pc.delete} onClick={() => onDelete(row)}>
               <DeleteOutlined fontSize="small" />
             </IconButton>
           </Stack>
         ),
       },
     ],
-    [onDelete, onEdit, t]
+    [
+      onDelete,
+      onEdit,
+      t,
+      pc.notSet,
+      pc.inactive,
+      pc.edit,
+      pc.directions.payout,
+      pc.directions.payin,
+      pc.directions.both,
+      pc.columns.status,
+      pc.delete,
+      pc.columns.slug,
+      pc.columns.actions,
+      pc.columns.supportedDirections,
+      pc.columns.name,
+      pc.columns.identifierKind,
+      pc.active,
+    ]
   );
 
   return (

@@ -1,10 +1,10 @@
 "use client";
 
 import { Box, Button, ButtonGroup, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { GenderSelectorLabels } from "@/shared/messages/types/ui/gender-selector";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { GenderSelectorLabels } from "@/shared/locale/types/ui/gender-selector";
 
 export type GenderSelectorProps = {
   readonly gender: Gender | null;
@@ -25,11 +25,11 @@ export const GenderSelector: React.FC<GenderSelectorProps> = ({
   labels,
   allowEmpty = false,
 }): React.ReactNode => {
-  const t = useTranslations("ui.genderSelector");
-  const title = labels?.title ?? t("title");
-  const maleLabel = labels?.male ?? t("male");
-  const femaleLabel = labels?.female ?? t("female");
-  const ariaLabel = labels?.ariaLabel ?? t("ariaLabel");
+  const t = useAppTranslation("ui.genderSelector");
+  const title = labels?.title ?? t.title;
+  const maleLabel = labels?.male ?? t.male;
+  const femaleLabel = labels?.female ?? t.female;
+  const ariaLabel = labels?.ariaLabel ?? t.ariaLabel;
 
   const buttons: ReadonlyArray<{
     readonly value: Gender;
@@ -98,7 +98,7 @@ export const GenderSelector: React.FC<GenderSelectorProps> = ({
             variant={gender === null ? "contained" : "outlined"}
             sx={{ width: `${100 / totalButtons}%`, minWidth: 0 }}
           >
-            {labels?.any ?? t("any")}
+            {labels?.any ?? t.any}
           </Button>
         ) : null}
       </ButtonGroup>

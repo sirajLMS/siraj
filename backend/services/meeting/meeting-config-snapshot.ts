@@ -5,11 +5,16 @@ import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meet
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { buildMeetingProviderCatalogSnapshot } from "@/backend/services/meeting/meeting-config-mask";
 import type { MeetingConfigSnapshot } from "@/backend/types/meeting/meeting-config.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace MeetingConfigSnapshotService {
-  export async function buildSessionSnapshot(configId: string, tx?: DBTransaction): Promise<MeetingConfigSnapshot> {
-    const config = await UserMeetingConfigRepository.getByIdOrThrow(configId, tx);
-    const provider = await MeetingProviderRepository.getByIdOrThrow(config.providerId, tx);
+  export async function buildSessionSnapshot(
+    configId: string,
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
+  ): Promise<MeetingConfigSnapshot> {
+    const config = await UserMeetingConfigRepository.getByIdOrThrow(configId, tErrors, tx);
+    const provider = await MeetingProviderRepository.getByIdOrThrow(config.providerId, tErrors, tx);
     const details = parseMeetingConfigDetails(provider, config.details);
 
     return {
@@ -24,10 +29,11 @@ export namespace MeetingConfigSnapshotService {
 
   export async function buildClassSessionSnapshot(
     configId: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<MeetingConfigSnapshot> {
-    const config = await ClassMeetingConfigRepository.getByIdOrThrow(configId, tx);
-    const provider = await MeetingProviderRepository.getByIdOrThrow(config.providerId, tx);
+    const config = await ClassMeetingConfigRepository.getByIdOrThrow(configId, tErrors, tx);
+    const provider = await MeetingProviderRepository.getByIdOrThrow(config.providerId, tErrors, tx);
     const details = parseMeetingConfigDetails(provider, config.details);
 
     return {

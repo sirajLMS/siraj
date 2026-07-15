@@ -2,17 +2,15 @@
 
 import { AlternateEmailOutlined, ChatOutlined, GroupsOutlined } from "@mui/icons-material";
 import { InputAdornment, Stack, TextField } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { PhoneDisplay, SectionPanel } from "@/frontend/common/components/ui";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
-import {
-  type ParentViewData,
-  toDisplayValue,
-} from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import type { ParentViewData } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { toDisplayValue } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import { buildSocialLink } from "@/shared/lib/social/social-links";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type SocialSectionProps =
   | {
@@ -37,18 +35,17 @@ const VIEW_FIELDS = [
 ] as const;
 
 export function SocialSection(props: SocialSectionProps) {
-  const t = useTranslations("profile.parent");
-  const tc = useTranslations("profile");
+  const t = useAppTranslation("profile").parent;
 
   if (props.mode === "edit") {
     return (
-      <SectionPanel title={t("sections.social")}>
+      <SectionPanel title={t.sections.social}>
         <Stack spacing={2.5}>
-          <PhoneFormField name="whatsapp" control={props.control} label={t("fields.whatsapp")} />
+          <PhoneFormField name="whatsapp" control={props.control} label={t.fields.whatsapp} />
           {NON_PHONE_SOCIAL_FIELDS.map(({ key, icon: Icon }) => (
             <TextField
               key={key}
-              label={t(`fields.${key}`)}
+              label={t.fields[key]}
               fullWidth
               size="small"
               {...props.register(key)}
@@ -69,7 +66,7 @@ export function SocialSection(props: SocialSectionProps) {
   }
 
   return (
-    <SectionPanel title={t("sections.social")}>
+    <SectionPanel title={t.sections.social}>
       <Stack spacing={2.5}>
         {VIEW_FIELDS.map(({ key, platform, icon: Icon }) => {
           const value = props.parentData[key];
@@ -79,10 +76,10 @@ export function SocialSection(props: SocialSectionProps) {
               <ProfileFieldRow
                 key={key}
                 icon={Icon}
-                label={t(`fields.${key}`)}
-                value={<PhoneDisplay phone={value} fallback={tc("notSet")} />}
+                label={t.fields[key]}
+                value={<PhoneDisplay phone={value} fallback={t.notSet} />}
                 href={whatsappLink?.href}
-                fallback={tc("notSet")}
+                fallback={t.notSet}
                 hover
               />
             );
@@ -92,10 +89,10 @@ export function SocialSection(props: SocialSectionProps) {
             <ProfileFieldRow
               key={key}
               icon={Icon}
-              label={t(`fields.${key}`)}
-              value={link?.displayText ?? toDisplayValue(value, tc("notSet"))}
+              label={t.fields[key]}
+              value={link?.displayText ?? toDisplayValue(value, t.notSet)}
               href={link?.href}
-              fallback={tc("notSet")}
+              fallback={t.notSet}
               hover
             />
           );

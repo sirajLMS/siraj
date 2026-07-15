@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { desc, eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
@@ -8,6 +8,13 @@ import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
+
+let tErrors: ErrorsLabels;
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -99,7 +106,7 @@ describe("Billing Safeguards & Exchange Rates", () => {
         updatedAt: staleDate,
       });
 
-      const error = await expectRepoError(() => BillingRepository.getLatestExchangeRate(from, to, tx));
+      const error = await expectRepoError(() => BillingRepository.getLatestExchangeRate(from, to, tErrors, tx));
       expect(error.message).toContain("stale");
 
       testLogger.info("Stale rate detection verified.");
@@ -136,6 +143,7 @@ describe("Billing Safeguards & Exchange Rates", () => {
           invoiceType: "MONTHLY",
           idempotencyKey: randomUUID(),
         },
+        tErrors,
         tx
       );
 

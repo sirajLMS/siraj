@@ -1,7 +1,7 @@
 import { Box, MenuItem, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/views/dashboard/managers/home/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Styled Components — Extracted inline sx styles for reusability & consistency
@@ -43,7 +43,7 @@ export function ManagersFilterBar({
   onRoleFilterChange,
   onStatusFilterChange,
 }: Readonly<ManagersFilterBarProps>) {
-  const t = useTranslations("dashboard.managersDirectory.filters");
+  const t = useAppTranslation("dashboard.managersDirectory").filters;
 
   return (
     <StyledFilterContainer>
@@ -57,9 +57,9 @@ export function ManagersFilterBar({
           }}
           sx={{ minWidth: 150 }}
         >
-          <MenuItem value="all">{t("allRoleTypes")}</MenuItem>
-          <MenuItem value="admin">{t("admin")}</MenuItem>
-          <MenuItem value="staff">{t("staff")}</MenuItem>
+          <MenuItem value="all">{t.allRoleTypes}</MenuItem>
+          <MenuItem value="admin">{t.admin}</MenuItem>
+          <MenuItem value="staff">{t.staff}</MenuItem>
         </Select>
 
         <Select
@@ -70,9 +70,9 @@ export function ManagersFilterBar({
           }}
           sx={{ minWidth: 150 }}
         >
-          <MenuItem value="all">{t("statusAll")}</MenuItem>
-          <MenuItem value="active">{t("active")}</MenuItem>
-          <MenuItem value="offline">{t("inactive")}</MenuItem>
+          <MenuItem value="all">{t.statusAll}</MenuItem>
+          <MenuItem value="active">{t.active}</MenuItem>
+          <MenuItem value="offline">{t.inactive}</MenuItem>
         </Select>
       </StyledInputGroup>
 

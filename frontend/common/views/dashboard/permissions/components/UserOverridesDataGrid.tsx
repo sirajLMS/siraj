@@ -5,13 +5,13 @@ import { CheckCircleOutlined, WarningOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import type { PermissionGroup, User, UserOverride } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface UserOverridesDataGridProps {
   readonly users: readonly User[];
@@ -248,13 +248,13 @@ export function UserOverridesDataGrid({
   onManageOverrides,
   loading = false,
 }: Readonly<UserOverridesDataGridProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const columns = useMemo<GridColDef<User>[]>(() => {
     return [
       {
         field: "name",
-        headerName: t("selectUserLabel"),
+        headerName: t.selectUserLabel,
         flex: 1.5,
         minWidth: 220,
         renderCell: params => {
@@ -276,7 +276,7 @@ export function UserOverridesDataGrid({
       },
       {
         field: "baseGroups",
-        headerName: t("groupsTab"),
+        headerName: t.groupsTab,
         flex: 1.5,
         minWidth: 200,
         sortable: false,
@@ -287,7 +287,7 @@ export function UserOverridesDataGrid({
       },
       {
         field: "activeGrants",
-        headerName: t("explicitGrant"),
+        headerName: t.explicitGrant,
         width: 140,
         align: "center",
         headerAlign: "center",
@@ -301,7 +301,7 @@ export function UserOverridesDataGrid({
       },
       {
         field: "activeRevokes",
-        headerName: t("explicitDeny"),
+        headerName: t.explicitDeny,
         width: 140,
         align: "center",
         headerAlign: "center",
@@ -353,7 +353,7 @@ export function UserOverridesDataGrid({
                 transition: "all 0.15s ease",
               })}
             >
-              {t("editOverrides")}
+              {t.editOverrides}
             </Button>
           );
         },
@@ -367,7 +367,7 @@ export function UserOverridesDataGrid({
         rows={users}
         columns={columns}
         getRowId={row => row.id ?? row.email ?? ""}
-        emptyMessage={t("noPermissionsFound")}
+        emptyMessage={t.noPermissionsFound}
         loading={loading}
         autoHeight
       />

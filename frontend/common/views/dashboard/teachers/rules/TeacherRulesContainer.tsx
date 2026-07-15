@@ -2,7 +2,6 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
@@ -10,12 +9,13 @@ import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { teacherHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { ActivationPolicyPanel } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
 import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function TeacherRulesContainer() {
-  const t = useTranslations("dashboard.teacherDashboard");
-  const dashboardT = useTranslations("dashboard");
-  const tJoin = useTranslations("ui.meetingConfig.join");
-  const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin("emptyTeacher"));
+  const t = useAppTranslation("dashboard.teacherDashboard");
+  const dashboardT = useAppTranslation("dashboard.core.layout");
+  const tJoin = useAppTranslation("ui.meetingConfig").join;
+  const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin.emptyTeacher);
   const [handbookRequested, setHandbookRequested] = useState(false);
   const { data: handbookData, loading: handbookLoading } = useQuery(teacherHandbookUrlQueryDocument, {
     skip: !handbookRequested,
@@ -33,7 +33,7 @@ export function TeacherRulesContainer() {
   return (
     <RequirePermission permissions={[AppPermission.TeacherViewDashboard]}>
       <PageContainer>
-        <PageHeader title={t("rules.pageTitle")} subtitle={t("rules.pageSubtitle")} />
+        <PageHeader title={t.rules.pageTitle} subtitle={t.rules.pageSubtitle} />
         {handbookLoading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
             <CircularProgress size={24} />

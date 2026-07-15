@@ -1,12 +1,12 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionCatalogDataGrid } from "@/frontend/common/views/dashboard/permissions/components/PermissionCatalogDataGrid";
 import { PermissionCatalogToolbar } from "@/frontend/common/views/dashboard/permissions/components/PermissionCatalogToolbar";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface PermissionCatalogSectionDesktopProps {
   readonly permissions: readonly Permission[];
@@ -19,7 +19,7 @@ export function PermissionCatalogSectionDesktop({
   groups,
   loading = false,
 }: Readonly<PermissionCatalogSectionDesktopProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
@@ -55,7 +55,7 @@ export function PermissionCatalogSectionDesktop({
         onSearchChange={setSearchQuery}
         onCategoryChange={setSelectedCategory}
       />
-      <SectionPanel title={t("catalogTab")}>
+      <SectionPanel title={t.catalogTab}>
         <PermissionCatalogDataGrid permissions={filteredPermissions} groups={groups} loading={loading} />
       </SectionPanel>
     </Box>

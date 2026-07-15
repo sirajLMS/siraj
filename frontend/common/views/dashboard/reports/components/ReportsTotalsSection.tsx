@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Stack, Tooltip, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
@@ -9,9 +8,11 @@ import {
   type BillingCurrencyBucket,
   formatBillingCurrencyTotals,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { ReportLedgerRow, ReportsSummary } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import { aggregatePaidAmountTotals } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface ReportsTotalsSectionProps {
   readonly summary: ReportsSummary;
@@ -21,14 +22,14 @@ interface ReportsTotalsSectionProps {
 }
 
 function useTotalsDisplay(rows: readonly ReportLedgerRow[]) {
-  const locale = useLocale();
-  const tProfile = useTranslations("profile");
-  const tErrors = useTranslations("errors");
+  const locale = useAppLocale();
+  const tProfile = useAppTranslation("profile");
+  const tErrors = useAppTranslation("errors");
 
   return useMemo(() => {
     const paidTotals = aggregatePaidAmountTotals(rows);
     if (paidTotals.length === 0) {
-      return { primary: "—", ariaLabel: tProfile("notSet") };
+      return { primary: "—", ariaLabel: tProfile.notSet };
     }
 
     const buckets: BillingCurrencyBucket[] = paidTotals.map(paid => ({

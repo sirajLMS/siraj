@@ -1,19 +1,20 @@
 "use client";
 
 import { Stack, TextField } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { CountryDisplay } from "@/frontend/common/components/ui/display";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/parent/sections/InfoField";
 import {
   type ParentAdminData,
   toDisplayValue,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type IdentitySectionProps =
   | {
@@ -27,12 +28,12 @@ type IdentitySectionProps =
     };
 
 export function IdentitySection(props: IdentitySectionProps) {
-  const t = useTranslations("profile.parent");
-  const tc = useTranslations("profile");
+  const t = useAppTranslation("profile").parent;
+  const _locale = useAppLocale();
 
   if (props.mode === "edit") {
     return (
-      <SectionPanel title={t("sections.identity")}>
+      <SectionPanel title={t.sections.identity}>
         <Stack spacing={2}>
           <Controller
             name="nationality"
@@ -44,7 +45,7 @@ export function IdentitySection(props: IdentitySectionProps) {
                 <CountrySelect
                   country={selectedCountry}
                   setCountryAction={country => field.onChange(country.code)}
-                  label={t("fields.nationality")}
+                  label={t.fields.nationality}
                   error={Boolean(fieldState.error)}
                   helperText={fieldState.error?.message}
                   onBlurAction={field.onBlur}
@@ -53,26 +54,26 @@ export function IdentitySection(props: IdentitySectionProps) {
               );
             }}
           />
-          <TextField label={t("fields.address")} fullWidth size="small" {...props.register("address")} />
+          <TextField label={t.fields.address} fullWidth size="small" {...props.register("address")} />
         </Stack>
       </SectionPanel>
     );
   }
 
   return (
-    <SectionPanel title={t("sections.identity")}>
+    <SectionPanel title={t.sections.identity}>
       <Stack spacing={2}>
         <InfoField
-          label={t("fields.nationality")}
+          label={t.fields.nationality}
           value={
             props.adminData.nationality ? (
-              <CountryDisplay code={props.adminData.nationality} fallback={tc("notSet")} />
+              <CountryDisplay code={props.adminData.nationality} fallback={t.notSet} />
             ) : (
-              tc("notSet")
+              t.notSet
             )
           }
         />
-        <InfoField label={t("fields.address")} value={toDisplayValue(props.adminData.address, tc("notSet"))} />
+        <InfoField label={t.fields.address} value={toDisplayValue(props.adminData.address, t.notSet)} />
       </Stack>
     </SectionPanel>
   );

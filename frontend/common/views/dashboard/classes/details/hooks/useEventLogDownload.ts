@@ -1,18 +1,18 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import type { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { classStatusEventsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
 import type { ActionFeedbackState } from "@/frontend/common/views/dashboard/classes/details/types";
+import type { useAppTranslation } from "@/shared/locale/client";
 
 export function useEventLogDownload(
   id: string,
   shouldLoadEvents: boolean,
   setShouldLoadEvents: (value: boolean) => void,
   setFeedbackState: (state: ActionFeedbackState | null) => void,
-  t: ReturnType<typeof useTranslations>
+  t: ReturnType<typeof useAppTranslation>
 ) {
   const { data: eventsData, error: eventsError } = useQuery(classStatusEventsQueryDocument, {
     variables: { classInstanceId: id },
@@ -33,10 +33,10 @@ export function useEventLogDownload(
         link.click();
         link.remove();
         URL.revokeObjectURL(url);
-        setFeedbackState({ message: t("actionFeedback.generateLogSuccess"), severity: "success" });
+        setFeedbackState({ message: t.actionFeedback.generateLogSuccess, severity: "success" });
       } catch (err) {
         logger.error("Error generating log:", err);
-        setFeedbackState({ message: t("actionFeedback.generateLogError"), severity: "error" });
+        setFeedbackState({ message: t.actionFeedback.generateLogError, severity: "error" });
       } finally {
         setShouldLoadEvents(false);
       }
@@ -46,7 +46,7 @@ export function useEventLogDownload(
   useEffect(() => {
     if (shouldLoadEvents && eventsError) {
       logger.error("Error fetching class status events:", eventsError);
-      setFeedbackState({ message: t("loadError"), severity: "error" });
+      setFeedbackState({ message: t.loadError, severity: "error" });
       setShouldLoadEvents(false);
     }
   }, [eventsError, shouldLoadEvents, t, setFeedbackState, setShouldLoadEvents]);

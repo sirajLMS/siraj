@@ -3,7 +3,6 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, type SxProps, type Theme } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useLocale } from "next-intl";
 import { useCallback, useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -12,6 +11,7 @@ import {
   rescheduleTrackingRowsQueryDocument,
   updateSessionStatusLeaveMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useRescheduleTrackingStore } from "@/frontend/common/stores/rescheduleTrackingStore";
 import { exportRescheduleTracking } from "@/frontend/common/utils/excel-export/tracking-export";
 import { logger } from "@/frontend/common/utils/logger";
@@ -214,7 +214,7 @@ function useTrackingHandlers(
 
 export function RescheduleTrackingContainer() {
   const t = useAppTranslation("dashboard.rescheduleTracking");
-  const locale = useLocale();
+  const locale = useAppLocale();
   const router = useRouter();
   const { page, pageSize, setPage, statusFilter, setStatusFilter } = useRescheduleTrackingStore();
 

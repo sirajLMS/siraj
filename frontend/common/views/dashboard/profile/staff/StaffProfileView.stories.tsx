@@ -2,10 +2,10 @@
 
 import { Box, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { useTranslations } from "next-intl";
 import type { ComponentProps } from "react";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StaffProfileView } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileView";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const staffProfile = {
   id: "user-staff-1",
@@ -28,16 +28,16 @@ type StaffProfileViewStoryProps = ComponentProps<typeof StaffProfileView> & {
 };
 
 function StaffProfileViewStory({ loading, hasError, ...viewProps }: StaffProfileViewStoryProps) {
-  const tc = useTranslations("profile");
+  const tc = useAppTranslation("profile");
 
   if (loading) {
-    return <Typography sx={{ color: theme => theme.palette.text.secondary }}>{tc("shell.loading")}</Typography>;
+    return <Typography sx={{ color: theme => theme.palette.text.secondary }}>{tc.shell.loading}</Typography>;
   }
 
   if (hasError) {
     return (
       <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>
-        {tc("errors.failedToLoad")}
+        {tc.errors.failedToLoad}
       </Typography>
     );
   }

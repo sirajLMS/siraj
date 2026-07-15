@@ -12,6 +12,7 @@ const config: CodegenConfig = {
   schema: "./frontend/common/graphql/generated/schema.graphql",
   documents: ["./frontend/common/graphql/sharedDocuments/**/*.ts", "./frontend/views/**/*.documents.ts"],
   ignoreNoDocuments: true,
+  noSilentErrors: true,
   generates: {
     "./frontend/common/graphql/generated/gql/": {
       preset: "client",

@@ -1,12 +1,10 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { studentClassHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-history.documents";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { StudentHistoryView } from "@/frontend/common/views/dashboard/student/history/studentHistoryView";
-import type { StudentHistoryLabels } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryLabels";
 import type {
   StudentHistoryMetrics,
   StudentHistorySessionRow,
@@ -16,38 +14,40 @@ import {
   mapStudentHistorySessions,
 } from "@/frontend/common/views/dashboard/student/history/utils/studentHistoryMappers";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory";
 
 function useStudentHistoryLabels(
-  t: ReturnType<typeof useTranslations<"dashboard.studentPortal.history">>
+  t: ReturnType<typeof useAppTranslation<"dashboard.studentPortal.history">>
 ): StudentHistoryLabels {
   return useMemo(
     () => ({
-      pageTitle: t("pageTitle"),
-      lessonHistory: t("lessonHistory"),
-      sessionDate: t("sessionDate"),
-      subject: t("subject"),
-      instructor: t("instructor"),
-      duration: t("duration"),
-      status: t("status"),
-      outcome: t("outcome"),
-      notes: t("notes"),
-      joinUrl: t("joinUrl"),
-      noHistory: t("noHistory"),
-      loadingMessage: t("loadingMessage"),
-      filterBySubject: t("filterBySubject"),
-      filterByDate: t("filterByDate"),
-      filterByStatus: t("filterByStatus"),
-      allSubjects: t("allSubjects"),
-      allStatuses: t("allStatuses"),
-      viewReport: t("viewReport"),
-      addReflection: t("addReflection"),
+      pageTitle: t.pageTitle,
+      lessonHistory: t.lessonHistory,
+      sessionDate: t.sessionDate,
+      subject: t.subject,
+      instructor: t.instructor,
+      duration: t.duration,
+      status: t.status,
+      outcome: t.outcome,
+      notes: t.notes,
+      joinUrl: t.joinUrl,
+      noHistory: t.noHistory,
+      loadingMessage: t.loadingMessage,
+      filterBySubject: t.filterBySubject,
+      filterByDate: t.filterByDate,
+      filterByStatus: t.filterByStatus,
+      allSubjects: t.allSubjects,
+      allStatuses: t.allStatuses,
+      viewReport: t.viewReport,
+      addReflection: t.addReflection,
     }),
     [t]
   );
 }
 
 export function StudentHistoryContainer() {
-  const t = useTranslations("dashboard.studentPortal.history");
+  const t = useAppTranslation("dashboard.studentPortal.history");
   const router = useRouter();
   const labels = useStudentHistoryLabels(t);
 

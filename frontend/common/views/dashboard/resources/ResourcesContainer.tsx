@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, UploadType } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -19,6 +18,7 @@ import { ResourcesView } from "@/frontend/common/views/dashboard/resources/resou
 import { buildResourcesLabels } from "@/frontend/common/views/dashboard/resources/utils/buildResourcesLabels";
 import { inferResourceFileType } from "@/frontend/common/views/dashboard/resources/utils/resourceFileTypeUtils";
 import { filterResources } from "@/frontend/common/views/dashboard/resources/utils/resourceFilters";
+import { useAppTranslation } from "@/shared/locale/client";
 import { extToMime, isAllowedMimeType, validateFileName } from "@/shared/utils/storage.utils";
 
 async function computeContentHash(file: File): Promise<string> {
@@ -33,7 +33,7 @@ async function computeContentHash(file: File): Promise<string> {
 }
 
 export function ResourcesContainer() {
-  const t = useTranslations("dashboard.resources");
+  const t = useAppTranslation("dashboard.resources");
   const notifications = useNotifications();
   const permissions = useUserStore(state => state.permissions);
 
@@ -111,7 +111,7 @@ export function ResourcesContainer() {
           : (extToMime[fileNameOnly.split(".").pop()?.toLowerCase() ?? ""] ?? "application/octet-stream");
 
       if (!isAllowedMimeType(contentType)) {
-        notifications.show(labels.notification.fileTypeNotAllowed.replace("{type}", contentType), {
+        notifications.show(labels.notification.fileTypeNotAllowed(contentType), {
           severity: "error",
           autoHideDuration: 4000,
         });
@@ -133,7 +133,7 @@ export function ResourcesContainer() {
       });
 
       if (!prepData?.prepareUpload) {
-        notifications.show(t("notification.uploadPrepareFailed"), { severity: "error", autoHideDuration: 4000 });
+        notifications.show(t.notification.uploadPrepareFailed, { severity: "error", autoHideDuration: 4000 });
         return;
       }
 
@@ -163,7 +163,7 @@ export function ResourcesContainer() {
         if (!putResponse.ok) {
           const errorText = await putResponse.text().catch(() => "Upload failed");
           logger.error("File upload failed", { status: putResponse.status, errorText });
-          notifications.show(t("notification.uploadFailed"), { severity: "error", autoHideDuration: 4000 });
+          notifications.show(t.notification.uploadFailed, { severity: "error", autoHideDuration: 4000 });
           return;
         }
       }
@@ -179,7 +179,7 @@ export function ResourcesContainer() {
       });
 
       if (!uploadData?.uploadLearningResource) {
-        notifications.show(t("notification.createRecordFailed"), { severity: "error", autoHideDuration: 4000 });
+        notifications.show(t.notification.createRecordFailed, { severity: "error", autoHideDuration: 4000 });
         return;
       }
 
@@ -187,7 +187,7 @@ export function ResourcesContainer() {
       await refetch();
     } catch (err) {
       logger.error("Error uploading resource", err);
-      notifications.show(t("notification.uploadRetryFailed"), { severity: "error", autoHideDuration: 4000 });
+      notifications.show(t.notification.uploadRetryFailed, { severity: "error", autoHideDuration: 4000 });
     } finally {
       setUploading(false);
     }
@@ -210,11 +210,11 @@ export function ResourcesContainer() {
       }
 
       logger.info(`Successfully deleted resource: ${pendingDeleteId}`);
-      notifications.show(t("notification.deleteSuccess"), { severity: "success", autoHideDuration: 3000 });
+      notifications.show(t.notification.deleteSuccess, { severity: "success", autoHideDuration: 3000 });
       await refetch();
     } catch (err) {
       logger.error(`Failed to delete resource ${pendingDeleteId}:`, err);
-      notifications.show(t("notification.deleteFailed"), { severity: "error", autoHideDuration: 4000 });
+      notifications.show(t.notification.deleteFailed, { severity: "error", autoHideDuration: 4000 });
     } finally {
       closeDeleteDialog();
     }

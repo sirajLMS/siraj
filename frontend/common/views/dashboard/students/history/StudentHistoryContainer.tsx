@@ -3,8 +3,6 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo } from "react";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { studentClassHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-history.documents";
@@ -14,18 +12,19 @@ import { StudentHistoryView } from "@/frontend/common/views/dashboard/students/h
 import type { ClassSession, StudentHistoryMetrics } from "@/frontend/common/views/dashboard/students/history/types";
 import { mapStatusToAttendance } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/StudentProfileContext";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 
 type HistoryData = NonNullable<NonNullable<Operations.StudentClassHistoryQuery["studentClassHistory"]>>;
 
 function useErrorNotification(
   error: unknown,
   notifications: ReturnType<typeof useNotifications>,
-  t: ReturnType<typeof useTranslations>
+  t: ReturnType<typeof useAppTranslation<"dashboard.studentHistory">>
 ) {
   useEffect(() => {
     if (error) {
       logger.error("Error loading student history:", { error });
-      notifications.show(t("errors.loadFailed"), {
+      notifications.show(t.errors.loadFailed, {
         severity: "error" as const,
         autoHideDuration: 4000,
       });
@@ -44,7 +43,7 @@ function computeMetrics(historyData: HistoryData["metrics"] | undefined): Studen
 
 function mapSessionsToClasses(
   sessions: HistoryData["sessions"] | undefined,
-  t: ReturnType<typeof useTranslations>
+  t: ReturnType<typeof useAppTranslation<"dashboard.studentHistory">>
 ): Record<number, ClassSession> {
   const result: Record<number, ClassSession> = {};
   if (sessions) {
@@ -53,7 +52,7 @@ function mapSessionsToClasses(
         result[session.dayOfMonth] = {
           id: session.id ?? "",
           dayOfMonth: session.dayOfMonth,
-          title: session.title ?? t("classDetails.classSession"),
+          title: session.title ?? t.classDetails.classDetails(""),
           time: session.time ?? "",
           duration: session.duration ?? 0,
           status: mapStatusToAttendance(session.status ?? "present"),
@@ -104,9 +103,9 @@ export function StudentHistoryContainer() {
   const params = useParams<{ id: string }>();
   const profileContext = useStudentProfileContext();
   const useUnifiedProfile = profileContext != null;
-  const t = useTranslations("dashboard.studentHistory");
+  const t = useAppTranslation("dashboard.studentHistory");
+  const locale = useAppLocale();
   const notifications = useNotifications();
-  const locale = useLocale();
 
   const { currentMonth, selectedWeek, selectedDay, setCurrentMonth, setSelectedWeek, setSelectedDay } =
     useStudentHistoryStore();
@@ -128,7 +127,7 @@ export function StudentHistoryContainer() {
   useErrorNotification(error, notifications, t);
 
   const historyData = data?.studentClassHistory;
-  const studentName = historyData?.studentName ?? t("common.student");
+  const studentName = historyData?.studentName ?? t.common.student;
 
   const metrics = useMemo(() => computeMetrics(historyData?.metrics), [historyData]);
   const classes = useMemo(() => mapSessionsToClasses(historyData?.sessions, t), [historyData, t]);

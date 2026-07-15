@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import {
@@ -9,8 +9,15 @@ import {
   setupTeacher,
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
+
+let tErrors: ErrorsLabels;
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
 
 function configTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
@@ -38,6 +45,7 @@ describe("ClassMeetingConfigRepository", () => {
         isDefault: true,
         details: { meetingUrl: "https://zoom.us/j/class-111" },
       },
+      tErrors,
       tx
     );
 
@@ -47,7 +55,7 @@ describe("ClassMeetingConfigRepository", () => {
   });
 
   configTest("getByIdOrThrow throws when config is missing", async tx => {
-    await expect(ClassMeetingConfigRepository.getByIdOrThrow(NIL_UUID, tx)).rejects.toThrow();
+    await expect(ClassMeetingConfigRepository.getByIdOrThrow(NIL_UUID, tErrors, tx)).rejects.toThrow();
   });
 
   configTest("setDefault clears previous default within same class instance", async tx => {
@@ -60,7 +68,7 @@ describe("ClassMeetingConfigRepository", () => {
     });
     const second = await createTestClassMeetingConfig(tx, { classInstanceId: instance.id }, provider.id);
 
-    await ClassMeetingConfigRepository.setDefault(second.id, tx);
+    await ClassMeetingConfigRepository.setDefault(second.id, tErrors, tx);
 
     const firstAfter = await ClassMeetingConfigRepository.getById(first.id, tx);
     const secondAfter = await ClassMeetingConfigRepository.getById(second.id, tx);

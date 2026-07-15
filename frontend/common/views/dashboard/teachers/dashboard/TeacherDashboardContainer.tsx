@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
-import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type { EffectiveMeeting } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -35,6 +34,7 @@ import { useTeacherDashboardLastUpdated } from "@/frontend/common/views/dashboar
 import type { TeacherScheduleRow } from "@/frontend/common/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
 import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type SupportRequestType = "COORDINATOR" | "SUPPORT";
 type SnackbarSeverity = "success" | "error" | "info";
@@ -187,10 +187,9 @@ function mapProgressFeed(
 }
 
 export function TeacherDashboardContainer() {
-  const t = useTranslations("dashboard.teacherDashboard");
-  const dashboardT = useTranslations("dashboard");
-  const tJoin = useTranslations("ui.meetingConfig.join");
-  const formatter = useFormatter();
+  const t = useAppTranslation("dashboard.teacherDashboard");
+  const dashboardT = useAppTranslation("dashboard");
+  const tJoin = useAppTranslation("ui.meetingConfig.join");
   const router = useRouter();
   const permissions = useUserStore(state => state.permissions);
   const userName = useUserStore(state => state.name);
@@ -245,7 +244,7 @@ export function TeacherDashboardContainer() {
       if (handbookData?.teacherHandbookUrl?.url) {
         globalThis.open(handbookData.teacherHandbookUrl.url, "_blank");
       } else {
-        setSnackbarMessage(t("errors.handbookUrlNotFound"));
+        setSnackbarMessage(t.errors.handbookUrlNotFound);
         setSnackbarSeverity("error");
         setSnackbarOpen(true);
       }
@@ -261,27 +260,27 @@ export function TeacherDashboardContainer() {
   const [logSupportRequest] = useMutation(logTeacherSupportRequestMutationDocument);
   const [submitLessonReport] = useMutation(submitLessonReportMutationDocument);
 
-  const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin("emptyTeacher"));
-  const lessonReportI18n = useTranslations("dashboard.lms.lessonReports");
+  const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin.emptyTeacher);
+  const lessonReportI18n = useAppTranslation("dashboard.lms.lessonReports");
   const lessonReportLabels: LessonReportFormLabels = useMemo(
     () => ({
-      attendanceEvaluation: lessonReportI18n("attendanceEvaluation"),
-      durationMinutes: lessonReportI18n("durationMinutes"),
-      completionPercentage: lessonReportI18n("completionPercentage"),
-      teacherNotes: lessonReportI18n("teacherNotes"),
-      present: lessonReportI18n("present"),
-      absent: lessonReportI18n("absent"),
-      late: lessonReportI18n("late"),
-      submit: lessonReportI18n("submit"),
-      dialogTitle: lessonReportI18n("dialogTitle"),
-      cancel: lessonReportI18n("cancel"),
-      submitting: lessonReportI18n("submitting"),
-      submitFailed: lessonReportI18n("submitFailed"),
-      attendanceRequired: lessonReportI18n("attendanceRequired"),
-      durationMin: lessonReportI18n("durationMin"),
-      durationMax: lessonReportI18n("durationMax"),
-      completionMin: lessonReportI18n("completionMin"),
-      completionMax: lessonReportI18n("completionMax"),
+      attendanceEvaluation: lessonReportI18n.attendanceEvaluation,
+      durationMinutes: lessonReportI18n.durationMinutes,
+      completionPercentage: lessonReportI18n.completionPercentage,
+      teacherNotes: lessonReportI18n.teacherNotes,
+      present: lessonReportI18n.present,
+      absent: lessonReportI18n.absent,
+      late: lessonReportI18n.late,
+      submit: lessonReportI18n.submit,
+      dialogTitle: lessonReportI18n.dialogTitle,
+      cancel: lessonReportI18n.cancel,
+      submitting: lessonReportI18n.submitting,
+      submitFailed: lessonReportI18n.submitFailed,
+      attendanceRequired: lessonReportI18n.attendanceRequired,
+      durationMin: lessonReportI18n.durationMin,
+      durationMax: lessonReportI18n.durationMax,
+      completionMin: lessonReportI18n.completionMin,
+      completionMax: lessonReportI18n.completionMax,
     }),
     [lessonReportI18n]
   );
@@ -317,7 +316,6 @@ export function TeacherDashboardContainer() {
   }, [
     dashboardData?.teacherDashboard?.progressFeed,
     dataArrivedAt,
-    formatter,
     labels.progressFeed,
     labels.schedule.durationValue,
   ]);
@@ -368,9 +366,9 @@ export function TeacherDashboardContainer() {
       const error = err as Error;
       logger.error("Error activating class:", error);
       if (error.message?.includes("missedClassTime") || error.message?.toLowerCase().includes("missed class time")) {
-        setActivationError(t("errors.missedClassTime"));
+        setActivationError(t.errors.missedClassTime);
       } else {
-        setActivationError(t("errors.activationFailed"));
+        setActivationError(t.errors.activationFailed);
       }
     }
   };
@@ -383,7 +381,7 @@ export function TeacherDashboardContainer() {
     classType: string;
   }) => {
     if (!teacherId) {
-      throw new Error(t("manualClassEntry.teacherIdNotFound"));
+      throw new Error(t.manualClassEntry.teacherIdNotFound);
     }
     await createManualEntry({
       variables: {
@@ -409,7 +407,7 @@ export function TeacherDashboardContainer() {
           },
         },
       });
-      setSnackbarMessage(t("supportRequestSubmitted", { type: type.toLowerCase() }));
+      setSnackbarMessage(t.supportRequestSubmitted(type.toLowerCase()));
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     } catch (err) {

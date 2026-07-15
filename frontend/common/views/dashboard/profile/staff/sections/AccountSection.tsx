@@ -1,7 +1,6 @@
 "use client";
 
 import { MenuItem, Stack, TextField, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import {
@@ -13,6 +12,7 @@ import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/s
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { StaffProfileData } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffAdminEditFormData } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type AccountSectionProps =
   | {
@@ -51,7 +51,7 @@ function StaffRoleStatusView({
 }
 
 export function AccountSection(props: AccountSectionProps) {
-  const t = useTranslations("profile.staff");
+  const t = useAppTranslation("profile").staff;
   const { canView, canEdit } = useProfileFieldAccess({ scope: props.scope });
 
   if (props.mode === "edit") {
@@ -61,18 +61,18 @@ export function AccountSection(props: AccountSectionProps) {
           mode="edit"
           scope={props.scope}
           name={props.staffData.name}
-          sectionTitle={t("sections.account")}
-          nameLabel={t("fields.fullName")}
-          emailLabel={t("fields.primaryEmail")}
-          currencyLabel={t("fields.displayCurrency")}
+          sectionTitle={t.sections.account}
+          nameLabel={t.fields.fullName}
+          emailLabel={t.fields.primaryEmail}
+          currencyLabel={t.fields.displayCurrency}
           register={props.register}
           control={props.control}
         />
         {props.isAdminScope && canEdit("staff_role") ? (
-          <SectionPanel title={t("sections.role")}>
-            <TextField label={t("fields.status")} fullWidth size="small" select {...props.register("status")}>
-              <MenuItem value={AccountStatus.Activated}>{t("fields.statusActive")}</MenuItem>
-              <MenuItem value={AccountStatus.Deactivated}>{t("fields.statusInactive")}</MenuItem>
+          <SectionPanel title={t.sections.role}>
+            <TextField label={t.fields.status} fullWidth size="small" select {...props.register("status")}>
+              <MenuItem value={AccountStatus.Activated}>{t.fields.statusActive}</MenuItem>
+              <MenuItem value={AccountStatus.Deactivated}>{t.fields.statusInactive}</MenuItem>
             </TextField>
           </SectionPanel>
         ) : null}
@@ -81,13 +81,13 @@ export function AccountSection(props: AccountSectionProps) {
   }
 
   const statusLabel =
-    props.staffData.status === AccountStatus.Activated ? t("fields.statusActive") : t("fields.statusInactive");
+    props.staffData.status === AccountStatus.Activated ? t.fields.statusActive : t.fields.statusInactive;
   const roleStatusContent =
     props.isAdminScope && canView("staff_role") ? (
       <StaffRoleStatusView
         status={(props.staffData.status ?? AccountStatus.Activated).toLowerCase()}
         statusLabel={statusLabel}
-        statusFieldLabel={t("fields.status")}
+        statusFieldLabel={t.fields.status}
       />
     ) : null;
 
@@ -98,10 +98,10 @@ export function AccountSection(props: AccountSectionProps) {
       name={props.staffData.name}
       email={props.staffData.email}
       displayCurrency={props.displayCurrency}
-      sectionTitle={t("sections.account")}
-      nameLabel={t("fields.fullName")}
-      emailLabel={t("fields.primaryEmail")}
-      currencyLabel={t("fields.displayCurrency")}
+      sectionTitle={t.sections.account}
+      nameLabel={t.fields.fullName}
+      emailLabel={t.fields.primaryEmail}
+      currencyLabel={t.fields.displayCurrency}
       additionalViewContent={roleStatusContent ?? undefined}
     />
   );

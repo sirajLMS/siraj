@@ -4,7 +4,6 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -25,6 +24,7 @@ import type {
   StatusChangeInput,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type StudentQueryData = Operations.StudentByIdQuery;
 type TeachersQueryData = Operations.TeachersQuery;
@@ -72,8 +72,8 @@ function ReassignmentErrorState({ message }: { readonly message: string }) {
 }
 
 export function TeacherReassignmentContainer() {
-  const t = useTranslations("dashboard.teacherReassignment");
-  const tc = useTranslations("common");
+  const t = useAppTranslation("dashboard.teacherReassignment");
+  const tc = useAppTranslation("common");
   const searchParams = useSearchParams();
   const studentId = searchParams.get("studentId") ?? "";
   const notifications = useNotifications();
@@ -98,22 +98,22 @@ export function TeacherReassignmentContainer() {
 
   const [reassignTeacher, { loading: isReassigning }] = useMutation(reassignStudentTeacherMutationDocument, {
     onCompleted: () => {
-      notifications.show(t("actions.reassignSuccess"), { severity: "success", autoHideDuration: 4000 });
+      notifications.show(t.actions.reassignSuccess, { severity: "success", autoHideDuration: 4000 });
     },
     onError: mutationError => {
       logger.error("Teacher reassignment failed:", { mutationError });
-      notifications.show(tc("operationFailed"), { severity: "error", autoHideDuration: 5000 });
+      notifications.show(tc.operationFailed, { severity: "error", autoHideDuration: 5000 });
     },
     refetchQueries: [{ query: studentByIdQueryDocument, variables: { studentId } }],
   });
 
   const [changeStatus, { loading: isChangingStatus }] = useMutation(changeStudentStatusMutationDocument, {
     onCompleted: () => {
-      notifications.show(t("actions.statusChangeSuccess"), { severity: "success", autoHideDuration: 4000 });
+      notifications.show(t.actions.statusChangeSuccess, { severity: "success", autoHideDuration: 4000 });
     },
     onError: mutationError => {
       logger.error("Student status change failed:", { mutationError });
-      notifications.show(tc("operationFailed"), { severity: "error", autoHideDuration: 5000 });
+      notifications.show(tc.operationFailed, { severity: "error", autoHideDuration: 5000 });
     },
     refetchQueries: [{ query: studentByIdQueryDocument, variables: { studentId } }],
   });
@@ -158,7 +158,7 @@ export function TeacherReassignmentContainer() {
   }, [router]);
 
   if (!studentId) {
-    return <ReassignmentErrorState message={t("errors.invalidId")} />;
+    return <ReassignmentErrorState message={t.errors.invalidId} />;
   }
 
   if (studentLoading || teachersLoading) {
@@ -167,11 +167,11 @@ export function TeacherReassignmentContainer() {
 
   if (studentError || teachersError) {
     logger.error("Error loading teacher reassignment data:", { studentError, teachersError });
-    return <ReassignmentErrorState message={tc("loadFailed")} />;
+    return <ReassignmentErrorState message={tc.loadFailed} />;
   }
 
   if (!student) {
-    return <ReassignmentErrorState message={t("errors.invalidId")} />;
+    return <ReassignmentErrorState message={t.errors.invalidId} />;
   }
 
   return (

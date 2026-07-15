@@ -17,7 +17,8 @@ gqlSchemaBuilder.queryField("meetingProviders", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return MeetingProviderCatalogService.listProviders(userId, args.activeOnly ?? true, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return MeetingProviderCatalogService.listProviders(userId, args.activeOnly ?? true, tErrors);
     },
   })
 );
@@ -31,7 +32,8 @@ gqlSchemaBuilder.queryField("meetingProvider", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return MeetingProviderCatalogService.getProviderById(userId, args.id, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return MeetingProviderCatalogService.getProviderById(userId, args.id, tErrors);
     },
   })
 );
@@ -45,7 +47,8 @@ gqlSchemaBuilder.queryField("userMeetingConfigs", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return MeetingConfigService.listUserMeetingConfigs(actorUserId, args.userId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return MeetingConfigService.listUserMeetingConfigs(actorUserId, args.userId, tErrors);
     },
   })
 );
@@ -59,7 +62,8 @@ gqlSchemaBuilder.queryField("userMeetingConfig", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return MeetingConfigService.getUserMeetingConfig(actorUserId, args.id, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      return MeetingConfigService.getUserMeetingConfig(actorUserId, args.id, tErrors);
     },
   })
 );

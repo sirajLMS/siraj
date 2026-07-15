@@ -30,8 +30,8 @@ export namespace ScheduleQueryService {
    *
    * @param actorUserId - The ID of the requesting user (must hold SCHEDULE_VIEW_ALL or DASHBOARD_VIEW_METRICS)
    * @param date - The date to fetch classes for (day boundaries computed from viewerTimezone)
-   * @param options - Optional search filter and timezone
    * @param tErrors - ErrorsLabels for i18n error messages
+   * @param options - Optional search filter and timezone
    * @returns Array of StatusTrackingRow objects
    */
   export async function getStatusTrackingSchedule(
@@ -54,7 +54,7 @@ export namespace ScheduleQueryService {
 
     return Promise.all(
       rows.map(async row => {
-        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id);
+        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id, tErrors);
         return {
           ...row,
           meetingJoinUrl: effectiveMeeting.joinUrl,

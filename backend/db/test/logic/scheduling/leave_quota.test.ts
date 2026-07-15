@@ -8,6 +8,7 @@ import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
   let errorCaught: Error | null = null;
@@ -236,12 +237,13 @@ describe("Leave Quota Repository Methods", () => {
     testLogger.info("Testing incrementTeacherLeaveQuota atomic increment...");
     await runInRollback(async tx => {
       const { teacher } = await setupTeacherAndStudent(tx);
+      const tErrors = await getServerTranslations("en", "errors");
 
-      await SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, "en");
+      await SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, tErrors);
       const usage1 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
       expect(usage1).toBe(1);
 
-      await SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, "en");
+      await SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, tErrors);
       const usage2 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
       expect(usage2).toBe(2);
     });
@@ -253,8 +255,9 @@ describe("Leave Quota Repository Methods", () => {
     await runInRollback(async tx => {
       const { teacher } = await setupTeacherAndStudent(tx);
       await insertLeaveQuota(tx, { teacherId: teacher.id, year: currentYear, month: currentMonth, count: 2 });
+      const tErrors = await getServerTranslations("en", "errors");
 
-      await expectLeaveQuotaExceeded(() => SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, "en"));
+      await expectLeaveQuotaExceeded(() => SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, tErrors));
     });
     testLogger.info("incrementTeacherLeaveQuota trigger block passed.");
   });

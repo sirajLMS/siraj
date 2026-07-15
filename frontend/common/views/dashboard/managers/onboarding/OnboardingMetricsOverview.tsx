@@ -4,9 +4,9 @@ import { useQuery } from "@apollo/client/react";
 import { GroupsOutlined, PendingActionsOutlined, SpeedOutlined } from "@mui/icons-material";
 import { Box, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { onboardingMetricsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const METRIC_ITEMS = [
   { key: "activeStaff", icon: GroupsOutlined },
@@ -48,7 +48,7 @@ function getValue(
 }
 
 export function OnboardingMetricsOverview() {
-  const t = useTranslations("dashboard.managerOnboarding.metrics");
+  const t = useAppTranslation("dashboard.managerOnboarding").metrics;
   const { data, loading } = useQuery(onboardingMetricsQueryDocument);
   const metrics = data?.onboardingMetrics;
 
@@ -58,7 +58,7 @@ export function OnboardingMetricsOverview() {
         {METRIC_ITEMS.map((item, index) => (
           <Box key={item.key} sx={{ flexShrink: 0, width: 192 }}>
             <MetricCard
-              label={t(item.key)}
+              label={t[item.key]}
               value={getValue(metrics, item.key, loading)}
               icon={item.icon}
               variant="default"
@@ -72,7 +72,7 @@ export function OnboardingMetricsOverview() {
         {METRIC_ITEMS.map((item, index) => (
           <Grid key={item.key} size={{ xs: 12, lg: 4 }}>
             <MetricCard
-              label={t(item.key)}
+              label={t[item.key]}
               value={getValue(metrics, item.key, loading)}
               icon={item.icon}
               variant="default"

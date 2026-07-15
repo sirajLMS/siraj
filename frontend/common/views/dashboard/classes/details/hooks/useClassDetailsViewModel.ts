@@ -1,8 +1,8 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
 import type { ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { formatScheduleTimeOnly } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
 import { useClassActionHandlers } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassActionHandlers";
@@ -13,6 +13,7 @@ import { useClassMutations } from "@/frontend/common/views/dashboard/classes/det
 import { useEventLogDownload } from "@/frontend/common/views/dashboard/classes/details/hooks/useEventLogDownload";
 import { formatClassDetailDate } from "@/frontend/common/views/dashboard/classes/details/types";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const noopAsync = () => Promise.resolve();
 
@@ -28,7 +29,7 @@ const noopSessionActionProps = {
   error: null,
 };
 
-type Translations = ReturnType<typeof useTranslations<"dashboard.classDetails">>;
+type Translations = ReturnType<typeof useAppTranslation<"dashboard.classDetails">>;
 type Handlers = ReturnType<typeof useClassActionHandlers>;
 type FeedbackState = { readonly message: string; readonly severity: "success" | "error" } | null;
 
@@ -174,7 +175,7 @@ export interface ClassDetailsViewModel {
   readonly feedbackState: { readonly message: string; readonly severity: "success" | "error" } | null;
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
-  readonly t: ReturnType<typeof useTranslations<"dashboard.classDetails">>;
+  readonly t: ReturnType<typeof useAppTranslation<"dashboard.classDetails">>;
   readonly formattedScheduledDate: string;
   readonly formattedStartTime: string;
   readonly formattedEndTime: string;
@@ -182,8 +183,8 @@ export interface ClassDetailsViewModel {
 
 export function useClassDetailsViewModel(): ClassDetailsViewModel {
   const router = useRouter();
-  const locale = useLocale();
-  const t = useTranslations("dashboard.classDetails");
+  const locale = useAppLocale();
+  const t = useAppTranslation("dashboard.classDetails");
 
   const params = useParams();
   const rawId = params?.id;

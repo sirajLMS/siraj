@@ -3,7 +3,6 @@
 import { NetworkStatus } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
@@ -13,9 +12,10 @@ import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleS
 import { SearchScheduleForm } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleForm";
 import { SearchSchedulePaginationFooter } from "@/frontend/common/views/dashboard/search-schedule/SearchSchedulePaginationFooter";
 import { SearchScheduleView } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleView";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function SearchScheduleContainer() {
-  const t = useTranslations("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
 
   const draft = useSearchScheduleStore(state => state.draft);
   const setDraft = useSearchScheduleStore(state => state.setDraft);
@@ -72,7 +72,7 @@ export function SearchScheduleContainer() {
         })}
       >
         <Box sx={{ px: { xs: 2, md: 0 } }}>
-          <PageHeader title={t("pageTitle")} titleVariant="headlineLg" />
+          <PageHeader title={t.pageTitle} titleVariant="headlineLg" />
         </Box>
         <Box
           sx={{
@@ -91,7 +91,7 @@ export function SearchScheduleContainer() {
             onSearch={commitSearch}
           />
 
-          {error ? <Typography color="error">{t("errorLoading")}</Typography> : null}
+          {error ? <Typography color="error">{t.errorLoading}</Typography> : null}
 
           {(hasSearched || searchResult) && (
             <Box sx={{ display: "flex", flexDirection: "column", flex: 1, gap: 2, minHeight: 0 }}>

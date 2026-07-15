@@ -1,11 +1,11 @@
 "use client";
 
 import { Box, Paper } from "@mui/material";
-import { useTranslations } from "next-intl";
 import {
   BOTTOM_NAV_SCROLL_THRESHOLD,
   BottomNavItemView,
 } from "@/frontend/common/views/dashboard/components/BottomNavItemView";
+import { useNavLabels } from "@/frontend/common/views/dashboard/components/useNavLabels";
 import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 
 interface BottomNavbarProps {
@@ -14,7 +14,7 @@ interface BottomNavbarProps {
 }
 
 export function BottomNavbar({ items, activeKey }: Readonly<BottomNavbarProps>) {
-  const t = useTranslations();
+  const t = useNavLabels();
   const isScrollable = items.length > BOTTOM_NAV_SCROLL_THRESHOLD;
 
   return (

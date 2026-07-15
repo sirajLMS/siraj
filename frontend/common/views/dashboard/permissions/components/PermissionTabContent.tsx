@@ -1,13 +1,13 @@
 "use client";
 
 import { Box, CircularProgress } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionCatalogSection } from "@/frontend/common/views/dashboard/permissions/components/PermissionCatalogSection";
 import { PermissionGroupCardList } from "@/frontend/common/views/dashboard/permissions/components/PermissionGroupCardList";
 import { PermissionGroupsDataGrid } from "@/frontend/common/views/dashboard/permissions/components/PermissionGroupsDataGrid";
 import { UserOverridesDataGrid } from "@/frontend/common/views/dashboard/permissions/components/UserOverridesDataGrid";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type TabKey = "groups" | "catalog" | "overrides";
 
@@ -40,7 +40,7 @@ export function PermissionTabContent({
   openManageOverrides,
   setSelectedUserIdForOverrides,
 }: Readonly<PermissionTabContentProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   if (isLoading && !groups) {
     return (
@@ -62,7 +62,7 @@ export function PermissionTabContent({
             onAssignGroup={openAssignDialog}
           />
         ) : (
-          <SectionPanel title={t("groupsTab")}>
+          <SectionPanel title={t.groupsTab}>
             <PermissionGroupsDataGrid
               groups={groups}
               onViewGroup={setSelectedGroupId}
@@ -79,7 +79,7 @@ export function PermissionTabContent({
       )}
 
       {activeTab === "overrides" && (
-        <SectionPanel title={t("overridesTab")}>
+        <SectionPanel title={t.overridesTab}>
           <UserOverridesDataGrid
             users={users}
             groups={groups}

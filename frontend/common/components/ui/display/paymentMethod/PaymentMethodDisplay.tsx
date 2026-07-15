@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Chip, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import {
@@ -14,6 +13,7 @@ import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graph
 import { type PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type PaymentMethodDisplayData = {
   readonly id?: string;
@@ -69,13 +69,15 @@ export function PaymentMethodDisplay({
   showDirection = true,
   compact = false,
 }: PaymentMethodDisplayProps): React.ReactNode {
-  const t = useTranslations("ui.paymentMethod");
-  const tDisplay = useTranslations("ui.paymentMethod.display");
+  const t = useAppTranslation("ui").paymentMethod;
+  const tDisplay = t.display;
   const details = method.details ?? {};
 
-  const typeLabel = method.type ? getPaymentMethodTypeLabel(method.type, key => t(key as never)) : "";
+  const typeLabel = method.type
+    ? getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "")
+    : "";
   const directionLabel = method.direction
-    ? getPaymentMethodDirectionLabel(method.direction, key => t(key as never))
+    ? getPaymentMethodDirectionLabel(method.direction, key => t.direction[key as keyof typeof t.direction] ?? "")
     : "";
 
   const verificationStatus = method.verifiedAt ? "verified" : "unverified";
@@ -91,77 +93,72 @@ export function PaymentMethodDisplay({
             {method.label?.trim() || typeLabel || method.catalogSlug}
           </Typography>
         )}
-        {method.isDefault ? <Chip size="small" color="primary" label={tDisplay("defaultBadge")} /> : null}
+        {method.isDefault ? <Chip size="small" color="primary" label={tDisplay.defaultBadge} /> : null}
         {showStatus && method.type === PaymentMethodType.BankTransfer ? (
-          <StatusBadge
-            category="paymentMethod"
-            status={verificationStatus}
-            label={tDisplay(verificationStatus)}
-            size="small"
-          />
+          <StatusBadge category="paymentMethod" status={verificationStatus} label={tDisplay.verified} size="small" />
         ) : null}
         {showStatus && method.isActive !== undefined && method.isActive !== null ? (
-          <StatusBadge category="paymentMethod" status={activityStatus} label={tDisplay(activityStatus)} size="small" />
+          <StatusBadge category="paymentMethod" status={activityStatus} label={tDisplay.active} size="small" />
         ) : null}
       </Stack>
 
       <Stack spacing={0.75}>
         {typeLabel ? (
-          <DetailRow label={t("list.columnType")}>
+          <DetailRow label={t.list.columnType}>
             <Typography sx={{ typography: "bodyMd" }}>{typeLabel}</Typography>
           </DetailRow>
         ) : null}
         {showDirection && directionLabel ? (
-          <DetailRow label={t("list.columnDirection")}>
+          <DetailRow label={t.list.columnDirection}>
             <Typography sx={{ typography: "bodyMd" }}>{directionLabel}</Typography>
           </DetailRow>
         ) : null}
         {method.countryCode ? (
-          <DetailRow label={t("typeFields.country")}>
+          <DetailRow label={t.typeFields.country}>
             <CountryDisplay code={method.countryCode} />
           </DetailRow>
         ) : null}
         {method.currencyCode ? (
-          <DetailRow label={t("typeFields.currency")}>
+          <DetailRow label={t.typeFields.currency}>
             <CurrencyDisplay code={method.currencyCode} />
           </DetailRow>
         ) : null}
         {details.phone ? (
-          <DetailRow label={tDisplay("phone")}>
+          <DetailRow label={tDisplay.phone}>
             <PhoneDisplay phone={details.phone} masked={method.masked} />
           </DetailRow>
         ) : null}
         {details.url ? (
-          <DetailRow label={tDisplay("url")}>
+          <DetailRow label={tDisplay.url}>
             <Typography sx={{ typography: "bodyMd" }} dir="ltr">
               {details.url}
             </Typography>
           </DetailRow>
         ) : null}
         {details.identifier ? (
-          <DetailRow label={tDisplay("identifier")}>
+          <DetailRow label={tDisplay.identifier}>
             <Typography sx={{ typography: "bodyMd" }}>{details.identifier}</Typography>
           </DetailRow>
         ) : null}
         {details.bankName ? (
-          <DetailRow label={tDisplay("bankName")}>
+          <DetailRow label={tDisplay.bankName}>
             <Typography sx={{ typography: "bodyMd" }}>{details.bankName}</Typography>
           </DetailRow>
         ) : null}
         {details.beneficiaryName ? (
-          <DetailRow label={tDisplay("beneficiaryName")}>
+          <DetailRow label={tDisplay.beneficiaryName}>
             <Typography sx={{ typography: "bodyMd" }}>{details.beneficiaryName}</Typography>
           </DetailRow>
         ) : null}
         {details.iban ? (
-          <DetailRow label={tDisplay("iban")}>
+          <DetailRow label={tDisplay.iban}>
             <Typography sx={{ typography: "bodyMd" }} dir="ltr">
               {method.masked ? "••••••••" : details.iban}
             </Typography>
           </DetailRow>
         ) : null}
         {details.note ? (
-          <DetailRow label={tDisplay("note")}>
+          <DetailRow label={tDisplay.note}>
             <Typography sx={{ typography: "bodyMd" }}>{details.note}</Typography>
           </DetailRow>
         ) : null}

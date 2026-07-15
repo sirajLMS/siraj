@@ -2,13 +2,14 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppPermission, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { pendingLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type LessonReportStatusValue = `${LessonReportStatus}`;
 type StatusFilterValue = "ALL" | LessonReportStatusValue;
@@ -59,8 +60,8 @@ interface TeacherLessonReportsContainerProps {
 }
 
 export function TeacherLessonReportsContainer({ teacherId }: Readonly<TeacherLessonReportsContainerProps>) {
-  const t = useTranslations("dashboard.lms.lessonReports");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.lms.lessonReports");
+  const locale = useAppLocale();
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>("ALL");
 
   const { data, loading, error } = useQuery(pendingLessonReportsQueryDocument, {
@@ -70,19 +71,19 @@ export function TeacherLessonReportsContainer({ teacherId }: Readonly<TeacherLes
 
   const labels = useMemo<ContainerLabels>(
     () => ({
-      title: t("historyTitle"),
-      noReports: t("noReports"),
-      attendanceEvaluation: t("attendanceEvaluation"),
-      durationMinutes: t("durationMinutes"),
-      completionPercentage: t("completionPercentage"),
-      teacherNotes: t("teacherNotes"),
-      rejectionReason: t("rejectionReason"),
-      submittedAt: t("submittedAt"),
-      filterAll: t("filterAll"),
-      pendingReview: t("pendingReview"),
-      approved: t("approved"),
-      rejected: t("rejected"),
-      draft: t("draft"),
+      title: t.historyTitle,
+      noReports: t.noReports,
+      attendanceEvaluation: t.attendanceEvaluation,
+      durationMinutes: t.durationMinutes,
+      completionPercentage: t.completionPercentage,
+      teacherNotes: t.teacherNotes,
+      rejectionReason: t.rejectionReason,
+      submittedAt: t.submittedAt,
+      filterAll: t.filterAll,
+      pendingReview: t.pendingReview,
+      approved: t.approved,
+      rejected: t.rejected,
+      draft: t.draft,
     }),
     [t]
   );

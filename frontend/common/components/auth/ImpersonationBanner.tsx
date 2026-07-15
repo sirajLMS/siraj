@@ -1,11 +1,11 @@
 "use client";
 
 import { Box, Link, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function ImpersonationBanner() {
-  const t = useTranslations("auth.impersonation");
+  const t = useAppTranslation("auth").impersonation;
   const { isImpersonating, status, endImpersonation, loading } = useImpersonation();
 
   if (!isImpersonating || !status?.targetUser) {
@@ -34,7 +34,7 @@ export function ImpersonationBanner() {
       })}
     >
       <Typography component="span" sx={{ fontWeight: 600, textAlign: "center" }}>
-        {t("bannerLoggedInAs", { name: targetName })}
+        {t.bannerLoggedInAs(targetName)}
       </Typography>
       <Link
         component="button"
@@ -51,7 +51,7 @@ export function ImpersonationBanner() {
           typography: "bodyMd",
         })}
       >
-        {t("returnToNormalLogin")}
+        {t.returnToNormalLogin}
       </Link>
     </Box>
   );

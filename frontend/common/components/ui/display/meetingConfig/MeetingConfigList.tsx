@@ -4,10 +4,11 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { ClassMeetingConfigFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type MeetingConfigListItem = UserMeetingConfigFieldsFragment | ClassMeetingConfigFieldsFragment;
 
@@ -30,14 +31,14 @@ export function MeetingConfigList({
   onDeleteAction,
   emptyMessage,
 }: MeetingConfigListProps) {
-  const locale = useLocale();
-  const t = useTranslations("ui.meetingConfig");
-  const tManager = useTranslations("ui.meetingConfig.manager");
-  const tDisplay = useTranslations("ui.meetingConfig.display");
-  const resolvedEmpty = emptyMessage ?? t("empty");
+  const t = useAppTranslation("ui.meetingConfig");
+  const tDisplay = useAppTranslation("ui.meetingConfig").display;
+  const tManager = useAppTranslation("ui.meetingConfig").manager;
+  const locale = useAppLocale();
+  const resolvedEmpty = emptyMessage ?? t.empty;
 
   if (loading && configs.length === 0) {
-    return <Typography sx={{ color: "text.secondary", typography: "bodyMd" }}>{t("loading")}</Typography>;
+    return <Typography sx={{ color: "text.secondary", typography: "bodyMd" }}>{t.loading}</Typography>;
   }
 
   if (configs.length === 0) {
@@ -67,9 +68,9 @@ export function MeetingConfigList({
               <Stack sx={{ gap: 0.5 }}>
                 <Stack sx={{ flexDirection: "row", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
                   <Typography sx={{ typography: "titleMd" }}>{providerName}</Typography>
-                  {config.isDefault ? <Chip size="small" label={tDisplay("defaultBadge")} color="primary" /> : null}
+                  {config.isDefault ? <Chip size="small" label={tDisplay.defaultBadge} color="primary" /> : null}
                   {"hasSecret" in config && config.hasSecret ? (
-                    <Chip size="small" label={tDisplay("passwordProtected")} variant="outlined" />
+                    <Chip size="small" label={tDisplay.passwordProtected} variant="outlined" />
                   ) : null}
                   {config.label ? (
                     <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{config.label}</Typography>
@@ -81,13 +82,13 @@ export function MeetingConfigList({
               </Stack>
               <Stack sx={{ flexDirection: "row", gap: 0.5 }}>
                 {onEditAction ? (
-                  <IconButton aria-label={tManager("edit")} size="small" onClick={() => onEditAction(config)}>
+                  <IconButton aria-label={tManager.edit} size="small" onClick={() => onEditAction(config)}>
                     <EditOutlinedIcon fontSize="small" />
                   </IconButton>
                 ) : null}
                 {!config.isDefault && onSetDefaultAction ? (
                   <IconButton
-                    aria-label={tManager("setDefault")}
+                    aria-label={tManager.setDefault}
                     size="small"
                     onClick={() => onSetDefaultAction(config.id as string)}
                   >
@@ -96,7 +97,7 @@ export function MeetingConfigList({
                 ) : null}
                 {onDeleteAction ? (
                   <IconButton
-                    aria-label={tManager("delete")}
+                    aria-label={tManager.delete}
                     size="small"
                     onClick={() => onDeleteAction(config.id as string)}
                   >

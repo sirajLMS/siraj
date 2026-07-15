@@ -1,12 +1,13 @@
 "use client";
 
 import { Alert } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function BillingImpersonationNotice(): React.ReactNode {
   const { isImpersonating } = useImpersonation();
-  const t = useTranslations("errors.auth");
+  const t = useAppTranslation("errors");
+  const auth = t.auth;
 
   if (!isImpersonating) {
     return null;
@@ -14,7 +15,7 @@ export function BillingImpersonationNotice(): React.ReactNode {
 
   return (
     <Alert severity="warning" sx={{ mb: 2 }}>
-      {t("impersonationNotAllowedDuringSession")}
+      {auth.impersonationNotAllowedDuringSession}
     </Alert>
   );
 }

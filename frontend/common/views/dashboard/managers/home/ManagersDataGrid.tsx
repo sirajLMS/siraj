@@ -4,13 +4,13 @@ import { MailOutlined } from "@mui/icons-material";
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, PhoneDisplay } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { profileHrefForStaff } from "@/frontend/common/utils/profileHref";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
 import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledRoleChip = styled(Chip, {
   shouldForwardProp: prop => prop !== "isStaff",
@@ -42,19 +42,19 @@ export function ManagersDataGrid({
   onPageChange,
   loading = false,
 }: Readonly<ManagersDataGridProps>) {
-  const t = useTranslations("dashboard.managersDirectory");
+  const t = useAppTranslation("dashboard.managersDirectory");
 
   const columns = useMemo<GridColDef<Manager>[]>(
     () => [
       {
         field: "userId",
-        headerName: t("table.hash"),
+        headerName: t.table.hash,
         width: 80,
         valueGetter: (_, row) => row.userId.slice(0, 8),
       },
       {
         field: "manager",
-        headerName: t("table.manager"),
+        headerName: t.table.manager,
         flex: 1.5,
         minWidth: 250,
         renderCell: params => (
@@ -78,7 +78,7 @@ export function ManagersDataGrid({
               <StatusBadge
                 category="session"
                 status={params.row.status === "active" ? "active" : "blocked"}
-                label={t(`status.${params.row.status}`)}
+                label={t.status[params.row.status]}
               />
             </Box>
           </Stack>
@@ -86,7 +86,7 @@ export function ManagersDataGrid({
       },
       {
         field: "email",
-        headerName: t("table.contactDetails"),
+        headerName: t.table.contactDetails,
         flex: 1.5,
         minWidth: 200,
         renderCell: params => (
@@ -102,23 +102,23 @@ export function ManagersDataGrid({
       },
       {
         field: "phone",
-        headerName: t("table.phone"),
+        headerName: t.table.phone,
         flex: 1,
         minWidth: 150,
         renderCell: params => <PhoneDisplay phone={params.row.phone} typographyVariant="bodyMd" />,
       },
       {
         field: "role",
-        headerName: t("table.roleType"),
+        headerName: t.table.roleType,
         width: 120,
         renderCell: params => {
           const isStaff = params.row.role === "staff";
-          return <StyledRoleChip label={t(`roles.${params.row.role}`)} size="small" isStaff={isStaff} />;
+          return <StyledRoleChip label={t.roles[params.row.role]} size="small" isStaff={isStaff} />;
         },
       },
       {
         field: "options",
-        headerName: t("table.options"),
+        headerName: t.table.options,
         width: 100,
         align: "center",
         headerAlign: "center",

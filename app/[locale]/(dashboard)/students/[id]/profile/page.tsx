@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { getStudentPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { StudentProfilePageClient } from "@/frontend/common/views/dashboard/students/profile/StudentProfilePageClient";
+import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({
   params,
@@ -9,12 +9,12 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly id: string; readonly locale: string }>;
 }): Promise<Metadata> {
   const { id, locale } = await params;
-  const t = await getTranslations({ locale, namespace: "dashboard.studentProfile" });
+  const t = await getTranslations(locale, "dashboard.studentProfile");
   const studentName = await getStudentPageTitle(id);
   if (studentName) {
     return { title: studentName };
   }
-  return { title: t("title") };
+  return { title: t.title };
 }
 
 export default function StudentProfilePage() {

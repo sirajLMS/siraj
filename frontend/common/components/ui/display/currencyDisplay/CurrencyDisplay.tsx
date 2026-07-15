@@ -4,11 +4,11 @@ import Stack from "@mui/material/Stack";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
-import { useLocale } from "next-intl";
 import type * as React from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 
 export const CurrencyDisplayPart = {
   Flag: "flag",
@@ -58,7 +58,7 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   typographyVariant,
   sx,
 }): React.ReactNode => {
-  const locale = useLocale();
+  const locale = useAppLocale();
   const visibleParts = resolveCurrencyDisplayParts(parts);
 
   if (!code) {

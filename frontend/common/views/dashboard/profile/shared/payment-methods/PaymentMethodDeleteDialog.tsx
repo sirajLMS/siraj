@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type PaymentMethodDeleteDialogProps = {
   readonly open: boolean;
@@ -18,7 +18,7 @@ export function PaymentMethodDeleteDialog({
   onClose,
   onConfirm,
 }: PaymentMethodDeleteDialogProps) {
-  const t = useTranslations("ui.paymentMethod.manager");
+  const t = useAppTranslation("ui").paymentMethod.manager;
 
   return (
     <BaseDeleteDialog
@@ -26,10 +26,10 @@ export function PaymentMethodDeleteDialog({
       onClose={onClose}
       onConfirm={onConfirm}
       isLoading={isLoading}
-      title={t("deleteTitle")}
-      body={t("deleteBody", { name: methodLabel })}
-      cancelLabel={t("cancel")}
-      confirmLabel={t("deleteConfirm")}
+      title={t.deleteTitle}
+      body={t.deleteBody(methodLabel)}
+      cancelLabel={t.cancel}
+      confirmLabel={t.deleteConfirm}
     />
   );
 }

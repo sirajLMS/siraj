@@ -15,7 +15,6 @@ import {
   TextField,
 } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { CatalogImageUpload } from "@/frontend/common/components/ui/input/catalogImageUpload/CatalogImageUpload";
@@ -43,6 +42,7 @@ import type { LocalizedString } from "@/frontend/common/types/localized-string.t
 import { logger } from "@/frontend/common/utils/logger";
 import type { CatalogEditDialogProps } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
 import { EntityFormDialogActions } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const FORM_ID = "payment-catalog-edit-form";
 
@@ -93,7 +93,7 @@ function resolveCurrency(code: string | null | undefined): CurrencyOption | null
 }
 
 export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonly<CatalogEditDialogProps>) {
-  const t = useTranslations("dashboard.paymentCatalogs");
+  const t = useAppTranslation("dashboard.paymentCatalogs");
   const notifications = useNotifications();
   const isEdit = Boolean(row?.id);
 
@@ -143,7 +143,7 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
     });
   }, [open, reset, row]);
 
-  const title = useMemo(() => (isEdit ? t("editTitle") : t("createTitle")), [isEdit, t]);
+  const title = useMemo(() => (isEdit ? t.editTitle : t.createTitle), [isEdit, t]);
 
   const buildSharedInput = (values: CatalogFormValues) => ({
     slug: values.slug,
@@ -199,7 +199,7 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
   const onSubmit = handleSubmit(async values => {
     const hasName = Boolean(values.name.en?.trim() || values.name.ar?.trim());
     if (!hasName) {
-      notifications.show(t("errors.nameRequired"), { severity: "error" });
+      notifications.show(t.errors.nameRequired, { severity: "error" });
       return;
     }
 
@@ -208,7 +208,7 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
       await onSaved();
     } catch (error) {
       logger.error("Failed to save catalog entry", { error });
-      notifications.show(t("saveError"), { severity: "error" });
+      notifications.show(t.saveError, { severity: "error" });
     }
   });
 
@@ -232,11 +232,11 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
           <Controller
             name="slug"
             control={control}
-            rules={{ required: t("errors.slugRequired") }}
+            rules={{ required: t.errors.slugRequired }}
             render={({ field, fieldState }) => (
               <TextField
                 {...field}
-                label={t("fields.slug")}
+                label={t.fields.slug}
                 fullWidth
                 required
                 disabled={isEdit}
@@ -249,23 +249,23 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
           <LocalizedStringFormField
             name="name"
             control={control}
-            label={t("fields.name")}
+            label={t.fields.name}
             required
             errorMessage={errors.name?.message}
           />
-          <LocalizedStringFormField name="description" control={control} label={t("fields.description")} />
-          <LocalizedStringFormField name="instructions" control={control} label={t("fields.instructions")} />
+          <LocalizedStringFormField name="description" control={control} label={t.fields.description} />
+          <LocalizedStringFormField name="instructions" control={control} label={t.fields.instructions} />
 
           <Controller
             name="supportedDirections"
             control={control}
             render={({ field }) => (
               <FormControl fullWidth>
-                <InputLabel id="supported-directions-label">{t("fields.supportedDirections")}</InputLabel>
-                <Select {...field} labelId="supported-directions-label" label={t("fields.supportedDirections")}>
-                  <MenuItem value={PaymentDirection.Payin}>{t("directions.payin")}</MenuItem>
-                  <MenuItem value={PaymentDirection.Payout}>{t("directions.payout")}</MenuItem>
-                  <MenuItem value={PaymentDirection.Both}>{t("directions.both")}</MenuItem>
+                <InputLabel id="supported-directions-label">{t.fields.supportedDirections}</InputLabel>
+                <Select {...field} labelId="supported-directions-label" label={t.fields.supportedDirections}>
+                  <MenuItem value={PaymentDirection.Payin}>{t.directions.payin}</MenuItem>
+                  <MenuItem value={PaymentDirection.Payout}>{t.directions.payout}</MenuItem>
+                  <MenuItem value={PaymentDirection.Both}>{t.directions.both}</MenuItem>
                 </Select>
               </FormControl>
             )}
@@ -277,20 +277,20 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
                 country={resolveCountry(countryCode)}
                 onChangeAction={country => setValue("countryCode", country.code as CountryCode)}
                 onClearAction={() => setValue("countryCode", "")}
-                label={t("fields.countryCode")}
+                label={t.fields.countryCode}
                 fullWidth
               />
               <CurrencySelect
                 currency={resolveCurrency(currencyCode)}
                 setCurrencyAction={currency => setValue("currencyCode", currency.code)}
                 onClearAction={() => setValue("currencyCode", "")}
-                label={t("fields.currencyCode")}
+                label={t.fields.currencyCode}
                 fullWidth
               />
               <Controller
                 name="phoneRegion"
                 control={control}
-                render={({ field }) => <TextField {...field} label={t("fields.phoneRegion")} fullWidth />}
+                render={({ field }) => <TextField {...field} label={t.fields.phoneRegion} fullWidth />}
               />
             </>
           ) : null}
@@ -302,8 +302,8 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
                 control={control}
                 render={({ field }) => (
                   <TagInput
-                    label={t("fields.urlAllowlist")}
-                    placeholder={t("fields.urlAllowlistHelp")}
+                    label={t.fields.urlAllowlist}
+                    placeholder={t.fields.urlAllowlistHelp}
                     initialTags={field.value}
                     onChange={field.onChange}
                   />
@@ -312,7 +312,7 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
               <Controller
                 name="urlExample"
                 control={control}
-                render={({ field }) => <TextField {...field} label={t("fields.urlExample")} fullWidth />}
+                render={({ field }) => <TextField {...field} label={t.fields.urlExample} fullWidth />}
               />
             </>
           ) : null}
@@ -324,16 +324,16 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
                 control={control}
                 render={({ field }) => (
                   <FormControl fullWidth>
-                    <InputLabel id="identifier-kind-label">{t("fields.identifierKind")}</InputLabel>
-                    <Select {...field} labelId="identifier-kind-label" label={t("fields.identifierKind")}>
-                      <MenuItem value={IdentifierKind.Email}>{t("identifierKinds.email")}</MenuItem>
-                      <MenuItem value={IdentifierKind.Handle}>{t("identifierKinds.handle")}</MenuItem>
-                      <MenuItem value={IdentifierKind.EmailOrHandle}>{t("identifierKinds.emailOrHandle")}</MenuItem>
+                    <InputLabel id="identifier-kind-label">{t.fields.identifierKind}</InputLabel>
+                    <Select {...field} labelId="identifier-kind-label" label={t.fields.identifierKind}>
+                      <MenuItem value={IdentifierKind.Email}>{t.identifierKinds.email}</MenuItem>
+                      <MenuItem value={IdentifierKind.Handle}>{t.identifierKinds.handle}</MenuItem>
+                      <MenuItem value={IdentifierKind.EmailOrHandle}>{t.identifierKinds.emailOrHandle}</MenuItem>
                     </Select>
                   </FormControl>
                 )}
               />
-              <LocalizedStringFormField name="identifierLabel" control={control} label={t("fields.identifierLabel")} />
+              <LocalizedStringFormField name="identifierLabel" control={control} label={t.fields.identifierLabel} />
             </>
           ) : null}
 
@@ -345,7 +345,7 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
                 imageUrl={field.value || null}
                 onImageUrlChangeAction={url => field.onChange(url ?? "")}
                 allowUrlFallback
-                label={t("fields.logoUrl")}
+                label={t.fields.logoUrl}
               />
             )}
           />
@@ -361,7 +361,7 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
                   color: field.value ? theme.palette.text.primary : theme.palette.text.secondary,
                 })}
                 control={<Checkbox checked={field.value} onChange={event => field.onChange(event.target.checked)} />}
-                label={`${t("fields.isActive")}: ${field.value ? t("active") : t("inactive")}`}
+                label={`${t.fields.isActive}: ${field.value ? t.active : t.inactive}`}
               />
             )}
           />
@@ -369,8 +369,8 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
       </DialogContent>
       <EntityFormDialogActions
         formId={FORM_ID}
-        cancelLabel={t("cancel")}
-        saveLabel={t("save")}
+        cancelLabel={t.cancel}
+        saveLabel={t.save}
         onClose={onClose}
         isLoading={isSaving}
       />

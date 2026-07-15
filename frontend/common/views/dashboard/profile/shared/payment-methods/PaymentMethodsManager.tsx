@@ -4,7 +4,6 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Button, Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { ErrorState } from "@/frontend/common/components/ui";
 import {
@@ -27,6 +26,7 @@ import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method"
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { PaymentMethodDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodDeleteDialog";
 import { PaymentMethodFormDialog } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodFormDialog";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type PaymentMethodsSlot = "payin" | "payout";
 
@@ -60,7 +60,7 @@ type VerifyButtonProps = {
   readonly methods: readonly PaymentMethodRow[];
   readonly verifying: boolean;
   readonly onVerify: (id: string) => Promise<void>;
-  readonly t: TranslationManager;
+  readonly t: MeetingConfigManagerLabels;
   readonly tType: TranslationType;
 };
 
@@ -80,7 +80,7 @@ function VerifyBankTransferButtons({ methods, verifying, onVerify, t, tType }: V
       }}
       sx={{ alignSelf: "flex-start" }}
     >
-      {t("verify", { label: row.label ?? getPaymentMethodTypeLabel(row.type, key => tType(key as never)) })}
+      {t.verify(row.label ?? getPaymentMethodTypeLabel(row.type, key => tType(key as never)))}
     </Button>
   ));
 }
@@ -120,8 +120,8 @@ function PaymentMethodFormDialogWrapped({
   );
 }
 
-type TranslationManager = ReturnType<typeof useTranslations<"ui.paymentMethod.manager">>;
-type TranslationType = ReturnType<typeof useTranslations<"ui.paymentMethod">>;
+type MeetingConfigManagerLabels = ReturnType<typeof useAppTranslation<"ui.meetingConfig.manager">>;
+type TranslationType = ReturnType<typeof useAppTranslation<"ui.meetingConfig">>;
 
 type PaymentMethodsManagerData = {
   readonly userPaymentMethods?: readonly UserPaymentMethodFieldsFragment[] | null;
@@ -190,8 +190,8 @@ function useMethodMutations(refetch: () => Promise<unknown>): PaymentMethodMutat
 }
 
 export function PaymentMethodsManager({ targetUserId, slot, canManage }: PaymentMethodsManagerProps) {
-  const t = useTranslations("ui.paymentMethod.manager");
-  const tType = useTranslations("ui.paymentMethod");
+  const t = useAppTranslation("ui").paymentMethod.manager;
+  const tType = useAppTranslation("ui").paymentMethod;
   const { hasPermission } = useUserStore();
   const canVerify = hasPermission(AppPermission.PaymentMethodsVerifyBankTransfer);
 
@@ -238,8 +238,8 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
     return (
       <ErrorState
         embedded
-        message={t("loadError")}
-        retryLabel={t("retry")}
+        message={t.loadError}
+        retryLabel={t.retry}
         onRetry={async () => {
           await refetch();
         }}
@@ -259,7 +259,7 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
               setFormOpen(true);
             }}
           >
-            {t("add")}
+            {t.add}
           </Button>
         </Stack>
       ) : null}
@@ -267,8 +267,8 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
       <PaymentMethodList
         methods={methods}
         loading={busy}
-        title={t("listTitle")}
-        emptyMessage={t("empty")}
+        title={t.listTitle}
+        emptyMessage={t.empty}
         onEditAction={handleEdit}
         onDeleteAction={canManage ? id => setDeleteId(id) : undefined}
         onSetDefaultAction={canManage ? mutations.setDefault : undefined}

@@ -4,10 +4,10 @@ import { RemoveCircleOutlined, SecurityOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
   fontFamily: "JetBrains Mono, monospace",
@@ -84,25 +84,25 @@ export function CurrentPermissionsTab({
   onSwitchToAddTab,
   loading = false,
 }: Readonly<CurrentPermissionsTabProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const currentPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {
     const cols: GridColDef<Permission>[] = [
       {
         field: "key",
-        headerName: t("columnKey"),
+        headerName: t.columnKey,
         flex: 1,
         minWidth: 200,
         renderCell: params => <StyledPermissionKeyCell>{params.value as string}</StyledPermissionKeyCell>,
       },
       {
         field: "category",
-        headerName: t("columnCategory"),
+        headerName: t.columnCategory,
         width: 180,
       },
       {
         field: "description",
-        headerName: t("columnDescription"),
+        headerName: t.columnDescription,
         flex: 1.5,
         minWidth: 250,
       },
@@ -121,7 +121,7 @@ export function CurrentPermissionsTab({
             startIcon={<RemoveCircleOutlined fontSize="small" />}
             onClick={() => params.row.id && onRevokePermission(params.row.id)}
           >
-            {t("revoke")}
+            {t.revoke}
           </StyledRevokeButton>
         ),
       });
@@ -131,7 +131,7 @@ export function CurrentPermissionsTab({
   }, [t, group.isSystem, onRevokePermission]);
 
   return (
-    <SectionPanel title={t("currentPermissions")}>
+    <SectionPanel title={t.currentPermissions}>
       {permissionsCount === 0 && !loading ? (
         /* Empty State */
         <StyledEmptyStateContainer>
@@ -140,12 +140,12 @@ export function CurrentPermissionsTab({
             <SecurityOutlined fontSize="large" sx={theme => ({ color: theme.palette.text.secondary })} />
           </StyledEmptyStateIconCircle>
           {/* Title & Description */}
-          <StyledEmptyStateTitle variant="titleLg">{t("noPermissionsAssignedYet")}</StyledEmptyStateTitle>
-          <StyledEmptyStateDescription variant="bodyMd">{t("noPermissionsDescription")}</StyledEmptyStateDescription>
+          <StyledEmptyStateTitle variant="titleLg">{t.noPermissionsAssignedYet}</StyledEmptyStateTitle>
+          <StyledEmptyStateDescription variant="bodyMd">{t.noPermissionsDescription}</StyledEmptyStateDescription>
           {/* Primary Action */}
           {!group.isSystem && (
             <StyledAssignFirstButton variant="contained" onClick={onSwitchToAddTab}>
-              {t("assignFirstPermission")}
+              {t.assignFirstPermission}
             </StyledAssignFirstButton>
           )}
         </StyledEmptyStateContainer>
@@ -155,7 +155,7 @@ export function CurrentPermissionsTab({
           rows={groupPermissions}
           columns={currentPermissionsColumns}
           getRowId={row => row.id ?? row.key ?? ""}
-          emptyMessage={t("noPermissionsFound")}
+          emptyMessage={t.noPermissionsFound}
           loading={loading}
           autoHeight
         />

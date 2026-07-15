@@ -3,18 +3,19 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { teacherAssignedClassesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import { ClassSessionActionButton } from "@/frontend/common/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
 import { useRouter } from "@/shared/i18n/routing";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function formatClassSchedule(
   scheduledStartAt: string | null | undefined,
@@ -46,9 +47,9 @@ function formatClassSchedule(
 }
 
 export function TeacherClassListContainer() {
-  const t = useTranslations("dashboard.teacherClassList");
-  const tDashboard = useTranslations("dashboard");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.teacherClassList");
+  const tDashboard = useAppTranslation("dashboard");
+  const locale = useAppLocale();
   const router = useRouter();
   const instanceStatusLabels = useMemo(() => buildClassInstanceStatusLabels(tDashboard), [tDashboard]);
   const { data, loading, error } = useQuery(teacherAssignedClassesQueryDocument);
@@ -63,7 +64,7 @@ export function TeacherClassListContainer() {
       joinSession: "",
       leaveClass: "",
       leaveDisabledReason: "",
-      viewClassAudit: t("viewClassAudit"),
+      viewClassAudit: t.viewClassAudit,
       contactAdmin: "",
     }),
     [t]
@@ -72,19 +73,19 @@ export function TeacherClassListContainer() {
   return (
     <RequirePermission permissions={[AppPermission.SessionViewDetails]}>
       <PageContainer>
-        <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
+        <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
             <CircularProgress />
           </Box>
         ) : null}
         {error ? (
-          <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.failedToLoad")}</Typography>
+          <Typography sx={{ color: theme => theme.palette.error.main }}>{t.errors.failedToLoad}</Typography>
         ) : null}
         {!loading && !error ? (
           <Stack spacing={1}>
             {rows.length === 0 ? (
-              <Typography sx={{ color: theme => theme.palette.text.secondary }}>{t("noClasses")}</Typography>
+              <Typography sx={{ color: theme => theme.palette.text.secondary }}>{t.noClasses}</Typography>
             ) : (
               rows.map(row => (
                 <Box
@@ -108,7 +109,7 @@ export function TeacherClassListContainer() {
                     <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", mt: 0.5 }}>
                       {row.durationMinutes ? (
                         <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-                          {t("durationMinutes", { minutes: row.durationMinutes })}
+                          {t.durationMinutes(row.durationMinutes)}
                         </Typography>
                       ) : null}
                       <ScheduleInstanceStatusBadge
@@ -129,7 +130,7 @@ export function TeacherClassListContainer() {
                         joinUrl={row.meetingJoinUrl}
                         meeting={row.effectiveMeeting}
                         emptyRole="teacher"
-                        label={tDashboard("actions.joinVideo")}
+                        label={tDashboard.actions.joinVideo}
                         setupHref="/profile?tab=meeting"
                       />
                     ) : (
@@ -142,7 +143,7 @@ export function TeacherClassListContainer() {
                       />
                     )}
                     <Button component={Link} href={`/classes/${row.id}`} variant="outlined" size="small">
-                      {t("viewDetails")}
+                      {t.viewDetails}
                     </Button>
                   </Box>
                 </Box>

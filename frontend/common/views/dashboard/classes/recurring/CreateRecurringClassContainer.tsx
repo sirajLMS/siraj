@@ -1,7 +1,6 @@
 "use client";
 
 import { type MutationTuple, useApolloClient, useMutation } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import type {
   CreateRecurringClassInput,
@@ -25,9 +24,9 @@ import {
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
 import { useRouter } from "@/shared/i18n/routing";
-import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
+import type { useAppTranslation } from "@/shared/locale/client";
 
-type TranslationFn = ReturnType<typeof useTranslations>;
+type TranslationFn = ReturnType<typeof useAppTranslation>;
 
 function useRecurringClassLabels(t: TranslationFn): CreateRecurringClassLabels {
   return useMemo(

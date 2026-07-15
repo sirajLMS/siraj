@@ -1,7 +1,6 @@
 // cspell:disable
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import type {
   AvailabilityEntry,
@@ -10,6 +9,7 @@ import type {
   WeeklyAvailability,
   WeeklyAvailabilityGridLabels,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface TeacherAvailabilityViewModel {
   readonly availability: WeeklyAvailability;
@@ -29,25 +29,25 @@ export function useTeacherAvailabilityViewModel(
 ): TeacherAvailabilityViewModel {
   const { availability, insights, defaultFilters, loading, onExportPdf, onSearch, onBlockClick } = props;
 
-  const t = useTranslations("dashboard.teacherAvailability");
+  const t = useAppTranslation("dashboard.teacherAvailability");
 
   const tableLabels = useMemo<WeeklyAvailabilityGridLabels>(
     () => ({
-      time: t("table.time"),
-      monday: t("table.monday"),
-      tuesday: t("table.tuesday"),
-      wednesday: t("table.wednesday"),
-      thursday: t("table.thursday"),
-      friday: t("table.friday"),
-      saturday: t("table.saturday"),
-      sunday: t("table.sunday"),
-      mon: t("table.mon"),
-      tue: t("table.tue"),
-      wed: t("table.wed"),
-      thu: t("table.thu"),
-      fri: t("table.fri"),
-      sat: t("table.sat"),
-      sun: t("table.sun"),
+      time: t.table.time,
+      monday: t.table.monday,
+      tuesday: t.table.tuesday,
+      wednesday: t.table.wednesday,
+      thursday: t.table.thursday,
+      friday: t.table.friday,
+      saturday: t.table.saturday,
+      sunday: t.table.sunday,
+      mon: t.table.mon,
+      tue: t.table.tue,
+      wed: t.table.wed,
+      thu: t.table.thu,
+      fri: t.table.fri,
+      sat: t.table.sat,
+      sun: t.table.sun,
     }),
     [t]
   );

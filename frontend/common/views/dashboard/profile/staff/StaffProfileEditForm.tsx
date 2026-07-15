@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
@@ -17,6 +16,7 @@ import {
   staffAdminEditSchema,
   staffOwnEditSchema,
 } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function StaffProfileEditForm({
   staffData,
@@ -31,7 +31,7 @@ export function StaffProfileEditForm({
   readonly isSaving: boolean;
   readonly onSubmit: (values: StaffAdminEditFormData) => Promise<void>;
 }) {
-  const tc = useTranslations("profile");
+  const tc = useAppTranslation("profile");
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canView, canEdit } = useProfileFieldAccess({ scope });
   const form = useForm<StaffAdminEditFormData>({
@@ -99,7 +99,7 @@ export function StaffProfileEditForm({
           ) : null}
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>
-          {tc("actions.save")}
+          {tc.actions.save}
         </PrimaryPageAction>
       </Stack>
     </Box>

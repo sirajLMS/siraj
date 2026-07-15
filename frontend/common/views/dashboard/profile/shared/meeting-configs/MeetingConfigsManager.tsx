@@ -3,7 +3,6 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { Button, Stack } from "@mui/material";
-import { useLocale } from "next-intl";
 import { useMemo, useState } from "react";
 import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
 import {
@@ -17,6 +16,7 @@ import {
   userMeetingConfigsQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { MeetingConfigDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigDeleteDialog";
 import { MeetingConfigFormDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog";
 import { useAppTranslation } from "@/shared/locale/client";
@@ -34,7 +34,7 @@ function configLabel(config: UserMeetingConfigFieldsFragment, locale: string): s
 
 function useMeetingConfigsState(targetUserId: string) {
   const t = useAppTranslation("ui").meetingConfig.manager;
-  const locale = useLocale();
+  const locale = useAppLocale();
 
   const { data, loading, error, refetch } = useQuery(userMeetingConfigsQueryDocument, {
     variables: { userId: targetUserId },

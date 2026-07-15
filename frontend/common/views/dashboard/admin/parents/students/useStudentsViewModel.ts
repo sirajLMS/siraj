@@ -2,7 +2,6 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import type { StudentFilterArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentDirectoryQuery } from "@/frontend/common/graphql/generated/gql/operations";
@@ -22,6 +21,7 @@ import {
 } from "@/frontend/common/views/dashboard/admin/parents/students/utils";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const EMPTY_FILTER_ARGS: StudentFilterArgs = {
   birthDate: null,
@@ -88,7 +88,7 @@ export interface StudentsViewModel {
   readonly onViewHistory: (id: string) => void;
 }
 
-type StudentDirectoryTranslator = ReturnType<typeof useTranslations>;
+type StudentDirectoryTranslator = ReturnType<typeof useAppTranslation<"dashboard.studentDirectory">>;
 
 function useComputedFilterArgs(searchQuery: string, filterArgs: StudentFilterArgs | null): StudentFilterArgs | null {
   return useMemo<StudentFilterArgs | null>(() => {
@@ -151,7 +151,7 @@ function createStudentHandlers(
 }
 
 export function useStudentsViewModel(): StudentsViewModel {
-  const t = useTranslations("dashboard.studentDirectory");
+  const t = useAppTranslation("dashboard.studentDirectory");
   const router = useRouter();
   const notifications = useNotifications();
 
@@ -169,7 +169,7 @@ export function useStudentsViewModel(): StudentsViewModel {
 
   useEffect(() => {
     if (error) {
-      notifications.show(t("loadFailed"), {
+      notifications.show(t.errors.loadFailed, {
         severity: "error",
         autoHideDuration: 5000,
       });

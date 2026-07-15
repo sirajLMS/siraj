@@ -2,9 +2,9 @@
 
 import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import type { CategoriesSectionProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function CategoriesSection({
   categories,
@@ -15,14 +15,14 @@ export function CategoriesSection({
   onDeleteCategory,
   canManage,
 }: Readonly<CategoriesSectionProps>) {
-  const t = useTranslations("dashboard.subjects");
+  const t = useAppTranslation("dashboard.subjects");
 
   return (
     <SectionPanel
-      title={t("categoriesTitle")}
+      title={t.categoriesTitle}
       actions={
         canManage ? (
-          <IconButton onClick={onCreateCategory} size="small" aria-label={t("createCategory")}>
+          <IconButton onClick={onCreateCategory} size="small" aria-label={t.createCategory}>
             <AddOutlined fontSize="small" />
           </IconButton>
         ) : undefined
@@ -30,7 +30,7 @@ export function CategoriesSection({
     >
       <Stack sx={{ flexDirection: "row", flexWrap: "wrap", gap: 1, p: 2 }}>
         <Chip
-          label={t("allCategories")}
+          label={t.allCategories}
           variant={activeCategoryId === null ? "filled" : "outlined"}
           color={activeCategoryId === null ? "primary" : "default"}
           onClick={() => onCategoryChange(null)}
@@ -52,7 +52,7 @@ export function CategoriesSection({
                       e.stopPropagation();
                       onEditCategory(cat.id ?? "");
                     }}
-                    aria-label={t("editCategory")}
+                    aria-label={t.editCategory}
                   >
                     <EditOutlined sx={{ fontSize: 14 }} />
                   </IconButton>

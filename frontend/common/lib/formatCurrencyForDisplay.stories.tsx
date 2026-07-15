@@ -2,7 +2,6 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { useLocale, useTranslations } from "next-intl";
 import {
   CurrencyDisplay,
   CurrencyDisplayPart,
@@ -10,7 +9,9 @@ import {
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type FxStoryProps = {
   readonly lockedAmount: string;
@@ -24,9 +25,9 @@ type FxStoryProps = {
 };
 
 function FxDisplayStory({ lockedAmount, lockedCurrency, displayAmount }: FxStoryProps) {
-  const locale = useLocale();
-  const t = useTranslations("profile.teacher");
-  const tErrors = useTranslations("errors");
+  const locale = useAppLocale();
+  const t = useAppTranslation("profile").teacher;
+  const tErrors = useAppTranslation("errors");
   const displayCurrency = useUserStore(state => state.displayCurrency);
 
   const formatted = formatCurrencyForDisplay(

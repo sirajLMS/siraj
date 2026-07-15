@@ -3,7 +3,6 @@
 import { AccessTimeOutlined, HistoryOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Avatar, Box, CircularProgress, Paper, Stack, type Theme, Tooltip, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
-import { useLocale } from "next-intl";
 import type * as React from "react";
 import { ActionIconLink, TimezoneDisplay } from "@/frontend/common/components/ui";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
@@ -24,6 +23,7 @@ import {
 } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
 import { Link } from "@/shared/i18n/routing";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useAppLocale } from "@/shared/locale/client";
 
 interface ScheduleOverviewCardListProps {
   readonly rows: readonly DailyScheduleRow[];
@@ -511,7 +511,7 @@ export function ScheduleOverviewCardList({
   emptyMessage,
   loading = false,
 }: ScheduleOverviewCardListProps) {
-  const locale = useLocale();
+  const locale = useAppLocale();
   const { hasPermission } = useUserStore();
   const showTimezones = hasPermission(AppPermission.ScheduleViewTimezones);
 

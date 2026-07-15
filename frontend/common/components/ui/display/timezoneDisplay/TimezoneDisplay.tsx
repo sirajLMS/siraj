@@ -3,9 +3,9 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
-import { useLocale } from "next-intl";
 import type * as React from "react";
 import { fromGraphqlIanaTimezone, getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 
 export type TimezoneDisplayProps = {
   readonly timezone?: string | null;
@@ -22,7 +22,7 @@ export const TimezoneDisplay: React.FC<TimezoneDisplayProps> = ({
   typographyVariant,
   sx,
 }): React.ReactNode => {
-  const locale = useLocale();
+  const locale = useAppLocale();
 
   if (!timezone) {
     return fallback ?? null;

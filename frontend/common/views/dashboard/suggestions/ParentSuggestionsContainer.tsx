@@ -2,7 +2,6 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { submitSuggestionMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
@@ -10,9 +9,10 @@ import { useParentSuggestionsStore } from "@/frontend/common/stores/parentSugges
 import { ParentSuggestionsView } from "@/frontend/common/views/dashboard/suggestions/parentSuggestionsView";
 import type { SuggestionFormData } from "@/frontend/common/views/dashboard/suggestions/schemas/suggestionFormSchema";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function ParentSuggestionsContainer() {
-  const t = useTranslations("dashboard.suggestions");
+  const t = useAppTranslation("dashboard.suggestions");
   const labels = buildSuggestionsLabels(t);
   const notifications = useNotifications();
 

@@ -1,6 +1,5 @@
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, styled, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -10,6 +9,7 @@ import {
 } from "@/frontend/common/views/dashboard/shared/CalendarGridShared";
 import type { CalendarGridProps, ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 import { Link } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const calendarCellBase = ({ theme }: { theme: import("@mui/material/styles").Theme }) => ({
   borderRight: `1px solid ${theme.palette.border.light}`,
@@ -112,12 +112,12 @@ function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: Cla
 }
 
 export function CalendarGrid({ currentMonth, classes }: Readonly<CalendarGridProps>) {
-  const t = useTranslations("dashboard.studentHistory.calendar.days");
+  const t = useAppTranslation("dashboard.studentHistory");
   const { daysInMonth, emptyStartDays, emptyEndDays } = computeCalendarGridLayout(currentMonth);
 
   return (
     <CalendarGridContainer>
-      <CalendarWeekdayHeader translateDay={day => t(day)} />
+      <CalendarWeekdayHeader translateDay={day => t.calendar.days[day as keyof typeof t.calendar.days]} />
 
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", minHeight: 800 }}>
         {emptyStartDays.map(day => (

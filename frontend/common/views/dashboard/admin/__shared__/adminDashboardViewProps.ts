@@ -1,6 +1,5 @@
 "use client";
 
-import type { useTranslations } from "next-intl";
 import type { AdminMetricKey, DashboardFilters, TeacherFilterItem } from "@/frontend/common/types/shared.types";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import {
@@ -8,8 +7,9 @@ import {
   type RawMetrics,
 } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import type { AdminDashboardViewLabels } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardViewLabels";
+import type { useAppTranslation } from "@/shared/locale/client";
 
-type TranslationFunction = ReturnType<typeof useTranslations<"dashboard">>;
+type TranslationObject = ReturnType<typeof useAppTranslation<"dashboard.admin">>;
 type MetricItemList = ReturnType<typeof buildAdminDashboardMetrics>;
 
 /** Summary derived from the admin dashboard schedule GraphQL response. */
@@ -38,12 +38,13 @@ export function extractScheduleSummary(scheduleResult: ScheduleResultLike | null
 }
 
 /** Computes the selected metric label from the active filter status. */
-export function buildSelectedMetricLabel(t: TranslationFunction, selectedStatus: AdminMetricKey | null): string | null {
-  return selectedStatus ? t(`admin.metrics.${selectedStatus}` as `admin.metrics.${AdminMetricKey}`) : null;
+export function buildSelectedMetricLabel(t: TranslationObject, selectedStatus: AdminMetricKey | null): string | null {
+  const admin = t.admin;
+  return selectedStatus ? (admin.metrics[selectedStatus] ?? null) : null;
 }
 
 export interface BuildAdminDashboardViewPropsParams {
-  readonly t: TranslationFunction;
+  readonly t: TranslationObject;
   readonly labels: AdminDashboardViewLabels;
   readonly filters: DashboardFilters;
   readonly loading: boolean;

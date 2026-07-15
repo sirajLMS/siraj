@@ -17,12 +17,12 @@ export async function generateMetadata({
   params: Promise<{ readonly id: string; readonly locale: string }>;
 }): Promise<Metadata> {
   const { id, locale } = await params;
-  const t = await getTranslations({ locale, namespace: "dashboard.teacherAvailability" });
+  const t = await getTranslations(locale, "dashboard.teacherAvailability");
   const teacherName = await getTeacherPageTitle(id);
   if (teacherName) {
-    return { title: `${teacherName} — ${t("pageTitle")}` };
+    return { title: `${teacherName} — ${t.pageTitle}` };
   }
-  return { title: t("pageTitle") };
+  return { title: t.pageTitle };
 }
 
 export default async function TeacherAvailabilityPage({ params }: PageProps) {

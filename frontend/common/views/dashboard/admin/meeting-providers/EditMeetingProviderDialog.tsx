@@ -12,7 +12,6 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { LocalizedStringInput } from "@/frontend/common/components/ui/input/localizedString";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
@@ -20,6 +19,7 @@ import { updateMeetingProviderMutationDocument } from "@/frontend/common/graphql
 import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { logger } from "@/frontend/common/utils/logger";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type EditMeetingProviderDialogProps = {
   readonly open: boolean;
@@ -36,7 +36,7 @@ export function EditMeetingProviderDialog({
   onSaved,
   onError,
 }: EditMeetingProviderDialogProps) {
-  const t = useTranslations("dashboard.meetingProviders");
+  const t = useAppTranslation("dashboard.meetingProviders");
   const [updateProvider, { loading }] = useMutation(updateMeetingProviderMutationDocument, {
     onError: error => {
       logger.error("Update meeting provider failed:", { error });
@@ -79,7 +79,7 @@ export function EditMeetingProviderDialog({
       setUrlAllowlistError(null);
       return true;
     }
-    setUrlAllowlistError(t("urlAllowlistInvalid"));
+    setUrlAllowlistError(t.urlAllowlistInvalid);
     return false;
   };
 
@@ -114,26 +114,26 @@ export function EditMeetingProviderDialog({
       await onSaved();
     } catch (error) {
       logger.error("Update meeting provider mutation failed:", { error });
-      onError(t("operationFailed"));
+      onError(t.operationFailed);
     }
   };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{t("editTitle")}</DialogTitle>
+      <DialogTitle>{t.editTitle}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
-          <TextField label={t("fields.slug")} value={slug} onChange={e => setSlug(e.target.value)} fullWidth disabled />
+          <TextField label={t.fields.slug} value={slug} onChange={e => setSlug(e.target.value)} fullWidth disabled />
           <LocalizedStringInput
-            label={t("fields.name")}
+            label={t.fields.name}
             value={name}
             onChangeAction={setName}
             required
             requiredLocales={["en"]}
           />
           <TextField
-            label={t("fields.urlAllowlist")}
-            helperText={parsedAllowlist.length === 0 ? t("fields.urlAllowlistRequired") : t("fields.urlAllowlistHelp")}
+            label={t.fields.urlAllowlist}
+            helperText={parsedAllowlist.length === 0 ? t.fields.urlAllowlistRequired : t.fields.urlAllowlistHelp}
             value={urlAllowlist}
             onChange={e => {
               setUrlAllowlist(e.target.value);
@@ -145,7 +145,7 @@ export function EditMeetingProviderDialog({
             fullWidth
           />
           <TextField
-            label={t("fields.urlExample")}
+            label={t.fields.urlExample}
             value={urlExample}
             onChange={e => {
               setUrlExample(e.target.value);
@@ -158,28 +158,28 @@ export function EditMeetingProviderDialog({
           />
           <FormControlLabel
             control={<Checkbox checked={isActive} onChange={e => setIsActive(e.target.checked)} />}
-            label={t("fields.isActive")}
+            label={t.fields.isActive}
           />
           <FormControlLabel
             control={<Checkbox checked={supportsUsername} onChange={e => setSupportsUsername(e.target.checked)} />}
-            label={t("fields.supportsUsername")}
+            label={t.fields.supportsUsername}
           />
           <FormControlLabel
             control={<Checkbox checked={supportsPassword} onChange={e => setSupportsPassword(e.target.checked)} />}
-            label={t("fields.supportsPassword")}
+            label={t.fields.supportsPassword}
           />
           <FormControlLabel
             control={<Checkbox checked={supportsTenantId} onChange={e => setSupportsTenantId(e.target.checked)} />}
-            label={t("fields.supportsTenantId")}
+            label={t.fields.supportsTenantId}
           />
         </Stack>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>
-          {t("cancel")}
+          {t.cancel}
         </Button>
         <Button variant="contained" disabled={!canSave} onClick={handleSave}>
-          {loading ? "..." : t("save")}
+          {loading ? "..." : t.save}
         </Button>
       </DialogActions>
     </Dialog>

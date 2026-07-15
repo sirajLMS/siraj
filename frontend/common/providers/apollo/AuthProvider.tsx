@@ -3,7 +3,6 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import { ErrorOutlined as ErrorIcon } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "@/frontend/common/context/AuthContext";
@@ -14,12 +13,13 @@ import { dedupedRefreshToken } from "@/frontend/common/lib/dedupedRefreshToken";
 import logger from "@/frontend/common/lib/logger";
 import { buildLoginHrefFromWindow, isSafeRedirect } from "@/frontend/common/lib/safeRedirect";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
+import { useAppTranslation } from "@/shared/locale/client";
 
 // A simple UI for the initial loading state
 interface LoadingUIProps {
   readonly onRetry: () => void;
   readonly error?: string | null;
-  readonly t: ReturnType<typeof useTranslations<"auth.login">>;
+  readonly t: ReturnType<typeof useAppTranslation<"auth">>["login"];
 }
 
 function LoadingUI({ onRetry, error, t }: LoadingUIProps) {
@@ -66,7 +66,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const t = useTranslations("auth.login");
+  const t = useAppTranslation("auth").login;
   const { updateAuthToken, clearAuthData } = useAuthToken();
   const client = useApolloClient();
   const [loginMutation] = useMutation(Document.loginMutationDocument);

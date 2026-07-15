@@ -7,12 +7,12 @@ import Chip from "@mui/material/Chip";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useMemo } from "react";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { userPaymentMethodToOptionLabel } from "@/frontend/common/lib/user-payment-method";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type UserPaymentMethodAutocompleteProps = {
   readonly value?: UserPaymentMethodFieldsFragment | null;
@@ -50,8 +50,8 @@ export function UserPaymentMethodAutocomplete({
   onBlurAction,
   style,
 }: UserPaymentMethodAutocompleteProps): React.ReactNode {
-  const tUi = useTranslations("ui.paymentMethod");
-  const tSelect = useTranslations("ui.paymentMethod.select");
+  const tUi = useAppTranslation("ui").paymentMethod;
+  const tSelect = useAppTranslation("ui").paymentMethod.select;
 
   const getOptionLabel = useCallback(
     (method: UserPaymentMethodFieldsFragment) => userPaymentMethodToOptionLabel(method, key => tUi(key as never)),
@@ -65,7 +65,7 @@ export function UserPaymentMethodAutocomplete({
 
   const showRequiredError = Boolean(required) && !value;
   const showError = Boolean(error) || showRequiredError;
-  const resolvedHelperText = helperText ?? (showRequiredError ? tSelect("required") : undefined);
+  const resolvedHelperText = helperText ?? (showRequiredError ? tSelect.required : undefined);
 
   return (
     <Autocomplete<UserPaymentMethodFieldsFragment, false, false, false>
@@ -93,7 +93,7 @@ export function UserPaymentMethodAutocomplete({
               <Typography variant="bodyMd" sx={{ flex: 1, minWidth: 0 }} noWrap>
                 {userPaymentMethodToOptionLabel(method, key => tUi(key as never))}
               </Typography>
-              {method.isDefault ? <Chip size="small" label={tUi("display.defaultBadge")} /> : null}
+              {method.isDefault ? <Chip size="small" label={tUi.display.defaultBadge} /> : null}
               {typeLabel ? (
                 <Typography variant="labelMd" sx={{ color: "text.secondary", flexShrink: 0 }}>
                   {typeLabel}
@@ -106,8 +106,8 @@ export function UserPaymentMethodAutocomplete({
       renderInput={params => (
         <TextField
           {...params}
-          label={label ?? tSelect("selectMethod")}
-          placeholder={placeholder ?? tSelect("searchByNameOrSlug")}
+          label={label ?? tSelect.selectMethod}
+          placeholder={placeholder ?? tSelect.searchByNameOrSlug}
           required={required}
           error={showError}
           helperText={resolvedHelperText}

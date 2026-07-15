@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -19,6 +18,7 @@ import {
   supportedOnlineAccountsQueryDocument,
   supportedPaymentLinksQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { logger } from "@/frontend/common/utils/logger";
 import { CatalogDeleteDialog } from "@/frontend/common/views/dashboard/admin/payment-catalogs/components/CatalogDeleteDialog";
 import { CatalogEditDialog } from "@/frontend/common/views/dashboard/admin/payment-catalogs/components/CatalogEditDialog";
@@ -27,6 +27,7 @@ import type {
   PaymentCatalogKind,
   PaymentCatalogRow,
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function resolveEntryName(row: PaymentCatalogRow | null, locale: string): string {
   if (!row?.name) return row?.slug ?? "";
@@ -35,8 +36,8 @@ function resolveEntryName(row: PaymentCatalogRow | null, locale: string): string
 }
 
 export function PaymentCatalogAdminContainer() {
-  const locale = useLocale();
-  const t = useTranslations("dashboard.paymentCatalogs");
+  const locale = useAppLocale();
+  const t = useAppTranslation("dashboard.paymentCatalogs");
   const notifications = useNotifications();
   const [activeTab, setActiveTab] = useState<PaymentCatalogKind>("mobileWallet");
   const [editOpen, setEditOpen] = useState(false);
@@ -100,7 +101,7 @@ export function PaymentCatalogAdminContainer() {
   const handleSaved = async () => {
     setEditOpen(false);
     setEditRow(null);
-    notifications.show(t("saveSuccess"), { severity: "success" });
+    notifications.show(t.saveSuccess, { severity: "success" });
     await refetchActive();
   };
 
@@ -117,11 +118,11 @@ export function PaymentCatalogAdminContainer() {
       } else {
         return;
       }
-      notifications.show(t("deactivateSuccess"), { severity: "success" });
+      notifications.show(t.deactivateSuccess, { severity: "success" });
       await refetchActive();
     } catch (error) {
       logger.error("Failed to deactivate catalog entry", { error });
-      notifications.show(t("deactivateError"), { severity: "error" });
+      notifications.show(t.deactivateError, { severity: "error" });
     } finally {
       setIsDeactivating(false);
       setDeleteRow(null);

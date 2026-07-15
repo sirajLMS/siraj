@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocaleContext } from "@/frontend/common/providers/LocaleProvider";
+import { useAppLocale, useLocaleContext } from "@/frontend/common/providers/LocaleProvider";
 import type { MessageSchema } from "@/shared/locale/types/message";
 
 /**
@@ -30,3 +30,5 @@ export function useAppTranslation<K extends keyof MessageSchema>(namespace: K): 
   }
   return value as MessageSchema[K];
 }
+
+export { useAppLocale };

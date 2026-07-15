@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { type AppLocale, locales, redirect } from "@/shared/i18n/routing";
+import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "common" });
-  return { title: t("title") };
+  const t = await getTranslations(locale, "common");
+  return { title: t.title };
 }
 
 export default async function RootPage({ params }: { readonly params: Promise<{ locale: string }> }) {

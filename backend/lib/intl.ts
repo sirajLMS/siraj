@@ -1,137 +1,76 @@
-// import { getTranslations } from "next-intl/server";
-// import { logger } from "@/backend/lib/logger";
-// import ar from "@/shared/messages/ar";
-// import en from "@/shared/messages/en";
-// import type { CommonLabels } from "@/shared/messages/types/common";
-// import type { NotificationsLabels } from "@/shared/messages/types/dashboard/core/notifications";
-// import type { ErrorsLabels } from "@/shared/messages/types/errors";
-// import type { SessionLabels } from "@/shared/messages/types/session";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { CommonLabels } from "@/shared/locale/types/common";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { MessageSchema } from "@/shared/locale/types/message";
+import type { SessionLabels } from "@/shared/locale/types/session";
 
-// interface BackendNamespaceMap {
-//   errors: ErrorsLabels;
-//   session: SessionLabels;
-//   common: CommonLabels;
-//   "dashboard.notifications": NotificationsLabels;
-// }
+/**
+ * Compatibility wrapper: provides the old string-key API on top of the new typed objects.
+ * Usage: const t = await getBackendTranslations({ locale, namespace: "errors" });
+ *        t("auth.unauthorizedAction") // works like old next-intl
+ *
+ * Also supports dotted namespace paths like "emails.complaintResponse" for backwards compatibility.
+ */
+export async function getBackendTranslations(opts: {
+  locale?: string;
+  namespace: keyof MessageSchema | string;
+}): Promise<Record<string, unknown> & ((key: string, values?: Record<string, unknown>) => string)> {
+  const locale = opts?.locale ?? "ar";
 
-// type NestedKeyOf<T> = T extends object
-//   ? {
-//       [K in keyof T & string]: T[K] extends object ? K | `${K}.${NestedKeyOf<T[K]>}` : K;
-//     }[keyof T & string]
-//   : never;
+  // Handle dotted namespace paths (e.g., "emails.complaintResponse" -> namespace "emails", subkey "complaintResponse")
+  let namespace: keyof MessageSchema;
+  let subPath: string | undefined;
 
-// export type TranslationFn<T> = (key: NestedKeyOf<T>, values?: Record<string, unknown>) => string;
+  if (typeof opts.namespace === "string" && opts.namespace.includes(".")) {
+    const parts = opts.namespace.split(".");
+    namespace = parts[0] as keyof MessageSchema;
+    subPath = parts.slice(1).join(".");
+  } else {
+    namespace = opts.namespace as keyof MessageSchema;
+  }
 
-// type BackendTranslationFn =
-//   | TranslationFn<ErrorsLabels>
-//   | TranslationFn<SessionLabels>
-//   | TranslationFn<CommonLabels>
-//   | TranslationFn<NotificationsLabels>;
+  const translations = await getServerTranslations(locale, namespace);
 
-// export type BackendNamespace = keyof BackendNamespaceMap;
+  // If subPath is provided, navigate to that sub-object
+  let targetTranslations: unknown = translations;
+  if (subPath) {
+    const parts = subPath.split(".");
+    for (const part of parts) {
+      if (targetTranslations && typeof targetTranslations === "object" && part in targetTranslations) {
+        targetTranslations = (targetTranslations as Record<string, unknown>)[part];
+      } else {
+        console.warn(`[getBackendTranslations] Missing translation sub-path: ${subPath} in namespace ${namespace}`);
+        targetTranslations = {};
+        break;
+      }
+    }
+  }
 
-// function resolveNamespace(messages: unknown, namespace: string): Record<string, unknown> | undefined {
-//   if (!namespace) {
-//     return messages as Record<string, unknown>;
-//   }
-//   let currentObj = messages as Record<string, unknown>;
-//   const parts = namespace.split(".");
-//   for (const part of parts) {
-//     if (currentObj && typeof currentObj === "object") {
-//       currentObj = currentObj[part] as Record<string, unknown>;
-//     } else {
-//       return undefined;
-//     }
-//   }
-//   return currentObj;
-// }
+  // Create a callable function that does dot-notation lookup
+  const t = (key: string, values?: Record<string, unknown>): string => {
+    const parts = key.split(".");
+    let current: unknown = targetTranslations;
+    for (const part of parts) {
+      if (current && typeof current === "object" && part in current) {
+        current = (current as Record<string, unknown>)[part];
+      } else {
+        console.warn(`[getBackendTranslations] Missing translation key: ${key} in namespace ${opts.namespace}`);
+        return key;
+      }
+    }
+    let result = String(current);
+    if (values) {
+      for (const [k, v] of Object.entries(values)) {
+        result = result.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
+      }
+    }
+    return result;
+  };
 
-// function getManualTranslations(locale: string, namespace: string) {
-//   const messages = locale === "en" ? en : ar;
-//   const namespaceObj = resolveNamespace(messages, namespace);
+  // Return the translations object with the callable function attached
+  // This makes the object itself callable: t("key") works
+  return Object.assign(t, targetTranslations as Record<string, unknown>) as Record<string, unknown> &
+    ((key: string, values?: Record<string, unknown>) => string);
+}
 
-//   return (key: string, values?: Record<string, unknown>) => {
-//     let template = resolveNamespace(namespaceObj, key) as unknown;
-
-//     if (typeof template !== "string") {
-//       const fallbackMessages = locale === "en" ? ar : en;
-//       const fallbackNamespaceObj = resolveNamespace(fallbackMessages, namespace);
-//       const fallbackTemplate = resolveNamespace(fallbackNamespaceObj, key) as unknown;
-//       template = typeof fallbackTemplate === "string" ? fallbackTemplate : key;
-//     }
-
-//     if (typeof template !== "string") {
-//       return key;
-//     }
-
-//     if (!values) return template;
-
-//     return template.replace(/\{(\w+)\}/g, (match, paramName) => {
-//       const val = values[paramName];
-
-//       if (val === undefined) {
-//         return match;
-//       }
-
-//       if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") {
-//         return String(val);
-//       }
-
-//       return val ? JSON.stringify(val) : "";
-//     });
-//   };
-// }
-
-// export async function getBackendTranslations(opts: {
-//   locale?: string;
-//   namespace: "errors";
-// }): Promise<TranslationFn<ErrorsLabels>>;
-// export async function getBackendTranslations(opts: {
-//   locale?: string;
-//   namespace: "session";
-// }): Promise<TranslationFn<SessionLabels>>;
-// export async function getBackendTranslations(opts: {
-//   locale?: string;
-//   namespace: "dashboard.notifications";
-// }): Promise<TranslationFn<NotificationsLabels>>;
-// export async function getBackendTranslations(opts: {
-//   locale?: string;
-//   namespace?: string;
-// }): Promise<BackendTranslationFn>;
-// export async function getBackendTranslations(): Promise<TranslationFn<CommonLabels>>;
-// export async function getBackendTranslations(opts?: {
-//   locale?: string;
-//   namespace?: string;
-// }): Promise<BackendTranslationFn> {
-//   const namespace = opts?.namespace || "common";
-
-//   const isTest =
-//     process.env.NODE_ENV === "test" ||
-//     !!process.env.VITEST ||
-//     !!process.env.BUN_ENV ||
-//     (typeof process !== "undefined" &&
-//       Array.isArray(process.argv) &&
-//       process.argv.some(arg => arg.includes("test") || arg.endsWith("test") || arg.includes("vitest")));
-
-//   const isSeedScript =
-//     process.env.SEED_MODE === "true" ||
-//     (typeof process !== "undefined" &&
-//       Array.isArray(process.argv) &&
-//       process.argv.some(arg => arg.includes("drizzleSeed")));
-
-//   const locale = opts?.locale || (isTest || isSeedScript ? "en" : "ar");
-
-//   if (isTest || isSeedScript) {
-//     return getManualTranslations(locale, namespace);
-//   }
-
-//   try {
-//     if (opts?.locale) {
-//       return (await getTranslations({ locale: opts.locale, namespace })) as BackendTranslationFn;
-//     }
-//     return (await getTranslations(namespace)) as BackendTranslationFn;
-//   } catch (error) {
-//     logger.debug("Failed to retrieve next-intl translations, falling back to manual resolver", { error });
-//     return getManualTranslations(locale, namespace);
-//   }
-// }
+export type { CommonLabels, ErrorsLabels, SessionLabels };

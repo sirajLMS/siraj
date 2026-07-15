@@ -2,14 +2,15 @@
 
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { useLocale, useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { LedgerStatus, ReportLedgerRow } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import { formatReportPaidAmounts } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface PerformanceLedgerCardLabels {
   readonly studentLabel: string;
@@ -64,12 +65,11 @@ function StatCell({
 }
 
 export function PerformanceLedgerCard({ row, labels, onClick }: Readonly<PerformanceLedgerCardProps>) {
-  const studentText = labels.studentLabel.replace("{name}", row.studentName);
+  const locale = useAppLocale();
+  const t = useAppTranslation("dashboard.reports");
+  const tErrors = useAppTranslation("errors");
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
-  const locale = useLocale();
-  const t = useTranslations("dashboard.reports");
-  const tErrors = useTranslations("errors");
 
   const paidLabel = formatReportPaidAmounts(row.paidAmounts, locale, buildFxDisplayMessages(t, tErrors));
 
@@ -116,7 +116,7 @@ export function PerformanceLedgerCard({ row, labels, onClick }: Readonly<Perform
               {row.name}
             </Typography>
             <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.secondary }}>
-              {studentText}
+              {labels.studentLabel}
             </Typography>
           </Box>
         </Box>

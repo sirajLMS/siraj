@@ -27,7 +27,7 @@ export namespace ScheduleDeletionService {
       }
 
       const idempotencyKey = `credit-refund:${result.id}`;
-      await CreditService.refundOnCancel(result.studentId, result.id, actorUserId, idempotencyKey, tx);
+      await CreditService.refundOnCancel(result.studentId, result.id, actorUserId, idempotencyKey, tx, tErrors);
       return true;
     });
   }
@@ -52,7 +52,7 @@ export namespace ScheduleDeletionService {
 
       for (const instance of result.refundedInstances) {
         const idempotencyKey = `credit-refund:${instance.id}`;
-        await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx);
+        await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, tErrors);
       }
 
       return true;

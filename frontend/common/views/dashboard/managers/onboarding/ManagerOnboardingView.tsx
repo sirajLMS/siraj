@@ -2,13 +2,13 @@
 
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { FormSuccessSnackbar, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { OnboardingMetricsOverview } from "@/frontend/common/views/dashboard/managers/onboarding/OnboardingMetricsOverview";
 import { StaffInfoSection } from "@/frontend/common/views/dashboard/managers/onboarding/StaffInfoSection";
 import { SystemAccessSection } from "@/frontend/common/views/dashboard/managers/onboarding/SystemAccessSection";
 import type { ManagerOnboardingFormData } from "@/frontend/common/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
+import { useAppTranslation } from "@/shared/locale/client";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Styled Components — Extracted inline sx styles for reusability & consistency
@@ -110,11 +110,11 @@ export function ManagerOnboardingView({
   onCancel,
   onDismissSuccess,
 }: Readonly<Props>) {
-  const t = useTranslations("dashboard.managerOnboarding");
+  const t = useAppTranslation("dashboard.managerOnboarding");
 
   return (
     <PageContainer>
-      <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
+      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
 
       <Box
         component="form"
@@ -141,7 +141,7 @@ export function ManagerOnboardingView({
                 borderRadius: Number(theme.shape.borderRadius) * 2,
               })}
             >
-              {isSubmitting ? t("actions.processing") : t("actions.signup")}
+              {isSubmitting ? t.actions.processing : t.actions.signup}
             </PrimaryPageAction>
             <PrimaryPageAction
               type="button"
@@ -152,7 +152,7 @@ export function ManagerOnboardingView({
                 color: theme.palette.text.secondary,
               })}
             >
-              {t("actions.cancel")}
+              {t.actions.cancel}
             </PrimaryPageAction>
           </StyledFormActions>
         </StyledFormWrapper>
@@ -162,7 +162,7 @@ export function ManagerOnboardingView({
       <OnboardingMetricsOverview />
 
       {/* Success notification snackbar */}
-      <FormSuccessSnackbar open={showSuccess} message={t("actions.successMessage")} onClose={onDismissSuccess} />
+      <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
     </PageContainer>
   );
 }

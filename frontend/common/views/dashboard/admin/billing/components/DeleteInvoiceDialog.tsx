@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type DeleteInvoiceDialogProps = {
   readonly open: boolean;
@@ -12,8 +12,8 @@ export type DeleteInvoiceDialogProps = {
 };
 
 export function DeleteInvoiceDialog({ open, invoiceId, isLoading, onClose, onConfirm }: DeleteInvoiceDialogProps) {
-  const t = useTranslations("dashboard.billing.deleteInvoiceDialog");
-  const tc = useTranslations("common");
+  const t = useAppTranslation("dashboard").billing.deleteInvoiceDialog;
+  const tc = useAppTranslation("common");
 
   const displayId = invoiceId ? invoiceId.replace("inv-", "INV-").toUpperCase() : "";
 
@@ -23,10 +23,10 @@ export function DeleteInvoiceDialog({ open, invoiceId, isLoading, onClose, onCon
       onClose={onClose}
       onConfirm={onConfirm}
       isLoading={isLoading}
-      title={t("title")}
-      body={t("body", { invoiceId: displayId })}
-      cancelLabel={tc("cancel")}
-      confirmLabel={t("confirm")}
+      title={t.title}
+      body={t.body(displayId)}
+      cancelLabel={tc.cancel}
+      confirmLabel={t.confirm}
     />
   );
 }

@@ -13,11 +13,11 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermissionGroupSimulation";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ViewAsUserVariant = "icon" | "link" | "menuItem" | "button";
 
@@ -38,7 +38,7 @@ export function ViewAsUserButton({
   variant = "icon",
   onMenuClose,
 }: ViewAsUserButtonProps) {
-  const t = useTranslations("auth.impersonation");
+  const t = useAppTranslation("auth").impersonation;
   const currentUser = useUserStore(state => state.user);
   const { isImpersonating, startImpersonation, loading } = useImpersonation();
   const { isSimulatingGroup } = usePermissionGroupSimulation();
@@ -65,7 +65,7 @@ export function ViewAsUserButton({
     }
   };
 
-  const loginLabel = t("loginAs");
+  const loginLabel = t.loginAs;
 
   function renderTrigger() {
     if (variant === "menuItem") {
@@ -113,12 +113,12 @@ export function ViewAsUserButton({
       {trigger}
 
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>{t("confirmTitle", { name: targetUserName })}</DialogTitle>
+        <DialogTitle>{t.confirmTitle(targetUserName)}</DialogTitle>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-          {t("confirmMessage")}
+          {t.confirmMessage}
           <TextField
-            label={t("reasonLabel")}
-            placeholder={t("reasonPlaceholder")}
+            label={t.reasonLabel}
+            placeholder={t.reasonPlaceholder}
             value={reason}
             onChange={e => setReason(e.target.value)}
             multiline
@@ -128,10 +128,10 @@ export function ViewAsUserButton({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)} disabled={loading}>
-            {t("cancel")}
+            {t.cancel}
           </Button>
           <Button variant="contained" onClick={() => void handleConfirm()} disabled={loading}>
-            {t("confirm")}
+            {t.confirm}
           </Button>
         </DialogActions>
       </Dialog>

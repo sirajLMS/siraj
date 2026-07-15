@@ -3,13 +3,13 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
 import { userMeetingConfigs } from "@/backend/db/schema";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type {
   UpdateUserMeetingConfigInput,
   UserMeetingConfigInsertType,
   UserMeetingConfigSelectType,
 } from "@/backend/types/meeting/meeting-config.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace UserMeetingConfigRepository {
   export async function listByUserId(userId: string, tx?: DBTransaction): Promise<UserMeetingConfigSelectType[]> {
@@ -33,13 +33,13 @@ export namespace UserMeetingConfigRepository {
 
   export async function getByIdOrThrow(
     id: string,
+    tErrors: ErrorsLabels,
     tx?: DBTransaction,
     locale?: string
   ): Promise<UserMeetingConfigSelectType> {
     const row = await getById(id, tx, locale);
     if (!row) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("meetingConfigNotFound", { id }));
+      throw new Error(tErrors.meetingConfigNotFound(id));
     }
     return row;
   }
@@ -66,8 +66,8 @@ export namespace UserMeetingConfigRepository {
 
   export async function create(
     input: UserMeetingConfigInsertType,
-    tx?: DBTransaction,
-    locale?: string
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
   ): Promise<UserMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<UserMeetingConfigSelectType> => {
       if (input.isDefault) {
@@ -90,8 +90,7 @@ export namespace UserMeetingConfigRepository {
         .returning();
 
       if (!result) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("meetingConfigCreateFailed"));
+        throw new Error(tErrors.meetingConfigCreateFailed);
       }
 
       logger.info("User meeting config created", { configId: result.id, userId: result.userId });
@@ -110,10 +109,11 @@ export namespace UserMeetingConfigRepository {
       details?: UserMeetingConfigInsertType["details"];
       encryptedSecret?: string | null;
     },
+    tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<UserMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<UserMeetingConfigSelectType> => {
-      const existing = await getByIdOrThrow(id, t, locale);
+      const existing = await getByIdOrThrow(id, tErrors, t);
 
       if (input.isDefault === true) {
         await clearDefault(existing.userId, t);
@@ -133,8 +133,7 @@ export namespace UserMeetingConfigRepository {
         .returning();
 
       if (!result) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("meetingConfigUpdateFailed"));
+        throw new Error(tErrors.meetingConfigUpdateFailed);
       }
 
       return result;
@@ -148,13 +147,13 @@ export namespace UserMeetingConfigRepository {
 
   export async function setDefault(
     id: string,
-    tx?: DBTransaction,
-    locale?: string
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
   ): Promise<UserMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<UserMeetingConfigSelectType> => {
-      const existing = await getByIdOrThrow(id, t, locale);
+      const existing = await getByIdOrThrow(id, tErrors, t);
       await clearDefault(existing.userId, t);
-      return update(id, { isDefault: true }, t, locale);
+      return update(id, { isDefault: true }, tErrors, t);
     };
 
     if (tx) {
@@ -163,9 +162,9 @@ export namespace UserMeetingConfigRepository {
     return db.transaction(run);
   }
 
-  export async function deleteConfig(id: string, tx?: DBTransaction, locale?: string): Promise<void> {
+  export async function deleteConfig(id: string, tErrors: ErrorsLabels, tx?: DBTransaction): Promise<void> {
     const run = async (t: DBTransaction): Promise<void> => {
-      await getByIdOrThrow(id, t, locale);
+      await getByIdOrThrow(id, tErrors, t);
       await t.delete(userMeetingConfigs).where(eq(userMeetingConfigs.id, id));
     };
 
@@ -199,13 +198,13 @@ export namespace UserMeetingConfigRepository {
 
   export async function upsertMany(
     inputs: readonly UserMeetingConfigInsertType[],
-    tx?: DBTransaction,
-    locale?: string
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
   ): Promise<UserMeetingConfigSelectType[]> {
     return upsertManyWith(
       inputs,
       (input, t) => findByUserProviderLabel(input.userId, input.providerId, input.label, t),
-      (input, t) => create(input, t, locale),
+      (input, t) => create(input, tErrors, t),
       (id, input, t) =>
         update(
           id,
@@ -216,9 +215,10 @@ export namespace UserMeetingConfigRepository {
             encryptedSecret: input.encryptedSecret,
             providerId: input.providerId,
           },
-          t,
-          locale
+          tErrors,
+          t
         ),
+      tErrors,
       tx
     );
   }

@@ -3,7 +3,6 @@
 import EmailOutlined from "@mui/icons-material/EmailOutlined";
 import PersonOutlined from "@mui/icons-material/PersonOutlined";
 import { Stack, TextField } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel, UserAvatar } from "@/frontend/common/components/ui";
@@ -11,9 +10,11 @@ import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currenc
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type CoreIdentityFormFields = {
   name: string;
@@ -51,7 +52,8 @@ type CoreIdentityEditProps = {
 type CoreIdentitySectionProps = CoreIdentityViewProps | CoreIdentityEditProps;
 
 export function CoreIdentitySection(props: CoreIdentitySectionProps) {
-  const tc = useTranslations("profile");
+  const t = useAppTranslation("profile");
+  const _locale = useAppLocale();
   const { canView, showField } = useProfileFieldAccess({ scope: props.scope });
 
   if (!canView("core_identity")) {
@@ -107,16 +109,16 @@ export function CoreIdentitySection(props: CoreIdentitySectionProps) {
           <UserAvatar src={props.avatarUrl} label={props.name ?? props.nameLabel} size={64} />
         ) : null}
         {showField(props.name, "core_identity") ? (
-          <ProfileFieldRow icon={PersonOutlined} label={props.nameLabel} value={props.name ?? tc("notSet")} />
+          <ProfileFieldRow icon={PersonOutlined} label={props.nameLabel} value={props.name ?? t.notSet} />
         ) : null}
         {showField(props.email, "core_identity") ? (
-          <ProfileFieldRow icon={EmailOutlined} label={props.emailLabel} value={props.email ?? tc("notSet")} />
+          <ProfileFieldRow icon={EmailOutlined} label={props.emailLabel} value={props.email ?? t.notSet} />
         ) : null}
         {showField(props.displayCurrency, "core_identity") ? (
           <ProfileFieldRow
             icon={PersonOutlined}
             label={props.currencyLabel}
-            value={<CurrencyDisplay code={props.displayCurrency} fallback={tc("notSet")} />}
+            value={<CurrencyDisplay code={props.displayCurrency} fallback={t.notSet} />}
           />
         ) : null}
         {props.additionalViewContent}

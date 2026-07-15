@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const APP_NAME = "Siraj";
 
@@ -11,7 +11,7 @@ export function useDocumentTitle(
   fallbackKey?: string,
   values?: Record<string, string | number>
 ): void {
-  const t = useTranslations(fallbackNamespace ?? "common");
+  const t = useAppTranslation(fallbackNamespace ?? "common");
 
   useEffect(() => {
     let documentTitle: string;
@@ -19,7 +19,7 @@ export function useDocumentTitle(
     if (title) {
       documentTitle = `${title} | ${APP_NAME}`;
     } else if (fallbackKey) {
-      const translated = values ? t(fallbackKey, values) : t(fallbackKey);
+      const translated = values ? t[fallbackKey as keyof typeof t](values as never) : t[fallbackKey as keyof typeof t];
       documentTitle = `${translated} | ${APP_NAME}`;
     } else {
       return;

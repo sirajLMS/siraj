@@ -3,9 +3,12 @@ import type { CommonLabels } from "@/shared/locale/types/common";
 import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
 import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 import type { AdminViewLabels } from "@/shared/locale/types/dashboard/admin/view";
+import type { CurrencyHedgesLabels } from "@/shared/locale/types/dashboard/billing/currencyHedges";
+import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates";
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
 import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
 import type { PaymentComponentLabels } from "@/shared/locale/types/dashboard/billing/payment";
+import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies";
 import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes/audit";
 import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details";
 import type { MainLabels as ClassesMainLabels } from "@/shared/locale/types/dashboard/classes/main";
@@ -65,10 +68,32 @@ import type { TeacherProfileLabels } from "@/shared/locale/types/dashboard/teach
 import type { TeacherReassignmentLabels } from "@/shared/locale/types/dashboard/teachers/reassignment";
 import type { TeacherStudentsLabels } from "@/shared/locale/types/dashboard/teachers/students";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
+import type { EmailsLabels } from "@/shared/locale/types/emails";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { ProfileLabels } from "@/shared/locale/types/profile";
 import type { SessionLabels } from "@/shared/locale/types/session";
-import type { UiLabels } from "@/shared/locale/types/ui";
+import type { SmsLabels } from "@/shared/locale/types/sms";
+import type {
+  CatalogImageUploadLabels,
+  CountrySelectLabels,
+  CurrencySelectLabels,
+  GenderSelectorLabels,
+  LanguageSelectorLabels,
+  LocalizedStringLabels,
+  MeetingConfigClassScopeLabels,
+  MeetingConfigDisplayLabels,
+  MeetingConfigLabels,
+  MeetingConfigManagerLabels,
+  MeetingConfigSummaryLabels,
+  PaymentMethodDisplayLabels,
+  PaymentMethodLabels,
+  PaymentMethodListLabels,
+  PaymentMethodManagerLabels,
+  PaymentMethodTypeSelectorLabels,
+  PhoneInputLabels,
+  TagInputLabels,
+  TimezoneSelectLabels,
+} from "@/shared/locale/types/ui";
 
 export type MessageSchema = {
   auth: AuthLabels;
@@ -105,6 +130,9 @@ export type MessageSchema = {
   "dashboard.billing": BillingLabels;
   "dashboard.billing.manual": BillingManualLabels;
   "dashboard.billing.payment": PaymentComponentLabels;
+  "dashboard.billing.exchangeRates": ExchangeRatesLabels;
+  "dashboard.billing.currencyHedges": CurrencyHedgesLabels;
+  "dashboard.billing.supportedCurrencies": SupportedCurrenciesLabels;
   "dashboard.booksAndBags": BooksAndBagsLabels;
   "dashboard.classes.main": ClassesMainLabels;
   "dashboard.classAudit": ClassAuditLabels;
@@ -140,7 +168,27 @@ export type MessageSchema = {
   "dashboard.supervisorPortal.pendingReviews": PendingReviewsLabels;
   "dashboard.supervisorPortal.monthlyReports": SupervisorMonthlyReportsLabels;
   "dashboard.supervisorPortal.teacherDues": SupervisorTeacherDuesLabels;
+  emails: EmailsLabels;
   profile: ProfileLabels;
   session: SessionLabels;
-  ui: UiLabels;
+  sms: SmsLabels;
+  "ui.catalogImageUpload": CatalogImageUploadLabels;
+  "ui.countrySelect": CountrySelectLabels;
+  "ui.currencySelect": CurrencySelectLabels;
+  "ui.genderSelector": GenderSelectorLabels;
+  "ui.languageSelector": LanguageSelectorLabels;
+  "ui.localizedString": LocalizedStringLabels;
+  "ui.meetingConfig": MeetingConfigLabels;
+  "ui.meetingConfig.manager": MeetingConfigManagerLabels;
+  "ui.meetingConfig.classScope": MeetingConfigClassScopeLabels;
+  "ui.meetingConfig.display": MeetingConfigDisplayLabels;
+  "ui.meetingConfig.summary": MeetingConfigSummaryLabels;
+  "ui.paymentMethod": PaymentMethodLabels;
+  "ui.paymentMethod.manager": PaymentMethodManagerLabels;
+  "ui.paymentMethod.display": PaymentMethodDisplayLabels;
+  "ui.paymentMethod.list": PaymentMethodListLabels;
+  "ui.paymentMethod.typeSelector": PaymentMethodTypeSelectorLabels;
+  "ui.phoneInput": PhoneInputLabels;
+  "ui.tagInput": TagInputLabels;
+  "ui.timezoneSelect": TimezoneSelectLabels;
 };

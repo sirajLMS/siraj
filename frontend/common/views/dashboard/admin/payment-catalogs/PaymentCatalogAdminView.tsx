@@ -2,7 +2,6 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Tab, Tabs } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type {
   SupportedMobileWalletFieldsFragment,
@@ -16,6 +15,7 @@ import type {
   PaymentCatalogKind,
   PaymentCatalogRow,
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface PaymentCatalogAdminViewProps {
   readonly activeTab: PaymentCatalogKind;
@@ -40,24 +40,25 @@ export function PaymentCatalogAdminView({
   onEdit,
   onDelete,
 }: Readonly<PaymentCatalogAdminViewProps>) {
-  const t = useTranslations("dashboard.paymentCatalogs");
+  const t = useAppTranslation("dashboard.paymentCatalogs");
+  const pc = t;
 
   return (
     <PageContainer>
       <PageHeader
-        title={t("pageTitle")}
-        subtitle={t("pageSubtitle")}
+        title={pc.pageTitle}
+        subtitle={pc.pageSubtitle}
         actions={
           <PrimaryPageAction onClick={onAdd} startIcon={<AddOutlined />}>
-            {t("addEntry")}
+            {pc.addEntry}
           </PrimaryPageAction>
         }
       />
 
       <Tabs value={activeTab} onChange={(_event, value: PaymentCatalogKind) => onTabChange(value)} sx={{ mb: 2 }}>
-        <Tab value="mobileWallet" label={t("tabs.mobileWallets")} />
-        <Tab value="paymentLink" label={t("tabs.paymentLinks")} />
-        <Tab value="onlineAccount" label={t("tabs.onlineAccounts")} />
+        <Tab value="mobileWallet" label={pc.tabs.mobileWallets} />
+        <Tab value="paymentLink" label={pc.tabs.paymentLinks} />
+        <Tab value="onlineAccount" label={pc.tabs.onlineAccounts} />
       </Tabs>
 
       {activeTab === "mobileWallet" ? (

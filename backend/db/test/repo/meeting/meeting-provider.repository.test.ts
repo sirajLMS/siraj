@@ -9,6 +9,7 @@ import {
   loc,
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -55,8 +56,9 @@ function expectProviderIdsInclude(results: { id: string }[], expectedIds: string
 
 describe("MeetingProviderRepository", () => {
   providerTest("create inserts a meeting provider", async tx => {
+    const tErrors = await getServerTranslations("en", "errors");
     const slug = `zoom-${randomUUID().slice(0, 8)}`;
-    const created = await MeetingProviderRepository.create(buildProviderInput(slug), tx);
+    const created = await MeetingProviderRepository.create(buildProviderInput(slug), tErrors, tx);
 
     expect(created.id).toBeDefined();
     expect(created.slug).toBe(slug);
@@ -80,7 +82,8 @@ describe("MeetingProviderRepository", () => {
   });
 
   providerTest("getByIdOrThrow throws when provider is missing", async tx => {
-    const error = await expectRepoError(() => MeetingProviderRepository.getByIdOrThrow(NIL_UUID, tx));
+    const tErrors = await getServerTranslations("en", "errors");
+    const error = await expectRepoError(() => MeetingProviderRepository.getByIdOrThrow(NIL_UUID, tErrors, tx));
     expect(error.message).toContain(NIL_UUID);
   });
 
@@ -121,10 +124,12 @@ describe("MeetingProviderRepository", () => {
   });
 
   providerTest("update modifies provider fields", async tx => {
+    const tErrors = await getServerTranslations("en", "errors");
     const provider = await createTestMeetingProvider(tx);
     const updated = await MeetingProviderRepository.update(
       provider.id,
       { name: loc("Updated Zoom"), isActive: false },
+      tErrors,
       tx
     );
 
@@ -134,19 +139,21 @@ describe("MeetingProviderRepository", () => {
   });
 
   providerTest("deleteProvider removes a provider with no configs", async tx => {
+    const tErrors = await getServerTranslations("en", "errors");
     const provider = await createTestMeetingProvider(tx);
-    await MeetingProviderRepository.deleteProvider(provider.id, tx);
+    await MeetingProviderRepository.deleteProvider(provider.id, tErrors, tx);
 
     const found = await MeetingProviderRepository.getById(provider.id, tx);
     expect(found).toBeNull();
   });
 
   providerTest("deleteProvider throws when configs reference the provider", async tx => {
+    const tErrors = await getServerTranslations("en", "errors");
     const user = await createTestUser(tx, { email: `mp-del-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     await createTestMeetingConfig(tx, user.id, provider.id);
 
-    const error = await expectRepoError(() => MeetingProviderRepository.deleteProvider(provider.id, tx));
+    const error = await expectRepoError(() => MeetingProviderRepository.deleteProvider(provider.id, tErrors, tx));
     expect(error.message.length).toBeGreaterThan(0);
 
     const stillThere = await MeetingProviderRepository.getById(provider.id, tx);

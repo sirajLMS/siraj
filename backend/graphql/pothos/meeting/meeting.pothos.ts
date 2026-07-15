@@ -23,7 +23,8 @@ interface MeetingConfigBaseShape {
 
 async function resolveMeetingProvider(parent: MeetingConfigBaseShape, _args: unknown, ctx: BaseContext) {
   const { MeetingProviderCatalogService } = await import("@/backend/services/meeting/meeting-provider-catalog.service");
-  return MeetingProviderCatalogService.getProviderById(ctx.user?.id ?? "", parent.providerId, ctx.locale);
+  const tErrors = await ctx.t("errors");
+  return MeetingProviderCatalogService.getProviderById(ctx.user?.id ?? "", parent.providerId, tErrors);
 }
 
 const MeetingProviderFieldSchemaRef =

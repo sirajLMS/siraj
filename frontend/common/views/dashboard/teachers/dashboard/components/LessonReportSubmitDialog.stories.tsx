@@ -1,34 +1,34 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useTranslations } from "next-intl";
 import { LessonReportSubmitDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/LessonReportSubmitDialog";
 import type { LessonReportFormLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function buildLabels(
-  lessonReportI18n: ReturnType<typeof useTranslations<"dashboard.lms.lessonReports">>
+  lessonReportI18n: ReturnType<typeof useAppTranslation<"dashboard.lms.lessonReports">>
 ): LessonReportFormLabels {
   return {
-    attendanceEvaluation: lessonReportI18n("attendanceEvaluation"),
-    durationMinutes: lessonReportI18n("durationMinutes"),
-    completionPercentage: lessonReportI18n("completionPercentage"),
-    teacherNotes: lessonReportI18n("teacherNotes"),
-    present: lessonReportI18n("present"),
-    absent: lessonReportI18n("absent"),
-    late: lessonReportI18n("late"),
-    submit: lessonReportI18n("submit"),
-    dialogTitle: lessonReportI18n("dialogTitle"),
-    cancel: lessonReportI18n("cancel"),
-    submitting: lessonReportI18n("submitting"),
-    submitFailed: lessonReportI18n("submitFailed"),
-    attendanceRequired: lessonReportI18n("attendanceRequired"),
-    durationMin: lessonReportI18n("durationMin"),
-    durationMax: lessonReportI18n("durationMax"),
-    completionMin: lessonReportI18n("completionMin"),
-    completionMax: lessonReportI18n("completionMax"),
+    attendanceEvaluation: lessonReportI18n.attendanceEvaluation,
+    durationMinutes: lessonReportI18n.durationMinutes,
+    completionPercentage: lessonReportI18n.completionPercentage,
+    teacherNotes: lessonReportI18n.teacherNotes,
+    present: lessonReportI18n.present,
+    absent: lessonReportI18n.absent,
+    late: lessonReportI18n.late,
+    submit: lessonReportI18n.submit,
+    dialogTitle: lessonReportI18n.dialogTitle,
+    cancel: lessonReportI18n.cancel,
+    submitting: lessonReportI18n.submitting,
+    submitFailed: lessonReportI18n.submitFailed,
+    attendanceRequired: lessonReportI18n.attendanceRequired,
+    durationMin: lessonReportI18n.durationMin,
+    durationMax: lessonReportI18n.durationMax,
+    completionMin: lessonReportI18n.completionMin,
+    completionMax: lessonReportI18n.completionMax,
   };
 }
 
 export function MockLessonReportSubmitDialog() {
-  const lessonReportI18n = useTranslations("dashboard.lms.lessonReports");
+  const lessonReportI18n = useAppTranslation("dashboard.lms.lessonReports");
   const labels = buildLabels(lessonReportI18n);
 
   return (

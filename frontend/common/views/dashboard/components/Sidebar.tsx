@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { SidebarShell, type TranslatedNavItem } from "@/frontend/common/views/dashboard/components/client/SidebarShell";
+import { useNavLabels } from "@/frontend/common/views/dashboard/components/useNavLabels";
 import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 
 interface SidebarProps {
@@ -11,7 +11,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ navItems, activeKey, sidebarWidth }: SidebarProps) {
-  const t = useTranslations();
+  const t = useNavLabels();
 
   const translatedNavItems: TranslatedNavItem[] = navItems.map(item => ({
     ...item,

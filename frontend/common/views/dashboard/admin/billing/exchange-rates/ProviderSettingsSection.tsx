@@ -15,7 +15,6 @@ import {
   Select,
   Typography,
 } from "@mui/material";
-import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { SectionPanel } from "@/frontend/common/components/ui";
@@ -29,7 +28,8 @@ import {
   updateFxProviderMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
-import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
+import { useAppLocale } from "@/shared/locale/client";
+import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates";
 
 type ProviderSettingsSectionProps = {
   readonly labels: ExchangeRatesLabels["providerSettings"];
@@ -51,7 +51,7 @@ function formatAuditDate(value: string | null | undefined, locale: string): stri
 }
 
 export function ProviderSettingsSection({ labels, onFeedback, actionsDisabled = false }: ProviderSettingsSectionProps) {
-  const locale = useLocale();
+  const locale = useAppLocale();
   const [selectedProvider, setSelectedProvider] = useState<FxProvider>(FxProvider.Fixer);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingProvider, setPendingProvider] = useState<FxProvider | null>(null);
@@ -76,9 +76,7 @@ export function ProviderSettingsSection({ labels, onFeedback, actionsDisabled = 
   const sourceLabel = config?.source === FxProviderConfigSource.Database ? labels.sourceDatabase : labels.sourceEnv;
   const lastChangedLabel =
     config?.updatedByName && config.updatedAt
-      ? labels.lastChangedBy
-          .replace("{name}", config.updatedByName)
-          .replace("{date}", formatAuditDate(config.updatedAt, locale))
+      ? labels.lastChangedBy(config.updatedByName, formatAuditDate(config.updatedAt, locale))
       : null;
 
   useEffect(() => {

@@ -3,7 +3,6 @@
 import { useQuery } from "@apollo/client/react";
 import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
@@ -19,6 +18,7 @@ import {
   mapBillingCurrencyBuckets,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useParentBillingStore } from "@/frontend/common/stores/parentBillingStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
@@ -43,18 +43,19 @@ import {
 import { deriveParentInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/common/views/dashboard/components/FxConversionNote";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
 }));
 
 export function ParentBillingContainer() {
-  const t = useTranslations("dashboard.billing");
-  const tProfile = useTranslations("profile.teacher");
-  const tProfileRoot = useTranslations("profile");
-  const tErrors = useTranslations("errors");
-  const locale = useLocale();
-  const tc = useTranslations("common");
+  const t = useAppTranslation("dashboard.billing");
+  const tProfile = useAppTranslation("profile").teacher;
+  const tProfileRoot = useAppTranslation("profile");
+  const tErrors = useAppTranslation("errors");
+  const locale = useAppLocale();
+  const tc = useAppTranslation("common");
   const labels = buildBillingLabels(t);
   const { isImpersonating } = useImpersonation();
   const billingActionsDisabled = isImpersonating;
@@ -210,12 +211,12 @@ export function ParentBillingContainer() {
 
   const handleQuickPay = () => {
     if (billingActionsDisabled) {
-      showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
+      showFeedback(tErrors.auth.impersonationNotAllowedDuringSession, "error");
       return;
     }
 
     if (summaryLoading) {
-      showFeedback(tc("loading"), "info");
+      showFeedback(tc.loading, "info");
       return;
     }
 
@@ -279,7 +280,7 @@ export function ParentBillingContainer() {
   if (error) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, mt: 8 }}>
-        <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>
+        <StyledErrorTypography>{tc.loadFailed}</StyledErrorTypography>
         <Button variant="outlined" onClick={refreshBillingData}>
           {labels.errors.retry}
         </Button>
@@ -326,7 +327,7 @@ export function ParentBillingContainer() {
             </Button>
           }
         >
-          {tc("loadFailed")}
+          {tc.loadFailed}
         </Alert>
       ) : null}
       <ParentBillingView {...viewProps} />

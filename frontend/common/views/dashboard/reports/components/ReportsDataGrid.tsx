@@ -2,15 +2,16 @@
 
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { ReportLedgerRow, ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import { formatReportPaidAmounts } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface ReportsDataGridLabels {
   readonly name: string;
@@ -70,11 +71,11 @@ export function ReportsDataGrid({
   loading = false,
   onRowClick,
 }: Readonly<ReportsDataGridProps>) {
+  const locale = useAppLocale();
+  const t = useAppTranslation("dashboard.reports");
+  const tErrors = useAppTranslation("errors");
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
-  const locale = useLocale();
-  const t = useTranslations("dashboard.reports");
-  const tErrors = useTranslations("errors");
 
   const columns = useMemo<GridColDef<ReportLedgerRow>[]>(() => {
     const cols: GridColDef<ReportLedgerRow>[] = [

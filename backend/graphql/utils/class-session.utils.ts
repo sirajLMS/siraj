@@ -103,7 +103,7 @@ export async function buildClassInstanceDetail(
   const hasTimezoneMismatch =
     teacherTimezone !== null && studentTimezone !== null && teacherTimezone !== studentTimezone;
 
-  const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(instance.id);
+  const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(instance.id, tErrors);
 
   const startTime = start.toISOString().split("T")[1].substring(0, 5);
   const endTime = end.toISOString().split("T")[1].substring(0, 5);

@@ -10,7 +10,6 @@ import {
   NotificationEventType,
 } from "@/backend/enum";
 import { parseClassExecutionState, parseClassOutcome, parseGroupClassAttendanceStatus } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
@@ -28,30 +27,28 @@ import type {
   GroupClassSelectType,
   GroupClassStudentReturnType,
 } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace GroupClassService {
-  async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
+  async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {
     const isAuthorized = await PermissionsService.hasPermission(userId, permission);
     if (!isAuthorized) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
   }
 
-  async function getGroupClassOrThrow(classInstanceId: string, locale?: string) {
+  async function getGroupClassOrThrow(classInstanceId: string, tErrors: ErrorsLabels) {
     const groupClass = await GroupClassRepository.getByClassInstanceId(classInstanceId);
     if (!groupClass) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
     return groupClass;
   }
 
-  async function getClassInstanceOrThrow(classInstanceId: string, locale?: string) {
+  async function getClassInstanceOrThrow(classInstanceId: string, tErrors: ErrorsLabels) {
     const classInstance = await SchedulingRepository.getClassInstanceById(classInstanceId);
     if (!classInstance) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
     return classInstance;
   }
@@ -86,8 +83,11 @@ export namespace GroupClassService {
     }));
   }
 
-  async function buildMeetingInfo(classInstanceId: string): Promise<GroupClassOnlineMeetingInfoReturnType> {
-    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(classInstanceId);
+  async function buildMeetingInfo(
+    classInstanceId: string,
+    tErrors: ErrorsLabels
+  ): Promise<GroupClassOnlineMeetingInfoReturnType> {
+    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(classInstanceId, tErrors);
     const joinUrl = effectiveMeeting.joinUrl;
     const providerSlug = effectiveMeeting.providerSlug;
     return {
@@ -104,17 +104,17 @@ export namespace GroupClassService {
   export async function getGroupClassAudit(
     userId: string,
     classInstanceId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<GroupClassAuditReturnType> {
-    await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, locale);
+    await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, tErrors);
 
-    const groupClass = await getGroupClassOrThrow(classInstanceId, locale);
-    const classInstance = await getClassInstanceOrThrow(classInstanceId, locale);
+    const groupClass = await getGroupClassOrThrow(classInstanceId, tErrors);
+    const classInstance = await getClassInstanceOrThrow(classInstanceId, tErrors);
 
     const [students, communicationLogs, meetingInfo] = await Promise.all([
       fetchStudents(groupClass.id),
       fetchCommunicationLogs(groupClass.id),
-      buildMeetingInfo(classInstanceId),
+      buildMeetingInfo(classInstanceId, tErrors),
     ]);
 
     const adminNote: GroupClassAdminNoteReturnType = {
@@ -149,27 +149,26 @@ export namespace GroupClassService {
     userId: string,
     classInstanceId: string,
     content: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<GroupClassAuditReturnType> {
-    await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, locale);
+    await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
 
     const result = await GroupClassRepository.updateAdminNote(classInstanceId, content);
     if (!result) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
 
-    return getGroupClassAudit(userId, classInstanceId, locale);
+    return getGroupClassAudit(userId, classInstanceId, tErrors);
   }
 
   export async function resendNotifications(
     userId: string,
     classInstanceId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<{ id: string; success: boolean }> {
-    await assertPermission(userId, AppPermission.SYSTEM_DISPATCH_EMAIL, locale);
+    await assertPermission(userId, AppPermission.SYSTEM_DISPATCH_EMAIL, tErrors);
 
-    const groupClass = await getGroupClassOrThrow(classInstanceId, locale);
+    const groupClass = await getGroupClassOrThrow(classInstanceId, tErrors);
 
     const parentUserIds = await GroupClassRepository.getParentUserIdsForGroupClass(groupClass.id);
     const uniqueUserIds = [...new Set(parentUserIds)];

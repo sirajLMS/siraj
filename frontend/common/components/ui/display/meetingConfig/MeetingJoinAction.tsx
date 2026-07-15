@@ -5,12 +5,14 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import VideocamOffOutlinedIcon from "@mui/icons-material/VideocamOffOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Alert, Avatar, alpha, Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import { Link } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { MeetingConfigDisplayLabels, MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
 
 export type MeetingJoinEmptyRole = "teacher" | "parent" | "class";
 
@@ -31,25 +33,22 @@ function resolveJoinUrl(props: MeetingJoinActionProps): string | null {
   return url?.trim() ? url.trim() : null;
 }
 
-function resolveEmptyMessage(
-  t: ReturnType<typeof useTranslations<"ui.meetingConfig.join">>,
-  emptyRole?: MeetingJoinEmptyRole
-): string {
-  if (emptyRole === "teacher") return t("emptyTeacher");
-  if (emptyRole === "class") return t("emptyClass");
-  if (emptyRole === "parent") return t("emptyParent");
-  return t("joinUnavailable");
+function resolveEmptyMessage(t: MeetingConfigJoinLabels, emptyRole?: MeetingJoinEmptyRole): string {
+  if (emptyRole === "teacher") return t.emptyTeacher;
+  if (emptyRole === "class") return t.emptyClass;
+  if (emptyRole === "parent") return t.emptyParent;
+  return t.joinUnavailable;
 }
 
 function resolveSourceLabel(
   source: EffectiveMeetingSource | string | null | undefined,
-  tDisplay: ReturnType<typeof useTranslations<"ui.meetingConfig.display">>
+  tDisplay: MeetingConfigDisplayLabels
 ): string {
   const normalized = String(source ?? "").toLowerCase();
-  if (normalized === EffectiveMeetingSource.Class) return tDisplay("sourceClass");
-  if (normalized === EffectiveMeetingSource.Recurring) return tDisplay("sourceRecurring");
-  if (normalized === EffectiveMeetingSource.Teacher) return tDisplay("sourceTeacher");
-  return tDisplay("sourceNone");
+  if (normalized === EffectiveMeetingSource.Class) return tDisplay.sourceClass;
+  if (normalized === EffectiveMeetingSource.Recurring) return tDisplay.sourceRecurring;
+  if (normalized === EffectiveMeetingSource.Teacher) return tDisplay.sourceTeacher;
+  return tDisplay.sourceNone;
 }
 
 function resolveTooltip({
@@ -63,8 +62,8 @@ function resolveTooltip({
   readonly hasUrl: boolean;
   readonly meeting?: EffectiveMeetingFieldsFragment | null;
   readonly locale: string;
-  readonly t: ReturnType<typeof useTranslations<"ui.meetingConfig.join">>;
-  readonly tDisplay: ReturnType<typeof useTranslations<"ui.meetingConfig.display">>;
+  readonly t: MeetingConfigJoinLabels;
+  readonly tDisplay: MeetingConfigDisplayLabels;
   readonly emptyRole?: MeetingJoinEmptyRole;
 }): string {
   if (!hasUrl) {
@@ -77,15 +76,15 @@ function resolveTooltip({
   const sourceLabel = meeting?.source ? resolveSourceLabel(meeting.source, tDisplay) : "";
 
   if (providerName && sourceLabel) {
-    return t("providerTooltip", { provider: providerName, source: sourceLabel });
+    return t.providerTooltip(providerName, sourceLabel);
   }
   if (providerName) return providerName;
-  return t("openInNewTab");
+  return t.openInNewTab;
 }
 
 type JoinContext = {
-  readonly t: ReturnType<typeof useTranslations<"ui.meetingConfig.join">>;
-  readonly tDisplay: ReturnType<typeof useTranslations<"ui.meetingConfig.display">>;
+  readonly t: MeetingConfigJoinLabels;
+  readonly tDisplay: MeetingConfigDisplayLabels;
   readonly hasUrl: boolean;
   readonly resolvedUrl: string | null;
   readonly buttonLabel: string;
@@ -96,12 +95,12 @@ type JoinContext = {
 };
 
 function useJoinContext(props: MeetingJoinActionProps) {
-  const t = useTranslations("ui.meetingConfig.join");
-  const tDisplay = useTranslations("ui.meetingConfig.display");
-  const locale = useLocale();
+  const t = useAppTranslation("ui.meetingConfig").join;
+  const tDisplay = useAppTranslation("ui.meetingConfig").display;
+  const locale = useAppLocale();
   const resolvedUrl = resolveJoinUrl(props);
   const hasUrl = Boolean(resolvedUrl) && !props.disabled;
-  const buttonLabel = props.label ?? t("joinMeeting");
+  const buttonLabel = props.label ?? t.joinMeeting;
   const tooltip = resolveTooltip({ hasUrl, meeting: props.meeting, locale, t, tDisplay, emptyRole: props.emptyRole });
   const providerLogo = props.meeting?.logoUrl?.trim() || null;
   return {
@@ -135,7 +134,7 @@ function renderSetupAlert(ctx: JoinContext, setupHref: string, emptyRole: Meetin
       <Stack spacing={1}>
         <Typography sx={{ typography: "bodySm" }}>{resolveEmptyMessage(ctx.t, emptyRole)}</Typography>
         <Button component={Link} href={setupHref} size="small" variant="outlined" startIcon={<SettingsOutlinedIcon />}>
-          {ctx.t("setupLink")}
+          {ctx.t.setupLink}
         </Button>
       </Stack>
     </Alert>
@@ -153,7 +152,7 @@ function renderIconVariant(ctx: JoinContext, setupHref?: string): React.ReactNod
           href={setupHref}
           id={ctx.id}
           size="small"
-          aria-label={ctx.t("setupLink")}
+          aria-label={ctx.t.setupLink}
           sx={theme => ({
             color: theme.palette.warning.main,
             "&:hover": {

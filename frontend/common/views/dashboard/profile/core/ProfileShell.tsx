@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Button, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { PageContainer } from "@/frontend/common/components/ui";
 import {
@@ -12,6 +11,7 @@ import {
 import { ProfileHeader } from "@/frontend/common/views/dashboard/profile/core/ProfileHeader";
 import { ProfileSkeleton } from "@/frontend/common/views/dashboard/profile/core/ProfileSkeleton";
 import { ProfileTabNav } from "@/frontend/common/views/dashboard/profile/core/ProfileTabNav";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type ProfileShellProps = {
   readonly loading?: boolean;
@@ -46,7 +46,7 @@ export function ProfileShell({
   roleLabel,
   avatarUrl,
 }: ProfileShellProps) {
-  const t = useTranslations("profile");
+  const t = useAppTranslation("profile");
   const showTabs = mode === ProfileMode.View && currentTab && onTabChange;
 
   function renderBody() {
@@ -58,10 +58,10 @@ export function ProfileShell({
       return (
         <Box sx={{ py: 4, textAlign: "center" }}>
           <Typography sx={theme => ({ color: theme.palette.error.main })}>{error}</Typography>
-          <Typography sx={{ mt: 2, color: theme => theme.palette.text.secondary }}>{t("shell.error.retry")}</Typography>
+          <Typography sx={{ mt: 2, color: theme => theme.palette.text.secondary }}>{t.shell.error.retry}</Typography>
           {onRetry ? (
             <Button variant="outlined" sx={{ mt: 2 }} onClick={onRetry}>
-              {t("actions.retry")}
+              {t.actions.retry}
             </Button>
           ) : null}
         </Box>

@@ -12,13 +12,13 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { LocalizedStringInput } from "@/frontend/common/components/ui/input/localizedString";
 import { createMeetingProviderMutationDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { logger } from "@/frontend/common/utils/logger";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type CreateMeetingProviderDialogProps = {
   readonly open: boolean;
@@ -32,7 +32,7 @@ const emptyLocalized = (): LocalizedString => ({ en: "", ar: "" });
 const SLUG_REGEX = /^[a-z0-9_]+$/;
 
 export function CreateMeetingProviderDialog({ open, onClose, onSaved, onError }: CreateMeetingProviderDialogProps) {
-  const t = useTranslations("dashboard.meetingProviders");
+  const t = useAppTranslation("dashboard.meetingProviders");
   const [createProvider, { loading }] = useMutation(createMeetingProviderMutationDocument, {
     onError: error => {
       logger.error("Create meeting provider failed:", { error });
@@ -78,7 +78,7 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved, onError }:
       setUrlAllowlistError(null);
       return true;
     }
-    setUrlAllowlistError(t("urlAllowlistInvalid"));
+    setUrlAllowlistError(t.urlAllowlistInvalid);
     return false;
   };
 
@@ -89,7 +89,7 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved, onError }:
       return;
     }
     if (!SLUG_REGEX.test(slug)) {
-      setSlugFormatError(t("fields.slugInvalidFormat"));
+      setSlugFormatError(t.fields.slugInvalidFormat);
     } else {
       setSlugFormatError(null);
     }
@@ -124,34 +124,34 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved, onError }:
       await onSaved();
     } catch (error) {
       logger.error("Create meeting provider mutation failed:", { error });
-      onError(t("operationFailed"));
+      onError(t.operationFailed);
     }
   };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{t("createTitle")}</DialogTitle>
+      <DialogTitle>{t.createTitle}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
           <TextField
-            label={t("fields.slug")}
+            label={t.fields.slug}
             value={slug}
             onChange={e => setSlug(e.target.value)}
             onBlur={handleSlugBlur}
             error={slugTouched && !slug.trim() ? true : Boolean(slugFormatError)}
-            helperText={slugTouched && !slug.trim() ? t("fields.slugRequired") : (slugFormatError ?? undefined)}
+            helperText={slugTouched && !slug.trim() ? t.fields.slugRequired : (slugFormatError ?? undefined)}
             fullWidth
           />
           <LocalizedStringInput
-            label={t("fields.name")}
+            label={t.fields.name}
             value={name}
             onChangeAction={setName}
             required
             requiredLocales={["en"]}
           />
           <TextField
-            label={t("fields.urlAllowlist")}
-            helperText={parsedAllowlist.length === 0 ? t("fields.urlAllowlistRequired") : t("fields.urlAllowlistHelp")}
+            label={t.fields.urlAllowlist}
+            helperText={parsedAllowlist.length === 0 ? t.fields.urlAllowlistRequired : t.fields.urlAllowlistHelp}
             value={urlAllowlist}
             onChange={e => {
               setUrlAllowlist(e.target.value);
@@ -163,7 +163,7 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved, onError }:
             fullWidth
           />
           <TextField
-            label={t("fields.urlExample")}
+            label={t.fields.urlExample}
             value={urlExample}
             onChange={e => {
               setUrlExample(e.target.value);
@@ -176,24 +176,24 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved, onError }:
           />
           <FormControlLabel
             control={<Checkbox checked={supportsUsername} onChange={e => setSupportsUsername(e.target.checked)} />}
-            label={t("fields.supportsUsername")}
+            label={t.fields.supportsUsername}
           />
           <FormControlLabel
             control={<Checkbox checked={supportsPassword} onChange={e => setSupportsPassword(e.target.checked)} />}
-            label={t("fields.supportsPassword")}
+            label={t.fields.supportsPassword}
           />
           <FormControlLabel
             control={<Checkbox checked={supportsTenantId} onChange={e => setSupportsTenantId(e.target.checked)} />}
-            label={t("fields.supportsTenantId")}
+            label={t.fields.supportsTenantId}
           />
         </Stack>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>
-          {t("cancel")}
+          {t.cancel}
         </Button>
         <Button variant="contained" disabled={!canSave} onClick={handleSave}>
-          {loading ? "..." : t("save")}
+          {loading ? "..." : t.save}
         </Button>
       </DialogActions>
     </Dialog>

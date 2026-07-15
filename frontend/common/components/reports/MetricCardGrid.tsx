@@ -3,10 +3,10 @@
 import type { Breakpoint } from "@mui/material";
 import { Box } from "@mui/material";
 import Grid, { type GridSize } from "@mui/material/Grid";
-import { useTranslations } from "next-intl";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T | null };
 
@@ -18,6 +18,9 @@ interface MetricCardGridProps {
   readonly selectedKey?: string;
   readonly size?: ResponsiveStyleValue<GridSize>;
   readonly layout?: MetricCardGridLayout;
+  /** Optional namespace for translations. If provided, uses useAppTranslation(namespace).
+   * If not provided, expects metrics to have pre-resolved labels in `metric.label`. */
+  readonly translationNamespace?: string;
 }
 
 const defaultSize = { xs: 6, sm: 4, md: 3, lg: 2 };
@@ -35,12 +38,13 @@ function renderMetricCard({
   selectedKey?: string;
   onMetricClick?: (key: string) => void;
   isScroll: boolean;
-  t: ReturnType<typeof useTranslations>;
+  t: ReturnType<typeof useAppTranslation> | ((key: string) => string);
 }) {
+  const label = metric.label ?? t(metric.labelKey);
   return (
     <MetricCard
       icon={metric.icon}
-      label={metric.label ?? t(metric.labelKey)}
+      label={label}
       value={metric.count}
       subLabel={metric.subLabel}
       variant={selectedKey === metric.key ? "highlight" : metric.variant}
@@ -57,8 +61,15 @@ function renderMetricCard({
   );
 }
 
-export function MetricCardGrid({ metrics, onMetricClick, selectedKey, size, layout = "grid" }: MetricCardGridProps) {
-  const t = useTranslations();
+export function MetricCardGrid({
+  metrics,
+  onMetricClick,
+  selectedKey,
+  size,
+  layout = "grid",
+  translationNamespace,
+}: MetricCardGridProps) {
+  const t = translationNamespace ? useAppTranslation(translationNamespace) : (key: string) => key;
   const isScroll = layout === "scroll";
 
   if (isScroll) {

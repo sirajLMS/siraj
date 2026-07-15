@@ -12,7 +12,6 @@ import {
   IconButton,
   Stack,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
@@ -21,6 +20,7 @@ import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleS
 import { ScheduleFooterLegend } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import WeeklyScheduleGrid from "@/frontend/common/views/dashboard/teachers/schedule/weekly/WeeklyScheduleGrid";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function TeacherWeeklyScheduleViewDesktop({
   schedule,
@@ -28,7 +28,7 @@ export function TeacherWeeklyScheduleViewDesktop({
   onClearSchedule,
   onAddClass,
 }: Readonly<TeacherWeeklyScheduleViewProps>) {
-  const t = useTranslations("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
   const clearDialogOpen = useWeeklyScheduleStore(state => state.clearDialogOpen);
   const setClearDialogOpen = useWeeklyScheduleStore(state => state.setClearDialogOpen);
 
@@ -43,18 +43,18 @@ export function TeacherWeeklyScheduleViewDesktop({
     setClearDialogOpen(false);
   };
 
-  const breadcrumbs = [{ label: t("breadcrumbs.teachers"), href: "/teachers" }, { label: t("breadcrumbs.schedule") }];
+  const breadcrumbs = [{ label: t.breadcrumbs.teachers, href: "/teachers" }, { label: t.breadcrumbs.schedule }];
 
   return (
     <PageContainer>
       <PageHeader
-        title={t("pageTitle", { name: schedule.teacherName })}
+        title={t.pageTitle(schedule.teacherName)}
         breadcrumbs={breadcrumbs}
         actions={
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
               <PrimaryPageAction startIcon={<AddOutlined />} onClick={onAddClass}>
-                {t("actions.addSlot")}
+                {t.actions.addSlot}
               </PrimaryPageAction>
             </RequirePermission>
             <RequirePermission permissions={[AppPermission.ScheduleClearWeekly]}>
@@ -78,7 +78,7 @@ export function TeacherWeeklyScheduleViewDesktop({
         <Box sx={{ display: "grid", gridTemplateColumns: { md: "repeat(4, 1fr)" }, gap: 2 }}>
           <MetricCard
             icon={TimerOutlined}
-            label={t("metrics.weeklyHoursWorked")}
+            label={t.metrics.weeklyHoursWorked(schedule.weeklyHoursWorked)}
             value={schedule.weeklyHoursWorked}
             variant="default"
           />
@@ -90,20 +90,20 @@ export function TeacherWeeklyScheduleViewDesktop({
       </SectionPanel>
 
       <ScheduleFooterLegend
-        bookedClassLabel={t("grid.bookedClass")}
-        availableSlotLabel={t("grid.availableSlot")}
-        lastUpdatedText={t("grid.lastUpdated", { time: schedule.lastUpdated })}
+        bookedClassLabel={t.grid.bookedClass}
+        availableSlotLabel={t.grid.availableSlot}
+        lastUpdatedText={t.grid.lastUpdated(schedule.lastUpdated)}
       />
 
       <Dialog open={clearDialogOpen} onClose={handleCancelClear}>
-        <DialogTitle>{t("dialogs.clearScheduleTitle")}</DialogTitle>
+        <DialogTitle>{t.dialogs.clearScheduleTitle}</DialogTitle>
         <DialogContent>
-          <DialogContentText>{t("dialogs.clearScheduleMessage")}</DialogContentText>
+          <DialogContentText>{t.dialogs.clearScheduleMessage}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelClear}>{t("dialogs.cancel")}</Button>
+          <Button onClick={handleCancelClear}>{t.dialogs.cancel}</Button>
           <Button onClick={handleConfirmClear} color="error" variant="contained" autoFocus>
-            {t("actions.clear")}
+            {t.actions.clearSchedule}
           </Button>
         </DialogActions>
       </Dialog>

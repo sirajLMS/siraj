@@ -3,7 +3,6 @@
 import { HistoryOutlined, MailOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { BaseCard, UserAvatar } from "@/frontend/common/components/ui";
 import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
@@ -11,6 +10,7 @@ import type {
   ReassignmentBentoGridProps,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardProps>) {
   return (
@@ -52,7 +52,7 @@ export function ReassignmentBentoGrid({
   lastUpdated,
   pendingNotificationCount,
 }: Readonly<ReassignmentBentoGridProps>) {
-  const t = useTranslations("dashboard.teacherReassignment.historyAndContact");
+  const t = useAppTranslation("dashboard.teacherReassignment").historyAndContact;
   const router = useRouter();
   const notifications = useNotifications();
 
@@ -65,17 +65,17 @@ export function ReassignmentBentoGrid({
       <Grid size={{ xs: 12, md: 6 }}>
         <BentoCard
           icon={HistoryOutlined}
-          title={t("changeHistory")}
-          subtitle={t("lastUpdated", { date: formattedDate })}
+          title={t.changeHistory}
+          subtitle={t.lastUpdated(formattedDate)}
           onClick={() => router.push(studentProfileTabHref(studentId, "history"))}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <BentoCard
           icon={MailOutlined}
-          title={t("parentContact")}
-          subtitle={t("pendingNotifications", { count: pendingNotificationCount })}
-          onClick={() => notifications.show(t("parentContact"), { severity: "info", autoHideDuration: 4000 })}
+          title={t.parentContact}
+          subtitle={t.pendingNotifications(pendingNotificationCount)}
+          onClick={() => notifications.show(t.parentContact, { severity: "info", autoHideDuration: 4000 })}
         />
       </Grid>
     </Grid>

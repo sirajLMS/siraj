@@ -5,13 +5,13 @@ import { useQuery } from "@apollo/client/react";
 import { Box, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { addDays, format } from "date-fns";
-import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { logger } from "@/frontend/common/utils/logger";
 import { TeacherAvailabilityView } from "@/frontend/common/views/dashboard/teachers/availability/TeacherAvailabilityView";
 import type {
@@ -20,6 +20,7 @@ import type {
   TeacherAvailabilityInsights,
   WeeklyAvailability,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function buildGraphQLInput(formData: AvailabilitySearchFormData) {
   const fromTime = formData.fromTime
@@ -129,8 +130,9 @@ function computeInsights(data: AvailabilitySearchData | null | undefined): Teach
 }
 
 export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId: string }>) {
-  const t = useTranslations("dashboard.teacherAvailability");
-  const tc = useTranslations("common");
+  const t = useAppTranslation("dashboard.teacherAvailability");
+  const tc = useAppTranslation("common");
+  const _locale = useAppLocale();
   const notifications = useNotifications();
   useDocumentTitle(null, "dashboard.teacherAvailability", "pageTitle");
 
@@ -172,7 +174,7 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
     (formData: AvailabilitySearchFormData) => {
       setSearchInput(formData);
       if (!formData.fromTime || !formData.toTime) {
-        notifications.show(t("errors.missingTimeRange"), { severity: "warning", autoHideDuration: 4000 });
+        notifications.show(t.errors.missingTimeRange, { severity: "warning", autoHideDuration: 4000 });
         return;
       }
       setHasSearched(true);
@@ -184,7 +186,7 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
 
   const handleBlockClick = useCallback(
     (entry: AvailabilityEntry) => {
-      notifications.show(t("teacherSlotSelected", { name: entry.teacherName, id: teacherId }), {
+      notifications.show(t.teacherSlotSelected(entry.teacherName, teacherId), {
         severity: "info",
         autoHideDuration: 4000,
       });
@@ -193,7 +195,7 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
   );
 
   const handleExportPdf = useCallback(() => {
-    notifications.show(t("exportPdfComingSoon"), { severity: "info", autoHideDuration: 4000 });
+    notifications.show(t.exportPdfComingSoon, { severity: "info", autoHideDuration: 4000 });
   }, [notifications, t]);
 
   if (error) {
@@ -201,7 +203,7 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
     return (
       <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
         <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <Typography sx={theme => ({ color: theme.palette.error.main })}>{tc("loadFailed")}</Typography>
+          <Typography sx={theme => ({ color: theme.palette.error.main })}>{tc.loadFailed}</Typography>
         </Box>
       </RequirePermission>
     );

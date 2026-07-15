@@ -2,12 +2,12 @@
 
 import { AlternateEmailOutlined, GroupsOutlined } from "@mui/icons-material";
 import { Grid, Input, InputAdornment } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface Props {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
@@ -15,24 +15,24 @@ interface Props {
 }
 
 export function SocialCommsSection({ register, control }: Props) {
-  const t = useTranslations("dashboard.parentOnboarding");
+  const t = useAppTranslation("dashboard.parentOnboarding");
 
   return (
-    <SectionPanel title={t("sections.socialComms")}>
+    <SectionPanel title={t.sections.socialComms}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <PhoneFormField
             name="whatsapp"
             control={control}
-            label={t("fields.whatsapp")}
-            placeholder={t("placeholders.whatsapp")}
+            label={t.fields.whatsapp}
+            placeholder={t.placeholders.whatsapp}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <FieldWrapper label={t("fields.facebook")}>
+          <FieldWrapper label={t.fields.facebook}>
             <Input
               {...register("facebook")}
-              placeholder={t("placeholders.facebook")}
+              placeholder={t.placeholders.facebook}
               fullWidth
               sx={standardInputSx}
               startAdornment={
@@ -44,10 +44,10 @@ export function SocialCommsSection({ register, control }: Props) {
           </FieldWrapper>
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <FieldWrapper label={t("fields.twitter")}>
+          <FieldWrapper label={t.fields.twitter}>
             <Input
               {...register("twitter")}
-              placeholder={t("placeholders.twitter")}
+              placeholder={t.placeholders.twitter}
               fullWidth
               sx={standardInputSx}
               startAdornment={

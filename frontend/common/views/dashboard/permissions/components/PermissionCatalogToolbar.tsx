@@ -2,7 +2,7 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, FormControl, InputAdornment, MenuItem, Select, TextField } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface CategoryChipProps {
   label: string;
@@ -51,7 +51,7 @@ export function PermissionCatalogToolbar({
   onSearchChange,
   onCategoryChange,
 }: PermissionCatalogToolbarProps) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   return (
     <Box
@@ -67,7 +67,7 @@ export function PermissionCatalogToolbar({
         size="small"
         value={searchQuery}
         onChange={e => onSearchChange(e.target.value)}
-        placeholder={t("searchPlaceholder")}
+        placeholder={t.searchPlaceholder}
         slotProps={{
           input: {
             startAdornment: (
@@ -84,7 +84,7 @@ export function PermissionCatalogToolbar({
       {!isMobile && (
         <FormControl size="small" sx={{ minWidth: 200 }}>
           <Select value={selectedCategory} onChange={e => onCategoryChange(e.target.value)} displayEmpty>
-            <MenuItem value="all">{t("allCategories")}</MenuItem>
+            <MenuItem value="all">{t.allCategories}</MenuItem>
             {categories.map(cat => (
               <MenuItem key={cat} value={cat}>
                 {cat}
@@ -107,7 +107,7 @@ export function PermissionCatalogToolbar({
           }}
         >
           <CategoryChip
-            label={t("allCategories")}
+            label={t.allCategories}
             active={selectedCategory === "all"}
             onClick={() => onCategoryChange("all")}
           />

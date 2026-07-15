@@ -2,7 +2,6 @@
 
 import { useMutation } from "@apollo/client/react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
@@ -13,6 +12,7 @@ import {
   reactivateParentMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ParentAccountActionsProps = {
   readonly parentId: string;
@@ -30,16 +30,14 @@ type AccountActionDialogProps = {
 };
 
 function AccountActionDialog({ open, onClose, onConfirm, loading, error, mode }: AccountActionDialogProps) {
-  const t = useTranslations("profile.parent.actions");
+  const t = useAppTranslation("profile").parent.actions;
   const isDeactivate = mode === "deactivate";
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{isDeactivate ? t("deactivateDialogTitle") : t("reactivateDialogTitle")}</DialogTitle>
+      <DialogTitle>{isDeactivate ? t.deactivateDialogTitle : t.reactivateDialogTitle}</DialogTitle>
       <DialogContent>
-        <Typography variant="bodyMd">
-          {isDeactivate ? t("deactivateConfirmText") : t("reactivateConfirmText")}
-        </Typography>
+        <Typography variant="bodyMd">{isDeactivate ? t.deactivateConfirmText : t.reactivateConfirmText}</Typography>
         {error ? (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main, mt: 2 })}>
             {error}
@@ -48,16 +46,16 @@ function AccountActionDialog({ open, onClose, onConfirm, loading, error, mode }:
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>
-          {t("cancel")}
+          {t.cancel}
         </Button>
         <Button onClick={onConfirm} variant="contained" color={isDeactivate ? "error" : "success"} disabled={loading}>
           {loading
             ? isDeactivate
-              ? t("deactivating")
-              : t("reactivating")
+              ? t.deactivating
+              : t.reactivating
             : isDeactivate
-              ? t("deactivateAccount")
-              : t("reactivateAccount")}
+              ? t.deactivateAccount
+              : t.reactivateAccount}
         </Button>
       </DialogActions>
     </Dialog>
@@ -65,7 +63,7 @@ function AccountActionDialog({ open, onClose, onConfirm, loading, error, mode }:
 }
 
 export function ParentAccountActions({ parentId, targetUserId, accountStatus }: ParentAccountActionsProps) {
-  const t = useTranslations("profile.parent.actions");
+  const t = useAppTranslation("profile").parent.actions;
   const [dialogMode, setDialogMode] = useState<"deactivate" | "reactivate" | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);
@@ -77,10 +75,10 @@ export function ParentAccountActions({ parentId, targetUserId, accountStatus }: 
     onCompleted: () => {
       setDialogMode(null);
       setMutationError(null);
-      setSuccessMessage(t("deactivateSuccess"));
+      setSuccessMessage(t.deactivateSuccess);
     },
     onError: error => {
-      setMutationError(getGraphQLErrorMessage(error, t("deactivateAccount")));
+      setMutationError(getGraphQLErrorMessage(error, t.deactivateAccount));
     },
   });
 
@@ -89,10 +87,10 @@ export function ParentAccountActions({ parentId, targetUserId, accountStatus }: 
     onCompleted: () => {
       setDialogMode(null);
       setMutationError(null);
-      setSuccessMessage(t("reactivateSuccess"));
+      setSuccessMessage(t.reactivateSuccess);
     },
     onError: error => {
-      setMutationError(getGraphQLErrorMessage(error, t("reactivateAccount")));
+      setMutationError(getGraphQLErrorMessage(error, t.reactivateAccount));
     },
   });
 
@@ -115,11 +113,11 @@ export function ParentAccountActions({ parentId, targetUserId, accountStatus }: 
       <Stack direction="row" spacing={1}>
         {isActivated ? (
           <Button variant="outlined" color="error" onClick={() => setDialogMode("deactivate")}>
-            {t("deactivateAccount")}
+            {t.deactivateAccount}
           </Button>
         ) : (
           <Button variant="outlined" color="success" onClick={() => setDialogMode("reactivate")}>
-            {t("reactivateAccount")}
+            {t.reactivateAccount}
           </Button>
         )}
       </Stack>

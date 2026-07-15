@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { type CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { MeetingSummarySection } from "@/frontend/common/views/dashboard/profile/shared/MeetingSummarySection";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
@@ -16,6 +16,7 @@ import {
   type TeacherAdminData,
   type TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function hasTeacherProfessionalData(teacherData: TeacherViewData): boolean {
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
@@ -55,7 +56,8 @@ export function TeacherProfileView({
   readonly targetUserId?: string;
   readonly meetingTabHref?: string;
 }) {
-  const t = useTranslations("profile.teacher");
+  const t = useAppTranslation("profile").teacher;
+  const _locale = useAppLocale();
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canView } = useProfileFieldAccess({ scope });
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
@@ -65,7 +67,7 @@ export function TeacherProfileView({
       return null;
     }
     if (!hasTeacherProfessionalData(teacherData)) {
-      return <ProfileRestrictedSection title={t("sections.compensation")} />;
+      return <ProfileRestrictedSection title={t.sections.compensation} />;
     }
     return (
       <CompensationSection
@@ -81,7 +83,7 @@ export function TeacherProfileView({
       return null;
     }
     if (!hasTeacherIdentityData(adminData)) {
-      return <ProfileRestrictedSection title={t("sections.adminOnly")} />;
+      return <ProfileRestrictedSection title={t.sections.adminOnly} />;
     }
     return <AdminOnlySection mode="view" adminData={adminData} />;
   };
@@ -91,7 +93,7 @@ export function TeacherProfileView({
       return null;
     }
     if (teacherData.totalClasses == null && !(isAdminScope && adminData?.avgEngagementScore != null)) {
-      return <ProfileRestrictedSection title={t("sections.stats")} />;
+      return <ProfileRestrictedSection title={t.sections.stats} />;
     }
     return <StatsSection teacherData={teacherData} isAdminScope={isAdminScope} />;
   };
@@ -100,7 +102,7 @@ export function TeacherProfileView({
     <Stack spacing={3}>
       {isAdminScope ? (
         <Typography sx={{ typography: "labelMd", color: theme => theme.palette.primary.main }}>
-          {t("adminBanner")}
+          {t.adminBanner}
         </Typography>
       ) : null}
 

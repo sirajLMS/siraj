@@ -1,27 +1,25 @@
 "use client";
 
 import { Alert, Box } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { PermissionManagementDialogs } from "@/frontend/common/views/dashboard/permissions/components/PermissionManagementDialogs";
 import { PermissionTabContent } from "@/frontend/common/views/dashboard/permissions/components/PermissionTabContent";
 import { SingleGroupView } from "@/frontend/common/views/dashboard/permissions/components/SingleGroupView";
 import type { PermissionManagementViewModel } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
 import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function PermissionErrorAlert({
   error,
   t,
 }: {
   readonly error: string | null;
-  readonly t: ReturnType<typeof useTranslations>;
+  readonly t: ReturnType<typeof useAppTranslation>;
 }) {
   if (!error) return null;
   return (
     <Alert severity="error" sx={{ mb: 2 }}>
-      {error === "operationFailed"
-        ? t("errors.operationFailed", { defaultValue: "Operation failed. Please try again." })
-        : error}
+      {error === "operationFailed" ? t.errors.operationFailed : error}
     </Alert>
   );
 }
@@ -63,18 +61,18 @@ export function PermissionManagementDesktopView({
   setActiveTab,
   setSelectedUserIdForOverrides,
 }: Readonly<PermissionManagementViewModel>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   const tabs = [
-    { key: "groups" as const, label: t("groupsTab") },
-    { key: "catalog" as const, label: t("catalogTab") },
-    { key: "overrides" as const, label: t("overridesTab") },
+    { key: "groups" as const, label: t.groupsTab },
+    { key: "catalog" as const, label: t.catalogTab },
+    { key: "overrides" as const, label: t.overridesTab },
   ];
 
   const headerActions =
     activeTab === "groups" ? (
       <PrimaryPageAction id="create-group-btn" onClick={openCreateDialog}>
-        {t("addPermissions")}
+        {t.addPermissions}
       </PrimaryPageAction>
     ) : null;
 
@@ -95,7 +93,7 @@ export function PermissionManagementDesktopView({
         />
       ) : (
         <>
-          <PageHeader title={t("title")} subtitle={t("subtitle")} actions={headerActions} />
+          <PageHeader title={t.title} subtitle={t.subtitle} actions={headerActions} />
 
           <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3 }}>
             <PermissionErrorAlert error={error} t={t} />

@@ -197,9 +197,9 @@ gqlSchemaBuilder.mutationField("updateStudentQuota", t =>
       return StudentManagementService.editQuota(
         ctx.user?.id || "",
         args.studentId,
+        tErrors,
         args.newClassesRemaining,
-        args.expectedVersion ?? undefined,
-        tErrors
+        args.expectedVersion ?? undefined
       );
     },
   })

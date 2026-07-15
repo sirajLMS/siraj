@@ -3,14 +3,15 @@
 import { EditOutlined } from "@mui/icons-material";
 import { Box, Button, FormHelperText, IconButton, type SxProps, TextField, type Theme } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LocaleAdornmentSwitch } from "@/frontend/common/components/ui/input/localizedString/LocaleAdornmentSwitch";
 import { LocalizedStringDrawer } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringDrawer";
 import { useLocaleSwitchSuccess } from "@/frontend/common/components/ui/input/localizedString/useLocaleSwitchSuccess";
 import { useNarrowContainer } from "@/frontend/common/components/ui/input/localizedString/useNarrowContainer";
 import { pickInitialActiveLocale, setLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
+import { useAppTranslation } from "@/shared/locale/client";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 export type LocalizedStringInputProps = {
@@ -69,7 +70,7 @@ export type LocalizedStringInputProps = {
  * `frontend/lib/locale/language/languages.ts`.
  */
 type EditDrawerControlProps = {
-  readonly t: ReturnType<typeof useTranslations<"ui.localizedString">>;
+  readonly t: ReturnType<typeof useAppTranslation<"ui.localizedString">>;
   readonly isCompact: boolean;
   readonly disabled: boolean;
   readonly onOpen: () => void;
@@ -79,7 +80,7 @@ const EditDrawerControl: React.FC<EditDrawerControlProps> = ({ t, isCompact, dis
   if (isCompact) {
     return (
       <IconButton
-        aria-label={t("editTranslations")}
+        aria-label={t.editTranslations}
         onClick={onOpen}
         disabled={disabled}
         size="small"
@@ -98,7 +99,7 @@ const EditDrawerControl: React.FC<EditDrawerControlProps> = ({ t, isCompact, dis
       startIcon={<EditOutlined fontSize="small" />}
       sx={{ flexShrink: 0, whiteSpace: "nowrap" }}
     >
-      {t("editTranslations")}
+      {t.editTranslations}
     </Button>
   );
 };
@@ -153,8 +154,8 @@ const useLocalizedStringInputState = ({
   multiline,
   containerRef,
 }: LocalizedStringInputStateProps): LocalizedStringInputState => {
-  const t = useTranslations("ui.localizedString");
-  const uiLocale = useLocale();
+  const t = useAppTranslation("ui.localizedString");
+  const uiLocale = useAppLocale();
   const isCompact = useNarrowContainer(containerRef);
 
   const resolvedRequiredLocales = useMemo(
@@ -222,10 +223,10 @@ const useLocalizedStringInputState = ({
   const inlineHelperText =
     errorMessage ??
     (activeRequired && fieldValue.trim() === "" && required
-      ? t("localeRequiredEntry", { localeName: t(`locale.${activeLocale}`) })
+      ? t.localeRequiredEntry({ localeName: t.locale[activeLocale as keyof typeof t.locale] })
       : helperText);
 
-  const drawerResolvedTitle = drawerTitle ?? label ?? t("editTranslations");
+  const drawerResolvedTitle = drawerTitle ?? label ?? t.editTranslations;
 
   const textFieldSuccessSx =
     successSwitch && !showInlineError
@@ -282,7 +283,7 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
   drawerDismissAction = "save",
   sx,
 }) => {
-  const t = useTranslations("ui.localizedString");
+  const t = useAppTranslation("ui.localizedString");
   const containerRef = useRef<HTMLDivElement>(null);
   const {
     isCompact,

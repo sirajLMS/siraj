@@ -2,13 +2,13 @@
 
 import { TranslateOutlined } from "@mui/icons-material";
 import { Paper, type PaperProps, Popover, Stack, styled } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { LanguageDisplay } from "@/frontend/common/components/ui/display";
 import { useLanguageSwitch } from "@/frontend/common/hooks/useLanguageSwitch";
 import { languages } from "@/frontend/common/lib/locale";
 import { NavbarIcon } from "@/frontend/common/views/dashboard/components/navbar/NavbarIcon";
 import type { Locale } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 // --- Styled Components ---
 
@@ -48,7 +48,7 @@ const LanguageOptionLayout = styled(Stack)(({ theme }) => ({
 // --- Main Component ---
 
 export function LanguageSwitcher() {
-  const t = useTranslations("common");
+  const t = useAppTranslation("common");
   const { currentLocale, switchLanguage, isPending } = useLanguageSwitch();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
@@ -69,7 +69,7 @@ export function LanguageSwitcher() {
 
   return (
     <>
-      <NavbarIcon tooltipTitle={t("languageTooltip")} onClick={handleClick} disabled={isPending}>
+      <NavbarIcon tooltipTitle={t.languageTooltip} onClick={handleClick} disabled={isPending}>
         <TranslateOutlined />
       </NavbarIcon>
 

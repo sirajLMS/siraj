@@ -8,6 +8,7 @@ import { queryWithPagination } from "@/backend/db/query.extensions";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { OrderSortDirection, StudentStatus } from "@/backend/enum";
 import { parseStudentStatus } from "@/backend/lib/enum";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import * as Types from "@/backend/types";
 import { ALLOWED_STATUS_TRANSITIONS } from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
@@ -179,13 +180,14 @@ export namespace StudentRepository {
     }
   };
 
-  export const loadByIds = async (ids: string[], tErrors: ErrorsLabels): Promise<(Types.Student | Error)[]> => {
+  export const loadByIds = async (ids: string[], locale?: string): Promise<(Types.Student | Error)[]> => {
     if (ids.length === 0) return [];
     const foundStudents = await db.select().from(students).where(inArray(students.id, ids));
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
 
     return ids.map(id => {
       const s = foundStudents.find(c => c.id === id);
-      return s ? (StudentUtils.mapEntityToDto(s) as Types.Student) : new Error(tErrors.studentNotFound(id));
+      return s ? (StudentUtils.mapEntityToDto(s) as Types.Student) : new Error(t("studentNotFound", { id }));
     });
   };
 

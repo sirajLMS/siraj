@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useTranslations } from "next-intl";
 import { AppPermission, SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/common/utils/logger";
 import { createMockAdminDecorator } from "@/frontend/common/views/dashboard/components/createMockAdminDecorator";
@@ -9,6 +8,7 @@ import type {
 } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 import { AdminSuggestionsDesktopView } from "@/frontend/desktop/views/dashboard/suggestions/adminSuggestions.desktop";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const MOCK_ADMIN_SUGGESTION_ROWS: readonly AdminSuggestionRow[] = [
   {
@@ -99,7 +99,7 @@ function AdminSuggestionsDesktopStoryRenderer({
   canManage,
   canDelete,
 }: Readonly<AdminSuggestionsDesktopStoryProps>) {
-  const t = useTranslations("dashboard.suggestions");
+  const t = useAppTranslation("dashboard.suggestions");
   const labels = buildSuggestionsLabels(t).admin;
 
   return (

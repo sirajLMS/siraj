@@ -1,7 +1,7 @@
 import { CheckCircleOutlined, GavelOutlined, InfoOutlined } from "@mui/icons-material";
 import { Box, Divider, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { PolicyItemProps } from "@/frontend/common/views/dashboard/students/status/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function PolicyItem({ title, description }: Readonly<PolicyItemProps>) {
   return (
@@ -27,7 +27,7 @@ function PolicyItem({ title, description }: Readonly<PolicyItemProps>) {
 }
 
 export function PolicyOverviewCard() {
-  const t = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentStatus");
 
   return (
     <Box
@@ -73,7 +73,7 @@ export function PolicyOverviewCard() {
             letterSpacing: "0.05em",
           })}
         >
-          {t("sections.policyOverview")}
+          {t.sections.policyOverview}
         </Typography>
       </Box>
 
@@ -86,16 +86,16 @@ export function PolicyOverviewCard() {
           zIndex: 1,
         }}
       >
-        <PolicyItem title={t("policies.suspensionTitle")} description={t("policies.suspensionDesc")} />
+        <PolicyItem title={t.policies.suspensionTitle} description={t.policies.suspensionDesc} />
         <Divider />
-        <PolicyItem title={t("policies.onLeaveTitle")} description={t("policies.onLeaveDesc")} />
+        <PolicyItem title={t.policies.onLeaveTitle} description={t.policies.onLeaveDesc} />
       </Box>
     </Box>
   );
 }
 
 export function SuspensionWarningBanner() {
-  const t = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentStatus");
 
   return (
     <Box
@@ -137,7 +137,7 @@ export function SuspensionWarningBanner() {
             mb: 0.5,
           })}
         >
-          {t("warning.title")}
+          {t.warning.title}
         </Typography>
         <Typography
           variant="bodyMd"
@@ -147,7 +147,7 @@ export function SuspensionWarningBanner() {
             lineHeight: 1.6,
           })}
         >
-          {t("warning.description")}
+          {t.warning.description}
         </Typography>
       </Box>
     </Box>

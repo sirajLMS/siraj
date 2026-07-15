@@ -4,7 +4,6 @@ import { ApolloClient, ApolloLink, HttpLink, InMemoryCache } from "@apollo/clien
 import { PersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { ApolloProvider } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NetworkConnectivityContext } from "@/frontend/common/context/NetworkConnectivityContext";
@@ -16,9 +15,10 @@ import {
   createErrorLinkHandler,
   sha256,
 } from "@/frontend/common/providers/apollo/utils";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function AppApolloProvider({ children }: { readonly children: React.ReactNode }) {
-  const t = useTranslations("common");
+  const t = useAppTranslation("common");
   const {
     isConnected,
     isChecking,

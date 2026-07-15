@@ -2,6 +2,7 @@
 
 import { Button, CircularProgress, DialogActions } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledFooterContainer = styled(DialogActions)(({ theme }) => ({
   borderTop: `1px solid ${theme.palette.divider}`,
@@ -29,7 +30,6 @@ interface OverridesDialogFooterProps {
   readonly handleSave: () => Promise<void>;
   readonly isDialogLoading: boolean;
   readonly isSaving: boolean;
-  readonly t: (key: string) => string;
 }
 
 export function OverridesDialogFooter({
@@ -37,17 +37,18 @@ export function OverridesDialogFooter({
   handleSave,
   isDialogLoading,
   isSaving,
-  t,
 }: Readonly<OverridesDialogFooterProps>) {
+  const t = useAppTranslation("dashboard.permissions");
+
   return (
     <StyledFooterContainer>
       {/* Cancel Action */}
       <StyledCancelButton onClick={onClose} disabled={isDialogLoading} variant="text">
-        {t("cancel")}
+        {t.cancel}
       </StyledCancelButton>
       {/* Save Action */}
       <StyledSaveButton onClick={handleSave} disabled={isDialogLoading} variant="contained">
-        {isSaving ? <CircularProgress size={20} color="inherit" /> : "Save Overrides"}
+        {isSaving ? <CircularProgress size={20} color="inherit" /> : t.saveOverrides}
       </StyledSaveButton>
     </StyledFooterContainer>
   );

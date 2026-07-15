@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
@@ -18,6 +17,7 @@ import {
   type TeacherEditData,
   teacherAdminEditSchema,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function TeacherAdminEditForm({
   teacherData,
@@ -32,7 +32,7 @@ export function TeacherAdminEditForm({
   readonly isSaving: boolean;
   readonly onSubmit: (values: TeacherAdminEditFormData) => Promise<void>;
 }) {
-  const tc = useTranslations("profile");
+  const t = useAppTranslation("profile").teacher;
   const scope = ProfileScope.Other;
   const { canEdit } = useProfileFieldAccess({ scope });
   const form = useForm<TeacherAdminEditFormData>({
@@ -111,7 +111,7 @@ export function TeacherAdminEditForm({
           ) : null}
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>
-          {isSaving ? tc("shell.loading") : tc("actions.save")}
+          {isSaving ? t.shell.loading : t.actions.save}
         </PrimaryPageAction>
       </Stack>
     </Box>

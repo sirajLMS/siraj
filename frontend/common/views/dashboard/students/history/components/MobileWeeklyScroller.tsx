@@ -1,8 +1,8 @@
 import { Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ClassSession, MobileWeeklyScrollerProps } from "@/frontend/common/views/dashboard/students/history/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface WeekDayData {
   dayKey: string;
@@ -68,7 +68,7 @@ export function MobileWeeklyScroller({
   onSelectWeek,
   onSelectDay,
 }: Readonly<MobileWeeklyScrollerProps>) {
-  const t = useTranslations("dashboard.studentHistory.calendar");
+  const t = useAppTranslation("dashboard.studentHistory.calendar");
 
   const weekDays = useMemo(
     () => computeWeekDays(currentMonth, selectedWeek, classes),
@@ -88,10 +88,10 @@ export function MobileWeeklyScroller({
     >
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
-          {t("weeklyAttendance")}
+          {t.weeklyAttendance}
         </Typography>
         <Typography variant="labelMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {t("week", { number: selectedWeek })}
+          {t.week({ number: selectedWeek })}
         </Typography>
       </Box>
 
@@ -151,7 +151,7 @@ export function MobileWeeklyScroller({
                 variant="labelMd"
                 sx={theme => ({ color: isSelected ? "inherit" : theme.palette.onSurfaceVariant, mb: 0.5 })}
               >
-                {t(`days.${d.dayKey}`)}
+                {t.days[d.dayKey as keyof typeof t.days]}
               </Typography>
               <Typography variant="titleLg">{d.displayDate}</Typography>
               {d.hasSession && (

@@ -1,7 +1,6 @@
 "use client";
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { ErrorState } from "@/frontend/common/components/ui";
 import { ParentStatus, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
@@ -23,6 +22,7 @@ import { ParentProfileLoadingSkeleton } from "@/frontend/common/views/dashboard/
 import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { MeetingConfigsTab } from "@/frontend/common/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;
@@ -106,7 +106,7 @@ export function ParentProfileContainer({
   targetUserId,
   activeTab: _activeTab = "profile",
 }: ParentProfileContainerProps) {
-  const tc = useTranslations("profile");
+  const t = useAppTranslation("profile");
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const router = useRouter();
@@ -179,8 +179,8 @@ export function ParentProfileContainer({
     return (
       <ErrorState
         embedded
-        message={tc("errors.failedToLoad")}
-        retryLabel={tc("actions.retry")}
+        message={t.errors.failedToLoad}
+        retryLabel={t.actions.retry}
         onRetry={() => {
           void refetch();
         }}
@@ -189,7 +189,7 @@ export function ParentProfileContainer({
   }
 
   if (!profile) {
-    return <ErrorState embedded message={tc("errors.notFound")} />;
+    return <ErrorState embedded message={t.errors.notFound} />;
   }
 
   const parentData = buildEditSource(scope, profile);

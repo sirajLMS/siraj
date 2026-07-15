@@ -2,10 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Grid, Paper, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -24,7 +22,8 @@ import {
   type StatusUpdateFormData,
 } from "@/frontend/common/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { StudentStatusViewProps } from "@/frontend/common/views/dashboard/students/status/types";
-import type { MessageSchema } from "@/shared/messages/types/message";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
 
 const STATUS_BADGE_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "regular",
@@ -39,7 +38,7 @@ function getBadgeStatusKey(status: StudentStatus): string {
 }
 
 function ReadOnlyStatusCard({ status }: Readonly<{ status: StudentStatus }>) {
-  const t = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentStatus");
 
   return (
     <Paper
@@ -56,9 +55,9 @@ function ReadOnlyStatusCard({ status }: Readonly<{ status: StudentStatus }>) {
         variant="labelMd"
         sx={theme => ({ color: theme.palette.onSurfaceVariant, mb: 1.5, display: "block" })}
       >
-        {t("fields.accountStatus")}
+        {t.fields.accountStatus}
       </Typography>
-      <StatusBadge category="studentAccount" status={getBadgeStatusKey(status)} label={t(`statusOptions.${status}`)} />
+      <StatusBadge category="studentAccount" status={getBadgeStatusKey(status)} label={t.statusOptions[status]} />
     </Paper>
   );
 }
@@ -69,8 +68,8 @@ export function StudentStatusView({
   embedded = false,
   onUpdateStatus,
 }: Readonly<StudentStatusViewProps>) {
-  const t = useTranslations("dashboard.studentStatus");
-  const validationMessages = useTranslations("dashboard.studentStatus.validation");
+  const t = useAppTranslation("dashboard.studentStatus");
+  const validationMessages = useAppTranslation("dashboard.studentStatus.validation");
   const { canView, canEdit } = useStudentFieldAccess();
 
   const canEditStatus = canEdit("student_academic");
@@ -78,9 +77,7 @@ export function StudentStatusView({
   const canViewSchedule = canView("student_schedule");
   const hasTabAccess = canViewStudentProfileTab("status", canView);
 
-  const schema = createStatusUpdateSchema(
-    validationMessages as unknown as MessageSchema["dashboard"]["studentStatus"]["validation"]
-  );
+  const schema = createStatusUpdateSchema(validationMessages as StudentStatusLabels["validation"]);
 
   const methods = useForm<StatusUpdateFormData>({
     resolver: zodResolver(schema),
@@ -113,7 +110,7 @@ export function StudentStatusView({
   const hasContent = hasLeftColumn || hasRightColumn;
 
   if (!hasTabAccess || !hasContent) {
-    const restricted = <ProfileRestrictedSection title={t("pageTitle")} />;
+    const restricted = <ProfileRestrictedSection title={t.pageTitle} />;
     return embedded ? restricted : <PageContainer>{restricted}</PageContainer>;
   }
 
@@ -121,11 +118,11 @@ export function StudentStatusView({
     <>
       {!embedded ? (
         <PageHeader
-          title={t("pageTitle")}
-          subtitle={t("studentId", { id: student.id })}
+          title={t.pageTitle}
+          subtitle={t.studentId(student.id)}
           breadcrumbs={[
-            { label: t("breadcrumbs.students"), href: "/students" },
-            { label: t("breadcrumbs.statusHold"), current: true },
+            { label: t.breadcrumbs.students, href: "/students" },
+            { label: t.breadcrumbs.statusHold, current: true },
           ]}
         />
       ) : null}

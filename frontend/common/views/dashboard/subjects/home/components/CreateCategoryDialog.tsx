@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import {
@@ -15,11 +14,12 @@ import {
   slugify,
 } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__";
 import type { CreateCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const FORM_ID = "create-category-form";
 
 export function CreateCategoryDialog({ open, onClose, onSubmit, isLoading }: Readonly<CreateCategoryDialogProps>) {
-  const t = useTranslations("dashboard.subjects");
+  const t = useAppTranslation("dashboard.subjects");
 
   const {
     control,
@@ -62,7 +62,7 @@ export function CreateCategoryDialog({ open, onClose, onSubmit, isLoading }: Rea
       maxWidth="sm"
       aria-labelledby="create-category-dialog-title"
     >
-      <DialogTitle id="create-category-dialog-title">{t("createCategory")}</DialogTitle>
+      <DialogTitle id="create-category-dialog-title">{t.createCategory}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Box
           component="form"
@@ -73,34 +73,34 @@ export function CreateCategoryDialog({ open, onClose, onSubmit, isLoading }: Rea
           <LabeledTextField
             name="name"
             control={control}
-            label={t("nameLabel")}
+            label={t.nameLabel}
             required
-            error={errors.name ? t("nameRequired") : undefined}
+            error={errors.name ? t.nameRequired : undefined}
             disabled={isLoading}
           />
           <LabeledTextField
             name="slug"
             control={control}
-            label={t("slugLabel")}
+            label={t.slugLabel}
             required
-            error={errors.slug ? t("slugRequired") : undefined}
+            error={errors.slug ? t.slugRequired : undefined}
             disabled={isLoading}
           />
           <LabeledTextField
             name="description"
             control={control}
-            label={t("descriptionLabel")}
+            label={t.descriptionLabel}
             disabled={isLoading}
             multiline
             rows={3}
           />
-          <ActiveToggleField name="isActive" control={control} label={t("activeLabel")} disabled={isLoading} />
+          <ActiveToggleField name="isActive" control={control} label={t.activeLabel} disabled={isLoading} />
         </Box>
       </DialogContent>
       <EntityFormDialogActions
         formId={FORM_ID}
-        cancelLabel={t("cancel")}
-        saveLabel={t("createCategory")}
+        cancelLabel={t.cancel}
+        saveLabel={t.createCategory}
         onClose={onClose}
         isLoading={isLoading}
       />

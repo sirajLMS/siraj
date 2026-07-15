@@ -1,12 +1,12 @@
 import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface TeacherDataGridProps {
   readonly rows: readonly TeacherDirectoryRow[];
@@ -68,13 +68,13 @@ export function TeacherDataGrid({
   totalCount,
   onPageChange,
 }: Readonly<TeacherDataGridProps>) {
-  const t = useTranslations("dashboard.teachersDirectory");
+  const t = useAppTranslation("dashboard.teachersDirectory");
   const router = useRouter();
 
   const columns: GridColDef<TeacherDirectoryRow>[] = [
     {
       field: "index",
-      headerName: t("table.hash"),
+      headerName: t.table.hash,
       width: 80,
       renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -84,7 +84,7 @@ export function TeacherDataGrid({
     },
     {
       field: "name",
-      headerName: t("table.name"),
+      headerName: t.table.name,
       flex: 1.5,
       renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
         <PersonProfileLinkCell
@@ -99,7 +99,7 @@ export function TeacherDataGrid({
     },
     {
       field: "email",
-      headerName: t("table.email"),
+      headerName: t.table.email,
       flex: 1.5,
       renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -109,7 +109,7 @@ export function TeacherDataGrid({
     },
     {
       field: "schedule",
-      headerName: t("table.schedule"),
+      headerName: t.table.schedule,
       width: 120,
       align: "center",
       headerAlign: "center",
@@ -122,7 +122,7 @@ export function TeacherDataGrid({
     },
     {
       field: "options",
-      headerName: t("table.options"),
+      headerName: t.table.options,
       width: 180,
       align: "center",
       headerAlign: "center",

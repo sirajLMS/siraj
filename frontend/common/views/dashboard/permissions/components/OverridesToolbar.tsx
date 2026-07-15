@@ -3,7 +3,7 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, Button, InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledToolbarContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -44,7 +44,7 @@ interface OverridesToolbarProps {
 }
 
 export function OverridesToolbar({ mode, onModeChange, searchQuery, onSearchChange }: Readonly<OverridesToolbarProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   return (
     <StyledToolbarContainer>

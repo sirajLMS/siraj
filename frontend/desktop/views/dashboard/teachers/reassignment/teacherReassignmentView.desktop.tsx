@@ -2,13 +2,13 @@
 
 import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Grid } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { CurrentTeacherCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/CurrentTeacherCard";
 import { ManagementControlsCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/ManagementControlsCard";
 import { ReassignmentBentoGrid } from "@/frontend/common/views/dashboard/teachers/reassignment/components/ReassignmentBentoGrid";
 import { StudentContextCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/StudentContextCard";
 import type { TeacherReassignmentViewModel } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function TeacherReassignmentViewDesktop({
   student,
@@ -19,17 +19,17 @@ export function TeacherReassignmentViewDesktop({
   onStatusChange,
   onCancel,
 }: Readonly<TeacherReassignmentViewModel>) {
-  const t = useTranslations("dashboard.teacherReassignment");
+  const t = useAppTranslation("dashboard.teacherReassignment");
 
   const breadcrumbs = [
-    { label: t("breadcrumbs.dashboard"), href: "/dashboard" },
-    { label: t("breadcrumbs.parentManagement"), href: "/teachers" },
-    { label: t("breadcrumbs.teacherReassignment"), active: true },
+    { label: t.breadcrumbs.dashboard, href: "/dashboard" },
+    { label: t.breadcrumbs.parentManagement, href: "/teachers" },
+    { label: t.breadcrumbs.teacherReassignment, active: true },
   ];
 
   return (
     <PageContainer>
-      <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} breadcrumbs={breadcrumbs} />
+      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} breadcrumbs={breadcrumbs} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 4 }}>
@@ -57,7 +57,7 @@ export function TeacherReassignmentViewDesktop({
                 fontWeight: 700,
               })}
             >
-              {t("warning")}
+              {t.warning}
             </Alert>
 
             <ManagementControlsCard

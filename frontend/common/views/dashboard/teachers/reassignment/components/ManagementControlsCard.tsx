@@ -3,7 +3,6 @@
 import { CheckCircleOutlined, InfoOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
 import { labelSx, outlinedInputSx } from "@/frontend/common/components/ui/form";
@@ -15,6 +14,7 @@ import type {
   ReassignmentSubmitInput,
   StatusChangeInput,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function TeacherSelection({
   teachers,
@@ -25,11 +25,11 @@ function TeacherSelection({
   selectedTeacherId: string;
   onTeacherChange: (id: string) => void;
 }>) {
-  const t = useTranslations("dashboard.teacherReassignment.controls");
+  const t = useAppTranslation("dashboard.teacherReassignment").controls;
   return (
     <Box>
       <Box component="label" sx={labelSx}>
-        {t("assignTeacher")}
+        {t.assignTeacher}
       </Box>
       <FormControl fullWidth sx={{ mt: 1.5 }}>
         <Select
@@ -43,7 +43,7 @@ function TeacherSelection({
           }}
         >
           <MenuItem value="" disabled>
-            {t("assignTeacherPlaceholder")}
+            {t.assignTeacherPlaceholder}
           </MenuItem>
           {teachers.map(teacher => (
             <MenuItem key={teacher.id} value={teacher.id}>
@@ -56,7 +56,7 @@ function TeacherSelection({
         variant="labelSm"
         sx={theme => ({ mt: 1, color: theme.palette.onSurfaceVariant, fontStyle: "italic", display: "block" })}
       >
-        {t("teacherAvailabilityNotice")}
+        {t.teacherAvailabilityNotice}
       </Typography>
     </Box>
   );
@@ -71,7 +71,7 @@ function StatusUpdate({
   selectedStatus: StudentStatus | "";
   onStatusChange: (status: StudentStatus | "") => void;
 }>) {
-  const t = useTranslations("dashboard.teacherReassignment.controls");
+  const t = useAppTranslation("dashboard.teacherReassignment").controls;
 
   const statusKey = STUDENT_STATUS_TO_ACCOUNT_STATUS[currentStatus] ?? currentStatus;
 
@@ -80,7 +80,7 @@ function StatusUpdate({
   return (
     <Box>
       <Box component="label" sx={labelSx}>
-        {t("statusUpdate")}
+        {t.statusUpdate}
       </Box>
       <FormControl fullWidth sx={{ mt: 1.5 }}>
         <Select
@@ -100,7 +100,7 @@ function StatusUpdate({
       </FormControl>
       <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}>
         <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t("currentStatus", { status: "" }).replace(":", "").trim()}:
+          {t.currentStatus("").replace(":", "").trim()}:
         </Typography>
         <StatusBadge category="studentAccount" status={statusKey} label={currentStatus} />
       </Box>
@@ -117,7 +117,7 @@ function ActionButtons({
   saved: boolean;
   onCancel: () => void;
 }>) {
-  const t = useTranslations("dashboard.teacherReassignment");
+  const t = useAppTranslation("dashboard.teacherReassignment").actions;
 
   const getButtonContent = (): React.ReactNode => {
     if (loading) return <CircularProgress size={20} color="inherit" />;
@@ -125,11 +125,11 @@ function ActionButtons({
       return (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "center" }}>
           <CheckCircleOutlined sx={{ fontSize: 18 }} />
-          <Typography variant="buttonText">{t("actions.saved")}</Typography>
+          <Typography variant="buttonText">{t.saved}</Typography>
         </Stack>
       );
     }
-    return <Typography variant="buttonText">{t("actions.submit")}</Typography>;
+    return <Typography variant="buttonText">{t.submit}</Typography>;
   };
 
   return (
@@ -150,7 +150,7 @@ function ActionButtons({
         sx={theme => ({ alignItems: "center", color: theme.palette.onSurfaceVariant })}
       >
         <InfoOutlined fontSize="small" sx={theme => ({ color: theme.palette.primary.main })} />
-        <Typography variant="labelSm">{t("actions.info")}</Typography>
+        <Typography variant="labelSm">{t.info}</Typography>
       </Stack>
 
       <Stack direction="row" spacing={2} sx={{ width: { xs: "100%", md: "auto" } }}>
@@ -170,7 +170,7 @@ function ActionButtons({
             },
           })}
         >
-          {t("actions.cancel")}
+          {t.cancel}
         </Button>
         <Button
           type="submit"
@@ -209,7 +209,7 @@ export function ManagementControlsCard({
   onStatusChange,
   onCancel,
 }: Readonly<ManagementControlsCardProps>) {
-  const t = useTranslations("dashboard.teacherReassignment");
+  const t = useAppTranslation("dashboard.teacherReassignment");
   const notifications = useNotifications();
   const [selectedTeacherId, setSelectedTeacherId] = useState("");
   const [selectedNewStatus, setSelectedNewStatus] = useState<StudentStatus | "">("");
@@ -219,7 +219,7 @@ export function ManagementControlsCard({
     e.preventDefault();
 
     if (!selectedTeacherId && !selectedNewStatus) {
-      notifications.show(t("actions.info"), { severity: "warning", autoHideDuration: 4000 });
+      notifications.show(t.actions.info, { severity: "warning", autoHideDuration: 4000 });
       return;
     }
 
@@ -253,10 +253,10 @@ export function ManagementControlsCard({
     <BaseCard sx={{ p: 4, boxShadow: theme => theme.palette.shadow.card }}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700, mb: 1 })}>
-          {t("controls.title")}
+          {t.controls.title}
         </Typography>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t("controls.subtitle")}
+          {t.controls.subtitle}
         </Typography>
       </Box>
 

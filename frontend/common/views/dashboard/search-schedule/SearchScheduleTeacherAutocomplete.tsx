@@ -2,10 +2,10 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Autocomplete, TextField } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { type SearchScheduleTeacherOption, useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const DEBOUNCE_MS = 300;
 const MIN_SEARCH_LENGTH = 2;
@@ -18,7 +18,7 @@ interface SearchScheduleTeacherAutocompleteProps {
 export function SearchScheduleTeacherAutocomplete({
   size = "small",
 }: Readonly<SearchScheduleTeacherAutocompleteProps>) {
-  const t = useTranslations("dashboard.searchSchedule");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
 
   const teacherSearchInput = useSearchScheduleStore(state => state.teacherSearchInput);
   const debouncedTeacherSearch = useSearchScheduleStore(state => state.debouncedTeacherSearch);
@@ -84,8 +84,8 @@ export function SearchScheduleTeacherAutocomplete({
       renderInput={params => (
         <TextField
           {...params}
-          label={t("teacherName")}
-          placeholder={t("teacherNamePlaceholder")}
+          label={t.teacherName}
+          placeholder={t.teacherNamePlaceholder}
           size={size}
           slotProps={{
             ...params.slotProps,
@@ -96,7 +96,7 @@ export function SearchScheduleTeacherAutocomplete({
           }}
         />
       )}
-      noOptionsText={shouldSearch ? t("teacherNameNoResults") : t("teacherNameTypeToSearch")}
+      noOptionsText={shouldSearch ? t.teacherNameNoResults : t.teacherNameTypeToSearch}
     />
   );
 }

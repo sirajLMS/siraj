@@ -1,11 +1,11 @@
 "use client";
 
 import { Stack } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { PaymentMethodsManager } from "@/frontend/common/views/dashboard/profile/shared/payment-methods";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type PaymentMethodsTabProps = {
   readonly targetUserId: string;
@@ -14,7 +14,7 @@ type PaymentMethodsTabProps = {
 };
 
 export function PaymentMethodsTab({ targetUserId, scope, slot }: PaymentMethodsTabProps) {
-  const t = useTranslations("profile.shell.tabs");
+  const t = useAppTranslation("profile.shell").tabs;
   const { user, hasPermission } = useUserStore();
 
   const canManage =
@@ -23,7 +23,7 @@ export function PaymentMethodsTab({ targetUserId, scope, slot }: PaymentMethodsT
   return (
     <PageContainer>
       <Stack spacing={3}>
-        <PageHeader title={t("paymentMethods")} />
+        <PageHeader title={t.paymentMethods} />
         <PaymentMethodsManager targetUserId={targetUserId} slot={slot} canManage={canManage} />
       </Stack>
     </PageContainer>

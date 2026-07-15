@@ -14,10 +14,10 @@ import {
   TextField,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface LiveSessionToolbarProps {
   readonly classInstanceId: string;
@@ -290,7 +290,7 @@ export function LiveSessionToolbar({
   isResetting = false,
   error = null,
 }: LiveSessionToolbarProps) {
-  const t = useTranslations("dashboard.classDetails.liveSession");
+  const t = useAppTranslation("dashboard.classDetails").liveSession;
 
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const [leaveReason, setLeaveReason] = useState("");

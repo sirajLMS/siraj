@@ -1,6 +1,7 @@
+"use client";
+
 import { Fingerprint, HistoryOutlined, MailOutlineOutlined } from "@mui/icons-material";
 import { Box, Button, Typography, useTheme } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { UserAvatar } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
@@ -10,6 +11,7 @@ import { profileHrefForUser, studentProfileTabHref } from "@/frontend/common/uti
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import type { StudentStatusHeaderProps } from "@/frontend/common/views/dashboard/students/status/types";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const STATUS_BADGE_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "regular",
@@ -48,7 +50,7 @@ function StudentAvatar({
 }
 
 function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["student"] }>) {
-  const t = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentStatus");
   const { showField, canView } = useStudentFieldAccess();
   const showIdentity = showField(student.name, "student_identity");
   const showTeacher = showField(student.teacherName, "student_teacher");
@@ -70,7 +72,7 @@ function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["
           <StatusBadge
             category="studentAccount"
             status={getBadgeStatusKey(student.status)}
-            label={t(`statusOptions.${student.status}`)}
+            label={t.statusOptions[student.status]}
           />
         ) : null}
       </Box>
@@ -87,7 +89,7 @@ function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["
           >
             <Fingerprint sx={{ fontSize: 16 }} />
             <Typography variant="labelMd" sx={{ letterSpacing: "0.05em" }}>
-              {t("studentId", { id: formatStudentDisplayId(student.id) })}
+              {t.studentId(formatStudentDisplayId(student.id))}
             </Typography>
           </Box>
         ) : null}
@@ -102,7 +104,7 @@ function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["
 }
 
 function HeaderActions({ student }: Readonly<{ student: StudentStatusHeaderProps["student"] }>) {
-  const t = useTranslations("dashboard.studentStatus");
+  const t = useAppTranslation("dashboard.studentStatus");
   const router = useRouter();
   const { canView } = useStudentFieldAccess();
 
@@ -141,7 +143,7 @@ function HeaderActions({ student }: Readonly<{ student: StudentStatusHeaderProps
             },
           })}
         >
-          {t("actions.viewHistory")}
+          {t.actions.viewHistory}
         </Button>
       ) : null}
       {showContactParent ? (
@@ -159,7 +161,7 @@ function HeaderActions({ student }: Readonly<{ student: StudentStatusHeaderProps
             },
           })}
         >
-          {t("actions.contactParent")}
+          {t.actions.contactParent}
         </Button>
       ) : null}
     </Box>

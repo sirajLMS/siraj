@@ -9,7 +9,6 @@ import {
   VerifiedUser,
 } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ClassSessionList } from "@/frontend/common/views/dashboard/students/history/components/ClassSessionList";
@@ -21,6 +20,7 @@ import type {
   StudentHistoryMobileProps,
 } from "@/frontend/common/views/dashboard/students/history/types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function deriveStreakDays(
   classes: Readonly<Partial<Record<number, ClassSession>>>,
@@ -68,7 +68,7 @@ export function StudentHistoryMobile({
   nowMonth,
   locale,
 }: Readonly<StudentHistoryMobileProps>) {
-  const t = useTranslations("dashboard.studentHistory");
+  const t = useAppTranslation("dashboard.studentHistory");
   const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
 
   const selectedDaySessions: ClassSession[] = useMemo(() => {
@@ -77,7 +77,7 @@ export function StudentHistoryMobile({
     return session ? [session] : [];
   }, [selectedDay, classes]);
 
-  const dateStr = selectedDay === null ? monthStr : t("dayOfMonth", { day: selectedDay, month: monthStr });
+  const dateStr = selectedDay === null ? monthStr : t.classDetails.dayOfMonth(selectedDay, monthStr);
 
   const streakDays = useMemo(
     () => deriveStreakDays(classes, currentMonth, selectedWeek),
@@ -114,7 +114,7 @@ export function StudentHistoryMobile({
 }
 
 function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: string; monthStr: string }>) {
-  const t = useTranslations("dashboard.studentHistory");
+  const t = useAppTranslation("dashboard.studentHistory");
   return (
     <Box sx={{ mb: 3 }}>
       <Box
@@ -126,7 +126,7 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
           mb: 1,
         })}
       >
-        <Typography variant="labelMd">{t("breadcrumbs.archive")}</Typography>
+        <Typography variant="labelMd">{t.breadcrumbs.archive}</Typography>
         <ChevronRight
           sx={{
             fontSize: 16,
@@ -140,7 +140,7 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
             color: theme.palette.primary.main,
           })}
         >
-          {t("breadcrumbs.history")}
+          {t.breadcrumbs.history}
         </Typography>
       </Box>
       <Typography
@@ -150,10 +150,10 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
           color: theme.palette.primary.main,
         })}
       >
-        {t("pageTitle", { name: studentName })}
+        {t.pageTitle({ name: studentName })}
       </Typography>
       <Typography variant="bodyMd" sx={theme => ({ mt: 0.5, color: theme.palette.onSurfaceVariant })}>
-        {t("pageSubtitle", { month: monthStr })}
+        {t.pageSubtitle({ month: monthStr })}
       </Typography>
     </Box>
   );
@@ -162,7 +162,7 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
 function HistoryMobileMetricsGrid({
   metrics,
 }: Readonly<{ metrics: { totalClasses: number; attendanceRate: number; hoursStudied: number; performance: number } }>) {
-  const t = useTranslations("dashboard.studentHistory");
+  const t = useAppTranslation("dashboard.studentHistory");
   return (
     <Box
       sx={{
@@ -173,25 +173,25 @@ function HistoryMobileMetricsGrid({
       }}
     >
       <MobileMetric
-        title={t("metrics.totalClasses", { count: metrics.totalClasses })}
+        title={t.metrics.totalClasses({ count: metrics.totalClasses })}
         icon={<School sx={theme => ({ color: theme.palette.onPrimaryContainer, fontSize: 18 })} />}
         value={metrics.totalClasses}
         bg={theme => theme.palette.primaryContainer}
       />
       <MobileMetric
-        title={t("metrics.attendanceRate", { rate: metrics.attendanceRate })}
+        title={t.metrics.attendanceRate({ rate: metrics.attendanceRate })}
         icon={<VerifiedUser sx={theme => ({ color: theme.palette.onSecondaryContainer, fontSize: 18 })} />}
         value={`${metrics.attendanceRate}%`}
         bg={theme => theme.palette.secondaryContainer}
       />
       <MobileMetric
-        title={t("metrics.hoursStudied", { hours: metrics.hoursStudied })}
+        title={t.metrics.hoursStudied({ hours: metrics.hoursStudied })}
         icon={<Timer sx={theme => ({ color: theme.palette.onTertiaryContainer, fontSize: 18 })} />}
         value={`${metrics.hoursStudied}h`}
         bg={theme => theme.palette.tertiaryContainer}
       />
       <MobileMetric
-        title={t("metrics.performance", { score: metrics.performance })}
+        title={t.metrics.performance({ score: metrics.performance })}
         icon={<TrendingUp sx={theme => ({ color: theme.palette.onErrorContainer, fontSize: 18 })} />}
         value={`${metrics.performance}%`}
         bg={theme => theme.palette.errorContainer}
@@ -215,7 +215,7 @@ function HistoryMobileActions({
   canGoPrev: boolean;
   canGoNext: boolean;
 }>) {
-  const t = useTranslations("dashboard.studentHistory");
+  const t = useAppTranslation("dashboard.studentHistory");
   const locale = useLocale();
   const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" }).toUpperCase();
   const yearStr = currentMonth.getFullYear();
@@ -281,7 +281,7 @@ function HistoryMobileActions({
       <Box
         component="button"
         type="button"
-        aria-label={t("exportPdf")}
+        aria-label={t.exportPdf}
         onClick={onPrint}
         sx={theme => ({
           width: 40,

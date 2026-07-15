@@ -2,10 +2,10 @@
 
 import { CheckCircleOutlined } from "@mui/icons-material";
 import { alpha, Box, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { UpdatedSessionsCardList } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdatedSessionsCardList";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function UpdatedSessionsSectionMobile({ sessions, successfulCount }: Readonly<Props>) {
-  const t = useTranslations("dashboard.dstMigration");
+  const t = useAppTranslation("dashboard.dstMigration");
 
   return (
     <Box
@@ -53,14 +53,10 @@ export function UpdatedSessionsSectionMobile({ sessions, successfulCount }: Read
             <CheckCircleOutlined sx={{ fontSize: 18 }} />
           </Box>
           <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-            {t("sections.updated")}
+            {t.sections.updated}
           </Typography>
         </Box>
-        <StatusBadge
-          category="session"
-          status="completed"
-          label={t("table.sessionsCount", { count: successfulCount })}
-        />
+        <StatusBadge category="session" status="completed" label={t.table.sessionsCount(successfulCount)} />
       </Box>
       <Box sx={{ p: { xs: 2, lg: 0 } }}>
         <UpdatedSessionsCardList sessions={sessions} successfulCount={successfulCount} />

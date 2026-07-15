@@ -2,13 +2,13 @@ import { asc, eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { meetingProviders, userMeetingConfigs } from "@/backend/db/schema";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type {
   MeetingProviderSelectType,
   MeetingProviderSubmitInput,
   UpdateMeetingProviderInput,
 } from "@/backend/types/meeting/meeting-provider.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace MeetingProviderRepository {
   export async function listActive(tx?: DBTransaction): Promise<MeetingProviderSelectType[]> {
@@ -25,11 +25,7 @@ export namespace MeetingProviderRepository {
     return client.select().from(meetingProviders).orderBy(asc(meetingProviders.slug));
   }
 
-  export async function getById(
-    id: string,
-    tx?: DBTransaction,
-    _locale?: string
-  ): Promise<MeetingProviderSelectType | null> {
+  export async function getById(id: string, tx?: DBTransaction): Promise<MeetingProviderSelectType | null> {
     const client = tx ?? db;
     const [row] = await client.select().from(meetingProviders).where(eq(meetingProviders.id, id)).limit(1);
     return row ?? null;
@@ -37,22 +33,17 @@ export namespace MeetingProviderRepository {
 
   export async function getByIdOrThrow(
     id: string,
-    tx?: DBTransaction,
-    locale?: string
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
   ): Promise<MeetingProviderSelectType> {
-    const row = await getById(id, tx, locale);
+    const row = await getById(id, tx);
     if (!row) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("meetingProviderNotFound", { id }));
+      throw new Error(tErrors.meetingProviderNotFound(id));
     }
     return row;
   }
 
-  export async function getBySlug(
-    slug: string,
-    tx?: DBTransaction,
-    _locale?: string
-  ): Promise<MeetingProviderSelectType | null> {
+  export async function getBySlug(slug: string, tx?: DBTransaction): Promise<MeetingProviderSelectType | null> {
     const client = tx ?? db;
     const [row] = await client.select().from(meetingProviders).where(eq(meetingProviders.slug, slug)).limit(1);
     return row ?? null;
@@ -60,8 +51,8 @@ export namespace MeetingProviderRepository {
 
   export async function create(
     input: MeetingProviderSubmitInput,
-    tx?: DBTransaction,
-    locale?: string
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
   ): Promise<MeetingProviderSelectType> {
     const run = async (t: DBTransaction): Promise<MeetingProviderSelectType> => {
       const now = new Date();
@@ -83,8 +74,7 @@ export namespace MeetingProviderRepository {
         .returning();
 
       if (!result) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("meetingProviderCreateFailed"));
+        throw new Error(tErrors.meetingProviderCreateFailed);
       }
 
       logger.info("Meeting provider created", { providerId: result.id, slug: result.slug });
@@ -100,11 +90,11 @@ export namespace MeetingProviderRepository {
   export async function update(
     id: string,
     input: UpdateMeetingProviderInput,
-    tx?: DBTransaction,
-    locale?: string
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
   ): Promise<MeetingProviderSelectType> {
     const run = async (t: DBTransaction): Promise<MeetingProviderSelectType> => {
-      await getByIdOrThrow(id, t, locale);
+      await getByIdOrThrow(id, tErrors, t);
       const [result] = await t
         .update(meetingProviders)
         .set({
@@ -123,8 +113,7 @@ export namespace MeetingProviderRepository {
         .returning();
 
       if (!result) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("meetingProviderUpdateFailed"));
+        throw new Error(tErrors.meetingProviderUpdateFailed);
       }
 
       return result;
@@ -138,6 +127,7 @@ export namespace MeetingProviderRepository {
 
   export async function upsertMany(
     inputs: readonly MeetingProviderSubmitInput[],
+    _tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<MeetingProviderSelectType[]> {
     if (inputs.length === 0) return [];
@@ -192,9 +182,9 @@ export namespace MeetingProviderRepository {
     return db.transaction(run);
   }
 
-  export async function deleteProvider(id: string, tx?: DBTransaction, locale?: string): Promise<void> {
+  export async function deleteProvider(id: string, tErrors: ErrorsLabels, tx?: DBTransaction): Promise<void> {
     const run = async (t: DBTransaction): Promise<void> => {
-      await getByIdOrThrow(id, t, locale);
+      await getByIdOrThrow(id, tErrors, t);
       const [inUse] = await t
         .select({ id: userMeetingConfigs.id })
         .from(userMeetingConfigs)
@@ -202,8 +192,7 @@ export namespace MeetingProviderRepository {
         .limit(1);
 
       if (inUse) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("meetingProviderInUse"));
+        throw new Error(tErrors.meetingProviderInUse);
       }
 
       await t.delete(meetingProviders).where(eq(meetingProviders.id, id));

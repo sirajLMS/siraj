@@ -3,25 +3,16 @@
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useLocale } from "next-intl";
 import { BaseCard } from "@/frontend/common/components/ui";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { OnlineMeetingInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 
 export interface OnlineMeetingCardMobileProps {
   readonly meetingInfo: OnlineMeetingInfo | null | undefined;
   readonly showJoin?: boolean;
-  readonly labels: {
-    readonly title: string;
-    readonly joinMeeting: string;
-    readonly capacityBadge: string;
-    readonly capacity: string;
-    readonly meetingIdLabel: string;
-    readonly online: string;
-    readonly meetingIdNA: string;
-  };
 }
 
 const StyledPreviewContainer = styled(Box)(({ theme }) => ({
@@ -88,12 +79,9 @@ function MeetingPreviewIcon({ logoUrl }: Readonly<{ logoUrl?: string | null }>) 
   return <StyledMobileVideoIcon />;
 }
 
-export function OnlineMeetingCardMobile({
-  meetingInfo,
-  labels,
-  showJoin = false,
-}: Readonly<OnlineMeetingCardMobileProps>) {
-  const locale = useLocale();
+export function OnlineMeetingCardMobile({ meetingInfo, showJoin = false }: Readonly<OnlineMeetingCardMobileProps>) {
+  const t = useAppTranslation("dashboard.classAudit");
+  const locale = useAppLocale();
   const providerName = resolveProviderDisplayName(meetingInfo, locale);
   const meeting = toEffectiveMeeting(meetingInfo);
 
@@ -105,10 +93,10 @@ export function OnlineMeetingCardMobile({
       </StyledPreviewContainer>
       <Box sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
-          <StyledMobilePlatformName variant="titleLg">{labels.title}</StyledMobilePlatformName>
+          <StyledMobilePlatformName variant="titleLg">{t.meeting.title}</StyledMobilePlatformName>
           {meetingInfo?.meetingId ? (
             <StyledLocationText variant="bodyMd">
-              {labels.meetingIdLabel} {meetingInfo.meetingId}
+              {t.meetingIdLabel} {meetingInfo.meetingId}
             </StyledLocationText>
           ) : null}
         </Box>
@@ -116,7 +104,7 @@ export function OnlineMeetingCardMobile({
           <MeetingJoinAction
             joinUrl={meetingInfo?.joinUrl}
             meeting={meeting}
-            label={labels.joinMeeting}
+            label={t.meeting.joinMeeting}
             variant="button"
             id="venue-join-meeting-mobile"
           />

@@ -7,7 +7,6 @@ import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { PaymentMethodOptionRow } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodOptionRow";
@@ -20,6 +19,7 @@ import {
   getPaymentMethodCatalogOptionLabel,
   type PaymentMethodCatalogOption,
 } from "@/frontend/common/lib/payment-method";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type PaymentMethodAutocompleteProps = {
   readonly option?: PaymentMethodCatalogOption | null;
@@ -196,7 +196,7 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
   listAttached = false,
   showSlug = true,
 }: PaymentMethodAutocompleteProps): React.ReactNode => {
-  const t = useTranslations("ui.paymentMethod.select");
+  const t = useAppTranslation("ui").paymentMethod.select;
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;
 
@@ -244,10 +244,10 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
 
   const showRequiredError = Boolean(required) && !option;
   const showError = Boolean(error) || showRequiredError;
-  const resolvedHelperText = helperText ?? (showRequiredError ? t("required") : undefined);
+  const resolvedHelperText = helperText ?? (showRequiredError ? t.required : undefined);
 
-  const resolvedLabel = listAttached ? undefined : (label ?? t("selectMethod"));
-  const resolvedPlaceholder = listAttached ? (label ?? t("selectMethod")) : (placeholder ?? t("searchByNameOrSlug"));
+  const resolvedLabel = listAttached ? undefined : (label ?? t.selectMethod);
+  const resolvedPlaceholder = listAttached ? (label ?? t.selectMethod) : (placeholder ?? t.searchByNameOrSlug);
 
   const autocompleteSx = useMemo(() => buildAutocompleteSx(style, listAttached, isOpen), [style, listAttached, isOpen]);
 

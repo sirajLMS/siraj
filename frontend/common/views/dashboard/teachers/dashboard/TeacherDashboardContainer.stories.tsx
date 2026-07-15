@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useTranslations } from "next-intl";
 import { create } from "zustand";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
@@ -12,6 +11,7 @@ import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilt
 import { TeacherDashboardView } from "@/frontend/common/views/dashboard/teachers/dashboard/teacherDashboardView";
 import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
 import { buildTeacherActiveMetricItems } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardMetrics";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const INITIAL_ROWS: TeacherScheduleRow[] = [
   {
@@ -197,32 +197,32 @@ const useTeacherDashboardStore = create<TeacherDashboardStoryState>(set => ({
 }));
 
 export function MockTeacherDashboardContainer() {
-  const t = useTranslations("dashboard.teacherDashboard");
-  const dashboardT = useTranslations("dashboard");
-  const tJoin = useTranslations("ui.meetingConfig.join");
-  const lessonReportI18n = useTranslations("dashboard.lms.lessonReports");
+  const t = useAppTranslation("dashboard.teacherDashboard");
+  const dashboardT = useAppTranslation("dashboard");
+  const tJoin = useAppTranslation("ui.meetingConfig.join");
+  const lessonReportI18n = useAppTranslation("dashboard.lms.lessonReports");
   const userName = useUserStore(state => state.name);
   const store = useTeacherDashboardStore();
   const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin("emptyTeacher"));
   const metricItems = buildTeacherActiveMetricItems(MOCK_RAW_METRICS, labels.activeMetrics);
   const lessonReportLabels = {
-    attendanceEvaluation: lessonReportI18n("attendanceEvaluation"),
-    durationMinutes: lessonReportI18n("durationMinutes"),
-    completionPercentage: lessonReportI18n("completionPercentage"),
-    teacherNotes: lessonReportI18n("teacherNotes"),
-    present: lessonReportI18n("present"),
-    absent: lessonReportI18n("absent"),
-    late: lessonReportI18n("late"),
-    submit: lessonReportI18n("submit"),
-    dialogTitle: lessonReportI18n("dialogTitle"),
-    cancel: lessonReportI18n("cancel"),
-    submitting: lessonReportI18n("submitting"),
-    submitFailed: lessonReportI18n("submitFailed"),
-    attendanceRequired: lessonReportI18n("attendanceRequired"),
-    durationMin: lessonReportI18n("durationMin"),
-    durationMax: lessonReportI18n("durationMax"),
-    completionMin: lessonReportI18n("completionMin"),
-    completionMax: lessonReportI18n("completionMax"),
+    attendanceEvaluation: lessonReportI18n.attendanceEvaluation,
+    durationMinutes: lessonReportI18n.durationMinutes,
+    completionPercentage: lessonReportI18n.completionPercentage,
+    teacherNotes: lessonReportI18n.teacherNotes,
+    present: lessonReportI18n.present,
+    absent: lessonReportI18n.absent,
+    late: lessonReportI18n.late,
+    submit: lessonReportI18n.submit,
+    dialogTitle: lessonReportI18n.dialogTitle,
+    cancel: lessonReportI18n.cancel,
+    submitting: lessonReportI18n.submitting,
+    submitFailed: lessonReportI18n.submitFailed,
+    attendanceRequired: lessonReportI18n.attendanceRequired,
+    durationMin: lessonReportI18n.durationMin,
+    durationMax: lessonReportI18n.durationMax,
+    completionMin: lessonReportI18n.completionMin,
+    completionMax: lessonReportI18n.completionMax,
   };
 
   return (

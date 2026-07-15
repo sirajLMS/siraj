@@ -1,16 +1,23 @@
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
 import { createTestMeetingConfig, createTestMeetingProvider, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
-async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
+let tErrors: ErrorsLabels;
+beforeAll(async () => {
+  tErrors = await getServerTranslations("en", "errors");
+});
+
+async function expectRepoError(promise: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
   try {
-    await fn();
+    await promise();
   } catch (error) {
     errorCaught = error;
   }
@@ -18,11 +25,11 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   return errorCaught as Error;
 }
 
-function configTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
+function configTest(name: string, fn: (tx: DBTransaction, tErrors: ErrorsLabels) => Promise<void>) {
   test(name, async () => {
     let completed = false;
     await runInRollback(async tx => {
-      await fn(tx);
+      await fn(tx, tErrors);
       completed = true;
     });
     expect(completed).toBe(true);
@@ -30,7 +37,7 @@ function configTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
 }
 
 describe("UserMeetingConfigRepository", () => {
-  configTest("create inserts a user meeting config", async tx => {
+  configTest("create inserts a user meeting config", async (tx, tErrors) => {
     const user = await createTestUser(tx, { email: `umc-create-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
 
@@ -42,6 +49,7 @@ describe("UserMeetingConfigRepository", () => {
         isDefault: false,
         details: { meetingUrl: "https://zoom.us/j/987654321" },
       },
+      tErrors,
       tx
     );
 
@@ -53,7 +61,7 @@ describe("UserMeetingConfigRepository", () => {
     expect(created.details.meetingUrl).toBe("https://zoom.us/j/987654321");
   });
 
-  configTest("getById returns a config when it exists", async tx => {
+  configTest("getById returns a config when it exists", async (tx, _tErrors) => {
     const user = await createTestUser(tx, { email: `umc-get-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     const config = await createTestMeetingConfig(tx, user.id, provider.id);
@@ -64,13 +72,13 @@ describe("UserMeetingConfigRepository", () => {
     expect(found?.id).toBe(config.id);
   });
 
-  configTest("getById returns null for unknown id", async tx => {
+  configTest("getById returns null for unknown id", async (tx, _tErrors) => {
     const found = await UserMeetingConfigRepository.getById(NIL_UUID, tx);
     expect(found).toBeNull();
   });
 
-  configTest("getByIdOrThrow throws when config is missing", async tx => {
-    const error = await expectRepoError(() => UserMeetingConfigRepository.getByIdOrThrow(NIL_UUID, tx));
+  configTest("getByIdOrThrow throws when config is missing", async (tx, tErrors) => {
+    const error = await expectRepoError(() => UserMeetingConfigRepository.getByIdOrThrow(NIL_UUID, tErrors, tx));
     expect(error.message).toContain(NIL_UUID);
   });
 
@@ -87,7 +95,7 @@ describe("UserMeetingConfigRepository", () => {
     expect(results[1]?.id).toBe(second.id);
   });
 
-  configTest("update modifies providerId", async tx => {
+  configTest("update modifies providerId", async (tx, tErrors) => {
     const user = await createTestUser(tx, { email: `umc-provider-${randomUUID()}@test.com` });
     const zoomProvider = await createTestMeetingProvider(tx);
     const meetProvider = await createTestMeetingProvider(tx, {
@@ -102,13 +110,14 @@ describe("UserMeetingConfigRepository", () => {
         providerId: meetProvider.id,
         details: { meetingUrl: "https://meet.google.com/abc-defg-hij" },
       },
+      tErrors,
       tx
     );
 
     expect(updated.providerId).toBe(meetProvider.id);
   });
 
-  configTest("update modifies config fields", async tx => {
+  configTest("update modifies config fields", async (tx, tErrors) => {
     const user = await createTestUser(tx, { email: `umc-update-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     const config = await createTestMeetingConfig(tx, user.id, provider.id);
@@ -119,6 +128,7 @@ describe("UserMeetingConfigRepository", () => {
         label: "Updated label",
         details: { meetingUrl: "https://zoom.us/j/111222333" },
       },
+      tErrors,
       tx
     );
 
@@ -127,18 +137,18 @@ describe("UserMeetingConfigRepository", () => {
     expect(updated.details.meetingUrl).toBe("https://zoom.us/j/111222333");
   });
 
-  configTest("deleteConfig removes a config", async tx => {
+  configTest("deleteConfig removes a config", async (tx, tErrors) => {
     const user = await createTestUser(tx, { email: `umc-delete-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     const config = await createTestMeetingConfig(tx, user.id, provider.id);
 
-    await UserMeetingConfigRepository.deleteConfig(config.id, tx);
+    await UserMeetingConfigRepository.deleteConfig(config.id, tErrors, tx);
 
     const found = await UserMeetingConfigRepository.getById(config.id, tx);
     expect(found).toBeNull();
   });
 
-  configTest("setDefault marks one config as default and clears the previous default", async tx => {
+  configTest("setDefault marks one config as default and clears the previous default", async (tx, tErrors) => {
     const user = await createTestUser(tx, { email: `umc-default-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     const first = await UserMeetingConfigRepository.create(
@@ -149,11 +159,12 @@ describe("UserMeetingConfigRepository", () => {
         isDefault: true,
         details: { meetingUrl: "https://zoom.us/j/100000001" },
       },
+      tErrors,
       tx
     );
     const second = await createTestMeetingConfig(tx, user.id, provider.id, { label: "Second" });
 
-    const defaulted = await UserMeetingConfigRepository.setDefault(second.id, tx);
+    const defaulted = await UserMeetingConfigRepository.setDefault(second.id, tErrors, tx);
     const refreshedFirst = await UserMeetingConfigRepository.getById(first.id, tx);
     const defaultConfig = await UserMeetingConfigRepository.getDefaultForUser(user.id, tx);
 
@@ -162,7 +173,7 @@ describe("UserMeetingConfigRepository", () => {
     expect(defaultConfig?.id).toBe(second.id);
   });
 
-  configTest("create with isDefault=true clears any existing default for the user", async tx => {
+  configTest("create with isDefault=true clears any existing default for the user", async (tx, tErrors) => {
     const user = await createTestUser(tx, { email: `umc-5c-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     const first = await UserMeetingConfigRepository.create(
@@ -173,6 +184,7 @@ describe("UserMeetingConfigRepository", () => {
         isDefault: true,
         details: { meetingUrl: "https://zoom.us/j/200000001" },
       },
+      tErrors,
       tx
     );
 
@@ -184,6 +196,7 @@ describe("UserMeetingConfigRepository", () => {
         isDefault: true,
         details: { meetingUrl: "https://zoom.us/j/200000002" },
       },
+      tErrors,
       tx
     );
 

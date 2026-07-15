@@ -1,6 +1,5 @@
 "use client";
 
-import type { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ClassDetailsAdminView } from "@/frontend/common/views/dashboard/classes/details/admin/ClassDetailsAdminView";
@@ -18,6 +17,7 @@ import {
   useAdminViewLabels,
   useTeacherViewLabels,
 } from "@/frontend/common/views/dashboard/classes/details/useClassDetailsLabels";
+import type { useAppTranslation } from "@/shared/locale/client";
 
 const AdminView = (props: AdminViewProps) => {
   const labels = useAdminViewLabels(props.instance.studentTimezone ?? "");
@@ -71,7 +71,7 @@ export function ClassDetailsContent({
   readonly deleteDialogOpen: boolean;
   readonly onCloseDeleteDialog: () => void;
   readonly onConfirmDelete: () => Promise<void>;
-  readonly t: ReturnType<typeof useTranslations<"dashboard.classDetails">>;
+  readonly t: ReturnType<typeof useAppTranslation<"dashboard.classDetails">>;
   readonly formattedScheduledDate: string;
   readonly formattedStartTime: string;
   readonly formattedEndTime: string;
@@ -117,10 +117,10 @@ export function ClassDetailsContent({
         open={deleteDialogOpen}
         onClose={onCloseDeleteDialog}
         onConfirm={onConfirmDelete}
-        title={t("deleteConfirm.title")}
-        message={t("deleteConfirm.message")}
-        cancelLabel={t("deleteConfirm.cancel")}
-        confirmLabel={t("deleteConfirm.confirm")}
+        title={t.deleteConfirm.title}
+        message={t.deleteConfirm.message}
+        cancelLabel={t.deleteConfirm.cancel}
+        confirmLabel={t.deleteConfirm.confirm}
       />
     </>
   );

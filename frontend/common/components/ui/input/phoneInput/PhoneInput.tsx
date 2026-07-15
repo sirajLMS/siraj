@@ -6,13 +6,13 @@ import FormHelperText from "@mui/material/FormHelperText";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import { PhoneCountryPicker } from "@/frontend/common/components/ui/input/phoneInput/PhoneCountryPicker";
 import { usePhoneInput } from "@/frontend/common/components/ui/input/phoneInput/usePhoneInput";
 import { LtrScope } from "@/frontend/common/providers/theme/LtrScope";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type PhoneInputProps = {
   readonly value: string | null;
@@ -208,7 +208,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   helperText,
   hideLabel,
 }: PhoneInputProps): React.ReactNode => {
-  const t = useTranslations("ui.phoneInput");
+  const t = useAppTranslation("ui").phoneInput;
   const [countryPickerOpen, setCountryPickerOpen] = useState(false);
 
   const {
@@ -258,13 +258,13 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   const showRequiredError = Boolean(required) && isEmpty;
   const showError = Boolean(error) || prefixInvalid || showRequiredError || phoneInvalid;
   const resolvedHelperText = prefixInvalid
-    ? t("invalidPrefix")
+    ? t.invalidPrefix
     : showRequiredError
-      ? t("required")
+      ? t.required
       : phoneInvalid
-        ? t("invalidPhone")
+        ? t.invalidPhone
         : helperText;
-  const resolvedLabel = hideLabel ? undefined : (label ?? t("label"));
+  const resolvedLabel = hideLabel ? undefined : (label ?? t.label);
 
   const startAdornment = (
     <CountryAdornment
@@ -280,7 +280,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
       onPrefixFocus={() => setActiveSlot("prefix")}
       onPrefixKeyDown={handlePrefixKeyDown}
       onPrefixInput={resetPrefixDisplay}
-      selectCountryLabel={t("selectCountry")}
+      selectCountryLabel={t.selectCountry}
     />
   );
 

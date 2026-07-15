@@ -15,11 +15,11 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { PaginationArgs, StudentFilterArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { studentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface ManualClassEntryDialogProps {
   readonly open: boolean;
@@ -42,7 +42,7 @@ export function ManualClassEntryDialog({
   onSubmit,
   defaultActive = false,
 }: Readonly<ManualClassEntryDialogProps>) {
-  const t = useTranslations("dashboard.teacherDashboard");
+  const t = useAppTranslation("dashboard.teacherDashboard");
   const [studentId, setStudentId] = useState("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -93,15 +93,15 @@ export function ManualClassEntryDialog({
   const handleFormSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!studentId) {
-      setError(t("manualClassEntry.selectStudent"));
+      setError(t.manualClassEntry.selectStudent);
       return;
     }
     if (!date) {
-      setError(t("manualClassEntry.selectDate"));
+      setError(t.manualClassEntry.selectDate);
       return;
     }
     if (!startTime) {
-      setError(t("manualClassEntry.selectTime"));
+      setError(t.manualClassEntry.selectTime);
       return;
     }
 
@@ -122,7 +122,7 @@ export function ManualClassEntryDialog({
       onClose();
     } catch (err) {
       logger.error("Manual class entry creation failed:", { err });
-      setError(t("manualClassEntry.createFailed"));
+      setError(t.manualClassEntry.createFailed);
     } finally {
       setSubmitting(false);
     }
@@ -132,7 +132,7 @@ export function ManualClassEntryDialog({
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <form onSubmit={handleFormSubmit}>
         <DialogTitle sx={{ typography: "titleLg" }}>
-          {defaultActive ? t("manualClassEntry.titleCreateActive") : t("manualClassEntry.titleCreate")}
+          {defaultActive ? t.manualClassEntry.titleCreateActive : t.manualClassEntry.titleCreate}
         </DialogTitle>
         <DialogContent dividers>
           <ManualClassEntryFormFields
@@ -154,10 +154,10 @@ export function ManualClassEntryDialog({
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={onClose} disabled={submitting}>
-            {t("manualClassEntry.cancel")}
+            {t.manualClassEntry.cancel}
           </Button>
           <Button type="submit" variant="contained" disabled={submitting || loading}>
-            {submitting ? t("manualClassEntry.creating") : t("manualClassEntry.create")}
+            {submitting ? t.manualClassEntry.creating : t.manualClassEntry.create}
           </Button>
         </DialogActions>
       </form>
@@ -168,19 +168,19 @@ export function ManualClassEntryDialog({
 function renderStudentMenuItems(
   loading: boolean,
   studentsList: ReadonlyArray<{ readonly id?: string | null; readonly name?: string | null }>,
-  t: ReturnType<typeof useTranslations<"dashboard.teacherDashboard">>
+  t: ReturnType<typeof useAppTranslation<"dashboard.teacherDashboard">>
 ) {
   if (loading) {
     return (
       <MenuItem value="" disabled>
-        {t("manualClassEntry.studentLoading")}
+        {t.manualClassEntry.studentLoading}
       </MenuItem>
     );
   }
   if (studentsList.length === 0) {
     return (
       <MenuItem value="" disabled>
-        {t("manualClassEntry.noStudentsAssigned")}
+        {t.manualClassEntry.noStudentsAssigned}
       </MenuItem>
     );
   }
@@ -205,7 +205,7 @@ interface ManualClassEntryFormFieldsProps {
   readonly setDuration: (value: number) => void;
   readonly classType: string;
   readonly setClassType: (value: string) => void;
-  readonly t: ReturnType<typeof useTranslations<"dashboard.teacherDashboard">>;
+  readonly t: ReturnType<typeof useAppTranslation<"dashboard.teacherDashboard">>;
 }
 
 function ManualClassEntryFormFields({
@@ -229,11 +229,11 @@ function ManualClassEntryFormFields({
       {error && <Alert severity="error">{error}</Alert>}
 
       <FormControl fullWidth required>
-        <InputLabel id="student-select-label">{t("manualClassEntry.studentLabel")}</InputLabel>
+        <InputLabel id="student-select-label">{t.manualClassEntry.studentLabel}</InputLabel>
         <Select
           labelId="student-select-label"
           value={studentId}
-          label={t("manualClassEntry.studentLabel")}
+          label={t.manualClassEntry.studentLabel}
           onChange={e => setStudentId(e.target.value)}
           disabled={loading}
         >
@@ -242,7 +242,7 @@ function ManualClassEntryFormFields({
       </FormControl>
 
       <TextField
-        label={t("manualClassEntry.scheduledDate")}
+        label={t.manualClassEntry.scheduledDate}
         type="date"
         required
         fullWidth
@@ -254,7 +254,7 @@ function ManualClassEntryFormFields({
       />
 
       <TextField
-        label={t("manualClassEntry.startTime")}
+        label={t.manualClassEntry.startTime}
         type="time"
         required
         fullWidth
@@ -266,7 +266,7 @@ function ManualClassEntryFormFields({
       />
 
       <TextField
-        label={t("manualClassEntry.durationMinutes")}
+        label={t.manualClassEntry.durationMinutes}
         type="number"
         required
         fullWidth
@@ -278,16 +278,16 @@ function ManualClassEntryFormFields({
       />
 
       <FormControl fullWidth required>
-        <InputLabel id="class-type-select-label">{t("manualClassEntry.classType")}</InputLabel>
+        <InputLabel id="class-type-select-label">{t.manualClassEntry.classType}</InputLabel>
         <Select
           labelId="class-type-select-label"
           value={classType}
-          label={t("manualClassEntry.classType")}
+          label={t.manualClassEntry.classType}
           onChange={e => setClassType(e.target.value)}
         >
-          <MenuItem value="REGULAR">{t("manualClassEntry.classTypeRegular")}</MenuItem>
-          <MenuItem value="TRIAL">{t("manualClassEntry.classTypeTrial")}</MenuItem>
-          <MenuItem value="PROMOTION">{t("manualClassEntry.classTypePromotion")}</MenuItem>
+          <MenuItem value="REGULAR">{t.manualClassEntry.classTypeRegular}</MenuItem>
+          <MenuItem value="TRIAL">{t.manualClassEntry.classTypeTrial}</MenuItem>
+          <MenuItem value="PROMOTION">{t.manualClassEntry.classTypePromotion}</MenuItem>
         </Select>
       </FormControl>
     </Stack>

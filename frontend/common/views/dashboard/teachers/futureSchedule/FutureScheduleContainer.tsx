@@ -3,7 +3,6 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -20,10 +19,11 @@ import type {
   ImportantNoteItem,
   SupportContactData,
 } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
+import { useAppTranslation } from "@/shared/locale/client";
 import { getErrorMessage } from "@/shared/utils/error";
 
 export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleContainerProps>) {
-  const t = useTranslations("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation("dashboard.teacherFutureSchedule");
   const notifications = useNotifications();
   useDocumentTitle(null, "dashboard.teacherFutureSchedule", "pageTitle");
   const { data, loading, error, refetch } = useQuery(teacherFutureScheduleQueryDocument, {
@@ -41,18 +41,18 @@ export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleCo
       await requestLeave({
         variables: {
           classInstanceId,
-          leaveReason: t("defaultLeaveReason"),
+          leaveReason: t.defaultLeaveReason,
         },
       });
       await refetch();
-      notifications.show(t("notifications.leaveRequested"), { severity: "success" });
+      notifications.show(t.notifications.leaveRequested, { severity: "success" });
     } catch (err) {
       const message = getErrorMessage(err);
       logger.error({ caller: "FutureScheduleContainer" }, `Leave request failed: ${message}`);
       if (message.includes("quota") || message.includes("Leave quota exceeded")) {
-        notifications.show(t("errors.quotaExceeded"), { severity: "error" });
+        notifications.show(t.errors.quotaExceeded, { severity: "error" });
       } else {
-        notifications.show(message || t("errors.leaveRequestFailed"), { severity: "error" });
+        notifications.show(message || t.errors.leaveRequestFailed, { severity: "error" });
       }
     }
   };
@@ -63,7 +63,7 @@ export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleCo
         <Stack sx={{ alignItems: "center" }} spacing={2}>
           <CircularProgress />
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {t("loading")}
+            {t.loading}
           </Typography>
         </Stack>
       </Box>
@@ -74,7 +74,7 @@ export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleCo
     return (
       <Box sx={{ py: 4, px: 3 }}>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main })}>
-          {t("errors.failedToLoad")}
+          {t.errors.failedToLoad}
         </Typography>
       </Box>
     );

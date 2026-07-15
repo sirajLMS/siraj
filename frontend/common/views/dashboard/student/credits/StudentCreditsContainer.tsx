@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import type { CreditReason } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -10,33 +9,34 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/billing/credit-lms.documents";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { StudentCreditsView } from "@/frontend/common/views/dashboard/student/credits/studentCreditsView";
-import type { StudentCreditsLabels } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsLabels";
 import type {
   StudentCreditBalanceInfo,
   StudentCreditTransactionRow,
 } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { StudentCreditsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentCredits";
 
 function useStudentCreditsLabels(
-  t: ReturnType<typeof useTranslations<"dashboard.studentPortal.credits">>
+  t: ReturnType<typeof useAppTranslation<"dashboard.studentPortal.credits">>
 ): StudentCreditsLabels {
   return useMemo(
     () => ({
-      pageTitle: t("pageTitle"),
-      currentBalance: t("currentBalance"),
-      hoursRemaining: t("hoursRemaining"),
-      hoursTotal: t("hoursTotal"),
-      transactionHistory: t("transactionHistory"),
-      dateColumn: t("dateColumn"),
-      typeColumn: t("typeColumn"),
-      amountColumn: t("amountColumn"),
-      notesColumn: t("notesColumn"),
-      purchase: t("purchase"),
-      deduction: t("deduction"),
-      refund: t("refund"),
-      adjustment: t("adjustment"),
-      noTransactions: t("noTransactions"),
-      backToDashboard: t("backToDashboard"),
+      pageTitle: t.pageTitle,
+      currentBalance: t.currentBalance,
+      hoursRemaining: t.hoursRemaining,
+      hoursTotal: t.hoursTotal,
+      transactionHistory: t.transactionHistory,
+      dateColumn: t.dateColumn,
+      typeColumn: t.typeColumn,
+      amountColumn: t.amountColumn,
+      notesColumn: t.notesColumn,
+      purchase: t.purchase,
+      deduction: t.deduction,
+      refund: t.refund,
+      adjustment: t.adjustment,
+      noTransactions: t.noTransactions,
+      backToDashboard: t.backToDashboard,
     }),
     [t]
   );
@@ -59,7 +59,7 @@ function mapTransaction(raw: TransactionItem): StudentCreditTransactionRow {
 }
 
 export function StudentCreditsContainer() {
-  const t = useTranslations("dashboard.studentPortal.credits");
+  const t = useAppTranslation("dashboard.studentPortal.credits");
   const router = useRouter();
   const labels = useStudentCreditsLabels(t);
 

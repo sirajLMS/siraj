@@ -4,12 +4,12 @@ import { BlockOutlined, VideocamOffOutlined, WarningAmberOutlined } from "@mui/i
 import { Box, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import { PersonProfileLink, PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import { StatusAction } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {
@@ -47,7 +47,7 @@ export function StatusTrackingDataGridDesktop({
   onVerify,
   loading = false,
 }: StatusTrackingDataGridProps) {
-  const locale = useLocale();
+  const locale = useAppLocale();
   const columns = useMemo<GridColDef<StatusTrackingRow>[]>(() => {
     const actionLabels = {
       joinSession: labels.joinSession,

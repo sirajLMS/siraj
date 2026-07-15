@@ -1,7 +1,6 @@
 "use client";
 
 import { useApolloClient, useMutation } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import {
   activateClassMutationDocument,
   activateOverrideClassMutationDocument,
@@ -15,6 +14,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
 import { logger } from "@/frontend/common/utils/logger";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface UseClassMutationsOptions {
   id: string;
@@ -37,12 +37,18 @@ interface UseClassMutationsReturn {
 }
 
 export function useClassMutations({ id, onError }: UseClassMutationsOptions): UseClassMutationsReturn {
-  const t = useTranslations("dashboard.classDetails");
+  const t = useAppTranslation("dashboard.classDetails");
   const client = useApolloClient();
 
   const reportMutationError = (context: string, err: unknown, fallbackKey: string) => {
     logger.error(context, { err });
-    onError?.(getGraphQLErrorMessage(err, t(fallbackKey)));
+    // fallbackKey is now in dot notation like "actionFeedback.activateError"
+    const keys = fallbackKey.split(".");
+    let fallbackValue: any = t;
+    for (const key of keys) {
+      fallbackValue = fallbackValue[key];
+    }
+    onError?.(getGraphQLErrorMessage(err, fallbackValue));
   };
 
   const [activateClass] = useMutation(activateClassMutationDocument, {

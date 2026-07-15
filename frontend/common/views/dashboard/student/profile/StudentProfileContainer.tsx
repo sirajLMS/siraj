@@ -1,49 +1,49 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { StudentProfileView } from "@/frontend/common/views/dashboard/student/profile/studentProfileView";
-import type { StudentProfileLabels } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileLabels";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { StudentProfileLabels } from "@/shared/locale/types/dashboard/studentPortal/studentProfile";
 
 function useStudentProfileLabels(
-  t: ReturnType<typeof useTranslations<"dashboard.studentPortal.profile">>
+  t: ReturnType<typeof useAppTranslation<"dashboard.studentPortal.profile">>
 ): StudentProfileLabels {
   return useMemo(
     () => ({
-      pageTitle: t("pageTitle"),
-      personalInfo: t("personalInfo"),
-      fullName: t("fullName"),
-      email: t("email"),
-      phone: t("phone"),
-      dateOfBirth: t("dateOfBirth"),
-      gender: t("gender"),
-      language: t("language"),
-      parentInfo: t("parentInfo"),
-      parentName: t("parentName"),
-      parentEmail: t("parentEmail"),
-      parentPhone: t("parentPhone"),
-      academicInfo: t("academicInfo"),
-      teacher: t("teacher"),
-      hoursPerWeek: t("hoursPerWeek"),
-      classesRemaining: t("classesRemaining"),
-      classesTotal: t("classesTotal"),
-      editProfile: t("editProfile"),
-      saveChanges: t("saveChanges"),
-      cancel: t("cancel"),
-      loadingMessage: t("loadingMessage"),
-      saveSuccess: t("saveSuccess"),
-      saveError: t("saveError"),
+      pageTitle: t.pageTitle,
+      personalInfo: t.personalInfo,
+      fullName: t.fullName,
+      email: t.email,
+      phone: t.phone,
+      dateOfBirth: t.dateOfBirth,
+      gender: t.gender,
+      language: t.language,
+      parentInfo: t.parentInfo,
+      parentName: t.parentName,
+      parentEmail: t.parentEmail,
+      parentPhone: t.parentPhone,
+      academicInfo: t.academicInfo,
+      teacher: t.teacher,
+      hoursPerWeek: t.hoursPerWeek,
+      classesRemaining: t.classesRemaining,
+      classesTotal: t.classesTotal,
+      editProfile: t.editProfile,
+      saveChanges: t.saveChanges,
+      cancel: t.cancel,
+      loadingMessage: t.loadingMessage,
+      saveSuccess: t.saveSuccess,
+      saveError: t.saveError,
     }),
     [t]
   );
 }
 
 export function StudentProfileContainer() {
-  const t = useTranslations("dashboard.studentPortal.profile");
+  const t = useAppTranslation("dashboard.studentPortal.profile");
   const router = useRouter();
   const labels = useStudentProfileLabels(t);
 

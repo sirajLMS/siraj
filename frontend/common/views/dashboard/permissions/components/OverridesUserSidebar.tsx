@@ -2,9 +2,9 @@
 
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledSidebarContainer = styled(Box)(({ theme }) => ({
   width: "100%",
@@ -74,7 +74,7 @@ interface OverridesUserSidebarProps {
 }
 
 export function OverridesUserSidebar({ user, userGroups }: Readonly<OverridesUserSidebarProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   return (
     <StyledSidebarContainer>
@@ -100,10 +100,10 @@ export function OverridesUserSidebar({ user, userGroups }: Readonly<OverridesUse
 
       {/* Current Groups */}
       <StyledGroupsSection>
-        <StyledGroupsSectionLabel variant="labelMd">{t("currentGroups")}</StyledGroupsSectionLabel>
+        <StyledGroupsSectionLabel variant="labelMd">{t.currentGroups}</StyledGroupsSectionLabel>
         {userGroups.length === 0 ? (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.disabled, fontStyle: "italic" })}>
-            {t("noAssignedGroups")}
+            {t.noAssignedGroups}
           </Typography>
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>

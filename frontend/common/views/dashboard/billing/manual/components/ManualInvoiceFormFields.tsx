@@ -1,7 +1,6 @@
 "use client";
 
 import { Autocomplete, Box, Skeleton, TextField } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
@@ -19,7 +18,8 @@ import type {
   ParentInvoiceOption,
   StudentOption,
 } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
-import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
 
 interface ManualInvoiceFormFieldsProps {
   readonly control: Control<ManualInvoiceFormData>;
@@ -120,8 +120,8 @@ export function ManualInvoiceFormFields({
   studentsLoading = false,
 }: Readonly<ManualInvoiceFormFieldsProps>) {
   const isMobile = variant === "mobile";
-  const tProfile = useTranslations("profile.parent");
-  const currencyLabel = tProfile("fields.currency");
+  const tProfile = useAppTranslation("profile").parent;
+  const currencyLabel = tProfile.fields.currency;
 
   const parentField = (
     <ManualInvoiceParentField control={control} errors={errors} labels={labels} parentOptions={parentOptions} />

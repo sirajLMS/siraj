@@ -15,23 +15,21 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import type { LocalizedStringDrawerProps } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringDrawer";
 import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
-
-type TranslationFn = (key: string, params?: Record<string, string>) => string;
 
 type HelperTextParams = {
   readonly draft: LocalizedString;
   readonly required: boolean;
   readonly resolvedRequired: readonly AppLocale[];
   readonly uiLocale: string;
-  readonly t: TranslationFn;
+  readonly t: ReturnType<typeof useAppTranslation>;
 };
 
 function buildHelperText({ draft, required, resolvedRequired, uiLocale, t }: HelperTextParams): string | undefined {
@@ -44,15 +42,15 @@ function buildHelperText({ draft, required, resolvedRequired, uiLocale, t }: Hel
       return !(typeof v === "string" && v.trim() !== "");
     });
     if (missing.length === 1) {
-      return t("localeRequired", { localeName: getLanguageDisplayName(missing[0], uiLocale) });
+      return t.localeRequired(getLanguageDisplayName(missing[0], uiLocale));
     }
     if (missing.length > 1) {
       const names = missing.map(l => getLanguageDisplayName(l, uiLocale)).join(", ");
-      return t("localesRequired", { localeNames: names });
+      return t.localesRequired(names);
     }
   }
   if (required) {
-    return t("atLeastOneTranslationRequired");
+    return t.atLeastOneTranslationRequired;
   }
   return undefined;
 }
@@ -120,7 +118,7 @@ type LocaleFieldProps = {
   readonly minRows: number | undefined;
   readonly disabled: boolean;
   readonly onChange: (locale: AppLocale, text: string) => void;
-  readonly t: TranslationFn;
+  readonly t: ReturnType<typeof useAppTranslation>;
 };
 
 const LocaleField: React.FC<LocaleFieldProps> = ({
@@ -155,7 +153,7 @@ const LocaleField: React.FC<LocaleFieldProps> = ({
     multiline={multiline}
     minRows={minRows}
     error={showError}
-    helperText={showError ? t("localeRequiredEntry", { localeName: languageName }) : undefined}
+    helperText={showError ? t.localeRequiredEntry(languageName) : undefined}
     disabled={disabled}
     dir={isRtl ? "rtl" : "ltr"}
     slotProps={{
@@ -180,7 +178,7 @@ type DrawerFooterProps = {
   readonly onSaveAction: (next: LocalizedString) => void;
   readonly draft: LocalizedString;
   readonly onCancelAction: () => void;
-  readonly t: TranslationFn;
+  readonly t: ReturnType<typeof useAppTranslation>;
 };
 
 const DrawerFooter: React.FC<DrawerFooterProps> = ({ canSave, saving, onSaveAction, draft, onCancelAction, t }) => {
@@ -199,10 +197,10 @@ const DrawerFooter: React.FC<DrawerFooterProps> = ({ canSave, saving, onSaveActi
       }}
     >
       <Button onClick={onCancelAction} disabled={saving} variant="text" sx={buttonSx}>
-        {t("cancel")}
+        {t.cancel}
       </Button>
       <Button variant="contained" disabled={!canSave} onClick={() => onSaveAction(draft)} sx={buttonSx}>
-        {t("save")}
+        {t.save}
       </Button>
     </DialogActions>
   );
@@ -232,8 +230,8 @@ export const LocalizedStringDrawerMobile: React.FC<LocalizedStringDrawerProps> =
   showActions,
   dismissAction = "save",
 }) => {
-  const t = useTranslations("ui.localizedString");
-  const uiLocale = useLocale();
+  const t = useAppTranslation("ui.localizedString");
+  const uiLocale = useAppLocale();
   const [draft, setDraft] = useState<LocalizedString>(value);
 
   const showFooter = useMemo(() => showActions ?? !autosave, [showActions, autosave]);
@@ -261,7 +259,7 @@ export const LocalizedStringDrawerMobile: React.FC<LocalizedStringDrawerProps> =
     [autosave, dismissAction, canSave, draft, onSaveAction, onCancelAction]
   );
 
-  const headerTitle = useMemo(() => title ?? t("editTranslations"), [title, t]);
+  const headerTitle = useMemo(() => title ?? t.localizedString.editTranslations, [title, t]);
   const requiredSet = useMemo(() => new Set<AppLocale>(resolvedRequired), [resolvedRequired]);
   const helperText = useMemo(
     () => buildHelperText({ draft, required, resolvedRequired, uiLocale, t }),
@@ -277,7 +275,7 @@ export const LocalizedStringDrawerMobile: React.FC<LocalizedStringDrawerProps> =
         <Typography variant="h6" component="span">
           {headerTitle}
         </Typography>
-        <IconButton onClick={handleDismiss} disabled={saving} size="small" aria-label={t("cancel")}>
+        <IconButton onClick={handleDismiss} disabled={saving} size="small" aria-label={t.cancel}>
           <CloseOutlined fontSize="small" />
         </IconButton>
       </DialogTitle>

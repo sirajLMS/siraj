@@ -1,7 +1,4 @@
-"use client";
-
 import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { AddPermissionsTab } from "@/frontend/common/views/dashboard/permissions/components/AddPermissionsTab";
@@ -10,6 +7,7 @@ import { CurrentPermissionsTab } from "@/frontend/common/views/dashboard/permiss
 import { SingleGroupHeader } from "@/frontend/common/views/dashboard/permissions/components/SingleGroupHeader";
 import type { SubTabKey } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
 import { useSingleGroupState } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface SingleGroupViewProps {
   readonly group: PermissionGroup;
@@ -40,7 +38,7 @@ export function SingleGroupView({
   onBulkRevoke,
   onUpdateGroup,
 }: Readonly<SingleGroupViewProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
   const {
     activeSubTab,
     setActiveSubTab,
@@ -78,15 +76,15 @@ export function SingleGroupView({
         >
           <Tab
             value="current"
-            label={`${t("currentPermissions")} (${permissionsCount})`}
+            label={`${t.currentPermissions} (${permissionsCount})`}
             sx={{ textTransform: "none", fontWeight: 600 }}
           />
           {!group.isSystem && (
-            <Tab value="add" label={t("addPermissions")} sx={{ textTransform: "none", fontWeight: 600 }} />
+            <Tab value="add" label={t.addPermissions} sx={{ textTransform: "none", fontWeight: 600 }} />
           )}
           <Tab
             value="users"
-            label={`${t("assignedUsers")} (${assignedUsersCount})`}
+            label={`${t.assignedUsers} (${assignedUsersCount})`}
             sx={{ textTransform: "none", fontWeight: 600 }}
           />
         </Tabs>

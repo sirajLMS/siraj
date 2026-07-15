@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import {
@@ -15,6 +14,7 @@ import type {
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type ParentAccountFormFields = {
   name: string;
@@ -26,10 +26,10 @@ type AccountParentData = Pick<ParentViewData, "name" | "email">;
 
 function resolveAccountStatusLabel(
   accountStatus: string | null | undefined,
-  t: ReturnType<typeof useTranslations<"profile.parent">>
+  t: ReturnType<typeof useAppTranslation<"profile.parent">>
 ): string {
   const normalized = (accountStatus ?? AccountStatus.Activated).toLowerCase();
-  return t(`accountStatus.${normalized as "activated" | "deactivated"}`);
+  return t.accountStatus[normalized as "activated" | "deactivated"];
 }
 
 type AccountSectionProps =
@@ -51,7 +51,7 @@ type AccountSectionProps =
     };
 
 export function AccountSection(props: AccountSectionProps) {
-  const t = useTranslations("profile.parent");
+  const t = useAppTranslation("profile").parent;
   const { canView } = useProfileFieldAccess({ scope: props.scope });
 
   if (props.mode === "edit") {
@@ -61,10 +61,10 @@ export function AccountSection(props: AccountSectionProps) {
         scope={props.scope}
         name={props.parentData.name}
         avatarUrl={props.avatarUrl}
-        sectionTitle={t("sections.account")}
-        nameLabel={t("fields.fullName")}
-        emailLabel={t("fields.primaryEmail")}
-        currencyLabel={t("fields.displayCurrency")}
+        sectionTitle={t.sections.account}
+        nameLabel={t.fields.fullName}
+        emailLabel={t.fields.primaryEmail}
+        currencyLabel={t.fields.displayCurrency}
         register={props.register}
         control={props.control}
       />
@@ -76,7 +76,7 @@ export function AccountSection(props: AccountSectionProps) {
   const accountStatusContent =
     canView("parent_account") && accountStatus ? (
       <InfoField
-        label={t("fields.accountStatus")}
+        label={t.fields.accountStatus}
         value={
           <StatusBadge
             category="staffAccount"
@@ -96,10 +96,10 @@ export function AccountSection(props: AccountSectionProps) {
       email={props.parentData.email}
       avatarUrl={props.avatarUrl}
       displayCurrency={props.displayCurrency}
-      sectionTitle={t("sections.account")}
-      nameLabel={t("fields.fullName")}
-      emailLabel={t("fields.primaryEmail")}
-      currencyLabel={t("fields.displayCurrency")}
+      sectionTitle={t.sections.account}
+      nameLabel={t.fields.fullName}
+      emailLabel={t.fields.primaryEmail}
+      currencyLabel={t.fields.displayCurrency}
       additionalViewContent={accountStatusContent}
     />
   );

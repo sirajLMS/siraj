@@ -2,13 +2,13 @@
 
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, Chip, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { TeacherAvailabilityGapItem } from "@/frontend/common/views/dashboard/search-schedule/TeacherAvailabilityDayPill";
 import {
   CalendarGridContainer,
   CalendarWeekdayHeader,
   computeCalendarGridLayout,
 } from "@/frontend/common/views/dashboard/shared/CalendarGridShared";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface TeacherAvailabilityCalendarDay {
   readonly day: number;
@@ -78,12 +78,12 @@ export function TeacherAvailabilityCalendarGrid({
   currentMonth,
   daysByDate,
 }: Readonly<TeacherAvailabilityCalendarGridProps>) {
-  const t = useTranslations("dashboard.searchSchedule.calendar.days");
+  const t = useAppTranslation("dashboard.core.searchSchedule");
   const { daysInMonth, emptyStartDays, emptyEndDays } = computeCalendarGridLayout(currentMonth);
 
   return (
     <CalendarGridContainer>
-      <CalendarWeekdayHeader translateDay={day => t(day)} />
+      <CalendarWeekdayHeader translateDay={day => t.calendar.days[day]} />
 
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
         {emptyStartDays.map(day => (

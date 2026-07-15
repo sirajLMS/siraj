@@ -59,14 +59,9 @@ function encryptDetailsForStorage(type: PaymentMethodType, details: PaymentMetho
 async function assertCatalogActive(
   type: PaymentMethodType,
   details: PaymentMethodDetails,
-  tx?: DBTransaction,
   tErrors: ErrorsLabels,
-  locale?: string
+  tx?: DBTransaction
 ): Promise<void> {
-  if (!tErrors) {
-    tErrors = await getServerTranslations(locale ?? "en", "errors");
-  }
-
   switch (type) {
     case PaymentMethodType.MOBILE_WALLET: {
       const wallet = await SupportedMobileWalletRepository.getById((details as { walletId: string }).walletId, tx);
@@ -116,13 +111,16 @@ async function hasAdminPaymentAccess(actorUserId: string): Promise<boolean> {
   return PermissionsService.hasPermission(actorUserId, AppPermission.USER_EDIT_PROFILE);
 }
 
-async function assertActorCanManageTarget(actorUserId: string, targetUserId: string, locale?: string): Promise<void> {
+async function assertActorCanManageTarget(
+  actorUserId: string,
+  targetUserId: string,
+  tErrors: ErrorsLabels
+): Promise<void> {
   if (actorUserId === targetUserId) {
     return;
   }
   const canManage = await hasAdminPaymentAccess(actorUserId);
   if (!canManage) {
-    const tErrors = await getServerTranslations(locale ?? "en", "errors");
     throw new Error(tErrors.insufficientPermissions);
   }
 }
@@ -217,15 +215,14 @@ export namespace PaymentMethodService {
     actorUserId: string,
     input: UserPaymentMethodSubmitInput,
     tErrors: ErrorsLabels,
-    locale?: string,
     tx?: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
-    await assertActorCanManageTarget(actorUserId, input.userId, locale);
+    await assertActorCanManageTarget(actorUserId, input.userId, tErrors);
     const parsed = userPaymentMethodSubmitInputSchema.parse(input);
     const encryptedDetails = encryptDetailsForStorage(parsed.type, parsed.details);
 
     const run = async (t: DBTransaction) => {
-      await assertCatalogActive(parsed.type, parsed.details, t, tErrors, locale);
+      await assertCatalogActive(parsed.type, parsed.details, tErrors, t);
 
       if (parsed.isDefault) {
         for (const slot of slotsForDirection(parsed.direction)) {
@@ -252,7 +249,6 @@ export namespace PaymentMethodService {
     id: string,
     input: UpdateUserPaymentMethodInput,
     tErrors: ErrorsLabels,
-    locale?: string,
     tx?: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
     const existing = await UserPaymentMethodRepository.getById(id, tx);
@@ -260,17 +256,16 @@ export namespace PaymentMethodService {
       throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
     }
 
-    await assertActorCanManageTarget(actorUserId, existing.userId, locale);
+    await assertActorCanManageTarget(actorUserId, existing.userId, tErrors);
 
     const run = async (t: DBTransaction) => {
-      const tErrors = await getServerTranslations(locale ?? "en", "errors");
       const details =
         input.details !== undefined
           ? encryptDetailsForStorage(existing.type as PaymentMethodType, input.details)
           : undefined;
 
       if (input.details !== undefined) {
-        await assertCatalogActive(existing.type as PaymentMethodType, input.details, t, tErrors, locale);
+        await assertCatalogActive(existing.type as PaymentMethodType, input.details, tErrors, t);
       }
 
       const direction = input.direction ?? (existing.direction as PaymentDirection);
@@ -286,6 +281,7 @@ export namespace PaymentMethodService {
           ...input,
           ...(details !== undefined ? { details } : {}),
         },
+        tErrors,
         t
       );
 
@@ -306,8 +302,8 @@ export namespace PaymentMethodService {
       throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
     }
 
-    await assertActorCanManageTarget(actorUserId, existing.userId, undefined);
-    await UserPaymentMethodRepository.deleteById(id, tx, tErrors);
+    await assertActorCanManageTarget(actorUserId, existing.userId, tErrors);
+    await UserPaymentMethodRepository.deleteById(id, tErrors, tx);
   }
 
   export async function setDefaultUserPaymentMethod(
@@ -352,7 +348,7 @@ export namespace PaymentMethodService {
       throw new Error(tErrors.billing.invoiceAlreadyPaid({ id, status: "PAID" }));
     }
 
-    const verified = await UserPaymentMethodRepository.setVerified(id, actorUserId, tx);
+    const verified = await UserPaymentMethodRepository.setVerified(id, actorUserId, tErrors, tx);
     return buildMaskedPaymentMethod(verified, true);
   }
 
@@ -399,6 +395,7 @@ export namespace PaymentMethodService {
         paymentMethodType: paymentMethodSnapshot.type,
         paymentMethodSnapshot,
       },
+      tErrors,
       tx
     );
   }
@@ -467,7 +464,7 @@ export namespace PaymentMethodService {
     const encryptedDetails = encryptDetailsForStorage(parsed.type, parsed.details);
 
     const tErrors = await getServerTranslations("en", "errors");
-    await assertCatalogActive(parsed.type, parsed.details, tx, tErrors);
+    await assertCatalogActive(parsed.type, parsed.details, tErrors, tx);
 
     if (parsed.isDefault) {
       for (const slot of slotsForDirection(parsed.direction)) {
@@ -574,8 +571,8 @@ export namespace PaymentMethodService {
             const verified = await UserPaymentMethodRepository.setVerified(
               existingPayout.id,
               adminUser.id,
-              tx,
-              tErrors
+              tErrors,
+              tx
             );
             results.push(buildMaskedPaymentMethod(verified, true));
           } else {
@@ -599,7 +596,7 @@ export namespace PaymentMethodService {
             tx
           );
           if (adminUser) {
-            const verified = await UserPaymentMethodRepository.setVerified(created.id, adminUser.id, tx, tErrors);
+            const verified = await UserPaymentMethodRepository.setVerified(created.id, adminUser.id, tErrors, tx);
             results.push(buildMaskedPaymentMethod(verified, true));
           } else {
             results.push(created);

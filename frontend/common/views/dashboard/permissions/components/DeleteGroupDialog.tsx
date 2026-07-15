@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface DeleteGroupDialogProps {
   readonly open: boolean;
@@ -22,7 +22,7 @@ export function DeleteGroupDialog({
   onClose,
   onConfirm,
 }: Readonly<DeleteGroupDialogProps>) {
-  const t = useTranslations("dashboard.permissions");
+  const t = useAppTranslation("dashboard.permissions");
 
   return (
     <Dialog
@@ -32,9 +32,9 @@ export function DeleteGroupDialog({
       maxWidth="xs"
       aria-labelledby="delete-group-dialog-title"
     >
-      <DialogTitle id="delete-group-dialog-title">{t("deleteConfirmTitle")}</DialogTitle>
+      <DialogTitle id="delete-group-dialog-title">{t.deleteConfirmTitle}</DialogTitle>
       <DialogContent>
-        <DialogContentText sx={{ mt: 1 }}>{t("deleteConfirmBody", { name: groupName })}</DialogContentText>
+        <DialogContentText sx={{ mt: 1 }}>{t.deleteConfirmBody({ name: groupName })}</DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button
@@ -47,7 +47,7 @@ export function DeleteGroupDialog({
             borderRadius: 1.5,
           })}
         >
-          {t("cancel", { defaultValue: "Cancel" })}
+          {t.cancel}
         </Button>
         <Button
           onClick={onConfirm}
@@ -63,7 +63,7 @@ export function DeleteGroupDialog({
             },
           })}
         >
-          {t("actionDelete")}
+          {t.actionDelete}
         </Button>
       </DialogActions>
     </Dialog>

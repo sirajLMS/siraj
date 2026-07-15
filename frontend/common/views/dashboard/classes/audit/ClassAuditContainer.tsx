@@ -13,7 +13,6 @@ import {
   TextField,
 } from "@mui/material";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   groupClassAuditQueryDocument,
@@ -24,6 +23,7 @@ import { logger } from "@/frontend/common/utils/logger";
 import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { ClassAuditView } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditView";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function exportToCsv(
   students: readonly {
@@ -57,7 +57,7 @@ function exportToCsv(
 }
 
 function useAuditLabels(
-  t: ReturnType<typeof useTranslations<"dashboard.classAudit">>,
+  t: ReturnType<typeof useAppTranslation<"dashboard.classAudit">>,
   audit: {
     readonly registeredStudentCount?: number | null;
     readonly adminNote?: { readonly lastUpdated?: string | null; readonly content?: string | null } | null;
@@ -65,57 +65,57 @@ function useAuditLabels(
 ) {
   return {
     breadcrumbs: {
-      dashboard: t("breadcrumbs.dashboard"),
-      schedules: t("breadcrumbs.schedules"),
-      current: t("breadcrumbs.current"),
+      dashboard: t.breadcrumbs.dashboard,
+      schedules: t.breadcrumbs.schedules,
+      current: t.breadcrumbs.current,
     },
-    pageTitle: t("pageTitle"),
-    mobileTitle: t("mobileTitle"),
-    generateReport: t("actions.generateReport"),
-    editClass: t("actions.editClass"),
-    courseCode: t("fields.courseCode"),
-    teacher: t("fields.teacher"),
-    originalDate: t("fields.originalDate"),
-    rescheduledDate: t("fields.rescheduledDate"),
-    timeSlot: t("fields.timeSlot"),
-    venue: t("fields.venue"),
-    auditTrailTitle: t("auditTrail.title"),
-    statusRescheduled: t("status.regularRescheduled"),
-    classDetails: t("fields.classDetails"),
+    pageTitle: t.pageTitle,
+    mobileTitle: t.mobileTitle,
+    generateReport: t.actions.generateReport,
+    editClass: t.actions.editClass,
+    courseCode: t.fields.courseCode,
+    teacher: t.fields.teacher,
+    originalDate: t.fields.originalDate,
+    rescheduledDate: t.fields.rescheduledDate,
+    timeSlot: t.fields.timeSlot,
+    venue: t.fields.venue,
+    auditTrailTitle: t.auditTrail.title,
+    statusRescheduled: t.status.regularRescheduled,
+    classDetails: t.fields.classDetails,
     registeredStudents: {
-      title: t("students.title", { count: audit?.registeredStudentCount ?? 0 }),
-      exportList: t("students.exportList"),
-      studentName: t("students.studentName"),
-      idNumber: t("students.idNumber"),
-      attendanceStatus: t("students.attendanceStatus"),
-      actions: t("students.actions"),
-      student: t("students.student"),
-      status: t("students.status"),
-      viewAll: t("students.viewAll", { count: audit?.registeredStudentCount ?? 0 }),
-      pending: t("students.pending"),
-      present: t("students.present"),
-      absent: t("students.absent"),
-      noEntries: t("students.noEntries"),
+      title: t.students.title({ count: audit?.registeredStudentCount ?? 0 }),
+      exportList: t.students.exportList,
+      studentName: t.students.studentName,
+      idNumber: t.students.idNumber,
+      attendanceStatus: t.students.attendanceStatus,
+      actions: t.students.actions,
+      student: t.students.student,
+      status: t.students.status,
+      viewAll: t.students.viewAll({ count: audit?.registeredStudentCount ?? 0 }),
+      pending: t.students.pending,
+      present: t.students.present,
+      absent: t.students.absent,
+      noEntries: t.students.noEntries,
     },
     meetingInfo: {
-      title: t("meeting.title"),
-      joinMeeting: t("meeting.joinMeeting"),
-      capacityBadge: t("venue.capacityBadge", { count: 0 }),
-      capacity: t("venue.capacity", { count: 0 }),
-      meetingIdLabel: t("meetingIdLabel"),
-      online: t("online"),
-      meetingIdNA: t("meetingIdNA"),
+      title: t.meeting.title,
+      joinMeeting: t.meeting.joinMeeting,
+      capacityBadge: t.venue.capacityBadge({ count: 0 }),
+      capacity: t.venue.capacity({ count: 0 }),
+      meetingIdLabel: t.meetingIdLabel,
+      online: t.online,
+      meetingIdNA: t.meetingIdNA,
     },
     communicationLog: {
-      title: t("communication.title"),
-      resendNotifications: t("communication.resendNotifications"),
+      title: t.communication.title,
+      resendNotifications: t.communication.resendNotifications,
     },
     adminNote: {
-      title: t("adminNote.title"),
-      titleMobile: t("adminNote.titleMobile"),
-      lastUpdated: t("adminNote.lastUpdated", { time: audit?.adminNote?.lastUpdated ?? "" }),
-      update: t("adminNote.update"),
-      edit: t("adminNote.edit"),
+      title: t.adminNote.title,
+      titleMobile: t.adminNote.titleMobile,
+      lastUpdated: t.adminNote.lastUpdated({ time: audit?.adminNote?.lastUpdated ?? "" }),
+      update: t.adminNote.update,
+      edit: t.adminNote.edit,
     },
   };
 }
@@ -168,8 +168,8 @@ function AdminNoteDialog({
 
 export function ClassAuditContainer() {
   const router = useRouter();
-  const t = useTranslations("dashboard.classAudit");
-  const tc = useTranslations("common");
+  const t = useAppTranslation("dashboard.classAudit");
+  const tc = useAppTranslation("common");
   const client = useApolloClient();
 
   const params = useParams();
@@ -210,15 +210,15 @@ export function ClassAuditContainer() {
   }
 
   if (!id) {
-    return <Box sx={{ p: 3, textAlign: "center" }}>{t("invalidClassId")}</Box>;
+    return <Box sx={{ p: 3, textAlign: "center" }}>{t.invalidClassId}</Box>;
   }
 
   if (error || !audit) {
     logger.error("Error fetching class audit:", error);
-    return <Alert severity="error">{tc("loadFailed")}</Alert>;
+    return <Alert severity="error">{tc.loadFailed}</Alert>;
   }
 
-  const csvHeaders = [t("students.studentName"), t("students.idNumber"), t("students.attendanceStatus")] as const;
+  const csvHeaders = [t.students.studentName, t.students.idNumber, t.students.attendanceStatus] as const;
 
   const handleGenerateReport = () => {
     exportToCsv(audit?.students ?? [], "class-audit", id, csvHeaders);
@@ -270,9 +270,9 @@ export function ClassAuditContainer() {
         onNoteContentChange={setNoteContent}
         onSave={handleSaveNote}
         isUpdatingNote={isUpdatingNote}
-        title={t("adminNote.title")}
-        editLabel={t("adminNote.edit")}
-        updateLabel={t("adminNote.update")}
+        title={t.adminNote.title}
+        editLabel={t.adminNote.edit}
+        updateLabel={t.adminNote.update}
       />
     </>
   );

@@ -12,9 +12,10 @@ import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repos
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type * as Types from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export { resolveStudentTimezone } from "@/backend/db/repo/scheduling/shared";
 
@@ -63,11 +64,12 @@ export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
 export const createClassInstance = async (
   input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
   tx?: DBTransaction,
-  locale?: string
+  tErrors?: ErrorsLabels
 ): Promise<Types.ClassInstanceEntity> => {
   const runner = async (t: DBTransaction) => {
+    const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
     await acquireLocks(t, input.teacherId, input.studentId);
-    await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt, locale);
+    await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt, tFuncErrors);
     await TeacherAvailabilityRepository.validateBookingAvailability(
       input.teacherId,
       input.scheduledStartAt,
@@ -78,6 +80,7 @@ export const createClassInstance = async (
     const effectiveMeeting = await EffectiveMeetingService.resolveForNewBooking(input.teacherId, {
       recurringScheduleId: input.recurringScheduleId,
       tx: t,
+      tErrors: tFuncErrors,
     });
 
     await checkOverlaps(
@@ -89,7 +92,7 @@ export const createClassInstance = async (
         endTime: input.scheduledEndAt,
         meetingJoinUrl: effectiveMeeting.joinUrl,
       },
-      locale
+      tFuncErrors
     );
 
     if (input.quotaDeducted) {
@@ -100,8 +103,7 @@ export const createClassInstance = async (
         .limit(1);
 
       if (!student || student.classesRemaining <= 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("outOfQuota"));
+        throw new Error(tFuncErrors.outOfQuota);
       }
     }
 
@@ -124,22 +126,23 @@ export const updateClassInstance = async (
   id: string,
   input: Partial<Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">>,
   tx?: DBTransaction,
-  locale?: string
+  tErrors?: ErrorsLabels
 ): Promise<Types.ClassInstanceEntity> => {
   const runner = async (t: DBTransaction) => {
-    const existing = await getClassInstanceByIdOrThrow(t, id, locale);
+    const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+    const existing = await getClassInstanceByIdOrThrow(t, id, tFuncErrors);
 
     const studentId = input.studentId ?? existing.studentId;
     const teacherId = input.teacherId ?? existing.teacherId;
     const startTime = input.scheduledStartAt ?? existing.scheduledStartAt;
     const endTime = input.scheduledEndAt ?? existing.scheduledEndAt;
     const isBeingSoftDeleted = Boolean(input.deletedAt);
-    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(id, t);
+    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(id, tFuncErrors, t);
 
     await acquireLocks(t, teacherId, studentId);
 
     if (!isBeingSoftDeleted) {
-      await validateTeacherAssignment(t, studentId, teacherId, startTime, locale);
+      await validateTeacherAssignment(t, studentId, teacherId, startTime, tFuncErrors);
       await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, startTime, endTime, t);
       await checkOverlaps(
         t,
@@ -151,7 +154,7 @@ export const updateClassInstance = async (
           meetingJoinUrl: effectiveMeeting.joinUrl,
           excludeId: id,
         },
-        locale
+        tFuncErrors
       );
     }
 
@@ -175,10 +178,11 @@ export const updateClassInstance = async (
 export const deleteClassInstance = async (
   id: string,
   tx?: DBTransaction,
-  locale?: string
+  tErrors?: ErrorsLabels
 ): Promise<Types.ClassInstanceEntity> => {
   const runner = async (t: DBTransaction) => {
-    await getClassInstanceByIdOrThrow(t, id, locale);
+    const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+    await getClassInstanceByIdOrThrow(t, id, tFuncErrors);
 
     const { entity: deleted } = await SoftDeleteRepository.softDeleteClassInstance(id, null, t);
     return deleted;
@@ -187,11 +191,11 @@ export const deleteClassInstance = async (
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
 
-export const softDeleteClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
+export const softDeleteClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction) => {
   const runner = async (t: DBTransaction) => {
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) return null;
-    const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+    const tFuncSession = await getServerTranslations("en", "session");
 
     const updated = await updateInstanceState(
       t,
@@ -201,12 +205,12 @@ export const softDeleteClassInstance = async (id: string, actorUserId: string, t
       {
         fromState: { executionState: existing.executionState, outcome: existing.outcome, deleted: false },
         toState: { executionState: existing.executionState, outcome: existing.outcome, deleted: true },
-        description: tFuncSession("softDeleteDescription"),
+        description: tFuncSession.softDeleteDescription,
       }
     );
 
     if (updated) {
-      await adjustQuotaOnUpdate(t, existing, { deletedAt: updated.deletedAt }, true, locale);
+      await adjustQuotaOnUpdate(t, existing, { deletedAt: updated.deletedAt }, true);
     }
     return updated;
   };

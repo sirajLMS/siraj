@@ -3,12 +3,12 @@
 import { useQuery } from "@apollo/client/react";
 import CloseIcon from "@mui/icons-material/CloseOutlined";
 import { Alert, Button, IconButton } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { userQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDisplayCurrencyHintDismissed } from "@/frontend/common/hooks/useDisplayCurrencyHintDismissed";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type DisplayCurrencyHintMode = "viewer" | "subject";
 type DisplayCurrencyHintVariant = "full" | "compact";
@@ -25,7 +25,7 @@ export function DisplayCurrencyHint({
   subjectUserId,
 }: Readonly<DisplayCurrencyHintProps>): React.ReactNode {
   const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
-  const t = useTranslations("dashboard.billing.displayCurrencyHint");
+  const t = useAppTranslation("dashboard.billing").displayCurrencyHint;
   const { dismissed, dismiss } = useDisplayCurrencyHintDismissed();
   const { data: subjectData, loading: subjectLoading } = useQuery(userQueryDocument, {
     variables: { id: subjectUserId ?? "" },
@@ -35,7 +35,7 @@ export function DisplayCurrencyHint({
 
   const dismissButton = (
     <IconButton
-      aria-label={t("dismiss")}
+      aria-label={t.dismiss}
       size="small"
       onClick={dismiss}
       sx={theme => ({
@@ -59,7 +59,7 @@ export function DisplayCurrencyHint({
     const action = (
       <>
         <Button component={Link} href="/profile/edit" color="inherit" size="small">
-          {t("cta")}
+          {t.cta}
         </Button>
         {dismissButton}
       </>
@@ -68,16 +68,16 @@ export function DisplayCurrencyHint({
     if (variant === "compact") {
       return (
         <Alert severity="info" sx={{ mx: 2, my: 1 }} action={action}>
-          <strong>{t("title")}</strong>
+          <strong>{t.title}</strong>
         </Alert>
       );
     }
 
     return (
       <Alert severity="info" sx={{ mb: 2 }} action={action}>
-        <strong>{t("title")}</strong>
+        <strong>{t.title}</strong>
         <br />
-        {t("body")}
+        {t.body}
       </Alert>
     );
   }
@@ -100,15 +100,15 @@ export function DisplayCurrencyHint({
       action={
         <>
           <Button component={Link} href={editHref} color="inherit" size="small">
-            {t("subject.cta")}
+            {t.subject.cta}
           </Button>
           {dismissButton}
         </>
       }
     >
-      <strong>{t("subject.title")}</strong>
+      <strong>{t.subject.title}</strong>
       <br />
-      {t("subject.body")}
+      {t.subject.body}
     </Alert>
   );
 }

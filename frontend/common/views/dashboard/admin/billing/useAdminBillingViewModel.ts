@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import {
@@ -41,6 +40,7 @@ import type {
 import { formatBillingDate } from "@/frontend/common/views/dashboard/billing/utils/formatBillingDate";
 import { deriveAdminInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 
 function formatDate(dateStr: string | null, locale: string): string {
   return formatBillingDate(dateStr, locale);
@@ -110,12 +110,12 @@ export interface AdminBillingViewModel {
 }
 
 export function useAdminBillingViewModel(): AdminBillingViewModel {
-  const t = useTranslations("dashboard.billing");
-  const tProfile = useTranslations("profile.teacher");
-  const tProfileRoot = useTranslations("profile");
-  const tErrors = useTranslations("errors");
-  const tc = useTranslations("common");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.billing");
+  const tProfile = useAppTranslation("profile").teacher;
+  const tProfileRoot = useAppTranslation("profile");
+  const tErrors = useAppTranslation("errors");
+  const tc = useAppTranslation("common");
+  const locale = useAppLocale();
   const router = useRouter();
   const labels = buildBillingLabels(t);
   const { isImpersonating } = useImpersonation();
@@ -227,22 +227,22 @@ export function useAdminBillingViewModel(): AdminBillingViewModel {
     onError: error => {
       logger.error("Delete invoice failed:", { error });
       setDeleteTargetId(null);
-      showFeedback(tc("operationFailed"), "error");
+      showFeedback(tc.operationFailed, "error");
     },
   });
 
   const [sendReminderMutation] = useMutation(sendPaymentReminderMutationDocument, {
     onCompleted: data => {
       if (data.sendPaymentReminder?.success) {
-        showFeedback(t("reminderSent"), "success");
+        showFeedback(t.reminderSent, "success");
       } else {
-        showFeedback(t("reminderFailed"), "error");
+        showFeedback(t.reminderFailed, "error");
       }
       setSendingReminderId(null);
     },
     onError: error => {
       logger.error("Send reminder failed:", { error });
-      showFeedback(tc("operationFailed"), "error");
+      showFeedback(tc.operationFailed, "error");
       setSendingReminderId(null);
     },
   });
@@ -295,9 +295,7 @@ export function useAdminBillingViewModel(): AdminBillingViewModel {
       totalOutstanding: outstandingTotals.primary,
       totalOutstandingSubLabel: outstandingTotals.breakdown,
       pendingInvoices: summaryData?.adminBillingSummary?.pendingCount ?? 0,
-      negativeBalanceCount: t("adminMetrics.negativeBalance", {
-        count: summaryData?.adminBillingSummary?.negativeBalanceCount ?? 0,
-      }),
+      negativeBalanceCount: t.adminMetrics.negativeBalance(summaryData?.adminBillingSummary?.negativeBalanceCount ?? 0),
       mtdRevenue: mtdRevenueTotals.primary,
       mtdRevenueSubLabel: mtdRevenueTotals.breakdown,
     };
@@ -348,7 +346,7 @@ export function useAdminBillingViewModel(): AdminBillingViewModel {
 
   const handleMarkAsPaid = (invoice: MarkPaidInvoiceTarget) => {
     if (billingActionsDisabled) {
-      showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
+      showFeedback(tErrors.auth.impersonationNotAllowedDuringSession, "error");
       return;
     }
     setProofTarget(invoice);
@@ -356,7 +354,7 @@ export function useAdminBillingViewModel(): AdminBillingViewModel {
 
   const handleRequestDeleteInvoice = (invoiceId: string) => {
     if (billingActionsDisabled) {
-      showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
+      showFeedback(tErrors.auth.impersonationNotAllowedDuringSession, "error");
       return;
     }
     setDeleteTargetId(invoiceId);
@@ -371,7 +369,7 @@ export function useAdminBillingViewModel(): AdminBillingViewModel {
 
   const handleSendReminder = (studentId: string) => {
     if (billingActionsDisabled) {
-      showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
+      showFeedback(tErrors.auth.impersonationNotAllowedDuringSession, "error");
       return;
     }
     setSendingReminderId(studentId);

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   toGqlProfileAudience,
   toGqlProfileMode,
@@ -16,11 +15,12 @@ import type {
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { ProfilePageClient } from "@/frontend/common/views/dashboard/profile/core/ProfilePageClient";
 import { redirect } from "@/shared/i18n/routing";
+import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "profile" });
-  return { title: t("editTitle") };
+  const t = await getTranslations(locale, "profile");
+  return { title: t.editTitle };
 }
 
 interface PageProps {
@@ -29,7 +29,6 @@ interface PageProps {
 
 export default async function ProfileEditPage({ params }: PageProps) {
   const { locale } = await params;
-  setRequestLocale(locale);
 
   const { userId, context } = await getServerUserContext();
   if (!userId) {

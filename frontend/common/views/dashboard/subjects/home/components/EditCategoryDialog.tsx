@@ -12,12 +12,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import type { EditCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function slugify(text: string): string {
   return text
@@ -88,30 +88,30 @@ function CategoryFormFields({
   errors: FieldErrors<EditCategoryFormValues>;
   disabled: boolean;
 }>) {
-  const t = useTranslations("dashboard.subjects");
+  const t = useAppTranslation("dashboard.subjects");
 
   return (
     <>
       <TextFieldController
         name="name"
         control={control}
-        label={t("nameLabel")}
+        label={t.nameLabel}
         required
-        error={errors.name ? t("nameRequired") : undefined}
+        error={errors.name ? t.nameRequired : undefined}
         disabled={disabled}
       />
       <TextFieldController
         name="slug"
         control={control}
-        label={t("slugLabel")}
+        label={t.slugLabel}
         required
-        error={errors.slug ? t("slugRequired") : undefined}
+        error={errors.slug ? t.slugRequired : undefined}
         disabled={disabled}
       />
       <TextFieldController
         name="description"
         control={control}
-        label={t("descriptionLabel")}
+        label={t.descriptionLabel}
         disabled={disabled}
         multiline
         rows={3}
@@ -122,7 +122,7 @@ function CategoryFormFields({
         render={({ field }) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Switch checked={field.value ?? true} onChange={field.onChange} disabled={disabled} />
-            <Typography variant="bodyMd">{t("activeLabel")}</Typography>
+            <Typography variant="bodyMd">{t.activeLabel}</Typography>
           </Box>
         )}
       />
@@ -181,7 +181,7 @@ export function EditCategoryDialog({
   category,
   isLoading,
 }: Readonly<EditCategoryDialogProps>) {
-  const t = useTranslations("dashboard.subjects");
+  const t = useAppTranslation("dashboard.subjects");
 
   const {
     control,
@@ -239,7 +239,7 @@ export function EditCategoryDialog({
       maxWidth="sm"
       aria-labelledby="edit-category-dialog-title"
     >
-      <DialogTitle id="edit-category-dialog-title">{t("editCategory")}</DialogTitle>
+      <DialogTitle id="edit-category-dialog-title">{t.editCategory}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Box
           component="form"
@@ -253,8 +253,8 @@ export function EditCategoryDialog({
       <EditCategoryDialogActions
         isLoading={isLoading}
         onClose={onClose}
-        saveLabel={t("saveChanges")}
-        cancelLabel={t("cancel")}
+        saveLabel={t.saveChanges}
+        cancelLabel={t.cancel}
       />
     </Dialog>
   );

@@ -3,7 +3,6 @@
 import { useQuery } from "@apollo/client/react";
 import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
@@ -20,6 +19,7 @@ import {
   mapBillingCurrencyBuckets,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
+import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useUserBillingProfileStore } from "@/frontend/common/stores/userBillingProfileStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
@@ -45,18 +45,19 @@ import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/component
 import { FxConversionNote } from "@/frontend/common/views/dashboard/components/FxConversionNote";
 import type { UserBillingProfileContainerProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { UserBillingProfileView } from "@/frontend/common/views/dashboard/users/billing-profile/userBillingProfileView";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
 }));
 
 export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProfileContainerProps>) {
-  const t = useTranslations("dashboard.billing");
-  const tProfile = useTranslations("profile.teacher");
-  const tProfileRoot = useTranslations("profile");
-  const tErrors = useTranslations("errors");
-  const tc = useTranslations("common");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.billing");
+  const tProfile = useAppTranslation("profile.teacher");
+  const tProfileRoot = useAppTranslation("profile");
+  const tErrors = useAppTranslation("errors");
+  const tc = useAppTranslation("common");
+  const locale = useAppLocale();
   const labels = buildBillingLabels(t);
   const { isImpersonating } = useImpersonation();
   const billingActionsDisabled = isImpersonating;

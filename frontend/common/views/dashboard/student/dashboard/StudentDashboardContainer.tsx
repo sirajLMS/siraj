@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { studentCreditBalanceQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/credit-lms.documents";
 import { pendingLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
@@ -10,7 +9,6 @@ import { useStudentDashboardStore } from "@/frontend/common/stores/studentDashbo
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import { StudentDashboardView } from "@/frontend/common/views/dashboard/student/dashboard/studentDashboardView";
-import type { StudentDashboardLabels } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardLabels";
 import type {
   RecentLessonReportRow,
   StudentCreditBalanceRow,
@@ -23,35 +21,37 @@ import {
   mapUpcomingLessons,
 } from "@/frontend/common/views/dashboard/student/dashboard/utils/studentDashboardMappers";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
+import type { StudentDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard";
 
 function useStudentDashboardLabels(
-  t: ReturnType<typeof useTranslations<"dashboard.studentPortal.dashboard">>
+  t: ReturnType<typeof useAppTranslation<"dashboard.studentPortal.dashboard">>
 ): StudentDashboardLabels {
   return useMemo(
     () => ({
-      pageTitle: t("pageTitle"),
-      welcomeMessage: t("welcomeMessage"),
-      nextClass: t("nextClass"),
-      joinNow: t("joinNow"),
-      noUpcomingClasses: t("noUpcomingClasses"),
-      creditBalance: t("creditBalance"),
-      classesRemaining: t("classesRemaining"),
-      classesTotal: t("classesTotal"),
-      recentLessonReports: t("recentLessonReports"),
-      viewAllHistory: t("viewAllHistory"),
-      viewCredits: t("viewCredits"),
-      addReflection: t("addReflection"),
-      upcomingToday: t("upcomingToday"),
-      upcomingThisWeek: t("upcomingThisWeek"),
-      noLessonReports: t("noLessonReports"),
-      loadingMessage: t("loadingMessage"),
+      pageTitle: t.pageTitle,
+      welcomeMessage: t.welcomeMessage,
+      nextClass: t.nextClass,
+      joinNow: t.joinNow,
+      noUpcomingClasses: t.noUpcomingClasses,
+      creditBalance: t.creditBalance,
+      classesRemaining: t.classesRemaining,
+      classesTotal: t.classesTotal,
+      recentLessonReports: t.recentLessonReports,
+      viewAllHistory: t.viewAllHistory,
+      viewCredits: t.viewCredits,
+      addReflection: t.addReflection,
+      upcomingToday: t.upcomingToday,
+      upcomingThisWeek: t.upcomingThisWeek,
+      noLessonReports: t.noLessonReports,
+      loadingMessage: t.loadingMessage,
     }),
     [t]
   );
 }
 
 export function StudentDashboardContainer() {
-  const t = useTranslations("dashboard.studentPortal.dashboard");
+  const t = useAppTranslation("dashboard.studentPortal.dashboard");
   const router = useRouter();
   const userName = useUserStore(state => state.name);
   const setSelectedReportId = useStudentDashboardStore(state => state.setSelectedReportId);
