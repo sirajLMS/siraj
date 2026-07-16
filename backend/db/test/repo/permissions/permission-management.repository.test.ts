@@ -202,7 +202,7 @@ describe("PermissionManagementRepository", () => {
             id: "00000000-0000-0000-0000-000000000000",
             name: loc("Fail Update"),
           },
-          undefined,
+          "ar",
           tx
         );
       } catch (err) {
@@ -223,7 +223,7 @@ describe("PermissionManagementRepository", () => {
             id: sysGroup.id,
             name: loc("Try Modifying System Group"),
           },
-          undefined,
+          "ar",
           tx
         );
       } catch (err) {
@@ -258,7 +258,7 @@ describe("PermissionManagementRepository", () => {
         tx
       );
 
-      const deleted = await PermissionManagementRepository.deleteGroup(group.id, undefined, tx);
+      const deleted = await PermissionManagementRepository.deleteGroup(group.id, "ar", tx);
       expect(deleted.id).toBe(group.id);
 
       // Verify deleted in DB
@@ -268,7 +268,7 @@ describe("PermissionManagementRepository", () => {
       // 2. Non-existent group
       let errorThrown: unknown = null;
       try {
-        await PermissionManagementRepository.deleteGroup("00000000-0000-0000-0000-000000000000", undefined, tx);
+        await PermissionManagementRepository.deleteGroup("00000000-0000-0000-0000-000000000000", "ar", tx);
       } catch (err) {
         errorThrown = err;
       }
@@ -282,7 +282,7 @@ describe("PermissionManagementRepository", () => {
 
       errorThrown = null;
       try {
-        await PermissionManagementRepository.deleteGroup(sysGroup.id, undefined, tx);
+        await PermissionManagementRepository.deleteGroup(sysGroup.id, "ar", tx);
       } catch (err) {
         errorThrown = err;
       }

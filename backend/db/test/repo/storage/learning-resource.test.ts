@@ -247,7 +247,7 @@ describe("LearningResourceRepository — deleteResource", () => {
     const nonExistentId = randomUUID();
 
     const error = await expectRepoError(async () => {
-      await LearningResourceRepository.deleteResource(nonExistentId, undefined, tx);
+      await LearningResourceRepository.deleteResource(nonExistentId, "ar", tx);
     });
 
     expect(error.message).toContain("غير موجود");

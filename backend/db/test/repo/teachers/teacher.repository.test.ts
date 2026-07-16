@@ -175,7 +175,7 @@ describe("TeacherRepository", () => {
 
         let error: unknown = null;
         try {
-          await TeacherRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx);
+          await TeacherRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx, "ar");
         } catch (e) {
           error = e;
         }

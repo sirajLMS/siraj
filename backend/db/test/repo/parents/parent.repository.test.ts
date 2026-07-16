@@ -172,7 +172,7 @@ describe("ParentRepository — deactivateParent", () => {
   test("throws parentNotFound for unknown parentId", async () => {
     await runInRollback(async tx => {
       const error = await expectRepoError(() =>
-        ParentRepository.deactivateParent("00000000-0000-0000-0000-000000000000", tx)
+        ParentRepository.deactivateParent("00000000-0000-0000-0000-000000000000", tx, "ar")
       );
       expect(error.message).toContain("غير موجود");
     });
@@ -183,7 +183,7 @@ describe("ParentRepository — deactivateParent", () => {
       const user = await createTestUser(tx, { name: "Active Parent", email: `ap-${randomUUID()}@test.com` });
       const parent = await createTestParent(tx, user.id, { status: "REGULAR" });
 
-      const result = await ParentRepository.deactivateParent(parent.id, tx);
+      const result = await ParentRepository.deactivateParent(parent.id, tx, "ar");
 
       expect(result.id).toBe(parent.id);
       expect(result.accountStatus).toBe(AccountStatus.DEACTIVATED);
@@ -206,7 +206,7 @@ describe("ParentRepository — deactivateParent", () => {
       const user = await createTestUser(tx, { name: "Trial Parent", email: `tp-${randomUUID()}@test.com` });
       const parent = await createTestParent(tx, user.id, { status: "ON_TRIAL" });
 
-      await ParentRepository.deactivateParent(parent.id, tx);
+      await ParentRepository.deactivateParent(parent.id, tx, "ar");
 
       const parentRow = await tx
         .select({ status: parents.status })
@@ -221,7 +221,7 @@ describe("ParentRepository — deactivateParent", () => {
     "throws parentAlreadyDeactivated when parent is already DEACTIVATED",
     "Deactivated Parent",
     "dp",
-    (ctx, tx) => ParentRepository.deactivateParent(ctx.parent.id, tx),
+    (ctx, tx) => ParentRepository.deactivateParent(ctx.parent.id, tx, "ar"),
     "معطل بالفعل",
     { userOverrides: { status: AccountStatus.DEACTIVATED }, parentOverrides: { status: "REGULAR" } }
   );
@@ -275,7 +275,8 @@ describe("ParentRepository — create", () => {
       try {
         await ParentRepository.create(
           { userId: user.id, status: "REGULAR", createdAt: new Date(), updatedAt: new Date() },
-          tx
+          tx,
+          "ar"
         );
       } catch (e) {
         error = e;
@@ -336,7 +337,8 @@ describe("ParentRepository — create", () => {
     try {
       await ParentRepository.create(
         { userId: user.id, status: "REGULAR", createdAt: new Date(), updatedAt: new Date() },
-        mockTx
+        mockTx,
+        "ar"
       );
     } catch (e) {
       error = e;
@@ -455,7 +457,7 @@ describe("ParentRepository — reactivateParent", () => {
       });
       const parent = await createTestParent(tx, user.id);
 
-      const result = await ParentRepository.reactivateParent(parent.id, tx);
+      const result = await ParentRepository.reactivateParent(parent.id, tx, "ar");
 
       expect(result.accountStatus).toBe(AccountStatus.ACTIVATED);
       const updated = await tx.select({ status: users.status }).from(users).where(eq(users.id, user.id)).limit(1);
@@ -467,7 +469,7 @@ describe("ParentRepository — reactivateParent", () => {
     "throws parentAlreadyActivated when account is already ACTIVATED",
     "Active Parent",
     "ap2",
-    (ctx, tx) => ParentRepository.reactivateParent(ctx.parent.id, tx),
+    (ctx, tx) => ParentRepository.reactivateParent(ctx.parent.id, tx, "ar"),
     "مفعّل بالفعل"
   );
 });

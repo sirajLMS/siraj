@@ -144,7 +144,8 @@ export async function performRescheduleValidations(
     input.teacherId,
     input.scheduledStartAt,
     input.scheduledEndAt,
-    t
+    t,
+    "ar"
   );
   await checkOverlaps(
     t,

@@ -93,7 +93,7 @@ async function validateRecurringScheduleAvailability(
   const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
   await acquireLocks(t, teacherId, studentId);
   await validateTeacherAssignment(t, studentId, teacherId, scheduledStartAt, tFuncErrors);
-  await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, scheduledStartAt, scheduledEndAt, t);
+  await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, scheduledStartAt, scheduledEndAt, t, "ar");
   await checkOverlaps(
     t,
     {

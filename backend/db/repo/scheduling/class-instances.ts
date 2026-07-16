@@ -78,7 +78,8 @@ export const createClassInstance = async (
       input.teacherId,
       input.scheduledStartAt,
       input.scheduledEndAt,
-      t
+      t,
+      "ar"
     );
 
     const effectiveMeeting = await EffectiveMeetingService.resolveForNewBooking(input.teacherId, {
@@ -142,7 +143,7 @@ export const updateClassInstance = async (
 
     if (!isBeingSoftDeleted) {
       await validateTeacherAssignment(t, studentId, teacherId, startTime, tFuncErrors);
-      await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, startTime, endTime, t);
+      await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, startTime, endTime, t, "ar");
       await checkOverlaps(
         t,
         {

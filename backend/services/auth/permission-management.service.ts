@@ -211,7 +211,8 @@ export namespace PermissionManagementService {
       description?: LocalizedString | null;
       permissionIds?: string[];
     },
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    locale?: string
   ): Promise<GroupWithPermissionIds> {
     await requireManageAccess(actorUserId, tErrors);
 
@@ -228,12 +229,12 @@ export namespace PermissionManagementService {
       slug,
       description: trimLocalizedString(input.description),
       permissionIds: input.permissionIds,
-    });
+    }, locale);
   }
 
-  export async function deleteGroup(actorUserId: string, groupId: string, tErrors: ErrorsLabels): Promise<void> {
+  export async function deleteGroup(actorUserId: string, groupId: string, tErrors: ErrorsLabels, locale?: string): Promise<void> {
     await requireManageAccess(actorUserId, tErrors);
-    await PermissionManagementRepository.deleteGroup(groupId);
+    await PermissionManagementRepository.deleteGroup(groupId, locale);
   }
 
   export async function assignGroupToUser(

@@ -88,7 +88,7 @@ async function assignUserToGroup(tx: DBTransaction, userId: string, groupId: str
 }
 
 async function updateProfile(tx: DBTransaction, profileId: string, input: ManagerProfileUpdateInput) {
-  return StaffProfileRepository.updateManagerProfile(profileId, input, undefined, tx);
+  return StaffProfileRepository.updateManagerProfile(profileId, input, "ar", tx);
 }
 
 async function createStaffAndGroup(tx: DBTransaction, staffName: string, groupName: string, groupSlug: string) {
@@ -434,7 +434,7 @@ describe("StaffProfileRepository — create", () => {
 
     let error: unknown = null;
     try {
-      await StaffProfileRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx);
+      await StaffProfileRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx, "ar");
     } catch (e) {
       error = e;
     }
