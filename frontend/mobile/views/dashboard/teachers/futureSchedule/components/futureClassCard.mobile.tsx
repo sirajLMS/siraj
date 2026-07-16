@@ -54,7 +54,7 @@ function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isReschedu
 }
 
 function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
-  const t = useAppTranslation("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
   const isRescheduled = item.isRescheduled === true;
 
   return (
@@ -100,7 +100,7 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
 }
 
 function ActionButtons({ item, onRequestLeave }: Readonly<{ item: FutureClass; onRequestLeave?: () => void }>) {
-  const t = useAppTranslation("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
 
   return (
     <Stack

@@ -92,7 +92,7 @@ function CalendarHeader({
   readonly onPrev: () => void;
   readonly onNext: () => void;
 }) {
-  const t = useAppTranslation("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
   return (
     <Stack
       direction="row"

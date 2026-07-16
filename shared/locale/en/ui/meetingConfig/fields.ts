@@ -1,4 +1,4 @@
-export const fields = {
+export const uiMeetingConfigFieldsEn = {
   meetingUrl: "Meeting URL",
   username: "Username",
   password: "Password",

@@ -1,6 +1,6 @@
 import type { TeacherStudentsLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const students: TeacherStudentsLabels = {
+export const dashboardTeacherStudentsEn: TeacherStudentsLabels = {
   pageTitle: "My Students",
   pageSubtitle: "View and manage your students",
   noStudents: "No students assigned.",

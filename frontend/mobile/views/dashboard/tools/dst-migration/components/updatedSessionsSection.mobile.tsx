@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function UpdatedSessionsSectionMobile({ sessions, successfulCount }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.dstMigration");
+  const t = useAppTranslation().dashboardTranslations.dstMigration;
 
   return (
     <Box

@@ -1,4 +1,4 @@
-export const join = {
+export const uiMeetingConfigJoinEn = {
   joinMeeting: "Join Meeting",
   joinUnavailable: "Meeting link unavailable",
   openInNewTab: "Opens in new tab",

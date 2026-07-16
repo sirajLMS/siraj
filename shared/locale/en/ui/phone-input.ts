@@ -1,4 +1,4 @@
-export const phoneInput = {
+export const uiPhoneInputEn = {
   label: "Phone number",
   selectCountry: "Select country",
   invalidPrefix: "Invalid dial code",

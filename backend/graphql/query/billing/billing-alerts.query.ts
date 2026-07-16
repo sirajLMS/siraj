@@ -8,7 +8,7 @@ gqlSchemaBuilder.queryFields(t => ({
     type: UnpaidInvoicesSummaryPothosObject,
     authScopes: { loggedIn: true },
     resolve: async (_root, _args, ctx) => {
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       if (!ctx.user) {
         throw new Error(tErrors.unauthorized);
       }

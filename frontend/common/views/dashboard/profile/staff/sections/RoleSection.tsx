@@ -10,8 +10,8 @@ import {
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function RoleSection({ staffData }: { readonly staffData: StaffProfileData }) {
-  const t = useAppTranslation("profile").staff;
-  const tc = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.staff;
+  const tc = useAppTranslation().profileTranslations.base;
 
   return (
     <SectionPanel title={t.sections.role}>

@@ -29,7 +29,7 @@ export function useTeacherAvailabilityViewModel(
 ): TeacherAvailabilityViewModel {
   const { availability, insights, defaultFilters, loading, onExportPdf, onSearch, onBlockClick } = props;
 
-  const t = useAppTranslation("dashboard.teacherAvailability");
+  const t = useAppTranslation().dashboardTranslations.teacherAvailability;
 
   const tableLabels = useMemo<WeeklyAvailabilityGridLabels>(
     () => ({

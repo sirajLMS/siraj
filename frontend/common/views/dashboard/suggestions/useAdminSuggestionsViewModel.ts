@@ -60,8 +60,8 @@ export interface AdminSuggestionsDialogHandlers {
 }
 
 export function useAdminSuggestionsViewModel(): AdminSuggestionsViewModel & AdminSuggestionsDialogHandlers {
-  const t = useAppTranslation("dashboard.suggestions");
-  const labels = buildSuggestionsLabels(t);
+  const t = useAppTranslation();
+  const labels = buildSuggestionsLabels(t.dashboardTranslations.suggestions);
   const notifications = useNotifications();
   const hasPermission = useUserStore(state => state.hasPermission);
 

@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function StaffInfoSection({ register, control, errors }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.managerOnboarding");
+  const t = useAppTranslation().dashboardTranslations.managerOnboarding;
 
   const translate = {
     fields: {

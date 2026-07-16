@@ -18,7 +18,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 import { getErrorMessage } from "@/shared/utils/error";
 
 export function SubjectDetailContainer({ subjectId }: Readonly<SubjectDetailContainerProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
   const notifications = useNotifications();
 
   const { data, loading, error } = useQuery(classSubjectByIdQueryDocument, {

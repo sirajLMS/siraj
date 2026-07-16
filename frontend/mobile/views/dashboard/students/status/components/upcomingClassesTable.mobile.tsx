@@ -34,7 +34,7 @@ function formatTime(locale: string, dateStr: string): string {
 }
 
 export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
   const locale = useAppLocale();
   const router = useRouter();
 

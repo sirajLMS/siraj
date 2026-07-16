@@ -9,7 +9,7 @@ import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function NewStudentContainer() {
-  const t = useAppTranslation("dashboard.studentDirectory");
+  const t = useAppTranslation().dashboardTranslations.studentDirectory;
   const router = useRouter();
   const notifications = useNotifications();
 

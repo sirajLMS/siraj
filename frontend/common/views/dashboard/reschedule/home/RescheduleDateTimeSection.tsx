@@ -21,7 +21,7 @@ interface Props {
 }
 
 export function RescheduleDateTimeSection({ control, errors }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.rescheduleForm");
+  const t = useAppTranslation().dashboardTranslations.rescheduleForm;
 
   return (
     <Grid container spacing={3}>

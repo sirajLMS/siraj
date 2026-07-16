@@ -26,7 +26,7 @@ export function SubjectsViewMobile({
   canManageSubjects,
   canManageCategories,
 }: Readonly<SubjectsViewProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
   const categoriesSectionOpen = useSubjectManagementStore(state => state.categoriesSectionOpen);
   const toggleCategoriesSection = useSubjectManagementStore(state => state.toggleCategoriesSection);
 

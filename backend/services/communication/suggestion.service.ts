@@ -1,6 +1,6 @@
 import { ParentRepository, SoftDeleteRepository, SuggestionRepository } from "@/backend/db/repo";
 import { AppPermission, NotificationEventType, SuggestionStatus } from "@/backend/enum";
-import { getBackendTranslations, logger } from "@/backend/lib";
+import { logger } from "@/backend/lib/logger";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type {
   ParentSuggestionOptions,
@@ -12,6 +12,7 @@ import type {
   SuggestionSelectType,
   SuggestionSubmitInput,
 } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace SuggestionService {
   export async function submitSuggestion(
@@ -24,14 +25,14 @@ export namespace SuggestionService {
       AppPermission.COMMUNICATION_SUBMIT_SUGGESTION
     );
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const parent = await ParentRepository.findByUserId(actorUserId);
     if (!parent) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound", { userId: actorUserId }));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.parentNotFound);
     }
 
     try {
@@ -76,8 +77,8 @@ export namespace SuggestionService {
   ): Promise<SuggestionQueueResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_LIST);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     try {
@@ -133,8 +134,8 @@ export namespace SuggestionService {
   ): Promise<SuggestionSelectType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     try {
@@ -166,14 +167,14 @@ export namespace SuggestionService {
   ): Promise<ReadonlyArray<SuggestionReturnType>> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const parent = await ParentRepository.findByUserId(actorUserId);
     if (!parent) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound", { userId: actorUserId }));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.parentNotFound);
     }
 
     try {
@@ -200,8 +201,8 @@ export namespace SuggestionService {
   ): Promise<ReadonlyArray<SuggestionSearchResultType>> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     try {
@@ -228,14 +229,13 @@ export namespace SuggestionService {
   ): Promise<SuggestionSelectType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const suggestion = await SuggestionRepository.getSuggestionById(suggestionId);
     if (!suggestion) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("suggestionNotFound", { id: suggestionId }));
+      throw new Error("suggestionNotFound");
     }
 
     try {
@@ -293,35 +293,30 @@ export namespace SuggestionService {
   ): Promise<SuggestionSelectType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     if (suggestionId === duplicateOfId) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("suggestion.cannotMarkSelfAsDuplicate"));
+      throw new Error("suggestion.cannotMarkSelfAsDuplicate");
     }
 
     const sourceSuggestion = await SuggestionRepository.getSuggestionById(suggestionId);
     if (!sourceSuggestion) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("suggestion.notFound", { id: suggestionId }));
+      throw new Error("suggestion.notFound");
     }
 
     const targetSuggestion = await SuggestionRepository.getSuggestionById(duplicateOfId);
     if (!targetSuggestion) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("suggestion.notFound", { id: duplicateOfId }));
+      throw new Error("suggestion.notFound");
     }
 
     if (targetSuggestion.status === SuggestionStatus.DUPLICATE) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("suggestion.targetIsAlreadyDuplicate"));
+      throw new Error("suggestion.targetIsAlreadyDuplicate");
     }
 
     if (targetSuggestion.duplicateOfId === suggestionId) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("suggestion.cannotCreateCircularDuplicate"));
+      throw new Error("suggestion.cannotCreateCircularDuplicate");
     }
 
     try {
@@ -369,14 +364,13 @@ export namespace SuggestionService {
   ): Promise<{ readonly deletedAt: string }> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_DELETE);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const suggestion = await SuggestionRepository.getSuggestionById(suggestionId);
     if (!suggestion) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("suggestionNotFound", { id: suggestionId }));
+      throw new Error("suggestionNotFound");
     }
 
     try {
@@ -407,13 +401,13 @@ export namespace SuggestionService {
       AppPermission.COMMUNICATION_SUBMIT_SUGGESTION
     );
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     if (days < 1 || days > 365) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invalidInput"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.invalidInput);
     }
 
     try {

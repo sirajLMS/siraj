@@ -114,7 +114,7 @@ function TimezoneInsight({
 }
 
 export function AvailabilityInsights({ insights }: Readonly<AvailabilityInsightsProps>) {
-  const t = useAppTranslation("dashboard.teacherAvailability").insights;
+  const t = useAppTranslation().dashboardTranslations.teacherAvailability.insights;
 
   return (
     <Box

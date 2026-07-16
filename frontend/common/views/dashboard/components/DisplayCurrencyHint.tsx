@@ -25,7 +25,7 @@ export function DisplayCurrencyHint({
   subjectUserId,
 }: Readonly<DisplayCurrencyHintProps>): React.ReactNode {
   const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
-  const t = useAppTranslation("dashboard.billing").displayCurrencyHint;
+  const t = useAppTranslation().dashboardTranslations.billing.displayCurrencyHint;
   const { dismissed, dismiss } = useDisplayCurrencyHintDismissed();
   const { data: subjectData, loading: subjectLoading } = useQuery(userQueryDocument, {
     variables: { id: subjectUserId ?? "" },

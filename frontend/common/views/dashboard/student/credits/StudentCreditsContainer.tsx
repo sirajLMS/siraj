@@ -18,7 +18,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 import type { StudentCreditsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentCredits";
 
 function useStudentCreditsLabels(
-  t: ReturnType<typeof useAppTranslation<"dashboard.studentPortal.credits">>
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentPortalCredits"]
 ): StudentCreditsLabels {
   return useMemo(
     () => ({
@@ -59,7 +59,7 @@ function mapTransaction(raw: TransactionItem): StudentCreditTransactionRow {
 }
 
 export function StudentCreditsContainer() {
-  const t = useAppTranslation("dashboard.studentPortal.credits");
+  const t = useAppTranslation().dashboardTranslations.studentPortalCredits;
   const router = useRouter();
   const labels = useStudentCreditsLabels(t);
 

@@ -20,7 +20,7 @@ type ContactSectionProps =
     };
 
 export function ContactSection(props: ContactSectionProps) {
-  const t = useAppTranslation("profile").staff;
+  const t = useAppTranslation().profileTranslations.staff;
 
   if (props.mode === "edit") {
     return (

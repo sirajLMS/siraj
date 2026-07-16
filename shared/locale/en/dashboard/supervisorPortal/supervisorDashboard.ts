@@ -1,6 +1,6 @@
 import type { SupervisorDashboardLabels } from "@/shared/locale/types/dashboard/supervisorPortal/supervisorDashboard";
 
-export const supervisorDashboard: SupervisorDashboardLabels = {
+export const dashboardSupervisorPortalDashboardEn: SupervisorDashboardLabels = {
   pageTitle: "Supervisor Dashboard",
   welcomeMessage: name => `Welcome, ${name}`,
   pendingReviewsHero: count => `${count} pending reviews need your attention`,

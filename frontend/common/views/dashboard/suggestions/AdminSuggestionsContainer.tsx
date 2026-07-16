@@ -25,7 +25,7 @@ const StyledErrorTypography = styled(Typography)(({ theme }) => ({
 }));
 
 export function AdminSuggestionsContainer() {
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation();
   const viewModel = useAdminSuggestionsViewModel();
 
   if (viewModel.loading && viewModel.rows.length === 0) {
@@ -37,7 +37,7 @@ export function AdminSuggestionsContainer() {
   }
 
   if (viewModel.error) {
-    return <StyledErrorTypography>{tc.loadFailed}</StyledErrorTypography>;
+    return <StyledErrorTypography>{t.commonTranslations.loadFailed}</StyledErrorTypography>;
   }
 
   const {

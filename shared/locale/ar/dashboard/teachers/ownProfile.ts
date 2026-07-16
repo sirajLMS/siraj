@@ -1,6 +1,6 @@
 import type { TeacherOwnProfileLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const ownProfile: TeacherOwnProfileLabels = {
+export const dashboardTeacherOwnProfileAr: TeacherOwnProfileLabels = {
   pageTitle: "تفاصيل الراتب",
   pageSubtitle: "اعرض ملفك الرسمي وتفاصيل التعويض.",
   notSet: "غير محدد",

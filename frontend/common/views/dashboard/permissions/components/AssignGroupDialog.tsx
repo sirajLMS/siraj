@@ -37,7 +37,7 @@ export function AssignGroupDialog({
   onClose,
   onAssign,
 }: Readonly<AssignGroupDialogProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   const {
     control,

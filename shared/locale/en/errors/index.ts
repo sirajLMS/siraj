@@ -1,6 +1,6 @@
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
-export const errors: ErrorsLabels = {
+export const errorsEn: ErrorsLabels = {
   auth: {
     // ─── No-param strings ────────────────────────────────────────────
     invalidRoleTab: "The selected role tab is invalid.",

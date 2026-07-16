@@ -1,4 +1,4 @@
-export const display = {
+export const uiMeetingConfigDisplayAr = {
   defaultBadge: "افتراضي",
   meetingUrl: "رابط الاجتماع",
   username: "اسم المستخدم",

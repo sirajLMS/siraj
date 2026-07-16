@@ -10,7 +10,7 @@ import { parentHandbookUrlQueryDocument } from "@/frontend/common/graphql/shared
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function ParentRulesContainer() {
-  const t = useAppTranslation("dashboard.parentRules");
+  const t = useAppTranslation().dashboardTranslations.parentRules;
   const [handbookRequested, setHandbookRequested] = useState(false);
   const { data: handbookData, loading: handbookLoading } = useQuery(parentHandbookUrlQueryDocument, {
     skip: !handbookRequested,

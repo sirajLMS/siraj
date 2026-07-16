@@ -21,7 +21,7 @@ export function ProfileActionBar({
   saving = false,
 }: ProfileActionBarProps) {
   const router = useRouter();
-  const t = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.base;
 
   if (mode === ProfileMode.Edit) {
     return (

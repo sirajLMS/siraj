@@ -27,7 +27,7 @@ import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/stu
 import { useAppTranslation } from "@/shared/locale/client";
 
 function TeacherField() {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
   const { canViewTeacher } = useQuotaFormAccess();
   const {
     control,
@@ -85,7 +85,7 @@ function TeacherField() {
 }
 
 function TotalClassesField() {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
   const { canViewTeacher } = useQuotaFormAccess();
   const {
     control,
@@ -119,7 +119,7 @@ function TotalClassesField() {
 }
 
 function ClassesLeftField() {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
   const { readOnly, canEditQuota, canViewQuota } = useQuotaFormAccess();
   const {
     control,
@@ -223,7 +223,7 @@ function ClassesLeftField() {
 }
 
 export function CourseDetailsSection() {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
   const { canViewTeacher, canViewQuota } = useQuotaFormAccess();
 
   if (!canViewQuota && !canViewTeacher) {

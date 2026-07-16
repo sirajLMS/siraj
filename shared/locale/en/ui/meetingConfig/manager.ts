@@ -1,4 +1,4 @@
-export const manager = {
+export const uiMeetingConfigManagerEn = {
   add: "Add Config",
   addTitle: "Add Meeting Config",
   editTitle: "Edit Meeting Config",

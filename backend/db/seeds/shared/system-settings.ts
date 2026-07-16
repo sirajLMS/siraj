@@ -91,7 +91,7 @@ const SEED_STORAGE_DIRECTORIES = [
 ] as const;
 
 export async function seedOrGet() {
-  const tErrors = await getServerTranslations("ar", "errors");
+  const tErrors = getServerTranslations("ar").errorsTranslations;
   logger.info("Initializing storage directories...");
   try {
     const fileSeeder = await createFileSeedingService();

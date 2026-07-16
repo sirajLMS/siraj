@@ -21,7 +21,7 @@ function StudentsLoadingState() {
 }
 
 export function AssociatedStudentsSection({ associatedStudents, loading = false }: AssociatedStudentsSectionProps) {
-  const t = useAppTranslation("profile").parent;
+  const t = useAppTranslation().profileTranslations.parent;
   const rows = associatedStudents?.rows ?? [];
 
   if (loading && !associatedStudents) {

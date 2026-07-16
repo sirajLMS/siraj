@@ -36,7 +36,7 @@ export const ClassSubjectPothosObject = ClassSubjectRef.implement({
       load: async (ids: string[], ctx) => {
         const categories = await ClassCategoryRepository.loadByIds(ids);
         const map = new Map(categories.map(c => [c.id, c]));
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         return ids.map(id => map.get(id) ?? new Error(tErrors.categoryNotFound(id)));
       },
       resolve: parent => parent.categoryId,
@@ -44,7 +44,7 @@ export const ClassSubjectPothosObject = ClassSubjectRef.implement({
     resources: t.field({
       type: [SubjectResourcePothosObject],
       resolve: async (parent, _args, ctx) => {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         return ClassSubjectService.getSubjectResources(ctx.user?.id ?? "", parent.id, tErrors);
       },
     }),

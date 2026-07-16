@@ -61,7 +61,7 @@ function useLabels(t: SupervisorDashboardLabels, userName: string, pendingReview
 }
 
 export function SupervisorDashboardContainer() {
-  const t = useAppTranslation("dashboard.supervisorPortal.dashboard");
+  const t = useAppTranslation().dashboardTranslations.supervisorPortalDashboard;
   const router = useRouter();
   const userName = useUserStore(state => state.name);
 

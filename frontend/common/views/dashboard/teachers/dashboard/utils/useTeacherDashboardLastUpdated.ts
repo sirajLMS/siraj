@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function useTeacherDashboardLastUpdated(dataArrivedAt: number | null): string {
-  const t = useAppTranslation("dashboard.teacherDashboard");
+  const t = useAppTranslation().dashboardTranslations.teacherDashboard;
   const updatedJustNow = t.updatedJustNow as string;
   const updatedMinutesAgo = t.updatedMinutesAgo as (minutes: number) => string;
   const [lastUpdated, setLastUpdated] = useState(updatedJustNow);

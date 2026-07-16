@@ -22,7 +22,7 @@ export function FutureScheduleViewDesktop({
   contact,
   classDates,
 }: Readonly<FutureScheduleViewModel>) {
-  const t = useAppTranslation("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
 
   return (
     <PageContainer>

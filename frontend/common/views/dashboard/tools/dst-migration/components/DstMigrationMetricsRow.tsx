@@ -11,7 +11,7 @@ interface Props {
 }
 
 export function DstMigrationMetricsRow({ metrics }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.dstMigration").metrics;
+  const t = useAppTranslation().dashboardTranslations.dstMigration.metrics;
 
   return (
     <Grid container spacing={2} sx={{ mt: 4 }}>

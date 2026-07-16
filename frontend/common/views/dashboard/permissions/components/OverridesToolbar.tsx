@@ -44,7 +44,7 @@ interface OverridesToolbarProps {
 }
 
 export function OverridesToolbar({ mode, onModeChange, searchQuery, onSearchChange }: Readonly<OverridesToolbarProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (
     <StyledToolbarContainer>

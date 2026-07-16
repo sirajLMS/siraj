@@ -68,7 +68,7 @@ export function TeacherDataGrid({
   totalCount,
   onPageChange,
 }: Readonly<TeacherDataGridProps>) {
-  const t = useAppTranslation("dashboard.teachersDirectory");
+  const t = useAppTranslation().dashboardTranslations.teachersDirectory;
   const router = useRouter();
 
   const columns: GridColDef<TeacherDirectoryRow>[] = [

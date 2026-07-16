@@ -68,7 +68,7 @@ export function StudentHistoryMobile({
   nowMonth,
   locale,
 }: Readonly<StudentHistoryMobileProps>) {
-  const t = useAppTranslation("dashboard.studentHistory");
+  const t = useAppTranslation().dashboardTranslations.studentHistory;
   const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
 
   const selectedDaySessions: ClassSession[] = useMemo(() => {
@@ -114,7 +114,7 @@ export function StudentHistoryMobile({
 }
 
 function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: string; monthStr: string }>) {
-  const t = useAppTranslation("dashboard.studentHistory");
+  const t = useAppTranslation().dashboardTranslations.studentHistory;
   return (
     <Box sx={{ mb: 3 }}>
       <Box
@@ -162,7 +162,7 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
 function HistoryMobileMetricsGrid({
   metrics,
 }: Readonly<{ metrics: { totalClasses: number; attendanceRate: number; hoursStudied: number; performance: number } }>) {
-  const t = useAppTranslation("dashboard.studentHistory");
+  const t = useAppTranslation().dashboardTranslations.studentHistory;
   return (
     <Box
       sx={{
@@ -215,7 +215,7 @@ function HistoryMobileActions({
   canGoPrev: boolean;
   canGoNext: boolean;
 }>) {
-  const t = useAppTranslation("dashboard.studentHistory");
+  const t = useAppTranslation().dashboardTranslations.studentHistory;
   const locale = useAppLocale();
   const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" }).toUpperCase();
   const yearStr = currentMonth.getFullYear();

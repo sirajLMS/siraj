@@ -1,6 +1,6 @@
 import type { ManagerOnboardingLabels } from "@/shared/locale/types/dashboard/managers";
 
-export const onboarding: ManagerOnboardingLabels = {
+export const dashboardManagerOnboardingAr: ManagerOnboardingLabels = {
   pageTitle: "انضمام المدير",
   pageSubtitle: "سجّل موظفاً إدارياً جديداً في نظام إدارة سراج.",
   sections: {

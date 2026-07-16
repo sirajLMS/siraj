@@ -53,7 +53,7 @@ export async function seedOrGet(
     return [];
   }
 
-  const tErrors = await getServerTranslations("ar", "errors");
+  const tErrors = getServerTranslations("ar").errorsTranslations;
 
   const results: (CreditTransactionReturnType | null)[] = [];
 

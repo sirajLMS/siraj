@@ -5,14 +5,14 @@ import { useEffect } from "react";
 import { classStatusEventsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
 import type { ActionFeedbackState } from "@/frontend/common/views/dashboard/classes/details/types";
-import type { useAppTranslation } from "@/shared/locale/client";
+import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details";
 
 export function useEventLogDownload(
   id: string,
   shouldLoadEvents: boolean,
   setShouldLoadEvents: (value: boolean) => void,
   setFeedbackState: (state: ActionFeedbackState | null) => void,
-  t: ReturnType<typeof useAppTranslation<"dashboard.classDetails">>
+  t: ClassDetailsLabels
 ) {
   const { data: eventsData, error: eventsError } = useQuery(classStatusEventsQueryDocument, {
     variables: { classInstanceId: id },

@@ -1,6 +1,6 @@
 import type { StatusTrackingLabels } from "@/shared/locale/types/dashboard/core";
 
-export const statusTracking: StatusTrackingLabels = {
+export const dashboardCoreStatusTrackingAr: StatusTrackingLabels = {
   pageTitle: "نظرة عامة على الحالة",
   pageSubtitle: "متابعة لحظية للأنشطة المؤسسية والتعليقات الإدارية.",
   filters: "الفلاتر",

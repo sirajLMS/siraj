@@ -102,8 +102,8 @@ interface StudentStatusHookParams {
   readonly useUnifiedProfile: boolean;
   readonly profileContext: ReturnType<typeof useStudentProfileContext>;
   readonly notifications: ReturnType<typeof useNotifications>;
-  readonly t: ReturnType<typeof useAppTranslation<"dashboard.studentStatus">>;
-  readonly tc: ReturnType<typeof useAppTranslation<"common">>;
+  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentStatus"];
+  readonly tc: ReturnType<typeof useAppTranslation>["commonTranslations"];
 }
 
 interface StudentStatusHookResult {
@@ -213,8 +213,8 @@ function useStudentStatusData({
 }
 
 export function StudentStatusContainer() {
-  const t = useAppTranslation("dashboard.studentStatus");
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const tc = useAppTranslation().commonTranslations;
   const params = useParams();
   const profileContext = useStudentProfileContext();
   const studentId = profileContext?.studentId ?? (typeof params?.id === "string" ? params.id : "");

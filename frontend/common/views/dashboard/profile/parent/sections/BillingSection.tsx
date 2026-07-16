@@ -51,7 +51,7 @@ function BillingEditSection({
   readonly register: UseFormRegister<ParentAdminEditFormData>;
   readonly control: Control<ParentAdminEditFormData>;
 }) {
-  const t = useAppTranslation("profile").parent;
+  const t = useAppTranslation().profileTranslations.parent;
 
   return (
     <SectionPanel title={t.sections.billing}>
@@ -111,9 +111,9 @@ function BillingViewSection({
   readonly adminData: ParentAdminData;
   readonly parentId?: string | null;
 }) {
-  const t = useAppTranslation("profile").parent;
-  const tc = useAppTranslation("profile");
-  const tErrors = useAppTranslation("errors");
+  const t = useAppTranslation().profileTranslations.parent;
+  const tc = useAppTranslation().profileTranslations.base;
+  const tErrors = useAppTranslation().errorsTranslations;
   const locale = useAppLocale();
 
   const lockedAmount = adminData.feeAmount ?? "0";

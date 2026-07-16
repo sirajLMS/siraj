@@ -68,7 +68,7 @@ function ClassSessionCard({
   statusLabel: string;
   durationLabel: string;
 }>) {
-  const t = useAppTranslation("dashboard.studentHistory").classDetails;
+  const t = useAppTranslation().dashboardTranslations.studentHistory.classDetails;
   const [timeValue, timePeriod] = session.time.split(" ");
   const showJoin = isJoinableClassSession(session.executionState, session.outcome, { isFrozen: session.isFrozen });
 
@@ -165,7 +165,7 @@ function ClassSessionCard({
 }
 
 export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionListProps>) {
-  const t = useAppTranslation("dashboard.studentHistory").classDetails;
+  const t = useAppTranslation().dashboardTranslations.studentHistory.classDetails;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

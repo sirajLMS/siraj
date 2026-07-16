@@ -1,6 +1,6 @@
 import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core";
 
-export const scheduleAlerts: ScheduleAlertsLabels = {
+export const dashboardCoreScheduleAlertsEn: ScheduleAlertsLabels = {
   pageTitle: "Schedule Alerts",
   pageSubtitle: "Monitor schedule alerts and daily classes.",
   alerts: {

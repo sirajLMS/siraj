@@ -19,7 +19,7 @@ gqlSchemaBuilder.queryField("invoicePayments", t =>
         (await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_VIEW_HISTORY)) ||
         (await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID));
       if (!canView) {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.insufficientPermissions);
       }
 

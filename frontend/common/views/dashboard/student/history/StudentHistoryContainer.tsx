@@ -18,7 +18,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory";
 
 function useStudentHistoryLabels(
-  t: ReturnType<typeof useAppTranslation<"dashboard.studentPortal.history">>
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentPortalHistory"]
 ): StudentHistoryLabels {
   return useMemo(
     () => ({
@@ -47,7 +47,7 @@ function useStudentHistoryLabels(
 }
 
 export function StudentHistoryContainer() {
-  const t = useAppTranslation("dashboard.studentPortal.history");
+  const t = useAppTranslation().dashboardTranslations.studentPortalHistory;
   const router = useRouter();
   const labels = useStudentHistoryLabels(t);
 

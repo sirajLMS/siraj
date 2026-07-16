@@ -268,8 +268,8 @@ export function ClassMeetingConfigsSection({
   canManage,
   effectiveMeeting,
 }: ClassMeetingConfigsSectionProps) {
-  const t = useAppTranslation("ui.meetingConfig.classScope");
-  const tManager = useAppTranslation("ui.meetingConfig.manager");
+  const t = useAppTranslation().uiTranslations.meetingConfigClassScope;
+  const tManager = useAppTranslation().uiTranslations.meetingConfigManager;
   const locale = useAppLocale();
   const { hasPermission } = useUserStore();
   const resolvedCanManage = canManage ?? hasPermission(AppPermission.MeetingConfigsManageClass);

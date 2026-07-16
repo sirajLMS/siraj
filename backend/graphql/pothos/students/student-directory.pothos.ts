@@ -61,7 +61,7 @@ gqlSchemaBuilder.queryField("studentDirectory", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
 
       // Construct PaginationArgs from GraphQL input
       let pagination: PaginationArgs | null = null;

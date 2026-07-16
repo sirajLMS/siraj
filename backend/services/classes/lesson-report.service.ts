@@ -4,7 +4,6 @@ import { LessonReportRepository, type PendingReviewFilters } from "@/backend/db/
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { classInstances, teachers } from "@/backend/db/schema";
 import { AppPermission, type AttendanceEvaluation, ClassExecutionState, LessonReportStatus } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
@@ -15,6 +14,7 @@ import type {
   PendingReviewCountReturnType,
 } from "@/backend/types";
 import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 /**
  * Service for the lesson report workflow (submit / review / approve / reject).
@@ -40,8 +40,8 @@ export namespace LessonReportService {
   async function requirePermission(actorUserId: string, permission: AppPermission, locale?: string): Promise<void> {
     const has = await PermissionsService.hasPermission(actorUserId, permission);
     if (!has) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorized"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.unauthorized);
     }
   }
 
@@ -56,20 +56,19 @@ export namespace LessonReportService {
       .where(eq(classInstances.id, classInstanceId))
       .limit(1);
     if (!instance) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("classInstanceNotFound", { id: classInstanceId }));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.scheduling.classInstanceNotFound({ id: classInstanceId }));
     }
     if (instance.teacherId !== teacherId) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("lessonReport.notEligibleForReview"));
+      throw new Error("lessonReport.notEligibleForReview");
     }
   }
 
   async function resolveTeacherIdForUser(userId: string, locale?: string): Promise<string> {
     const [teacher] = await db.select({ id: teachers.id }).from(teachers).where(eq(teachers.userId, userId)).limit(1);
     if (!teacher) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("teacherNotFound"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.teacher.teacherNotFound(userId));
     }
     return teacher.id;
   }
@@ -80,13 +79,13 @@ export namespace LessonReportService {
     locale?: string
   ): Promise<LessonReportReturnType> {
     await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_SUBMIT, locale);
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
     if (input.completionPercentage < 0 || input.completionPercentage > 100) {
-      throw new Error(t("invalidInput"));
+      throw new Error(tErrors.invalidInput);
     }
     if (input.durationMinutes <= 0) {
-      throw new Error(t("invalidInput"));
+      throw new Error(tErrors.invalidInput);
     }
 
     const teacherId = await resolveTeacherIdForUser(actorUserId, locale);
@@ -104,16 +103,16 @@ export namespace LessonReportService {
       .where(eq(classInstances.id, input.classInstanceId))
       .limit(1);
     if (!instance) {
-      throw new Error(t("classInstanceNotFound", { id: input.classInstanceId }));
+      throw new Error(tErrors.scheduling.classInstanceNotFound({ id: input.classInstanceId }));
     }
     if (instance.executionState !== ClassExecutionState.COMPLETED) {
-      throw new Error(t("lessonReport.notEligibleForReview"));
+      throw new Error("lessonReport.notEligibleForReview");
     }
 
     // Idempotency: at most one report per class instance
     const existing = await LessonReportRepository.findByClassInstanceId(input.classInstanceId);
     if (existing) {
-      throw new Error(t("lessonReport.alreadyExists"));
+      throw new Error("lessonReport.alreadyExists");
     }
 
     const idempotencyKey = `lesson-report:${input.classInstanceId}`;
@@ -141,7 +140,7 @@ export namespace LessonReportService {
       return toReturnType(created);
     } catch (error) {
       logger.error("Failed to submit lesson report", { classInstanceId: input.classInstanceId, error });
-      throw new Error(t("lessonReport.createFailed"), { cause: error });
+      throw new Error("lessonReport.createFailed", { cause: error });
     }
   }
 
@@ -234,14 +233,13 @@ export namespace LessonReportService {
     locale?: string
   ): Promise<LessonReportReturnType> {
     await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_APPROVE, locale);
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
 
     const report = await LessonReportRepository.findById(reportId);
     if (!report) {
-      throw new Error(t("lessonReport.notFound"));
+      throw new Error("lessonReport.notFound");
     }
     if (report.status !== LessonReportStatus.PENDING_REVIEW) {
-      throw new Error(t("lessonReport.alreadyReviewed"));
+      throw new Error("lessonReport.alreadyReviewed");
     }
 
     const updated = await LessonReportRepository.updateStatus(reportId, LessonReportStatus.APPROVED, actorUserId, null);
@@ -258,17 +256,17 @@ export namespace LessonReportService {
     locale?: string
   ): Promise<LessonReportReturnType> {
     await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_REJECT, locale);
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const report = await LessonReportRepository.findById(input.reportId);
     if (!report) {
-      throw new Error(t("lessonReport.notFound"));
+      throw new Error("lessonReport.notFound");
     }
     if (report.status !== LessonReportStatus.PENDING_REVIEW) {
-      throw new Error(t("lessonReport.alreadyReviewed"));
+      throw new Error("lessonReport.alreadyReviewed");
     }
     if (!input.rejectionReason || input.rejectionReason.trim().length === 0) {
-      throw new Error(t("invalidInput"));
+      throw new Error(tErrors.invalidInput);
     }
 
     const updated = await LessonReportRepository.updateStatus(
@@ -310,30 +308,30 @@ export namespace LessonReportService {
     studentNotes: string,
     locale?: string
   ): Promise<LessonReportReturnType> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_OWN_DASHBOARD);
     if (!hasPermission) {
-      throw new Error(t("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     if (!studentNotes || studentNotes.trim().length === 0) {
-      throw new Error(t("invalidInput"));
+      throw new Error(tErrors.invalidInput);
     }
 
     const report = await LessonReportRepository.findByClassInstanceId(classInstanceId);
     if (!report) {
-      throw new Error(t("lessonReport.notFound"));
+      throw new Error("lessonReport.notFound");
     }
 
     const studentId = await StudentRepository.getStudentIdByUserId(actorUserId);
     if (!studentId || studentId !== report.studentId) {
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     const updated = await LessonReportRepository.updateStudentNotes(classInstanceId, studentNotes);
     if (!updated) {
-      throw new Error(t("lessonReport.notFound"));
+      throw new Error("lessonReport.notFound");
     }
 
     return toReturnType(updated);

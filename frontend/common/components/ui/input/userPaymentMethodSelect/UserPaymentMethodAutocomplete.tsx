@@ -98,7 +98,7 @@ export function UserPaymentMethodAutocomplete({
   onBlurAction,
   style,
 }: UserPaymentMethodAutocompleteProps): React.ReactNode {
-  const t = useAppTranslation("ui.paymentMethod");
+  const t = useAppTranslation().uiTranslations.paymentMethod;
 
   const resolveLabel = useMemo(
     () => createPaymentMethodResolver(t.type, t.direction, t.identifier, t.select, t.display),

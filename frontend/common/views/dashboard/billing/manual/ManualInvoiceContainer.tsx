@@ -50,9 +50,9 @@ function billingMonthsToInput(months: string[], year?: number): { year: number; 
 }
 
 export function ManualInvoiceContainer() {
-  const t = useAppTranslation("dashboard.billing");
-  const tc = useAppTranslation("common");
-  const tErrors = useAppTranslation("errors");
+  const t = useAppTranslation().dashboardTranslations.billing;
+  const tc = useAppTranslation().commonTranslations;
+  const tErrors = useAppTranslation().errorsTranslations;
   const router = useRouter();
   const labels = buildManualInvoiceLabels(t.manual);
   const { isImpersonating } = useImpersonation();

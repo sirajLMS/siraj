@@ -1,10 +1,10 @@
 import { LearningResourceRepository } from "@/backend/db/repo/storage/learning-resource.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getStorageService } from "@/backend/storage/storage.service";
 import type { LearningResourceListResult, LearningResourceReturnType } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export interface CreateResourceInput {
   readonly displayName: string;
@@ -24,8 +24,8 @@ export namespace LearningResourceService {
   ): Promise<LearningResourceListResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_LIST);
     if (!hasPermission) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.unauthorizedAction);
     }
 
     return await LearningResourceRepository.listResources();
@@ -41,24 +41,24 @@ export namespace LearningResourceService {
     input: CreateResourceInput,
     locale?: string
   ): Promise<LearningResourceReturnType> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const t = getServerTranslations(locale ?? "ar").errorsTranslations;
 
     // Step 0: Validate input
     if (!input.displayName || input.displayName.trim() === "") {
-      throw new Error(t("invalidInput"));
+      throw new Error(t.invalidInput);
     }
 
     // Step 1: Verify upload permission
     const hasUploadPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_UPLOAD);
     if (!hasUploadPermission) {
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(t.unauthorizedAction);
     }
 
     // Step 2: Verify file exists in storage
     const storageService = await getStorageService();
     const fileInfo = await storageService.fileInfoByPath(input.filePath);
     if (!fileInfo) {
-      throw new Error(t("notFound"));
+      throw new Error(t.notFound);
     }
 
     // Step 3: Create resource within transaction (repo handles atomicity)
@@ -117,7 +117,7 @@ export namespace LearningResourceService {
         `[LearningResourceService.deleteResource] Initiating deletion of resource ${resourceId} by user ${actorUserId}`
       );
 
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
 
       // 1. Core Permission Check
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_DELETE);
@@ -126,14 +126,14 @@ export namespace LearningResourceService {
         logger.warn(
           `[LearningResourceService.deleteResource] Unauthorized deletion attempt by user ${actorUserId} for resource ${resourceId}`
         );
-        throw new Error(t("unauthorizedAction"));
+        throw new Error(t.unauthorizedAction);
       }
 
       // 2. Resource Retrieval
       const resource = await LearningResourceRepository.findById(resourceId);
       if (!resource) {
         logger.warn(`[LearningResourceService.deleteResource] Resource ID not found: ${resourceId}`);
-        throw new Error(t("resourceNotFound"));
+        throw new Error(t.resourceNotFound);
       }
 
       logger.debug(`[LearningResourceService.deleteResource] Resource fetched. Target file path: ${resource.filePath}`);
@@ -156,14 +156,11 @@ export namespace LearningResourceService {
         `[LearningResourceService.deleteResource] Failed to orchestrate deletion for resource ${resourceId}:`,
         error
       );
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      if (
-        error instanceof Error &&
-        (error.message === t("unauthorizedAction") || error.message === t("resourceNotFound"))
-      ) {
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      if (error instanceof Error && (error.message === t.unauthorizedAction || error.message === t.resourceNotFound)) {
         throw error;
       }
-      throw new Error(t("resourceDeleteFailed"), { cause: error });
+      throw new Error("resourceDeleteFailed", { cause: error });
     }
   }
 

@@ -1,10 +1,8 @@
-import { getBackendTranslations } from "@/backend/lib/intl";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 function sanitizeSms(text: string): string {
   return text.replace(/[\r\n\t]/g, " ").trim();
 }
-
-type GenericTranslationFn = (key: string, values?: Record<string, unknown>) => string;
 
 interface UrgentComplaintResponseSmsData {
   readonly parentName: string;
@@ -16,33 +14,23 @@ export const renderUrgentComplaintResponseSms = async (
   data: UrgentComplaintResponseSmsData,
   locale?: string
 ): Promise<string> => {
-  const t = (await getBackendTranslations({
-    locale,
-    namespace: "sms.complaintResponse",
-  })) as GenericTranslationFn;
+  const t = getServerTranslations(locale ?? "en").smsTranslations.complaintResponse;
 
-  const message = t("urgentResponse", {
+  return t.urgentResponse({
     parentName: sanitizeSms(data.parentName),
     complaintTitle: sanitizeSms(data.complaintTitle),
     responseSummary: sanitizeSms(data.responseSummary),
   });
-
-  return message;
 };
 
 export const renderSuggestionAcknowledgedSms = async (
   data: { readonly parentName: string; readonly suggestionTitle: string },
   locale?: string
 ): Promise<string> => {
-  const t = (await getBackendTranslations({
-    locale,
-    namespace: "sms.suggestionAcknowledged",
-  })) as GenericTranslationFn;
+  const t = getServerTranslations(locale ?? "en").smsTranslations.suggestionAcknowledged;
 
-  const message = t("acknowledged", {
+  return t.acknowledged({
     parentName: sanitizeSms(data.parentName),
     suggestionTitle: sanitizeSms(data.suggestionTitle),
   });
-
-  return message;
 };

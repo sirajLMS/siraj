@@ -1,6 +1,6 @@
 import type { ParentProfileLabels } from "@/shared/locale/types/dashboard/parents";
 
-export const profile: ParentProfileLabels = {
+export const dashboardParentProfileEn: ParentProfileLabels = {
   pageTitle: "Parent Profile",
   status: {
     regular: "Regular",

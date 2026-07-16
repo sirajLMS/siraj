@@ -41,7 +41,7 @@ function getSeverityIcon(severity: string) {
 }
 
 export function NotificationPanel() {
-  const t = useAppTranslation("dashboard.core.notifications");
+  const t = useAppTranslation().dashboardTranslations.coreNotifications;
   const { data, loading, error } = useQuery(notificationAlertsQueryDocument);
 
   if (loading) {

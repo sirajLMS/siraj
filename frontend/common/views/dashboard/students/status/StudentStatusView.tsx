@@ -37,7 +37,7 @@ function getBadgeStatusKey(status: StudentStatus): string {
 }
 
 function ReadOnlyStatusCard({ status }: Readonly<{ status: StudentStatus }>) {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
 
   return (
     <Paper
@@ -66,7 +66,7 @@ function StudentStatusViewHeader({
   student,
   embedded,
 }: Readonly<{
-  t: ReturnType<typeof useAppTranslation<"dashboard.studentStatus">>;
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentStatus"];
   student: StudentStatusViewProps["student"];
   embedded: boolean;
 }>) {
@@ -138,7 +138,7 @@ export function StudentStatusView({
   embedded = false,
   onUpdateStatus,
 }: Readonly<StudentStatusViewProps>) {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
   const { canView, canEdit } = useStudentFieldAccess();
 
   const canEditStatus = canEdit("student_academic");

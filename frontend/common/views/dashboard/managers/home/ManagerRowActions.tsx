@@ -78,7 +78,7 @@ function EditProfileDialog({
   onPhoneChange,
   updateLoading,
 }: Readonly<EditProfileDialogProps>) {
-  const t = useAppTranslation("dashboard.managersDirectory");
+  const t = useAppTranslation().dashboardTranslations.managersDirectory;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -133,7 +133,7 @@ function DeactivateDialog({
   manager,
   updateLoading,
 }: Readonly<DeactivateDialogProps>) {
-  const t = useAppTranslation("dashboard.managersDirectory");
+  const t = useAppTranslation().dashboardTranslations.managersDirectory;
   const actions = t.actions;
 
   const dialogTitle = isDeactivate ? actions.deactivate : actions.activate;
@@ -183,7 +183,7 @@ function ActionMenu({
   manager,
   isDeactivate,
 }: Readonly<ActionMenuProps>) {
-  const t = useAppTranslation("dashboard.managersDirectory");
+  const t = useAppTranslation().dashboardTranslations.managersDirectory;
 
   return (
     <Menu anchorEl={anchorEl} open={menuOpen} onClose={onMenuClose}>
@@ -212,7 +212,7 @@ function ActionMenu({
 }
 
 export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>) {
-  const t = useAppTranslation("dashboard.managersDirectory");
+  const t = useAppTranslation().dashboardTranslations.managersDirectory;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
   const [editDialogOpen, setEditDialogOpen] = useState(false);

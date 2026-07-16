@@ -1,6 +1,6 @@
 import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes";
 
-export const classAudit: ClassAuditLabels = {
+export const dashboardClassAuditAr: ClassAuditLabels = {
   invalidClassId: "معرف الحصة غير صالح",
   pageTitle: "عرض تفاصيل الحصة",
   mobileTitle: "سجل تدقيق الحصة",
@@ -69,4 +69,4 @@ export const classAudit: ClassAuditLabels = {
   meetingIdNA: "غير متوفر",
 };
 
-export { classAudit as audit };
+export { dashboardClassAuditAr as audit };

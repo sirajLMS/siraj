@@ -128,7 +128,7 @@ function ReportsMainContent({
   onPrintReport,
   onRowClick,
 }: ReportsMainContentProps) {
-  const t = useAppTranslation("dashboard.reports");
+  const t = useAppTranslation().dashboardTranslations.reports;
 
   const rows = useMemo(() => mapReportRows(reportData?.generateAttendanceReport?.rows), [reportData]);
 
@@ -414,8 +414,8 @@ function useReportHandlers({
 export function ReportsContainer() {
   const { hasPermission } = useUserStore();
   const locale = useAppLocale();
-  const t = useAppTranslation("dashboard.reports");
-  const tErrors = useAppTranslation("errors");
+  const t = useAppTranslation().dashboardTranslations.reports;
+  const tErrors = useAppTranslation().errorsTranslations;
   const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 

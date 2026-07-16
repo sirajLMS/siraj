@@ -31,7 +31,7 @@ export function StaffProfileEditForm({
   readonly isSaving: boolean;
   readonly onSubmit: (values: StaffAdminEditFormData) => Promise<void>;
 }) {
-  const tc = useAppTranslation("profile");
+  const tc = useAppTranslation().profileTranslations.base;
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canView, canEdit } = useProfileFieldAccess({ scope });
   const form = useForm<StaffAdminEditFormData>({

@@ -19,7 +19,7 @@ export function TeacherReassignmentViewDesktop({
   onStatusChange,
   onCancel,
 }: Readonly<TeacherReassignmentViewModel>) {
-  const t = useAppTranslation("dashboard.teacherReassignment");
+  const t = useAppTranslation().dashboardTranslations.teacherReassignment;
 
   const breadcrumbs = [
     { label: t.breadcrumbs.dashboard, href: "/dashboard" },

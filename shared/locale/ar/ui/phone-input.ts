@@ -1,4 +1,4 @@
-export const phoneInput = {
+export const uiPhoneInputAr = {
   label: "رقم الهاتف",
   selectCountry: "اختر البلد",
   invalidPrefix: "رمز الاتصال غير صالح",

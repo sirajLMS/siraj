@@ -137,7 +137,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     resolve: async (_parent, args, ctx) => {
       const { email, password } = args.input;
       const ipAddress = ctx.ipAddress || "127.0.0.1";
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
 
       // 0. Enforce auth rate limit before any credential checks
       const rateLimitResult = await checkRateLimit(ipAddress, authRateLimiter);
@@ -246,7 +246,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       input: t.arg({ type: DemoLoginInputPothosObject, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       const isDemo = getBooleanEnv("IS_DEMO");
       if (!isDemo) {
         throw new GraphQLError(tErrors.auth.demoLoginNotEnabled, {
@@ -342,7 +342,7 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       if (ctx.isImpersonating && ctx.sessionId) {
         try {
-          const tErrors = await ctx.t("errors");
+          const tErrors = ctx.t().errorsTranslations;
           await ImpersonationService.endImpersonation(sessionOwnerId, ctx.sessionId, tErrors, ctx.ipAddress);
         } catch (error) {
           logger.warn("Failed to end impersonation during logout", { error });

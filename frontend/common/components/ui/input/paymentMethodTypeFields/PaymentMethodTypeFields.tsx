@@ -83,7 +83,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
   detailsPrefix,
   catalogPrefix,
 }: PaymentMethodTypeFieldsProps<T>): React.ReactNode {
-  const t = useAppTranslation("ui.paymentMethod");
+  const t = useAppTranslation().uiTranslations.paymentMethod;
   const tTypeFields = t.typeFields;
 
   const renderCatalogMetadata = () => {

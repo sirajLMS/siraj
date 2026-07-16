@@ -11,7 +11,7 @@ import type { SupportContactProps } from "@/frontend/common/views/dashboard/teac
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function SupportContact({ contact }: Readonly<SupportContactProps>) {
-  const t = useAppTranslation("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
   const notifications = useNotifications();
   const [logSupportRequest] = useMutation(logTeacherSupportRequestMutationDocument);
 

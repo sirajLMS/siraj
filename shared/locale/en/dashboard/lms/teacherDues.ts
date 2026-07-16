@@ -1,6 +1,6 @@
 import type { TeacherDueLabels } from "@/shared/locale/types/dashboard/lms/teacherDues";
 
-export const teacherDues: TeacherDueLabels = {
+export const dashboardLmsTeacherDuesEn: TeacherDueLabels = {
   title: "Teacher Dues",
   pending: "Pending Payment",
   paid: "Paid",

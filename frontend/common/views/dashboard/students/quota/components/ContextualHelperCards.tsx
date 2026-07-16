@@ -3,7 +3,7 @@ import { Box, Typography } from "@mui/material";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function ContextualHelperCards() {
-  const t = useAppTranslation<"dashboard.studentQuota">("dashboard.studentQuota").info;
+  const t = useAppTranslation().dashboardTranslations.studentQuota.info;
 
   return (
     <Box

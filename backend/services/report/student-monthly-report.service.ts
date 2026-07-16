@@ -3,10 +3,10 @@ import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
 import { classInstances, creditTransactions, lessonReports, students } from "@/backend/db/schema";
 import { AppPermission, AttendanceEvaluation, ClassExecutionState, ClassOutcome, CreditReason } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { StudentMonthlyReportReturnType } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace StudentMonthlyReportService {
   async function assertCanViewMonthlyReport(actorUserId: string, studentId: string, locale?: string): Promise<void> {
@@ -27,8 +27,8 @@ export namespace StudentMonthlyReportService {
       .limit(1);
 
     if (!studentRow) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("studentNotFound", { id: studentId }));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.studentNotFound(studentId));
     }
 
     // Self: student viewing own report
@@ -40,8 +40,8 @@ export namespace StudentMonthlyReportService {
       if (parent && parent.id === studentRow.parentId) return;
     }
 
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(t("unauthorizedAction"));
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+    throw new Error(tErrors.unauthorizedAction);
   }
 
   export async function getMonthlyReport(
@@ -68,8 +68,8 @@ export namespace StudentMonthlyReportService {
       .limit(1);
 
     if (!studentRow) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("studentNotFound", { id: studentId }));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.studentNotFound(studentId));
     }
 
     const studentName = studentRow.studentName ?? "";

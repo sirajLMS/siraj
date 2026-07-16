@@ -3,7 +3,6 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { complaintResponses, complaints, users } from "@/backend/db/schema";
 import { ComplaintStatus } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   ComplaintResponseInput,
   ComplaintResponseReturnType,
@@ -41,7 +40,7 @@ export namespace ComplaintResponseRepository {
     return created;
   };
 
-  export const createResponse = async (input: CreateComplaintResponseInput, tx?: DBTransaction, locale?: string) => {
+  export const createResponse = async (input: CreateComplaintResponseInput, tx?: DBTransaction, _locale?: string) => {
     const runner = async (t: DBTransaction) => {
       const now = new Date();
 
@@ -57,8 +56,7 @@ export namespace ComplaintResponseRepository {
         .returning();
 
       if (!created) {
-        const tr = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tr("complaintResponse.createFailed"));
+        throw new Error("Failed to create complaint response");
       }
 
       await t

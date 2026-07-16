@@ -52,7 +52,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return await TeacherOnboardingService.createTeacher(
         userId,
         {
@@ -87,7 +87,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return await ParentOnboardingService.createParent(
         userId,
         {
@@ -120,7 +120,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return await StudentOnboardingService.createStudent(userId, args.input, tErrors, ctx.locale);
     },
   }),

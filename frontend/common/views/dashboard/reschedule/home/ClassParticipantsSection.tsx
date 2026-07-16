@@ -42,7 +42,7 @@ function ParticipantField({
 }
 
 export function ClassParticipantsSection({ session }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.rescheduleForm").fields;
+  const t = useAppTranslation().dashboardTranslations.rescheduleForm.fields;
 
   return (
     <Grid container spacing={3}>

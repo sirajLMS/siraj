@@ -1,11 +1,11 @@
-import { currencyHedges } from "@/shared/locale/ar/dashboard/billing/currencyHedges";
-import { exchangeRates } from "@/shared/locale/ar/dashboard/billing/exchangeRates";
-import { manual } from "@/shared/locale/ar/dashboard/billing/manual";
-import { payment } from "@/shared/locale/ar/dashboard/billing/payment";
-import { supportedCurrencies } from "@/shared/locale/ar/dashboard/billing/supportedCurrencies";
+import { dashboardBillingCurrencyHedgesAr as currencyHedges } from "@/shared/locale/ar/dashboard/billing/currencyHedges";
+import { dashboardBillingExchangeRatesAr as exchangeRates } from "@/shared/locale/ar/dashboard/billing/exchangeRates";
+import { dashboardBillingManualAr as manual } from "@/shared/locale/ar/dashboard/billing/manual";
+import { dashboardBillingPaymentAr as payment } from "@/shared/locale/ar/dashboard/billing/payment";
+import { dashboardBillingSupportedCurrenciesAr as supportedCurrencies } from "@/shared/locale/ar/dashboard/billing/supportedCurrencies";
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
 
-export const main: BillingLabels = {
+export const dashboardBillingAr: BillingLabels = {
   ...payment,
   adminPageTitle: "إدارة الفواتير",
   adminPageSubtitle: "نظرة عامة مالية وسجلات المعاملات",

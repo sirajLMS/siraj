@@ -1,10 +1,9 @@
 "use client";
 
-import type { useAppTranslation } from "@/shared/locale/client";
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
 import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
 
-export type BillingTranslator = ReturnType<typeof useAppTranslation<"dashboard.billing">>;
+export type BillingTranslator = BillingLabels;
 
 export function buildPageLabels(t: BillingTranslator) {
   return {

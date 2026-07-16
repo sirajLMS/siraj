@@ -40,7 +40,7 @@ export function ManagersViewMobile({
   onRoleFilterChange,
   onStatusFilterChange,
 }: Readonly<ManagersViewMobileProps>) {
-  const t = useAppTranslation("dashboard.managersDirectory");
+  const t = useAppTranslation().dashboardTranslations.managersDirectory;
 
   const actions = (
     <RequirePermission permissions={[AppPermission.StaffCreate]}>

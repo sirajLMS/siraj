@@ -2,14 +2,14 @@
 import type { useClassMutations } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassMutations";
 import type { ActionFeedbackState, ClassActionHandlers } from "@/frontend/common/views/dashboard/classes/details/types";
 import type { useRouter } from "@/shared/i18n/routing";
-import type { useAppTranslation } from "@/shared/locale/client";
+import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details";
 
 export function useClassActionHandlers(
   id: string,
   mutations: ReturnType<typeof useClassMutations>,
   router: ReturnType<typeof useRouter>,
   setFeedbackState: (state: ActionFeedbackState | null) => void,
-  t: ReturnType<typeof useAppTranslation<"dashboard.classDetails">>
+  t: ClassDetailsLabels
 ): ClassActionHandlers {
   return {
     handleForceActivate: async () => {

@@ -25,7 +25,7 @@ export const GenderSelector: React.FC<GenderSelectorProps> = ({
   labels,
   allowEmpty = false,
 }): React.ReactNode => {
-  const t = useAppTranslation("ui.genderSelector");
+  const t = useAppTranslation().uiTranslations.genderSelector;
   const title = labels?.title ?? t.title;
   const maleLabel = labels?.male ?? t.male;
   const femaleLabel = labels?.female ?? t.female;

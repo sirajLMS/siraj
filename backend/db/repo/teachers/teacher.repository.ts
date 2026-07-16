@@ -5,7 +5,6 @@ import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
 import { AccountStatus, type CurrencyCode, type Gender } from "@/backend/enum";
 import { parseAccountStatus, parseGender, parseIanaTimezone } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   PaginationArgs,
   TeacherCreateResult,
@@ -33,8 +32,8 @@ export namespace TeacherRepository {
       .limit(1);
 
     if (existingTeacher.length > 0) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("teacher.alreadyExists"));
+      const { teacher } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(teacher.alreadyExists);
     }
 
     const [created] = await queryDb
@@ -57,8 +56,7 @@ export namespace TeacherRepository {
       .returning();
 
     if (!created) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("teacher.createFailed"));
+      throw new Error("Failed to create teacher profile");
     }
 
     const [userRow] = await queryDb

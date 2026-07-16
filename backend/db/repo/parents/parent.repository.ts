@@ -32,7 +32,7 @@ import {
   parseParentStatus,
   parseStudentStatus,
 } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type {
   PaginationArgs,
   ParentCreateResult,
@@ -64,8 +64,8 @@ export namespace ParentRepository {
       .limit(1);
 
     if (existingParent.length > 0) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("parent.alreadyExists"));
+      const { parent } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(parent.alreadyExists);
     }
 
     const [created] = await queryDb
@@ -87,8 +87,8 @@ export namespace ParentRepository {
       .returning();
 
     if (!created) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("parent.createFailed"));
+      const { parent } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(parent.createFailed);
     }
 
     const [userRow] = await queryDb
@@ -334,11 +334,11 @@ export namespace ParentRepository {
     tx?: DBTransaction
   ): Promise<ParentProfileResult> => {
     const queryDb = tx ?? db;
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const existing = await getParentProfile(parentId, tx);
     if (!existing) {
-      throw new Error(tFunc("parentNotFound", { id: parentId }));
+      throw new Error(errorsTranslations.parentNotFound);
     }
 
     const now = new Date();
@@ -357,7 +357,7 @@ export namespace ParentRepository {
 
     const updated = await getParentProfile(parentId, tx);
     if (!updated) {
-      throw new Error(tFunc("parentNotFound", { id: parentId }));
+      throw new Error(errorsTranslations.parentNotFound);
     }
 
     return updated;
@@ -392,6 +392,7 @@ export namespace ParentRepository {
     locale?: string
   ): Promise<DeactivatedParentResult> => {
     const queryDb = tx ?? db;
+    const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const existing = await queryDb
       .select({ id: parents.id, userId: parents.userId, accountStatus: users.status })
@@ -401,14 +402,12 @@ export namespace ParentRepository {
       .limit(1);
 
     if (existing.length === 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound", { id: parentId }));
+      throw new Error(errorsTranslations.parentNotFound);
     }
 
     const current = existing[0];
     if (parseAccountStatus(current.accountStatus) === AccountStatus.DEACTIVATED) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentAlreadyDeactivated", { id: parentId }));
+      throw new Error(errorsTranslations.parentAlreadyDeactivated);
     }
 
     const updatedUser = await UserRepository.updateStatus(current.userId, AccountStatus.DEACTIVATED, tx, locale);
@@ -437,6 +436,7 @@ export namespace ParentRepository {
     locale?: string
   ): Promise<DeactivatedParentResult> => {
     const queryDb = tx ?? db;
+    const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const existing = await queryDb
       .select({ id: parents.id, userId: parents.userId, accountStatus: users.status })
@@ -446,14 +446,12 @@ export namespace ParentRepository {
       .limit(1);
 
     if (existing.length === 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound", { id: parentId }));
+      throw new Error(errorsTranslations.parentNotFound);
     }
 
     const current = existing[0];
     if (parseAccountStatus(current.accountStatus) !== AccountStatus.DEACTIVATED) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentAlreadyActivated", { id: parentId }));
+      throw new Error(errorsTranslations.parentAlreadyActivated);
     }
 
     const updatedUser = await UserRepository.updateStatus(current.userId, AccountStatus.ACTIVATED, tx, locale);
@@ -488,12 +486,12 @@ export namespace ParentRepository {
     locale?: string
   ): Promise<ChangeParentLifecycleResult> => {
     const queryDb = tx ?? db;
+    const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const existing = await queryDb.select({ id: parents.id }).from(parents).where(eq(parents.id, parentId)).limit(1);
 
     if (existing.length === 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound", { id: parentId }));
+      throw new Error(errorsTranslations.parentNotFound);
     }
 
     const [updated] = await queryDb

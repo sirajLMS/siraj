@@ -1,6 +1,6 @@
 import type { CurrencyHedgesLabels } from "@/shared/locale/types/dashboard/billing/currencyHedges";
 
-export const currencyHedges: CurrencyHedgesLabels = {
+export const dashboardBillingCurrencyHedgesAr: CurrencyHedgesLabels = {
   pageTitle: "تحوط العملات",
   pageSubtitle: "إدارة مراكز التحوط بالعملات الأجنبية",
   addHedge: "إضافة تحوط",

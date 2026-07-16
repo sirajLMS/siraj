@@ -37,7 +37,7 @@ interface UseClassMutationsReturn {
 }
 
 export function useClassMutations({ id, onError }: UseClassMutationsOptions): UseClassMutationsReturn {
-  const t = useAppTranslation("dashboard.classDetails");
+  const t = useAppTranslation().dashboardTranslations.classDetails;
   const client = useApolloClient();
 
   const reportMutationError = (context: string, err: unknown, fallbackMessage: string) => {

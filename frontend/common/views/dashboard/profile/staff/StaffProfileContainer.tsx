@@ -95,7 +95,7 @@ function PermissionsTabContent({
   readonly hasProfile: boolean;
   readonly refetch: () => void;
 }) {
-  const tc = useAppTranslation("profile");
+  const tc = useAppTranslation().profileTranslations.base;
 
   if (loading && !hasProfile) {
     return <StaffProfileLoadingSkeleton />;
@@ -118,7 +118,7 @@ export function StaffProfileContainer({
   targetUserId,
   activeTab: _activeTab = "profile",
 }: StaffProfileContainerProps) {
-  const tc = useAppTranslation("profile");
+  const tc = useAppTranslation().profileTranslations.base;
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const router = useRouter();

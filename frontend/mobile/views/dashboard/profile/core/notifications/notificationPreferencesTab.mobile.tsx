@@ -18,7 +18,7 @@ export function NotificationPreferencesTabMobile({
   onSnackbarClose,
   errorLoading,
 }: Readonly<NotificationPreferencesTabMobileProps>) {
-  const t = useAppTranslation("profile").notifications;
+  const t = useAppTranslation().profileTranslations.notifications;
 
   if (errorLoading) {
     return (

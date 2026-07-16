@@ -19,11 +19,11 @@ gqlSchemaBuilder.mutationField("recordCreditPurchase", t =>
       const actorUserId = await requireAuth(ctx);
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.CREDITS_MANAGE);
       if (!hasPermission) {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.insufficientPermissions);
       }
 
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return CreditService.recordPurchase(
         actorUserId,
         {

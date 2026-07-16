@@ -4,7 +4,6 @@ import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
 import { type ComplaintCategory, ComplaintStatus } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   ComplaintFileReturnType,
   ComplaintMetrics,
@@ -143,7 +142,7 @@ export namespace ComplaintRepository {
     input: ComplaintSubmitInput,
     parentId: string,
     tx?: DBTransaction,
-    locale?: string
+    _locale?: string
   ): Promise<ComplaintSelectType> => {
     const queryDb = tx ?? db;
     const now = new Date();
@@ -160,8 +159,7 @@ export namespace ComplaintRepository {
       .returning();
 
     if (!created) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("complaint.createFailed"));
+      throw new Error("Failed to create complaint");
     }
 
     return {

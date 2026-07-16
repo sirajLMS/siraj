@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function SocialCommsSection({ register, control }: Props) {
-  const t = useAppTranslation("dashboard.parentOnboarding");
+  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
 
   return (
     <SectionPanel title={t.sections.socialComms}>

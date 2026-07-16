@@ -18,7 +18,7 @@ import {
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function AppApolloProvider({ children }: { readonly children: React.ReactNode }) {
-  const t = useAppTranslation("common");
+  const t = useAppTranslation().commonTranslations;
   const {
     isConnected,
     isChecking,

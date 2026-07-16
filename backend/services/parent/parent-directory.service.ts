@@ -1,9 +1,9 @@
 import { ParentRepository } from "@/backend/db/repo";
 import { AppPermission, ParentStatus } from "@/backend/enum";
 import { parseAccountStatus, parseParentStatus } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { PaginationArgs, ParentDirectoryResult, ParentDirectoryRow } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export type {
   ParentDirectoryMetrics,
@@ -25,8 +25,8 @@ export namespace ParentDirectoryService {
   ): Promise<ParentDirectoryResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_VIEW_DIRECTORY);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
     }
 
     const {

@@ -463,7 +463,7 @@ export namespace PaymentMethodService {
     const parsed = userPaymentMethodSubmitInputSchema.parse(input);
     const encryptedDetails = encryptDetailsForStorage(parsed.type, parsed.details);
 
-    const tErrors = await getServerTranslations("en", "errors");
+    const tErrors = getServerTranslations("en").errorsTranslations;
     await assertCatalogActive(parsed.type, parsed.details, tErrors, tx);
 
     if (parsed.isDefault) {
@@ -511,7 +511,7 @@ export namespace PaymentMethodService {
 
     const adminUser = usersList.find(u => u.email === "academy@siraj.local");
     const { PaymentCatalogService } = await import("@/backend/services/payment-method/payment-catalog.service");
-    const tErrors = await getServerTranslations("en", "errors");
+    const tErrors = getServerTranslations("en").errorsTranslations;
 
     return db.transaction(async tx => {
       const results: UserPaymentMethodReturnType[] = [];

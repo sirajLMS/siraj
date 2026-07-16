@@ -1,6 +1,6 @@
 import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/core";
 
-export const nav: DashboardNavigationLabels = {
+export const dashboardCoreNavEn: DashboardNavigationLabels = {
   home: "Home",
   scheduleSearch: "Schedule Search",
   scheduleTracking: "Reschedule Tracking",

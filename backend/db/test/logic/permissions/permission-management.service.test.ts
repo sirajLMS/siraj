@@ -90,7 +90,7 @@ describe("PermissionManagementService Business Logic", () => {
   }
 
   beforeAll(async () => {
-    tErrors = await getServerTranslations("en", "errors");
+    tErrors = getServerTranslations("en").errorsTranslations;
     // Override PermissionsService.getUserContext to return mock context if set
     PermissionsService.getUserContext = async (userId: string): Promise<UserPermissionContext> => {
       if (mockContext) {

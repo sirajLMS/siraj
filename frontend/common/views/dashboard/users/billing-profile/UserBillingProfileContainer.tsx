@@ -52,11 +52,11 @@ const StyledErrorTypography = styled(Typography)(({ theme }) => ({
 }));
 
 export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProfileContainerProps>) {
-  const t = useAppTranslation("dashboard.billing");
-  const tProfile = useAppTranslation("profile.teacher");
-  const tProfileRoot = useAppTranslation("profile");
-  const tErrors = useAppTranslation("errors");
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation().dashboardTranslations.billing;
+  const tProfile = useAppTranslation().profileTranslations.teacher;
+  const tProfileRoot = useAppTranslation().profileTranslations.base;
+  const tErrors = useAppTranslation().errorsTranslations;
+  const tc = useAppTranslation().commonTranslations;
   const locale = useAppLocale();
   const labels = buildBillingLabels(t);
   const { isImpersonating } = useImpersonation();

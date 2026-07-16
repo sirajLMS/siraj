@@ -1,8 +1,8 @@
 import { useAppTranslation } from "@/shared/locale/client";
-import type { MessageSchema } from "@/shared/messages/types/message";
+import type { TeacherOnboardingLabels } from "@/shared/locale/types/dashboard/teachers/onboarding";
 
-export function useTeacherOnboardingLabels(): MessageSchema["dashboard"]["teacherOnboarding"] {
-  const t = useAppTranslation("dashboard.teacherOnboarding");
+export function useTeacherOnboardingLabels(): TeacherOnboardingLabels {
+  const t = useAppTranslation().dashboardTranslations.teacherOnboarding;
   return {
     pageTitle: t.pageTitle,
     pageSubtitle: t.pageSubtitle,

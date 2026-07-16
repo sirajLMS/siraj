@@ -135,7 +135,7 @@ async function runStateChange(
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) return null;
 
-    const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+    const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
 
     await checkStateChangeAuth(t, existing, actorUserId, tFuncErrors);
 
@@ -197,7 +197,7 @@ async function buildLeaveStateChangePayload(
   successorId: string,
   reason: string | null
 ) {
-  const tFuncSession = await getServerTranslations("en", "session");
+  const tFuncSession = getServerTranslations("en").sessionTranslations;
   const now = new Date();
   const msg = tFuncSession.leaveProcessedDescription(successorId);
   return {
@@ -249,7 +249,7 @@ async function executeProcessClassLeave(
   actorUserId: string,
   tErrors: ErrorsLabels
 ): Promise<{ originalId: string; successorId: string }> {
-  const tFuncSession = await getServerTranslations("en", "session");
+  const tFuncSession = getServerTranslations("en").sessionTranslations;
   const tFuncErrors = tErrors;
 
   const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
@@ -402,7 +402,7 @@ export const activateClassInstance = async (
     id,
     actorUserId,
     async () => {
-      const tFuncSession = await getServerTranslations("en", "session");
+      const tFuncSession = getServerTranslations("en").sessionTranslations;
       return {
         state: {
           executionState: "ACTIVATED",
@@ -429,7 +429,7 @@ export const stopClassInstance = async (
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
 ) => {
-  const tFuncSession = await getServerTranslations("en", "session");
+  const tFuncSession = getServerTranslations("en").sessionTranslations;
   return transitionToCompleted(id, actorUserId, "TAKEN", tFuncSession.stopDescription, tx, tErrors);
 };
 
@@ -443,7 +443,7 @@ export const startClassInstance = async (
     id,
     actorUserId,
     async (_, existing) => {
-      const tFuncSession = await getServerTranslations("en", "session");
+      const tFuncSession = getServerTranslations("en").sessionTranslations;
       return {
         state: { executionState: "RUNNING", outcome: "PENDING", actualStartAt: new Date() },
         event: {
@@ -463,7 +463,7 @@ export const markClassAbsent = async (id: string, actorUserId: string, tx?: DBTr
     id,
     actorUserId,
     async (_, existing) => {
-      const tFuncSession = await getServerTranslations("en", "session");
+      const tFuncSession = getServerTranslations("en").sessionTranslations;
       const now = new Date();
       return {
         state: {
@@ -497,8 +497,8 @@ export const markClassMissedBySystem = async (
       return null;
     }
 
-    const tFuncSession = await getServerTranslations("en", "session");
-    const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+    const tFuncSession = getServerTranslations("en").sessionTranslations;
+    const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     const now = new Date();
     const state = {
       executionState: "COMPLETED" as const,
@@ -529,7 +529,7 @@ export const processClassLeave = async (
   tErrors?: ErrorsLabels
 ) => {
   const runner = async (t: DBTransaction) => {
-    const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+    const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     return executeProcessClassLeave(t, id, reason, actorUserId, tErrors ?? tFuncErrors);
   };
   return tx ? await runner(tx) : await db.transaction(runner);
@@ -542,7 +542,7 @@ export const resetClassInstance = async (
   tErrors?: ErrorsLabels
 ) => {
   const runner = async (t: DBTransaction) => {
-    await getServerTranslations("en", "errors");
+    getServerTranslations("en").errorsTranslations;
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) return null;
 
@@ -555,7 +555,7 @@ export const resetClassInstance = async (
       id,
       actorUserId,
       async () => {
-        const tFuncSession = await getServerTranslations("en", "session");
+        const tFuncSession = getServerTranslations("en").sessionTranslations;
         return {
           state: {
             executionState: "NOT_ACTIVATED",
@@ -621,7 +621,7 @@ export const rescheduleClassInstance = async (
   tErrors?: ErrorsLabels
 ): Promise<Types.ClassInstanceEntity> => {
   const runner = async (t: DBTransaction) => {
-    const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+    const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     const results = await t.select().from(classInstances).where(eq(classInstances.id, originalClassId)).limit(1);
     if (results.length === 0) {
       throw new Error(tFuncErrors.originalClassNotFound);
@@ -694,7 +694,7 @@ export async function processAutomatedClassLeave(
   tErrors?: ErrorsLabels
 ): Promise<{ originalId: string; successorId: string | null }> {
   const runner = async (t: DBTransaction) => {
-    const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+    const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) {
       throw new Error(tFuncErrors.classInstanceNotFound({ id }));

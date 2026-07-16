@@ -1,6 +1,6 @@
 import type { ProfileLabels } from "@/shared/locale/types/profile";
 
-export const profile: ProfileLabels = {
+export const profileAr: ProfileLabels = {
   shell: {
     tabs: {
       profile: "الملف الشخصي",

@@ -25,7 +25,7 @@ function TeacherSelection({
   selectedTeacherId: string;
   onTeacherChange: (id: string) => void;
 }>) {
-  const t = useAppTranslation("dashboard.teacherReassignment").controls;
+  const t = useAppTranslation().dashboardTranslations.teacherReassignment.controls;
   return (
     <Box>
       <Box component="label" sx={labelSx}>
@@ -71,7 +71,7 @@ function StatusUpdate({
   selectedStatus: StudentStatus | "";
   onStatusChange: (status: StudentStatus | "") => void;
 }>) {
-  const t = useAppTranslation("dashboard.teacherReassignment").controls;
+  const t = useAppTranslation().dashboardTranslations.teacherReassignment.controls;
 
   const statusKey = STUDENT_STATUS_TO_ACCOUNT_STATUS[currentStatus] ?? currentStatus;
 
@@ -117,7 +117,7 @@ function ActionButtons({
   saved: boolean;
   onCancel: () => void;
 }>) {
-  const t = useAppTranslation("dashboard.teacherReassignment").actions;
+  const t = useAppTranslation().dashboardTranslations.teacherReassignment.actions;
 
   const getButtonContent = (): React.ReactNode => {
     if (loading) return <CircularProgress size={20} color="inherit" />;
@@ -209,7 +209,7 @@ export function ManagementControlsCard({
   onStatusChange,
   onCancel,
 }: Readonly<ManagementControlsCardProps>) {
-  const t = useAppTranslation("dashboard.teacherReassignment");
+  const t = useAppTranslation().dashboardTranslations.teacherReassignment;
   const notifications = useNotifications();
   const [selectedTeacherId, setSelectedTeacherId] = useState("");
   const [selectedNewStatus, setSelectedNewStatus] = useState<StudentStatus | "">("");

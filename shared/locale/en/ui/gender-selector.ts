@@ -1,4 +1,4 @@
-export const genderSelector = {
+export const uiGenderSelectorEn = {
   title: "Gender",
   male: "Male",
   female: "Female",

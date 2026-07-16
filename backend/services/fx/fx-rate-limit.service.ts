@@ -1,4 +1,4 @@
-import { getBackendTranslations, logger } from "@/backend/lib";
+import { logger } from "@/backend/lib/logger";
 import { getRedisService } from "@/backend/services";
 
 const RATE_LIMIT_WINDOW_SECONDS = 3600;
@@ -14,8 +14,7 @@ export namespace FxRateLimitService {
     }
     if (current > RATE_LIMIT_MAX_REFRESHES) {
       logger.info("FX manual refresh rate limit exceeded", { userId, current });
-      const tFunc = await getBackendTranslations({ namespace: "errors" });
-      throw new Error(tFunc("fxRefreshRateLimitExceeded"));
+      throw new Error("fxRefreshRateLimitExceeded");
     }
   }
 }

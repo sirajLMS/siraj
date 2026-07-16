@@ -79,7 +79,7 @@ function StudentAvatar({
 }
 
 function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["student"] }>) {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
   const { showField, canView } = useStudentFieldAccess();
   const showIdentity = showField(student.name, "student_identity");
   const showTeacher = showField(student.teacherName, "student_teacher");
@@ -133,7 +133,7 @@ function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["
 }
 
 function HeaderActions({ student }: Readonly<{ student: StudentStatusHeaderProps["student"] }>) {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
   const router = useRouter();
   const { canView } = useStudentFieldAccess();
 

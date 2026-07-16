@@ -26,7 +26,7 @@ export type ProfilePageClientProps = {
 };
 
 export function ProfilePageClient({ scope, mode, audience, targetUserId }: ProfilePageClientProps) {
-  const t = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.base;
   const searchParams = useSearchParams();
   const [currentTab, setCurrentTab] = useState(searchParams.get("tab") ?? "");
 

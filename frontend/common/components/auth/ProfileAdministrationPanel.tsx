@@ -18,7 +18,7 @@ export function ProfileAdministrationPanel({
   profileUserName,
   profileIsSuperAdmin = false,
 }: Readonly<ProfileAdministrationPanelProps>) {
-  const t = useAppTranslation("auth").impersonation;
+  const t = useAppTranslation().authTranslations.impersonation;
   const currentUser = useUserStore(state => state.user);
   const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
   const isSelf = currentUser?.id === profileUserId;

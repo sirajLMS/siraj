@@ -1,6 +1,6 @@
 import type { PendingReviewsLabels } from "@/shared/locale/types/dashboard/supervisorPortal/pendingReviews";
 
-export const pendingReviews: PendingReviewsLabels = {
+export const dashboardSupervisorPortalPendingReviewsAr: PendingReviewsLabels = {
   pageTitle: "مراجعات الحصص المعلقة",
   filterByTeacher: "تصفية حسب المعلم",
   filterByStudent: "تصفية حسب الطالب",

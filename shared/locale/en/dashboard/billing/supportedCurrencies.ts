@@ -1,6 +1,6 @@
 import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies";
 
-export const supportedCurrencies: SupportedCurrenciesLabels = {
+export const dashboardBillingSupportedCurrenciesEn: SupportedCurrenciesLabels = {
   pageTitle: "Supported Currencies",
   pageSubtitle: "Manage currencies available for use in billing",
   code: "Code",

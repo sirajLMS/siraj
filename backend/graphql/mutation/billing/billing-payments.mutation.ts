@@ -27,11 +27,11 @@ gqlSchemaBuilder.mutationField("recordPayment", t =>
         AppPermission.BILLING_UPDATE_STATUS_PAID
       );
       if (!hasPermission) {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.insufficientPermissions);
       }
 
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       const payment = await PaymentMethodService.recordPayin(
         {
           invoiceId: args.invoiceId,
@@ -67,7 +67,7 @@ gqlSchemaBuilder.mutationField("createTeacherPayment", t =>
     },
     resolve: async (_root, args, ctx) => {
       await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentMethodService.recordPayout(
         {
           teacherId: args.teacherId,

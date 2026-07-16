@@ -19,8 +19,8 @@ export function TeacherOnboardingContainer() {
   const createdTeacher = useTeacherOnboardingStore(state => state.result);
   const [showSuccess, setShowSuccess] = useState(false);
   const labels = useTeacherOnboardingLabels();
-  const tMeeting = useAppTranslation("ui.meetingConfig.manager");
-  const tJoin = useAppTranslation("ui.meetingConfig.join");
+  const tMeeting = useAppTranslation().uiTranslations.meetingConfigManager;
+  const tJoin = useAppTranslation().uiTranslations.meetingConfigJoin;
   const router = useRouter();
 
   const meetingSetupHref = createdTeacher

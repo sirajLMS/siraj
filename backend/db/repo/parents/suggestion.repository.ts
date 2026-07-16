@@ -3,7 +3,6 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { SuggestionStatus } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import type { SuggestionContributorStats, SuggestionReturnType, SuggestionSubmitInput } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 
@@ -36,8 +35,7 @@ export namespace SuggestionRepository {
       })
       .returning();
     if (!created) {
-      const t = await getBackendTranslations({ namespace: "errors" });
-      throw new Error(t("suggestion.createFailed"));
+      throw new Error("Failed to submit suggestion");
     }
     return created;
   };
@@ -45,7 +43,7 @@ export namespace SuggestionRepository {
   export const submitSuggestion = async (
     input: SuggestionSubmitInput & { parentId: string },
     tx?: DBTransaction,
-    locale?: string
+    _locale?: string
   ) => {
     const queryDb = tx ?? db;
     const now = new Date();
@@ -61,8 +59,7 @@ export namespace SuggestionRepository {
       .returning();
 
     if (!created) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("suggestion.createFailed"));
+      throw new Error("Failed to submit suggestion");
     }
 
     return created;
@@ -244,7 +241,7 @@ export namespace SuggestionRepository {
     suggestionId: string,
     fields: Partial<typeof suggestions.$inferInsert>,
     tx?: DBTransaction,
-    locale?: string
+    _locale?: string
   ) => {
     const runner = async (t: DBTransaction) => {
       const [updated] = await t
@@ -254,8 +251,7 @@ export namespace SuggestionRepository {
         .returning();
 
       if (!updated) {
-        const t18n = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t18n("suggestion.notFound", { id: suggestionId }));
+        throw new Error(`Suggestion ${suggestionId} not found`);
       }
 
       return updated;

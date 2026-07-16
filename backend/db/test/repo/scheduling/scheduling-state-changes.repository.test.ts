@@ -342,7 +342,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         );
         expect(initialUsage).toBe(0);
 
-        const tErrors = await getServerTranslations("en", "errors");
+        const tErrors = getServerTranslations("en").errorsTranslations;
         await SchedulingRepository.processClassLeave(id, "Sick leave", u, tx, tErrors);
 
         const finalUsage = await SchedulingRepository.getTeacherLeaveQuotaUsage(
@@ -371,7 +371,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
           usedCount: 2,
         });
 
-        const tErrors = await getServerTranslations("en", "errors");
+        const tErrors = getServerTranslations("en").errorsTranslations;
         const quotaError = await expectRepositoryError(() =>
           SchedulingRepository.processClassLeave(id, "Third leave", u, tx, tErrors)
         );
@@ -394,7 +394,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
           scheduledEndAt: new Date(now.getTime() + 86400000 + 3600000),
         });
         await SchedulingRepository.activateClassInstance(instance1.id, teacher.userId, { force: false }, tx);
-        const tErrors = await getServerTranslations("en", "errors");
+        const tErrors = getServerTranslations("en").errorsTranslations;
         await SchedulingRepository.processClassLeave(instance1.id, "Leave 1", teacher.userId, tx, tErrors);
 
         const usage1 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);

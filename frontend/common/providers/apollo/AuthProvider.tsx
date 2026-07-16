@@ -19,7 +19,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 interface LoadingUIProps {
   readonly onRetry: () => void;
   readonly error?: string | null;
-  readonly t: ReturnType<typeof useAppTranslation<"auth">>["login"];
+  readonly t: ReturnType<typeof useAppTranslation>["authTranslations"]["login"];
 }
 
 function LoadingUI({ onRetry, error, t }: LoadingUIProps) {
@@ -66,7 +66,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const t = useAppTranslation("auth").login;
+  const t = useAppTranslation().authTranslations.login;
   const { updateAuthToken, clearAuthData } = useAuthToken();
   const client = useApolloClient();
   const [loginMutation] = useMutation(Document.loginMutationDocument);

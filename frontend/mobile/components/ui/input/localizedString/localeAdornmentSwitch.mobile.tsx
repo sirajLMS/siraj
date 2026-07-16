@@ -34,7 +34,7 @@ const MobileLanguageOption = styled(Box, {
 }));
 
 function MobileLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<MobileLocaleListProps>) {
-  const t = useAppTranslation("ui.localizedString");
+  const t = useAppTranslation().uiTranslations.localizedString;
   const uiLocale = useAppLocale();
 
   return (
@@ -82,7 +82,7 @@ export function LocaleAdornmentSwitchMobile({
   successSwitch = false,
   ariaLabel,
 }: LocaleAdornmentSwitchProps) {
-  const t = useAppTranslation("ui.localizedString");
+  const t = useAppTranslation().uiTranslations.localizedString;
   const uiLocale = useAppLocale();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 

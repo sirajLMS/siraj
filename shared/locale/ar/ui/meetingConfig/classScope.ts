@@ -1,4 +1,4 @@
-export const classScope = {
+export const uiMeetingConfigClassScopeAr = {
   sectionTitle: "إعدادات اجتماع الحصة",
   sectionSubtitle: "تجاوز إعدادات المعلم الافتراضية لهذه الحصة أو الجدول المتكرر.",
   selectLabel: "إعداد الاجتماع",

@@ -17,7 +17,7 @@ import {
   useAdminViewLabels,
   useTeacherViewLabels,
 } from "@/frontend/common/views/dashboard/classes/details/useClassDetailsLabels";
-import type { useAppTranslation } from "@/shared/locale/client";
+import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details";
 
 const AdminView = (props: AdminViewProps) => {
   const labels = useAdminViewLabels(props.instance.studentTimezone ?? "");
@@ -71,7 +71,7 @@ export function ClassDetailsContent({
   readonly deleteDialogOpen: boolean;
   readonly onCloseDeleteDialog: () => void;
   readonly onConfirmDelete: () => Promise<void>;
-  readonly t: ReturnType<typeof useAppTranslation<"dashboard.classDetails">>;
+  readonly t: ClassDetailsLabels;
   readonly formattedScheduledDate: string;
   readonly formattedStartTime: string;
   readonly formattedEndTime: string;

@@ -12,7 +12,7 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function SupportedCurrenciesContainer() {
-  const t = useAppTranslation("dashboard.billing");
+  const t = useAppTranslation().dashboardTranslations.billing;
   const locale = useAppLocale();
 
   const rows = useMemo(

@@ -15,8 +15,8 @@ type AssociatedStudentsDataGridProps = {
 };
 
 export function AssociatedStudentsDataGrid({ rows, loading = false, emptyMessage }: AssociatedStudentsDataGridProps) {
-  const t = useAppTranslation("profile").parent;
-  const tProfile = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.parent;
+  const tProfile = useAppTranslation().profileTranslations.base;
 
   const columns = useMemo<GridColDef<AssociatedStudentRow>[]>(
     () => [

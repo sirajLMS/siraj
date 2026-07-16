@@ -15,9 +15,10 @@ import {
   teacherFiles,
   userFiles,
 } from "@/backend/db";
-import { getBackendTranslations, logger } from "@/backend/lib";
+import { logger } from "@/backend/lib";
 import type * as StorageTypes from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace StorageDbRepository {
   // File operations
@@ -419,8 +420,8 @@ export namespace StorageDbRepository {
         await db.insert(classInstanceFiles).values({ fileId, classInstanceId: refId, usageType: type, createdAt });
         break;
       default: {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("unsupportedTable", { table }));
+        const { invalidInput } = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(`${invalidInput} Unsupported table: ${table}`);
       }
     }
   }

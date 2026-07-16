@@ -9,7 +9,7 @@ import { parentAssignedStudentsQueryDocument } from "@/frontend/common/graphql/s
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function ParentStudentsContainer() {
-  const t = useAppTranslation("dashboard.parentStudents");
+  const t = useAppTranslation().dashboardTranslations.parentStudents;
   const { data, loading, error } = useQuery(parentAssignedStudentsQueryDocument);
 
   const rows = data?.parentAssignedStudents?.rows ?? [];

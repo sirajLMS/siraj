@@ -6,7 +6,6 @@ import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { AppPermission } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
@@ -18,6 +17,7 @@ import type {
   ClassStatusEventReturnType,
 } from "@/backend/types";
 import type { ClassStatusEventSelectType } from "@/backend/types/scheduling/class-status-event.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { SessionLabels } from "@/shared/locale/types/session";
 
@@ -279,10 +279,7 @@ export namespace ClassSessionService {
       );
 
       if (existing.quotaDeducted && existing.deletedAt === null) {
-        const tErrors = (await getBackendTranslations({
-          locale: "ar",
-          namespace: "errors",
-        })) as unknown as ErrorsLabels;
+        const tErrors = getServerTranslations("ar").errorsTranslations;
         await refundCreditIfDeducted(existing, userId, tErrors, tx);
       }
 

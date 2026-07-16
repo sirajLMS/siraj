@@ -1,12 +1,12 @@
 import { ParentRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   PaginationArgs,
   ParentDashboardMetricsReturnType,
   ParentDashboardSchedulePaginatedResult,
 } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace ParentDashboardService {
   export async function getSchedule(
@@ -18,14 +18,14 @@ export namespace ParentDashboardService {
   ): Promise<ParentDashboardSchedulePaginatedResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SCHEDULE_VIEW_FAMILY);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
     }
 
     const parent = await ParentRepository.findByUserId(actorUserId);
     if (!parent) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound", { id: actorUserId }));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.parentNotFound);
     }
 
     const result = await ParentRepository.getParentDashboardSchedule(parent.id, {
@@ -44,14 +44,14 @@ export namespace ParentDashboardService {
   ): Promise<ParentDashboardMetricsReturnType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SCHEDULE_VIEW_FAMILY);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
     }
 
     const parent = await ParentRepository.findByUserId(actorUserId);
     if (!parent) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound", { id: actorUserId }));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.parentNotFound);
     }
 
     const [metrics, studentProgress, workshopPromo] = await Promise.all([

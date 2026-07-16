@@ -57,8 +57,8 @@ function TeacherIdentityFieldsView({
   readonly address: string | null | undefined;
   readonly scope: ProfileScope;
 }) {
-  const t = useAppTranslation("profile").teacher;
-  const tc = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.teacher;
+  const tc = useAppTranslation().profileTranslations.base;
   const { canView, showField } = useProfileFieldAccess({ scope });
 
   if (!canView("teacher_identity")) {
@@ -91,7 +91,7 @@ function TeacherIdentityFieldsEdit({
   readonly control: Control<TeacherAdminEditFormData>;
   readonly scope?: ProfileScope;
 }) {
-  const t = useAppTranslation("profile").teacher;
+  const t = useAppTranslation().profileTranslations.teacher;
   const { canView, canEdit } = useProfileFieldAccess({ scope });
 
   if (!canView("teacher_identity")) {
@@ -134,7 +134,7 @@ function TeacherIdentityFieldsEdit({
 }
 
 function ContactSectionEdit(props: ContactSectionOwnEditProps | ContactSectionAdminEditProps): ReactElement | null {
-  const t = useAppTranslation("profile").teacher;
+  const t = useAppTranslation().profileTranslations.teacher;
   const scope = props.scope ?? ProfileScope.Own;
   const { canView } = useProfileFieldAccess({ scope });
 
@@ -157,8 +157,8 @@ function ContactSectionEdit(props: ContactSectionOwnEditProps | ContactSectionAd
 }
 
 function ContactSectionView(props: ContactSectionViewProps): ReactElement {
-  const t = useAppTranslation("profile").teacher;
-  const tc = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.teacher;
+  const tc = useAppTranslation().profileTranslations.base;
   const scope = props.scope ?? (props.isAdminScope ? ProfileScope.Other : ProfileScope.Own);
   const { canView, showField } = useProfileFieldAccess({ scope });
 

@@ -25,7 +25,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 import type { StudentDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard";
 
 function useStudentDashboardLabels(
-  t: ReturnType<typeof useAppTranslation<"dashboard.studentPortal.dashboard">>
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentPortalDashboard"]
 ): StudentDashboardLabels {
   return useMemo(
     () => ({
@@ -51,7 +51,7 @@ function useStudentDashboardLabels(
 }
 
 export function StudentDashboardContainer() {
-  const t = useAppTranslation("dashboard.studentPortal.dashboard");
+  const t = useAppTranslation().dashboardTranslations.studentPortalDashboard;
   const router = useRouter();
   const userName = useUserStore(state => state.name);
   const setSelectedReportId = useStudentDashboardStore(state => state.setSelectedReportId);

@@ -1,8 +1,8 @@
 import { BillingRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { UpsertManualExchangeRateInput, UpsertManualExchangeRateResult } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace FxRateAdminService {
   async function assertOverridePermission(actorUserId: string, locale?: string): Promise<void> {
@@ -11,8 +11,8 @@ export namespace FxRateAdminService {
       AppPermission.BILLING_OVERRIDE_EXCHANGE_RATES
     );
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
   }
 

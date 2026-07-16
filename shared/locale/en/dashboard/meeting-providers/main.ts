@@ -1,6 +1,6 @@
 import type { MeetingProvidersLabels } from "@/shared/locale/types/dashboard/meeting-providers/main";
 
-export const main: MeetingProvidersLabels = {
+export const dashboardMeetingProvidersEn: MeetingProvidersLabels = {
   pageTitle: "Meeting Providers",
   pageSubtitle: "Manage meeting platform catalog entries for user settings.",
   addProvider: "Add Provider",

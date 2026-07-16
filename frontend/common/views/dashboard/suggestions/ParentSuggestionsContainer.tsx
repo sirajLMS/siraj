@@ -12,8 +12,8 @@ import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/sugges
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function ParentSuggestionsContainer() {
-  const t = useAppTranslation("dashboard.suggestions");
-  const labels = buildSuggestionsLabels(t);
+  const t = useAppTranslation();
+  const labels = buildSuggestionsLabels(t.dashboardTranslations.suggestions);
   const notifications = useNotifications();
 
   const isSubmitting = useParentSuggestionsStore(state => state.isSubmitting);

@@ -208,7 +208,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   helperText,
   hideLabel,
 }: PhoneInputProps): React.ReactNode => {
-  const t = useAppTranslation("ui.phoneInput");
+  const t = useAppTranslation().uiTranslations.phoneInput;
   const [countryPickerOpen, setCountryPickerOpen] = useState(false);
 
   const {

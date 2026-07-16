@@ -240,11 +240,11 @@ export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
       type: ClassInstanceDetailPothosObject,
       resolve: async (parent, _args, ctx) => {
         if (!ctx.user) {
-          const tErrors = await ctx.t("errors");
+          const tErrors = ctx.t().errorsTranslations;
           throw new Error(tErrors.unauthorized);
         }
-        const tErrors = await ctx.t("errors");
-        const tSession = await ctx.t("session");
+        const tErrors = ctx.t().errorsTranslations;
+        const tSession = ctx.t().sessionTranslations;
         return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.completedInstanceId, tSession, tErrors);
       },
     }),
@@ -252,11 +252,11 @@ export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
       type: ClassInstanceDetailPothosObject,
       resolve: async (parent, _args, ctx) => {
         if (!ctx.user) {
-          const tErrors = await ctx.t("errors");
+          const tErrors = ctx.t().errorsTranslations;
           throw new Error(tErrors.unauthorized);
         }
-        const tErrors = await ctx.t("errors");
-        const tSession = await ctx.t("session");
+        const tErrors = ctx.t().errorsTranslations;
+        const tSession = ctx.t().sessionTranslations;
         return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.rescheduledInstanceId, tSession, tErrors);
       },
     }),

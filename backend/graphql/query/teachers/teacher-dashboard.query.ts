@@ -13,7 +13,7 @@ async function resolveTeacherDashboard(
   args: { date: string; pagination?: Record<string, unknown> | null }
 ) {
   if (!ctx.user) {
-    const tErrors = await ctx.t("errors");
+    const tErrors = ctx.t().errorsTranslations;
     throw new Error(tErrors.unauthorized);
   }
   const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
@@ -54,10 +54,10 @@ gqlSchemaBuilder.queryField("teacherHandbookUrl", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, _args, ctx) => {
       if (!ctx.user) {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.unauthorized);
       }
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       const url = await TeacherDashboardService.getHandbookDownloadUrl(ctx.user.id, tErrors);
       return { id: `handbook-${ctx.user.id}`, url };
     },

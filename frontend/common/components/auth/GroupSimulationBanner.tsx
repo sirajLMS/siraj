@@ -5,7 +5,7 @@ import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermiss
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function GroupSimulationBanner() {
-  const t = useAppTranslation("auth").groupSimulation;
+  const t = useAppTranslation().authTranslations.groupSimulation;
   const { isSimulatingGroup, status, endSimulation, loading } = usePermissionGroupSimulation();
 
   if (!isSimulatingGroup || !status?.groupName) {

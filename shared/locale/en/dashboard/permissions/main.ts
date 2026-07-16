@@ -1,6 +1,6 @@
 import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions";
 
-export const main: PermissionsLabels = {
+export const dashboardPermissionsEn: PermissionsLabels = {
   pageTitle: "Permission Management",
   title: "Permission Management",
   subtitle: "Configure role-based access control, manage permission groups, and set user-level overrides.",

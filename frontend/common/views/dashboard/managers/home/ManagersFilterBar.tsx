@@ -43,7 +43,7 @@ export function ManagersFilterBar({
   onRoleFilterChange,
   onStatusFilterChange,
 }: Readonly<ManagersFilterBarProps>) {
-  const t = useAppTranslation("dashboard.managersDirectory").filters;
+  const t = useAppTranslation().dashboardTranslations.managersDirectory.filters;
 
   return (
     <StyledFilterContainer>

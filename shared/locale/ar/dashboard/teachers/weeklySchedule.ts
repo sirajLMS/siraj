@@ -1,6 +1,6 @@
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const weeklySchedule: TeacherWeeklyScheduleLabels = {
+export const dashboardTeacherWeeklyScheduleAr: TeacherWeeklyScheduleLabels = {
   pageTitle: name => `جدول ${name}`,
   breadcrumbs: {
     teachers: "المعلمون",

@@ -84,7 +84,7 @@ export function PermissionCatalogDataGrid({
   groups,
   loading = false,
 }: Readonly<PermissionCatalogDataGridProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   const columns = useMemo<GridColDef<Permission>[]>(() => {
     return [

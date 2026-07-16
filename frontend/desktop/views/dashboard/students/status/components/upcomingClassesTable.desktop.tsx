@@ -51,7 +51,7 @@ function RenderCellWrapper({
 }
 
 function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string; pendingCount: number }>) {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
   return (
     <Box
       sx={theme => ({
@@ -92,7 +92,7 @@ function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string
 }
 
 function DesktopFooter({ studentId }: Readonly<{ studentId: string }>) {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
   return (
     <Box
       sx={theme => ({
@@ -136,7 +136,7 @@ function InstructorCell({ row, minutesLabel }: Readonly<{ row: UpcomingClassDisp
 }
 
 export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
   const locale = useAppLocale();
 
   const columns: GridColDef<UpcomingClassDisplay>[] = [

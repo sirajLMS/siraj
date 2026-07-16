@@ -213,7 +213,7 @@ function useTrackingHandlers(
 }
 
 export function RescheduleTrackingContainer() {
-  const t = useAppTranslation("dashboard.rescheduleTracking");
+  const t = useAppTranslation().dashboardTranslations.rescheduleTracking;
   const locale = useAppLocale();
   const router = useRouter();
   const { page, pageSize, setPage, statusFilter, setStatusFilter } = useRescheduleTrackingStore();

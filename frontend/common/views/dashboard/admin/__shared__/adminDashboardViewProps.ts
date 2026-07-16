@@ -7,9 +7,9 @@ import {
   type RawMetrics,
 } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import type { AdminDashboardViewLabels } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardViewLabels";
-import type { useAppTranslation } from "@/shared/locale/client";
+import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
 
-type TranslationObject = ReturnType<typeof useAppTranslation<"dashboard.admin">>;
+type TranslationObject = AdminDashboardLabels;
 type MetricItemList = ReturnType<typeof buildAdminDashboardMetrics>;
 
 /** Summary derived from the admin dashboard schedule GraphQL response. */

@@ -95,8 +95,9 @@ type JoinContext = {
 };
 
 function useJoinContext(props: MeetingJoinActionProps) {
-  const t = useAppTranslation("ui.meetingConfig").join;
-  const tDisplay = useAppTranslation("ui.meetingConfig").display;
+  const meetingConfig = useAppTranslation().uiTranslations.meetingConfig;
+  const t = meetingConfig.join;
+  const tDisplay = meetingConfig.display;
   const locale = useAppLocale();
   const resolvedUrl = resolveJoinUrl(props);
   const hasUrl = Boolean(resolvedUrl) && !props.disabled;

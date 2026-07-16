@@ -1,7 +1,9 @@
 import { z } from "zod";
-import type { MessageSchema } from "@/shared/messages/types/message";
+import type { Translations } from "@/shared/locale/types/message";
 
-export const createStudentQuotaSchema = (messages: MessageSchema["dashboard"]["studentQuota"]["validation"]) => {
+export const createStudentQuotaSchema = (
+  messages: Translations["dashboardTranslations"]["studentQuota"]["validation"]
+) => {
   return z.object({
     studentName: z.string().min(1, messages.nameRequired),
     dateOfBirth: z.string().min(1, messages.dobRequired),

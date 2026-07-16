@@ -48,7 +48,7 @@ function getValue(
 }
 
 export function OnboardingMetricsOverview() {
-  const t = useAppTranslation("dashboard.managerOnboarding").metrics;
+  const t = useAppTranslation().dashboardTranslations.managerOnboarding.metrics;
   const { data, loading } = useQuery(onboardingMetricsQueryDocument);
   const metrics = data?.onboardingMetrics;
 

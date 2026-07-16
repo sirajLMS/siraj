@@ -41,7 +41,7 @@ function shouldShowSupervisorDashboard(permissions: readonly AppPermission[]): b
 
 export function DashboardContainer() {
   const { user, setUser } = useUserStore();
-  const t = useAppTranslation("common");
+  const t = useAppTranslation().commonTranslations;
 
   const { data, loading } = useQuery(meQueryDocument, {
     skip: !!user?.role,

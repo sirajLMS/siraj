@@ -38,7 +38,7 @@ export function ViewAsUserButton({
   variant = "icon",
   onMenuClose,
 }: ViewAsUserButtonProps) {
-  const t = useAppTranslation("auth").impersonation;
+  const t = useAppTranslation().authTranslations.impersonation;
   const currentUser = useUserStore(state => state.user);
   const { isImpersonating, startImpersonation, loading } = useImpersonation();
   const { isSimulatingGroup } = usePermissionGroupSimulation();

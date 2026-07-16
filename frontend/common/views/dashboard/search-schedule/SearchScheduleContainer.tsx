@@ -15,7 +15,7 @@ import { SearchScheduleView } from "@/frontend/common/views/dashboard/search-sch
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function SearchScheduleContainer() {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
 
   const draft = useSearchScheduleStore(state => state.draft);
   const setDraft = useSearchScheduleStore(state => state.setDraft);

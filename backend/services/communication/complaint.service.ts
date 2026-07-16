@@ -7,7 +7,7 @@ import {
   SystemSettingsRepository,
 } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations, logger } from "@/backend/lib";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import type {
   ComplaintFileReturnType,
@@ -20,19 +20,20 @@ import type {
   PaginationArgs,
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace ComplaintService {
   export async function getParentIdForComplaints(actorUserId: string, locale?: string): Promise<string> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_SUBMIT_COMPLAINT);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const parent = await ParentRepository.findByUserId(actorUserId);
     if (!parent) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound", { userId: actorUserId }));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.parentNotFound);
     }
 
     return parent.id;
@@ -45,21 +46,21 @@ export namespace ComplaintService {
   ): Promise<ComplaintSelectType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_SUBMIT_COMPLAINT);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const parent = await ParentRepository.findByUserId(actorUserId);
     if (!parent) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound", { userId: actorUserId }));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.parentNotFound);
     }
 
     if (input.studentId) {
       const student = await ParentRepository.getAssociatedStudentById(input.studentId);
       if (!student) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("studentNotFound", { id: input.studentId }));
+        const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(tErrors.studentNotFound(input.studentId));
       }
     }
 
@@ -117,14 +118,14 @@ export namespace ComplaintService {
   ): Promise<ParentComplaintPaginatedResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const parent = await ParentRepository.findByUserId(actorUserId);
     if (!parent) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound", { userId: actorUserId }));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.parentNotFound);
     }
 
     try {
@@ -165,8 +166,8 @@ export namespace ComplaintService {
   ): Promise<{ complaints: ReadonlyArray<ComplaintReturnType> }> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     try {
@@ -198,8 +199,8 @@ export namespace ComplaintService {
   }> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     try {
@@ -245,8 +246,8 @@ export namespace ComplaintService {
   }> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     try {
@@ -295,8 +296,8 @@ export namespace ComplaintService {
   ): Promise<{ readonly deletedAt: string }> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_DELETE);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     try {
@@ -326,21 +327,20 @@ export namespace ComplaintService {
     const canViewHistory = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY);
 
     if (!canListComplaints && !canViewHistory) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const complaint = await ComplaintRepository.getComplaintById(complaintId);
     if (!complaint) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("complaintNotFound", { id: complaintId }));
+      throw new Error("complaintNotFound");
     }
 
     if (!canListComplaints) {
       const parent = await ParentRepository.findByUserId(actorUserId);
       if (parent?.id !== complaint.parentId) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("insufficientPermissions"));
+        const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(tErrors.insufficientPermissions);
       }
     }
 
@@ -384,11 +384,11 @@ export namespace ComplaintService {
 }
 
 async function validateComplaintFiles(files: ReadonlyArray<FileMetadata>, locale?: string): Promise<void> {
-  const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+  const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
   const maxFiles = await SystemSettingsRepository.getIntValue("complaint_max_files_per_complaint", 5);
   if (files.length > maxFiles) {
-    throw new Error(tFunc("complaint.tooManyFiles", { max: maxFiles }));
+    throw new Error(`complaint.tooManyFiles:${maxFiles}`);
   }
 
   const maxSizeMb = await SystemSettingsRepository.getIntValue("complaint_max_file_size_mb", 25);
@@ -408,11 +408,11 @@ async function validateComplaintFiles(files: ReadonlyArray<FileMetadata>, locale
 
   for (const file of files) {
     if (file.sizeBytes > maxSizeBytes) {
-      throw new Error(tFunc("complaint.fileTooLarge", { max: maxSizeMb }));
+      throw new Error(`complaint.fileTooLarge:${maxSizeMb}`);
     }
 
     if (!allowedMimeTypes.includes(file.mimeType)) {
-      throw new Error(tFunc("complaint.invalidFileType", { allowed: allowedMimeTypes.join(", ") }));
+      throw new Error(tErrors.file.invalidFileType);
     }
   }
 }

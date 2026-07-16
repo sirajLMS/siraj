@@ -9,7 +9,7 @@ interface ManagersMetricsProps {
 }
 
 export function ManagersMetrics({ metrics }: Readonly<ManagersMetricsProps>) {
-  const t = useAppTranslation("dashboard.managersDirectory").metrics;
+  const t = useAppTranslation().dashboardTranslations.managersDirectory.metrics;
 
   return (
     <Grid container spacing={2}>

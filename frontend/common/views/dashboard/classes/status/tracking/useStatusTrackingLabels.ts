@@ -3,7 +3,7 @@
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function useStatusTrackingLabels() {
-  const t = useAppTranslation("dashboard.core.statusTracking");
+  const t = useAppTranslation().dashboardTranslations.coreStatusTracking;
 
   return {
     pageTitle: t.pageTitle,

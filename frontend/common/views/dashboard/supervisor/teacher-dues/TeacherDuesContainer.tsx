@@ -12,10 +12,11 @@ import { logger } from "@/frontend/common/utils/logger";
 import { TeacherDuesView } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/teacherDuesView";
 import type { TeacherDueRow } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { SupervisorTeacherDuesLabels } from "@/shared/locale/types/dashboard/supervisorPortal/teacherDues";
 
 type SnackbarSeverity = "success" | "error";
 
-function useLabels(t: ReturnType<typeof useAppTranslation<"dashboard.supervisorPortal.teacherDues">>) {
+function useLabels(t: SupervisorTeacherDuesLabels) {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,
@@ -37,7 +38,7 @@ function useLabels(t: ReturnType<typeof useAppTranslation<"dashboard.supervisorP
 }
 
 export function TeacherDuesContainer() {
-  const t = useAppTranslation("dashboard.supervisorPortal.teacherDues");
+  const t = useAppTranslation().dashboardTranslations.supervisorPortalTeacherDues;
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");

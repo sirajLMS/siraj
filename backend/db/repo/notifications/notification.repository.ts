@@ -3,7 +3,6 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
 import { NotificationChannel, NotificationDeliveryStatus, type NotificationEventType } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   CreateNotificationDeliveryInput,
   NotificationDeliveryAnalyticsFilter,
@@ -18,6 +17,7 @@ import type {
   SetNotificationPreferenceInput,
   UserNotificationPreferenceSelectType,
 } from "@/backend/types/users/userNotificationPreferences.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {
   [NotificationDeliveryStatus.PENDING]: 0,
@@ -86,8 +86,8 @@ export namespace NotificationRepository {
     }
 
     if (currentStatus === NotificationDeliveryStatus.FAILED) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("cannotTransitionFailed", { status: nextStatus }));
+      const { invalidTransition } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(`Cannot transition delivery status from FAILED to ${nextStatus}. ${invalidTransition}`);
     }
 
     if (nextStatus === NotificationDeliveryStatus.FAILED) {
@@ -95,8 +95,8 @@ export namespace NotificationRepository {
     }
 
     if (STATUS_ORDER[nextStatus] <= STATUS_ORDER[currentStatus]) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("invalidTransition", { currentStatus, nextStatus }));
+      const { invalidTransition: invalidTransitionMsg } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(`${invalidTransitionMsg}: ${currentStatus} -> ${nextStatus}`);
     }
   }
 
@@ -237,8 +237,7 @@ export namespace NotificationRepository {
         .limit(1);
 
       if (results.length === 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("notificationNotFound", { id: input.deliveryId }));
+        throw new Error(`Notification delivery ${input.deliveryId} not found`);
       }
 
       const current = results[0];
@@ -322,8 +321,7 @@ export namespace NotificationRepository {
     const runner = async (t: DBTransaction) => {
       const delivery = await getDeliveryByProviderMessageId(providerMessageId, t);
       if (!delivery) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("notificationProviderNotFound", { providerMessageId }));
+        throw new Error(`Notification delivery with provider message ID ${providerMessageId} not found`);
       }
 
       return updateDeliveryStatus(

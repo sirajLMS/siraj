@@ -1,6 +1,6 @@
 import type { ManagerOnboardingLabels } from "@/shared/locale/types/dashboard/managers";
 
-export const onboarding: ManagerOnboardingLabels = {
+export const dashboardManagerOnboardingEn: ManagerOnboardingLabels = {
   pageTitle: "Manager Onboarding",
   pageSubtitle: "Register a new administrative staff member into the Siraj management system.",
   sections: {

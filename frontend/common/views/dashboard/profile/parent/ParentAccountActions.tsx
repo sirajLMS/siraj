@@ -30,7 +30,7 @@ type AccountActionDialogProps = {
 };
 
 function AccountActionDialog({ open, onClose, onConfirm, loading, error, mode }: AccountActionDialogProps) {
-  const t = useAppTranslation("profile").parent.actions;
+  const t = useAppTranslation().profileTranslations.parent.actions;
   const isDeactivate = mode === "deactivate";
 
   return (
@@ -63,7 +63,7 @@ function AccountActionDialog({ open, onClose, onConfirm, loading, error, mode }:
 }
 
 export function ParentAccountActions({ parentId, targetUserId, accountStatus }: ParentAccountActionsProps) {
-  const t = useAppTranslation("profile").parent.actions;
+  const t = useAppTranslation().profileTranslations.parent.actions;
   const [dialogMode, setDialogMode] = useState<"deactivate" | "reactivate" | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);

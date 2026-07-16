@@ -24,7 +24,7 @@ export function SubjectsViewDesktop({
   canManageSubjects,
   canManageCategories,
 }: Readonly<SubjectsViewProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
 
   const filteredSubjects = activeCategoryId ? subjects.filter(s => s.category?.id === activeCategoryId) : subjects;
 

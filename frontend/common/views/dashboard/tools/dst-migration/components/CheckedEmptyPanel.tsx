@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function CheckedEmptyPanel({ items }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.dstMigration");
+  const t = useAppTranslation().dashboardTranslations.dstMigration;
 
   return (
     <Box

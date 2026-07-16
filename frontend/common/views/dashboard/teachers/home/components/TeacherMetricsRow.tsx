@@ -14,7 +14,7 @@ interface TeacherMetricsRowProps {
 }
 
 export function TeacherMetricsRow({ metrics }: Readonly<TeacherMetricsRowProps>) {
-  const t = useAppTranslation("dashboard.teachersDirectory").metrics;
+  const t = useAppTranslation().dashboardTranslations.teachersDirectory.metrics;
 
   return (
     <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: "gutter" }}>

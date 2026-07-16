@@ -47,7 +47,7 @@ type CoreContactSectionProps<T extends CoreContactFormFields = CoreContactFormFi
 export function CoreContactSection<T extends CoreContactFormFields = CoreContactFormFields>(
   props: CoreContactSectionProps<T>
 ) {
-  const t = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.base;
   const { canView, showField } = useProfileFieldAccess({ scope: props.scope });
 
   if (!canView("core_contact")) {

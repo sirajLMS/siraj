@@ -1,6 +1,6 @@
 import type { TeacherProfileLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const profile: TeacherProfileLabels = {
+export const dashboardTeacherProfileAr: TeacherProfileLabels = {
   pageTitle: "تعديل الملف الشخصي للمعلم",
   pageSubtitle: "إدارة البيانات المؤسسية والتفاصيل الإدارية لأعضاء هيئة التدريس.",
   breadcrumbs: {

@@ -4,7 +4,6 @@ export * from "@/backend/lib/enum";
 export * from "@/backend/lib/env";
 export * from "@/backend/lib/errors";
 export * from "@/backend/lib/field-encryption";
-export * from "@/backend/lib/intl";
 export * from "@/backend/lib/logger";
 export * from "@/backend/lib/path-validator";
 export * from "@/backend/lib/payment-method.validation";

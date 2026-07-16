@@ -21,18 +21,18 @@ import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboar
 import { teacherOnboardingSchema } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import { CountryCode, Gender } from "@/frontend/common/views/dashboard/teachers/onboarding/types";
 import { useAppTranslation } from "@/shared/locale/client";
-import type { MessageSchema } from "@/shared/messages/types/message";
+import type { TeacherOnboardingLabels } from "@/shared/locale/types/dashboard/teachers/onboarding";
 
 interface TeacherOnboardingViewProps {
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
-  readonly labels: MessageSchema["dashboard"]["teacherOnboarding"];
+  readonly labels: TeacherOnboardingLabels;
   readonly onSubmit: (data: TeacherOnboardingFormData) => void | Promise<void>;
   readonly onDismissSuccess: () => void;
 }
 
 function OnboardingBanner() {
-  const t = useAppTranslation("dashboard.teacherOnboarding");
+  const t = useAppTranslation().dashboardTranslations.teacherOnboarding;
 
   return (
     <Box
@@ -68,7 +68,7 @@ function FormActions({
   labels,
 }: {
   readonly isSubmitting: boolean;
-  readonly labels: MessageSchema["dashboard"]["teacherOnboarding"];
+  readonly labels: TeacherOnboardingLabels;
 }) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>

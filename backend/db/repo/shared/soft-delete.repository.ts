@@ -13,8 +13,8 @@ import {
   users,
 } from "@/backend/db/schema";
 import { NotFoundError } from "@/backend/lib";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 const SOFT_DELETE_TABLES = {
   users: {
@@ -83,10 +83,10 @@ export namespace SoftDeleteRepository {
         .limit(1);
 
       if (results.length === 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        const { file } = getServerTranslations(locale ?? "en").errorsTranslations;
         throw new NotFoundError(
           input.tableName.toUpperCase(),
-          tFunc("activeRecordNotFound", { tableName: input.tableName, entityId: input.entityId })
+          file.recordNotFound({ tableName: input.tableName, entityId: input.entityId })
         );
       }
 
@@ -212,8 +212,8 @@ export namespace SoftDeleteRepository {
         .returning()) as unknown[];
 
       if (deletedResults.length === 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("recordNotFound", { tableName, entityId }));
+        const { file } = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(file.recordNotFound({ tableName, entityId }));
       }
 
       return deletedResults[0] as Types.SoftDeletableEntityMap[T];

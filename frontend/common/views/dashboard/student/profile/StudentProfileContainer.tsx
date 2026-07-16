@@ -10,7 +10,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 import type { StudentProfileLabels } from "@/shared/locale/types/dashboard/studentPortal/studentProfile";
 
 function useStudentProfileLabels(
-  t: ReturnType<typeof useAppTranslation<"dashboard.studentPortal.profile">>
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentPortalProfile"]
 ): StudentProfileLabels {
   return useMemo(
     () => ({
@@ -43,7 +43,7 @@ function useStudentProfileLabels(
 }
 
 export function StudentProfileContainer() {
-  const t = useAppTranslation("dashboard.studentPortal.profile");
+  const t = useAppTranslation().dashboardTranslations.studentPortalProfile;
   const router = useRouter();
   const labels = useStudentProfileLabels(t);
 

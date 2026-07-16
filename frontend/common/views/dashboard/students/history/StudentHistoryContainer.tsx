@@ -20,7 +20,7 @@ type HistoryData = NonNullable<NonNullable<Operations.StudentClassHistoryQuery["
 function useErrorNotification(
   error: unknown,
   notifications: ReturnType<typeof useNotifications>,
-  t: ReturnType<typeof useAppTranslation<"dashboard.studentHistory">>
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentHistory"]
 ) {
   useEffect(() => {
     if (error) {
@@ -44,7 +44,7 @@ function computeMetrics(historyData: HistoryData["metrics"] | undefined): Studen
 
 function mapSessionsToClasses(
   sessions: HistoryData["sessions"] | undefined,
-  t: ReturnType<typeof useAppTranslation<"dashboard.studentHistory">>
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentHistory"]
 ): Record<number, ClassSession> {
   const result: Record<number, ClassSession> = {};
   if (sessions) {
@@ -104,7 +104,7 @@ export function StudentHistoryContainer() {
   const params = useParams<{ id: string }>();
   const profileContext = useStudentProfileContext();
   const useUnifiedProfile = profileContext != null;
-  const t = useAppTranslation("dashboard.studentHistory");
+  const t = useAppTranslation().dashboardTranslations.studentHistory;
   const locale = useAppLocale();
   const notifications = useNotifications();
 

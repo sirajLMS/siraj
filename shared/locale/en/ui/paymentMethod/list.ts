@@ -1,4 +1,4 @@
-export const list = {
+export const uiPaymentMethodListEn = {
   title: "Payment methods",
   empty: "No payment methods yet",
   columnLabel: "Label",

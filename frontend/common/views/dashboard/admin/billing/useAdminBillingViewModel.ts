@@ -110,11 +110,11 @@ export interface AdminBillingViewModel {
 }
 
 export function useAdminBillingViewModel(): AdminBillingViewModel {
-  const t = useAppTranslation("dashboard.billing");
-  const tProfile = useAppTranslation("profile").teacher;
-  const tProfileRoot = useAppTranslation("profile");
-  const tErrors = useAppTranslation("errors");
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation().dashboardTranslations.billing;
+  const tProfile = useAppTranslation().profileTranslations.teacher;
+  const tProfileRoot = useAppTranslation().profileTranslations.base;
+  const tErrors = useAppTranslation().errorsTranslations;
+  const tc = useAppTranslation().commonTranslations;
   const locale = useAppLocale();
   const router = useRouter();
   const labels = buildBillingLabels(t);

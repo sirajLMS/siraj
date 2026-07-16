@@ -21,7 +21,7 @@ interface Props {
 }
 
 export function ParentOnboardingView({ register, control, errors, handleSubmit, isSubmitting, onSubmit }: Props) {
-  const t = useAppTranslation("dashboard.parentOnboarding");
+  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
 
   return (
     <PageContainer>

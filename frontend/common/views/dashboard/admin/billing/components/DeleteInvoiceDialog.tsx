@@ -12,8 +12,8 @@ export type DeleteInvoiceDialogProps = {
 };
 
 export function DeleteInvoiceDialog({ open, invoiceId, isLoading, onClose, onConfirm }: DeleteInvoiceDialogProps) {
-  const t = useAppTranslation("dashboard.billing");
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation().dashboardTranslations.billing;
+  const tc = useAppTranslation().commonTranslations;
 
   const displayId = invoiceId ? invoiceId.replace("inv-", "INV-").toUpperCase() : "";
 

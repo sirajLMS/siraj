@@ -1,6 +1,6 @@
 import type { ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
 
-export const main: ResourcesLabels = {
+export const dashboardResourcesEn: ResourcesLabels = {
   pageTitle: "Learning Resources",
   pageSubtitle: "Manage and distribute educational materials for teachers and students.",
   upload: {

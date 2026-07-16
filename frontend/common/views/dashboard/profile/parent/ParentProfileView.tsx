@@ -58,7 +58,7 @@ export function ParentProfileView({
   readonly parentId?: string | null;
   readonly meetingTabHref?: string;
 }) {
-  const t = useAppTranslation("profile").parent;
+  const t = useAppTranslation().profileTranslations.parent;
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canView } = useProfileFieldAccess({ scope });
   const adminData = isAdminScope ? (parentData as ParentAdminData) : null;

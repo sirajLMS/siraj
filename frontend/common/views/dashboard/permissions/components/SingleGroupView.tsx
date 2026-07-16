@@ -38,7 +38,7 @@ export function SingleGroupView({
   onBulkRevoke,
   onUpdateGroup,
 }: Readonly<SingleGroupViewProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
   const {
     activeSubTab,
     setActiveSubTab,

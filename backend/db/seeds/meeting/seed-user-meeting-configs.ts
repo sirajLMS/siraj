@@ -35,7 +35,7 @@ export async function seedOrGet(teachersList: TeacherEntity[], config?: SeedConf
     password: index === 0 ? "seed-zoom-pass" : null,
   }));
 
-  const tErrors = await getServerTranslations("en", "errors");
+  const tErrors = getServerTranslations("en").errorsTranslations;
   const results = await MeetingConfigService.upsertManyUserMeetingConfigs(inputs, tErrors);
   logger.info(`User meeting configs seeded (${results.length} rows).`);
   return results;

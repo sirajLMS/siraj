@@ -33,7 +33,8 @@ async function computeContentHash(file: File): Promise<string> {
 }
 
 export function ResourcesContainer() {
-  const t = useAppTranslation("dashboard.resources");
+  const t = useAppTranslation();
+  const tResources = t.dashboardTranslations.resources;
   const notifications = useNotifications();
   const permissions = useUserStore(state => state.permissions);
 
@@ -92,7 +93,7 @@ export function ResourcesContainer() {
     return resources.find(resource => resource.id === pendingDeleteId)?.title ?? null;
   }, [pendingDeleteId, resources]);
 
-  const labels = buildResourcesLabels(t);
+  const labels = buildResourcesLabels(tResources);
 
   const handleUpload = async (formData: { documentName: string; fileName: string }, file: File) => {
     setUploading(true);
@@ -179,7 +180,7 @@ export function ResourcesContainer() {
       });
 
       if (!uploadData?.uploadLearningResource) {
-        notifications.show(t.notification.createRecordFailed, { severity: "error", autoHideDuration: 4000 });
+        notifications.show(tResources.notification.createRecordFailed, { severity: "error", autoHideDuration: 4000 });
         return;
       }
 
@@ -187,7 +188,7 @@ export function ResourcesContainer() {
       await refetch();
     } catch (err) {
       logger.error("Error uploading resource", err);
-      notifications.show(t.notification.uploadRetryFailed, { severity: "error", autoHideDuration: 4000 });
+      notifications.show(tResources.notification.uploadRetryFailed, { severity: "error", autoHideDuration: 4000 });
     } finally {
       setUploading(false);
     }
@@ -210,11 +211,11 @@ export function ResourcesContainer() {
       }
 
       logger.info(`Successfully deleted resource: ${pendingDeleteId}`);
-      notifications.show(t.notification.deleteSuccess, { severity: "success", autoHideDuration: 3000 });
+      notifications.show(tResources.notification.deleteSuccess, { severity: "success", autoHideDuration: 3000 });
       await refetch();
     } catch (err) {
       logger.error(`Failed to delete resource ${pendingDeleteId}:`, err);
-      notifications.show(t.notification.deleteFailed, { severity: "error", autoHideDuration: 4000 });
+      notifications.show(tResources.notification.deleteFailed, { severity: "error", autoHideDuration: 4000 });
     } finally {
       closeDeleteDialog();
     }

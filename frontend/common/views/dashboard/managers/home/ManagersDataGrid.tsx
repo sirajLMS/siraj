@@ -42,7 +42,7 @@ export function ManagersDataGrid({
   onPageChange,
   loading = false,
 }: Readonly<ManagersDataGridProps>) {
-  const t = useAppTranslation("dashboard.managersDirectory");
+  const t = useAppTranslation().dashboardTranslations.managersDirectory;
 
   const columns = useMemo<GridColDef<Manager>[]>(
     () => [

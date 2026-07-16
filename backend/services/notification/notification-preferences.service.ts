@@ -1,12 +1,12 @@
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
 import { AppPermission, NotificationChannel, NotificationEventType } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   NotificationPreferenceReturnType,
   NotificationPreferenceUpdateInput,
 } from "@/backend/types/notifications/notification-preferences.types";
 import type { UserNotificationPreferenceSelectType } from "@/backend/types/users/userNotificationPreferences.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 const ALL_CHANNELS = Object.values(NotificationChannel);
 const ALL_EVENT_TYPES = Object.values(NotificationEventType);
@@ -46,8 +46,8 @@ function mergeWithDefaults(stored: UserNotificationPreferenceSelectType[]): Noti
 async function assertOwnProfileAccess(actorUserId: string, locale?: string): Promise<void> {
   const canView = await PermissionsService.hasPermission(actorUserId, AppPermission.AUTH_VIEW_OWN_PROFILE);
   if (!canView) {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(t("unauthorizedAction"));
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+    throw new Error(tErrors.unauthorizedAction);
   }
 }
 

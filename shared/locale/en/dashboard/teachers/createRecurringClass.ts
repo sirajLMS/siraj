@@ -1,6 +1,6 @@
 import type { TeacherCreateRecurringClassLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const createRecurringClass: TeacherCreateRecurringClassLabels = {
+export const dashboardTeacherCreateRecurringClassEn: TeacherCreateRecurringClassLabels = {
   dialogTitle: "Create Recurring Class",
   fields: {
     student: "Student",

@@ -3,9 +3,9 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { learningResources } from "@/backend/db/schema";
 import { learningResourceFiles } from "@/backend/db/schema/storage/storage";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type { LearningResourceReturnType, PaginationArgs } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export type LearningResourceRow = LearningResourceReturnType;
 
@@ -123,11 +123,10 @@ export namespace LearningResourceRepository {
 
   export async function createResource(
     input: LearningResourceCreateInput,
-    locale?: string,
+    _locale?: string,
     tx?: DBTransaction
   ): Promise<LearningResourceRow> {
     const createTx = async (t: DBTransaction): Promise<LearningResourceRow> => {
-      const t18n = await getBackendTranslations({ locale, namespace: "errors" });
       const now = new Date();
 
       const [resource] = await t
@@ -141,7 +140,7 @@ export namespace LearningResourceRepository {
         .returning();
 
       if (!resource) {
-        throw new Error(t18n("resourceCreateFailed"));
+        throw new Error("Failed to create learning resource");
       }
 
       await t.insert(learningResourceFiles).values({
@@ -195,7 +194,7 @@ export namespace LearningResourceRepository {
    */
   export async function deleteResource(id: string, locale?: string, tx?: DBTransaction): Promise<boolean> {
     const execute = async (t: DBTransaction): Promise<boolean> => {
-      const t18n = await getBackendTranslations({ locale, namespace: "errors" });
+      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
       logger.debug(`[LearningResourceRepository.deleteResource] Attempting deletion for ID: ${id}`);
 
       // 1. Pre-deletion Verification
@@ -212,7 +211,7 @@ export namespace LearningResourceRepository {
       // If the array is empty, the record does not exist
       if (existingRecord.length === 0) {
         logger.warn(`[LearningResourceRepository.deleteResource] Resource ID not found: ${id}`);
-        throw new Error(t18n("resourceNotFound"));
+        throw new Error(errorsTranslations.resourceNotFound);
       }
 
       // Log the metadata of what we are about to destroy

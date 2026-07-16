@@ -18,7 +18,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 export function RescheduleContainer() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const t = useAppTranslation("dashboard.rescheduleForm");
+  const t = useAppTranslation().dashboardTranslations.rescheduleForm;
   const storeSession = useRescheduleStore(state => state.session);
   const setShowSuccess = useRescheduleStore(state => state.setShowSuccess);
   const classInstanceId = searchParams.get("classInstanceId") || storeSession.sessionId || "";

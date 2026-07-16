@@ -31,7 +31,7 @@ function getSortLabelKey(
 }
 
 export function SearchScheduleSortMenu({ sortBy, onSortChange }: Readonly<SearchScheduleSortMenuProps>) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
   const sortActive = isSortApplied(sortBy);

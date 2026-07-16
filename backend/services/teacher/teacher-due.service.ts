@@ -5,7 +5,6 @@ import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository
 import { TeacherDueRepository } from "@/backend/db/repo/teachers/teacher-due.repository";
 import { classInstances } from "@/backend/db/schema";
 import { AppPermission, type CurrencyCode, TeacherDueStatus } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
@@ -15,6 +14,7 @@ import type {
   TeacherMonthlyReportReturnType,
   TeacherPendingDuesSummaryReturnType,
 } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace TeacherDueService {
   async function assertCanViewDues(actorUserId: string, teacherId: string, locale?: string): Promise<void> {
@@ -24,8 +24,8 @@ export namespace TeacherDueService {
     const ownTeacher = await TeacherRepository.findByUserId(actorUserId);
     if (ownTeacher && ownTeacher.id === teacherId) return;
 
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(t("unauthorizedAction"));
+    const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+    throw new Error(t.unauthorizedAction);
   }
 
   export async function createDueEntry(
@@ -45,14 +45,14 @@ export namespace TeacherDueService {
       .where(eq(classInstances.id, classInstanceId))
       .limit(1);
     if (!classInstance) {
-      const t = await getBackendTranslations({ namespace: "errors" });
-      throw new Error(t("classInstanceNotFound", { id: classInstanceId }));
+      const t = getServerTranslations("ar").errorsTranslations;
+      throw new Error(t.classInstanceNotFound({ id: classInstanceId }));
     }
 
     const teacher = await TeacherRepository.findById(teacherId, tx);
     if (!teacher) {
-      const t = await getBackendTranslations({ namespace: "errors" });
-      throw new Error(t("teacherNotFound", { id: teacherId }));
+      const t = getServerTranslations("ar").errorsTranslations;
+      throw new Error(t.teacherNotFound(teacherId));
     }
 
     const hourlyRateStr = teacher.hourlyRate ?? "0";
@@ -169,8 +169,8 @@ export namespace TeacherDueService {
   ): Promise<TeacherPendingDuesSummaryReturnType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.TEACHER_DUES_VIEW);
     if (!hasPermission) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("insufficientPermissions"));
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.insufficientPermissions);
     }
     return TeacherDueRepository.getPendingDuesSummary();
   }
@@ -183,8 +183,8 @@ export namespace TeacherDueService {
   ): Promise<TeacherDueReturnType[]> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.TEACHER_DUES_VIEW);
     if (!hasPermission) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("insufficientPermissions"));
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.insufficientPermissions);
     }
     const updated = await TeacherDueRepository.markAsPaid([...dueIds], teacherPaymentId);
     return updated.map(row => ({

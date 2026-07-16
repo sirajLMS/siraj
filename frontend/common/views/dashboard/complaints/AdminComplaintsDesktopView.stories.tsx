@@ -106,8 +106,8 @@ function AdminComplaintsDesktopStoryRenderer({
   deleteComplaintId,
   isDeletingComplaint,
 }: Readonly<AdminComplaintsDesktopStoryProps>) {
-  const t = useAppTranslation("dashboard.complaints");
-  const labels = buildComplaintsLabels(t).admin;
+  const t = useAppTranslation();
+  const labels = buildComplaintsLabels(t.dashboardTranslations.complaints).admin;
 
   return (
     <AdminComplaintsDesktopView

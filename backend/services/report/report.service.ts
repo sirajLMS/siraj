@@ -1,10 +1,10 @@
 import type { AttendanceReportFilters } from "@/backend/db/repo/books/report.repository";
 import { ReportRepository } from "@/backend/db/repo/books/report.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { AttendanceReportResult } from "@/backend/types/books/report.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export {
   type AttendanceReportFilters,
@@ -30,8 +30,8 @@ export namespace ReportService {
         logger.warn(
           `[ReportService.generateAttendanceReport] Blocked execution. User ${actorUserId} lacks ${AppPermission.REPORT_GENERATE_CUSTOM}`
         );
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedAction"));
+        const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(tErrors.unauthorizedAction);
       }
 
       const rawResults = await ReportRepository.generateAttendanceReport(filters);
@@ -59,11 +59,11 @@ export namespace ReportService {
       return { rows: rawResults, engagementGrowth };
     } catch (error) {
       logger.error(`[ReportService.generateAttendanceReport] Failed for user ${actorUserId}:`, error);
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      if (error instanceof Error && error.message === t("unauthorizedAction")) {
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      if (error instanceof Error && error.message === tErrors.unauthorizedAction) {
         throw error;
       }
-      throw new Error(t("permissionDenied"), { cause: error });
+      throw new Error("permissionDenied", { cause: error });
     }
   }
 }

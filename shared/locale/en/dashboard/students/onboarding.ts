@@ -1,6 +1,6 @@
 import type { StudentOnboardingLabels } from "@/shared/locale/types/dashboard/students";
 
-export const onboarding: StudentOnboardingLabels = {
+export const dashboardStudentOnboardingEn: StudentOnboardingLabels = {
   pageTitle: "New Student Registration",
   pageSubtitle: "Complete the following fields to enroll a new student under an existing parent.",
   statusBanner: "Account Status: Pending Registration",

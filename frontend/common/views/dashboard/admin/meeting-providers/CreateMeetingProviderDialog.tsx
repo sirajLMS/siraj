@@ -32,7 +32,7 @@ const emptyLocalized = (): LocalizedString => ({ en: "", ar: "" });
 const SLUG_REGEX = /^[a-z0-9_]+$/;
 
 export function CreateMeetingProviderDialog({ open, onClose, onSaved, onError }: CreateMeetingProviderDialogProps) {
-  const t = useAppTranslation("dashboard.meetingProviders");
+  const t = useAppTranslation().dashboardTranslations.meetingProviders;
   const [createProvider, { loading }] = useMutation(createMeetingProviderMutationDocument, {
     onError: error => {
       logger.error("Create meeting provider failed:", { error });

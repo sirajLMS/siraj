@@ -16,9 +16,9 @@ import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function UnpaidInvoicesSection() {
-  const t = useAppTranslation("dashboard.core.notifications");
-  const tProfile = useAppTranslation("profile");
-  const tErrors = useAppTranslation("errors");
+  const t = useAppTranslation().dashboardTranslations.coreNotifications;
+  const tProfile = useAppTranslation().profileTranslations.base;
+  const tErrors = useAppTranslation().errorsTranslations;
   const router = useRouter();
   const displayCurrency = useUserStore(state => state.displayCurrency);
 

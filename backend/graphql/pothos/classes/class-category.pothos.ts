@@ -7,7 +7,7 @@ export const ClassCategoryPothosObject = gqlSchemaBuilder
     load: async (ids: string[], ctx) => {
       const categories = await ClassCategoryRepository.loadByIds(ids);
       const map = new Map(categories.map(c => [c.id, c]));
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return ids.map(id => map.get(id) ?? new Error(tErrors.categoryNotFound(id)));
     },
     sort: c => c.id,

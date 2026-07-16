@@ -4,6 +4,7 @@ import type { Control, UseFormRegister } from "react-hook-form";
 import { CompensationEditFields, CompensationViewSection } from "@/frontend/common/views/dashboard/profile/__shared__";
 import type { TeacherViewData } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import type { TeacherAdminEditFormData } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type CompensationSectionProps =
   | {
@@ -18,12 +19,13 @@ type CompensationSectionProps =
     };
 
 export function CompensationSection(props: CompensationSectionProps) {
+  const translations = useAppTranslation().profileTranslations.teacher;
   if (props.mode === "edit") {
     return (
       <CompensationEditFields<TeacherAdminEditFormData>
         register={props.register}
         control={props.control}
-        translationNamespace="profile.teacher"
+        translations={translations}
       />
     );
   }
@@ -32,7 +34,7 @@ export function CompensationSection(props: CompensationSectionProps) {
     <CompensationViewSection
       profileData={props.teacherData}
       subjectUserId={props.subjectUserId}
-      translationNamespace="profile.teacher"
+      translations={translations}
     />
   );
 }

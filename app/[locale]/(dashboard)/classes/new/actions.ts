@@ -2,7 +2,6 @@
 
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { parseIanaTimezone } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { logger } from "@/frontend/common/utils/logger";
@@ -18,20 +17,24 @@ export async function createRecurringClass(
   | { success: false; message: string }
 > {
   const { userId } = await getServerUserContext();
+  const localeSafe = locale ?? "en";
+  const translations = getServerTranslations(localeSafe);
+
   if (!userId) {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    return { success: false, message: t("unauthorized") };
+    return { success: false, message: translations.errorsTranslations.unauthorized };
   }
 
   try {
     const input = mapFormDataToServiceInput(data);
 
     if (input.days.length === 0) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      return { success: false, message: t("atLeastOneDayRequired") };
+      return {
+        success: false,
+        message: translations.dashboardTranslations.createRecurringClass.validation.daysRequired,
+      };
     }
 
-    const tErrors = await getServerTranslations(locale ?? "", "errors");
+    const tErrors = translations.errorsTranslations;
     const result = await RecurringClassService.createRecurringClass(
       userId,
       { ...input, timezone: parseIanaTimezone(toGraphqlIanaTimezone(input.timezone)) },
@@ -46,7 +49,9 @@ export async function createRecurringClass(
     };
   } catch (error) {
     logger.error("Failed to create recurring class", { error });
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    return { success: false, message: t("failedToCreateRecurringClass") };
+    return {
+      success: false,
+      message: translations.dashboardTranslations.createRecurringClass.validation.creationFailed,
+    };
   }
 }

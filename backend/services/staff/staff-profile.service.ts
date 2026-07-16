@@ -1,8 +1,8 @@
 import { TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 function maskNationalId(value: string | null): string | null {
   if (!value) {
@@ -32,8 +32,8 @@ export namespace StaffProfileService {
   ): Promise<TeacherProfileReturnType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_EDIT_PROFILE);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
     }
 
     const { timezone: timezoneInput, status, ...restInput } = input;
@@ -41,8 +41,8 @@ export namespace StaffProfileService {
     if (timezoneInput != null) {
       const teacher = await TeacherRepository.findById(teacherId);
       if (!teacher) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("teacherNotFound", { id: teacherId }));
+        const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+        throw new Error(tFunc.teacherNotFound(teacherId));
       }
       await UserRepository.updateTimezone(teacher.userId, timezoneInput, undefined, locale);
     }
@@ -50,8 +50,8 @@ export namespace StaffProfileService {
     if (status != null) {
       const teacher = await TeacherRepository.findById(teacherId);
       if (!teacher) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("teacherNotFound", { id: teacherId }));
+        const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+        throw new Error(tFunc.teacherNotFound(teacherId));
       }
       await UserRepository.updateStatus(teacher.userId, status, undefined, locale);
     }
@@ -59,14 +59,14 @@ export namespace StaffProfileService {
     const success = await TeacherRepository.updateTeacherProfile(teacherId, restInput);
 
     if (!success) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("teacherNotFound", { id: teacherId }));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.teacherNotFound(teacherId));
     }
 
     const profile = await TeacherRepository.getTeacherProfileForEdit(teacherId);
     if (!profile) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("teacherNotFound", { id: teacherId }));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.teacherNotFound(teacherId));
     }
 
     return toMaskedTeacherProfile(profile);
@@ -79,14 +79,14 @@ export namespace StaffProfileService {
   ): Promise<TeacherProfileReturnType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_EDIT_PROFILE);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
     }
 
     const profile = await TeacherRepository.getTeacherProfileForEdit(teacherId);
     if (!profile) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("teacherNotFound", { id: teacherId }));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.teacherNotFound(teacherId));
     }
 
     return toMaskedTeacherProfile(profile);

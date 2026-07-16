@@ -1,4 +1,4 @@
-export { monthlyReports } from "@/shared/locale/en/dashboard/supervisorPortal/monthlyReports";
-export { pendingReviews } from "@/shared/locale/en/dashboard/supervisorPortal/pendingReviews";
-export { supervisorDashboard } from "@/shared/locale/en/dashboard/supervisorPortal/supervisorDashboard";
-export { teacherDues } from "@/shared/locale/en/dashboard/supervisorPortal/teacherDues";
+export { dashboardSupervisorPortalMonthlyReportsEn as monthlyReports } from "@/shared/locale/en/dashboard/supervisorPortal/monthlyReports";
+export { dashboardSupervisorPortalPendingReviewsEn as pendingReviews } from "@/shared/locale/en/dashboard/supervisorPortal/pendingReviews";
+export { dashboardSupervisorPortalDashboardEn as supervisorDashboard } from "@/shared/locale/en/dashboard/supervisorPortal/supervisorDashboard";
+export { dashboardSupervisorPortalTeacherDuesEn as teacherDues } from "@/shared/locale/en/dashboard/supervisorPortal/teacherDues";

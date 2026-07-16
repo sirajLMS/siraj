@@ -9,7 +9,7 @@ interface BillingProfilePageProps {
 
 export async function generateMetadata({ params }: BillingProfilePageProps): Promise<Metadata> {
   const { id, locale } = await params;
-  const t = await getTranslations(locale, "dashboard.billing");
+  const t = getTranslations(locale).dashboardTranslations.billing;
   const userName = await getUserPageTitle(id);
   if (userName) {
     return { title: `${userName} — ${t.billingProfileTitle}` };

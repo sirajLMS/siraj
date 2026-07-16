@@ -1,6 +1,6 @@
 import type { ParentRulesLabels } from "@/shared/locale/types/dashboard/parents";
 
-export const rules: ParentRulesLabels = {
+export const dashboardParentRulesEn: ParentRulesLabels = {
   pageTitle: "Rules & Policies",
   pageSubtitle: "Important policies for guardians",
   sections: {

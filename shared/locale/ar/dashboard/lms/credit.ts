@@ -1,6 +1,6 @@
 import type { CreditLabels } from "@/shared/locale/types/dashboard/lms/credit";
 
-export const credit: CreditLabels = {
+export const dashboardLmsCreditAr: CreditLabels = {
   title: "الرصيد",
   balance: "الرصيد المتبقي",
   purchase: "شراء",

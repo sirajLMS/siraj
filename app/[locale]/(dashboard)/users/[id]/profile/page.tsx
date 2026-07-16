@@ -20,7 +20,7 @@ import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id, locale } = await params;
-  const t = await getTranslations(locale, "profile");
+  const t = getTranslations(locale).profileTranslations.base;
   const userName = await getUserPageTitle(id);
   if (userName) {
     return { title: `${userName} — ${t.pageTitle}` };

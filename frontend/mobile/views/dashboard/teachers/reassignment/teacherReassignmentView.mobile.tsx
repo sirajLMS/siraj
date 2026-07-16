@@ -20,7 +20,7 @@ export function TeacherReassignmentViewMobile({
   onStatusChange,
   onCancel,
 }: Readonly<TeacherReassignmentViewModel>) {
-  const t = useAppTranslation("dashboard.teacherReassignment");
+  const t = useAppTranslation().dashboardTranslations.teacherReassignment;
 
   return (
     <PageContainer>

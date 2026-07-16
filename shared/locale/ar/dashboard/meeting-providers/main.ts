@@ -1,6 +1,6 @@
 import type { MeetingProvidersLabels } from "@/shared/locale/types/dashboard/meeting-providers/main";
 
-export const main: MeetingProvidersLabels = {
+export const dashboardMeetingProvidersAr: MeetingProvidersLabels = {
   pageTitle: "مزودو الاجتماعات",
   pageSubtitle: "إدارة كتالوج منصات الاجتماعات المستخدمة في إعدادات المستخدم.",
   addProvider: "إضافة مزود",

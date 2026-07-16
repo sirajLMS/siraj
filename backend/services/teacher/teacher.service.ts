@@ -1,14 +1,14 @@
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace TeacherService {
   export async function searchTeachers(userId: string | undefined, search: string, limit: number, locale?: string) {
     try {
       if (!userId) {
         logger.warn("Unauthorized access to searchTeachers - user not logged in");
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+        throw new Error(tFunc.unauthorized);
       }
 
       const teachers = await TeacherRepository.searchTeachers(search, limit);

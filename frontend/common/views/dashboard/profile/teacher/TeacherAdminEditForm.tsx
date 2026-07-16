@@ -32,7 +32,7 @@ export function TeacherAdminEditForm({
   readonly isSaving: boolean;
   readonly onSubmit: (values: TeacherAdminEditFormData) => Promise<void>;
 }) {
-  const t = useAppTranslation("profile").teacher;
+  const t = useAppTranslation().profileTranslations.teacher;
   const scope = ProfileScope.Other;
   const { canEdit } = useProfileFieldAccess({ scope });
   const form = useForm<TeacherAdminEditFormData>({

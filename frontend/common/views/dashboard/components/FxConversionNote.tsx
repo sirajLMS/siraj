@@ -15,7 +15,7 @@ interface FxConversionNoteProps {
 
 export function FxConversionNote({ mode = "viewer", subjectUserId }: Readonly<FxConversionNoteProps>): React.ReactNode {
   const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
-  const tBilling = useAppTranslation("dashboard.billing");
+  const tBilling = useAppTranslation().dashboardTranslations.billing;
 
   const { data: subjectData, loading: subjectLoading } = useQuery(userQueryDocument, {
     variables: { id: subjectUserId ?? "" },

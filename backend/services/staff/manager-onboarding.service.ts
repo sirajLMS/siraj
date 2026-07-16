@@ -2,9 +2,9 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository, StaffProfileRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export interface ManagerOnboardingInput {
   readonly name: string;
@@ -31,24 +31,24 @@ export namespace ManagerOnboardingService {
     locale?: string,
     tx?: DBTransaction
   ): Promise<ManagerOnboardingResult> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const tErrors = getServerTranslations(locale ?? "ar").errorsTranslations;
 
     // Permission check (must have staff.create)
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_CREATE);
     if (!hasPermission) {
-      throw new Error(t("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     // Secondary check: actor must be super_admin
     const actorContext = await PermissionsService.getUserContext(actorUserId);
     if (!actorContext.isSuperAdmin && !actorContext.permissionGroups.includes(SystemPermissionGroupSlug.SUPER_ADMIN)) {
-      throw new Error(t("manager.onlySuperAdminCanCreate"));
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     // Email uniqueness check
     const emailExists = await UserRepository.existsByEmail(input.email);
     if (emailExists) {
-      throw new Error(t("user.emailAlreadyExists"));
+      throw new Error(tErrors.user.userEmailExists);
     }
 
     // Determine permission group based on account type
@@ -86,7 +86,7 @@ export namespace ManagerOnboardingService {
       const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
       const targetGroup = groups.find(g => g.slug === targetGroupSlug);
       if (!targetGroup) {
-        throw new Error(t("permission.groupNotFound"));
+        throw new Error(tErrors.permissionGroup.permissionGroupNotFound);
       }
 
       await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], targetGroup.id, actorUserId, txObj);

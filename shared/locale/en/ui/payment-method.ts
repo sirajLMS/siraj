@@ -1,4 +1,4 @@
-export const paymentMethod = {
+export const uiPaymentMethodEn = {
   type: {
     mobileWallet: "Mobile wallet",
     paymentLink: "Payment link",

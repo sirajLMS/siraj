@@ -1,6 +1,6 @@
 import type { ProfileTeacherLabels } from "@/shared/locale/types/profile";
 
-export const teacher: ProfileTeacherLabels = {
+export const profileTeacherAr: ProfileTeacherLabels = {
   ownSubtitle: "عرض وتحديث ملفك التدريسي وبيانات الاتصال.",
   subtitle: "إدارة بيانات الاعتماد المؤسسية والتفاصيل الإدارية لأعضاء هيئة التدريس.",
   adminBanner: "عرض إداري: تظهر حقول الهوية وبيانات زووم والحالة.",

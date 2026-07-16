@@ -18,8 +18,8 @@ import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 let tErrors: ErrorsLabels;
-beforeAll(async () => {
-  tErrors = await getServerTranslations("en", "errors");
+beforeAll(() => {
+  tErrors = getServerTranslations("en").errorsTranslations;
 });
 
 function requireInstance(instance: ClassInstanceEntity | null): ClassInstanceEntity {

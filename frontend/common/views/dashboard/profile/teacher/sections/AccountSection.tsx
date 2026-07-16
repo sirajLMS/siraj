@@ -30,7 +30,7 @@ type AccountSectionProps =
     };
 
 export function AccountSection(props: AccountSectionProps) {
-  const t = useAppTranslation("profile").teacher;
+  const t = useAppTranslation().profileTranslations.teacher;
 
   if (props.mode === "edit") {
     return (

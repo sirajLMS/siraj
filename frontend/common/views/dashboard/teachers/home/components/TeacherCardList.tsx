@@ -172,7 +172,7 @@ export function TeacherCardList({
   totalCount,
   onPageChange,
 }: Readonly<TeacherCardListProps>) {
-  const t = useAppTranslation("dashboard.teachersDirectory");
+  const t = useAppTranslation().dashboardTranslations.teachersDirectory;
   const router = useRouter();
 
   const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;

@@ -26,9 +26,9 @@ import {
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 import type { CreateRecurringClassLabels } from "@/shared/locale/types/dashboard/classes/createRecurringClass";
-import type { MessageSchema } from "@/shared/locale/types/message";
+import type { MeetingConfigClassScopeLabels, MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
 
-type TranslationFn = MessageSchema["dashboard.createRecurringClass"];
+type TranslationFn = CreateRecurringClassLabels;
 
 function useRecurringClassLabels(t: TranslationFn): CreateRecurringClassLabels {
   return useMemo(
@@ -88,9 +88,9 @@ function useRecurringClassLabels(t: TranslationFn): CreateRecurringClassLabels {
 }
 
 interface SubmitHookParams {
-  readonly t: MessageSchema["dashboard.createRecurringClass"];
-  readonly tMeeting: MessageSchema["ui.meetingConfig.manager"];
-  readonly tClassScope: MessageSchema["ui.meetingConfig.classScope"];
+  readonly t: CreateRecurringClassLabels;
+  readonly tMeeting: MeetingConfigManagerLabels;
+  readonly tClassScope: MeetingConfigClassScopeLabels;
   readonly client: ReturnType<typeof useApolloClient>;
   readonly router: ReturnType<typeof useRouter>;
   readonly createClassMutation: MutationTuple<
@@ -187,10 +187,10 @@ function useRecurringClassSubmit(params: SubmitHookParams) {
 }
 
 export function CreateRecurringClassContainer() {
-  const t = useAppTranslation("dashboard.createRecurringClass");
-  const tMeeting = useAppTranslation("ui.meetingConfig.manager");
-  const tClassScope = useAppTranslation("ui.meetingConfig.classScope");
-  const tRecurring = useAppTranslation("ui.meetingConfig.recurringSchedule");
+  const t = useAppTranslation().dashboardTranslations.createRecurringClass;
+  const tMeeting = useAppTranslation().uiTranslations.meetingConfigManager;
+  const tClassScope = useAppTranslation().uiTranslations.meetingConfigClassScope;
+  const tRecurring = useAppTranslation().uiTranslations.meetingConfigRecurringSchedule;
   const router = useRouter();
   const client = useApolloClient();
   const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);

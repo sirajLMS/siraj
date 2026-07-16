@@ -6,7 +6,6 @@ import {
   UserRepository,
 } from "@/backend/db";
 import { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import {
   ManagerProfileService,
   ParentPortalService,
@@ -36,7 +35,7 @@ import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meetin
 import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
 import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
 import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 type ResolvedRoleIds = {
   readonly audience: ProfileAudience;
@@ -169,8 +168,8 @@ async function checkOtherScopePermission(
 }
 
 async function throwInsufficientPermissions(locale?: string): Promise<never> {
-  const t = await getBackendTranslations({ locale, namespace: "errors" });
-  throw new Error(t("insufficientPermissions"));
+  const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
+  throw new Error(errorsTranslations.insufficientPermissions);
 }
 
 async function assertOwnScopeOrThrow(
@@ -258,7 +257,7 @@ export namespace ProfileService {
     }
 
     if (scope === ProfileScope.OWN) {
-      const tErrors = (await getBackendTranslations({ locale, namespace: "errors" })) as unknown as ErrorsLabels;
+      const tErrors = getServerTranslations(locale ?? "ar").errorsTranslations;
       return {
         teacherOwnProfile: await TeacherPortalService.getOwnProfile(targetUserId, tErrors),
         teacherAdminProfile: null,
@@ -412,7 +411,7 @@ export namespace ProfileService {
     locale?: string
   ): Promise<UserMeetingConfigReturnType[] | null> {
     try {
-      const tErrors = (await getBackendTranslations({ locale, namespace: "errors" })) as unknown as ErrorsLabels;
+      const tErrors = getServerTranslations(locale ?? "ar").errorsTranslations;
       return await MeetingConfigService.listUserMeetingConfigs(actorUserId, targetUserId, tErrors);
     } catch {
       return null;
@@ -438,8 +437,8 @@ export namespace ProfileService {
   async function resolveUserOrThrow(targetUserId: string, locale?: string) {
     const user = await UserRepository.findSafeById(targetUserId);
     if (!user) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("userNotFound", { id: targetUserId }));
+      const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(errorsTranslations.userNotFound(targetUserId));
     }
     return user;
   }
@@ -453,8 +452,8 @@ export namespace ProfileService {
     const roleIds = await resolveRoleIdsForUser(targetUserId);
 
     if (!roleIds) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(errorsTranslations.notFound);
     }
 
     await assertCanViewProfile(actorUserId, targetUserId, scope, roleIds.audience, locale);
@@ -531,8 +530,8 @@ export namespace ProfileService {
       scope === ProfileScope.OWN ? AppPermission.AUTH_EDIT_OWN_PROFILE : AppPermission.USER_EDIT_PROFILE;
     const canEdit = await PermissionsService.hasPermission(actorUserId, requiredPermission);
     if (!canEdit) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("insufficientPermissions"));
+      const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(errorsTranslations.insufficientPermissions);
     }
 
     await UserRepository.updateProfileFields(targetUserId, core, locale);
@@ -564,7 +563,7 @@ export namespace ProfileService {
     }
 
     if (scope === ProfileScope.OWN) {
-      const tErrors = (await getBackendTranslations({ locale, namespace: "errors" })) as unknown as ErrorsLabels;
+      const tErrors = getServerTranslations(locale ?? "ar").errorsTranslations;
       await TeacherPortalService.updateOwnProfile(actorUserId, roleIds.teacherId, teacherInput, tErrors);
       return;
     }
@@ -663,8 +662,8 @@ export namespace ProfileService {
   async function resolveRoleIdsOrThrow(userId: string, locale?: string): Promise<ResolvedRoleIds> {
     const roleIds = await resolveRoleIdsForUser(userId);
     if (!roleIds) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(errorsTranslations.notFound);
     }
     return roleIds;
   }

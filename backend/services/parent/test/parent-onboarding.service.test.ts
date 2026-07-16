@@ -15,8 +15,8 @@ function generateTestPassword(): string {
   return `TestPass-${randomUUID().slice(0, 8)}!`;
 }
 
-beforeAll(async () => {
-  tErrors = await getServerTranslations("en", "errors");
+beforeAll(() => {
+  tErrors = getServerTranslations("en").errorsTranslations;
 });
 
 describe("ParentOnboardingService.createParent", () => {

@@ -22,7 +22,7 @@ import type { TeacherWeeklyScheduleContainerProps } from "@/frontend/common/view
 import { useAppTranslation } from "@/shared/locale/client";
 
 export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<TeacherWeeklyScheduleContainerProps>) {
-  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
   const notifications = useNotifications();
   const { selectedWeekDate } = useWeeklyScheduleStore();
   const { openDialog } = useCreateRecurringClassStore();

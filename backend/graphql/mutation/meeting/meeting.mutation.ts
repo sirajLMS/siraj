@@ -23,7 +23,7 @@ function withAuthResult<TArgs, TResult>(
 ) {
   return async (_parent: unknown, args: TArgs, ctx: BaseContext): Promise<TResult> => {
     const actorUserId = await requireAuth(ctx);
-    const tErrors = await ctx.t("errors");
+    const tErrors = ctx.t().errorsTranslations;
     return fn(actorUserId, args, tErrors, ctx.locale);
   };
 }
@@ -33,7 +33,7 @@ function withAuthVoid<TArgs>(
 ) {
   return async (_parent: unknown, args: TArgs, ctx: BaseContext): Promise<boolean> => {
     const actorUserId = await requireAuth(ctx);
-    const tErrors = await ctx.t("errors");
+    const tErrors = ctx.t().errorsTranslations;
     await fn(actorUserId, args, tErrors, ctx.locale);
     return true;
   };

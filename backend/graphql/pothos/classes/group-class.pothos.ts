@@ -112,7 +112,7 @@ gqlSchemaBuilder.queryField("groupClassAudit", t =>
       if (!ctx.user) {
         throw new Error("Unauthorized");
       }
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return GroupClassService.getGroupClassAudit(ctx.user.id, args.classInstanceId, tErrors);
     },
   })
@@ -130,7 +130,7 @@ gqlSchemaBuilder.mutationField("updateClassAdminNote", t =>
       if (!ctx.user) {
         throw new Error("Unauthorized");
       }
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return GroupClassService.updateAdminNote(ctx.user.id, args.classInstanceId, args.content, tErrors);
     },
   })
@@ -147,7 +147,7 @@ gqlSchemaBuilder.mutationField("resendClassNotifications", t =>
       if (!ctx.user) {
         throw new Error("Unauthorized");
       }
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return GroupClassService.resendNotifications(ctx.user.id, args.classInstanceId, tErrors);
     },
   })

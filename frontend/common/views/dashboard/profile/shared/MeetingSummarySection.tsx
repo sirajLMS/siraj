@@ -26,7 +26,7 @@ function toDisplayData(config: UserMeetingConfigFieldsFragment) {
 }
 
 export function MeetingSummarySection({ userId, meetingTabHref }: MeetingSummarySectionProps) {
-  const t = useAppTranslation("ui.meetingConfig.summary");
+  const t = useAppTranslation().uiTranslations.meetingConfigSummary;
   const { data, loading } = useQuery(userMeetingConfigsQueryDocument, {
     variables: { userId },
   });

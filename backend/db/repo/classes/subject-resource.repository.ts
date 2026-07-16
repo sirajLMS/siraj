@@ -2,7 +2,6 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { learningResources, subjectResources } from "@/backend/db/schema";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type { SubjectResourceAttachInput, SubjectResourceReturnType } from "@/backend/types";
 
@@ -95,7 +94,7 @@ export namespace SubjectResourceRepository {
 
   export async function attachResource(
     input: SubjectResourceAttachInput,
-    locale?: string,
+    _locale?: string,
     tx?: DBTransaction
   ): Promise<SubjectResourceReturnType> {
     try {
@@ -111,8 +110,7 @@ export namespace SubjectResourceRepository {
           .returning();
 
         if (!result) {
-          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(tFunc("subjectResourceAttachFailed"));
+          throw new Error("Failed to attach resource to subject");
         }
 
         logger.info("Resource attached to subject", {
@@ -138,7 +136,7 @@ export namespace SubjectResourceRepository {
   export async function detachResource(
     subjectId: string,
     learningResourceId: string,
-    locale?: string,
+    _locale?: string,
     tx?: DBTransaction
   ): Promise<{ id: string }> {
     try {
@@ -152,8 +150,7 @@ export namespace SubjectResourceRepository {
           .limit(1);
 
         if (!existing) {
-          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(tFunc("subjectResourceLinkNotFound"));
+          throw new Error("Resource link not found");
         }
 
         await t
@@ -175,7 +172,7 @@ export namespace SubjectResourceRepository {
   export async function reorderResource(
     id: string,
     sortOrder: number,
-    locale?: string,
+    _locale?: string,
     tx?: DBTransaction
   ): Promise<{ id: string; sortOrder: number }> {
     try {
@@ -187,8 +184,7 @@ export namespace SubjectResourceRepository {
           .returning({ id: subjectResources.id, sortOrder: subjectResources.sortOrder });
 
         if (!updated) {
-          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(tFunc("subjectResourceNotFound"));
+          throw new Error("Subject resource not found");
         }
 
         logger.info("Resource reordered", { subjectResourceId: id, sortOrder });

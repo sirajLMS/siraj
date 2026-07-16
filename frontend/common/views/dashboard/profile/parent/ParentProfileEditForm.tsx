@@ -38,7 +38,7 @@ export function ParentProfileEditForm({
   readonly isSaving: boolean;
   readonly onSubmit: (values: ParentAdminEditFormData) => Promise<void>;
 }) {
-  const t = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.base;
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canEdit } = useProfileFieldAccess({ scope });
   const schema = isAdminScope ? parentAdminEditSchema : parentOwnEditSchema;

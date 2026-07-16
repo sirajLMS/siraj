@@ -10,7 +10,7 @@ interface ParentsMetricGridProps {
 }
 
 export function ParentsMetricGrid({ metrics }: Readonly<ParentsMetricGridProps>) {
-  const t = useAppTranslation("dashboard.parentsDirectory");
+  const t = useAppTranslation().dashboardTranslations.parentsDirectory;
   const parents = t;
 
   return (

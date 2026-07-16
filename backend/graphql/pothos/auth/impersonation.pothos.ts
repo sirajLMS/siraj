@@ -93,7 +93,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       reason: t.arg.string({ required: false }),
     },
     resolve: async (_parent, args, ctx) => {
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       if (ctx.isImpersonating) {
         throw new GraphQLError(tErrors.auth.impersonationNotAllowedDuringSession, {
           extensions: { code: "FORBIDDEN" },
@@ -135,7 +135,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: EndImpersonationResponsePothosObject,
     authScopes: { loggedIn: true },
     resolve: async (_parent, _args, ctx) => {
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       const actorUserId = ctx.actorUserId ?? ctx.user?.id;
       if (!actorUserId || !ctx.sessionId) {
         throw new GraphQLError(tErrors.auth.impersonationSessionInvalid, {

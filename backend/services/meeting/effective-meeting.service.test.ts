@@ -17,7 +17,7 @@ function resolutionTest(name: string, fn: (tx: DBTransaction, tErrors: ErrorsLab
   test(name, async () => {
     let completed = false;
     await runInRollback(async tx => {
-      const tErrors = (await getServerTranslations("en", "errors")) as ErrorsLabels;
+      const tErrors = getServerTranslations("en").errorsTranslations;
       await fn(tx, tErrors);
       completed = true;
     });

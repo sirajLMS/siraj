@@ -1,6 +1,6 @@
 import type { BooksAndBagsLabels } from "@/shared/locale/types/dashboard/resources";
 
-export const booksAndBags: BooksAndBagsLabels = {
+export const dashboardBooksAndBagsAr: BooksAndBagsLabels = {
   pageTitle: "الكتب والحقائب",
   pageSubtitle: "تصفح وإدارة مخزون الكتب والحقائب.",
   noEntries: "لم يتم العثور على كتب أو حقائب.",

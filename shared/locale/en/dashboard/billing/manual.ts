@@ -1,6 +1,6 @@
 import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
 
-export const manual: BillingManualLabels = {
+export const dashboardBillingManualEn: BillingManualLabels = {
   pageTitle: "Create Manual Invoice",
   pageSubtitle: "Create one-time charge records for institutional billing.",
   backToFinancials: "Back to Financials",

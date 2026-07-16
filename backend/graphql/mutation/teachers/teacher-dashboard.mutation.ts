@@ -21,11 +21,11 @@ gqlSchemaBuilder.mutationField("createTeacherManualClassEntry", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.unauthorized);
       }
-      const tErrors = await ctx.t("errors");
-      const tSession = await ctx.t("session");
+      const tErrors = ctx.t().errorsTranslations;
+      const tSession = ctx.t().sessionTranslations;
       const created = await TeacherDashboardService.createManualEntry(
         ctx.user.id,
         {
@@ -52,10 +52,10 @@ gqlSchemaBuilder.mutationField("logTeacherSupportRequest", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.unauthorized);
       }
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       const result = await TeacherDashboardService.logSupportRequest(
         ctx.user.id,
         { reason: args.input.reason },

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] || "ar";
-  const tErrors = await getServerTranslations(locale, "errors");
+  const tErrors = getServerTranslations(locale).errorsTranslations;
 
   try {
     await BillingManagementService.verifyInvoiceAccess(userId, invoiceId, context, tErrors);

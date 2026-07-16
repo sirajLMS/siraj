@@ -1,6 +1,6 @@
 import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes";
 
-export const rescheduleForm: RescheduleFormLabels = {
+export const dashboardRescheduleFormAr: RescheduleFormLabels = {
   pageTitle: "إعادة جدولة حصة",
   pageSubtitle: "عدّل توقيت الجلسة للمشاركين التاليين.",
   sections: {

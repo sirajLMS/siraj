@@ -1,11 +1,11 @@
-import { currencyHedges } from "@/shared/locale/en/dashboard/billing/currencyHedges";
-import { exchangeRates } from "@/shared/locale/en/dashboard/billing/exchangeRates";
-import { manual } from "@/shared/locale/en/dashboard/billing/manual";
-import { payment } from "@/shared/locale/en/dashboard/billing/payment";
-import { supportedCurrencies } from "@/shared/locale/en/dashboard/billing/supportedCurrencies";
+import { dashboardBillingCurrencyHedgesEn as currencyHedges } from "@/shared/locale/en/dashboard/billing/currencyHedges";
+import { dashboardBillingExchangeRatesEn as exchangeRates } from "@/shared/locale/en/dashboard/billing/exchangeRates";
+import { dashboardBillingManualEn as manual } from "@/shared/locale/en/dashboard/billing/manual";
+import { dashboardBillingPaymentEn as payment } from "@/shared/locale/en/dashboard/billing/payment";
+import { dashboardBillingSupportedCurrenciesEn as supportedCurrencies } from "@/shared/locale/en/dashboard/billing/supportedCurrencies";
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
 
-export const main: BillingLabels = {
+export const dashboardBillingEn: BillingLabels = {
   ...payment,
   adminPageTitle: "Billing Management",
   adminPageSubtitle: "Financial overview and transaction records",

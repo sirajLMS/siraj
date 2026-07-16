@@ -9,13 +9,13 @@ import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
 import { PaginationArgsDefault } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { parseAccountStatus } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
 import type { PaginatedUsersResponseSelectType } from "@/backend/types/auth/auth.types";
 import type { PaginationInput } from "@/backend/types/shared/pagination.types";
 import type { UserCreateInput, UserReturnType, UserSelectType } from "@/backend/types/users/user.types";
 import { AuthUtils } from "@/backend/utils";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export async function findOne(condition: SQL | undefined): Promise<UserSelectType | null> {
   try {
@@ -36,8 +36,7 @@ export namespace UserRepository {
   export const findUserByIdOrThrow = async (id: string, locale?: string): Promise<UserSelectType> => {
     const user = await findById(id);
     if (!user) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("userNotFound", { id }));
+      throw new Error(getServerTranslations(locale ?? "en").errorsTranslations.userNotFound(id));
     }
     return user;
   };
@@ -135,11 +134,11 @@ export namespace UserRepository {
   export const loadByIds = async (ids: string[], locale?: string): Promise<(UserReturnType | Error)[]> => {
     if (ids.length === 0) return [];
     const filteredUsers = await db.select().from(users).where(inArray(users.id, ids));
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const { userNotFound } = getServerTranslations(locale ?? "en").errorsTranslations;
 
     return ids.map(id => {
       const matchingUser = filteredUsers.find(c => c.id === id);
-      if (!matchingUser) return new Error(t("userNotFound", { id }));
+      if (!matchingUser) return new Error(userNotFound(id));
       return AuthUtils.toUserReturnType(matchingUser);
     });
   };
@@ -185,9 +184,9 @@ export namespace UserRepository {
   ): Promise<UserReturnType> => {
     const queryDb = tx ?? db;
     const exists = await existsByEmail(input.email.value, tx);
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
     if (exists) {
-      throw new Error(t("userEmailExists", { email: input.email.value }));
+      throw new Error(errorsTranslations.userEmailExists);
     }
 
     AuthUtils.validateUserName(input.name);
@@ -210,7 +209,7 @@ export namespace UserRepository {
       return AuthUtils.toUserReturnType(result);
     } catch (err) {
       logger.error(err);
-      throw new Error(t("userCreateFailed", { email: input.email.value }), { cause: err });
+      throw new Error(`Failed to create user with email: ${input.email.value}`, { cause: err });
     }
   };
 
@@ -234,11 +233,11 @@ export namespace UserRepository {
     tx?: DBTransaction
   ): Promise<UserReturnType> => {
     const queryDb = tx ?? db;
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const existing = await findSafeById(userId, tx);
     if (!existing) {
-      throw new Error(t("userNotFound", { id: userId }));
+      throw new Error(errorsTranslations.userNotFound(userId));
     }
 
     const updateSet: Partial<typeof users.$inferInsert> = {
@@ -253,7 +252,7 @@ export namespace UserRepository {
     if (input.email !== undefined) {
       const emailExists = await existsByEmail(input.email, tx);
       if (emailExists && existing.email !== input.email) {
-        throw new Error(t("userEmailExists", { email: input.email }));
+        throw new Error(errorsTranslations.userEmailExists);
       }
       updateSet.email = input.email;
     }
@@ -273,7 +272,7 @@ export namespace UserRepository {
     const [updated] = await queryDb.update(users).set(updateSet).where(eq(users.id, userId)).returning();
 
     if (!updated) {
-      throw new Error(t("userNotFound", { id: userId }));
+      throw new Error(errorsTranslations.userNotFound(userId));
     }
 
     return AuthUtils.toUserReturnType(updated);
@@ -286,7 +285,7 @@ export namespace UserRepository {
     locale?: string
   ): Promise<UserSelectType> {
     const queryDb = tx ?? db;
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const [updated] = await queryDb
       .update(users)
@@ -295,7 +294,7 @@ export namespace UserRepository {
       .returning();
 
     if (!updated) {
-      throw new Error(t("userNotFound", { id: userId }));
+      throw new Error(errorsTranslations.userNotFound(userId));
     }
 
     return updated;
@@ -307,11 +306,11 @@ export namespace UserRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<UserSelectType> => {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
     const normalizedTimezone = normalizeIanaTimezone(timezone);
 
     if (!isValidIanaTimezone(normalizedTimezone)) {
-      throw new Error(t("parent.invalidTimezone"));
+      throw new Error(errorsTranslations.parent.invalidTimezone);
     }
 
     return updateUserColumn(userId, { timezone: normalizedTimezone }, tx, locale);

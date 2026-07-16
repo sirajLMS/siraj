@@ -1,4 +1,4 @@
-export const defaultsEditor = {
+export const uiPaymentMethodDefaultsEditorAr = {
   payinDefault: "افتراضي الدفع الداخل",
   payoutDefault: "افتراضي الدفع الخارج",
   instructions: "التعليمات",

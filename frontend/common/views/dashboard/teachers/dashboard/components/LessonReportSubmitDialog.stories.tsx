@@ -2,10 +2,9 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { LessonReportSubmitDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/LessonReportSubmitDialog";
 import type { LessonReportFormLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports";
 
-function buildLabels(
-  lessonReportI18n: ReturnType<typeof useAppTranslation<"dashboard.lms.lessonReports">>
-): LessonReportFormLabels {
+function buildLabels(lessonReportI18n: LessonReportLabels): LessonReportFormLabels {
   return {
     attendanceEvaluation: lessonReportI18n.attendanceEvaluation,
     durationMinutes: lessonReportI18n.durationMinutes,
@@ -28,7 +27,7 @@ function buildLabels(
 }
 
 export function MockLessonReportSubmitDialog() {
-  const lessonReportI18n = useAppTranslation("dashboard.lms.lessonReports");
+  const lessonReportI18n = useAppTranslation().dashboardTranslations.lmsLessonReports;
   const labels = buildLabels(lessonReportI18n);
 
   return (

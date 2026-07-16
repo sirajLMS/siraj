@@ -25,8 +25,8 @@ import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function StudentOnboardingContainer() {
-  const t = useAppTranslation("dashboard.studentOnboarding");
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation().dashboardTranslations.studentOnboarding;
+  const tc = useAppTranslation().commonTranslations;
   const router = useRouter();
   const notifications = useNotifications();
   const searchParams = useSearchParams();

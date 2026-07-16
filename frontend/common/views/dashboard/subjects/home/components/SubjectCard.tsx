@@ -6,7 +6,7 @@ import type { SubjectCardProps } from "@/frontend/common/views/dashboard/subject
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function SubjectCard({ subject, onEdit, onDelete, onClick, canManage }: Readonly<SubjectCardProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
 
   return (
     <Card

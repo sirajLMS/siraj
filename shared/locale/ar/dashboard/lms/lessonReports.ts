@@ -1,6 +1,6 @@
 import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports";
 
-export const lessonReports: LessonReportLabels = {
+export const dashboardLmsLessonReportsAr: LessonReportLabels = {
   title: "تقارير الدروس",
   submitReport: "إرسال التقرير",
   pendingReview: "قيد المراجعة",

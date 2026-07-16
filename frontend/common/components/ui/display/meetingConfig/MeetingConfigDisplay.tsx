@@ -102,7 +102,7 @@ export function MeetingConfigDisplay({
   showSource = false,
   compact = false,
 }: MeetingConfigDisplayProps): React.ReactNode {
-  const t = useAppTranslation("ui.meetingConfig");
+  const t = useAppTranslation().uiTranslations.meetingConfig;
   const locale = useAppLocale();
   const tDisplay = t.display;
   const details = config.details ?? {};

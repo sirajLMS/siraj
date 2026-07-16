@@ -25,7 +25,7 @@ interface Props {
 }
 
 function MobileInactiveNote() {
-  const t = useAppTranslation("dashboard.dstMigration");
+  const t = useAppTranslation().dashboardTranslations.dstMigration;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -50,13 +50,13 @@ function MobileInactiveNote() {
 }
 
 function MobileConflictsHeader() {
-  const t = useAppTranslation("dashboard.dstMigration");
+  const t = useAppTranslation().dashboardTranslations.dstMigration;
 
   return <SectionPanel title={t.sections.conflictsDetected} />;
 }
 
 function MobileUpdatedHeader() {
-  const t = useAppTranslation("dashboard.dstMigration");
+  const t = useAppTranslation().dashboardTranslations.dstMigration;
 
   return <SectionPanel title={t.sections.successfullyUpdated} />;
 }
@@ -69,7 +69,7 @@ export function DstMigrationViewMobile({
   onUpdate,
   dstOffsetDetected,
 }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.dstMigration");
+  const t = useAppTranslation().dashboardTranslations.dstMigration;
 
   return (
     <PageContainer>

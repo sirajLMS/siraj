@@ -11,7 +11,7 @@ export function DeleteCategoryDialog({
   categoryName,
   isLoading,
 }: Readonly<DeleteCategoryDialogProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
 
   return (
     <BaseDeleteDialog

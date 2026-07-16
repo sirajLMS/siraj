@@ -193,7 +193,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
 
       await setBillingFxDisplayCurrencyForSubject(ctx, args.userId ?? null, callerUserId);
 
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return BillingHistoryService.getParentInvoiceHistory(
         callerUserId,
         args.parentId ?? null,
@@ -218,7 +218,7 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
       const userId = await requireAuth(ctx);
       const pagination = parsePaginationArgs(args.paginationArgs);
 
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       const result = await BillingHistoryService.getAdminInvoices(userId, pagination, args.search ?? null, tErrors);
       await populateBillingFxDisplayCurrencyByUserId(
         ctx,
@@ -235,7 +235,7 @@ gqlSchemaBuilder.queryField("adminBillingSummary", t =>
     authScopes: { permission: AppPermission.BILLING_VIEW_HISTORY },
     resolve: async (_root, _args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return BillingHistoryService.getAdminBillingSummary(userId, tErrors);
     },
   })
@@ -247,7 +247,7 @@ gqlSchemaBuilder.queryField("studentCreditStatus", t =>
     authScopes: { loggedIn: true },
     resolve: async (_root, _args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return BillingHistoryService.getStudentCreditStatus(userId, tErrors);
     },
   })
@@ -266,7 +266,7 @@ gqlSchemaBuilder.queryField("parentBillingSummary", t =>
 
       await setBillingFxDisplayCurrencyForSubject(ctx, args.userId ?? null, callerUserId);
 
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return BillingHistoryService.getParentBillingSummary(
         callerUserId,
         args.parentId ?? null,

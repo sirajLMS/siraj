@@ -27,7 +27,7 @@ export async function seedOrGet() {
     updatedAt: now,
   }));
 
-  const tErrors = await getServerTranslations("en", "errors");
+  const tErrors = getServerTranslations("en").errorsTranslations;
   const results = await PaymentCatalogService.upsertManyPaymentLinks(inputs, tErrors);
   logger.info(`Supported payment links seeded (${results.length} rows).`);
   return results;

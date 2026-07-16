@@ -1,9 +1,8 @@
 // cspell:ignore Financials
 
-import type { useAppTranslation } from "@/shared/locale/client";
 import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
 
-type BillingManualTranslator = ReturnType<typeof useAppTranslation<"dashboard.billing.manual">>;
+type BillingManualTranslator = BillingManualLabels;
 
 export function buildManualInvoiceLabels(t: BillingManualTranslator): BillingManualLabels {
   return {

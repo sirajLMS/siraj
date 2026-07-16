@@ -1,6 +1,6 @@
 import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students";
 
-export const status: StudentStatusLabels = {
+export const dashboardStudentStatusEn: StudentStatusLabels = {
   pageTitle: "Student Status & Schedule Hold",
   studentId: id => `ID: #${id}`,
   breadcrumbs: {

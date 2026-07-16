@@ -1,4 +1,4 @@
-export const manager = {
+export const uiPaymentMethodManagerEn = {
   add: "Add method",
   addTitle: "Add payment method",
   editTitle: "Edit payment method",

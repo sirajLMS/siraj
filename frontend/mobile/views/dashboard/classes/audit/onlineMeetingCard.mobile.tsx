@@ -80,7 +80,7 @@ function MeetingPreviewIcon({ logoUrl }: Readonly<{ logoUrl?: string | null }>) 
 }
 
 export function OnlineMeetingCardMobile({ meetingInfo, showJoin = false }: Readonly<OnlineMeetingCardMobileProps>) {
-  const t = useAppTranslation("dashboard.classAudit");
+  const t = useAppTranslation().dashboardTranslations.classAudit;
   const locale = useAppLocale();
   const providerName = resolveProviderDisplayName(meetingInfo, locale);
   const meeting = toEffectiveMeeting(meetingInfo);

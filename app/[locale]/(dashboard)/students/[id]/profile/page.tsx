@@ -9,7 +9,7 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly id: string; readonly locale: string }>;
 }): Promise<Metadata> {
   const { id, locale } = await params;
-  const t = await getTranslations(locale, "dashboard.studentProfile");
+  const t = getTranslations(locale).dashboardTranslations.studentProfile;
   const studentName = await getStudentPageTitle(id);
   if (studentName) {
     return { title: studentName };

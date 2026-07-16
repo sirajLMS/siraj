@@ -14,10 +14,11 @@ import { RejectReportDialog } from "@/frontend/common/views/dashboard/supervisor
 import { PendingReviewsView } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/pendingReviewsView";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { PendingReviewsLabels } from "@/shared/locale/types/dashboard/supervisorPortal/pendingReviews";
 
 type SnackbarSeverity = "success" | "error";
 
-function useLabels(t: ReturnType<typeof useAppTranslation<"dashboard.supervisorPortal.pendingReviews">>) {
+function useLabels(t: PendingReviewsLabels) {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,
@@ -49,7 +50,7 @@ function useLabels(t: ReturnType<typeof useAppTranslation<"dashboard.supervisorP
 }
 
 export function PendingReviewsContainer() {
-  const t = useAppTranslation("dashboard.supervisorPortal.pendingReviews");
+  const t = useAppTranslation().dashboardTranslations.supervisorPortalPendingReviews;
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");

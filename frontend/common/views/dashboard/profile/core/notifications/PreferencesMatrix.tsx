@@ -69,7 +69,7 @@ export function PreferencesMatrix({
   disabled = false,
   loading = false,
 }: Readonly<PreferencesMatrixProps>) {
-  const t = useAppTranslation("profile").notifications;
+  const t = useAppTranslation().profileTranslations.notifications;
   const preferenceMap = buildPreferenceMap(preferences);
 
   const rows = useMemo<PreferenceMatrixRow[]>(() => {

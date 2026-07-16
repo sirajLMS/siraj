@@ -33,7 +33,7 @@ export async function seedOrGet(classInstancesList: ClassInstanceEntity[], confi
     encryptedSecret: null,
   }));
 
-  const tErrors = await getServerTranslations("en", "errors");
+  const tErrors = getServerTranslations("en").errorsTranslations;
   const results = await MeetingConfigService.upsertManyClassMeetingConfigs(inputs, tErrors);
   logger.info(`Class meeting configs seeded (${results.length} rows).`);
   return results;

@@ -1,4 +1,4 @@
-export const defaultsEditor = {
+export const uiPaymentMethodDefaultsEditorEn = {
   payinDefault: "Payin default",
   payoutDefault: "Payout default",
   instructions: "Instructions",

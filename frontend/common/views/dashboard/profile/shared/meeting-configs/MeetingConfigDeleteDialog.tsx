@@ -18,7 +18,7 @@ export function MeetingConfigDeleteDialog({
   onClose,
   onConfirm,
 }: MeetingConfigDeleteDialogProps) {
-  const t = useAppTranslation("ui.meetingConfig.manager");
+  const t = useAppTranslation().uiTranslations.meetingConfigManager;
 
   return (
     <BaseDeleteDialog

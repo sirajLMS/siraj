@@ -31,7 +31,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Readonly<MobileProfileHeaderProps>) {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
   return (
     <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", alignItems: "center", py: 4 }}>
       <Box sx={{ position: "relative", width: 96, height: 96, mb: 2 }}>
@@ -70,7 +70,7 @@ function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Read
 }
 
 function DesktopBreadcrumbs(
-  t: ReturnType<typeof useAppTranslation<"dashboard.studentQuota">>
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentQuota"]
 ): readonly PageHeaderBreadcrumb[] {
   return [
     { label: t.breadcrumbs.students, href: "/students" },
@@ -86,7 +86,7 @@ function FormActions({
   readOnly = false,
   showCancel = true,
 }: Readonly<FormActionsProps>) {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
 
   let saveIcon = <Save />;
   if (isSaving) saveIcon = <SyncOutlined sx={{ animation: "spin 1s linear infinite" }} />;
@@ -203,7 +203,7 @@ function QuotaFormCard({
   canViewQuota: boolean;
   canViewTeacher: boolean;
 }>) {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
   const showAvatarEdit = !embedded && !readOnly && canEditIdentity;
 
   return (
@@ -279,7 +279,7 @@ function useQuotaForm(
   studentData: StudentQuotaViewProps["studentData"],
   onSave: (data: StudentQuotaFormData) => Promise<void>
 ) {
-  const validationMessages = useAppTranslation("dashboard.studentQuota").validation;
+  const validationMessages = useAppTranslation().dashboardTranslations.studentQuota.validation;
   const schema = createStudentQuotaSchema(validationMessages as StudentQuotaLabels["validation"]);
 
   const methods = useForm<StudentQuotaFormInput, undefined, StudentQuotaFormData>({

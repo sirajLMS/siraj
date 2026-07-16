@@ -1,4 +1,4 @@
-export const display = {
+export const uiPaymentMethodDisplayAr = {
   defaultBadge: "افتراضي",
   verified: "موثّق",
   unverified: "غير موثّق",

@@ -1,6 +1,6 @@
 import type { StudentProfileLabels } from "@/shared/locale/types/dashboard/studentPortal/studentProfile";
 
-export const studentProfile: StudentProfileLabels = {
+export const dashboardStudentPortalProfileAr: StudentProfileLabels = {
   pageTitle: "ملفي الشخصي",
   personalInfo: "المعلومات الشخصية",
   fullName: "الاسم الكامل",

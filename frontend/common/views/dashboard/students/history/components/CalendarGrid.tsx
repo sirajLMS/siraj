@@ -112,7 +112,7 @@ function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: Cla
 }
 
 export function CalendarGrid({ currentMonth, classes }: Readonly<CalendarGridProps>) {
-  const t = useAppTranslation("dashboard.studentHistory");
+  const t = useAppTranslation().dashboardTranslations.studentHistory;
   const { daysInMonth, emptyStartDays, emptyEndDays } = computeCalendarGridLayout(currentMonth);
 
   return (

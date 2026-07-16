@@ -1,6 +1,6 @@
 import type { ParentSocialLabels } from "@/shared/locale/types/dashboard/parents";
 
-export const social: ParentSocialLabels = {
+export const dashboardParentSocialAr: ParentSocialLabels = {
   pageTitle: "وسائل التواصل الاجتماعي",
   pageSubtitle: "قنوات الاتصال ووسائل التواصل المسجلة لديك.",
   sections: {

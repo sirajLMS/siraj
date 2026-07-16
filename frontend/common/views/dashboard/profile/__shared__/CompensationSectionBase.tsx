@@ -13,6 +13,7 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { ProfileStaffLabels, ProfileTeacherLabels } from "@/shared/locale/types/profile";
 
 export interface CompensationViewData {
   readonly hourlyRate?: string | null;
@@ -24,18 +25,18 @@ export interface CompensationViewData {
   } | null;
 }
 
-type CompensationTranslationNamespace = "profile.teacher" | "profile.staff";
+type CompensationTranslations = ProfileTeacherLabels | ProfileStaffLabels;
 
 export function CompensationEditFields<TFormValues extends FieldValues>({
   register,
   control,
-  translationNamespace,
+  translations,
 }: {
   readonly register: UseFormRegister<TFormValues>;
   readonly control: Control<TFormValues>;
-  readonly translationNamespace: CompensationTranslationNamespace;
+  readonly translations: CompensationTranslations;
 }) {
-  const t = useAppTranslation(translationNamespace);
+  const t = translations;
   const rateCurrency = useWatch({ control, name: "rateCurrency" as FieldPath<TFormValues> });
   const currencySymbol = getCurrencySymbol(rateCurrency ?? CurrencyCode.Usd);
 
@@ -83,15 +84,15 @@ export function CompensationEditFields<TFormValues extends FieldValues>({
 export function CompensationViewSection({
   profileData,
   subjectUserId,
-  translationNamespace,
+  translations,
 }: {
   readonly profileData: CompensationViewData;
   readonly subjectUserId?: string;
-  readonly translationNamespace: CompensationTranslationNamespace;
+  readonly translations: CompensationTranslations;
 }) {
-  const t = useAppTranslation(translationNamespace);
-  const tProfile = useAppTranslation("profile");
-  const tErrors = useAppTranslation("errors");
+  const t = translations;
+  const tProfile = useAppTranslation().profileTranslations.base;
+  const tErrors = useAppTranslation().errorsTranslations;
   const locale = useAppLocale();
 
   const lockedAmount = profileData.hourlyRate ?? "0";

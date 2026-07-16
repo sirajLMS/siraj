@@ -1,1 +1,1 @@
-export { main } from "./main";
+export { dashboardSubjectsAr } from "./main";

@@ -16,8 +16,8 @@ const SUPER_TARGET_ID = "33333333-3333-3333-3333-333333333333";
 
 let tErrors: ErrorsLabels;
 
-beforeAll(async () => {
-  tErrors = await getServerTranslations("en", "errors");
+beforeAll(() => {
+  tErrors = getServerTranslations("en").errorsTranslations;
 });
 
 /* Test fixtures */

@@ -17,7 +17,7 @@ gqlSchemaBuilder.queryField("meetingProviders", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return MeetingProviderCatalogService.listProviders(userId, args.activeOnly ?? true, tErrors);
     },
   })
@@ -32,7 +32,7 @@ gqlSchemaBuilder.queryField("meetingProvider", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return MeetingProviderCatalogService.getProviderById(userId, args.id, tErrors);
     },
   })
@@ -47,7 +47,7 @@ gqlSchemaBuilder.queryField("userMeetingConfigs", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return MeetingConfigService.listUserMeetingConfigs(actorUserId, args.userId, tErrors);
     },
   })
@@ -62,7 +62,7 @@ gqlSchemaBuilder.queryField("userMeetingConfig", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return MeetingConfigService.getUserMeetingConfig(actorUserId, args.id, tErrors);
     },
   })
@@ -77,7 +77,7 @@ gqlSchemaBuilder.queryField("classMeetingConfigs", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return ClassMeetingConfigService.listClassMeetingConfigs(actorUserId, args.classInstanceId, tErrors);
     },
   })
@@ -92,7 +92,7 @@ gqlSchemaBuilder.queryField("recurringMeetingConfigs", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return ClassMeetingConfigService.listRecurringMeetingConfigs(actorUserId, args.recurringScheduleId, tErrors);
     },
   })

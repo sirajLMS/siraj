@@ -32,7 +32,7 @@ const DesktopLanguageOption = styled(Box, {
 }));
 
 function DesktopLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<DesktopLocaleListProps>) {
-  const t = useAppTranslation("ui.localizedString");
+  const t = useAppTranslation().uiTranslations.localizedString;
   const uiLocale = useAppLocale();
 
   return (
@@ -80,7 +80,7 @@ export function LocaleAdornmentSwitchDesktop({
   successSwitch = false,
   ariaLabel,
 }: LocaleAdornmentSwitchProps) {
-  const t = useAppTranslation("ui.localizedString");
+  const t = useAppTranslation().uiTranslations.localizedString;
   const uiLocale = useAppLocale();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 

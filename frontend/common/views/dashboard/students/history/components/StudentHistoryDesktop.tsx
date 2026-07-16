@@ -29,7 +29,7 @@ export function StudentHistoryDesktop({
   nowMonth,
   locale,
 }: Readonly<StudentHistoryDesktopProps>) {
-  const t = useAppTranslation("dashboard.studentHistory");
+  const t = useAppTranslation().dashboardTranslations.studentHistory;
   const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
   const yearStr = currentMonth.getFullYear();
 

@@ -3,10 +3,11 @@ import { db } from "@/backend/db/drizzleDb";
 import { BillingRepository, FxSyncRepository } from "@/backend/db/repo";
 import { AppPermission, FxSyncStatus, FxSyncTrigger } from "@/backend/enum";
 import { CurrencyCode } from "@/backend/enum/shared/currency.enum";
-import { getBackendTranslations, logger } from "@/backend/lib";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import { getFxRateProvider } from "@/backend/services/fx/providers/FxRateProviderFactory";
 import type * as Types from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 const IDEMPOTENCY_WINDOW_MINUTES = 30;
 
@@ -18,8 +19,8 @@ export namespace FxIngestionService {
       AppPermission.BILLING_REFRESH_EXCHANGE_RATES
     );
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
   }
 
@@ -86,12 +87,11 @@ export namespace FxIngestionService {
     return SKIPPED_RESULT;
   }
 
-  async function rejectConcurrentSync(locale?: string): Promise<void> {
+  async function rejectConcurrentSync(_locale?: string): Promise<void> {
     const running = await FxSyncRepository.getRunningSyncRun();
     if (!running) return;
     logger.warn("FX sync already running; rejecting concurrent sync", { runningId: running.id });
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("fxSyncAlreadyRunning"));
+    throw new Error("fxSyncAlreadyRunning");
   }
 
   async function persistPairsInTx(

@@ -23,8 +23,8 @@ interface ReportsTotalsSectionProps {
 
 function useTotalsDisplay(rows: readonly ReportLedgerRow[]) {
   const locale = useAppLocale();
-  const tProfile = useAppTranslation("profile");
-  const tErrors = useAppTranslation("errors");
+  const tProfile = useAppTranslation().profileTranslations.base;
+  const tErrors = useAppTranslation().errorsTranslations;
 
   return useMemo(() => {
     const paidTotals = aggregatePaidAmountTotals(rows);

@@ -1,4 +1,4 @@
-export const typeFields = {
+export const uiPaymentMethodTypeFieldsAr = {
   wallet: "المحفظة",
   paymentLink: "رابط الدفع",
   onlineAccount: "حساب أونلاين",

@@ -28,7 +28,7 @@ interface UseSubjectMutationsOptions {
 }
 
 export function useSubjectMutations(opts: UseSubjectMutationsOptions) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
   const notifications = useNotifications();
   const closeCreateDialog = useSubjectManagementStore(state => state.closeCreateDialog);
   const closeEditDialog = useSubjectManagementStore(state => state.closeEditDialog);

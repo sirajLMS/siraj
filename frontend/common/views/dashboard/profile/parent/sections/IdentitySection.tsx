@@ -27,7 +27,7 @@ type IdentitySectionProps =
     };
 
 export function IdentitySection(props: IdentitySectionProps) {
-  const t = useAppTranslation("profile").parent;
+  const t = useAppTranslation().profileTranslations.parent;
 
   if (props.mode === "edit") {
     return (

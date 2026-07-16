@@ -3,10 +3,10 @@ import type {
   TeacherDashboardViewLabels,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
-import type { useAppTranslation } from "@/shared/locale/client";
+import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
+import type { TeacherDashboardLabels as TeacherDashboardTranslator } from "@/shared/locale/types/dashboard/teachers/dashboard";
 
-type TeacherDashboardTranslator = ReturnType<typeof useAppTranslation<"dashboard.teacherDashboard">>;
-type DashboardTranslator = ReturnType<typeof useAppTranslation<"dashboard.admin">>;
+type DashboardTranslator = AdminDashboardLabels;
 
 function buildMetricsLabels(t: TeacherDashboardTranslator): TeacherDashboardViewLabels["metrics"] {
   return {

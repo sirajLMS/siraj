@@ -18,7 +18,7 @@ gqlSchemaBuilder.queryField("studentCreditBalance", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return CreditService.getStudentBalance(actorUserId, args.studentId, tErrors);
     },
   })
@@ -35,7 +35,7 @@ gqlSchemaBuilder.queryField("studentCreditTransactions", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       let pagination: PaginationArgs | null = null;
       if (args.paginationArgs) {
         pagination = new PaginationArgs({

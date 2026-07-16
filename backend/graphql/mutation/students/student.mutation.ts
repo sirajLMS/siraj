@@ -30,7 +30,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_query, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       const input: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(args.input)) {
         if (value !== null) {
@@ -57,7 +57,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_query, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       await requireStudentManageStatus(userId, tErrors);
       return await StudentRepository.deleteById(args.id, tErrors).then(s => StudentUtils.mapEntityToDto(s));
     },

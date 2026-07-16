@@ -11,7 +11,7 @@ interface DashboardLayoutContainerProps {
 
 export async function DashboardLayoutContainer({ children, userProfile, isSuperAdmin }: DashboardLayoutContainerProps) {
   const locale = await getLocale();
-  const t = await getTranslations(locale, "dashboard.admin");
+  const t = getTranslations(locale).dashboardTranslations.admin;
 
   return (
     <DashboardClientBridge userProfile={userProfile} isSuperAdmin={isSuperAdmin} roleLabel={t.roleLabel}>

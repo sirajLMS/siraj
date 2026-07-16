@@ -36,7 +36,7 @@ const StyledAccountTypeButton = styled(Button, {
 }));
 
 function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboardingFormData> }) {
-  const t = useAppTranslation("dashboard.managerOnboarding");
+  const t = useAppTranslation().dashboardTranslations.managerOnboarding;
 
   return (
     <Controller
@@ -74,7 +74,7 @@ interface Props {
 }
 
 export function SystemAccessSection({ register, control, errors }: Props) {
-  const t = useAppTranslation("dashboard.managerOnboarding");
+  const t = useAppTranslation().dashboardTranslations.managerOnboarding;
   const accountType = useWatch({ control, name: "accountType" });
 
   const getDescription = (): string => {

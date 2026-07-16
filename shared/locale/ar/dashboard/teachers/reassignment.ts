@@ -1,6 +1,6 @@
 import type { TeacherReassignmentLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const reassignment: TeacherReassignmentLabels = {
+export const dashboardTeacherReassignmentAr: TeacherReassignmentLabels = {
   pageTitle: "إعادة تعيين المعلم",
   pageSubtitle: "تحديث المعلم الأساسي والحالة الإدارية للطالب المختار.",
   breadcrumbs: {

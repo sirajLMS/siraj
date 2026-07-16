@@ -1,4 +1,4 @@
-export const typeFields = {
+export const uiPaymentMethodTypeFieldsEn = {
   wallet: "Wallet",
   paymentLink: "Payment link",
   onlineAccount: "Online account",

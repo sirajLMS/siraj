@@ -4,6 +4,7 @@ import { CheckCircleOutlined, SyncOutlined } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import { MigrationStatus } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 interface Props {
   readonly status: MigrationStatus;
@@ -12,10 +13,7 @@ interface Props {
   readonly dstOffsetDetected: boolean;
 }
 
-function getButtonLabel(
-  status: MigrationStatus,
-  t: ReturnType<typeof useAppTranslation<"dashboard.dstMigration">>
-): string {
+function getButtonLabel(status: MigrationStatus, t: DstMigrationLabels): string {
   if (status === MigrationStatus.RUNNING) return t.actions.migrating;
   if (status === MigrationStatus.COMPLETE) return t.actions.migrationComplete;
   return t.actions.updateSchedules;
@@ -27,7 +25,7 @@ function getStartIcon(status: MigrationStatus) {
 }
 
 export function UpdateSchedulesButton({ status, onUpdate, fullWidth = false, dstOffsetDetected }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.dstMigration");
+  const t = useAppTranslation().dashboardTranslations.dstMigration;
   const isRunning = status === MigrationStatus.RUNNING;
   const isComplete = status === MigrationStatus.COMPLETE;
 
@@ -72,7 +70,7 @@ export function UpdateSchedulesButtonMobile({
   onUpdate,
   dstOffsetDetected,
 }: Readonly<Omit<Props, "fullWidth">>) {
-  const t = useAppTranslation("dashboard.dstMigration");
+  const t = useAppTranslation().dashboardTranslations.dstMigration;
   const isRunning = status === MigrationStatus.RUNNING;
   const isComplete = status === MigrationStatus.COMPLETE;
   const label = getButtonLabel(status, t);

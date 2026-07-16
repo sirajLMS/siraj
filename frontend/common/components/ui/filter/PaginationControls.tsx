@@ -84,7 +84,7 @@ export function PaginationControls({
   embedded = false,
   onPageChange,
 }: PaginationControlsProps) {
-  const t = useAppTranslation("dashboard.admin");
+  const t = useAppTranslation().dashboardTranslations.admin;
   const [pageInput, setPageInput] = useState(String(page + 1));
 
   useEffect(() => {

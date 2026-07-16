@@ -1,6 +1,6 @@
 import type { AuthLabels } from "@/shared/locale/types/auth";
 
-export const auth: AuthLabels = {
+export const authAr: AuthLabels = {
   login: {
     pageTitle: "تسجيل الدخول",
     title: "سراج LMS",

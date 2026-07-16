@@ -1,6 +1,6 @@
 import type { ReportsLabels } from "@/shared/locale/types/dashboard/reports";
 
-export const main: ReportsLabels = {
+export const dashboardReportsAr: ReportsLabels = {
   pageTitle: "محرك التقارير الرئيسي",
   pageSubtitle: "محرك التقارير والتحليلات الرئيسي",
   filtersTitle: "فلاتر التقرير",

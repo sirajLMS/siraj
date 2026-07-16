@@ -151,7 +151,7 @@ function createStudentHandlers(
 }
 
 export function useStudentsViewModel(): StudentsViewModel {
-  const t = useAppTranslation("dashboard.studentDirectory");
+  const t = useAppTranslation().dashboardTranslations.studentDirectory;
   const router = useRouter();
   const notifications = useNotifications();
 

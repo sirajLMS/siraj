@@ -28,7 +28,7 @@ type StaffProfileViewStoryProps = ComponentProps<typeof StaffProfileView> & {
 };
 
 function StaffProfileViewStory({ loading, hasError, ...viewProps }: StaffProfileViewStoryProps) {
-  const tc = useAppTranslation("profile");
+  const tc = useAppTranslation().profileTranslations.base;
 
   if (loading) {
     return <Typography sx={{ color: theme => theme.palette.text.secondary }}>{tc.shell.loading}</Typography>;

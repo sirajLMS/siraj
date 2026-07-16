@@ -68,7 +68,7 @@ function LeaveQuotaStat({
   leaveQuotaUsed,
   leaveQuotaTotal,
 }: Readonly<Pick<JumpToDateHeaderProps, "leaveQuotaUsed" | "leaveQuotaTotal">>) {
-  const t = useAppTranslation("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
   return (
     <Box
       sx={theme => ({
@@ -94,7 +94,7 @@ function LeaveQuotaStat({
 }
 
 function TotalClassesStat({ totalClasses }: Readonly<Pick<JumpToDateHeaderProps, "totalClasses">>) {
-  const t = useAppTranslation("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
   return (
     <Box
       sx={theme => ({
@@ -126,7 +126,7 @@ export function JumpToDateHeaderDesktop({
   selectedDate,
   onDateChange,
 }: Readonly<JumpToDateHeaderProps>) {
-  const t = useAppTranslation("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
 
   return (
     <BaseCard sx={{ p: 3 }}>

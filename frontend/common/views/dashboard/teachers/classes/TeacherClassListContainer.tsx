@@ -44,7 +44,7 @@ function formatClassSchedule(
 }
 
 export function TeacherClassListContainer() {
-  const t = useAppTranslation("dashboard.teacherClassList");
+  const t = useAppTranslation().dashboardTranslations.teacherClassList;
   const locale = useAppLocale();
   const router = useRouter();
   const { data, loading, error } = useQuery(teacherAssignedClassesQueryDocument);

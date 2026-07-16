@@ -10,7 +10,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 
 export function UpcomingClassesTable({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
   const { isMobile } = useViewport();
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
   const { canView } = useStudentFieldAccess();
 
   if (!canView("student_schedule")) {

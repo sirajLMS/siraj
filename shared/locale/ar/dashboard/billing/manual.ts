@@ -1,6 +1,6 @@
 import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
 
-export const manual: BillingManualLabels = {
+export const dashboardBillingManualAr: BillingManualLabels = {
   pageTitle: "إنشاء فاتورة يدوية",
   pageSubtitle: "إنشاء سجلات رسوم لمرة واحدة للفوترة المؤسسية.",
   backToFinancials: "العودة إلى المالية",

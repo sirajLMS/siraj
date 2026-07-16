@@ -1,6 +1,6 @@
 import type { ParentStudentsLabels } from "@/shared/locale/types/dashboard/parents";
 
-export const students: ParentStudentsLabels = {
+export const dashboardParentStudentsAr: ParentStudentsLabels = {
   pageTitle: "طلابك",
   pageSubtitle: "الطلاب المرتبطون بحساب عائلتك.",
   noStudents: "لا يوجد طلاب مرتبطون بحسابك بعد.",

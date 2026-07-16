@@ -23,8 +23,8 @@ type FxStoryProps = {
 
 function FxDisplayStory({ lockedAmount, lockedCurrency, displayAmount }: FxStoryProps) {
   const locale = useAppLocale();
-  const t = useAppTranslation("profile");
-  const tErrors = useAppTranslation("errors");
+  const t = useAppTranslation().profileTranslations.base;
+  const tErrors = useAppTranslation().errorsTranslations;
   const displayCurrency = useUserStore(state => state.displayCurrency);
 
   const formatted = formatCurrencyForDisplay(

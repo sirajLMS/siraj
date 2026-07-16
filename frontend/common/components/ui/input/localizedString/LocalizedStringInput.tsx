@@ -13,6 +13,7 @@ import { pickInitialActiveLocale, setLocalizedString } from "@/frontend/common/l
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { LocalizedStringLabels } from "@/shared/locale/types/ui";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 export type LocalizedStringInputProps = {
@@ -71,7 +72,7 @@ export type LocalizedStringInputProps = {
  * `frontend/lib/locale/language/languages.ts`.
  */
 type EditDrawerControlProps = {
-  readonly t: ReturnType<typeof useAppTranslation<"ui.localizedString">>;
+  readonly t: LocalizedStringLabels;
   readonly isCompact: boolean;
   readonly disabled: boolean;
   readonly onOpen: () => void;
@@ -155,7 +156,7 @@ const useLocalizedStringInputState = ({
   multiline,
   containerRef,
 }: LocalizedStringInputStateProps): LocalizedStringInputState => {
-  const t = useAppTranslation("ui.localizedString");
+  const t = useAppTranslation().uiTranslations.localizedString;
   const uiLocale = useAppLocale();
   const isCompact = useNarrowContainer(containerRef);
 
@@ -284,7 +285,7 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
   drawerDismissAction = "save",
   sx,
 }) => {
-  const t = useAppTranslation("ui.localizedString");
+  const t = useAppTranslation().uiTranslations.localizedString;
   const containerRef = useRef<HTMLDivElement>(null);
   const {
     isCompact,

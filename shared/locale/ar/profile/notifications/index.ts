@@ -1,6 +1,6 @@
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
-export const notifications: ProfileNotificationsLabels = {
+export const profileNotificationsAr: ProfileNotificationsLabels = {
   title: "تفضيلات الإشعارات",
   description: "اختر كيفية استلام التحديثات لكل نوع حدث وقناة.",
   saved: "تم حفظ تفضيلات الإشعارات.",

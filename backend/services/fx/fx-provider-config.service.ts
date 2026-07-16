@@ -1,12 +1,12 @@
 import { SystemSettingsRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, type FxProvider } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   getResolvedFxProviderConfig,
   resetFxRateProvider,
 } from "@/backend/services/fx/providers/FxRateProviderFactory";
 import type { FxProviderConfigReturnType } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 const FX_PROVIDER_SETTING_KEY = "fx_provider";
 
@@ -14,8 +14,8 @@ export namespace FxProviderConfigService {
   async function assertManagePermission(actorUserId: string, locale?: string): Promise<void> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_MANAGE_FX_PROVIDER);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
   }
 

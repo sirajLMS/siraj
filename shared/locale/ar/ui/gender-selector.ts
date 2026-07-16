@@ -1,4 +1,4 @@
-export const genderSelector = {
+export const uiGenderSelectorAr = {
   title: "الجنس",
   male: "ذكر",
   female: "أنثى",

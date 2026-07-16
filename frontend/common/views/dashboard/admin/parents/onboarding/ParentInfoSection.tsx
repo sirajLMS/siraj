@@ -18,7 +18,7 @@ interface Props {
 }
 
 export function ParentInfoSection({ register, control, errors }: Props) {
-  const t = useAppTranslation("dashboard.parentOnboarding");
+  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
 
   return (
     <SectionPanel title={t.sections.parentInfo}>

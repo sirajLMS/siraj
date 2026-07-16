@@ -1,7 +1,7 @@
 import { StorageDbRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export interface ParentDocumentRow {
   readonly id: string;
@@ -35,8 +35,8 @@ export namespace ParentDocumentService {
       AppPermission.DOCUMENT_MANAGE_PARENT_DOCS
     );
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
     }
 
     return StorageDbRepository.getFilesForParent(parentId);
@@ -60,13 +60,12 @@ export namespace ParentDocumentService {
       AppPermission.DOCUMENT_MANAGE_PARENT_DOCS
     );
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
     }
 
     if (!fileId || typeof fileId !== "string") {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invalidFileId"));
+      throw new Error("invalidFileId");
     }
 
     return StorageDbRepository.linkFileToParent(parentId, fileId, usageType);

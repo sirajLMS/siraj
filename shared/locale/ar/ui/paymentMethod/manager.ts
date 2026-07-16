@@ -1,4 +1,4 @@
-export const manager = {
+export const uiPaymentMethodManagerAr = {
   add: "إضافة طريقة دفع",
   addTitle: "إضافة طريقة دفع",
   editTitle: "تعديل طريقة الدفع",

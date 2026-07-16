@@ -13,7 +13,7 @@ interface ClassDetailsHeaderProps {
 }
 
 export const ClassDetailsHeader = ({ instance, canOverride, isMobile }: ClassDetailsHeaderProps) => {
-  const t = useAppTranslation("dashboard.classDetails");
+  const t = useAppTranslation().dashboardTranslations.classDetails;
 
   return (
     <Box sx={classDetailsContentPaddingSx}>

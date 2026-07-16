@@ -26,6 +26,7 @@ import {
   permissionGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions/main";
 
 type ValidPermission = Permission & { id: string; key: string; category: string };
 
@@ -39,7 +40,7 @@ interface PermissionGroupFormProps {
 }
 
 function usePermissionFilters(permissions: readonly Permission[], searchTerm: string, selectedCategory: string) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   const validPermissions = useMemo(
     () => permissions.filter((p): p is ValidPermission => !!p.id && !!p.key && !!p.category),
@@ -138,7 +139,7 @@ function PermissionGroupFormActions({
 }: {
   readonly isLoading: boolean;
   readonly onClose: () => void;
-  readonly t: ReturnType<typeof useAppTranslation<"dashboard.permissions">>;
+  readonly t: PermissionsLabels;
 }) {
   return (
     <DialogActions sx={{ px: 3, pb: 3, pt: 2 }}>
@@ -206,7 +207,7 @@ function PermissionGroupFormContent({
   readonly handleSelectAllCategory: (perms: Array<Permission & { id: string }>, checked: boolean) => void;
   readonly handleTogglePermission: (permId: string, isSystem: boolean) => void;
   readonly handleSubmitForm: (e: React.SyntheticEvent<HTMLFormElement>) => void;
-  readonly t: ReturnType<typeof useAppTranslation<"dashboard.permissions">>;
+  readonly t: PermissionsLabels;
 }) {
   return (
     <DialogContent dividers sx={{ p: 3 }}>
@@ -281,7 +282,7 @@ export function PermissionGroupForm({
   onClose,
   onSave,
 }: Readonly<PermissionGroupFormProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");

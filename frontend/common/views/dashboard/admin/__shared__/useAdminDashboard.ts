@@ -14,7 +14,7 @@ export const ADMIN_DASHBOARD_PAGE_SIZE = 10;
 
 /** Tracks when dashboard data first arrives and computes an elapsed-time label that updates every minute. */
 export function useLastUpdatedLabel(data: unknown) {
-  const admin = useAppTranslation("dashboard.admin");
+  const admin = useAppTranslation().dashboardTranslations.admin;
 
   const [dataArrivedAt, setDataArrivedAt] = useState<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState(admin.updatedJustNow);

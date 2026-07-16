@@ -103,7 +103,7 @@ interface SingleGroupHeaderProps {
 }
 
 export function SingleGroupHeader({ group, onBack, onEditGroup }: Readonly<SingleGroupHeaderProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
   const groupName = resolveLocalizedString(group.name);
   const groupDescription = resolveLocalizedString(group.description);
 

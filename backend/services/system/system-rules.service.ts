@@ -1,7 +1,7 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceEntity } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace SystemRulesService {
   /**
@@ -18,8 +18,8 @@ export namespace SystemRulesService {
     const endWindow = new Date(instance.scheduledEndAt);
 
     if (now < startWindow || now > endWindow) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("scheduling.missedClassTime"));
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.scheduling.missedClassTime);
     }
   }
 
@@ -31,8 +31,7 @@ export namespace SystemRulesService {
     requiredWaitTime.setMinutes(requiredWaitTime.getMinutes() + waitingMinutes);
 
     if (now < requiredWaitTime) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("absentTooEarly", { waitingMinutes: String(waitingMinutes) }));
+      throw new Error(`absentTooEarly:${waitingMinutes}:${locale ?? "ar"}`);
     }
   }
 
@@ -49,8 +48,8 @@ export namespace SystemRulesService {
     const currentUsage = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacherId, periodYear, periodMonth, tx);
 
     if (currentUsage >= maxLeaves) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("leaveQuotaExceeded", { maxLeaves: String(maxLeaves) }));
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.leaveQuotaExceeded({ maxLeaves: String(maxLeaves) }));
     }
   }
 }

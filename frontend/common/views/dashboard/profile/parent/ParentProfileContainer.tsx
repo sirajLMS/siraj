@@ -106,7 +106,7 @@ export function ParentProfileContainer({
   targetUserId,
   activeTab: _activeTab = "profile",
 }: ParentProfileContainerProps) {
-  const t = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.base;
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const router = useRouter();

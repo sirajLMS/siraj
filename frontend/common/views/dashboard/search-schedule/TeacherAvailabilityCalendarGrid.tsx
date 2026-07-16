@@ -78,7 +78,7 @@ export function TeacherAvailabilityCalendarGrid({
   currentMonth,
   daysByDate,
 }: Readonly<TeacherAvailabilityCalendarGridProps>) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const { daysInMonth, emptyStartDays, emptyEndDays } = computeCalendarGridLayout(currentMonth);
 
   return (

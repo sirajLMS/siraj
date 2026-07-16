@@ -12,8 +12,8 @@ import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 let tErrors: ErrorsLabels;
 
-beforeAll(async () => {
-  tErrors = await getServerTranslations("en", "errors");
+beforeAll(() => {
+  tErrors = getServerTranslations("en").errorsTranslations;
 });
 
 function generateTestPassword(): string {

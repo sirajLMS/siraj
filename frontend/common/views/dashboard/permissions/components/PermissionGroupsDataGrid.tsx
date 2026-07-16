@@ -26,7 +26,7 @@ interface RowActionsProps {
 }
 
 function RowActions({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readonly<RowActionsProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -87,7 +87,7 @@ export function PermissionGroupsDataGrid({
   onAssignGroup,
   loading = false,
 }: Readonly<PermissionGroupsDataGridProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   const columns = useMemo<GridColDef<PermissionGroup>[]>(() => {
     return [

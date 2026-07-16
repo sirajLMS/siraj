@@ -5,7 +5,7 @@ import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function ImpersonationBanner() {
-  const t = useAppTranslation("auth").impersonation;
+  const t = useAppTranslation().authTranslations.impersonation;
   const { isImpersonating, status, endImpersonation, loading } = useImpersonation();
 
   if (!isImpersonating || !status?.targetUser) {

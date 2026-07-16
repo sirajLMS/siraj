@@ -15,7 +15,7 @@ export async function deleteEntityResolver(
   deleteFn: (userId: string, entityId: string, tErrors: ErrorsLabels) => Promise<unknown>
 ): Promise<boolean> {
   const userId = await requireAuth(ctx);
-  const tErrors = await ctx.t("errors");
+  const tErrors = ctx.t().errorsTranslations;
   await deleteFn(userId, entityId, tErrors);
   return true;
 }

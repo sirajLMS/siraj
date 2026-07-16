@@ -57,7 +57,7 @@ function markInvoicePaidResolver<TArgs extends Record<string, unknown>>(
 ) {
   return async (_root: unknown, args: TArgs, ctx: BaseContext): Promise<MarkInvoicePaidReturnType> => {
     const userId = await requireAuth(ctx);
-    const tErrors = await ctx.t("errors");
+    const tErrors = ctx.t().errorsTranslations;
     const result = await serviceCall(userId, args, tErrors);
     return flattenMarkInvoicePaidResult(result);
   };
@@ -163,7 +163,7 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return BillingManagementService.createManualInvoice(
         userId,
         {
@@ -278,7 +278,7 @@ gqlSchemaBuilder.queryField("invoicePaymentSubmission", t =>
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
       await setBillingFxDisplayCurrencyForInvoiceParent(ctx, args.invoiceId, userId);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return BillingManagementService.getInvoicePaymentSubmission(userId, args.invoiceId, tErrors);
     },
   })
@@ -293,7 +293,7 @@ gqlSchemaBuilder.mutationField("deleteInvoice", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       const result = await BillingManagementService.deleteInvoice(userId, args.invoiceId, tErrors);
       return flattenDeleteInvoiceResult(result);
     },
@@ -318,7 +318,7 @@ gqlSchemaBuilder.mutationField("sendPaymentReminder", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return BillingManagementService.sendPaymentReminder(userId, args.studentId, tErrors);
     },
   })

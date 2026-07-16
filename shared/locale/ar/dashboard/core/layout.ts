@@ -1,6 +1,6 @@
 import type { DashboardCoreLayoutLabels } from "@/shared/locale/types/dashboard/core";
 
-export const layout: DashboardCoreLayoutLabels = {
+export const dashboardCoreLayoutAr: DashboardCoreLayoutLabels = {
   // ─── Static strings ────────────────────────────────────────────────
   appTitle: "سراج LMS",
   notifications: "الإشعارات",

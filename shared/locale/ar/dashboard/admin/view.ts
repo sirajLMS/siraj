@@ -1,6 +1,6 @@
 import type { AdminViewLabels } from "@/shared/locale/types/dashboard/admin/view";
 
-export const view: AdminViewLabels = {
+export const dashboardAdminViewAr: AdminViewLabels = {
   admin: {
     pageTitle: "لوحة تحكم المسؤول",
     roleLabel: "دور المسؤول",

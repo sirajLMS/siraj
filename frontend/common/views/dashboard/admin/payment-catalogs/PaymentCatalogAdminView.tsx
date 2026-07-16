@@ -40,7 +40,7 @@ export function PaymentCatalogAdminView({
   onEdit,
   onDelete,
 }: Readonly<PaymentCatalogAdminViewProps>) {
-  const t = useAppTranslation("dashboard.paymentCatalogs");
+  const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
   const pc = t;
 
   return (

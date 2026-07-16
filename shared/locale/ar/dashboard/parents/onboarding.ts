@@ -1,6 +1,6 @@
 import type { ParentOnboardingLabels } from "@/shared/locale/types/dashboard/parents";
 
-export const onboarding: ParentOnboardingLabels = {
+export const dashboardParentOnboardingAr: ParentOnboardingLabels = {
   pageTitle: "تسجيل ولي أمر جديد",
   pageSubtitle: "أكمل الحقول التالية لتسجيل ولي أمر جديد في نظام سراج LMS.",
   statusBanner: "حالة الحساب: انتظار التسجيل",

@@ -1,6 +1,6 @@
 import type { StudentDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard";
 
-export const studentDashboard: StudentDashboardLabels = {
+export const dashboardStudentPortalDashboardEn: StudentDashboardLabels = {
   pageTitle: "My Dashboard",
   welcomeMessage: name => `Welcome, ${name}`,
   nextClass: "Next Class",

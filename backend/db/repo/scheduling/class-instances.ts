@@ -71,7 +71,7 @@ export const createClassInstance = async (
   tErrors?: ErrorsLabels
 ): Promise<Types.ClassInstanceEntity> => {
   const runner = async (t: DBTransaction) => {
-    const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+    const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     await acquireLocks(t, input.teacherId, input.studentId);
     await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt, tFuncErrors);
     await TeacherAvailabilityRepository.validateBookingAvailability(
@@ -128,7 +128,7 @@ export const updateClassInstance = async (
   tErrors?: ErrorsLabels
 ): Promise<Types.ClassInstanceEntity> => {
   const runner = async (t: DBTransaction) => {
-    const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+    const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     const existing = await getClassInstanceByIdOrThrow(t, id, tFuncErrors);
 
     const studentId = input.studentId ?? existing.studentId;
@@ -180,7 +180,7 @@ export const deleteClassInstance = async (
   tErrors?: ErrorsLabels
 ): Promise<Types.ClassInstanceEntity> => {
   const runner = async (t: DBTransaction) => {
-    const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+    const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) {
       throw new Error(tFuncErrors.classInstanceNotFound({ id }));
@@ -203,7 +203,7 @@ export const softDeleteClassInstance = async (id: string, actorUserId: string, t
   const runner = async (t: DBTransaction) => {
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) return null;
-    const tFuncSession = await getServerTranslations("en", "session");
+    const tFuncSession = getServerTranslations("en").sessionTranslations;
 
     const updated = await updateInstanceState(
       t,

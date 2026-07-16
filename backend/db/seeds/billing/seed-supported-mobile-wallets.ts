@@ -28,7 +28,7 @@ export async function seedOrGet() {
     updatedAt: now,
   }));
 
-  const tErrors = await getServerTranslations("en", "errors");
+  const tErrors = getServerTranslations("en").errorsTranslations;
   const results = await PaymentCatalogService.upsertManyMobileWallets(inputs, tErrors);
   logger.info(`Supported mobile wallets seeded (${results.length} rows).`);
   return results;

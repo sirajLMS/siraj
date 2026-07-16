@@ -49,7 +49,7 @@ function buildMetrics(counts: MetricCounts, subLabelMap: Record<string, string>)
 }
 
 export function useStatusTrackingMetrics(rows: readonly StatusTrackingRow[]) {
-  const t = useAppTranslation("dashboard.core.statusTracking");
+  const t = useAppTranslation().dashboardTranslations.coreStatusTracking;
 
   const suspendedCount = useMemo(
     () =>

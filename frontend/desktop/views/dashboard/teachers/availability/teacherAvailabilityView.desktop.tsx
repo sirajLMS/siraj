@@ -24,7 +24,7 @@ export function TeacherAvailabilityDesktopView({
   onBlockClick,
   tableLabels,
 }: Readonly<TeacherAvailabilityViewModel>) {
-  const t = useAppTranslation("dashboard.teacherAvailability");
+  const t = useAppTranslation().dashboardTranslations.teacherAvailability;
   const storeFilters = useTeacherAvailabilityStore(
     (state: { readonly filters: AvailabilitySearchFormData }) => state.filters
   );

@@ -22,7 +22,7 @@ gqlSchemaBuilder.mutationField("createClassSubject", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return ClassSubjectService.createSubject(
         userId,
         {
@@ -49,7 +49,7 @@ gqlSchemaBuilder.mutationField("updateClassSubject", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return ClassSubjectService.updateSubject(
         userId,
         args.id,
@@ -76,7 +76,7 @@ gqlSchemaBuilder.mutationField("attachSubjectResource", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return ClassSubjectService.attachResource(
         userId,
         {
@@ -101,7 +101,7 @@ gqlSchemaBuilder.mutationField("detachSubjectResource", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       await ClassSubjectService.detachResource(userId, args.subjectId, args.learningResourceId, tErrors);
       return true;
     },

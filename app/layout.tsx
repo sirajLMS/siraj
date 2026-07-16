@@ -13,9 +13,8 @@ import { AuthProvider } from "@/frontend/common/providers/apollo/AuthProvider";
 import { getLocale, getTranslations, loadAllTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Migrated to compile-time i18n - use getTranslations for "common" namespace
   const locale = await getLocale();
-  const t = await getTranslations(locale, "common");
+  const t = getTranslations(locale).commonTranslations;
   return {
     metadataBase: new URL(NEXT_PUBLIC_BASE_URL),
     title: {
@@ -42,7 +41,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const locale = await getLocale();
 
   // Load ALL translation namespaces server-side for LocaleProvider.
-  const allTranslations = await loadAllTranslations(locale);
+  const allTranslations = loadAllTranslations(locale);
 
   const cookieStore = await cookies();
   const themeCookie = cookieStore.get(THEME_COOKIE_NAME);

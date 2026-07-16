@@ -12,11 +12,11 @@ import {
 import { AvailabilitySearchSortBy, DayOfWeek, type Gender, VacationRequestStatus } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { parseGender, parseIanaTimezone } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 type TeacherGender = string | null;
 
@@ -316,8 +316,8 @@ export namespace TeacherAvailabilityRepository {
 
   async function assertValidTimeRange(startTime: string, endTime: string, locale?: string): Promise<void> {
     if (timeToMinutes(startTime) >= timeToMinutes(endTime)) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("startTimeBeforeEndTime"));
+      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(`${errorsTranslations.invalidInput}; Start time must be before end time`);
     }
   }
 
@@ -395,8 +395,8 @@ export namespace TeacherAvailabilityRepository {
   ): Promise<Types.TeacherVacationRequestSelectType> => {
     const runner = async (t: DBTransaction) => {
       if (input.startAt >= input.endAt) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("vacationStartBeforeEnd"));
+        const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(`${errorsTranslations.invalidInput}; Vacation start date must be before end date`);
       }
 
       await acquireAvailabilityLock(t, teacherId);
@@ -445,7 +445,7 @@ export namespace TeacherAvailabilityRepository {
   async function fetchVacationRequest(
     t: DBTransaction,
     vacationRequestId: string,
-    locale?: string
+    _locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> {
     const results = await t
       .select()
@@ -454,8 +454,7 @@ export namespace TeacherAvailabilityRepository {
       .limit(1);
 
     if (results.length === 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("vacationRequestNotFound", { id: vacationRequestId }));
+      throw new Error(`Vacation request ${vacationRequestId} not found`);
     }
 
     return results[0];
@@ -469,8 +468,12 @@ export namespace TeacherAvailabilityRepository {
     locale?: string
   ): Promise<void> {
     if (shouldFail(current.status as VacationRequestStatus)) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc(errorKey, { id: vacationRequestId }));
+      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(
+        errorKey === "vacationRequestNotPending"
+          ? `Vacation request ${vacationRequestId} is not in pending status. ${errorsTranslations.invalidInput}`
+          : `Vacation request ${vacationRequestId} is already cancelled. ${errorsTranslations.invalidInput}`
+      );
     }
   }
 
@@ -572,8 +575,8 @@ export namespace TeacherAvailabilityRepository {
       .limit(1);
 
     if (approvedVacations.length > 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("teacherOnVacation"));
+      const { teacherOnVacation } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(teacherOnVacation);
     }
   }
 
@@ -612,8 +615,8 @@ export namespace TeacherAvailabilityRepository {
           timeToMinutes(pattern.endTime)
         )
       ) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("teacherUnavailabilityConflict"));
+        const { teacherUnavailabilityConflict } = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(teacherUnavailabilityConflict);
       }
     }
   }
@@ -649,8 +652,8 @@ export namespace TeacherAvailabilityRepository {
     });
 
     if (!matches) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("outsideAvailability"));
+      const { outsideAvailability } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(outsideAvailability);
     }
   }
 
@@ -947,16 +950,16 @@ export namespace TeacherAvailabilityRepository {
     const timeRange: MinuteRange = { from: fromMinutes, to: toMinutes };
 
     if (fromMinutes >= toMinutes) {
-      const tFunc = await getBackendTranslations({ locale: undefined, namespace: "errors" });
-      throw new Error(tFunc("startTimeBeforeEndTime"));
+      const { invalidInput } = getServerTranslations("en").errorsTranslations;
+      throw new Error(`${invalidInput}; Start time must be before end time`);
     }
 
     const fromDate = input.fromDate ?? getUtcDateString(new Date());
     const toDate = input.toDate ?? getUtcDateString(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
 
     if (fromDate > toDate) {
-      const tFunc = await getBackendTranslations({ locale: undefined, namespace: "errors" });
-      throw new Error(tFunc("startTimeBeforeEndTime"));
+      const { invalidInput } = getServerTranslations("en").errorsTranslations;
+      throw new Error(`${invalidInput}; Vacation start date must be before end date`);
     }
 
     const calendarDates = expandDateRange(fromDate, toDate);

@@ -25,7 +25,7 @@ gqlSchemaBuilder.queryField("currencyHedges", t =>
     authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES },
     resolve: async (_root, _args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return CurrencyHedgeService.listHedges(userId, tErrors);
     },
   })
@@ -43,7 +43,7 @@ gqlSchemaBuilder.mutationField("createCurrencyHedge", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return CurrencyHedgeService.createHedge(
         userId,
         {
@@ -71,7 +71,7 @@ gqlSchemaBuilder.mutationField("updateCurrencyHedge", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return CurrencyHedgeService.updateHedge(
         userId,
         args.id,
@@ -96,7 +96,7 @@ gqlSchemaBuilder.mutationField("deleteCurrencyHedge", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return CurrencyHedgeService.deleteHedge(userId, args.id, tErrors);
     },
   })

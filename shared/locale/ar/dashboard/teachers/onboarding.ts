@@ -1,6 +1,6 @@
 import type { TeacherOnboardingLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const onboarding: TeacherOnboardingLabels = {
+export const dashboardTeacherOnboardingAr: TeacherOnboardingLabels = {
   pageTitle: "انضمام المعلم",
   pageSubtitle: "نموذج التسجيل",
   mandatoryFields: "* الحقول الإلزامية",

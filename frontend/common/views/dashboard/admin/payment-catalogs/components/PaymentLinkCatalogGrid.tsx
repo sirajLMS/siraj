@@ -22,7 +22,7 @@ export function PaymentLinkCatalogGrid({
   onEdit,
   onDelete,
 }: Readonly<PaymentLinkCatalogGridProps>) {
-  const t = useAppTranslation("dashboard.paymentCatalogs");
+  const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
   const pc = t;
   const columns = useMemo<GridColDef<SupportedPaymentLinkFieldsFragment>[]>(
     () => [

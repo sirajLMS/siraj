@@ -67,7 +67,7 @@ export function PreferencesChannelTabs({
   disabled = false,
   loading = false,
 }: PreferencesChannelTabsProps) {
-  const t = useAppTranslation("profile.notifications");
+  const t = useAppTranslation().profileTranslations.notifications;
   const [activeChannel, setActiveChannel] = useState<ChannelId>(NOTIFICATION_CHANNELS[0]);
   const [slideDirection, setSlideDirection] = useState<"left" | "right">("left");
   const previousIndexRef = useRef(0);

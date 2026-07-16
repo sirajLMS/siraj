@@ -11,7 +11,8 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { localeJsonKey, omitEmptyLocalized, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import type { AppPermission } from "@/backend/enum";
-import { getBackendTranslations, logger } from "@/backend/lib";
+import logger from "@/backend/lib/logger";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type {
   CreateGroupInput,
   GroupUserEntity,
@@ -340,14 +341,14 @@ export namespace PermissionManagementRepository {
     const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
       const [existing] = await t.select().from(permissionGroups).where(eq(permissionGroups.id, input.id)).limit(1);
 
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
       if (!existing) {
-        throw new Error(tFunc("permissionGroupNotFound", { id: input.id }));
+        throw new Error(errorsTranslations.permissionManagement.permissionGroupNotFound(input.id));
       }
 
       if (existing.isSystem) {
-        throw new Error(tFunc("permissionManagement.cannotModifySystemPermissionGroup"));
+        throw new Error(errorsTranslations.permissionManagement.cannotModifySystemPermissionGroup);
       }
 
       const now = new Date();
@@ -411,14 +412,14 @@ export namespace PermissionManagementRepository {
     const run = async (t: DBTransaction): Promise<{ id: string }> => {
       const [existing] = await t.select().from(permissionGroups).where(eq(permissionGroups.id, groupId)).limit(1);
 
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
       if (!existing) {
-        throw new Error(tFunc("permissionGroupNotFound", { id: groupId }));
+        throw new Error(errorsTranslations.permissionManagement.permissionGroupNotFound(groupId));
       }
 
       if (existing.isSystem) {
-        throw new Error(tFunc("permissionManagement.cannotDeleteSystemPermissionGroup"));
+        throw new Error(errorsTranslations.permissionManagement.cannotDeleteSystemPermissionGroup);
       }
 
       await t.delete(permissionGroups).where(eq(permissionGroups.id, groupId));

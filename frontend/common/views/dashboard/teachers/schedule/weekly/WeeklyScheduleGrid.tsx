@@ -54,8 +54,8 @@ interface SlotItemProps {
 
 function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
   const [open, setOpen] = useState(false);
-  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
-  const tMeeting = useAppTranslation("ui.meetingConfig").join;
+  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
+  const tMeeting = useAppTranslation().uiTranslations.meetingConfig.join;
 
   const handleDeleteClick = () => {
     setOpen(true);
@@ -147,7 +147,7 @@ function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
 }
 
 function GridHeader() {
-  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
 
   return (
     <Box
@@ -196,7 +196,7 @@ interface GridRowProps {
 }
 
 function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
-  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
 
   const getClassesForSlot = (day: string) => {
     return classes.filter(c => c.day?.toLowerCase() === day && c.startTime === time);

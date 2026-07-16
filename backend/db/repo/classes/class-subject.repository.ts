@@ -2,7 +2,6 @@ import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classSubjects } from "@/backend/db/schema";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type { ClassSubjectSelectType, ClassSubjectSubmitInput, ClassSubjectUpdateInput } from "@/backend/types";
 
@@ -28,7 +27,7 @@ export namespace ClassSubjectRepository {
   async function fetchSubjectByField(
     field: "id" | "slug",
     value: string,
-    locale: string | undefined,
+    _locale: string | undefined,
     tx: DBTransaction | undefined
   ): Promise<ClassSubjectSelectType> {
     try {
@@ -39,10 +38,8 @@ export namespace ClassSubjectRepository {
         .where(and(eq(classSubjects[field], value), isNull(classSubjects.deletedAt)))
         .limit(1);
 
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-
       if (!result) {
-        throw new Error(tFunc("subjectNotFound", { [field]: value }));
+        throw new Error(`Subject ${value} not found`);
       }
 
       return result;
@@ -62,7 +59,7 @@ export namespace ClassSubjectRepository {
 
   export async function createSubject(
     input: ClassSubjectSubmitInput,
-    locale?: string,
+    _locale?: string,
     tx?: DBTransaction
   ): Promise<ClassSubjectSelectType> {
     const run = async (t: DBTransaction): Promise<ClassSubjectSelectType> => {
@@ -80,8 +77,7 @@ export namespace ClassSubjectRepository {
         .returning();
 
       if (!result) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("subjectCreateFailed"));
+        throw new Error("Failed to create class subject");
       }
 
       logger.info("Class subject created", { subjectId: result.id, slug: result.slug });
@@ -103,7 +99,7 @@ export namespace ClassSubjectRepository {
   export async function updateSubject(
     id: string,
     input: ClassSubjectUpdateInput,
-    locale?: string,
+    _locale?: string,
     tx?: DBTransaction
   ): Promise<ClassSubjectSelectType> {
     const run = async (t: DBTransaction): Promise<ClassSubjectSelectType> => {
@@ -113,10 +109,8 @@ export namespace ClassSubjectRepository {
         .where(and(eq(classSubjects.id, id), isNull(classSubjects.deletedAt)))
         .limit(1);
 
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-
       if (!existing) {
-        throw new Error(tFunc("subjectNotFound", { id }));
+        throw new Error(`Subject ${id} not found`);
       }
 
       const now = new Date();
@@ -149,7 +143,7 @@ export namespace ClassSubjectRepository {
     }
   }
 
-  export async function deleteSubject(id: string, locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
+  export async function deleteSubject(id: string, _locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
     const run = async (t: DBTransaction): Promise<{ id: string }> => {
       const [existing] = await t
         .select()
@@ -157,10 +151,8 @@ export namespace ClassSubjectRepository {
         .where(and(eq(classSubjects.id, id), isNull(classSubjects.deletedAt)))
         .limit(1);
 
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-
       if (!existing) {
-        throw new Error(tFunc("subjectNotFound", { id }));
+        throw new Error(`Subject ${id} not found`);
       }
 
       const now = new Date();

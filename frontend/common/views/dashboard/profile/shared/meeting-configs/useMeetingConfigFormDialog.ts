@@ -47,7 +47,7 @@ export type UseMeetingConfigFormStateOptions = {
 };
 
 export function useMeetingConfigFormState({ open, editConfig, existingCount }: UseMeetingConfigFormStateOptions) {
-  const t = useAppTranslation("ui.meetingConfig.manager");
+  const t = useAppTranslation().uiTranslations.meetingConfigManager;
   const locale = useAppLocale();
   const isEdit = editConfig?.id != null;
 

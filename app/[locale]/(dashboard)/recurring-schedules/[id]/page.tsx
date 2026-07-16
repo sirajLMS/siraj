@@ -9,7 +9,7 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly id: string; readonly locale: string }>;
 }): Promise<Metadata> {
   const { id, locale } = await params;
-  const t = await getTranslations(locale, "common");
+  const t = getTranslations(locale).commonTranslations;
   const scheduleName = await getRecurringSchedulePageTitle(id);
   if (scheduleName) {
     return { title: scheduleName };

@@ -25,7 +25,6 @@ import type {
   UpdateSupportedOnlineAccountInput,
   UpdateSupportedPaymentLinkInput,
 } from "@/backend/types/billing/payment-method.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 gqlSchemaBuilder.mutationField("createUserPaymentMethod", t =>
   t.field({
@@ -36,7 +35,7 @@ gqlSchemaBuilder.mutationField("createUserPaymentMethod", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentMethodService.createUserPaymentMethod(
         actorUserId,
         {
@@ -63,7 +62,7 @@ gqlSchemaBuilder.mutationField("updateUserPaymentMethod", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentMethodService.updateUserPaymentMethod(
         actorUserId,
         args.id,
@@ -88,7 +87,7 @@ gqlSchemaBuilder.mutationField("deleteUserPaymentMethod", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       await PaymentMethodService.deleteUserPaymentMethod(actorUserId, args.id, tErrors);
       return true;
     },
@@ -104,7 +103,7 @@ gqlSchemaBuilder.mutationField("setDefaultUserPaymentMethod", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentMethodService.setDefaultUserPaymentMethod(actorUserId, args.id, tErrors);
     },
   })
@@ -119,7 +118,7 @@ gqlSchemaBuilder.mutationField("verifyBankTransferPaymentMethod", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentMethodService.verifyBankTransferPaymentMethod(actorUserId, args.id, tErrors);
     },
   })
@@ -134,7 +133,7 @@ gqlSchemaBuilder.mutationField("createSupportedMobileWallet", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.createMobileWallet(
         actorUserId,
         args.input as SupportedMobileWalletSubmitInput,
@@ -154,7 +153,7 @@ gqlSchemaBuilder.mutationField("updateSupportedMobileWallet", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.updateMobileWallet(
         actorUserId,
         args.id,
@@ -174,7 +173,7 @@ gqlSchemaBuilder.mutationField("deactivateSupportedMobileWallet", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.deactivateMobileWallet(actorUserId, args.id, tErrors);
     },
   })
@@ -189,7 +188,7 @@ gqlSchemaBuilder.mutationField("createSupportedPaymentLink", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.createPaymentLink(
         actorUserId,
         args.input as SupportedPaymentLinkSubmitInput,
@@ -209,7 +208,7 @@ gqlSchemaBuilder.mutationField("updateSupportedPaymentLink", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.updatePaymentLink(
         actorUserId,
         args.id,
@@ -229,7 +228,7 @@ gqlSchemaBuilder.mutationField("deactivateSupportedPaymentLink", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.deactivatePaymentLink(actorUserId, args.id, tErrors);
     },
   })
@@ -244,7 +243,7 @@ gqlSchemaBuilder.mutationField("createSupportedOnlineAccount", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.createOnlineAccount(
         actorUserId,
         args.input as SupportedOnlineAccountSubmitInput,
@@ -264,7 +263,7 @@ gqlSchemaBuilder.mutationField("updateSupportedOnlineAccount", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.updateOnlineAccount(
         actorUserId,
         args.id,
@@ -284,7 +283,7 @@ gqlSchemaBuilder.mutationField("deactivateSupportedOnlineAccount", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.deactivateOnlineAccount(actorUserId, args.id, tErrors);
     },
   })

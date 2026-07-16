@@ -1,4 +1,4 @@
-export const meetingConfig = {
+export const uiMeetingConfigEn = {
   sectionTitle: "Meeting Settings",
   addConfig: "Add Meeting Config",
   editConfig: "Edit Meeting Config",

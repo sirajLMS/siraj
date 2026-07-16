@@ -1,8 +1,9 @@
 import { ParentRepository } from "@/backend/db";
 import { AppPermission, type ParentStatus } from "@/backend/enum";
-import { getBackendTranslations, logger } from "@/backend/lib";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import type { ChangeParentLifecycleResult } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace ParentLifecycleService {
   export async function changeLifecycleStatus(
@@ -13,8 +14,8 @@ export namespace ParentLifecycleService {
   ): Promise<ChangeParentLifecycleResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_MANAGE_STATUS);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
     }
 
     try {

@@ -144,7 +144,7 @@ function useDashboardLabels(t: ParentDashboardLabels, _userName: string) {
 }
 
 export function ParentDashboardContainer() {
-  const t = useAppTranslation("dashboard.core.parentDashboard");
+  const t = useAppTranslation().dashboardTranslations.coreParentDashboard;
   const router = useRouter();
   const userName = useUserStore(state => state.name);
   const page = useParentDashboardStore(state => state.page);

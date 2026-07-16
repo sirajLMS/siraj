@@ -1,6 +1,6 @@
 import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions";
 
-export const main: PermissionsLabels = {
+export const dashboardPermissionsAr: PermissionsLabels = {
   pageTitle: "إدارة الصلاحيات",
   title: "إدارة الصلاحيات",
   subtitle: "تهيئة التحكم بالوصول المستند إلى الأدوار، وإدارة مجموعات الصلاحيات، وتحديد استثناءات المستخدمين.",

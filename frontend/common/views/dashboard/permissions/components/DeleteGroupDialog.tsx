@@ -22,7 +22,7 @@ export function DeleteGroupDialog({
   onClose,
   onConfirm,
 }: Readonly<DeleteGroupDialogProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (
     <Dialog

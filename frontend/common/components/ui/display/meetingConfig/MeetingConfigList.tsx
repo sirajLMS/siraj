@@ -31,9 +31,9 @@ export function MeetingConfigList({
   onDeleteAction,
   emptyMessage,
 }: MeetingConfigListProps) {
-  const t = useAppTranslation("ui.meetingConfig");
-  const tDisplay = useAppTranslation("ui.meetingConfig").display;
-  const tManager = useAppTranslation("ui.meetingConfig").manager;
+  const t = useAppTranslation().uiTranslations.meetingConfig;
+  const tDisplay = t.display;
+  const tManager = t.manager;
   const locale = useAppLocale();
   const resolvedEmpty = emptyMessage ?? t.empty;
 

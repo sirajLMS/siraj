@@ -15,8 +15,8 @@ import type { ParentLifecyclePageData } from "@/frontend/common/views/dashboard/
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function ParentLifecycleContainer() {
-  const t = useAppTranslation("dashboard.parentLifecycle");
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation().dashboardTranslations.parentLifecycle;
+  const tc = useAppTranslation().commonTranslations;
   const params = useParams();
   const parentId = typeof params?.id === "string" ? params.id : "";
   const notifications = useNotifications();

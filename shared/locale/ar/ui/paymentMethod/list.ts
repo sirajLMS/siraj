@@ -1,4 +1,4 @@
-export const list = {
+export const uiPaymentMethodListAr = {
   title: "طرق الدفع",
   empty: "لا توجد طرق دفع بعد",
   columnLabel: "التسمية",

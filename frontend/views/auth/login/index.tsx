@@ -17,7 +17,7 @@ export interface LoginContainerProps {
 }
 
 export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
-  const t = useAppTranslation("auth").login;
+  const t = useAppTranslation().authTranslations.login;
   const searchParams = useSearchParams();
   const { login, error: authError, isAuthenticated } = useAuth();
   const { updateAuthToken } = useAuthToken();

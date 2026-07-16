@@ -64,7 +64,7 @@ const getGroupIcon = (slug: string) => {
 };
 
 export function DemoFastLogin({ groups, onFastLogin }: Readonly<DemoFastLoginProps>) {
-  const t = useAppTranslation("auth").login;
+  const t = useAppTranslation().authTranslations.login;
 
   if (!groups || groups.length === 0) return null;
 

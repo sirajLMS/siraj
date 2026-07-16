@@ -19,7 +19,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 const FORM_ID = "create-category-form";
 
 export function CreateCategoryDialog({ open, onClose, onSubmit, isLoading }: Readonly<CreateCategoryDialogProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
 
   const {
     control,

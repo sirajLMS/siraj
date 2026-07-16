@@ -1,4 +1,4 @@
-export const localizedString = {
+export const uiLocalizedStringEn = {
   editTranslations: "Edit translations",
   cancel: "Cancel",
   save: "Save",

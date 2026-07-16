@@ -1,1 +1,1 @@
-export { main } from "./main";
+export { dashboardPermissionsEn } from "./main";

@@ -1,6 +1,6 @@
 import type { StudentDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard";
 
-export const studentDashboard: StudentDashboardLabels = {
+export const dashboardStudentPortalDashboardAr: StudentDashboardLabels = {
   pageTitle: "لوحتي",
   welcomeMessage: name => `أهلًا، ${name}`,
   nextClass: "الحصة القادمة",

@@ -58,7 +58,7 @@ gqlSchemaBuilder.queryField("supportedMobileWallets", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.listMobileWallets(actorUserId, tErrors, {
         countryCode: (args.countryCode as CountryCode | null | undefined) ?? undefined,
         direction: (args.direction as PaymentDirection | null | undefined) ?? undefined,
@@ -78,7 +78,7 @@ gqlSchemaBuilder.queryField("supportedPaymentLinks", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.listPaymentLinks(actorUserId, tErrors, {
         direction: (args.direction as PaymentDirection | null | undefined) ?? undefined,
         activeOnly: args.activeOnly ?? true,
@@ -97,7 +97,7 @@ gqlSchemaBuilder.queryField("supportedOnlineAccounts", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.listOnlineAccounts(actorUserId, tErrors, {
         direction: (args.direction as PaymentDirection | null | undefined) ?? undefined,
         activeOnly: args.activeOnly ?? true,

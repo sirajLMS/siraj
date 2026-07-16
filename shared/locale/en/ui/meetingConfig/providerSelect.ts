@@ -1,4 +1,4 @@
-export const providerSelect = {
+export const uiMeetingConfigProviderSelectEn = {
   emptyCatalogTitle: "No meeting providers",
   emptyCatalogBody: "Admin must add meeting providers before configuring meetings.",
   emptyCatalogAdminLink: "Manage meeting providers",

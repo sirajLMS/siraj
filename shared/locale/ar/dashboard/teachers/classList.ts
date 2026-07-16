@@ -1,6 +1,6 @@
 import type { TeacherClassListLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const classList: TeacherClassListLabels = {
+export const dashboardTeacherClassListAr: TeacherClassListLabels = {
   pageTitle: "قائمة الحصص",
   pageSubtitle: "عرض وإدارة حصصك المجدولة",
   noClasses: "لم يتم العثور على حصص.",

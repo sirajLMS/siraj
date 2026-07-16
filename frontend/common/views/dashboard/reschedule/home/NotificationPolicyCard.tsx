@@ -5,7 +5,7 @@ import { Box, Typography } from "@mui/material";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function NotificationPolicyCard() {
-  const t = useAppTranslation("dashboard.rescheduleForm").notificationPolicy;
+  const t = useAppTranslation().dashboardTranslations.rescheduleForm.notificationPolicy;
 
   return (
     <Box

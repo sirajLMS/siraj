@@ -35,7 +35,7 @@ const VIEW_FIELDS = [
 ] as const;
 
 export function SocialSection(props: SocialSectionProps) {
-  const t = useAppTranslation("profile").parent;
+  const t = useAppTranslation().profileTranslations.parent;
 
   if (props.mode === "edit") {
     return (

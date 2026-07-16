@@ -28,6 +28,7 @@ import { logger } from "@/frontend/common/utils/logger";
 import { CreateMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/CreateMeetingProviderDialog";
 import { EditMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/EditMeetingProviderDialog";
 import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import type { MeetingProvidersLabels } from "@/shared/locale/types/dashboard/meeting-providers/main";
 
 type MeetingProviderLabels = {
   readonly slug: string;
@@ -120,7 +121,7 @@ function useNotificationState() {
 }
 
 type MeetingProvidersViewProps = {
-  readonly t: ReturnType<typeof useAppTranslation<"dashboard.meetingProviders">>;
+  readonly t: MeetingProvidersLabels;
   readonly locale: string;
   readonly rows: MeetingProviderFieldsFragment[];
   readonly columns: GridColDef<MeetingProviderFieldsFragment>[];
@@ -220,7 +221,7 @@ function MeetingProvidersView({
 }
 
 export function MeetingProvidersContainer() {
-  const t = useAppTranslation("dashboard.meetingProviders");
+  const t = useAppTranslation().dashboardTranslations.meetingProviders;
   const locale = useAppLocale();
   const [createOpen, setCreateOpen] = useState(false);
   const [editProvider, setEditProvider] = useState<MeetingProviderFieldsFragment | null>(null);

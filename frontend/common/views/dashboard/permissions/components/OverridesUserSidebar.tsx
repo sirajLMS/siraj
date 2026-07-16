@@ -74,7 +74,7 @@ interface OverridesUserSidebarProps {
 }
 
 export function OverridesUserSidebar({ user, userGroups }: Readonly<OverridesUserSidebarProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (
     <StyledSidebarContainer>

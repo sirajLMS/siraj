@@ -16,7 +16,7 @@ export type ProfileTabNavProps = {
 };
 
 export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: ProfileTabNavProps) {
-  const t = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.base;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

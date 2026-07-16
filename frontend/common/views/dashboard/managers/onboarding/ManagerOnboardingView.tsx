@@ -110,7 +110,7 @@ export function ManagerOnboardingView({
   onCancel,
   onDismissSuccess,
 }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.managerOnboarding");
+  const t = useAppTranslation().dashboardTranslations.managerOnboarding;
 
   return (
     <PageContainer>

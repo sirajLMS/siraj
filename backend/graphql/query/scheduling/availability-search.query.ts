@@ -13,7 +13,7 @@ gqlSchemaBuilder.queryFields(t => ({
       input: t.arg({ type: AvailabilitySearchInputPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       if (!ctx.user) {
         throw new Error(tErrors.unauthorized);
       }

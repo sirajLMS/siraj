@@ -12,7 +12,7 @@ interface NavbarChromeProps {
 }
 
 export function NavbarChrome({ roleLabel, rightSlot }: Readonly<NavbarChromeProps>) {
-  const t = useAppTranslation("dashboard.core.layout");
+  const t = useAppTranslation().dashboardTranslations.coreLayout;
 
   return (
     <AppBar

@@ -12,9 +12,9 @@ import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/t
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function TeacherRulesContainer() {
-  const t = useAppTranslation("dashboard.teacherDashboard");
-  const dashboardT = useAppTranslation("dashboard.admin");
-  const tJoin = useAppTranslation("ui.meetingConfig").join;
+  const t = useAppTranslation().dashboardTranslations.teacherDashboard;
+  const dashboardT = useAppTranslation().dashboardTranslations.admin;
+  const tJoin = useAppTranslation().uiTranslations.meetingConfig.join;
   const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin.emptyTeacher);
   const [handbookRequested, setHandbookRequested] = useState(false);
   const { data: handbookData, loading: handbookLoading } = useQuery(teacherHandbookUrlQueryDocument, {

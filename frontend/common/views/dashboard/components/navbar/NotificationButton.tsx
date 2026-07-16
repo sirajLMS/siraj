@@ -14,7 +14,7 @@ interface NotificationButtonProps extends Omit<IconButtonProps, "children" | "ti
 }
 
 export function NotificationButton({ notificationCount, ...props }: Readonly<NotificationButtonProps>) {
-  const t = useAppTranslation("common");
+  const t = useAppTranslation().commonTranslations;
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {

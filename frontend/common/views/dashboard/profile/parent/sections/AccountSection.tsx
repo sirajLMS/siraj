@@ -26,7 +26,7 @@ type AccountParentData = Pick<ParentViewData, "name" | "email">;
 
 function resolveAccountStatusLabel(
   accountStatus: string | null | undefined,
-  t: ReturnType<typeof useAppTranslation<"profile.parent">>
+  t: ReturnType<typeof useAppTranslation>["profileTranslations"]["parent"]
 ): string {
   const normalized = (accountStatus ?? AccountStatus.Activated).toLowerCase();
   return t.accountStatus[normalized as "activated" | "deactivated"];
@@ -51,7 +51,7 @@ type AccountSectionProps =
     };
 
 export function AccountSection(props: AccountSectionProps) {
-  const t = useAppTranslation("profile").parent;
+  const t = useAppTranslation().profileTranslations.parent;
   const { canView } = useProfileFieldAccess({ scope: props.scope });
 
   if (props.mode === "edit") {

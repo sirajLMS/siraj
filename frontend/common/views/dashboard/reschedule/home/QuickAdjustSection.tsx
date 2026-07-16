@@ -39,7 +39,7 @@ function applyQuickAdjust(
 }
 
 export function QuickAdjustSection({ setValue, getValues }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.rescheduleForm").quickAdjust;
+  const t = useAppTranslation().dashboardTranslations.rescheduleForm.quickAdjust;
 
   return (
     <Box

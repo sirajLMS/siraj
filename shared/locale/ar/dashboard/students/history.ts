@@ -1,6 +1,6 @@
 import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/students";
 
-export const history: StudentHistoryLabels = {
+export const dashboardStudentHistoryAr: StudentHistoryLabels = {
   breadcrumbs: {
     archive: "أرشيف الطلاب",
     history: "تاريخ الحصص",

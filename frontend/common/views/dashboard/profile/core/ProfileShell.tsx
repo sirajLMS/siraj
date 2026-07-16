@@ -46,7 +46,7 @@ export function ProfileShell({
   roleLabel,
   avatarUrl,
 }: ProfileShellProps) {
-  const t = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.base;
   const showTabs = mode === ProfileMode.View && currentTab && onTabChange;
 
   function renderBody() {

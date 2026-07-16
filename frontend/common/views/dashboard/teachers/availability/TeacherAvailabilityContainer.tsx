@@ -129,8 +129,8 @@ function computeInsights(data: AvailabilitySearchData | null | undefined): Teach
 }
 
 export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId: string }>) {
-  const t = useAppTranslation("dashboard.teacherAvailability");
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation().dashboardTranslations.teacherAvailability;
+  const tc = useAppTranslation().commonTranslations;
   const notifications = useNotifications();
   useDocumentTitle(null, "dashboard.teacherAvailability", "pageTitle");
 

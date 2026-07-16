@@ -43,7 +43,7 @@ const StyledSubtitle = styled(Typography)(({ theme }) => ({
 }));
 
 export function LoginHeader() {
-  const t = useAppTranslation("auth").login;
+  const t = useAppTranslation().authTranslations.login;
 
   return (
     <StyledHeaderContainer sx={{ mb: 4 }}>

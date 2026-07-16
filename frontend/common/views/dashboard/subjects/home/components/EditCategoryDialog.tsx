@@ -88,7 +88,7 @@ function CategoryFormFields({
   errors: FieldErrors<EditCategoryFormValues>;
   disabled: boolean;
 }>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
 
   return (
     <>
@@ -181,7 +181,7 @@ export function EditCategoryDialog({
   category,
   isLoading,
 }: Readonly<EditCategoryDialogProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
 
   const {
     control,

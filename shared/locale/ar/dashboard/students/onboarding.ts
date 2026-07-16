@@ -1,6 +1,6 @@
 import type { StudentOnboardingLabels } from "@/shared/locale/types/dashboard/students";
 
-export const onboarding: StudentOnboardingLabels = {
+export const dashboardStudentOnboardingAr: StudentOnboardingLabels = {
   pageTitle: "تسجيل طالب جديد",
   pageSubtitle: "أكمل الحقول التالية لإضافة طالب جديد تحت ولي أمر موجود.",
   statusBanner: "حالة الحساب: قيد التسجيل",

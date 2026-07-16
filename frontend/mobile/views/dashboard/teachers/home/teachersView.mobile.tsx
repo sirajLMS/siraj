@@ -42,7 +42,7 @@ export function TeachersMobileView({
   totalCount,
   onPageChange,
 }: Readonly<TeachersMobileViewProps>) {
-  const t = useAppTranslation("dashboard.teachersDirectory");
+  const t = useAppTranslation().dashboardTranslations.teachersDirectory;
 
   return (
     <PageContainer>

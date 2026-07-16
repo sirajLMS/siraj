@@ -1,6 +1,6 @@
 import type { SupervisorTeacherDuesLabels } from "@/shared/locale/types/dashboard/supervisorPortal/teacherDues";
 
-export const teacherDues: SupervisorTeacherDuesLabels = {
+export const dashboardSupervisorPortalTeacherDuesEn: SupervisorTeacherDuesLabels = {
   pageTitle: "Teacher Dues",
   teacherNameColumn: "Teacher",
   classDateColumn: "Class Date",

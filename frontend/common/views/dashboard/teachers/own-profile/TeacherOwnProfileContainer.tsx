@@ -15,9 +15,9 @@ import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/component
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function TeacherOwnProfileContainer() {
-  const t = useAppTranslation("dashboard.teacherOwnProfile");
-  const tProfile = useAppTranslation("profile");
-  const tErrors = useAppTranslation("errors");
+  const t = useAppTranslation().dashboardTranslations.teacherOwnProfile;
+  const tProfile = useAppTranslation().profileTranslations.base;
+  const tErrors = useAppTranslation().errorsTranslations;
   const locale = useAppLocale();
   const { data, loading, error } = useQuery(teacherOwnProfileQueryDocument);
   const profile = data?.teacherOwnProfile;

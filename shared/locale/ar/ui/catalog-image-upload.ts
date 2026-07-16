@@ -1,4 +1,4 @@
-export const catalogImageUpload = {
+export const uiCatalogImageUploadAr = {
   upload: "رفع صورة",
   uploading: "جارٍ الرفع…",
   remove: "إزالة",

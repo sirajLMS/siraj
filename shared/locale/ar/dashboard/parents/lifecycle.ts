@@ -1,6 +1,6 @@
 import type { ParentLifecycleLabels } from "@/shared/locale/types/dashboard/parents";
 
-export const lifecycle: ParentLifecycleLabels = {
+export const dashboardParentLifecycleAr: ParentLifecycleLabels = {
   pageTitle: "دورة حياة ولي الأمر",
   parentId: id => `معرف ولي الأمر: ${id}`,
   breadcrumbs: {

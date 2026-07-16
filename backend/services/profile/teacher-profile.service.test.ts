@@ -46,7 +46,7 @@ describe("StaffProfileService teacher profile masking", () => {
 
 describe("TeacherPortalService own profile", () => {
   test("includes totalClasses from teacher profile", async () => {
-    const tErrors = await getServerTranslations("en", "errors");
+    const tErrors = getServerTranslations("en").errorsTranslations;
     spyOn(PermissionsService, "hasPermission").mockImplementation(
       async (_userId, permission) => permission === AppPermission.TEACHER_VIEW_OWN_PROFILE
     );

@@ -26,7 +26,7 @@ export function CreateSubjectDialog({
   categories,
   isLoading,
 }: Readonly<CreateSubjectDialogProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
 
   const {
     control,

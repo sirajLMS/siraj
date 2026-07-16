@@ -1,6 +1,6 @@
 import type { StudentDirectoryLabels } from "@/shared/locale/types/dashboard/students";
 
-export const directory: StudentDirectoryLabels = {
+export const dashboardStudentDirectoryAr: StudentDirectoryLabels = {
   pageTitle: "دليل الطلاب الرئيسي",
   pageSubtitle: "إدارة شاملة لبيانات الطلاب المسجلين والتاريخية.",
   mobileTitle: "دليل الطلاب",

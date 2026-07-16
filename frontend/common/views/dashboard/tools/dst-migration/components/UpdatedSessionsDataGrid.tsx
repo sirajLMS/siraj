@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function UpdatedSessionsDataGrid({ sessions, loading = false }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.dstMigration");
+  const t = useAppTranslation().dashboardTranslations.dstMigration;
 
   const columns = useMemo<GridColDef<UpdatedSession>[]>(
     () => [

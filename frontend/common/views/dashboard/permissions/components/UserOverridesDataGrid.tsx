@@ -248,7 +248,7 @@ export function UserOverridesDataGrid({
   onManageOverrides,
   loading = false,
 }: Readonly<UserOverridesDataGridProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   const columns = useMemo<GridColDef<User>[]>(() => {
     return [

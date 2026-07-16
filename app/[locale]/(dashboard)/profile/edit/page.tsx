@@ -19,7 +19,7 @@ import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations(locale, "profile");
+  const t = getTranslations(locale).profileTranslations.base;
   return { title: t.editTitle };
 }
 

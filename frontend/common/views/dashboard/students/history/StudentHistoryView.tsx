@@ -25,7 +25,7 @@ export function StudentHistoryView({
   nowMonth,
   locale,
 }: Readonly<StudentHistoryViewProps>) {
-  const t = useAppTranslation("dashboard.studentHistory");
+  const t = useAppTranslation().dashboardTranslations.studentHistory;
   const { canView } = useStudentFieldAccess();
 
   const content = canView("student_history") ? (

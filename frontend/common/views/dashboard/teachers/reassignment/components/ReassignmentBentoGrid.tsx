@@ -52,7 +52,7 @@ export function ReassignmentBentoGrid({
   lastUpdated,
   pendingNotificationCount,
 }: Readonly<ReassignmentBentoGridProps>) {
-  const t = useAppTranslation("dashboard.teacherReassignment").historyAndContact;
+  const t = useAppTranslation().dashboardTranslations.teacherReassignment.historyAndContact;
   const router = useRouter();
   const notifications = useNotifications();
 

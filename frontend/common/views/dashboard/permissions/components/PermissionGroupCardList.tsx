@@ -25,7 +25,7 @@ interface GroupCardProps {
 }
 
 function GroupCard({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGroup }: Readonly<GroupCardProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -154,7 +154,7 @@ export function PermissionGroupCardList({
   onDeleteGroup,
   onAssignGroup,
 }: Readonly<PermissionGroupCardListProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   if (groups.length === 0) {
     return (

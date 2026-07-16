@@ -193,7 +193,7 @@ const useStoryStatusTrackingStore = create<StoryStatusTrackingState>(set => ({
 }));
 
 function StoryStatusTrackingContainer() {
-  const t = useAppTranslation("dashboard.core.statusTracking");
+  const t = useAppTranslation().dashboardTranslations.coreStatusTracking;
   const router = useRouter();
   const setRescheduleSession = useRescheduleStore(state => state.setSession);
 

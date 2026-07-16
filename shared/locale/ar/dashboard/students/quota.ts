@@ -1,6 +1,6 @@
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students";
 
-export const quota: StudentQuotaLabels = {
+export const dashboardStudentQuotaAr: StudentQuotaLabels = {
   pageTitle: "تعديل الملف الشخصي للطالب",
   studentId: id => `معرف الطالب: #${id}`,
   common: {

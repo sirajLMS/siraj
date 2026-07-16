@@ -18,7 +18,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 
 // Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
 export function AdminDashboardContainer() {
-  const t = useAppTranslation("dashboard.admin");
+  const t = useAppTranslation().dashboardTranslations.admin;
   const { headers, statusLabels } = useAdminDashboardLabels();
 
   const { dashboardData, loading, refetch, page, setPage } = useAdminScheduleQuery();

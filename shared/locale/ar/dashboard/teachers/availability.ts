@@ -1,6 +1,6 @@
 import type { TeacherAvailabilityLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const availability: TeacherAvailabilityLabels = {
+export const dashboardTeacherAvailabilityAr: TeacherAvailabilityLabels = {
   pageTitle: "أداة توفر المعلمين",
   pageSubtitle: "عرض والبحث عن الفترات الزمنية المتاحة عبر كادر هيئة التدريس.",
   exportPdf: "تصدير PDF",

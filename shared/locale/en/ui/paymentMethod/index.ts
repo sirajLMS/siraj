@@ -1,26 +1,26 @@
-export { defaultsEditor } from "./defaultsEditor";
-export { direction } from "./direction";
-export { display } from "./display";
-export { identifier } from "./identifier";
-export { list } from "./list";
-export { manager } from "./manager";
-export { select } from "./select";
-export { type } from "./type";
-export { typeFields } from "./typeFields";
-export { typeSelector } from "./typeSelector";
+export { uiPaymentMethodDefaultsEditorEn as defaultsEditor } from "./defaultsEditor";
+export { uiPaymentMethodDirectionEn as direction } from "./direction";
+export { uiPaymentMethodDisplayEn as display } from "./display";
+export { uiPaymentMethodIdentifierEn as identifier } from "./identifier";
+export { uiPaymentMethodListEn as list } from "./list";
+export { uiPaymentMethodManagerEn as manager } from "./manager";
+export { uiPaymentMethodSelectEn as select } from "./select";
+export { uiPaymentMethodTypeEn as type } from "./type";
+export { uiPaymentMethodTypeFieldsEn as typeFields } from "./typeFields";
+export { uiPaymentMethodTypeSelectorEn as typeSelector } from "./typeSelector";
 
-import { defaultsEditor } from "./defaultsEditor";
-import { direction } from "./direction";
-import { display } from "./display";
-import { identifier } from "./identifier";
-import { list } from "./list";
-import { manager } from "./manager";
-import { select } from "./select";
-import { type } from "./type";
-import { typeFields } from "./typeFields";
-import { typeSelector } from "./typeSelector";
+import { uiPaymentMethodDefaultsEditorEn as defaultsEditor } from "./defaultsEditor";
+import { uiPaymentMethodDirectionEn as direction } from "./direction";
+import { uiPaymentMethodDisplayEn as display } from "./display";
+import { uiPaymentMethodIdentifierEn as identifier } from "./identifier";
+import { uiPaymentMethodListEn as list } from "./list";
+import { uiPaymentMethodManagerEn as manager } from "./manager";
+import { uiPaymentMethodSelectEn as select } from "./select";
+import { uiPaymentMethodTypeEn as type } from "./type";
+import { uiPaymentMethodTypeFieldsEn as typeFields } from "./typeFields";
+import { uiPaymentMethodTypeSelectorEn as typeSelector } from "./typeSelector";
 
-export const paymentMethod = {
+export const uiPaymentMethodEn = {
   type,
   direction,
   identifier,

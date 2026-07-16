@@ -1,6 +1,6 @@
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students";
 
-export const quota: StudentQuotaLabels = {
+export const dashboardStudentQuotaEn: StudentQuotaLabels = {
   pageTitle: "Student Quota",
   studentId: id => `Student ID: ${id}`,
   common: {

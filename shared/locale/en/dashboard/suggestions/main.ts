@@ -1,6 +1,6 @@
 import type { SuggestionsLabels } from "@/shared/locale/types/dashboard/suggestions";
 
-export const main: SuggestionsLabels = {
+export const dashboardSuggestionsEn: SuggestionsLabels = {
   parent: {
     pageTitle: "Parent Feedback Portal",
     heroTitle: "Parent Feedback Portal",

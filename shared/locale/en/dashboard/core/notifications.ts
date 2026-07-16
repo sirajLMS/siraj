@@ -1,6 +1,6 @@
 import type { DashboardCoreNotificationsLabels } from "@/shared/locale/types/dashboard/core/notifications";
 
-export const notifications: DashboardCoreNotificationsLabels = {
+export const dashboardCoreNotificationsEn: DashboardCoreNotificationsLabels = {
   title: "Notifications",
   noAlerts: "No alerts at this time.",
   errorLoading: "Failed to load notifications.",

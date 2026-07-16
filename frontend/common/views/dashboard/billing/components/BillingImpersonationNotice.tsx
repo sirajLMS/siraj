@@ -6,7 +6,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 
 export function BillingImpersonationNotice(): React.ReactNode {
   const { isImpersonating } = useImpersonation();
-  const t = useAppTranslation("errors");
+  const t = useAppTranslation().errorsTranslations;
   const auth = t.auth;
 
   if (!isImpersonating) {

@@ -1,6 +1,6 @@
 import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents";
 
-export const directory: ParentsDirectoryLabels = {
+export const dashboardParentsDirectoryAr: ParentsDirectoryLabels = {
   pageTitle: "دليل أولياء الأمور",
   pageSubtitle: "إدارة ملفات أولياء الأمور، حالات الاشتراك، والسجلات المالية.",
   searchPlaceholder: "البحث عن أولياء الأمور...",

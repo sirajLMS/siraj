@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { getBackendTranslations } from "@/backend/lib/intl";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 const SALT_ROUNDS = 12;
 
@@ -9,23 +9,23 @@ const SALT_ROUNDS = 12;
  * Returns i18n-friendly error messages for each failed rule.
  */
 export async function validatePasswordStrength(password: string, locale?: string): Promise<void> {
-  const t = await getBackendTranslations({ locale, namespace: "errors" });
+  const { auth } = getServerTranslations(locale ?? "en").errorsTranslations;
   const errors: string[] = [];
 
   if (password.length < 8) {
-    errors.push(t("auth.passwordMinLength"));
+    errors.push(auth.passwordMinLength);
   }
   if (!/[A-Z]/.test(password)) {
-    errors.push(t("auth.passwordRequiresUppercase"));
+    errors.push(auth.passwordRequiresUppercase);
   }
   if (!/[a-z]/.test(password)) {
-    errors.push(t("auth.passwordRequiresLowercase"));
+    errors.push(auth.passwordRequiresLowercase);
   }
   if (!/\d/.test(password)) {
-    errors.push(t("auth.passwordRequiresDigit"));
+    errors.push(auth.passwordRequiresDigit);
   }
   if (!/[!@#$%^&*()_+\-=[\]{}|;:',.<>?/]/.test(password)) {
-    errors.push(t("auth.passwordRequiresSpecialChar"));
+    errors.push(auth.passwordRequiresSpecialChar);
   }
 
   if (errors.length > 0) {

@@ -1,6 +1,6 @@
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
-export const errors: ErrorsLabels = {
+export const errorsAr: ErrorsLabels = {
   auth: {
     // ─── No-param strings ────────────────────────────────────────────
     invalidRoleTab: "علامة التبويب المحددة للدور غير صالحة.",

@@ -1,13 +1,11 @@
 import { StudentStatus } from "@/backend/enum";
 import { parseAppLanguage, parseGender, parseStudentStatus } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import type { Student, StudentEntity } from "@/backend/types";
 
 export namespace StudentUtils {
-  export const validateName = async (name: string, locale?: string): Promise<string | null> => {
+  export const validateName = async (name: string, _locale?: string): Promise<string | null> => {
     if (name.length < 3 || name.length > 255) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      return t("studentNameLength");
+      return "studentNameLength";
     }
     return null;
   };

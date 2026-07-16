@@ -42,8 +42,8 @@ interface MobileSlotItemProps {
 
 function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) {
   const [open, setOpen] = useState(false);
-  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
-  const tMeeting = useAppTranslation("ui.meetingConfig").join;
+  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
+  const tMeeting = useAppTranslation().uiTranslations.meetingConfig.join;
 
   const handleDeleteClick = () => {
     setOpen(true);
@@ -154,7 +154,7 @@ interface DaySelectorProps {
 }
 
 function DaySelector({ selectedDay, onSelect }: Readonly<DaySelectorProps>) {
-  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
 
   return (
     <Box
@@ -204,7 +204,7 @@ interface TimeSlotRowProps {
 }
 
 function TimeSlotRow({ time, slotClasses, onRemoveClass }: Readonly<TimeSlotRowProps>) {
-  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
   const isLunch = time === "12:00 PM";
 
   let content = (

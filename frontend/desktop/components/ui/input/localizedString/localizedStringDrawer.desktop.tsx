@@ -22,6 +22,7 @@ import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import type { LocalizedStringLabels } from "@/shared/locale/types/ui";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 type HelperTextParams = {
@@ -29,7 +30,7 @@ type HelperTextParams = {
   readonly required: boolean;
   readonly resolvedRequired: readonly AppLocale[];
   readonly uiLocale: string;
-  readonly t: ReturnType<typeof useAppTranslation<"ui.localizedString">>;
+  readonly t: LocalizedStringLabels;
 };
 
 function buildHelperText({ draft, required, resolvedRequired, uiLocale, t }: HelperTextParams): string | undefined {
@@ -118,7 +119,7 @@ type LocaleFieldProps = {
   readonly minRows: number | undefined;
   readonly disabled: boolean;
   readonly onChange: (locale: AppLocale, text: string) => void;
-  readonly t: ReturnType<typeof useAppTranslation<"ui.localizedString">>;
+  readonly t: LocalizedStringLabels;
 };
 
 const LocaleField: React.FC<LocaleFieldProps> = ({
@@ -178,7 +179,7 @@ type DrawerFooterProps = {
   readonly onSaveAction: (next: LocalizedString) => void;
   readonly draft: LocalizedString;
   readonly onCancelAction: () => void;
-  readonly t: ReturnType<typeof useAppTranslation<"ui.localizedString">>;
+  readonly t: LocalizedStringLabels;
 };
 
 const DrawerFooter: React.FC<DrawerFooterProps> = ({ canSave, saving, onSaveAction, draft, onCancelAction, t }) => {
@@ -230,7 +231,7 @@ export const LocalizedStringDrawerDesktop: React.FC<LocalizedStringDrawerProps> 
   dismissAction = "save",
   anchor = "right",
 }) => {
-  const t = useAppTranslation("ui.localizedString");
+  const t = useAppTranslation().uiTranslations.localizedString;
   const uiLocale = useAppLocale();
   const [draft, setDraft] = useState<LocalizedString>(value);
 

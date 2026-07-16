@@ -21,6 +21,7 @@ import type {
 import { useRouter } from "@/shared/i18n/routing";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core/scheduleAlerts";
 
 function getTodayString() {
   const today = new Date();
@@ -98,7 +99,7 @@ function mapScheduleRowsToClasses(rows: ScheduleRow[] | null | undefined): Acade
   });
 }
 
-function buildScheduleLabels(t: ReturnType<typeof useAppTranslation<"dashboard.core.scheduleAlerts">>) {
+function buildScheduleLabels(t: ScheduleAlertsLabels) {
   return {
     pageTitle: t.pageTitle,
     pageSubtitle: t.pageSubtitle,
@@ -136,7 +137,7 @@ function buildScheduleLabels(t: ReturnType<typeof useAppTranslation<"dashboard.c
 }
 
 export function ScheduleAlertsContainer() {
-  const t = useAppTranslation("dashboard.core.scheduleAlerts");
+  const t = useAppTranslation().dashboardTranslations.coreScheduleAlerts;
   const router = useRouter();
 
   const page = useScheduleAlertsStore(state => state.page);

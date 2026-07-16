@@ -27,7 +27,7 @@ function PolicyItem({ title, description }: Readonly<PolicyItemProps>) {
 }
 
 export function PolicyOverviewCard() {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
 
   return (
     <Box
@@ -95,7 +95,7 @@ export function PolicyOverviewCard() {
 }
 
 export function SuspensionWarningBanner() {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
 
   return (
     <Box

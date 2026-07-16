@@ -38,7 +38,7 @@ export function TeacherAvailabilityMobileView({
   onBlockClick,
   tableLabels,
 }: Readonly<TeacherAvailabilityMobileViewProps>) {
-  const t = useAppTranslation("dashboard.teacherAvailability");
+  const t = useAppTranslation().dashboardTranslations.teacherAvailability;
   const storeFilters = useTeacherAvailabilityStore(
     (state: { readonly filters: AvailabilitySearchFormData }) => state.filters
   );

@@ -1,6 +1,6 @@
 import type { SmsLabels } from "@/shared/locale/types/sms";
 
-export const sms: SmsLabels = {
+export const smsEn: SmsLabels = {
   complaintResponse: {
     urgentResponse: ({ parentName, complaintTitle, responseSummary }) =>
       `Dear ${parentName}, regarding "${complaintTitle}": ${responseSummary}. - Support Team`,

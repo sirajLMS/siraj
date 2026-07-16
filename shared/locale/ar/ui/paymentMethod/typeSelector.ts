@@ -1,4 +1,4 @@
-export const typeSelector = {
+export const uiPaymentMethodTypeSelectorAr = {
   title: "نوع طريقة الدفع",
   mobileWallet: "محفظة جوال",
   paymentLink: "رابط دفع",

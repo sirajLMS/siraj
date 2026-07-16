@@ -1,9 +1,10 @@
 import { StaffProfileRepository, UserRepository } from "@/backend/db";
 import { AccountStatus, AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
-import { getBackendTranslations, logger } from "@/backend/lib";
 import { parseAccountStatus } from "@/backend/lib/enum";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import type { ManagerDirectoryRow } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export interface UpdateManagerProfileInput {
   readonly phone?: string | null;
@@ -19,11 +20,11 @@ export namespace ManagerProfileService {
     input: Pick<UpdateManagerProfileInput, "phone">,
     locale?: string
   ): Promise<ManagerDirectoryRow> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const t = getServerTranslations(locale ?? "ar").errorsTranslations;
 
     const targetRow = await StaffProfileRepository.findByStaffProfileId(targetStaffProfileId);
     if (targetRow?.id !== actorUserId) {
-      throw new Error(t("insufficientPermissions"));
+      throw new Error(t.insufficientPermissions);
     }
 
     if (input.phone !== undefined) {
@@ -32,7 +33,7 @@ export namespace ManagerProfileService {
 
     const updatedProfile = await StaffProfileRepository.findByStaffProfileId(targetStaffProfileId, undefined, locale);
     if (!updatedProfile) {
-      throw new Error(t("staffProfileNotFound"));
+      throw new Error(t.staffProfileNotFound);
     }
 
     logger.info("Own staff profile updated", {
@@ -49,17 +50,17 @@ export namespace ManagerProfileService {
     input: UpdateManagerProfileInput,
     locale?: string
   ): Promise<ManagerDirectoryRow> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const t = getServerTranslations(locale ?? "ar").errorsTranslations;
 
     const hasEditPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_EDIT_PROFILE);
     if (!hasEditPermission) {
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(t.unauthorizedAction);
     }
 
     const directory = await StaffProfileRepository.getManagerDirectory();
     const targetRow = directory.rows.find(row => row.staffProfileId === targetStaffProfileId);
     if (!targetRow) {
-      throw new Error(t("staffProfileNotFound"));
+      throw new Error(t.staffProfileNotFound);
     }
 
     const actorGroupSlugs = await StaffProfileRepository.getUserPermissionGroupSlugs(actorUserId);
@@ -76,7 +77,7 @@ export namespace ManagerProfileService {
         actorUserId,
       });
     } else if (targetIsSuperAdmin || targetIsAcademyAdmin) {
-      throw new Error(t("insufficientPermissions"));
+      throw new Error(t.insufficientPermissions);
     }
 
     if (input.phone !== undefined) {
@@ -107,7 +108,7 @@ export namespace ManagerProfileService {
 
     const updatedProfile = await StaffProfileRepository.findByStaffProfileId(targetStaffProfileId, undefined, locale);
     if (!updatedProfile) {
-      throw new Error(t("staffProfileNotFound"));
+      throw new Error(t.staffProfileNotFound);
     }
 
     logger.info("Manager profile updated successfully", {

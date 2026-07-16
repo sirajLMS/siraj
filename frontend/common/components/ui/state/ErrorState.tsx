@@ -10,7 +10,7 @@ type ErrorStateProps = {
 };
 
 export function ErrorState({ message, onRetry, retryLabel, embedded = false }: ErrorStateProps) {
-  const tDefault = useAppTranslation("common");
+  const tDefault = useAppTranslation().commonTranslations;
   const displayMessage = message ?? tDefault.loadFailed ?? "";
 
   const alert = (

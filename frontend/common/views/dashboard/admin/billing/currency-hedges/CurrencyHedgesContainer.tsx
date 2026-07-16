@@ -53,8 +53,8 @@ function formatTimestamp(value: string | null | undefined, locale: string): stri
 }
 
 export function CurrencyHedgesContainer() {
-  const t = useAppTranslation("dashboard.billing.currencyHedges");
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation().dashboardTranslations.billingCurrencyHedges;
+  const tc = useAppTranslation().commonTranslations;
   const locale = useAppLocale();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);

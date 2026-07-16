@@ -1,6 +1,6 @@
 import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes";
 
-export const classDetails: ClassDetailsLabels = {
+export const dashboardClassDetailsAr: ClassDetailsLabels = {
   pageSubtitleAdmin: "مراقبة مقاييس الحصة المباشرة والضوابط الإدارية",
   pageSubtitleTeacher: "عرض تفاصيل الحصة وإدارة الإجراءات",
   breadcrumbs: {
@@ -150,4 +150,4 @@ export const classDetails: ClassDetailsLabels = {
   invalidClassId: "معرف الحصة غير صالح",
 };
 
-export { classDetails as details };
+export { dashboardClassDetailsAr as details };

@@ -41,7 +41,7 @@ export function TeachersDesktopView({
   totalCount,
   onPageChange,
 }: Readonly<TeachersDesktopViewProps>) {
-  const t = useAppTranslation("dashboard.teachersDirectory");
+  const t = useAppTranslation().dashboardTranslations.teachersDirectory;
 
   return (
     <PageContainer>

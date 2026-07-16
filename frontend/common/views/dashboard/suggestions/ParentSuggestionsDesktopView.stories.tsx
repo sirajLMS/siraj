@@ -27,8 +27,8 @@ function ParentSuggestionsDesktopStoryRenderer({
   isSubmitting,
   canSubmit,
 }: Readonly<ParentSuggestionsDesktopStoryProps>) {
-  const t = useAppTranslation("dashboard.suggestions");
-  const labels = buildSuggestionsLabels(t).parent;
+  const t = useAppTranslation();
+  const labels = buildSuggestionsLabels(t.dashboardTranslations.suggestions).parent;
   const {
     control,
     formState: { errors },

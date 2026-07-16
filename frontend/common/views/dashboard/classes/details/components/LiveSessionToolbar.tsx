@@ -290,7 +290,7 @@ export function LiveSessionToolbar({
   isResetting = false,
   error = null,
 }: LiveSessionToolbarProps) {
-  const t = useAppTranslation("dashboard.classDetails").liveSession;
+  const t = useAppTranslation().dashboardTranslations.classDetails.liveSession;
 
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const [leaveReason, setLeaveReason] = useState("");

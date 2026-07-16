@@ -15,7 +15,7 @@ export function CategoriesSection({
   onDeleteCategory,
   canManage,
 }: Readonly<CategoriesSectionProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
 
   return (
     <SectionPanel

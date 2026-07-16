@@ -13,19 +13,20 @@ import type {
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function BooksAndBagsClient({ initialBooks }: Readonly<BooksAndBagsClientProps>) {
-  const t = useAppTranslation("dashboard.booksAndBags");
+  const t = useAppTranslation();
+  const tBooks = t.dashboardTranslations.booksAndBags;
 
   const labels: BooksAndBagsLabels = useMemo(
     () => ({
-      pageTitle: t.pageTitle,
-      pageSubtitle: t.pageSubtitle,
-      noEntries: t.noEntries,
-      statusAvailable: t.statusAvailable,
-      statusOutOfStock: t.statusOutOfStock,
-      deleteSuccess: t.deleteSuccess,
-      deleteFailed: t.deleteFailed,
+      pageTitle: tBooks.pageTitle,
+      pageSubtitle: tBooks.pageSubtitle,
+      noEntries: tBooks.noEntries,
+      statusAvailable: tBooks.statusAvailable,
+      statusOutOfStock: tBooks.statusOutOfStock,
+      deleteSuccess: tBooks.deleteSuccess,
+      deleteFailed: tBooks.deleteFailed,
     }),
-    [t]
+    [tBooks]
   );
 
   const [books, setBooks] = useState<BookItem[]>(() =>

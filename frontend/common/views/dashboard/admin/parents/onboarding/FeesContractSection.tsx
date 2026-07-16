@@ -36,7 +36,7 @@ interface InvoiceFieldsProps {
 }
 
 function InvoiceFields({ register, control, errors }: InvoiceFieldsProps) {
-  const t = useAppTranslation("dashboard.parentOnboarding");
+  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
   const currency = useWatch({ control, name: "currency" });
   const currencySymbol = getCurrencySymbol(currency ?? CurrencyCode.Usd);
   return (
@@ -95,7 +95,7 @@ function InvoiceFields({ register, control, errors }: InvoiceFieldsProps) {
 }
 
 function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "errors">) {
-  const t = useAppTranslation("dashboard.parentOnboarding");
+  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
   const { setValue } = useFormContext<ParentOnboardingFormData>();
   const methodType = useWatch({ control, name: "payinMethod.type" }) ?? PaymentMethodType.BankTransfer;
   const { walletOptions, paymentLinkOptions, onlineAccountOptions } = usePaymentMethodCatalogs(PaymentDirection.Payin);
@@ -203,7 +203,7 @@ function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "erro
 }
 
 export function FeesContractSection({ register, control, errors }: SectionProps) {
-  const t = useAppTranslation("dashboard.parentOnboarding");
+  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
 
   return (
     <SectionPanel title={t.sections.feesContract}>

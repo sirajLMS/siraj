@@ -15,8 +15,8 @@ import { getErrorMessage } from "@/shared/utils/error";
 
 let tErrors: ErrorsLabels;
 
-beforeAll(async () => {
-  tErrors = await getServerTranslations("en", "errors");
+beforeAll(() => {
+  tErrors = getServerTranslations("en").errorsTranslations;
 });
 
 describe("Scheduling Security & Trigger Compatibility", () => {

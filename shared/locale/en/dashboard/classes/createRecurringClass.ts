@@ -1,6 +1,6 @@
 import type { CreateRecurringClassLabels } from "@/shared/locale/types/dashboard/classes/createRecurringClass";
 
-export const createRecurringClass: CreateRecurringClassLabels = {
+export const dashboardCreateRecurringClassEn: CreateRecurringClassLabels = {
   pageTitle: "Add Recurring Class",
   title: "Add Recurring Class",
   subtitle: "Configure schedule for automatic weekly sessions",

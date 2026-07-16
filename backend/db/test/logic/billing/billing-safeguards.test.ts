@@ -12,8 +12,8 @@ import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 let tErrors: ErrorsLabels;
-beforeAll(async () => {
-  tErrors = await getServerTranslations("en", "errors");
+beforeAll(() => {
+  tErrors = getServerTranslations("en").errorsTranslations;
 });
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {

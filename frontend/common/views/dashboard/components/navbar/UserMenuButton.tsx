@@ -88,7 +88,7 @@ function DefaultUserInfo({ name, mail, secondaryLine }: Readonly<UserInfoSlotPro
 }
 
 function DefaultLogoutButton({ onClick }: Readonly<LogoutButtonSlotProps>) {
-  const t = useAppTranslation("dashboard.core.nav");
+  const t = useAppTranslation().dashboardTranslations.coreNav;
   return (
     <MenuItem
       onClick={onClick}
@@ -324,9 +324,9 @@ export function UserMenuButton({
 }: Readonly<UserMenuButtonProps>) {
   const { logout } = useAuth();
   const router = useRouter();
-  const tCommon = useAppTranslation("common");
-  const tProfile = useAppTranslation("profile");
-  const tAuth = useAppTranslation("auth");
+  const tCommon = useAppTranslation().commonTranslations;
+  const tProfile = useAppTranslation().profileTranslations.base;
+  const tAuth = useAppTranslation().authTranslations;
   const actorIsSuperAdmin = useUserStore(state => state.actorIsSuperAdmin);
   const canViewOwnProfile = useUserStore(state => state.hasPermission(AppPermission.AuthViewOwnProfile));
   const {

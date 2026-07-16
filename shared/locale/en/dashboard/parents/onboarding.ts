@@ -1,6 +1,6 @@
 import type { ParentOnboardingLabels } from "@/shared/locale/types/dashboard/parents";
 
-export const onboarding: ParentOnboardingLabels = {
+export const dashboardParentOnboardingEn: ParentOnboardingLabels = {
   pageTitle: "Complete Your Onboarding",
   pageSubtitle: "Fill in the required information to get started",
   statusBanner: "You have mandatory fields to complete",

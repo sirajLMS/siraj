@@ -28,7 +28,7 @@ function buildDateColumns(fromDate: string, toDate: string): string[] {
 }
 
 export function TeacherAvailabilityGrid({ teacher, fromDate, toDate }: Readonly<TeacherAvailabilityGridProps>) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const dateColumns = useMemo(() => buildDateColumns(fromDate, toDate), [fromDate, toDate]);

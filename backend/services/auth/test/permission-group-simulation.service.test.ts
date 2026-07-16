@@ -12,8 +12,8 @@ const SESSION_ID = "session-raw-id";
 
 let tErrors: ErrorsLabels;
 
-beforeAll(async () => {
-  tErrors = await getServerTranslations("en", "errors");
+beforeAll(() => {
+  tErrors = getServerTranslations("en").errorsTranslations;
 });
 
 function mockSuperAdminActor() {

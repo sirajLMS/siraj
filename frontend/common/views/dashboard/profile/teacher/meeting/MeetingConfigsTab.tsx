@@ -13,7 +13,7 @@ type MeetingConfigsTabProps = {
 };
 
 export function MeetingConfigsTab({ targetUserId, scope }: MeetingConfigsTabProps) {
-  const t = useAppTranslation("ui.meetingConfig");
+  const t = useAppTranslation().uiTranslations.meetingConfig;
   const { hasPermission } = useUserStore();
 
   const canManage =

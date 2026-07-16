@@ -79,7 +79,7 @@ export function ManagersCardList({
   totalCount,
   onPageChange,
 }: Readonly<ManagersCardListProps>) {
-  const t = useAppTranslation("dashboard.managersDirectory");
+  const t = useAppTranslation().dashboardTranslations.managersDirectory;
 
   const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
 

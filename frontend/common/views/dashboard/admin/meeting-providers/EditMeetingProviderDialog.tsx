@@ -36,7 +36,7 @@ export function EditMeetingProviderDialog({
   onSaved,
   onError,
 }: EditMeetingProviderDialogProps) {
-  const t = useAppTranslation("dashboard.meetingProviders");
+  const t = useAppTranslation().dashboardTranslations.meetingProviders;
   const [updateProvider, { loading }] = useMutation(updateMeetingProviderMutationDocument, {
     onError: error => {
       logger.error("Update meeting provider failed:", { error });

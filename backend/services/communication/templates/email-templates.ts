@@ -1,4 +1,4 @@
-import { getBackendTranslations } from "@/backend/lib/intl";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 function escapeHtml(text: string): string {
   return text
@@ -8,8 +8,6 @@ function escapeHtml(text: string): string {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-
-type GenericTranslationFn = (key: string, values?: Record<string, unknown>) => string;
 
 interface ComplaintResponseEmailData {
   readonly parentName: string;
@@ -31,17 +29,14 @@ export const renderComplaintResponseEmail = async (
   data: ComplaintResponseEmailData,
   locale?: string
 ): Promise<string> => {
-  const t = (await getBackendTranslations({
-    locale,
-    namespace: "emails.complaintResponse",
-  })) as GenericTranslationFn;
+  const t = getServerTranslations(locale ?? "en").emailsTranslations.complaintResponse;
 
-  const subject = t("subject", { complaintTitle: escapeHtml(data.complaintTitle) });
-  const greeting = t("greeting", { parentName: escapeHtml(data.parentName) });
-  const body = t("body", { complaintTitle: escapeHtml(data.complaintTitle) });
-  const responseLabel = t("responseLabel");
-  const dateLabel = t("dateLabel");
-  const footer = t("footer");
+  const subject = t.subject({ complaintTitle: escapeHtml(data.complaintTitle) });
+  const greeting = t.greeting({ parentName: escapeHtml(data.parentName) });
+  const body = t.body({ complaintTitle: escapeHtml(data.complaintTitle) });
+  const responseLabel = t.responseLabel;
+  const dateLabel = t.dateLabel;
+  const footer = t.footer;
 
   return `
 <!DOCTYPE html>
@@ -91,17 +86,14 @@ export const renderSuggestionAcknowledgedEmail = async (
   data: SuggestionAcknowledgedEmailData,
   locale?: string
 ): Promise<string> => {
-  const t = (await getBackendTranslations({
-    locale,
-    namespace: "emails.suggestionAcknowledged",
-  })) as GenericTranslationFn;
+  const t = getServerTranslations(locale ?? "en").emailsTranslations.suggestionAcknowledged;
 
-  const subject = t("subject");
-  const greeting = t("greeting", { parentName: escapeHtml(data.parentName) });
-  const body = t("body");
-  const suggestionLabel = t("suggestionLabel");
-  const dateLabel = t("dateLabel");
-  const footer = t("footer");
+  const subject = t.subject;
+  const greeting = t.greeting({ parentName: escapeHtml(data.parentName) });
+  const body = t.body;
+  const suggestionLabel = t.suggestionLabel;
+  const dateLabel = t.dateLabel;
+  const footer = t.footer;
 
   return `
 <!DOCTYPE html>

@@ -60,7 +60,7 @@ export function PaymentMethodDefaultsEditor({
   successOpen = false,
   onSuccessCloseAction,
 }: PaymentMethodDefaultsEditorProps) {
-  const t = useAppTranslation("ui.paymentMethod");
+  const t = useAppTranslation().uiTranslations.paymentMethod;
   const tDefaults = t.defaultsEditor;
   const [instructionsOpen, setInstructionsOpen] = useState(false);
 

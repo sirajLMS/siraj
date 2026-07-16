@@ -7,7 +7,7 @@ import type { ImportantNotesProps } from "@/frontend/common/views/dashboard/teac
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function ImportantNotes({ notes }: Readonly<ImportantNotesProps>) {
-  const t = useAppTranslation("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
 
   return (
     <BaseCard

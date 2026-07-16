@@ -1,23 +1,23 @@
 import { ParentRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ParentAssignedStudentsResult, ParentOwnProfileReturnType } from "@/backend/types/parents/parent.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace ParentPortalService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
     const isAuthorized = await PermissionsService.hasPermission(userId, permission);
     if (!isAuthorized) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.unauthorizedAction);
     }
   }
 
   async function resolveParentForUser(userId: string, locale?: string) {
     const parent = await ParentRepository.findByUserId(userId);
     if (!parent) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.notFound);
     }
     return parent;
   }
@@ -50,8 +50,8 @@ export namespace ParentPortalService {
     const parent = await resolveParentForUser(userId, locale);
     const profile = await ParentRepository.getParentProfile(parent.id);
     if (!profile) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.notFound);
     }
 
     return {

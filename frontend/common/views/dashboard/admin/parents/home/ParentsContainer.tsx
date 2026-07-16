@@ -146,7 +146,7 @@ function useDirectoryLabels(t: ParentsDirectoryLabels) {
 }
 
 export function ParentsContainer() {
-  const t = useAppTranslation("dashboard.parentsDirectory");
+  const t = useAppTranslation().dashboardTranslations.parentsDirectory;
   const router = useRouter();
   const {
     searchQuery,

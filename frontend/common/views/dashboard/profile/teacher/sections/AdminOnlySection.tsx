@@ -39,8 +39,8 @@ function formatGender(
 }
 
 export function AdminOnlySection(props: AdminOnlySectionProps) {
-  const t = useAppTranslation("profile").teacher;
-  const tc = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.teacher;
+  const tc = useAppTranslation().profileTranslations.base;
 
   if (props.mode === "edit") {
     return (

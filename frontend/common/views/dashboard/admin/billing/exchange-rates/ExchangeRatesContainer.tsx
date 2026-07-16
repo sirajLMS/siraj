@@ -330,7 +330,7 @@ function ExchangeRatesSyncPanel({
 }
 
 export function ExchangeRatesContainer() {
-  const t = useAppTranslation("dashboard.billing");
+  const t = useAppTranslation().dashboardTranslations.billing;
   const labels = t.exchangeRates;
   const { isImpersonating } = useImpersonation();
   const billingActionsDisabled = isImpersonating;

@@ -1,6 +1,6 @@
 import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core";
 
-export const searchSchedule: SearchScheduleLabels = {
+export const dashboardCoreSearchScheduleAr: SearchScheduleLabels = {
   pageTitle: "البحث عن توفر الجدول",
   fromDate: "من تاريخ",
   toDate: "إلى تاريخ",

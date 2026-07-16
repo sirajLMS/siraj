@@ -36,7 +36,7 @@ export function PaymentMethodList({
   onDeleteAction,
   onSetDefaultAction,
 }: PaymentMethodListProps) {
-  const t = useAppTranslation("ui.paymentMethod");
+  const t = useAppTranslation().uiTranslations.paymentMethod;
   const tList = t.list;
 
   const columns = useMemo<GridColDef<PaymentMethodRow>[]>(() => {

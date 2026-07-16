@@ -60,7 +60,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       groupSlug: t.arg.string({ required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       const actorUserId = ctx.realUserId ?? ctx.user?.id;
       if (!actorUserId || !ctx.sessionId) {
         throw new GraphQLError(tErrors.auth.groupSimulationSessionInvalid, {
@@ -92,7 +92,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: EndPermissionGroupSimulationResponsePothosObject,
     authScopes: { loggedIn: true },
     resolve: async (_parent, _args, ctx) => {
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       const actorUserId = ctx.realUserId ?? ctx.user?.id;
       if (!actorUserId || !ctx.sessionId) {
         throw new GraphQLError(tErrors.auth.groupSimulationSessionInvalid, {

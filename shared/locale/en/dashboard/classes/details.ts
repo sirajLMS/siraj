@@ -1,6 +1,6 @@
 import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes";
 
-export const classDetails: ClassDetailsLabels = {
+export const dashboardClassDetailsEn: ClassDetailsLabels = {
   pageSubtitleAdmin: "Live class metrics monitoring and administrative controls",
   pageSubtitleTeacher: "Class details overview and action management",
   breadcrumbs: {
@@ -152,4 +152,4 @@ export const classDetails: ClassDetailsLabels = {
   invalidClassId: "Invalid class ID",
 };
 
-export { classDetails as details };
+export { dashboardClassDetailsEn as details };

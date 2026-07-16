@@ -11,7 +11,7 @@ gqlSchemaBuilder.queryField("classCategories", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, _args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return ClassCategoryService.listCategories(userId, tErrors);
     },
   })
@@ -26,7 +26,7 @@ gqlSchemaBuilder.queryField("classSubjects", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return ClassSubjectService.listSubjects(userId, tErrors, args.categoryId ?? undefined);
     },
   })
@@ -41,7 +41,7 @@ gqlSchemaBuilder.queryField("classSubject", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return ClassSubjectService.getSubjectById(userId, args.id, tErrors);
     },
   })

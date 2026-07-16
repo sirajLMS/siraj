@@ -1,6 +1,6 @@
 import type { ParentStudentsLabels } from "@/shared/locale/types/dashboard/parents";
 
-export const students: ParentStudentsLabels = {
+export const dashboardParentStudentsEn: ParentStudentsLabels = {
   pageTitle: "Associated Students",
   pageSubtitle: "View and manage your associated students",
   noStudents: "No students associated with this account.",

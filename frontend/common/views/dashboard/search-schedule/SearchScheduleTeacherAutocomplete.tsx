@@ -18,7 +18,7 @@ interface SearchScheduleTeacherAutocompleteProps {
 export function SearchScheduleTeacherAutocomplete({
   size = "small",
 }: Readonly<SearchScheduleTeacherAutocompleteProps>) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
 
   const teacherSearchInput = useSearchScheduleStore(state => state.teacherSearchInput);
   const debouncedTeacherSearch = useSearchScheduleStore(state => state.debouncedTeacherSearch);

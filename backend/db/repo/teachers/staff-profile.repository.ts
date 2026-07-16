@@ -13,7 +13,6 @@ import {
 } from "@/backend/db/schema";
 import { AccountStatus, OverrideState } from "@/backend/enum";
 import { parseAccountStatus, parseOverrideState } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type {
   LocalizedString,
@@ -29,6 +28,7 @@ import type {
   StaffProfileEntityInput,
 } from "@/backend/types";
 import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export interface ManagerProfileUpdateInput {
   readonly phone?: string | null;
@@ -56,8 +56,8 @@ export namespace StaffProfileRepository {
       .limit(1);
 
     if (existingProfile.length > 0) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("staff.alreadyExists"));
+      const { staff } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(staff.alreadyExists);
     }
 
     const [created] = await queryDb
@@ -70,8 +70,7 @@ export namespace StaffProfileRepository {
       .returning();
 
     if (!created) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("staff.createFailed"));
+      throw new Error("Failed to create staff profile");
     }
 
     const [userRow] = await queryDb
@@ -81,8 +80,8 @@ export namespace StaffProfileRepository {
       .limit(1);
 
     if (!userRow) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("userNotFound", { id: created.userId }));
+      const { userNotFound } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(userNotFound(created.userId));
     }
 
     return {
@@ -343,12 +342,12 @@ export namespace StaffProfileRepository {
     tx?: DBTransaction
   ): Promise<ManagerDirectoryRow> {
     const updateTx = async (t: DBTransaction): Promise<ManagerDirectoryRow> => {
-      const t18n = await getBackendTranslations({ locale, namespace: "errors" });
+      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
       const existing = await t.select().from(staffProfiles).where(eq(staffProfiles.id, staffProfileId)).limit(1);
 
       if (existing.length === 0) {
-        throw new Error(t18n("staffProfileNotFound"));
+        throw new Error(errorsTranslations.staffProfileNotFound);
       }
 
       const profile = existing[0];
@@ -389,7 +388,7 @@ export namespace StaffProfileRepository {
         .limit(1);
 
       if (updated.length === 0) {
-        throw new Error(t18n("staffProfileUpdateFailed"));
+        throw new Error("Failed to update staff profile");
       }
 
       logger.info("Manager profile updated", { staffProfileId });

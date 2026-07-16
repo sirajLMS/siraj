@@ -1,6 +1,6 @@
 import type { ProfileStaffLabels } from "@/shared/locale/types/profile";
 
-export const staff: ProfileStaffLabels = {
+export const profileStaffAr: ProfileStaffLabels = {
   ownSubtitle: "عرض وتحديث بيانات حسابك ومعلومات الاتصال.",
   subtitle: "إدارة الأدوار والصلاحيات على مستوى النظام للموظفين الإداريين.",
   adminBanner: "عرض إداري: الحالة والصلاحيات مرئية.",

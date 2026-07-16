@@ -28,6 +28,6 @@ export async function resolveEffectiveMeetingForClassInstance(classInstanceId: s
 }
 
 export async function resolveEffectiveMeetingForClassInstanceFromContext(classInstanceId: string, ctx: BaseContext) {
-  const tErrors = await ctx.t("errors");
+  const tErrors = ctx.t().errorsTranslations;
   return resolveEffectiveMeetingForClassInstance(classInstanceId, tErrors);
 }

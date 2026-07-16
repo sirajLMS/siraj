@@ -26,7 +26,7 @@ function DaysOfWeekSelect({
   readonly value: DayOfWeek[];
   readonly onChange: (event: SelectChangeEvent<string[]>) => void;
 }) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
 
   return (
     <FormControl size="small" fullWidth>
@@ -62,7 +62,7 @@ interface FilterFieldsProps {
 }
 
 function FilterFields({ draft, onDraftChange }: Readonly<FilterFieldsProps>) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
 
   const handleDaysOfWeekChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value;
@@ -138,7 +138,7 @@ interface DrawerActionsProps {
 }
 
 function DrawerActions({ onClear, onApply }: Readonly<DrawerActionsProps>) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
 
   return (
     <Box
@@ -167,7 +167,7 @@ export function SearchScheduleFilterDrawerMobile({
   onDraftChange,
   onApply,
 }: Readonly<SearchScheduleFilterDrawerProps>) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
 
   const handleClear = () => {
     onDraftChange(getClearDrawerFiltersPatch());

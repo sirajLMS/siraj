@@ -12,11 +12,11 @@ export namespace NotificationAlertsService {
     try {
       const canViewAlerts = await PermissionsService.hasPermission(userId, AppPermission.NOTIFICATION_VIEW_ALERTS);
       if (!canViewAlerts) {
-        const t = await getServerTranslations(locale ?? "en", "errors");
+        const t = getServerTranslations(locale ?? "en").errorsTranslations;
         throw new Error(t.unauthorizedAction);
       }
 
-      const tNotifications = await getServerTranslations(locale ?? "en", "dashboard.core.notifications");
+      const tNotifications = getServerTranslations(locale ?? "en").dashboardTranslations.coreNotifications;
 
       const unansweredComplaints = await db
         .select({

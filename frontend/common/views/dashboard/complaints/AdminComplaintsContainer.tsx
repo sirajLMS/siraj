@@ -27,9 +27,8 @@ const StyledErrorTypography = styled(Typography)(({ theme }) => ({
 }));
 
 export function AdminComplaintsContainer() {
-  const t = useAppTranslation("dashboard.complaints");
-  const tc = useAppTranslation("common");
-  const labels = buildComplaintsLabels(t);
+  const t = useAppTranslation();
+  const labels = buildComplaintsLabels(t.dashboardTranslations.complaints);
   const hasPermission = useUserStore(state => state.hasPermission);
 
   const searchQuery = useAdminComplaintsStore(state => state.searchQuery);
@@ -151,7 +150,7 @@ export function AdminComplaintsContainer() {
 
   if (error) {
     logger.error("Error loading complaints:", { error });
-    return <StyledErrorTypography>{tc.loadFailed}</StyledErrorTypography>;
+    return <StyledErrorTypography>{t.commonTranslations.loadFailed}</StyledErrorTypography>;
   }
 
   return (

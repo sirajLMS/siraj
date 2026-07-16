@@ -19,7 +19,7 @@ export function StaffProfileView({
   readonly displayCurrency: CurrencyCode | null | undefined;
   readonly isAdminScope: boolean;
 }) {
-  const t = useAppTranslation("profile").staff;
+  const t = useAppTranslation().profileTranslations.staff;
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canView } = useProfileFieldAccess({ scope });
 

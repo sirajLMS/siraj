@@ -11,7 +11,7 @@ type ProfileRestrictedSectionProps = {
 };
 
 export function ProfileRestrictedSection({ title, description }: Readonly<ProfileRestrictedSectionProps>) {
-  const t = useAppTranslation("profile").fieldAccess;
+  const t = useAppTranslation().profileTranslations.base.fieldAccess;
 
   return (
     <SectionPanel title={title ?? t.restrictedTitle}>

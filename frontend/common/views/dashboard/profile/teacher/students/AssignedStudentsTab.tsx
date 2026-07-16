@@ -24,7 +24,7 @@ type AssignedStudentsTabProps = {
 
 function toViewRow(
   student: AssignedStudentsItem,
-  t: ReturnType<typeof useAppTranslation<"profile">>["students"]
+  t: ReturnType<typeof useAppTranslation>["profileTranslations"]["base"]["students"]
 ): AssignedStudentsRow {
   const classesTotal = student.classesTotal ?? 0;
   const classesRemaining = student.classesRemaining ?? 0;
@@ -56,7 +56,7 @@ function LoadingState() {
 }
 
 export function AssignedStudentsTab({ assignedStudents, loading, hasError, onRetry }: AssignedStudentsTabProps) {
-  const t = useAppTranslation("profile").students;
+  const t = useAppTranslation().profileTranslations.base.students;
   const [selectedClass, setSelectedClass] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);

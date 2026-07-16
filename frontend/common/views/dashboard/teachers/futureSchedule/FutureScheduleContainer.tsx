@@ -23,7 +23,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 import { getErrorMessage } from "@/shared/utils/error";
 
 export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleContainerProps>) {
-  const t = useAppTranslation("dashboard.teacherFutureSchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
   const notifications = useNotifications();
   useDocumentTitle(null, "dashboard.teacherFutureSchedule", "pageTitle");
   const { data, loading, error, refetch } = useQuery(teacherFutureScheduleQueryDocument, {

@@ -1,6 +1,6 @@
 import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const directory: TeachersDirectoryLabels = {
+export const dashboardTeachersDirectoryAr: TeachersDirectoryLabels = {
   pageTitle: "دليل المعلمين",
   pageSubtitle: "إدارة شاملة لجميع الكوادر التعليمية النشطة وغير النشطة.",
   metrics: {

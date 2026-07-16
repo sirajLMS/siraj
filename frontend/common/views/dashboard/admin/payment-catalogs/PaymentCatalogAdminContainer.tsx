@@ -37,7 +37,7 @@ function resolveEntryName(row: PaymentCatalogRow | null, locale: string): string
 
 export function PaymentCatalogAdminContainer() {
   const locale = useAppLocale();
-  const t = useAppTranslation("dashboard.paymentCatalogs");
+  const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
   const notifications = useNotifications();
   const [activeTab, setActiveTab] = useState<PaymentCatalogKind>("mobileWallet");
   const [editOpen, setEditOpen] = useState(false);

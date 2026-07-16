@@ -19,7 +19,7 @@ gqlSchemaBuilder.mutationField("createTeacherImportantNote", t =>
       const userId = await requireAuth(ctx);
       const teacher = await SchedulingRepository.getTeacherByUserId(userId);
       const teacherId = teacher?.id ?? null;
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return TeacherNotesService.createNote(
         userId,
         {
@@ -47,7 +47,7 @@ gqlSchemaBuilder.mutationField("updateTeacherImportantNote", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return TeacherNotesService.updateNote(
         userId,
         args.id,
@@ -74,7 +74,7 @@ gqlSchemaBuilder.mutationField("deleteTeacherImportantNote", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       await TeacherNotesService.deleteNote(userId, args.id, tErrors);
       return true;
     },

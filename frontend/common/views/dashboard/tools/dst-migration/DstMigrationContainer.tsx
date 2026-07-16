@@ -30,7 +30,7 @@ function detectDstOffsetMinutes(): number | null {
 
 export function DstMigrationContainer() {
   const notifications = useNotifications();
-  const t = useAppTranslation("dashboard.dstMigration");
+  const t = useAppTranslation().dashboardTranslations.dstMigration;
   const [executeDstUpdate, { loading, data }] = useMutation(executeDstBulkUpdateMutationDocument);
 
   const report = data?.executeDstBulkUpdate;

@@ -1,4 +1,4 @@
-export const typeSelector = {
+export const uiPaymentMethodTypeSelectorEn = {
   title: "Payment method type",
   mobileWallet: "Mobile wallet",
   paymentLink: "Payment link",

@@ -11,7 +11,7 @@ export function DeleteSubjectDialog({
   subjectName,
   isLoading,
 }: Readonly<DeleteSubjectDialogProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
 
   return (
     <BaseDeleteDialog

@@ -23,7 +23,7 @@ import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 
 function PolicyOverviewCard() {
-  const t = useAppTranslation("dashboard.parentLifecycle");
+  const t = useAppTranslation().dashboardTranslations.parentLifecycle;
 
   return (
     <Box
@@ -61,7 +61,7 @@ function PolicyOverviewCard() {
 }
 
 function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
-  const t = useAppTranslation("dashboard.parentLifecycle");
+  const t = useAppTranslation().dashboardTranslations.parentLifecycle;
   const { control, register } = useFormContext<LifecycleUpdateFormData>();
 
   return (
@@ -107,8 +107,8 @@ function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
 }
 
 export function ParentLifecycleView({ parent, isUpdating, onUpdateLifecycle }: Readonly<ParentLifecycleViewProps>) {
-  const t = useAppTranslation("dashboard.parentLifecycle");
-  const tp = useAppTranslation("profile");
+  const t = useAppTranslation().dashboardTranslations.parentLifecycle;
+  const tp = useAppTranslation().profileTranslations.base;
 
   const methods = useForm<LifecycleUpdateFormData>({
     resolver: zodResolver(lifecycleUpdateSchema),

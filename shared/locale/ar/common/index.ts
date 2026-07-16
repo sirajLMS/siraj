@@ -1,6 +1,6 @@
 import type { CommonLabels } from "@/shared/locale/types/common";
 
-export const common: CommonLabels = {
+export const commonAr: CommonLabels = {
   title: "سراج",
   description:
     "مرحبًا بك في سراج. تم تهيئة هذا التطبيق بنجاح مع Next.js و Material-UI وتم تخصيصه بالكامل بجماليات علامتك التجارية الفاخرة.",

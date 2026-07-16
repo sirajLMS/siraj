@@ -12,7 +12,7 @@ export interface PermissionCatalogCardListProps {
 }
 
 export function PermissionCatalogCardList({ permissions, groups }: Readonly<PermissionCatalogCardListProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   if (permissions.length === 0) {
     return (

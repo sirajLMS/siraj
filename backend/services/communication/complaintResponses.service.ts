@@ -1,8 +1,9 @@
 import { ComplaintRepository, ComplaintResponseRepository, ParentRepository } from "@/backend/db/repo";
 import { AppPermission, NotificationEventType } from "@/backend/enum";
-import { getBackendTranslations, logger } from "@/backend/lib";
+import { logger } from "@/backend/lib/logger";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type { ComplaintResponseReturnType, ComplaintResponseSubmitInput } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 type ComplaintById = NonNullable<Awaited<ReturnType<typeof ComplaintRepository.getComplaintById>>>;
 
@@ -13,14 +14,13 @@ async function assertCanRespondToComplaint(
 ): Promise<ComplaintById> {
   const hasPermission = await PermissionsService.hasPermission(responderUserId, AppPermission.COMPLAINTS_RESPOND);
   if (!hasPermission) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("insufficientPermissions"));
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+    throw new Error(tErrors.insufficientPermissions);
   }
 
   const complaint = await ComplaintRepository.getComplaintById(complaintId);
   if (!complaint) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("complaintNotFound", { id: complaintId }));
+    throw new Error("complaintNotFound");
   }
 
   return complaint;

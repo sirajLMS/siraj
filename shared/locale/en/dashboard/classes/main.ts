@@ -1,6 +1,6 @@
 import type { MainLabels } from "@/shared/locale/types/dashboard/classes";
 
-export const main: MainLabels = {
+export const dashboardClassesMainEn: MainLabels = {
   pageTitle: "Add Recurring Class",
   title: "Add Recurring Class",
   subtitle: "Configure schedule for automatic weekly sessions",

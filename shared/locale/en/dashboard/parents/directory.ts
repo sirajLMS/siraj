@@ -1,6 +1,6 @@
 import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents";
 
-export const directory: ParentsDirectoryLabels = {
+export const dashboardParentsDirectoryEn: ParentsDirectoryLabels = {
   pageTitle: "Parents Directory",
   pageSubtitle: "Manage guardian profiles, subscription statuses, and financial records.",
   searchPlaceholder: "Search parents...",

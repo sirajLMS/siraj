@@ -1,7 +1,6 @@
 import { BillingRepository, FxSyncRepository } from "@/backend/db/repo";
 import { AppPermission, FxSyncStatus } from "@/backend/enum";
 import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   CurrencyExchangeRateReturnType,
@@ -9,6 +8,7 @@ import type {
   FxSyncHealthReturnType,
   PaginationArgs,
 } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 const FX_STALE_MS = 24 * 60 * 60 * 1000;
 
@@ -43,8 +43,8 @@ export namespace FxRateQueryService {
       AppPermission.BILLING_VIEW_EXCHANGE_RATES
     );
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
     }
   }
 

@@ -1,6 +1,6 @@
 import type { PaymentComponentLabels } from "@/shared/locale/types/dashboard/billing/payment";
 
-export const payment: PaymentComponentLabels = {
+export const dashboardBillingPaymentAr: PaymentComponentLabels = {
   paymentMethodSelector: {
     label: "طريقة الدفع",
     placeholder: "اختر طريقة دفع محفوظة",

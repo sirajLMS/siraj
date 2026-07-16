@@ -16,7 +16,7 @@ function formatStatusLabel(status: string): string {
 }
 
 export function AssignedStudentsCardList({ rows }: AssignedStudentsCardListProps) {
-  const t = useAppTranslation("profile").students;
+  const t = useAppTranslation().profileTranslations.base.students;
 
   return (
     <Stack spacing={1.5} aria-label={t.mobileListLabel}>

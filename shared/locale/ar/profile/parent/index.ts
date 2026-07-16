@@ -1,6 +1,6 @@
 import type { ProfileParentLabels } from "@/shared/locale/types/profile";
 
-export const parent: ProfileParentLabels = {
+export const profileParentAr: ProfileParentLabels = {
   ownSubtitle: "عرض وتحديث بيانات الاتصال والتواصل الخاصة بك.",
   subtitle: "إدارة بيانات الاتصال والتواصل لولي الأمر الأساسي للطالب.",
   adminBanner: "عرض إداري: تظهر حقول الهوية والفوترة.",

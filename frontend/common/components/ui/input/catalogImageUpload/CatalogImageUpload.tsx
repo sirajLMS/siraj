@@ -70,7 +70,7 @@ type UrlFallbackFieldProps = {
 
 function useImageUpload(params: ImageUploadHookParams) {
   const { onImageUrlChangeAction, onUploadAction, onFilePathChangeAction, maxSizeMb = DEFAULT_MAX_SIZE_MB } = params;
-  const t = useAppTranslation("ui.catalogImageUpload");
+  const t = useAppTranslation().uiTranslations.catalogImageUpload;
   const notifications = useNotifications();
   const objectUrlRef = useRef<string | null>(null);
 
@@ -321,7 +321,7 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
   error = false,
   errorMessage,
 }): React.ReactNode => {
-  const t = useAppTranslation("ui.catalogImageUpload");
+  const t = useAppTranslation().uiTranslations.catalogImageUpload;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const upload = useImageUpload({
     onImageUrlChangeAction,

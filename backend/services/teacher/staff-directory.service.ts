@@ -1,17 +1,17 @@
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { PageInfo, PaginationArgs, TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace StaffDirectoryService {
   async function assertDirectoryAccess(userId: string, locale?: string): Promise<void> {
     const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.STAFF_VIEW_DIRECTORY);
     if (!isAuthorized) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.unauthorizedAction);
     }
   }
 

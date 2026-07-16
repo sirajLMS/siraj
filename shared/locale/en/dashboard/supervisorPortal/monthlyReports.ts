@@ -1,6 +1,6 @@
 import type { SupervisorMonthlyReportsLabels } from "@/shared/locale/types/dashboard/supervisorPortal/monthlyReports";
 
-export const monthlyReports: SupervisorMonthlyReportsLabels = {
+export const dashboardSupervisorPortalMonthlyReportsEn: SupervisorMonthlyReportsLabels = {
   pageTitle: "Monthly Reports",
   reportTypeToggle: "Report Type",
   teacherReport: "Teacher Report",

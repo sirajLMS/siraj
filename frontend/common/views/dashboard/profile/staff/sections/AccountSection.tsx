@@ -51,7 +51,7 @@ function StaffRoleStatusView({
 }
 
 export function AccountSection(props: AccountSectionProps) {
-  const t = useAppTranslation("profile").staff;
+  const t = useAppTranslation().profileTranslations.staff;
   const { canView, canEdit } = useProfileFieldAccess({ scope: props.scope });
 
   if (props.mode === "edit") {

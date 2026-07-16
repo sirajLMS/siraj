@@ -6,7 +6,7 @@ export async function requireNotImpersonating(ctx: BaseContext): Promise<void> {
     return;
   }
 
-  const tErrors = await ctx.t("errors");
+  const tErrors = ctx.t().errorsTranslations;
   throw new GraphQLError(tErrors.auth.impersonationNotAllowedDuringSession, {
     extensions: { code: "FORBIDDEN" },
   });

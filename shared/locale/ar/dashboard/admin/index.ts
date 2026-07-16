@@ -1,6 +1,6 @@
 import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
 
-export const admin: AdminDashboardLabels = {
+export const dashboardAdminAr: AdminDashboardLabels = {
   // ─── Static strings ────────────────────────────────────────────────
   pageTitle: "لوحة التحكم",
   roleLabel: "لوحة تحكم المدير",

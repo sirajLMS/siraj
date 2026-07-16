@@ -1,6 +1,6 @@
 import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const futureSchedule: TeacherFutureScheduleLabels = {
+export const dashboardTeacherFutureScheduleAr: TeacherFutureScheduleLabels = {
   pageTitle: "جدول المعلم القادم",
   jumpToDate: "الانتقال إلى تاريخ",
   leaveQuota: "حصة الإجازة",

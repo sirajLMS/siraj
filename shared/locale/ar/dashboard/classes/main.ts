@@ -1,6 +1,6 @@
 import type { MainLabels } from "@/shared/locale/types/dashboard/classes";
 
-export const main: MainLabels = {
+export const dashboardClassesMainAr: MainLabels = {
   pageTitle: "إضافة حصة متكررة",
   title: "إضافة حصة متكررة",
   subtitle: "تكوين الجدول للجلسات الأسبوعية التلقائية",

@@ -1,6 +1,6 @@
 import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
-export const dstMigration: DstMigrationLabels = {
+export const dashboardDstMigrationEn: DstMigrationLabels = {
   pageTitle: "Daylight Saving Time Adjustment",
   pageSubtitle:
     "Bulk migration tool to adjust institutional schedules for upcoming seasonal time changes. This tool audits all active classes and offsets local start/end times by 60 minutes to maintain global synchronization.",

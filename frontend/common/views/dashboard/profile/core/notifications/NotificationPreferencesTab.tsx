@@ -38,7 +38,7 @@ function buildDefaultPreferences(): NotificationPrefRow[] {
 }
 
 export function NotificationPreferencesTab({ isActive }: Readonly<NotificationPreferencesTabProps>) {
-  const t = useAppTranslation("profile.notifications");
+  const t = useAppTranslation().profileTranslations.notifications;
   const [localPreferences, setLocalPreferences] = useState<NotificationPrefRow[]>(buildDefaultPreferences);
   const pendingChangesRef = useRef<Map<string, PendingChange>>(new Map());
   const [snackbarOpen, setSnackbarOpen] = useState(false);

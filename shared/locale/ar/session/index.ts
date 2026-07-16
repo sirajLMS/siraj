@@ -1,6 +1,6 @@
 import type { SessionLabels } from "@/shared/locale/types/session";
 
-export const session: SessionLabels = {
+export const sessionAr: SessionLabels = {
   leaveProcessedDescription: successorId => `تمت معالجة طلب الإجازة، تمت إعادة الجدولة إلى الجلسة ${successorId}.`,
   absentWaitingRemark: "انتظر طوال مدة الحصة.",
   leaveRescheduledRemark: "تمت الموافقة على الإجازة - تمت إعادة جدولة الجلسة.",

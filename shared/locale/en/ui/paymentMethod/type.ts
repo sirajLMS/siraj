@@ -1,4 +1,4 @@
-export const type = {
+export const uiPaymentMethodTypeEn = {
   mobileWallet: "Mobile wallet",
   paymentLink: "Payment link",
   onlineAccount: "Online account",

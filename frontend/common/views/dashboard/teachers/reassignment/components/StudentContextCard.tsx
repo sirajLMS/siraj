@@ -6,7 +6,7 @@ import type { StudentContextCardProps } from "@/frontend/common/views/dashboard/
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function StudentContextCard({ student }: Readonly<StudentContextCardProps>) {
-  const t = useAppTranslation("dashboard.teacherReassignment").studentContext;
+  const t = useAppTranslation().dashboardTranslations.teacherReassignment.studentContext;
 
   return (
     <BaseCard>

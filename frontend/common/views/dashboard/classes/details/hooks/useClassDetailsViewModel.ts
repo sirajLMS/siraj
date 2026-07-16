@@ -14,6 +14,7 @@ import { useEventLogDownload } from "@/frontend/common/views/dashboard/classes/d
 import { formatClassDetailDate } from "@/frontend/common/views/dashboard/classes/details/types";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details";
 
 const noopAsync = () => Promise.resolve();
 
@@ -29,7 +30,7 @@ const noopSessionActionProps = {
   error: null,
 };
 
-type Translations = ReturnType<typeof useAppTranslation<"dashboard.classDetails">>;
+type Translations = ClassDetailsLabels;
 type Handlers = ReturnType<typeof useClassActionHandlers>;
 type FeedbackState = { readonly message: string; readonly severity: "success" | "error" } | null;
 
@@ -175,7 +176,7 @@ export interface ClassDetailsViewModel {
   readonly feedbackState: { readonly message: string; readonly severity: "success" | "error" } | null;
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
-  readonly t: ReturnType<typeof useAppTranslation<"dashboard.classDetails">>;
+  readonly t: ClassDetailsLabels;
   readonly formattedScheduledDate: string;
   readonly formattedStartTime: string;
   readonly formattedEndTime: string;
@@ -184,7 +185,7 @@ export interface ClassDetailsViewModel {
 export function useClassDetailsViewModel(): ClassDetailsViewModel {
   const router = useRouter();
   const locale = useAppLocale();
-  const t = useAppTranslation("dashboard.classDetails");
+  const t = useAppTranslation().dashboardTranslations.classDetails;
 
   const params = useParams();
   const rawId = params?.id;

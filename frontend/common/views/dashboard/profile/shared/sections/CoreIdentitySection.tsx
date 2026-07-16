@@ -51,7 +51,7 @@ type CoreIdentityEditProps = {
 type CoreIdentitySectionProps = CoreIdentityViewProps | CoreIdentityEditProps;
 
 export function CoreIdentitySection(props: CoreIdentitySectionProps) {
-  const t = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.base;
   const { canView, showField } = useProfileFieldAccess({ scope: props.scope });
 
   if (!canView("core_identity")) {

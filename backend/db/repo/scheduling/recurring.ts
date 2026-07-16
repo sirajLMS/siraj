@@ -90,7 +90,7 @@ async function validateRecurringScheduleAvailability(
   scheduledEndAt: Date,
   tErrors?: ErrorsLabels
 ): Promise<void> {
-  const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+  const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
   await acquireLocks(t, teacherId, studentId);
   await validateTeacherAssignment(t, studentId, teacherId, scheduledStartAt, tFuncErrors);
   await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, scheduledStartAt, scheduledEndAt, t);
@@ -119,7 +119,7 @@ async function createSingleRecurringInstance(params: {
 }): Promise<string> {
   const { t, recurringScheduleId, day, weekOffset, effectiveStartDate, input, utcOffsetSnapshot, now, tErrors } =
     params;
-  const tFuncErrors = tErrors ?? (await getServerTranslations("en", "errors"));
+  const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
   const scheduledStartAt = computeScheduledStartForDay(
     day.dayOfWeek,
     day.startTime,

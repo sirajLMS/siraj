@@ -130,8 +130,8 @@ function StudentProfilePageContent({
   readonly profile: StudentProfileQueryData | undefined;
   readonly loading: boolean;
 }) {
-  const t = useAppTranslation("dashboard.studentProfile");
-  const tStatus = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentProfile;
+  const tStatus = useAppTranslation().dashboardTranslations.studentStatus;
   const searchParams = useSearchParams();
   const router = useRouter();
   const { canView, showField } = useStudentFieldAccess();

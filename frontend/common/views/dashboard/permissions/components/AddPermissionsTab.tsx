@@ -51,7 +51,7 @@ export function AddPermissionsTab({
   onCategoryChange,
   loading = false,
 }: Readonly<AddPermissionsTabProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   const addPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {
     return [

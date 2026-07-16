@@ -68,7 +68,7 @@ function WhatsAppLink({ label, value }: { readonly label: string; readonly value
 }
 
 export function ParentSocialContainer() {
-  const t = useAppTranslation("dashboard.parentSocial");
+  const t = useAppTranslation().dashboardTranslations.parentSocial;
   const { data, loading, error } = useQuery(parentOwnProfileQueryDocument);
   const profile = data?.parentOwnProfile;
 

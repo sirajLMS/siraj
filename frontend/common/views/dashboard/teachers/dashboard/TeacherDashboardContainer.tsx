@@ -188,9 +188,9 @@ function mapProgressFeed(
 }
 
 export function TeacherDashboardContainer() {
-  const t = useAppTranslation("dashboard.teacherDashboard");
-  const dashboardT = useAppTranslation("dashboard.admin");
-  const tJoin = useAppTranslation("ui.meetingConfig.join");
+  const t = useAppTranslation().dashboardTranslations.teacherDashboard;
+  const dashboardT = useAppTranslation().dashboardTranslations.admin;
+  const tJoin = useAppTranslation().uiTranslations.meetingConfigJoin;
   const router = useRouter();
   const permissions = useUserStore(state => state.permissions);
   const userName = useUserStore(state => state.name);
@@ -262,7 +262,7 @@ export function TeacherDashboardContainer() {
   const [submitLessonReport] = useMutation(submitLessonReportMutationDocument);
 
   const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin.emptyTeacher);
-  const lessonReportI18n = useAppTranslation("dashboard.lms.lessonReports");
+  const lessonReportI18n = useAppTranslation().dashboardTranslations.lmsLessonReports;
   const lessonReportLabels: LessonReportFormLabels = useMemo(
     () => ({
       attendanceEvaluation: lessonReportI18n.attendanceEvaluation,

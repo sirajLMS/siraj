@@ -1,6 +1,6 @@
 import type { StudentProfileLabels } from "@/shared/locale/types/dashboard/students";
 
-export const profile: StudentProfileLabels = {
+export const dashboardStudentProfileEn: StudentProfileLabels = {
   title: "Student Profile",
   subtitle: "View and manage student information",
   restrictedIdentity: id => `Student ${id}`,

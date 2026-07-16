@@ -9,7 +9,7 @@ import { teacherAssignedStudentsQueryDocument } from "@/frontend/common/graphql/
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function TeacherStudentsContainer() {
-  const t = useAppTranslation("dashboard.teacherStudents");
+  const t = useAppTranslation().dashboardTranslations.teacherStudents;
   const { data, loading, error } = useQuery(teacherAssignedStudentsQueryDocument);
 
   const rows = data?.teacherAssignedStudents?.rows ?? [];

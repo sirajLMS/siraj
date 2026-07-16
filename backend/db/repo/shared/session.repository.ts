@@ -2,9 +2,9 @@ import { and, desc, eq, lte, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
-import { getBackendTranslations, logger } from "@/backend/lib";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { getEnvironmentConfig } from "@/backend/lib/env";
+import logger from "@/backend/lib/logger";
 import { getRedisService, SessionRedisService } from "@/backend/services";
 import type {
   RedisGroupSimulationSessionData,
@@ -219,12 +219,11 @@ export namespace SessionRepository {
   export const create = async (
     input: SessionCreationOptions,
     tx?: DBTransaction,
-    locale?: string
+    _locale?: string
   ): Promise<SessionSelectType> => {
     const runner = async (t: DBTransaction) => {
       if (!input.userId) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("userIdRequiredSessionCreate"));
+        throw new Error("User ID (userId) is required to create a session");
       }
 
       const hashedId = hashSessionId(input.hashedId);
@@ -290,12 +289,11 @@ export namespace SessionRepository {
   export const update = async (
     input: Omit<SessionInsertType, "lastActivity"> & { roleName?: string },
     tx?: DBTransaction,
-    locale?: string
+    _locale?: string
   ): Promise<SessionSelectType> => {
     const runner = async (t: DBTransaction) => {
       if (!input.userId) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("userIdRequiredSessionUpdate"));
+        throw new Error("User ID (userId) is required to update a session");
       }
 
       const hashedId = hashSessionId(input.hashedId);
@@ -317,8 +315,7 @@ export namespace SessionRepository {
           .where(eq(sessions.hashedId, hashedId))
           .returning();
         if (returning.length === 0) {
-          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(tFunc("sessionNotFound", { id: hashedId }));
+          throw new Error(`Session ${hashedId} not found`);
         }
         return returning[0];
       }
@@ -328,8 +325,7 @@ export namespace SessionRepository {
       const success = await redisService.touchSession(hashedId, config.ttlSeconds);
 
       if (!success) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("sessionNotFound", { id: hashedId }));
+        throw new Error(`Session ${hashedId} not found`);
       }
 
       const expiresAt = new Date(now.getTime() + config.ttlSeconds * 1000);

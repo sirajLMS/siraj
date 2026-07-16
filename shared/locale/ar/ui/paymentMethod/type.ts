@@ -1,4 +1,4 @@
-export const type = {
+export const uiPaymentMethodTypeAr = {
   mobileWallet: "محفظة جوال",
   paymentLink: "رابط دفع",
   onlineAccount: "حساب إلكتروني",

@@ -1,6 +1,6 @@
 import type { RescheduleTrackingLabels } from "@/shared/locale/types/dashboard/classes";
 
-export const rescheduleTracking: RescheduleTrackingLabels = {
+export const dashboardRescheduleTrackingEn: RescheduleTrackingLabels = {
   pageTitle: "Dashboard Overview",
   sectionTitle: "Class Schedule & Tracking",
   exportData: "Export Data",

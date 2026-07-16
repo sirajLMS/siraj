@@ -1,18 +1,18 @@
 import { BookRepository } from "@/backend/db/repo/books/book.repository";
 import { AppPermission, type AvailabilityStatus } from "@/backend/enum";
 import { DomainError, UnauthorizedError } from "@/backend/lib";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { BookReturnType } from "@/backend/types/books/book.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace BookService {
   export async function listBooks(actorUserId: string, locale?: string): Promise<BookReturnType[]> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const t = getServerTranslations(locale ?? "ar").errorsTranslations;
 
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_LIST);
     if (!hasPermission) {
-      throw new UnauthorizedError(t("unauthorizedAction"));
+      throw new UnauthorizedError(t.unauthorizedAction);
     }
 
     return await BookRepository.findMany();
@@ -20,11 +20,11 @@ export namespace BookService {
 
   export async function deleteBook(bookId: string, actorUserId: string, locale?: string): Promise<boolean> {
     try {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
 
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_DELETE);
       if (!hasPermission) {
-        throw new UnauthorizedError(t("unauthorizedAction"));
+        throw new UnauthorizedError(t.unauthorizedAction);
       }
 
       await BookRepository.deleteBook(bookId, actorUserId);
@@ -37,8 +37,7 @@ export namespace BookService {
           throw error;
         }
       }
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("bookDeleteFailed"), { cause: error });
+      throw new Error("bookDeleteFailed", { cause: error });
     }
   }
 

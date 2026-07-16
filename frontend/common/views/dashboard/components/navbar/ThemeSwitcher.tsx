@@ -6,7 +6,7 @@ import { NavbarIcon } from "@/frontend/common/views/dashboard/components/navbar/
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function ThemeSwitcher() {
-  const t = useAppTranslation("common");
+  const t = useAppTranslation().commonTranslations;
   const { mode, toggleTheme } = useThemeMode();
   const isDark = mode === "dark";
 

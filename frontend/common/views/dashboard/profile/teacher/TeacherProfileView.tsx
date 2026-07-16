@@ -55,7 +55,7 @@ export function TeacherProfileView({
   readonly targetUserId?: string;
   readonly meetingTabHref?: string;
 }) {
-  const t = useAppTranslation("profile").teacher;
+  const t = useAppTranslation().profileTranslations.teacher;
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canView } = useProfileFieldAccess({ scope });
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;

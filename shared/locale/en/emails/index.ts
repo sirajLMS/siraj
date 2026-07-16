@@ -1,6 +1,6 @@
 import type { EmailsLabels } from "@/shared/locale/types/emails";
 
-export const emails: EmailsLabels = {
+export const emailsEn: EmailsLabels = {
   complaintResponse: {
     subject: ({ complaintTitle }) => `Response to your complaint: ${complaintTitle}`,
     greeting: ({ parentName }) => `Dear ${parentName},`,

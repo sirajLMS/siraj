@@ -72,8 +72,8 @@ function ReassignmentErrorState({ message }: { readonly message: string }) {
 }
 
 export function TeacherReassignmentContainer() {
-  const t = useAppTranslation("dashboard.teacherReassignment");
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation().dashboardTranslations.teacherReassignment;
+  const tc = useAppTranslation().commonTranslations;
   const searchParams = useSearchParams();
   const studentId = searchParams.get("studentId") ?? "";
   const notifications = useNotifications();

@@ -58,7 +58,7 @@ export function PermissionFilterBar({
   selectedCount,
   isLoading,
 }: Readonly<PermissionFilterBarProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (
     <StyledFilterContainer>

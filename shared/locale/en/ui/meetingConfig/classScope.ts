@@ -1,4 +1,4 @@
-export const classScope = {
+export const uiMeetingConfigClassScopeEn = {
   sectionTitle: "Class Meeting Config",
   sectionSubtitle: "Override teacher default meeting config for this class or recurring schedule.",
   selectLabel: "Meeting Config",

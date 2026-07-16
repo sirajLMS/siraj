@@ -1,6 +1,6 @@
 import type { ParentProfileLabels } from "@/shared/locale/types/dashboard/parents";
 
-export const profile: ParentProfileLabels = {
+export const dashboardParentProfileAr: ParentProfileLabels = {
   pageTitle: "الملف الشخصي لولي الأمر",
   status: {
     regular: "عادي",

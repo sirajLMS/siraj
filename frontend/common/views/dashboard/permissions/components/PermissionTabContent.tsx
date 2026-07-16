@@ -40,7 +40,7 @@ export function PermissionTabContent({
   openManageOverrides,
   setSelectedUserIdForOverrides,
 }: Readonly<PermissionTabContentProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   if (isLoading && !groups) {
     return (

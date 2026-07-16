@@ -3,9 +3,8 @@ import type {
   ComplaintsLabels,
   ComplaintsParentLabels,
 } from "@/shared/locale/types/dashboard/complaints";
-import type { MessageSchema } from "@/shared/locale/types/message";
 
-function buildParentLabels(t: MessageSchema["dashboard.complaints"]["parent"]): ComplaintsParentLabels {
+function buildParentLabels(t: ComplaintsParentLabels): ComplaintsParentLabels {
   return {
     pageTitle: t.pageTitle,
     formTitle: t.formTitle,
@@ -44,7 +43,7 @@ function buildParentLabels(t: MessageSchema["dashboard.complaints"]["parent"]): 
   };
 }
 
-function buildAdminLabels(t: MessageSchema["dashboard.complaints"]["admin"]): ComplaintsAdminLabels {
+function buildAdminLabels(t: ComplaintsAdminLabels): ComplaintsAdminLabels {
   return {
     pageTitle: t.pageTitle,
     pageSubtitle: t.pageSubtitle,
@@ -84,6 +83,6 @@ function buildAdminLabels(t: MessageSchema["dashboard.complaints"]["admin"]): Co
   };
 }
 
-export function buildComplaintsLabels(t: MessageSchema["dashboard.complaints"]): ComplaintsLabels {
+export function buildComplaintsLabels(t: ComplaintsLabels): ComplaintsLabels {
   return { parent: buildParentLabels(t.parent), admin: buildAdminLabels(t.admin) };
 }

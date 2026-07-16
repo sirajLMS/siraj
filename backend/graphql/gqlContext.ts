@@ -3,7 +3,7 @@ import { UserRepository } from "@/backend/db/repo";
 import { type AppPermission, type CurrencyCode, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { MessageSchema } from "@/shared/locale/types/message";
+import type { Translations } from "@/shared/locale/types/message";
 
 export type BaseContext = {
   user:
@@ -28,7 +28,7 @@ export type BaseContext = {
   locale: string;
   billingFxDisplayCurrency?: CurrencyCode | null;
   billingFxDisplayCurrencyByUserId?: Map<string, CurrencyCode | null>;
-  t: <K extends keyof MessageSchema>(namespace: K) => Promise<MessageSchema[K]>;
+  t: () => Translations;
 };
 
 export type AuthContexts = {
@@ -68,7 +68,7 @@ export async function createContext({
       refreshToken: undefined,
       sessionId: undefined,
       locale,
-      t: <K extends keyof MessageSchema>(namespace: K) => getServerTranslations(locale, namespace),
+      t: () => getServerTranslations(locale),
     };
   }
 
@@ -94,6 +94,6 @@ export async function createContext({
     refreshToken: undefined,
     sessionId: undefined,
     locale,
-    t: <K extends keyof MessageSchema>(namespace: K) => getServerTranslations(locale, namespace),
+    t: () => getServerTranslations(locale),
   };
 }

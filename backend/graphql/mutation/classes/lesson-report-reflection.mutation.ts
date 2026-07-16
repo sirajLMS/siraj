@@ -21,7 +21,7 @@ gqlSchemaBuilder.mutationField("submitStudentLessonReportReflection", t =>
         AppPermission.STUDENT_VIEW_OWN_DASHBOARD
       );
       if (!hasPermission) {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.insufficientPermissions);
       }
       return LessonReportService.submitStudentReflection(

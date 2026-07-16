@@ -45,7 +45,7 @@ export interface TeacherViewLabels {
 }
 
 export const useAdminViewLabels = (_timezone: string): AdminViewLabels => {
-  const t = useAppTranslation("dashboard.classDetails");
+  const t = useAppTranslation().dashboardTranslations.classDetails;
 
   return useMemo(
     () => ({
@@ -115,7 +115,7 @@ export const useAdminViewLabels = (_timezone: string): AdminViewLabels => {
 };
 
 export const useTeacherViewLabels = (_timezone: string): TeacherViewLabels => {
-  const t = useAppTranslation("dashboard.classDetails");
+  const t = useAppTranslation().dashboardTranslations.classDetails;
 
   return useMemo(() => {
     const statusLabels: Record<ClassInstanceStatus, string> = {

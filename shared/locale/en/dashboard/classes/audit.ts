@@ -1,6 +1,6 @@
 import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes";
 
-export const classAudit: ClassAuditLabels = {
+export const dashboardClassAuditEn: ClassAuditLabels = {
   invalidClassId: "Invalid class ID",
   pageTitle: "Class Details View",
   mobileTitle: "Class Audit Log",
@@ -69,4 +69,4 @@ export const classAudit: ClassAuditLabels = {
   meetingIdNA: "Not available",
 };
 
-export { classAudit as audit };
+export { dashboardClassAuditEn as audit };

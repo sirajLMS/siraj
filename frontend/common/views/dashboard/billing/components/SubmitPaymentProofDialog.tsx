@@ -278,8 +278,8 @@ export function SubmitPaymentProofDialog({
   onSuccess,
   onError,
 }: SubmitPaymentProofDialogProps): React.ReactNode {
-  const t = useAppTranslation("dashboard.billing").submitProofDialog;
-  const tErrors = useAppTranslation("errors");
+  const t = useAppTranslation().dashboardTranslations.billing.submitProofDialog;
+  const tErrors = useAppTranslation().errorsTranslations;
   const displayCurrency = useUserStore(state => state.displayCurrency);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);

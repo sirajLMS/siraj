@@ -63,7 +63,7 @@ export function ManageOverridesDialog({
   onClose,
   onSave,
 }: Readonly<ManageOverridesDialogProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   const {
     user,

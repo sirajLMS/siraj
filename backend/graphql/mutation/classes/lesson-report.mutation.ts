@@ -21,7 +21,7 @@ gqlSchemaBuilder.mutationField("submitLessonReport", t =>
       const actorUserId = await requireAuth(ctx);
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.LESSON_REPORTS_SUBMIT);
       if (!hasPermission) {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.insufficientPermissions);
       }
 
@@ -52,7 +52,7 @@ gqlSchemaBuilder.mutationField("approveLessonReport", t =>
       const actorUserId = await requireAuth(ctx);
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.LESSON_REPORTS_APPROVE);
       if (!hasPermission) {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.insufficientPermissions);
       }
 
@@ -74,7 +74,7 @@ gqlSchemaBuilder.mutationField("rejectLessonReport", t =>
       const actorUserId = await requireAuth(ctx);
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.LESSON_REPORTS_REJECT);
       if (!hasPermission) {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.insufficientPermissions);
       }
 

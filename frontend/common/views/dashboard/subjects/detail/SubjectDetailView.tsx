@@ -20,7 +20,7 @@ import type {
 import { useAppTranslation } from "@/shared/locale/client";
 
 function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) {
-  const t = useAppTranslation("dashboard.subjects").detail;
+  const t = useAppTranslation().dashboardTranslations.subjects.detail;
   const handleDownload = () => {
     if (resource.filePath) {
       window.open(`/api/storage/files/` + `${resource.filePath}`, `_blank`, "noopener,noreferrer");
@@ -52,7 +52,7 @@ function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) 
 }
 
 export function SubjectDetailView({ subject, resources, breadcrumbs }: Readonly<SubjectDetailViewProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
 
   return (
     <PageContainer>

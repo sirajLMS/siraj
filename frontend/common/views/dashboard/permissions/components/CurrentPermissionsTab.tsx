@@ -84,7 +84,7 @@ export function CurrentPermissionsTab({
   onSwitchToAddTab,
   loading = false,
 }: Readonly<CurrentPermissionsTabProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   const currentPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {
     const cols: GridColDef<Permission>[] = [

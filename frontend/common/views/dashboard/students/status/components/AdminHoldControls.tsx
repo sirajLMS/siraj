@@ -7,7 +7,7 @@ import type { AdminHoldControlsProps } from "@/frontend/common/views/dashboard/s
 import { useAppTranslation } from "@/shared/locale/client";
 
 function StatusSelectionField() {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
   const { control } = useFormContext<StatusUpdateFormData>();
 
   return (
@@ -52,7 +52,7 @@ function StatusSelectionField() {
 }
 
 function ReasonEntryField() {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
   const {
     control,
     formState: { errors },
@@ -128,7 +128,7 @@ function ReasonEntryField() {
 }
 
 function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
   const { watch } = useFormContext<StatusUpdateFormData>();
   const currentStatus = watch("status");
 
@@ -153,7 +153,7 @@ function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
 }
 
 export function AdminHoldControls({ isUpdating }: Readonly<AdminHoldControlsProps>) {
-  const t = useAppTranslation("dashboard.studentStatus");
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
 
   return (
     <AdminControlPanel title={t.sections.adminHold}>

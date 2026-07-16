@@ -1,13 +1,10 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { MessageSchema } from "@/shared/locale/types/message";
 
 gqlSchemaBuilder.queryFields(t => ({
   welcomeMessage: t.field({
     type: "String",
-    resolve: async (_parent, _args, ctx) => {
-      const translations = await getServerTranslations(ctx.locale, "common");
-      return translations.welcome;
+    resolve: (_parent, _args, ctx) => {
+      return ctx.t().commonTranslations.welcome;
     },
   }),
 
@@ -18,10 +15,10 @@ gqlSchemaBuilder.queryFields(t => ({
       key: t.arg.string({ required: true }),
       namespace: t.arg.string({ required: true }),
     },
-    resolve: async (_parent, { key, namespace }, ctx) => {
-      const translations = await getServerTranslations(ctx.locale, namespace as keyof MessageSchema);
-      const translationsRecord = translations as Record<string, unknown>;
-      return translationsRecord[key] as string;
+    resolve: (_parent, { key, namespace }, ctx) => {
+      const translations = ctx.t() as unknown as Record<string, unknown>;
+      const namespaceTranslations = translations[namespace] as Record<string, unknown> | undefined;
+      return (namespaceTranslations?.[key] as string) ?? key;
     },
   }),
 }));

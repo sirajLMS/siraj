@@ -16,7 +16,7 @@ gqlSchemaBuilder.queryField("studentClassHistory", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       if (!ctx.user) {
         throw new Error(tErrors.unauthorized);
       }
@@ -38,7 +38,7 @@ gqlSchemaBuilder.queryField("studentClassSessionDetail", t =>
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       if (!ctx.user) {
         throw new Error(tErrors.unauthorized);
       }

@@ -1,4 +1,4 @@
-export const paymentMethod = {
+export const uiPaymentMethodAr = {
   type: {
     mobileWallet: "محفظة جوال",
     paymentLink: "رابط دفع",

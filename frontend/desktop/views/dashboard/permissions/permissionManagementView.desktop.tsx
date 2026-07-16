@@ -61,7 +61,7 @@ export function PermissionManagementDesktopView({
   setActiveTab,
   setSelectedUserIdForOverrides,
 }: Readonly<PermissionManagementViewModel>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   const tabs = [
     { key: "groups" as const, label: t.groupsTab },

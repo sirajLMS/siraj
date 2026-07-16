@@ -1,4 +1,4 @@
-export const recurringSchedule = {
+export const uiMeetingConfigRecurringScheduleEn = {
   pageTitle: "Recurring Series Meeting",
   scheduleSummary: (student: string, teacher: string, duration: number | string, timezone: string) =>
     `${student} with ${teacher} · ${duration} min · ${timezone}`,

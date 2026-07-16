@@ -1,6 +1,6 @@
-import type { useAppTranslation } from "@/shared/locale/client";
+import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
 
-type TranslationObject = ReturnType<typeof useAppTranslation<"dashboard.admin">>;
+type TranslationObject = AdminDashboardLabels;
 
 export interface AdminDashboardViewLabels {
   readonly todayClassesTitle: string;

@@ -62,7 +62,7 @@ export function EditSubjectDialog({
   categories,
   isLoading,
 }: Readonly<EditSubjectDialogProps>) {
-  const t = useAppTranslation("dashboard.subjects");
+  const t = useAppTranslation().dashboardTranslations.subjects;
   const { control, errors, handleSubmit } = useEditSubjectForm(open, subject);
 
   const handleFormSubmit = (data: SubjectFormValues) => {

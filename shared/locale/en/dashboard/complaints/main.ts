@@ -1,6 +1,6 @@
 import type { ComplaintsLabels } from "@/shared/locale/types/dashboard/complaints";
 
-export const main: ComplaintsLabels = {
+export const dashboardComplaintsEn: ComplaintsLabels = {
   parent: {
     pageTitle: "Complaints & Records",
     formTitle: "Submit a New Complaint",

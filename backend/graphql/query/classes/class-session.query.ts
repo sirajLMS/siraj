@@ -13,8 +13,8 @@ gqlSchemaBuilder.queryField("classInstance", t =>
     args: { id: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      const tSession = await ctx.t("session");
-      const tErrors = await ctx.t("errors");
+      const tSession = ctx.t().sessionTranslations;
+      const tErrors = ctx.t().errorsTranslations;
       if (!ctx.user) {
         throw new Error(tErrors.unauthorized);
       }
@@ -29,7 +29,7 @@ gqlSchemaBuilder.queryField("classStatusEvents", t =>
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       if (!ctx.user) {
         throw new Error(tErrors.unauthorized);
       }
@@ -46,7 +46,7 @@ gqlSchemaBuilder.queryField("teacherFutureSchedule", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       if (!ctx.user) {
         throw new Error(tErrors.unauthorized);
       }

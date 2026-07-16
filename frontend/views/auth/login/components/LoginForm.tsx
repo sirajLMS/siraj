@@ -53,7 +53,7 @@ const FormFields = ({
   showPassword: boolean;
   setShowPassword: (show: boolean) => void;
 }) => {
-  const t = useAppTranslation("auth").login;
+  const t = useAppTranslation().authTranslations.login;
 
   return (
     <>
@@ -125,7 +125,7 @@ const FormFields = ({
 };
 
 const FormActions = ({ isSubmitting: _isSubmitting }: { isSubmitting: boolean }) => {
-  const t = useAppTranslation("auth").login;
+  const t = useAppTranslation().authTranslations.login;
 
   return (
     <StyledFormActionsContainer>
@@ -142,7 +142,7 @@ export interface LoginFormProps {
 }
 
 export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProps = {}) {
-  const t = useAppTranslation("auth").login;
+  const t = useAppTranslation().authTranslations.login;
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginResult, setLoginResult] = useState<{

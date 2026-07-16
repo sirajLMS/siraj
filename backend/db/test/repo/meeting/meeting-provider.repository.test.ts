@@ -56,7 +56,7 @@ function expectProviderIdsInclude(results: { id: string }[], expectedIds: string
 
 describe("MeetingProviderRepository", () => {
   providerTest("create inserts a meeting provider", async tx => {
-    const tErrors = await getServerTranslations("en", "errors");
+    const tErrors = getServerTranslations("en").errorsTranslations;
     const slug = `zoom-${randomUUID().slice(0, 8)}`;
     const created = await MeetingProviderRepository.create(buildProviderInput(slug), tErrors, tx);
 
@@ -82,7 +82,7 @@ describe("MeetingProviderRepository", () => {
   });
 
   providerTest("getByIdOrThrow throws when provider is missing", async tx => {
-    const tErrors = await getServerTranslations("en", "errors");
+    const tErrors = getServerTranslations("en").errorsTranslations;
     const error = await expectRepoError(() => MeetingProviderRepository.getByIdOrThrow(NIL_UUID, tErrors, tx));
     expect(error.message).toContain(NIL_UUID);
   });
@@ -124,7 +124,7 @@ describe("MeetingProviderRepository", () => {
   });
 
   providerTest("update modifies provider fields", async tx => {
-    const tErrors = await getServerTranslations("en", "errors");
+    const tErrors = getServerTranslations("en").errorsTranslations;
     const provider = await createTestMeetingProvider(tx);
     const updated = await MeetingProviderRepository.update(
       provider.id,
@@ -139,7 +139,7 @@ describe("MeetingProviderRepository", () => {
   });
 
   providerTest("deleteProvider removes a provider with no configs", async tx => {
-    const tErrors = await getServerTranslations("en", "errors");
+    const tErrors = getServerTranslations("en").errorsTranslations;
     const provider = await createTestMeetingProvider(tx);
     await MeetingProviderRepository.deleteProvider(provider.id, tErrors, tx);
 
@@ -148,7 +148,7 @@ describe("MeetingProviderRepository", () => {
   });
 
   providerTest("deleteProvider throws when configs reference the provider", async tx => {
-    const tErrors = await getServerTranslations("en", "errors");
+    const tErrors = getServerTranslations("en").errorsTranslations;
     const user = await createTestUser(tx, { email: `mp-del-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     await createTestMeetingConfig(tx, user.id, provider.id);

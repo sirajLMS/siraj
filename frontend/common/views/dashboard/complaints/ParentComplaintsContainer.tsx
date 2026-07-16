@@ -98,9 +98,8 @@ function AccessDeniedView() {
 }
 
 export function ParentComplaintsContainer({ parentId }: ParentComplaintsContainerProps) {
-  const tComplaints = useAppTranslation("dashboard.complaints");
-  const tCommon = useAppTranslation("common");
-  const labels = buildComplaintsLabels(tComplaints);
+  const t = useAppTranslation();
+  const labels = buildComplaintsLabels(t.dashboardTranslations.complaints);
 
   const isSubmitting = useParentComplaintsStore(state => state.isSubmitting);
   const showSuccess = useParentComplaintsStore(state => state.showSuccess);
@@ -151,7 +150,7 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
 
   if (error) {
     logger.error("Error loading parent complaints:", { error });
-    return <ErrorView message={tCommon.loadFailed} />;
+    return <ErrorView message={t.commonTranslations.loadFailed} />;
   }
 
   const handleSubmit = (formData: ComplaintFormData) => {

@@ -2,7 +2,6 @@ import { and, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherImportantNotes } from "@/backend/db/schema";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type {
   TeacherImportantNoteSelectType,
@@ -39,7 +38,7 @@ export namespace TeacherNotesRepository {
 
   export async function createNote(
     input: TeacherImportantNoteSubmitInput & { createdByUserId: string; teacherId: string | null },
-    locale?: string,
+    _locale?: string,
     tx?: DBTransaction
   ): Promise<TeacherImportantNoteSelectType> {
     const run = async (t: DBTransaction): Promise<TeacherImportantNoteSelectType> => {
@@ -58,8 +57,7 @@ export namespace TeacherNotesRepository {
         .returning();
 
       if (!result) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("noteCreateFailed"));
+        throw new Error("Failed to create teacher note");
       }
 
       logger.info("Teacher note created", { noteId: result.id, title: result.title });
@@ -81,7 +79,7 @@ export namespace TeacherNotesRepository {
   export async function updateNote(
     id: string,
     input: TeacherImportantNoteUpdateInput,
-    locale?: string,
+    _locale?: string,
     tx?: DBTransaction
   ): Promise<TeacherImportantNoteSelectType> {
     const run = async (t: DBTransaction): Promise<TeacherImportantNoteSelectType> => {
@@ -91,10 +89,8 @@ export namespace TeacherNotesRepository {
         .where(and(eq(teacherImportantNotes.id, id), isNull(teacherImportantNotes.deletedAt)))
         .limit(1);
 
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-
       if (!existing) {
-        throw new Error(tFunc("noteNotFound", { id }));
+        throw new Error(`Note ${id} not found`);
       }
 
       const now = new Date();
@@ -126,7 +122,7 @@ export namespace TeacherNotesRepository {
     }
   }
 
-  export async function deleteNote(id: string, locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
+  export async function deleteNote(id: string, _locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
     const run = async (t: DBTransaction): Promise<{ id: string }> => {
       const [existing] = await t
         .select()
@@ -134,10 +130,8 @@ export namespace TeacherNotesRepository {
         .where(and(eq(teacherImportantNotes.id, id), isNull(teacherImportantNotes.deletedAt)))
         .limit(1);
 
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-
       if (!existing) {
-        throw new Error(tFunc("noteNotFound", { id }));
+        throw new Error(`Note ${id} not found`);
       }
 
       const now = new Date();

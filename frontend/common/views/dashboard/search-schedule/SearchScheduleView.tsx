@@ -58,7 +58,7 @@ function getColumnCount(fromDate: string, toDate: string): number {
 }
 
 export function SearchScheduleView({ result, fromDate, toDate, isInitialLoading }: Readonly<SearchScheduleViewProps>) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const columnCount = getColumnCount(fromDate, toDate);
 
   if (isInitialLoading) {

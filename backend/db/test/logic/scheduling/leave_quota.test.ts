@@ -237,7 +237,7 @@ describe("Leave Quota Repository Methods", () => {
     testLogger.info("Testing incrementTeacherLeaveQuota atomic increment...");
     await runInRollback(async tx => {
       const { teacher } = await setupTeacherAndStudent(tx);
-      const tErrors = await getServerTranslations("en", "errors");
+      const tErrors = getServerTranslations("en").errorsTranslations;
 
       await SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, tErrors);
       const usage1 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
@@ -255,7 +255,7 @@ describe("Leave Quota Repository Methods", () => {
     await runInRollback(async tx => {
       const { teacher } = await setupTeacherAndStudent(tx);
       await insertLeaveQuota(tx, { teacherId: teacher.id, year: currentYear, month: currentMonth, count: 2 });
-      const tErrors = await getServerTranslations("en", "errors");
+      const tErrors = getServerTranslations("en").errorsTranslations;
 
       await expectLeaveQuotaExceeded(() => SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, tErrors));
     });

@@ -1,6 +1,6 @@
 import type { CurrencyHedgesLabels } from "@/shared/locale/types/dashboard/billing/currencyHedges";
 
-export const currencyHedges: CurrencyHedgesLabels = {
+export const dashboardBillingCurrencyHedgesEn: CurrencyHedgesLabels = {
   pageTitle: "Currency Hedges",
   pageSubtitle: "Manage currency hedges for financial planning",
   addHedge: "Add Hedge",

@@ -1,6 +1,6 @@
 import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates";
 
-export const exchangeRates: ExchangeRatesLabels = {
+export const dashboardBillingExchangeRatesEn: ExchangeRatesLabels = {
   pageTitle: "Exchange Rates",
   pageSubtitle: "View and manage currency exchange rates",
   status: "Status",

@@ -32,7 +32,7 @@ function parseDateValue(dateStr: string): Date | null {
 }
 
 function StudentNameField() {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
   const {
     control,
     formState: { errors },
@@ -60,7 +60,7 @@ function StudentNameField() {
 }
 
 function DateOfBirthField() {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
   const {
     control,
     formState: { errors },
@@ -95,7 +95,7 @@ function DateOfBirthField() {
 }
 
 function LanguageField() {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
   const {
     control,
     formState: { errors },
@@ -116,7 +116,7 @@ function LanguageField() {
 }
 
 function GenderField() {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
   const {
     control,
     formState: { errors },
@@ -173,7 +173,7 @@ function GenderField() {
 }
 
 export function StudentInformationSection() {
-  const t = useAppTranslation("dashboard.studentQuota");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
   const { canView } = useStudentFieldAccess();
 
   if (!canView("student_identity")) {

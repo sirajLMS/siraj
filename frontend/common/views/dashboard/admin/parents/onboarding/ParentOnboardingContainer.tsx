@@ -44,9 +44,9 @@ const defaultValues: ParentOnboardingFormData = {
 };
 
 export function ParentOnboardingContainer() {
-  const t = useAppTranslation("dashboard.parentOnboarding");
-  const tMeeting = useAppTranslation("ui.meetingConfig").manager;
-  const tJoin = useAppTranslation("ui.meetingConfig").join;
+  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
+  const tMeeting = useAppTranslation().uiTranslations.meetingConfig.manager;
+  const tJoin = useAppTranslation().uiTranslations.meetingConfig.join;
   const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateParentOnboarding();
   const createdParent = useParentOnboardingStore(state => state.result);
   const [showSuccess, setShowSuccess] = useState(false);

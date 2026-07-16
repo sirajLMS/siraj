@@ -1,6 +1,6 @@
 import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
-export const dstMigration: DstMigrationLabels = {
+export const dashboardDstMigrationAr: DstMigrationLabels = {
   pageTitle: "التوقيت الصيفي",
   pageSubtitle:
     "أداة ترحيل جماعية لضبط الجداول المؤسسية لتغييرات التوقيت الموسمية القادمة. تدقق هذه الأداة جميع الحصص النشطة وتزيح أوقات البدء والانتهاء المحلية بمقدار 60 دقيقة للحفاظ على التزامن العالمي.",

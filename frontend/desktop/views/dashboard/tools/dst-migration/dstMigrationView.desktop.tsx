@@ -35,7 +35,7 @@ export function DstMigrationViewDesktop({
   onUpdate,
   dstOffsetDetected,
 }: Readonly<Props>) {
-  const t = useAppTranslation("dashboard.dstMigration");
+  const t = useAppTranslation().dashboardTranslations.dstMigration;
 
   const headerActions = (
     <UpdateSchedulesButton status={migrationStatus} onUpdate={onUpdate} dstOffsetDetected={dstOffsetDetected} />

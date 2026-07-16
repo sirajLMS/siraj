@@ -1,6 +1,6 @@
 import type { ParentDashboardLabels } from "@/shared/locale/types/dashboard/core";
 
-export const parentDashboard: ParentDashboardLabels = {
+export const dashboardCoreParentDashboardEn: ParentDashboardLabels = {
   pageTitle: "Dashboard",
   welcome: name => `Welcome, ${name}`,
   welcomeBack: "Welcome back,",

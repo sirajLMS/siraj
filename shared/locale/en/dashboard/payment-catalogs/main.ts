@@ -1,6 +1,6 @@
 import type { PaymentCatalogsLabels } from "@/shared/locale/types/dashboard/payment-catalogs/main";
 
-export const main: PaymentCatalogsLabels = {
+export const dashboardPaymentCatalogsEn: PaymentCatalogsLabels = {
   pageTitle: "Payment Catalogs",
   pageSubtitle: "Manage supported payment wallets, links, and electronic accounts.",
   addEntry: "Add Entry",

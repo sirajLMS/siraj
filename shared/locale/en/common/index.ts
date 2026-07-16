@@ -1,6 +1,6 @@
 import type { CommonLabels } from "@/shared/locale/types/common";
 
-export const common: CommonLabels = {
+export const commonEn: CommonLabels = {
   title: "Siraj",
   description:
     "Welcome to Siraj. This app is successfully initialized with Next.js and Material-UI, fully customized with your brand aesthetics.",

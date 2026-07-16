@@ -19,7 +19,7 @@ export function PermissionCatalogSectionDesktop({
   groups,
   loading = false,
 }: Readonly<PermissionCatalogSectionDesktopProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 

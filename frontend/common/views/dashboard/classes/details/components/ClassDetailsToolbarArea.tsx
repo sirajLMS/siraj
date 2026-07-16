@@ -68,7 +68,7 @@ export function ClassDetailsToolbarArea({
   isResetting,
   error,
 }: ClassDetailsToolbarAreaProps) {
-  const tJoin = useAppTranslation("ui.meetingConfig").join;
+  const tJoin = useAppTranslation().uiTranslations.meetingConfig.join;
   const meeting = instance.effectiveMeeting;
   const joinUrl = meeting?.joinUrl?.trim() || instance.meetingJoinUrl?.trim();
   const joinLabel = tJoin.joinMeeting;

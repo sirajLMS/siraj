@@ -99,8 +99,8 @@ function AdminSuggestionsDesktopStoryRenderer({
   canManage,
   canDelete,
 }: Readonly<AdminSuggestionsDesktopStoryProps>) {
-  const t = useAppTranslation("dashboard.suggestions");
-  const labels = buildSuggestionsLabels(t).admin;
+  const t = useAppTranslation();
+  const labels = buildSuggestionsLabels(t.dashboardTranslations.suggestions).admin;
 
   return (
     <AdminSuggestionsDesktopView

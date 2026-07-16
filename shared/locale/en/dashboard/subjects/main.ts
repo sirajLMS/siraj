@@ -1,6 +1,6 @@
 import type { SubjectsLabels } from "@/shared/locale/types/dashboard/subjects";
 
-export const main: SubjectsLabels = {
+export const dashboardSubjectsEn: SubjectsLabels = {
   pageTitle: "Subjects",
   pageSubtitle: "Manage class subjects, categories, and learning resources.",
   addSubject: "Add Subject",

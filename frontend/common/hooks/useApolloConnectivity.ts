@@ -20,7 +20,7 @@ const getReconnectionDelay = (attempt: number): number | null => {
 
 export const useApolloConnectivity = () => {
   const notifications = useNotifications();
-  const t = useAppTranslation("common");
+  const t = useAppTranslation().commonTranslations;
 
   const [isConnected, setIsConnected] = useState(false);
   const [isChecking, setIsChecking] = useState(false);

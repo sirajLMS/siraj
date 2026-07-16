@@ -120,7 +120,7 @@ export function ManualInvoiceFormFields({
   studentsLoading = false,
 }: Readonly<ManualInvoiceFormFieldsProps>) {
   const isMobile = variant === "mobile";
-  const tProfile = useAppTranslation("profile").parent;
+  const tProfile = useAppTranslation().profileTranslations.parent;
   const currencyLabel = tProfile.fields.currency;
 
   const parentField = (

@@ -48,7 +48,7 @@ const LanguageOptionLayout = styled(Stack)(({ theme }) => ({
 // --- Main Component ---
 
 export function LanguageSwitcher() {
-  const t = useAppTranslation("common");
+  const t = useAppTranslation().commonTranslations;
   const { currentLocale, switchLanguage, isPending } = useLanguageSwitch();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 

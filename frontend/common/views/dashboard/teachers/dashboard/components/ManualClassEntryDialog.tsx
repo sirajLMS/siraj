@@ -20,6 +20,7 @@ import type { PaginationArgs, StudentFilterArgs } from "@/frontend/common/graphq
 import { studentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { TeacherDashboardLabels } from "@/shared/locale/types/dashboard/teachers/dashboard";
 
 interface ManualClassEntryDialogProps {
   readonly open: boolean;
@@ -42,7 +43,7 @@ export function ManualClassEntryDialog({
   onSubmit,
   defaultActive = false,
 }: Readonly<ManualClassEntryDialogProps>) {
-  const t = useAppTranslation("dashboard.teacherDashboard");
+  const t = useAppTranslation().dashboardTranslations.teacherDashboard;
   const [studentId, setStudentId] = useState("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -168,7 +169,7 @@ export function ManualClassEntryDialog({
 function renderStudentMenuItems(
   loading: boolean,
   studentsList: ReadonlyArray<{ readonly id?: string | null; readonly name?: string | null }>,
-  t: ReturnType<typeof useAppTranslation<"dashboard.teacherDashboard">>
+  t: TeacherDashboardLabels
 ) {
   if (loading) {
     return (
@@ -205,7 +206,7 @@ interface ManualClassEntryFormFieldsProps {
   readonly setDuration: (value: number) => void;
   readonly classType: string;
   readonly setClassType: (value: string) => void;
-  readonly t: ReturnType<typeof useAppTranslation<"dashboard.teacherDashboard">>;
+  readonly t: TeacherDashboardLabels;
 }
 
 function ManualClassEntryFormFields({

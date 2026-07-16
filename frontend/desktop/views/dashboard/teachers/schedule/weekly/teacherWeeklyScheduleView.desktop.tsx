@@ -28,7 +28,7 @@ export function TeacherWeeklyScheduleViewDesktop({
   onClearSchedule,
   onAddClass,
 }: Readonly<TeacherWeeklyScheduleViewProps>) {
-  const t = useAppTranslation("dashboard.teacherWeeklySchedule");
+  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
   const clearDialogOpen = useWeeklyScheduleStore(state => state.clearDialogOpen);
   const setClearDialogOpen = useWeeklyScheduleStore(state => state.setClearDialogOpen);
 

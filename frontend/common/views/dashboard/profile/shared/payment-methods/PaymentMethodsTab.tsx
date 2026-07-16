@@ -14,7 +14,7 @@ type PaymentMethodsTabProps = {
 };
 
 export function PaymentMethodsTab({ targetUserId, scope, slot }: PaymentMethodsTabProps) {
-  const t = useAppTranslation("profile");
+  const t = useAppTranslation().profileTranslations.base;
   const { user, hasPermission } = useUserStore();
 
   const canManage =

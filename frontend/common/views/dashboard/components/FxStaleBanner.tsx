@@ -13,7 +13,7 @@ export function FxStaleBanner(): React.ReactNode {
   const displayCurrency = useUserStore(state => state.displayCurrency);
   const hasPermission = useUserStore(state => state.hasPermission);
   const isAdmin = hasPermission(AppPermission.BillingViewExchangeRates);
-  const t = useAppTranslation("dashboard.billing").fxStaleBanner;
+  const t = useAppTranslation().dashboardTranslations.billing.fxStaleBanner;
 
   const { data } = useQuery(fxSyncHealthQueryDocument, {
     fetchPolicy: "cache-and-network",

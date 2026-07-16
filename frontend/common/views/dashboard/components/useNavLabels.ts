@@ -8,7 +8,7 @@ import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/
  * Maps "dashboard.nav.{key}" to the corresponding property in DashboardNavigationLabels.
  */
 export function useNavLabels(): (labelKey: `dashboard.nav.${keyof DashboardNavigationLabels}`) => string {
-  const t = useAppTranslation("dashboard.core.nav");
+  const t = useAppTranslation().dashboardTranslations.coreNav;
 
   return (labelKey: `dashboard.nav.${keyof DashboardNavigationLabels}`): string => {
     const key = labelKey.replace("dashboard.nav.", "") as keyof DashboardNavigationLabels;

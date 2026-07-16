@@ -60,7 +60,7 @@ interface TeacherLessonReportsContainerProps {
 }
 
 export function TeacherLessonReportsContainer({ teacherId }: Readonly<TeacherLessonReportsContainerProps>) {
-  const t = useAppTranslation("dashboard.lms.lessonReports");
+  const t = useAppTranslation().dashboardTranslations.lmsLessonReports;
   const locale = useAppLocale();
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>("ALL");
 

@@ -51,7 +51,7 @@ export function PermissionCatalogToolbar({
   onSearchChange,
   onCategoryChange,
 }: PermissionCatalogToolbarProps) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (
     <Box

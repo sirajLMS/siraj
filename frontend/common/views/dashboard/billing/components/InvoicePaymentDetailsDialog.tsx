@@ -601,9 +601,9 @@ export function InvoicePaymentDetailsDialog({
   billingActionsDisabled = false,
   onSuccess,
 }: InvoicePaymentDetailsDialogProps): React.ReactNode {
-  const t = useAppTranslation("dashboard.billing").paymentDetailsDialog;
-  const tProfile = useAppTranslation("profile");
-  const tErrors = useAppTranslation("errors");
+  const t = useAppTranslation().dashboardTranslations.billing.paymentDetailsDialog;
+  const tProfile = useAppTranslation().profileTranslations.base;
+  const tErrors = useAppTranslation().errorsTranslations;
   const locale = useAppLocale();
   const displayCurrency = useUserStore(state => state.displayCurrency);
   const fxMessages = buildFxDisplayMessages(

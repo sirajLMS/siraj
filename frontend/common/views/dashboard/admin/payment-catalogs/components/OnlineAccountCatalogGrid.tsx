@@ -10,16 +10,14 @@ import { IdentifierKind, PaymentDirection } from "@/frontend/common/graphql/gene
 import type { SupportedOnlineAccountFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { PaymentCatalogsLabels } from "@/shared/locale/types/dashboard/payment-catalogs/main";
 
 export interface OnlineAccountCatalogGridProps extends CatalogGridActionHandlers {
   readonly rows: readonly SupportedOnlineAccountFieldsFragment[];
   readonly loading?: boolean;
 }
 
-function resolveIdentifierKindLabel(
-  kind: IdentifierKind | null | undefined,
-  t: ReturnType<typeof useAppTranslation<"dashboard.paymentCatalogs">>
-): string {
+function resolveIdentifierKindLabel(kind: IdentifierKind | null | undefined, t: PaymentCatalogsLabels): string {
   const pc = t;
   switch (kind) {
     case IdentifierKind.Email:
@@ -39,7 +37,7 @@ export function OnlineAccountCatalogGrid({
   onEdit,
   onDelete,
 }: Readonly<OnlineAccountCatalogGridProps>) {
-  const t = useAppTranslation("dashboard.paymentCatalogs");
+  const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
   const pc = t;
   const columns = useMemo<GridColDef<SupportedOnlineAccountFieldsFragment>[]>(
     () => [

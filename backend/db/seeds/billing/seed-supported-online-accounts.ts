@@ -27,7 +27,7 @@ export async function seedOrGet() {
     updatedAt: now,
   }));
 
-  const tErrors = await getServerTranslations("en", "errors");
+  const tErrors = getServerTranslations("en").errorsTranslations;
   const results = await PaymentCatalogService.upsertManyOnlineAccounts(inputs, tErrors);
   logger.info(`Supported online accounts seeded (${results.length} rows).`);
   return results;

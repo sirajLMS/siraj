@@ -1,6 +1,5 @@
 import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   ManagerDirectoryFilters,
@@ -8,6 +7,7 @@ import type {
   OnboardingMetricsResult,
   PaginationArgs,
 } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace ManagerDirectoryService {
   export async function getManagerDirectory(
@@ -18,8 +18,8 @@ export namespace ManagerDirectoryService {
   ): Promise<ManagerDirectoryResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_VIEW_DIRECTORY);
     if (!hasPermission) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.unauthorizedAction);
     }
 
     return await StaffProfileRepository.getManagerDirectory(pagination, filters, undefined, locale);
@@ -28,8 +28,8 @@ export namespace ManagerDirectoryService {
   export async function getOnboardingMetrics(actorUserId: string, locale?: string): Promise<OnboardingMetricsResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_VIEW_DIRECTORY);
     if (!hasPermission) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.unauthorizedAction);
     }
 
     return await StaffProfileRepository.getOnboardingMetrics();

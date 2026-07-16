@@ -14,10 +14,10 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
     authScopes: { superAdmin: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user?.id) {
-        const tErrors = await ctx.t("errors");
+        const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.unauthorized);
       }
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
 
       return await RecurringClassService.createRecurringClass(
         ctx.user.id,

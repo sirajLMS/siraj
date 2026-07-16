@@ -11,7 +11,7 @@ export function CatalogDeleteDialog({
   onClose,
   onConfirm,
 }: Readonly<CatalogDeleteDialogProps>) {
-  const t = useAppTranslation("dashboard.paymentCatalogs");
+  const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
 
   return (
     <BaseDeleteDialog

@@ -48,7 +48,7 @@ function TimeField({ label, name }: Readonly<TimeFieldProps>) {
 }
 
 export function AvailabilitySearchForm({ onSearch }: Readonly<AvailabilitySearchFormProps>) {
-  const t = useAppTranslation("dashboard.teacherAvailability");
+  const t = useAppTranslation().dashboardTranslations.teacherAvailability;
   const { control, handleSubmit } = useFormContext<AvailabilitySearchFormData>();
 
   const onSubmit = (data: AvailabilitySearchFormData) => {

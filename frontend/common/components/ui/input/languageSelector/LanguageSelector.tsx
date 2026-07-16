@@ -39,7 +39,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onBlurAction: onBlur,
   style,
 }: LanguageSelectorProps): React.ReactNode => {
-  const t = useAppTranslation("ui.languageSelector");
+  const t = useAppTranslation().uiTranslations.languageSelector;
   const locale = useAppLocale();
 
   const getLanguageName = useCallback((code: string) => getLanguageDisplayName(code, locale), [locale]);

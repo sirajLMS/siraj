@@ -2,13 +2,13 @@
 
 import { ErrorOutlined as ErrorIcon } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
-import type { useAppTranslation } from "@/shared/locale/client";
+import type { CommonLabels } from "@/shared/locale/types/common";
 
 // Loading UI shown during initial connectivity check
 interface InitializingUIProps {
   readonly error?: boolean;
   readonly onRetry?: () => void;
-  readonly t: ReturnType<typeof useAppTranslation<"common">>;
+  readonly t: CommonLabels;
 }
 
 export function InitializingUI({ error, onRetry, t }: InitializingUIProps) {

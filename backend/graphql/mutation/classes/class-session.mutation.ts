@@ -10,8 +10,8 @@ import { type ClassActionFn, ClassSessionService } from "@/backend/services/sess
 
 async function handleClassAction<R>(ctx: BaseContext, classInstanceId: string, action: ClassActionFn<R>) {
   const userId = await requireAuth(ctx);
-  const tErrors = await ctx.t("errors");
-  const tSession = await ctx.t("session");
+  const tErrors = ctx.t().errorsTranslations;
+  const tSession = ctx.t().sessionTranslations;
   await action(userId, classInstanceId, tErrors);
   return ClassSessionService.getClassInstanceDetail(userId, classInstanceId, tSession, tErrors);
 }
@@ -75,7 +75,7 @@ gqlSchemaBuilder.mutationField("updateSessionStatusLeave", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       const result = await ClassSessionService.updateStatusLeave(
         userId,
         args.classInstanceId,
@@ -101,8 +101,8 @@ gqlSchemaBuilder.mutationField("rescheduleClass", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
-      const tSession = await ctx.t("session");
+      const tErrors = ctx.t().errorsTranslations;
+      const tSession = ctx.t().sessionTranslations;
       const newInstance = await ClassSessionService.reschedule(
         userId,
         args.classInstanceId,
@@ -126,7 +126,7 @@ gqlSchemaBuilder.mutationField("resetClass", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       await ClassSessionService.reset(userId, args.classInstanceId, tErrors);
       return true;
     },
@@ -140,7 +140,7 @@ gqlSchemaBuilder.mutationField("deleteClassInstance", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const tErrors = await ctx.t("errors");
+      const tErrors = ctx.t().errorsTranslations;
       return ClassSessionService.deleteInstance(userId, args.classInstanceId, tErrors);
     },
   })

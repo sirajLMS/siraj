@@ -72,8 +72,8 @@ export function ReportsDataGrid({
   onRowClick,
 }: Readonly<ReportsDataGridProps>) {
   const locale = useAppLocale();
-  const t = useAppTranslation("dashboard.reports");
-  const tErrors = useAppTranslation("errors");
+  const t = useAppTranslation().dashboardTranslations.reports;
+  const tErrors = useAppTranslation().errorsTranslations;
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 

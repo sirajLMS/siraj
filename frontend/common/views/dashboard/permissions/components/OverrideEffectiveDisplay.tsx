@@ -46,7 +46,7 @@ interface OverrideEffectiveDisplayProps {
 }
 
 export function OverrideEffectiveDisplay({ effectiveState, overrideState }: Readonly<OverrideEffectiveDisplayProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (
     <StyledEffectiveContainer>

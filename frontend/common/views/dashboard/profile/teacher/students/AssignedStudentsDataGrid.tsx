@@ -41,7 +41,7 @@ export function AssignedStudentsDataGrid({
   pageSize,
   onPaginationModelChange,
 }: AssignedStudentsDataGridProps) {
-  const t = useAppTranslation("profile").students;
+  const t = useAppTranslation().profileTranslations.base.students;
 
   const columns: GridColDef<AssignedStudentsRow>[] = [
     {

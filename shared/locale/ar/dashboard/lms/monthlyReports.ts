@@ -1,6 +1,6 @@
 import type { MonthlyReportLabels } from "@/shared/locale/types/dashboard/lms/monthlyReports";
 
-export const monthlyReports: MonthlyReportLabels = {
+export const dashboardLmsMonthlyReportsAr: MonthlyReportLabels = {
   title: "التقارير الشهرية",
   teacherReport: "تقرير المعلم",
   studentReport: "تقرير الطالب",

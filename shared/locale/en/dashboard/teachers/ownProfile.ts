@@ -1,6 +1,6 @@
 import type { TeacherOwnProfileLabels } from "@/shared/locale/types/dashboard/teachers";
 
-export const ownProfile: TeacherOwnProfileLabels = {
+export const dashboardTeacherOwnProfileEn: TeacherOwnProfileLabels = {
   pageTitle: "My Profile",
   pageSubtitle: "Manage your information",
   notSet: "Not set",

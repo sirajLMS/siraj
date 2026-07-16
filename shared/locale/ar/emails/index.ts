@@ -1,6 +1,6 @@
 import type { EmailsLabels } from "@/shared/locale/types/emails";
 
-export const emails: EmailsLabels = {
+export const emailsAr: EmailsLabels = {
   complaintResponse: {
     subject: ({ complaintTitle }) => `رد على شكواك: ${complaintTitle}`,
     greeting: ({ parentName }) => `عزيزي ${parentName}،`,

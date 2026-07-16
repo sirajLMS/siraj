@@ -7,7 +7,7 @@ import type { CurrentTeacherCardProps } from "@/frontend/common/views/dashboard/
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function CurrentTeacherCard({ currentTeacherName, teacherId }: Readonly<CurrentTeacherCardProps>) {
-  const t = useAppTranslation("dashboard.teacherReassignment").currentTeacher;
+  const t = useAppTranslation().dashboardTranslations.teacherReassignment.currentTeacher;
 
   return (
     <BaseCard

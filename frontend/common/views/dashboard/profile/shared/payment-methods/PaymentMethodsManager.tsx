@@ -122,8 +122,8 @@ function PaymentMethodFormDialogWrapped({
   );
 }
 
-type PaymentMethodManagerLabels = ReturnType<typeof useAppTranslation<"ui.paymentMethod.manager">>;
-type PaymentMethodLabels = ReturnType<typeof useAppTranslation<"ui.paymentMethod">>;
+type PaymentMethodManagerLabels = ReturnType<typeof useAppTranslation>["uiTranslations"]["paymentMethodManager"];
+type PaymentMethodLabels = ReturnType<typeof useAppTranslation>["uiTranslations"]["paymentMethod"];
 
 type PaymentMethodsManagerData = {
   readonly userPaymentMethods?: readonly UserPaymentMethodFieldsFragment[] | null;
@@ -236,8 +236,8 @@ function renderAddButton(t: PaymentMethodManagerLabels, onClick: () => void) {
 }
 
 export function PaymentMethodsManager({ targetUserId, slot, canManage }: PaymentMethodsManagerProps) {
-  const t = useAppTranslation("ui.paymentMethod.manager");
-  const tType = useAppTranslation("ui.paymentMethod");
+  const t = useAppTranslation().uiTranslations.paymentMethodManager;
+  const tType = useAppTranslation().uiTranslations.paymentMethod;
   const { hasPermission } = useUserStore();
   const canVerify = hasPermission(AppPermission.PaymentMethodsVerifyBankTransfer);
 

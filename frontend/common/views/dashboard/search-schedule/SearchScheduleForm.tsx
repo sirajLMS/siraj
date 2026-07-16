@@ -19,7 +19,7 @@ interface SearchScheduleFormProps {
 }
 
 export function SearchScheduleForm({ draft, isSearching, onDraftChange, onSearch }: Readonly<SearchScheduleFormProps>) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const activeFilterCount = countActiveDrawerFilters(draft);
 

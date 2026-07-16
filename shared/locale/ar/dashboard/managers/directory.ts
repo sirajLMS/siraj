@@ -1,6 +1,6 @@
 import type { ManagersDirectoryLabels } from "@/shared/locale/types/dashboard/managers";
 
-export const directory: ManagersDirectoryLabels = {
+export const dashboardManagersDirectoryAr: ManagersDirectoryLabels = {
   pageTitle: "دليل المديرين",
   pageSubtitle: "إدارة شاملة للإداريين وموظفي النظام.",
   mobileTitle: "دليل الموظفين",

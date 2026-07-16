@@ -125,7 +125,7 @@ export function AssignedUsersTab({
   onAssignGroup,
   loading = false,
 }: Readonly<AssignedUsersTabProps>) {
-  const t = useAppTranslation("dashboard.permissions");
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
   const assignedUsersColumns = useMemo<GridColDef<GroupUser>[]>(() => {
     return [

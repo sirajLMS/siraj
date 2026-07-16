@@ -24,6 +24,7 @@ import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { ClassAuditView } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditView";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes/audit";
 
 function exportToCsv(
   students: readonly {
@@ -57,7 +58,7 @@ function exportToCsv(
 }
 
 function useAuditLabels(
-  t: ReturnType<typeof useAppTranslation<"dashboard.classAudit">>,
+  t: ClassAuditLabels,
   audit: {
     readonly registeredStudentCount?: number | null;
     readonly adminNote?: { readonly lastUpdated?: string | null; readonly content?: string | null } | null;
@@ -168,8 +169,8 @@ function AdminNoteDialog({
 
 export function ClassAuditContainer() {
   const router = useRouter();
-  const t = useAppTranslation("dashboard.classAudit");
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation().dashboardTranslations.classAudit;
+  const tc = useAppTranslation().commonTranslations;
   const client = useApolloClient();
 
   const params = useParams();

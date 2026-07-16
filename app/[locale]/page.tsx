@@ -6,7 +6,7 @@ import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations(locale, "common");
+  const t = getTranslations(locale).commonTranslations;
   return { title: t.title };
 }
 

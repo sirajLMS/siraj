@@ -15,8 +15,8 @@ import type { ErrorsLabels } from "@/shared/locale/types/errors";
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
 let tErrors: ErrorsLabels;
-beforeAll(async () => {
-  tErrors = await getServerTranslations("en", "errors");
+beforeAll(() => {
+  tErrors = getServerTranslations("en").errorsTranslations;
 });
 
 function configTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {

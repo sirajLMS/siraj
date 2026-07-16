@@ -116,7 +116,7 @@ function useMonthDrawerQuery(
 }
 
 function DrawerHeader({ title, onClose }: { readonly title: string; readonly onClose: () => void }) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   return (
     <Box
       sx={{
@@ -149,7 +149,7 @@ function MonthNavigator({
   readonly currentMonth: Date;
   readonly onMonthChange: (fn: (prev: Date) => Date) => void;
 }) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
   const yearStr = currentMonth.getFullYear();
 
@@ -186,7 +186,7 @@ function DrawerContent({
   readonly currentMonth: Date;
   readonly daysByDate: Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>;
 }) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   return (
     <Box sx={{ flex: 1, overflow: "auto", px: 2, pb: 3 }}>
       {loading ? (
@@ -214,7 +214,7 @@ export function TeacherAvailabilityMonthDrawer({
   anchorFromDate,
   onClose,
 }: Readonly<TeacherAvailabilityMonthDrawerProps>) {
-  const t = useAppTranslation("dashboard.core.searchSchedule");
+  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
 
   const [currentMonth, setCurrentMonth] = useState(() => parse(anchorFromDate, "yyyy-MM-dd", new Date()));
 

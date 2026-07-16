@@ -93,7 +93,7 @@ function resolveCurrency(code: string | null | undefined): CurrencyOption | null
 }
 
 export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonly<CatalogEditDialogProps>) {
-  const t = useAppTranslation("dashboard.paymentCatalogs");
+  const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
   const notifications = useNotifications();
   const isEdit = Boolean(row?.id);
 

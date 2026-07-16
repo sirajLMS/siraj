@@ -1,22 +1,22 @@
-export { classScope } from "./classScope";
-export { display } from "./display";
-export { fields } from "./fields";
-export { join } from "./join";
-export { manager } from "./manager";
-export { providerSelect } from "./providerSelect";
-export { recurringSchedule } from "./recurringSchedule";
-export { summary } from "./summary";
+export { uiMeetingConfigClassScopeEn as classScope } from "./classScope";
+export { uiMeetingConfigDisplayEn as display } from "./display";
+export { uiMeetingConfigFieldsEn as fields } from "./fields";
+export { uiMeetingConfigJoinEn as join } from "./join";
+export { uiMeetingConfigManagerEn as manager } from "./manager";
+export { uiMeetingConfigProviderSelectEn as providerSelect } from "./providerSelect";
+export { uiMeetingConfigRecurringScheduleEn as recurringSchedule } from "./recurringSchedule";
+export { uiMeetingConfigSummaryEn as summary } from "./summary";
 
-import { classScope } from "./classScope";
-import { display } from "./display";
-import { fields } from "./fields";
-import { join } from "./join";
-import { manager } from "./manager";
-import { providerSelect } from "./providerSelect";
-import { recurringSchedule } from "./recurringSchedule";
-import { summary } from "./summary";
+import { uiMeetingConfigClassScopeEn as classScope } from "./classScope";
+import { uiMeetingConfigDisplayEn as display } from "./display";
+import { uiMeetingConfigFieldsEn as fields } from "./fields";
+import { uiMeetingConfigJoinEn as join } from "./join";
+import { uiMeetingConfigManagerEn as manager } from "./manager";
+import { uiMeetingConfigProviderSelectEn as providerSelect } from "./providerSelect";
+import { uiMeetingConfigRecurringScheduleEn as recurringSchedule } from "./recurringSchedule";
+import { uiMeetingConfigSummaryEn as summary } from "./summary";
 
-export const meetingConfig = {
+export const uiMeetingConfigEn = {
   display,
   join,
   manager,

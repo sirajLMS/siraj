@@ -14,8 +14,9 @@ import type {
   TeacherMonthlyReportData,
 } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { SupervisorMonthlyReportsLabels } from "@/shared/locale/types/dashboard/supervisorPortal/monthlyReports";
 
-function useLabels(t: ReturnType<typeof useAppTranslation<"dashboard.supervisorPortal.monthlyReports">>) {
+function useLabels(t: SupervisorMonthlyReportsLabels) {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,
@@ -52,7 +53,7 @@ function useLabels(t: ReturnType<typeof useAppTranslation<"dashboard.supervisorP
 }
 
 export function MonthlyReportsContainer() {
-  const t = useAppTranslation("dashboard.supervisorPortal.monthlyReports");
+  const t = useAppTranslation().dashboardTranslations.supervisorPortalMonthlyReports;
 
   const reportType = useSupervisorMonthlyReportsStore(s => s.reportType);
   const year = useSupervisorMonthlyReportsStore(s => s.year);

@@ -28,7 +28,7 @@ export const PaymentMethodTypeSelector: React.FC<PaymentMethodTypeSelectorProps>
   allowEmpty = false,
   allowedTypes,
 }): React.ReactNode => {
-  const t = useAppTranslation("ui.paymentMethod.typeSelector");
+  const t = useAppTranslation().uiTranslations.paymentMethod.typeSelector;
   const title = labels?.title ?? t.title;
   const ariaLabel = labels?.ariaLabel ?? t.ariaLabel;
 

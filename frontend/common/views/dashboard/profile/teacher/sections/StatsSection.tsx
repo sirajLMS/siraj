@@ -15,7 +15,7 @@ type StatsSectionProps = {
 };
 
 export function StatsSection({ teacherData, isAdminScope }: StatsSectionProps) {
-  const t = useAppTranslation("dashboard.teacherProfile");
+  const t = useAppTranslation().dashboardTranslations.teacherProfile;
 
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
 

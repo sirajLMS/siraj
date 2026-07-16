@@ -75,7 +75,7 @@ function buildStudentQuotaData(
         avatarUrl?: string | null;
       }
     | undefined,
-  tc: ReturnType<typeof useAppTranslation<"common">>
+  tc: ReturnType<typeof useAppTranslation>["commonTranslations"]
 ): StudentProfileData | null {
   const s = useUnifiedProfile ? profile : studentById;
   if (!s || typeof s.id !== "string" || s.id.length === 0) return null;
@@ -96,8 +96,8 @@ function buildStudentQuotaData(
 }
 
 export function StudentQuotaContainer() {
-  const t = useAppTranslation("dashboard.studentQuota");
-  const tc = useAppTranslation("common");
+  const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const tc = useAppTranslation().commonTranslations;
   const params = useParams();
   const profileContext = useStudentProfileContext();
   const studentId = profileContext?.studentId ?? (typeof params?.id === "string" ? params.id : "");

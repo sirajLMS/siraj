@@ -1,7 +1,7 @@
 import { ParentRepository, SessionRepository, UserRepository } from "@/backend/db";
 import { AppPermission, StudentStatus } from "@/backend/enum";
-import { getBackendTranslations, logger } from "@/backend/lib";
 import { parseStudentStatus } from "@/backend/lib/enum";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import type {
   AssociatedStudentResult,
@@ -11,6 +11,7 @@ import type {
   ParentProfileUpdateInput,
   ReactivateParentResult,
 } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export type {
   AssociatedStudentResult,
@@ -28,16 +29,16 @@ async function toParentProfileResult(profile: ParentProfileRepoResult): Promise<
 async function requirePermission(actorUserId: string, permission: AppPermission, locale?: string): Promise<void> {
   const hasPermission = await PermissionsService.hasPermission(actorUserId, permission);
   if (!hasPermission) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("insufficientPermissions"));
+    const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+    throw new Error(tFunc.insufficientPermissions);
   }
 }
 
 async function requireParentProfile(parentId: string, locale: string | undefined): Promise<ParentProfileRepoResult> {
   const profile = await ParentRepository.getParentProfile(parentId);
   if (!profile) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("parentNotFound", { id: parentId }));
+    const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+    throw new Error(tFunc.parentNotFound);
   }
   return profile;
 }
@@ -48,8 +49,8 @@ async function requireStudent(
 ): Promise<NonNullable<Awaited<ReturnType<typeof ParentRepository.getAssociatedStudentById>>>> {
   const student = await ParentRepository.getAssociatedStudentById(studentId);
   if (!student) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("studentNotFound", { id: studentId }));
+    const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+    throw new Error(tFunc.studentNotFound(studentId));
   }
   return student;
 }
@@ -177,8 +178,8 @@ export namespace ParentProfileService {
 
     const parent = await ParentRepository.findByUserId(actorUserId);
     if (parent?.id !== parentId) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
     }
 
     const { phone, ...repoInput } = input;

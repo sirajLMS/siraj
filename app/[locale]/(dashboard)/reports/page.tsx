@@ -8,7 +8,7 @@ export async function generateMetadata({
   params: Promise<{ readonly locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations(locale, "dashboard.reports");
+  const t = getTranslations(locale).dashboardTranslations.reports;
   return { title: t.pageTitle };
 }
 
