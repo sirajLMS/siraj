@@ -70,6 +70,7 @@ jobs:
       - name: Next.js build
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_ENCRYPTION_KEY: ${{ secrets.DATABASE_ENCRYPTION_KEY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           NEXT_PUBLIC_BASE_URL: http://localhost:3000
           NODE_ENV: test
