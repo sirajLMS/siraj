@@ -542,7 +542,6 @@ export const resetClassInstance = async (
   tErrors?: ErrorsLabels
 ) => {
   const runner = async (t: DBTransaction) => {
-    getServerTranslations("en").errorsTranslations;
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) return null;
 

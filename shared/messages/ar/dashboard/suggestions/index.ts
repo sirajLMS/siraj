@@ -1,1 +1,0 @@
-export { suggestions } from "./main";
