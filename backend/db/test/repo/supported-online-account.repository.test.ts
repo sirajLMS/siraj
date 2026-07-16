@@ -2,8 +2,7 @@ import { beforeAll, describe, expect, test } from "bun:test";
 import { SupportedOnlineAccountRepository } from "@/backend/db/repo";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { IdentifierKind, PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 let tErrors: ErrorsLabels;

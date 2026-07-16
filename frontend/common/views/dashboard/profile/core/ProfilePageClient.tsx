@@ -16,7 +16,7 @@ import { ParentAccountActions } from "@/frontend/common/views/dashboard/profile/
 import { ParentProfileContainer } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileContainer";
 import { StaffProfileContainer } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileContainer";
 import { TeacherProfileContainer } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileContainer";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type ProfilePageClientProps = {
   readonly scope: ProfileScope;

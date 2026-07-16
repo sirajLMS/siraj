@@ -5,7 +5,7 @@ import { logger } from "@/backend/lib/logger";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { assertStudentFieldView, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
 import type { StudentUpcomingClassesResult } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace StudentStatusService {
   export async function getUpcomingClasses(

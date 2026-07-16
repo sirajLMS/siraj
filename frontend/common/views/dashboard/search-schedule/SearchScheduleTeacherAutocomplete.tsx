@@ -5,7 +5,7 @@ import { Autocomplete, TextField } from "@mui/material";
 import { useEffect, useMemo } from "react";
 import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { type SearchScheduleTeacherOption, useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const DEBOUNCE_MS = 300;
 const MIN_SEARCH_LENGTH = 2;

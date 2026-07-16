@@ -4,7 +4,7 @@ import { parseAccountStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import type { ManagerDirectoryRow } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export interface UpdateManagerProfileInput {
   readonly phone?: string | null;

@@ -4,7 +4,7 @@ import { Paper, Stack, Typography } from "@mui/material";
 import { PersonProfileLink, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssociatedStudentRow } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type AssociatedStudentsCardListProps = {
   readonly rows: readonly AssociatedStudentRow[];

@@ -14,8 +14,8 @@ import {
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CreditReason } from "@/backend/enum";
 import type { ClassInstanceEntity } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 
 let tErrors: ErrorsLabels;
 beforeAll(() => {

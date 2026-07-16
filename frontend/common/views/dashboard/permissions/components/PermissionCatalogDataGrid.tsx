@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionCatalogDataGridProps {
   readonly permissions: readonly Permission[];

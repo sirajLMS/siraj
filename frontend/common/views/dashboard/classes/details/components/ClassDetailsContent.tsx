@@ -17,7 +17,7 @@ import {
   useAdminViewLabels,
   useTeacherViewLabels,
 } from "@/frontend/common/views/dashboard/classes/details/useClassDetailsLabels";
-import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details";
+import type { ClassDetailsLabels } from "@/shared/locale";
 
 const AdminView = (props: AdminViewProps) => {
   const labels = useAdminViewLabels(props.instance.studentTimezone ?? "");

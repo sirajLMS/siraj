@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DstMigrationContainer } from "@/frontend/common/views/dashboard/tools/dst-migration/DstMigrationContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

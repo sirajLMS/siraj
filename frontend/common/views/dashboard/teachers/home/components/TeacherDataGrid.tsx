@@ -6,7 +6,7 @@ import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/c
 import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface TeacherDataGridProps {
   readonly rows: readonly TeacherDirectoryRow[];

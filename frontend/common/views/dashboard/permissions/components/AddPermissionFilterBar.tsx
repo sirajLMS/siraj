@@ -3,7 +3,7 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { InputAdornment, MenuItem, Select, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions";
+import type { PermissionsLabels } from "@/shared/locale";
 
 const StyledFilterContainer = styled("div")(({ theme }) => ({
   padding: theme.spacing(2),

@@ -16,7 +16,7 @@ import {
 import { CurrencyCode, StudentStatus } from "@/backend/enum";
 import { parseInvoiceStatus, parseInvoiceType, parseStudentStatus } from "@/backend/lib/enum";
 import type * as Types from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 type CurrencyExchangeRateUpdateInput = Omit<Types.CurrencyExchangeRateInsertType, "id" | "createdAt" | "updatedAt">;
 type InvoiceCreateInput = Omit<Types.InvoiceInsertType, "id" | "createdAt" | "updatedAt">;

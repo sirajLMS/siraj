@@ -6,7 +6,7 @@ import {
   type SuggestionFormData,
   suggestionFormSchema,
 } from "@/frontend/common/views/dashboard/suggestions/schemas/suggestionFormSchema";
-import type { SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
+import type { SuggestionsLabels } from "@/shared/locale";
 
 /**
  * ParentSuggestions ViewModel.

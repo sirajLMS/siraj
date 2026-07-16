@@ -23,7 +23,7 @@ import {
 } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
 import { Link } from "@/shared/i18n/routing";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppLocale } from "@/shared/locale/client";
+import { useAppLocale } from "@/shared/locale";
 
 interface ScheduleOverviewCardListProps {
   readonly rows: readonly DailyScheduleRow[];

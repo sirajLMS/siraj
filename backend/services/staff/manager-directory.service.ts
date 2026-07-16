@@ -7,7 +7,7 @@ import type {
   OnboardingMetricsResult,
   PaginationArgs,
 } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace ManagerDirectoryService {
   export async function getManagerDirectory(

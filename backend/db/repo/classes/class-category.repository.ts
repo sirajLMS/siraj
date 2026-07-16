@@ -4,7 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { classCategories } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type { ClassCategorySelectType, ClassCategorySubmitInput, ClassCategoryUpdateInput } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ClassCategoryRepository {
   /**

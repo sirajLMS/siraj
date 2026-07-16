@@ -13,7 +13,7 @@ import {
 } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { rtlFlipIconSx } from "@/frontend/common/utils/rtlFlipIconSx";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface PaginationControlsProps {
   readonly page: number;

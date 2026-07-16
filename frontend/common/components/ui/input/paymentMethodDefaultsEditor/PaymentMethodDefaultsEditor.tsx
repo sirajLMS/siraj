@@ -14,7 +14,7 @@ import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphq
 import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type PaymentMethodDefaultsEditorProps = {
   readonly methods: readonly PaymentMethodRow[];

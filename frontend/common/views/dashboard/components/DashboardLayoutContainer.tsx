@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { DashboardClientBridge } from "@/frontend/common/views/dashboard/components/DashboardClientBridge";
-import { getLocale, getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
 interface DashboardLayoutContainerProps {
   readonly children: ReactNode;

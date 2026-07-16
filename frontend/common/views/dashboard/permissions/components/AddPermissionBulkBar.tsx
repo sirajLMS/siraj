@@ -2,7 +2,7 @@
 
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions";
+import type { PermissionsLabels } from "@/shared/locale";
 
 const StyledBulkBarContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),

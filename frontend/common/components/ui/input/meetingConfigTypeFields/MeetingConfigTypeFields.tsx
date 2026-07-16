@@ -4,7 +4,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { getVisibleMeetingConfigFields } from "@/frontend/common/lib/meeting-config";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type MeetingConfigDetailsFormValue = {
   meetingUrl: string;

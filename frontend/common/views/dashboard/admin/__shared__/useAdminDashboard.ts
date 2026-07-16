@@ -8,7 +8,7 @@ import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
 import { resolveDailyScheduleMetricFilter } from "@/frontend/common/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export const ADMIN_DASHBOARD_PAGE_SIZE = 10;
 

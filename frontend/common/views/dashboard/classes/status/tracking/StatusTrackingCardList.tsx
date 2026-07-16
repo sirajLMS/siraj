@@ -20,7 +20,7 @@ import {
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppLocale } from "@/shared/locale/client";
+import { useAppLocale } from "@/shared/locale";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, "regular" | "suspendedPending" | "onLeave" | "pendingVerification"> = {
   [SessionStatus.REGULAR]: "regular",

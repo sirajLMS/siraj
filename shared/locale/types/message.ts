@@ -1,5 +1,6 @@
 /** Flattened, dot-free top-level translation schema. */
 
+import type { AppLocale } from "@/shared/locale/AppLocale";
 import type { AuthLabels } from "@/shared/locale/types/auth";
 import type { CommonLabels } from "@/shared/locale/types/common";
 import type { DashboardTranslations } from "@/shared/locale/types/dashboard";
@@ -10,7 +11,7 @@ import type { SessionLabels } from "@/shared/locale/types/session";
 import type { SmsLabels } from "@/shared/locale/types/sms";
 import type { UiTranslations } from "@/shared/locale/types/ui-translations";
 
-export type AppLocale = "ar" | "en";
+export type { AppLocale };
 
 export type Translations = {
   authTranslations: AuthLabels;

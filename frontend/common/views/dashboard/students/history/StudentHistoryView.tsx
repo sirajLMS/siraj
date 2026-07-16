@@ -6,7 +6,7 @@ import { StudentHistoryDesktop } from "@/frontend/common/views/dashboard/student
 import { StudentHistoryMobile } from "@/frontend/common/views/dashboard/students/history/components/StudentHistoryMobile";
 import type { StudentHistoryViewProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function StudentHistoryView({
   studentName,

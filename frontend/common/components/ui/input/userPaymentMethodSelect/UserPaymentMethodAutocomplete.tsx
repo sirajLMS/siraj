@@ -12,8 +12,7 @@ import { useCallback, useMemo } from "react";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { userPaymentMethodToOptionLabel } from "@/frontend/common/lib/user-payment-method";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { PaymentMethodLabels } from "@/shared/locale/types/ui";
+import { type PaymentMethodLabels, useAppTranslation } from "@/shared/locale";
 
 export type UserPaymentMethodAutocompleteProps = {
   readonly value?: UserPaymentMethodFieldsFragment | null;

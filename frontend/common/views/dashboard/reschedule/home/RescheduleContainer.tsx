@@ -13,7 +13,7 @@ import { RescheduleView } from "@/frontend/common/views/dashboard/reschedule/hom
 import type { RescheduleFormData } from "@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema";
 import { combineDateTime } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function RescheduleContainer() {
   const router = useRouter();

@@ -24,9 +24,12 @@ import {
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { CreateRecurringClassLabels } from "@/shared/locale/types/dashboard/classes/createRecurringClass";
-import type { MeetingConfigClassScopeLabels, MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
+import {
+  type CreateRecurringClassLabels,
+  type MeetingConfigClassScopeLabels,
+  type MeetingConfigManagerLabels,
+  useAppTranslation,
+} from "@/shared/locale";
 
 type TranslationFn = CreateRecurringClassLabels;
 

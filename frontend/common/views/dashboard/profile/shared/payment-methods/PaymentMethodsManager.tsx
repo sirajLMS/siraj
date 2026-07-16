@@ -26,8 +26,7 @@ import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method"
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { PaymentMethodDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodDeleteDialog";
 import { PaymentMethodFormDialog } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodFormDialog";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { PaymentMethodLabels, PaymentMethodManagerLabels } from "@/shared/locale/types/ui";
+import { type PaymentMethodLabels, type PaymentMethodManagerLabels, useAppTranslation } from "@/shared/locale";
 
 export type PaymentMethodsSlot = "payin" | "payout";
 

@@ -6,7 +6,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 import type { TeacherProfileReturnType } from "@/backend/types/teachers/teacher.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 const baseProfile: TeacherProfileReturnType = {
   id: "teacher-1",

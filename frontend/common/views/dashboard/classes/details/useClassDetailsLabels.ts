@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import type { ClassInstanceStatus } from "@/frontend/common/views/dashboard/types/dashboard";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { AdminViewLabels } from "@/shared/locale/types/dashboard/admin/view";
+import { type AdminViewLabels, useAppTranslation } from "@/shared/locale";
 
 export interface TeacherViewLabels {
   readonly timezone: {

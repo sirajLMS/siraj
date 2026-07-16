@@ -16,7 +16,7 @@ import type {
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { ProfilePageClient } from "@/frontend/common/views/dashboard/profile/core/ProfilePageClient";
 import { redirect } from "@/shared/i18n/routing";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id, locale } = await params;

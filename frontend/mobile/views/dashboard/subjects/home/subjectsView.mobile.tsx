@@ -8,7 +8,7 @@ import { CategoriesSection } from "@/frontend/common/views/dashboard/subjects/ho
 import { SubjectCard } from "@/frontend/common/views/dashboard/subjects/home/components/SubjectCard";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function SubjectsViewMobile({
   categories,

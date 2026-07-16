@@ -9,7 +9,7 @@ import { CountryDisplay, CurrencyDisplay, LocalizedStringDisplay } from "@/front
 import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SupportedMobileWalletFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface MobileWalletCatalogGridProps extends CatalogGridActionHandlers {
   readonly rows: readonly SupportedMobileWalletFieldsFragment[];

@@ -5,7 +5,7 @@ import {
 } from "@/backend/db/seeds/lib/meeting-provider-factory";
 import logger from "@/backend/lib/logger";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export async function seedOrGet() {
   logger.info("Seeding meeting providers...");

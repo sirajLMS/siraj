@@ -1,6 +1,6 @@
 // cspell:ignore Financials
 
-import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/locale";
 
 type BillingManualTranslator = BillingManualLabels;
 

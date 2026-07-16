@@ -14,7 +14,7 @@ import type {
   PendingReviewCountReturnType,
 } from "@/backend/types";
 import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 /**
  * Service for the lesson report workflow (submit / review / approve / reject).

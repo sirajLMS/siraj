@@ -1,6 +1,6 @@
 "use client";
 
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function useStatusTrackingLabels() {
   const t = useAppTranslation().dashboardTranslations.coreStatusTracking;

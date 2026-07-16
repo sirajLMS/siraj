@@ -6,7 +6,7 @@ import type {
   AdminSuggestionsSummary,
   SuggestionStatus,
 } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
-import type { SuggestionsAdminLabels, SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
+import type { SuggestionsAdminLabels, SuggestionsLabels } from "@/shared/locale";
 
 export type { SuggestionsAdminLabels, SuggestionsLabels };
 

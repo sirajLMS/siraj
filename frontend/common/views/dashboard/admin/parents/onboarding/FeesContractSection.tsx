@@ -21,7 +21,7 @@ import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/commo
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 import { usePaymentMethodCatalogs } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface SectionProps {
   readonly register: UseFormRegister<ParentOnboardingFormData>;

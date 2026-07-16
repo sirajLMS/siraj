@@ -8,7 +8,7 @@ import type {
   ParentBillingSummaryResult,
   StudentCreditRow,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace BillingHistoryService {
   async function assertBillingViewPermission(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {

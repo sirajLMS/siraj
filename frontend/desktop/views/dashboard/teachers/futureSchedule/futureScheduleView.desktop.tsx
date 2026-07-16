@@ -8,7 +8,7 @@ import { JumpToDateHeader } from "@/frontend/common/views/dashboard/teachers/fut
 import { MiniCalendar } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/MiniCalendar";
 import { SupportContact } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/SupportContact";
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function FutureScheduleViewDesktop({
   classes,

@@ -8,7 +8,7 @@ import {
   CalendarWeekdayHeader,
 } from "@/frontend/common/views/dashboard/shared/CalendarGridShared";
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface TeacherAvailabilityCalendarDay {
   readonly day: number;

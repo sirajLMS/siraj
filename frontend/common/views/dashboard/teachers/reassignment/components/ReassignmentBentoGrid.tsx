@@ -10,7 +10,7 @@ import type {
   ReassignmentBentoGridProps,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardProps>) {
   return (

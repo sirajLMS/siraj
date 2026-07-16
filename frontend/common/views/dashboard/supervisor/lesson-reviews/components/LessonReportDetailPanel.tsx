@@ -3,7 +3,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
-import type { PendingReviewsLabels } from "@/shared/messages/types/dashboard/supervisorPortal/pendingReviews";
+import type { PendingReviewsLabels } from "@/shared/locale";
 
 interface LessonReportDetailPanelProps {
   readonly report: PendingReviewRow | null;

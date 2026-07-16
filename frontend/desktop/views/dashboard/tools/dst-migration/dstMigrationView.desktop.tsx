@@ -14,7 +14,7 @@ import type {
   UpdatedSession,
 } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 import { UpdatedSessionsSectionDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/updatedSessionsSection.desktop";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly metrics: DstMigrationMetrics;

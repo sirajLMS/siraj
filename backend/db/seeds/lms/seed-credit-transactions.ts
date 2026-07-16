@@ -3,7 +3,7 @@ import { findAdminUserOrFallback } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import type { CreditTransactionReturnType, StudentEntity, UserSelectType } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 type CreditPurchaseSpec = {
   studentIndex: number;

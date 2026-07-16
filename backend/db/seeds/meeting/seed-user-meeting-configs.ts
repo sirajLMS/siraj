@@ -4,7 +4,7 @@ import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import type { TeacherEntity } from "@/backend/types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export async function seedOrGet(teachersList: TeacherEntity[], config?: SeedConfig) {
   logger.info("Seeding user meeting configs...");

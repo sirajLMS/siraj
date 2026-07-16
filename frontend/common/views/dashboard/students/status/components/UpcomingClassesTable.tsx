@@ -6,7 +6,7 @@ import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/student
 import type { UpcomingClassesTableProps } from "@/frontend/common/views/dashboard/students/status/types";
 import { UpcomingClassesTableDesktop } from "@/frontend/desktop/views/dashboard/students/status/components/upcomingClassesTable.desktop";
 import { UpcomingClassesTableMobile } from "@/frontend/mobile/views/dashboard/students/status/components/upcomingClassesTable.mobile";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function UpcomingClassesTable({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
   const { isMobile } = useViewport();

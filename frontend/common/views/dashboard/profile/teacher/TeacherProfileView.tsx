@@ -15,7 +15,7 @@ import {
   type TeacherAdminData,
   type TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function hasTeacherProfessionalData(teacherData: TeacherViewData): boolean {
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;

@@ -14,7 +14,7 @@ import {
   type TeacherOwnEditFormData,
   teacherOwnEditSchema,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type { TeacherEditData, TeacherOwnEditFormData };
 

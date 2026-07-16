@@ -4,7 +4,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 import type { TeacherMonthlyReportReturnType } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherMonthlyReportService {
   async function assertCanViewMonthlyReport(actorUserId: string, teacherId: string, locale?: string): Promise<void> {

@@ -12,8 +12,8 @@ import { logger } from "@/frontend/common/utils/logger";
 import { SupervisorDashboardView } from "@/frontend/common/views/dashboard/supervisor/dashboard/supervisorDashboardView";
 import type { RecentApproval } from "@/frontend/common/views/dashboard/supervisor/dashboard/types/supervisorDashboardTypes";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { SupervisorDashboardLabels } from "@/shared/locale/types/dashboard/supervisorPortal/supervisorDashboard";
+import type { SupervisorDashboardLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 const MONTH_NAMES = [
   "January",
@@ -39,25 +39,8 @@ function useCurrentMonth(): { year: number; month: number; label: string } {
   }, []);
 }
 
-function useLabels(t: SupervisorDashboardLabels, userName: string, pendingReviewCount: number) {
-  return useMemo(
-    () => ({
-      pageTitle: t.pageTitle,
-      welcomeMessage: t.welcomeMessage(userName),
-      pendingReviewsHero: t.pendingReviewsHero(pendingReviewCount),
-      pendingReviewsSubtitle: t.pendingReviewsSubtitle,
-      goToReviews: t.goToReviews,
-      teacherDuesSummary: t.teacherDuesSummary,
-      totalPendingDues: t.totalPendingDues,
-      goToDues: t.goToDues,
-      monthlyReportsShortcut: t.monthlyReportsShortcut,
-      goToMonthlyReports: t.goToMonthlyReports,
-      recentApprovals: t.recentApprovals,
-      noRecentApprovals: t.noRecentApprovals,
-      loadingMessage: t.loadingMessage,
-    }),
-    [t, userName, pendingReviewCount]
-  );
+function useLabels(t: SupervisorDashboardLabels) {
+  return useMemo(() => t, [t]);
 }
 
 export function SupervisorDashboardContainer() {
@@ -112,7 +95,7 @@ export function SupervisorDashboardContainer() {
       .slice(0, 5);
   }, [recentData]);
 
-  const labels = useLabels(t, userName ?? "", pendingReviewCount);
+  const labels = useLabels(t);
 
   const handlers = useMemo(
     () => ({

@@ -8,7 +8,7 @@ import type { SuggestionFormData } from "@/frontend/common/views/dashboard/sugge
 import { suggestionFormSchema } from "@/frontend/common/views/dashboard/suggestions/schemas/suggestionFormSchema";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 import { ParentSuggestionsDesktopView } from "@/frontend/desktop/views/dashboard/suggestions/parentSuggestions.desktop";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const PARENT_PERMISSIONS = [AppPermission.CommunicationSubmitSuggestion];
 

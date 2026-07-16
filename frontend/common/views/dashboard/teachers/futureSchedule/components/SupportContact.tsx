@@ -8,7 +8,7 @@ import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display";
 import { logTeacherSupportRequestMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { SupportContactProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function SupportContact({ contact }: Readonly<SupportContactProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;

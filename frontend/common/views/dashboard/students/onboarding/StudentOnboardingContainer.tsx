@@ -22,7 +22,7 @@ import {
 } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import type { TeacherOption } from "@/frontend/common/views/dashboard/students/onboarding/TeacherAssignmentSection";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function StudentOnboardingContainer() {
   const t = useAppTranslation().dashboardTranslations.studentOnboarding;

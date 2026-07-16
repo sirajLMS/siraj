@@ -9,6 +9,7 @@ import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashb
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
 
 export function SupervisorDashboardMobileView({
+  userName,
   pendingReviewCount,
   pendingDuesSummary,
   monthlySnapshot,
@@ -22,7 +23,7 @@ export function SupervisorDashboardMobileView({
   return (
     <PageContainer>
       <MobileContentStack>
-        <MobilePageHeader title={labels.pageTitle} subtitle={labels.welcomeMessage} />
+        <MobilePageHeader title={labels.pageTitle} subtitle={labels.welcomeMessage(userName ?? "")} />
 
         {loading ? (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>

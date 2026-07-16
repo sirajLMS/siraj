@@ -6,7 +6,7 @@ import { SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionCatalogDataGrid } from "@/frontend/common/views/dashboard/permissions/components/PermissionCatalogDataGrid";
 import { PermissionCatalogToolbar } from "@/frontend/common/views/dashboard/permissions/components/PermissionCatalogToolbar";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionCatalogSectionDesktopProps {
   readonly permissions: readonly Permission[];

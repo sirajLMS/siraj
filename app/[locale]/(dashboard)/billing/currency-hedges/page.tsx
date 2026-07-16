@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { CurrencyHedgesContainer } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/CurrencyHedgesContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

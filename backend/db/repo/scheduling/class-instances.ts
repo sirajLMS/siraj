@@ -18,8 +18,8 @@ import { classInstances, classSubjects, recurringSchedules, students, teachers, 
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type * as Types from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 
 export { resolveStudentTimezone } from "@/backend/db/repo/scheduling/shared";
 

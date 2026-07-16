@@ -12,7 +12,7 @@ import type {
   CreditTransactionSubmitInput,
   PaginationArgs,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 function deriveBookingIdempotencyKey(input: {
   studentId: string;

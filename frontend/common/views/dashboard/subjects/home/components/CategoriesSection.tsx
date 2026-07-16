@@ -4,7 +4,7 @@ import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Stack } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import type { CategoriesSectionProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function CategoriesSection({
   categories,

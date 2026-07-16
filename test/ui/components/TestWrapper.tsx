@@ -15,8 +15,6 @@ import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import { createAppTheme } from "@/frontend/common/providers/theme/theme";
 import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { messagesByLocale } from "@/shared/locale/messages";
-import type { Translations } from "@/shared/locale/types/message";
 
 const cacheLtr = createCache({
   key: "test-ltr",
@@ -47,7 +45,6 @@ export function TestWrapper({
   children,
 }: TestWrapperProps) {
   const direction: "rtl" | "ltr" = locale === "ar" ? "rtl" : "ltr";
-  const translations: Translations = messagesByLocale[locale];
   const theme = useMemo(() => createAppTheme(themeMode, direction, locale), [themeMode, direction, locale]);
   const cache = direction === "rtl" ? cacheRtl : cacheLtr;
 
@@ -85,7 +82,7 @@ export function TestWrapper({
   useUserStore.setState({ permissions });
 
   return (
-    <LocaleProvider translations={translations} locale={locale}>
+    <LocaleProvider locale={locale}>
       <ThemeContext.Provider value={themeContextValue}>
         <CacheProvider value={cache}>
           <ThemeProvider theme={theme}>

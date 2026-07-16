@@ -5,7 +5,7 @@ import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { PaymentMethodsManager } from "@/frontend/common/views/dashboard/profile/shared/payment-methods";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type PaymentMethodsTabProps = {
   readonly targetUserId: string;

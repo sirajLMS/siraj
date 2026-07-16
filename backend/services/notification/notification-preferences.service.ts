@@ -6,7 +6,7 @@ import type {
   NotificationPreferenceUpdateInput,
 } from "@/backend/types/notifications/notification-preferences.types";
 import type { UserNotificationPreferenceSelectType } from "@/backend/types/users/userNotificationPreferences.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 const ALL_CHANNELS = Object.values(NotificationChannel);
 const ALL_EVENT_TYPES = Object.values(NotificationEventType);

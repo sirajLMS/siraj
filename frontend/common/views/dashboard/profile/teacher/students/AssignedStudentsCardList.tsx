@@ -4,7 +4,7 @@ import { Chip, Paper, Stack, Typography } from "@mui/material";
 import { PersonProfileLink } from "@/frontend/common/components/ui";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/AssignedStudentsDataGrid";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type AssignedStudentsCardListProps = {
   readonly rows: readonly AssignedStudentsRow[];

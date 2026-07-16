@@ -9,7 +9,7 @@ import { SearchScheduleFilterDrawer } from "@/frontend/common/views/dashboard/se
 import { SearchScheduleSortMenu } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleSortMenu";
 import { SearchScheduleTeacherAutocomplete } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleTeacherAutocomplete";
 import { countActiveDrawerFilters } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface SearchScheduleFormProps {
   readonly draft: SearchScheduleDraftFilters;

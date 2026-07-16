@@ -6,7 +6,7 @@ import { useState } from "react";
 import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionGroupCardListProps {
   readonly groups: readonly PermissionGroup[];

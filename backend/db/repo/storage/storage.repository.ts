@@ -18,7 +18,7 @@ import {
 import { logger } from "@/backend/lib";
 import type * as StorageTypes from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace StorageDbRepository {
   // File operations

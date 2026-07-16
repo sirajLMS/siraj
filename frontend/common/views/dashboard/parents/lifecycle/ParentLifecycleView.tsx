@@ -20,7 +20,7 @@ import {
 } from "@/frontend/common/views/dashboard/parents/lifecycle/schemas/lifecycleUpdateSchema";
 import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
 import { Link } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function PolicyOverviewCard() {
   const t = useAppTranslation().dashboardTranslations.parentLifecycle;

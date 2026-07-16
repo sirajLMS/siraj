@@ -8,7 +8,7 @@ import { AdminBillingView } from "@/frontend/common/views/dashboard/admin/billin
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/common/views/dashboard/components/FxConversionNote";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface AdminBillingContainerProps {
   readonly parentId?: string;

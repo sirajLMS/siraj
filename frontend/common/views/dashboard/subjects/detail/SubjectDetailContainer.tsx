@@ -14,7 +14,7 @@ import type {
   SubjectDetailContainerProps,
   SubjectResourceItem,
 } from "@/frontend/common/views/dashboard/subjects/detail/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 export function SubjectDetailContainer({ subjectId }: Readonly<SubjectDetailContainerProps>) {

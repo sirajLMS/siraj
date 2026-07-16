@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface DeleteGroupDialogProps {
   readonly open: boolean;

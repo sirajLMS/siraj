@@ -9,8 +9,7 @@ import {
   setupTeacher,
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 

@@ -6,7 +6,7 @@ import { Controller } from "react-hook-form";
 import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
 import type { ManualInvoiceFormData } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
 import { parseFormDate } from "@/frontend/common/views/dashboard/billing/manual/utils/manualInvoiceFormatters";
-import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/locale";
 
 const DATE_FORMAT = "yyyy-MM-dd";
 

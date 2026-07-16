@@ -27,8 +27,7 @@ import type { LocalizedString } from "@/frontend/common/types/localized-string.t
 import { logger } from "@/frontend/common/utils/logger";
 import { CreateMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/CreateMeetingProviderDialog";
 import { EditMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/EditMeetingProviderDialog";
-import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
-import type { MeetingProvidersLabels } from "@/shared/locale/types/dashboard/meeting-providers/main";
+import { type MeetingProvidersLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 type MeetingProviderLabels = {
   readonly slug: string;

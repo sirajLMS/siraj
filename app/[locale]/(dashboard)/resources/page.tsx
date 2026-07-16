@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ResourcesContainer } from "@/frontend/common/views/dashboard/resources/ResourcesContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

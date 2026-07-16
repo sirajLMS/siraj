@@ -32,8 +32,7 @@ import {
 import { ManualOverrideDialog } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
 import { ProviderSettingsSection } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates";
+import { type ExchangeRatesLabels, useAppTranslation } from "@/shared/locale";
 
 type SyncRun = {
   readonly finishedAt?: string | null;

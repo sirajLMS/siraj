@@ -10,7 +10,7 @@ import { ParentDashboardContainer } from "@/frontend/common/views/dashboard/pare
 import { StudentDashboardContainer } from "@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer";
 import { SupervisorDashboardContainer } from "@/frontend/common/views/dashboard/supervisor/dashboard/SupervisorDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
   return (

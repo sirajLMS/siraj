@@ -9,7 +9,7 @@ import {
   type ComplaintPriority,
   ComplaintStatus,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ComplaintsAdminLabels } from "@/shared/locale";
 
 /** Container for an already-answered complaint response with surface background */
 const StyledAnsweredResponseBox = styled(Box)(({ theme }) => ({

@@ -2,7 +2,7 @@ import { BillingRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { UpsertManualExchangeRateInput, UpsertManualExchangeRateResult } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace FxRateAdminService {
   async function assertOverridePermission(actorUserId: string, locale?: string): Promise<void> {

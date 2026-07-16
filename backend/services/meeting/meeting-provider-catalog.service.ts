@@ -12,7 +12,7 @@ import type {
   MeetingProviderSubmitInput,
   UpdateMeetingProviderInput,
 } from "@/backend/types/meeting/meeting-provider.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace MeetingProviderCatalogService {
   async function assertManageCatalog(userId: string, tErrors: ErrorsLabels): Promise<void> {

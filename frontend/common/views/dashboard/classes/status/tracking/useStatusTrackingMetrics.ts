@@ -14,7 +14,7 @@ import {
   SessionStatus,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const METRIC_DEFINITIONS: readonly (Omit<RawMetric, "count"> & { readonly key: keyof MetricCounts })[] = [
   { key: "regular", labelKey: "metrics.regular", icon: CheckCircleOutlineOutlined },

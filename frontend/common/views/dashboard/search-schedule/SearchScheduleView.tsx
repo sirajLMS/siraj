@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { differenceInCalendarDays, parse } from "date-fns";
 import { SearchScheduleResultsSkeleton } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleResultsSkeleton";
 import { TeacherAvailabilityGrid } from "@/frontend/common/views/dashboard/search-schedule/TeacherAvailabilityGrid";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface SearchScheduleResultItem {
   readonly id?: string | null;

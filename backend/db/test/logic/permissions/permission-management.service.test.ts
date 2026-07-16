@@ -7,8 +7,8 @@ import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, OverrideState, UserRole } from "@/backend/enum";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
 import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 let tErrors: ErrorsLabels;

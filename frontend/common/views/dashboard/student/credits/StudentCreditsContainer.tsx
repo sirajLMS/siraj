@@ -14,10 +14,9 @@ import type {
   StudentCreditTransactionRow,
 } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { StudentCreditsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentCredits";
+import { type StudentPortalCreditsLabels, useAppTranslation } from "@/shared/locale";
 
-function useStudentCreditsLabels(t: StudentCreditsLabels): StudentCreditsLabels {
+function useStudentCreditsLabels(t: StudentPortalCreditsLabels): StudentPortalCreditsLabels {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,

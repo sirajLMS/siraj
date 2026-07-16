@@ -8,7 +8,7 @@ import { AppDataGrid, SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AddPermissionBulkBar } from "@/frontend/common/views/dashboard/permissions/components/AddPermissionBulkBar";
 import { AddPermissionFilterBar } from "@/frontend/common/views/dashboard/permissions/components/AddPermissionFilterBar";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledTabContainer = styled(Box)({
   display: "flex",

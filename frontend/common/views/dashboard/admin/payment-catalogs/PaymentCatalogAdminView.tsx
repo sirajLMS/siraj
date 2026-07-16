@@ -15,7 +15,7 @@ import type {
   PaymentCatalogKind,
   PaymentCatalogRow,
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface PaymentCatalogAdminViewProps {
   readonly activeTab: PaymentCatalogKind;

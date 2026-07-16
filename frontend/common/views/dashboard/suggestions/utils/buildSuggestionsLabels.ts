@@ -1,8 +1,4 @@
-import type {
-  SuggestionsAdminLabels,
-  SuggestionsLabels,
-  SuggestionsParentLabels,
-} from "@/shared/locale/types/dashboard/suggestions";
+import type { SuggestionsAdminLabels, SuggestionsLabels, SuggestionsParentLabels } from "@/shared/locale";
 
 function buildParentLabels(t: SuggestionsParentLabels): SuggestionsParentLabels {
   return {

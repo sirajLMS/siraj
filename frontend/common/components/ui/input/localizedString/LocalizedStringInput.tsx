@@ -12,8 +12,7 @@ import { getLanguageDisplayName } from "@/frontend/common/lib/locale";
 import { pickInitialActiveLocale, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { LocalizedStringLabels } from "@/shared/locale/types/ui";
+import { type LocalizedStringLabels, useAppTranslation } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 export type LocalizedStringInputProps = {

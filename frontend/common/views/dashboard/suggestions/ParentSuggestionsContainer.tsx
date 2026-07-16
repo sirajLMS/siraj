@@ -9,7 +9,7 @@ import { useParentSuggestionsStore } from "@/frontend/common/stores/parentSugges
 import { ParentSuggestionsView } from "@/frontend/common/views/dashboard/suggestions/parentSuggestionsView";
 import type { SuggestionFormData } from "@/frontend/common/views/dashboard/suggestions/schemas/suggestionFormSchema";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function ParentSuggestionsContainer() {
   const t = useAppTranslation();

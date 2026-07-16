@@ -13,8 +13,7 @@ import { useClassMutations } from "@/frontend/common/views/dashboard/classes/det
 import { useEventLogDownload } from "@/frontend/common/views/dashboard/classes/details/hooks/useEventLogDownload";
 import { formatClassDetailDate } from "@/frontend/common/views/dashboard/classes/details/types";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details";
+import { type ClassDetailsLabels, useAppTranslation } from "@/shared/locale";
 
 const noopAsync = () => Promise.resolve();
 

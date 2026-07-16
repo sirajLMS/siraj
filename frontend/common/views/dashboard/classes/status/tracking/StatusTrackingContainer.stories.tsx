@@ -15,7 +15,7 @@ import {
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { StatusTrackingView } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusTrackingView";
 import type { RawMetric, StatusTrackingRow } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface StoryStatusTrackingState {
   readonly metrics: readonly RawMetric[];

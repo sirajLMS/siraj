@@ -16,7 +16,7 @@ import type {
   StorageUploadValidationParams,
 } from "@/backend/types";
 import type { SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 // --- Extended StorageService ---
 export namespace StorageService {

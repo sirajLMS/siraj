@@ -6,7 +6,7 @@ import { AppPermission, AttendanceEvaluation, ClassExecutionState, ClassOutcome,
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { StudentMonthlyReportReturnType } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace StudentMonthlyReportService {
   async function assertCanViewMonthlyReport(actorUserId: string, studentId: string, locale?: string): Promise<void> {

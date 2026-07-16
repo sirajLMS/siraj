@@ -9,7 +9,7 @@ import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display"
 import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SupportedPaymentLinkFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface PaymentLinkCatalogGridProps extends CatalogGridActionHandlers {
   readonly rows: readonly SupportedPaymentLinkFieldsFragment[];

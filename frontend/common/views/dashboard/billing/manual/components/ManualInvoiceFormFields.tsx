@@ -18,8 +18,8 @@ import type {
   ParentInvoiceOption,
   StudentOption,
 } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 interface ManualInvoiceFormFieldsProps {
   readonly control: Control<ManualInvoiceFormData>;

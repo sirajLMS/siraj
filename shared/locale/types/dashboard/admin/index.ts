@@ -7,6 +7,9 @@
  * Keys that had ICU plural syntax (e.g. {minutes, plural, =1 {...} other {#...}})
  * are typed as (n: number) => string — implemented per-locale with plain TypeScript.
  */
+
+export type { DstMigrationLabels } from "./dstMigration";
+
 export interface AdminDashboardLabels {
   // ─── Static strings ────────────────────────────────────────────────
   readonly pageTitle: string;

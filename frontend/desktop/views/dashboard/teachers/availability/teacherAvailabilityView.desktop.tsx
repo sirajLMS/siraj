@@ -12,7 +12,7 @@ import { WeeklyAvailabilityGrid } from "@/frontend/common/views/dashboard/teache
 import { availabilitySearchSchema } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
 import type { AvailabilitySearchFormData } from "@/frontend/common/views/dashboard/teachers/availability/types";
 import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherAvailabilityDesktopView({
   availability,

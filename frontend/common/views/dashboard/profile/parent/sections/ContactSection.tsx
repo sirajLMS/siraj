@@ -5,7 +5,7 @@ import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graph
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import type { ParentViewData } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { CoreContactSection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreContactSection";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type ContactSectionProps =
   | {

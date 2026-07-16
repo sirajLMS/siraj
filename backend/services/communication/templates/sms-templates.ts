@@ -1,4 +1,4 @@
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 function sanitizeSms(text: string): string {
   return text.replace(/[\r\n\t]/g, " ").trim();

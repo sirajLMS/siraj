@@ -6,7 +6,7 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { teacherAssignedStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherStudentsContainer() {
   const t = useAppTranslation().dashboardTranslations.teacherStudents;

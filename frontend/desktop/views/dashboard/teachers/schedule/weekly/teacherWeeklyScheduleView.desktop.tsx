@@ -20,7 +20,7 @@ import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleS
 import { ScheduleFooterLegend } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import WeeklyScheduleGrid from "@/frontend/common/views/dashboard/teachers/schedule/weekly/WeeklyScheduleGrid";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherWeeklyScheduleViewDesktop({
   schedule,

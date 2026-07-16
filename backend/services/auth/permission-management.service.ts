@@ -14,7 +14,7 @@ import type {
   UserOverrideInput,
 } from "@/backend/types";
 import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace PermissionManagementService {
   // ─── Private Guards ───────────────────────────────────────────────────────

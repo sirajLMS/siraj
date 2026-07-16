@@ -19,7 +19,7 @@ import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graph
 import { useCurrencyCatalog } from "@/frontend/common/hooks/useCurrencyCatalog";
 import { type CurrencyOption, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type CurrencyAutocompleteProps = {
   readonly currency?: CurrencyOption | null;

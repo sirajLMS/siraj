@@ -13,8 +13,8 @@ import { logger } from "@/frontend/common/utils/logger";
 import { RejectReportDialog } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/components/RejectReportDialog";
 import { PendingReviewsView } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/pendingReviewsView";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { PendingReviewsLabels } from "@/shared/locale/types/dashboard/supervisorPortal/pendingReviews";
+import type { PendingReviewsLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 type SnackbarSeverity = "success" | "error";
 

@@ -18,7 +18,7 @@ import {
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { NotificationPreferencesTabDesktop } from "@/frontend/desktop/views/dashboard/profile/core/notifications/notificationPreferencesTab.desktop";
 import { NotificationPreferencesTabMobile } from "@/frontend/mobile/views/dashboard/profile/core/notifications/notificationPreferencesTab.mobile";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type NotificationPreferencesTabProps = {
   readonly isActive: boolean;

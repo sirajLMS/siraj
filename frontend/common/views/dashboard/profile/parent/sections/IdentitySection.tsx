@@ -13,7 +13,7 @@ import {
   type ParentAdminData,
   toDisplayValue,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type IdentitySectionProps =
   | {

@@ -4,8 +4,7 @@ import { Box, Button, ButtonGroup, Typography } from "@mui/material";
 import type * as React from "react";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PAYMENT_METHOD_TYPES } from "@/frontend/common/lib/payment-method";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { PaymentMethodTypeSelectorLabels } from "@/shared/locale/types/ui";
+import { type PaymentMethodTypeSelectorLabels, useAppTranslation } from "@/shared/locale";
 
 export type PaymentMethodTypeSelectorProps = {
   readonly type: PaymentMethodType | null;

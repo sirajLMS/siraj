@@ -8,7 +8,7 @@ import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/staff/sections/CompensationSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/staff/sections/ContactSection";
 import type { StaffProfileData } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function StaffProfileView({
   staffData,

@@ -8,7 +8,7 @@ import type {
 } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 import { AdminSuggestionsDesktopView } from "@/frontend/desktop/views/dashboard/suggestions/adminSuggestions.desktop";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const MOCK_ADMIN_SUGGESTION_ROWS: readonly AdminSuggestionRow[] = [
   {

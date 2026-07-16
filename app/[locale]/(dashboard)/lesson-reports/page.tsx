@@ -2,7 +2,7 @@ import { Box, CircularProgress } from "@mui/material";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PendingReviewsContainer } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/PendingReviewsContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

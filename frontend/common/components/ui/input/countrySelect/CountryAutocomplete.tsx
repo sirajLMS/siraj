@@ -15,7 +15,7 @@ import {
 import { getCountryOptionLabel } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.utils";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type CountryAutocompleteProps = {
   readonly country?: CountryType;

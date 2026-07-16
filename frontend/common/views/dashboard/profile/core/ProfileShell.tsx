@@ -11,7 +11,7 @@ import {
 import { ProfileHeader } from "@/frontend/common/views/dashboard/profile/core/ProfileHeader";
 import { ProfileSkeleton } from "@/frontend/common/views/dashboard/profile/core/ProfileSkeleton";
 import { ProfileTabNav } from "@/frontend/common/views/dashboard/profile/core/ProfileTabNav";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type ProfileShellProps = {
   readonly loading?: boolean;

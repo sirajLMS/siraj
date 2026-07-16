@@ -24,7 +24,7 @@ import type {
   StatusChangeInput,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type StudentQueryData = Operations.StudentByIdQuery;
 type TeachersQueryData = Operations.TeachersQuery;

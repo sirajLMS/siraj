@@ -9,7 +9,7 @@ import {
   loc,
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 

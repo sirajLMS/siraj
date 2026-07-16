@@ -5,7 +5,7 @@ import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/compo
 import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { MeetingConfigsManager } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type MeetingConfigsTabProps = {
   readonly targetUserId: string;

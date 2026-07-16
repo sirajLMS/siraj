@@ -3,7 +3,7 @@
 import LockOutlined from "@mui/icons-material/LockOutlined";
 import { Box, Typography } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type ProfileRestrictedSectionProps = {
   readonly title?: string;

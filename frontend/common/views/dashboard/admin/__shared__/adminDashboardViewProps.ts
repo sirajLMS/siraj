@@ -7,7 +7,7 @@ import {
   type RawMetrics,
 } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import type { AdminDashboardViewLabels } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardViewLabels";
-import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
+import type { AdminDashboardLabels } from "@/shared/locale";
 
 type TranslationObject = AdminDashboardLabels;
 type MetricItemList = ReturnType<typeof buildAdminDashboardMetrics>;

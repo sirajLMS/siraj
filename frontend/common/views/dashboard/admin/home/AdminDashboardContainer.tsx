@@ -14,7 +14,7 @@ import {
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { useAdminDashboardLabels } from "@/frontend/common/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 // Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
 export function AdminDashboardContainer() {

@@ -7,7 +7,7 @@ import { PermissionCatalogSection } from "@/frontend/common/views/dashboard/perm
 import { PermissionGroupCardList } from "@/frontend/common/views/dashboard/permissions/components/PermissionGroupCardList";
 import { PermissionGroupsDataGrid } from "@/frontend/common/views/dashboard/permissions/components/PermissionGroupsDataGrid";
 import { UserOverridesDataGrid } from "@/frontend/common/views/dashboard/permissions/components/UserOverridesDataGrid";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type TabKey = "groups" | "catalog" | "overrides";
 

@@ -8,7 +8,7 @@ import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meeti
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { FutureClassCardProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isRescheduled: boolean }>) {
   const dateObj = new Date(date);

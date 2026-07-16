@@ -1,6 +1,6 @@
 import { Alert, Button } from "@mui/material";
 import { PageContainer } from "@/frontend/common/components/ui/container/page/PageContainer";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type ErrorStateProps = {
   readonly message?: string;

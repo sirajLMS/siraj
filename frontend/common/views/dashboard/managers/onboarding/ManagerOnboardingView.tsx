@@ -8,7 +8,7 @@ import { OnboardingMetricsOverview } from "@/frontend/common/views/dashboard/man
 import { StaffInfoSection } from "@/frontend/common/views/dashboard/managers/onboarding/StaffInfoSection";
 import { SystemAccessSection } from "@/frontend/common/views/dashboard/managers/onboarding/SystemAccessSection";
 import type { ManagerOnboardingFormData } from "@/frontend/common/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Styled Components — Extracted inline sx styles for reusability & consistency

@@ -4,7 +4,7 @@ import { AnalyticsOutlined, ErrorOutlined, HistoryOutlined, VerifiedOutlined } f
 import { Grid } from "@mui/material";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { DstMigrationMetrics } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly metrics: DstMigrationMetrics;

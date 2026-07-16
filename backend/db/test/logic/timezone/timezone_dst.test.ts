@@ -23,8 +23,8 @@ import { DstMigrationService } from "@/backend/services/system/dst-migration.ser
 import type { ClassInstanceInsertInput, ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
 import type { UserSelectType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 let tErrors: ErrorsLabels;

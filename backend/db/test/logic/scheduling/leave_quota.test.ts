@@ -8,7 +8,7 @@ import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
   let errorCaught: Error | null = null;

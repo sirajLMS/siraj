@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ComplaintCategory } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { ComplaintValidationLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ComplaintValidationLabels } from "@/shared/locale";
 
 export const complaintFormSchema = (labels: ComplaintValidationLabels) =>
   z.object({

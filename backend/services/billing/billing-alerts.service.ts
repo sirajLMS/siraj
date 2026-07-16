@@ -2,7 +2,7 @@ import { BillingRepository } from "@/backend/db/repo/billing/billing.repository"
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace BillingAlertsService {
   export async function getUnpaidInvoices(

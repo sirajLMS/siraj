@@ -12,8 +12,7 @@ import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ProfileStaffLabels, ProfileTeacherLabels } from "@/shared/locale/types/profile";
+import { type ProfileStaffLabels, type ProfileTeacherLabels, useAppTranslation } from "@/shared/locale";
 
 export interface CompensationViewData {
   readonly hourlyRate?: string | null;

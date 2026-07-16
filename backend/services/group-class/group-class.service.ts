@@ -27,7 +27,7 @@ import type {
   GroupClassSelectType,
   GroupClassStudentReturnType,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace GroupClassService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {

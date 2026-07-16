@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function useTeacherDashboardLastUpdated(dataArrivedAt: number | null): string {
   const t = useAppTranslation().dashboardTranslations.teacherDashboard;

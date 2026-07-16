@@ -8,7 +8,7 @@ import type {
   SupportedOnlineAccountSelectType,
   UpdateSupportedOnlineAccountInput,
 } from "@/backend/types/billing/payment-method.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 type AccountRow = typeof supportedOnlineAccounts.$inferSelect;
 

@@ -8,7 +8,7 @@ import { generateAccessToken, generateRefreshToken } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
 import type { SafeUser, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace DemoAuthService {
   /**

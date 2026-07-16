@@ -19,7 +19,7 @@ import type {
   TeacherAvailabilityInsights,
   WeeklyAvailability,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function buildGraphQLInput(formData: AvailabilitySearchFormData) {
   const fromTime = formData.fromTime

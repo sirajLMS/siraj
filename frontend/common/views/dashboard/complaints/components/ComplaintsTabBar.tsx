@@ -6,7 +6,7 @@ import {
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
 import { formatAdminQueueTabLabel } from "@/frontend/common/views/dashboard/shared/utils";
-import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ComplaintsAdminLabels } from "@/shared/locale";
 
 interface ComplaintsTabBarProps {
   readonly activeTab: ComplaintTab;

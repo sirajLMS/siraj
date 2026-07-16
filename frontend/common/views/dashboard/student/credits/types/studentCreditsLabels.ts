@@ -1,3 +1,3 @@
-import type { StudentCreditsLabels } from "@/shared/messages/types/dashboard/studentPortal/studentCredits";
+import type { StudentPortalCreditsLabels } from "@/shared/locale";
 
-export type { StudentCreditsLabels };
+export type { StudentPortalCreditsLabels as StudentCreditsLabels };

@@ -3,7 +3,7 @@ import { SchedulingRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ScheduleDeletionService {
   /**

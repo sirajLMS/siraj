@@ -12,7 +12,7 @@ import { TeacherCardList } from "@/frontend/common/views/dashboard/teachers/home
 import { TeacherMetricsRow } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherMetricsRow";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface TeachersMobileViewProps {
   readonly metrics: TeacherDirectoryMetrics | null | undefined;

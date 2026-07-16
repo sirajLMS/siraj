@@ -15,7 +15,7 @@ import {
   validateProofFile,
 } from "@/backend/services/billing/billing-payment-proof.helpers";
 import type * as Types from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 function deriveIdempotencyKey(input: {
   parentId: string;

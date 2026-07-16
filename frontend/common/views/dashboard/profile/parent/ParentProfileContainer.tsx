@@ -22,7 +22,7 @@ import { ParentProfileLoadingSkeleton } from "@/frontend/common/views/dashboard/
 import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { MeetingConfigsTab } from "@/frontend/common/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;

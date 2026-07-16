@@ -5,7 +5,7 @@ import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/grap
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { BooksAndBagsClient } from "@/frontend/common/views/dashboard/resources/books-and-bags/BooksAndBagsClient";
 import type { BooksAndBagsPageProps } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 function mapAvailabilityStatus(status: string): AvailabilityStatus {
   if (status === "OUT_OF_STOCK") {

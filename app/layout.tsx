@@ -10,7 +10,8 @@ import MuiProvider from "@/frontend/common/providers/theme/MuiProvider";
 import "@/app/index.css";
 import { AppApolloProvider } from "@/frontend/common/context";
 import { AuthProvider } from "@/frontend/common/providers/apollo/AuthProvider";
-import { getLocale, getTranslations, loadAllTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -40,9 +41,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   const locale = await getLocale();
 
-  // Load ALL translation namespaces server-side for LocaleProvider.
-  const allTranslations = loadAllTranslations(locale);
-
   const cookieStore = await cookies();
   const themeCookie = cookieStore.get(THEME_COOKIE_NAME);
   const initialTheme = getThemeFromCookies(themeCookie?.value);
@@ -62,8 +60,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           defaultMode={initialTheme}
           modeStorageKey="theme" // match the existing localStorage key from `theme-detection.ts`
         />
-        {/* Our compile-time locale provider — grows as namespaces are migrated */}
-        <LocaleProvider translations={allTranslations} locale={locale}>
+        {/* Compile-time locale provider — client-side loads `messagesByLocale`
+            from the barrel directly; only the serializable `locale` enum
+            value crosses the Server→Client boundary (per RSC protocol,
+            function-valued translation keys cannot be serialized). */}
+        <LocaleProvider locale={locale}>
           <MuiProvider initialTheme={initialTheme}>
             <AppApolloProvider>
               <AuthProvider>{children}</AuthProvider>

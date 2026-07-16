@@ -7,7 +7,7 @@ import type {
   ParentInvoiceRow,
 } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
 import type { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
-import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
+import type { BillingLabels } from "@/shared/locale";
 
 export type { UserBillingProfileState } from "@/frontend/common/stores/userBillingProfileStore";
 export { DEFAULT_PAGE_SIZE } from "@/frontend/common/stores/userBillingProfileStore";

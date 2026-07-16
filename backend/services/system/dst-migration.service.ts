@@ -11,7 +11,7 @@ import type {
   DstMigrationRunSelectType,
   DstUpdatedSessionReturnType,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace DstMigrationService {
   async function ensurePermission(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {

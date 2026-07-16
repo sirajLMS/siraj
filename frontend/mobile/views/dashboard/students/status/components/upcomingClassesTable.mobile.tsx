@@ -13,7 +13,7 @@ import type {
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function formatDateTime(locale: string, dateStr: string): string {
   try {

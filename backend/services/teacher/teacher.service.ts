@@ -1,6 +1,6 @@
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { logger } from "@/backend/lib/logger";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherService {
   export async function searchTeachers(userId: string | undefined, search: string, limit: number, locale?: string) {

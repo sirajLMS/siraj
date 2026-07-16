@@ -35,7 +35,7 @@ import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meetin
 import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
 import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
 import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 type ResolvedRoleIds = {
   readonly audience: ProfileAudience;

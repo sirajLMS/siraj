@@ -7,7 +7,7 @@ import {
   useTagInputDeletion,
   useTagInputEditing,
 } from "@/frontend/common/components/ui/input/tagInput/useTagInputEditing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type TagInputProps = {
   readonly label?: string;

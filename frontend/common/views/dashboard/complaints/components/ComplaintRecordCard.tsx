@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import type { ParentComplaintRecord } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { ComplaintStatus } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ComplaintsParentLabels } from "@/shared/locale";
 
 /** Root card paper with border, hover transition, and rounded corners */
 const StyledRecordCardPaper = styled(Paper)(({ theme }) => ({

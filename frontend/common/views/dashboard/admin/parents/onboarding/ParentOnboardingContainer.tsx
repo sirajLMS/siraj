@@ -18,7 +18,7 @@ import {
 } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType, PaymentMethodType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const defaultValues: ParentOnboardingFormData = {
   name: "",

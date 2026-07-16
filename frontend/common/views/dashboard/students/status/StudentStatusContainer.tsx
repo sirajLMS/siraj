@@ -23,9 +23,7 @@ import type {
   StudentStatusPageData,
   UpcomingClassDisplay,
 } from "@/frontend/common/views/dashboard/students/status/types";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { CommonLabels } from "@/shared/locale/types/common";
-import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
+import { type CommonLabels, type StudentStatusLabels, useAppTranslation } from "@/shared/locale";
 
 type UpcomingClassInput = {
   readonly id?: string | null;

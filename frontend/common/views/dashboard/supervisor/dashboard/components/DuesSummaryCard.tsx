@@ -3,7 +3,7 @@
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
-import type { SupervisorDashboardLabels } from "@/shared/messages/types/dashboard/supervisorPortal/supervisorDashboard";
+import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 interface DuesSummaryCardProps {
   readonly summary: {

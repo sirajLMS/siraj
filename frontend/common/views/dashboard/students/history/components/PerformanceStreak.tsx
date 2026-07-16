@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import type { PerformanceStreakProps } from "@/frontend/common/views/dashboard/students/history/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const MAX_STREAK_HEIGHT = 48;
 const MIN_STREAK_HEIGHT = 16;

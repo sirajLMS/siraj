@@ -19,7 +19,7 @@ import { ContactSection } from "@/frontend/common/views/dashboard/profile/parent
 import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
 import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/sections/SocialSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 

@@ -1,5 +1,5 @@
 import type { AttendanceEvaluation, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { PendingReviewsLabels } from "@/shared/messages/types/dashboard/supervisorPortal/pendingReviews";
+import type { PendingReviewsLabels } from "@/shared/locale";
 
 export interface PendingReviewRow {
   readonly id: string;

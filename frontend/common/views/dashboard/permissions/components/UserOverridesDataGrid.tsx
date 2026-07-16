@@ -11,7 +11,7 @@ import type { PermissionGroup, User, UserOverride } from "@/frontend/common/grap
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface UserOverridesDataGridProps {
   readonly users: readonly User[];

@@ -9,7 +9,7 @@ import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { type CurrencyOption, currencies, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function SupportedCurrenciesContainer() {
   const t = useAppTranslation().dashboardTranslations.billing;

@@ -3,7 +3,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly timezone: string;

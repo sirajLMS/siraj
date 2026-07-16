@@ -9,7 +9,7 @@ import type {
   DailyScheduleList,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherFilterItem } from "@/frontend/common/types/shared.types";
-import type { DashboardNavigationLabels } from "@/shared/messages/types/message";
+import type { DashboardNavigationLabels } from "@/shared/locale";
 
 export type { DashboardFilters, MetricItem, Pagination, TeacherFilterItem } from "@/frontend/common/types/shared.types";
 
@@ -19,7 +19,7 @@ export type NavAudience = "teacher" | "parent" | "student" | "supervisor";
 
 export interface NavItem {
   readonly key: string;
-  readonly labelKey: `dashboard.nav.${keyof DashboardNavigationLabels}`;
+  readonly labelKey: `dashboard.nav.${keyof DashboardNavigationLabels & string}`;
   readonly icon: SvgIconComponent;
   readonly href: string;
   readonly section: "main" | "footer";

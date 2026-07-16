@@ -2,7 +2,7 @@
 
 import { Box, Link, Typography } from "@mui/material";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function ImpersonationBanner() {
   const t = useAppTranslation().authTranslations.impersonation;

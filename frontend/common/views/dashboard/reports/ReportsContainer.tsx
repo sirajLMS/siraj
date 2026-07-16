@@ -35,7 +35,7 @@ import {
   formatReportPaidAmount,
 } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function formatHours(hours: number): string {
   const h = Math.floor(hours);

@@ -3,7 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionCategoryGroup } from "@/frontend/common/views/dashboard/permissions/components/PermissionCategoryGroup";
-import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions";
+import type { PermissionsLabels } from "@/shared/locale";
 
 type ValidPermission = Permission & { id: string; key: string; category: string };
 

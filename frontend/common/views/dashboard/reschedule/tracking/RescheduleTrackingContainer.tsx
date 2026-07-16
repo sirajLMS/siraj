@@ -22,8 +22,7 @@ import {
 } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.helpers";
 import type { RescheduleTrackingViewLabels } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { RescheduleTrackingLabels } from "@/shared/locale/types/dashboard/classes/rescheduleTracking";
+import { type RescheduleTrackingLabels, useAppTranslation } from "@/shared/locale";
 
 const loadingSx: SxProps<Theme> = {
   display: "flex",

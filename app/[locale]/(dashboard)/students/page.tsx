@@ -8,7 +8,7 @@ import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { StudentsContainer } from "@/frontend/common/views/dashboard/admin/parents/students/StudentsContainer";
 import { ParentStudentsContainer } from "@/frontend/common/views/dashboard/parent/students/ParentStudentsContainer";
 import { TeacherStudentsContainer } from "@/frontend/common/views/dashboard/teachers/students/TeacherStudentsContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

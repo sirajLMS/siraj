@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledBreadcrumbNav = styled(Box)({
   display: "flex",

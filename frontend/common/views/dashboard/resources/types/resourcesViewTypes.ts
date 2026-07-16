@@ -4,7 +4,7 @@ import type {
   ResourceSortBy,
   ResourceUploadFormData,
 } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
-import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
+import type { ResourcesLabels } from "@/shared/locale";
 
 export interface ResourcesViewProps {
   readonly labels: ResourcesLabels;

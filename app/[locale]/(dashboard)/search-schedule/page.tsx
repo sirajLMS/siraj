@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SearchScheduleContainer } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

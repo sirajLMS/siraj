@@ -10,7 +10,7 @@ import type {
   AvailabilityInsightsProps,
   InsightCardProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function InsightCard({ title, value, description, icon }: Readonly<InsightCardProps>) {
   return (

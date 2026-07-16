@@ -10,7 +10,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace TeacherDashboardService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {

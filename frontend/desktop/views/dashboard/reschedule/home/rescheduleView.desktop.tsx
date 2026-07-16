@@ -16,7 +16,7 @@ import { RescheduleDateTimeSection } from "@/frontend/common/views/dashboard/res
 import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/reschedule/home/TimezoneWarningBanner";
 import type { RescheduleViewModel } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
 import { Link } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const ActionContainer = styled(Box)<BoxProps>(({ theme }) => ({
   display: "flex",

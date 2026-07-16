@@ -4,7 +4,7 @@ import type { Control, UseFormRegister } from "react-hook-form";
 import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import type { TeacherViewData } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type TeacherAccountFormFields = {
   name: string;

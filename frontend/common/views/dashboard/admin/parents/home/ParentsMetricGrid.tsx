@@ -3,7 +3,7 @@
 import { Grid } from "@mui/material";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface ParentsMetricGridProps {
   readonly metrics: readonly MetricItem[];

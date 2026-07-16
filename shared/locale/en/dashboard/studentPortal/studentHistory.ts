@@ -1,6 +1,6 @@
-import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory";
+import type { StudentPortalHistoryLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory";
 
-export const dashboardStudentPortalHistoryEn: StudentHistoryLabels = {
+export const dashboardStudentPortalHistoryEn: StudentPortalHistoryLabels = {
   pageTitle: "Lesson History",
   lessonHistory: "Lesson History",
   sessionDate: "Date",

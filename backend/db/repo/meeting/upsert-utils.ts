@@ -1,6 +1,6 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 /**
  * Shared `upsertMany` loop used by both ClassMeetingConfigRepository and

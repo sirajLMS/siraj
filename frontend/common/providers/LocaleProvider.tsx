@@ -1,16 +1,14 @@
 "use client";
 
 import type * as React from "react";
-import type { AppLocale } from "@/shared/locale/AppLocale";
-import { LocaleContext } from "@/shared/locale/localeContext";
-import type { Translations } from "@/shared/locale/types/message";
+import { type AppLocale, LocaleContext, messagesByLocale } from "@/shared/locale";
 
 export interface LocaleProviderProps {
   readonly children: React.ReactNode;
-  readonly translations: Translations;
   readonly locale: AppLocale;
 }
 
-export function LocaleProvider({ children, translations, locale }: Readonly<LocaleProviderProps>): React.ReactNode {
+export function LocaleProvider({ children, locale }: Readonly<LocaleProviderProps>): React.ReactNode {
+  const translations = messagesByLocale[locale];
   return <LocaleContext.Provider value={{ translations, locale }}>{children}</LocaleContext.Provider>;
 }

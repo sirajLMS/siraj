@@ -23,8 +23,8 @@ import type { UpdateManagerProfileInput } from "@/frontend/common/graphql/genera
 import { updateManagerProfileMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
 import { logger } from "@/frontend/common/utils/logger";
 import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ManagersDirectoryLabels } from "@/shared/locale/types/dashboard/managers/directory";
+import type { ManagersDirectoryLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 interface ManagerRowActionsProps {
   readonly manager: Manager;

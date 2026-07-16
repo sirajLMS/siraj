@@ -20,7 +20,7 @@ import {
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
 import { Link } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type BillingSectionProps =
   | {

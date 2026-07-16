@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 const SALT_ROUNDS = 12;
 

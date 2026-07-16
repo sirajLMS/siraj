@@ -22,8 +22,7 @@ import {
   type StatusUpdateFormData,
 } from "@/frontend/common/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { StudentStatusViewProps } from "@/frontend/common/views/dashboard/students/status/types";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
+import { type StudentStatusLabels, useAppTranslation } from "@/shared/locale";
 
 const STATUS_BADGE_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "regular",

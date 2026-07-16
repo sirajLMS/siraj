@@ -1,3 +1,3 @@
-import type { StudentHistoryLabels } from "@/shared/messages/types/dashboard/studentPortal/studentHistory";
+import type { StudentPortalHistoryLabels } from "@/shared/locale";
 
-export type { StudentHistoryLabels };
+export type { StudentPortalHistoryLabels as StudentHistoryLabels };

@@ -16,7 +16,7 @@ import type {
   AvailabilitySearchFormProps,
   TimeFieldProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function TimeField({ label, name }: Readonly<TimeFieldProps>) {
   const { control } = useFormContext<AvailabilitySearchFormData>();

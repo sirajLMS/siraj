@@ -5,7 +5,7 @@ import { learningResources } from "@/backend/db/schema";
 import { learningResourceFiles } from "@/backend/db/schema/storage/storage";
 import { logger } from "@/backend/lib/logger";
 import type { LearningResourceReturnType, PaginationArgs } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export type LearningResourceRow = LearningResourceReturnType;
 

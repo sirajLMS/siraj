@@ -8,7 +8,7 @@ import { ManagementControlsCard } from "@/frontend/common/views/dashboard/teache
 import { ReassignmentBentoGrid } from "@/frontend/common/views/dashboard/teachers/reassignment/components/ReassignmentBentoGrid";
 import { StudentContextCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/StudentContextCard";
 import type { TeacherReassignmentViewModel } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherReassignmentViewDesktop({
   student,

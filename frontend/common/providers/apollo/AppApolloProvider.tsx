@@ -15,7 +15,7 @@ import {
   createErrorLinkHandler,
   sha256,
 } from "@/frontend/common/providers/apollo/utils";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function AppApolloProvider({ children }: { readonly children: React.ReactNode }) {
   const t = useAppTranslation().commonTranslations;

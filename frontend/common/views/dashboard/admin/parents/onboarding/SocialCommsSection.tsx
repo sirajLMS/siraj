@@ -7,7 +7,7 @@ import { SectionPanel } from "@/frontend/common/components/ui/container/SectionP
 import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly register: UseFormRegister<ParentOnboardingFormData>;

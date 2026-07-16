@@ -3,7 +3,7 @@ import { AppPermission, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type { ComplaintResponseReturnType, ComplaintResponseSubmitInput } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 type ComplaintById = NonNullable<Awaited<ReturnType<typeof ComplaintRepository.getComplaintById>>>;
 

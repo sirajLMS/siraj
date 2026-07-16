@@ -1,7 +1,7 @@
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 const EffectiveMeetingSourceRef = gqlSchemaBuilder.enumType("EffectiveMeetingSource", {
   values: ["class", "recurring", "teacher", "none"] as const,

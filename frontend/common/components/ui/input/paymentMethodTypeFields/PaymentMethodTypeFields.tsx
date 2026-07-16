@@ -15,7 +15,7 @@ import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graph
 import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import type { CountryType } from "@/frontend/common/lib/locale";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type PaymentMethodDetailsFormValue = {
   readonly walletId?: string;

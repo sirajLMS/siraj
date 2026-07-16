@@ -23,7 +23,7 @@ import type {
   WeeklyScheduleGridProps,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function isTerminalClassInstance(executionState?: ClassExecutionState | null, outcome?: ClassOutcome | null): boolean {
   return (

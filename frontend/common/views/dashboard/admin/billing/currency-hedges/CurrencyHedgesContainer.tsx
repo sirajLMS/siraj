@@ -31,7 +31,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { getCurrencyByCode, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { logger } from "@/frontend/common/utils/logger";
-import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 const HEDGE_TYPE_LONG = "LONG";
 const HEDGE_TYPE_SHORT = "SHORT";

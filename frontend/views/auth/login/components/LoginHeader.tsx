@@ -3,7 +3,7 @@
 import { School } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 // Main container for the login header section - centers content vertically
 const StyledHeaderContainer = styled(Box)({

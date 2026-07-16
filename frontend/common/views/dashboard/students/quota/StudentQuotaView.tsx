@@ -27,8 +27,7 @@ import type {
   MobileProfileHeaderProps,
   StudentQuotaViewProps,
 } from "@/frontend/common/views/dashboard/students/quota/types";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
+import { type StudentQuotaLabels, useAppTranslation } from "@/shared/locale";
 
 function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Readonly<MobileProfileHeaderProps>) {
   const t = useAppTranslation().dashboardTranslations.studentQuota;

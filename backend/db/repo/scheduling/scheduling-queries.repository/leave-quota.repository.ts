@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { leaveQuotaUsage, teachers } from "@/backend/db/schema";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 function collectErrorMessages(error: unknown): string {
   const messages: string[] = [];

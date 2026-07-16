@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getRecurringSchedulePageTitle } from "@/backend/lib/titles/cached-page-title";
 import { RecurringScheduleDetailContainer } from "@/frontend/common/views/dashboard/classes/recurring/RecurringScheduleDetailContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

@@ -6,8 +6,8 @@ import { students } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { StudentStatus } from "@/backend/enum";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 
 let tErrors: ErrorsLabels;
 beforeAll(() => {

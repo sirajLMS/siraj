@@ -19,7 +19,7 @@ import { TimeInput } from "@/frontend/common/views/dashboard/classes/recurring/T
 import type { SimpleEntity } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { CLASS_TYPE_OPTIONS } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
+import type { CreateRecurringClassLabels } from "@/shared/locale";
 
 interface RecurringClassFormFieldsProps {
   readonly register: UseFormRegister<RecurringClassFormData>;

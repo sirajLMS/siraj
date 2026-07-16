@@ -12,7 +12,7 @@ import type {
   SuggestionSelectType,
   SuggestionSubmitInput,
 } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace SuggestionService {
   export async function submitSuggestion(

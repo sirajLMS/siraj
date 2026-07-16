@@ -8,7 +8,7 @@ import type { LocaleAdornmentSwitchProps } from "@/frontend/common/components/ui
 import { getLanguageDisplayName, getLanguageEmoji, languages } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { AppLocale } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type MobileLocaleListProps = {
   readonly activeLocale: AppLocale;

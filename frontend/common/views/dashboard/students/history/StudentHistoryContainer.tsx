@@ -13,8 +13,7 @@ import { StudentHistoryView } from "@/frontend/common/views/dashboard/students/h
 import type { ClassSession, StudentHistoryMetrics } from "@/frontend/common/views/dashboard/students/history/types";
 import { mapStatusToAttendance } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
-import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
-import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/students/history";
+import { type StudentHistoryLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 type HistoryData = NonNullable<NonNullable<Operations.StudentClassHistoryQuery["studentClassHistory"]>>;
 

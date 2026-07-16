@@ -2,7 +2,7 @@ import { TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 function maskNationalId(value: string | null): string | null {
   if (!value) {

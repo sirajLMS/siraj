@@ -14,7 +14,7 @@ import type {
 } from "@/backend/types/billing/payment-method.types";
 import { INVOICE_FILE_USAGE } from "@/shared/constants/billing/invoice-file-usage";
 import { isAllowedPaymentProofMimeType } from "@/shared/constants/billing/payment-proof";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 import { extToMime } from "@/shared/utils/storage.utils";
 
 function inferMimeFromPath(path: string): string | null {

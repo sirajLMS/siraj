@@ -6,7 +6,7 @@ import type {
   StudentProgressItem,
   WorkshopPromo,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-import type { ParentDashboardLabels } from "@/shared/locale/types/dashboard/core/parentDashboard";
+import type { ParentDashboardLabels } from "@/shared/locale";
 
 /**
  * ParentDashboard ViewModel.

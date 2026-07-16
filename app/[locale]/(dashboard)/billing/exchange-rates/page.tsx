@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ExchangeRatesContainer } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ExchangeRatesContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

@@ -46,7 +46,7 @@ import type {
   WorkshopPromoReturnType,
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace ParentRepository {
   export async function create(

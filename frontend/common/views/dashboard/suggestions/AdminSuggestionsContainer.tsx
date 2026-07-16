@@ -18,7 +18,7 @@ import { AdminSuggestionsView } from "@/frontend/common/views/dashboard/suggesti
 import { SuggestionMarkDuplicateDialog } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionMarkDuplicateDialog";
 import { SuggestionRespondDialog } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionRespondDialog";
 import { useAdminSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useAdminSuggestionsViewModel";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,

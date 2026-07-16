@@ -8,7 +8,7 @@ import { PaymentMethodService } from "@/backend/services/payment-method/payment-
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
 import type { TeacherCreateResult } from "@/backend/types/teachers/teacher.types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export interface TeacherOnboardingInput {
   readonly name: string;

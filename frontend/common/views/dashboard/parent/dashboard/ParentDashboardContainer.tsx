@@ -22,8 +22,8 @@ import type {
   WorkshopPromo,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ParentDashboardLabels } from "@/shared/locale/types/dashboard/core/parentDashboard";
+import type { ParentDashboardLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 function mapExecutionStateToLiveClassStatus(
   executionState: string,

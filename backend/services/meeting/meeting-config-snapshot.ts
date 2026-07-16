@@ -5,7 +5,7 @@ import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meet
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { buildMeetingProviderCatalogSnapshot } from "@/backend/services/meeting/meeting-config-mask";
 import type { MeetingConfigSnapshot } from "@/backend/types/meeting/meeting-config.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace MeetingConfigSnapshotService {
   export async function buildSessionSnapshot(

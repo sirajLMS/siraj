@@ -17,7 +17,7 @@ import {
   NOTIFICATION_EVENT_TYPES,
   type NotificationPrefRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type PreferencesChannelTabsProps = {
   readonly preferences: readonly NotificationPrefRow[];

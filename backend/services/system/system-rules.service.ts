@@ -1,7 +1,7 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import type { ClassInstanceEntity } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace SystemRulesService {
   /**

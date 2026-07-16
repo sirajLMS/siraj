@@ -8,7 +8,7 @@ import { Controller } from "react-hook-form";
 import { ComplaintCategory } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ComplaintFormData } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
 import type { ParentStudentOption } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ComplaintsParentLabels } from "@/shared/locale";
 
 const StyledFieldLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,

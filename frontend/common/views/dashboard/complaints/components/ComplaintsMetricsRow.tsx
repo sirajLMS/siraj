@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
 import type { AdminComplaintsSummary } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { AdminQueueEfficiencyBanner } from "@/frontend/common/views/dashboard/shared/AdminQueueEfficiencyBanner";
-import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ComplaintsAdminLabels } from "@/shared/locale";
 
 const StyledMetricsContainer = styled(Box)(({ theme }) => ({
   display: "flex",

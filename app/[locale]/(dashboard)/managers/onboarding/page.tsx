@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ManagerOnboardingContainer } from "@/frontend/common/views/dashboard/managers/onboarding/ManagerOnboardingContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 interface Props {
   params: Promise<{ locale: string }>;

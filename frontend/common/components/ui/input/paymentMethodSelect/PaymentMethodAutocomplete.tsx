@@ -19,7 +19,7 @@ import {
   getPaymentMethodCatalogOptionLabel,
   type PaymentMethodCatalogOption,
 } from "@/frontend/common/lib/payment-method";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type PaymentMethodAutocompleteProps = {
   readonly option?: PaymentMethodCatalogOption | null;

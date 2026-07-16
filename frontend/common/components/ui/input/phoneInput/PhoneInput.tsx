@@ -12,7 +12,7 @@ import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import { PhoneCountryPicker } from "@/frontend/common/components/ui/input/phoneInput/PhoneCountryPicker";
 import { usePhoneInput } from "@/frontend/common/components/ui/input/phoneInput/usePhoneInput";
 import { LtrScope } from "@/frontend/common/providers/theme/LtrScope";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type PhoneInputProps = {
   readonly value: string | null;

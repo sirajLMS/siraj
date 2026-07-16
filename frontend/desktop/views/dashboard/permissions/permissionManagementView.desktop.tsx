@@ -7,14 +7,14 @@ import { PermissionTabContent } from "@/frontend/common/views/dashboard/permissi
 import { SingleGroupView } from "@/frontend/common/views/dashboard/permissions/components/SingleGroupView";
 import type { PermissionManagementViewModel } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
 import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function PermissionErrorAlert({
   error,
   t,
 }: {
   readonly error: string | null;
-  readonly t: import("@/shared/locale/types/dashboard/permissions").PermissionsLabels;
+  readonly t: import("@/shared/locale").PermissionsLabels;
 }) {
   if (!error) return null;
   return (

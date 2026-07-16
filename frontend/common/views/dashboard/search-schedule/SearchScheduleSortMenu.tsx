@@ -6,7 +6,7 @@ import { type MouseEvent, useState } from "react";
 import { AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
 import { isSortApplied } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface SearchScheduleSortMenuProps {
   readonly sortBy: SearchScheduleDraftFilters["sortBy"];

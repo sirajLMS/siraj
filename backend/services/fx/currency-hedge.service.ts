@@ -2,7 +2,7 @@ import { CurrencyHedgeRepository } from "@/backend/db/repo/billing/currency-hedg
 import { AppPermission, type CurrencyCode } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { CurrencyHedgeSelectType, CurrencyHedgeSubmitInput, CurrencyHedgeUpdateInput } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 const VALID_HEDGE_TYPES = ["LONG", "SHORT"] as const;
 

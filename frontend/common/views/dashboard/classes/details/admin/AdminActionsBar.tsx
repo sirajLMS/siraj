@@ -16,7 +16,7 @@ import {
   getForceActivateDisabledTooltip,
   getStopDisabledTooltip,
 } from "@/frontend/common/views/dashboard/classes/details/admin/adminActionTooltips";
-import type { AdminViewLabels } from "@/shared/messages/types/message";
+import type { AdminViewLabels } from "@/shared/locale";
 
 type AdminActionLabels = AdminViewLabels["adminActions"];
 

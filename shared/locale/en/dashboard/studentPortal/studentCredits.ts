@@ -1,6 +1,6 @@
-import type { StudentCreditsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentCredits";
+import type { StudentPortalCreditsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentCredits";
 
-export const dashboardStudentPortalCreditsEn: StudentCreditsLabels = {
+export const dashboardStudentPortalCreditsEn: StudentPortalCreditsLabels = {
   pageTitle: "My Credits",
   currentBalance: "Current Balance",
   hoursRemaining: "Hours Remaining",

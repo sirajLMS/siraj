@@ -9,7 +9,7 @@ import { CountrySelect } from "@/frontend/common/components/ui/input/countrySele
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { OnboardingIdentityFields } from "@/frontend/common/views/dashboard/components/onboarding/OnboardingIdentityFields";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly register: UseFormRegister<ParentOnboardingFormData>;

@@ -15,7 +15,7 @@ import {
   MigrationStatus,
   type UpdatedSession,
 } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function detectDstOffsetMinutes(): number | null {
   const now = new Date();

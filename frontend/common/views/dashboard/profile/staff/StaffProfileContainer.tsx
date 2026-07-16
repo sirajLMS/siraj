@@ -27,7 +27,7 @@ import type {
   StaffOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type StaffProfileContainerProps = {
   readonly scope: ProfileScope;

@@ -8,7 +8,7 @@ import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMess
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type FxStoryProps = {
   readonly lockedAmount: string;

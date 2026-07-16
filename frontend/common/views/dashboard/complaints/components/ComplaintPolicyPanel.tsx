@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ComplaintsParentLabels } from "@/shared/locale";
 
 const StyledPolicyPanelBox = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(4),

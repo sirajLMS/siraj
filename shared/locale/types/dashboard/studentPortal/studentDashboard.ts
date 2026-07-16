@@ -1,4 +1,4 @@
-export interface StudentDashboardLabels {
+export interface StudentPortalDashboardLabels {
   readonly pageTitle: string;
   readonly welcomeMessage: (name: string) => string;
   readonly nextClass: string;

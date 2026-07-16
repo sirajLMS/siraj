@@ -10,7 +10,7 @@ import {
 import { StudentStatusService } from "@/backend/services/student/student-status.service";
 import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
 import type { StudentProfileReturnType } from "@/backend/types/students/student-profile.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 type GetProfileOptions = {
   readonly year?: number | null;

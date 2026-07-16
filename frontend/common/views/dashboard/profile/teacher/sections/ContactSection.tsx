@@ -21,7 +21,7 @@ import type {
   TeacherAdminEditFormData,
   TeacherOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type ContactSectionViewProps = {
   readonly mode: "view";

@@ -6,7 +6,7 @@ import logger from "@/backend/lib/logger";
 import { sanitizeStoragePath, validateStoragePath } from "@/backend/lib/path-validator";
 import { StorageAuthService, StorageManageService } from "@/backend/services/storage";
 import { getStorageService } from "@/backend/storage/storage.service";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 /** Maximum number of items allowed in a single bulk operation. */
 const BULK_ITEM_LIMIT = 100;

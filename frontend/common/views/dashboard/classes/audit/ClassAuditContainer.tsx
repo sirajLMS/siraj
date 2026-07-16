@@ -23,8 +23,7 @@ import { logger } from "@/frontend/common/utils/logger";
 import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { ClassAuditView } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditView";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes/audit";
+import { type ClassAuditLabels, useAppTranslation } from "@/shared/locale";
 
 function exportToCsv(
   students: readonly {

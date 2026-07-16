@@ -13,7 +13,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import type { RecurringScheduleDayEntity, RecurringScheduleEntity } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export interface CreateRecurringClassInput {
   studentId: string;

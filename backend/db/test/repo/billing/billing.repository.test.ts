@@ -8,8 +8,8 @@ import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode, InvoiceStatus, InvoiceType } from "@/backend/enum";
 import { PaginationArgs } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 
 let tErrors: ErrorsLabels;
 beforeAll(() => {

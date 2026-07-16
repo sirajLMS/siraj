@@ -1,5 +1,5 @@
 "use client";
 
-import type { StudentProfileLabels } from "@/shared/messages/types/dashboard/studentPortal/studentProfile";
+import type { StudentPortalProfileLabels } from "@/shared/locale";
 
-export type { StudentProfileLabels };
+export type { StudentPortalProfileLabels as StudentProfileLabels };

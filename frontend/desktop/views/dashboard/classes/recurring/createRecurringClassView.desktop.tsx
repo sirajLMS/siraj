@@ -16,7 +16,7 @@ import {
   emptyRecurringMeetingConfigState,
   type RecurringMeetingConfigFormState,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
+import type { CreateRecurringClassLabels } from "@/shared/locale";
 
 interface CreateRecurringClassViewDesktopProps {
   readonly isSubmitting: boolean;

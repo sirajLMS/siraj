@@ -25,8 +25,7 @@ import {
   type PermissionGroupFormData,
   permissionGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions/main";
+import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
 
 type ValidPermission = Permission & { id: string; key: string; category: string };
 

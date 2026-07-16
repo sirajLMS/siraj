@@ -6,8 +6,8 @@ import { invoices, parents, students, users } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 
 let tErrors: ErrorsLabels;
 beforeAll(() => {

@@ -13,7 +13,7 @@ import {
   RESCHEDULE_DATE_FORMAT,
   RESCHEDULE_TIME_FORMAT,
 } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly control: Control<RescheduleFormData>;

@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { getTeacherPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { TeacherAvailabilityContainer } from "@/frontend/common/views/dashboard/teachers/availability/TeacherAvailabilityContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 interface PageProps {
   readonly params: Promise<{

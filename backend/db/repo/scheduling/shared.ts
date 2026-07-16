@@ -10,7 +10,7 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teache
 import { classInstances, parents, students, teacherAssignments, users } from "@/backend/db/schema";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type * as Types from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export async function acquireLocks(tx: DBTransaction, teacherId: string, studentId: string) {
   await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('booking_teacher_' || ${teacherId}::text))`);

@@ -1,4 +1,4 @@
-export interface StudentCreditsLabels {
+export interface StudentPortalCreditsLabels {
   readonly pageTitle: string;
   readonly currentBalance: string;
   readonly hoursRemaining: string;

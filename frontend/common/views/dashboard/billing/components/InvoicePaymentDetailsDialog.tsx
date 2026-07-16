@@ -32,7 +32,7 @@ import { type FormatCurrencyMessages, formatCurrencyForDisplay } from "@/fronten
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/common/views/dashboard/components/FxConversionNote";
-import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import { useAppLocale, useAppTranslation } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 export type InvoicePaymentDetailsDialogProps = {

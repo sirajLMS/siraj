@@ -12,7 +12,7 @@ import {
   reactivateParentMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type ParentAccountActionsProps = {
   readonly parentId: string;

@@ -16,7 +16,7 @@ import {
   staffAdminEditSchema,
   staffOwnEditSchema,
 } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function StaffProfileEditForm({
   staffData,

@@ -20,8 +20,7 @@ import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/c
 import { SectionHeader } from "@/frontend/common/views/dashboard/students/quota/components/SectionHeader";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import { GENDER_OPTIONS } from "@/frontend/common/views/dashboard/students/quota/types";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
+import { type StudentQuotaLabels, useAppTranslation } from "@/shared/locale";
 
 const DATE_FORMAT = "yyyy-MM-dd";
 

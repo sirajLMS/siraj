@@ -11,8 +11,8 @@ import { parseStudentStatus } from "@/backend/lib/enum";
 import * as Types from "@/backend/types";
 import { ALLOWED_STATUS_TRANSITIONS } from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 
 const _processStudentQuery = async (
   query: PgSelect,

@@ -17,7 +17,7 @@ import {
   getRecurringMeetingConfigErrorKey,
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
-import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 export type RecurringMeetingConfigSectionProps = {
   readonly teacherId: string;

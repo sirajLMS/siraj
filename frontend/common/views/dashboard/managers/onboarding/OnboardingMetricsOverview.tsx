@@ -6,7 +6,7 @@ import { Box, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { onboardingMetricsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const METRIC_ITEMS = [
   { key: "activeStaff", icon: GroupsOutlined },

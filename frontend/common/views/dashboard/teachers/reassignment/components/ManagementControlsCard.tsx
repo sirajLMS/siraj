@@ -14,7 +14,7 @@ import type {
   ReassignmentSubmitInput,
   StatusChangeInput,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function TeacherSelection({
   teachers,

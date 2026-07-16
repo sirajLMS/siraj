@@ -9,7 +9,7 @@ import type {
   UserMeetingConfigInsertType,
   UserMeetingConfigSelectType,
 } from "@/backend/types/meeting/meeting-config.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace UserMeetingConfigRepository {
   export async function listByUserId(userId: string, tx?: DBTransaction): Promise<UserMeetingConfigSelectType[]> {

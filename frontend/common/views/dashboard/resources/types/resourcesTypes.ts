@@ -1,5 +1,5 @@
 import type { ResourceFileType, ResourceFilterType, ResourceSortBy } from "@/frontend/common/types/shared.types";
-import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
+import type { ResourcesLabels } from "@/shared/locale";
 
 export type {
   LearningResourceRow as GqlLearningResourceRow,

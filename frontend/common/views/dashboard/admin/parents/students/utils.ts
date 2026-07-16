@@ -22,7 +22,7 @@ import {
   STUDENT_STATUS_TO_ACCOUNT_STATUS,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
-import type { StudentDirectoryLabels } from "@/shared/locale/types/dashboard/students/directory";
+import type { StudentDirectoryLabels } from "@/shared/locale";
 
 const MOBILE_METRIC_ICONS = {
   regular: PersonOutlined,

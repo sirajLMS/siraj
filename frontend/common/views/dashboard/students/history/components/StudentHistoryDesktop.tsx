@@ -15,7 +15,7 @@ import { PageHeader } from "@/frontend/common/components/ui/container";
 import { CalendarGrid } from "@/frontend/common/views/dashboard/students/history/components/CalendarGrid";
 import type { StudentHistoryDesktopProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function StudentHistoryDesktop({
   studentName,

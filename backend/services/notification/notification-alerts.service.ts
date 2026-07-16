@@ -5,7 +5,7 @@ import { AppPermission, ComplaintStatus, NotificationDeliveryStatus } from "@/ba
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { NotificationAlertReturnType, NotificationAlertsPaginatedReturnType } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace NotificationAlertsService {
   export async function getAlerts(userId: string, locale?: string): Promise<NotificationAlertsPaginatedReturnType> {

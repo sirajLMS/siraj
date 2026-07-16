@@ -9,7 +9,7 @@ import type {
   ScheduleOverviewData,
   TeacherFilterItem,
 } from "@/frontend/common/views/dashboard/types/dashboard";
-import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
+import type { AdminDashboardLabels } from "@/shared/locale";
 
 type DashboardHeaders = ScheduleOverviewData["headers"];
 type DashboardStatusLabels = ScheduleOverviewData["statusLabels"];

@@ -20,8 +20,7 @@ import type {
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import { useRouter } from "@/shared/i18n/routing";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core/scheduleAlerts";
+import { type ScheduleAlertsLabels, useAppTranslation } from "@/shared/locale";
 
 function getTodayString() {
   const today = new Date();

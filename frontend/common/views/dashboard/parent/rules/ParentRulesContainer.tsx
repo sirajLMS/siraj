@@ -7,7 +7,7 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { parentHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function ParentRulesContainer() {
   const t = useAppTranslation().dashboardTranslations.parentRules;

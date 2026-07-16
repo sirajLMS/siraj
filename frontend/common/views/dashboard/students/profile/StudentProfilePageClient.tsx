@@ -23,8 +23,7 @@ import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/student
 import { StudentQuotaContainer } from "@/frontend/common/views/dashboard/students/quota/StudentQuotaContainer";
 import { StudentStatusContainer } from "@/frontend/common/views/dashboard/students/status/StudentStatusContainer";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
+import { type StudentStatusLabels, useAppTranslation } from "@/shared/locale";
 
 const STATUS_BADGE_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "regular",

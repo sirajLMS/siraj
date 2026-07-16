@@ -2,7 +2,7 @@
 
 import { AdminPanelSettings, Badge, FamilyRestroom, Group as GroupIcon, School } from "@mui/icons-material";
 import { Box, Button, type ButtonProps, Divider, styled, Typography } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 // Main container for the demo fast login section
 const StyledContainer = styled(Box)({

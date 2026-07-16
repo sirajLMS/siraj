@@ -7,7 +7,7 @@ import type {
   UserPaymentMethodInsertType,
   UserPaymentMethodSelectType,
 } from "@/backend/types/billing/payment-method.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 type DefaultSlot = "PAYIN" | "PAYOUT";
 

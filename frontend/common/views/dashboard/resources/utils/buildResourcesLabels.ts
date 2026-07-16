@@ -1,4 +1,4 @@
-import type { ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
+import type { ResourcesLabels } from "@/shared/locale";
 
 type ResourcesTranslator = ResourcesLabels;
 

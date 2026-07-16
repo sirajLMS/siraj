@@ -41,10 +41,10 @@ import type { PaymentCatalogsLabels } from "@/shared/locale/types/dashboard/paym
 import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions/main";
 import type { ReportsLabels } from "@/shared/locale/types/dashboard/reports/main";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
-import type { StudentCreditsLabels as StudentPortalCreditsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentCredits";
-import type { StudentDashboardLabels as StudentPortalDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard";
-import type { StudentHistoryLabels as StudentPortalHistoryLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory";
-import type { StudentProfileLabels as StudentPortalProfileLabels } from "@/shared/locale/types/dashboard/studentPortal/studentProfile";
+import type { StudentPortalCreditsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentCredits";
+import type { StudentPortalDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard";
+import type { StudentPortalHistoryLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory";
+import type { StudentPortalProfileLabels } from "@/shared/locale/types/dashboard/studentPortal/studentProfile";
 import type { StudentDirectoryLabels } from "@/shared/locale/types/dashboard/students/directory";
 import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/students/history";
 import type { StudentOnboardingLabels } from "@/shared/locale/types/dashboard/students/onboarding";

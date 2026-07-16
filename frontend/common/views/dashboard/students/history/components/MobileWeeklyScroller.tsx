@@ -2,7 +2,7 @@ import { Box, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ClassSession, MobileWeeklyScrollerProps } from "@/frontend/common/views/dashboard/students/history/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface WeekDayData {
   dayKey: string;

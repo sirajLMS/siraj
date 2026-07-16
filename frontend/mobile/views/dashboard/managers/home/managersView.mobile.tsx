@@ -12,7 +12,7 @@ import type {
 } from "@/frontend/common/views/dashboard/managers/home/types";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface ManagersViewMobileProps {
   readonly managers: readonly Manager[];

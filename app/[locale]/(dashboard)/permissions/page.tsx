@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionManagementContainer } from "@/frontend/common/views/dashboard/permissions/PermissionManagementContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

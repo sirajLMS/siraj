@@ -5,7 +5,7 @@ import type { FieldErrors, UseFormSetValue, UseFormWatch } from "react-hook-form
 import { labelSx } from "@/frontend/common/components/ui/form";
 import { DayScheduleRow } from "@/frontend/common/views/dashboard/classes/recurring/DayScheduleRow";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
-import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
+import type { CreateRecurringClassLabels } from "@/shared/locale";
 
 interface DaysScheduleSectionProps {
   readonly watch: UseFormWatch<RecurringClassFormData>;

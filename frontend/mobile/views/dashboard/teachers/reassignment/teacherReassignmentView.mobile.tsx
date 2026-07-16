@@ -9,7 +9,7 @@ import { ReassignmentBentoGrid } from "@/frontend/common/views/dashboard/teacher
 import { StudentContextCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/StudentContextCard";
 import type { TeacherReassignmentViewModel } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherReassignmentViewMobile({
   student,

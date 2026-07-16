@@ -10,7 +10,7 @@ import logger from "@/frontend/common/lib/logger";
 import { isSafeRedirect, LOGIN_REDIRECT_PARAM } from "@/frontend/common/lib/safeRedirect";
 import { LoginView } from "@/frontend/views/auth/login/LoginView";
 import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface LoginContainerProps {
   demoGroups?: { slug: string; name: string; description: string | null }[];

@@ -17,9 +17,7 @@ import type {
   ClassStatusEventReturnType,
 } from "@/backend/types";
 import type { ClassStatusEventSelectType } from "@/backend/types/scheduling/class-status-event.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
-import type { SessionLabels } from "@/shared/locale/types/session";
+import { type ErrorsLabels, getServerTranslations, type SessionLabels } from "@/shared/locale";
 
 /**
  * ClassSessionService

@@ -2,7 +2,7 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import { db, invoicePaymentSubmissions } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import type * as Types from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace InvoicePaymentSubmissionRepository {
   export async function createSubmission(

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Translations } from "@/shared/locale/types/message";
+import type { Translations } from "@/shared/locale";
 
 export const createStudentQuotaSchema = (
   messages: Translations["dashboardTranslations"]["studentQuota"]["validation"]

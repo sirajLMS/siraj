@@ -3,8 +3,7 @@ import type {
   TeacherDashboardViewLabels,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
-import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
-import type { TeacherDashboardLabels as TeacherDashboardTranslator } from "@/shared/locale/types/dashboard/teachers/dashboard";
+import type { AdminDashboardLabels, TeacherDashboardLabels as TeacherDashboardTranslator } from "@/shared/locale";
 
 type DashboardTranslator = AdminDashboardLabels;
 

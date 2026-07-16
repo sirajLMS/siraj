@@ -9,7 +9,7 @@ import type {
   WeeklyAvailability,
   WeeklyAvailabilityGridLabels,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface TeacherAvailabilityViewModel {
   readonly availability: WeeklyAvailability;

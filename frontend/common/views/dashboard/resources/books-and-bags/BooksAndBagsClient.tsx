@@ -10,7 +10,7 @@ import type {
   BooksAndBagsClientProps,
   BooksAndBagsLabels,
 } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function BooksAndBagsClient({ initialBooks }: Readonly<BooksAndBagsClientProps>) {
   const t = useAppTranslation();

@@ -11,7 +11,7 @@ import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilt
 import { TeacherDashboardView } from "@/frontend/common/views/dashboard/teachers/dashboard/teacherDashboardView";
 import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
 import { buildTeacherActiveMetricItems } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardMetrics";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const INITIAL_ROWS: TeacherScheduleRow[] = [
   {

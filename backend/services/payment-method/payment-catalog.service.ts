@@ -20,7 +20,7 @@ import type {
   UpdateSupportedOnlineAccountInput,
   UpdateSupportedPaymentLinkInput,
 } from "@/backend/types/billing/payment-method.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 async function assertCatalogAdmin(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
   const hasPermission = await PermissionsService.hasPermission(

@@ -4,7 +4,7 @@ import { CancelOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Stack, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import type { ConflictGroup } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly conflictGroups: readonly ConflictGroup[];

@@ -4,7 +4,7 @@ import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 const createSetting = (
   key: string,

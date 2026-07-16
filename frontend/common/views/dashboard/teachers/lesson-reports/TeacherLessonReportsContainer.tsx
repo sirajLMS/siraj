@@ -9,7 +9,7 @@ import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppPermission, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { pendingLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type LessonReportStatusValue = `${LessonReportStatus}`;
 type StatusFilterValue = "ALL" | LessonReportStatusValue;

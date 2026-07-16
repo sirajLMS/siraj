@@ -14,7 +14,7 @@ import {
   slugify,
 } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__";
 import type { CreateCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const FORM_ID = "create-category-form";
 

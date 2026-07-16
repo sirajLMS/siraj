@@ -15,14 +15,14 @@ import type {
 } from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
-import { useAppTranslation } from "@/shared/locale/client";
-import type {
-  PaymentMethodDirectionLabels,
-  PaymentMethodDisplayLabels,
-  PaymentMethodListLabels,
-  PaymentMethodTypeFieldsLabels,
-  PaymentMethodTypeLabels,
-} from "@/shared/locale/types/ui";
+import {
+  type PaymentMethodDirectionLabels,
+  type PaymentMethodDisplayLabels,
+  type PaymentMethodListLabels,
+  type PaymentMethodTypeFieldsLabels,
+  type PaymentMethodTypeLabels,
+  useAppTranslation,
+} from "@/shared/locale";
 
 function DetailRow({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
   return (

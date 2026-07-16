@@ -4,7 +4,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getStorageService } from "@/backend/storage/storage.service";
 import type { LearningResourceListResult, LearningResourceReturnType } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export interface CreateResourceInput {
   readonly displayName: string;

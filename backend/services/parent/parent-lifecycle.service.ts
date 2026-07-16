@@ -3,7 +3,7 @@ import { AppPermission, type ParentStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import type { ChangeParentLifecycleResult } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace ParentLifecycleService {
   export async function changeLifecycleStatus(

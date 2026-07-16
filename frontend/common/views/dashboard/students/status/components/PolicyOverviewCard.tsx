@@ -1,7 +1,7 @@
 import { CheckCircleOutlined, GavelOutlined, InfoOutlined } from "@mui/icons-material";
 import { Box, Divider, Typography } from "@mui/material";
 import type { PolicyItemProps } from "@/frontend/common/views/dashboard/students/status/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function PolicyItem({ title, description }: Readonly<PolicyItemProps>) {
   return (

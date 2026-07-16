@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];

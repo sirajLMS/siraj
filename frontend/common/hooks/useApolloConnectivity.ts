@@ -3,7 +3,7 @@
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useEffect, useRef, useState } from "react";
 import logger from "@/frontend/common/lib/logger";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 // Configuration
 const CONNECTIVITY_CHECK_URL = "/api/graphql";

@@ -8,7 +8,7 @@ import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meeti
 import type { OnlineMeetingInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 export interface OnlineMeetingCardMobileProps {
   readonly meetingInfo: OnlineMeetingInfo | null | undefined;

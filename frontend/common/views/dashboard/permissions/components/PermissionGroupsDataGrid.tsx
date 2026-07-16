@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionGroupsDataGridProps {
   readonly groups: readonly PermissionGroup[];

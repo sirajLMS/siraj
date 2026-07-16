@@ -12,7 +12,7 @@ import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/a
 import { ClassSessionActionButton } from "@/frontend/common/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import { useRouter } from "@/shared/i18n/routing";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function formatClassSchedule(
   scheduledStartAt: string | null | undefined,

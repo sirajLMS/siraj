@@ -2,7 +2,7 @@ import { ParentRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ParentAssignedStudentsResult, ParentOwnProfileReturnType } from "@/backend/types/parents/parent.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace ParentPortalService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {

@@ -16,7 +16,7 @@ import type {
   UserMeetingConfigSelectType,
   UserMeetingConfigSubmitInput,
 } from "@/backend/types/meeting/meeting-config.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace MeetingConfigService {
   async function assertCanManageUser(

@@ -8,7 +8,7 @@ import { z } from "zod";
 import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface AssignGroupDialogProps {
   readonly open: boolean;

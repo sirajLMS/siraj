@@ -3,7 +3,7 @@ import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { getSubjectPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { SubjectDetailContainer } from "@/frontend/common/views/dashboard/subjects/detail/SubjectDetailContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

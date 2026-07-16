@@ -16,7 +16,7 @@ import type { SearchScheduleResultItem } from "@/frontend/common/views/dashboard
 import { buildTeacherMonthAvailabilityInput } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
 import { TeacherAvailabilityCalendarGrid } from "@/frontend/common/views/dashboard/search-schedule/TeacherAvailabilityCalendarGrid";
 import type { TeacherAvailabilityGapItem } from "@/frontend/common/views/dashboard/search-schedule/TeacherAvailabilityDayPill";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface TeacherAvailabilityMonthDrawerProps {
   readonly open: boolean;

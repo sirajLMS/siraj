@@ -22,7 +22,7 @@ import {
   formatScheduleYourTime,
 } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppLocale } from "@/shared/locale/client";
+import { useAppLocale } from "@/shared/locale";
 
 interface UseScheduleColumnsParams {
   readonly headers: {

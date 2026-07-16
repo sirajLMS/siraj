@@ -1,7 +1,7 @@
 "use client";
 
 import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashboard/supervisor/dashboard/types/supervisorDashboardTypes";
-import type { SupervisorDashboardLabels } from "@/shared/messages/types/dashboard/supervisorPortal/supervisorDashboard";
+import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 export type { SupervisorDashboardViewModel };
 

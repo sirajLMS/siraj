@@ -11,7 +11,7 @@ import type {
   StaffPermissionGroups,
   StaffPermissionOverrides,
 } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type PermissionsSectionProps = {
   readonly permissionGroups: StaffPermissionGroups;

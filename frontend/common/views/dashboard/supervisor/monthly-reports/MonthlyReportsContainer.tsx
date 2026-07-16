@@ -13,8 +13,8 @@ import type {
   StudentMonthlyReportData,
   TeacherMonthlyReportData,
 } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { SupervisorMonthlyReportsLabels } from "@/shared/locale/types/dashboard/supervisorPortal/monthlyReports";
+import type { SupervisorMonthlyReportsLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 function useLabels(t: SupervisorMonthlyReportsLabels) {
   return useMemo(

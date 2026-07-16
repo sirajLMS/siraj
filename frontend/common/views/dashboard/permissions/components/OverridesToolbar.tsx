@@ -3,7 +3,7 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, Button, InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledToolbarContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),

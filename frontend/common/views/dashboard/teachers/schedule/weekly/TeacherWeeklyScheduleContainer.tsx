@@ -19,7 +19,7 @@ import { logger } from "@/frontend/common/utils/logger";
 import { CreateRecurringClassDialog } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/CreateRecurringClassDialog";
 import TeacherWeeklyScheduleView from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";
 import type { TeacherWeeklyScheduleContainerProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<TeacherWeeklyScheduleContainerProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;

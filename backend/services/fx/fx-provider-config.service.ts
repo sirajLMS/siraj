@@ -6,7 +6,7 @@ import {
   resetFxRateProvider,
 } from "@/backend/services/fx/providers/FxRateProviderFactory";
 import type { FxProviderConfigReturnType } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 const FX_PROVIDER_SETTING_KEY = "fx_provider";
 

@@ -7,7 +7,7 @@ import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji
 import type { LocaleAdornmentSwitchProps } from "@/frontend/common/components/ui/input/localizedString/LocaleAdornmentSwitch";
 import { getLanguageDisplayName, getLanguageEmoji, languages } from "@/frontend/common/lib/locale";
 import type { AppLocale } from "@/shared/i18n/routing";
-import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 type DesktopLocaleListProps = {
   readonly activeLocale: AppLocale;

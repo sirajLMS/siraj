@@ -3,7 +3,7 @@
 import { Button, Stack } from "@mui/material";
 import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type ProfileActionBarProps = {
   readonly mode?: ProfileMode;

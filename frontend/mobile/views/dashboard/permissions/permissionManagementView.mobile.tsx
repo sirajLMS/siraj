@@ -8,8 +8,7 @@ import { SingleGroupView } from "@/frontend/common/views/dashboard/permissions/c
 import type { PermissionManagementViewModel } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
 import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions";
+import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
 
 function PermissionErrorAlert({ error, t }: { readonly error: string | null; readonly t: PermissionsLabels }) {
   if (!error) return null;

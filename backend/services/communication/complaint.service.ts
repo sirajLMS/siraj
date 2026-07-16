@@ -20,7 +20,7 @@ import type {
   PaginationArgs,
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace ComplaintService {
   export async function getParentIdForComplaints(actorUserId: string, locale?: string): Promise<string> {

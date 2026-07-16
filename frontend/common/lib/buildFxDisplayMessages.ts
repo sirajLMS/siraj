@@ -1,4 +1,4 @@
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 export type FxDisplayMessages = {
   readonly convertedAmount: (values: {
     lockedAmount: string;

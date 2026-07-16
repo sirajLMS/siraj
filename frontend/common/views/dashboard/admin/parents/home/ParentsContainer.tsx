@@ -20,8 +20,7 @@ import {
 import { ParentsView } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsView";
 import type { ParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents/directory";
+import { type ParentsDirectoryLabels, useAppTranslation } from "@/shared/locale";
 
 function useDirectoryMetrics(
   directory: {

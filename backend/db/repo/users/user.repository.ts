@@ -15,7 +15,7 @@ import type { PaginatedUsersResponseSelectType } from "@/backend/types/auth/auth
 import type { PaginationInput } from "@/backend/types/shared/pagination.types";
 import type { UserCreateInput, UserReturnType, UserSelectType } from "@/backend/types/users/user.types";
 import { AuthUtils } from "@/backend/utils";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export async function findOne(condition: SQL | undefined): Promise<UserSelectType | null> {
   try {

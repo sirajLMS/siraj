@@ -6,7 +6,7 @@ import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/
 import { CategoriesSection } from "@/frontend/common/views/dashboard/subjects/home/components/CategoriesSection";
 import { SubjectCard } from "@/frontend/common/views/dashboard/subjects/home/components/SubjectCard";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function SubjectsViewDesktop({
   categories,

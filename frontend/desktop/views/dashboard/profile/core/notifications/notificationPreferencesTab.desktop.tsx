@@ -3,7 +3,7 @@
 import { Alert, Box, Snackbar, Typography } from "@mui/material";
 import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { PreferencesMatrix } from "@/frontend/common/views/dashboard/profile/core/notifications/PreferencesMatrix";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type NotificationPreferencesTabDesktopProps = NotificationPreferencesTabVariantProps;
 

@@ -2,7 +2,7 @@ import { StudentRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services";
 import type { PaginationArgs, StudentDirectoryResult, StudentFilterArgs, StudentsOrderByClause } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace StudentDirectoryService {
   /**

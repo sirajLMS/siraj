@@ -12,7 +12,7 @@ import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleS
 import { SearchScheduleForm } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleForm";
 import { SearchSchedulePaginationFooter } from "@/frontend/common/views/dashboard/search-schedule/SearchSchedulePaginationFooter";
 import { SearchScheduleView } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleView";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function SearchScheduleContainer() {
   const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;

@@ -1,7 +1,7 @@
 "use client";
 
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type DeleteInvoiceDialogProps = {
   readonly open: boolean;

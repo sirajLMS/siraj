@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { LessonReportSubmitDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/LessonReportSubmitDialog";
 import type { LessonReportFormLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports";
+import type { LessonReportLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 function buildLabels(lessonReportI18n: LessonReportLabels): LessonReportFormLabels {
   return {

@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { BaseCard, PaginationControls, PhoneDisplay, StatusBadge } from "@/frontend/common/components/ui";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
 import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledEmptyStateBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),

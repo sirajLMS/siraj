@@ -15,7 +15,7 @@ import type {
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
 import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface TeacherAvailabilityMobileViewProps extends Omit<TeacherAvailabilityViewModel, "insights"> {
   readonly insights?: TeacherAvailabilityInsights;

@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { PaginationControls } from "@/frontend/common/components/ui";
 import { ComplaintRecordCard } from "@/frontend/common/views/dashboard/complaints/components/ComplaintRecordCard";
 import type { ParentComplaintRecord } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ComplaintsParentLabels } from "@/shared/locale";
 
 /** Header row with icon/title on the left and count chip on the right */
 const StyledCardListHeader = styled(Box)(({ theme }) => ({

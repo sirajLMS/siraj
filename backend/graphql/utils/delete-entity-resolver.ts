@@ -1,6 +1,6 @@
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 /**
  * Shared resolver body for "delete entity by id" Boolean mutations.

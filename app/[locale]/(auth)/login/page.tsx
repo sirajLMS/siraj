@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getBooleanEnv } from "@/backend/lib/env";
 import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
 import { LoginContainer } from "@/frontend/views/auth/login";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;

@@ -4,7 +4,7 @@ import type { Control, UseFormRegister } from "react-hook-form";
 import { CompensationEditFields, CompensationViewSection } from "@/frontend/common/views/dashboard/profile/__shared__";
 import type { TeacherViewData } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import type { TeacherAdminEditFormData } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type CompensationSectionProps =
   | {

@@ -11,8 +11,7 @@ import {
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type { ClassInstanceDetailReturnType } from "@/backend/types";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
-import type { SessionLabels } from "@/shared/locale/types/session";
+import type { ErrorsLabels, SessionLabels } from "@/shared/locale";
 
 type ClassInstanceWithRelations = NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>;
 

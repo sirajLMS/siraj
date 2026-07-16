@@ -17,7 +17,7 @@ import { useState } from "react";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermissionGroupSimulation";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type ViewAsUserVariant = "icon" | "link" | "menuItem" | "button";
 

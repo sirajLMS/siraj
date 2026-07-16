@@ -7,7 +7,7 @@ import {
   isTeacherAdminData,
   type TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type StatsSectionProps = {
   readonly teacherData: TeacherViewData;

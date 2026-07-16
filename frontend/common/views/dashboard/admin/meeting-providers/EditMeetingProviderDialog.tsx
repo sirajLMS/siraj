@@ -19,7 +19,7 @@ import { updateMeetingProviderMutationDocument } from "@/frontend/common/graphql
 import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { logger } from "@/frontend/common/utils/logger";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type EditMeetingProviderDialogProps = {
   readonly open: boolean;

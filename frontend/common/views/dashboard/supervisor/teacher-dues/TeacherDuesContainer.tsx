@@ -11,8 +11,8 @@ import { useTeacherDuesStore } from "@/frontend/common/stores/teacherDuesStore";
 import { logger } from "@/frontend/common/utils/logger";
 import { TeacherDuesView } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/teacherDuesView";
 import type { TeacherDueRow } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { SupervisorTeacherDuesLabels } from "@/shared/locale/types/dashboard/supervisorPortal/teacherDues";
+import type { SupervisorTeacherDuesLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 type SnackbarSeverity = "success" | "error";
 

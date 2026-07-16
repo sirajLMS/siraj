@@ -5,8 +5,7 @@ import { AccountStatus, UserRole } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 /* Test constants */
 

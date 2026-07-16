@@ -9,7 +9,7 @@ import {
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
 import type { CalendarGridProps, ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 import { Link } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const calendarCellBase = ({ theme }: { theme: import("@mui/material/styles").Theme }) => ({
   borderRight: `1px solid ${theme.palette.border.light}`,

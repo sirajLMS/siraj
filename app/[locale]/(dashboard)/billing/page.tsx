@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { AdminBillingContainer } from "@/frontend/common/views/dashboard/admin/billing/AdminBillingContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

@@ -14,7 +14,7 @@ import type {
   TeacherMonthlyReportReturnType,
   TeacherPendingDuesSummaryReturnType,
 } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherDueService {
   async function assertCanViewDues(actorUserId: string, teacherId: string, locale?: string): Promise<void> {

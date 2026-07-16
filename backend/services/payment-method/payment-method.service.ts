@@ -28,8 +28,7 @@ import type {
   UserPaymentMethodSubmitInput,
 } from "@/backend/types/billing/payment-method.types";
 import type { CreateTeacherPaymentInput, TeacherPaymentSelectType } from "@/backend/types/teachers/teacher.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 type DefaultSlot = "PAYIN" | "PAYOUT";
 

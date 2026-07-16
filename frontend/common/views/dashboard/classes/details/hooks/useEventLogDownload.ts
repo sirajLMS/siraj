@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { classStatusEventsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
 import type { ActionFeedbackState } from "@/frontend/common/views/dashboard/classes/details/types";
-import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details";
+import type { ClassDetailsLabels } from "@/shared/locale";
 
 export function useEventLogDownload(
   id: string,

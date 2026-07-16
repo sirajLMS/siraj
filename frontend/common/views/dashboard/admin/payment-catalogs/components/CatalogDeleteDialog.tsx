@@ -2,7 +2,7 @@
 
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { CatalogDeleteDialogProps } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function CatalogDeleteDialog({
   open,

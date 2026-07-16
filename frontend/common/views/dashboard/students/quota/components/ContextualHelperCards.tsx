@@ -1,6 +1,6 @@
 import { InfoOutlined, PublicOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function ContextualHelperCards() {
   const t = useAppTranslation().dashboardTranslations.studentQuota.info;

@@ -9,7 +9,7 @@ import type {
   ClassMeetingConfigSelectType,
   UpdateClassMeetingConfigInput,
 } from "@/backend/types/meeting/class-meeting-config.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 type ClassScope = { readonly classInstanceId: string };
 type RecurringScope = { readonly recurringScheduleId: string };

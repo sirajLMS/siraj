@@ -1,3 +1,3 @@
-import type { ParentDashboardLabels as NewParentDashboardLabels } from "@/shared/locale/types/dashboard/core/parentDashboard";
+import type { ParentDashboardLabels as NewParentDashboardLabels } from "@/shared/locale";
 
 export type ParentDashboardLabels = NewParentDashboardLabels;

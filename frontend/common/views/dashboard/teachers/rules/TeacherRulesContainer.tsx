@@ -9,7 +9,7 @@ import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { teacherHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { ActivationPolicyPanel } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
 import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherRulesContainer() {
   const t = useAppTranslation().dashboardTranslations.teacherDashboard;

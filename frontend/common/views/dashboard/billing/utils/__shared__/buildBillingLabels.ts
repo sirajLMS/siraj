@@ -1,7 +1,6 @@
 "use client";
 
-import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
-import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
+import type { BillingLabels, BillingManualLabels } from "@/shared/locale";
 
 export type BillingTranslator = BillingLabels;
 

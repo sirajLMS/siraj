@@ -2,7 +2,7 @@
 
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { DeleteSubjectDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function DeleteSubjectDialog({
   open,

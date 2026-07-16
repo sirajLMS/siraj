@@ -1,7 +1,7 @@
 import { Box, MenuItem, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/views/dashboard/managers/home/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Styled Components — Extracted inline sx styles for reusability & consistency

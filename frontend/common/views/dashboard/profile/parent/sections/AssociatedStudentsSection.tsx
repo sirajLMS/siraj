@@ -5,7 +5,7 @@ import { AppDataGridLoadingOverlay, SectionPanel } from "@/frontend/common/compo
 import { AssociatedStudentsCardList } from "@/frontend/common/views/dashboard/profile/parent/sections/AssociatedStudentsCardList";
 import { AssociatedStudentsDataGrid } from "@/frontend/common/views/dashboard/profile/parent/sections/AssociatedStudentsDataGrid";
 import type { AssociatedStudents } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type AssociatedStudentsSectionProps = {
   readonly associatedStudents: AssociatedStudents;

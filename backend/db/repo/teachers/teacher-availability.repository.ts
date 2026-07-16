@@ -16,7 +16,7 @@ import type * as Types from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 type TeacherGender = string | null;
 

@@ -19,7 +19,7 @@ import type {
   EffectiveMeetingReturnType,
   UpdateClassMeetingConfigInput,
 } from "@/backend/types/meeting/class-meeting-config.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ClassMeetingConfigService {
   async function assertCanManageClass(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {

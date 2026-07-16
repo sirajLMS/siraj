@@ -7,8 +7,7 @@ import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/paym
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 let tErrors: ErrorsLabels;
 

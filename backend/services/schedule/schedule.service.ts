@@ -25,7 +25,7 @@ import type {
   TeacherImportantNoteReturnType,
 } from "@/backend/types";
 import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ScheduleService {
   async function resolveViewerTimezone(userId: string): Promise<IanaTimezone> {

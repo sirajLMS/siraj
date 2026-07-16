@@ -12,7 +12,7 @@ import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMess
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherOwnProfileContainer() {
   const t = useAppTranslation().dashboardTranslations.teacherOwnProfile;

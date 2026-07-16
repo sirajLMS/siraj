@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { RescheduleContainer } from "@/frontend/common/views/dashboard/reschedule/home/RescheduleContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

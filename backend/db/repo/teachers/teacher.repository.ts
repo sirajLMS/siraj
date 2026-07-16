@@ -16,7 +16,7 @@ import type {
   TeacherProfileUpdateInputType,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherRepository {
   export async function create(

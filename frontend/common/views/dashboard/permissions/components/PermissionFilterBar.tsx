@@ -4,7 +4,7 @@ import { Search } from "@mui/icons-material";
 import { Box, Input, InputAdornment, MenuItem, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { standardInputSx } from "@/frontend/common/components/ui/form";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledFilterContainer = styled(Box)(({ theme }) => ({
   display: "flex",

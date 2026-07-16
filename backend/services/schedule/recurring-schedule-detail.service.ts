@@ -4,7 +4,7 @@ import { AppPermission } from "@/backend/enum";
 import { parseIanaTimezone } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { RecurringScheduleDetailReturnType } from "@/backend/types/scheduling/recurring-schedule-detail.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace RecurringScheduleDetailService {
   async function assertViewAccess(userId: string, teacherId: string, tErrors: ErrorsLabels) {

@@ -9,8 +9,7 @@ import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display"
 import { IdentifierKind, PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SupportedOnlineAccountFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { PaymentCatalogsLabels } from "@/shared/locale/types/dashboard/payment-catalogs/main";
+import { type PaymentCatalogsLabels, useAppTranslation } from "@/shared/locale";
 
 export interface OnlineAccountCatalogGridProps extends CatalogGridActionHandlers {
   readonly rows: readonly SupportedOnlineAccountFieldsFragment[];

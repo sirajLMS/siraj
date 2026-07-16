@@ -3,7 +3,7 @@
 import { Alert, Chip, Stack } from "@mui/material";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type ClassMeetingContextBannerProps = {
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;

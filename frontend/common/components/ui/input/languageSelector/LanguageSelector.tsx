@@ -9,7 +9,7 @@ import { useCallback } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import { getLanguageDisplayName, type LanguageType, languages } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type LanguageSelectorProps = {
   readonly language?: LanguageType;

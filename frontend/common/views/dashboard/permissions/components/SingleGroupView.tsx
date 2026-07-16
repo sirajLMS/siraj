@@ -7,7 +7,7 @@ import { CurrentPermissionsTab } from "@/frontend/common/views/dashboard/permiss
 import { SingleGroupHeader } from "@/frontend/common/views/dashboard/permissions/components/SingleGroupHeader";
 import type { SubTabKey } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
 import { useSingleGroupState } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface SingleGroupViewProps {
   readonly group: PermissionGroup;

@@ -14,7 +14,7 @@ import type {
 import { RecurringClassFormFields } from "@/frontend/common/views/dashboard/classes/recurring/RecurringClassFormFields";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
+import type { CreateRecurringClassLabels } from "@/shared/locale";
 
 interface RecurringClassFormProps {
   readonly register: UseFormRegister<RecurringClassFormData>;

@@ -3,7 +3,7 @@ import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ClassCategoryReturnType, ClassCategorySubmitInput, ClassCategoryUpdateInput } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ClassCategoryService {
   export async function listCategories(userId: string, tErrors: ErrorsLabels): Promise<ClassCategoryReturnType[]> {

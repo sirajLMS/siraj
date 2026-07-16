@@ -14,7 +14,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
 import { logger } from "@/frontend/common/utils/logger";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface UseClassMutationsOptions {
   id: string;

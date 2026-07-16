@@ -21,10 +21,9 @@ import {
   mapUpcomingLessons,
 } from "@/frontend/common/views/dashboard/student/dashboard/utils/studentDashboardMappers";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { StudentDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard";
+import { type StudentPortalDashboardLabels, useAppTranslation } from "@/shared/locale";
 
-function useStudentDashboardLabels(t: StudentDashboardLabels): StudentDashboardLabels {
+function useStudentDashboardLabels(t: StudentPortalDashboardLabels): StudentPortalDashboardLabels {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,

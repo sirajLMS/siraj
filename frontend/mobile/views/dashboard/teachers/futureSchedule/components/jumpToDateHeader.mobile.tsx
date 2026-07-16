@@ -4,7 +4,7 @@ import { CalendarTodayOutlined, ChevronLeftOutlined, ChevronRightOutlined } from
 import { alpha, Box, IconButton, Stack, type SxProps, type Theme, Typography, useTheme } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { JumpToDateHeaderProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function shiftDate(selectedDate: string, delta: number): string {
   const d = new Date(selectedDate + "T00:00:00");

@@ -3,7 +3,7 @@ import { requireTeacherIdForPage } from "@/backend/lib/auth/require-teacher-id";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import TeacherWeeklyScheduleContainer from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 interface PageProps {
   readonly params: Promise<{ readonly locale: string }>;

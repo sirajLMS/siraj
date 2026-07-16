@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ScheduleAlertsContainer } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

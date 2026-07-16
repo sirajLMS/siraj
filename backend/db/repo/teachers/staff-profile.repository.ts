@@ -28,7 +28,7 @@ import type {
   StaffProfileEntityInput,
 } from "@/backend/types";
 import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export interface ManagerProfileUpdateInput {
   readonly phone?: string | null;

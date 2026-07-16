@@ -1,6 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { deleteEntityResolver } from "@/backend/graphql/utils";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 /**
  * Common update input fields shared by class-category and class-subject update mutations.

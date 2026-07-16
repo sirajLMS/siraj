@@ -4,7 +4,7 @@ import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 /**
  * ScheduleQueryService — thin service layer for schedule-related read queries.

@@ -6,8 +6,7 @@ import { CurrencyCode } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 let tErrors: ErrorsLabels;
 

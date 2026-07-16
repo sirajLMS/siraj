@@ -21,7 +21,7 @@ import MobileScheduleList from "@/frontend/common/views/dashboard/teachers/sched
 import { ScheduleFooterLegend } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherWeeklyScheduleViewMobile({
   schedule,

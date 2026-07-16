@@ -8,7 +8,7 @@ import { useState } from "react";
 import { type Control, Controller, type FieldErrors, useForm } from "react-hook-form";
 import { mockLogin } from "@/frontend/views/auth/login/actions/mockLogin";
 import { createLoginSchema, type LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 // Person icon for email field with secondary color
 const StyledPersonIcon = styled(Person)(({ theme }) => ({

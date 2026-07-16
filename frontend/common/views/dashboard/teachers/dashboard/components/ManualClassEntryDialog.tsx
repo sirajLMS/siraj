@@ -19,8 +19,8 @@ import { useEffect, useState } from "react";
 import type { PaginationArgs, StudentFilterArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { studentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { TeacherDashboardLabels } from "@/shared/locale/types/dashboard/teachers/dashboard";
+import type { TeacherDashboardLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 interface ManualClassEntryDialogProps {
   readonly open: boolean;

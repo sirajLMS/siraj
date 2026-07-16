@@ -3,7 +3,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { BaseCard, StatusBadge, UserAvatar } from "@/frontend/common/components/ui";
 import type { StudentContextCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function StudentContextCard({ student }: Readonly<StudentContextCardProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherReassignment.studentContext;

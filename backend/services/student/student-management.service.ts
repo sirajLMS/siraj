@@ -1,6 +1,6 @@
 import { StudentRepository } from "@/backend/db/repo";
 import { assertStudentFieldEdit, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export interface EditQuotaResult {
   readonly id: string;

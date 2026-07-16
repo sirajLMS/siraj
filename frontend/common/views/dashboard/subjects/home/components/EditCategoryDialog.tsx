@@ -17,7 +17,7 @@ import { type Control, Controller, type FieldErrors, useForm, useWatch } from "r
 import { z } from "zod";
 import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import type { EditCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function slugify(text: string): string {
   return text

@@ -4,7 +4,7 @@ import type { SxProps } from "@mui/material";
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
-import type { PendingReviewsLabels } from "@/shared/messages/types/dashboard/supervisorPortal/pendingReviews";
+import type { PendingReviewsLabels } from "@/shared/locale";
 
 interface RejectReportDialogProps {
   readonly open: boolean;

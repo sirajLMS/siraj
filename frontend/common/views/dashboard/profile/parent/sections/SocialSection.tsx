@@ -10,7 +10,7 @@ import type { ParentViewData } from "@/frontend/common/views/dashboard/profile/p
 import { toDisplayValue } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import { buildSocialLink } from "@/shared/lib/social/social-links";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type SocialSectionProps =
   | {

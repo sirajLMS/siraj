@@ -10,7 +10,7 @@ import {
   resolveDailyScheduleMetricFilter,
 } from "@/frontend/common/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 import { MOCK_SCHEDULE, MOCK_TEACHERS } from "@/test/ui/components/fixtures/adminDashboardFixtures";
 
 export function MockAdminDashboardContainer() {

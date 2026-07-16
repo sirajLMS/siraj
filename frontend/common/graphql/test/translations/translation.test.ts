@@ -3,8 +3,10 @@ import { translatedMessageQueryDocument, welcomeMessageQueryDocument } from "@/f
 import { loginDemoUser } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
-import ar from "@/shared/messages/ar";
-import en from "@/shared/messages/en";
+import { messagesByLocale } from "@/shared/locale";
+
+const ar = messagesByLocale.ar;
+const en = messagesByLocale.en;
 
 describe("GraphQL Translation Integration Tests", () => {
   setupTestServerLifecycle();
@@ -22,7 +24,7 @@ describe("GraphQL Translation Integration Tests", () => {
     });
     expect(result.data).toBeDefined();
     if (result.data) {
-      expect(result.data.welcomeMessage).toBe(ar.common.welcome);
+      expect(result.data.welcomeMessage).toBe(ar.commonTranslations.welcome);
     }
   });
 
@@ -37,7 +39,7 @@ describe("GraphQL Translation Integration Tests", () => {
     });
     expect(result.data).toBeDefined();
     if (result.data) {
-      expect(result.data.welcomeMessage).toBe(en.common.welcome);
+      expect(result.data.welcomeMessage).toBe(en.commonTranslations.welcome);
     }
   });
 
@@ -52,7 +54,7 @@ describe("GraphQL Translation Integration Tests", () => {
     });
     expect(result.data).toBeDefined();
     if (result.data) {
-      expect(result.data.welcomeMessage).toBe(ar.common.welcome);
+      expect(result.data.welcomeMessage).toBe(ar.commonTranslations.welcome);
     }
   });
 
@@ -67,7 +69,7 @@ describe("GraphQL Translation Integration Tests", () => {
     });
     expect(result.data).toBeDefined();
     if (result.data) {
-      expect(result.data.welcomeMessage).toBe(en.common.welcome);
+      expect(result.data.welcomeMessage).toBe(en.commonTranslations.welcome);
     }
   });
 
@@ -87,7 +89,7 @@ describe("GraphQL Translation Integration Tests", () => {
     });
     expect(resultEn.data).toBeDefined();
     if (resultEn.data) {
-      expect(resultEn.data.translatedMessage).toBe(en.common.title);
+      expect(resultEn.data.translatedMessage).toBe(en.commonTranslations.title);
     }
 
     const resultAr = await testClient.query({
@@ -105,7 +107,7 @@ describe("GraphQL Translation Integration Tests", () => {
     });
     expect(resultAr.data).toBeDefined();
     if (resultAr.data) {
-      expect(resultAr.data.translatedMessage).toBe(ar.common.title);
+      expect(resultAr.data.translatedMessage).toBe(ar.commonTranslations.title);
     }
   });
 });

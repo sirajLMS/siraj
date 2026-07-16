@@ -7,7 +7,7 @@ import { PageContainer, PageHeader, PhoneDisplay, SectionPanel } from "@/fronten
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { parentOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { isSafeUrl } from "@/frontend/common/lib/safeRedirect";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function SocialLink({ label, value }: { readonly label: string; readonly value: string | null | undefined }) {
   if (!value) return null;

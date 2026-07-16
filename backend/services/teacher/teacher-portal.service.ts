@@ -8,7 +8,7 @@ import type {
   TeacherOwnProfileReturnType,
   TeacherOwnProfileUpdateInput,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace TeacherPortalService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {

@@ -6,7 +6,7 @@ import type {
   TeacherImportantNoteSubmitInput,
   TeacherImportantNoteUpdateInput,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace TeacherNotesService {
   export async function getActiveNotes(

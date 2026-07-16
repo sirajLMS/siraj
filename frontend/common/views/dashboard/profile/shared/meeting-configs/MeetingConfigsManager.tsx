@@ -19,7 +19,7 @@ import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { MeetingConfigDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigDeleteDialog";
 import { MeetingConfigFormDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type MeetingConfigsManagerProps = {
   readonly targetUserId: string;

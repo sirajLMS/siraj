@@ -8,7 +8,7 @@ import { SectionPanel } from "@/frontend/common/components/ui/container/SectionP
 import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import type { ManagerOnboardingFormData } from "@/frontend/common/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
 import { ManagerAccountType } from "@/frontend/common/views/dashboard/managers/onboarding/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const ACCOUNT_TYPES: readonly ManagerAccountType[] = [ManagerAccountType.Manager, ManagerAccountType.Admin];
 

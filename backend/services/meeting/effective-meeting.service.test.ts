@@ -10,8 +10,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 function resolutionTest(name: string, fn: (tx: DBTransaction, tErrors: ErrorsLabels) => Promise<void>) {
   test(name, async () => {

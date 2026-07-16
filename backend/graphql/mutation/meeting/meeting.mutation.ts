@@ -16,7 +16,7 @@ import { ClassMeetingConfigService, MeetingConfigService } from "@/backend/servi
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 function withAuthResult<TArgs, TResult>(
   fn: (actorUserId: string, args: TArgs, tErrors: ErrorsLabels, locale: string) => Promise<TResult>

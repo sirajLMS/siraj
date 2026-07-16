@@ -25,8 +25,11 @@ import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ClassMeetingConfigFormDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigFormDialog";
 import { ClassMeetingContextBanner } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingContextBanner";
 import { MeetingConfigDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigDeleteDialog";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { MeetingConfigClassScopeLabels, MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
+import {
+  type MeetingConfigClassScopeLabels,
+  type MeetingConfigManagerLabels,
+  useAppTranslation,
+} from "@/shared/locale";
 
 export type ClassMeetingConfigsSectionProps = {
   readonly classInstanceId?: string;

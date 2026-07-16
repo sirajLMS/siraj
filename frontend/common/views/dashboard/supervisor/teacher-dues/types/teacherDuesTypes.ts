@@ -1,5 +1,5 @@
 import type { CurrencyCode, TeacherDueStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { SupervisorTeacherDuesLabels } from "@/shared/messages/types/dashboard/supervisorPortal/teacherDues";
+import type { SupervisorTeacherDuesLabels } from "@/shared/locale";
 
 export interface TeacherDueRow {
   readonly id: string;

@@ -11,7 +11,7 @@ import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import type { SearchScheduleResultItem } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleView";
 import { TeacherAvailabilityDayPill } from "@/frontend/common/views/dashboard/search-schedule/TeacherAvailabilityDayPill";
 import { TeacherAvailabilityMonthDrawer } from "@/frontend/common/views/dashboard/search-schedule/TeacherAvailabilityMonthDrawer";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface TeacherAvailabilityGridProps {
   readonly teacher: SearchScheduleResultItem;

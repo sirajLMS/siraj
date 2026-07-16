@@ -10,7 +10,7 @@ import { profileHrefForUser, studentProfileTabHref } from "@/frontend/common/uti
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import type { StudentStatusHeaderProps } from "@/frontend/common/views/dashboard/students/status/types";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const STATUS_DOT_COLOR_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "success",

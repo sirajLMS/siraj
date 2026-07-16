@@ -9,7 +9,7 @@ import { logger } from "@/backend/lib/logger";
 import { clearOptionalRedisGroupSimulation } from "@/backend/services/auth/permission-group-simulation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export const IMPERSONATION_TTL_MS = 30 * 60 * 1000;
 

@@ -8,7 +8,7 @@ import type {
   MeetingProviderSubmitInput,
   UpdateMeetingProviderInput,
 } from "@/backend/types/meeting/meeting-provider.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace MeetingProviderRepository {
   export async function listActive(tx?: DBTransaction): Promise<MeetingProviderSelectType[]> {

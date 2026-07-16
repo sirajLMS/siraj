@@ -1,5 +1,5 @@
-import { useAppTranslation } from "@/shared/locale/client";
-import type { TeacherOnboardingLabels } from "@/shared/locale/types/dashboard/teachers/onboarding";
+import type { TeacherOnboardingLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 export function useTeacherOnboardingLabels(): TeacherOnboardingLabels {
   const t = useAppTranslation().dashboardTranslations.teacherOnboarding;

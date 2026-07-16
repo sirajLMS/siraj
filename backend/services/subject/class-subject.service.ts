@@ -9,7 +9,7 @@ import type {
   SubjectResourceAttachInput,
   SubjectResourceReturnType,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ClassSubjectService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels): Promise<void> {

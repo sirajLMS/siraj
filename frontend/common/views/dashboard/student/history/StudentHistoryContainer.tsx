@@ -14,10 +14,9 @@ import {
   mapStudentHistorySessions,
 } from "@/frontend/common/views/dashboard/student/history/utils/studentHistoryMappers";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory";
+import { type StudentPortalHistoryLabels, useAppTranslation } from "@/shared/locale";
 
-function useStudentHistoryLabels(t: StudentHistoryLabels): StudentHistoryLabels {
+function useStudentHistoryLabels(t: StudentPortalHistoryLabels): StudentPortalHistoryLabels {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,

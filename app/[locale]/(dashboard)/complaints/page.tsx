@@ -5,7 +5,7 @@ import { logger } from "@/backend/lib/logger";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { ParentComplaintsContainer } from "@/frontend/common/views/dashboard/complaints/ParentComplaintsContainer";
 import { redirect } from "@/shared/i18n/routing";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,

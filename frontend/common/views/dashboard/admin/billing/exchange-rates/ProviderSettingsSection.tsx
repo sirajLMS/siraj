@@ -28,8 +28,7 @@ import {
   updateFxProviderMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
-import { useAppLocale } from "@/shared/locale/client";
-import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates";
+import { type ExchangeRatesLabels, useAppLocale } from "@/shared/locale";
 
 type ProviderSettingsSectionProps = {
   readonly labels: ExchangeRatesLabels["providerSettings"];

@@ -35,7 +35,7 @@ import { useTeacherDashboardLastUpdated } from "@/frontend/common/views/dashboar
 import type { TeacherScheduleRow } from "@/frontend/common/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
 import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type SupportRequestType = "COORDINATOR" | "SUPPORT";
 type SnackbarSeverity = "success" | "error" | "info";

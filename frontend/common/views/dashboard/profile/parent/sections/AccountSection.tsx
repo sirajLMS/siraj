@@ -14,8 +14,7 @@ import type {
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ProfileParentLabels } from "@/shared/locale/types/profile";
+import { type ProfileParentLabels, useAppTranslation } from "@/shared/locale";
 
 type ParentAccountFormFields = {
   name: string;

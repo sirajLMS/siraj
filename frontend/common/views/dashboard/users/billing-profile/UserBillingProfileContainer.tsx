@@ -45,7 +45,7 @@ import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/component
 import { FxConversionNote } from "@/frontend/common/views/dashboard/components/FxConversionNote";
 import type { UserBillingProfileContainerProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { UserBillingProfileView } from "@/frontend/common/views/dashboard/users/billing-profile/userBillingProfileView";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,

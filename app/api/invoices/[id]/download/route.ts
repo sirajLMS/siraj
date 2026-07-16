@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { ForbiddenError, getServerUserContext, logger, NotFoundError } from "@/backend/lib";
 import { BillingManagementService, StorageService } from "@/backend/services";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: invoiceId } = await params;

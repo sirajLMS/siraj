@@ -42,7 +42,7 @@ import type { LocalizedString } from "@/frontend/common/types/localized-string.t
 import { logger } from "@/frontend/common/utils/logger";
 import type { CatalogEditDialogProps } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
 import { EntityFormDialogActions } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const FORM_ID = "payment-catalog-edit-form";
 

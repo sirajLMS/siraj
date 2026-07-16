@@ -20,8 +20,8 @@ import { TeacherInfoSection } from "@/frontend/common/views/dashboard/teachers/o
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import { teacherOnboardingSchema } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import { CountryCode, Gender } from "@/frontend/common/views/dashboard/teachers/onboarding/types";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { TeacherOnboardingLabels } from "@/shared/locale/types/dashboard/teachers/onboarding";
+import type { TeacherOnboardingLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 interface TeacherOnboardingViewProps {
   readonly isSubmitting: boolean;

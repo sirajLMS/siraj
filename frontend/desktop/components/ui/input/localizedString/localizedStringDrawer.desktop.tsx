@@ -21,8 +21,7 @@ import type { LocalizedStringDrawerProps } from "@/frontend/common/components/ui
 import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
-import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
-import type { LocalizedStringLabels } from "@/shared/locale/types/ui";
+import { type LocalizedStringLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 type HelperTextParams = {

@@ -7,7 +7,7 @@ import { ErrorState, LoadingState, PageContainer, PageHeader } from "@/frontend/
 import { recurringScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function RecurringScheduleDetailContainer() {
   const t = useAppTranslation().uiTranslations.meetingConfigRecurringSchedule;

@@ -1,4 +1,4 @@
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 function escapeHtml(text: string): string {
   return text

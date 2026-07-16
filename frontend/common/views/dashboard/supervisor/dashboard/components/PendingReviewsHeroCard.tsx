@@ -3,7 +3,7 @@
 import { PendingActionsOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
-import type { SupervisorDashboardLabels } from "@/shared/messages/types/dashboard/supervisorPortal/supervisorDashboard";
+import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 interface PendingReviewsHeroCardProps {
   readonly count: number;
@@ -42,7 +42,7 @@ export function PendingReviewsHeroCard({ count, labels, onGoToReviews }: Readonl
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface, mb: 0.5 })}>
-            {labels.pendingReviewsHero.replace("{count}", String(count))}
+            {labels.pendingReviewsHero(count)}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
             {labels.pendingReviewsSubtitle}

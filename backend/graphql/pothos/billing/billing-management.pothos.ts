@@ -23,7 +23,7 @@ import type {
   MarkInvoicePaidReturnType,
   SendPaymentReminderResult,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 // ─── Result Flattening Helpers ──────────────────────────────────────────────
 // Services return nested { invoice: {...}, notificationSummaryUpdated } shapes.

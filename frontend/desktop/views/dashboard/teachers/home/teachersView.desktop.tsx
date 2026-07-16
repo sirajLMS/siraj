@@ -13,7 +13,7 @@ import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { TeacherDataGrid } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherDataGrid";
 import { TeacherMetricsRow } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherMetricsRow";
 import { Link } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface TeachersDesktopViewProps {
   readonly metrics: TeacherDirectoryMetrics | null | undefined;

@@ -17,7 +17,7 @@ import { DayOfWeek, Gender } from "@/frontend/common/graphql/generated/gql/graph
 import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
 import type { SearchScheduleFilterDrawerProps } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleFilterDrawer";
 import { getClearDrawerFiltersPatch } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function DaysOfWeekSelect({
   value,

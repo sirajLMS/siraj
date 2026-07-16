@@ -27,7 +27,7 @@ import type {
   PaymentCatalogKind,
   PaymentCatalogRow,
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function resolveEntryName(row: PaymentCatalogRow | null, locale: string): string {
   if (!row?.name) return row?.slug ?? "";

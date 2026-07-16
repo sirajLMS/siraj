@@ -4,7 +4,7 @@ import { Box } from "@mui/material";
 import { PageHeader } from "@/frontend/common/components/ui";
 import type { ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classDetailsContentPaddingSx } from "@/frontend/common/views/dashboard/classes/details/classDetailsMobileLayout";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface ClassDetailsHeaderProps {
   readonly instance: ClassInstanceDetail;

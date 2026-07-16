@@ -9,7 +9,7 @@ import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-ty
 import { upsertManualExchangeRateMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { logger } from "@/frontend/common/utils/logger";
-import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates";
+import type { ExchangeRatesLabels } from "@/shared/locale";
 
 type ManualOverrideDialogProps = {
   readonly open: boolean;

@@ -20,7 +20,7 @@ import type {
   StudentHistoryMobileProps,
 } from "@/frontend/common/views/dashboard/students/history/types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
-import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 function deriveStreakDays(
   classes: Readonly<Partial<Record<number, ClassSession>>>,

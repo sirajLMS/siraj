@@ -17,8 +17,6 @@ import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import { createAppTheme } from "@/frontend/common/providers/theme/theme";
 import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { messagesByLocale } from "@/shared/locale/messages";
-import type { Translations } from "@/shared/locale/types/message";
 
 // Create Emotion caches for Storybook
 const cacheLtr = createCache({
@@ -37,7 +35,6 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
   const themeMode = (context.globals.theme as PaletteMode | undefined) ?? "dark";
   const _viewport = (context.globals.viewport as "mobile" | "tablet" | "desktop" | undefined) ?? "desktop";
   const direction: "rtl" | "ltr" = locale === "ar" ? "rtl" : "ltr";
-  const translations: Translations = messagesByLocale[locale];
 
   // Build the theme object directly to avoid Next.js-specific provider issues
   const theme = useMemo(() => createAppTheme(themeMode, direction, locale), [themeMode, direction, locale]);
@@ -158,7 +155,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
   const maxWidth = _viewport === "mobile" ? 600 : _viewport === "tablet" ? 900 : "none";
 
   return (
-    <LocaleProvider translations={translations} locale={locale}>
+    <LocaleProvider locale={locale}>
       <ThemeContext.Provider value={themeContextValue}>
         <CacheProvider value={cache}>
           <ThemeProvider theme={theme}>

@@ -10,8 +10,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 export namespace WeeklyScheduleService {
   function getWeekBoundaries(date: Date): { weekStart: Date; weekEnd: Date } {

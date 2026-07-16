@@ -5,7 +5,7 @@ import { styled } from "@mui/material/styles";
 import { labelSx } from "@/frontend/common/components/ui/form";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionRow } from "@/frontend/common/views/dashboard/permissions/components/PermissionRow";
-import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions";
+import type { PermissionsLabels } from "@/shared/locale";
 
 const StyledCategoryContainer = styled(Box)(({ theme }) => ({
   border: `1px solid ${theme.palette.outlineVariant}`,

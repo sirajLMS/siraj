@@ -24,7 +24,7 @@ import type {
   UserOverrideInput,
 } from "@/backend/types";
 import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 function toPermissionReturn(row: PermissionSelectType, locale?: string): PermissionReturnType {
   return {

@@ -1,7 +1,7 @@
 "use client";
 
 import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export const useAdminDashboardLabels = () => {
   const t = useAppTranslation().dashboardTranslations.admin;

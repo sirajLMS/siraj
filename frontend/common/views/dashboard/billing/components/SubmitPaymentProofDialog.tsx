@@ -29,7 +29,7 @@ import {
   MAX_PAYMENT_PROOF_FILE_SIZE_BYTES,
   PAYMENT_PROOF_ACCEPT,
 } from "@/shared/constants/billing/payment-proof";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 import { extToMime } from "@/shared/utils/storage.utils";
 

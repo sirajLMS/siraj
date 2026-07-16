@@ -1,4 +1,4 @@
-import type { SupervisorDashboardLabels } from "@/shared/messages/types/dashboard/supervisorPortal/supervisorDashboard";
+import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 export interface PendingDuesSummary {
   readonly totalCount: number;

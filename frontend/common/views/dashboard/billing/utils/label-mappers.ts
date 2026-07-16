@@ -1,4 +1,4 @@
-import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
+import type { BillingLabels } from "@/shared/locale";
 
 export function getAdminInvoiceGridLabels(labels: BillingLabels) {
   return {

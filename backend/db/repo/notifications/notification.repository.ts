@@ -17,7 +17,7 @@ import type {
   SetNotificationPreferenceInput,
   UserNotificationPreferenceSelectType,
 } from "@/backend/types/users/userNotificationPreferences.types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {
   [NotificationDeliveryStatus.PENDING]: 0,

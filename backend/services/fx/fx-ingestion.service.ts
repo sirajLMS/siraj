@@ -7,7 +7,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import { getFxRateProvider } from "@/backend/services/fx/providers/FxRateProviderFactory";
 import type * as Types from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 const IDEMPOTENCY_WINDOW_MINUTES = 30;
 

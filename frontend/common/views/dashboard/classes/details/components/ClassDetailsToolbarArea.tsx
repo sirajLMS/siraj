@@ -12,7 +12,7 @@ import {
 import { LiveSessionToolbar } from "@/frontend/common/views/dashboard/classes/details/components/LiveSessionToolbar";
 import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/classes/details/teacher/TimezoneWarningBanner";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type ClassDetailsToolbarViewMode = "teacher" | "parent" | "admin";
 

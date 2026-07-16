@@ -25,7 +25,7 @@ import type {
   TeacherOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 type TeacherOwnData = NonNullable<ProfileData["teacherOwnProfile"]>;

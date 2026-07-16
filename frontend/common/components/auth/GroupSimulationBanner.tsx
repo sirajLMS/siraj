@@ -2,7 +2,7 @@
 
 import { Box, Link, Typography } from "@mui/material";
 import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermissionGroupSimulation";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function GroupSimulationBanner() {
   const t = useAppTranslation().authTranslations.groupSimulation;

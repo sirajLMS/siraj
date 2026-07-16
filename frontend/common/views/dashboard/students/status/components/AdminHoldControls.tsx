@@ -4,7 +4,7 @@ import { AdminControlPanel, FilterButton, PrimaryPageAction } from "@/frontend/c
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StatusUpdateFormData } from "@/frontend/common/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { AdminHoldControlsProps } from "@/frontend/common/views/dashboard/students/status/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function StatusSelectionField() {
   const t = useAppTranslation().dashboardTranslations.studentStatus;

@@ -10,7 +10,7 @@ import { AppDataGrid, SectionPanel } from "@/frontend/common/components/ui";
 import type { GroupUser, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledTabContainer = styled(Box)(({ theme }) => ({
   display: "flex",

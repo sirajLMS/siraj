@@ -13,7 +13,7 @@ import { PaymentMethodDisplay } from "@/frontend/common/components/ui/display/pa
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type { PaymentMethodRow };
 

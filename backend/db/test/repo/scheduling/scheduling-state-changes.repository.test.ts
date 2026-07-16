@@ -15,7 +15,7 @@ import { runInRollback } from "@/backend/db/test/test-utils";
 import type { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 describe("Scheduling Repository — State Changes & Leave Quota", () => {
   describe("State transitions and IDOR checks", () => {

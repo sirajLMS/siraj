@@ -6,7 +6,7 @@ import { SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigDisplay } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { userMeetingConfigsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type MeetingSummarySectionProps = {
   readonly userId: string;

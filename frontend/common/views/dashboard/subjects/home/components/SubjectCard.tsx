@@ -3,7 +3,7 @@
 import { BookOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Card, CardActionArea, CardActions, CardContent, Chip, IconButton, Stack, Typography } from "@mui/material";
 import type { SubjectCardProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function SubjectCard({ subject, onEdit, onDelete, onClick, canManage }: Readonly<SubjectCardProps>) {
   const t = useAppTranslation().dashboardTranslations.subjects;

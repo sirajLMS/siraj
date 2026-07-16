@@ -17,7 +17,7 @@ import type {
   SubjectDetailViewProps,
   SubjectResourceItem,
 } from "@/frontend/common/views/dashboard/subjects/detail/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) {
   const t = useAppTranslation().dashboardTranslations.subjects.detail;

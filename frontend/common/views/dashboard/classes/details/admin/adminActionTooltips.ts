@@ -1,4 +1,4 @@
-import type { AdminViewLabels } from "@/shared/messages/types/message";
+import type { AdminViewLabels } from "@/shared/locale";
 
 type DisabledTooltips = AdminViewLabels["adminActions"]["disabledTooltips"];
 

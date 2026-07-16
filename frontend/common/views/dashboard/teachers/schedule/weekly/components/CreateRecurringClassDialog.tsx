@@ -48,13 +48,12 @@ import {
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
 import type { CreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { TeacherCreateRecurringClassLabels } from "@/shared/locale/types/dashboard/teachers/createRecurringClass";
 import type {
   MeetingConfigClassScopeLabels,
   MeetingConfigManagerLabels,
   MeetingConfigRecurringScheduleLabels,
-} from "@/shared/locale/types/ui";
+} from "@/shared/locale";
+import { type TeacherCreateRecurringClassLabels, useAppTranslation } from "@/shared/locale";
 
 function buildCreateRecurringClassInput(
   studentId: string,

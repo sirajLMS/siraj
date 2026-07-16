@@ -2,7 +2,7 @@
 
 import { Button, CircularProgress, DialogActions } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions";
+import type { PermissionsLabels } from "@/shared/locale";
 
 const StyledFooterContainer = styled(DialogActions)(({ theme }) => ({
   borderTop: `1px solid ${theme.palette.divider}`,

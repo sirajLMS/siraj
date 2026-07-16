@@ -24,7 +24,7 @@ import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/c
 import { SectionHeader } from "@/frontend/common/views/dashboard/students/quota/components/SectionHeader";
 import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/quotaFormAccessContext";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function TeacherField() {
   const t = useAppTranslation().dashboardTranslations.studentQuota;

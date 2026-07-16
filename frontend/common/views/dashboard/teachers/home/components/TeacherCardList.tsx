@@ -7,8 +7,8 @@ import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gq
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
+import type { TeachersDirectoryLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 interface TeacherCardListProps {
   readonly rows: readonly TeacherDirectoryRow[];

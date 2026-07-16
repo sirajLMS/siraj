@@ -10,7 +10,7 @@ import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { profileHrefForStaff } from "@/frontend/common/utils/profileHref";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
 import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledRoleChip = styled(Chip, {
   shouldForwardProp: prop => prop !== "isStaff",

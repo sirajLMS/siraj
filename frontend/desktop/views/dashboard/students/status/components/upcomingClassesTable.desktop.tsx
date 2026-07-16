@@ -13,7 +13,7 @@ import type {
 } from "@/frontend/common/views/dashboard/students/status/types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 function formatDateTime(locale: string, dateStr: string): string {
   try {

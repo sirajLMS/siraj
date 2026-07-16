@@ -3,7 +3,7 @@ import { AppPermission } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getStorageService } from "@/backend/storage/storage.service";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 const HANDBOOK_SETTING_KEY = "teacher_handbook_url";
 const PARENT_HANDBOOK_SETTING_KEY = "parent_handbook_url";

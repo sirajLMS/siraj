@@ -8,7 +8,7 @@ import type {
   FxSyncHealthReturnType,
   PaginationArgs,
 } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 const FX_STALE_MS = 24 * 60 * 60 * 1000;
 

@@ -7,7 +7,7 @@ import {
   type StaffProfileData,
   toDisplayValue,
 } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function RoleSection({ staffData }: { readonly staffData: StaffProfileData }) {
   const t = useAppTranslation().profileTranslations.staff;

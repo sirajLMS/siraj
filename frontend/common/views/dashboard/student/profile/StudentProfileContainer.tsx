@@ -6,10 +6,9 @@ import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDoc
 import { StudentProfileView } from "@/frontend/common/views/dashboard/student/profile/studentProfileView";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { StudentProfileLabels } from "@/shared/locale/types/dashboard/studentPortal/studentProfile";
+import { type StudentPortalProfileLabels, useAppTranslation } from "@/shared/locale";
 
-function useStudentProfileLabels(t: StudentProfileLabels): StudentProfileLabels {
+function useStudentProfileLabels(t: StudentPortalProfileLabels): StudentPortalProfileLabels {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,

@@ -11,7 +11,7 @@ import type {
   NonNullableManagerDirectoryMetrics,
 } from "@/frontend/common/views/dashboard/managers/home/types";
 import { Link } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface ManagersViewDesktopProps {
   readonly managers: readonly Manager[];

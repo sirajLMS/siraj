@@ -12,7 +12,7 @@ import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboar
 import { TeacherOnboardingView } from "@/frontend/common/views/dashboard/teachers/onboarding/TeacherOnboardingView";
 import { useTeacherOnboardingLabels } from "@/frontend/common/views/dashboard/teachers/onboarding/useTeacherOnboardingLabels";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherOnboardingContainer() {
   const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateTeacherOnboarding();

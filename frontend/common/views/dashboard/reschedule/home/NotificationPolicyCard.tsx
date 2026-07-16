@@ -2,7 +2,7 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function NotificationPolicyCard() {
   const t = useAppTranslation().dashboardTranslations.rescheduleForm.notificationPolicy;

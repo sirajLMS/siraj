@@ -11,8 +11,8 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teache
 import { classInstances, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 
 export interface CreateRecurringScheduleInput {
   studentId: string;

@@ -11,7 +11,7 @@ import type {
   ParentProfileUpdateInput,
   ReactivateParentResult,
 } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export type {
   AssociatedStudentResult,

@@ -9,7 +9,7 @@ import { OverridesDialogFooter } from "@/frontend/common/views/dashboard/permiss
 import { OverridesToolbar } from "@/frontend/common/views/dashboard/permissions/components/OverridesToolbar";
 import { OverridesUserSidebar } from "@/frontend/common/views/dashboard/permissions/components/OverridesUserSidebar";
 import { useManageOverridesState } from "@/frontend/common/views/dashboard/permissions/components/useManageOverridesState";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.divider}`,

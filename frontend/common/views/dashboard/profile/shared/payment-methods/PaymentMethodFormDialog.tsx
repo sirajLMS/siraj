@@ -39,7 +39,7 @@ import {
   paymentMethodFormSchema,
 } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 import { usePaymentMethodCatalogs } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type PaymentMethodFormDialogProps = {
   readonly open: boolean;

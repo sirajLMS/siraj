@@ -10,7 +10,7 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { LedgerStatus, ReportLedgerRow } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import { formatReportPaidAmounts } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface PerformanceLedgerCardLabels {
   readonly studentLabel: (name: string) => string;

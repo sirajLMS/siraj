@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { Translations } from "@/shared/locale/types/message";
+import { type Translations, useAppTranslation } from "@/shared/locale";
 
 const APP_NAME = "Siraj";
 

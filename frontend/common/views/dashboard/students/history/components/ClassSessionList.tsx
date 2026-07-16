@@ -6,7 +6,7 @@ import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphq
 import type { ClassSession, ClassSessionListProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { isJoinableClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 import { Link } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function formatDuration(mins: number): string {
   if (mins < 60) return `${mins}m`;

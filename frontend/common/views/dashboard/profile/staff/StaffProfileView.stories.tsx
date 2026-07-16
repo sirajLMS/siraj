@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import type { ComponentProps } from "react";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StaffProfileView } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileView";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const staffProfile = {
   id: "user-staff-1",

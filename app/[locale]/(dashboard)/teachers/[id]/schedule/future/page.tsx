@@ -3,7 +3,7 @@ import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { getTeacherPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { FutureScheduleContainer } from "@/frontend/common/views/dashboard/teachers/futureSchedule/FutureScheduleContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
 
 interface PageProps {
   readonly params: Promise<{

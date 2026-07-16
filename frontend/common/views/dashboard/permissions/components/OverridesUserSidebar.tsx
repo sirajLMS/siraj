@@ -4,7 +4,7 @@ import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledSidebarContainer = styled(Box)(({ theme }) => ({
   width: "100%",

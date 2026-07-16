@@ -4,7 +4,7 @@ import { PermissionManagementRepository, StaffProfileRepository, UserRepository 
 import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export interface ManagerOnboardingInput {
   readonly name: string;

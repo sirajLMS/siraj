@@ -2,8 +2,7 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import logger from "@/backend/lib/logger";
 import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 const DEFAULT_BATCH_SIZE = 50;
 

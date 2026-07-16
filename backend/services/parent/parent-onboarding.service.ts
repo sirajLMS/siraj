@@ -7,7 +7,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export interface ParentOnboardingInput {
   readonly name: string;

@@ -11,7 +11,7 @@ import { useUserStore } from "@/frontend/common/stores/userStore";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { ReportLedgerRow, ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import { formatReportPaidAmounts } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface ReportsDataGridLabels {
   readonly name: string;

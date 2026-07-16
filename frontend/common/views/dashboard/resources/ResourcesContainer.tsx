@@ -18,7 +18,7 @@ import { ResourcesView } from "@/frontend/common/views/dashboard/resources/resou
 import { buildResourcesLabels } from "@/frontend/common/views/dashboard/resources/utils/buildResourcesLabels";
 import { inferResourceFileType } from "@/frontend/common/views/dashboard/resources/utils/resourceFileTypeUtils";
 import { filterResources } from "@/frontend/common/views/dashboard/resources/utils/resourceFilters";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 import { extToMime, isAllowedMimeType, validateFileName } from "@/shared/utils/storage.utils";
 
 async function computeContentHash(file: File): Promise<string> {

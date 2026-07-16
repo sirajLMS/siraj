@@ -4,7 +4,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { PageInfo, PaginationArgs, TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace StaffDirectoryService {
   async function assertDirectoryAccess(userId: string, locale?: string): Promise<void> {

@@ -13,8 +13,7 @@ import { dedupedRefreshToken } from "@/frontend/common/lib/dedupedRefreshToken";
 import logger from "@/frontend/common/lib/logger";
 import { buildLoginHrefFromWindow, isSafeRedirect } from "@/frontend/common/lib/safeRedirect";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { AuthLoginLabels } from "@/shared/locale/types/auth";
+import { type AuthLoginLabels, useAppTranslation } from "@/shared/locale";
 
 // A simple UI for the initial loading state
 interface LoadingUIProps {

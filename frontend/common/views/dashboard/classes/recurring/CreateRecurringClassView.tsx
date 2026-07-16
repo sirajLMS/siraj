@@ -5,7 +5,7 @@ import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/c
 import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import { CreateRecurringClassViewDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/createRecurringClassView.desktop";
 import { CreateRecurringClassViewMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/createRecurringClassView.mobile";
-import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
+import type { CreateRecurringClassLabels } from "@/shared/locale";
 
 export interface CreateRecurringClassViewProps {
   readonly isSubmitting: boolean;

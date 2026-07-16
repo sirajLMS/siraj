@@ -3,7 +3,7 @@ import { AppPermission, ParentStatus } from "@/backend/enum";
 import { parseAccountStatus, parseParentStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { PaginationArgs, ParentDirectoryResult, ParentDirectoryRow } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export type {
   ParentDirectoryMetrics,

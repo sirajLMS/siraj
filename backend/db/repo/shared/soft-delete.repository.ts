@@ -14,7 +14,7 @@ import {
 } from "@/backend/db/schema";
 import { NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 const SOFT_DELETE_TABLES = {
   users: {

@@ -8,6 +8,7 @@ import { PendingReviewsHeroCard } from "@/frontend/common/views/dashboard/superv
 import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashboard/supervisor/dashboard/useSupervisorDashboardViewModel";
 
 export function SupervisorDashboardDesktopView({
+  userName,
   pendingReviewCount,
   pendingDuesSummary,
   monthlySnapshot,
@@ -20,7 +21,7 @@ export function SupervisorDashboardDesktopView({
 }: Readonly<SupervisorDashboardViewModel>) {
   return (
     <PageContainer>
-      <PageHeader title={labels.pageTitle} subtitle={labels.welcomeMessage} />
+      <PageHeader title={labels.pageTitle} subtitle={labels.welcomeMessage(userName ?? "")} />
 
       {loading ? (
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>

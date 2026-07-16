@@ -43,7 +43,7 @@ import {
 import { deriveParentInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/common/views/dashboard/components/FxConversionNote";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,

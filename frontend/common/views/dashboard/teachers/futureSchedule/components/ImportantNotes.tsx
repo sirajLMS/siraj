@@ -4,7 +4,7 @@ import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { ImportantNotesProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function ImportantNotes({ notes }: Readonly<ImportantNotesProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;

@@ -6,7 +6,7 @@ import type {
   ParentDashboardMetricsReturnType,
   ParentDashboardSchedulePaginatedResult,
 } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace ParentDashboardService {
   export async function getSchedule(

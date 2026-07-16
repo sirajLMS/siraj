@@ -6,7 +6,7 @@ import type {
   AdminComplaintsSummary,
   ComplaintTab,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ComplaintsAdminLabels } from "@/shared/locale";
 
 export interface AdminComplaintsViewModel {
   readonly labels: ComplaintsAdminLabels;

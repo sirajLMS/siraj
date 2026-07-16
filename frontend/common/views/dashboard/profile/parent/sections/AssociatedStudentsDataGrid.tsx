@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssociatedStudentRow } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type AssociatedStudentsDataGridProps = {
   readonly rows: readonly AssociatedStudentRow[];

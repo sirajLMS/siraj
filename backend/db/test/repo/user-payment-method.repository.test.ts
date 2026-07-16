@@ -3,8 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { UserPaymentMethodRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 let tErrors: ErrorsLabels;

@@ -2,7 +2,7 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, FormControl, InputAdornment, MenuItem, Select, TextField } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface CategoryChipProps {
   label: string;

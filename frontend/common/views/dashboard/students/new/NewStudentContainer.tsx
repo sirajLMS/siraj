@@ -6,7 +6,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useEffect } from "react";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { useRouter } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function NewStudentContainer() {
   const t = useAppTranslation().dashboardTranslations.studentDirectory;

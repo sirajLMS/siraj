@@ -10,8 +10,7 @@ import {
   AssignedStudentsDataGrid,
   type AssignedStudentsRow,
 } from "@/frontend/common/views/dashboard/profile/teacher/students/AssignedStudentsDataGrid";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ProfileStudentsLabels } from "@/shared/locale/types/profile";
+import { type ProfileStudentsLabels, useAppTranslation } from "@/shared/locale";
 
 type AssignedStudentsResult = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>["assignedStudents"];
 type AssignedStudentsItem = NonNullable<NonNullable<AssignedStudentsResult>["rows"]>[number];

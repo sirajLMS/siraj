@@ -5,7 +5,7 @@ import { alpha, Box, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { UpdatedSessionsDataGrid } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdatedSessionsDataGrid";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];

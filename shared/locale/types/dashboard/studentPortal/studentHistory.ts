@@ -1,4 +1,4 @@
-export interface StudentHistoryLabels {
+export interface StudentPortalHistoryLabels {
   readonly pageTitle: string;
   readonly lessonHistory: string;
   readonly sessionDate: string;

@@ -3,7 +3,7 @@ import type {
   ParentBillingSummary,
   ParentInvoiceRow,
 } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
-import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
+import type { BillingLabels } from "@/shared/locale";
 import type { AdminInvoiceStatus, CoreInvoiceStatus, StudentCreditStatus } from "@/shared/types/billing-view";
 
 export type { AdminInvoiceStatus, CoreInvoiceStatus, StudentCreditStatus };

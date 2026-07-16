@@ -6,7 +6,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import Image from "next/image";
 import type * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 const DEFAULT_MAX_SIZE_MB = 2;

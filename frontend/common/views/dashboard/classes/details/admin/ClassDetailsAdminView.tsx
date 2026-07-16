@@ -16,7 +16,7 @@ import { classDetailsSectionStackSx } from "@/frontend/common/views/dashboard/cl
 import { ClassDetailsToolbarArea } from "@/frontend/common/views/dashboard/classes/details/components/ClassDetailsToolbarArea";
 import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
 import { RecurringSeriesMeetingPanel } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/RecurringSeriesMeetingPanel";
-import type { AdminViewLabels } from "@/shared/messages/types/message";
+import type { AdminViewLabels } from "@/shared/locale";
 
 export interface ClassDetailsAdminViewProps {
   readonly instance: ClassInstanceDetail;

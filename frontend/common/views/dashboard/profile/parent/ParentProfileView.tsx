@@ -17,7 +17,7 @@ import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/
 import { MeetingSummarySection } from "@/frontend/common/views/dashboard/profile/shared/MeetingSummarySection";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 function hasParentSocialData(parentData: ParentViewData): boolean {
   return Boolean(parentData.facebook?.trim() || parentData.whatsapp?.trim() || parentData.twitter?.trim());

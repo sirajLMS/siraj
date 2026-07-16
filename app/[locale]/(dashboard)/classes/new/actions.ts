@@ -7,7 +7,7 @@ import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { logger } from "@/frontend/common/utils/logger";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import { mapFormDataToServiceInput } from "@/frontend/common/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 export async function createRecurringClass(
   data: RecurringClassFormData,

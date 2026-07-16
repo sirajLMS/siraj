@@ -1,4 +1,4 @@
-import type { SupervisorMonthlyReportsLabels } from "@/shared/messages/types/dashboard/supervisorPortal/monthlyReports";
+import type { SupervisorMonthlyReportsLabels } from "@/shared/locale";
 
 export interface TeacherMonthlyReportData {
   readonly teacherId: string;

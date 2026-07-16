@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionCatalogCardListProps {
   readonly permissions: readonly Permission[];

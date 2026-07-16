@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { BILLING_MONTH_IDS } from "@/frontend/common/views/dashboard/billing/manual/constants/billingMonths";
-import type { BillingManualValidationLabels } from "@/shared/messages/types/dashboard/billing/manual";
+import type { BillingManualValidationLabels } from "@/shared/locale";
 
 export const manualInvoiceSchema = (labels: BillingManualValidationLabels) =>
   z

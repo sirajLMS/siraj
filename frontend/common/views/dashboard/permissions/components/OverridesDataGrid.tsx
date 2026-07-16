@@ -8,7 +8,7 @@ import { AppDataGrid, GridPagination } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { OverrideEditControls } from "@/frontend/common/views/dashboard/permissions/components/OverrideEditControls";
 import { OverrideEffectiveDisplay } from "@/frontend/common/views/dashboard/permissions/components/OverrideEffectiveDisplay";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export type OverrideState = "GRANTED" | "DENIED" | "INHERIT";
 

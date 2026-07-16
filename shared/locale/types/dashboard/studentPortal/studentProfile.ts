@@ -1,4 +1,4 @@
-export interface StudentProfileLabels {
+export interface StudentPortalProfileLabels {
   readonly pageTitle: string;
   readonly personalInfo: string;
   readonly fullName: string;

@@ -12,7 +12,7 @@ import {
   buildExchangeRateColumns,
   type ExchangeRateRow,
 } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
-import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates";
+import type { ExchangeRatesLabels } from "@/shared/locale";
 
 const HISTORY_DAY_OPTIONS = [7, 30, 90] as const;
 

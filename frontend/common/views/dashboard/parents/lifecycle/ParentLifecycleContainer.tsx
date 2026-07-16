@@ -12,7 +12,7 @@ import { parentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocu
 import { logger } from "@/frontend/common/utils/logger";
 import { ParentLifecycleView } from "@/frontend/common/views/dashboard/parents/lifecycle/ParentLifecycleView";
 import type { ParentLifecyclePageData } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function ParentLifecycleContainer() {
   const t = useAppTranslation().dashboardTranslations.parentLifecycle;

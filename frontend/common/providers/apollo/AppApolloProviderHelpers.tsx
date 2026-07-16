@@ -2,7 +2,7 @@
 
 import { ErrorOutlined as ErrorIcon } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
-import type { CommonLabels } from "@/shared/locale/types/common";
+import type { CommonLabels } from "@/shared/locale";
 
 // Loading UI shown during initial connectivity check
 interface InitializingUIProps {

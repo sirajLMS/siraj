@@ -9,8 +9,8 @@ import { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ScheduleDeletionService } from "@/backend/services/schedule/schedule-deletion.service";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 let tErrors: ErrorsLabels;
