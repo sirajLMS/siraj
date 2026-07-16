@@ -27,6 +27,7 @@ import { useUserStore } from "@/frontend/common/stores/userStore";
 import { PaymentMethodDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodDeleteDialog";
 import { PaymentMethodFormDialog } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodFormDialog";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { PaymentMethodLabels, PaymentMethodManagerLabels } from "@/shared/locale/types/ui";
 
 export type PaymentMethodsSlot = "payin" | "payout";
 
@@ -121,9 +122,6 @@ function PaymentMethodFormDialogWrapped({
     />
   );
 }
-
-type PaymentMethodManagerLabels = ReturnType<typeof useAppTranslation>["uiTranslations"]["paymentMethodManager"];
-type PaymentMethodLabels = ReturnType<typeof useAppTranslation>["uiTranslations"]["paymentMethod"];
 
 type PaymentMethodsManagerData = {
   readonly userPaymentMethods?: readonly UserPaymentMethodFieldsFragment[] | null;

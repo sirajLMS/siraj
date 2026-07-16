@@ -9,9 +9,7 @@ import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 import type { StudentProfileLabels } from "@/shared/locale/types/dashboard/studentPortal/studentProfile";
 
-function useStudentProfileLabels(
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentPortalProfile"]
-): StudentProfileLabels {
+function useStudentProfileLabels(t: StudentProfileLabels): StudentProfileLabels {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,

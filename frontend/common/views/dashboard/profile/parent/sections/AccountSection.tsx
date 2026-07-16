@@ -15,6 +15,7 @@ import type {
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { ProfileParentLabels } from "@/shared/locale/types/profile";
 
 type ParentAccountFormFields = {
   name: string;
@@ -24,10 +25,7 @@ type ParentAccountFormFields = {
 
 type AccountParentData = Pick<ParentViewData, "name" | "email">;
 
-function resolveAccountStatusLabel(
-  accountStatus: string | null | undefined,
-  t: ReturnType<typeof useAppTranslation>["profileTranslations"]["parent"]
-): string {
+function resolveAccountStatusLabel(accountStatus: string | null | undefined, t: ProfileParentLabels): string {
   const normalized = (accountStatus ?? AccountStatus.Activated).toLowerCase();
   return t.accountStatus[normalized as "activated" | "deactivated"];
 }

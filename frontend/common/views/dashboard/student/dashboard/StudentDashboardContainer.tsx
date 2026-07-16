@@ -24,9 +24,7 @@ import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 import type { StudentDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard";
 
-function useStudentDashboardLabels(
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentPortalDashboard"]
-): StudentDashboardLabels {
+function useStudentDashboardLabels(t: StudentDashboardLabels): StudentDashboardLabels {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,

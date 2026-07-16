@@ -83,7 +83,6 @@ mock.module("@/backend/services", () => ({
 }));
 
 mock.module("@/backend/lib", () => ({
-  getBackendTranslations: mock(async () => (key: string) => key),
   logger: {
     log: () => {},
     info: () => {},
@@ -91,6 +90,17 @@ mock.module("@/backend/lib", () => ({
     error: () => {},
     debug: () => {},
   },
+}));
+
+// Service now calls getServerTranslations(locale).errorsTranslations (real import).
+// Mock returns the required literal strings so the assertion expectations match.
+// fxSyncAlreadyRunning is preserved as a raw literal — no schema counterpart.
+mock.module("@/shared/locale/server-graphql", () => ({
+  getServerTranslations: () => ({
+    errorsTranslations: {
+      insufficientPermissions: "insufficientPermissions",
+    },
+  }),
 }));
 
 // Provider mock — population-driven via beforeEach overrides.

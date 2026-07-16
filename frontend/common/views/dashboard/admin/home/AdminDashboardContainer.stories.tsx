@@ -14,7 +14,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 import { MOCK_SCHEDULE, MOCK_TEACHERS } from "@/test/ui/components/fixtures/adminDashboardFixtures";
 
 export function MockAdminDashboardContainer() {
-  const t = useAppTranslation("dashboard.admin");
+  const t = useAppTranslation().dashboardTranslations.admin;
   const { headers, statusLabels } = useAdminDashboardLabels();
 
   const lastUpdatedKey = useDashboardStore(state => state.lastUpdated);

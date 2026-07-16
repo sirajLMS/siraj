@@ -20,7 +20,6 @@ mock.module("@/backend/services", () => ({
 }));
 
 mock.module("@/backend/lib", () => ({
-  getBackendTranslations: mock(async () => (key: string) => key),
   logger: {
     log: () => {},
     info: () => {},
@@ -29,6 +28,10 @@ mock.module("@/backend/lib", () => ({
     debug: () => {},
   },
 }));
+
+// Service now calls getServerTranslations(locale).errorsTranslations (real import).
+// fxRefreshRateLimitExceeded is preserved as a raw literal — no schema counterpart.
+// (No mock needed here: fx-rate-limit.service does not call getServerTranslations.)
 
 // ---------------------------------------------------------------------------
 // SUT import (deferred so mocks are registered first)

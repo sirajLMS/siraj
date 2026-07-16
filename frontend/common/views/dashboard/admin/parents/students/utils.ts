@@ -22,7 +22,6 @@ import {
   STUDENT_STATUS_TO_ACCOUNT_STATUS,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
-import type { useAppTranslation } from "@/shared/locale/client";
 import type { StudentDirectoryLabels } from "@/shared/locale/types/dashboard/students/directory";
 
 const MOBILE_METRIC_ICONS = {
@@ -98,11 +97,9 @@ export function buildStatusCounts(rows: StudentDirectoryRowExtended[]): Record<S
   return res;
 }
 
-type StudentDirectoryTranslator = ReturnType<typeof useAppTranslation<"dashboard.studentDirectory">>;
-
 type StudentMetricKey = keyof StudentDirectoryLabels["metrics"];
 
-function toMetricItem(key: string, count: number, icon: SvgIconComponent, t: StudentDirectoryTranslator): MetricItem {
+function toMetricItem(key: string, count: number, icon: SvgIconComponent, t: StudentDirectoryLabels): MetricItem {
   const metricKey = getMetricTranslationKey(key) as StudentMetricKey;
   return {
     key,
@@ -116,19 +113,19 @@ function toMetricItem(key: string, count: number, icon: SvgIconComponent, t: Stu
 
 export function buildViewMetrics(
   counts: Record<StudentAccountStatus, number>,
-  t: StudentDirectoryTranslator
+  t: StudentDirectoryLabels
 ): MetricItem[] {
   return METRIC_DEFINITIONS.map(({ key, icon }) => toMetricItem(key, counts[key], icon, t));
 }
 
 export function buildMobileMetrics(
   counts: Record<StudentAccountStatus, number>,
-  t: StudentDirectoryTranslator
+  t: StudentDirectoryLabels
 ): MetricItem[] {
   return MOBILE_METRIC_KEYS.map(key => toMetricItem(key, counts[key], MOBILE_METRIC_ICONS[key], t));
 }
 
-export function buildLabels(t: StudentDirectoryTranslator): StudentsViewLabels {
+export function buildLabels(t: StudentDirectoryLabels): StudentsViewLabels {
   return {
     pageTitle: t.pageTitle,
     pageSubtitle: t.pageSubtitle,

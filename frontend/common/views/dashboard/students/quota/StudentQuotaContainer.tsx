@@ -21,6 +21,7 @@ import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/stu
 import type { StudentProfileData } from "@/frontend/common/views/dashboard/students/quota/types";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { CommonLabels } from "@/shared/locale/types/common";
 
 function resolveGenderLabel(raw: string | null | undefined): "MALE" | "FEMALE" | null {
   if (raw == null) {
@@ -75,7 +76,7 @@ function buildStudentQuotaData(
         avatarUrl?: string | null;
       }
     | undefined,
-  tc: ReturnType<typeof useAppTranslation>["commonTranslations"]
+  tc: CommonLabels
 ): StudentProfileData | null {
   const s = useUnifiedProfile ? profile : studentById;
   if (!s || typeof s.id !== "string" || s.id.length === 0) return null;

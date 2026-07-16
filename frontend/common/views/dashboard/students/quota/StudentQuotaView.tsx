@@ -69,9 +69,7 @@ function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Read
   );
 }
 
-function DesktopBreadcrumbs(
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentQuota"]
-): readonly PageHeaderBreadcrumb[] {
+function DesktopBreadcrumbs(t: StudentQuotaLabels): readonly PageHeaderBreadcrumb[] {
   return [
     { label: t.breadcrumbs.students, href: "/students" },
     { label: t.breadcrumbs.adjustQuota, current: true },

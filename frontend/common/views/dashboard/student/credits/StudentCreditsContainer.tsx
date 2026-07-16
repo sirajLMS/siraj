@@ -17,9 +17,7 @@ import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 import type { StudentCreditsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentCredits";
 
-function useStudentCreditsLabels(
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentPortalCredits"]
-): StudentCreditsLabels {
+function useStudentCreditsLabels(t: StudentCreditsLabels): StudentCreditsLabels {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,

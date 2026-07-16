@@ -32,7 +32,6 @@ import {
   parseParentStatus,
   parseStudentStatus,
 } from "@/backend/lib/enum";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type {
   PaginationArgs,
   ParentCreateResult,
@@ -47,6 +46,7 @@ import type {
   WorkshopPromoReturnType,
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace ParentRepository {
   export async function create(

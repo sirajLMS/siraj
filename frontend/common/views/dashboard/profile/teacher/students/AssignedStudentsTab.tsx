@@ -11,6 +11,7 @@ import {
   type AssignedStudentsRow,
 } from "@/frontend/common/views/dashboard/profile/teacher/students/AssignedStudentsDataGrid";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { ProfileStudentsLabels } from "@/shared/locale/types/profile";
 
 type AssignedStudentsResult = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>["assignedStudents"];
 type AssignedStudentsItem = NonNullable<NonNullable<AssignedStudentsResult>["rows"]>[number];
@@ -22,10 +23,7 @@ type AssignedStudentsTabProps = {
   readonly onRetry: () => void;
 };
 
-function toViewRow(
-  student: AssignedStudentsItem,
-  t: ReturnType<typeof useAppTranslation>["profileTranslations"]["base"]["students"]
-): AssignedStudentsRow {
+function toViewRow(student: AssignedStudentsItem, t: ProfileStudentsLabels): AssignedStudentsRow {
   const classesTotal = student.classesTotal ?? 0;
   const classesRemaining = student.classesRemaining ?? 0;
   const hoursPerWeek = student.hoursPerWeek ?? 0;

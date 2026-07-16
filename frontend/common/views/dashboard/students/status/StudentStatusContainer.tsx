@@ -24,6 +24,8 @@ import type {
   UpcomingClassDisplay,
 } from "@/frontend/common/views/dashboard/students/status/types";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { CommonLabels } from "@/shared/locale/types/common";
+import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
 
 type UpcomingClassInput = {
   readonly id?: string | null;
@@ -102,8 +104,8 @@ interface StudentStatusHookParams {
   readonly useUnifiedProfile: boolean;
   readonly profileContext: ReturnType<typeof useStudentProfileContext>;
   readonly notifications: ReturnType<typeof useNotifications>;
-  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentStatus"];
-  readonly tc: ReturnType<typeof useAppTranslation>["commonTranslations"];
+  readonly t: StudentStatusLabels;
+  readonly tc: CommonLabels;
 }
 
 interface StudentStatusHookResult {

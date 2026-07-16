@@ -12,7 +12,6 @@ import { db } from "@/backend/db/drizzleDb";
 import { localeJsonKey, omitEmptyLocalized, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import type { AppPermission } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type {
   CreateGroupInput,
   GroupUserEntity,
@@ -25,6 +24,7 @@ import type {
   UserOverrideInput,
 } from "@/backend/types";
 import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 function toPermissionReturn(row: PermissionSelectType, locale?: string): PermissionReturnType {
   return {

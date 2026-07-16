@@ -14,12 +14,13 @@ import logger from "@/frontend/common/lib/logger";
 import { buildLoginHrefFromWindow, isSafeRedirect } from "@/frontend/common/lib/safeRedirect";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { AuthLoginLabels } from "@/shared/locale/types/auth";
 
 // A simple UI for the initial loading state
 interface LoadingUIProps {
   readonly onRetry: () => void;
   readonly error?: string | null;
-  readonly t: ReturnType<typeof useAppTranslation>["authTranslations"]["login"];
+  readonly t: AuthLoginLabels;
 }
 
 function LoadingUI({ onRetry, error, t }: LoadingUIProps) {

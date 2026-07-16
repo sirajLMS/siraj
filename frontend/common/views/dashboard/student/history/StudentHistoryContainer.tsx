@@ -17,9 +17,7 @@ import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory";
 
-function useStudentHistoryLabels(
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentPortalHistory"]
-): StudentHistoryLabels {
+function useStudentHistoryLabels(t: StudentHistoryLabels): StudentHistoryLabels {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,

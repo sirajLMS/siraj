@@ -22,6 +22,7 @@ import {
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { StudentDirectoryLabels } from "@/shared/locale/types/dashboard/students/directory";
 
 const EMPTY_FILTER_ARGS: StudentFilterArgs = {
   birthDate: null,
@@ -88,7 +89,7 @@ export interface StudentsViewModel {
   readonly onViewHistory: (id: string) => void;
 }
 
-type StudentDirectoryTranslator = ReturnType<typeof useAppTranslation<"dashboard.studentDirectory">>;
+type StudentDirectoryTranslator = StudentDirectoryLabels;
 
 function useComputedFilterArgs(searchQuery: string, filterArgs: StudentFilterArgs | null): StudentFilterArgs | null {
   return useMemo<StudentFilterArgs | null>(() => {

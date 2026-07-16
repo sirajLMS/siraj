@@ -14,13 +14,14 @@ import type { ClassSession, StudentHistoryMetrics } from "@/frontend/common/view
 import { mapStatusToAttendance } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/students/history";
 
 type HistoryData = NonNullable<NonNullable<Operations.StudentClassHistoryQuery["studentClassHistory"]>>;
 
 function useErrorNotification(
   error: unknown,
   notifications: ReturnType<typeof useNotifications>,
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentHistory"]
+  t: StudentHistoryLabels
 ) {
   useEffect(() => {
     if (error) {
@@ -44,7 +45,7 @@ function computeMetrics(historyData: HistoryData["metrics"] | undefined): Studen
 
 function mapSessionsToClasses(
   sessions: HistoryData["sessions"] | undefined,
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentHistory"]
+  t: StudentHistoryLabels
 ): Record<number, ClassSession> {
   const result: Record<number, ClassSession> = {};
   if (sessions) {
