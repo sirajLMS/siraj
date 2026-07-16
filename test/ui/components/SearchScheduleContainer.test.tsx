@@ -2,10 +2,28 @@ import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-ty
 
 mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
+  useRouter: () => ({
+    push: () => {},
+    back: () => {},
+    forward: () => {},
+    refresh: () => {},
+    replace: () => {},
+    prefetch: () => {},
+  }),
+  usePathname: () => "/search-schedule",
+  useSearchParams: () => new URLSearchParams(),
+  redirect: () => {},
 }));
 
 mock.module("@/shared/i18n/routing", () => ({
-  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
+  useRouter: () => ({
+    push: mock(() => {}),
+    back: mock(() => {}),
+    forward: mock(() => {}),
+    refresh: mock(() => {}),
+    replace: mock(() => {}),
+    prefetch: mock(() => {}),
+  }),
   usePathname: () => "/search-schedule",
   Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
     <a href={href} {...props}>
@@ -13,6 +31,10 @@ mock.module("@/shared/i18n/routing", () => ({
     </a>
   ),
   redirect: () => {},
+}));
+
+mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+  useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 
 import { afterEach, describe, expect, mock, test } from "bun:test";
@@ -146,7 +168,7 @@ describe("SearchScheduleContainer", () => {
       permissions: [],
     });
 
-    expect(screen.queryByText("Schedule Availability Search")).toBeNull();
+    expect(screen.queryByText("Search Schedule Availability")).toBeNull();
   });
 
   test("renders page title and search form when permission granted", () => {
@@ -156,7 +178,7 @@ describe("SearchScheduleContainer", () => {
       mocks: createSearchMock(),
     });
 
-    expect(screen.getByText("Schedule Availability Search")).toBeVisible();
+    expect(screen.getByText("Search Schedule Availability")).toBeVisible();
     expect(screen.getByRole("button", { name: /search/i })).toBeVisible();
   });
 
@@ -191,7 +213,7 @@ describe("SearchScheduleContainer", () => {
       mocks: createSearchMock(mockEmptyResult),
     });
 
-    const noResults = await screen.findByText("No available time slots found for the selected criteria.");
+    const noResults = await screen.findByText("No available time slots found for the given criteria.");
     expect(noResults).toBeVisible();
   });
 
@@ -223,20 +245,19 @@ describe("SearchScheduleContainer", () => {
       mocks: createSearchMock(),
     });
 
-    expect(screen.getByLabelText("From")).toBeVisible();
-    expect(screen.getByLabelText("To")).toBeVisible();
+    expect(screen.getByLabelText("Date range")).toBeVisible();
+    expect(screen.getByLabelText("Time range")).toBeVisible();
     expect(screen.getByLabelText("Teacher name")).toBeVisible();
-    expect(screen.getByLabelText("Min available days")).toBeVisible();
-    expect(screen.getByLabelText("Sort by")).toBeVisible();
+    expect(screen.getByRole("button", { name: /search/i })).toBeVisible();
   });
 
-  test("form renders Gender dropdown with options", () => {
+  test("form renders filter drawer button", () => {
     renderWithWrapper(<SearchScheduleContainer />, {
       locale: "en",
       permissions: [AppPermission.ScheduleSearchAvailability],
       mocks: createSearchMock(),
     });
 
-    expect(screen.getByLabelText("Gender")).toBeVisible();
+    expect(screen.getByLabelText("Filters")).toBeVisible();
   });
 });

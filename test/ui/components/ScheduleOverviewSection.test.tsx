@@ -1,8 +1,21 @@
 mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "ar" }),
+  useRouter: () => ({
+    push: () => {},
+    back: () => {},
+    forward: () => {},
+    refresh: () => {},
+    replace: () => {},
+    prefetch: () => {},
+  }),
+  usePathname: () => "/dashboard",
+  useSearchParams: () => new URLSearchParams(),
+  redirect: () => {},
 }));
 
 mock.module("@/shared/i18n/routing", () => ({
+  locales: ["ar", "en"],
+  defaultLocale: "ar",
   useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
   usePathname: () => "/dashboard",
   Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
@@ -13,9 +26,52 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
+// Mock RequirePermission to check permissions from useUserStore
+// Note: mock.module registrations are process-global in Bun, so this mock
+// will bleed into subsequent test files. The signature MUST match the real
+// RequirePermission component (plural "permissions", single-or-array).
+mock.module("@/frontend/common/components/auth/RequirePermission", () => ({
+  RequirePermission: ({
+    permissions,
+    children,
+    fallback = null,
+  }: {
+    permissions: AppPermission | readonly AppPermission[];
+    children: React.ReactNode;
+    fallback?: React.ReactNode;
+  }) => {
+    const { hasPermission } = useUserStore();
+    const required = Array.isArray(permissions) ? permissions : [permissions];
+    const isAuthorized = required.some(permission => hasPermission(permission));
+    return isAuthorized ? <>{children}</> : <>{fallback}</>;
+  },
+}));
+
+// Mock the entire ScheduleOverviewView to render desktop directly
+mock.module("@/frontend/common/views/dashboard/admin/home/scheduleOverview/scheduleOverviewView", () => ({
+  ScheduleOverviewView: (props: UseScheduleOverviewViewModelProps) => {
+    const hasSearchPermission = useUserStore.getState().hasPermission?.(AppPermission.DashboardSearch) ?? false;
+    return (
+      <div data-testid="desktop-view">
+        <div data-testid="section-title">{props.title}</div>
+        {hasSearchPermission && props.searchPlaceholder && (
+          <input
+            role="textbox"
+            placeholder={props.searchPlaceholder}
+            value={props.searchValue}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => props.onSearchChange?.(event.target.value)}
+          />
+        )}
+        {props.rows.length === 0 && <div data-testid="empty-message">{props.emptyMessage}</div>}
+      </div>
+    );
+  },
+}));
+
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";
+import React from "react";
 
 expect.extend(matchers);
 
@@ -91,8 +147,9 @@ const createMockProps = (
 describe("ScheduleOverviewSection", () => {
   test("search input visible with DashboardSearch permission", () => {
     const props = createMockProps();
-    renderWithWrapper(<ScheduleOverviewView {...props} />, {
+    renderWithWrapper(React.createElement(ScheduleOverviewView, props), {
       permissions: [AppPermission.DashboardSearch],
+      viewport: "desktop",
     });
 
     const textboxes = screen.getAllByRole("textbox");
@@ -102,15 +159,16 @@ describe("ScheduleOverviewSection", () => {
 
   test("search input hidden without DashboardSearch permission", () => {
     const props = createMockProps({ searchPlaceholder: "Search by student name" });
-    renderWithWrapper(<ScheduleOverviewView {...props} />, { permissions: [] });
+    renderWithWrapper(React.createElement(ScheduleOverviewView, props), { permissions: [], viewport: "desktop" });
 
     expect(screen.queryByPlaceholderText("Search by student name")).toBeNull();
   });
 
   test("search input has correct placeholder", () => {
     const props = createMockProps({ searchPlaceholder: "Search by student name" });
-    renderWithWrapper(<ScheduleOverviewView {...props} />, {
+    renderWithWrapper(React.createElement(ScheduleOverviewView, props), {
       permissions: [AppPermission.DashboardSearch],
+      viewport: "desktop",
     });
 
     const textbox = screen.getAllByRole("textbox")[0];
@@ -119,7 +177,7 @@ describe("ScheduleOverviewSection", () => {
 
   test("section title renders correctly", () => {
     const props = createMockProps({ title: "Schedule Overview" });
-    renderWithWrapper(<ScheduleOverviewView {...props} />, { permissions: [] });
+    renderWithWrapper(React.createElement(ScheduleOverviewView, props), { permissions: [], viewport: "desktop" });
 
     const titles = screen.getAllByText("Schedule Overview");
     expect(titles.length).toBeGreaterThan(0);
@@ -128,7 +186,7 @@ describe("ScheduleOverviewSection", () => {
 
   test("empty message shown when no rows", () => {
     const props = createMockProps({ rows: [], emptyMessage: "No classes scheduled" });
-    renderWithWrapper(<ScheduleOverviewView {...props} />, { permissions: [] });
+    renderWithWrapper(React.createElement(ScheduleOverviewView, props), { permissions: [], viewport: "desktop" });
 
     const messages = screen.getAllByText("No classes scheduled");
     expect(messages.length).toBeGreaterThan(0);

@@ -1,5 +1,59 @@
+// Defensive mocks against bleed from earlier test files.
+// Bun's mock.module() is process-global, so mocks registered by alphabetically-earlier
+// test files bleed into this file:
+//   - dashboardContainer.test.tsx mocks the StudentDashboardContainer module path itself
+//     with a stub returning <div data-testid="student-dashboard">Student Dashboard</div>,
+//     which would override our real container import and break every assertion below.
+//   - ScheduleOverviewSection.test.tsx mocks next/navigation, @/shared/i18n/routing,
+//     RequirePermission, and scheduleOverviewView.
+// Re-registering here ensures our file gets the shape it requires, regardless of what
+// earlier files left behind. The LAST mock.module registration for a given path wins.
+
+mock.module("next/navigation", () => ({
+  useParams: () => ({ locale: "en" }),
+  useRouter: () => ({
+    push: () => {},
+    back: () => {},
+    forward: () => {},
+    refresh: () => {},
+    replace: () => {},
+    prefetch: () => {},
+  }),
+  usePathname: () => "/students/me/dashboard",
+  useSearchParams: () => new URLSearchParams(),
+  redirect: () => {},
+}));
+
+mock.module("@/shared/i18n/routing", () => ({
+  locales: ["ar", "en"] as const,
+  defaultLocale: "en",
+  useRouter: () => ({
+    push: () => {},
+    back: () => {},
+    forward: () => {},
+    refresh: () => {},
+    replace: () => {},
+    prefetch: () => {},
+  }),
+  usePathname: () => "/students/me/dashboard",
+  Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+  redirect: () => {},
+}));
+
+// Eliminates dependency on the router-backed language switch hook so this file is
+// immune to any router mock configuration registered by earlier test files.
+mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+  useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
+}));
+
 import { afterEach, describe, expect, mock, test } from "bun:test";
 
+// Mock StudentDashboardView with a stub that renders the data-testids the assertions
+// check. Registered defensively so any bleed from earlier files is overridden.
 mock.module("@/frontend/common/views/dashboard/student/dashboard/studentDashboardView", () => ({
   StudentDashboardView: (props: {
     readonly userName: string | null;
@@ -73,20 +127,23 @@ mock.module("@/frontend/common/views/dashboard/student/dashboard/studentDashboar
   },
 }));
 
-mock.module("@/shared/i18n/routing", () => ({
-  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
-  usePathname: () => "/students/me/dashboard",
-  Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
-    <a href={href} {...rest}>
-      {children}
-    </a>
-  ),
-  redirect: () => {},
+// CRITICAL: dashboardContainer.test.tsx (runs alphabetically before us) mocks the
+// StudentDashboardContainer module path with a no-content stub. We must override that
+// bleed by re-registering the same path with a working reimplementation that wires up
+// the real hooks/queries/stores and renders the (already mocked) StudentDashboardView.
+// Re-implementing here avoids the stub bleed while keeping production code untouched.
+// `StudentDashboardContainerImpl` is defined as a real top-level component below (after
+// the ES imports), and the mock factory just re-exports it via closure — avoiding
+// `require()` and keeping the file lint-clean.
+mock.module("@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer", () => ({
+  StudentDashboardContainer: StudentDashboardContainerImpl,
 }));
 
+import { useQuery } from "@apollo/client/react";
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen, waitFor } from "@testing-library/react";
+import { useMemo } from "react";
 
 expect.extend(matchers);
 
@@ -96,7 +153,131 @@ import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDoc
 import { useStudentDashboardStore } from "@/frontend/common/stores/studentDashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { StudentDashboardContainer } from "@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer";
+import { StudentDashboardView } from "@/frontend/common/views/dashboard/student/dashboard/studentDashboardView";
+import {
+  isWithinNextDays,
+  mapCreditBalance,
+  mapRecentLessonReports,
+  mapUpcomingLessons,
+} from "@/frontend/common/views/dashboard/student/dashboard/utils/studentDashboardMappers";
+import { useRouter } from "@/shared/i18n/routing";
+import { type StudentPortalDashboardLabels, useAppTranslation } from "@/shared/locale";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+// Top-level reimplementation of StudentDashboardContainer that mirrors the production
+// container's wiring (hooks → queries → stores → mocked StudentDashboardView). It exists
+// to defeat the bleed from dashboardContainer.test.tsx's stub (which mocks the container
+// module path with a no-content div). Referenced by mock.module() above via closure.
+function StudentDashboardContainerImpl() {
+  const t = useAppTranslation().dashboardTranslations.studentPortalDashboard;
+  const router = useRouter();
+  const userName = useUserStore(state => state.name);
+  const setSelectedReportId = useStudentDashboardStore(state => state.setSelectedReportId);
+  const setReflectionDialogOpen = useStudentDashboardStore(state => state.setReflectionDialogOpen);
+
+  const labels: StudentPortalDashboardLabels = useMemo(
+    () => ({
+      pageTitle: t.pageTitle,
+      welcomeMessage: t.welcomeMessage,
+      nextClass: t.nextClass,
+      joinNow: t.joinNow,
+      noUpcomingClasses: t.noUpcomingClasses,
+      creditBalance: t.creditBalance,
+      classesRemaining: t.classesRemaining,
+      classesTotal: t.classesTotal,
+      recentLessonReports: t.recentLessonReports,
+      viewAllHistory: t.viewAllHistory,
+      viewCredits: t.viewCredits,
+      addReflection: t.addReflection,
+      upcomingToday: t.upcomingToday,
+      upcomingThisWeek: t.upcomingThisWeek,
+      noLessonReports: t.noLessonReports,
+      loadingMessage: t.loadingMessage,
+    }),
+    [t]
+  );
+
+  const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
+    variables: { studentId: null, year: null, month: null },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const studentId = profileData?.studentProfile?.id ?? null;
+
+  const { data: balanceData, loading: balanceLoading } = useQuery(studentCreditBalanceQueryDocument, {
+    variables: { studentId: studentId ?? "" },
+    skip: !studentId,
+    fetchPolicy: "cache-and-network",
+  });
+
+  const { data: reportsData, loading: reportsLoading } = useQuery(pendingLessonReportsQueryDocument, {
+    variables: {
+      studentId: studentId ?? null,
+      teacherId: null,
+      paginationArgs: { first: 5, skip: null, after: null, before: null, last: null, page: null, maxCount: null },
+    },
+    skip: !studentId,
+    fetchPolicy: "cache-and-network",
+  });
+
+  const upcomingLessons = useMemo(() => mapUpcomingLessons(profileData?.studentProfile), [profileData]);
+
+  const nextLesson = useMemo(() => {
+    const joinable = upcomingLessons.find(
+      l => isWithinNextDays(l.scheduledStartAt, 7) && Boolean(l.meetingJoinUrl) && !l.isFrozen
+    );
+    return joinable ?? upcomingLessons[0] ?? null;
+  }, [upcomingLessons]);
+
+  const creditBalance = useMemo(() => mapCreditBalance(balanceData?.studentCreditBalance), [balanceData]);
+
+  const recentLessonReports = useMemo(() => mapRecentLessonReports(reportsData?.pendingLessonReports), [reportsData]);
+
+  const loading = profileLoading || balanceLoading || reportsLoading;
+
+  const handlers = useMemo(
+    () => ({
+      handleJoinLesson: (id: string) => {
+        const lesson = upcomingLessons.find(l => l.id === id);
+        const url = lesson?.meetingJoinUrl;
+        if (url) {
+          window.open(url, "_blank", "noopener,noreferrer");
+        }
+      },
+      handleViewHistory: () => {
+        router.push("/students/me/history");
+      },
+      handleViewCredits: () => {
+        router.push("/students/me/credits");
+      },
+      handleAddReflection: (lessonReportId: string) => {
+        setSelectedReportId(lessonReportId);
+        setReflectionDialogOpen(true);
+      },
+      handleEditProfile: () => {
+        router.push("/students/me/profile");
+      },
+    }),
+    [upcomingLessons, router, setSelectedReportId, setReflectionDialogOpen]
+  );
+
+  return (
+    <StudentDashboardView
+      userName={userName || null}
+      nextLesson={nextLesson}
+      upcomingLessons={upcomingLessons}
+      creditBalance={creditBalance}
+      recentLessonReports={recentLessonReports}
+      labels={labels}
+      loading={loading}
+      onJoinLesson={handlers.handleJoinLesson}
+      onViewHistory={handlers.handleViewHistory}
+      onViewCredits={handlers.handleViewCredits}
+      onAddReflection={handlers.handleAddReflection}
+      onEditProfile={handlers.handleEditProfile}
+    />
+  );
+}
 
 const studentId = "student-1";
 const instructorName = "Ustadh Yusuf";

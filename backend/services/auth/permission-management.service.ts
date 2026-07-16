@@ -223,16 +223,24 @@ export namespace PermissionManagementService {
       slug = validated.slug;
     }
 
-    return PermissionManagementRepository.updateGroup({
-      id: input.groupId,
-      name: input.name,
-      slug,
-      description: trimLocalizedString(input.description),
-      permissionIds: input.permissionIds,
-    }, locale);
+    return PermissionManagementRepository.updateGroup(
+      {
+        id: input.groupId,
+        name: input.name,
+        slug,
+        description: trimLocalizedString(input.description),
+        permissionIds: input.permissionIds,
+      },
+      locale
+    );
   }
 
-  export async function deleteGroup(actorUserId: string, groupId: string, tErrors: ErrorsLabels, locale?: string): Promise<void> {
+  export async function deleteGroup(
+    actorUserId: string,
+    groupId: string,
+    tErrors: ErrorsLabels,
+    locale?: string
+  ): Promise<void> {
     await requireManageAccess(actorUserId, tErrors);
     await PermissionManagementRepository.deleteGroup(groupId, locale);
   }

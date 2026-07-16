@@ -18,7 +18,7 @@ mock.module("@/shared/i18n/routing", () => ({
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
@@ -134,14 +134,12 @@ describe("PendingReviewsContainer", () => {
       mocks: createMocks(),
     });
 
-    await waitFor(() => {
-      expect(screen.getByText("Pending Lesson Reviews")).toBeVisible();
-    });
+    await screen.findByText("Pending Lesson Reviews");
 
-    expect(screen.getByText("student-1")).toBeVisible();
-    expect(screen.getByText("teacher-1")).toBeVisible();
-    expect(screen.getByText("student-2")).toBeVisible();
-    expect(screen.getByText("teacher-2")).toBeVisible();
+    expect(await screen.findByText("student-1")).toBeVisible();
+    expect(await screen.findByText("teacher-1")).toBeVisible();
+    expect(await screen.findByText("student-2")).toBeVisible();
+    expect(await screen.findByText("teacher-2")).toBeVisible();
   });
 
   test("renders an approve button for each pending review row", async () => {

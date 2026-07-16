@@ -137,8 +137,11 @@ describe("ScheduleOverviewDataGrid", () => {
   test("renders student and teacher names as profile links", () => {
     renderScheduleDataGrid([]);
 
-    expect(screen.getByRole("link", { name: "Ahmed Hassan" })).toHaveAttribute("href", "/ar/students/student-1");
-    expect(screen.getByRole("link", { name: "Dr. Sarah" })).toHaveAttribute("href", "/ar/teachers/teacher-1/profile");
+    expect(screen.getByRole("link", { name: "AH Ahmed Hassan" })).toHaveAttribute(
+      "href",
+      "/students/student-1/profile?tab=status"
+    );
+    expect(screen.getByRole("link", { name: "DS Dr. Sarah" })).toHaveAttribute("href", "/teachers/teacher-1/profile");
   });
 
   test("renders history and details action links", () => {
@@ -146,9 +149,9 @@ describe("ScheduleOverviewDataGrid", () => {
 
     expect(screen.getAllByRole("link", { name: "History" })[0]).toHaveAttribute(
       "href",
-      "/ar/students/student-1/history"
+      "/students/student-1/profile?tab=history"
     );
-    expect(screen.getAllByRole("link", { name: "View Details" })[0]).toHaveAttribute("href", "/ar/classes/row-1");
+    expect(screen.getAllByRole("link", { name: "View Details" })[0]).toHaveAttribute("href", "/classes/row-1");
   });
 
   test("renders empty message when no rows", () => {

@@ -29,9 +29,9 @@ describe("teacher sidebar navigation", () => {
     expect(keys).toContain("today-classes");
     expect(keys).toContain("regular-schedule");
     expect(keys).toContain("your-students");
-    expect(keys).toContain("resources");
-    expect(keys).toContain("teacher-salary");
+    expect(keys).toContain("teacher-profile");
     expect(keys).toContain("teacher-rules");
+    expect(keys).toContain("resources");
     expect(keys).toContain("logout");
     expect(keys).not.toContain("home");
     expect(keys).not.toContain("books-and-bags");

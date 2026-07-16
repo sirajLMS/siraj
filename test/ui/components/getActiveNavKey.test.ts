@@ -40,14 +40,14 @@ describe("getActiveNavKey", () => {
     expect(getActiveNavKey("/students", items)).toBe("your-students");
   });
 
-  test("highlights regular-schedule on /teachers/me/schedule/future", () => {
+  test("highlights regular-schedule on /schedule", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, TEACHER_PERMISSIONS);
-    expect(getActiveNavKey("/teachers/me/schedule/future", items)).toBe("regular-schedule");
+    expect(getActiveNavKey("/schedule", items)).toBe("regular-schedule");
   });
 
-  test("highlights regular-schedule on /teachers/me/schedule/weekly", () => {
+  test("highlights regular-schedule on /schedule/weekly", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, TEACHER_PERMISSIONS);
-    expect(getActiveNavKey("/teachers/me/schedule/weekly", items)).toBe("regular-schedule");
+    expect(getActiveNavKey("/schedule/weekly", items)).toBe("regular-schedule");
   });
 
   test("prefers longest matching href when multiple items match", () => {

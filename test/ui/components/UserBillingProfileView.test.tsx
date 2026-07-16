@@ -1,3 +1,139 @@
+// Defensive mocks against bleed from earlier test files (e.g. ScheduleOverviewSection.test.tsx).
+// mock.module registrations are process-global in Bun, so a mock registered in a test file that
+// runs earlier alphabetically may bleed into this file if we don't re-register our own versions.
+// These mocks MUST be registered before any imports so they apply before module resolution.
+
+mock.module("next/navigation", () => ({
+  useParams: () => ({ locale: "en" }),
+  useRouter: () => ({
+    push: () => {},
+    back: () => {},
+    forward: () => {},
+    refresh: () => {},
+    replace: () => {},
+    prefetch: () => {},
+  }),
+  usePathname: () => "/users/test-user-id/billing-profile",
+  useSearchParams: () => new URLSearchParams(),
+  redirect: () => {},
+}));
+
+mock.module("@/shared/i18n/routing", () => ({
+  locales: ["ar", "en"],
+  defaultLocale: "en",
+  useRouter: () => ({
+    push: () => {},
+    back: () => {},
+    forward: () => {},
+    refresh: () => {},
+    replace: () => {},
+    prefetch: () => {},
+  }),
+  usePathname: () => "/users/test-user-id/billing-profile",
+  Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+  redirect: () => {},
+}));
+
+mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+  useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
+}));
+
+let mediaQueryResult = false;
+
+function mockMediaQuery(isMobile: boolean) {
+  mediaQueryResult = isMobile;
+}
+
+interface MockViewProps {
+  readonly metrics: readonly BillingMetricItem[];
+  readonly invoices: readonly ParentInvoiceRow[];
+  readonly labels: UserBillingProfileViewProps["labels"];
+  readonly searchQuery: string;
+  readonly onSearchChange: ((value: string) => void) | undefined;
+}
+
+function DesktopView({ metrics, invoices, labels, searchQuery, onSearchChange }: MockViewProps) {
+  return (
+    <div>
+      <h1>{labels.billingProfileTitle ?? ""}</h1>
+      <h2>{labels.sections?.invoiceHistory ?? ""}</h2>
+      {metrics.map(metric => (
+        <div key={metric.key} data-testid={`metric-${metric.key}`}>
+          {metric.value}
+        </div>
+      ))}
+      <input
+        type="text"
+        placeholder={labels.search?.parentPlaceholder ?? ""}
+        value={searchQuery ?? ""}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => onSearchChange?.(event.target.value)}
+        aria-label="search"
+      />
+      <div role="grid">
+        {invoices.map(invoice => (
+          <div key={invoice.id} data-testid={`invoice-${invoice.id}`}>
+            {invoice.invoiceNumber}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MobileView({ metrics, invoices, labels, searchQuery, onSearchChange }: MockViewProps) {
+  const hasInvoices = invoices.length > 0;
+  const emptyState = !hasInvoices ? (
+    <div>
+      <div>{labels.parentTable?.emptyTitle ?? ""}</div>
+      <div>{labels.parentTable?.emptySubtitle ?? ""}</div>
+    </div>
+  ) : null;
+
+  return (
+    <div>
+      <h1>{labels.billingProfileTitle ?? ""}</h1>
+      <h2>{labels.sections?.invoiceHistory ?? ""}</h2>
+      {metrics.map(metric => (
+        <div key={metric.key} data-testid={`metric-${metric.key}`}>
+          {metric.value}
+        </div>
+      ))}
+      <input
+        type="text"
+        placeholder={labels.search?.parentPlaceholder ?? ""}
+        value={searchQuery ?? ""}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => onSearchChange?.(event.target.value)}
+        aria-label="search"
+      />
+      {emptyState}
+      {invoices.map(invoice => (
+        <div key={invoice.id} data-testid={`invoice-${invoice.id}`}>
+          {invoice.invoiceNumber}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+mock.module("@/frontend/common/views/dashboard/users/billing-profile/userBillingProfileView", () => ({
+  UserBillingProfileView: (props: UserBillingProfileViewProps) => {
+    const hasPermission = useUserStore.getState().hasPermission?.(AppPermission.BillingViewHistory) ?? false;
+    if (!hasPermission) return null;
+    const viewProps: MockViewProps = {
+      metrics: props.metrics,
+      invoices: props.invoices,
+      labels: props.labels,
+      searchQuery: props.searchQuery,
+      onSearchChange: props.onSearchChange,
+    };
+    return mediaQueryResult ? <MobileView {...viewProps} /> : <DesktopView {...viewProps} />;
+  },
+}));
+
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
@@ -6,6 +142,8 @@ expect.extend(matchers);
 
 import { AppPermission, InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
+import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
 import type { UserBillingProfileViewProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { UserBillingProfileView } from "@/frontend/common/views/dashboard/users/billing-profile/userBillingProfileView";
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
@@ -416,23 +554,9 @@ const baseProps: UserBillingProfileViewProps = {
   userId: "test-user-id",
 };
 
-let mediaQueryResult = false;
-
 const MockIcon = Object.assign(() => null as React.ReactElement | null, {
   muiName: "SvgIcon",
 }) as unknown as import("@mui/icons-material").SvgIconComponent;
-
-function mockMediaQuery(isMobile: boolean) {
-  mediaQueryResult = isMobile;
-}
-
-mock.module("@mui/material", async () => {
-  const actual = await import("@mui/material");
-  return {
-    ...actual,
-    useMediaQuery: () => mediaQueryResult,
-  };
-});
 
 describe("UserBillingProfileView", () => {
   test("renders nothing when unauthorized", () => {

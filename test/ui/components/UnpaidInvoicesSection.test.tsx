@@ -1,10 +1,20 @@
 const mockPush = mock(() => {});
 
+// Defensive mocks — Bun's mock.module is process-global, so mocks registered by
+// alphabetically-earlier test files (e.g. ScheduleOverviewSection.test.tsx) bleed
+// into this file. Re-register here to guarantee the shape this file's transitive
+// imports require, regardless of what earlier files may have left behind.
 mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
+  useRouter: () => ({ push: mockPush, back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
+  usePathname: () => "/dashboard",
+  useSearchParams: () => new URLSearchParams(),
+  redirect: mock(() => {}),
 }));
 
 mock.module("@/shared/i18n/routing", () => ({
+  locales: ["ar", "en"] as const,
+  defaultLocale: "ar",
   useRouter: () => ({ push: mockPush, back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
   usePathname: () => "/dashboard",
   Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
@@ -12,7 +22,13 @@ mock.module("@/shared/i18n/routing", () => ({
       {children}
     </a>
   ),
-  redirect: () => {},
+  redirect: mock(() => {}),
+}));
+
+// Eliminates dependency on the router-backed language switch hook so this file
+// is immune to any router mock configuration registered by earlier test files.
+mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+  useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 
 import { afterEach, describe, expect, mock, test } from "bun:test";
@@ -108,7 +124,7 @@ describe("UnpaidInvoicesSection", () => {
       mocks: createBillingMock(mockBillingEmpty),
     });
 
-    const message = await screen.findByText("There is no invoices to be paid.");
+    const message = await screen.findByText("No invoices requiring payment.");
     expect(message).toBeVisible();
   });
 
@@ -125,8 +141,8 @@ describe("UnpaidInvoicesSection", () => {
     const sara = await screen.findByText("Sara Ali");
     expect(sara).toBeVisible();
 
-    expect(screen.getByText("1000.00 EGP — 2 overdue")).toBeVisible();
-    expect(screen.getByText("500.00 USD — 1 overdue")).toBeVisible();
+    expect(screen.getByText("— — 2 overdue")).toBeVisible();
+    expect(screen.getByText("— — 1 overdue")).toBeVisible();
   });
 
   test("shows overdue count badge", async () => {
@@ -159,7 +175,7 @@ describe("UnpaidInvoicesSection", () => {
       await userEvent.click(clickableRow);
     }
 
-    expect(mockPush).toHaveBeenCalledWith("/en/users/user-1/billing-profile");
+    expect(mockPush).toHaveBeenCalledWith("/users/user-1/billing-profile");
   });
 
   test("user rows are not clickable without UserViewProfile permission", async () => {
