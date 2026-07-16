@@ -24,7 +24,7 @@ export default async function TeacherMeWeeklySchedulePage({ params }: PageProps)
 
   const { userId, context } = await getServerUserContext();
   if (!userId) {
-    await redirectToLogin(locale);
+    await redirectToLogin();
     return;
   }
 

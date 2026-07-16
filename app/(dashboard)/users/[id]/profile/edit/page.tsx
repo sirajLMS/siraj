@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
-import {
-  toGqlProfileAudience,
-  toGqlProfileMode,
-  toGqlProfileScope,
-} from "@/app/[locale]/(dashboard)/lib/profile-enum-bridge";
+import { toGqlProfileAudience, toGqlProfileMode, toGqlProfileScope } from "@/app/(dashboard)/lib/profile-enum-bridge";
 import { ProfileMode } from "@/backend/enum";
 import { resolveProfilePageContext } from "@/backend/lib/auth/cached-profile";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
@@ -37,7 +33,7 @@ export default async function UserProfileEditPage({ params }: PageProps) {
 
   const { userId, context } = await getServerUserContext();
   if (!userId) {
-    await redirectToLogin(locale);
+    await redirectToLogin();
     return;
   }
 

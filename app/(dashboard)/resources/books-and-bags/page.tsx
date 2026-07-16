@@ -30,7 +30,7 @@ export default async function BooksAndBagsPage({ params }: BooksAndBagsPageProps
   const { userId } = await getServerUserContext();
 
   if (!userId) {
-    await redirectToLogin(locale);
+    await redirectToLogin();
     return;
   }
 

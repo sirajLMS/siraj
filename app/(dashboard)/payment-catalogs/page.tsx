@@ -19,12 +19,12 @@ export default async function PaymentCatalogsPage({
 }: {
   readonly params: Promise<{ readonly locale: string }>;
 }) {
-  const { locale } = await params;
+  const { locale: _locale } = await params;
 
   const { userId } = await getServerUserContext();
 
   if (!userId) {
-    await redirectToLogin(locale);
+    await redirectToLogin();
     return;
   }
 

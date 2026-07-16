@@ -22,7 +22,7 @@ export default async function ComplaintsPage({ params }: { readonly params: Prom
   const { locale } = await params;
 
   if (!userId) {
-    await redirectToLogin(locale);
+    await redirectToLogin();
     return;
   }
 

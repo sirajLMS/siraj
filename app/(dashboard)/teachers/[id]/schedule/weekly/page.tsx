@@ -27,12 +27,12 @@ export async function generateMetadata({
 }
 
 export default async function TeacherWeeklySchedulePage({ params }: PageProps) {
-  const { id, locale } = await params;
+  const { id, locale: _locale } = await params;
 
   const { userId } = await getServerUserContext();
 
   if (!userId) {
-    await redirectToLogin(locale);
+    await redirectToLogin();
     return;
   }
 

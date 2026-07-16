@@ -12,7 +12,7 @@ export default async function ParentProfileEditRedirectPage({ params }: PageProp
 
   const { userId } = await getServerUserContext();
   if (!userId) {
-    await redirectToLogin(locale);
+    await redirectToLogin();
     return;
   }
 

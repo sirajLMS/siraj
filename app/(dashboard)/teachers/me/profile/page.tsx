@@ -11,7 +11,7 @@ export default async function TeacherMeProfileRedirectPage({ params }: PageProps
 
   const { userId } = await getServerUserContext();
   if (!userId) {
-    await redirectToLogin(locale);
+    await redirectToLogin();
     return;
   }
 

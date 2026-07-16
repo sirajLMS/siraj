@@ -19,11 +19,11 @@ interface PageProps {
 }
 
 export default async function ParentRulesPage({ params }: PageProps) {
-  const { locale } = await params;
+  const { locale: _locale } = await params;
 
   const { userId } = await getServerUserContext();
   if (!userId) {
-    await redirectToLogin(locale);
+    await redirectToLogin();
     return;
   }
 
