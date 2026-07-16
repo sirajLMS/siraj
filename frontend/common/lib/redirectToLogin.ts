@@ -1,11 +1,11 @@
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import {
   buildLoginHref,
   DEFAULT_POST_LOGIN_PATH,
   isSafeRedirect,
   LOGIN_REDIRECT_PARAM,
 } from "@/frontend/common/lib/safeRedirect";
-import { redirect } from "@/shared/i18n/routing";
 
 /**
  * Reads the current request path (+ search) from proxy-injected headers.
@@ -42,7 +42,7 @@ export async function getAuthenticatedAuthBounceHref(): Promise<string> {
 /**
  * Server redirect to login, preserving the current request path as `?redirect=`.
  */
-export async function redirectToLogin(locale: string): Promise<never> {
+export async function redirectToLogin(): Promise<never> {
   const returnPath = await getRequestReturnPath();
-  return redirect({ href: buildLoginHref(returnPath), locale });
+  return redirect(buildLoginHref(returnPath));
 }

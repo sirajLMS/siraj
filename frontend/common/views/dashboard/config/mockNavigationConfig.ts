@@ -37,7 +37,7 @@ import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard"
 const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   home: {
     key: "home",
-    labelKey: "dashboard.nav.home",
+    labelKey: "home",
     icon: DashboardOutlined,
     href: "/dashboard",
     section: "main",
@@ -45,7 +45,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   teacherDashboard: {
     key: "teacher-dashboard",
-    labelKey: "dashboard.nav.teacherDashboard",
+    labelKey: "teacherDashboard",
     icon: DashboardOutlined,
     href: "/dashboard",
     section: "main",
@@ -53,7 +53,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   teachers: {
     key: "teachers",
-    labelKey: "dashboard.nav.teachers",
+    labelKey: "teachers",
     icon: SchoolOutlined,
     href: "/teachers",
     section: "main",
@@ -61,7 +61,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   teacherWeeklySchedule: {
     key: "teacher-weekly-schedule",
-    labelKey: "dashboard.nav.teacherWeeklySchedule",
+    labelKey: "teacherWeeklySchedule",
     icon: CalendarTodayOutlined,
     href: "/teachers/tea-1/schedule/weekly",
     section: "main",
@@ -69,7 +69,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   teacherFutureSchedule: {
     key: "teacher-future-schedule",
-    labelKey: "dashboard.nav.teacherFutureSchedule",
+    labelKey: "teacherFutureSchedule",
     icon: CalendarTodayOutlined,
     href: "/teachers/tea-1/schedule/future",
     section: "main",
@@ -77,7 +77,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   teacherReassignment: {
     key: "teacher-reassignment",
-    labelKey: "dashboard.nav.teacherReassignment",
+    labelKey: "teacherReassignment",
     icon: PersonAddAltOutlined,
     href: "/teachers/tea-1/reassignment",
     section: "main",
@@ -85,7 +85,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   dstMigration: {
     key: "dst-migration",
-    labelKey: "dashboard.nav.dstMigration",
+    labelKey: "dstMigration",
     icon: UpdateOutlined,
     href: "/tools/dst-migration",
     section: "main",
@@ -93,7 +93,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   teacherAvailability: {
     key: "teacher-availability",
-    labelKey: "dashboard.nav.teacherAvailability",
+    labelKey: "teacherAvailability",
     icon: EventRepeatOutlined,
     href: "/teachers/tea-1/availability",
     section: "main",
@@ -101,7 +101,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   parents: {
     key: "parents",
-    labelKey: "dashboard.nav.parents",
+    labelKey: "parents",
     icon: Diversity1Outlined,
     href: "/parents",
     section: "main",
@@ -109,7 +109,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   students: {
     key: "students",
-    labelKey: "dashboard.nav.students",
+    labelKey: "students",
     icon: PersonOutlineOutlined,
     href: "/students",
     section: "main",
@@ -117,7 +117,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   reports: {
     key: "reports",
-    labelKey: "dashboard.nav.reports",
+    labelKey: "reports",
     icon: AssessmentOutlined,
     href: "/reports",
     section: "main",
@@ -125,7 +125,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   billingAdmin: {
     key: "billing-admin",
-    labelKey: "dashboard.nav.billingAdmin",
+    labelKey: "billingAdmin",
     icon: PaymentsOutlined,
     href: "/billing",
     section: "main",
@@ -133,7 +133,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   paymentCatalogs: {
     key: "payment-catalogs",
-    labelKey: "dashboard.nav.paymentCatalogs",
+    labelKey: "paymentCatalogs",
     icon: PaymentsOutlined,
     href: "/payment-catalogs",
     section: "main",
@@ -141,7 +141,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   billingParent: {
     key: "billing-parent",
-    labelKey: "dashboard.nav.billingParent",
+    labelKey: "billingParent",
     icon: ReceiptLongOutlined,
     href: "/billing/invoices",
     section: "main",
@@ -149,7 +149,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   billingManual: {
     key: "billing-manual",
-    labelKey: "dashboard.nav.billingManual",
+    labelKey: "billingManual",
     icon: NoteAddOutlined,
     href: "/billing/manual",
     section: "main",
@@ -157,7 +157,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   suggestionsManage: {
     key: "suggestions-manage",
-    labelKey: "dashboard.nav.suggestionsManage",
+    labelKey: "suggestionsManage",
     icon: LightbulbOutlined,
     href: "/suggestions/manage",
     section: "main",
@@ -165,7 +165,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   suggestionsSubmit: {
     key: "suggestions-submit",
-    labelKey: "dashboard.nav.suggestionsSubmit",
+    labelKey: "suggestionsSubmit",
     icon: LightbulbOutlined,
     href: "/suggestions",
     section: "main",
@@ -173,7 +173,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   complaintsManage: {
     key: "complaints-manage",
-    labelKey: "dashboard.nav.complaintsManage",
+    labelKey: "complaintsManage",
     icon: ReportProblemOutlined,
     href: "/complaints/manage",
     section: "main",
@@ -181,7 +181,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   },
   complaintsSubmit: {
     key: "complaints-submit",
-    labelKey: "dashboard.nav.complaintsSubmit",
+    labelKey: "complaintsSubmit",
     icon: ReportProblemOutlined,
     href: "/complaints",
     section: "main",
@@ -199,7 +199,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   COMMON_NAV_ITEMS.teacherDashboard,
   {
     key: "schedule-search",
-    labelKey: "dashboard.nav.scheduleSearch",
+    labelKey: "scheduleSearch",
     icon: SearchOutlined,
     href: "/schedule-search",
     section: "main",
@@ -207,7 +207,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "schedule-tracking",
-    labelKey: "dashboard.nav.scheduleTracking",
+    labelKey: "scheduleTracking",
     icon: EventRepeatOutlined,
     href: "/schedule/tracking/reschedule",
     section: "main",
@@ -215,7 +215,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "status-tracking",
-    labelKey: "dashboard.nav.statusTracking",
+    labelKey: "statusTracking",
     icon: TimelineOutlined,
     href: "/schedule/tracking/status",
     section: "main",
@@ -223,7 +223,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "schedule-alerts",
-    labelKey: "dashboard.nav.scheduleAlerts",
+    labelKey: "scheduleAlerts",
     icon: NotificationsActiveOutlined,
     href: "/schedule/alerts",
     section: "main",
@@ -231,7 +231,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "class-details",
-    labelKey: "dashboard.nav.classDetails",
+    labelKey: "classDetails",
     icon: ClassOutlined,
     href: "/classes/cls-9921",
     section: "main",
@@ -239,7 +239,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "class-audit",
-    labelKey: "dashboard.nav.classAudit",
+    labelKey: "classAudit",
     icon: HistoryOutlined,
     href: "/classes/cls-9921/audit",
     section: "main",
@@ -256,7 +256,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   COMMON_NAV_ITEMS.parents,
   {
     key: "parent-profile",
-    labelKey: "dashboard.nav.parents",
+    labelKey: "parents",
     icon: PersonOutlineOutlined,
     href: profileHrefForParent({ parentId: "par-001" }) ?? "/parents",
     section: "main",
@@ -265,7 +265,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   COMMON_NAV_ITEMS.students,
   {
     key: "student-history",
-    labelKey: "dashboard.nav.studentHistory",
+    labelKey: "studentHistory",
     icon: HistoryOutlined,
     href: "/students/SRJ-9921/profile?tab=history",
     section: "main",
@@ -273,7 +273,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "student-quota",
-    labelKey: "dashboard.nav.studentQuota",
+    labelKey: "studentQuota",
     icon: EditOutlined,
     href: "/students/SRJ-9921/profile?tab=quota",
     section: "main",
@@ -281,7 +281,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "student-status",
-    labelKey: "dashboard.nav.studentStatus",
+    labelKey: "studentStatus",
     icon: ClassOutlined,
     href: "/students/SRJ-9921/profile?tab=status",
     section: "main",
@@ -289,7 +289,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "managers",
-    labelKey: "dashboard.nav.managers",
+    labelKey: "managers",
     icon: BadgeOutlined,
     href: "/managers",
     section: "main",
@@ -297,7 +297,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "resources",
-    labelKey: "dashboard.nav.resources",
+    labelKey: "resources",
     icon: FolderOpenOutlined,
     href: "/resources",
     section: "main",
@@ -305,7 +305,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "books-and-bags",
-    labelKey: "dashboard.nav.booksAndBags",
+    labelKey: "booksAndBags",
     icon: MenuBookOutlined,
     href: "/resources/books-and-bags",
     section: "main",
@@ -322,13 +322,13 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   COMMON_NAV_ITEMS.dstMigration,
   {
     key: "add-account",
-    labelKey: "dashboard.nav.addAccount",
+    labelKey: "addAccount",
     icon: PersonAddAltOutlined,
     href: "/add-account",
     section: "footer",
     permission: AppPermission.PermissionGroupsAssign,
   },
-  { key: "logout", labelKey: "dashboard.nav.logout", icon: LogoutOutlined, href: "/logout", section: "footer" },
+  { key: "logout", labelKey: "logout", icon: LogoutOutlined, href: "/logout", section: "footer" },
 ];
 
 /**
@@ -338,7 +338,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
 export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "schedule",
-    labelKey: "dashboard.nav.schedule",
+    labelKey: "schedule",
     icon: CalendarTodayOutlined,
     href: "/dashboard",
     section: "main",
@@ -354,7 +354,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   COMMON_NAV_ITEMS.parents,
   {
     key: "students",
-    labelKey: "dashboard.nav.students",
+    labelKey: "students",
     icon: GroupOutlined,
     href: "/students",
     section: "main",
@@ -362,7 +362,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "reports",
-    labelKey: "dashboard.nav.reports",
+    labelKey: "reports",
     icon: AnalyticsOutlined,
     href: "/reports",
     section: "main",

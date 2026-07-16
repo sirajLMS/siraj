@@ -41,7 +41,7 @@ import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard"
 export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "home",
-    labelKey: "dashboard.nav.home",
+    labelKey: "home",
     icon: DashboardOutlined,
     href: "/dashboard",
     section: "main",
@@ -49,7 +49,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "today-classes",
-    labelKey: "dashboard.nav.todayClasses",
+    labelKey: "todayClasses",
     icon: CalendarTodayOutlined,
     href: "/dashboard",
     section: "main",
@@ -58,7 +58,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "regular-schedule",
-    labelKey: "dashboard.nav.regularSchedule",
+    labelKey: "regularSchedule",
     icon: EventRepeatOutlined,
     href: "/schedule",
     section: "main",
@@ -67,7 +67,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "your-students",
-    labelKey: "dashboard.nav.yourStudents",
+    labelKey: "yourStudents",
     icon: GroupOutlined,
     href: "/students",
     section: "main",
@@ -76,7 +76,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "teacher-profile",
-    labelKey: "dashboard.nav.yourProfile",
+    labelKey: "yourProfile",
     icon: PersonOutlineOutlined,
     href: "/profile",
     section: "main",
@@ -93,7 +93,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   // },
   {
     key: "teacher-rules",
-    labelKey: "dashboard.nav.teacherRules",
+    labelKey: "teacherRules",
     icon: DescriptionOutlined,
     href: "/teachers/rules",
     section: "main",
@@ -102,7 +102,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parent-today-classes",
-    labelKey: "dashboard.nav.todayClasses",
+    labelKey: "todayClasses",
     icon: CalendarTodayOutlined,
     href: "/dashboard",
     section: "main",
@@ -111,7 +111,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parent-your-students",
-    labelKey: "dashboard.nav.yourStudents",
+    labelKey: "yourStudents",
     icon: GroupOutlined,
     href: "/students",
     section: "main",
@@ -120,7 +120,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parent-suggest",
-    labelKey: "dashboard.nav.suggest",
+    labelKey: "suggest",
     icon: LightbulbOutlined,
     href: "/suggestions",
     section: "main",
@@ -129,7 +129,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parent-rules",
-    labelKey: "dashboard.nav.parentRules",
+    labelKey: "parentRules",
     icon: DescriptionOutlined,
     href: "/parents/rules",
     section: "main",
@@ -138,7 +138,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parent-profile",
-    labelKey: "dashboard.nav.yourProfile",
+    labelKey: "yourProfile",
     icon: PersonOutlineOutlined,
     href: "/profile",
     section: "main",
@@ -147,7 +147,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parent-social",
-    labelKey: "dashboard.nav.socialMedia",
+    labelKey: "socialMedia",
     icon: ShareOutlined,
     href: "/social",
     section: "footer",
@@ -156,7 +156,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "student-today-classes",
-    labelKey: "dashboard.nav.studentTodayClasses",
+    labelKey: "studentTodayClasses",
     icon: CalendarTodayOutlined,
     href: "/dashboard",
     section: "main",
@@ -165,7 +165,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "student-schedule",
-    labelKey: "dashboard.nav.studentSchedule",
+    labelKey: "studentSchedule",
     icon: EventRepeatOutlined,
     href: "/students/me/history",
     section: "main",
@@ -174,7 +174,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "student-credits",
-    labelKey: "dashboard.nav.studentCredits",
+    labelKey: "studentCredits",
     icon: AccountBalanceWalletOutlined,
     href: "/students/me/credits",
     section: "main",
@@ -183,7 +183,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "student-profile",
-    labelKey: "dashboard.nav.studentProfile",
+    labelKey: "studentProfile",
     icon: PersonOutlineOutlined,
     href: "/students/me/profile",
     section: "main",
@@ -192,7 +192,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "supervisor-home",
-    labelKey: "dashboard.nav.supervisorHome",
+    labelKey: "supervisorHome",
     icon: DashboardOutlined,
     href: "/dashboard",
     section: "main",
@@ -201,7 +201,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "pending-reviews",
-    labelKey: "dashboard.nav.pendingReviews",
+    labelKey: "pendingReviews",
     icon: RateReviewOutlined,
     href: "/lesson-reports",
     section: "main",
@@ -210,7 +210,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "teacher-dues",
-    labelKey: "dashboard.nav.teacherDues",
+    labelKey: "teacherDues",
     icon: PaymentsOutlined,
     href: "/supervisor/teacher-dues",
     section: "main",
@@ -219,7 +219,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "monthly-reports",
-    labelKey: "dashboard.nav.monthlyReports",
+    labelKey: "monthlyReports",
     icon: AssessmentOutlined,
     href: "/supervisor/monthly-reports",
     section: "main",
@@ -228,7 +228,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "supervisor-profile",
-    labelKey: "dashboard.nav.supervisorProfile",
+    labelKey: "supervisorProfile",
     icon: PersonOutlineOutlined,
     href: "/supervisor/profile",
     section: "main",
@@ -237,7 +237,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "search-schedule",
-    labelKey: "dashboard.nav.scheduleSearch",
+    labelKey: "scheduleSearch",
     icon: SearchOutlined,
     href: "/search-schedule",
     section: "main",
@@ -245,7 +245,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "schedule-tracking",
-    labelKey: "dashboard.nav.scheduleTracking",
+    labelKey: "scheduleTracking",
     icon: EventRepeatOutlined,
     href: "/schedule/tracking/reschedule",
     section: "main",
@@ -253,7 +253,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "status-tracking",
-    labelKey: "dashboard.nav.statusTracking",
+    labelKey: "statusTracking",
     icon: TimelineOutlined,
     href: "/schedule/tracking/status",
     section: "main",
@@ -261,7 +261,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "schedule-alerts",
-    labelKey: "dashboard.nav.scheduleAlerts",
+    labelKey: "scheduleAlerts",
     icon: NotificationsActiveOutlined,
     href: "/schedule/alerts",
     section: "main",
@@ -269,7 +269,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "teachers",
-    labelKey: "dashboard.nav.teachers",
+    labelKey: "teachers",
     icon: SchoolOutlined,
     href: "/teachers",
     section: "main",
@@ -277,7 +277,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parents",
-    labelKey: "dashboard.nav.parents",
+    labelKey: "parents",
     icon: Diversity1Outlined,
     href: "/parents",
     section: "main",
@@ -285,7 +285,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "students",
-    labelKey: "dashboard.nav.students",
+    labelKey: "students",
     icon: PersonOutlineOutlined,
     href: "/students",
     section: "main",
@@ -293,7 +293,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "managers",
-    labelKey: "dashboard.nav.managers",
+    labelKey: "managers",
     icon: BadgeOutlined,
     href: "/managers",
     section: "main",
@@ -301,7 +301,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "resources",
-    labelKey: "dashboard.nav.resources",
+    labelKey: "resources",
     icon: FolderOpenOutlined,
     href: "/resources",
     section: "main",
@@ -309,7 +309,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "subjects",
-    labelKey: "dashboard.nav.subjects",
+    labelKey: "subjects",
     icon: CategoryOutlined,
     href: "/subjects",
     section: "main",
@@ -317,7 +317,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "books-and-bags",
-    labelKey: "dashboard.nav.booksAndBags",
+    labelKey: "booksAndBags",
     icon: MenuBookOutlined,
     href: "/resources/books-and-bags",
     section: "main",
@@ -325,7 +325,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "reports",
-    labelKey: "dashboard.nav.reports",
+    labelKey: "reports",
     icon: AssessmentOutlined,
     href: "/reports",
     section: "main",
@@ -333,7 +333,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "billing-admin",
-    labelKey: "dashboard.nav.billingAdmin",
+    labelKey: "billingAdmin",
     icon: PaymentsOutlined,
     href: "/billing",
     section: "main",
@@ -341,7 +341,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "exchange-rates",
-    labelKey: "dashboard.nav.exchangeRates",
+    labelKey: "exchangeRates",
     icon: TimelineOutlined,
     href: "/billing/exchange-rates",
     section: "main",
@@ -349,7 +349,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "supported-currencies",
-    labelKey: "dashboard.nav.supportedCurrencies",
+    labelKey: "supportedCurrencies",
     icon: CurrencyExchangeOutlined,
     href: "/billing/currencies",
     section: "main",
@@ -357,7 +357,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "currency-hedges",
-    labelKey: "dashboard.nav.currencyHedges",
+    labelKey: "currencyHedges",
     icon: ShieldOutlined,
     href: "/billing/currency-hedges",
     section: "main",
@@ -365,7 +365,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "billing-manual",
-    labelKey: "dashboard.nav.billingManual",
+    labelKey: "billingManual",
     icon: NoteAddOutlined,
     href: "/billing/manual",
     section: "main",
@@ -373,7 +373,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "payment-catalogs",
-    labelKey: "dashboard.nav.paymentCatalogs",
+    labelKey: "paymentCatalogs",
     icon: AccountBalanceWalletOutlined,
     href: "/payment-catalogs",
     section: "main",
@@ -381,7 +381,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "meeting-providers",
-    labelKey: "dashboard.nav.meetingProviders",
+    labelKey: "meetingProviders",
     icon: VideocamOutlined,
     href: "/meeting-providers",
     section: "main",
@@ -389,7 +389,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "billing-parent",
-    labelKey: "dashboard.nav.invoices",
+    labelKey: "invoices",
     icon: ReceiptLongOutlined,
     href: "/billing/invoices",
     section: "main",
@@ -398,7 +398,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "suggestions-manage",
-    labelKey: "dashboard.nav.suggestionsManage",
+    labelKey: "suggestionsManage",
     icon: LightbulbOutlined,
     href: "/suggestions/manage",
     section: "main",
@@ -406,7 +406,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "suggestions-submit",
-    labelKey: "dashboard.nav.suggestionsSubmit",
+    labelKey: "suggestionsSubmit",
     icon: LightbulbOutlined,
     href: "/suggestions",
     section: "main",
@@ -415,7 +415,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "complaints-manage",
-    labelKey: "dashboard.nav.complaintsManage",
+    labelKey: "complaintsManage",
     icon: ReportProblemOutlined,
     href: "/complaints/manage",
     section: "main",
@@ -423,7 +423,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "complaints-submit",
-    labelKey: "dashboard.nav.complaintsSubmit",
+    labelKey: "complaintsSubmit",
     icon: ReportProblemOutlined,
     href: "/complaints",
     section: "main",
@@ -432,7 +432,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "dst-migration",
-    labelKey: "dashboard.nav.dstMigration",
+    labelKey: "dstMigration",
     icon: UpdateOutlined,
     href: "/tools/dst-migration",
     section: "main",
@@ -440,7 +440,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "permissions",
-    labelKey: "dashboard.nav.permissions",
+    labelKey: "permissions",
     icon: SecurityOutlined,
     href: "/permissions",
     section: "main",
@@ -448,7 +448,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "own-profile",
-    labelKey: "dashboard.nav.yourProfile",
+    labelKey: "yourProfile",
     icon: PersonOutlineOutlined,
     href: "/profile",
     section: "footer",
@@ -456,7 +456,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "logout",
-    labelKey: "dashboard.nav.logout",
+    labelKey: "logout",
     icon: LogoutOutlined,
     href: "/logout",
     section: "footer",
@@ -469,7 +469,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
 export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "today-classes",
-    labelKey: "dashboard.nav.todayClasses",
+    labelKey: "todayClasses",
     icon: CalendarTodayOutlined,
     href: "/dashboard",
     section: "main",
@@ -478,7 +478,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "regular-schedule",
-    labelKey: "dashboard.nav.regularSchedule",
+    labelKey: "regularSchedule",
     icon: EventRepeatOutlined,
     href: "/schedule",
     section: "main",
@@ -487,7 +487,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "your-students",
-    labelKey: "dashboard.nav.yourStudents",
+    labelKey: "yourStudents",
     icon: GroupOutlined,
     href: "/students",
     section: "main",
@@ -496,7 +496,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "home",
-    labelKey: "dashboard.nav.home",
+    labelKey: "home",
     icon: DashboardOutlined,
     href: "/dashboard",
     section: "main",
@@ -504,7 +504,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "schedule",
-    labelKey: "dashboard.nav.schedule",
+    labelKey: "schedule",
     icon: CalendarTodayOutlined,
     href: "/dashboard",
     section: "main",
@@ -512,7 +512,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "resources",
-    labelKey: "dashboard.nav.resources",
+    labelKey: "resources",
     icon: FolderOpenOutlined,
     href: "/resources",
     section: "main",
@@ -520,7 +520,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "teacher-profile",
-    labelKey: "dashboard.nav.yourProfile",
+    labelKey: "yourProfile",
     icon: PersonOutlineOutlined,
     href: "/profile",
     section: "main",
@@ -529,7 +529,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "teachers",
-    labelKey: "dashboard.nav.teachers",
+    labelKey: "teachers",
     icon: SchoolOutlined,
     href: "/teachers",
     section: "main",
@@ -537,7 +537,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "students",
-    labelKey: "dashboard.nav.students",
+    labelKey: "students",
     icon: GroupOutlined,
     href: "/students",
     section: "main",
@@ -545,7 +545,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parents",
-    labelKey: "dashboard.nav.parents",
+    labelKey: "parents",
     icon: Diversity1Outlined,
     href: "/parents",
     section: "main",
@@ -553,7 +553,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "subjects",
-    labelKey: "dashboard.nav.subjects",
+    labelKey: "subjects",
     icon: CategoryOutlined,
     href: "/subjects",
     section: "main",
@@ -561,7 +561,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "reports",
-    labelKey: "dashboard.nav.reports",
+    labelKey: "reports",
     icon: AssessmentOutlined,
     href: "/reports",
     section: "main",
@@ -569,7 +569,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "billing-admin",
-    labelKey: "dashboard.nav.billingAdmin",
+    labelKey: "billingAdmin",
     icon: PaymentsOutlined,
     href: "/billing",
     section: "main",
@@ -577,7 +577,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "exchange-rates",
-    labelKey: "dashboard.nav.exchangeRates",
+    labelKey: "exchangeRates",
     icon: TimelineOutlined,
     href: "/billing/exchange-rates",
     section: "main",
@@ -585,7 +585,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "supported-currencies",
-    labelKey: "dashboard.nav.supportedCurrencies",
+    labelKey: "supportedCurrencies",
     icon: CurrencyExchangeOutlined,
     href: "/billing/currencies",
     section: "main",
@@ -593,7 +593,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "currency-hedges",
-    labelKey: "dashboard.nav.currencyHedges",
+    labelKey: "currencyHedges",
     icon: ShieldOutlined,
     href: "/billing/currency-hedges",
     section: "main",
@@ -601,7 +601,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "billing-manual",
-    labelKey: "dashboard.nav.billingManual",
+    labelKey: "billingManual",
     icon: NoteAddOutlined,
     href: "/billing/manual",
     section: "main",
@@ -609,7 +609,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "payment-catalogs",
-    labelKey: "dashboard.nav.paymentCatalogs",
+    labelKey: "paymentCatalogs",
     icon: AccountBalanceWalletOutlined,
     href: "/payment-catalogs",
     section: "main",
@@ -617,7 +617,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "meeting-providers",
-    labelKey: "dashboard.nav.meetingProviders",
+    labelKey: "meetingProviders",
     icon: VideocamOutlined,
     href: "/meeting-providers",
     section: "main",
@@ -625,7 +625,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "billing-parent",
-    labelKey: "dashboard.nav.invoices",
+    labelKey: "invoices",
     icon: ReceiptLongOutlined,
     href: "/billing/invoices",
     section: "main",
@@ -634,7 +634,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parent-today-classes",
-    labelKey: "dashboard.nav.todayClasses",
+    labelKey: "todayClasses",
     icon: CalendarTodayOutlined,
     href: "/dashboard",
     section: "main",
@@ -643,7 +643,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parent-your-students",
-    labelKey: "dashboard.nav.yourStudents",
+    labelKey: "yourStudents",
     icon: GroupOutlined,
     href: "/students",
     section: "main",
@@ -652,7 +652,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parent-suggest",
-    labelKey: "dashboard.nav.suggest",
+    labelKey: "suggest",
     icon: LightbulbOutlined,
     href: "/suggestions",
     section: "main",
@@ -661,7 +661,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "parent-profile",
-    labelKey: "dashboard.nav.yourProfile",
+    labelKey: "yourProfile",
     icon: PersonOutlineOutlined,
     href: "/profile",
     section: "main",
@@ -670,7 +670,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "student-today-classes",
-    labelKey: "dashboard.nav.studentTodayClasses",
+    labelKey: "studentTodayClasses",
     icon: CalendarTodayOutlined,
     href: "/dashboard",
     section: "main",
@@ -679,7 +679,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "supervisor-home",
-    labelKey: "dashboard.nav.supervisorHome",
+    labelKey: "supervisorHome",
     icon: DashboardOutlined,
     href: "/dashboard",
     section: "main",
@@ -688,7 +688,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "complaints-submit",
-    labelKey: "dashboard.nav.complaintsSubmit",
+    labelKey: "complaintsSubmit",
     icon: ReportProblemOutlined,
     href: "/complaints",
     section: "main",
@@ -697,7 +697,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "own-profile",
-    labelKey: "dashboard.nav.yourProfile",
+    labelKey: "yourProfile",
     icon: PersonOutlineOutlined,
     href: "/profile",
     section: "main",
@@ -705,7 +705,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "suggestions-manage",
-    labelKey: "dashboard.nav.suggestionsManage",
+    labelKey: "suggestionsManage",
     icon: LightbulbOutlined,
     href: "/suggestions/manage",
     section: "main",
@@ -713,7 +713,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "complaints-manage",
-    labelKey: "dashboard.nav.complaintsManage",
+    labelKey: "complaintsManage",
     icon: ReportProblemOutlined,
     href: "/complaints/manage",
     section: "main",

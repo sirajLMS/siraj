@@ -19,7 +19,7 @@ export type NavAudience = "teacher" | "parent" | "student" | "supervisor";
 
 export interface NavItem {
   readonly key: string;
-  readonly labelKey: `dashboard.nav.${keyof DashboardNavigationLabels & string}`;
+  readonly labelKey: keyof DashboardNavigationLabels;
   readonly icon: SvgIconComponent;
   readonly href: string;
   readonly section: "main" | "footer";

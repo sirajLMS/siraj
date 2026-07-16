@@ -3,24 +3,19 @@ import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { SubjectsContainer } from "@/frontend/common/views/dashboard/subjects/home/SubjectsContainer";
 import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
-export async function generateMetadata({
-  params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.subjects;
   return { title: t.pageTitle };
 }
 
-export default async function SubjectsPage({ params }: { readonly params: Promise<{ readonly locale: string }> }) {
-  const { locale } = await params;
-
+export default async function SubjectsPage() {
   const { userId } = await getServerUserContext();
 
   if (!userId) {
-    await redirectToLogin(locale);
+    await redirectToLogin();
     return;
   }
 

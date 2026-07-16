@@ -4,28 +4,20 @@ import { useAppTranslation } from "@/shared/locale/client";
 import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/core/nav";
 
 /**
- * Creates a typed lookup function for navigation labels.
- * Maps "dashboard.nav.{key}" to the corresponding property in DashboardNavigationLabels.
+ * Resolves a nav `labelKey` (a `keyof DashboardNavigationLabels`) to its
+ * localized string. Compile-time safe — invalid keys fail tsgo.
+ *
+ * `nav` is a nested object on the labels interface (not a string), so callers
+ * that need its inner navigational strings should access the sub-property
+ * directly via a typed `labels.nav.logout` etc. rather than via this helper.
  */
-export function useNavLabels(): (labelKey: `dashboard.nav.${keyof DashboardNavigationLabels}`) => string {
-  const t = useAppTranslation().dashboardTranslations.coreNav;
+export function useNavLabels(): (labelKey: keyof DashboardNavigationLabels) => string {
+  const labels = useAppTranslation().dashboardTranslations.coreNav;
 
-  return (labelKey: `dashboard.nav.${keyof DashboardNavigationLabels}`): string => {
-    const key = labelKey.replace("dashboard.nav.", "") as keyof DashboardNavigationLabels;
-    if (key === "nav") {
-      throw new Error("nav is a nested object, use specific keys like dashboard.nav.logout");
+  return (labelKey: keyof DashboardNavigationLabels): string => {
+    if (labelKey === "nav") {
+      throw new Error("nav is a nested object, use specific sub-keys like labels.nav.logout");
     }
-    return t[key] as string;
-  };
-}
-
-/**
- * Creates a typed lookup function for metric labels.
- * Maps "dashboard.metrics.{key}" to the corresponding property in the provided labels object.
- */
-export function useMetricLabels<T extends Record<string, string>>(labels: T): (labelKey: string) => string {
-  return (labelKey: string): string => {
-    const key = labelKey.replace("dashboard.metrics.", "");
-    return labels[key as keyof T] ?? labelKey;
+    return labels[labelKey] as string;
   };
 }

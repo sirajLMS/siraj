@@ -11,20 +11,9 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { DashboardLayoutContainer } from "@/frontend/common/views/dashboard/components/DashboardLayoutContainer";
-import { type AppLocale, locales } from "@/shared/i18n/routing";
 
-export default async function DashboardLayout({
-  children,
-  params,
-}: {
-  readonly children: ReactNode;
-  readonly params: Promise<{ locale: string }>;
-}) {
+export default async function DashboardLayout({ children }: { readonly children: ReactNode }) {
   const { userId, context, isImpersonating, isSimulatingGroup } = await getServerUserContext();
-  let { locale } = await params;
-
-  const isValidLocale = locales.includes(locale as AppLocale);
-  locale = isValidLocale ? locale : locales[0];
 
   if (!userId || !context) {
     const reason = userId ? "missing permission context" : "missing userId";
@@ -35,7 +24,7 @@ export default async function DashboardLayout({
       isImpersonating,
       isSimulatingGroup,
     });
-    await redirectToLogin(locale);
+    await redirectToLogin();
     return;
   }
 

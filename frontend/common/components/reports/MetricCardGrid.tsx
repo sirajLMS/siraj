@@ -22,31 +22,71 @@ interface MetricCardGridProps {
 
 const defaultSize = { xs: 6, sm: 4, md: 3, lg: 2 };
 
+function resolveDashboardTranslation(
+  path: string,
+  translations: ReturnType<typeof useAppTranslation>
+): string | undefined {
+  const parts = path.split(".");
+  let ns = parts[1];
+  if (ns === "statusTracking") {
+    ns = "coreStatusTracking";
+  }
+  const section = translations.dashboardTranslations[ns as keyof typeof translations.dashboardTranslations];
+  if (!section) {
+    return undefined;
+  }
+  let curr: unknown = section;
+  for (let i = 2; i < parts.length; i++) {
+    if (curr && typeof curr === "object") {
+      curr = (curr as Record<string, unknown>)[parts[i]];
+    } else {
+      return undefined;
+    }
+  }
+  return typeof curr === "string" ? curr : undefined;
+}
+
+export function resolveMetricLabel(path: string, translations: ReturnType<typeof useAppTranslation>): string {
+  if (path.startsWith("dashboard.")) {
+    const val = resolveDashboardTranslation(path, translations);
+    if (val !== undefined) {
+      return val;
+    }
+  } else if (path.startsWith("metrics.")) {
+    const parts = path.split(".");
+    const resolved =
+      translations.dashboardTranslations.coreStatusTracking.metrics[
+        parts[1] as keyof typeof translations.dashboardTranslations.coreStatusTracking.metrics
+      ];
+    if (typeof resolved === "string") {
+      return resolved;
+    }
+  }
+
+  const commonT = translations.commonTranslations as unknown as Record<string, unknown>;
+  if (path in commonT && typeof commonT[path] === "string") {
+    return commonT[path] as string;
+  }
+
+  return path;
+}
+
 function renderMetricCard({
   metric,
   index,
   selectedKey,
   onMetricClick,
   isScroll,
-  t,
+  translations,
 }: {
   metric: MetricItem;
   index: number;
   selectedKey?: string;
   onMetricClick?: (key: string) => void;
   isScroll: boolean;
-  t: unknown;
+  translations: ReturnType<typeof useAppTranslation>;
 }) {
-  let label: string;
-  if (metric.label) {
-    label = metric.label;
-  } else if (typeof t === "function") {
-    label = t(metric.labelKey);
-  } else if (t && typeof t === "object" && metric.labelKey in t) {
-    label = (t as Record<string, string>)[metric.labelKey];
-  } else {
-    label = metric.labelKey;
-  }
+  const label = metric.label || resolveMetricLabel(metric.labelKey, translations);
   return (
     <MetricCard
       icon={metric.icon}
@@ -68,7 +108,7 @@ function renderMetricCard({
 }
 
 export function MetricCardGrid({ metrics, onMetricClick, selectedKey, size, layout = "grid" }: MetricCardGridProps) {
-  const t = useAppTranslation().commonTranslations;
+  const translations = useAppTranslation();
   const isScroll = layout === "scroll";
 
   if (isScroll) {
@@ -84,7 +124,7 @@ export function MetricCardGrid({ metrics, onMetricClick, selectedKey, size, layo
               borderRadius: 0,
             }}
           >
-            {renderMetricCard({ metric, index, selectedKey, onMetricClick, isScroll, t })}
+            {renderMetricCard({ metric, index, selectedKey, onMetricClick, isScroll, translations })}
           </Box>
         ))}
       </HorizontalScrollRow>
@@ -95,7 +135,7 @@ export function MetricCardGrid({ metrics, onMetricClick, selectedKey, size, layo
     <Grid container spacing={2}>
       {metrics.map((metric, index) => (
         <Grid key={metric.key} size={size ?? defaultSize} sx={{ minWidth: 0 }}>
-          {renderMetricCard({ metric, index, selectedKey, onMetricClick, isScroll, t })}
+          {renderMetricCard({ metric, index, selectedKey, onMetricClick, isScroll, translations })}
         </Grid>
       ))}
     </Grid>
