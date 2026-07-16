@@ -25,13 +25,13 @@ describe("Supervisor Portal E2E", () => {
     await page.waitForLoadState("networkidle");
 
     // Dashboard page title
-    await expect(page.getByRole("heading", { name: /لوحة المشرف/i })).toBeVisible();
+    expect(await page.getByRole("heading", { name: /لوحة المشرف/i }).isVisible()).toBe(true);
 
     // Pending reviews hero card - shows count
-    await expect(page.getByText(/لديك \d+ مراجعات معلقة بحاجة إلى اهتمامك/i)).toBeVisible();
+    expect(await page.getByText(/لديك \d+ مراجعات معلقة بحاجة إلى اهتمامك/i).isVisible()).toBe(true);
 
     // Go to reviews button
-    await expect(page.getByRole("button", { name: /انتقل إلى المراجعات/i })).toBeVisible();
+    expect(await page.getByRole("button", { name: /انتقل إلى المراجعات/i }).isVisible()).toBe(true);
   });
 
   test("Supervisor dashboard shows teacher dues summary", async () => {
@@ -41,9 +41,9 @@ describe("Supervisor Portal E2E", () => {
     await page.waitForLoadState("networkidle");
 
     // Teacher dues summary section
-    await expect(page.getByRole("heading", { name: /ملخص مستحقات المعلمين/i })).toBeVisible();
-    await expect(page.getByText(/إجمالي المستحقات المعلقة/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: /عرض مستحقات المعلمين/i })).toBeVisible();
+    expect(await page.getByRole("heading", { name: /ملخص مستحقات المعلمين/i }).isVisible()).toBe(true);
+    expect(await page.getByText(/إجمالي المستحقات المعلقة/i).isVisible()).toBe(true);
+    expect(await page.getByRole("button", { name: /عرض مستحقات المعلمين/i }).isVisible()).toBe(true);
   });
 
   test("Supervisor dashboard shows monthly reports shortcut", async () => {
@@ -53,8 +53,8 @@ describe("Supervisor Portal E2E", () => {
     await page.waitForLoadState("networkidle");
 
     // Monthly reports shortcut section
-    await expect(page.getByRole("heading", { name: /التقارير الشهرية/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /عرض التقارير الشهرية/i })).toBeVisible();
+    expect(await page.getByRole("heading", { name: /التقارير الشهرية/i }).isVisible()).toBe(true);
+    expect(await page.getByRole("button", { name: /عرض التقارير الشهرية/i }).isVisible()).toBe(true);
   });
 
   test("Supervisor can navigate to pending reviews page", async () => {
@@ -69,11 +69,11 @@ describe("Supervisor Portal E2E", () => {
     await page.waitForLoadState("networkidle");
 
     // Pending reviews page title
-    await expect(page.getByRole("heading", { name: /مراجعات الحصص المعلقة/i })).toBeVisible();
+    expect(await page.getByRole("heading", { name: /مراجعات الحصص المعلقة/i }).isVisible()).toBe(true);
 
     // Filter dropdowns
-    await expect(page.getByRole("combobox", { name: /تصفية حسب المعلم/i })).toBeVisible();
-    await expect(page.getByRole("combobox", { name: /تصفية حسب الطالب/i })).toBeVisible();
+    expect(await page.getByRole("combobox", { name: /تصفية حسب المعلم/i }).isVisible()).toBe(true);
+    expect(await page.getByRole("combobox", { name: /تصفية حسب الطالب/i }).isVisible()).toBe(true);
   });
 
   test("Pending reviews page shows queue with approve/reject buttons or empty state", async () => {
@@ -110,16 +110,16 @@ describe("Supervisor Portal E2E", () => {
     await page.waitForLoadState("networkidle");
 
     // Teacher dues page title
-    await expect(page.getByRole("heading", { name: /مستحقات المعلمين/i })).toBeVisible();
+    expect(await page.getByRole("heading", { name: /مستحقات المعلمين/i }).isVisible()).toBe(true);
 
     // Mark as paid button (batch action)
-    await expect(page.getByRole("button", { name: /تحديد كمدفوع/i })).toBeVisible();
+    expect(await page.getByRole("button", { name: /تحديد كمدفوع/i }).isVisible()).toBe(true);
 
     // Table columns
-    await expect(page.getByRole("columnheader", { name: /المعلم/i })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: /تاريخ الحصة/i })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: /الطالب/i })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: /الحالة/i })).toBeVisible();
+    expect(await page.getByRole("columnheader", { name: /المعلم/i }).isVisible()).toBe(true);
+    expect(await page.getByRole("columnheader", { name: /تاريخ الحصة/i }).isVisible()).toBe(true);
+    expect(await page.getByRole("columnheader", { name: /الطالب/i }).isVisible()).toBe(true);
+    expect(await page.getByRole("columnheader", { name: /الحالة/i }).isVisible()).toBe(true);
   });
 
   test("Supervisor can navigate to monthly reports page", async () => {
@@ -134,17 +134,17 @@ describe("Supervisor Portal E2E", () => {
     await page.waitForLoadState("networkidle");
 
     // Monthly reports page title
-    await expect(page.getByRole("heading", { name: /التقارير الشهرية/i })).toBeVisible();
+    expect(await page.getByRole("heading", { name: /التقارير الشهرية/i }).isVisible()).toBe(true);
 
     // Report type toggle
-    await expect(page.getByRole("button", { name: /نوع التقرير/i })).toBeVisible();
+    expect(await page.getByRole("button", { name: /نوع التقرير/i }).isVisible()).toBe(true);
 
     // Generate report button
-    await expect(page.getByRole("button", { name: /إنشاء التقرير/i })).toBeVisible();
+    expect(await page.getByRole("button", { name: /إنشاء التقرير/i }).isVisible()).toBe(true);
 
     // Year/Month selectors
-    await expect(page.getByRole("combobox", { name: /السنة/i })).toBeVisible();
-    await expect(page.getByRole("combobox", { name: /الشهر/i })).toBeVisible();
+    expect(await page.getByRole("combobox", { name: /السنة/i }).isVisible()).toBe(true);
+    expect(await page.getByRole("combobox", { name: /الشهر/i }).isVisible()).toBe(true);
   });
 
   test("Supervisor can navigate to profile page", async () => {
@@ -157,7 +157,7 @@ describe("Supervisor Portal E2E", () => {
     await page.waitForLoadState("networkidle");
 
     // Profile page loads (title may vary)
-    await expect(page.getByRole("heading", { name: /الملف الشخصي|الملف/i })).toBeVisible();
+    expect(await page.getByRole("heading", { name: /الملف الشخصي|الملف/i }).isVisible()).toBe(true);
   });
 
   test("Mobile viewport: supervisor dashboard renders mobile view", async () => {
@@ -167,15 +167,15 @@ describe("Supervisor Portal E2E", () => {
     await page.waitForLoadState("networkidle");
 
     // Dashboard page title visible
-    await expect(page.getByRole("heading", { name: /لوحة المشرف/i })).toBeVisible();
+    expect(await page.getByRole("heading", { name: /لوحة المشرف/i }).isVisible()).toBe(true);
 
     // Pending reviews card visible (mobile uses card layout)
-    await expect(page.getByText(/لديك \d+ مراجعات معلقة بحاجة إلى اهتمامك/i)).toBeVisible();
+    expect(await page.getByText(/لديك \d+ مراجعات معلقة بحاجة إلى اهتمامك/i).isVisible()).toBe(true);
 
     // Teacher dues summary visible
-    await expect(page.getByRole("heading", { name: /ملخص مستحقات المعلمين/i })).toBeVisible();
+    expect(await page.getByRole("heading", { name: /ملخص مستحقات المعلمين/i }).isVisible()).toBe(true);
 
     // Monthly reports shortcut visible
-    await expect(page.getByRole("button", { name: /عرض التقارير الشهرية/i })).toBeVisible();
+    expect(await page.getByRole("button", { name: /عرض التقارير الشهرية/i }).isVisible()).toBe(true);
   });
 });

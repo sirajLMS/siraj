@@ -34,25 +34,25 @@ function getBellButton(p: Page): Locator {
 describe("Notifications & Billing E2E", () => {
   test("Admin sees notification bell icon", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
-    expect(getBellButton(p)).toBeVisible();
+    expect(await getBellButton(p).isVisible()).toBe(true);
   });
 
   test("Clicking bell opens popover with notifications", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     await getBellButton(p).click();
-    expect(p.getByText("Notifications").first()).toBeVisible();
+    expect(await p.getByText("Notifications").first().isVisible()).toBe(true);
   });
 
   test("Billing section appears in popover for Admin", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     await getBellButton(p).click();
-    expect(p.getByText("Unpaid Invoices").first()).toBeVisible();
+    expect(await p.getByText("Unpaid Invoices").first().isVisible()).toBe(true);
   });
 
   test("Clicking user row in billing section navigates to billing profile", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     await getBellButton(p).click();
-    expect(p.getByText("Unpaid Invoices").first()).toBeVisible();
+    expect(await p.getByText("Unpaid Invoices").first().isVisible()).toBe(true);
 
     const userRow = p.locator('[role="button"]').filter({ hasText: /\w+/ }).last();
     if (await userRow.isVisible()) {
@@ -70,8 +70,8 @@ describe("Notifications & Billing E2E", () => {
 
   test("Mobile: bell icon visible and popover renders", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug, createMobileContext);
-    expect(getBellButton(p)).toBeVisible();
+    expect(await getBellButton(p).isVisible()).toBe(true);
     await getBellButton(p).click();
-    expect(p.getByText("Notifications").first()).toBeVisible();
+    expect(await p.getByText("Notifications").first().isVisible()).toBe(true);
   });
 });

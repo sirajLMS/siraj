@@ -3,7 +3,7 @@
 import { Box, type SxProps, type Theme } from "@mui/material";
 import type { TypographyProps } from "@mui/material/Typography";
 import type { ReactNode } from "react";
-import { PageHeader } from "@/frontend/common/components/ui/container/page/PageHeader";
+import { PageHeaderCore } from "@/frontend/common/components/ui/container/page/pageHeaderCore.base";
 
 export interface MobilePageHeaderProps {
   readonly title: string;
@@ -46,7 +46,7 @@ export function MobilePageHeader({
 
   return (
     <Box sx={headerSx}>
-      <PageHeader
+      <PageHeaderCore
         title={title}
         subtitle={subtitle}
         breadcrumbs={breadcrumbs}

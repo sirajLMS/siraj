@@ -45,7 +45,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
 
     // 3. Check teacher dashboard loads
     const pageTitle = page.getByRole("heading", { level: 1 });
-    await expect(pageTitle.first()).toBeVisible();
+    expect(await pageTitle.first().isVisible()).toBe(true);
 
     // 4. Find and click "Mark Completed" button for a class instance
     const markCompletedButton = page.getByRole("button", { name: /mark\s+completed|mark\s+complete|إكمال/i }).first();
@@ -101,11 +101,11 @@ describe("Teacher Lesson Report E2E Flow", () => {
         await successSnackbar.waitFor({ state: "visible", timeout: 5000 });
       } catch {
         // If no snackbar, at least verify the dialog closed
-        await expect(dialog).not.toBeVisible();
+        expect(await dialog.isVisible()).toBe(false);
       }
     } else {
       // No eligible classes - just verify the UI elements exist (defensive test)
-      await expect(pageTitle.first()).toBeVisible();
+      expect(await pageTitle.first().isVisible()).toBe(true);
     }
 
     // 8. Logout as teacher
@@ -169,12 +169,12 @@ describe("Teacher Lesson Report E2E Flow", () => {
           await approvedStatus.waitFor({ state: "visible", timeout: 5000 });
         } catch {
           // At minimum, verify the approve button is no longer visible (action was attempted)
-          await expect(approveButton).not.toBeVisible();
+          expect(await approveButton.isVisible()).toBe(false);
         }
       }
     } else {
       // No pending reports found - verify the page loads correctly (defensive)
-      await expect(reviewsTitle.first()).toBeVisible();
+      expect(await reviewsTitle.first().isVisible()).toBe(true);
     }
 
     // 15. Logout as supervisor
@@ -194,7 +194,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
 
     // Verify teacher dashboard loads
     const dashboardTitle = page.getByRole("heading", { level: 1 });
-    await expect(dashboardTitle.first()).toBeVisible();
+    expect(await dashboardTitle.first().isVisible()).toBe(true);
 
     // Check for Mark Completed button (either enabled or disabled)
     const markCompletedButtons = page.getByRole("button", { name: /mark\s+completed|mark\s+complete|إكمال/i });
@@ -207,7 +207,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
       await scheduleGrid.waitFor({ state: "visible", timeout: 10000 });
     } catch {
       // Fallback: verify the dashboard heading is still visible
-      await expect(dashboardTitle.first()).toBeVisible();
+      expect(await dashboardTitle.first().isVisible()).toBe(true);
     }
   });
 

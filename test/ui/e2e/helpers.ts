@@ -37,23 +37,28 @@ export const DEMO_USERS = {
 export type DemoUserSlug = keyof typeof DEMO_USERS;
 
 export async function loginAsDemoUser(page: Page, context: BrowserContext, groupSlug: string): Promise<void> {
-  const response = await page.evaluate(async (slug: string) => {
-    const res = await fetch("/api/graphql", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `
+  const graphqlUrl = `${getTestBaseUrl()}/api/graphql`;
+  await page.goto(getTestBaseUrl());
+  const response = await page.evaluate(
+    async ({ slug, url }: { slug: string; url: string }) => {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `
           mutation demoLogin($input: DemoLoginInput!) {
             demoLogin(input: $input) {
               token
             }
           }
         `,
-        variables: { input: { groupSlug: slug } },
-      }),
-    });
-    return res.json();
-  }, groupSlug);
+          variables: { input: { groupSlug: slug } },
+        }),
+      });
+      return res.json();
+    },
+    { slug: groupSlug, url: graphqlUrl }
+  );
 
   const token = response?.data?.demoLogin?.token;
   if (!token) {

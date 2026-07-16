@@ -43,7 +43,7 @@ mock.module("@/frontend/common/components/auth/RequirePermission", () => ({
     const { hasPermission } = useUserStore();
     const required = Array.isArray(permissions) ? permissions : [permissions];
     const isAuthorized = required.some(permission => hasPermission(permission));
-    return isAuthorized ? <>{children}</> : <>{fallback}</>;
+    return isAuthorized ? children : fallback;
   },
 }));
 
@@ -56,7 +56,6 @@ mock.module("@/frontend/common/views/dashboard/admin/home/scheduleOverview/sched
         <div data-testid="section-title">{props.title}</div>
         {hasSearchPermission && props.searchPlaceholder && (
           <input
-            role="textbox"
             placeholder={props.searchPlaceholder}
             value={props.searchValue}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => props.onSearchChange?.(event.target.value)}

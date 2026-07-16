@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import type { BrowserContext, Page } from "playwright";
+import type { BrowserContext, Locator, Page } from "playwright";
 import { DEMO_USERS, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
@@ -17,6 +17,37 @@ afterEach(async () => {
   }
 });
 
+async function expectVisible(locator: Locator): Promise<void> {
+  expect(await locator.first().isVisible()).toBe(true);
+}
+
+async function _expectHaveText(locator: Locator, text: string): Promise<void> {
+  expect(await locator.first().textContent()).toBe(text);
+}
+
+async function _expectContainText(locator: Locator, text: string): Promise<void> {
+  const content = await locator.first().textContent();
+  expect(content).toBeTruthy();
+  expect(content as string).toContain(text);
+}
+
+async function _expectHaveAttribute(locator: Locator, attr: string, value: string): Promise<void> {
+  expect(await locator.first().getAttribute(attr)).toBe(value);
+}
+
+async function _expectHaveCount(locator: Locator, count: number): Promise<void> {
+  expect(await locator.count()).toBe(count);
+}
+
+async function _expectUrl(page: Page, url: string, exact = true): Promise<void> {
+  const current = page.url();
+  if (exact) {
+    expect(current).toBe(url);
+  } else {
+    expect(current).toContain(url);
+  }
+}
+
 describe("Student Portal E2E", () => {
   test("Student login → dashboard loads with NextClassJoinCard hero", async () => {
     context = await createContext();
@@ -26,8 +57,8 @@ describe("Student Portal E2E", () => {
     await page.waitForURL("**/ar/dashboard**");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByRole("heading", { name: /Next Class|Next Class|الفصل القادم/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Join Now|انضم الآن/i })).toBeVisible();
+    await expectVisible(page.getByRole("heading", { name: /Next Class|Next Class|الفصل القادم/i }));
+    await expectVisible(page.getByRole("button", { name: /Join Now|انضم الآن/i }));
   });
 
   test("Student dashboard shows credit balance section", async () => {
@@ -38,9 +69,9 @@ describe("Student Portal E2E", () => {
     await page.waitForURL("**/ar/dashboard**");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByText(/Credit Balance|رصيد الكريديت|الرصيد/i)).toBeVisible();
-    await expect(page.getByText(/Classes Remaining|الحصص المتبقية/i)).toBeVisible();
-    await expect(page.getByText(/Total Classes|إجمالي الحصص/i)).toBeVisible();
+    await expectVisible(page.getByText(/Credit Balance|رصيد الكريديت|الرصيد/i));
+    await expectVisible(page.getByText(/Classes Remaining|الحصص المتبقية/i));
+    await expectVisible(page.getByText(/Total Classes|إجمالي الحصص/i));
   });
 
   test("Student dashboard shows recent lesson reports section", async () => {
@@ -51,8 +82,8 @@ describe("Student Portal E2E", () => {
     await page.waitForURL("**/ar/dashboard**");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByRole("heading", { name: /Recent Lesson Reports|تقارير الدروس الأخيرة/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /View All History|عرض كامل السجل/i })).toBeVisible();
+    await expectVisible(page.getByRole("heading", { name: /Recent Lesson Reports|تقارير الدروس الأخيرة/i }));
+    await expectVisible(page.getByRole("link", { name: /View All History|عرض كامل السجل/i }));
   });
 
   test("Student can navigate to credits page via sidebar", async () => {
@@ -67,7 +98,7 @@ describe("Student Portal E2E", () => {
     await page.waitForURL("**/ar/students/me/credits**");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByRole("heading", { name: /My Credits|كريديتاتي|رصيدي/i })).toBeVisible();
+    await expectVisible(page.getByRole("heading", { name: /My Credits|كريديتاتي|رصيدي/i }));
   });
 
   test("Student credits page shows transaction history", async () => {
@@ -79,11 +110,11 @@ describe("Student Portal E2E", () => {
     await page.waitForURL("**/ar/students/me/credits**");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByRole("heading", { name: /Transaction History|سجل المعاملات/i })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: /Date|التاريخ/i })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: /Type|النوع/i })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: /Amount|المبلغ/i })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: /Notes|ملاحظات/i })).toBeVisible();
+    await expectVisible(page.getByRole("heading", { name: /Transaction History|سجل المعاملات/i }));
+    await expectVisible(page.getByRole("columnheader", { name: /Date|التاريخ/i }));
+    await expectVisible(page.getByRole("columnheader", { name: /Type|النوع/i }));
+    await expectVisible(page.getByRole("columnheader", { name: /Amount|المبلغ/i }));
+    await expectVisible(page.getByRole("columnheader", { name: /Notes|ملاحظات/i }));
   });
 
   test("Mobile viewport: student dashboard renders mobile view (card list)", async () => {
@@ -97,7 +128,7 @@ describe("Student Portal E2E", () => {
     const cardList = page
       .locator('[class*="MuiPaper-root"]')
       .filter({ hasText: /Next Class|Next Class|الفصل القادم/i });
-    await expect(cardList.first()).toBeVisible();
+    await expectVisible(cardList.first());
   });
 
   test("Student sidebar shows all expected navigation items", async () => {
@@ -108,10 +139,10 @@ describe("Student Portal E2E", () => {
     await page.waitForURL("**/ar/dashboard**");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByRole("link", { name: /Today's Classes|صفوف اليوم/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /My Schedule|جدولي/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /My Credits|كريديتاتي|رصيدي/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /My Profile|ملفي الشخصي/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Logout|تسجيل خروج/i })).toBeVisible();
+    await expectVisible(page.getByRole("link", { name: /Today's Classes|صفوف اليوم/i }));
+    await expectVisible(page.getByRole("link", { name: /My Schedule|جدولي/i }));
+    await expectVisible(page.getByRole("link", { name: /My Credits|كريديتاتي|رصيدي/i }));
+    await expectVisible(page.getByRole("link", { name: /My Profile|ملفي الشخصي/i }));
+    await expectVisible(page.getByRole("button", { name: /Logout|تسجيل خروج/i }));
   });
 });
