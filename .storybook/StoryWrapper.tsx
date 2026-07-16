@@ -3,7 +3,6 @@ import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { Box, CssBaseline, GlobalStyles, type PaletteMode, ThemeProvider } from "@mui/material";
 import type { StoryContext, StoryFn } from "@storybook/react";
-import { NextIntlClientProvider } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
@@ -14,12 +13,14 @@ import {
   AppPermission as AppPermissionEnum,
   CurrencyCode as CurrencyCodeEnum,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import { createAppTheme } from "@/frontend/common/providers/theme/theme";
 import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { MessageSchema } from "@/shared/locale/types/message";
 import ar from "@/shared/messages/ar";
 import en from "@/shared/messages/en";
-import type { MessageSchema } from "@/shared/messages/types/message";
+import type { MessageSchema as LegacyMessageSchema } from "@/shared/messages/types/message";
 
 // Create Emotion caches for Storybook
 const cacheLtr = createCache({
@@ -34,11 +35,16 @@ const cacheRtl = createCache({
 });
 
 export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: StoryContext }) => {
-  const locale = (context.globals.locale as string | undefined) ?? "ar";
+  const locale = ((context.globals.locale as string | undefined) ?? "ar") as "ar" | "en";
   const themeMode = (context.globals.theme as PaletteMode | undefined) ?? "dark";
   const _viewport = (context.globals.viewport as "mobile" | "tablet" | "desktop" | undefined) ?? "desktop";
   const direction: "rtl" | "ltr" = locale === "ar" ? "rtl" : "ltr";
-  const messages: MessageSchema = locale === "ar" ? ar : en;
+  const messages: LegacyMessageSchema = locale === "ar" ? ar : en;
+  // Cast legacy MessageSchema to the new compile-time MessageSchema during
+  // i18n migration. Storybook consumers call useAppTranslation(K) which reads
+  // ctx.translations[K]; the legacy object provides best-effort values until
+  // each namespace is fully migrated. See shared/AGENTS.md.
+  const translations = messages as unknown as Partial<MessageSchema>;
 
   // Build the theme object directly to avoid Next.js-specific provider issues
   const theme = useMemo(() => createAppTheme(themeMode, direction, locale), [themeMode, direction, locale]);
@@ -159,7 +165,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
   const maxWidth = _viewport === "mobile" ? 600 : _viewport === "tablet" ? 900 : "none";
 
   return (
-    <NextIntlClientProvider messages={messages} locale={locale}>
+    <LocaleProvider translations={translations} locale={locale}>
       <ThemeContext.Provider value={themeContextValue}>
         <CacheProvider value={cache}>
           <ThemeProvider theme={theme}>
@@ -215,7 +221,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
           </ThemeProvider>
         </CacheProvider>
       </ThemeContext.Provider>
-    </NextIntlClientProvider>
+    </LocaleProvider>
   );
 };
 

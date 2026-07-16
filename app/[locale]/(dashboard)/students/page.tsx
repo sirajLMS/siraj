@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cache } from "react";
 import { AppPermission } from "@/backend/enum";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
@@ -9,6 +8,7 @@ import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { StudentsContainer } from "@/frontend/common/views/dashboard/admin/parents/students/StudentsContainer";
 import { ParentStudentsContainer } from "@/frontend/common/views/dashboard/parent/students/ParentStudentsContainer";
 import { TeacherStudentsContainer } from "@/frontend/common/views/dashboard/teachers/students/TeacherStudentsContainer";
+import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({
   params,
@@ -16,8 +16,8 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "dashboard.studentDirectory" });
-  return { title: t("pageTitle") };
+  const t = await getTranslations(locale, "dashboard.studentDirectory");
+  return { title: t.pageTitle };
 }
 
 type StudentsAudience = "parent" | "teacher" | "admin";
@@ -50,7 +50,6 @@ interface PageProps {
 
 export default async function StudentsPage({ params }: PageProps) {
   const { locale } = await params;
-  setRequestLocale(locale);
 
   const { userId, context } = await getServerUserContext();
   if (!userId) {

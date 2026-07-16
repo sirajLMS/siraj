@@ -5,19 +5,20 @@ import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { type RenderResult, render } from "@testing-library/react";
-import { NextIntlClientProvider } from "next-intl";
 import { type ReactElement, type ReactNode, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
 import type { ViewportTier } from "@/frontend/common/context/ViewportContext";
 import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import { createAppTheme } from "@/frontend/common/providers/theme/theme";
 import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { MessageSchema } from "@/shared/locale/types/message";
 import ar from "@/shared/messages/ar";
 import en from "@/shared/messages/en";
-import type { MessageSchema } from "@/shared/messages/types/message";
+import type { MessageSchema as LegacyMessageSchema } from "@/shared/messages/types/message";
 
 const cacheLtr = createCache({
   key: "test-ltr",
@@ -48,7 +49,12 @@ export function TestWrapper({
   children,
 }: TestWrapperProps) {
   const direction: "rtl" | "ltr" = locale === "ar" ? "rtl" : "ltr";
-  const messages: MessageSchema = locale === "ar" ? ar : en;
+  const messages: LegacyMessageSchema = locale === "ar" ? ar : en;
+  // Cast legacy MessageSchema to the new compile-time MessageSchema during
+  // i18n migration. Test consumers call useAppTranslation(K) which reads
+  // ctx.translations[K]; the legacy object provides best-effort values until
+  // each namespace is fully migrated. See shared/AGENTS.md.
+  const translations = messages as unknown as Partial<MessageSchema>;
   const theme = useMemo(() => createAppTheme(themeMode, direction, locale), [themeMode, direction, locale]);
   const cache = direction === "rtl" ? cacheRtl : cacheLtr;
 
@@ -86,7 +92,7 @@ export function TestWrapper({
   useUserStore.setState({ permissions });
 
   return (
-    <NextIntlClientProvider messages={messages} locale={locale}>
+    <LocaleProvider translations={translations} locale={locale}>
       <ThemeContext.Provider value={themeContextValue}>
         <CacheProvider value={cache}>
           <ThemeProvider theme={theme}>
@@ -97,7 +103,7 @@ export function TestWrapper({
           </ThemeProvider>
         </CacheProvider>
       </ThemeContext.Provider>
-    </NextIntlClientProvider>
+    </LocaleProvider>
   );
 }
 
