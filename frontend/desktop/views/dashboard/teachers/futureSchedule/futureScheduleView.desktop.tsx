@@ -2,6 +2,7 @@
 
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { FutureClassCardDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/futureClassCard.desktop";
 import { ImportantNotesDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/importantNotes.desktop";
 import { JumpToDateHeaderDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.desktop";

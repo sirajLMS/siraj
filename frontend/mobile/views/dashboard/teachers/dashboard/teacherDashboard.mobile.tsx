@@ -12,7 +12,7 @@ import {
   teacherDashboardContentPaddingSx,
   teacherDashboardPageContainerSx,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
-import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
 import { ActivationPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/activationPolicyPanel.mobile";
 import { MissedClassAlertBannerMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.mobile";
 import { StudentProgressFeedMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/studentProgressFeed.mobile";

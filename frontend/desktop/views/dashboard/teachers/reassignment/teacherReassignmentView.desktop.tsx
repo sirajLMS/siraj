@@ -3,6 +3,7 @@
 import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Grid } from "@mui/material";
 import type { TeacherReassignmentViewModel } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { CurrentTeacherCardDesktop } from "@/frontend/desktop/views/dashboard/teachers/reassignment/components/currentTeacherCard.desktop";
 import { ManagementControlsCardDesktop } from "@/frontend/desktop/views/dashboard/teachers/reassignment/components/managementControlsCard.desktop";
 import { ReassignmentBentoGridDesktop } from "@/frontend/desktop/views/dashboard/teachers/reassignment/components/reassignmentBentoGrid.desktop";

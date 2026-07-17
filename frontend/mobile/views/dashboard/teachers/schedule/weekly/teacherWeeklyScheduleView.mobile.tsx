@@ -16,10 +16,10 @@ import {
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 import MobileScheduleList from "@/frontend/mobile/views/dashboard/teachers/schedule/weekly/mobileScheduleList.mobile";
 import { useAppTranslation } from "@/shared/locale";
 

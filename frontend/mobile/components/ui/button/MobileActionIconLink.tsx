@@ -1,0 +1,20 @@
+"use client";
+
+import { alpha, styled } from "@mui/material/styles";
+import { Link } from "@/shared/i18n/routing";
+
+export const MobileActionIconLink = styled(Link)(({ theme }) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: 44,
+  height: 44,
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  color: theme.palette.onSurfaceVariant,
+  textDecoration: "none",
+  flexShrink: 0,
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+    color: theme.palette.primary.main,
+  },
+}));

@@ -49,7 +49,7 @@ export function TeacherAvailabilityMobileView({
   });
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader
         title={t.mobile.pageTitle}
         subtitle={t.mobile.pageSubtitle}
