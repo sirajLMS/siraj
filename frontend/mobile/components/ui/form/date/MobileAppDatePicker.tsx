@@ -1,50 +1,59 @@
 "use client";
 
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import type { PickersInputLocaleText } from "@mui/x-date-pickers/locales";
-import { MobileDatePicker, type MobileDatePickerProps } from "@mui/x-date-pickers/MobileDatePicker";
-import { ar } from "date-fns/locale/ar";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { TextField } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
+import type { ReactElement } from "react";
 
-export type MobileAppDatePickerProps = MobileDatePickerProps;
+export type MobileAppDatePickerProps = {
+  readonly value: Date | null;
+  readonly onChangeAction: (date: Date | null) => void;
+  readonly label?: string;
+  readonly disabled?: boolean;
+  readonly required?: boolean;
+  readonly error?: boolean;
+  readonly helperText?: string;
+  readonly fullWidth?: boolean;
+  readonly sx?: SxProps<Theme>;
+  readonly slotProps?: {
+    readonly textField?: Partial<React.ComponentProps<typeof TextField>>;
+  };
+};
 
-const ARABIC_PICKER_LOCALE_TEXT = {
-  previousMonth: "الشهر السابق",
-  nextMonth: "الشهر التالي",
-  openPreviousView: "افتح العرض السابق",
-  openNextView: "افتح العرض التالي",
-  calendarViewSwitchingButtonAriaLabel: view =>
-    view === "year" ? "عرض السنة مفتوح، انتقل إلى عرض التقويم" : "عرض التقويم مفتوح، انتقل إلى عرض السنة",
-  cancelButtonLabel: "إلغاء",
-  clearButtonLabel: "مسح",
-  okButtonLabel: "موافق",
-  todayButtonLabel: "اليوم",
-  datePickerToolbarTitle: "اختر التاريخ",
-  openDatePickerDialogue: formattedDate =>
-    formattedDate ? `اختر التاريخ، التاريخ المحدد هو ${formattedDate}` : "اختر التاريخ",
-  fieldClearLabel: "مسح",
-  dateTableLabel: "اختر التاريخ",
-  fieldYearPlaceholder: params => "س".repeat(params.digitAmount),
-  fieldMonthPlaceholder: params => (params.contentType === "letter" ? "شهر" : "شش"),
-  fieldDayPlaceholder: () => "يي",
-  year: "السنة",
-  month: "الشهر",
-  day: "اليوم",
-  weekDay: "يوم الأسبوع",
-} satisfies PickersInputLocaleText;
-
-export function MobileAppDatePicker(props: Readonly<MobileAppDatePickerProps>) {
-  const locale = useAppLocale();
-  const isArabicLocale = locale === "ar";
+/**
+ * Mobile-tier date picker. Simple TextField with type="date" — no desktop popover/card complexity.
+ * Uses native mobile date picker UI.
+ */
+export const MobileAppDatePicker: React.FC<MobileAppDatePickerProps> = ({
+  value,
+  onChangeAction,
+  label,
+  disabled,
+  required,
+  error,
+  helperText,
+  fullWidth = true,
+  sx,
+  slotProps,
+}): ReactElement => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.value ? new Date(event.target.value) : null;
+    onChangeAction(newValue);
+  };
 
   return (
-    <LocalizationProvider
-      dateAdapter={AdapterDateFns}
-      adapterLocale={isArabicLocale ? ar : undefined}
-      localeText={isArabicLocale ? ARABIC_PICKER_LOCALE_TEXT : undefined}
-    >
-      <MobileDatePicker {...props} />
-    </LocalizationProvider>
+    <TextField
+      type="date"
+      fullWidth={fullWidth}
+      label={label}
+      value={value ? value.toISOString().split("T")[0] : ""}
+      onChange={handleChange}
+      disabled={disabled}
+      required={required}
+      error={error}
+      helperText={helperText}
+      InputLabelProps={{ shrink: true }}
+      sx={sx}
+      slotProps={slotProps}
+    />
   );
-}
+};

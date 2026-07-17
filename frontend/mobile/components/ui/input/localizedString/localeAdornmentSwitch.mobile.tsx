@@ -3,10 +3,10 @@
 import { ArrowDropDown } from "@mui/icons-material";
 import { Box, IconButton, Popover, Stack, styled, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
-import type { LocaleAdornmentSwitchProps } from "@/frontend/common/components/ui/input/localizedString/LocaleAdornmentSwitch";
 import { getLanguageDisplayName, getLanguageEmoji, languages } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
+import type { LocaleAdornmentSwitchProps } from "@/frontend/mobile/components/ui/input/localizedString/localeAdornmentSwitch.types";
 import type { AppLocale } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -51,7 +51,7 @@ function MobileLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<MobileLo
             isLastItem={isLastItem}
             onClick={() => onPick(language.code as AppLocale)}
           >
-            <LocaleEmoji emoji={language.emoji} />
+            <MobileLocaleEmoji emoji={language.emoji} />
             <Typography component="span" sx={{ flex: 1, fontSize: "0.875rem" }}>
               {getLanguageDisplayName(language.code, uiLocale)}
             </Typography>
@@ -143,7 +143,7 @@ export function LocaleAdornmentSwitchMobile({
           },
         ]}
       >
-        <LocaleEmoji emoji={emoji} />
+        <MobileLocaleEmoji emoji={emoji} />
         {compact ? null : (
           <Typography component="span" sx={{ whiteSpace: "nowrap", fontSize: "0.875rem" }}>
             {label}

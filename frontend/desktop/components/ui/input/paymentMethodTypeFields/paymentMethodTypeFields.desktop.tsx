@@ -1,14 +1,7 @@
-"use client";
-
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
-import { Controller, type FieldPath, type FieldValues } from "react-hook-form";
-import type {
-  PaymentMethodCatalogFormValue,
-  PaymentMethodDetailsFormValue,
-  PaymentMethodTypeFieldsProps,
-} from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields";
+import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CountryAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/countrySelect";
 import { CurrencySelectDesktop } from "@/frontend/desktop/components/ui/input/currencySelect";
@@ -18,7 +11,66 @@ import { PhoneFormFieldDesktop } from "@/frontend/desktop/components/ui/input/ph
 import { TagInputDesktop } from "@/frontend/desktop/components/ui/input/tagInput";
 import { useAppTranslation } from "@/shared/locale";
 
-export type { PaymentMethodCatalogFormValue, PaymentMethodDetailsFormValue, PaymentMethodTypeFieldsProps };
+/**
+ * Payment method details form value — desktop tier duplicate of common type.
+ * Keep in sync with `@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields`.
+ */
+export type PaymentMethodDetailsFormValue = {
+  readonly walletId?: string;
+  readonly phone?: string;
+  readonly paymentLinkId?: string;
+  readonly url?: string;
+  readonly onlineAccountId?: string;
+  readonly identifier?: string;
+  readonly iban?: string;
+  readonly bankName?: string;
+  readonly beneficiaryName?: string;
+  readonly swiftBic?: string;
+  readonly accountNumber?: string;
+  readonly routingNumber?: string;
+  readonly note?: string;
+};
+
+/**
+ * Payment method catalog form value — desktop tier duplicate of common type.
+ * Keep in sync with `@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields`.
+ */
+export type PaymentMethodCatalogFormValue = {
+  readonly name?: Record<string, string>;
+  readonly description?: Record<string, string>;
+  readonly instructions?: Record<string, string>;
+  readonly countryCode?: CountryType | null;
+  readonly currency?: CurrencyOption | null;
+  readonly urlAllowlist?: readonly string[];
+};
+
+/**
+ * Props for the PaymentMethodTypeFieldsDesktop component — desktop tier duplicate of common type.
+ * Keep in sync with `@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields`.
+ */
+export type PaymentMethodTypeFieldsProps<T extends FieldValues> = {
+  readonly type: PaymentMethodType;
+  readonly control: Control<T>;
+  readonly disabled?: boolean;
+  readonly walletOptions?: readonly PaymentMethodCatalogOption[];
+  readonly paymentLinkOptions?: readonly PaymentMethodCatalogOption[];
+  readonly onlineAccountOptions?: readonly PaymentMethodCatalogOption[];
+  readonly selectedWallet?: PaymentMethodCatalogOption | null;
+  readonly selectedPaymentLink?: PaymentMethodCatalogOption | null;
+  readonly selectedOnlineAccount?: PaymentMethodCatalogOption | null;
+  readonly onWalletChangeAction?: (option: PaymentMethodCatalogOption) => void;
+  readonly onPaymentLinkChangeAction?: (option: PaymentMethodCatalogOption) => void;
+  readonly onOnlineAccountChangeAction?: (option: PaymentMethodCatalogOption) => void;
+  readonly allowedCurrencyCodes?: readonly CurrencyCode[];
+  readonly showCatalogMetadata?: boolean;
+  readonly detailsPrefix?: string;
+  readonly catalogPrefix?: string;
+};
+
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyOption } from "@/frontend/common/lib/currency";
+import type { CountryType } from "@/frontend/common/lib/locale";
+import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 
 function resolveFieldName<T extends FieldValues>(prefix: string | undefined, field: string): FieldPath<T> {
   return (prefix ? `${prefix}.${field}` : field) as FieldPath<T>;

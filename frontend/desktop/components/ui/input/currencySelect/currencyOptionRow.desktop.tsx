@@ -3,8 +3,8 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import { type CurrencyOption, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
+import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 
 export type CurrencyOptionRowProps = {
   readonly currency: CurrencyOption;
@@ -19,7 +19,7 @@ export function CurrencyOptionRowDesktop({
 }: CurrencyOptionRowProps): React.ReactNode {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
-      <LocaleEmoji emoji={currency.flagEmoji} />
+      <DesktopLocaleEmoji emoji={currency.flagEmoji} />
       <Typography component="span" sx={{ flex: 1 }}>
         {getCurrencyDisplayName(currency.code, locale)}
       </Typography>

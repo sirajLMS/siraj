@@ -2,10 +2,10 @@
 
 import { Box, Button, ButtonGroup, Typography } from "@mui/material";
 import type * as React from "react";
-import type { PaymentMethodTypeSelectorProps } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PAYMENT_METHOD_TYPES } from "@/frontend/common/lib/payment-method";
-import { type PaymentMethodTypeSelectorLabels, useAppTranslation } from "@/shared/locale";
+import type { PaymentMethodTypeSelectorProps } from "@/frontend/mobile/components/ui/input/paymentMethodTypeFields/paymentMethodTypeFields.types";
+import { useAppTranslation } from "@/shared/locale";
 
 export const PaymentMethodTypeSelectorMobile: React.FC<PaymentMethodTypeSelectorProps> = ({
   type,

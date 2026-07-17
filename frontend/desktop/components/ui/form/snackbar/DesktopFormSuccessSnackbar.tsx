@@ -9,9 +9,14 @@ export interface DesktopFormSuccessSnackbarProps {
   readonly onClose: () => void;
 }
 
+/**
+ * Desktop-tier success snackbar for form submissions.
+ * Self-contained — no shared base component.
+ * Duplicate of `@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar`.
+ */
 export function DesktopFormSuccessSnackbar({ open, message, onClose }: Readonly<DesktopFormSuccessSnackbarProps>) {
   return (
-    <Snackbar open={open} anchorOrigin={{ vertical: "top", horizontal: "right" }} onClose={onClose}>
+    <Snackbar open={open} anchorOrigin={{ vertical: "bottom", horizontal: "center" }} onClose={onClose}>
       <Box
         sx={theme => ({
           display: "flex",

@@ -4,14 +4,14 @@ import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { format, isValid } from "date-fns";
-import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
-import { rtlFlipIconSx } from "@/frontend/common/utils/rtlFlipIconSx";
+import { AppDatePickerDesktop } from "@/frontend/desktop/components/ui/form/date/AppDatePicker.desktop";
+import { rtlFlipIconSxDesktop } from "@/frontend/desktop/components/ui/utils/rtlFlipIconSx.desktop";
 import {
-  getTodayScheduleFilterDate,
-  isScheduleFilterDateToday,
-  parseScheduleFilterDate,
-  shiftScheduleFilterDate,
-} from "@/frontend/common/utils/scheduleFilterDate";
+  getTodayScheduleFilterDateDesktop,
+  isScheduleFilterDateTodayDesktop,
+  parseScheduleFilterDateDesktop,
+  shiftScheduleFilterDateDesktop,
+} from "@/frontend/desktop/components/ui/utils/scheduleFilterDate.desktop";
 
 const StyledDateControls = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -52,8 +52,8 @@ export function DateNavigatorDesktop({
   dateLabel,
   onDateChange,
 }: Readonly<DateNavigatorDesktopProps>) {
-  const selectedDate = parseScheduleFilterDate(dateValue);
-  const isTodaySelected = isScheduleFilterDateToday(dateValue);
+  const selectedDate = parseScheduleFilterDateDesktop(dateValue);
+  const isTodaySelected = isScheduleFilterDateTodayDesktop(dateValue);
 
   return (
     <StyledDateControls>
@@ -61,9 +61,9 @@ export function DateNavigatorDesktop({
         <StyledDateNavButton
           size="small"
           aria-label={previousDayLabel}
-          onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, -1))}
+          onClick={() => onDateChange(shiftScheduleFilterDateDesktop(dateValue, -1))}
         >
-          <ChevronLeft fontSize="small" sx={rtlFlipIconSx} />
+          <ChevronLeft fontSize="small" sx={rtlFlipIconSxDesktop} />
         </StyledDateNavButton>
       </Tooltip>
 
@@ -89,9 +89,9 @@ export function DateNavigatorDesktop({
         <StyledDateNavButton
           size="small"
           aria-label={nextDayLabel}
-          onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, 1))}
+          onClick={() => onDateChange(shiftScheduleFilterDateDesktop(dateValue, 1))}
         >
-          <ChevronRight fontSize="small" sx={rtlFlipIconSx} />
+          <ChevronRight fontSize="small" sx={rtlFlipIconSxDesktop} />
         </StyledDateNavButton>
       </Tooltip>
 
@@ -99,7 +99,7 @@ export function DateNavigatorDesktop({
         variant="text"
         size="small"
         disabled={isTodaySelected}
-        onClick={() => onDateChange(getTodayScheduleFilterDate())}
+        onClick={() => onDateChange(getTodayScheduleFilterDateDesktop())}
         sx={{
           flexShrink: 0,
           minWidth: "auto",

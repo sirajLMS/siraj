@@ -1,9 +1,11 @@
 "use client";
 
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
-import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringInput";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
-import { LocalizedStringInputDesktop } from "@/frontend/desktop/components/ui/input/localizedString/localizedStringInput.desktop";
+import {
+  LocalizedStringInputDesktop,
+  type LocalizedStringInputProps,
+} from "@/frontend/desktop/components/ui/input/localizedString/localizedStringInput.desktop";
 
 type LocalizedStringFormFieldProps<T extends FieldValues> = Omit<
   LocalizedStringInputProps,

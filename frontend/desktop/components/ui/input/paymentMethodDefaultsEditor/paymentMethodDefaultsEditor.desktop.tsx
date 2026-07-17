@@ -5,14 +5,30 @@ import { Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/materi
 import { useCallback, useState } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
-import { FieldWrapper } from "@/frontend/common/components/ui/form/field/FieldWrapper";
-import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
-import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/PaymentMethodDefaultsEditor";
 import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
+import { DesktopFieldWrapper } from "@/frontend/desktop/components/ui/form/field";
+import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/form/snackbar";
 import { CurrencySelectDesktop } from "@/frontend/desktop/components/ui/input/currencySelect";
 import { LocalizedStringDrawerDesktop } from "@/frontend/desktop/components/ui/input/localizedString";
 import { useAppTranslation } from "@/shared/locale";
+
+export type PaymentMethodDefaultsEditorProps = {
+  readonly methods: readonly PaymentMethodRow[];
+  readonly payinDefaultId: string | null;
+  readonly payoutDefaultId: string | null;
+  readonly onPayinDefaultChangeAction: (id: string | null) => void;
+  readonly onPayoutDefaultChangeAction: (id: string | null) => void;
+  readonly instructions?: Record<string, string>;
+  readonly onInstructionsSaveAction?: (next: Record<string, string>) => void;
+  readonly displayCurrency?: CurrencyOption | null;
+  readonly onDisplayCurrencyChangeAction?: (currency: CurrencyOption) => void;
+  readonly allowedCurrencyCodes?: readonly string[];
+  readonly disabled?: boolean;
+  readonly successOpen?: boolean;
+  readonly onSuccessCloseAction?: () => void;
+};
 
 function filterMethodsForDirection(
   methods: readonly PaymentMethodRow[],
@@ -65,7 +81,7 @@ export function PaymentMethodDefaultsEditorDesktop({
 
   return (
     <Stack spacing={2}>
-      <FieldWrapper label={tDefaults.payinDefault}>
+      <DesktopFieldWrapper label={tDefaults.payinDefault}>
         <TextField
           select
           fullWidth
@@ -81,9 +97,9 @@ export function PaymentMethodDefaultsEditorDesktop({
             </MenuItem>
           ))}
         </TextField>
-      </FieldWrapper>
+      </DesktopFieldWrapper>
 
-      <FieldWrapper label={tDefaults.payoutDefault}>
+      <DesktopFieldWrapper label={tDefaults.payoutDefault}>
         <TextField
           select
           fullWidth
@@ -99,10 +115,10 @@ export function PaymentMethodDefaultsEditorDesktop({
             </MenuItem>
           ))}
         </TextField>
-      </FieldWrapper>
+      </DesktopFieldWrapper>
 
       {onInstructionsSaveAction ? (
-        <FieldWrapper label={tDefaults.instructions}>
+        <DesktopFieldWrapper label={tDefaults.instructions}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Typography sx={{ flex: 1, typography: "bodyMd", color: "text.secondary" }}>
               {Object.values(instructions).find(value => value.trim() !== "") ?? tDefaults.none}
@@ -128,11 +144,11 @@ export function PaymentMethodDefaultsEditorDesktop({
             }}
             onCancelAction={() => setInstructionsOpen(false)}
           />
-        </FieldWrapper>
+        </DesktopFieldWrapper>
       ) : null}
 
       {onDisplayCurrencyChangeAction ? (
-        <FieldWrapper label={tDefaults.displayCurrency}>
+        <DesktopFieldWrapper label={tDefaults.displayCurrency}>
           <CurrencySelectDesktop
             currency={displayCurrency ?? null}
             setCurrencyAction={onDisplayCurrencyChangeAction}
@@ -140,7 +156,7 @@ export function PaymentMethodDefaultsEditorDesktop({
             disabled={disabled}
             fullWidth
           />
-        </FieldWrapper>
+        </DesktopFieldWrapper>
       ) : null}
 
       {methods.length > 0 ? (
@@ -166,7 +182,11 @@ export function PaymentMethodDefaultsEditorDesktop({
         </Stack>
       ) : null}
 
-      <FormSuccessSnackbar open={successOpen} message={tDefaults.saved} onClose={() => onSuccessCloseAction?.()} />
+      <DesktopFormSuccessSnackbar
+        open={successOpen}
+        message={tDefaults.saved}
+        onClose={() => onSuccessCloseAction?.()}
+      />
     </Stack>
   );
 }

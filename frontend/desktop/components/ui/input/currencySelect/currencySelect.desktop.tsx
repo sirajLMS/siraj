@@ -1,8 +1,8 @@
 "use client";
 
 import type * as React from "react";
-import type { CurrencyAutocompleteProps } from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocomplete";
 import type { CurrencyOption } from "@/frontend/common/lib/currency";
+import type { CurrencyAutocompleteProps } from "@/frontend/desktop/components/ui/input/currencySelect/currencyAutocomplete.desktop";
 import { CurrencyAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/currencySelect/currencyAutocomplete.desktop";
 
 export type CurrencySelectProps = {

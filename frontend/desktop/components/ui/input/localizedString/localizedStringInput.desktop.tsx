@@ -4,17 +4,42 @@ import { EditOutlined } from "@mui/icons-material";
 import { Box, Button, FormHelperText, IconButton, type SxProps, TextField, type Theme } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringInput";
-import { useLocaleSwitchSuccess } from "@/frontend/common/components/ui/input/localizedString/useLocaleSwitchSuccess";
-import { useNarrowContainer } from "@/frontend/common/components/ui/input/localizedString/useNarrowContainer";
 import { getLanguageDisplayName } from "@/frontend/common/lib/locale";
 import { pickInitialActiveLocale, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { LocaleAdornmentSwitchDesktop } from "@/frontend/desktop/components/ui/input/localizedString/localeAdornmentSwitch.desktop";
 import { LocalizedStringDrawerDesktop } from "@/frontend/desktop/components/ui/input/localizedString/localizedStringDrawer.desktop";
+import { useLocaleSwitchSuccess } from "@/frontend/desktop/components/ui/input/localizedString/useLocaleSwitchSuccess.desktop";
+import { useNarrowContainer } from "@/frontend/desktop/components/ui/input/localizedString/useNarrowContainer.desktop";
 import { type LocalizedStringLabels, useAppTranslation } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
+
+/**
+ * Desktop tier duplicate of LocalizedStringInputProps from common.
+ * Keep in sync with `@/frontend/common/components/ui/input/localizedString/LocalizedStringInput`.
+ */
+export type LocalizedStringInputProps = {
+  readonly value: LocalizedString;
+  readonly onChangeAction: (value: LocalizedString) => void;
+  readonly onBlurAction?: () => void;
+  readonly label?: string;
+  readonly helperText?: string;
+  readonly error?: boolean;
+  readonly errorMessage?: string;
+  readonly required?: boolean;
+  readonly requiredLocales?: readonly AppLocale[];
+  readonly multiline?: boolean;
+  readonly minRows?: number;
+  readonly disabled?: boolean;
+  readonly fullWidth?: boolean;
+  readonly drawerTitle?: string;
+  readonly disableDrawer?: boolean;
+  readonly drawerAutosave?: boolean;
+  readonly drawerShowActions?: boolean;
+  readonly drawerDismissAction?: "save" | "cancel";
+  readonly sx?: SxProps<Theme>;
+};
 
 type EditDrawerControlProps = {
   readonly t: LocalizedStringLabels;

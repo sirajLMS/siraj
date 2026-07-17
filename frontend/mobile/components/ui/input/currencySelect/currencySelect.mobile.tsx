@@ -1,9 +1,9 @@
 "use client";
 
 import type * as React from "react";
-import type { CurrencyAutocompleteProps } from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocomplete";
 import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import { CurrencyAutocompleteMobile } from "@/frontend/mobile/components/ui/input/currencySelect/currencyAutocomplete.mobile";
+import type { CurrencyAutocompleteProps } from "@/frontend/mobile/components/ui/input/currencySelect/currencyAutocomplete.types";
 
 export type CurrencySelectProps = {
   readonly currency?: CurrencyOption | null;

@@ -2,10 +2,39 @@
 
 import { Box, Button, ButtonGroup, Typography } from "@mui/material";
 import type * as React from "react";
-import type { PaymentMethodTypeSelectorProps } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PAYMENT_METHOD_TYPES } from "@/frontend/common/lib/payment-method";
-import { type PaymentMethodTypeSelectorLabels, useAppTranslation } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
+
+/**
+ * Labels for the PaymentMethodTypeSelector component — desktop tier duplicate of common type.
+ * Keep in sync with `@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector`.
+ */
+export type PaymentMethodTypeSelectorLabels = {
+  readonly title?: string;
+  readonly ariaLabel?: string;
+  readonly mobileWallet?: string;
+  readonly paymentLink?: string;
+  readonly onlineAccount?: string;
+  readonly bankTransfer?: string;
+  readonly cash?: string;
+  readonly any?: string;
+};
+
+/**
+ * Props for the PaymentMethodTypeSelectorDesktop component — desktop tier duplicate of common type.
+ * Keep in sync with `@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector`.
+ */
+export type PaymentMethodTypeSelectorProps = {
+  readonly type: PaymentMethodType | null;
+  readonly setTypeAction: (type: PaymentMethodType | null) => void;
+  readonly error?: boolean;
+  readonly required?: boolean;
+  readonly fullWidth?: boolean;
+  readonly labels?: Partial<PaymentMethodTypeSelectorLabels>;
+  readonly allowEmpty?: boolean;
+  readonly allowedTypes?: readonly PaymentMethodType[];
+};
 
 export const PaymentMethodTypeSelectorDesktop: React.FC<PaymentMethodTypeSelectorProps> = ({
   type,
@@ -97,5 +126,3 @@ export const PaymentMethodTypeSelectorDesktop: React.FC<PaymentMethodTypeSelecto
     </Box>
   );
 };
-
-export type { PaymentMethodTypeSelectorLabels };

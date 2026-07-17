@@ -1,7 +1,7 @@
 "use client";
 
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
-import type { PhoneInputProps } from "@/frontend/common/components/ui/input/phoneInput/PhoneInput";
+import type { PhoneInputProps } from "@/frontend/mobile/components/ui/input/phoneInput/PhoneInput";
 
 import { PhoneInputMobile } from "@/frontend/mobile/components/ui/input/phoneInput/phoneInput.mobile";
 

@@ -4,21 +4,15 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
 import { Controller, type FieldPath, type FieldValues } from "react-hook-form";
-import type {
-  PaymentMethodCatalogFormValue,
-  PaymentMethodDetailsFormValue,
-  PaymentMethodTypeFieldsProps,
-} from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CountryAutocompleteMobile } from "@/frontend/mobile/components/ui/input/countrySelect";
 import { CurrencySelectMobile } from "@/frontend/mobile/components/ui/input/currencySelect";
 import { LocalizedStringFormFieldMobile } from "@/frontend/mobile/components/ui/input/localizedString";
 import { PaymentMethodSelectMobile } from "@/frontend/mobile/components/ui/input/paymentMethodSelect";
+import type { PaymentMethodTypeFieldsProps } from "@/frontend/mobile/components/ui/input/paymentMethodTypeFields/paymentMethodTypeFields.types";
 import { PhoneFormFieldMobile } from "@/frontend/mobile/components/ui/input/phoneInput";
 import { TagInputMobile } from "@/frontend/mobile/components/ui/input/tagInput";
 import { useAppTranslation } from "@/shared/locale";
-
-export type { PaymentMethodCatalogFormValue, PaymentMethodDetailsFormValue, PaymentMethodTypeFieldsProps };
 
 function resolveFieldName<T extends FieldValues>(prefix: string | undefined, field: string): FieldPath<T> {
   return (prefix ? `${prefix}.${field}` : field) as FieldPath<T>;

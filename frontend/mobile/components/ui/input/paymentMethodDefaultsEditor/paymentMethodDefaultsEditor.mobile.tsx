@@ -3,15 +3,17 @@
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
-import { FieldWrapper } from "@/frontend/common/components/ui/form/field/FieldWrapper";
-import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
-import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/PaymentMethodDefaultsEditor";
 import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge/MobileStatusBadge";
+import { MobileFieldWrapper } from "@/frontend/mobile/components/ui/form/field/MobileFieldWrapper";
+import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar/MobileFormSuccessSnackbar";
 import { CurrencySelectMobile } from "@/frontend/mobile/components/ui/input/currencySelect";
 import { LocalizedStringDrawerMobile } from "@/frontend/mobile/components/ui/input/localizedString";
+import type {
+  PaymentMethodDefaultsEditorProps,
+  PaymentMethodRow,
+} from "@/frontend/mobile/components/ui/input/paymentMethodDefaultsEditor/paymentMethodDefaultsEditor.types";
 import { useAppTranslation } from "@/shared/locale";
 
 function filterMethodsForDirection(
@@ -65,7 +67,7 @@ export function PaymentMethodDefaultsEditorMobile({
 
   return (
     <Stack sx={{ gap: 2 }}>
-      <FieldWrapper label={tDefaults.payinDefault}>
+      <MobileFieldWrapper label={tDefaults.payinDefault}>
         <TextField
           select
           fullWidth
@@ -83,9 +85,9 @@ export function PaymentMethodDefaultsEditorMobile({
             </MenuItem>
           ))}
         </TextField>
-      </FieldWrapper>
+      </MobileFieldWrapper>
 
-      <FieldWrapper label={tDefaults.payoutDefault}>
+      <MobileFieldWrapper label={tDefaults.payoutDefault}>
         <TextField
           select
           fullWidth
@@ -103,10 +105,10 @@ export function PaymentMethodDefaultsEditorMobile({
             </MenuItem>
           ))}
         </TextField>
-      </FieldWrapper>
+      </MobileFieldWrapper>
 
       {onInstructionsSaveAction ? (
-        <FieldWrapper label={tDefaults.instructions}>
+        <MobileFieldWrapper label={tDefaults.instructions}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Typography sx={{ flex: 1, typography: "bodyMd", color: "text.secondary" }}>
               {Object.values(instructions).find(value => value.trim() !== "") ?? tDefaults.none}
@@ -132,11 +134,11 @@ export function PaymentMethodDefaultsEditorMobile({
             }}
             onCancelAction={() => setInstructionsOpen(false)}
           />
-        </FieldWrapper>
+        </MobileFieldWrapper>
       ) : null}
 
       {onDisplayCurrencyChangeAction ? (
-        <FieldWrapper label={tDefaults.displayCurrency}>
+        <MobileFieldWrapper label={tDefaults.displayCurrency}>
           <CurrencySelectMobile
             currency={displayCurrency ?? null}
             setCurrencyAction={onDisplayCurrencyChangeAction}
@@ -144,7 +146,7 @@ export function PaymentMethodDefaultsEditorMobile({
             disabled={disabled}
             fullWidth
           />
-        </FieldWrapper>
+        </MobileFieldWrapper>
       ) : null}
 
       {methods.length > 0 ? (
@@ -163,14 +165,23 @@ export function PaymentMethodDefaultsEditorMobile({
             >
               <Typography sx={{ flex: 1, typography: "bodyMd" }}>{formatMethodLabel(method)}</Typography>
               {method.isDefault ? (
-                <StatusBadge category="paymentMethod" status="active" label={t.display.defaultBadge} size="small" />
+                <MobileStatusBadge
+                  category="paymentMethod"
+                  status="active"
+                  label={t.display.defaultBadge}
+                  size="small"
+                />
               ) : null}
             </Box>
           ))}
         </Stack>
       ) : null}
 
-      <FormSuccessSnackbar open={successOpen} message={tDefaults.saved} onClose={() => onSuccessCloseAction?.()} />
+      <MobileFormSuccessSnackbar
+        open={successOpen}
+        message={tDefaults.saved}
+        onClose={() => onSuccessCloseAction?.()}
+      />
     </Stack>
   );
 }

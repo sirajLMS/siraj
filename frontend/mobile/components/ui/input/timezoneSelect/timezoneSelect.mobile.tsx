@@ -7,8 +7,6 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useMemo } from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import type { TimezoneSelectProps } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import {
   fromGraphqlIanaTimezone,
   getTimezoneOptions,
@@ -16,6 +14,8 @@ import {
   toGraphqlIanaTimezone,
 } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
+import type { TimezoneSelectProps } from "@/frontend/mobile/components/ui/input/timezoneSelect/TimezoneSelect";
 import { useAppTranslation } from "@/shared/locale";
 
 export const TimezoneSelectMobile: React.FC<TimezoneSelectProps> = ({
@@ -77,7 +77,7 @@ export const TimezoneSelectMobile: React.FC<TimezoneSelectProps> = ({
             }}
             {...optionProps}
           >
-            <LocaleEmoji emoji={option.emoji} />
+            <MobileLocaleEmoji emoji={option.emoji} />
             <Typography component="span" variant="bodyMd">
               {option.pathLabel}
             </Typography>
@@ -102,7 +102,7 @@ export const TimezoneSelectMobile: React.FC<TimezoneSelectProps> = ({
               startAdornment: selectedOption ? (
                 <>
                   <InputAdornment position="start">
-                    <LocaleEmoji emoji={selectedOption.emoji} />
+                    <MobileLocaleEmoji emoji={selectedOption.emoji} />
                   </InputAdornment>
                   {params.slotProps.input?.startAdornment}
                 </>

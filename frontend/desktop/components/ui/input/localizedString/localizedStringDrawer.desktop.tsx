@@ -16,11 +16,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import type { LocalizedStringDrawerProps } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringDrawer";
 import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
+import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { type LocalizedStringLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
@@ -140,7 +140,7 @@ const LocaleField: React.FC<LocaleFieldProps> = ({
     label={
       multiline ? (
         <>
-          <LocaleEmoji emoji={emoji} sx={{ marginInlineEnd: 0.5 }} />
+          <DesktopLocaleEmoji emoji={emoji} sx={{ marginInlineEnd: 0.5 }} />
           {languageName}
           {isLocaleRequired ? " *" : ""}
         </>
@@ -163,7 +163,7 @@ const LocaleField: React.FC<LocaleFieldProps> = ({
         : {
             startAdornment: (
               <InputAdornment position="start">
-                <LocaleEmoji emoji={emoji} />
+                <DesktopLocaleEmoji emoji={emoji} />
               </InputAdornment>
             ),
           },

@@ -8,17 +8,16 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import type { CurrencyAutocompleteProps } from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocomplete";
 import {
   getCurrencyAutocompletePaperSlotProps,
   getCurrencyAutocompletePopperSlotProps,
 } from "@/frontend/common/components/ui/input/currencySelect/currencyAutocompletePopper";
-import { getCurrencyOptionRowLabel } from "@/frontend/common/components/ui/input/currencySelect/currencyOptionRow.utils";
 import { useCurrencyCatalog } from "@/frontend/common/hooks/useCurrencyCatalog";
 import { type CurrencyOption, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import type { CurrencyAutocompleteProps } from "@/frontend/mobile/components/ui/input/currencySelect/currencyAutocomplete.types";
 import { CurrencyOptionRowMobile } from "@/frontend/mobile/components/ui/input/currencySelect/currencyOptionRow.mobile";
+import { getCurrencyOptionRowLabel } from "@/frontend/mobile/components/ui/input/currencySelect/currencyOptionRow.utils";
 import { useAppTranslation } from "@/shared/locale";
 
 const filterOptions = createFilterOptions<CurrencyOption>({
@@ -76,7 +75,7 @@ const renderCurrencyInput = ({
               </InputAdornment>
               {currency ? (
                 <InputAdornment position="start">
-                  <LocaleEmoji emoji={currency.flagEmoji} />
+                  <MobileLocaleEmoji emoji={currency.flagEmoji} />
                 </InputAdornment>
               ) : null}
               {params.slotProps.input?.startAdornment}

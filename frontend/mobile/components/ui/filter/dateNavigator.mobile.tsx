@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { format, isValid } from "date-fns";
-import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
 import { rtlFlipIconSx } from "@/frontend/common/utils/rtlFlipIconSx";
 import {
   getTodayScheduleFilterDate,
@@ -12,6 +11,7 @@ import {
   parseScheduleFilterDate,
   shiftScheduleFilterDate,
 } from "@/frontend/common/utils/scheduleFilterDate";
+import { MobileAppDatePicker } from "@/frontend/mobile/components/ui/form/date";
 
 const StyledDateControls = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -65,9 +65,9 @@ export function DateNavigatorMobile({
         </StyledDateNavButton>
       </Tooltip>
 
-      <AppDatePicker
+      <MobileAppDatePicker
         value={selectedDate}
-        onChange={(date: Date | null) => {
+        onChangeAction={(date: Date | null) => {
           onDateChange(date && isValid(date) ? format(date, DATE_FILTER_FORMAT) : "");
         }}
         slotProps={{

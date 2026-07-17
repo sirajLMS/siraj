@@ -6,10 +6,10 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
 import { useCallback } from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import type { LanguageSelectorProps } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { getLanguageDisplayName, languages } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
+import type { LanguageSelectorProps } from "@/frontend/mobile/components/ui/input/languageSelector/LanguageSelector";
 import { useAppTranslation } from "@/shared/locale";
 
 export const LanguageSelectorMobile: React.FC<LanguageSelectorProps> = ({
@@ -58,7 +58,7 @@ export const LanguageSelectorMobile: React.FC<LanguageSelectorProps> = ({
             sx={{ display: "flex", alignItems: "center", py: 1.25, minHeight: 48, gap: 1.5 }}
             {...optionProps}
           >
-            <LocaleEmoji emoji={option.emoji} />
+            <MobileLocaleEmoji emoji={option.emoji} />
             {getLanguageName(option.code)}
           </Box>
         );
@@ -81,7 +81,7 @@ export const LanguageSelectorMobile: React.FC<LanguageSelectorProps> = ({
               startAdornment: language ? (
                 <>
                   <InputAdornment position="start">
-                    <LocaleEmoji emoji={language.emoji} />
+                    <MobileLocaleEmoji emoji={language.emoji} />
                   </InputAdornment>
                   {params.slotProps.input?.startAdornment}
                 </>

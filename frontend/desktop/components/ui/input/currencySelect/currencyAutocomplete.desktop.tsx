@@ -8,22 +8,49 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import type { CurrencyAutocompleteProps } from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocomplete";
-import {
-  getCurrencyAutocompletePaperSlotProps,
-  getCurrencyAutocompletePopperSlotProps,
-} from "@/frontend/common/components/ui/input/currencySelect/currencyAutocompletePopper";
-import { getCurrencyOptionRowLabel } from "@/frontend/common/components/ui/input/currencySelect/currencyOptionRow.utils";
 import { useCurrencyCatalog } from "@/frontend/common/hooks/useCurrencyCatalog";
 import { type CurrencyOption, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
+import {
+  getCurrencyAutocompletePaperSlotPropsDesktop,
+  getCurrencyAutocompletePopperSlotPropsDesktop,
+} from "@/frontend/desktop/components/ui/input/currencySelect/currencyAutocompletePopper";
 import { CurrencyOptionRowDesktop } from "@/frontend/desktop/components/ui/input/currencySelect/currencyOptionRow.desktop";
+import { getCurrencyOptionRowLabelDesktop } from "@/frontend/desktop/components/ui/input/currencySelect/currencyOptionRow.utils";
 import { useAppTranslation } from "@/shared/locale";
+
+export type CurrencyAutocompleteProps = {
+  readonly currency?: CurrencyOption | null;
+  readonly onChangeAction: (currency: CurrencyOption) => void;
+  readonly onClearAction?: () => void;
+  readonly autoComplete?: string;
+  readonly fullWidth?: boolean;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly label?: string;
+  readonly placeholder?: string;
+  readonly error?: boolean;
+  readonly helperText?: string;
+  readonly onBlurAction?: () => void;
+  readonly style?: React.CSSProperties;
+  readonly open?: boolean;
+  readonly onOpenAction?: () => void;
+  readonly onCloseAction?: () => void;
+  readonly autoFocus?: boolean;
+  /**
+   * Filter the visible options to a subset of ISO 4217 codes.
+   */
+  readonly allowedCodes?: readonly string[];
+  readonly matchAnchorWidth?: boolean;
+  readonly disablePortal?: boolean;
+  readonly listAttached?: boolean;
+  readonly showSymbol?: boolean;
+};
 
 const filterOptions = createFilterOptions<CurrencyOption>({
   matchFrom: "any",
-  stringify: option => `${option.code as string} ${option.symbol} ${getCurrencyOptionRowLabel(option, "en")}`,
+  stringify: option => `${option.code as string} ${option.symbol} ${getCurrencyOptionRowLabelDesktop(option, "en")}`,
 });
 
 type RenderInputParams = {
@@ -76,7 +103,7 @@ const renderCurrencyInput = ({
               </InputAdornment>
               {currency ? (
                 <InputAdornment position="start">
-                  <LocaleEmoji emoji={currency.flagEmoji} />
+                  <DesktopLocaleEmoji emoji={currency.flagEmoji} />
                 </InputAdornment>
               ) : null}
               {params.slotProps.input?.startAdornment}
@@ -183,7 +210,10 @@ export const CurrencyAutocompleteDesktop: React.FC<CurrencyAutocompleteProps> = 
     return allOptions.filter(option => allowedCodes.includes(option.code));
   }, [allOptions, allowedCodes, catalogLoaded, currency]);
 
-  const getOptionLabel = useCallback((option: CurrencyOption) => getCurrencyOptionRowLabel(option, locale), [locale]);
+  const getOptionLabel = useCallback(
+    (option: CurrencyOption) => getCurrencyOptionRowLabelDesktop(option, locale),
+    [locale]
+  );
 
   const handleOpen = useCallback(() => {
     if (openProp === undefined) {
@@ -233,12 +263,12 @@ export const CurrencyAutocompleteDesktop: React.FC<CurrencyAutocompleteProps> = 
       getOptionLabel={getOptionLabel}
       filterOptions={filterOptions}
       slotProps={{
-        popper: getCurrencyAutocompletePopperSlotProps({
+        popper: getCurrencyAutocompletePopperSlotPropsDesktop({
           matchAnchorWidth,
           disablePortal: disablePortal || listAttached,
           listAttached,
         }),
-        paper: getCurrencyAutocompletePaperSlotProps(listAttached),
+        paper: getCurrencyAutocompletePaperSlotPropsDesktop(listAttached),
       }}
       renderOption={(props, option) => renderCurrencyOption({ props, option, locale, showSymbol })}
       renderInput={params =>
