@@ -3,6 +3,7 @@
 import Box from "@mui/material/Box";
 import type * as React from "react";
 import type { CountryType } from "@/frontend/common/lib/locale";
+import { CountryAutocompleteMobile } from "@/frontend/mobile/components/ui/input/countrySelect";
 import { useAppTranslation } from "@/shared/locale";
 
 export type PhoneCountryPickerMobileProps = {

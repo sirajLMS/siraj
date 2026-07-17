@@ -9,6 +9,5 @@ export * from "@/frontend/mobile/components/ui/dialog";
 export * from "@/frontend/mobile/components/ui/display";
 export * from "@/frontend/mobile/components/ui/filter";
 export * from "@/frontend/mobile/components/ui/form";
-export * from "@/frontend/mobile/components/ui/input/localizedString";
-export * from "@/frontend/mobile/components/ui/input/phoneInput";
+export * from "@/frontend/mobile/components/ui/input";
 export * from "@/frontend/mobile/components/ui/state";
