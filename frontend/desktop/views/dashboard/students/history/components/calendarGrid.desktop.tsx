@@ -2,7 +2,6 @@
 
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, styled, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   CalendarGridContainer,
@@ -10,6 +9,7 @@ import {
 } from "@/frontend/common/views/dashboard/shared/CalendarGridShared";
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
 import type { CalendarGridProps, ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -57,7 +57,7 @@ function CalendarStatusBadge({ status, label }: Readonly<{ status: AttendanceSta
   } else {
     badgeStatus = "pending";
   }
-  return <StatusBadge category="classSession" status={badgeStatus} label={label} />;
+  return <DesktopStatusBadge category="classSession" status={badgeStatus} label={label} />;
 }
 
 function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: ClassSession }>) {

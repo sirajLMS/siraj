@@ -3,20 +3,22 @@
 import { CheckCircleOutlined, Save, ScheduleOutlined, SyncOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { FormProvider, type UseFormReturn } from "react-hook-form";
-import { type PageHeaderBreadcrumb, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { QuotaFormAccessProvider } from "@/frontend/common/views/dashboard/students/quota/QuotaFormAccessProvider";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import type { FormActionsProps, StudentProfileData } from "@/frontend/common/views/dashboard/students/quota/types";
 import type { StudentQuotaViewModel } from "@/frontend/common/views/dashboard/students/quota/useStudentQuotaViewModel";
-import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page/DesktopPageContainer";
-import { DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page/DesktopPageHeader";
+import {
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopPrimaryPageAction,
+} from "@/frontend/desktop/components/ui/container/page";
 import { ContextualHelperCardsDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/contextualHelperCards.desktop";
 import { CourseDetailsSectionDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/courseDetailsSection.desktop";
 import { StudentInformationSectionDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/studentInformationSection.desktop";
 import type { StudentQuotaLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
-function DesktopBreadcrumbs(t: StudentQuotaLabels): readonly PageHeaderBreadcrumb[] {
+function DesktopBreadcrumbs(t: StudentQuotaLabels) {
   return [
     { label: t.breadcrumbs.students, href: "/students" },
     { label: t.breadcrumbs.adjustQuota, current: true },
@@ -61,7 +63,7 @@ function FormActionsDesktop({
         }}
       >
         {readOnly ? null : (
-          <PrimaryPageAction
+          <DesktopPrimaryPageAction
             type="submit"
             disabled={isSaving || isSaved}
             startIcon={saveIcon}
@@ -80,10 +82,10 @@ function FormActionsDesktop({
             })}
           >
             {saveText}
-          </PrimaryPageAction>
+          </DesktopPrimaryPageAction>
         )}
         {showCancel ? (
-          <PrimaryPageAction
+          <DesktopPrimaryPageAction
             type="button"
             variant="text"
             onClick={onCancel}
@@ -100,7 +102,7 @@ function FormActionsDesktop({
             })}
           >
             {t.actions.cancel}
-          </PrimaryPageAction>
+          </DesktopPrimaryPageAction>
         ) : null}
       </Box>
 

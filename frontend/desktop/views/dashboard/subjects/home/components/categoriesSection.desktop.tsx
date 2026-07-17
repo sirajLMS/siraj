@@ -2,8 +2,8 @@
 
 import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Stack } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { CategoriesSectionProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { useAppTranslation } from "@/shared/locale";
 
 /**
@@ -25,7 +25,7 @@ export function CategoriesSectionDesktop({
   const t = useAppTranslation().dashboardTranslations.subjects;
 
   return (
-    <SectionPanel
+    <DesktopSectionPanel
       title={t.categoriesTitle}
       actions={
         canManage ? (
@@ -70,6 +70,6 @@ export function CategoriesSectionDesktop({
           />
         ))}
       </Stack>
-    </SectionPanel>
+    </DesktopSectionPanel>
   );
 }

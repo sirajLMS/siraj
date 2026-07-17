@@ -6,11 +6,31 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
 import { useCallback } from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import type { LanguageSelectorProps } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { getLanguageDisplayName, languages } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { useAppTranslation } from "@/shared/locale";
+
+export type LanguageType = {
+  readonly code: string;
+  readonly name: Record<string, string>;
+  readonly nativeName: string;
+  readonly emoji: string;
+  readonly dir: "ltr" | "rtl";
+};
+
+export type LanguageSelectorProps = {
+  readonly language?: LanguageType | null;
+  readonly setLanguageAction: (language: LanguageType) => void;
+  readonly fullWidth?: boolean;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly label?: string;
+  readonly error?: boolean;
+  readonly helperText?: string;
+  readonly onBlurAction?: () => void;
+  readonly style?: React.CSSProperties;
+};
 
 export const LanguageSelectorDesktop: React.FC<LanguageSelectorProps> = ({
   language,
@@ -53,7 +73,7 @@ export const LanguageSelectorDesktop: React.FC<LanguageSelectorProps> = ({
         const { key, ...optionProps } = props;
         return (
           <Box key={key} component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }} {...optionProps}>
-            <LocaleEmoji emoji={option.emoji} />
+            <DesktopLocaleEmoji emoji={option.emoji} />
             {getLanguageName(option.code)}
           </Box>
         );
@@ -65,6 +85,7 @@ export const LanguageSelectorDesktop: React.FC<LanguageSelectorProps> = ({
           required={required}
           error={showError}
           helperText={resolvedHelperText}
+          onBlur={onBlur}
           slotProps={{
             ...params.slotProps,
             input: {
@@ -72,7 +93,7 @@ export const LanguageSelectorDesktop: React.FC<LanguageSelectorProps> = ({
               startAdornment: language ? (
                 <>
                   <InputAdornment position="start">
-                    <LocaleEmoji emoji={language.emoji} />
+                    <DesktopLocaleEmoji emoji={language.emoji} />
                   </InputAdornment>
                   {params.slotProps.input?.startAdornment}
                 </>

@@ -4,9 +4,9 @@ import { FamilyRestroomOutlined } from "@mui/icons-material";
 import { Autocomplete, Box, InputAdornment, TextField } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import type { ParentOption } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 
 interface ParentAssignmentSectionProps {
   readonly control: Control<StudentOnboardingFormData>;
@@ -30,7 +30,7 @@ export function ParentAssignmentSection({
   labels,
 }: Readonly<ParentAssignmentSectionProps>) {
   return (
-    <SectionPanel title={sectionTitle}>
+    <MobileSectionPanel title={sectionTitle}>
       <Box sx={theme => ({ p: theme.layout.cardPadding })}>
         <Controller
           control={control}
@@ -80,6 +80,6 @@ export function ParentAssignmentSection({
           }}
         />
       </Box>
-    </SectionPanel>
+    </MobileSectionPanel>
   );
 }

@@ -4,15 +4,11 @@ import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Fab } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import {
-  FilterButton,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
-import { StatusTrackingDataGridDesktop } from "@/frontend/desktop/views/dashboard/classes/status/tracking/statusTrackingDataGrid.desktop";
+import { FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import type { DesktopLayoutProps } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { SuspensionAnalytics } from "@/frontend/desktop/views/dashboard/classes/status/tracking/components/suspensionAnalytics.desktop";
+import { StatusTrackingDataGridDesktop } from "@/frontend/desktop/views/dashboard/classes/status/tracking/statusTrackingDataGrid.desktop";
 
 const StyledTotalSessionsBadge = styled(Box)(({ theme }) => ({
   paddingInline: theme.spacing(2),
@@ -117,6 +113,6 @@ export function StatusTrackingDesktopView({
       <StyledDesktopFab id="status-desktop-fab-btn" aria-label={labels.newReport} onClick={onNewReport}>
         <AddOutlined />
       </StyledDesktopFab>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

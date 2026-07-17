@@ -2,7 +2,7 @@
 
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 interface DuesSummaryCardMobileProps {
@@ -76,9 +76,9 @@ export function DuesSummaryCardMobile({ summary, labels, onGoToDues }: Readonly<
         </Typography>
       </Stack>
       {summary.totalCount > 0 ? (
-        <PrimaryPageAction onClick={onGoToDues} sx={{ alignSelf: "flex-start" }}>
+        <MobilePrimaryPageAction onClick={onGoToDues} sx={{ alignSelf: "flex-start" }}>
           {labels.goToDues}
-        </PrimaryPageAction>
+        </MobilePrimaryPageAction>
       ) : null}
     </Box>
   );

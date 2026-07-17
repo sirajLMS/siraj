@@ -3,8 +3,6 @@
 import { AccessTimeOutlined, AcUnitOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/common/components/ui";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/common/utils/profileHref";
@@ -15,6 +13,8 @@ import {
   getStatusLabel,
   resolveTeacherStatusBadge,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/sessionStatusUtils";
+import { MobileActionIconLink, MobileStatusBadge, MobileUserAvatar } from "@/frontend/mobile/components/ui";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { SessionActivateButtonMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/sessionActivateButton.mobile";
 import { TeacherActiveSessionControlsMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherActiveSessionControls.mobile";
 import { TeacherScheduleStatusContentMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherScheduleStatusContent.mobile";
@@ -232,7 +232,7 @@ function CardHeader({
         <StudentNameLink studentName={row.studentName} studentHref={studentHref} />
         {!canActivate || row.status === "pending" || row.status === "connecting" ? null : (
           <Box sx={{ mt: 0.75 }}>
-            <StatusBadge
+            <MobileStatusBadge
               category={badge.category}
               status={badge.status}
               label={getStatusLabel(row.status, labels.status)}
@@ -243,9 +243,9 @@ function CardHeader({
       </Box>
       <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
         <Tooltip title={labels.schedule.classId}>
-          <ActionIconLink href={`/classes/${row.id}`} aria-label={labels.schedule.classId}>
+          <MobileActionIconLink href={`/classes/${row.id}`} aria-label={labels.schedule.classId}>
             <VisibilityOutlined fontSize="small" />
-          </ActionIconLink>
+          </MobileActionIconLink>
         </Tooltip>
       </Box>
     </Box>
@@ -303,9 +303,9 @@ function StudentInfoRow({ row }: { readonly row: TeacherScheduleRow }) {
         borderTop: `1px solid ${theme.palette.border.light}`,
       })}
     >
-      <UserAvatar label={row.studentName} size={32}>
+      <MobileUserAvatar label={row.studentName} size={32}>
         {row.studentInitials}
-      </UserAvatar>
+      </MobileUserAvatar>
       {href ? (
         <Typography
           component={Link}
@@ -339,7 +339,7 @@ function VideoButton({
   readonly labels: TeacherDashboardViewLabels;
 }) {
   return (
-    <MeetingJoinAction
+    <MobileMeetingJoinAction
       variant="icon"
       joinUrl={row.meetingJoinUrl}
       meeting={row.effectiveMeeting}

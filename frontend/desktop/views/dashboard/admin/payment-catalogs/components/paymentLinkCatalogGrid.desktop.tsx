@@ -5,10 +5,10 @@ import { Box, Chip, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/common/components/ui";
-import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display";
 import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SupportedPaymentLinkFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface PaymentLinkCatalogGridDesktopProps extends CatalogGridActionHandlers {

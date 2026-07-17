@@ -3,8 +3,8 @@
 import { RemoveCircleOutlined, SecurityOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledRevokeButton = styled(Button)(({ theme }) => ({
@@ -116,7 +116,7 @@ export function CurrentPermissionsTabMobile({
       {groupPermissions.map(permission => {
         const key = permission.id ?? permission.key ?? "";
         return (
-          <BaseCard key={key} sx={{ p: 2 }}>
+          <MobileBaseCard key={key} sx={{ p: 2 }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
                 <StyledPermissionKeyChip>{permission.key}</StyledPermissionKeyChip>

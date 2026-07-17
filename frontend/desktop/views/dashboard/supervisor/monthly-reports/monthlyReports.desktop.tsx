@@ -2,10 +2,11 @@
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import { FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/useMonthlyReportsViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
+import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
@@ -30,9 +31,9 @@ export function MonthlyReportsDesktopView({
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.pageTitle} />
 
-      <SectionPanel title={labels.reportTypeToggle}>
+      <DesktopSectionPanel title={labels.reportTypeToggle}>
         <Stack sx={{ flexDirection: "row", gap: 2, alignItems: "center", flexWrap: "wrap", mb: 2 }}>
-          <FilterButton
+          <DesktopFilterButton
             onClick={() => onReportTypeChange("teacher")}
             sx={theme =>
               reportType === "teacher"
@@ -41,8 +42,8 @@ export function MonthlyReportsDesktopView({
             }
           >
             {labels.teacherReport}
-          </FilterButton>
-          <FilterButton
+          </DesktopFilterButton>
+          <DesktopFilterButton
             onClick={() => onReportTypeChange("student")}
             sx={theme =>
               reportType === "student"
@@ -51,7 +52,7 @@ export function MonthlyReportsDesktopView({
             }
           >
             {labels.studentReport}
-          </FilterButton>
+          </DesktopFilterButton>
         </Stack>
 
         <Grid container spacing={2} sx={{ alignItems: "center" }}>
@@ -103,12 +104,12 @@ export function MonthlyReportsDesktopView({
             )}
           </Grid>
           <Grid size={{ xs: 12, md: 3 }}>
-            <PrimaryPageAction onClick={onGenerate} startIcon={<CalendarMonthOutlined />}>
+            <DesktopPrimaryPageAction onClick={onGenerate} startIcon={<CalendarMonthOutlined />}>
               {labels.generateReport}
-            </PrimaryPageAction>
+            </DesktopPrimaryPageAction>
           </Grid>
         </Grid>
-      </SectionPanel>
+      </DesktopSectionPanel>
 
       {loading ? (
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -126,7 +127,7 @@ export function MonthlyReportsDesktopView({
         <Grid container spacing={3}>
           {metrics.map(metric => (
             <Grid key={metric.label} size={{ xs: 12, md: 4, lg: 3 }}>
-              <MetricCard icon={CalendarMonthOutlined} label={metric.label} value={metric.value} />
+              <DesktopMetricCard icon={CalendarMonthOutlined} label={metric.label} value={metric.value} />
             </Grid>
           ))}
         </Grid>

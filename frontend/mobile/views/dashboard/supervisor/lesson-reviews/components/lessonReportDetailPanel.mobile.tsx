@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/material";
-import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import type { PendingReviewsLabels } from "@/shared/locale";
 
 interface LessonReportDetailPanelMobileProps {

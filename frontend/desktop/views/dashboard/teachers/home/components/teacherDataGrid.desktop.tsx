@@ -2,9 +2,13 @@ import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
-import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
+import {
+  DesktopAppDataGrid,
+  DesktopGridPagination,
+  DesktopPersonProfileLinkCell,
+} from "@/frontend/desktop/components/ui";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -87,7 +91,7 @@ export function TeacherDataGrid({
       headerName: t.table.name,
       flex: 1.5,
       renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
-        <PersonProfileLinkCell
+        <DesktopPersonProfileLinkCell
           href={profileHrefForTeacher({ userId: params.row.userId, teacherId: params.row.id })}
           name={(params.value as string) ?? ""}
           avatarUrl={params.row.avatarUrl}
@@ -159,7 +163,7 @@ export function TeacherDataGrid({
   };
 
   return (
-    <AppDataGrid<TeacherDirectoryRow>
+    <DesktopAppDataGrid<TeacherDirectoryRow>
       rows={rows}
       columns={columns}
       rowHeight={72}
@@ -174,7 +178,7 @@ export function TeacherDataGrid({
               onPageChange(model.page);
             },
             pageSizeOptions: [pageSize],
-            slots: { pagination: GridPagination },
+            slots: { pagination: DesktopGridPagination },
           }
         : {})}
     />

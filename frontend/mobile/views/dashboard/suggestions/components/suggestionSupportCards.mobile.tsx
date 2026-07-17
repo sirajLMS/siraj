@@ -2,8 +2,8 @@
 
 import { AutoAwesomeOutlined, SecurityOutlined, UpdateOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { SuggestionSupportCardsProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui";
 
 const SUPPORT_CARDS = [
   { key: "privacy", icon: SecurityOutlined },
@@ -26,7 +26,7 @@ export function SuggestionSupportCardsMobile({ labels }: Readonly<Omit<Suggestio
         const Icon = card.icon;
 
         return (
-          <BaseCard key={card.key} sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+          <MobileBaseCard key={card.key} sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
             <Box
               sx={theme => ({
                 width: 48,
@@ -49,7 +49,7 @@ export function SuggestionSupportCardsMobile({ labels }: Readonly<Omit<Suggestio
                 {cardLabels.body}
               </Typography>
             </Box>
-          </BaseCard>
+          </MobileBaseCard>
         );
       })}
     </Box>

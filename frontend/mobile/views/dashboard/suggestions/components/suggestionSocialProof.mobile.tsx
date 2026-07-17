@@ -2,9 +2,9 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Box, Typography } from "@mui/material";
-import { UserAvatar } from "@/frontend/common/components/ui";
 import { suggestionContributorStatsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { SuggestionSocialProofProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
+import { MobileUserAvatar } from "@/frontend/mobile/components/ui";
 
 const CONTRIBUTOR_AVATAR_LIMIT = 3;
 const CONTRIBUTOR_STATS_DAYS = 30;
@@ -31,7 +31,7 @@ export function SuggestionSocialProofMobile({ labels }: Readonly<SuggestionSocia
     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
       <Box sx={{ display: "flex" }}>
         {displayContributors.map(contributor => (
-          <UserAvatar
+          <MobileUserAvatar
             key={contributor?.id ?? ""}
             label={contributor?.name ?? ""}
             size={32}
@@ -44,10 +44,10 @@ export function SuggestionSocialProofMobile({ labels }: Readonly<SuggestionSocia
             })}
           >
             {getInitials(contributor?.name ?? "")}
-          </UserAvatar>
+          </MobileUserAvatar>
         ))}
         {remainingCount > 0 && (
-          <UserAvatar
+          <MobileUserAvatar
             size={32}
             sx={theme => ({
               typography: "labelSm",
@@ -58,7 +58,7 @@ export function SuggestionSocialProofMobile({ labels }: Readonly<SuggestionSocia
             })}
           >
             +{remainingCount}
-          </UserAvatar>
+          </MobileUserAvatar>
         )}
       </Box>
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, fontStyle: "italic" })}>

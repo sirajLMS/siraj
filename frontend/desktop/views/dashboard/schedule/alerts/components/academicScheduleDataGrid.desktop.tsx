@@ -3,16 +3,16 @@
 import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import {
-  AppDataGrid,
-  ClassProfileLinkCell,
-  GridPagination,
-  PersonProfileLinkCell,
-} from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/common/views/dashboard/schedule/alerts/types";
+import {
+  DesktopAppDataGrid,
+  DesktopClassProfileLinkCell,
+  DesktopGridPagination,
+  DesktopPersonProfileLinkCell,
+} from "@/frontend/desktop/components/ui";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { ClassSessionActionButtonDesktop } from "@/frontend/desktop/views/dashboard/schedule/alerts/components/classSessionActionButton.desktop";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
@@ -87,7 +87,7 @@ export function AcademicScheduleDataGridDesktop({
         flex: 1.2,
         minWidth: 200,
         renderCell: ({ row }) => (
-          <ClassProfileLinkCell
+          <DesktopClassProfileLinkCell
             href={classHref(row.id)}
             name={row.className}
             avatarSize={40}
@@ -103,7 +103,7 @@ export function AcademicScheduleDataGridDesktop({
         flex: 1,
         minWidth: 140,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             href={profileHrefForTeacher({ teacherId: row.instructorId })}
             name={row.instructor}
             avatarSize={32}
@@ -141,7 +141,7 @@ export function AcademicScheduleDataGridDesktop({
               height: "100%",
             }}
           >
-            <StatusBadge
+            <DesktopStatusBadge
               category="classSession"
               status={row.sessionStatus}
               label={labels[SESSION_STATUS_LABELS[row.sessionStatus]]}
@@ -172,7 +172,7 @@ export function AcademicScheduleDataGridDesktop({
   const isServerPagination = totalClasses !== undefined && onPageChange !== undefined;
 
   return (
-    <AppDataGrid<AcademicClassRow>
+    <DesktopAppDataGrid<AcademicClassRow>
       rows={rows}
       columns={columns}
       loading={loading}
@@ -190,7 +190,7 @@ export function AcademicScheduleDataGridDesktop({
               onPageChange(model.page);
             },
             pageSizeOptions: [pageSize],
-            slots: { pagination: GridPagination },
+            slots: { pagination: DesktopGridPagination },
           }
         : {})}
     />

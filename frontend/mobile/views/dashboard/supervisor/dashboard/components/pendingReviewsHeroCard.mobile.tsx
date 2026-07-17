@@ -2,7 +2,7 @@
 
 import { PendingActionsOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 interface PendingReviewsHeroCardMobileProps {
@@ -54,9 +54,9 @@ export function PendingReviewsHeroCardMobile({
         </Box>
       </Stack>
       {count > 0 ? (
-        <PrimaryPageAction onClick={onGoToReviews} sx={{ alignSelf: "flex-start" }}>
+        <MobilePrimaryPageAction onClick={onGoToReviews} sx={{ alignSelf: "flex-start" }}>
           {labels.goToReviews}
-        </PrimaryPageAction>
+        </MobilePrimaryPageAction>
       ) : null}
     </Box>
   );

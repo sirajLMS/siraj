@@ -2,9 +2,9 @@
 
 import { ReportProblemOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { DstMigrationViewModel } from "@/frontend/common/views/dashboard/tools/dst-migration/useDstMigrationViewModel";
 import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { ConflictErrorsPanelMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/conflictErrorsPanel.mobile";
 import { DstMigrationMetricsRowMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/dstMigrationMetricsRow.mobile";
 import { UpdatedSessionsSectionMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/updatedSessionsSection.mobile";
@@ -44,7 +44,7 @@ function MobileInactiveNote() {
 function MobileConflictsHeader() {
   const t = useAppTranslation().dashboardTranslations.dstMigration;
 
-  return <SectionPanel title={t.sections.conflictsDetected} />;
+  return <MobileSectionPanel title={t.sections.conflictsDetected} />;
 }
 
 function MobileUpdatedHeader() {

@@ -3,10 +3,10 @@
 import type { Theme } from "@mui/material";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ClassSession, ClassSessionListProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { isJoinableClassSession } from "@/frontend/common/views/dashboard/students/history/types";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -154,7 +154,7 @@ function ClassSessionCard({
         </Box>
       </Box>
       {showJoin ? (
-        <MeetingJoinAction
+        <MobileMeetingJoinAction
           variant="icon"
           joinUrl={session.meetingJoinUrl}
           meeting={session.effectiveMeeting}

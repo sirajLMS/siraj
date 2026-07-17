@@ -25,7 +25,6 @@ import Toolbar from "@mui/material/Toolbar";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import {
   AppPermission,
   ClassType as ClassTypeEnum,
@@ -50,6 +49,7 @@ import {
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
 import type { CreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import { TimezoneSelectMobile } from "@/frontend/mobile/components/ui/input/timezoneSelect";
 import { useRouter } from "@/shared/i18n/routing";
 import type {
   MeetingConfigClassScopeLabels,
@@ -297,7 +297,7 @@ function TimezoneClassTypeFields({
   };
   return (
     <Stack sx={{ flexDirection: "column", gap: 2 }}>
-      <TimezoneSelect
+      <TimezoneSelectMobile
         value={toGraphqlIanaTimezone(timezone)}
         onChangeAction={value => {
           setTimezone(value ? fromGraphqlIanaTimezone(value) : "");

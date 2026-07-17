@@ -3,7 +3,6 @@
 import { Button, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type { AdminSuggestionRow } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
@@ -12,6 +11,7 @@ import {
   mapStatusForBadge,
   statusLabelKey,
 } from "@/frontend/common/views/dashboard/suggestions/utils/suggestionStatusMap";
+import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 
 function actionButtons(
   row: AdminSuggestionRow,
@@ -103,7 +103,7 @@ export function SuggestionsDataGridDesktop({
         flex: 0.9,
         minWidth: 140,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             name={row.parentName}
             href={profileHrefForParent({ userId: row.parentUserId, parentId: row.parentId })}
             avatarSize={32}
@@ -139,7 +139,7 @@ export function SuggestionsDataGridDesktop({
         flex: 0.7,
         minWidth: 110,
         renderCell: ({ row }) => (
-          <StatusBadge
+          <DesktopStatusBadge
             category="invoice"
             status={mapStatusForBadge(row.status)}
             label={labels.statusLabels[statusLabelKey(row.status)]}
@@ -170,7 +170,7 @@ export function SuggestionsDataGridDesktop({
   );
 
   return (
-    <AppDataGrid
+    <DesktopAppDataGrid
       rows={rows}
       columns={columns}
       getRowId={row => row.id}

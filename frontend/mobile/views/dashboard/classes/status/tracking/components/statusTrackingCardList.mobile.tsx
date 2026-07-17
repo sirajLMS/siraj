@@ -9,8 +9,6 @@ import {
 } from "@mui/icons-material";
 import { Box, Button, Card, CardContent, Typography, useTheme } from "@mui/material";
 import { styled, type Theme } from "@mui/material/styles";
-import { StatusBadge } from "@/frontend/common/components/ui";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import {
   type CardListLabels,
   computeSessionStatus,
@@ -19,6 +17,8 @@ import {
   type StatusTrackingCardListProps,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale } from "@/shared/locale";
 
@@ -124,7 +124,7 @@ function getCardActionButton(
     if (isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false })) {
       return (
         <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
-          <MeetingJoinAction
+          <MobileMeetingJoinAction
             variant="icon"
             joinUrl={row.meetingJoinUrl}
             meeting={row.effectiveMeeting}
@@ -252,7 +252,7 @@ function StatusTrackingCard({
                 <StyledStudentNameText>{row.studentName ?? ""}</StyledStudentNameText>
                 <StyledClassNameText>{row.teacherName ?? ""}</StyledClassNameText>
               </Box>
-              <StatusBadge
+              <MobileStatusBadge
                 category="sessionTracking"
                 status={sessionStatus}
                 label={labels[STATUS_LABEL_KEYS[sessionStatus]]}

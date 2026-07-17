@@ -1,5 +1,4 @@
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ManagersFilterBar } from "@/frontend/common/views/dashboard/managers/home/ManagersFilterBar";
 import { ManagersMetrics } from "@/frontend/common/views/dashboard/managers/home/ManagersMetrics";
@@ -10,6 +9,8 @@ import type {
   NonNullableManagerDirectoryMetrics,
 } from "@/frontend/common/views/dashboard/managers/home/types";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { ManagersCardListMobile } from "@/frontend/mobile/views/dashboard/managers/home/components/managersCardList.mobile";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
@@ -45,7 +46,7 @@ export function ManagersViewMobile({
   const actions = (
     <RequirePermission permissions={[AppPermission.StaffCreate]}>
       <Link href="/managers/onboarding" style={{ textDecoration: "none" }}>
-        <PrimaryPageAction>{t.actions.addManager}</PrimaryPageAction>
+        <MobilePrimaryPageAction>{t.actions.addManager}</MobilePrimaryPageAction>
       </Link>
     </RequirePermission>
   );
@@ -56,7 +57,7 @@ export function ManagersViewMobile({
 
       <ManagersMetrics metrics={metrics} />
 
-      <SectionPanel>
+      <MobileSectionPanel>
         <ManagersFilterBar
           roleFilter={roleFilter}
           statusFilter={statusFilter}
@@ -71,7 +72,7 @@ export function ManagersViewMobile({
           totalCount={totalManagers}
           onPageChange={onPageChange}
         />
-      </SectionPanel>
+      </MobileSectionPanel>
     </MobilePageContainer>
   );
 }

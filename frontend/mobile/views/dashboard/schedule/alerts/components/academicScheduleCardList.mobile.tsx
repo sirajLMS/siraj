@@ -9,9 +9,14 @@ import {
 } from "@mui/icons-material";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { MobilePaginationControls, MobilePersonProfileLink, MobileStatusBadge, MobileMeetingJoinAction } from "@/frontend/mobile/components/ui";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/common/views/dashboard/schedule/alerts/types";
+import {
+  MobileMeetingJoinAction,
+  MobilePaginationControls,
+  MobilePersonProfileLink,
+  MobileStatusBadge,
+} from "@/frontend/mobile/components/ui";
 import { ClassSessionActionButtonMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/components/classSessionActionButton.mobile";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 

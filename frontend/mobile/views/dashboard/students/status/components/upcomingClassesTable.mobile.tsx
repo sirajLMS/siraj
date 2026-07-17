@@ -1,15 +1,15 @@
 import { CalendarTodayOutlined, PersonOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { useCallback } from "react";
-import { PersonProfileLink } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { profileHrefForTeacher, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   UpcomingClassDisplay,
   UpcomingClassesTableProps,
 } from "@/frontend/common/views/dashboard/students/status/types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
@@ -96,7 +96,7 @@ export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<Upco
                   })}
                 >
                   <PersonOutlined sx={{ fontSize: 18 }} />
-                  <PersonProfileLink
+                  <MobilePersonProfileLink
                     href={profileHrefForTeacher({ teacherId: cls.teacherId })}
                     name={cls.instructor}
                     showAvatar={false}
@@ -119,13 +119,13 @@ export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<Upco
                 </Box>
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
-                <StatusBadge
+                <MobileStatusBadge
                   category="classInstance"
                   status={cls.executionState}
                   label={cls.isFrozen ? t.table.frozen.toUpperCase() : cls.executionState}
                 />
                 {isJoinableClassInstance(cls.executionState, cls.outcome, { isFrozen: cls.isFrozen }) ? (
-                  <MeetingJoinAction
+                  <MobileMeetingJoinAction
                     variant="icon"
                     joinUrl={cls.meetingJoinUrl}
                     meeting={cls.effectiveMeeting}

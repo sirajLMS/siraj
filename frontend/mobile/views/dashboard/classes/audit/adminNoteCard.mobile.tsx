@@ -3,8 +3,8 @@
 import { StickyNote2Outlined } from "@mui/icons-material";
 import { alpha, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 
 export interface AdminNoteCardMobileProps {
   readonly note: AdminNoteInfo | null | undefined;
@@ -72,7 +72,7 @@ export function AdminNoteCardMobile({ note, labels, onUpdate, onEdit }: Readonly
   const content = note?.content ?? "";
 
   return (
-    <BaseCard
+    <MobileBaseCard
       sx={theme => ({
         backgroundColor: theme.palette.sidebar,
         color: theme.palette.onSidebar,
@@ -86,6 +86,6 @@ export function AdminNoteCardMobile({ note, labels, onUpdate, onEdit }: Readonly
       </Typography>
 
       <NoteFooterMobile updateLabel={labels.update} editLabel={labels.edit} onUpdate={onUpdate} onEdit={onEdit} />
-    </BaseCard>
+    </MobileBaseCard>
   );
 }

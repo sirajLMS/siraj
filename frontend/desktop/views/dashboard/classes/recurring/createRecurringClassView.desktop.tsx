@@ -6,7 +6,6 @@ import { alpha, Box, IconButton, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import { createRecurringClassSchema } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
@@ -15,6 +14,11 @@ import {
   emptyRecurringMeetingConfigState,
   type RecurringMeetingConfigFormState,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
+import {
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui/container/page";
 import { RecurringClassFormDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/recurringClassForm.desktop";
 import type { CreateRecurringClassLabels } from "@/shared/locale";
 
@@ -134,8 +138,8 @@ export function CreateRecurringClassViewDesktop({
   ];
 
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={labels.title}
         subtitle={labels.subtitle}
         titleVariant="headlineLg"
@@ -148,7 +152,7 @@ export function CreateRecurringClassViewDesktop({
       />
 
       <Box>
-        <SectionPanel
+        <DesktopSectionPanel
           sx={{
             backgroundColor: alpha(theme.palette.surfaceContainer, 0.2),
           }}
@@ -171,8 +175,8 @@ export function CreateRecurringClassViewDesktop({
             onMeetingConfigChangeAction={setMeetingConfig}
             onSubmit={data => onSubmit(data, meetingConfig)}
           />
-        </SectionPanel>
+        </DesktopSectionPanel>
       </Box>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

@@ -3,13 +3,13 @@
 import { CalendarMonthOutlined, HistoryOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Grid, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type {
   RecentLessonReportRow,
   UpcomingLessonRow,
 } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
+import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
+import { DesktopPageContainer, DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/page";
 import { NextClassJoinCard } from "@/frontend/desktop/views/dashboard/student/dashboard/components/nextClassJoinCard.desktop";
 
 interface DesktopUpcomingItemProps {
@@ -132,11 +132,11 @@ export function StudentDashboardDesktopView({
 }: Readonly<StudentDashboardViewModel>) {
   if (loading && !nextLesson) {
     return (
-      <PageContainer>
+      <DesktopPageContainer>
         <Typography variant="bodyMd" sx={{ p: 3 }}>
           {labels.loadingMessage}
         </Typography>
-      </PageContainer>
+      </DesktopPageContainer>
     );
   }
 
@@ -147,7 +147,7 @@ export function StudentDashboardDesktopView({
   });
 
   return (
-    <PageContainer>
+    <DesktopPageContainer>
       <Box sx={{ mb: 3 }}>
         <Typography variant="headlineLg" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
           {labels.welcomeMessage(userName ?? "")}
@@ -161,7 +161,7 @@ export function StudentDashboardDesktopView({
         <Grid size={{ xs: 12, lg: 4 }}>
           <Stack spacing={3}>
             <NextClassJoinCard lesson={nextLesson} labels={labels} onJoin={onJoinLesson} />
-            <SectionPanel title={labels.upcomingToday}>
+            <DesktopSectionPanel title={labels.upcomingToday}>
               <Stack spacing={2}>
                 {todaysLessons.length === 0 ? (
                   <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
@@ -173,20 +173,20 @@ export function StudentDashboardDesktopView({
                   ))
                 )}
               </Stack>
-            </SectionPanel>
+            </DesktopSectionPanel>
           </Stack>
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }}>
-          <SectionPanel title={labels.creditBalance} sx={{ height: "100%" }}>
+          <DesktopSectionPanel title={labels.creditBalance} sx={{ height: "100%" }}>
             <Stack spacing={2}>
-              <MetricCard
+              <DesktopMetricCard
                 icon={PaymentsOutlined}
                 label={labels.classesRemaining}
                 value={creditBalance.classesRemaining}
                 variant="compact"
               />
-              <MetricCard
+              <DesktopMetricCard
                 icon={SchoolOutlined}
                 label={labels.classesTotal}
                 value={creditBalance.classesTotal}
@@ -210,11 +210,11 @@ export function StudentDashboardDesktopView({
                 {labels.viewAllHistory}
               </Button>
             </Stack>
-          </SectionPanel>
+          </DesktopSectionPanel>
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }}>
-          <SectionPanel title={labels.recentLessonReports} sx={{ height: "100%" }}>
+          <DesktopSectionPanel title={labels.recentLessonReports} sx={{ height: "100%" }}>
             <Stack spacing={2}>
               {recentLessonReports.length === 0 ? (
                 <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
@@ -226,7 +226,7 @@ export function StudentDashboardDesktopView({
                 ))
               )}
             </Stack>
-          </SectionPanel>
+          </DesktopSectionPanel>
         </Grid>
       </Grid>
 
@@ -240,6 +240,6 @@ export function StudentDashboardDesktopView({
           {labels.viewAllHistory}
         </Button>
       </Box>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

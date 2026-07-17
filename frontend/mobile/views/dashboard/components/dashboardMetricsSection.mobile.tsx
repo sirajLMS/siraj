@@ -3,9 +3,9 @@
 import { AccessTimeOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import type { GridSize } from "@mui/material/Grid";
-import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 
 type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in import("@mui/material").Breakpoint]?: T | null };
 
@@ -29,7 +29,7 @@ export function DashboardMetricsSectionMobile({
   gridSize,
 }: Readonly<DashboardMetricsSectionMobileProps>) {
   const section = (
-    <SectionPanel
+    <MobileSectionPanel
       title={title}
       edgeToEdge
       actions={
@@ -47,14 +47,14 @@ export function DashboardMetricsSectionMobile({
           py: { xs: 2, md: 2.5 },
         }}
       >
-        <MetricCardGrid
+        <MobileMetricCardGrid
           metrics={metrics}
           onMetricClick={onMetricClick}
           selectedKey={selectedMetricKey}
           size={gridSize}
         />
       </Box>
-    </SectionPanel>
+    </MobileSectionPanel>
   );
 
   if (withSectionMargin) {

@@ -2,8 +2,8 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { DesktopPageContainer, DesktopPageHeader, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
 import { CategoriesSectionDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/categoriesSection.desktop";
 import { SubjectCardDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/subjectCard.desktop";
 import { useAppTranslation } from "@/shared/locale";
@@ -41,15 +41,15 @@ export function SubjectsViewDesktop({
   );
 
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={t.pageTitle}
         subtitle={t.pageSubtitle}
         actions={
           canManageSubjects ? (
-            <PrimaryPageAction onClick={onAddSubject} startIcon={<AddOutlined />}>
+            <DesktopPrimaryPageAction onClick={onAddSubject} startIcon={<AddOutlined />}>
               {t.addSubject}
-            </PrimaryPageAction>
+            </DesktopPrimaryPageAction>
           ) : undefined
         }
       />
@@ -105,6 +105,6 @@ export function SubjectsViewDesktop({
           </Grid>
         );
       })()}
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

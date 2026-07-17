@@ -2,10 +2,10 @@
 
 import { Box, Paper, Typography } from "@mui/material";
 import { FormProvider } from "react-hook-form";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type { StudentStatusViewModel } from "@/frontend/common/views/dashboard/students/status/useStudentStatusViewModel";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/page/MobilePageContainer";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui/container/page/MobilePageHeader";
 import { AdminHoldControlsMobile } from "@/frontend/mobile/views/dashboard/students/status/components/adminHoldControls.mobile";
@@ -49,7 +49,7 @@ function ReadOnlyStatusCardMobile({ status }: Readonly<{ status: StudentStatus }
       >
         {t.fields.accountStatus}
       </Typography>
-      <StatusBadge category="studentAccount" status={getBadgeStatusKey(status)} label={t.statusOptions[status]} />
+      <MobileStatusBadge category="studentAccount" status={getBadgeStatusKey(status)} label={t.statusOptions[status]} />
     </Paper>
   );
 }

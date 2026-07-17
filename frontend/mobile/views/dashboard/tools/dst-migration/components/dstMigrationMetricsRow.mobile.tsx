@@ -2,8 +2,8 @@
 
 import { AnalyticsOutlined, ErrorOutlined, HistoryOutlined, VerifiedOutlined } from "@mui/icons-material";
 import { Box, Stack } from "@mui/material";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { DstMigrationMetrics } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MetricCard";
 import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
@@ -15,15 +15,15 @@ export function DstMigrationMetricsRowMobile({ metrics }: Readonly<Props>) {
 
   return (
     <Stack spacing={1.5} sx={{ width: "100%" }}>
-      <MetricCard label={t.totalAudited} value={metrics.totalAudited} icon={AnalyticsOutlined} />
-      <MetricCard
+      <MobileMetricCard label={t.totalAudited} value={metrics.totalAudited} icon={AnalyticsOutlined} />
+      <MobileMetricCard
         label={t.successful}
         value={metrics.successful}
         icon={VerifiedOutlined}
         variant="highlight"
         animationIndex={1}
       />
-      <MetricCard
+      <MobileMetricCard
         label={t.conflicts}
         value={metrics.conflicts}
         icon={ErrorOutlined}
@@ -31,7 +31,7 @@ export function DstMigrationMetricsRowMobile({ metrics }: Readonly<Props>) {
         animationIndex={2}
       />
       <Box>
-        <MetricCard label={t.unchanged} value={metrics.unchanged} icon={HistoryOutlined} animationIndex={3} />
+        <MobileMetricCard label={t.unchanged} value={metrics.unchanged} icon={HistoryOutlined} animationIndex={3} />
       </Box>
     </Stack>
   );

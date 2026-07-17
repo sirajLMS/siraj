@@ -3,12 +3,12 @@
 import { AlternateEmailOutlined, CheckCircleOutlined, DeleteOutlineOutlined, SendOutlined } from "@mui/icons-material";
 import { Avatar, Box, Paper, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/common/components/ui";
 import {
   type AdminComplaintRow,
   type ComplaintPriority,
   ComplaintStatus,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
+import { MobileFilterButton, MobilePrimaryPageAction, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
 
 const StyledAnsweredResponseBox = styled(Box)(({ theme }) => ({
@@ -54,7 +54,7 @@ const StyledResponseActionsBox = styled(Box)(({ theme }) => ({
   gap: theme.spacing(1.5),
 }));
 
-const StyledEmailActionButton = styled(FilterButton)(({ theme }) => ({
+const StyledEmailActionButton = styled(MobileFilterButton)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
   color: theme.palette.onPrimary,
   borderColor: theme.palette.primary.main,
@@ -120,7 +120,7 @@ const StyledComplaintTextBox = styled(Box, {
   borderLeft: `4px solid ${theme.palette.primary.main}`,
 }));
 
-const StyledDeleteButton = styled(FilterButton)(({ theme }) => ({
+const StyledDeleteButton = styled(MobileFilterButton)(({ theme }) => ({
   color: theme.palette.error.main,
   borderColor: theme.palette.error.main,
   "&:hover": { backgroundColor: theme.palette.errorContainer },
@@ -209,7 +209,7 @@ function ComplaintResponseSectionMobile({
         slotProps={{ htmlInput: { autoComplete: "off" } }}
       />
       <StyledResponseActionsBox>
-        <PrimaryPageAction
+        <MobilePrimaryPageAction
           startIcon={<SendOutlined />}
           disabled={draftResponse.trim().length === 0}
           onClick={() => {
@@ -217,7 +217,7 @@ function ComplaintResponseSectionMobile({
           }}
         >
           {labels.queue.answer}
-        </PrimaryPageAction>
+        </MobilePrimaryPageAction>
         <StyledEmailActionButton
           startIcon={<AlternateEmailOutlined />}
           disabled={draftResponse.trim().length === 0}
@@ -267,7 +267,7 @@ export function ComplaintQueueCardMobile({
           </Box>
         </StyledSubmitterInfoBox>
         <StyledQueueCardStatusBox>
-          <StatusBadge
+          <MobileStatusBadge
             category="classStatus"
             status={mapPriorityForBadge(row.priority)}
             label={labels.priorityLabels[row.priority]}

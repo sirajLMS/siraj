@@ -2,12 +2,12 @@
 
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { StaffInfoSection } from "@/frontend/common/views/dashboard/managers/onboarding/StaffInfoSection";
 import { SystemAccessSection } from "@/frontend/common/views/dashboard/managers/onboarding/SystemAccessSection";
 import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/managers/onboarding/types";
 import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopFormSuccessSnackbar, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { OnboardingMetricsOverviewDesktop } from "@/frontend/desktop/views/dashboard/managers/onboarding/components/onboardingMetricsOverview.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -56,7 +56,7 @@ export function ManagerOnboardingDesktopView({
           <SystemAccessSection register={register} control={control} errors={errors} />
 
           <StyledFormActions>
-            <PrimaryPageAction
+            <DesktopPrimaryPageAction
               type="submit"
               disabled={isSubmitting}
               sx={theme => ({
@@ -67,8 +67,8 @@ export function ManagerOnboardingDesktopView({
               })}
             >
               {isSubmitting ? t.actions.processing : t.actions.signup}
-            </PrimaryPageAction>
-            <PrimaryPageAction
+            </DesktopPrimaryPageAction>
+            <DesktopPrimaryPageAction
               type="button"
               variant="text"
               onClick={onCancel}
@@ -78,14 +78,14 @@ export function ManagerOnboardingDesktopView({
               })}
             >
               {t.actions.cancel}
-            </PrimaryPageAction>
+            </DesktopPrimaryPageAction>
           </StyledFormActions>
         </StyledFormWrapper>
       </Box>
 
       <OnboardingMetricsOverviewDesktop model={metricsModel} />
 
-      <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
+      <DesktopFormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
     </DesktopPageContainer>
   );
 }

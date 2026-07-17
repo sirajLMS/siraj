@@ -2,20 +2,20 @@
 
 import { Box, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { ClassAuditDetailsCard } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
 import type {
   ClassAuditDetailsLabels,
   ClassAuditViewProps,
 } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 import { RegisteredStudentsSection } from "@/frontend/common/views/dashboard/classes/audit/RegisteredStudentsSection";
+import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { AdminNoteCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/adminNoteCard.desktop";
 import { CommunicationLogCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/communicationLogCard.desktop";
 import { OnlineMeetingCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/onlineMeetingCard.desktop";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
-const StyledGenerateReportButton = styled(FilterButton)(({ theme }) => ({
+const StyledGenerateReportButton = styled(DesktopFilterButton)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   "&:hover": {
     backgroundColor: theme.palette.action.selected,
@@ -64,9 +64,9 @@ export function ClassAuditViewDesktop({
             <StyledGenerateReportButton id="audit-generate-report-btn" onClick={onGenerateReport}>
               {labels.generateReport}
             </StyledGenerateReportButton>
-            <PrimaryPageAction id="audit-edit-class-btn" onClick={onEditClass}>
+            <DesktopPrimaryPageAction id="audit-edit-class-btn" onClick={onEditClass}>
               {labels.editClass}
-            </PrimaryPageAction>
+            </DesktopPrimaryPageAction>
           </>
         }
       />
@@ -109,6 +109,6 @@ export function ClassAuditViewDesktop({
           <AdminNoteCardDesktop note={audit.adminNote} labels={labels.adminNote} onUpdate={onUpdateAdminNote} />
         </Grid>
       </Grid>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

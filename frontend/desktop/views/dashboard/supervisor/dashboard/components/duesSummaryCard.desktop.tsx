@@ -2,7 +2,7 @@
 
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 interface DuesSummaryCardDesktopProps {
@@ -77,9 +77,9 @@ export function DuesSummaryCardDesktop({ summary, labels, onGoToDues }: Readonly
         </Typography>
       </Stack>
       {summary.totalCount > 0 ? (
-        <PrimaryPageAction onClick={onGoToDues} sx={{ alignSelf: "flex-start" }}>
+        <DesktopPrimaryPageAction onClick={onGoToDues} sx={{ alignSelf: "flex-start" }}>
           {labels.goToDues}
-        </PrimaryPageAction>
+        </DesktopPrimaryPageAction>
       ) : null}
     </Box>
   );

@@ -1,11 +1,15 @@
 "use client";
 
 import { Box, type BoxProps, Divider, Link as MuiLink, Stack, styled } from "@mui/material";
-import { FormSuccessSnackbar, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigDisplay } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
 import { effectiveMeetingToDisplayData } from "@/frontend/common/components/ui/display/meetingConfig/meetingConfigDisplay.types";
 import type { RescheduleViewModel } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import {
+  DesktopFormSuccessSnackbar,
+  DesktopPrimaryPageAction,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { ClassParticipantsSectionDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/classParticipantsSection.desktop";
 import { QuickAdjustSectionDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/quickAdjustSection.desktop";
 import { RescheduleDateTimeSectionDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/rescheduleDateTimeSection.desktop";
@@ -46,7 +50,7 @@ export function RescheduleViewDesktop({
 
       <TimezoneWarningBannerDesktop timezone={session.teacherTimezone} />
 
-      <SectionPanel title={t.sections.classDetails}>
+      <DesktopSectionPanel title={t.sections.classDetails}>
         <Box
           component="form"
           onSubmit={e => {
@@ -80,10 +84,10 @@ export function RescheduleViewDesktop({
           <QuickAdjustSectionDesktop setValue={setValue} getValues={getValues} />
 
           <ActionContainer>
-            <PrimaryPageAction type="submit" disabled={isSubmitting}>
+            <DesktopPrimaryPageAction type="submit" disabled={isSubmitting}>
               {isSubmitting ? t.actions.processing : t.actions.submit}
-            </PrimaryPageAction>
-            <PrimaryPageAction
+            </DesktopPrimaryPageAction>
+            <DesktopPrimaryPageAction
               type="button"
               variant="text"
               onClick={onCancel}
@@ -93,12 +97,12 @@ export function RescheduleViewDesktop({
               })}
             >
               {t.actions.cancel}
-            </PrimaryPageAction>
+            </DesktopPrimaryPageAction>
           </ActionContainer>
         </Box>
-      </SectionPanel>
+      </DesktopSectionPanel>
 
-      <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
+      <DesktopFormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
     </DesktopPageContainer>
   );
 }

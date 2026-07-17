@@ -1,11 +1,16 @@
 "use client";
 
 import { Box, type BoxProps, Divider, Link as MuiLink, Stack, styled } from "@mui/material";
-import { FormSuccessSnackbar, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { MeetingConfigDisplay } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
-import { effectiveMeetingToDisplayData } from "@/frontend/common/components/ui/display/meetingConfig/meetingConfigDisplay.types";
 import type { RescheduleViewModel } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobilePageContainer,
+  MobilePageHeader,
+  MobilePrimaryPageAction,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
+import { MobileMeetingConfigDisplay } from "@/frontend/mobile/components/ui/display/meetingConfig";
+import { effectiveMeetingToDisplayData } from "@/frontend/mobile/components/ui/display/meetingConfig/meetingConfigDisplay.types";
+import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar";
 import { ClassParticipantsSectionMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/classParticipantsSection.mobile";
 import { NotificationPolicyCardMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/notificationPolicyCard.mobile";
 import { QuickAdjustSectionMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/quickAdjustSection.mobile";
@@ -47,7 +52,7 @@ export function RescheduleViewMobile({
 
       <TimezoneWarningBannerMobile timezone={session.teacherTimezone} />
 
-      <SectionPanel title={t.sections.classDetails}>
+      <MobileSectionPanel title={t.sections.classDetails}>
         <Box
           component="form"
           onSubmit={e => {
@@ -61,7 +66,10 @@ export function RescheduleViewMobile({
             <>
               <Divider />
               <Stack spacing={1}>
-                <MeetingConfigDisplay config={effectiveMeetingToDisplayData(session.effectiveMeeting)} showSource />
+                <MobileMeetingConfigDisplay
+                  config={effectiveMeetingToDisplayData(session.effectiveMeeting)}
+                  showSource
+                />
                 <MuiLink
                   component={Link}
                   href={`/classes/${session.sessionId}#meeting-configs`}
@@ -81,10 +89,10 @@ export function RescheduleViewMobile({
           <QuickAdjustSectionMobile setValue={setValue} getValues={getValues} />
 
           <ActionContainer>
-            <PrimaryPageAction type="submit" disabled={isSubmitting}>
+            <MobilePrimaryPageAction type="submit" disabled={isSubmitting}>
               {isSubmitting ? t.actions.processing : t.actions.submitMobile}
-            </PrimaryPageAction>
-            <PrimaryPageAction
+            </MobilePrimaryPageAction>
+            <MobilePrimaryPageAction
               type="button"
               variant="text"
               onClick={onCancel}
@@ -94,14 +102,14 @@ export function RescheduleViewMobile({
               })}
             >
               {t.actions.cancel}
-            </PrimaryPageAction>
+            </MobilePrimaryPageAction>
           </ActionContainer>
         </Box>
       </SectionPanel>
 
       <NotificationPolicyCardMobile />
 
-      <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
+      <MobileFormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
     </MobilePageContainer>
   );
 }

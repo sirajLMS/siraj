@@ -2,8 +2,8 @@
 
 import { CancelOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Stack, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import type { ConflictGroup } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
@@ -84,7 +84,11 @@ export function ConflictErrorsPanelMobile({ conflictGroups }: Readonly<Props>) {
       <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
         {conflictGroups.map(group => (
           <Box key={group.id} sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <StatusBadge category="session" status="pending" label={t.conflicts.teacherLabel(group.teacherName)} />
+            <MobileStatusBadge
+              category="session"
+              status="pending"
+              label={t.conflicts.teacherLabel(group.teacherName)}
+            />
             {group.conflicts.map(conflict => (
               <ConflictCard key={conflict.id} studentName={conflict.studentName} message={conflict.message} />
             ))}

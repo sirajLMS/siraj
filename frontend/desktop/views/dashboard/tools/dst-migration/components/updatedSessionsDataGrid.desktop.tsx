@@ -4,9 +4,9 @@ import { ArrowForwardOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
@@ -26,14 +26,14 @@ export function UpdatedSessionsDataGridDesktop({ sessions, loading = false }: Re
         minWidth: 220,
         renderCell: params => (
           <Box sx={{ py: 1 }}>
-            <PersonProfileLinkCell
+            <DesktopPersonProfileLinkCell
               href={params.row.studentId ? studentHref(params.row.studentId) : undefined}
               name={params.row.studentName}
               showAvatar={false}
               typographyVariant="bodyMd"
               fontWeight={700}
             />
-            <PersonProfileLinkCell
+            <DesktopPersonProfileLinkCell
               href={profileHrefForTeacher({ teacherId: params.row.teacherId })}
               name={params.row.teacherName}
               showAvatar={false}
@@ -49,7 +49,7 @@ export function UpdatedSessionsDataGridDesktop({ sessions, loading = false }: Re
         width: 130,
         align: "center",
         headerAlign: "center",
-        renderCell: params => <StatusBadge category="session" status="pending" label={params.row.fromTime} />,
+        renderCell: params => <DesktopStatusBadge category="session" status="pending" label={params.row.fromTime} />,
       },
       {
         field: "arrow",
@@ -69,14 +69,14 @@ export function UpdatedSessionsDataGridDesktop({ sessions, loading = false }: Re
         width: 130,
         align: "center",
         headerAlign: "center",
-        renderCell: params => <StatusBadge category="session" status="completed" label={params.row.toTime} />,
+        renderCell: params => <DesktopStatusBadge category="session" status="completed" label={params.row.toTime} />,
       },
     ],
     [t]
   );
 
   return (
-    <AppDataGrid
+    <DesktopAppDataGrid
       rows={sessions}
       columns={columns}
       getRowId={row => row.id}

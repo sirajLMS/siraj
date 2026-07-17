@@ -2,9 +2,9 @@
 
 import { CloudUploadOutlined, ExpandMoreOutlined } from "@mui/icons-material";
 import { Accordion, AccordionDetails, AccordionSummary, Box } from "@mui/material";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { ResourcesViewModel } from "@/frontend/common/views/dashboard/resources/useResourcesViewModel";
 import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { ResourceDeleteDialogMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceDeleteDialog.mobile";
 import { ResourceGovernancePanelMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceGovernancePanel.mobile";
 import { ResourceLibraryListMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceLibraryList.mobile";
@@ -47,7 +47,7 @@ export function ResourcesMobileView({
               </Box>
             </AccordionSummary>
             <AccordionDetails sx={{ p: 0 }}>
-              <BaseCard sx={{ border: "none", boxShadow: "none", p: 0 }}>
+              <MobileBaseCard sx={{ border: "none", boxShadow: "none", p: 0 }}>
                 <ResourceUploadFormMobile
                   labels={labels}
                   documentName={documentName}
@@ -59,7 +59,7 @@ export function ResourcesMobileView({
                   onFileSelect={onFileSelect}
                 />
                 <ResourceGovernancePanelMobile labels={labels} />
-              </BaseCard>
+              </MobileBaseCard>
             </AccordionDetails>
           </Accordion>
         ) : null}

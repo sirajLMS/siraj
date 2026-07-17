@@ -2,8 +2,8 @@
 
 import { CloudUploadOutlined, DescriptionOutlined } from "@mui/icons-material";
 import { Box, TextField, Typography } from "@mui/material";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { ResourceUploadFormProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import { ResourceUploadDropzoneMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceUploadDropzone.mobile";
 
 export function ResourceUploadFormMobile({
@@ -47,9 +47,9 @@ export function ResourceUploadFormMobile({
         <ResourceUploadDropzoneMobile labels={labels} selectedFileName={selectedFileName} onFileSelect={onFileSelect} />
       </Box>
 
-      <PrimaryPageAction fullWidth disabled={isUploading} onClick={onFormSubmit} sx={{ py: 1.75 }}>
+      <MobilePrimaryPageAction fullWidth disabled={isUploading} onClick={onFormSubmit} sx={{ py: 1.75 }}>
         {labels.upload.submit}
-      </PrimaryPageAction>
+      </MobilePrimaryPageAction>
 
       {selectedFileName ? (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

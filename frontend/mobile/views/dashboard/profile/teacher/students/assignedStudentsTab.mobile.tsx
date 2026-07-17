@@ -1,8 +1,8 @@
 "use client";
 
 import { Alert, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
-import { PaginationControls } from "@/frontend/common/components/ui";
 import type { AssignedStudentsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsTabTypes";
+import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter";
 import { AssignedStudentsCardList } from "@/frontend/mobile/views/dashboard/profile/teacher/students/assignedStudentsCardList.mobile";
 
 function LoadingState() {
@@ -91,7 +91,7 @@ export function AssignedStudentsTabMobileView({
 
       <AssignedStudentsCardList rows={pagedRows} />
 
-      <PaginationControls
+      <MobilePaginationControls
         embedded
         page={page}
         pageCount={pageCount}

@@ -6,9 +6,9 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/common/components/ui";
 import { IdentifierKind, PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display";
 import type { SupportedOnlineAccountFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display";
 import { type PaymentCatalogsLabels, useAppTranslation } from "@/shared/locale";
 
 export interface OnlineAccountCatalogGridDesktopProps extends CatalogGridActionHandlers {

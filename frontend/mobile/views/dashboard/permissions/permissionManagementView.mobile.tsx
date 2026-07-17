@@ -1,10 +1,10 @@
 "use client";
 
 import { Alert, Box } from "@mui/material";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { PermissionManagementViewModel } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
 import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { PermissionManagementDialogsMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionManagementDialogs.mobile";
 import { PermissionTabContentMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionTabContent.mobile";
 import { SingleGroupViewMobile } from "@/frontend/mobile/views/dashboard/permissions/components/singleGroupView.mobile";
@@ -66,9 +66,9 @@ export function PermissionManagementMobileView({
 
   const headerActions =
     activeTab === "groups" ? (
-      <PrimaryPageAction id="create-group-btn" onClick={openCreateDialog}>
+      <MobilePrimaryPageAction id="create-group-btn" onClick={openCreateDialog}>
         {t.addPermissions}
-      </PrimaryPageAction>
+      </MobilePrimaryPageAction>
     ) : null;
 
   return (

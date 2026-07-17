@@ -2,9 +2,9 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { StudentOnboardingViewModel } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopFormSuccessSnackbar, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { ParentAssignmentSection } from "@/frontend/desktop/views/dashboard/students/onboarding/components/parentAssignmentSection.desktop";
 import { StudentInfoSection } from "@/frontend/desktop/views/dashboard/students/onboarding/components/studentInfoSection.desktop";
 import { TeacherAssignmentSection } from "@/frontend/desktop/views/dashboard/students/onboarding/components/teacherAssignmentSection.desktop";
@@ -111,13 +111,13 @@ export function StudentOnboardingDesktopView({
             justifyContent: "flex-end",
           })}
         >
-          <PrimaryPageAction type="submit" disabled={isSubmitting} sx={{ px: 6, py: 2, minWidth: 200 }}>
+          <DesktopPrimaryPageAction type="submit" disabled={isSubmitting} sx={{ px: 6, py: 2, minWidth: 200 }}>
             {isSubmitting ? labels.processing : labels.create}
-          </PrimaryPageAction>
+          </DesktopPrimaryPageAction>
         </Box>
       </Box>
 
-      <FormSuccessSnackbar open={successOpen} message={successMessage} onClose={onCloseSuccess} />
+      <DesktopFormSuccessSnackbar open={successOpen} message={successMessage} onClose={onCloseSuccess} />
     </DesktopPageContainer>
   );
 }

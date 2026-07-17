@@ -4,9 +4,9 @@ import { SchoolOutlined } from "@mui/icons-material";
 import { Autocomplete, InputAdornment, TextField } from "@mui/material";
 import type { Control } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import type { TeacherOption } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 
 interface TeacherAssignmentSectionProps {
   readonly control: Control<StudentOnboardingFormData>;
@@ -20,7 +20,7 @@ interface TeacherAssignmentSectionProps {
 
 export function TeacherAssignmentSection({ control, teacherOptions, labels }: Readonly<TeacherAssignmentSectionProps>) {
   return (
-    <SectionPanel title={labels.sectionTitle}>
+    <MobileSectionPanel title={labels.sectionTitle}>
       <Controller
         control={control}
         name="primaryTeacherId"
@@ -65,6 +65,6 @@ export function TeacherAssignmentSection({ control, teacherOptions, labels }: Re
           );
         }}
       />
-    </SectionPanel>
+    </MobileSectionPanel>
   );
 }

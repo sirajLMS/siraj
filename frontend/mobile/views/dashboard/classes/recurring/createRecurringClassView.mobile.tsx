@@ -6,7 +6,6 @@ import { alpha, Box, IconButton, Snackbar, Typography, useTheme } from "@mui/mat
 import { styled } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import { createRecurringClassSchema } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
@@ -16,6 +15,7 @@ import {
   type RecurringMeetingConfigFormState,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { RecurringClassFormMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/recurringClassForm.mobile";
 import type { CreateRecurringClassLabels } from "@/shared/locale";
 
@@ -243,7 +243,7 @@ export function CreateRecurringClassViewMobile({
       />
 
       <Box sx={{ pb: 12 }}>
-        <SectionPanel
+        <MobileSectionPanel
           sx={{
             backgroundColor: alpha(theme.palette.surfaceContainer, 0.2),
           }}
@@ -265,7 +265,7 @@ export function CreateRecurringClassViewMobile({
             onMeetingConfigChangeAction={setMeetingConfig}
             onSubmit={data => onSubmit(data, meetingConfig)}
           />
-        </SectionPanel>
+        </MobileSectionPanel>
       </Box>
 
       <SuccessSnackbar open={showSuccess} onClose={onDismissSuccess} labels={labels.addedSuccessfully} />

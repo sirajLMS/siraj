@@ -2,8 +2,8 @@
 
 import { FilterListOutlined, SortOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { FilterButton } from "@/frontend/common/components/ui";
 import type { ResourceLibraryHeaderProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
+import { DesktopFilterButton } from "@/frontend/desktop/components/ui/button";
 
 export function ResourceLibraryHeaderDesktop({
   labels,
@@ -42,12 +42,12 @@ export function ResourceLibraryHeaderDesktop({
 
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
-      <FilterButton startIcon={<FilterListOutlined />} onClick={handleFilterToggle} sx={{ borderRadius: 999 }}>
+      <DesktopFilterButton startIcon={<FilterListOutlined />} onClick={handleFilterToggle} sx={{ borderRadius: 999 }}>
         {filterLabel}
-      </FilterButton>
-      <FilterButton startIcon={<SortOutlined />} onClick={handleSortToggle} sx={{ borderRadius: 999 }}>
+      </DesktopFilterButton>
+      <DesktopFilterButton startIcon={<SortOutlined />} onClick={handleSortToggle} sx={{ borderRadius: 999 }}>
         {sortLabel}
-      </FilterButton>
+      </DesktopFilterButton>
     </Box>
   );
 }

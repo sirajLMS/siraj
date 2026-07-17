@@ -3,9 +3,9 @@
 import { HourglassEmptyOutlined, VerifiedUserOutlined } from "@mui/icons-material";
 import { Box, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import type { ParentComplaintRecord } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { ComplaintStatus } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import type { ComplaintsParentLabels } from "@/shared/locale";
 
 const StyledRecordCardPaper = styled(Paper)(({ theme }) => ({
@@ -111,7 +111,7 @@ export function ComplaintRecordCardMobile({ record, labels }: Readonly<Complaint
             <StyledRecordRegardingLabel variant="labelMd">{record.regarding}</StyledRecordRegardingLabel>
             <StyledRecordSummaryText variant="bodyLg">{record.summary}</StyledRecordSummaryText>
           </Box>
-          <StatusBadge
+          <MobileStatusBadge
             category="classStatus"
             status={mapStatusForBadge(record.status)}
             label={labels.statusLabels[labelKey]}

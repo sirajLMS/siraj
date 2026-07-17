@@ -3,7 +3,6 @@
 import { CheckCircleOutlined, EditOutlined, Save, ScheduleOutlined, SyncOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import { FormProvider, type UseFormReturn } from "react-hook-form";
-import { PrimaryPageAction, UserAvatar } from "@/frontend/common/components/ui";
 import { QuotaFormAccessProvider } from "@/frontend/common/views/dashboard/students/quota/QuotaFormAccessProvider";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import type {
@@ -12,6 +11,8 @@ import type {
   StudentProfileData,
 } from "@/frontend/common/views/dashboard/students/quota/types";
 import type { StudentQuotaViewModel } from "@/frontend/common/views/dashboard/students/quota/useStudentQuotaViewModel";
+import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/page/MobilePageContainer";
 import { ContextualHelperCardsMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/contextualHelperCards.mobile";
 import { CourseDetailsSectionMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/courseDetailsSection.mobile";
@@ -23,7 +24,7 @@ function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Read
   return (
     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", py: 4 }}>
       <Box sx={{ position: "relative", width: 96, height: 96, mb: 2 }}>
-        <UserAvatar
+        <MobileUserAvatar
           src={studentData.profileImage}
           label={studentData.studentName}
           size={96}
@@ -95,7 +96,7 @@ function FormActionsMobile({
         }}
       >
         {readOnly ? null : (
-          <PrimaryPageAction
+          <MobilePrimaryPageAction
             type="submit"
             disabled={isSaving || isSaved}
             startIcon={saveIcon}
@@ -114,10 +115,10 @@ function FormActionsMobile({
             })}
           >
             {saveText}
-          </PrimaryPageAction>
+          </MobilePrimaryPageAction>
         )}
         {showCancel ? (
-          <PrimaryPageAction
+          <MobilePrimaryPageAction
             type="button"
             variant="text"
             onClick={onCancel}
@@ -134,7 +135,7 @@ function FormActionsMobile({
             })}
           >
             {t.actions.cancel}
-          </PrimaryPageAction>
+          </MobilePrimaryPageAction>
         ) : null}
       </Box>
 

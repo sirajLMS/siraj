@@ -3,7 +3,6 @@
 import { AccessTimeOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, Paper, Tooltip, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { ActionIconLink, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
@@ -12,6 +11,11 @@ import {
   getStatusLabel,
   resolveTeacherStatusBadge,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/sessionStatusUtils";
+import {
+  DesktopActionIconLink,
+  DesktopPersonProfileLinkCell,
+  DesktopStatusBadge,
+} from "@/frontend/desktop/components/ui";
 import { TeacherScheduleSessionActionsCellDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherScheduleSessionActionsCell.desktop";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/schedule/teacher-schedule-session-actions";
 
@@ -94,7 +98,7 @@ export function TeacherScheduleCardDesktop({
       </Typography>
 
       <Box sx={{ minWidth: 160, flex: "1 1 200px" }}>
-        <PersonProfileLinkCell
+        <DesktopPersonProfileLinkCell
           href={studentHrefValue}
           name={row.studentName}
           showAvatar
@@ -138,7 +142,7 @@ export function TeacherScheduleCardDesktop({
             {labels.schedule.frozen}
           </Typography>
         ) : (
-          <StatusBadge
+          <DesktopStatusBadge
             category={badge.category}
             status={badge.status}
             label={getStatusLabel(row.status, labels.status)}
@@ -162,9 +166,9 @@ export function TeacherScheduleCardDesktop({
       ) : null}
 
       <Tooltip title={labels.schedule.classId}>
-        <ActionIconLink href={`/classes/${row.id}`} aria-label={labels.schedule.classId}>
+        <DesktopActionIconLink href={`/classes/${row.id}`} aria-label={labels.schedule.classId}>
           <VisibilityOutlined fontSize="small" />
-        </ActionIconLink>
+        </DesktopActionIconLink>
       </Tooltip>
     </Paper>
   );

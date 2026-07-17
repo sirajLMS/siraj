@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useCurrencyCatalog } from "@/frontend/common/hooks/useCurrencyCatalog";
 import { type CurrencyOption, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -41,7 +42,7 @@ export type CurrencyAutocompleteProps = {
   /**
    * Filter the visible options to a subset of ISO 4217 codes.
    */
-  readonly allowedCodes?: readonly string[];
+  readonly allowedCodes?: readonly CurrencyCode[];
   readonly matchAnchorWidth?: boolean;
   readonly disablePortal?: boolean;
   readonly listAttached?: boolean;

@@ -1,9 +1,9 @@
 "use client";
 
 import { Paper, Stack, Typography } from "@mui/material";
-import { PersonProfileLink, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssociatedStudentRow } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 interface AssociatedStudentsCardListMobileProps {
@@ -25,19 +25,19 @@ export function AssociatedStudentsCardListMobile({ rows }: Readonly<AssociatedSt
         <Paper key={row.id} variant="outlined" sx={{ p: 2 }}>
           <Stack spacing={1.5}>
             <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", gap: 1 }}>
-              <PersonProfileLink
+              <MobilePersonProfileLink
                 href={row.id ? studentHref(row.id) : undefined}
                 avatarUrl={row.studentAvatarUrl}
                 name={row.name ?? tProfile.notSet}
                 fallbackInitial="S"
               />
-              <StatusBadge
+              <MobileStatusBadge
                 category="studentAccount"
                 status={(row.status ?? "REGULAR").toLowerCase()}
                 label={formatStatusLabel(row.status ?? "REGULAR")}
               />
             </Stack>
-            <PersonProfileLink
+            <MobilePersonProfileLink
               href={row.teacherUserId ? profileHrefForUser(row.teacherUserId) : undefined}
               avatarUrl={row.teacherAvatarUrl}
               name={row.teacherName?.trim() || tProfile.notSet}

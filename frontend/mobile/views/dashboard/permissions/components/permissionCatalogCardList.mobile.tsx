@@ -1,10 +1,10 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { BaseCard } from "@/frontend/common/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { MobileCardList } from "@/frontend/mobile/components/ui";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionCatalogCardListMobileProps {
@@ -30,7 +30,7 @@ export function PermissionCatalogCardListMobile({
         });
 
         return (
-          <BaseCard sx={{ p: 2 }}>
+          <MobileBaseCard sx={{ p: 2 }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
                 <Box
@@ -94,7 +94,7 @@ export function PermissionCatalogCardListMobile({
                     {usedGroups.map(g => {
                       if (!g.id || !g.name) return null;
                       return (
-                        <LocalizedStringDisplay
+                        <MobileLocalizedStringDisplay
                           key={g.id}
                           value={g.name}
                           typographyVariant="labelMd"
@@ -115,7 +115,7 @@ export function PermissionCatalogCardListMobile({
                 </Box>
               )}
             </Box>
-          </BaseCard>
+          </MobileBaseCard>
         );
       }}
     />

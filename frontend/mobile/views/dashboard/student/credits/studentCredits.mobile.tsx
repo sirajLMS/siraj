@@ -2,11 +2,15 @@
 
 import { ArrowBackOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { StudentCreditTransactionRow } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
-import { MobileCardList, MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileContentStack,
+  MobileMetricCard,
+  MobilePageContainer,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
 
 interface MobileTransactionItemProps {
   readonly row: StudentCreditTransactionRow;
@@ -88,10 +92,10 @@ export function StudentCreditsMobileView({
   return (
     <MobilePageContainer>
       <MobileContentStack>
-        <SectionPanel title={labels.currentBalance}>
+        <MobileSectionPanel title={labels.currentBalance}>
           <Stack direction="row" spacing={2} sx={{ alignItems: "stretch" }}>
             <Box sx={{ flex: 1 }}>
-              <MetricCard
+              <MobileMetricCard
                 icon={PaymentsOutlined}
                 label={labels.hoursRemaining}
                 value={balance.classesRemaining}
@@ -99,7 +103,7 @@ export function StudentCreditsMobileView({
               />
             </Box>
             <Box sx={{ flex: 1 }}>
-              <MetricCard
+              <MobileMetricCard
                 icon={SchoolOutlined}
                 label={labels.hoursTotal}
                 value={balance.classesTotal}
@@ -107,16 +111,16 @@ export function StudentCreditsMobileView({
               />
             </Box>
           </Stack>
-        </SectionPanel>
+        </MobileSectionPanel>
 
-        <SectionPanel title={labels.transactionHistory}>
+        <MobileSectionPanel title={labels.transactionHistory}>
           <MobileCardList<StudentCreditTransactionRow>
             rows={transactions}
             emptyMessage={labels.noTransactions}
             getKey={row => row.id}
             renderItem={row => <MobileTransactionItem row={row} labels={labels} />}
           />
-        </SectionPanel>
+        </MobileSectionPanel>
 
         <Button
           variant="outlined"

@@ -3,11 +3,16 @@
 import { Grid } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import type { PendingReviewsViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import {
+  DesktopAppDataGrid,
+  DesktopFilterButton,
+  DesktopPrimaryPageAction,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { LessonReportDetailPanelDesktop } from "@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/components/lessonReportDetailPanel.desktop";
 
 interface PendingReviewsDesktopViewProps extends PendingReviewsViewModel {
@@ -72,7 +77,7 @@ export function PendingReviewsDesktopView({
         headerName: labels.statusColumn,
         width: 140,
         renderCell: params => (
-          <StatusBadge
+          <DesktopStatusBadge
             category="classStatus"
             status={params.row.status ? params.row.status.toLowerCase() : "pending"}
             label={params.row.status ?? "PENDING"}
@@ -88,17 +93,17 @@ export function PendingReviewsDesktopView({
         renderCell: params => (
           <Grid container spacing={1} sx={{ flexWrap: "nowrap" }}>
             <Grid>
-              <FilterButton size="small" onClick={() => onSelectReport(params.row)}>
+              <DesktopFilterButton size="small" onClick={() => onSelectReport(params.row)}>
                 {labels.reviewButton}
-              </FilterButton>
+              </DesktopFilterButton>
             </Grid>
             <Grid>
-              <PrimaryPageAction size="small" onClick={() => onApprove(params.row.id)} disabled={approving}>
+              <DesktopPrimaryPageAction size="small" onClick={() => onApprove(params.row.id)} disabled={approving}>
                 {labels.approveButton}
-              </PrimaryPageAction>
+              </DesktopPrimaryPageAction>
             </Grid>
             <Grid>
-              <FilterButton
+              <DesktopFilterButton
                 size="small"
                 onClick={() => onOpenRejectDialog(params.row)}
                 sx={theme => ({
@@ -107,7 +112,7 @@ export function PendingReviewsDesktopView({
                 })}
               >
                 {labels.rejectButton}
-              </FilterButton>
+              </DesktopFilterButton>
             </Grid>
           </Grid>
         ),
@@ -123,21 +128,21 @@ export function PendingReviewsDesktopView({
         actions={
           <Grid container spacing={1}>
             <Grid>
-              <FilterButton onClick={() => onTeacherFilterChange(teacherFilter ? "" : "active")}>
+              <DesktopFilterButton onClick={() => onTeacherFilterChange(teacherFilter ? "" : "active")}>
                 {labels.filterByTeacher}
-              </FilterButton>
+              </DesktopFilterButton>
             </Grid>
             <Grid>
-              <FilterButton onClick={() => onStudentFilterChange(studentFilter ? "" : "active")}>
+              <DesktopFilterButton onClick={() => onStudentFilterChange(studentFilter ? "" : "active")}>
                 {labels.filterByStudent}
-              </FilterButton>
+              </DesktopFilterButton>
             </Grid>
           </Grid>
         }
       />
 
-      <SectionPanel sx={{ flex: 1 }}>
-        <AppDataGrid<PendingReviewRow>
+      <DesktopSectionPanel sx={{ flex: 1 }}>
+        <DesktopAppDataGrid<PendingReviewRow>
           rows={rows}
           columns={columns}
           getRowId={row => row.id}
@@ -146,7 +151,7 @@ export function PendingReviewsDesktopView({
           autoHeight
           rowHeight={64}
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
 
       <Grid size={{ xs: 12, lg: 4 }}>
         <LessonReportDetailPanelDesktop report={selectedReport} labels={labels} />

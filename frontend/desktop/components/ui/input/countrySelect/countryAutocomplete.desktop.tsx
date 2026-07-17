@@ -3,20 +3,119 @@
 import Autocomplete, { type AutocompleteRenderInputParams } from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
+import type { Theme } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
+import type { Modifier } from "@popperjs/core";
 import type * as React from "react";
 import { useCallback, useState } from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import type { CountryAutocompleteProps } from "@/frontend/common/components/ui/input/countrySelect/CountryAutocomplete";
-import {
-  getCountryAutocompletePaperSlotProps,
-  getCountryAutocompletePopperSlotProps,
-} from "@/frontend/common/components/ui/input/countrySelect/countryAutocompletePopper";
-import { getCountryOptionLabel } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.utils";
-import { type CountryType, countries } from "@/frontend/common/lib/locale";
+import { type CountryType, countries, getCountryDisplayName } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { CountryOptionRowDesktop } from "@/frontend/desktop/components/ui/input/countrySelect/countryOptionRow.desktop";
 import { useAppTranslation } from "@/shared/locale";
+
+export type CountryAutocompleteProps = {
+  readonly country?: CountryType | null;
+  readonly onChangeAction: (country: CountryType) => void;
+  readonly onClearAction?: () => void;
+  readonly autoComplete?: string;
+  readonly fullWidth?: boolean;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly label?: string;
+  readonly error?: boolean;
+  readonly helperText?: string;
+  readonly onBlurAction?: () => void;
+  readonly style?: React.CSSProperties;
+  readonly open?: boolean;
+  readonly onOpenAction?: () => void;
+  readonly onCloseAction?: () => void;
+  readonly autoFocus?: boolean;
+  readonly showPhonePrefix?: boolean;
+  readonly matchAnchorWidth?: boolean;
+  readonly disablePortal?: boolean;
+  readonly listAttached?: boolean;
+};
+
+type CountryAutocompleteSlotProps = NonNullable<AutocompleteProps<CountryType, false, false, false>["slotProps"]>;
+
+const sameWidthModifier: Modifier<"sameWidth", Record<string, unknown>> = {
+  name: "sameWidth",
+  enabled: true,
+  phase: "beforeWrite",
+  requires: ["computeStyles"],
+  fn: ({ state }) => {
+    const anchor = state.rects.reference;
+    if (anchor) {
+      state.styles.popper = {
+        ...state.styles.popper,
+        width: `${anchor.width}px`,
+        minWidth: `${anchor.width}px`,
+      };
+    }
+  },
+};
+
+function _getCountryAutocompletePopperSlotPropsDesktop(options: {
+  readonly matchAnchorWidth: boolean;
+  readonly disablePortal: boolean;
+  readonly listAttached: boolean;
+}): NonNullable<CountryAutocompleteSlotProps["popper"]> {
+  const { matchAnchorWidth, disablePortal, listAttached } = options;
+
+  return {
+    disablePortal,
+    placement: "bottom-start",
+    modifiers: matchAnchorWidth
+      ? [
+          sameWidthModifier,
+          {
+            name: "offset",
+            options: {
+              offset: [0, listAttached ? 0 : 4],
+            },
+          },
+        ]
+      : [
+          {
+            name: "offset",
+            options: {
+              offset: [0, listAttached ? 0 : 4],
+            },
+          },
+        ],
+    sx: matchAnchorWidth
+      ? {
+          width: "fit-content",
+          minWidth: "fit-content",
+        }
+      : undefined,
+  };
+}
+
+function _getCountryAutocompletePaperSlotPropsDesktop(listAttached: boolean): CountryAutocompleteSlotProps["paper"] {
+  if (!listAttached) {
+    return undefined;
+  }
+
+  return {
+    sx: (theme: Theme) => ({
+      mt: 0,
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
+      borderTopWidth: 0,
+      boxShadow: theme.shadows[4],
+    }),
+  };
+}
+
+function getCountryOptionLabel(country: CountryType, locale: string, showPhonePrefix = true): string {
+  const name = getCountryDisplayName(country.code, locale);
+  if (!showPhonePrefix) {
+    return name;
+  }
+  return `${name} (+${country.phone})`;
+}
 
 const buildSxProp = (
   style: React.CSSProperties | undefined,
@@ -84,7 +183,7 @@ const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {
           startAdornment: country ? (
             <>
               <InputAdornment position="start">
-                <LocaleEmoji emoji={country.emoji} />
+                <DesktopLocaleEmoji emoji={country.emoji} />
               </InputAdornment>
               {params.slotProps.input?.startAdornment}
             </>

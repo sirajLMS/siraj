@@ -3,8 +3,8 @@
 import { CheckCircleOutlined, EmailOutlined, RadioButtonUncheckedOutlined, SmsOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, CircularProgress, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 
 export interface CommunicationLogCardMobileProps {
   readonly entries: readonly (CommunicationLogEntry | null)[] | null | undefined;
@@ -124,13 +124,13 @@ export function CommunicationLogCardMobile({
         </StyledMobileResendButton>
       </Box>
 
-      <BaseCard sx={{ p: 3 }}>
+      <MobileBaseCard sx={{ p: 3 }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           {validEntries.map(entry => (
             <MobileLogEntryItem key={entry.id ?? ""} entry={entry} />
           ))}
         </Box>
-      </BaseCard>
+      </MobileBaseCard>
     </Box>
   );
 }

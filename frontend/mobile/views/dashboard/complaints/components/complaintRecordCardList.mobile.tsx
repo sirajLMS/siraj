@@ -3,8 +3,8 @@
 import { ExpandMoreOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PaginationControls } from "@/frontend/common/components/ui";
 import type { ParentComplaintRecord } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
+import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter";
 import { ComplaintRecordCardMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintRecordCard.mobile";
 import type { ComplaintsParentLabels } from "@/shared/locale";
 
@@ -91,7 +91,7 @@ export function ComplaintRecordCardListMobile({
       </StyledCardListContainer>
 
       {showPagination ? (
-        <PaginationControls
+        <MobilePaginationControls
           page={page}
           pageCount={pageCount}
           rowCount={totalCount ?? 0}

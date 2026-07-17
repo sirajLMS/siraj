@@ -1,8 +1,9 @@
 "use client";
 
 import { Grid } from "@mui/material";
-import { BaseCard, PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import type { ResourcesViewModel } from "@/frontend/common/views/dashboard/resources/useResourcesViewModel";
+import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { ResourceDeleteDialogDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceDeleteDialog.desktop";
 import { ResourceGovernancePanelDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceGovernancePanel.desktop";
 import { ResourceLibraryGridDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceLibraryGrid.desktop";
@@ -32,13 +33,13 @@ export function ResourcesDesktopView({
   onCardClick,
 }: Readonly<ResourcesViewModel>) {
   return (
-    <PageContainer>
-      <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
       <Grid container spacing={4}>
         {canManage ? (
           <Grid size={{ xs: 12, xl: 4 }}>
-            <BaseCard>
+            <DesktopBaseCard>
               <ResourceUploadFormDesktop
                 labels={labels}
                 documentName={documentName}
@@ -50,7 +51,7 @@ export function ResourcesDesktopView({
                 onFileSelect={onFileSelect}
               />
               <ResourceGovernancePanelDesktop labels={labels} />
-            </BaseCard>
+            </DesktopBaseCard>
             <ResourceUploadGuidelinesDesktop labels={labels} />
           </Grid>
         ) : null}
@@ -77,6 +78,6 @@ export function ResourcesDesktopView({
         onConfirm={onDeleteConfirm}
         loading={isDeleting}
       />
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

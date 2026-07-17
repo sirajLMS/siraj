@@ -3,11 +3,11 @@
 import { LinearProgress } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { TeacherDueRow } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
 import type { TeacherDuesViewModel } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/useTeacherDuesViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopAppDataGrid, DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 interface TeacherDuesDesktopViewProps extends TeacherDuesViewModel {
   readonly rows: readonly TeacherDueRow[];
@@ -64,7 +64,7 @@ export function TeacherDuesDesktopView({
         headerName: labels.statusColumn,
         width: 130,
         renderCell: params => (
-          <StatusBadge
+          <DesktopStatusBadge
             category="invoice"
             status={params.row.status ?? "PENDING"}
             label={params.row.status ?? "PENDING"}
@@ -85,9 +85,9 @@ export function TeacherDuesDesktopView({
         align: "center",
         headerAlign: "center",
         renderCell: params => (
-          <PrimaryPageAction size="small" onClick={() => onMarkPaid([params.row.id])} disabled={markingPaid}>
+          <DesktopPrimaryPageAction size="small" onClick={() => onMarkPaid([params.row.id])} disabled={markingPaid}>
             {labels.markAsPaidButton}
-          </PrimaryPageAction>
+          </DesktopPrimaryPageAction>
         ),
       },
     ],
@@ -100,17 +100,17 @@ export function TeacherDuesDesktopView({
         title={labels.pageTitle}
         actions={
           selectedDueIds.length > 0 ? (
-            <PrimaryPageAction onClick={() => onMarkPaid(selectedDueIds)} disabled={markingPaid}>
+            <DesktopPrimaryPageAction onClick={() => onMarkPaid(selectedDueIds)} disabled={markingPaid}>
               {labels.markAsPaidButton}
-            </PrimaryPageAction>
+            </DesktopPrimaryPageAction>
           ) : null
         }
       />
 
       {loading ? <LinearProgress /> : null}
 
-      <SectionPanel sx={{ flex: 1 }}>
-        <AppDataGrid<TeacherDueRow>
+      <DesktopSectionPanel sx={{ flex: 1 }}>
+        <DesktopAppDataGrid<TeacherDueRow>
           rows={rows}
           columns={columns}
           getRowId={row => row.id}
@@ -124,7 +124,7 @@ export function TeacherDuesDesktopView({
             onSelectDues(selectedIds);
           }}
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
     </DesktopPageContainer>
   );
 }

@@ -3,13 +3,14 @@
 import { Grid, Input, MenuItem, Select } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
-import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
-import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
-import { LanguageSelector } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
+import { standardInputSx } from "@/frontend/common/components/ui/form";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getLanguageByCode } from "@/frontend/common/lib/locale";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
+import { MobileFieldWrapper } from "@/frontend/mobile/components/ui/form/field";
+import { GenderSelectorMobile } from "@/frontend/mobile/components/ui/input/genderSelector";
+import { LanguageSelectorMobile } from "@/frontend/mobile/components/ui/input/languageSelector";
 
 interface StudentInfoSectionProps {
   readonly register: UseFormRegister<StudentOnboardingFormData>;
@@ -35,10 +36,10 @@ interface StudentInfoSectionProps {
 
 export function StudentInfoSection({ register, errors, control, labels }: Readonly<StudentInfoSectionProps>) {
   return (
-    <SectionPanel title={labels.sectionTitle}>
+    <MobileSectionPanel title={labels.sectionTitle}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper label={labels.name} required error={errors.name ? labels.nameMinLength : undefined}>
+          <MobileFieldWrapper label={labels.name} required error={errors.name ? labels.nameMinLength : undefined}>
             <Input
               {...register("name")}
               placeholder={labels.namePlaceholder}
@@ -46,10 +47,10 @@ export function StudentInfoSection({ register, errors, control, labels }: Readon
               fullWidth
               sx={standardInputSx}
             />
-          </FieldWrapper>
+          </MobileFieldWrapper>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper label={labels.dateOfBirth}>
+          <MobileFieldWrapper label={labels.dateOfBirth}>
             <Input
               {...register("dateOfBirth")}
               type="date"
@@ -57,14 +58,14 @@ export function StudentInfoSection({ register, errors, control, labels }: Readon
               fullWidth
               sx={standardInputSx}
             />
-          </FieldWrapper>
+          </MobileFieldWrapper>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <Controller
             control={control}
             name="gender"
             render={({ field }) => (
-              <GenderSelector
+              <GenderSelectorMobile
                 gender={field.value ?? null}
                 setGenderAction={field.onChange}
                 fullWidth
@@ -82,7 +83,7 @@ export function StudentInfoSection({ register, errors, control, labels }: Readon
             control={control}
             name="language"
             render={({ field }) => (
-              <LanguageSelector
+              <LanguageSelectorMobile
                 fullWidth
                 label={labels.language}
                 language={field.value ? getLanguageByCode(field.value) : undefined}
@@ -97,7 +98,7 @@ export function StudentInfoSection({ register, errors, control, labels }: Readon
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper label={labels.status}>
+          <MobileFieldWrapper label={labels.status}>
             <Controller
               control={control}
               name="status"
@@ -108,9 +109,9 @@ export function StudentInfoSection({ register, errors, control, labels }: Readon
                 </Select>
               )}
             />
-          </FieldWrapper>
+          </MobileFieldWrapper>
         </Grid>
       </Grid>
-    </SectionPanel>
+    </MobileSectionPanel>
   );
 }

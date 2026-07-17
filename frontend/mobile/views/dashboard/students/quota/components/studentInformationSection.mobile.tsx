@@ -13,13 +13,13 @@ import {
 } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
 import { Controller, useFormContext } from "react-hook-form";
-import { LanguageDisplay } from "@/frontend/common/components/ui/display";
-import { AppDatePicker } from "@/frontend/common/components/ui/form";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/components/quotaFieldStyles";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import { GENDER_OPTIONS } from "@/frontend/common/views/dashboard/students/quota/types";
+import { MobileLanguageDisplay } from "@/frontend/mobile/components/ui/display/language";
+import { MobileAppDatePicker } from "@/frontend/mobile/components/ui/form/date";
 import { QuotaFormFieldMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/quotaFormField.mobile";
 import { SectionHeaderMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/sectionHeader.mobile";
 import { type StudentQuotaLabels, useAppTranslation } from "@/shared/locale";
@@ -72,7 +72,7 @@ function DateOfBirthField() {
         name="dateOfBirth"
         control={control}
         render={({ field }) => (
-          <AppDatePicker
+          <MobileAppDatePicker
             value={parseDateValue(field.value)}
             onChange={(date: Date | null) => {
               field.onChange(date && isValid(date) ? format(date, DATE_FORMAT) : "");
@@ -108,7 +108,7 @@ function LanguageField() {
         control={control}
         render={({ field }) => (
           <Box sx={quotaInputSx}>
-            <LanguageDisplay code={field.value} />
+            <MobileLanguageDisplay code={field.value} />
           </Box>
         )}
       />

@@ -1,10 +1,10 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { DesktopPageContainer } from "@/frontend/desktop/components/ui";
 import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
 import { LoadingState } from "@/frontend/common/components/ui/state/LoadingState";
 import type { ClassDetailsViewModel } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
+import { DesktopPageContainer } from "@/frontend/desktop/components/ui";
 import { ClassDetailsContentDesktop } from "@/frontend/desktop/views/dashboard/classes/details/components/classDetailsContent.desktop";
 
 interface InvalidIdStateProps {
@@ -51,6 +51,6 @@ export function ClassDetailsContainerDesktop({ viewModel }: { readonly viewModel
         formattedStartTime={viewModel.formattedStartTime}
         formattedEndTime={viewModel.formattedEndTime}
       />
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

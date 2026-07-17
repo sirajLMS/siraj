@@ -5,7 +5,6 @@ import { Box, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { DesktopPersonProfileLink, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
@@ -19,6 +18,7 @@ import {
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
+import { DesktopPersonProfileLink, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, "regular" | "suspendedPending" | "onLeave" | "pendingVerification"> = {

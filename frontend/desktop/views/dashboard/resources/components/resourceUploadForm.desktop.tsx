@@ -2,8 +2,8 @@
 
 import { CloudUploadOutlined, DescriptionOutlined } from "@mui/icons-material";
 import { Box, TextField, Typography } from "@mui/material";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { ResourceUploadFormProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { ResourceUploadDropzoneDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceUploadDropzone.desktop";
 
 export function ResourceUploadFormDesktop({
@@ -51,9 +51,9 @@ export function ResourceUploadFormDesktop({
         />
       </Box>
 
-      <PrimaryPageAction fullWidth disabled={isUploading} onClick={onFormSubmit} sx={{ py: 2 }}>
+      <DesktopPrimaryPageAction fullWidth disabled={isUploading} onClick={onFormSubmit} sx={{ py: 2 }}>
         {labels.upload.submit}
-      </PrimaryPageAction>
+      </DesktopPrimaryPageAction>
 
       {selectedFileName ? (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

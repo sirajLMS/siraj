@@ -2,8 +2,8 @@
 
 import { CheckCircleOutlined } from "@mui/icons-material";
 import { alpha, Box, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { UpdatedSessionsCardListMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/updatedSessionsCardList.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -56,7 +56,7 @@ export function UpdatedSessionsSectionMobile({ sessions, successfulCount }: Read
             {t.sections.updated}
           </Typography>
         </Box>
-        <StatusBadge category="session" status="completed" label={t.table.sessionsCount(successfulCount)} />
+        <MobileStatusBadge category="session" status="completed" label={t.table.sessionsCount(successfulCount)} />
       </Box>
       <Box sx={{ p: 2 }}>
         <UpdatedSessionsCardListMobile sessions={sessions} successfulCount={successfulCount} />

@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Button, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { AdminSuggestionRow } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
 import type { SuggestionsAdminLabels } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
@@ -18,6 +17,7 @@ import {
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { SuggestionsMetricsRowMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionsMetricsRow.mobile";
 import { SuggestionsSearchBarMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionsSearchBar.mobile";
 import { SuggestionsTabBarMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionsTabBar.mobile";
@@ -148,7 +148,7 @@ function SuggestionCardItem({
             {row.submittedAt}
           </Typography>
         </Box>
-        <StatusBadge
+        <MobileStatusBadge
           category="invoice"
           status={mapStatusForBadge(row.status)}
           label={labels.statusLabels[statusLabelKey(row.status)]}

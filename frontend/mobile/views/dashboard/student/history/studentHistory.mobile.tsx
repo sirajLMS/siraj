@@ -2,11 +2,15 @@
 
 import { ArrowBackOutlined, AssignmentOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, type Theme, Typography } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
-import { MobileCardList, MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileContentStack,
+  MobileMetricCard,
+  MobilePageContainer,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
 
 function StatusChip({ status }: { status: string }) {
   const getStatusColors = (theme: Theme, statusKey: string) => {
@@ -104,11 +108,11 @@ export function StudentHistoryMobileView({
   return (
     <MobilePageContainer>
       <MobileContentStack>
-        <SectionPanel title={labels.lessonHistory}>
+        <MobileSectionPanel title={labels.lessonHistory}>
           <Stack spacing={2}>
             <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap" }}>
               <Box sx={{ flex: "1 1 140px" }}>
-                <MetricCard
+                <MobileMetricCard
                   icon={AssignmentOutlined}
                   label={labels.sessionDate}
                   value={metrics.totalClasses}
@@ -116,7 +120,7 @@ export function StudentHistoryMobileView({
                 />
               </Box>
               <Box sx={{ flex: "1 1 140px" }}>
-                <MetricCard
+                <MobileMetricCard
                   icon={SchoolOutlined}
                   label={labels.duration}
                   value={metrics.hoursStudied}
@@ -132,7 +136,7 @@ export function StudentHistoryMobileView({
               renderItem={row => <MobileSessionItem row={row} labels={labels} />}
             />
           </Stack>
-        </SectionPanel>
+        </MobileSectionPanel>
 
         <Button
           variant="outlined"

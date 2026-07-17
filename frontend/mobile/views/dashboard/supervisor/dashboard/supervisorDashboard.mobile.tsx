@@ -2,9 +2,13 @@
 
 import { CalendarMonthOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashboard/supervisor/dashboard/useSupervisorDashboardViewModel";
-import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileContentStack,
+  MobilePageContainer,
+  MobilePageHeader,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
 import { DuesSummaryCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/duesSummaryCard.mobile";
 import { PendingReviewsHeroCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/pendingReviewsHeroCard.mobile";
 
@@ -35,7 +39,7 @@ export function SupervisorDashboardMobileView({
 
         <DuesSummaryCardMobile summary={pendingDuesSummary} labels={labels} onGoToDues={onGoToDues} />
 
-        <SectionPanel title={labels.monthlyReportsShortcut}>
+        <MobileSectionPanel title={labels.monthlyReportsShortcut}>
           <Stack sx={{ gap: 1.5 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <CalendarMonthOutlined fontSize="small" sx={theme => ({ color: theme.palette.primary.main })} />
@@ -60,9 +64,9 @@ export function SupervisorDashboardMobileView({
               {labels.goToMonthlyReports}
             </Box>
           </Stack>
-        </SectionPanel>
+        </MobileSectionPanel>
 
-        <SectionPanel title={labels.recentApprovals}>
+        <MobileSectionPanel title={labels.recentApprovals}>
           {recentApprovals.length === 0 ? (
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
               {labels.noRecentApprovals}
@@ -89,7 +93,7 @@ export function SupervisorDashboardMobileView({
               ))}
             </Stack>
           )}
-        </SectionPanel>
+        </MobileSectionPanel>
       </MobileContentStack>
     </MobilePageContainer>
   );

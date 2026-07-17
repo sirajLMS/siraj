@@ -11,9 +11,9 @@ import {
   SchoolOutlined,
 } from "@mui/icons-material";
 import { Box, Button, Divider, Grid, Stack, Typography } from "@mui/material";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
+import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
+import { DesktopPageContainer, DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/page";
 
 export function StudentProfileDesktopView({
   profile,
@@ -23,16 +23,16 @@ export function StudentProfileDesktopView({
 }: Readonly<StudentProfileViewModel>) {
   if (loading || !profile) {
     return (
-      <PageContainer>
+      <DesktopPageContainer>
         <Typography variant="bodyMd" sx={{ p: 3 }}>
           {labels.loadingMessage}
         </Typography>
-      </PageContainer>
+      </DesktopPageContainer>
     );
   }
 
   return (
-    <PageContainer>
+    <DesktopPageContainer>
       <Box sx={{ mb: 3 }}>
         <Typography variant="headlineLg" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
           {labels.pageTitle}
@@ -41,7 +41,7 @@ export function StudentProfileDesktopView({
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <SectionPanel title={labels.personalInfo} sx={{ height: "100%" }}>
+          <DesktopSectionPanel title={labels.personalInfo} sx={{ height: "100%" }}>
             <Stack spacing={3}>
               <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                 <Box
@@ -108,12 +108,12 @@ export function StudentProfileDesktopView({
                 </Stack>
               </Stack>
             </Stack>
-          </SectionPanel>
+          </DesktopSectionPanel>
         </Grid>
 
         <Grid size={{ xs: 12, md: 8 }}>
           {profile.parentName && (
-            <SectionPanel title={labels.parentInfo} sx={{ mb: 3 }}>
+            <DesktopSectionPanel title={labels.parentInfo} sx={{ mb: 3 }}>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, md: 4 }}>
                   <Stack spacing={0.5}>
@@ -140,13 +140,13 @@ export function StudentProfileDesktopView({
                   </Stack>
                 </Grid>
               </Grid>
-            </SectionPanel>
+            </DesktopSectionPanel>
           )}
 
-          <SectionPanel title={labels.academicInfo} sx={{ mb: 3 }}>
+          <DesktopSectionPanel title={labels.academicInfo} sx={{ mb: 3 }}>
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 4 }}>
-                <MetricCard
+                <DesktopMetricCard
                   icon={SchoolOutlined}
                   label={labels.teacher}
                   value={profile.teacherName ?? "—"}
@@ -154,7 +154,7 @@ export function StudentProfileDesktopView({
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
-                <MetricCard
+                <DesktopMetricCard
                   icon={CalendarTodayOutlined}
                   label={labels.hoursPerWeek}
                   value={profile.hoursPerWeek ?? 0}
@@ -162,7 +162,7 @@ export function StudentProfileDesktopView({
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
-                <MetricCard
+                <DesktopMetricCard
                   icon={PersonOutlined}
                   label={labels.classesRemaining}
                   value={profile.classesRemaining ?? 0}
@@ -170,7 +170,7 @@ export function StudentProfileDesktopView({
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
-                <MetricCard
+                <DesktopMetricCard
                   icon={AssignmentOutlined}
                   label={labels.classesTotal}
                   value={profile.classesTotal ?? 0}
@@ -178,7 +178,7 @@ export function StudentProfileDesktopView({
                 />
               </Grid>
             </Grid>
-          </SectionPanel>
+          </DesktopSectionPanel>
         </Grid>
       </Grid>
 
@@ -192,6 +192,6 @@ export function StudentProfileDesktopView({
           {labels.cancel}
         </Button>
       </Box>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

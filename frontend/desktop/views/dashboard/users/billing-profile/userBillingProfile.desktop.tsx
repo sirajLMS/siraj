@@ -2,9 +2,13 @@
 
 import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Button, TextField } from "@mui/material";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 import type { UserBillingProfileViewModel } from "@/frontend/common/views/dashboard/users/billing-profile/useUserBillingProfileViewModel";
+import {
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui/container/page";
 import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
 import { ParentInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/billing/components/parentInvoicesDataGrid.desktop";
 
@@ -35,10 +39,10 @@ export function UserBillingProfileDesktopView({
   const listLoading = isSearchPending || (loading && invoices.length === 0);
 
   return (
-    <PageContainer>
-      <PageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser(userId)} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser(userId)} />
       <BillingMetricsRowDesktop metrics={metrics} loading={summaryLoading} />
-      <SectionPanel
+      <DesktopSectionPanel
         title={labels.sections.invoiceHistory}
         subTitle={labels.sections.invoiceHistorySubtitle}
         actions={
@@ -86,7 +90,7 @@ export function UserBillingProfileDesktopView({
           onPageChange={onPageChange}
           loading={listLoading}
         />
-      </SectionPanel>
-    </PageContainer>
+      </DesktopSectionPanel>
+    </DesktopPageContainer>
   );
 }

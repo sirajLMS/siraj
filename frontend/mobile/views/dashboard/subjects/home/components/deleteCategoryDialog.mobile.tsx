@@ -2,8 +2,8 @@
 
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
-import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui/button/ActionButtons";
 import type { DeleteCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { MobileFilterButton, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { useAppTranslation } from "@/shared/locale";
 
 /**
@@ -57,10 +57,10 @@ export function DeleteCategoryDialogMobile({
         </Typography>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-        <FilterButton fullWidth onClick={onClose} disabled={isLoading} sx={{ py: 1.5 }}>
+        <MobileFilterButton fullWidth onClick={onClose} disabled={isLoading} sx={{ py: 1.5 }}>
           {t.cancel}
-        </FilterButton>
-        <PrimaryPageAction
+        </MobileFilterButton>
+        <MobilePrimaryPageAction
           fullWidth
           onClick={onConfirm}
           disabled={isLoading}
@@ -72,7 +72,7 @@ export function DeleteCategoryDialogMobile({
           })}
         >
           {isLoading ? "..." : t.deleteCategory}
-        </PrimaryPageAction>
+        </MobilePrimaryPageAction>
       </DialogActions>
     </Dialog>
   );

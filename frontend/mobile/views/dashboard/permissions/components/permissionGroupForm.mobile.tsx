@@ -1,7 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Close } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -15,14 +13,13 @@ import {
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { type Control, useForm, useWatch } from "react-hook-form";
-import { SectionPanel } from "@/frontend/common/components/ui";
-import { LocalizedStringFormField } from "@/frontend/common/components/ui/input/localizedString";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import {
   type PermissionGroupFormData,
   permissionGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { PermissionCategoryListMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionCategoryList.mobile";
 import { PermissionFilterBarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionFilterBar.mobile";
 import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
@@ -240,7 +237,7 @@ function PermissionGroupFormContentMobile({
           </Grid>
         </Grid>
 
-        <SectionPanel title={t.addPermissions}>
+        <MobileSectionPanel title={t.addPermissions}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <PermissionFilterBarMobile
               searchTerm={searchTerm}

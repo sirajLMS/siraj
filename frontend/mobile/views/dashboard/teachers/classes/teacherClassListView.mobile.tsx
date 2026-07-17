@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Button, CircularProgress, Link, Stack, Typography } from "@mui/material";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import {
   formatClassSchedule,
@@ -14,6 +13,7 @@ import {
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { ClassSessionActionButtonMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/components/classSessionActionButton.mobile";
 
 type TeacherClassRow = TeacherClassListViewModel["rows"][number];
@@ -56,7 +56,7 @@ function ClassCard({
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1.5, flexWrap: "wrap" }}>
         {isRowJoinable(row) ? (
-          <MeetingJoinAction
+          <MobileMeetingJoinAction
             variant="icon"
             joinUrl={row.meetingJoinUrl}
             meeting={row.effectiveMeeting}

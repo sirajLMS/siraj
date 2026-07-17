@@ -5,11 +5,12 @@ import { Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination, PersonProfileLinkCell, PhoneDisplay } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { profileHrefForStaff } from "@/frontend/common/utils/profileHref";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
 import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
+import { DesktopAppDataGrid, DesktopGridPagination } from "@/frontend/desktop/components/ui";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { DesktopPersonProfileLinkCell, DesktopPhoneDisplay } from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledRoleChip = styled(Chip, {
@@ -67,7 +68,7 @@ export function ManagersDataGridDesktop({
                 gap: 0.5,
               }}
             >
-              <PersonProfileLinkCell
+              <DesktopPersonProfileLinkCell
                 href={profileHrefForStaff({ userId: params.row.userId })}
                 name={params.row.name}
                 avatarUrl={params.row.avatarUrl}
@@ -75,7 +76,7 @@ export function ManagersDataGridDesktop({
                 typographyVariant="bodyMd"
                 fontWeight={700}
               />
-              <StatusBadge
+              <DesktopStatusBadge
                 category="session"
                 status={params.row.status === "active" ? "active" : "blocked"}
                 label={t.status[params.row.status]}
@@ -105,7 +106,7 @@ export function ManagersDataGridDesktop({
         headerName: t.table.phone,
         flex: 1,
         minWidth: 150,
-        renderCell: params => <PhoneDisplay phone={params.row.phone} typographyVariant="bodyMd" />,
+        renderCell: params => <DesktopPhoneDisplay phone={params.row.phone} typographyVariant="bodyMd" />,
       },
       {
         field: "role",
@@ -132,7 +133,7 @@ export function ManagersDataGridDesktop({
 
   return (
     <StyledDataGridWrapper>
-      <AppDataGrid<Manager>
+      <DesktopAppDataGrid<Manager>
         rows={managers}
         columns={columns}
         getRowId={row => row.userId}
@@ -149,7 +150,7 @@ export function ManagersDataGridDesktop({
                 onPageChange(model.page);
               },
               pageSizeOptions: [pageSize],
-              slots: { pagination: GridPagination },
+              slots: { pagination: DesktopGridPagination },
             }
           : {})}
       />

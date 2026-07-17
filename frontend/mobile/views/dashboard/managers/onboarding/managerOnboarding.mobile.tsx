@@ -2,12 +2,13 @@
 
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { StaffInfoSection } from "@/frontend/common/views/dashboard/managers/onboarding/StaffInfoSection";
 import { SystemAccessSection } from "@/frontend/common/views/dashboard/managers/onboarding/SystemAccessSection";
 import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/managers/onboarding/types";
 import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
+import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar";
 import { OnboardingMetricsOverviewMobile } from "@/frontend/mobile/views/dashboard/managers/onboarding/components/onboardingMetricsOverview.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -57,7 +58,7 @@ export function ManagerOnboardingMobileView({
           <SystemAccessSection register={register} control={control} errors={errors} />
 
           <StyledFormActions>
-            <PrimaryPageAction
+            <MobilePrimaryPageAction
               type="submit"
               disabled={isSubmitting}
               fullWidth
@@ -67,8 +68,8 @@ export function ManagerOnboardingMobileView({
               })}
             >
               {isSubmitting ? t.actions.processing : t.actions.signup}
-            </PrimaryPageAction>
-            <PrimaryPageAction
+            </MobilePrimaryPageAction>
+            <MobilePrimaryPageAction
               type="button"
               variant="text"
               onClick={onCancel}
@@ -78,7 +79,7 @@ export function ManagerOnboardingMobileView({
               })}
             >
               {t.actions.cancel}
-            </PrimaryPageAction>
+            </MobilePrimaryPageAction>
           </StyledFormActions>
         </StyledFormWrapper>
       </Box>
@@ -87,7 +88,7 @@ export function ManagerOnboardingMobileView({
         <OnboardingMetricsOverviewMobile model={metricsModel} />
       </Box>
 
-      <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
+      <MobileFormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
     </MobilePageContainer>
   );
 }

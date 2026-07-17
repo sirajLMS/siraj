@@ -22,9 +22,9 @@ import {
   Typography,
 } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
+import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
+import { DesktopPageContainer, DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/page";
 
 function statusColor(status: string | null, theme: Theme): string {
   if (!status) return theme.palette.onSurfaceVariant;
@@ -49,16 +49,16 @@ export function StudentHistoryDesktopView({
 }: Readonly<StudentHistoryViewModel>) {
   if (loading && metrics.totalClasses === 0) {
     return (
-      <PageContainer>
+      <DesktopPageContainer>
         <Typography variant="bodyMd" sx={{ p: 3 }}>
           {labels.loadingMessage}
         </Typography>
-      </PageContainer>
+      </DesktopPageContainer>
     );
   }
 
   return (
-    <PageContainer>
+    <DesktopPageContainer>
       <Box sx={{ mb: 3 }}>
         <Typography variant="headlineLg" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
           {labels.pageTitle}
@@ -67,27 +67,32 @@ export function StudentHistoryDesktopView({
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <SectionPanel title={labels.lessonHistory} sx={{ height: "100%" }}>
+          <DesktopSectionPanel title={labels.lessonHistory} sx={{ height: "100%" }}>
             <Stack spacing={2}>
-              <MetricCard
+              <DesktopMetricCard
                 icon={EventOutlined}
                 label={labels.sessionDate}
                 value={metrics.totalClasses}
                 variant="compact"
               />
-              <MetricCard icon={SchoolOutlined} label={labels.subject} value={metrics.hoursStudied} variant="compact" />
-              <MetricCard
+              <DesktopMetricCard
+                icon={SchoolOutlined}
+                label={labels.subject}
+                value={metrics.hoursStudied}
+                variant="compact"
+              />
+              <DesktopMetricCard
                 icon={PersonOutlined}
                 label={labels.instructor}
                 value={metrics.attendanceRate}
                 variant="compact"
               />
             </Stack>
-          </SectionPanel>
+          </DesktopSectionPanel>
         </Grid>
 
         <Grid size={{ xs: 12, md: 8 }}>
-          <SectionPanel title={labels.lessonHistory}>
+          <DesktopSectionPanel title={labels.lessonHistory}>
             {sessions.length === 0 ? (
               <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                 {labels.noHistory}
@@ -142,7 +147,7 @@ export function StudentHistoryDesktopView({
                 </Table>
               </TableContainer>
             )}
-          </SectionPanel>
+          </DesktopSectionPanel>
         </Grid>
       </Grid>
 
@@ -156,6 +161,6 @@ export function StudentHistoryDesktopView({
           {labels.addReflection}
         </Button>
       </Box>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

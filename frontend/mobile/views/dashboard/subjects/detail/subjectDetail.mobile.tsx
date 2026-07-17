@@ -13,10 +13,10 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { SubjectResourceItem } from "@/frontend/common/views/dashboard/subjects/detail/types";
 import type { SubjectDetailViewModel } from "@/frontend/common/views/dashboard/subjects/detail/useSubjectDetailViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 
 function ResourceItemMobile({
   resource,
@@ -101,7 +101,7 @@ export function SubjectDetailMobileView({
         </Box>
       )}
 
-      <SectionPanel title={labels.resourcesTitle} subTitle={labels.resourcesSubtitle(resources.length)}>
+      <MobileSectionPanel title={labels.resourcesTitle} subTitle={labels.resourcesSubtitle(resources.length)}>
         {resources.length === 0 ? (
           <Box sx={{ py: 4, textAlign: "center" }}>
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>

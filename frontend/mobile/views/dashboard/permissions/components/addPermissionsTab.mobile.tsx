@@ -2,9 +2,9 @@
 
 import { Box, Checkbox, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { SectionPanel } from "@/frontend/common/components/ui";
-import { BaseCard } from "@/frontend/common/components/ui/card";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { AddPermissionBulkBarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/addPermissionBulkBar.mobile";
 import { AddPermissionFilterBarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/addPermissionFilterBar.mobile";
 import { useAppTranslation } from "@/shared/locale";
@@ -37,7 +37,7 @@ interface PermissionCardProps {
 function AddPermissionCardMobile({ permission, checked, onToggle }: Readonly<PermissionCardProps>) {
   const id = permission.id ?? "";
   return (
-    <BaseCard
+    <MobileBaseCard
       sx={theme => ({
         p: 2,
         backgroundColor: checked ? theme.palette.primaryContainer : undefined,
@@ -74,7 +74,7 @@ function AddPermissionCardMobile({ permission, checked, onToggle }: Readonly<Per
           )}
         </Box>
       </Box>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }
 
@@ -111,7 +111,7 @@ export function AddPermissionsTabMobile({
         />
       )}
 
-      <SectionPanel title={t.addPermissions}>
+      <MobileSectionPanel title={t.addPermissions}>
         {filteredAvailablePermissions.length === 0 && !loading ? (
           <Box sx={{ p: 4, textAlign: "center" }}>
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -134,7 +134,7 @@ export function AddPermissionsTabMobile({
             })}
           </Box>
         )}
-      </SectionPanel>
+      </MobileSectionPanel>
     </StyledTabContainer>
   );
 }

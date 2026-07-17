@@ -2,10 +2,10 @@
 
 import { Box, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
-import { AdminControlPanel, FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StatusUpdateFormData } from "@/frontend/common/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { AdminHoldControlsProps } from "@/frontend/common/views/dashboard/students/status/types";
+import { MobileAdminControlPanel, MobileFilterButton, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 function StatusSelectionField() {
@@ -114,7 +114,7 @@ function ReasonEntryField() {
       />
       <Box sx={{ mt: 1.5, display: "flex", flexWrap: "wrap", gap: 0.75 }}>
         {quickReasons.map(reason => (
-          <FilterButton
+          <MobileFilterButton
             key={reason.label}
             size="small"
             onClick={() => {
@@ -122,7 +122,7 @@ function ReasonEntryField() {
             }}
           >
             {reason.label}
-          </FilterButton>
+          </MobileFilterButton>
         ))}
       </Box>
     </Box>
@@ -137,7 +137,7 @@ function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
   const isSuspended = currentStatus === StudentStatus.Suspended;
 
   return (
-    <PrimaryPageAction
+    <MobilePrimaryPageAction
       type="submit"
       fullWidth
       disabled={isUpdating}
@@ -151,7 +151,7 @@ function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
       })}
     >
       {t.actions.applyChange}
-    </PrimaryPageAction>
+    </MobilePrimaryPageAction>
   );
 }
 
@@ -159,12 +159,12 @@ export function AdminHoldControlsMobile({ isUpdating }: Readonly<AdminHoldContro
   const t = useAppTranslation().dashboardTranslations.studentStatus;
 
   return (
-    <AdminControlPanel title={t.sections.adminHold}>
+    <MobileAdminControlPanel title={t.sections.adminHold}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
         <StatusSelectionField />
         <ReasonEntryField />
         <SubmitStatusButton isUpdating={isUpdating} />
       </Box>
-    </AdminControlPanel>
+    </MobileAdminControlPanel>
   );
 }

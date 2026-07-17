@@ -3,9 +3,14 @@
 import { MailOutlined, PhoneOutlined } from "@mui/icons-material";
 import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard, PaginationControls, PhoneDisplay, StatusBadge } from "@/frontend/common/components/ui";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
 import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
+import {
+  MobileBaseCard,
+  MobilePaginationControls,
+  MobilePhoneDisplay,
+  MobileStatusBadge,
+} from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledEmptyStateBox = styled(Box)(({ theme }) => ({
@@ -18,7 +23,7 @@ const StyledCardListWrapper = styled(Stack)(({ theme }) => ({
   padding: theme.spacing(2),
 }));
 
-const StyledManagerCard = styled(BaseCard)({
+const StyledManagerCard = styled(MobileBaseCard)({
   position: "relative",
 });
 
@@ -119,10 +124,11 @@ export function ManagersCardListMobile({
                 </Typography>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }} useFlexGap>
                   <StyledRoleChip label={t.roles[manager.role]} size="small" isStaff={isStaff} />
-                  <StatusBadge
+                  <MobileStatusBadge
                     category="session"
                     status={manager.status === "active" ? "active" : "blocked"}
                     label={t.status[manager.status]}
+                    size="small"
                   />
                 </Stack>
               </Box>
@@ -135,7 +141,7 @@ export function ManagersCardListMobile({
               </StyledContactItemBox>
               <StyledContactItemBox direction="row" spacing={1.5}>
                 <PhoneOutlined fontSize="small" sx={theme => ({ color: theme.palette.primaryContainer })} />
-                <PhoneDisplay phone={manager.phone} typographyVariant="bodyMd" />
+                <MobilePhoneDisplay phone={manager.phone} typographyVariant="bodyMd" />
               </StyledContactItemBox>
             </Stack>
           </StyledManagerCard>
@@ -143,7 +149,7 @@ export function ManagersCardListMobile({
       })}
 
       {onPageChange && totalCount !== undefined ? (
-        <PaginationControls
+        <MobilePaginationControls
           page={page}
           pageCount={pageCount}
           rowCount={totalCount}

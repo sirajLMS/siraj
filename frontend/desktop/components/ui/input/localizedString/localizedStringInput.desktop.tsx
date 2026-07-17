@@ -27,17 +27,34 @@ export type LocalizedStringInputProps = {
   readonly helperText?: string;
   readonly error?: boolean;
   readonly errorMessage?: string;
-  readonly required?: boolean;
+  /** Required locales; default `["ar"]` when `required` is true. */
   readonly requiredLocales?: readonly AppLocale[];
+  /** At least one non-empty entry is required (form-level `required`). */
+  readonly required?: boolean;
   readonly multiline?: boolean;
   readonly minRows?: number;
   readonly disabled?: boolean;
   readonly fullWidth?: boolean;
+  /** Drawer title; defaults to `label`. */
   readonly drawerTitle?: string;
+  /** Disable the end-adornment button + drawer (e.g. read-only mode). */
   readonly disableDrawer?: boolean;
+  /**
+   * When `true`, drawer field edits commit to `onChangeAction` on each change
+   * (no Save button unless `drawerShowActions` is set).
+   */
   readonly drawerAutosave?: boolean;
+  /**
+   * Show Cancel/Save in the drawer footer.
+   * Defaults to `!drawerAutosave`.
+   */
   readonly drawerShowActions?: boolean;
+  /**
+   * Drawer dismiss (×, backdrop, Escape): `save` commits when valid (default),
+   * `cancel` discards. Footer Cancel always discards.
+   */
   readonly drawerDismissAction?: "save" | "cancel";
+  /** Optional sx passthrough applied to the wrapper Box. */
   readonly sx?: SxProps<Theme>;
 };
 

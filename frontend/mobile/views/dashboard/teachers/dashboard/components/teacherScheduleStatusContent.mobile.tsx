@@ -1,7 +1,6 @@
 "use client";
 
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
@@ -10,6 +9,7 @@ import {
   getStatusLabel,
   resolveTeacherStatusBadge,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/sessionStatusUtils";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { SessionActivateButtonMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/sessionActivateButton.mobile";
 
 interface TeacherScheduleStatusContentMobileProps {
@@ -48,7 +48,7 @@ export function TeacherScheduleStatusContentMobile({
 
   const badge = resolveTeacherStatusBadge(row.status);
   return (
-    <StatusBadge
+    <MobileStatusBadge
       category={badge.category}
       status={badge.status}
       label={getStatusLabel(row.status, labels.status)}

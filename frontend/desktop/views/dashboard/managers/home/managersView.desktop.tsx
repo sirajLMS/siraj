@@ -1,5 +1,3 @@
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ManagersFilterBar } from "@/frontend/common/views/dashboard/managers/home/ManagersFilterBar";
 import { ManagersMetrics } from "@/frontend/common/views/dashboard/managers/home/ManagersMetrics";
@@ -9,6 +7,8 @@ import type {
   ManagerStatusFilter,
   NonNullableManagerDirectoryMetrics,
 } from "@/frontend/common/views/dashboard/managers/home/types";
+import { DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { ManagersDataGridDesktop } from "@/frontend/desktop/views/dashboard/managers/home/components/managersDataGrid.desktop";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
@@ -45,18 +45,18 @@ export function ManagersViewDesktop({
   const actions = (
     <RequirePermission permissions={[AppPermission.StaffCreate]}>
       <Link href="/managers/onboarding" style={{ textDecoration: "none" }}>
-        <PrimaryPageAction>{t.actions.addManager}</PrimaryPageAction>
+        <DesktopPrimaryPageAction>{t.actions.addManager}</DesktopPrimaryPageAction>
       </Link>
     </RequirePermission>
   );
 
   return (
-    <PageContainer>
-      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} actions={actions} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={t.pageTitle} subtitle={t.pageSubtitle} actions={actions} />
 
       <ManagersMetrics metrics={metrics} />
 
-      <SectionPanel>
+      <DesktopSectionPanel>
         <ManagersFilterBar
           roleFilter={roleFilter}
           statusFilter={statusFilter}
@@ -72,7 +72,7 @@ export function ManagersViewDesktop({
           onPageChange={onPageChange}
           loading={loading}
         />
-      </SectionPanel>
-    </PageContainer>
+      </DesktopSectionPanel>
+    </DesktopPageContainer>
   );
 }

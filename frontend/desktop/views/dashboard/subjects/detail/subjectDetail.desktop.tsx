@@ -13,9 +13,9 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { SubjectResourceItem } from "@/frontend/common/views/dashboard/subjects/detail/types";
 import type { SubjectDetailViewModel } from "@/frontend/common/views/dashboard/subjects/detail/useSubjectDetailViewModel";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 function ResourceItemDesktop({
@@ -101,7 +101,11 @@ export function SubjectDetailDesktopView({
         </Box>
       )}
 
-      <SectionPanel title={labels.resourcesTitle} subTitle={labels.resourcesSubtitle(resources.length)} sx={{ mt: 3 }}>
+      <DesktopSectionPanel
+        title={labels.resourcesTitle}
+        subTitle={labels.resourcesSubtitle(resources.length)}
+        sx={{ mt: 3 }}
+      >
         {resources.length === 0 ? (
           <Box sx={{ py: 4, textAlign: "center" }}>
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -115,7 +119,7 @@ export function SubjectDetailDesktopView({
             ))}
           </List>
         )}
-      </SectionPanel>
+      </DesktopSectionPanel>
     </DesktopPageContainer>
   );
 }

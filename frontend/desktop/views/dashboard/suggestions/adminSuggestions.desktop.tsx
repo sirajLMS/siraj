@@ -1,8 +1,8 @@
 "use client";
 
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { AdminSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useAdminSuggestionsViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { SuggestionsDataGridDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionsDataGrid.desktop";
 import { SuggestionsMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionsMetricsRow.desktop";
 import { SuggestionsSearchBarDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionsSearchBar.desktop";
@@ -30,7 +30,7 @@ export function AdminSuggestionsDesktopView({
 
       <SuggestionsMetricsRowDesktop summary={summary} labels={labels} />
 
-      <SectionPanel
+      <DesktopSectionPanel
         actions={
           <SuggestionsSearchBarDesktop
             value={searchQuery}
@@ -58,7 +58,7 @@ export function AdminSuggestionsDesktopView({
           onDelete={onDelete}
           loading={loading}
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
     </DesktopPageContainer>
   );
 }

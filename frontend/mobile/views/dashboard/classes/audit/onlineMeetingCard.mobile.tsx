@@ -3,11 +3,11 @@
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { OnlineMeetingInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 export interface OnlineMeetingCardMobileProps {
@@ -86,7 +86,7 @@ export function OnlineMeetingCardMobile({ meetingInfo, showJoin = false }: Reado
   const meeting = toEffectiveMeeting(meetingInfo);
 
   return (
-    <BaseCard sx={{ p: 0, overflow: "hidden" }}>
+    <MobileBaseCard sx={{ p: 0, overflow: "hidden" }}>
       <StyledPreviewContainer sx={{ height: 128 }}>
         <MeetingPreviewIcon logoUrl={meetingInfo?.logoUrl} />
         {providerName ? <StyledPlatformBadge>{providerName.toUpperCase()}</StyledPlatformBadge> : null}
@@ -101,7 +101,7 @@ export function OnlineMeetingCardMobile({ meetingInfo, showJoin = false }: Reado
           ) : null}
         </Box>
         {showJoin ? (
-          <MeetingJoinAction
+          <MobileMeetingJoinAction
             joinUrl={meetingInfo?.joinUrl}
             meeting={meeting}
             label={t.meeting.joinMeeting}
@@ -110,6 +110,6 @@ export function OnlineMeetingCardMobile({ meetingInfo, showJoin = false }: Reado
           />
         ) : null}
       </Box>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }

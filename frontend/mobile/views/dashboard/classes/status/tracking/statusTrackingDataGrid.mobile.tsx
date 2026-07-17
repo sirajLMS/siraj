@@ -5,10 +5,6 @@ import { Box, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { PersonProfileLink, PersonProfileLinkCell } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import { StatusAction } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {
@@ -18,6 +14,13 @@ import {
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileAppDataGrid } from "@/frontend/mobile/components/ui/dataGrid";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
+import {
+  MobilePersonProfileLink,
+  MobilePersonProfileLinkCell,
+} from "@/frontend/mobile/components/ui/display/personProfileLink";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale } from "@/shared/locale";
 
@@ -68,7 +71,7 @@ export function StatusTrackingDataGridMobile({
           const teacherProfileHref = profileHrefForTeacher({ teacherId: row.teacherId });
           return (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, justifyContent: "center", height: "100%" }}>
-              <PersonProfileLinkCell
+              <MobilePersonProfileLinkCell
                 href={studentProfileHref}
                 name={row.studentName ?? ""}
                 avatarUrl={row.studentAvatarUrl}
@@ -76,7 +79,7 @@ export function StatusTrackingDataGridMobile({
                 typographyVariant="bodyMd"
                 fontWeight={700}
               />
-              <PersonProfileLink
+              <MobilePersonProfileLink
                 href={teacherProfileHref}
                 name={row.teacherName ?? ""}
                 avatarUrl={row.teacherAvatarUrl}
@@ -95,7 +98,7 @@ export function StatusTrackingDataGridMobile({
         flex: 1,
         minWidth: 140,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell
+          <MobilePersonProfileLinkCell
             href={profileHrefForTeacher({ teacherId: row.teacherId })}
             name={row.teacherName ?? ""}
             avatarUrl={row.teacherAvatarUrl}
@@ -119,7 +122,7 @@ export function StatusTrackingDataGridMobile({
         renderCell: ({ row }) => {
           const status = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
           return (
-            <StatusBadge
+            <MobileStatusBadge
               category="sessionTracking"
               status={status}
               label={labels[STATUS_LABEL_KEYS[status]]}
@@ -143,7 +146,7 @@ export function StatusTrackingDataGridMobile({
               <Box
                 sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
               >
-                <MeetingJoinAction
+                <MobileMeetingJoinAction
                   variant="icon"
                   joinUrl={row.meetingJoinUrl}
                   meeting={row.effectiveMeeting}
@@ -187,7 +190,7 @@ export function StatusTrackingDataGridMobile({
   }, [labels, locale, onActivate, onReschedule, onVerify]);
 
   return (
-    <AppDataGrid<StatusTrackingRow>
+    <MobileAppDataGrid<StatusTrackingRow>
       rows={rows}
       columns={columns}
       loading={loading}

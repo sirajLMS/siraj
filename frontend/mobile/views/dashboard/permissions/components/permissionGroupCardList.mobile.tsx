@@ -3,9 +3,10 @@
 import { DeleteOutlined, EditOutlined, MoreVertOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import { useState } from "react";
-import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionGroupCardListMobileProps {
@@ -53,7 +54,7 @@ function GroupCardMobile({
   const permissionsCount = group.permissionIds?.length ?? 0;
 
   return (
-    <BaseCard
+    <MobileBaseCard
       sx={theme => ({
         p: 2,
         boxShadow: theme.palette.shadow.card,
@@ -74,7 +75,7 @@ function GroupCardMobile({
                 },
               })}
             >
-              <LocalizedStringDisplay value={group.name} />
+              <MobileLocalizedStringDisplay value={group.name} />
             </Typography>
             <Typography
               variant="labelMd"
@@ -119,7 +120,7 @@ function GroupCardMobile({
         </Box>
 
         {group.description && (
-          <LocalizedStringDisplay
+          <MobileLocalizedStringDisplay
             value={group.description}
             typographyVariant="bodyMd"
             fallback={null}
@@ -136,7 +137,7 @@ function GroupCardMobile({
             borderTop: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
           })}
         >
-          <StatusBadge
+          <MobileStatusBadge
             category="session"
             status={group.isSystem ? "active" : "pending"}
             label={group.isSystem ? t.systemBadge : t.customBadge}

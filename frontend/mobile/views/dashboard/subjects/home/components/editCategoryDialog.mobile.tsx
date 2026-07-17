@@ -15,7 +15,7 @@ import {
 import { useEffect } from "react";
 import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
-import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { MobileFieldWrapper, standardInputSx } from "@/frontend/mobile/components/ui/form/field";
 import type { EditCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -62,7 +62,7 @@ function TextFieldController({
       name={name}
       control={control}
       render={({ field }) => (
-        <FieldWrapper label={label} required={required} error={error}>
+        <MobileFieldWrapper label={label} required={required} error={error}>
           <TextField
             {...field}
             fullWidth
@@ -73,7 +73,7 @@ function TextFieldController({
             disabled={disabled}
             sx={standardInputSx}
           />
-        </FieldWrapper>
+        </MobileFieldWrapper>
       )}
     />
   );

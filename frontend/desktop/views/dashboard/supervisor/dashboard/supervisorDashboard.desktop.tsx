@@ -2,9 +2,9 @@
 
 import { CalendarMonthOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
-import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashboard/supervisor/dashboard/useSupervisorDashboardViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DuesSummaryCardDesktop } from "@/frontend/desktop/views/dashboard/supervisor/dashboard/components/duesSummaryCard.desktop";
 import { PendingReviewsHeroCardDesktop } from "@/frontend/desktop/views/dashboard/supervisor/dashboard/components/pendingReviewsHeroCard.desktop";
 
@@ -39,7 +39,7 @@ export function SupervisorDashboardDesktopView({
         </Grid>
       </Grid>
 
-      <SectionPanel title={labels.monthlyReportsShortcut}>
+      <DesktopSectionPanel title={labels.monthlyReportsShortcut}>
         <Stack sx={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
           <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.5 }}>
             <CalendarMonthOutlined sx={theme => ({ color: theme.palette.primary.main })} />
@@ -47,11 +47,13 @@ export function SupervisorDashboardDesktopView({
               {monthlySnapshot.label}
             </Typography>
           </Stack>
-          <PrimaryPageAction onClick={onGoToMonthlyReports}>{labels.goToMonthlyReports}</PrimaryPageAction>
+          <DesktopPrimaryPageAction onClick={onGoToMonthlyReports}>
+            {labels.goToMonthlyReports}
+          </DesktopPrimaryPageAction>
         </Stack>
-      </SectionPanel>
+      </DesktopSectionPanel>
 
-      <SectionPanel title={labels.recentApprovals}>
+      <DesktopSectionPanel title={labels.recentApprovals}>
         {recentApprovals.length === 0 ? (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
             {labels.noRecentApprovals}
@@ -78,7 +80,7 @@ export function SupervisorDashboardDesktopView({
             ))}
           </Stack>
         )}
-      </SectionPanel>
+      </DesktopSectionPanel>
     </DesktopPageContainer>
   );
 }

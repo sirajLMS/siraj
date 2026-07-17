@@ -2,8 +2,8 @@
 
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledSidebarContainer = styled(Box)(({ theme }) => ({
@@ -102,7 +102,7 @@ export function OverridesUserSidebarMobile({ user, userGroups }: Readonly<Overri
             {userGroups.map(g => (
               <StyledGroupChip key={g.id || g.slug}>
                 <StyledGroupName variant="bodyMd">
-                  <LocalizedStringDisplay value={g.name ?? {}} typographyVariant="bodyMd" />
+                  <MobileLocalizedStringDisplay value={g.name ?? {}} typographyVariant="bodyMd" />
                 </StyledGroupName>
               </StyledGroupChip>
             ))}

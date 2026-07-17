@@ -2,9 +2,9 @@
 
 import { ArrowForwardOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { PersonProfileLink } from "@/frontend/common/components/ui";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];
@@ -25,14 +25,14 @@ function UpdatedSessionRow({ session }: Readonly<{ session: UpdatedSession }>) {
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", minWidth: 0 }}>
         <CheckCircleOutlined sx={theme => ({ color: theme.palette.tertiaryContainer })} />
         <Box sx={{ minWidth: 0 }}>
-          <PersonProfileLink
+          <MobilePersonProfileLink
             href={session.studentId ? studentHref(session.studentId) : undefined}
             name={session.studentName}
             showAvatar={false}
             typographyVariant="bodyMd"
             fontWeight={700}
           />
-          <PersonProfileLink
+          <MobilePersonProfileLink
             href={profileHrefForTeacher({ teacherId: session.teacherId })}
             name={session.teacherName}
             showAvatar={false}

@@ -3,7 +3,7 @@
 import type { SxProps } from "@mui/material";
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import type { PendingReviewsLabels } from "@/shared/locale";
 
 interface RejectReportDialogDesktopProps {
@@ -54,17 +54,17 @@ export function RejectReportDialogDesktop({
         />
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-        <FilterButton fullWidth onClick={onClose} disabled={loading} sx={{ py: 1.5 }}>
+        <DesktopFilterButton fullWidth onClick={onClose} disabled={loading} sx={{ py: 1.5 }}>
           {labels.rejectCancel}
-        </FilterButton>
-        <PrimaryPageAction
+        </DesktopFilterButton>
+        <DesktopPrimaryPageAction
           fullWidth
           onClick={onConfirm}
           disabled={loading || reason.trim().length === 0}
           sx={confirmSx}
         >
           {loading ? "..." : labels.rejectConfirm}
-        </PrimaryPageAction>
+        </DesktopPrimaryPageAction>
       </DialogActions>
     </Dialog>
   );

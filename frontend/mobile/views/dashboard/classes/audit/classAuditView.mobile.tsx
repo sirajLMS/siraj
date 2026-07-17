@@ -2,14 +2,13 @@
 
 import { Box, Chip, Grid, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { ClassAuditDetailsCard } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
 import type {
   ClassAuditDetailsLabels,
   ClassAuditViewProps,
 } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 import { RegisteredStudentsSection } from "@/frontend/common/views/dashboard/classes/audit/RegisteredStudentsSection";
-import { MobilePageContainer } from "@/frontend/mobile/components/ui";
+import { MobileFilterButton, MobilePageContainer, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import { AdminNoteCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/adminNoteCard.mobile";
 import { CommunicationLogCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/communicationLogCard.mobile";
 import { OnlineMeetingCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/onlineMeetingCard.mobile";
@@ -33,7 +32,7 @@ const StyledMobileStatusChip = styled(Chip)(({ theme }) => ({
   textTransform: "uppercase",
 }));
 
-const StyledGenerateReportButton = styled(FilterButton)(({ theme }) => ({
+const StyledGenerateReportButton = styled(MobileFilterButton)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   "&:hover": {
     backgroundColor: theme.palette.action.selected,
@@ -76,9 +75,9 @@ export function ClassAuditViewMobile({
           <StyledGenerateReportButton id="audit-generate-report-btn" onClick={onGenerateReport}>
             {labels.generateReport}
           </StyledGenerateReportButton>
-          <PrimaryPageAction id="audit-edit-class-btn" onClick={onEditClass}>
+          <MobilePrimaryPageAction id="audit-edit-class-btn" onClick={onEditClass}>
             {labels.editClass}
-          </PrimaryPageAction>
+          </MobilePrimaryPageAction>
         </Box>
         <StyledMobileClassTitle sx={{ mb: 1 }}>{audit.className}</StyledMobileClassTitle>
         <StyledMobileStatusChip label={labels.statusRescheduled} size="small" />

@@ -2,14 +2,20 @@
 
 import { FileDownloadOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
-import { ExportButton, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { ScheduleAlertsLabels } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsView";
 import type {
   AcademicClassRow,
   AlertsMetric,
   ScheduleAlert,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
+import {
+  DesktopExportButton,
+  DesktopFilterButton,
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
+import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
 import {
   AcademicScheduleDataGridDesktop,
   type AcademicScheduleDataGridDesktopLabels,
@@ -52,7 +58,7 @@ function DesktopMetricsSection({
         const metricLabel = metricLabels[metric.key];
         return (
           <Grid key={metric.key} size={{ xs: 6, md: 3 }}>
-            <MetricCard
+            <DesktopMetricCard
               icon={metric.icon}
               label={metricLabel.label}
               value={metric.value}
@@ -117,17 +123,17 @@ function DesktopAlertsBody({
     );
   }
   return (
-    <SectionPanel
+    <DesktopSectionPanel
       title={labels.sectionTitle}
       subTitle={labels.sectionSubtitle}
       actions={
         <>
-          <FilterButton id="schedule-alerts-filter" startIcon={<FilterListOutlined />} onClick={onFilter}>
+          <DesktopFilterButton id="schedule-alerts-filter" startIcon={<FilterListOutlined />} onClick={onFilter}>
             {labels.filter}
-          </FilterButton>
-          <ExportButton id="schedule-alerts-export" startIcon={<FileDownloadOutlined />} onClick={onExport}>
+          </DesktopFilterButton>
+          <DesktopExportButton id="schedule-alerts-export" startIcon={<FileDownloadOutlined />} onClick={onExport}>
             {labels.export}
-          </ExportButton>
+          </DesktopExportButton>
         </>
       }
     >
@@ -142,7 +148,7 @@ function DesktopAlertsBody({
         onPageChange={onPageChange}
         loading={loading}
       />
-    </SectionPanel>
+    </DesktopSectionPanel>
   );
 }
 
@@ -182,8 +188,8 @@ export function ScheduleAlertsViewDesktop({
   };
 
   return (
-    <PageContainer>
-      <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
       <ScheduleAlertBannersDesktop alerts={alerts} labels={labels.alertMessages} />
 
@@ -208,6 +214,6 @@ export function ScheduleAlertsViewDesktop({
         onPageChange={onPageChange}
         gridLabels={gridLabels}
       />
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

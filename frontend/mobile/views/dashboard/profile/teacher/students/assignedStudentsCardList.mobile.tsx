@@ -1,9 +1,9 @@
 "use client";
 
 import { Chip, Paper, Stack, Typography } from "@mui/material";
-import { PersonProfileLink } from "@/frontend/common/components/ui";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 import { useAppTranslation } from "@/shared/locale";
 
 type AssignedStudentsCardListProps = {
@@ -24,7 +24,7 @@ export function AssignedStudentsCardList({ rows }: Readonly<AssignedStudentsCard
         <Paper key={row.id} variant="outlined" sx={{ p: 2 }}>
           <Stack spacing={1}>
             <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", gap: 1 }}>
-              <PersonProfileLink
+              <MobilePersonProfileLink
                 href={row.id ? studentHref(row.id) : undefined}
                 avatarUrl={row.studentAvatarUrl}
                 name={row.studentName}
@@ -32,7 +32,7 @@ export function AssignedStudentsCardList({ rows }: Readonly<AssignedStudentsCard
               />
               <Chip size="small" variant="outlined" label={formatStatusLabel(row.status)} />
             </Stack>
-            <PersonProfileLink
+            <MobilePersonProfileLink
               href={profileHrefForParent({
                 userId: row.parentUserId,
                 parentId: row.parentId,

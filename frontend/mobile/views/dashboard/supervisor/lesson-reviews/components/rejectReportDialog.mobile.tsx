@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
-import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { MobileFilterButton, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import type { PendingReviewsLabels } from "@/shared/locale";
 
 interface RejectReportDialogMobileProps {
@@ -61,10 +61,10 @@ export function RejectReportDialogMobile({
         />
       </DialogContent>
       <DialogContent sx={{ p: 2.5, display: "flex", flexDirection: "row", gap: 1 }}>
-        <FilterButton fullWidth onClick={onClose} disabled={loading} sx={{ py: 1.5 }}>
+        <MobileFilterButton fullWidth onClick={onClose} disabled={loading} sx={{ py: 1.5 }}>
           {labels.rejectCancel}
-        </FilterButton>
-        <PrimaryPageAction
+        </MobileFilterButton>
+        <MobilePrimaryPageAction
           fullWidth
           onClick={onConfirm}
           disabled={loading || reason.trim().length === 0}
@@ -76,7 +76,7 @@ export function RejectReportDialogMobile({
           })}
         >
           {loading ? "..." : labels.rejectConfirm}
-        </PrimaryPageAction>
+        </MobilePrimaryPageAction>
       </DialogContent>
     </Dialog>
   );

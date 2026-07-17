@@ -2,7 +2,6 @@
 
 import { Box, Typography } from "@mui/material";
 import { FormProvider } from "react-hook-form";
-import { FormSuccessSnackbar, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
 import { PaymentMethodSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/PaymentMethodSection";
@@ -10,6 +9,9 @@ import { SalaryDetailsSection } from "@/frontend/common/views/dashboard/teachers
 import { TeacherInfoSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/TeacherInfoSection";
 import type { TeacherOnboardingViewModel } from "@/frontend/common/views/dashboard/teachers/onboarding/useTeacherOnboardingViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
+import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar";
 import { useAppTranslation } from "@/shared/locale";
 
 function OnboardingBanner() {
@@ -53,7 +55,7 @@ function FormActions({
 }) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
-      <PrimaryPageAction
+      <MobilePrimaryPageAction
         type="submit"
         disabled={isSubmitting}
         sx={theme => ({
@@ -67,14 +69,14 @@ function FormActions({
         })}
       >
         {isSubmitting ? labels.actions.proceeding : labels.actions.signup}
-      </PrimaryPageAction>
-      <PrimaryPageAction
+      </MobilePrimaryPageAction>
+      <MobilePrimaryPageAction
         type="reset"
         variant="text"
         sx={theme => ({ color: theme.palette.text.secondary, fontWeight: 700, letterSpacing: "0.1em" })}
       >
         {labels.actions.cancel}
-      </PrimaryPageAction>
+      </MobilePrimaryPageAction>
     </Box>
   );
 }
@@ -114,19 +116,19 @@ export function TeacherOnboardingMobileView({
           sx={{ display: "flex", flexDirection: "column", gap: 4, pb: 12 }}
         >
           <OnboardingBanner />
-          <SectionPanel title={labels.sections.teacherInfo}>
+          <MobileSectionPanel title={labels.sections.teacherInfo}>
             <TeacherInfoSection register={register} control={control} errors={errors} labels={labels} />
-          </SectionPanel>
-          <SectionPanel title={labels.sections.officialDetails}>
+          </MobileSectionPanel>
+          <MobileSectionPanel title={labels.sections.officialDetails}>
             <OfficialDetailsSection register={register} control={control} errors={errors} labels={labels} />
-          </SectionPanel>
-          <SectionPanel title={labels.sections.salaryDetails}>
+          </MobileSectionPanel>
+          <MobileSectionPanel title={labels.sections.salaryDetails}>
             <SalaryDetailsSection register={register} control={control} errors={errors} labels={labels} />
-          </SectionPanel>
-          <SectionPanel title={labels.sections.paymentMethod}>
+          </MobileSectionPanel>
+          <MobileSectionPanel title={labels.sections.paymentMethod}>
             <PaymentMethodSection control={control} errors={errors} />
-          </SectionPanel>
-          <SectionPanel title={labels.sections.meetingConfig}>
+          </MobileSectionPanel>
+          <MobileSectionPanel title={labels.sections.meetingConfig}>
             <MeetingConfigOnboardingSection
               register={register}
               control={control}
@@ -144,11 +146,15 @@ export function TeacherOnboardingMobileView({
                 optionalHint: labels.optionalHint,
               }}
             />
-          </SectionPanel>
+          </MobileSectionPanel>
           <FormActions isSubmitting={isSubmitting} labels={labels} />
         </Box>
       </FormProvider>
-      <FormSuccessSnackbar open={showSuccess} message={labels.actions.successMessage} onClose={onDismissSuccess} />
+      <MobileFormSuccessSnackbar
+        open={showSuccess}
+        message={labels.actions.successMessage}
+        onClose={onDismissSuccess}
+      />
     </MobilePageContainer>
   );
 }

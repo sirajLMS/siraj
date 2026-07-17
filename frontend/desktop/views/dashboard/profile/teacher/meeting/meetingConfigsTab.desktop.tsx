@@ -1,10 +1,10 @@
 "use client";
 
 import { Stack } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigsManager } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs";
 import type { MeetingConfigsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/meeting/meetingConfigsTabTypes";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 export function MeetingConfigsTabDesktopView({
   targetUserId,
@@ -15,9 +15,9 @@ export function MeetingConfigsTabDesktopView({
     <DesktopPageContainer>
       <Stack spacing={3}>
         <DesktopPageHeader title={sectionTitle} />
-        <SectionPanel>
+        <DesktopSectionPanel>
           <MeetingConfigsManager targetUserId={targetUserId} canManage={canManage} />
-        </SectionPanel>
+        </DesktopSectionPanel>
       </Stack>
     </DesktopPageContainer>
   );

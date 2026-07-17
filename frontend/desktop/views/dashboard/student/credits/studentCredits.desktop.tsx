@@ -2,10 +2,10 @@
 
 import { ArrowBackOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, Stack, Typography } from "@mui/material";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { StudentCreditTransactionRow } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
+import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
+import { DesktopPageContainer, DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/page";
 
 function reasonLabel(reason: StudentCreditTransactionRow["reason"], labels: StudentCreditsViewModel["labels"]): string {
   if (!reason) return "";
@@ -32,16 +32,16 @@ export function StudentCreditsDesktopView({
 }: Readonly<StudentCreditsViewModel>) {
   if (loading && balance.classesTotal === 0) {
     return (
-      <PageContainer>
+      <DesktopPageContainer>
         <Typography variant="bodyMd" sx={{ p: 3 }}>
           {labels.pageTitle}
         </Typography>
-      </PageContainer>
+      </DesktopPageContainer>
     );
   }
 
   return (
-    <PageContainer>
+    <DesktopPageContainer>
       <Box sx={{ mb: 3 }}>
         <Typography variant="headlineLg" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
           {labels.pageTitle}
@@ -50,26 +50,26 @@ export function StudentCreditsDesktopView({
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <SectionPanel title={labels.currentBalance} sx={{ height: "100%" }}>
+          <DesktopSectionPanel title={labels.currentBalance} sx={{ height: "100%" }}>
             <Stack spacing={2}>
-              <MetricCard
+              <DesktopMetricCard
                 icon={PaymentsOutlined}
                 label={labels.hoursRemaining}
                 value={balance.classesRemaining}
                 variant="compact"
               />
-              <MetricCard
+              <DesktopMetricCard
                 icon={SchoolOutlined}
                 label={labels.hoursTotal}
                 value={balance.classesTotal}
                 variant="compact"
               />
             </Stack>
-          </SectionPanel>
+          </DesktopSectionPanel>
         </Grid>
 
         <Grid size={{ xs: 12, md: 8 }}>
-          <SectionPanel title={labels.transactionHistory}>
+          <DesktopSectionPanel title={labels.transactionHistory}>
             <Stack spacing={2}>
               {transactions.length === 0 ? (
                 <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
@@ -117,7 +117,7 @@ export function StudentCreditsDesktopView({
                 ))
               )}
             </Stack>
-          </SectionPanel>
+          </DesktopSectionPanel>
         </Grid>
       </Grid>
 
@@ -131,6 +131,6 @@ export function StudentCreditsDesktopView({
           {labels.backToDashboard}
         </Button>
       </Box>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }
