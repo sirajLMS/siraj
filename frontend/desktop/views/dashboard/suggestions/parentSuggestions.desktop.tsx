@@ -3,11 +3,11 @@
 import { SendOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { SuggestionFormFields } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionFormFields";
-import { SuggestionHeroBanner } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionHeroBanner";
-import { SuggestionSocialProof } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionSocialProof";
-import { SuggestionSupportCards } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionSupportCards";
 import type { ParentSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useParentSuggestionsViewModel";
+import { SuggestionFormFieldsDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionFormFields.desktop";
+import { SuggestionHeroBannerDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionHeroBanner.desktop";
+import { SuggestionSocialProofDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionSocialProof.desktop";
+import { SuggestionSupportCardsDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionSupportCards.desktop";
 
 export function ParentSuggestionsDesktopView({
   labels,
@@ -21,11 +21,11 @@ export function ParentSuggestionsDesktopView({
     <PageContainer>
       <PageHeader title={labels.pageTitle} />
 
-      <SuggestionHeroBanner labels={labels} variant="desktop" />
+      <SuggestionHeroBannerDesktop labels={labels} />
 
       <Box sx={{ maxWidth: 960, mx: "auto", width: "100%" }}>
         <BaseCard>
-          <SuggestionFormFields control={control} errors={errors} labels={labels} variant="desktop" />
+          <SuggestionFormFieldsDesktop control={control} errors={errors} labels={labels} />
 
           <Box
             sx={{
@@ -45,11 +45,11 @@ export function ParentSuggestionsDesktopView({
             >
               {labels.submit}
             </PrimaryPageAction>
-            <SuggestionSocialProof labels={labels} />
+            <SuggestionSocialProofDesktop labels={labels} />
           </Box>
         </BaseCard>
 
-        <SuggestionSupportCards labels={labels} variant="desktop" />
+        <SuggestionSupportCardsDesktop labels={labels} />
       </Box>
     </PageContainer>
   );

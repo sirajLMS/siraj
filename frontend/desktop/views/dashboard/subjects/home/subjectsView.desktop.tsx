@@ -3,9 +3,9 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { CategoriesSection } from "@/frontend/common/views/dashboard/subjects/home/components/CategoriesSection";
-import { SubjectCard } from "@/frontend/common/views/dashboard/subjects/home/components/SubjectCard";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { CategoriesSectionDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/categoriesSection.desktop";
+import { SubjectCardDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/subjectCard.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
 export function SubjectsViewDesktop({
@@ -29,7 +29,7 @@ export function SubjectsViewDesktop({
   const filteredSubjects = activeCategoryId ? subjects.filter(s => s.category?.id === activeCategoryId) : subjects;
 
   const categoriesSection = (
-    <CategoriesSection
+    <CategoriesSectionDesktop
       categories={categories}
       activeCategoryId={activeCategoryId}
       onCategoryChange={onCategoryChange}
@@ -93,7 +93,7 @@ export function SubjectsViewDesktop({
           <Grid container spacing={2}>
             {filteredSubjects.map(subject => (
               <Grid key={subject.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <SubjectCard
+                <SubjectCardDesktop
                   subject={subject}
                   onEdit={() => onEditSubject(subject.id ?? "")}
                   onDelete={() => onDeleteSubject(subject.id ?? "")}

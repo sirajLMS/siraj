@@ -2,12 +2,12 @@
 
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
-import { FutureClassCard } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/FutureClassCard";
-import { ImportantNotes } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/ImportantNotes";
-import { JumpToDateHeader } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/JumpToDateHeader";
-import { MiniCalendar } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/MiniCalendar";
-import { SupportContact } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/SupportContact";
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
+import { FutureClassCardDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/futureClassCard.desktop";
+import { ImportantNotesDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/importantNotes.desktop";
+import { JumpToDateHeaderDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.desktop";
+import { MiniCalendarDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/miniCalendar.desktop";
+import { SupportContactDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/supportContact.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
 export function FutureScheduleViewDesktop({
@@ -30,7 +30,7 @@ export function FutureScheduleViewDesktop({
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
-          <JumpToDateHeader
+          <JumpToDateHeaderDesktop
             leaveQuotaUsed={leaveQuotaUsed}
             leaveQuotaTotal={leaveQuotaTotal}
             totalClasses={totalClasses}
@@ -76,7 +76,7 @@ export function FutureScheduleViewDesktop({
             </Box>
 
             {classes.map(item => (
-              <FutureClassCard
+              <FutureClassCardDesktop
                 key={item.id ?? ""}
                 item={item}
                 onRequestLeave={() => {
@@ -89,9 +89,9 @@ export function FutureScheduleViewDesktop({
 
         <Grid size={{ xs: 12, lg: 4 }}>
           <Stack spacing={3}>
-            <MiniCalendar selectedDate={selectedDate} onSelectDate={onDateChange} classDates={classDates} />
-            <ImportantNotes notes={notes} />
-            <SupportContact contact={contact} />
+            <MiniCalendarDesktop selectedDate={selectedDate} onSelectDate={onDateChange} classDates={classDates} />
+            <ImportantNotesDesktop notes={notes} />
+            <SupportContactDesktop contact={contact} />
           </Stack>
         </Grid>
       </Grid>

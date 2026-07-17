@@ -9,7 +9,7 @@ import { classCategoriesQueryDocument } from "@/frontend/common/graphql/sharedDo
 import { classSubjectsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
 import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { SubjectDialogs } from "@/frontend/common/views/dashboard/subjects/home/components/SubjectDialogs";
+import { SubjectDialogsView } from "@/frontend/common/views/dashboard/subjects/home/SubjectDialogsView";
 import { SubjectsView } from "@/frontend/common/views/dashboard/subjects/home/SubjectsView";
 import type { CategoryItem, SubjectItem } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { useRouter } from "@/shared/i18n/routing";
@@ -114,7 +114,7 @@ export function SubjectsContainer() {
         canManageCategories={canManageCategories}
       />
 
-      <SubjectDialogs
+      <SubjectDialogsView
         categories={categories}
         selectedSubject={selectedSubject}
         selectedCategory={selectedCategory}

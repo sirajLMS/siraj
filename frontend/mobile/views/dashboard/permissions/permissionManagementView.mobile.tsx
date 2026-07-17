@@ -2,12 +2,12 @@
 
 import { Alert, Box } from "@mui/material";
 import { PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { PermissionManagementDialogs } from "@/frontend/common/views/dashboard/permissions/components/PermissionManagementDialogs";
-import { PermissionTabContent } from "@/frontend/common/views/dashboard/permissions/components/PermissionTabContent";
-import { SingleGroupView } from "@/frontend/common/views/dashboard/permissions/components/SingleGroupView";
 import type { PermissionManagementViewModel } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
 import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { PermissionManagementDialogsMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionManagementDialogs.mobile";
+import { PermissionTabContentMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionTabContent.mobile";
+import { SingleGroupViewMobile } from "@/frontend/mobile/views/dashboard/permissions/components/singleGroupView.mobile";
 import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
 
 function PermissionErrorAlert({ error, t }: { readonly error: string | null; readonly t: PermissionsLabels }) {
@@ -74,7 +74,7 @@ export function PermissionManagementMobileView({
   return (
     <PageContainer>
       {activeGroup ? (
-        <SingleGroupView
+        <SingleGroupViewMobile
           group={activeGroup}
           permissions={permissions}
           isLoading={isLoading}
@@ -95,10 +95,9 @@ export function PermissionManagementMobileView({
 
             <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={setActiveTab} />
 
-            <PermissionTabContent
+            <PermissionTabContentMobile
               activeTab={activeTab}
               isLoading={isLoading}
-              isMobile
               permissions={permissions}
               groups={groups}
               users={users}
@@ -113,7 +112,7 @@ export function PermissionManagementMobileView({
         </>
       )}
 
-      <PermissionManagementDialogs
+      <PermissionManagementDialogsMobile
         permissions={permissions}
         groups={groups}
         users={users}

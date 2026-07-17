@@ -4,18 +4,18 @@ import { FileDownloadOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
 import { ExportButton, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
-import {
-  AcademicScheduleDataGrid,
-  type AcademicScheduleDataGridLabels,
-} from "@/frontend/common/views/dashboard/schedule/alerts/AcademicScheduleDataGrid";
-import { InstitutionalReportCard } from "@/frontend/common/views/dashboard/schedule/alerts/InstitutionalReportCard";
-import { ScheduleAlertBanners } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertBanners";
 import type { ScheduleAlertsLabels } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsView";
 import type {
   AcademicClassRow,
   AlertsMetric,
   ScheduleAlert,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
+import {
+  AcademicScheduleDataGridDesktop,
+  type AcademicScheduleDataGridDesktopLabels,
+} from "@/frontend/desktop/views/dashboard/schedule/alerts/components/academicScheduleDataGrid.desktop";
+import { InstitutionalReportCardDesktop } from "@/frontend/desktop/views/dashboard/schedule/alerts/institutionalReportCard.desktop";
+import { ScheduleAlertBannersDesktop } from "@/frontend/desktop/views/dashboard/schedule/alerts/scheduleAlertBanners.desktop";
 
 export interface ScheduleAlertsViewDesktopProps {
   readonly alerts: readonly ScheduleAlert[];
@@ -63,7 +63,7 @@ function DesktopMetricsSection({
         );
       })}
       <Grid size={{ xs: 12, md: 6 }}>
-        <InstitutionalReportCard
+        <InstitutionalReportCardDesktop
           title={labels.reportTitle}
           description={labels.reportDescription}
           downloadLabel={labels.downloadPdf}
@@ -99,7 +99,7 @@ function DesktopAlertsBody({
   readonly onLeave: (id: string) => void;
   readonly onViewClassAudit: (id: string) => void;
   readonly onPageChange: (page: number) => void;
-  readonly gridLabels: AcademicScheduleDataGridLabels;
+  readonly gridLabels: AcademicScheduleDataGridDesktopLabels;
 }) {
   if (loading) {
     return (
@@ -131,7 +131,7 @@ function DesktopAlertsBody({
         </>
       }
     >
-      <AcademicScheduleDataGrid
+      <AcademicScheduleDataGridDesktop
         rows={classes}
         page={currentPage}
         pageSize={pageSize}
@@ -163,7 +163,7 @@ export function ScheduleAlertsViewDesktop({
   onFilter,
   onExport,
 }: Readonly<ScheduleAlertsViewDesktopProps>) {
-  const gridLabels: AcademicScheduleDataGridLabels = {
+  const gridLabels: AcademicScheduleDataGridDesktopLabels = {
     className: labels.className,
     instructor: labels.instructor,
     time: labels.time,
@@ -185,7 +185,7 @@ export function ScheduleAlertsViewDesktop({
     <PageContainer>
       <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
-      <ScheduleAlertBanners alerts={alerts} labels={labels.alertMessages} />
+      <ScheduleAlertBannersDesktop alerts={alerts} labels={labels.alertMessages} />
 
       <DesktopMetricsSection
         metrics={metrics}

@@ -1,26 +1,21 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   FormControl,
-  IconButton,
   InputLabel,
   MenuItem,
   Select,
   Stack,
   TextField,
 } from "@mui/material";
-import type { GridColDef } from "@mui/x-data-grid";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppDataGrid, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -29,33 +24,20 @@ import {
   deleteCurrencyHedgeMutationDocument,
   updateCurrencyHedgeMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { getCurrencyByCode, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
+import { getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { logger } from "@/frontend/common/utils/logger";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import {
+  CurrencyHedgesView,
+  type HedgeRow,
+} from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/currencyHedgesView";
+import { useAppTranslation } from "@/shared/locale";
 
 const HEDGE_TYPE_LONG = "LONG";
 const HEDGE_TYPE_SHORT = "SHORT";
 
-type HedgeRow = {
-  readonly id: string;
-  readonly currency: CurrencyCode;
-  readonly amount: string;
-  readonly hedgeType: string;
-  readonly notes: string | null;
-  readonly updatedAt: string | null;
-};
-
-function formatTimestamp(value: string | null | undefined, locale: string): string {
-  if (!value) {
-    return "";
-  }
-  return new Date(value).toLocaleString(locale);
-}
-
 export function CurrencyHedgesContainer() {
   const t = useAppTranslation().dashboardTranslations.billingCurrencyHedges;
   const tc = useAppTranslation().commonTranslations;
-  const locale = useAppLocale();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editingRow, setEditingRow] = useState<HedgeRow | null>(null);
@@ -154,132 +136,87 @@ export function CurrencyHedgesContainer() {
     }
   };
 
-  const columns = useMemo<GridColDef<HedgeRow>[]>(
-    () => [
-      {
-        field: "currency",
-        headerName: t.columns.currency,
-        flex: 1,
-        minWidth: 120,
-        valueFormatter: value => getCurrencyDisplayName(String(value), locale),
-      },
-      { field: "amount", headerName: t.columns.amount, flex: 1, minWidth: 120 },
-      { field: "hedgeType", headerName: t.columns.hedgeType, flex: 1, minWidth: 140 },
-      { field: "notes", headerName: t.columns.notes, flex: 1.5, minWidth: 180 },
-      {
-        field: "updatedAt",
-        headerName: t.columns.updatedAt,
-        flex: 1,
-        minWidth: 160,
-        valueFormatter: value => formatTimestamp(String(value), locale),
-      },
-      {
-        field: "actions",
-        headerName: t.columns.actions,
-        width: 120,
-        sortable: false,
-        filterable: false,
-        renderCell: ({ row }) => (
-          <Stack direction="row" spacing={0.5}>
-            <IconButton size="small" aria-label={t.editHedge} onClick={() => openEdit(row)}>
-              <EditOutlined fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              aria-label={t.deleteHedge}
-              onClick={() => {
-                setDeletingRow(row);
-                setDeleteOpen(true);
-              }}
-            >
-              <DeleteOutlined fontSize="small" />
-            </IconButton>
-          </Stack>
-        ),
-      },
-    ],
-    [locale, t, openEdit]
-  );
-
   return (
     <RequirePermission permissions={AppPermission.BillingManageCurrencyHedges}>
-      <PageContainer>
-        <PageHeader
-          title={t.pageTitle}
-          subtitle={t.pageSubtitle}
-          actions={
-            <PrimaryPageAction onClick={openCreate} startIcon={<AddOutlined />}>
-              {t.addHedge}
-            </PrimaryPageAction>
-          }
-        />
-        <Box sx={{ height: 560 }}>
-          <AppDataGrid
-            rows={rows}
-            columns={columns}
-            loading={loading}
-            emptyMessage={t.empty}
-            getRowId={row => row.id}
-          />
-        </Box>
+      <CurrencyHedgesView
+        rows={rows}
+        loading={loading}
+        pageTitle={t.pageTitle}
+        pageSubtitle={t.pageSubtitle}
+        emptyMessage={t.empty}
+        addHedgeLabel={t.addHedge}
+        currencyColumnLabel={t.columns.currency}
+        amountColumnLabel={t.columns.amount}
+        hedgeTypeColumnLabel={t.columns.hedgeType}
+        notesColumnLabel={t.columns.notes}
+        updatedAtColumnLabel={t.columns.updatedAt}
+        actionsColumnLabel={t.columns.actions}
+        editHedgeLabel={t.editHedge}
+        deleteHedgeLabel={t.deleteHedge}
+        onEdit={openEdit}
+        onDelete={row => {
+          setDeletingRow(row);
+          setDeleteOpen(true);
+        }}
+        onAdd={openCreate}
+      />
 
-        <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
-          <DialogTitle>{editingRow ? t.editHedge : t.addHedge}</DialogTitle>
-          <DialogContent>
-            <Stack spacing={2} sx={{ pt: 1 }}>
-              <CurrencySelect
-                currency={getCurrencyByCode(currency) ?? null}
-                setCurrencyAction={option => setCurrency(option.code)}
-                label={t.fields.currency}
-                fullWidth
-              />
-              <TextField
-                label={t.fields.amount}
-                value={amount}
-                onChange={event => setAmount(event.target.value)}
-                fullWidth
-              />
-              <FormControl fullWidth>
-                <InputLabel id="hedge-type-label">{t.fields.hedgeType}</InputLabel>
-                <Select
-                  labelId="hedge-type-label"
-                  label={t.fields.hedgeType}
-                  value={hedgeType}
-                  onChange={event => setHedgeType(event.target.value)}
-                >
-                  <MenuItem value={HEDGE_TYPE_LONG}>{t.hedgeTypes.long}</MenuItem>
-                  <MenuItem value={HEDGE_TYPE_SHORT}>{t.hedgeTypes.short}</MenuItem>
-                </Select>
-              </FormControl>
-              <TextField
-                label={t.fields.notes}
-                value={notes}
-                onChange={event => setNotes(event.target.value)}
-                fullWidth
-                multiline
-                minRows={2}
-              />
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>{tc.cancel}</Button>
-            <Button variant="contained" onClick={() => void handleSave()} disabled={creating || updating}>
-              {tc.save}
-            </Button>
-          </DialogActions>
-        </Dialog>
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>{editingRow ? t.editHedge : t.addHedge}</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ pt: 1 }}>
+            <CurrencySelect
+              currency={getCurrencyByCode(currency) ?? null}
+              setCurrencyAction={option => setCurrency(option.code)}
+              label={t.fields.currency}
+              fullWidth
+            />
+            <TextField
+              label={t.fields.amount}
+              value={amount}
+              onChange={event => setAmount(event.target.value)}
+              fullWidth
+            />
+            <FormControl fullWidth>
+              <InputLabel id="hedge-type-label">{t.fields.hedgeType}</InputLabel>
+              <Select
+                labelId="hedge-type-label"
+                label={t.fields.hedgeType}
+                value={hedgeType}
+                onChange={event => setHedgeType(event.target.value)}
+              >
+                <MenuItem value={HEDGE_TYPE_LONG}>{t.hedgeTypes.long}</MenuItem>
+                <MenuItem value={HEDGE_TYPE_SHORT}>{t.hedgeTypes.short}</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label={t.fields.notes}
+              value={notes}
+              onChange={event => setNotes(event.target.value)}
+              fullWidth
+              multiline
+              minRows={2}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)}>{tc.cancel}</Button>
+          <Button variant="contained" onClick={() => void handleSave()} disabled={creating || updating}>
+            {tc.save}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-          <DialogTitle>{t.deleteHedge}</DialogTitle>
-          <DialogContent>{t.deleteConfirm}</DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDeleteOpen(false)}>{tc.cancel}</Button>
-            <Button color="error" variant="contained" onClick={() => void handleDelete()} disabled={deleting}>
-              {t.deleteHedge}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </PageContainer>
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
+        <DialogTitle>{t.deleteHedge}</DialogTitle>
+        <DialogContent>{t.deleteConfirm}</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteOpen(false)}>{tc.cancel}</Button>
+          <Button color="error" variant="contained" onClick={() => void handleDelete()} disabled={deleting}>
+            {t.deleteHedge}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </RequirePermission>
   );
 }

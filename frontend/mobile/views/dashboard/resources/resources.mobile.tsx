@@ -3,13 +3,13 @@
 import { CloudUploadOutlined, ExpandMoreOutlined } from "@mui/icons-material";
 import { Accordion, AccordionDetails, AccordionSummary, Box } from "@mui/material";
 import { BaseCard, PageContainer } from "@/frontend/common/components/ui";
-import { ResourceDeleteDialog } from "@/frontend/common/views/dashboard/resources/components/ResourceDeleteDialog";
-import { ResourceGovernancePanel } from "@/frontend/common/views/dashboard/resources/components/ResourceGovernancePanel";
-import { ResourceLibraryList } from "@/frontend/common/views/dashboard/resources/components/ResourceLibraryList";
-import { ResourceUploadForm } from "@/frontend/common/views/dashboard/resources/components/ResourceUploadForm";
-import { ResourceUploadGuidelines } from "@/frontend/common/views/dashboard/resources/components/ResourceUploadGuidelines";
 import type { ResourcesViewModel } from "@/frontend/common/views/dashboard/resources/useResourcesViewModel";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { ResourceDeleteDialogMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceDeleteDialog.mobile";
+import { ResourceGovernancePanelMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceGovernancePanel.mobile";
+import { ResourceLibraryListMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceLibraryList.mobile";
+import { ResourceUploadFormMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceUploadForm.mobile";
+import { ResourceUploadGuidelinesMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceUploadGuidelines.mobile";
 
 export function ResourcesMobileView({
   labels,
@@ -48,7 +48,7 @@ export function ResourcesMobileView({
             </AccordionSummary>
             <AccordionDetails sx={{ p: 0 }}>
               <BaseCard sx={{ border: "none", boxShadow: "none", p: 0 }}>
-                <ResourceUploadForm
+                <ResourceUploadFormMobile
                   labels={labels}
                   documentName={documentName}
                   selectedFileName={selectedFileName}
@@ -57,15 +57,14 @@ export function ResourcesMobileView({
                   onDocumentNameChange={onDocumentNameChange}
                   onFormSubmit={onFormSubmit}
                   onFileSelect={onFileSelect}
-                  variant="mobile"
                 />
-                <ResourceGovernancePanel labels={labels} />
+                <ResourceGovernancePanelMobile labels={labels} />
               </BaseCard>
             </AccordionDetails>
           </Accordion>
         ) : null}
 
-        <ResourceLibraryList
+        <ResourceLibraryListMobile
           resources={resources}
           labels={labels}
           filterType={filterType}
@@ -77,10 +76,10 @@ export function ResourcesMobileView({
           onCardClick={onCardClick}
         />
 
-        {canManage ? <ResourceUploadGuidelines labels={labels} /> : null}
+        {canManage ? <ResourceUploadGuidelinesMobile labels={labels} /> : null}
       </MobileContentStack>
 
-      <ResourceDeleteDialog
+      <ResourceDeleteDialogMobile
         labels={labels}
         open={Boolean(pendingDeleteId)}
         resourceTitle={pendingDeleteTitle}

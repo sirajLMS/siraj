@@ -24,3 +24,28 @@ export interface ParentDirectoryRow {
   readonly accountStatus: ParentAccountStatusKey;
   readonly unpaidInvoices: number;
 }
+
+export interface ParentCardListLabels {
+  readonly guardianOf: (name: string) => string;
+  readonly unpaidCount: (count: number) => string;
+  readonly invoicesCleared: string;
+  readonly statusLabels: Record<ParentLifecycleStatus, string>;
+  readonly accountStatusLabels: Record<ParentAccountStatusKey, string>;
+}
+
+export interface ParentsDataGridLabels {
+  readonly index: string;
+  readonly image: string;
+  readonly name: string;
+  readonly email: string;
+  readonly time: string;
+  readonly status: string;
+  readonly accountStatus: string;
+  readonly unpaidInvoices: string;
+  readonly options: string;
+  readonly noEntries: string;
+  readonly guardianOf: (name: string) => string;
+  readonly statusLabels: Record<ParentLifecycleStatus, string>;
+  readonly accountStatusLabels: Record<ParentAccountStatusKey, string>;
+  readonly manageLifecycle: string;
+}

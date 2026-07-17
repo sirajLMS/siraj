@@ -5,15 +5,15 @@ import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
 import { ParentSupportFab } from "@/frontend/common/views/dashboard/parent/dashboard/components/ParentSupportFab";
-import { ActivationPolicyPanel } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
-import { StudentProgressFeed } from "@/frontend/common/views/dashboard/teachers/dashboard/components/StudentProgressFeed";
-import { TeacherDailyScheduleSection } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherDailyScheduleSection";
-import { MissedClassAlertBanner } from "@/frontend/common/views/dashboard/teachers/dashboard/shared/missedClassAlertBanner";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import {
   teacherDashboardContentPaddingSx,
   teacherDashboardPageContainerSx,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
+import { ActivationPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/activationPolicyPanel.desktop";
+import { MissedClassAlertBannerDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.desktop";
+import { StudentProgressFeedDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/studentProgressFeed.desktop";
+import { TeacherDailyScheduleSectionDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherDailyScheduleSection.desktop";
 
 export function TeacherDashboardDesktopView({
   userName,
@@ -42,7 +42,7 @@ export function TeacherDashboardDesktopView({
 }: Readonly<TeacherDashboardViewModel>) {
   return (
     <>
-      {missedAlert && <MissedClassAlertBanner alert={missedAlert} labels={labels.alert} fixed />}
+      {missedAlert && <MissedClassAlertBannerDesktop alert={missedAlert} labels={labels.alert} fixed />}
 
       <PageContainer sx={mergeSx(teacherDashboardPageContainerSx, missedAlert ? { pt: 10 } : undefined)}>
         {activationError && (
@@ -60,7 +60,7 @@ export function TeacherDashboardDesktopView({
           gridSize={{ xs: 6, sm: 6, md: 3 }}
         />
 
-        <TeacherDailyScheduleSection
+        <TeacherDailyScheduleSectionDesktop
           title={labels.schedule.title}
           dateValue={dateValue}
           todayLabel={labels.dateFilter.today}
@@ -85,10 +85,14 @@ export function TeacherDashboardDesktopView({
         />
 
         <Box sx={teacherDashboardContentPaddingSx}>
-          <StudentProgressFeed items={progressFeed} title={labels.progressFeed.title} labels={labels.progressFeed} />
+          <StudentProgressFeedDesktop
+            items={progressFeed}
+            title={labels.progressFeed.title}
+            labels={labels.progressFeed}
+          />
         </Box>
 
-        <ActivationPolicyPanel
+        <ActivationPolicyPanelDesktop
           labels={labels.policy}
           onDownloadHandbook={onDownloadHandbook}
           onContactCoordinator={onContactCoordinator}

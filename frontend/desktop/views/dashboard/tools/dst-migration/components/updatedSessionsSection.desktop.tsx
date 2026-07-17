@@ -3,8 +3,8 @@
 import { CheckCircleOutlined } from "@mui/icons-material";
 import { alpha, Box, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui";
-import { UpdatedSessionsDataGrid } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdatedSessionsDataGrid";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { UpdatedSessionsDataGridDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/updatedSessionsDataGrid.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
@@ -59,7 +59,7 @@ export function UpdatedSessionsSectionDesktop({ sessions, successfulCount, loadi
         <StatusBadge category="session" status="completed" label={t.table.sessionsCount(successfulCount)} />
       </Box>
       <Box sx={{ p: { xs: 2, lg: 0 } }}>
-        <UpdatedSessionsDataGrid sessions={sessions} loading={loading} />
+        <UpdatedSessionsDataGridDesktop sessions={sessions} loading={loading} />
       </Box>
     </Box>
   );

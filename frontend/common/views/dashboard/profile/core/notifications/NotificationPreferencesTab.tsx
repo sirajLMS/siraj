@@ -3,21 +3,21 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   notificationPreferencesQueryDocument,
   updateNotificationPreferencesMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { logger } from "@/frontend/common/utils/logger";
 import {
   NOTIFICATION_CHANNELS,
   NOTIFICATION_EVENT_TYPES,
+  type NotificationPreferencesTabVariantProps,
   type NotificationPrefRow,
   preferenceKey,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
-import { NotificationPreferencesTabDesktop } from "@/frontend/desktop/views/dashboard/profile/core/notifications/notificationPreferencesTab.desktop";
-import { NotificationPreferencesTabMobile } from "@/frontend/mobile/views/dashboard/profile/core/notifications/notificationPreferencesTab.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
 type NotificationPreferencesTabProps = {
@@ -36,6 +36,19 @@ function buildDefaultPreferences(): NotificationPrefRow[] {
     }))
   );
 }
+
+const lazyViews = createLazyView<NotificationPreferencesTabVariantProps>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/profile/core/notifications/notificationPreferencesTab.mobile").then(
+      m => ({
+        default: m.NotificationPreferencesTabMobile,
+      })
+    ),
+  () =>
+    import("@/frontend/desktop/views/dashboard/profile/core/notifications/notificationPreferencesTab.desktop").then(
+      m => ({ default: m.NotificationPreferencesTabDesktop })
+    )
+);
 
 export function NotificationPreferencesTab({ isActive }: Readonly<NotificationPreferencesTabProps>) {
   const t = useAppTranslation().profileTranslations.notifications;
@@ -107,9 +120,7 @@ export function NotificationPreferencesTab({ isActive }: Readonly<NotificationPr
     setSnackbarOpen(false);
   }, []);
 
-  const { isMobile } = useViewport();
-
-  const variantProps = {
+  const variantProps: NotificationPreferencesTabVariantProps = {
     preferences: localPreferences,
     onToggle: handleToggle,
     disabled: saving,
@@ -121,9 +132,5 @@ export function NotificationPreferencesTab({ isActive }: Readonly<NotificationPr
     errorLoading: Boolean(error),
   };
 
-  return isMobile ? (
-    <NotificationPreferencesTabMobile {...variantProps} />
-  ) : (
-    <NotificationPreferencesTabDesktop {...variantProps} />
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={variantProps} />;
 }

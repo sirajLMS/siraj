@@ -3,8 +3,8 @@
 import { CheckCircleOutlined } from "@mui/icons-material";
 import { alpha, Box, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui";
-import { UpdatedSessionsCardList } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdatedSessionsCardList";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { UpdatedSessionsCardListMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/updatedSessionsCardList.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
@@ -58,8 +58,8 @@ export function UpdatedSessionsSectionMobile({ sessions, successfulCount }: Read
         </Box>
         <StatusBadge category="session" status="completed" label={t.table.sessionsCount(successfulCount)} />
       </Box>
-      <Box sx={{ p: { xs: 2, lg: 0 } }}>
-        <UpdatedSessionsCardList sessions={sessions} successfulCount={successfulCount} />
+      <Box sx={{ p: 2 }}>
+        <UpdatedSessionsCardListMobile sessions={sessions} successfulCount={successfulCount} />
       </Box>
     </Box>
   );

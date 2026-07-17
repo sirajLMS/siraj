@@ -1,15 +1,11 @@
 "use client";
 
-import { Alert, Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
-import type { GridPaginationModel } from "@mui/x-data-grid";
 import { useMemo, useState } from "react";
-import { PaginationControls } from "@/frontend/common/components/ui";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
-import { AssignedStudentsCardList } from "@/frontend/common/views/dashboard/profile/teacher/students/AssignedStudentsCardList";
-import {
-  AssignedStudentsDataGrid,
-  type AssignedStudentsRow,
-} from "@/frontend/common/views/dashboard/profile/teacher/students/AssignedStudentsDataGrid";
+import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
+import type { AssignedStudentsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsTabTypes";
 import { type ProfileStudentsLabels, useAppTranslation } from "@/shared/locale";
 
 type AssignedStudentsResult = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>["assignedStudents"];
@@ -43,14 +39,16 @@ function toViewRow(student: AssignedStudentsItem, t: ProfileStudentsLabels): Ass
   };
 }
 
-function LoadingState() {
-  return (
-    <Stack spacing={1.5}>
-      <Skeleton variant="rounded" height={36} />
-      <Skeleton variant="rounded" height={420} />
-    </Stack>
-  );
-}
+const lazyViews = createLazyView<AssignedStudentsTabViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/profile/teacher/students/assignedStudentsTab.mobile").then(m => ({
+      default: m.AssignedStudentsTabMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/profile/teacher/students/assignedStudentsTab.desktop").then(m => ({
+      default: m.AssignedStudentsTabDesktopView,
+    }))
+);
 
 export function AssignedStudentsTab({ assignedStudents, loading, hasError, onRetry }: AssignedStudentsTabProps) {
   const t = useAppTranslation().profileTranslations.base.students;
@@ -85,94 +83,39 @@ export function AssignedStudentsTab({ assignedStudents, loading, hasError, onRet
   }, [rows, selectedClass]);
 
   const totalCount = filteredRows.length;
-  const pagedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
 
   const handleClassChange = (className: string) => {
     setSelectedClass(className === t.allClasses ? "all" : className);
     setPage(0);
   };
 
-  const handlePaginationModelChange = (model: GridPaginationModel) => {
-    setPage(model.page);
-    setPageSize(model.pageSize);
+  const viewModel: AssignedStudentsTabViewModel = {
+    title: t.title,
+    description: t.description,
+    rows: filteredRows,
+    loading,
+    hasError,
+    retryLabel: t.errors.retry,
+    errorLabel: t.errors.failedToLoad,
+    onRetry,
+    empty: { title: t.empty.title, description: t.empty.description },
+    classFilter: {
+      options: classOptions,
+      selected: selectedClass,
+      onSelect: handleClassChange,
+      allClassesLabel: t.allClasses,
+    },
+    pagination: {
+      page,
+      pageSize,
+      totalCount,
+      onPageChange: setPage,
+      onPaginationModelChange: (nextPage, nextPageSize) => {
+        setPage(nextPage);
+        setPageSize(nextPageSize);
+      },
+    },
   };
 
-  if (loading && !assignedStudents) {
-    return <LoadingState />;
-  }
-
-  if (hasError) {
-    return (
-      <Alert
-        severity="error"
-        action={
-          <Button color="inherit" size="small" onClick={onRetry}>
-            {t.errors.retry}
-          </Button>
-        }
-      >
-        {t.errors.failedToLoad}
-      </Alert>
-    );
-  }
-
-  if (!assignedStudents || rows.length === 0) {
-    return (
-      <Stack spacing={1}>
-        <Typography sx={{ typography: "titleLg" }}>{t.empty.title}</Typography>
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-          {t.empty.description}
-        </Typography>
-      </Stack>
-    );
-  }
-
-  return (
-    <Stack spacing={2}>
-      <Stack spacing={0.5}>
-        <Typography sx={{ typography: "titleLg" }}>{t.title}</Typography>
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-          {t.description}
-        </Typography>
-      </Stack>
-
-      <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
-        {classOptions.map(className => {
-          const isActive = (className === t.allClasses && selectedClass === "all") || selectedClass === className;
-          return (
-            <Chip
-              key={className}
-              label={className}
-              clickable
-              variant={isActive ? "filled" : "outlined"}
-              onClick={() => {
-                handleClassChange(className);
-              }}
-            />
-          );
-        })}
-      </Stack>
-
-      <Box sx={{ display: { xs: "none", md: "block" } }}>
-        <AssignedStudentsDataGrid
-          rows={filteredRows}
-          loading={loading}
-          page={page}
-          pageSize={pageSize}
-          onPaginationModelChange={handlePaginationModelChange}
-        />
-      </Box>
-      <Box sx={{ display: { xs: "block", md: "none" } }}>
-        <AssignedStudentsCardList rows={pagedRows} />
-        <PaginationControls
-          embedded
-          page={page}
-          pageCount={pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0}
-          rowCount={totalCount}
-          pageSize={pageSize}
-          onPageChange={setPage}
-        />
-      </Box>
-    </Stack>
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

@@ -3,12 +3,12 @@
 import { FileDownloadOutlined, PrintOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import { BaseCard, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import { EngagementRateCard } from "@/frontend/common/views/dashboard/reports/components/EngagementRateCard";
-import { FinancialDistributionCard } from "@/frontend/common/views/dashboard/reports/components/FinancialDistributionCard";
-import { ReportFiltersForm } from "@/frontend/common/views/dashboard/reports/components/ReportFiltersForm";
-import { ReportsDataGrid } from "@/frontend/common/views/dashboard/reports/components/ReportsDataGrid";
-import { ReportsTotalsSection } from "@/frontend/common/views/dashboard/reports/components/ReportsTotalsSection";
 import type { ReportsViewModel } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
+import { EngagementRateCardDesktop } from "@/frontend/desktop/views/dashboard/reports/components/engagementRateCard.desktop";
+import { FinancialDistributionCardDesktop } from "@/frontend/desktop/views/dashboard/reports/components/financialDistributionCard.desktop";
+import { ReportFiltersFormDesktop } from "@/frontend/desktop/views/dashboard/reports/components/reportFiltersForm.desktop";
+import { ReportsDataGridDesktop } from "@/frontend/desktop/views/dashboard/reports/components/reportsDataGrid.desktop";
+import { ReportsTotalsSectionDesktop } from "@/frontend/desktop/views/dashboard/reports/components/reportsTotalsSection.desktop";
 
 export function ReportsDesktopView({
   labels,
@@ -48,7 +48,7 @@ export function ReportsDesktopView({
       />
 
       <BaseCard>
-        <ReportFiltersForm
+        <ReportFiltersFormDesktop
           fromDate={fromDate}
           toDate={toDate}
           teacherId={teacherId}
@@ -65,19 +65,19 @@ export function ReportsDesktopView({
       </BaseCard>
 
       <SectionPanel>
-        <ReportsDataGrid
+        <ReportsDataGridDesktop
           rows={rows}
           labels={labels.tableLabels}
           reportType={reportType}
           loading={loading}
           onRowClick={onRowClick}
         />
-        <ReportsTotalsSection summary={summary} rows={rows} totalsLabel={labels.totalsLabel} variant="desktop" />
+        <ReportsTotalsSectionDesktop summary={summary} rows={rows} totalsLabel={labels.totalsLabel} />
       </SectionPanel>
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <EngagementRateCard
+          <EngagementRateCardDesktop
             rate={summary.engagementRate}
             growth={summary.engagementGrowth}
             title={labels.summaryLabels.engagementRate}
@@ -86,7 +86,7 @@ export function ReportsDesktopView({
           />
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
-          <FinancialDistributionCard
+          <FinancialDistributionCardDesktop
             currencyDistribution={summary.currencyDistribution}
             title={labels.summaryLabels.financialDistribution}
             subtitle={labels.summaryLabels.financialSubtitle}

@@ -3,12 +3,13 @@
 import { FileDownloadOutlined } from "@mui/icons-material";
 import { Box, MenuItem, Select, type SelectChangeEvent } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import { ExportButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
+import { ExportButton, SectionPanel } from "@/frontend/common/components/ui";
 import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { RescheduleTrackingDataGrid } from "@/frontend/common/views/dashboard/reschedule/tracking/RescheduleTrackingDataGrid";
 import { getTrackingStatusLabel } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.helpers";
 import type { RescheduleTrackingViewProps } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { STATUS_FILTER_OPTIONS } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { RescheduleTrackingDataGridDesktop } from "@/frontend/desktop/views/dashboard/reschedule/tracking/components/rescheduleTrackingDataGrid.desktop";
 
 export function RescheduleTrackingViewDesktop({
   metrics,
@@ -77,8 +78,8 @@ export function RescheduleTrackingViewDesktop({
   );
 
   return (
-    <PageContainer>
-      <PageHeader title={labels.pageTitle} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={labels.pageTitle} />
 
       <MetricCardGrid metrics={metrics} size={{ md: 4, lg: "grow" }} />
 
@@ -93,7 +94,7 @@ export function RescheduleTrackingViewDesktop({
           </Box>
         }
       >
-        <RescheduleTrackingDataGrid
+        <RescheduleTrackingDataGridDesktop
           rows={rows}
           headers={tableHeaders}
           labels={tableLabels}
@@ -107,6 +108,6 @@ export function RescheduleTrackingViewDesktop({
           loading={loading}
         />
       </SectionPanel>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

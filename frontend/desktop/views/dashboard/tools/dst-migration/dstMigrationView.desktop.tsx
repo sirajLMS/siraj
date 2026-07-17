@@ -1,30 +1,25 @@
 "use client";
 
 import { Grid, Stack } from "@mui/material";
-import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
-import { CheckedEmptyPanel } from "@/frontend/common/views/dashboard/tools/dst-migration/components/CheckedEmptyPanel";
-import { ConflictErrorsPanel } from "@/frontend/common/views/dashboard/tools/dst-migration/components/ConflictErrorsPanel";
-import { DstMigrationMetricsRow } from "@/frontend/common/views/dashboard/tools/dst-migration/components/DstMigrationMetricsRow";
-import { UpdateSchedulesButton } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdateSchedulesButton";
-import type {
-  CheckedEmptyItem,
-  ConflictGroup,
-  DstMigrationMetrics,
-  MigrationStatus,
-  UpdatedSession,
-} from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import type { DstMigrationViewModel } from "@/frontend/common/views/dashboard/tools/dst-migration/useDstMigrationViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { CheckedEmptyPanelDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/checkedEmptyPanel.desktop";
+import { ConflictErrorsPanelDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/conflictErrorsPanel.desktop";
+import { DstMigrationMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/dstMigrationMetricsRow.desktop";
 import { UpdatedSessionsSectionDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/updatedSessionsSection.desktop";
+import { UpdateSchedulesButtonDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/updateSchedulesButton.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
-interface Props {
-  readonly metrics: DstMigrationMetrics;
-  readonly updatedSessions: readonly UpdatedSession[];
-  readonly conflictGroups: readonly ConflictGroup[];
-  readonly checkedEmptyItems: readonly CheckedEmptyItem[];
-  readonly migrationStatus: MigrationStatus;
-  readonly onUpdate: () => void;
-  readonly dstOffsetDetected: boolean;
-}
+type Props = Pick<
+  DstMigrationViewModel,
+  | "metrics"
+  | "updatedSessions"
+  | "conflictGroups"
+  | "checkedEmptyItems"
+  | "migrationStatus"
+  | "onUpdate"
+  | "dstOffsetDetected"
+>;
 
 export function DstMigrationViewDesktop({
   metrics,
@@ -38,26 +33,26 @@ export function DstMigrationViewDesktop({
   const t = useAppTranslation().dashboardTranslations.dstMigration;
 
   const headerActions = (
-    <UpdateSchedulesButton status={migrationStatus} onUpdate={onUpdate} dstOffsetDetected={dstOffsetDetected} />
+    <UpdateSchedulesButtonDesktop status={migrationStatus} onUpdate={onUpdate} dstOffsetDetected={dstOffsetDetected} />
   );
 
   return (
-    <PageContainer>
-      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} actions={headerActions} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={t.pageTitle} subtitle={t.pageSubtitle} actions={headerActions} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>
           <UpdatedSessionsSectionDesktop sessions={updatedSessions} successfulCount={metrics.successful} />
         </Grid>
         <Grid size={{ xs: 12, lg: 4 }}>
-          <Stack spacing={3}>
-            <ConflictErrorsPanel conflictGroups={conflictGroups} />
-            <CheckedEmptyPanel items={checkedEmptyItems} />
+          <Stack spacing={3} sx={{ alignItems: "stretch" }}>
+            <ConflictErrorsPanelDesktop conflictGroups={conflictGroups} />
+            <CheckedEmptyPanelDesktop items={checkedEmptyItems} />
           </Stack>
         </Grid>
       </Grid>
 
-      <DstMigrationMetricsRow metrics={metrics} />
-    </PageContainer>
+      <DstMigrationMetricsRowDesktop metrics={metrics} />
+    </DesktopPageContainer>
   );
 }

@@ -10,3 +10,9 @@ export type AssociatedStudentRow = NonNullable<NonNullable<AssociatedStudents>["
 export function toDisplayValue(value: string | null | undefined, fallback: string): string {
   return value?.trim() || fallback;
 }
+
+export interface AssociatedStudentsSectionVariantProps {
+  readonly rows: readonly AssociatedStudentRow[];
+  readonly loading: boolean;
+  readonly emptyMessage: string;
+}

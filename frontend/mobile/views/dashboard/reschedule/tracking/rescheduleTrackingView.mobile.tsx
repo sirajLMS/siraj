@@ -2,12 +2,13 @@
 
 import { Box, MenuItem, Select, type SelectChangeEvent } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { RescheduleTrackingCardList } from "@/frontend/common/views/dashboard/reschedule/tracking/RescheduleTrackingCardList";
 import { getTrackingStatusLabel } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.helpers";
 import type { RescheduleTrackingViewProps } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { STATUS_FILTER_OPTIONS } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { RescheduleTrackingCardListMobile } from "@/frontend/mobile/views/dashboard/reschedule/tracking/components/rescheduleTrackingCardList.mobile";
 
 export function RescheduleTrackingViewMobile({
   metrics,
@@ -67,8 +68,8 @@ export function RescheduleTrackingViewMobile({
   );
 
   return (
-    <PageContainer>
-      <PageHeader title={labels.pageTitle} />
+    <MobilePageContainer>
+      <MobilePageHeader title={labels.pageTitle} edgeToEdge={false} />
 
       <MetricCardGrid metrics={metrics} size={{ md: 4, lg: "grow" }} />
 
@@ -77,7 +78,7 @@ export function RescheduleTrackingViewMobile({
         actions={<Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>{filterSelect}</Box>}
       >
         <Box sx={{ p: 2 }}>
-          <RescheduleTrackingCardList
+          <RescheduleTrackingCardListMobile
             rows={rows}
             labels={tableLabels}
             onView={onView}
@@ -88,6 +89,6 @@ export function RescheduleTrackingViewMobile({
           />
         </Box>
       </SectionPanel>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

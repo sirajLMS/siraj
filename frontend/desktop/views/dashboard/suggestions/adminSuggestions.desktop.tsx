@@ -1,11 +1,11 @@
 "use client";
 
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import { SuggestionsDataGrid } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsDataGrid";
-import { SuggestionsMetricsRow } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsMetricsRow";
-import { SuggestionsSearchBar } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsSearchBar";
-import { SuggestionsTabBar } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsTabBar";
 import type { AdminSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useAdminSuggestionsViewModel";
+import { SuggestionsDataGridDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionsDataGrid.desktop";
+import { SuggestionsMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionsMetricsRow.desktop";
+import { SuggestionsSearchBarDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionsSearchBar.desktop";
+import { SuggestionsTabBarDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionsTabBar.desktop";
 
 export function AdminSuggestionsDesktopView({
   labels,
@@ -27,14 +27,18 @@ export function AdminSuggestionsDesktopView({
     <PageContainer>
       <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
-      <SuggestionsMetricsRow summary={summary} labels={labels} />
+      <SuggestionsMetricsRowDesktop summary={summary} labels={labels} />
 
       <SectionPanel
         actions={
-          <SuggestionsSearchBar value={searchQuery} placeholder={labels.searchPlaceholder} onChange={onSearchChange} />
+          <SuggestionsSearchBarDesktop
+            value={searchQuery}
+            placeholder={labels.searchPlaceholder}
+            onChange={onSearchChange}
+          />
         }
       >
-        <SuggestionsTabBar
+        <SuggestionsTabBarDesktop
           activeTab={activeTab}
           pendingCount={summary.pending}
           reviewedCount={summary.reviewed}
@@ -42,7 +46,7 @@ export function AdminSuggestionsDesktopView({
           labels={labels}
           onTabChange={onTabChange}
         />
-        <SuggestionsDataGrid
+        <SuggestionsDataGridDesktop
           rows={rows}
           labels={labels}
           canManage={canManage}

@@ -5,12 +5,12 @@ import { ArrowBackOutlined } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard, PageContainer, PageHeader } from "@/frontend/common/components/ui";
-import { BillingMonthSelector } from "@/frontend/common/views/dashboard/billing/manual/components/BillingMonthSelector";
-import { InvoiceDraftSummaryCard } from "@/frontend/common/views/dashboard/billing/manual/components/InvoiceDraftSummaryCard";
-import { ManualInvoiceActions } from "@/frontend/common/views/dashboard/billing/manual/components/ManualInvoiceActions";
-import { ManualInvoiceFormFields } from "@/frontend/common/views/dashboard/billing/manual/components/ManualInvoiceFormFields";
-import { ManualInvoiceSupportCards } from "@/frontend/common/views/dashboard/billing/manual/components/ManualInvoiceSupportCards";
 import type { ManualInvoiceViewModel } from "@/frontend/common/views/dashboard/billing/manual/useManualInvoiceViewModel";
+import { BillingMonthSelectorDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/billingMonthSelector.desktop";
+import { InvoiceDraftSummaryCardDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/invoiceDraftSummaryCard.desktop";
+import { ManualInvoiceActionsDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceActions.desktop";
+import { ManualInvoiceFormFieldsDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceFormFields.desktop";
+import { ManualInvoiceSupportCardsDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceSupportCards.desktop";
 
 const StyledBackButton = styled(Button)(({ theme }) => ({
   color: theme.palette.primary.main,
@@ -67,30 +67,27 @@ export function ManualInvoiceDesktopView({
         <BaseCard sx={{ p: { xs: 3, md: 5 } }}>
           <StyledFormFieldset disabled={!canCreate}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <ManualInvoiceFormFields
+              <ManualInvoiceFormFieldsDesktop
                 control={control}
                 errors={errors}
                 labels={labels}
                 parentOptions={parentOptions}
                 studentOptions={studentOptions}
                 draftCurrency={draftCurrency}
-                variant="desktop"
                 parentsLoading={parentsLoading}
                 studentsLoading={studentsLoading}
               />
-              <BillingMonthSelector control={control} errors={errors} labels={labels} variant="desktop" />
-              <InvoiceDraftSummaryCard
+              <BillingMonthSelectorDesktop control={control} errors={errors} labels={labels} />
+              <InvoiceDraftSummaryCardDesktop
                 labels={labels}
                 totalFormatted={totalFormatted}
                 currency={draftCurrency}
-                variant="desktop"
               />
-              <ManualInvoiceActions
+              <ManualInvoiceActionsDesktop
                 labels={labels}
                 canCreate={canCreate}
                 canSendEmail={canSendEmail}
                 isSubmitting={isSubmitting}
-                variant="desktop"
                 onSubmit={onSubmitClick}
                 onSubmitAndSendEmail={onSubmitAndSendEmailClick}
               />
@@ -99,7 +96,7 @@ export function ManualInvoiceDesktopView({
         </BaseCard>
       </Box>
 
-      <ManualInvoiceSupportCards labels={labels} />
+      <ManualInvoiceSupportCardsDesktop labels={labels} />
     </PageContainer>
   );
 }

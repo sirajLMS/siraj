@@ -13,11 +13,11 @@ import {
 } from "@/frontend/common/components/ui";
 import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
-import { ParentsDataGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsDataGrid";
 import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
 import type { ParentsViewLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsView";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import { ParentsDataGridDesktop } from "@/frontend/desktop/views/dashboard/admin/parents/home/components/parentsDataGrid.desktop";
 
 export interface ParentsViewDesktopProps {
   readonly metrics: readonly MetricItem[];
@@ -129,7 +129,7 @@ export function ParentsViewDesktop({
           onLifecycleStatusFilterChange={onLifecycleStatusFilterChange}
           onResetFilters={onResetFilters}
         />
-        <ParentsDataGrid
+        <ParentsDataGridDesktop
           rows={rows}
           labels={labels.table}
           onOpenSettings={onOpenSettings}

@@ -2,12 +2,12 @@
 
 import { Box } from "@mui/material";
 import { BaseCard, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { ComplaintFormFields } from "@/frontend/common/views/dashboard/complaints/components/ComplaintFormFields";
-import { ComplaintPolicyPanel } from "@/frontend/common/views/dashboard/complaints/components/ComplaintPolicyPanel";
-import { ComplaintRecordCardList } from "@/frontend/common/views/dashboard/complaints/components/ComplaintRecordCardList";
 import type { ParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
 import { SubmissionSuccessBanner } from "@/frontend/common/views/dashboard/shared/SubmissionSuccessBanner";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { ComplaintFormFieldsMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintFormFields.mobile";
+import { ComplaintPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintPolicyPanel.mobile";
+import { ComplaintRecordCardListMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintRecordCardList.mobile";
 
 export function ParentComplaintsMobileView({
   labels,
@@ -40,12 +40,11 @@ export function ParentComplaintsMobileView({
 
         <MobileContentStack gap={3} paddingBottom={4}>
           <BaseCard>
-            <ComplaintFormFields
+            <ComplaintFormFieldsMobile
               control={control}
               errors={errors}
               labels={labels}
               studentOptions={studentOptions}
-              variant="mobile"
             />
             <PrimaryPageAction
               fullWidth
@@ -57,7 +56,7 @@ export function ParentComplaintsMobileView({
             </PrimaryPageAction>
           </BaseCard>
 
-          <ComplaintRecordCardList
+          <ComplaintRecordCardListMobile
             records={records}
             labels={labels}
             hasOlderRecords={hasOlderRecords}
@@ -68,7 +67,7 @@ export function ParentComplaintsMobileView({
             onPageChange={onPageChange}
           />
 
-          <ComplaintPolicyPanel labels={labels} />
+          <ComplaintPolicyPanelMobile labels={labels} />
         </MobileContentStack>
       </PageContainer>
     </>

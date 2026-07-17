@@ -3,15 +3,15 @@
 import { Box, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { AdminNoteCard } from "@/frontend/common/views/dashboard/classes/audit/AdminNoteCard";
 import { ClassAuditDetailsCard } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
-import { CommunicationLogCard } from "@/frontend/common/views/dashboard/classes/audit/CommunicationLogCard";
 import type {
   ClassAuditDetailsLabels,
   ClassAuditViewProps,
 } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
-import { OnlineMeetingCard } from "@/frontend/common/views/dashboard/classes/audit/OnlineMeetingCard";
 import { RegisteredStudentsSection } from "@/frontend/common/views/dashboard/classes/audit/RegisteredStudentsSection";
+import { AdminNoteCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/adminNoteCard.desktop";
+import { CommunicationLogCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/communicationLogCard.desktop";
+import { OnlineMeetingCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/onlineMeetingCard.desktop";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 const StyledGenerateReportButton = styled(FilterButton)(({ theme }) => ({
@@ -45,7 +45,6 @@ export function ClassAuditViewDesktop({
   onViewStudent,
   onResendNotifications,
   onUpdateAdminNote,
-  onEditAdminNote,
   isResending,
 }: Readonly<ClassAuditViewProps>) {
   const detailsLabels = buildDetailsLabels(labels);
@@ -77,7 +76,7 @@ export function ClassAuditViewDesktop({
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 2, lg: 2 } }}>
-          <OnlineMeetingCard
+          <OnlineMeetingCardDesktop
             meetingInfo={audit.meetingInfo}
             labels={labels.meetingInfo}
             showJoin={isJoinableClassInstance(audit.status, audit.outcome, { isFrozen: audit.isFrozen ?? false })}
@@ -86,7 +85,7 @@ export function ClassAuditViewDesktop({
 
         <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 3, lg: 4 } }}>
           <Box sx={{ mt: { lg: 0 } }}>
-            <CommunicationLogCard
+            <CommunicationLogCardDesktop
               entries={audit.communications}
               labels={labels.communicationLog}
               onResend={onResendNotifications}
@@ -106,12 +105,7 @@ export function ClassAuditViewDesktop({
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 5, lg: 5 } }}>
-          <AdminNoteCard
-            note={audit.adminNote}
-            labels={labels.adminNote}
-            onUpdate={onUpdateAdminNote}
-            onEdit={onEditAdminNote}
-          />
+          <AdminNoteCardDesktop note={audit.adminNote} labels={labels.adminNote} onUpdate={onUpdateAdminNote} />
         </Grid>
       </Grid>
     </PageContainer>

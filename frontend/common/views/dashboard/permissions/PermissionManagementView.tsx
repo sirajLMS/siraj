@@ -1,35 +1,27 @@
 "use client";
 
-import { useViewport } from "@/frontend/common/hooks/useViewport";
-import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
-  type PermissionManagementViewProps,
+  type PermissionManagementViewModel,
+  type UsePermissionManagementViewModelProps,
   usePermissionManagementViewModel,
 } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
-import { PermissionManagementDesktopView } from "@/frontend/desktop/views/dashboard/permissions/permissionManagementView.desktop";
-import { PermissionManagementMobileView } from "@/frontend/mobile/views/dashboard/permissions/permissionManagementView.mobile";
 
-export type { PermissionManagementViewProps };
+export type { PermissionManagementViewModel };
 
-export function PermissionManagementView(props: Readonly<PermissionManagementViewProps>) {
-  const activeTab = usePermissionManagementStore(state => state.activeTab);
-  const selectedUserIdForOverrides = usePermissionManagementStore(state => state.selectedUserIdForOverrides);
-  const setActiveTab = usePermissionManagementStore(state => state.setActiveTab);
-  const setSelectedUserIdForOverrides = usePermissionManagementStore(state => state.setSelectedUserIdForOverrides);
+const lazyViews = createLazyView<PermissionManagementViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/permissions/permissionManagementView.mobile").then(m => ({
+      default: m.PermissionManagementMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/permissions/permissionManagementView.desktop").then(m => ({
+      default: m.PermissionManagementDesktopView,
+    }))
+);
 
-  const viewModel = usePermissionManagementViewModel({
-    ...props,
-    activeTab,
-    selectedUserIdForOverrides,
-    setActiveTab,
-    setSelectedUserIdForOverrides,
-  });
-
-  const { isMobile } = useViewport();
-
-  return isMobile ? (
-    <PermissionManagementMobileView {...viewModel} />
-  ) : (
-    <PermissionManagementDesktopView {...viewModel} />
-  );
+export function PermissionManagementView(props: Readonly<UsePermissionManagementViewModelProps>) {
+  const viewModel = usePermissionManagementViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

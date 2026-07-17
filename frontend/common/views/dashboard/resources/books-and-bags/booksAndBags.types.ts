@@ -27,7 +27,7 @@ export interface BookItemCardProps {
 }
 
 export interface BooksAndBagsGridProps {
-  readonly books: BookItem[];
+  readonly books: readonly BookItem[];
   readonly labels: BooksAndBagsLabels;
   readonly onDelete: (bookId: string) => void;
 }

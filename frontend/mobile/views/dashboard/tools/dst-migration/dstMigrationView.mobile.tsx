@@ -1,28 +1,20 @@
 "use client";
 
 import { ReportProblemOutlined } from "@mui/icons-material";
-import { Box, Stack, Typography } from "@mui/material";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import { ConflictErrorsPanel } from "@/frontend/common/views/dashboard/tools/dst-migration/components/ConflictErrorsPanel";
-import { DstMigrationMetricsRow } from "@/frontend/common/views/dashboard/tools/dst-migration/components/DstMigrationMetricsRow";
-import { UpdatedSessionsCardList } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdatedSessionsCardList";
-import { UpdateSchedulesButtonMobile } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdateSchedulesButton";
-import type {
-  ConflictGroup,
-  DstMigrationMetrics,
-  MigrationStatus,
-  UpdatedSession,
-} from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { Box, Typography } from "@mui/material";
+import { SectionPanel } from "@/frontend/common/components/ui";
+import type { DstMigrationViewModel } from "@/frontend/common/views/dashboard/tools/dst-migration/useDstMigrationViewModel";
+import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { ConflictErrorsPanelMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/conflictErrorsPanel.mobile";
+import { DstMigrationMetricsRowMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/dstMigrationMetricsRow.mobile";
+import { UpdatedSessionsSectionMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/updatedSessionsSection.mobile";
+import { UpdateSchedulesButtonMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/updateSchedulesButton.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
-interface Props {
-  readonly metrics: DstMigrationMetrics;
-  readonly updatedSessions: readonly UpdatedSession[];
-  readonly conflictGroups: readonly ConflictGroup[];
-  readonly migrationStatus: MigrationStatus;
-  readonly onUpdate: () => void;
-  readonly dstOffsetDetected: boolean;
-}
+type Props = Pick<
+  DstMigrationViewModel,
+  "metrics" | "updatedSessions" | "conflictGroups" | "migrationStatus" | "onUpdate" | "dstOffsetDetected"
+>;
 
 function MobileInactiveNote() {
   const t = useAppTranslation().dashboardTranslations.dstMigration;
@@ -72,8 +64,8 @@ export function DstMigrationViewMobile({
   const t = useAppTranslation().dashboardTranslations.dstMigration;
 
   return (
-    <PageContainer>
-      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
+    <MobilePageContainer>
+      <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
 
       <Box sx={{ mb: 3 }}>
         <UpdateSchedulesButtonMobile
@@ -84,20 +76,20 @@ export function DstMigrationViewMobile({
       </Box>
 
       <Box sx={{ mb: 4 }}>
-        <DstMigrationMetricsRow metrics={metrics} />
+        <DstMigrationMetricsRowMobile metrics={metrics} />
       </Box>
 
-      <Stack spacing={4}>
+      <MobileContentStack>
         <Box>
           <MobileConflictsHeader />
-          <ConflictErrorsPanel conflictGroups={conflictGroups} />
+          <ConflictErrorsPanelMobile conflictGroups={conflictGroups} />
         </Box>
         <Box>
           <MobileUpdatedHeader />
-          <UpdatedSessionsCardList sessions={updatedSessions} successfulCount={metrics.successful} />
+          <UpdatedSessionsSectionMobile sessions={updatedSessions} successfulCount={metrics.successful} />
         </Box>
         <MobileInactiveNote />
-      </Stack>
-    </PageContainer>
+      </MobileContentStack>
+    </MobilePageContainer>
   );
 }

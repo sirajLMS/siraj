@@ -3,12 +3,12 @@
 import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
 import { PageContainer } from "@/frontend/common/components/ui";
-import { CurrentTeacherCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/CurrentTeacherCard";
-import { ManagementControlsCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/ManagementControlsCard";
-import { ReassignmentBentoGrid } from "@/frontend/common/views/dashboard/teachers/reassignment/components/ReassignmentBentoGrid";
-import { StudentContextCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/StudentContextCard";
 import type { TeacherReassignmentViewModel } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { CurrentTeacherCardMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/components/currentTeacherCard.mobile";
+import { ManagementControlsCardMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/components/managementControlsCard.mobile";
+import { ReassignmentBentoGridMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/components/reassignmentBentoGrid.mobile";
+import { StudentContextCardMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/components/studentContextCard.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherReassignmentViewMobile({
@@ -28,8 +28,8 @@ export function TeacherReassignmentViewMobile({
 
       <MobileContentStack>
         <Stack spacing={3}>
-          <StudentContextCard student={student} />
-          <CurrentTeacherCard
+          <StudentContextCardMobile student={student} />
+          <CurrentTeacherCardMobile
             currentTeacherName={currentTeacherName}
             teacherId={student.primaryTeacherId ?? undefined}
           />
@@ -52,7 +52,7 @@ export function TeacherReassignmentViewMobile({
             {t.warning}
           </Alert>
 
-          <ManagementControlsCard
+          <ManagementControlsCardMobile
             teachers={teachers}
             currentStatus={student.status}
             studentId={student.id}
@@ -63,7 +63,11 @@ export function TeacherReassignmentViewMobile({
             onCancel={onCancel}
           />
 
-          <ReassignmentBentoGrid studentId={student.id} lastUpdated={student.updatedAt} pendingNotificationCount={0} />
+          <ReassignmentBentoGridMobile
+            studentId={student.id}
+            lastUpdated={student.updatedAt}
+            pendingNotificationCount={0}
+          />
         </Box>
       </MobileContentStack>
     </PageContainer>

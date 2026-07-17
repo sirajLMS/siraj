@@ -2,9 +2,9 @@
 
 import { Box, LinearProgress, type SxProps, type Theme } from "@mui/material";
 import type { ReactNode } from "react";
-import { PageContainerCore } from "@/frontend/common/components/ui/container/page/pageContainerCore.base";
 import { useLanguageSwitch } from "@/frontend/common/hooks/useLanguageSwitch";
 import { useThemeMode } from "@/frontend/common/hooks/useThemeMode";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export interface DesktopPageContainerProps {
   readonly sx?: SxProps<Theme>;
@@ -20,16 +20,26 @@ export function DesktopPageContainer({ sx, children }: DesktopPageContainerProps
   const { isThemeChanging } = useThemeMode();
   const { isPending: isLanguageChanging } = useLanguageSwitch();
 
-  // Show progress bar when either theme or language is changing
   const showProgressBar = isThemeChanging || isLanguageChanging;
 
   return (
-    <PageContainerCore sx={sx}>
+    <Box
+      sx={mergeSx(
+        {
+          display: "flex",
+          flexDirection: "column",
+          gap: theme => theme.layout.sectionGap,
+          width: "100%",
+          position: "relative",
+        },
+        sx
+      )}
+    >
       {showProgressBar ? (
         <Box
           sx={{
             position: "fixed",
-            top: "64px", // Height of the navbar
+            top: "64px",
             left: 0,
             right: 0,
             zIndex: theme => theme.zIndex.appBar + 1,
@@ -48,6 +58,6 @@ export function DesktopPageContainer({ sx, children }: DesktopPageContainerProps
         </Box>
       ) : null}
       {children}
-    </PageContainerCore>
+    </Box>
   );
 }

@@ -3,9 +3,9 @@
 import { AddOutlined } from "@mui/icons-material";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
 import { PageContainer } from "@/frontend/common/components/ui";
-import { StatusTrackingCardList } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusTrackingCardList";
 import type { MobileLayoutProps } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { MobileContentStack, MobileFab, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { StatusTrackingCardList } from "@/frontend/mobile/views/dashboard/classes/status/tracking/components/statusTrackingCardList.mobile";
 
 /**
  * Mobile variant of the Status Tracking dashboard view.

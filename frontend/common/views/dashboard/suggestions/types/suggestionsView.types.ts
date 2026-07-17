@@ -47,21 +47,9 @@ export interface SuggestionsDataGridProps {
   readonly loading?: boolean;
 }
 
-export interface SuggestionsCardListProps {
-  readonly rows: readonly AdminSuggestionRow[];
-  readonly labels: SuggestionsAdminLabels;
-  readonly canManage: boolean;
-  readonly canDelete: boolean;
-  readonly onMarkReviewed: (id: string) => void;
-  readonly onRespond: (id: string) => void;
-  readonly onMarkDuplicate: (id: string) => void;
-  readonly onDelete: (id: string) => void;
-}
-
 export interface SuggestionsMetricsRowProps {
   readonly summary: AdminSuggestionsSummary;
   readonly labels: SuggestionsAdminLabels;
-  readonly compact?: boolean;
 }
 
 export interface SuggestionsTabBarProps {
@@ -134,17 +122,14 @@ export interface SuggestionFormFieldsProps {
   readonly control: Control<SuggestionFormData>;
   readonly errors: FieldErrors<SuggestionFormData>;
   readonly labels: SuggestionsLabels["parent"];
-  readonly variant: "desktop" | "mobile";
 }
 
 export interface SuggestionHeroBannerProps {
   readonly labels: SuggestionsLabels["parent"];
-  readonly variant: "desktop" | "mobile";
 }
 
 export interface SuggestionSupportCardsProps {
   readonly labels: SuggestionsLabels["parent"];
-  readonly variant: "desktop" | "mobile";
 }
 
 export interface SuggestionSocialProofProps {

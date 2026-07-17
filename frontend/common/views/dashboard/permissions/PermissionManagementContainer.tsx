@@ -61,6 +61,10 @@ export function PermissionManagementContainer() {
       onBulkAssign={handleBulkAssign}
       onBulkRevoke={handleBulkRevoke}
       onUpdateOverrides={handleUpdateOverrides}
+      activeTab={store.activeTab}
+      selectedUserIdForOverrides={store.selectedUserIdForOverrides}
+      setActiveTab={store.setActiveTab}
+      setSelectedUserIdForOverrides={store.setSelectedUserIdForOverrides}
     />
   );
 }

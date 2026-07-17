@@ -4,7 +4,6 @@ import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { AdminInvoicesDataGrid } from "@/frontend/common/views/dashboard/admin/billing/components/AdminInvoicesDataGrid";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
 import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
 import { BillingSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingSearchBar";
@@ -14,6 +13,7 @@ import {
   getAdminInvoiceGridLabels,
   getStudentCreditGridLabels,
 } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
+import { AdminInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/admin/billing/components/adminInvoicesDataGrid.desktop";
 import { Link } from "@/shared/i18n/routing";
 
 const StyledAttentionChip = styled(Chip)(({ theme }) => ({
@@ -177,7 +177,7 @@ export function AdminBillingDesktopView({
           />
         }
       >
-        <AdminInvoicesDataGrid
+        <AdminInvoicesDataGridDesktop
           rows={invoices}
           canManage={canManage}
           canDelete={canDelete}

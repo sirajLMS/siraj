@@ -4,19 +4,19 @@ import { FilterListOutlined, IosShareOutlined } from "@mui/icons-material";
 import { Box, Grid, IconButton, Typography } from "@mui/material";
 import { PageContainer } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
-import { AcademicScheduleCardList } from "@/frontend/common/views/dashboard/schedule/alerts/AcademicScheduleCardList";
-import { InstitutionalReportCard } from "@/frontend/common/views/dashboard/schedule/alerts/InstitutionalReportCard";
-import { ScheduleAlertBanners } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertBanners";
-import type {
-  CardListLabels,
-  ScheduleAlertsLabels,
-} from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsView";
+import type { ScheduleAlertsLabels } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsView";
 import type {
   AcademicClassRow,
   AlertsMetric,
   ScheduleAlert,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  AcademicScheduleCardListMobile,
+  type AcademicScheduleCardListMobileLabels,
+} from "@/frontend/mobile/views/dashboard/schedule/alerts/components/academicScheduleCardList.mobile";
+import { InstitutionalReportCardMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/institutionalReportCard.mobile";
+import { ScheduleAlertBannersMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/scheduleAlertBanners.mobile";
 
 export interface ScheduleAlertsViewMobileProps {
   readonly alerts: readonly ScheduleAlert[];
@@ -64,7 +64,7 @@ function MobileMetricsSection({
         );
       })}
       <Grid size={{ xs: 12 }}>
-        <InstitutionalReportCard
+        <InstitutionalReportCardMobile
           title={labels.reportTitle}
           description={labels.reportDescriptionMobile}
           downloadLabel={labels.downloadPdf}
@@ -100,7 +100,7 @@ function MobileAlertsBody({
   readonly onLeave: (id: string) => void;
   readonly onViewClassAudit: (id: string) => void;
   readonly onPageChange: (page: number) => void;
-  readonly cardListLabels: CardListLabels;
+  readonly cardListLabels: AcademicScheduleCardListMobileLabels;
 }) {
   if (loading) {
     return (
@@ -154,7 +154,7 @@ function MobileAlertsBody({
           </IconButton>
         </Box>
       </Box>
-      <AcademicScheduleCardList
+      <AcademicScheduleCardListMobile
         rows={classes}
         totalCount={totalClasses}
         currentPage={currentPage}
@@ -185,7 +185,7 @@ export function ScheduleAlertsViewMobile({
   onFilter,
   onExport,
 }: Readonly<ScheduleAlertsViewMobileProps>) {
-  const cardListLabels: CardListLabels = {
+  const cardListLabels: AcademicScheduleCardListMobileLabels = {
     joinSession: labels.joinSession,
     leaveClass: labels.leaveClass,
     leaveDisabledReason: labels.leaveDisabledReason,
@@ -203,7 +203,7 @@ export function ScheduleAlertsViewMobile({
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={2} paddingBottom={4}>
-        <ScheduleAlertBanners alerts={alerts} labels={labels.alertMessages} />
+        <ScheduleAlertBannersMobile alerts={alerts} labels={labels.alertMessages} />
 
         <MobileMetricsSection
           metrics={metrics}

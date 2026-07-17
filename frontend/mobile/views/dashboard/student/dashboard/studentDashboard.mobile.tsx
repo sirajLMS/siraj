@@ -5,10 +5,10 @@ import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
-import { NextClassJoinCard } from "@/frontend/common/views/dashboard/student/dashboard/components/NextClassJoinCard";
 import type { UpcomingLessonRow } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
 import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
+import { NextClassJoinCard } from "@/frontend/mobile/views/dashboard/student/dashboard/components/nextClassJoinCard.mobile";
 
 interface MobileUpcomingItemProps {
   readonly lesson: UpcomingLessonRow;

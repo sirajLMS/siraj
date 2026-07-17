@@ -1,8 +1,10 @@
 "use client";
 
 import { useReportsStore } from "@/frontend/common/stores/reportsStore";
-import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/components/ReportFiltersForm";
-import type { ReportsDataGridLabels } from "@/frontend/common/views/dashboard/reports/components/ReportsDataGrid";
+import type {
+  ReportFiltersFormLabels,
+  ReportsDataGridLabels,
+} from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type {
   LedgerStatus,
   ReportLedgerRow,

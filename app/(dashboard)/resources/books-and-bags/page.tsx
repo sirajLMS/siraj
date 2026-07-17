@@ -3,8 +3,8 @@ import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { BookService } from "@/backend/services/resource/book.service";
 import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { BooksAndBagsClient } from "@/frontend/common/views/dashboard/resources/books-and-bags/BooksAndBagsClient";
 import type { BooksAndBagsPageProps } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
+import { BooksAndBagsView } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBagsView";
 import { getTranslations } from "@/shared/locale";
 
 function mapAvailabilityStatus(status: string): AvailabilityStatus {
@@ -37,7 +37,7 @@ export default async function BooksAndBagsPage({ params }: BooksAndBagsPageProps
   const books = await BookService.listBooks(userId, locale);
 
   return (
-    <BooksAndBagsClient
+    <BooksAndBagsView
       initialBooks={books.map(book => ({
         id: book.id,
         name: book.name,

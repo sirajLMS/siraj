@@ -6,8 +6,6 @@ import { Box, CircularProgress } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import { ExportButton, PageContainer, SectionPanel } from "@/frontend/common/components/ui";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
-import { AvailabilitySearchForm } from "@/frontend/common/views/dashboard/teachers/availability/components/AvailabilitySearchForm";
-import { WeeklyAvailabilityGrid } from "@/frontend/common/views/dashboard/teachers/availability/components/WeeklyAvailabilityGrid";
 import { availabilitySearchSchema } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
 import type {
   AvailabilitySearchFormData,
@@ -15,6 +13,8 @@ import type {
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
 import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { AvailabilitySearchFormMobile } from "@/frontend/mobile/views/dashboard/teachers/availability/components/availabilitySearchForm.mobile";
+import { WeeklyAvailabilityGridMobile } from "@/frontend/mobile/views/dashboard/teachers/availability/components/weeklyAvailabilityGrid.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
 interface TeacherAvailabilityMobileViewProps extends Omit<TeacherAvailabilityViewModel, "insights"> {
@@ -63,7 +63,7 @@ export function TeacherAvailabilityMobileView({
       <Box sx={{ mb: 2 }}>
         <SectionPanel title={t.searchTitle} edgeToEdge>
           <FormProvider {...methods}>
-            <AvailabilitySearchForm onSearch={onSearch} />
+            <AvailabilitySearchFormMobile onSearch={onSearch} />
           </FormProvider>
         </SectionPanel>
       </Box>
@@ -75,7 +75,7 @@ export function TeacherAvailabilityMobileView({
       )}
 
       {!loading && (
-        <WeeklyAvailabilityGrid availability={availability} labels={tableLabels} onBlockClick={onBlockClick} />
+        <WeeklyAvailabilityGridMobile availability={availability} labels={tableLabels} onBlockClick={onBlockClick} />
       )}
     </PageContainer>
   );

@@ -11,16 +11,16 @@ import {
   DialogTitle,
   IconButton,
   Stack,
+  Typography,
 } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
-import MobileScheduleList from "@/frontend/common/views/dashboard/teachers/schedule/weekly/MobileScheduleList";
-import { ScheduleFooterLegend } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
+import MobileScheduleList from "@/frontend/mobile/views/dashboard/teachers/schedule/weekly/mobileScheduleList.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherWeeklyScheduleViewMobile({
@@ -93,11 +93,48 @@ export function TeacherWeeklyScheduleViewMobile({
         <MobileScheduleList classes={schedule.classes} onRemoveClass={onRemoveClass} />
       </SectionPanel>
 
-      <ScheduleFooterLegend
-        bookedClassLabel={t.grid.bookedClass}
-        availableSlotLabel={t.grid.availableSlot}
-        lastUpdatedText={t.grid.lastUpdated(schedule.lastUpdated)}
-      />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 2,
+          mt: 2,
+        }}
+      >
+        <Box sx={{ display: "flex", flexDirection: "row", gap: 3, alignItems: "center" }}>
+          <Box sx={{ display: "flex", flexDirection: "row", gap: 1, alignItems: "center" }}>
+            <Box
+              sx={theme => ({
+                width: 12,
+                height: 12,
+                backgroundColor: theme.palette.primary.main,
+                borderRadius: 0.5,
+              })}
+            />
+            <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {t.grid.bookedClass}
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", flexDirection: "row", gap: 1, alignItems: "center" }}>
+            <Box
+              sx={theme => ({
+                width: 12,
+                height: 12,
+                border: `1px solid ${theme.palette.border.light}`,
+                borderRadius: 0.5,
+              })}
+            />
+            <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {t.grid.availableSlot}
+            </Typography>
+          </Box>
+        </Box>
+        <Typography variant="caption" sx={theme => ({ color: theme.palette.text.disabled })}>
+          {t.grid.lastUpdated(schedule.lastUpdated)}
+        </Typography>
+      </Box>
 
       <Dialog open={clearDialogOpen} onClose={handleCancelClear}>
         <DialogTitle>{t.dialogs.clearScheduleTitle}</DialogTitle>

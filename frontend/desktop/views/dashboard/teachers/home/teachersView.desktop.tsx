@@ -10,8 +10,8 @@ import type {
   TeacherDirectoryRow,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { TeacherDataGrid } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherDataGrid";
-import { TeacherMetricsRow } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherMetricsRow";
+import { TeacherDataGrid } from "@/frontend/desktop/views/dashboard/teachers/home/components/teacherDataGrid.desktop";
+import { TeacherMetricsRow } from "@/frontend/desktop/views/dashboard/teachers/home/components/teacherMetricsRow.desktop";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 

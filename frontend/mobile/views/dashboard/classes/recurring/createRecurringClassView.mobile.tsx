@@ -8,7 +8,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
-import { RecurringClassForm } from "@/frontend/common/views/dashboard/classes/recurring/RecurringClassForm";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import { createRecurringClassSchema } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import { DEFAULT_DAY_SCHEDULE } from "@/frontend/common/views/dashboard/classes/recurring/types";
@@ -16,6 +15,7 @@ import {
   emptyRecurringMeetingConfigState,
   type RecurringMeetingConfigFormState,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
+import { RecurringClassFormMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/recurringClassForm.mobile";
 import type { CreateRecurringClassLabels } from "@/shared/locale";
 
 interface CreateRecurringClassViewMobileProps {
@@ -247,7 +247,7 @@ export function CreateRecurringClassViewMobile({
             backgroundColor: alpha(theme.palette.surfaceContainer, 0.2),
           }}
         >
-          <RecurringClassForm
+          <RecurringClassFormMobile
             register={register}
             errors={errors}
             watch={watch}
@@ -255,8 +255,6 @@ export function CreateRecurringClassViewMobile({
             control={control}
             handleSubmit={handleSubmit}
             isSubmitting={isSubmitting}
-            isMobile
-            showSuccess={showSuccess}
             meetingConfigWarning={meetingConfigWarning}
             meetingConfigWarningMessage={meetingConfigWarningMessage}
             goToClassLabel={goToClassLabel}

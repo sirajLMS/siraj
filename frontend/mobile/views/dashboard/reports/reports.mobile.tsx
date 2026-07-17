@@ -1,12 +1,6 @@
 "use client";
 
 import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
-import { EngagementRateCard } from "@/frontend/common/views/dashboard/reports/components/EngagementRateCard";
-import { FinancialDistributionCard } from "@/frontend/common/views/dashboard/reports/components/FinancialDistributionCard";
-import { PerformanceLedgerCard } from "@/frontend/common/views/dashboard/reports/components/PerformanceLedgerCard";
-import { ReportFiltersCollapsible } from "@/frontend/common/views/dashboard/reports/components/ReportFiltersCollapsible";
-import { ReportsTotalsSection } from "@/frontend/common/views/dashboard/reports/components/ReportsTotalsSection";
-import type { ReportLedgerRow } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import type { ReportsViewModel } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
 import {
   MobileCardList,
@@ -14,6 +8,11 @@ import {
   MobileContentStack,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
+import { EngagementRateCardMobile } from "@/frontend/mobile/views/dashboard/reports/components/engagementRateCard.mobile";
+import { FinancialDistributionCardMobile } from "@/frontend/mobile/views/dashboard/reports/components/financialDistributionCard.mobile";
+import { PerformanceLedgerCardMobile } from "@/frontend/mobile/views/dashboard/reports/components/performanceLedgerCard.mobile";
+import { ReportFiltersCollapsibleMobile } from "@/frontend/mobile/views/dashboard/reports/components/reportFiltersCollapsible.mobile";
+import { ReportsTotalsSectionMobile } from "@/frontend/mobile/views/dashboard/reports/components/reportsTotalsSection.mobile";
 
 export function ReportsMobileView({
   labels,
@@ -38,7 +37,7 @@ export function ReportsMobileView({
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={3} paddingBottom={4}>
-        <ReportFiltersCollapsible
+        <ReportFiltersCollapsibleMobile
           title={labels.filtersTitle}
           fromDate={fromDate}
           toDate={toDate}
@@ -54,26 +53,24 @@ export function ReportsMobileView({
           onSubmit={onSubmit}
         />
 
-        <EngagementRateCard
+        <EngagementRateCardMobile
           rate={summary.engagementRate}
           growth={summary.engagementGrowth}
           title={labels.summaryLabels.engagementRate}
           subtitle={labels.summaryLabels.engagementGrowth}
           increaseLabel=""
-          compact
         />
 
-        <FinancialDistributionCard
+        <FinancialDistributionCardMobile
           currencyDistribution={summary.currencyDistribution}
           title={labels.summaryLabels.financialDistribution}
           subtitle={labels.summaryLabels.financialSubtitle}
-          compact
         />
 
         <SectionPanel title={labels.ledgerTitle}>
-          <ReportsTotalsSection summary={summary} rows={rows} totalsLabel={labels.totalsLabel} variant="mobile" />
+          <ReportsTotalsSectionMobile summary={summary} rows={rows} totalsLabel={labels.totalsLabel} />
 
-          <MobileCardList<ReportLedgerRow>
+          <MobileCardList
             rows={rows}
             getKey={row => row.id}
             loading={loading}
@@ -81,7 +78,7 @@ export function ReportsMobileView({
             gap={2}
             renderItem={row => (
               <MobileCardListItem key={row.id} interactive={Boolean(onRowClick)}>
-                <PerformanceLedgerCard row={row} labels={labels.ledgerLabels} onClick={onRowClick} />
+                <PerformanceLedgerCardMobile row={row} labels={labels.ledgerLabels} onClick={onRowClick} />
               </MobileCardListItem>
             )}
           />

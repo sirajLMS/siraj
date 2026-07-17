@@ -13,12 +13,13 @@ import {
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import { ClassDetailsAdminView } from "@/frontend/common/views/dashboard/classes/details/admin/ClassDetailsAdminView";
-import { ClassDetailsHeader } from "@/frontend/common/views/dashboard/classes/details/ClassDetailsHeader";
 import { ClassDetailsTeacherView } from "@/frontend/common/views/dashboard/classes/details/teacher/ClassDetailsTeacherView";
 import {
   useAdminViewLabels,
   useTeacherViewLabels,
 } from "@/frontend/common/views/dashboard/classes/details/useClassDetailsLabels";
+import { ClassDetailsHeaderDesktop } from "@/frontend/desktop/views/dashboard/classes/details/components/classDetailsHeader.desktop";
+import { ClassDetailsHeaderMobile } from "@/frontend/mobile/views/dashboard/classes/details/components/classDetailsHeader.mobile";
 
 interface MockClassDetailsState {
   instance: ClassInstanceDetail;
@@ -196,7 +197,11 @@ export function MockClassDetailsContainer() {
 
   const instance = mockInstance;
 
-  const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;
+  const pageHeader = isMobile ? (
+    <ClassDetailsHeaderMobile instance={instance} canOverride={canOverride} />
+  ) : (
+    <ClassDetailsHeaderDesktop instance={instance} canOverride={canOverride} />
+  );
 
   if (canOverride) {
     return (

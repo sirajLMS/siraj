@@ -2,7 +2,7 @@
 
 import { Alert, Box, Snackbar, Typography } from "@mui/material";
 import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
-import { PreferencesMatrix } from "@/frontend/common/views/dashboard/profile/core/notifications/PreferencesMatrix";
+import { PreferencesMatrixDesktopView } from "@/frontend/desktop/views/dashboard/profile/core/notifications/preferencesMatrix.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
 export type NotificationPreferencesTabDesktopProps = NotificationPreferencesTabVariantProps;
@@ -35,7 +35,12 @@ export function NotificationPreferencesTabDesktop({
         </Typography>
       </Box>
 
-      <PreferencesMatrix preferences={preferences} onToggle={onToggle} disabled={disabled} loading={loading} />
+      <PreferencesMatrixDesktopView
+        preferences={preferences}
+        onToggle={onToggle}
+        disabled={disabled}
+        loading={loading}
+      />
 
       <Snackbar
         open={snackbarOpen}

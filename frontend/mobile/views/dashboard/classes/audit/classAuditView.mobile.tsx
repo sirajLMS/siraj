@@ -3,15 +3,15 @@
 import { Box, Chip, Grid, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { FilterButton, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { AdminNoteCard } from "@/frontend/common/views/dashboard/classes/audit/AdminNoteCard";
 import { ClassAuditDetailsCard } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
-import { CommunicationLogCard } from "@/frontend/common/views/dashboard/classes/audit/CommunicationLogCard";
 import type {
   ClassAuditDetailsLabels,
   ClassAuditViewProps,
 } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
-import { OnlineMeetingCard } from "@/frontend/common/views/dashboard/classes/audit/OnlineMeetingCard";
 import { RegisteredStudentsSection } from "@/frontend/common/views/dashboard/classes/audit/RegisteredStudentsSection";
+import { AdminNoteCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/adminNoteCard.mobile";
+import { CommunicationLogCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/communicationLogCard.mobile";
+import { OnlineMeetingCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/onlineMeetingCard.mobile";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 const StyledMobileClassTitle = styled(Typography)(({ theme }) => ({
@@ -89,16 +89,15 @@ export function ClassAuditViewMobile({
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 2, lg: 2 } }}>
-          <OnlineMeetingCard
+          <OnlineMeetingCardMobile
             meetingInfo={audit.meetingInfo}
-            labels={labels.meetingInfo}
             showJoin={isJoinableClassInstance(audit.status, audit.outcome, { isFrozen: audit.isFrozen ?? false })}
           />
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 3, lg: 4 } }}>
           <Box sx={{ mt: { lg: 0 } }}>
-            <CommunicationLogCard
+            <CommunicationLogCardMobile
               entries={audit.communications}
               labels={labels.communicationLog}
               onResend={onResendNotifications}
@@ -118,7 +117,7 @@ export function ClassAuditViewMobile({
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 5, lg: 5 } }}>
-          <AdminNoteCard
+          <AdminNoteCardMobile
             note={audit.adminNote}
             labels={labels.adminNote}
             onUpdate={onUpdateAdminNote}

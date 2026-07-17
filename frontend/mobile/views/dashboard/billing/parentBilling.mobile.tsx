@@ -3,13 +3,13 @@
 import { AddCardOutlined } from "@mui/icons-material";
 import { Typography } from "@mui/material";
 import { PageContainer } from "@/frontend/common/components/ui";
-import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
-import { BillingMobileSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingMobileSearchBar";
-import { ParentInvoicesCardList } from "@/frontend/common/views/dashboard/billing/components/ParentInvoicesCardList";
 import type { ParentBillingViewModel } from "@/frontend/common/views/dashboard/billing/useParentBillingViewModel";
 import { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 import { MobileContentStack, MobileEmptyState, MobileFab, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { BillingMetricsRowMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMetricsRow.mobile";
+import { BillingMobileSearchBarMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMobileSearchBar.mobile";
+import { ParentInvoicesCardListMobile } from "@/frontend/mobile/views/dashboard/billing/components/parentInvoicesCardList.mobile";
 
 export function ParentBillingMobileView({
   labels,
@@ -44,8 +44,8 @@ export function ParentBillingMobileView({
         <MobilePageHeader title={labels.parentPageTitle} subtitle={labels.parentPageSubtitle} edgeToEdge={false} />
 
         <MobileContentStack gap={3} paddingBottom={4}>
-          <BillingMetricsRow metrics={parentMetrics} compact loading={summaryLoading} />
-          <BillingMobileSearchBar
+          <BillingMetricsRowMobile metrics={parentMetrics} compact loading={summaryLoading} />
+          <BillingMobileSearchBarMobile
             value={searchQuery}
             placeholder={labels.search.parentPlaceholder}
             searchingLabel={labels.search.searching}
@@ -56,7 +56,7 @@ export function ParentBillingMobileView({
           {invoices.length === 0 && !listLoading ? (
             <MobileEmptyState title={labels.parentTable.emptyTitle} subtitle={labels.parentTable.emptySubtitle} />
           ) : (
-            <ParentInvoicesCardList
+            <ParentInvoicesCardListMobile
               rows={invoices}
               canView={canView}
               canSubmitProof={canSubmitProof}

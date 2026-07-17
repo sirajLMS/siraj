@@ -2,11 +2,11 @@
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import { ComplaintQueueCardList } from "@/frontend/common/views/dashboard/complaints/components/ComplaintQueueCardList";
-import { ComplaintsMetricsRow } from "@/frontend/common/views/dashboard/complaints/components/ComplaintsMetricsRow";
-import { ComplaintsSearchBar } from "@/frontend/common/views/dashboard/complaints/components/ComplaintsSearchBar";
-import { ComplaintsTabBar } from "@/frontend/common/views/dashboard/complaints/components/ComplaintsTabBar";
 import type { AdminComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useAdminComplaintsViewModel";
+import { ComplaintQueueCardListDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintQueueCardList.desktop";
+import { ComplaintsMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintsMetricsRow.desktop";
+import { ComplaintsSearchBarDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintsSearchBar.desktop";
+import { ComplaintsTabBarDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintsTabBar.desktop";
 
 export function AdminComplaintsDesktopView({
   labels,
@@ -35,21 +35,25 @@ export function AdminComplaintsDesktopView({
     <PageContainer>
       <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
-      <ComplaintsMetricsRow summary={summary} labels={labels} />
+      <ComplaintsMetricsRowDesktop summary={summary} labels={labels} />
 
       <SectionPanel
         actions={
-          <ComplaintsSearchBar value={searchQuery} placeholder={labels.searchPlaceholder} onChange={onSearchChange} />
+          <ComplaintsSearchBarDesktop
+            value={searchQuery}
+            placeholder={labels.searchPlaceholder}
+            onChange={onSearchChange}
+          />
         }
       >
-        <ComplaintsTabBar
+        <ComplaintsTabBarDesktop
           activeTab={activeTab}
           unansweredCount={summary.unanswered}
           answeredCount={summary.answered}
           labels={labels}
           onTabChange={onTabChange}
         />
-        <ComplaintQueueCardList
+        <ComplaintQueueCardListDesktop
           rows={rows}
           labels={labels}
           draftResponses={draftResponses}

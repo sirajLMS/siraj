@@ -2,12 +2,12 @@
 
 import { Grid } from "@mui/material";
 import { BaseCard, PageContainer, PageHeader } from "@/frontend/common/components/ui";
-import { ResourceDeleteDialog } from "@/frontend/common/views/dashboard/resources/components/ResourceDeleteDialog";
-import { ResourceGovernancePanel } from "@/frontend/common/views/dashboard/resources/components/ResourceGovernancePanel";
-import { ResourceLibraryGrid } from "@/frontend/common/views/dashboard/resources/components/ResourceLibraryGrid";
-import { ResourceUploadForm } from "@/frontend/common/views/dashboard/resources/components/ResourceUploadForm";
-import { ResourceUploadGuidelines } from "@/frontend/common/views/dashboard/resources/components/ResourceUploadGuidelines";
 import type { ResourcesViewModel } from "@/frontend/common/views/dashboard/resources/useResourcesViewModel";
+import { ResourceDeleteDialogDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceDeleteDialog.desktop";
+import { ResourceGovernancePanelDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceGovernancePanel.desktop";
+import { ResourceLibraryGridDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceLibraryGrid.desktop";
+import { ResourceUploadFormDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceUploadForm.desktop";
+import { ResourceUploadGuidelinesDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceUploadGuidelines.desktop";
 
 export function ResourcesDesktopView({
   labels,
@@ -39,7 +39,7 @@ export function ResourcesDesktopView({
         {canManage ? (
           <Grid size={{ xs: 12, xl: 4 }}>
             <BaseCard>
-              <ResourceUploadForm
+              <ResourceUploadFormDesktop
                 labels={labels}
                 documentName={documentName}
                 selectedFileName={selectedFileName}
@@ -48,21 +48,19 @@ export function ResourcesDesktopView({
                 onDocumentNameChange={onDocumentNameChange}
                 onFormSubmit={onFormSubmit}
                 onFileSelect={onFileSelect}
-                variant="desktop"
               />
-              <ResourceGovernancePanel labels={labels} />
+              <ResourceGovernancePanelDesktop labels={labels} />
             </BaseCard>
-            <ResourceUploadGuidelines labels={labels} />
+            <ResourceUploadGuidelinesDesktop labels={labels} />
           </Grid>
         ) : null}
 
         <Grid size={{ xs: 12, xl: canManage ? 8 : 12 }}>
-          <ResourceLibraryGrid
+          <ResourceLibraryGridDesktop
             resources={resources}
             labels={labels}
             filterType={filterType}
             sortBy={sortBy}
-            canManage={canManage}
             onFilterTypeChange={onFilterTypeChange}
             onSortByChange={onSortByChange}
             onDeleteRequest={onDeleteRequest}
@@ -71,7 +69,7 @@ export function ResourcesDesktopView({
         </Grid>
       </Grid>
 
-      <ResourceDeleteDialog
+      <ResourceDeleteDialogDesktop
         labels={labels}
         open={Boolean(pendingDeleteId)}
         resourceTitle={pendingDeleteTitle}

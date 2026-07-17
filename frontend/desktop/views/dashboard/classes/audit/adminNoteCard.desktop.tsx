@@ -16,7 +16,7 @@ export interface AdminNoteCardDesktopProps {
     readonly edit: string;
   };
   readonly onUpdate: () => void;
-  readonly onEdit: () => void;
+  readonly onEdit?: () => void;
 }
 
 const StyledDesktopFooter = styled(Box)(({ theme }) => ({

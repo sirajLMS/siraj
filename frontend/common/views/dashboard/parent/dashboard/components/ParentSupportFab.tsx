@@ -1,30 +1,12 @@
 "use client";
 
-import { SupportAgentOutlined } from "@mui/icons-material";
-import { Fab, Tooltip } from "@mui/material";
-
-interface ParentSupportFabProps {
-  readonly label: string;
-  readonly onClick: () => void;
-}
-
-export function ParentSupportFab({ label, onClick }: Readonly<ParentSupportFabProps>) {
-  return (
-    <Tooltip title={label} placement="left">
-      <Fab
-        aria-label={label}
-        onClick={onClick}
-        sx={theme => ({
-          position: "fixed",
-          bottom: 32,
-          right: 32,
-          backgroundColor: theme.palette.header,
-          color: theme.palette.onPrimary,
-          "&:hover": { backgroundColor: theme.palette.primary.dark },
-        })}
-      >
-        <SupportAgentOutlined sx={{ fontSize: 28 }} />
-      </Fab>
-    </Tooltip>
-  );
-}
+/**
+ * @deprecated Re-export — the parent-support FAB now lives in the desktop
+ * tier (`@/frontend/desktop/views/dashboard/parent/dashboard/components/parentSupportFab.desktop`).
+ * This common alias is retained so OUT-OF-SCOPE consumers (currently the
+ * teachers desktop dashboard) keep type-checking during the staged tier
+ * split. Consumers inside `frontend/desktop/views/dashboard/teachers/**`
+ * (Plan E scope) should migrate to the desktop path directly and this file
+ * should be deleted once no remaining common consumers exist.
+ */
+export { ParentSupportFabDesktop as ParentSupportFab } from "@/frontend/desktop/views/dashboard/parent/dashboard/components/parentSupportFab.desktop";

@@ -1,12 +1,10 @@
 "use client";
 
-import type { SxProps } from "@mui/material";
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
-import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { PendingReviewsLabels } from "@/shared/locale";
 
-interface RejectReportDialogProps {
+export interface RejectReportDialogProps {
   readonly open: boolean;
   readonly reason: string;
   readonly loading: boolean;
@@ -16,56 +14,17 @@ interface RejectReportDialogProps {
   readonly onConfirm: () => void;
 }
 
-export function RejectReportDialog({
-  open,
-  reason,
-  loading,
-  labels,
-  onReasonChange,
-  onClose,
-  onConfirm,
-}: Readonly<RejectReportDialogProps>) {
-  const confirmSx: SxProps<Theme> = theme => ({
-    py: 1.5,
-    backgroundColor: theme.palette.error.main,
-    color: theme.palette.onError,
-    "&:hover": { backgroundColor: theme.palette.error.dark },
-  });
+const lazyViews = createLazyView<RejectReportDialogProps>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/rejectReportDialog.mobile").then(
+      m => ({ default: m.RejectReportDialogMobile })
+    ),
+  () =>
+    import("@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/components/rejectReportDialog.desktop").then(
+      m => ({ default: m.RejectReportDialogDesktop })
+    )
+);
 
-  return (
-    <Dialog open={open} onClose={loading ? undefined : onClose} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ pt: 4 }}>
-        <Typography variant="headlineMd">{labels.rejectDialogTitle}</Typography>
-      </DialogTitle>
-      <DialogContent>
-        <TextField
-          fullWidth
-          multiline
-          rows={4}
-          label={labels.rejectReasonLabel}
-          placeholder={labels.rejectReasonPlaceholder}
-          value={reason}
-          onChange={e => onReasonChange(e.target.value)}
-          disabled={loading}
-          sx={{ mt: 1 }}
-          slotProps={{
-            htmlInput: { maxLength: 500 },
-          }}
-        />
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-        <FilterButton fullWidth onClick={onClose} disabled={loading} sx={{ py: 1.5 }}>
-          {labels.rejectCancel}
-        </FilterButton>
-        <PrimaryPageAction
-          fullWidth
-          onClick={onConfirm}
-          disabled={loading || reason.trim().length === 0}
-          sx={confirmSx}
-        >
-          {loading ? "..." : labels.rejectConfirm}
-        </PrimaryPageAction>
-      </DialogActions>
-    </Dialog>
-  );
+export function RejectReportDialog(props: Readonly<RejectReportDialogProps>) {
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }

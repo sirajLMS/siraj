@@ -1,12 +1,13 @@
 "use client";
 
-import { Box, Chip, Stack, Tab, Tabs } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { ProfileTabNavVariantProps } from "@/frontend/common/views/dashboard/profile/core/profileTabNavTypes";
 import { getVisibleProfileTabs } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
-import { useAppTranslation } from "@/shared/locale";
 
 export type ProfileTabNavProps = {
   readonly audience: ProfileAudience;
@@ -15,8 +16,18 @@ export type ProfileTabNavProps = {
   readonly onTabChange: (tab: string) => void;
 };
 
-export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: ProfileTabNavProps) {
-  const t = useAppTranslation().profileTranslations.base;
+const lazyViews = createLazyView<ProfileTabNavVariantProps>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/profile/core/profileTabNav.mobile").then(m => ({
+      default: m.ProfileTabNavMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/profile/core/profileTabNav.desktop").then(m => ({
+      default: m.ProfileTabNavDesktopView,
+    }))
+);
+
+export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Readonly<ProfileTabNavProps>) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -27,10 +38,6 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Prof
     [audience, scope, hasPermission]
   );
 
-  // URL → state: only react to external URL changes (back/forward, deep links).
-  // We compare against the current `currentTab` prop and call `onTabChange` only
-  // when the URL param resolves to a different tab — this avoids the redirect
-  // loop that occurred when depending on a synced ref alongside the state → URL effect.
   useEffect(() => {
     const tabParam = searchParams.get("tab");
     const nextTab = tabParam && availableTabs.some(tab => tab.id === tabParam) ? tabParam : availableTabs[0]?.id;
@@ -40,7 +47,6 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Prof
     }
   }, [searchParams, availableTabs, onTabChange, currentTab]);
 
-  // State → URL: keep the query param in sync after tab clicks.
   useEffect(() => {
     if (!currentTab) {
       return;
@@ -60,71 +66,10 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Prof
   }
 
   return (
-    <Box
-      sx={theme => ({
-        width: "100%",
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        mx: { xs: -2, md: 0 },
-        px: { xs: 2, md: 0 },
-      })}
-    >
-      <Box sx={{ display: { xs: "flex", md: "none" }, overflowX: "auto", pb: 1 }}>
-        <Stack direction="row" spacing={1} sx={{ minWidth: "fit-content", px: 1 }}>
-          <Box component="div" role="tablist" aria-label="Profile sections">
-            {availableTabs.map(tab => (
-              <Chip
-                key={tab.id}
-                role="tab"
-                tabIndex={0}
-                aria-selected={currentTab === tab.id}
-                label={t.shell.tabs[tab.id as keyof typeof t.shell.tabs]}
-                onClick={() => onTabChange(tab.id)}
-                onKeyDown={event => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    onTabChange(tab.id);
-                  }
-                }}
-                sx={theme => ({
-                  ...(currentTab === tab.id
-                    ? {
-                        bgcolor: theme.palette.primary.main,
-                        color: theme.palette.onPrimary,
-                        borderColor: theme.palette.primary.dark,
-                      }
-                    : {
-                        bgcolor: "transparent",
-                        color: theme.palette.text.primary,
-                        borderColor: theme.palette.divider,
-                      }),
-                  borderWidth: 1,
-                  borderStyle: "solid",
-                })}
-              />
-            ))}
-          </Box>
-        </Stack>
-      </Box>
-
-      <Tabs
-        value={currentTab}
-        onChange={(_, newValue) => onTabChange(newValue)}
-        sx={{ display: { xs: "none", md: "flex" } }}
-      >
-        {availableTabs.map(tab => (
-          <Tab
-            key={tab.id}
-            value={tab.id}
-            label={t.shell.tabs[tab.id as keyof typeof t.shell.tabs]}
-            sx={theme => ({
-              fontSize: theme.typography.bodyMd.fontSize,
-              ...(currentTab === tab.id
-                ? { color: theme.palette.primary.main }
-                : { color: theme.palette.text.secondary }),
-            })}
-          />
-        ))}
-      </Tabs>
-    </Box>
+    <ResponsiveViewSwitch
+      mobile={lazyViews.mobile}
+      desktop={lazyViews.desktop}
+      props={{ availableTabs, currentTab, onTabChange }}
+    />
   );
 }

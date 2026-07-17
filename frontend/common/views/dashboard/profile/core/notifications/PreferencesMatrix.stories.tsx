@@ -8,7 +8,7 @@ import {
   NOTIFICATION_EVENT_TYPES,
   preferenceKey,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
-import { PreferencesMatrix } from "@/frontend/common/views/dashboard/profile/core/notifications/PreferencesMatrix";
+import { PreferencesMatrixDesktopView } from "@/frontend/desktop/views/dashboard/profile/core/notifications/preferencesMatrix.desktop";
 
 const mockPreferences = NOTIFICATION_CHANNELS.flatMap(channel =>
   NOTIFICATION_EVENT_TYPES.map(eventType => ({
@@ -19,9 +19,9 @@ const mockPreferences = NOTIFICATION_CHANNELS.flatMap(channel =>
   }))
 );
 
-const meta: Meta<typeof PreferencesMatrix> = {
+const meta: Meta<typeof PreferencesMatrixDesktopView> = {
   title: "Views/profile/core/notifications/PreferencesMatrix",
-  component: PreferencesMatrix,
+  component: PreferencesMatrixDesktopView,
   tags: ["autodocs"],
   decorators: [
     Story => (
@@ -33,7 +33,7 @@ const meta: Meta<typeof PreferencesMatrix> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof PreferencesMatrix>;
+type Story = StoryObj<typeof PreferencesMatrixDesktopView>;
 
 export const Default: Story = {
   args: {

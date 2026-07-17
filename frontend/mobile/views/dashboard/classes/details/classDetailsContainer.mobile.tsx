@@ -4,8 +4,8 @@ import { Box } from "@mui/material";
 import { PageContainer } from "@/frontend/common/components/ui";
 import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
 import { LoadingState } from "@/frontend/common/components/ui/state/LoadingState";
-import { ClassDetailsContent } from "@/frontend/common/views/dashboard/classes/details/components/ClassDetailsContent";
 import type { ClassDetailsViewModel } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
+import { ClassDetailsContentMobile } from "@/frontend/mobile/views/dashboard/classes/details/components/classDetailsContent.mobile";
 
 interface InvalidIdStateProps {
   readonly t: ClassDetailsViewModel["t"];
@@ -34,11 +34,10 @@ export function ClassDetailsContainerMobile({ viewModel }: { readonly viewModel:
 
   return (
     <PageContainer>
-      <ClassDetailsContent
+      <ClassDetailsContentMobile
         instance={viewModel.instance}
         canOverride={viewModel.canOverride}
         isParentView={viewModel.isParentView}
-        isMobile
         isWarningDismissed={viewModel.isWarningDismissed}
         onDismissWarning={() => viewModel.setIsWarningDismissed(true)}
         handlers={viewModel.handlers}

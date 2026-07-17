@@ -3,12 +3,12 @@
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard, PageContainer } from "@/frontend/common/components/ui";
-import { BillingMonthSelector } from "@/frontend/common/views/dashboard/billing/manual/components/BillingMonthSelector";
-import { InvoiceDraftSummaryCard } from "@/frontend/common/views/dashboard/billing/manual/components/InvoiceDraftSummaryCard";
-import { ManualInvoiceActions } from "@/frontend/common/views/dashboard/billing/manual/components/ManualInvoiceActions";
-import { ManualInvoiceFormFields } from "@/frontend/common/views/dashboard/billing/manual/components/ManualInvoiceFormFields";
 import type { ManualInvoiceViewModel } from "@/frontend/common/views/dashboard/billing/manual/useManualInvoiceViewModel";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { BillingMonthSelectorMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/billingMonthSelector.mobile";
+import { InvoiceDraftSummaryCardMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/invoiceDraftSummaryCard.mobile";
+import { ManualInvoiceActionsMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceActions.mobile";
+import { ManualInvoiceFormFieldsMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceFormFields.mobile";
 
 const StyledFormFieldset = styled("fieldset")(({ theme }) => ({
   border: 0,
@@ -52,35 +52,28 @@ export function ManualInvoiceMobileView({
         }}
       >
         <StyledFormFieldset disabled={!canCreate}>
-          <ManualInvoiceFormFields
+          <ManualInvoiceFormFieldsMobile
             control={control}
             errors={errors}
             labels={labels}
             parentOptions={parentOptions}
             studentOptions={studentOptions}
             draftCurrency={draftCurrency}
-            variant="mobile"
             parentsLoading={parentsLoading}
             studentsLoading={studentsLoading}
           />
 
           <BaseCard>
-            <BillingMonthSelector control={control} errors={errors} labels={labels} variant="mobile" />
+            <BillingMonthSelectorMobile control={control} errors={errors} labels={labels} />
           </BaseCard>
 
-          <InvoiceDraftSummaryCard
-            labels={labels}
-            totalFormatted={totalFormatted}
-            currency={draftCurrency}
-            variant="mobile"
-          />
+          <InvoiceDraftSummaryCardMobile labels={labels} totalFormatted={totalFormatted} currency={draftCurrency} />
 
-          <ManualInvoiceActions
+          <ManualInvoiceActionsMobile
             labels={labels}
             canCreate={canCreate}
             canSendEmail={canSendEmail}
             isSubmitting={isSubmitting}
-            variant="mobile"
             onSubmit={onSubmitClick}
             onSubmitAndSendEmail={onSubmitAndSendEmailClick}
           />

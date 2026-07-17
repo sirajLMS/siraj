@@ -3,9 +3,6 @@
 import { Box, Button, Typography } from "@mui/material";
 import { PageContainer, StatusBadge } from "@/frontend/common/components/ui";
 import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { SuggestionsMetricsRow } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsMetricsRow";
-import { SuggestionsSearchBar } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsSearchBar";
-import { SuggestionsTabBar } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsTabBar";
 import type { AdminSuggestionRow } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
 import type { SuggestionsAdminLabels } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
 import type { AdminSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useAdminSuggestionsViewModel";
@@ -20,6 +17,9 @@ import {
   MobileEmptyState,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
+import { SuggestionsMetricsRowMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionsMetricsRow.mobile";
+import { SuggestionsSearchBarMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionsSearchBar.mobile";
+import { SuggestionsTabBarMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionsTabBar.mobile";
 
 interface SuggestionCardActionsProps {
   readonly row: AdminSuggestionRow;
@@ -240,11 +240,15 @@ export function AdminSuggestionsMobileView({
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={2} paddingBottom={4}>
-        <SuggestionsMetricsRow summary={summary} labels={labels} compact />
+        <SuggestionsMetricsRowMobile summary={summary} labels={labels} />
 
-        <SuggestionsSearchBar value={searchQuery} placeholder={labels.searchPlaceholder} onChange={onSearchChange} />
+        <SuggestionsSearchBarMobile
+          value={searchQuery}
+          placeholder={labels.searchPlaceholder}
+          onChange={onSearchChange}
+        />
 
-        <SuggestionsTabBar
+        <SuggestionsTabBarMobile
           activeTab={activeTab}
           pendingCount={summary.pending}
           reviewedCount={summary.reviewed}

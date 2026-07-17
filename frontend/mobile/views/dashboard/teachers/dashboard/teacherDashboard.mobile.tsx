@@ -13,15 +13,15 @@ import {
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
-import { ActivationPolicyPanel } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
-import { StudentProgressFeed } from "@/frontend/common/views/dashboard/teachers/dashboard/components/StudentProgressFeed";
-import { MissedClassAlertBanner } from "@/frontend/common/views/dashboard/teachers/dashboard/shared/missedClassAlertBanner";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import {
   teacherDashboardContentPaddingSx,
   teacherDashboardPageContainerSx,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
 import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
+import { ActivationPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/activationPolicyPanel.mobile";
+import { MissedClassAlertBannerMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.mobile";
+import { StudentProgressFeedMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/studentProgressFeed.mobile";
 import { TeacherScheduleCardMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherScheduleCard.mobile";
 
 interface MobileWelcomeHeaderProps {
@@ -155,11 +155,15 @@ function MobileFooter({ progressFeed, labels, onDownloadHandbook, onContactCoord
   return (
     <>
       <Box sx={teacherDashboardContentPaddingSx}>
-        <StudentProgressFeed items={progressFeed} title={labels.progressFeed.title} labels={labels.progressFeed} />
+        <StudentProgressFeedMobile
+          items={progressFeed}
+          title={labels.progressFeed.title}
+          labels={labels.progressFeed}
+        />
       </Box>
 
       <Box sx={teacherDashboardContentPaddingSx}>
-        <ActivationPolicyPanel
+        <ActivationPolicyPanelMobile
           labels={labels.policy}
           compact
           onDownloadHandbook={onDownloadHandbook}
@@ -202,7 +206,7 @@ export function TeacherDashboardMobileView({
     <>
       {missedAlert && (
         <Box sx={teacherDashboardContentPaddingSx}>
-          <MissedClassAlertBanner alert={missedAlert} labels={labels.alert} />
+          <MissedClassAlertBannerMobile alert={missedAlert} labels={labels.alert} />
         </Box>
       )}
 

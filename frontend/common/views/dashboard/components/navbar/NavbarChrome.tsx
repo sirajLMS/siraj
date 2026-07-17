@@ -3,15 +3,15 @@
 import { SchoolOutlined } from "@mui/icons-material";
 import { AppBar, alpha, Box, Toolbar, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { MobileMenuButton } from "@/frontend/common/views/dashboard/components/client/MobileMenuButton";
 import { useAppTranslation } from "@/shared/locale/client";
 
 interface NavbarChromeProps {
   readonly roleLabel: string;
   readonly rightSlot: ReactNode;
+  readonly leftSlot?: ReactNode;
 }
 
-export function NavbarChrome({ roleLabel, rightSlot }: Readonly<NavbarChromeProps>) {
+export function NavbarChrome({ roleLabel, rightSlot, leftSlot }: Readonly<NavbarChromeProps>) {
   const t = useAppTranslation().dashboardTranslations.coreLayout;
 
   return (
@@ -34,7 +34,7 @@ export function NavbarChrome({ roleLabel, rightSlot }: Readonly<NavbarChromeProp
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 2 } }}>
-          <MobileMenuButton />
+          {leftSlot}
           <Box
             sx={theme => ({
               width: 40,

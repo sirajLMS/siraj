@@ -3,9 +3,9 @@
 import { CalendarMonthOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { DuesSummaryCard } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/DuesSummaryCard";
-import { PendingReviewsHeroCard } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/PendingReviewsHeroCard";
 import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashboard/supervisor/dashboard/useSupervisorDashboardViewModel";
+import { DuesSummaryCardDesktop } from "@/frontend/desktop/views/dashboard/supervisor/dashboard/components/duesSummaryCard.desktop";
+import { PendingReviewsHeroCardDesktop } from "@/frontend/desktop/views/dashboard/supervisor/dashboard/components/pendingReviewsHeroCard.desktop";
 
 export function SupervisorDashboardDesktopView({
   userName,
@@ -31,10 +31,10 @@ export function SupervisorDashboardDesktopView({
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <PendingReviewsHeroCard count={pendingReviewCount} labels={labels} onGoToReviews={onGoToReviews} />
+          <PendingReviewsHeroCardDesktop count={pendingReviewCount} labels={labels} onGoToReviews={onGoToReviews} />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <DuesSummaryCard summary={pendingDuesSummary} labels={labels} onGoToDues={onGoToDues} />
+          <DuesSummaryCardDesktop summary={pendingDuesSummary} labels={labels} onGoToDues={onGoToDues} />
         </Grid>
       </Grid>
 

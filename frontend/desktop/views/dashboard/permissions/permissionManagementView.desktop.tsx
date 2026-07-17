@@ -2,11 +2,11 @@
 
 import { Alert, Box } from "@mui/material";
 import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { PermissionManagementDialogs } from "@/frontend/common/views/dashboard/permissions/components/PermissionManagementDialogs";
-import { PermissionTabContent } from "@/frontend/common/views/dashboard/permissions/components/PermissionTabContent";
-import { SingleGroupView } from "@/frontend/common/views/dashboard/permissions/components/SingleGroupView";
 import type { PermissionManagementViewModel } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
 import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
+import { PermissionManagementDialogsDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionManagementDialogs.desktop";
+import { PermissionTabContentDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionTabContent.desktop";
+import { SingleGroupViewDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/singleGroupView.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
 function PermissionErrorAlert({
@@ -79,7 +79,7 @@ export function PermissionManagementDesktopView({
   return (
     <PageContainer>
       {activeGroup ? (
-        <SingleGroupView
+        <SingleGroupViewDesktop
           group={activeGroup}
           permissions={permissions}
           isLoading={isLoading}
@@ -100,10 +100,9 @@ export function PermissionManagementDesktopView({
 
             <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={setActiveTab} />
 
-            <PermissionTabContent
+            <PermissionTabContentDesktop
               activeTab={activeTab}
               isLoading={isLoading}
-              isMobile={false}
               permissions={permissions}
               groups={groups}
               users={users}
@@ -118,7 +117,7 @@ export function PermissionManagementDesktopView({
         </>
       )}
 
-      <PermissionManagementDialogs
+      <PermissionManagementDialogsDesktop
         permissions={permissions}
         groups={groups}
         users={users}

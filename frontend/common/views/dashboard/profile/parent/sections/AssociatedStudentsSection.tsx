@@ -2,9 +2,12 @@
 
 import { Box, Typography } from "@mui/material";
 import { AppDataGridLoadingOverlay, SectionPanel } from "@/frontend/common/components/ui";
-import { AssociatedStudentsCardList } from "@/frontend/common/views/dashboard/profile/parent/sections/AssociatedStudentsCardList";
-import { AssociatedStudentsDataGrid } from "@/frontend/common/views/dashboard/profile/parent/sections/AssociatedStudentsDataGrid";
-import type { AssociatedStudents } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import type {
+  AssociatedStudents,
+  AssociatedStudentsSectionVariantProps,
+} from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { useAppTranslation } from "@/shared/locale";
 
 type AssociatedStudentsSectionProps = {
@@ -19,6 +22,17 @@ function StudentsLoadingState() {
     </Box>
   );
 }
+
+const lazyViews = createLazyView<AssociatedStudentsSectionVariantProps>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/profile/parent/sections/associatedStudentsSection.mobile").then(m => ({
+      default: m.AssociatedStudentsSectionMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/profile/parent/sections/associatedStudentsSection.desktop").then(m => ({
+      default: m.AssociatedStudentsSectionDesktopView,
+    }))
+);
 
 export function AssociatedStudentsSection({ associatedStudents, loading = false }: AssociatedStudentsSectionProps) {
   const t = useAppTranslation().profileTranslations.parent;
@@ -42,15 +56,11 @@ export function AssociatedStudentsSection({ associatedStudents, loading = false 
     );
   }
 
-  return (
-    <SectionPanel title={t.sections.students} edgeToEdge>
-      <Box sx={{ display: { xs: "none", md: "block" } }}>
-        <AssociatedStudentsDataGrid rows={rows} loading={loading} emptyMessage={t.students.empty} />
-      </Box>
+  const variantProps: AssociatedStudentsSectionVariantProps = {
+    rows,
+    loading,
+    emptyMessage: t.students.empty,
+  };
 
-      <Box sx={{ display: { xs: "block", md: "none" }, px: { xs: 2, md: 3 }, py: 2.5 }}>
-        {loading ? <StudentsLoadingState /> : <AssociatedStudentsCardList rows={rows} />}
-      </Box>
-    </SectionPanel>
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={variantProps} />;
 }

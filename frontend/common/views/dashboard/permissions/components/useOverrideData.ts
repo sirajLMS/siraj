@@ -2,7 +2,7 @@ import { useQuery } from "@apollo/client/react";
 import { useEffect, useMemo, useState } from "react";
 import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/OverridesDataGrid";
+import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 
 interface UseOverrideDataParams {
   readonly userId: string | null;

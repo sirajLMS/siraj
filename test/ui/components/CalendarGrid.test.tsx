@@ -5,8 +5,8 @@ import { cleanup, screen } from "@testing-library/react";
 expect.extend(matchers);
 
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { CalendarGrid } from "@/frontend/common/views/dashboard/students/history/components/CalendarGrid";
 import type { ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
+import { CalendarGridDesktop } from "@/frontend/desktop/views/dashboard/students/history/components/calendarGrid.desktop";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -15,11 +15,11 @@ afterEach(() => {
 
 const currentMonth = new Date(2026, 5, 1); // June 2026 (30 days)
 
-describe("CalendarGrid", () => {
+describe("CalendarGridDesktop", () => {
   test("renders all days of the month", () => {
     const classes = {};
 
-    renderWithWrapper(<CalendarGrid currentMonth={currentMonth} classes={classes} />, {
+    renderWithWrapper(<CalendarGridDesktop currentMonth={currentMonth} classes={classes} />, {
       permissions: [],
     });
 
@@ -45,7 +45,7 @@ describe("CalendarGrid", () => {
 
     const classes = { 15: session };
 
-    renderWithWrapper(<CalendarGrid currentMonth={currentMonth} classes={classes} />, {
+    renderWithWrapper(<CalendarGridDesktop currentMonth={currentMonth} classes={classes} />, {
       permissions: [],
     });
 
@@ -70,7 +70,7 @@ describe("CalendarGrid", () => {
 
     const classes = { 15: session };
 
-    renderWithWrapper(<CalendarGrid currentMonth={currentMonth} classes={classes} />, {
+    renderWithWrapper(<CalendarGridDesktop currentMonth={currentMonth} classes={classes} />, {
       permissions: [],
     });
 
@@ -81,7 +81,7 @@ describe("CalendarGrid", () => {
   test("empty cells render correctly", () => {
     const classes = {};
 
-    renderWithWrapper(<CalendarGrid currentMonth={currentMonth} classes={classes} />, {
+    renderWithWrapper(<CalendarGridDesktop currentMonth={currentMonth} classes={classes} />, {
       permissions: [],
     });
 

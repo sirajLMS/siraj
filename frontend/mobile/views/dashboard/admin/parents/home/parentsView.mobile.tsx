@@ -12,12 +12,12 @@ import {
 } from "@/frontend/common/components/ui";
 import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
-import { ParentCardList } from "@/frontend/common/views/dashboard/admin/parents/home/ParentCardList";
 import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
 import type { ParentsViewLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsView";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { ParentCardListMobile } from "@/frontend/mobile/views/dashboard/admin/parents/home/components/parentCardList.mobile";
 
 export interface ParentsViewMobileProps {
   readonly metrics: readonly MetricItem[];
@@ -129,7 +129,7 @@ export function ParentsViewMobile({
             onLifecycleStatusFilterChange={onLifecycleStatusFilterChange}
             onResetFilters={onResetFilters}
           />
-          <ParentCardList
+          <ParentCardListMobile
             rows={rows}
             labels={labels.card}
             onOpenSettings={onOpenSettings}

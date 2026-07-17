@@ -2,12 +2,12 @@
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { PageContainer } from "@/frontend/common/components/ui";
-import { ComplaintQueueCardList } from "@/frontend/common/views/dashboard/complaints/components/ComplaintQueueCardList";
-import { ComplaintsMetricsRow } from "@/frontend/common/views/dashboard/complaints/components/ComplaintsMetricsRow";
-import { ComplaintsSearchBar } from "@/frontend/common/views/dashboard/complaints/components/ComplaintsSearchBar";
-import { ComplaintsTabBar } from "@/frontend/common/views/dashboard/complaints/components/ComplaintsTabBar";
 import type { AdminComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useAdminComplaintsViewModel";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { ComplaintQueueCardListMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintQueueCardList.mobile";
+import { ComplaintsMetricsRowMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintsMetricsRow.mobile";
+import { ComplaintsSearchBarMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintsSearchBar.mobile";
+import { ComplaintsTabBarMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintsTabBar.mobile";
 
 export function AdminComplaintsMobileView({
   labels,
@@ -37,11 +37,15 @@ export function AdminComplaintsMobileView({
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={3} paddingBottom={4}>
-        <ComplaintsMetricsRow summary={summary} labels={labels} compact />
+        <ComplaintsMetricsRowMobile summary={summary} labels={labels} compact />
 
-        <ComplaintsSearchBar value={searchQuery} placeholder={labels.searchPlaceholder} onChange={onSearchChange} />
+        <ComplaintsSearchBarMobile
+          value={searchQuery}
+          placeholder={labels.searchPlaceholder}
+          onChange={onSearchChange}
+        />
 
-        <ComplaintsTabBar
+        <ComplaintsTabBarMobile
           activeTab={activeTab}
           unansweredCount={summary.unanswered}
           answeredCount={summary.answered}
@@ -49,7 +53,7 @@ export function AdminComplaintsMobileView({
           onTabChange={onTabChange}
         />
 
-        <ComplaintQueueCardList
+        <ComplaintQueueCardListMobile
           rows={rows}
           labels={labels}
           draftResponses={draftResponses}

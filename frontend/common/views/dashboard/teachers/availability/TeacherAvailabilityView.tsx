@@ -1,55 +1,28 @@
 // cspell:disable
 "use client";
 
-import { useViewport } from "@/frontend/common/hooks/useViewport";
-import type {
-  AvailabilityEntry,
-  AvailabilitySearchFormData,
-  TeacherAvailabilityInsights,
-  WeeklyAvailability,
-} from "@/frontend/common/views/dashboard/teachers/availability/types";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
   type TeacherAvailabilityViewModel,
+  type UseTeacherAvailabilityViewModelProps,
   useTeacherAvailabilityViewModel,
 } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
-import { TeacherAvailabilityDesktopView } from "@/frontend/desktop/views/dashboard/teachers/availability/teacherAvailabilityView.desktop";
-import { TeacherAvailabilityMobileView } from "@/frontend/mobile/views/dashboard/teachers/availability/teacherAvailabilityView.mobile";
 
-export type { TeacherAvailabilityViewProps } from "@/frontend/common/views/dashboard/teachers/availability/types";
-export type { TeacherAvailabilityViewModel };
+export type { TeacherAvailabilityViewModel, UseTeacherAvailabilityViewModelProps };
 
-export function TeacherAvailabilityView({
-  availability,
-  insights,
-  defaultFilters,
-  loading,
-  onExportPdf,
-  onSearch,
-  onBlockClick,
-}: Readonly<{
-  availability: WeeklyAvailability;
-  insights: TeacherAvailabilityInsights;
-  defaultFilters: AvailabilitySearchFormData;
-  loading?: boolean;
-  onExportPdf?: () => void;
-  onSearch?: (formData: AvailabilitySearchFormData) => void;
-  onBlockClick?: (entry: AvailabilityEntry) => void;
-}>) {
-  const viewModel = useTeacherAvailabilityViewModel({
-    availability,
-    insights,
-    defaultFilters,
-    loading,
-    onExportPdf,
-    onSearch,
-    onBlockClick,
-  });
+const lazyViews = createLazyView<TeacherAvailabilityViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/teachers/availability/teacherAvailabilityView.mobile").then(m => ({
+      default: m.TeacherAvailabilityMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/teachers/availability/teacherAvailabilityView.desktop").then(m => ({
+      default: m.TeacherAvailabilityDesktopView,
+    }))
+);
 
-  const { isMobile } = useViewport();
-
-  return isMobile ? (
-    <TeacherAvailabilityMobileView {...viewModel} />
-  ) : (
-    <TeacherAvailabilityDesktopView {...viewModel} />
-  );
+export function TeacherAvailabilityView(props: Readonly<UseTeacherAvailabilityViewModelProps>) {
+  const viewModel = useTeacherAvailabilityViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

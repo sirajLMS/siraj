@@ -5,12 +5,12 @@ import { Box, Button, Chip, Grid, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
-import { NextClassJoinCard } from "@/frontend/common/views/dashboard/student/dashboard/components/NextClassJoinCard";
 import type {
   RecentLessonReportRow,
   UpcomingLessonRow,
 } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
+import { NextClassJoinCard } from "@/frontend/desktop/views/dashboard/student/dashboard/components/nextClassJoinCard.desktop";
 
 interface DesktopUpcomingItemProps {
   readonly lesson: UpcomingLessonRow;

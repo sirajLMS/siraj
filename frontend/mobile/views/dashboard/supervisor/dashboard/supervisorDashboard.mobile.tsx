@@ -3,10 +3,10 @@
 import { CalendarMonthOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
-import { DuesSummaryCard } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/DuesSummaryCard";
-import { PendingReviewsHeroCard } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/PendingReviewsHeroCard";
 import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashboard/supervisor/dashboard/useSupervisorDashboardViewModel";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { DuesSummaryCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/duesSummaryCard.mobile";
+import { PendingReviewsHeroCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/pendingReviewsHeroCard.mobile";
 
 export function SupervisorDashboardMobileView({
   userName,
@@ -31,9 +31,9 @@ export function SupervisorDashboardMobileView({
           </Typography>
         ) : null}
 
-        <PendingReviewsHeroCard count={pendingReviewCount} labels={labels} onGoToReviews={onGoToReviews} />
+        <PendingReviewsHeroCardMobile count={pendingReviewCount} labels={labels} onGoToReviews={onGoToReviews} />
 
-        <DuesSummaryCard summary={pendingDuesSummary} labels={labels} onGoToDues={onGoToDues} />
+        <DuesSummaryCardMobile summary={pendingDuesSummary} labels={labels} onGoToDues={onGoToDues} />
 
         <SectionPanel title={labels.monthlyReportsShortcut}>
           <Stack sx={{ gap: 1.5 }}>

@@ -54,36 +54,6 @@ export interface StudentHistoryViewProps {
   readonly locale: string;
 }
 
-export interface StudentHistoryDesktopProps {
-  readonly studentName: string;
-  readonly currentMonth: Date;
-  readonly metrics: StudentHistoryMetrics;
-  readonly classes: Readonly<Partial<Record<number, ClassSession>>>;
-  readonly onPrevMonth: () => void;
-  readonly onNextMonth: () => void;
-  readonly onPrint: () => void;
-  readonly enrollmentMonth?: Date;
-  readonly nowMonth?: Date;
-  readonly locale: string;
-}
-
-export interface StudentHistoryMobileProps {
-  readonly studentName: string;
-  readonly currentMonth: Date;
-  readonly metrics: StudentHistoryMetrics;
-  readonly classes: Readonly<Partial<Record<number, ClassSession>>>;
-  readonly selectedWeek: number;
-  readonly selectedDay: number | null;
-  readonly onSelectWeek: (week: number) => void;
-  readonly onSelectDay: (day: number | null) => void;
-  readonly onPrevMonth: () => void;
-  readonly onNextMonth: () => void;
-  readonly onPrint: () => void;
-  readonly enrollmentMonth?: Date;
-  readonly nowMonth?: Date;
-  readonly locale: string;
-}
-
 export interface CalendarGridProps {
   readonly currentMonth: Date;
   readonly classes: Readonly<Partial<Record<number, ClassSession>>>;

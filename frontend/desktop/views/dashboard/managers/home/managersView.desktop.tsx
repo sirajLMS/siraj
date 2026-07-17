@@ -1,7 +1,6 @@
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ManagersDataGrid } from "@/frontend/common/views/dashboard/managers/home/ManagersDataGrid";
 import { ManagersFilterBar } from "@/frontend/common/views/dashboard/managers/home/ManagersFilterBar";
 import { ManagersMetrics } from "@/frontend/common/views/dashboard/managers/home/ManagersMetrics";
 import type {
@@ -10,6 +9,7 @@ import type {
   ManagerStatusFilter,
   NonNullableManagerDirectoryMetrics,
 } from "@/frontend/common/views/dashboard/managers/home/types";
+import { ManagersDataGridDesktop } from "@/frontend/desktop/views/dashboard/managers/home/components/managersDataGrid.desktop";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -64,7 +64,7 @@ export function ManagersViewDesktop({
           onStatusFilterChange={onStatusFilterChange}
         />
 
-        <ManagersDataGrid
+        <ManagersDataGridDesktop
           managers={managers as Manager[]}
           page={page}
           pageSize={pageSize}

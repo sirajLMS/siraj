@@ -3,9 +3,11 @@
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
-import type { ParentCardListLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentCardList";
-import type { ParentsDataGridLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsDataGrid";
+import type {
+  ParentCardListLabels,
+  ParentDirectoryRow,
+  ParentsDataGridLabels,
+} from "@/frontend/common/views/dashboard/admin/parents/home/directory";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { ParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";
 

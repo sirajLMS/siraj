@@ -1,12 +1,11 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { parentHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { ParentRulesView } from "@/frontend/common/views/dashboard/parent/rules/parentRulesView";
 import { useAppTranslation } from "@/shared/locale";
 
 export function ParentRulesContainer() {
@@ -27,30 +26,11 @@ export function ParentRulesContainer() {
 
   return (
     <RequirePermission permissions={[AppPermission.ScheduleViewFamily]}>
-      <PageContainer>
-        <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
-        {handbookLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress size={24} />
-          </Box>
-        ) : null}
-        <SectionPanel title={t.sections.policies}>
-          <Stack spacing={2}>
-            <Typography sx={{ typography: "bodyLg", color: theme => theme.palette.text.secondary }}>
-              {t.policyIntro}
-            </Typography>
-            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-              {t.policyLeave}
-            </Typography>
-            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-              {t.policyBilling}
-            </Typography>
-            <Button variant="outlined" onClick={() => setHandbookRequested(true)}>
-              {t.downloadHandbook}
-            </Button>
-          </Stack>
-        </SectionPanel>
-      </PageContainer>
+      <ParentRulesView
+        labels={t}
+        handbookLoading={handbookLoading}
+        onDownloadHandbook={() => setHandbookRequested(true)}
+      />
     </RequirePermission>
   );
 }

@@ -4,10 +4,10 @@ import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
-import { CategoriesSection } from "@/frontend/common/views/dashboard/subjects/home/components/CategoriesSection";
-import { SubjectCard } from "@/frontend/common/views/dashboard/subjects/home/components/SubjectCard";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { CategoriesSectionMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/categoriesSection.mobile";
+import { SubjectCardMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/subjectCard.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
 export function SubjectsViewMobile({
@@ -33,7 +33,7 @@ export function SubjectsViewMobile({
   const filteredSubjects = activeCategoryId ? subjects.filter(s => s.category?.id === activeCategoryId) : subjects;
 
   const categoriesSection = (
-    <CategoriesSection
+    <CategoriesSectionMobile
       categories={categories}
       activeCategoryId={activeCategoryId}
       onCategoryChange={onCategoryChange}
@@ -103,7 +103,7 @@ export function SubjectsViewMobile({
           <Grid container spacing={2}>
             {filteredSubjects.map(subject => (
               <Grid key={subject.id} size={{ xs: 12, sm: 6 }}>
-                <SubjectCard
+                <SubjectCardMobile
                   subject={subject}
                   onEdit={() => onEditSubject(subject.id ?? "")}
                   onDelete={() => onDeleteSubject(subject.id ?? "")}

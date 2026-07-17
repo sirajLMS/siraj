@@ -8,7 +8,7 @@ import {
   TrendingUpOutlined,
   WarningAmberOutlined,
 } from "@mui/icons-material";
-import type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
+import type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
 import type { AdminBillingSummary } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import type { ParentBillingSummary } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
 import type { BillingLabels } from "@/shared/locale";

@@ -1,59 +1,22 @@
 "use client";
 
-import { useViewport } from "@/frontend/common/hooks/useViewport";
-import type {
-  CheckedEmptyItem,
-  ConflictGroup,
-  DstMigrationMetrics,
-  MigrationStatus,
-  UpdatedSession,
-} from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { DstMigrationViewDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/dstMigrationView.desktop";
-import { DstMigrationViewMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/dstMigrationView.mobile";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import type { DstMigrationViewModel } from "@/frontend/common/views/dashboard/tools/dst-migration/useDstMigrationViewModel";
 
-export interface DstMigrationViewProps {
-  readonly metrics: DstMigrationMetrics;
-  readonly updatedSessions: readonly UpdatedSession[];
-  readonly conflictGroups: readonly ConflictGroup[];
-  readonly checkedEmptyItems: readonly CheckedEmptyItem[];
-  readonly migrationStatus: MigrationStatus;
-  readonly onUpdate: () => void;
-  readonly dstOffsetDetected: boolean;
-}
+export type { DstMigrationViewModel };
 
-export function DstMigrationView({
-  metrics,
-  updatedSessions,
-  conflictGroups,
-  checkedEmptyItems,
-  migrationStatus,
-  onUpdate,
-  dstOffsetDetected,
-}: Readonly<DstMigrationViewProps>) {
-  const { isMobile } = useViewport();
+const lazyViews = createLazyView<DstMigrationViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/tools/dst-migration/dstMigrationView.mobile").then(m => ({
+      default: m.DstMigrationViewMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/tools/dst-migration/dstMigrationView.desktop").then(m => ({
+      default: m.DstMigrationViewDesktop,
+    }))
+);
 
-  if (isMobile) {
-    return (
-      <DstMigrationViewMobile
-        metrics={metrics}
-        updatedSessions={updatedSessions}
-        conflictGroups={conflictGroups}
-        migrationStatus={migrationStatus}
-        onUpdate={onUpdate}
-        dstOffsetDetected={dstOffsetDetected}
-      />
-    );
-  }
-
-  return (
-    <DstMigrationViewDesktop
-      metrics={metrics}
-      updatedSessions={updatedSessions}
-      conflictGroups={conflictGroups}
-      checkedEmptyItems={checkedEmptyItems}
-      migrationStatus={migrationStatus}
-      onUpdate={onUpdate}
-      dstOffsetDetected={dstOffsetDetected}
-    />
-  );
+export function DstMigrationView(viewModel: Readonly<DstMigrationViewModel>) {
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

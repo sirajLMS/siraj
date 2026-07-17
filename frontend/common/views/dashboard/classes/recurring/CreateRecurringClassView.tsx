@@ -1,10 +1,9 @@
 "use client";
 
-import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import { CreateRecurringClassViewDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/createRecurringClassView.desktop";
-import { CreateRecurringClassViewMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/createRecurringClassView.mobile";
 import type { CreateRecurringClassLabels } from "@/shared/locale";
 
 export interface CreateRecurringClassViewProps {
@@ -22,12 +21,17 @@ export interface CreateRecurringClassViewProps {
   readonly onDismissError: () => void;
 }
 
+const lazyViews = createLazyView<CreateRecurringClassViewProps>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/classes/recurring/createRecurringClassView.mobile").then(m => ({
+      default: m.CreateRecurringClassViewMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/classes/recurring/createRecurringClassView.desktop").then(m => ({
+      default: m.CreateRecurringClassViewDesktop,
+    }))
+);
+
 export function CreateRecurringClassView(props: Readonly<CreateRecurringClassViewProps>) {
-  const { isMobile } = useViewport();
-
-  if (isMobile) {
-    return <CreateRecurringClassViewMobile {...props} />;
-  }
-
-  return <CreateRecurringClassViewDesktop {...props} />;
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }

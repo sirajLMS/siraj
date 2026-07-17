@@ -1,8 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useForm } from "react-hook-form";
+import {
+  type Control,
+  type FieldErrors,
+  type UseFormHandleSubmit,
+  type UseFormRegister,
+  useForm,
+} from "react-hook-form";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { StudentOnboardingView } from "@/frontend/common/views/dashboard/students/onboarding/StudentOnboardingView";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
+import type { StudentOnboardingViewModel } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
+import { StudentOnboardingDesktopView } from "@/frontend/desktop/views/dashboard/students/onboarding/studentOnboarding.desktop";
 
 const labels = {
   pageTitle: "New Student Registration",
@@ -58,20 +65,23 @@ function StudentOnboardingStory() {
     },
   });
 
-  return (
-    <StudentOnboardingView
-      register={register}
-      control={control}
-      errors={formState.errors}
-      handleSubmit={handleSubmit}
-      isSubmitting={false}
-      parentOptions={[{ id: "parent-1", label: "Ahmed Parent" }]}
-      teacherOptions={[{ id: "teacher-1", name: "Sara Teacher" }]}
-      parentLocked
-      labels={labels}
-      onSubmit={() => undefined}
-    />
-  );
+  const viewModel: StudentOnboardingViewModel = {
+    register: register as UseFormRegister<StudentOnboardingFormData>,
+    control: control as Control<StudentOnboardingFormData>,
+    errors: formState.errors as FieldErrors<StudentOnboardingFormData>,
+    handleSubmit: handleSubmit as UseFormHandleSubmit<StudentOnboardingFormData>,
+    isSubmitting: false,
+    parentOptions: [{ id: "parent-1", label: "Ahmed Parent" }],
+    teacherOptions: [{ id: "teacher-1", name: "Sara Teacher" }],
+    parentLocked: true,
+    labels,
+    onSubmit: () => undefined,
+    successOpen: false,
+    onCloseSuccess: () => undefined,
+    successMessage: "Student created successfully.",
+  };
+
+  return <StudentOnboardingDesktopView {...viewModel} />;
 }
 
 const meta = {

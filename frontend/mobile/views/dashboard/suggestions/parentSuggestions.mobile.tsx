@@ -2,12 +2,12 @@
 
 import { Box } from "@mui/material";
 import { BaseCard, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { SuggestionFormFields } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionFormFields";
-import { SuggestionHeroBanner } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionHeroBanner";
-import { SuggestionSocialProof } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionSocialProof";
-import { SuggestionSupportCards } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionSupportCards";
 import type { ParentSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useParentSuggestionsViewModel";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { SuggestionFormFieldsMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionFormFields.mobile";
+import { SuggestionHeroBannerMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionHeroBanner.mobile";
+import { SuggestionSocialProofMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionSocialProof.mobile";
+import { SuggestionSupportCardsMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionSupportCards.mobile";
 
 export function ParentSuggestionsMobileView({
   labels,
@@ -22,10 +22,10 @@ export function ParentSuggestionsMobileView({
       <MobilePageHeader title={labels.pageTitle} edgeToEdge={false} />
 
       <MobileContentStack gap={2} paddingBottom={12}>
-        <SuggestionHeroBanner labels={labels} variant="mobile" />
+        <SuggestionHeroBannerMobile labels={labels} />
 
         <BaseCard>
-          <SuggestionFormFields control={control} errors={errors} labels={labels} variant="mobile" />
+          <SuggestionFormFieldsMobile control={control} errors={errors} labels={labels} />
           <Box sx={{ pt: 3 }}>
             <PrimaryPageAction
               fullWidth
@@ -37,11 +37,11 @@ export function ParentSuggestionsMobileView({
             </PrimaryPageAction>
           </Box>
           <Box sx={{ pt: 3 }}>
-            <SuggestionSocialProof labels={labels} />
+            <SuggestionSocialProofMobile labels={labels} />
           </Box>
         </BaseCard>
 
-        <SuggestionSupportCards labels={labels} variant="mobile" />
+        <SuggestionSupportCardsMobile labels={labels} />
       </MobileContentStack>
     </PageContainer>
   );

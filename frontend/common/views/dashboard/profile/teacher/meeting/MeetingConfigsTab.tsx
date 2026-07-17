@@ -1,10 +1,10 @@
 "use client";
 
-import { Stack } from "@mui/material";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { MeetingConfigsManager } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs";
+import type { MeetingConfigsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/meeting/meetingConfigsTabTypes";
 import { useAppTranslation } from "@/shared/locale";
 
 type MeetingConfigsTabProps = {
@@ -12,7 +12,18 @@ type MeetingConfigsTabProps = {
   readonly scope: ProfileScope;
 };
 
-export function MeetingConfigsTab({ targetUserId, scope }: MeetingConfigsTabProps) {
+const lazyViews = createLazyView<MeetingConfigsTabViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/profile/teacher/meeting/meetingConfigsTab.mobile").then(m => ({
+      default: m.MeetingConfigsTabMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/profile/teacher/meeting/meetingConfigsTab.desktop").then(m => ({
+      default: m.MeetingConfigsTabDesktopView,
+    }))
+);
+
+export function MeetingConfigsTab({ targetUserId, scope }: Readonly<MeetingConfigsTabProps>) {
   const t = useAppTranslation().uiTranslations.meetingConfig;
   const { hasPermission } = useUserStore();
 
@@ -21,14 +32,11 @@ export function MeetingConfigsTab({ targetUserId, scope }: MeetingConfigsTabProp
       ? hasPermission(AppPermission.MeetingConfigsManageOwn)
       : hasPermission(AppPermission.MeetingConfigsManageOther);
 
-  return (
-    <PageContainer>
-      <Stack spacing={3}>
-        <PageHeader title={t.sectionTitle} />
-        <SectionPanel>
-          <MeetingConfigsManager targetUserId={targetUserId} canManage={canManage} />
-        </SectionPanel>
-      </Stack>
-    </PageContainer>
-  );
+  const viewModel: MeetingConfigsTabViewModel = {
+    targetUserId,
+    canManage,
+    sectionTitle: t.sectionTitle,
+  };
+
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

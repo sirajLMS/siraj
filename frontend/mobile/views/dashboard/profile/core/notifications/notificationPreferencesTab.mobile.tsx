@@ -2,7 +2,7 @@
 
 import { Alert, Box, Snackbar, Typography } from "@mui/material";
 import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
-import { PreferencesChannelTabs } from "@/frontend/common/views/dashboard/profile/core/notifications/PreferencesChannelTabs";
+import { PreferencesChannelTabsMobileView } from "@/frontend/mobile/views/dashboard/profile/core/notifications/preferencesChannelTabs.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
 export type NotificationPreferencesTabMobileProps = NotificationPreferencesTabVariantProps;
@@ -35,7 +35,12 @@ export function NotificationPreferencesTabMobile({
         </Typography>
       </Box>
 
-      <PreferencesChannelTabs preferences={preferences} onToggle={onToggle} disabled={disabled} loading={loading} />
+      <PreferencesChannelTabsMobileView
+        preferences={preferences}
+        onToggle={onToggle}
+        disabled={disabled}
+        loading={loading}
+      />
 
       <Snackbar
         open={snackbarOpen}

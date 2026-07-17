@@ -3,16 +3,11 @@
 import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import {
-  FilterButton,
-  PageContainer,
-  PageHeader,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
+import { FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { StudentDirectoryDataGrid } from "@/frontend/common/views/dashboard/admin/parents/students/components/StudentDirectoryDataGrid";
 import type { StudentsViewModel } from "@/frontend/common/views/dashboard/admin/parents/students/useStudentsViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { StudentDirectoryDataGrid } from "@/frontend/desktop/views/dashboard/admin/parents/students/components/studentDirectoryDataGrid.desktop";
 
 export function StudentsDesktopView({
   labels,
@@ -46,8 +41,8 @@ export function StudentsDesktopView({
   };
 
   return (
-    <PageContainer>
-      <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
       <MetricCardGrid metrics={metrics} size={{ md: 6, lg: "grow" }} />
 
@@ -78,6 +73,6 @@ export function StudentsDesktopView({
           loading={loading}
         />
       </SectionPanel>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

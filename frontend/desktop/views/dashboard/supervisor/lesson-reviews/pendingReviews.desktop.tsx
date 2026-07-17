@@ -12,9 +12,9 @@ import {
   SectionPanel,
 } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { LessonReportDetailPanel } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/components/LessonReportDetailPanel";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import type { PendingReviewsViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";
+import { LessonReportDetailPanelDesktop } from "@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/components/lessonReportDetailPanel.desktop";
 
 interface PendingReviewsDesktopViewProps extends PendingReviewsViewModel {
   readonly rows: readonly PendingReviewRow[];
@@ -155,7 +155,7 @@ export function PendingReviewsDesktopView({
       </SectionPanel>
 
       <Grid size={{ xs: 12, lg: 4 }}>
-        <LessonReportDetailPanel report={selectedReport} labels={labels} />
+        <LessonReportDetailPanelDesktop report={selectedReport} labels={labels} />
       </Grid>
     </PageContainer>
   );

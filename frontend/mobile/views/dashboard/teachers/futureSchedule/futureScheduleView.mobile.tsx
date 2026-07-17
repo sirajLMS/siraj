@@ -2,12 +2,12 @@
 
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
-import { FutureClassCard } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/FutureClassCard";
-import { ImportantNotes } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/ImportantNotes";
-import { JumpToDateHeader } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/JumpToDateHeader";
-import { MiniCalendar } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/MiniCalendar";
-import { SupportContact } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/SupportContact";
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
+import { FutureClassCardMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/futureClassCard.mobile";
+import { ImportantNotesMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/importantNotes.mobile";
+import { JumpToDateHeaderMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.mobile";
+import { MiniCalendarMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/miniCalendar.mobile";
+import { SupportContactMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/supportContact.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
 export function FutureScheduleViewMobile({
@@ -30,7 +30,7 @@ export function FutureScheduleViewMobile({
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
-          <JumpToDateHeader
+          <JumpToDateHeaderMobile
             leaveQuotaUsed={leaveQuotaUsed}
             leaveQuotaTotal={leaveQuotaTotal}
             totalClasses={totalClasses}
@@ -76,7 +76,7 @@ export function FutureScheduleViewMobile({
             </Box>
 
             {classes.map(item => (
-              <FutureClassCard
+              <FutureClassCardMobile
                 key={item.id ?? ""}
                 item={item}
                 onRequestLeave={() => {
@@ -89,9 +89,9 @@ export function FutureScheduleViewMobile({
 
         <Grid size={{ xs: 12 }}>
           <Stack spacing={3} sx={{ mt: 2 }}>
-            <MiniCalendar selectedDate={selectedDate} onSelectDate={onDateChange} classDates={classDates} />
-            <ImportantNotes notes={notes} />
-            <SupportContact contact={contact} />
+            <MiniCalendarMobile selectedDate={selectedDate} onSelectDate={onDateChange} classDates={classDates} />
+            <ImportantNotesMobile notes={notes} />
+            <SupportContactMobile contact={contact} />
           </Stack>
         </Grid>
       </Grid>

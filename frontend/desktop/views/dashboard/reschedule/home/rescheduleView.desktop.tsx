@@ -1,20 +1,15 @@
 "use client";
 
 import { Box, type BoxProps, Divider, Link as MuiLink, Stack, styled } from "@mui/material";
-import {
-  FormSuccessSnackbar,
-  PageContainer,
-  PageHeader,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
+import { FormSuccessSnackbar, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigDisplay } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
 import { effectiveMeetingToDisplayData } from "@/frontend/common/components/ui/display/meetingConfig/meetingConfigDisplay.types";
-import { ClassParticipantsSection } from "@/frontend/common/views/dashboard/reschedule/home/ClassParticipantsSection";
-import { QuickAdjustSection } from "@/frontend/common/views/dashboard/reschedule/home/QuickAdjustSection";
-import { RescheduleDateTimeSection } from "@/frontend/common/views/dashboard/reschedule/home/RescheduleDateTimeSection";
-import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/reschedule/home/TimezoneWarningBanner";
 import type { RescheduleViewModel } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { ClassParticipantsSectionDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/classParticipantsSection.desktop";
+import { QuickAdjustSectionDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/quickAdjustSection.desktop";
+import { RescheduleDateTimeSectionDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/rescheduleDateTimeSection.desktop";
+import { TimezoneWarningBannerDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/timezoneWarningBanner.desktop";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -46,10 +41,10 @@ export function RescheduleViewDesktop({
   const tMeeting = useAppTranslation().uiTranslations.meetingConfig;
 
   return (
-    <PageContainer sx={{ maxWidth: 900, mx: "auto" }}>
-      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
+    <DesktopPageContainer sx={{ maxWidth: 900, mx: "auto" }}>
+      <DesktopPageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
 
-      <TimezoneWarningBanner timezone={session.teacherTimezone} />
+      <TimezoneWarningBannerDesktop timezone={session.teacherTimezone} />
 
       <SectionPanel title={t.sections.classDetails}>
         <Box
@@ -59,7 +54,7 @@ export function RescheduleViewDesktop({
           }}
           sx={theme => ({ p: theme.layout.cardPadding, display: "flex", flexDirection: "column", gap: 4 })}
         >
-          <ClassParticipantsSection session={session} />
+          <ClassParticipantsSectionDesktop session={session} />
 
           {session.effectiveMeeting ? (
             <>
@@ -80,9 +75,9 @@ export function RescheduleViewDesktop({
 
           <Divider />
 
-          <RescheduleDateTimeSection control={control} errors={errors} />
+          <RescheduleDateTimeSectionDesktop control={control} errors={errors} />
 
-          <QuickAdjustSection setValue={setValue} getValues={getValues} />
+          <QuickAdjustSectionDesktop setValue={setValue} getValues={getValues} />
 
           <ActionContainer>
             <PrimaryPageAction type="submit" disabled={isSubmitting}>
@@ -104,6 +99,6 @@ export function RescheduleViewDesktop({
       </SectionPanel>
 
       <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

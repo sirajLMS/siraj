@@ -1,21 +1,16 @@
 "use client";
 
 import { Box, type BoxProps, Divider, Link as MuiLink, Stack, styled } from "@mui/material";
-import {
-  FormSuccessSnackbar,
-  PageContainer,
-  PageHeader,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
+import { FormSuccessSnackbar, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigDisplay } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
 import { effectiveMeetingToDisplayData } from "@/frontend/common/components/ui/display/meetingConfig/meetingConfigDisplay.types";
-import { ClassParticipantsSection } from "@/frontend/common/views/dashboard/reschedule/home/ClassParticipantsSection";
-import { NotificationPolicyCard } from "@/frontend/common/views/dashboard/reschedule/home/NotificationPolicyCard";
-import { QuickAdjustSection } from "@/frontend/common/views/dashboard/reschedule/home/QuickAdjustSection";
-import { RescheduleDateTimeSection } from "@/frontend/common/views/dashboard/reschedule/home/RescheduleDateTimeSection";
-import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/reschedule/home/TimezoneWarningBanner";
 import type { RescheduleViewModel } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { ClassParticipantsSectionMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/classParticipantsSection.mobile";
+import { NotificationPolicyCardMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/notificationPolicyCard.mobile";
+import { QuickAdjustSectionMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/quickAdjustSection.mobile";
+import { RescheduleDateTimeSectionMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/rescheduleDateTimeSection.mobile";
+import { TimezoneWarningBannerMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/timezoneWarningBanner.mobile";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -47,10 +42,10 @@ export function RescheduleViewMobile({
   const tMeeting = useAppTranslation().uiTranslations.meetingConfig;
 
   return (
-    <PageContainer sx={{ maxWidth: 900, mx: "auto" }}>
-      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
+    <MobilePageContainer sx={{ maxWidth: 900, mx: "auto" }}>
+      <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} edgeToEdge={false} />
 
-      <TimezoneWarningBanner timezone={session.teacherTimezone} />
+      <TimezoneWarningBannerMobile timezone={session.teacherTimezone} />
 
       <SectionPanel title={t.sections.classDetails}>
         <Box
@@ -60,7 +55,7 @@ export function RescheduleViewMobile({
           }}
           sx={theme => ({ p: theme.layout.cardPadding, display: "flex", flexDirection: "column", gap: 4 })}
         >
-          <ClassParticipantsSection session={session} />
+          <ClassParticipantsSectionMobile session={session} />
 
           {session.effectiveMeeting ? (
             <>
@@ -81,9 +76,9 @@ export function RescheduleViewMobile({
 
           <Divider />
 
-          <RescheduleDateTimeSection control={control} errors={errors} />
+          <RescheduleDateTimeSectionMobile control={control} errors={errors} />
 
-          <QuickAdjustSection setValue={setValue} getValues={getValues} />
+          <QuickAdjustSectionMobile setValue={setValue} getValues={getValues} />
 
           <ActionContainer>
             <PrimaryPageAction type="submit" disabled={isSubmitting}>
@@ -104,9 +99,9 @@ export function RescheduleViewMobile({
         </Box>
       </SectionPanel>
 
-      <NotificationPolicyCard />
+      <NotificationPolicyCardMobile />
 
       <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

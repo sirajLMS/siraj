@@ -1,22 +1,28 @@
+// cspell:disable
 "use client";
 
-import { useViewport } from "@/frontend/common/hooks/useViewport";
-import type {
-  TeacherReassignmentViewModel,
-  UseTeacherReassignmentViewModelProps,
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import {
+  type TeacherReassignmentViewModel,
+  type UseTeacherReassignmentViewModelProps,
+  useTeacherReassignmentViewModel,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
-import { useTeacherReassignmentViewModel } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
-import { TeacherReassignmentViewDesktop } from "@/frontend/desktop/views/dashboard/teachers/reassignment/teacherReassignmentView.desktop";
-import { TeacherReassignmentViewMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/teacherReassignmentView.mobile";
 
 export type { TeacherReassignmentViewModel, UseTeacherReassignmentViewModelProps };
 
+const lazyViews = createLazyView<TeacherReassignmentViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/teachers/reassignment/teacherReassignmentView.mobile").then(m => ({
+      default: m.TeacherReassignmentViewMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/teachers/reassignment/teacherReassignmentView.desktop").then(m => ({
+      default: m.TeacherReassignmentViewDesktop,
+    }))
+);
+
 export function TeacherReassignmentView(props: Readonly<UseTeacherReassignmentViewModelProps>) {
   const viewModel = useTeacherReassignmentViewModel(props);
-  const { isMobile } = useViewport();
-  return isMobile ? (
-    <TeacherReassignmentViewMobile {...viewModel} />
-  ) : (
-    <TeacherReassignmentViewDesktop {...viewModel} />
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

@@ -4,8 +4,8 @@ import { Box } from "@mui/material";
 import { useMemo, useState } from "react";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { PermissionCatalogDataGrid } from "@/frontend/common/views/dashboard/permissions/components/PermissionCatalogDataGrid";
-import { PermissionCatalogToolbar } from "@/frontend/common/views/dashboard/permissions/components/PermissionCatalogToolbar";
+import { PermissionCatalogDataGridDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCatalogDataGrid.desktop";
+import { PermissionCatalogToolbarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCatalogToolbar.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionCatalogSectionDesktopProps {
@@ -47,16 +47,15 @@ export function PermissionCatalogSectionDesktop({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <PermissionCatalogToolbar
+      <PermissionCatalogToolbarDesktop
         searchQuery={searchQuery}
         selectedCategory={selectedCategory}
         categories={categories}
-        isMobile={false}
         onSearchChange={setSearchQuery}
         onCategoryChange={setSelectedCategory}
       />
       <SectionPanel title={t.catalogTab}>
-        <PermissionCatalogDataGrid permissions={filteredPermissions} groups={groups} loading={loading} />
+        <PermissionCatalogDataGridDesktop permissions={filteredPermissions} groups={groups} loading={loading} />
       </SectionPanel>
     </Box>
   );

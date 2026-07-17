@@ -2,11 +2,11 @@
 
 import { Grid } from "@mui/material";
 import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { ComplaintFormFields } from "@/frontend/common/views/dashboard/complaints/components/ComplaintFormFields";
-import { ComplaintPolicyPanel } from "@/frontend/common/views/dashboard/complaints/components/ComplaintPolicyPanel";
-import { ComplaintRecordCardList } from "@/frontend/common/views/dashboard/complaints/components/ComplaintRecordCardList";
 import type { ParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
 import { SubmissionSuccessBanner } from "@/frontend/common/views/dashboard/shared/SubmissionSuccessBanner";
+import { ComplaintFormFieldsDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintFormFields.desktop";
+import { ComplaintPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintPolicyPanel.desktop";
+import { ComplaintRecordCardListDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintRecordCardList.desktop";
 
 export function ParentComplaintsDesktopView({
   labels,
@@ -35,12 +35,11 @@ export function ParentComplaintsDesktopView({
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, lg: 5 }}>
           <BaseCard>
-            <ComplaintFormFields
+            <ComplaintFormFieldsDesktop
               control={control}
               errors={errors}
               labels={labels}
               studentOptions={studentOptions}
-              variant="desktop"
             />
             <PrimaryPageAction
               fullWidth
@@ -51,11 +50,11 @@ export function ParentComplaintsDesktopView({
               {labels.submit}
             </PrimaryPageAction>
           </BaseCard>
-          <ComplaintPolicyPanel labels={labels} />
+          <ComplaintPolicyPanelDesktop labels={labels} />
         </Grid>
 
         <Grid size={{ xs: 12, lg: 7 }}>
-          <ComplaintRecordCardList
+          <ComplaintRecordCardListDesktop
             records={records}
             labels={labels}
             hasOlderRecords={hasOlderRecords}

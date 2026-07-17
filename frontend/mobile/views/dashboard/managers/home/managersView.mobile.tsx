@@ -1,7 +1,6 @@
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ManagersCardList } from "@/frontend/common/views/dashboard/managers/home/ManagersCardList";
 import { ManagersFilterBar } from "@/frontend/common/views/dashboard/managers/home/ManagersFilterBar";
 import { ManagersMetrics } from "@/frontend/common/views/dashboard/managers/home/ManagersMetrics";
 import type {
@@ -11,6 +10,7 @@ import type {
   NonNullableManagerDirectoryMetrics,
 } from "@/frontend/common/views/dashboard/managers/home/types";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { ManagersCardListMobile } from "@/frontend/mobile/views/dashboard/managers/home/components/managersCardList.mobile";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -64,7 +64,7 @@ export function ManagersViewMobile({
           onStatusFilterChange={onStatusFilterChange}
         />
 
-        <ManagersCardList
+        <ManagersCardListMobile
           managers={managers as Manager[]}
           page={page}
           pageSize={pageSize}

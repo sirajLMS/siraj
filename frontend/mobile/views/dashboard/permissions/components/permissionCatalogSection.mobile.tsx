@@ -3,8 +3,8 @@
 import { Box } from "@mui/material";
 import { useMemo, useState } from "react";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { PermissionCatalogCardList } from "@/frontend/common/views/dashboard/permissions/components/PermissionCatalogCardList";
-import { PermissionCatalogToolbar } from "@/frontend/common/views/dashboard/permissions/components/PermissionCatalogToolbar";
+import { PermissionCatalogCardListMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionCatalogCardList.mobile";
+import { PermissionCatalogToolbarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionCatalogToolbar.mobile";
 
 export interface PermissionCatalogSectionMobileProps {
   readonly permissions: readonly Permission[];
@@ -40,15 +40,14 @@ export function PermissionCatalogSectionMobile({ permissions, groups }: Readonly
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <PermissionCatalogToolbar
+      <PermissionCatalogToolbarMobile
         searchQuery={searchQuery}
         selectedCategory={selectedCategory}
         categories={categories}
-        isMobile
         onSearchChange={setSearchQuery}
         onCategoryChange={setSelectedCategory}
       />
-      <PermissionCatalogCardList permissions={filteredPermissions} groups={groups} />
+      <PermissionCatalogCardListMobile permissions={filteredPermissions} groups={groups} />
     </Box>
   );
 }
