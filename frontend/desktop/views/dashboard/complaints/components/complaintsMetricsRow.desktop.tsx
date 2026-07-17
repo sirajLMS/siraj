@@ -3,9 +3,9 @@
 import { CheckCircleOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
 import type { AdminComplaintsSummary } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { AdminQueueEfficiencyBanner } from "@/frontend/common/views/dashboard/shared/AdminQueueEfficiencyBanner";
+import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
 
 const StyledMetricsContainer = styled(Box)(({ theme }) => ({
@@ -17,14 +17,9 @@ const StyledMetricsContainer = styled(Box)(({ theme }) => ({
 interface ComplaintsMetricsRowDesktopProps {
   readonly summary: AdminComplaintsSummary;
   readonly labels: ComplaintsAdminLabels;
-  readonly compact?: boolean;
 }
 
-export function ComplaintsMetricsRowDesktop({
-  summary,
-  labels,
-  compact = false,
-}: Readonly<ComplaintsMetricsRowDesktopProps>) {
+export function ComplaintsMetricsRowDesktop({ summary, labels }: Readonly<ComplaintsMetricsRowDesktopProps>) {
   const metrics = [
     {
       key: "unanswered",
@@ -44,7 +39,7 @@ export function ComplaintsMetricsRowDesktop({
 
   return (
     <StyledMetricsContainer>
-      <BillingMetricsRow metrics={metrics} compact={compact} />
+      <BillingMetricsRowDesktop metrics={metrics} />
       <AdminQueueEfficiencyBanner
         avgLabel={labels.metrics.avgResolution}
         avgValue={summary.avgResolutionHours}

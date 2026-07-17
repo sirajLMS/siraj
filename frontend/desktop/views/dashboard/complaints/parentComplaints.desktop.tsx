@@ -1,9 +1,10 @@
 "use client";
 
 import { Grid } from "@mui/material";
-import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { BaseCard, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { ParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
 import { SubmissionSuccessBanner } from "@/frontend/common/views/dashboard/shared/SubmissionSuccessBanner";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { ComplaintFormFieldsDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintFormFields.desktop";
 import { ComplaintPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintPolicyPanel.desktop";
 import { ComplaintRecordCardListDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintRecordCardList.desktop";
@@ -27,10 +28,10 @@ export function ParentComplaintsDesktopView({
   onPageChange,
 }: Readonly<ParentComplaintsViewModel>) {
   return (
-    <PageContainer>
+    <DesktopPageContainer>
       {showSuccess ? <SubmissionSuccessBanner message={labels.successMessage} onDismiss={onDismissSuccess} /> : null}
 
-      <PageHeader title={labels.pageTitle} />
+      <DesktopPageHeader title={labels.pageTitle} />
 
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, lg: 5 }}>
@@ -66,6 +67,6 @@ export function ParentComplaintsDesktopView({
           />
         </Grid>
       </Grid>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

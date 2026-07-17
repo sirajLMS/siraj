@@ -1,11 +1,7 @@
+"use client";
+
 import { useQuery } from "@apollo/client/react";
-import {
-  AutoStoriesOutlined,
-  BookOutlined,
-  EditNoteOutlined,
-  InfoOutlined,
-  SyncProblemOutlined,
-} from "@mui/icons-material";
+import { AutoStoriesOutlined, EditNoteOutlined } from "@mui/icons-material";
 import {
   Box,
   CircularProgress,
@@ -19,11 +15,11 @@ import {
 import { Controller, useFormContext } from "react-hook-form";
 import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
-import { QuotaFormField } from "@/frontend/common/views/dashboard/students/quota/components/QuotaFormField";
 import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/components/quotaFieldStyles";
-import { SectionHeader } from "@/frontend/common/views/dashboard/students/quota/components/SectionHeader";
 import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/quotaFormAccessContext";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
+import { QuotaFormFieldDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/quotaFormField.desktop";
+import { SectionHeaderDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/sectionHeader.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
 function TeacherField() {
@@ -46,7 +42,7 @@ function TeacherField() {
   const teachers = data?.teachers ?? [];
 
   return (
-    <QuotaFormField label={t.fields.teacher}>
+    <QuotaFormFieldDesktop label={t.fields.teacher}>
       <Controller
         name="teacher"
         control={control}
@@ -56,7 +52,7 @@ function TeacherField() {
           const showCurrentAsExtra = !loading && currentValue !== "" && !isInOptions;
 
           return (
-            <FormControl fullWidth error={!!errors.teacher}>
+            <FormControl fullWidth error={Boolean(errors.teacher)}>
               <Select {...field} displayEmpty disabled sx={quotaInputSx}>
                 {loading && (
                   <MenuItem disabled value="">
@@ -80,7 +76,7 @@ function TeacherField() {
           );
         }}
       />
-    </QuotaFormField>
+    </QuotaFormFieldDesktop>
   );
 }
 
@@ -97,7 +93,7 @@ function TotalClassesField() {
   }
 
   return (
-    <QuotaFormField label={t.fields.totalClasses}>
+    <QuotaFormFieldDesktop label={t.fields.totalClasses}>
       <Controller
         name="totalClasses"
         control={control}
@@ -108,13 +104,13 @@ function TotalClassesField() {
             variant="outlined"
             fullWidth
             disabled
-            error={!!errors.totalClasses}
+            error={Boolean(errors.totalClasses)}
             helperText={errors.totalClasses?.message}
             sx={quotaInputSx}
           />
         )}
       />
-    </QuotaFormField>
+    </QuotaFormFieldDesktop>
   );
 }
 
@@ -132,40 +128,21 @@ function ClassesLeftField() {
   }
 
   return (
-    <QuotaFormField
+    <QuotaFormFieldDesktop
       label={t.fields.classesLeft}
-      extraLabel={
-        fieldDisabled ? null : (
-          <Box
-            sx={theme => ({
-              display: { xs: "flex", md: "none" },
-              alignItems: "center",
-              gap: 0.5,
-              color: theme.palette.tertiary,
-              mb: 0.5,
-            })}
-          >
-            <SyncProblemOutlined sx={{ fontSize: 16 }} />
-            <Typography variant="labelSm" sx={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              {t.fields.overrideActive}
-            </Typography>
-          </Box>
-        )
-      }
       helperText={
         fieldDisabled ? null : (
           <Typography
             variant="bodyMd"
             sx={theme => ({
-              color: { xs: theme.palette.tertiaryContainer, md: theme.palette.onSurfaceVariant },
+              color: theme.palette.onSurfaceVariant,
               fontStyle: "italic",
               display: "flex",
               alignItems: "flex-start",
               gap: 0.5,
-              mt: { xs: 1, md: 0 },
+              mt: 0,
             })}
           >
-            <InfoOutlined sx={{ display: { xs: "block", md: "none" }, fontSize: 14, mt: 0.5 }} />
             {t.fields.overrideNotice}
           </Typography>
         )
@@ -181,14 +158,14 @@ function ClassesLeftField() {
             variant="outlined"
             fullWidth
             disabled={fieldDisabled}
-            error={!!errors.classesLeft}
+            error={Boolean(errors.classesLeft)}
             helperText={errors.classesLeft?.message}
             slotProps={{
               input: {
                 endAdornment: fieldDisabled ? undefined : (
                   <Box
                     sx={theme => ({
-                      display: { xs: "none", md: "flex" },
+                      display: "flex",
                       alignItems: "center",
                       gap: 0.5,
                       color: theme.palette.primary.main,
@@ -206,23 +183,23 @@ function ClassesLeftField() {
             sx={theme => ({
               "& .MuiOutlinedInput-root": {
                 borderRadius: "lg",
-                backgroundColor: { xs: "transparent", md: theme.palette.background.paper },
-                color: { xs: theme.palette.tertiary, md: theme.palette.primary.main },
+                backgroundColor: theme.palette.background.paper,
+                color: theme.palette.primary.main,
                 fontWeight: 700,
                 "& fieldset": {
-                  borderWidth: { xs: "0 0 2px 0", md: "1px" },
-                  borderColor: { xs: theme.palette.tertiary, md: theme.palette.border.light },
+                  borderWidth: "1px",
+                  borderColor: theme.palette.border.light,
                 },
               },
             })}
           />
         )}
       />
-    </QuotaFormField>
+    </QuotaFormFieldDesktop>
   );
 }
 
-export function CourseDetailsSection() {
+export function CourseDetailsSectionDesktop() {
   const t = useAppTranslation().dashboardTranslations.studentQuota;
   const { canViewTeacher, canViewQuota } = useQuotaFormAccess();
 
@@ -231,10 +208,10 @@ export function CourseDetailsSection() {
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 3, md: 4 } }}>
-      <SectionHeader title={t.sections.courseDetails} desktopIcon={AutoStoriesOutlined} mobileIcon={BookOutlined} />
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <SectionHeaderDesktop title={t.sections.courseDetails} desktopIcon={AutoStoriesOutlined} />
 
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: { xs: 2, md: 4 } }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 4 }}>
         <TeacherField />
         <TotalClassesField />
         <ClassesLeftField />

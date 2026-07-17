@@ -1,13 +1,13 @@
 "use client";
 
 import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import type { ParentRulesViewModel } from "@/frontend/common/views/dashboard/parent/rules/useParentRulesViewModel";
-import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 
 export function ParentRulesMobileView({ labels, handbookLoading, onDownloadHandbook }: Readonly<ParentRulesViewModel>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
       {handbookLoading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
@@ -30,6 +30,6 @@ export function ParentRulesMobileView({ labels, handbookLoading, onDownloadHandb
           </Button>
         </Stack>
       </SectionPanel>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

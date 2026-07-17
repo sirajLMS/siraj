@@ -15,11 +15,11 @@ import {
 } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
-import { PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
+import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
-import { MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 import MobileScheduleList from "@/frontend/mobile/views/dashboard/teachers/schedule/weekly/mobileScheduleList.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -47,7 +47,7 @@ export function TeacherWeeklyScheduleViewMobile({
   const breadcrumbs = [{ label: t.breadcrumbs.teachers, href: "/teachers" }, { label: t.breadcrumbs.schedule }];
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader
         title={t.pageTitle(schedule.teacherName)}
         breadcrumbs={breadcrumbs}
@@ -148,6 +148,6 @@ export function TeacherWeeklyScheduleViewMobile({
           </Button>
         </DialogActions>
       </Dialog>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

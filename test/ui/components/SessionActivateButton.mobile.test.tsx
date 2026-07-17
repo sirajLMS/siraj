@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 
 expect.extend(matchers);
 
-import { SessionActivateButton } from "@/frontend/common/views/dashboard/teachers/dashboard/components/SessionActivateButton";
+import { SessionActivateButtonMobile as SessionActivateButton } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/sessionActivateButton.mobile";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -32,7 +32,7 @@ function renderButton(options: { disabled?: boolean; isConnecting?: boolean; onA
   return { onActivate };
 }
 
-describe("SessionActivateButton", () => {
+describe("SessionActivateButtonMobile", () => {
   test("renders activate button in ready state", () => {
     renderButton({ disabled: false, isConnecting: false });
 

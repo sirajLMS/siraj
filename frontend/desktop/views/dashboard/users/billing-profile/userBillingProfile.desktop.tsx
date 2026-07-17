@@ -3,10 +3,10 @@
 import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Button, TextField } from "@mui/material";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
-import { ParentInvoicesDataGrid } from "@/frontend/common/views/dashboard/billing/components/ParentInvoicesDataGrid";
 import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 import type { UserBillingProfileViewModel } from "@/frontend/common/views/dashboard/users/billing-profile/useUserBillingProfileViewModel";
+import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
+import { ParentInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/billing/components/parentInvoicesDataGrid.desktop";
 
 export function UserBillingProfileDesktopView({
   labels,
@@ -37,7 +37,7 @@ export function UserBillingProfileDesktopView({
   return (
     <PageContainer>
       <PageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser(userId)} />
-      <BillingMetricsRow metrics={metrics} loading={summaryLoading} />
+      <BillingMetricsRowDesktop metrics={metrics} loading={summaryLoading} />
       <SectionPanel
         title={labels.sections.invoiceHistory}
         subTitle={labels.sections.invoiceHistorySubtitle}
@@ -66,7 +66,7 @@ export function UserBillingProfileDesktopView({
           </Box>
         }
       >
-        <ParentInvoicesDataGrid
+        <ParentInvoicesDataGridDesktop
           rows={invoices}
           canView={canView}
           canSubmitProof={canSubmitProof}

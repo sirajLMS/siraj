@@ -2,7 +2,6 @@
 
 import { FilterListOutlined, IosShareOutlined } from "@mui/icons-material";
 import { Box, Grid, IconButton, Typography } from "@mui/material";
-import { PageContainer } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { ScheduleAlertsLabels } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsView";
 import type {
@@ -10,7 +9,7 @@ import type {
   AlertsMetric,
   ScheduleAlert,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
-import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import {
   AcademicScheduleCardListMobile,
   type AcademicScheduleCardListMobileLabels,
@@ -199,7 +198,7 @@ export function ScheduleAlertsViewMobile({
   };
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={2} paddingBottom={4}>
@@ -227,6 +226,6 @@ export function ScheduleAlertsViewMobile({
           cardListLabels={cardListLabels}
         />
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

@@ -2,11 +2,16 @@
 
 import { Box, Checkbox, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { TeacherDueRow } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
 import type { TeacherDuesViewModel } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/useTeacherDuesViewModel";
-import { MobileCardList, MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileContentStack,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 
 interface DueCardProps {
   readonly row: TeacherDueRow;
@@ -106,7 +111,7 @@ export function TeacherDuesMobileView({
   );
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobileContentStack>
         <MobilePageHeader title={labels.pageTitle} />
 
@@ -127,6 +132,6 @@ export function TeacherDuesMobileView({
           />
         </SectionPanel>
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

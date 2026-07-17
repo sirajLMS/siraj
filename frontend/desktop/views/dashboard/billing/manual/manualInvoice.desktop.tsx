@@ -4,8 +4,9 @@
 import { ArrowBackOutlined } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard, PageContainer, PageHeader } from "@/frontend/common/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { ManualInvoiceViewModel } from "@/frontend/common/views/dashboard/billing/manual/useManualInvoiceViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { BillingMonthSelectorDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/billingMonthSelector.desktop";
 import { InvoiceDraftSummaryCardDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/invoiceDraftSummaryCard.desktop";
 import { ManualInvoiceActionsDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceActions.desktop";
@@ -46,8 +47,8 @@ export function ManualInvoiceDesktopView({
   onSubmitAndSendEmailClick,
 }: Readonly<ManualInvoiceViewModel>) {
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={labels.pageTitle}
         subtitle={labels.pageSubtitle}
         actions={
@@ -73,7 +74,6 @@ export function ManualInvoiceDesktopView({
                 labels={labels}
                 parentOptions={parentOptions}
                 studentOptions={studentOptions}
-                draftCurrency={draftCurrency}
                 parentsLoading={parentsLoading}
                 studentsLoading={studentsLoading}
               />
@@ -97,6 +97,6 @@ export function ManualInvoiceDesktopView({
       </Box>
 
       <ManualInvoiceSupportCardsDesktop labels={labels} />
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

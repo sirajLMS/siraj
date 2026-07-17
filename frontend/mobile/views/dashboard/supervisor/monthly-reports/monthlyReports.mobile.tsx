@@ -2,10 +2,10 @@
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import { FilterButton, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import { FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/useMonthlyReportsViewModel";
-import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
@@ -27,7 +27,7 @@ export function MonthlyReportsMobileView({
   onGenerate,
 }: Readonly<MonthlyReportsViewModel>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobileContentStack>
         <MobilePageHeader title={labels.pageTitle} />
 
@@ -133,6 +133,6 @@ export function MonthlyReportsMobileView({
           </Grid>
         ) : null}
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

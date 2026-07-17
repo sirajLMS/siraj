@@ -22,7 +22,7 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { logger } from "@/frontend/common/utils/logger";
 import { CatalogDeleteDialog } from "@/frontend/common/views/dashboard/admin/payment-catalogs/components/CatalogDeleteDialog";
 import { CatalogEditDialog } from "@/frontend/common/views/dashboard/admin/payment-catalogs/components/CatalogEditDialog";
-import { PaymentCatalogAdminView } from "@/frontend/common/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminView";
+import { PaymentCatalogAdminView } from "@/frontend/common/views/dashboard/admin/payment-catalogs/paymentCatalogAdminView";
 import type {
   PaymentCatalogKind,
   PaymentCatalogRow,

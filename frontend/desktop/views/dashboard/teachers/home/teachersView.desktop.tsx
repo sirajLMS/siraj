@@ -3,13 +3,14 @@
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { PrimaryPageAction } from "@/frontend/common/components/ui/button/ActionButtons";
 import type {
   TeacherDirectoryMetrics,
   TeacherDirectoryRow,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { TeacherDataGrid } from "@/frontend/desktop/views/dashboard/teachers/home/components/teacherDataGrid.desktop";
 import { TeacherMetricsRow } from "@/frontend/desktop/views/dashboard/teachers/home/components/teacherMetricsRow.desktop";
 import { Link } from "@/shared/i18n/routing";
@@ -44,8 +45,8 @@ export function TeachersDesktopView({
   const t = useAppTranslation().dashboardTranslations.teachersDirectory;
 
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={t.pageTitle}
         subtitle={t.pageSubtitle}
         actions={
@@ -73,6 +74,6 @@ export function TeachersDesktopView({
           onPageChange={onPageChange}
         />
       </SectionPanel>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

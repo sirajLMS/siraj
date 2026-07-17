@@ -4,7 +4,7 @@ import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
 import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
 import { BillingMobileSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingMobileSearchBar";
@@ -16,6 +16,7 @@ import {
   MobileContentStack,
   MobileEmptyState,
   MobileFab,
+  MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
 import { AdminInvoiceMobileCard } from "@/frontend/mobile/views/dashboard/admin/billing/components/adminInvoiceCard.mobile";
@@ -217,7 +218,7 @@ export function AdminBillingMobileView({
 }: Readonly<AdminBillingViewModel>) {
   return (
     <>
-      <PageContainer>
+      <MobilePageContainer>
         <MobilePageHeader title={labels.adminPageTitle} subtitle={labels.adminPageSubtitle} edgeToEdge={false} />
         <MobileContentStack gap={3} paddingBottom={4}>
           {canViewExchangeRates ? <ExchangeRatesLink labels={labels} /> : null}
@@ -260,7 +261,7 @@ export function AdminBillingMobileView({
             />
           )}
         </MobileContentStack>
-      </PageContainer>
+      </MobilePageContainer>
       {canCreate && <MobileFab icon={<AddOutlined />} label={labels.manualInvoice} onClick={onManualInvoice} />}
     </>
   );

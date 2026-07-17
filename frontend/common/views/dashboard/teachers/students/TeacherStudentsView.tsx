@@ -18,7 +18,7 @@ const lazyViews = createLazyView<TeacherStudentsViewModel>(
   () =>
     import("@/frontend/desktop/views/dashboard/teachers/students/teacherStudentsView.desktop").then(m => ({
       default: m.TeacherStudentsDesktopView,
-    })),
+    }))
 );
 
 /**

@@ -2,15 +2,10 @@
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import {
-  FilterButton,
-  PageContainer,
-  PageHeader,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
+import { FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/useMonthlyReportsViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
@@ -32,8 +27,8 @@ export function MonthlyReportsDesktopView({
   onGenerate,
 }: Readonly<MonthlyReportsViewModel>) {
   return (
-    <PageContainer>
-      <PageHeader title={labels.pageTitle} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={labels.pageTitle} />
 
       <SectionPanel title={labels.reportTypeToggle}>
         <Stack sx={{ flexDirection: "row", gap: 2, alignItems: "center", flexWrap: "wrap", mb: 2 }}>
@@ -136,6 +131,6 @@ export function MonthlyReportsDesktopView({
           ))}
         </Grid>
       ) : null}
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

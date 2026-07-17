@@ -8,10 +8,10 @@ import {
   SchoolOutlined,
 } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
-import { MobileContentStack } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
 
 export function StudentProfileMobileView({
   profile,
@@ -21,16 +21,16 @@ export function StudentProfileMobileView({
 }: Readonly<StudentProfileViewModel>) {
   if (loading || !profile) {
     return (
-      <PageContainer>
+      <MobilePageContainer>
         <Typography variant="bodyMd" sx={{ p: 3 }}>
           {labels.loadingMessage}
         </Typography>
-      </PageContainer>
+      </MobilePageContainer>
     );
   }
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobileContentStack>
         <SectionPanel title={labels.personalInfo}>
           <Stack spacing={2}>
@@ -164,6 +164,6 @@ export function StudentProfileMobileView({
           {labels.cancel}
         </Button>
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

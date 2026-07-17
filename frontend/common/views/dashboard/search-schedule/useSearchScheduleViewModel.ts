@@ -1,11 +1,12 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
+import type { ErrorLike } from "@apollo/client";
 import { NetworkStatus } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import { useEffect, useMemo } from "react";
 import { AppPermission, type AvailabilitySearchInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
+import { type SearchScheduleDraftFilters, useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
 
 export interface SearchScheduleResultItem {
   readonly id?: string | null;
@@ -56,13 +57,13 @@ export interface SearchScheduleViewModel {
   readonly isInitialLoading: boolean;
   readonly isRefetching: boolean;
   readonly hasSearched: boolean;
-  readonly error: ReturnType<typeof useQuery>["error"];
+  readonly error: ErrorLike | undefined;
   readonly pageInfo: SearchSchedulePageInfo | null | undefined;
   readonly teacherCount: number;
   readonly showPaginationFooter: boolean;
-  readonly draft: ReturnType<typeof useSearchScheduleStore.getState>["draft"];
+  readonly draft: SearchScheduleDraftFilters;
   readonly hasHydrated: boolean;
-  readonly onDraftChange: (draft: Partial<ReturnType<typeof useSearchScheduleStore.getState>["draft"]>) => void;
+  readonly onDraftChange: (draft: Partial<SearchScheduleDraftFilters>) => void;
   readonly onSearch: () => void;
   readonly onPageChange: (page: number) => void;
   readonly requiredPermission: AppPermission;

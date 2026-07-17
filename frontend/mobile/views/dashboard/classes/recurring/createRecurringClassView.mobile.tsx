@@ -6,7 +6,7 @@ import { alpha, Box, IconButton, Snackbar, Typography, useTheme } from "@mui/mat
 import { styled } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import { createRecurringClassSchema } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
@@ -15,6 +15,7 @@ import {
   emptyRecurringMeetingConfigState,
   type RecurringMeetingConfigFormState,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { RecurringClassFormMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/recurringClassForm.mobile";
 import type { CreateRecurringClassLabels } from "@/shared/locale";
 
@@ -230,8 +231,8 @@ export function CreateRecurringClassViewMobile({
   }, [errorMessage, onDismissError]);
 
   return (
-    <PageContainer>
-      <PageHeader
+    <MobilePageContainer>
+      <MobilePageHeader
         title={labels.title}
         titleVariant="headlineMd"
         actions={
@@ -269,6 +270,6 @@ export function CreateRecurringClassViewMobile({
 
       <SuccessSnackbar open={showSuccess} onClose={onDismissSuccess} labels={labels.addedSuccessfully} />
       <ErrorSnackbar open={!!errorMessage} onClose={onDismissError} message={errorMessage ?? ""} />
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

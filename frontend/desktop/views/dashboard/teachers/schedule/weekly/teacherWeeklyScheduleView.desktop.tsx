@@ -15,10 +15,11 @@ import {
 } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
-import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
+import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import WeeklyScheduleGrid from "@/frontend/desktop/views/dashboard/teachers/schedule/weekly/components/weeklyScheduleGrid.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -46,8 +47,8 @@ export function TeacherWeeklyScheduleViewDesktop({
   const breadcrumbs = [{ label: t.breadcrumbs.teachers, href: "/teachers" }, { label: t.breadcrumbs.schedule }];
 
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={t.pageTitle(schedule.teacherName)}
         breadcrumbs={breadcrumbs}
         actions={
@@ -144,6 +145,6 @@ export function TeacherWeeklyScheduleViewDesktop({
           </Button>
         </DialogActions>
       </Dialog>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

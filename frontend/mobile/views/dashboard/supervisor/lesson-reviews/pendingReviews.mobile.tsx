@@ -3,11 +3,16 @@
 import { ChevronRightOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { FilterButton, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import { FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import type { PendingReviewsViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";
-import { MobileCardList, MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileContentStack,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 import { LessonReportDetailPanelMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/lessonReportDetailPanel.mobile";
 
 interface ReviewCardProps {
@@ -118,7 +123,7 @@ export function PendingReviewsMobileView({
   );
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobileContentStack>
         <MobilePageHeader title={labels.pageTitle} />
 
@@ -146,6 +151,6 @@ export function PendingReviewsMobileView({
 
         <LessonReportDetailPanelMobile report={selectedReport} labels={labels} />
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

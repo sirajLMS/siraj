@@ -2,9 +2,9 @@
 
 import { CalendarMonthOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashboard/supervisor/dashboard/useSupervisorDashboardViewModel";
-import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { DuesSummaryCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/duesSummaryCard.mobile";
 import { PendingReviewsHeroCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/pendingReviewsHeroCard.mobile";
 
@@ -21,7 +21,7 @@ export function SupervisorDashboardMobileView({
   onGoToMonthlyReports,
 }: Readonly<SupervisorDashboardViewModel>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobileContentStack>
         <MobilePageHeader title={labels.pageTitle} subtitle={labels.welcomeMessage(userName ?? "")} />
 
@@ -91,6 +91,6 @@ export function SupervisorDashboardMobileView({
           )}
         </SectionPanel>
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

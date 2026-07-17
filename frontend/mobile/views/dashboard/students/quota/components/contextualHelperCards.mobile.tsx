@@ -1,17 +1,19 @@
+"use client";
+
 import { InfoOutlined, PublicOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { useAppTranslation } from "@/shared/locale";
 
-export function ContextualHelperCards() {
+export function ContextualHelperCardsMobile() {
   const t = useAppTranslation().dashboardTranslations.studentQuota.info;
 
   return (
     <Box
       sx={{
-        mt: { xs: 4, md: 6 },
-        display: "grid",
-        gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-        gap: { xs: 2, md: 4 },
+        mt: 4,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
       }}
     >
       <Box
@@ -26,7 +28,7 @@ export function ContextualHelperCards() {
       >
         <Box
           sx={theme => ({
-            display: { xs: "flex", md: "none" },
+            display: "flex",
             width: 48,
             height: 48,
             alignItems: "center",
@@ -38,13 +40,6 @@ export function ContextualHelperCards() {
         >
           <InfoOutlined sx={theme => ({ color: theme.palette.onSecondaryContainer })} />
         </Box>
-        <InfoOutlined
-          sx={theme => ({
-            display: { xs: "none", md: "block" },
-            color: theme.palette.primary.main,
-            flexShrink: 0,
-          })}
-        />
         <Box>
           <Typography
             variant="labelMd"
@@ -74,7 +69,7 @@ export function ContextualHelperCards() {
       >
         <Box
           sx={theme => ({
-            display: { xs: "flex", md: "none" },
+            display: "flex",
             width: 48,
             height: 48,
             alignItems: "center",
@@ -86,13 +81,6 @@ export function ContextualHelperCards() {
         >
           <PublicOutlined sx={theme => ({ color: theme.palette.onSecondaryContainer })} />
         </Box>
-        <PublicOutlined
-          sx={theme => ({
-            display: { xs: "none", md: "block" },
-            color: theme.palette.onSurfaceVariant,
-            flexShrink: 0,
-          })}
-        />
         <Box>
           <Typography
             variant="labelMd"

@@ -2,9 +2,9 @@
 
 import { CloudUploadOutlined, ExpandMoreOutlined } from "@mui/icons-material";
 import { Accordion, AccordionDetails, AccordionSummary, Box } from "@mui/material";
-import { BaseCard, PageContainer } from "@/frontend/common/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { ResourcesViewModel } from "@/frontend/common/views/dashboard/resources/useResourcesViewModel";
-import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { ResourceDeleteDialogMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceDeleteDialog.mobile";
 import { ResourceGovernancePanelMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceGovernancePanel.mobile";
 import { ResourceLibraryListMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceLibraryList.mobile";
@@ -34,7 +34,7 @@ export function ResourcesMobileView({
   onCardClick,
 }: Readonly<ResourcesViewModel>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={3} paddingBottom={4}>
@@ -87,6 +87,6 @@ export function ResourcesMobileView({
         onConfirm={onDeleteConfirm}
         loading={isDeleting}
       />
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

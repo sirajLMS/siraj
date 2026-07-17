@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, Grid, Stack, Typography } from "@mui/material";
-import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { FutureClassCardMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/futureClassCard.mobile";
 import { ImportantNotesMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/importantNotes.mobile";
 import { JumpToDateHeaderMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.mobile";
@@ -25,8 +25,8 @@ export function FutureScheduleViewMobile({
   const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
 
   return (
-    <PageContainer>
-      <PageHeader title={t.pageTitle} />
+    <MobilePageContainer>
+      <MobilePageHeader title={t.pageTitle} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
@@ -95,6 +95,6 @@ export function FutureScheduleViewMobile({
           </Stack>
         </Grid>
       </Grid>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

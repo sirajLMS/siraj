@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Grid, Stack, Typography } from "@mui/material";
-import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
 import { FutureClassCardDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/futureClassCard.desktop";
 import { ImportantNotesDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/importantNotes.desktop";
@@ -25,8 +24,8 @@ export function FutureScheduleViewDesktop({
   const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
 
   return (
-    <PageContainer>
-      <PageHeader title={t.pageTitle} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={t.pageTitle} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
@@ -95,6 +94,6 @@ export function FutureScheduleViewDesktop({
           </Stack>
         </Grid>
       </Grid>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

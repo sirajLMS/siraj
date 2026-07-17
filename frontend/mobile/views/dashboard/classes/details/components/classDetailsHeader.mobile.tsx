@@ -1,9 +1,9 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { PageHeader } from "@/frontend/common/components/ui";
 import type { ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classDetailsContentPaddingSx } from "@/frontend/common/views/dashboard/classes/details/classDetailsMobileLayout";
+import { MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 interface ClassDetailsHeaderMobileProps {
@@ -16,7 +16,7 @@ export function ClassDetailsHeaderMobile({ instance, canOverride }: ClassDetails
 
   return (
     <Box sx={classDetailsContentPaddingSx}>
-      <PageHeader
+      <MobilePageHeader
         title={instance.courseName ?? ""}
         subtitle={canOverride ? t.pageSubtitleAdmin : t.pageSubtitleTeacher}
         titleVariant="headlineMd"

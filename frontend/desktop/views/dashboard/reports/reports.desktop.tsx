@@ -2,8 +2,9 @@
 
 import { FileDownloadOutlined, PrintOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
-import { BaseCard, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
+import { BaseCard, FilterButton, SectionPanel } from "@/frontend/common/components/ui";
 import type { ReportsViewModel } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { EngagementRateCardDesktop } from "@/frontend/desktop/views/dashboard/reports/components/engagementRateCard.desktop";
 import { FinancialDistributionCardDesktop } from "@/frontend/desktop/views/dashboard/reports/components/financialDistributionCard.desktop";
 import { ReportFiltersFormDesktop } from "@/frontend/desktop/views/dashboard/reports/components/reportFiltersForm.desktop";
@@ -31,8 +32,8 @@ export function ReportsDesktopView({
   onRowClick,
 }: Readonly<ReportsViewModel>) {
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={labels.pageTitle}
         subtitle={labels.pageSubtitle}
         actions={
@@ -93,6 +94,6 @@ export function ReportsDesktopView({
           />
         </Grid>
       </Grid>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

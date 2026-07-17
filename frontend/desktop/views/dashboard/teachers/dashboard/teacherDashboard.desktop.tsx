@@ -1,7 +1,6 @@
 "use client";
 
 import { Alert, Box } from "@mui/material";
-import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
 import { ParentSupportFab } from "@/frontend/common/views/dashboard/parent/dashboard/components/ParentSupportFab";
@@ -10,6 +9,7 @@ import {
   teacherDashboardContentPaddingSx,
   teacherDashboardPageContainerSx,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { ActivationPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/activationPolicyPanel.desktop";
 import { MissedClassAlertBannerDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.desktop";
 import { StudentProgressFeedDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/studentProgressFeed.desktop";
@@ -44,14 +44,14 @@ export function TeacherDashboardDesktopView({
     <>
       {missedAlert && <MissedClassAlertBannerDesktop alert={missedAlert} labels={labels.alert} fixed />}
 
-      <PageContainer sx={mergeSx(teacherDashboardPageContainerSx, missedAlert ? { pt: 10 } : undefined)}>
+      <DesktopPageContainer sx={mergeSx(teacherDashboardPageContainerSx, missedAlert ? { pt: 10 } : undefined)}>
         {activationError && (
           <Alert severity="error" sx={teacherDashboardContentPaddingSx}>
             {activationError}
           </Alert>
         )}
 
-        <PageHeader title={labels.activeWelcome.title(userName)} />
+        <DesktopPageHeader title={labels.activeWelcome.title(userName)} />
 
         <DashboardMetricsSection
           title={labels.pageTitle}
@@ -100,7 +100,7 @@ export function TeacherDashboardDesktopView({
         />
 
         <ParentSupportFab label={labels.support.liveSupport} onClick={onSupport} />
-      </PageContainer>
+      </DesktopPageContainer>
     </>
   );
 }

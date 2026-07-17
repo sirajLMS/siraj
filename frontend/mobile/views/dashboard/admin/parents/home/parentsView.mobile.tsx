@@ -3,20 +3,14 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { InputAdornment, Stack, TextField } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import {
-  ExportButton,
-  FilterButton,
-  PageContainer,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
+import { ExportButton, FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
 import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
 import type { ParentsViewLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsView";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
-import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { ParentCardListMobile } from "@/frontend/mobile/views/dashboard/admin/parents/home/components/parentCardList.mobile";
 
 export interface ParentsViewMobileProps {
@@ -92,7 +86,7 @@ export function ParentsViewMobile({
   onResetFilters,
 }: Readonly<ParentsViewMobileProps>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader
         title={labels.pageTitle}
         subtitle={labels.pageSubtitle}
@@ -140,6 +134,6 @@ export function ParentsViewMobile({
           />
         </SectionPanel>
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

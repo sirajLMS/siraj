@@ -2,10 +2,11 @@
 
 import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Button, TextField } from "@mui/material";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import type { ParentBillingViewModel } from "@/frontend/common/views/dashboard/billing/useParentBillingViewModel";
 import { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
 import { ParentInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/billing/components/parentInvoicesDataGrid.desktop";
 
@@ -36,8 +37,8 @@ export function ParentBillingDesktopView({
   const listLoading = isSearchPending || (loading && invoices.length === 0);
 
   return (
-    <PageContainer>
-      <PageHeader title={labels.parentPageTitle} subtitle={labels.parentPageSubtitle} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={labels.parentPageTitle} subtitle={labels.parentPageSubtitle} />
       <BillingMetricsRowDesktop metrics={parentMetrics} loading={summaryLoading} />
       <SectionPanel
         title={labels.sections.invoiceHistory}
@@ -88,6 +89,6 @@ export function ParentBillingDesktopView({
           loading={listLoading}
         />
       </SectionPanel>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

@@ -1,10 +1,10 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { BaseCard, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { BaseCard, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { ParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
 import { SubmissionSuccessBanner } from "@/frontend/common/views/dashboard/shared/SubmissionSuccessBanner";
-import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { ComplaintFormFieldsMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintFormFields.mobile";
 import { ComplaintPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintPolicyPanel.mobile";
 import { ComplaintRecordCardListMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintRecordCardList.mobile";
@@ -35,7 +35,7 @@ export function ParentComplaintsMobileView({
         </Box>
       ) : null}
 
-      <PageContainer>
+      <MobilePageContainer>
         <MobilePageHeader title={labels.pageTitle} edgeToEdge={false} />
 
         <MobileContentStack gap={3} paddingBottom={4}>
@@ -69,7 +69,7 @@ export function ParentComplaintsMobileView({
 
           <ComplaintPolicyPanelMobile labels={labels} />
         </MobileContentStack>
-      </PageContainer>
+      </MobilePageContainer>
     </>
   );
 }

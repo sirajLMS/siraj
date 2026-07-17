@@ -1,7 +1,9 @@
+import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { classSubjectByIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { SubjectDetailView } from "@/frontend/common/views/dashboard/subjects/detail/SubjectDetailView";
+import { SubjectDetailContainer } from "@/frontend/common/views/dashboard/subjects/detail/SubjectDetailContainer";
 import type { SubjectDetailData, SubjectResourceItem } from "@/frontend/common/views/dashboard/subjects/detail/types";
 
 const mockResources: SubjectResourceItem[] = [
@@ -47,28 +49,16 @@ const mockSubject: SubjectDetailData = {
   resources: mockResources,
 };
 
-const baseArgs = {
-  subject: mockSubject,
-  resources: mockResources,
-  breadcrumbs: [
-    { label: "Subjects", href: "/subjects" },
-    { label: "Tajweed", current: true },
-  ],
-};
+function subjectByIdMocks(subject: SubjectDetailData | null) {
+  return [
+    {
+      request: { query: classSubjectByIdQueryDocument, variables: { id: subject?.id ?? "subj-1" } },
+      result: { data: { classSubject: subject } },
+    },
+  ];
+}
 
-const meta: Meta<typeof SubjectDetailView> = {
-  title: "Views/dashboard/subjects/detail/SubjectDetailView",
-  component: SubjectDetailView,
-  tags: ["autodocs"],
-  parameters: {
-    layout: "fullscreen",
-  },
-};
-
-export default meta;
-type Story = StoryObj<typeof SubjectDetailView>;
-
-const mockPermsDecorator = (Story: React.ComponentType) => {
+function applyMockPerms() {
   const perms = [AppPermission.SubjectsViewResources, AppPermission.SubjectsList];
   useUserStore.setState({
     permissions: perms,
@@ -91,27 +81,72 @@ const mockPermsDecorator = (Story: React.ComponentType) => {
       displayCurrency: CurrencyCode.Usd,
     },
   });
-  return <Story />;
+}
+
+const meta: Meta<typeof SubjectDetailContainer> = {
+  title: "Views/dashboard/subjects/detail/SubjectDetailView",
+  component: SubjectDetailContainer,
+  tags: ["autodocs"],
+  parameters: {
+    layout: "fullscreen",
+  },
 };
 
+export default meta;
+type Story = StoryObj<typeof SubjectDetailContainer>;
+
 export const Default: Story = {
-  args: baseArgs,
-  decorators: [mockPermsDecorator],
+  args: { subjectId: "subj-1" },
+  decorators: [
+    function DefaultDecorator(Story: React.ComponentType) {
+      applyMockPerms();
+      return (
+        <MockedProvider mocks={subjectByIdMocks(mockSubject)}>
+          <Story />
+        </MockedProvider>
+      );
+    },
+  ],
 };
 
 export const NoResources: Story = {
-  args: {
-    ...baseArgs,
-    resources: [],
-    subject: { ...mockSubject, resources: [] },
-  },
-  decorators: [mockPermsDecorator],
+  args: { subjectId: "subj-1" },
+  decorators: [
+    function NoResourcesDecorator(Story: React.ComponentType) {
+      applyMockPerms();
+      return (
+        <MockedProvider mocks={subjectByIdMocks({ ...mockSubject, resources: [] })}>
+          <Story />
+        </MockedProvider>
+      );
+    },
+  ],
 };
 
 export const NoCategory: Story = {
-  args: {
-    ...baseArgs,
-    subject: { ...mockSubject, category: null },
-  },
-  decorators: [mockPermsDecorator],
+  args: { subjectId: "subj-1" },
+  decorators: [
+    function NoCategoryDecorator(Story: React.ComponentType) {
+      applyMockPerms();
+      return (
+        <MockedProvider mocks={subjectByIdMocks({ ...mockSubject, category: null })}>
+          <Story />
+        </MockedProvider>
+      );
+    },
+  ],
+};
+
+export const NotFound: Story = {
+  args: { subjectId: "missing-subject" },
+  decorators: [
+    function NotFoundDecorator(Story: React.ComponentType) {
+      applyMockPerms();
+      return (
+        <MockedProvider mocks={subjectByIdMocks(null)}>
+          <Story />
+        </MockedProvider>
+      );
+    },
+  ],
 };

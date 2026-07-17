@@ -1,88 +1,32 @@
 "use client";
 
-import { DownloadOutlined, FolderOutlined } from "@mui/icons-material";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
-  Box,
-  Chip,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-} from "@mui/material";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import type {
-  SubjectDetailViewProps,
-  SubjectResourceItem,
-} from "@/frontend/common/views/dashboard/subjects/detail/types";
-import { useAppTranslation } from "@/shared/locale";
+  type SubjectDetailViewModel,
+  type UseSubjectDetailViewModelProps,
+  useSubjectDetailViewModel,
+} from "@/frontend/common/views/dashboard/subjects/detail/useSubjectDetailViewModel";
 
-function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) {
-  const t = useAppTranslation().dashboardTranslations.subjects.detail;
-  const handleDownload = () => {
-    if (resource.filePath) {
-      window.open(`/api/storage/files/` + `${resource.filePath}`, `_blank`, "noopener,noreferrer");
-    }
-  };
+export type { SubjectDetailViewModel };
 
-  return (
-    <ListItem
-      disablePadding
-      secondaryAction={
-        resource.filePath ? (
-          <IconButton edge="end" onClick={handleDownload} aria-label={t.download}>
-            <DownloadOutlined />
-          </IconButton>
-        ) : undefined
-      }
-    >
-      <ListItemButton onClick={handleDownload} disabled={!resource.filePath}>
-        <ListItemIcon sx={{ minWidth: 40 }}>
-          <FolderOutlined />
-        </ListItemIcon>
-        <ListItemText
-          primary={resource.displayName ?? t.untitledResource}
-          secondary={resource.resourceType ?? undefined}
-        />
-      </ListItemButton>
-    </ListItem>
-  );
-}
+const lazyViews = createLazyView<SubjectDetailViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/subjects/detail/subjectDetail.mobile").then(m => ({
+      default: m.SubjectDetailMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/subjects/detail/subjectDetail.desktop").then(m => ({
+      default: m.SubjectDetailDesktopView,
+    }))
+);
 
-export function SubjectDetailView({ subject, resources, breadcrumbs }: Readonly<SubjectDetailViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
-
-  return (
-    <PageContainer>
-      <PageHeader title={subject.name ?? ""} subtitle={subject.description ?? undefined} breadcrumbs={breadcrumbs} />
-
-      {subject.category && (
-        <Box sx={{ mt: 2, mb: 1 }}>
-          <Chip label={subject.category.name ?? ""} size="small" variant="outlined" />
-        </Box>
-      )}
-
-      <SectionPanel
-        title={t.detail.resourcesTitle}
-        subTitle={t.detail.resourcesSubtitle(resources.length)}
-        sx={{ mt: 3 }}
-      >
-        {resources.length === 0 ? (
-          <Box sx={{ py: 4, textAlign: "center" }}>
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {t.detail.noResources}
-            </Typography>
-          </Box>
-        ) : (
-          <List disablePadding>
-            {resources.map(resource => (
-              <ResourceItem key={resource.id ?? ""} resource={resource} />
-            ))}
-          </List>
-        )}
-      </SectionPanel>
-    </PageContainer>
-  );
+/**
+ * SubjectDetailView — pure switcher. The Container wires business logic +
+ * translations into the view-model hook and hands the result off to the
+ * lazily-loaded mobile/desktop tier views via `ResponsiveViewSwitch`.
+ */
+export function SubjectDetailView(props: Readonly<UseSubjectDetailViewModelProps>) {
+  const viewModel = useSubjectDetailViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

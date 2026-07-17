@@ -1,9 +1,9 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { BaseCard, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { BaseCard, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { ParentSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useParentSuggestionsViewModel";
-import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { SuggestionFormFieldsMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionFormFields.mobile";
 import { SuggestionHeroBannerMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionHeroBanner.mobile";
 import { SuggestionSocialProofMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionSocialProof.mobile";
@@ -18,7 +18,7 @@ export function ParentSuggestionsMobileView({
   onFormSubmit,
 }: Readonly<ParentSuggestionsViewModel>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} edgeToEdge={false} />
 
       <MobileContentStack gap={2} paddingBottom={12}>
@@ -43,6 +43,6 @@ export function ParentSuggestionsMobileView({
 
         <SuggestionSupportCardsMobile labels={labels} />
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

@@ -2,19 +2,14 @@
 
 import { Box, Typography } from "@mui/material";
 import { FormProvider } from "react-hook-form";
-import {
-  FormSuccessSnackbar,
-  PageContainer,
-  PageHeader,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
+import { FormSuccessSnackbar, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
 import { PaymentMethodSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/PaymentMethodSection";
 import { SalaryDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/SalaryDetailsSection";
 import { TeacherInfoSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/TeacherInfoSection";
 import type { TeacherOnboardingViewModel } from "@/frontend/common/views/dashboard/teachers/onboarding/useTeacherOnboardingViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 function OnboardingBanner() {
@@ -97,8 +92,8 @@ export function TeacherOnboardingDesktopView({
   onDismissSuccess,
 }: Readonly<TeacherOnboardingViewModel>) {
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={labels.pageTitle}
         subtitle={labels.pageSubtitle}
         actions={
@@ -154,6 +149,6 @@ export function TeacherOnboardingDesktopView({
         </Box>
       </FormProvider>
       <FormSuccessSnackbar open={showSuccess} message={labels.actions.successMessage} onClose={onDismissSuccess} />
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

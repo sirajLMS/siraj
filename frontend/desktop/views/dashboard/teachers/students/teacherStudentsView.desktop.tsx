@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
-import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import type { TeacherStudentsViewModel } from "@/frontend/common/views/dashboard/teachers/students/useTeacherStudentsViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 
 type StudentRow = TeacherStudentsViewModel["rows"][number];
 
@@ -40,23 +40,16 @@ function StudentRowCard({
  * Desktop variant of the Teacher Students view. Renders a vertical `Stack` of
  * outlined `Box` rows mirroring the original container layout.
  */
-export function TeacherStudentsDesktopView({
-  rows,
-  loading,
-  error,
-  labels,
-}: Readonly<TeacherStudentsViewModel>) {
+export function TeacherStudentsDesktopView({ rows, loading, error, labels }: Readonly<TeacherStudentsViewModel>) {
   return (
-    <PageContainer>
-      <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress />
         </Box>
       ) : null}
-      {error ? (
-        <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.failedToLoad}</Typography>
-      ) : null}
+      {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.failedToLoad}</Typography> : null}
       {!loading && !error ? (
         <Stack spacing={1}>
           {rows.length === 0 ? (
@@ -66,6 +59,6 @@ export function TeacherStudentsDesktopView({
           )}
         </Stack>
       ) : null}
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

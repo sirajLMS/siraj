@@ -2,9 +2,8 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import { PageContainer } from "@/frontend/common/components/ui";
 import type { MobileLayoutProps } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
-import { MobileContentStack, MobileFab, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobileFab, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { StatusTrackingCardList } from "@/frontend/mobile/views/dashboard/classes/status/tracking/components/statusTrackingCardList.mobile";
 
 /**
@@ -27,7 +26,7 @@ export function StatusTrackingMobileView({
   onSeeAll,
 }: Readonly<MobileLayoutProps>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={3} paddingBottom={12}>
@@ -45,6 +44,6 @@ export function StatusTrackingMobileView({
       </MobileContentStack>
 
       <MobileFab icon={<AddOutlined />} label={labels.newReport} onClick={onNewReport} />
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

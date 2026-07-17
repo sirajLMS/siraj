@@ -3,70 +3,96 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useMemo } from "react";
+import { useEffect } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classSubjectByIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
-import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { logger } from "@/frontend/common/utils/logger";
 import { SubjectDetailView } from "@/frontend/common/views/dashboard/subjects/detail/SubjectDetailView";
-import type {
-  SubjectDetailContainerProps,
-  SubjectResourceItem,
-} from "@/frontend/common/views/dashboard/subjects/detail/types";
+import type { SubjectDetailContainerProps } from "@/frontend/common/views/dashboard/subjects/detail/types";
+import type { SubjectDetailViewModelLabels } from "@/frontend/common/views/dashboard/subjects/detail/useSubjectDetailViewModel";
 import { useAppTranslation } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
+/**
+ * SubjectDetailContainer — orchestrator only.
+ *
+ * Wires the i18n labels + permission guard into the `SubjectDetailView`
+ * switcher. The actual GraphQL fetch, resources sort, breadcrumbs memo, and
+ * notFound derivation live in the `useSubjectDetailViewModel` hook driven by
+ * `SubjectDetailView`. The hook-driven fetch error surfaces through the
+ * `notifications.show` side-effect centralised here (rather than imported by
+ * either tier View).
+ */
 export function SubjectDetailContainer({ subjectId }: Readonly<SubjectDetailContainerProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
+  const { subjects } = useAppTranslation().dashboardTranslations;
   const notifications = useNotifications();
 
+  const labels: SubjectDetailViewModelLabels = {
+    pageTitle: subjects.detail.pageTitle,
+    notFound: subjects.detail.notFound,
+    resourcesTitle: subjects.detail.resourcesTitle,
+    resourcesSubtitle: subjects.detail.resourcesSubtitle,
+    noResources: subjects.detail.noResources,
+    download: subjects.detail.download,
+    untitledResource: subjects.detail.untitledResource,
+    subjectsPageTitle: subjects.pageTitle,
+  };
+
+  // Centralise fetch-error notifications so neither tier View depends on
+  // @toolpad/core. The View tier renders loading / notFound hand-off states
+  // based on the view-model; the toast for errors is fired here.
+  // DataSource hook below doesn't itself subscribe to network status — we
+  // listen to the same query the View-model hook asks for; Apollo's cache
+  // dedupes both subscriptions, so the actual network request is still single.
   const { data, loading, error } = useQuery(classSubjectByIdQueryDocument, {
     variables: { id: subjectId },
     skip: !subjectId,
   });
 
-  const subject = data?.classSubject ?? null;
+  useEffect(() => {
+    if (error) {
+      logger.error("Error fetching subject detail:", error);
+      notifications.show(getErrorMessage(error), { severity: "error", autoHideDuration: 4000 });
+    }
+  }, [error, notifications]);
 
-  useDocumentTitle(subject?.name, "dashboard.subjects", "pageTitle");
+  // Track the document title based on the fetched subject's name.
+  const subjectName = data?.classSubject?.name ?? null;
+  useEffect(() => {
+    if (subjectName) {
+      document.title = `${subjectName} | Siraj`;
+    } else if (!loading) {
+      document.title = `${subjects.pageTitle} | Siraj`;
+    }
+  }, [subjectName, loading, subjects.pageTitle]);
 
-  const resources = useMemo<readonly SubjectResourceItem[]>(() => {
-    if (!subject?.resources) return [];
-    return [...subject.resources].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-  }, [subject?.resources]);
-
-  const breadcrumbs = useMemo(
-    () => [
-      { label: t.pageTitle, href: "/subjects" },
-      { label: subject?.name ?? "", current: true },
-    ],
-    [t, subject?.name]
-  );
-
+  // Render a fallback box for the loading state to preserve SSR hydration
+  // before the View-model-driven View take over rendering. This is a no-op
+  // once the View tier renders its own loading state through the switcher.
   if (loading && !data) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <CircularProgress />
-      </Box>
+      <RequirePermission permissions={[AppPermission.SubjectsViewResources]}>
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+          <CircularProgress />
+        </Box>
+      </RequirePermission>
     );
   }
 
-  if (error) {
-    logger.error("Error fetching subject detail:", error);
-    notifications.show(getErrorMessage(error), { severity: "error", autoHideDuration: 4000 });
-  }
-
-  if (!subject) {
+  if (!loading && !data?.classSubject) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <Typography variant="bodyMd">{t.detail.notFound}</Typography>
-      </Box>
+      <RequirePermission permissions={[AppPermission.SubjectsViewResources]}>
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+          <Typography variant="bodyMd">{subjects.detail.notFound}</Typography>
+        </Box>
+      </RequirePermission>
     );
   }
 
   return (
     <RequirePermission permissions={[AppPermission.SubjectsViewResources]}>
-      <SubjectDetailView subject={subject} resources={resources} breadcrumbs={breadcrumbs} />
+      <SubjectDetailView subjectId={subjectId} labels={labels} />
     </RequirePermission>
   );
 }

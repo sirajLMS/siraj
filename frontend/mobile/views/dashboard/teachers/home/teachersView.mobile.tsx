@@ -2,7 +2,7 @@
 
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import type {
   TeacherDirectoryMetrics,
   TeacherDirectoryRow,
@@ -45,7 +45,7 @@ export function TeachersMobileView({
   const t = useAppTranslation().dashboardTranslations.teachersDirectory;
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader
         title={t.pageTitle}
         subtitle={t.pageSubtitle}
@@ -75,6 +75,6 @@ export function TeachersMobileView({
           onPageChange={onPageChange}
         />
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

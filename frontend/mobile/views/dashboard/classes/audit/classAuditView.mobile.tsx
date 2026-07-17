@@ -2,13 +2,14 @@
 
 import { Box, Chip, Grid, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { FilterButton, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { ClassAuditDetailsCard } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
 import type {
   ClassAuditDetailsLabels,
   ClassAuditViewProps,
 } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 import { RegisteredStudentsSection } from "@/frontend/common/views/dashboard/classes/audit/RegisteredStudentsSection";
+import { MobilePageContainer } from "@/frontend/mobile/components/ui";
 import { AdminNoteCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/adminNoteCard.mobile";
 import { CommunicationLogCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/communicationLogCard.mobile";
 import { OnlineMeetingCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/onlineMeetingCard.mobile";
@@ -69,7 +70,7 @@ export function ClassAuditViewMobile({
   const detailsLabels = buildDetailsLabels(labels);
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <Box sx={{ mb: 3 }}>
         <Box sx={{ mb: 2, display: "flex", gap: 1, alignItems: "center", justifyContent: "flex-end" }}>
           <StyledGenerateReportButton id="audit-generate-report-btn" onClick={onGenerateReport}>
@@ -125,6 +126,6 @@ export function ClassAuditViewMobile({
           />
         </Grid>
       </Grid>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

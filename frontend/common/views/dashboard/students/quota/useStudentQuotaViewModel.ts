@@ -21,6 +21,7 @@ export interface UseStudentQuotaViewModelProps {
   readonly onSave: (data: StudentQuotaFormData) => Promise<void>;
   readonly onCancel: () => void;
   readonly onEditAvatar?: () => void;
+  readonly isLoading?: boolean;
 }
 
 export interface StudentQuotaViewModel {
@@ -30,6 +31,7 @@ export interface StudentQuotaViewModel {
   readonly readOnly: boolean;
   readonly isSaving: boolean;
   readonly isSaved: boolean;
+  readonly isLoading: boolean;
   readonly canEditIdentity: boolean;
   readonly canEditQuota: boolean;
   readonly canViewQuota: boolean;
@@ -44,7 +46,17 @@ export function useStudentQuotaViewModel(props: Readonly<UseStudentQuotaViewMode
   const t = useAppTranslation().dashboardTranslations.studentQuota;
   const { canView, canEdit } = useStudentFieldAccess();
 
-  const { studentData, isSaving, isSaved, embedded = false, readOnly = false, onSave, onCancel, onEditAvatar } = props;
+  const {
+    studentData,
+    isSaving,
+    isSaved,
+    embedded = false,
+    readOnly = false,
+    onSave,
+    onCancel,
+    onEditAvatar,
+    isLoading = false,
+  } = props;
 
   const canEditIdentity = canEdit("student_identity");
   const canEditQuota = canEdit("student_quota_edit");
@@ -92,6 +104,7 @@ export function useStudentQuotaViewModel(props: Readonly<UseStudentQuotaViewMode
     readOnly,
     isSaving,
     isSaved,
+    isLoading,
     canEditIdentity,
     canEditQuota,
     canViewQuota,

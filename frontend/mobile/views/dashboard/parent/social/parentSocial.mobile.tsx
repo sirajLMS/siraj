@@ -1,10 +1,10 @@
 "use client";
 
 import { Box, CircularProgress, Link, Stack, Typography } from "@mui/material";
-import { PageContainer, PhoneDisplay, SectionPanel } from "@/frontend/common/components/ui";
+import { PhoneDisplay, SectionPanel } from "@/frontend/common/components/ui";
 import { isSafeUrl } from "@/frontend/common/lib/safeRedirect";
-import { MobilePageHeader } from "@/frontend/mobile/components/ui";
 import type { ParentSocialViewModel } from "@/frontend/common/views/dashboard/parent/social/useParentSocialViewModel";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 
 function SocialLinkMobile({ label, value }: { readonly label: string; readonly value: string | null | undefined }) {
   if (!value) return null;
@@ -66,7 +66,7 @@ function WhatsAppLinkMobile({ label, value }: { readonly label: string; readonly
 
 export function ParentSocialMobileView({ labels, loading, error, profile }: Readonly<ParentSocialViewModel>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
@@ -97,6 +97,6 @@ export function ParentSocialMobileView({ labels, loading, error, profile }: Read
           </SectionPanel>
         </Stack>
       ) : null}
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

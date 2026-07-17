@@ -1,11 +1,12 @@
 "use client";
 
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import type { ReportsViewModel } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
 import {
   MobileCardList,
   MobileCardListItem,
   MobileContentStack,
+  MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
 import { EngagementRateCardMobile } from "@/frontend/mobile/views/dashboard/reports/components/engagementRateCard.mobile";
@@ -33,7 +34,7 @@ export function ReportsMobileView({
   onRowClick,
 }: Readonly<ReportsViewModel>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={3} paddingBottom={4}>
@@ -84,6 +85,6 @@ export function ReportsMobileView({
           />
         </SectionPanel>
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

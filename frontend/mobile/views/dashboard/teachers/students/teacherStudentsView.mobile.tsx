@@ -1,8 +1,13 @@
 "use client";
 
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { MobileCardList, MobileCardListItem, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import type { TeacherStudentsViewModel } from "@/frontend/common/views/dashboard/teachers/students/useTeacherStudentsViewModel";
+import {
+  MobileCardList,
+  MobileCardListItem,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 
 type StudentRow = TeacherStudentsViewModel["rows"][number];
 
@@ -33,12 +38,7 @@ function StudentCard({
  * Mobile variant of the Teacher Students view. Uses `MobileCardList` + edge-
  * to-edge `MobileCardListItem` for each assigned student row.
  */
-export function TeacherStudentsMobileView({
-  rows,
-  loading,
-  error,
-  labels,
-}: Readonly<TeacherStudentsViewModel>) {
+export function TeacherStudentsMobileView({ rows, loading, error, labels }: Readonly<TeacherStudentsViewModel>) {
   return (
     <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
@@ -47,9 +47,7 @@ export function TeacherStudentsMobileView({
           <CircularProgress />
         </Box>
       ) : null}
-      {error ? (
-        <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.failedToLoad}</Typography>
-      ) : null}
+      {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.failedToLoad}</Typography> : null}
       {!loading && !error ? (
         <MobileCardList
           rows={rows}

@@ -2,7 +2,6 @@
 
 import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Grid } from "@mui/material";
-import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import type { TeacherReassignmentViewModel } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
 import { CurrentTeacherCardDesktop } from "@/frontend/desktop/views/dashboard/teachers/reassignment/components/currentTeacherCard.desktop";
 import { ManagementControlsCardDesktop } from "@/frontend/desktop/views/dashboard/teachers/reassignment/components/managementControlsCard.desktop";
@@ -28,8 +27,8 @@ export function TeacherReassignmentViewDesktop({
   ];
 
   return (
-    <PageContainer>
-      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} breadcrumbs={breadcrumbs} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={t.pageTitle} subtitle={t.pageSubtitle} breadcrumbs={breadcrumbs} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 4 }}>
@@ -79,6 +78,6 @@ export function TeacherReassignmentViewDesktop({
           </Box>
         </Grid>
       </Grid>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

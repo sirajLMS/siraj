@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, Typography } from "@mui/material";
-import { PageContainer, StatusBadge } from "@/frontend/common/components/ui";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { AdminSuggestionRow } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
 import type { SuggestionsAdminLabels } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
@@ -15,6 +15,7 @@ import {
   MobileCardListItem,
   MobileContentStack,
   MobileEmptyState,
+  MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
 import { SuggestionsMetricsRowMobile } from "@/frontend/mobile/views/dashboard/suggestions/components/suggestionsMetricsRow.mobile";
@@ -236,7 +237,7 @@ export function AdminSuggestionsMobileView({
   onDelete,
 }: Readonly<AdminSuggestionsViewModel>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={2} paddingBottom={4}>
@@ -268,6 +269,6 @@ export function AdminSuggestionsMobileView({
           onDelete={onDelete}
         />
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

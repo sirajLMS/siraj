@@ -1,5 +1,5 @@
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ManagersFilterBar } from "@/frontend/common/views/dashboard/managers/home/ManagersFilterBar";
 import { ManagersMetrics } from "@/frontend/common/views/dashboard/managers/home/ManagersMetrics";
@@ -9,7 +9,7 @@ import type {
   ManagerStatusFilter,
   NonNullableManagerDirectoryMetrics,
 } from "@/frontend/common/views/dashboard/managers/home/types";
-import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { ManagersCardListMobile } from "@/frontend/mobile/views/dashboard/managers/home/components/managersCardList.mobile";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
@@ -51,7 +51,7 @@ export function ManagersViewMobile({
   );
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={t.mobileTitle} subtitle={t.pageSubtitle} actions={actions} />
 
       <ManagersMetrics metrics={metrics} />
@@ -72,6 +72,6 @@ export function ManagersViewMobile({
           onPageChange={onPageChange}
         />
       </SectionPanel>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

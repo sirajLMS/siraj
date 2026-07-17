@@ -2,10 +2,10 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { CategoriesSectionMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/categoriesSection.mobile";
 import { SubjectCardMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/subjectCard.mobile";
 import { useAppTranslation } from "@/shared/locale";
@@ -45,7 +45,7 @@ export function SubjectsViewMobile({
   );
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader
         title={t.pageTitle}
         subtitle={t.pageSubtitle}
@@ -115,6 +115,6 @@ export function SubjectsViewMobile({
           </Grid>
         );
       })()}
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

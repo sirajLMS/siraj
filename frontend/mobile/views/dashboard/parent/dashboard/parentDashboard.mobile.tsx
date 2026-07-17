@@ -1,9 +1,9 @@
 "use client";
 
-import { PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import type { ParentDashboardViewModel } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
-import { MobileContentStack } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
 import { AcademicProgressSummaryMobile } from "@/frontend/mobile/views/dashboard/parent/dashboard/components/academicProgressSummary.mobile";
 import { ParentDashboardMetricsRowMobile } from "@/frontend/mobile/views/dashboard/parent/dashboard/components/parentDashboardMetrics.mobile";
 import { ParentScheduleListMobile } from "@/frontend/mobile/views/dashboard/parent/dashboard/components/parentScheduleList.mobile";
@@ -55,7 +55,7 @@ export function ParentDashboardMobileView({
   pageCount,
 }: Readonly<ParentDashboardViewModel>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobileContentStack>
         <ParentWelcomeHeroMobile
           userName={userName}
@@ -80,6 +80,6 @@ export function ParentDashboardMobileView({
           onDownloadReport={onDownloadReport}
         />
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

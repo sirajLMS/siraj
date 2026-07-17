@@ -1,9 +1,8 @@
 "use client";
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import { PageContainer } from "@/frontend/common/components/ui";
 import type { AdminComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useAdminComplaintsViewModel";
-import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { ComplaintQueueCardListMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintQueueCardList.mobile";
 import { ComplaintsMetricsRowMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintsMetricsRow.mobile";
 import { ComplaintsSearchBarMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintsSearchBar.mobile";
@@ -33,7 +32,7 @@ export function AdminComplaintsMobileView({
   onDeleteDialogConfirm,
 }: Readonly<AdminComplaintsViewModel>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={3} paddingBottom={4}>
@@ -83,6 +82,6 @@ export function AdminComplaintsMobileView({
           </DialogActions>
         </Dialog>
       ) : null}
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

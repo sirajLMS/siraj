@@ -1,10 +1,10 @@
 "use client";
 
 import { Alert, Box } from "@mui/material";
-import { PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { PermissionManagementViewModel } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
 import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
-import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { PermissionManagementDialogsMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionManagementDialogs.mobile";
 import { PermissionTabContentMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionTabContent.mobile";
 import { SingleGroupViewMobile } from "@/frontend/mobile/views/dashboard/permissions/components/singleGroupView.mobile";
@@ -72,7 +72,7 @@ export function PermissionManagementMobileView({
     ) : null;
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       {activeGroup ? (
         <SingleGroupViewMobile
           group={activeGroup}
@@ -137,6 +137,6 @@ export function PermissionManagementMobileView({
         onAssignGroup={onAssignGroup}
         onUpdateOverrides={onUpdateOverrides}
       />
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

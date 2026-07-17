@@ -3,13 +3,7 @@
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import {
-  DateNavigator,
-  PageContainer,
-  PaginationControls,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
+import { DateNavigator, PaginationControls, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
@@ -210,7 +204,7 @@ export function TeacherDashboardMobileView({
         </Box>
       )}
 
-      <PageContainer sx={teacherDashboardPageContainerSx}>
+      <MobilePageContainer sx={teacherDashboardPageContainerSx}>
         {activationError && (
           <Alert severity="error" sx={teacherDashboardContentPaddingSx}>
             {activationError}
@@ -257,7 +251,7 @@ export function TeacherDashboardMobileView({
             onContactCoordinator={onContactCoordinator}
           />
         </MobileContentStack>
-      </PageContainer>
+      </MobilePageContainer>
     </>
   );
 }

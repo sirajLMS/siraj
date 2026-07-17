@@ -1,6 +1,7 @@
 "use client";
 
-import { BookOutlined, EditNoteOutlined, InfoOutlined, SyncProblemOutlined } from "@mui/icons-material";
+import { useQuery } from "@apollo/client/react";
+import { BookOutlined, InfoOutlined, SyncProblemOutlined } from "@mui/icons-material";
 import {
   Box,
   CircularProgress,
@@ -12,15 +13,14 @@ import {
   Typography,
 } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
-import { useQuery } from "@apollo/client/react";
 import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/components/quotaFieldStyles";
 import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/quotaFormAccessContext";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
-import { useAppTranslation } from "@/shared/locale";
 import { QuotaFormFieldMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/quotaFormField.mobile";
 import { SectionHeaderMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/sectionHeader.mobile";
+import { useAppTranslation } from "@/shared/locale";
 
 function TeacherField() {
   const t = useAppTranslation().dashboardTranslations.studentQuota;

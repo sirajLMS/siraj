@@ -2,9 +2,9 @@
 
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard, PageContainer } from "@/frontend/common/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { ManualInvoiceViewModel } from "@/frontend/common/views/dashboard/billing/manual/useManualInvoiceViewModel";
-import { MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { BillingMonthSelectorMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/billingMonthSelector.mobile";
 import { InvoiceDraftSummaryCardMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/invoiceDraftSummaryCard.mobile";
 import { ManualInvoiceActionsMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceActions.mobile";
@@ -42,7 +42,7 @@ export function ManualInvoiceMobileView({
   onSubmitAndSendEmailClick,
 }: Readonly<ManualInvoiceViewModel>) {
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <Box
@@ -79,6 +79,6 @@ export function ManualInvoiceMobileView({
           />
         </StyledFormFieldset>
       </Box>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

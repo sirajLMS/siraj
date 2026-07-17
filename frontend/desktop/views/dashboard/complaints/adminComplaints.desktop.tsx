@@ -1,8 +1,9 @@
 "use client";
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import type { AdminComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useAdminComplaintsViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { ComplaintQueueCardListDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintQueueCardList.desktop";
 import { ComplaintsMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintsMetricsRow.desktop";
 import { ComplaintsSearchBarDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintsSearchBar.desktop";
@@ -32,8 +33,8 @@ export function AdminComplaintsDesktopView({
   onDeleteDialogConfirm,
 }: Readonly<AdminComplaintsViewModel>) {
   return (
-    <PageContainer>
-      <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
       <ComplaintsMetricsRowDesktop summary={summary} labels={labels} />
 
@@ -83,6 +84,6 @@ export function AdminComplaintsDesktopView({
           </DialogActions>
         </Dialog>
       ) : null}
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

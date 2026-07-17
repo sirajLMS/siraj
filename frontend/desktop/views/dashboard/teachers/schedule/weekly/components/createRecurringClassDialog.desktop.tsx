@@ -500,7 +500,7 @@ function DialogFormContent({
           timezone={state.timezone}
           setTimezone={state.setTimezone}
           classType={state.classType}
-          setClassType={state.setClassType}
+          setClassType={value => state.setClassType(value as ClassTypeEnum)}
           mutationLoading={mutationLoading}
           t={t}
         />

@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, CircularProgress } from "@mui/material";
-import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import type { TeacherRulesViewModel } from "@/frontend/common/views/dashboard/teachers/rules/useTeacherRulesViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { ActivationPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/activationPolicyPanel.desktop";
 
 /**
@@ -19,8 +19,8 @@ export function TeacherRulesDesktopView({
   onContactCoordinator,
 }: Readonly<TeacherRulesViewModel>) {
   return (
-    <PageContainer>
-      <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
       {handbookLoading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress size={24} />
@@ -32,6 +32,6 @@ export function TeacherRulesDesktopView({
         onDownloadHandbook={onDownloadHandbook}
         onContactCoordinator={onContactCoordinator}
       />
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

@@ -3,11 +3,11 @@
 import { CalendarMonthOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { UpcomingLessonRow } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
-import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
 import { NextClassJoinCard } from "@/frontend/mobile/views/dashboard/student/dashboard/components/nextClassJoinCard.mobile";
 
 interface MobileUpcomingItemProps {
@@ -129,16 +129,16 @@ export function StudentDashboardMobileView({
 }: Readonly<StudentDashboardViewModel>) {
   if (loading && !nextLesson) {
     return (
-      <PageContainer>
+      <MobilePageContainer>
         <Typography variant="bodyMd" sx={{ p: 3 }}>
           {labels.loadingMessage}
         </Typography>
-      </PageContainer>
+      </MobilePageContainer>
     );
   }
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobileContentStack>
         <Box>
           <Typography variant="headlineLg" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
@@ -208,6 +208,6 @@ export function StudentDashboardMobileView({
           {labels.viewAllHistory}
         </Button>
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

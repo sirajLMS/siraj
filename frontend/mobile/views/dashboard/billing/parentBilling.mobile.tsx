@@ -2,11 +2,16 @@
 
 import { AddCardOutlined } from "@mui/icons-material";
 import { Typography } from "@mui/material";
-import { PageContainer } from "@/frontend/common/components/ui";
 import type { ParentBillingViewModel } from "@/frontend/common/views/dashboard/billing/useParentBillingViewModel";
 import { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
-import { MobileContentStack, MobileEmptyState, MobileFab, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileContentStack,
+  MobileEmptyState,
+  MobileFab,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 import { BillingMetricsRowMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMetricsRow.mobile";
 import { BillingMobileSearchBarMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMobileSearchBar.mobile";
 import { ParentInvoicesCardListMobile } from "@/frontend/mobile/views/dashboard/billing/components/parentInvoicesCardList.mobile";
@@ -40,7 +45,7 @@ export function ParentBillingMobileView({
 
   return (
     <>
-      <PageContainer>
+      <MobilePageContainer>
         <MobilePageHeader title={labels.parentPageTitle} subtitle={labels.parentPageSubtitle} edgeToEdge={false} />
 
         <MobileContentStack gap={3} paddingBottom={4}>
@@ -78,7 +83,7 @@ export function ParentBillingMobileView({
             />
           )}
         </MobileContentStack>
-      </PageContainer>
+      </MobilePageContainer>
       {showQuickPayFab ? <MobileFab icon={<AddCardOutlined />} label={labels.quickPay} onClick={onQuickPay} /> : null}
     </>
   );

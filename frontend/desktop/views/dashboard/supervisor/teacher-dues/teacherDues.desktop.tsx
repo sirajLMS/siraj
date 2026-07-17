@@ -3,16 +3,11 @@
 import { LinearProgress } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import {
-  AppDataGrid,
-  PageContainer,
-  PageHeader,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
+import { AppDataGrid, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { TeacherDueRow } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
 import type { TeacherDuesViewModel } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/useTeacherDuesViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 
 interface TeacherDuesDesktopViewProps extends TeacherDuesViewModel {
   readonly rows: readonly TeacherDueRow[];
@@ -100,8 +95,8 @@ export function TeacherDuesDesktopView({
   );
 
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={labels.pageTitle}
         actions={
           selectedDueIds.length > 0 ? (
@@ -130,6 +125,6 @@ export function TeacherDuesDesktopView({
           }}
         />
       </SectionPanel>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

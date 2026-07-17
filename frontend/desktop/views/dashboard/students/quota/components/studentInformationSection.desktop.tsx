@@ -13,16 +13,16 @@ import {
 } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
 import { Controller, useFormContext } from "react-hook-form";
-import { AppDatePicker } from "@/frontend/common/components/ui/form";
 import { LanguageDisplay } from "@/frontend/common/components/ui/display";
+import { AppDatePicker } from "@/frontend/common/components/ui/form";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/components/quotaFieldStyles";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import { GENDER_OPTIONS } from "@/frontend/common/views/dashboard/students/quota/types";
-import { type StudentQuotaLabels, useAppTranslation } from "@/shared/locale";
 import { QuotaFormFieldDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/quotaFormField.desktop";
 import { SectionHeaderDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/sectionHeader.desktop";
+import { type StudentQuotaLabels, useAppTranslation } from "@/shared/locale";
 
 const DATE_FORMAT = "yyyy-MM-dd";
 
@@ -132,10 +132,7 @@ function GenderField() {
         return (
           <QuotaFormFieldDesktop label={t.fields.gender}>
             {hasGender ? (
-              <FormControl
-                error={Boolean(errors.gender)}
-                sx={{ height: "48px", justifyContent: "center", px: 0 }}
-              >
+              <FormControl error={Boolean(errors.gender)} sx={{ height: "48px", justifyContent: "center", px: 0 }}>
                 <RadioGroup {...field} row>
                   {GENDER_OPTIONS.map(option => (
                     <FormControlLabel

@@ -1,13 +1,11 @@
 "use client";
 
-import type { Breakpoint } from "@mui/material";
 import type { GridSize } from "@mui/material/Grid";
-import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
-import { DashboardMetricsSectionDesktop } from "@/frontend/desktop/views/dashboard/components/dashboardMetricsSection.desktop";
-import { DashboardMetricsSectionMobile } from "@/frontend/mobile/views/dashboard/components/dashboardMetricsSection.mobile";
 
-type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T | null };
+type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in import("@mui/material").Breakpoint]?: T | null };
 
 export type DashboardMetricsSectionGridSize = ResponsiveStyleValue<GridSize>;
 
@@ -23,40 +21,31 @@ export interface DashboardMetricsSectionProps {
   readonly withSectionMargin?: boolean;
 }
 
-export function DashboardMetricsSection({
-  title,
-  lastUpdated,
-  metrics,
-  onMetricClick,
-  selectedMetricKey,
-  gridSize = DEFAULT_GRID_SIZE,
-  withSectionMargin = false,
-}: Readonly<DashboardMetricsSectionProps>) {
-  const { isMobile } = useViewport();
+interface DashboardMetricsSectionViewModel extends DashboardMetricsSectionProps {
+  readonly gridSize: ResponsiveStyleValue<GridSize>;
+}
 
-  if (isMobile) {
-    return (
-      <DashboardMetricsSectionMobile
-        title={title}
-        lastUpdated={lastUpdated}
-        metrics={metrics}
-        onMetricClick={onMetricClick}
-        selectedMetricKey={selectedMetricKey}
-        gridSize={gridSize}
-        withSectionMargin={withSectionMargin}
-      />
-    );
-  }
+function useDashboardMetricsSectionViewModel(
+  props: Readonly<DashboardMetricsSectionProps>
+): DashboardMetricsSectionViewModel {
+  return {
+    ...props,
+    gridSize: props.gridSize ?? DEFAULT_GRID_SIZE,
+  };
+}
 
-  return (
-    <DashboardMetricsSectionDesktop
-      title={title}
-      lastUpdated={lastUpdated}
-      metrics={metrics}
-      onMetricClick={onMetricClick}
-      selectedMetricKey={selectedMetricKey}
-      gridSize={gridSize}
-      withSectionMargin={withSectionMargin}
-    />
-  );
+const lazyViews = createLazyView<DashboardMetricsSectionViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/components/dashboardMetricsSection.mobile").then(m => ({
+      default: m.DashboardMetricsSectionMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/components/dashboardMetricsSection.desktop").then(m => ({
+      default: m.DashboardMetricsSectionDesktop,
+    }))
+);
+
+export function DashboardMetricsSection(props: Readonly<DashboardMetricsSectionProps>) {
+  const viewModel = useDashboardMetricsSectionViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

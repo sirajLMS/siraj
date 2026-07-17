@@ -1,10 +1,10 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { PageContainer } from "@/frontend/common/components/ui";
 import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
 import { LoadingState } from "@/frontend/common/components/ui/state/LoadingState";
 import type { ClassDetailsViewModel } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
+import { MobilePageContainer } from "@/frontend/mobile/components/ui";
 import { ClassDetailsContentMobile } from "@/frontend/mobile/views/dashboard/classes/details/components/classDetailsContent.mobile";
 
 interface InvalidIdStateProps {
@@ -33,7 +33,7 @@ export function ClassDetailsContainerMobile({ viewModel }: { readonly viewModel:
   }
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <ClassDetailsContentMobile
         instance={viewModel.instance}
         canOverride={viewModel.canOverride}
@@ -51,6 +51,6 @@ export function ClassDetailsContainerMobile({ viewModel }: { readonly viewModel:
         formattedStartTime={viewModel.formattedStartTime}
         formattedEndTime={viewModel.formattedEndTime}
       />
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

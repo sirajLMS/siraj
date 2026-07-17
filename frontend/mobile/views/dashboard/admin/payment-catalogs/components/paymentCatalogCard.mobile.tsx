@@ -4,13 +4,16 @@ import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
-import { useAppTranslation } from "@/shared/locale";
 import type {
   CatalogGridActionHandlers,
   PaymentCatalogRow,
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { useAppTranslation } from "@/shared/locale";
 
-function actionLabelForDirection(dir: string | null | undefined, t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["paymentCatalogs"]): string {
+function actionLabelForDirection(
+  dir: string | null | undefined,
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["paymentCatalogs"]
+): string {
   if (!dir) return t.notSet;
   if (dir === "PAYIN") return t.directions.payin;
   if (dir === "PAYOUT") return t.directions.payout;

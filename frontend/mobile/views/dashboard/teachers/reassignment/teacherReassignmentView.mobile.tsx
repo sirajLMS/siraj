@@ -2,9 +2,8 @@
 
 import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
-import { PageContainer } from "@/frontend/common/components/ui";
 import type { TeacherReassignmentViewModel } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
-import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { CurrentTeacherCardMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/components/currentTeacherCard.mobile";
 import { ManagementControlsCardMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/components/managementControlsCard.mobile";
 import { ReassignmentBentoGridMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/components/reassignmentBentoGrid.mobile";
@@ -23,7 +22,7 @@ export function TeacherReassignmentViewMobile({
   const t = useAppTranslation().dashboardTranslations.teacherReassignment;
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
 
       <MobileContentStack>
@@ -70,6 +69,6 @@ export function TeacherReassignmentViewMobile({
           />
         </Box>
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

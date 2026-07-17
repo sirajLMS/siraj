@@ -3,17 +3,11 @@
 import { Grid } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import {
-  AppDataGrid,
-  FilterButton,
-  PageContainer,
-  PageHeader,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
+import { AppDataGrid, FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import type { PendingReviewsViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { LessonReportDetailPanelDesktop } from "@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/components/lessonReportDetailPanel.desktop";
 
 interface PendingReviewsDesktopViewProps extends PendingReviewsViewModel {
@@ -123,8 +117,8 @@ export function PendingReviewsDesktopView({
   );
 
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={labels.pageTitle}
         actions={
           <Grid container spacing={1}>
@@ -157,6 +151,6 @@ export function PendingReviewsDesktopView({
       <Grid size={{ xs: 12, lg: 4 }}>
         <LessonReportDetailPanelDesktop report={selectedReport} labels={labels} />
       </Grid>
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

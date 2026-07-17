@@ -1,7 +1,6 @@
 "use client";
 
 import type { ParentSocialLabels } from "@/shared/locale";
-import type { ParentOwnProfileQuery } from "@/frontend/common/graphql/sharedDocuments";
 
 interface ParentSocialProfileShape {
   readonly phone?: string | null;
@@ -23,5 +22,3 @@ export function useParentSocialViewModel(props: Readonly<UseParentSocialViewMode
   const { labels, loading, error, profile } = props;
   return { labels, loading, error, profile };
 }
-
-export type { ParentOwnProfileQuery };

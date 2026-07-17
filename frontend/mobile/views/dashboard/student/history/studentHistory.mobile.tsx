@@ -2,11 +2,11 @@
 
 import { ArrowBackOutlined, AssignmentOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, type Theme, Typography } from "@mui/material";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
-import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
 
 function StatusChip({ status }: { status: string }) {
   const getStatusColors = (theme: Theme, statusKey: string) => {
@@ -93,16 +93,16 @@ export function StudentHistoryMobileView({
 }: Readonly<StudentHistoryViewModel>) {
   if (loading && metrics.totalClasses === 0) {
     return (
-      <PageContainer>
+      <MobilePageContainer>
         <Typography variant="bodyMd" sx={{ p: 3 }}>
           {labels.loadingMessage}
         </Typography>
-      </PageContainer>
+      </MobilePageContainer>
     );
   }
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobileContentStack>
         <SectionPanel title={labels.lessonHistory}>
           <Stack spacing={2}>
@@ -144,6 +144,6 @@ export function StudentHistoryMobileView({
           {labels.addReflection}
         </Button>
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

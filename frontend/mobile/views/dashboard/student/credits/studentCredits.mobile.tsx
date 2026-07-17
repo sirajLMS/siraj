@@ -2,11 +2,11 @@
 
 import { ArrowBackOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { StudentCreditTransactionRow } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
-import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
 
 interface MobileTransactionItemProps {
   readonly row: StudentCreditTransactionRow;
@@ -77,16 +77,16 @@ export function StudentCreditsMobileView({
 }: Readonly<StudentCreditsViewModel>) {
   if (loading && balance.classesTotal === 0) {
     return (
-      <PageContainer>
+      <MobilePageContainer>
         <Typography variant="bodyMd" sx={{ p: 3 }}>
           {labels.pageTitle}
         </Typography>
-      </PageContainer>
+      </MobilePageContainer>
     );
   }
 
   return (
-    <PageContainer>
+    <MobilePageContainer>
       <MobileContentStack>
         <SectionPanel title={labels.currentBalance}>
           <Stack direction="row" spacing={2} sx={{ alignItems: "stretch" }}>
@@ -128,6 +128,6 @@ export function StudentCreditsMobileView({
           {labels.backToDashboard}
         </Button>
       </MobileContentStack>
-    </PageContainer>
+    </MobilePageContainer>
   );
 }

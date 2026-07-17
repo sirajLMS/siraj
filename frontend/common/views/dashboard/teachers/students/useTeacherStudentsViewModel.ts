@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import type { ApolloError } from "@apollo/client";
 import type { TeacherAssignedStudentsQuery_teacherAssignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent } from "@/frontend/common/graphql/generated/gql/operations";
 import { teacherAssignedStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAppTranslation } from "@/shared/locale";
@@ -11,15 +10,18 @@ import { useAppTranslation } from "@/shared/locale";
  *
  * Pulls the assigned-students list via `useQuery` and exposes the localized
  * labels alongside the row data. Both tier views consume the same flat shape;
- * no viewport logic lives here.
+ * no viewport logic lives here. The `error` field is typed as `unknown`
+ * because Apollo Client v4's `useQuery` returns an opaque error union; tier
+ * views only treat it as a truthy failure flag.
  */
 
-type TeacherStudentRow = TeacherAssignedStudentsQuery_teacherAssignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent;
+type TeacherStudentRow =
+  TeacherAssignedStudentsQuery_teacherAssignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent;
 
 export interface TeacherStudentsViewModel {
   readonly rows: readonly TeacherStudentRow[];
   readonly loading: boolean;
-  readonly error: ApolloError | undefined;
+  readonly error: unknown;
   readonly labels: TeacherStudentsLabels;
 }
 
@@ -35,7 +37,9 @@ export interface TeacherStudentsLabels {
 
 export type UseTeacherStudentsViewModelProps = Record<string, never>;
 
-export function useTeacherStudentsViewModel(_props: Readonly<UseTeacherStudentsViewModelProps> = {}): TeacherStudentsViewModel {
+export function useTeacherStudentsViewModel(
+  _props: Readonly<UseTeacherStudentsViewModelProps> = {}
+): TeacherStudentsViewModel {
   const t = useAppTranslation().dashboardTranslations.teacherStudents;
   const { data, loading, error } = useQuery(teacherAssignedStudentsQueryDocument);
 
