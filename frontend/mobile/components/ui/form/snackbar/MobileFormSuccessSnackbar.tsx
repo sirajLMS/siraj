@@ -3,11 +3,11 @@
 import { CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Snackbar, Typography } from "@mui/material";
 
-interface MobileFormSuccessSnackbarProps {
+export type MobileFormSuccessSnackbarProps = {
   readonly open: boolean;
   readonly message: string;
   readonly onClose: () => void;
-}
+};
 
 export function MobileFormSuccessSnackbar({ open, message, onClose }: Readonly<MobileFormSuccessSnackbarProps>) {
   return (

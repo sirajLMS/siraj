@@ -1,9 +1,9 @@
 "use client";
 
 import type * as React from "react";
-import type { CountryAutocompleteProps } from "@/frontend/common/components/ui/input/countrySelect/CountryAutocomplete";
-import type { CountrySelectProps } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { CountryAutocompleteMobile } from "@/frontend/mobile/components/ui/input/countrySelect/countryAutocomplete.mobile";
+import type { CountryAutocompleteProps } from "@/frontend/mobile/components/ui/input/countrySelect/countryAutocomplete.types";
+import type { CountrySelectProps } from "@/frontend/mobile/components/ui/input/countrySelect/countrySelect.types";
 
 /**
  * CountrySelectMobile component allows users to select a country from a dropdown list.

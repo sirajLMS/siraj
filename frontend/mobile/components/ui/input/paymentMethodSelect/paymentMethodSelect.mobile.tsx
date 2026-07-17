@@ -1,19 +1,19 @@
 "use client";
 
 import type * as React from "react";
-import type { PaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodAutocomplete";
-import type { PaymentMethodSelectProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodSelect";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import { PaymentMethodAutocompleteMobile } from "@/frontend/mobile/components/ui/input/paymentMethodSelect/paymentMethodAutocomplete.mobile";
+import type {
+  PaymentMethodAutocompleteProps,
+  PaymentMethodSelectProps,
+} from "@/frontend/mobile/components/ui/input/paymentMethodSelect/paymentMethodAutocomplete.types";
 
-export type PaymentMethodSelectMobileProps = PaymentMethodSelectProps;
-
-export const PaymentMethodSelectMobile: React.FC<PaymentMethodSelectMobileProps> = ({
+export const PaymentMethodSelectMobile: React.FC<PaymentMethodSelectProps> = ({
   option,
   setOptionAction,
   options,
   ...props
-}: PaymentMethodSelectMobileProps): React.ReactNode => {
+}: PaymentMethodSelectProps): React.ReactNode => {
   const autocompleteProps: PaymentMethodAutocompleteProps = {
     option,
     options,

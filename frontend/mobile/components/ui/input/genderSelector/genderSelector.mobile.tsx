@@ -2,9 +2,24 @@
 
 import { Box, Button, ButtonGroup, Typography } from "@mui/material";
 import type * as React from "react";
-import type { GenderSelectorProps } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAppTranslation } from "@/shared/locale";
+
+export type GenderSelectorProps = {
+  readonly gender: Gender | null;
+  readonly setGenderAction: (gender: Gender | null) => void;
+  readonly error?: boolean;
+  readonly required?: boolean;
+  readonly fullWidth?: boolean;
+  readonly labels?: {
+    readonly title?: string;
+    readonly male?: string;
+    readonly female?: string;
+    readonly any?: string;
+    readonly ariaLabel?: string;
+  };
+  readonly allowEmpty?: boolean;
+};
 
 export const GenderSelectorMobile: React.FC<GenderSelectorProps> = ({
   gender,

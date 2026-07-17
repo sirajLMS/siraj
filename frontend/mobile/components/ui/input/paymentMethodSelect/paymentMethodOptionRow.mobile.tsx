@@ -9,8 +9,14 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import type { PaymentMethodOptionRowProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
+
+export type PaymentMethodOptionRowProps = {
+  readonly option: PaymentMethodCatalogOption;
+  readonly type?: PaymentMethodType | null;
+  readonly showSlug?: boolean;
+};
 
 function resolveTypeIcon(type: PaymentMethodType | null | undefined): React.ReactNode {
   switch (type) {

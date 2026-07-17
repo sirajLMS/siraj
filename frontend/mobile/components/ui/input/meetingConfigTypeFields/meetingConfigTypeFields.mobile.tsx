@@ -1,10 +1,45 @@
 "use client";
 
 import TextField from "@mui/material/TextField";
-import type { MeetingConfigTypeFieldsProps } from "@/frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields";
 import { getVisibleMeetingConfigFields } from "@/frontend/common/lib/meeting-config";
 import { MobileContentStack } from "@/frontend/mobile/components/ui/container";
 import { useAppTranslation } from "@/shared/locale";
+
+export type MeetingProviderFieldsFragment = {
+  readonly id: string | null;
+  readonly slug: string | null;
+  readonly name: Partial<Record<"ar" | "en", string>> | null;
+  readonly description: Partial<Record<"ar" | "en", string>> | null;
+  readonly instructions: Partial<Record<"ar" | "en", string>> | null;
+  readonly urlAllowlist: readonly string[] | null;
+  readonly urlExample: string | null;
+  readonly logoUrl: string | null;
+  readonly isActive: boolean | null;
+  readonly createdAt: string | null;
+  readonly updatedAt: string | null;
+  readonly fieldSchema: {
+    readonly requiresMeetingUrl: boolean | null;
+    readonly supportsUsername: boolean | null;
+    readonly supportsPassword: boolean | null;
+    readonly supportsTenantId: boolean | null;
+  } | null;
+};
+
+export type MeetingConfigDetailsFormValue = {
+  meetingUrl: string;
+  username?: string;
+  password?: string;
+  tenantId?: string;
+};
+
+export type MeetingConfigTypeFieldsProps = {
+  readonly provider: MeetingProviderFieldsFragment | null;
+  readonly value: MeetingConfigDetailsFormValue;
+  readonly onChangeAction: (value: MeetingConfigDetailsFormValue) => void;
+  readonly disabled?: boolean;
+  readonly passwordHelperText?: string;
+  readonly onMeetingUrlBlur?: () => void;
+};
 
 export function MeetingConfigTypeFieldsMobile({
   provider,

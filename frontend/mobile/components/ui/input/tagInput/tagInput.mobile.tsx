@@ -3,12 +3,18 @@
 import { Box, Chip, InputBase, Paper, styled, Typography, useTheme } from "@mui/material";
 import type React from "react";
 import { type KeyboardEvent, type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
-import type { TagInputProps } from "@/frontend/common/components/ui/input/tagInput/TagInput";
 import {
   useTagInputDeletion,
   useTagInputEditing,
-} from "@/frontend/common/components/ui/input/tagInput/useTagInputEditing";
+} from "@/frontend/mobile/components/ui/input/tagInput/useTagInputEditing";
 import { useAppTranslation } from "@/shared/locale";
+
+export type TagInputProps = {
+  readonly label?: string;
+  readonly placeholder?: string;
+  readonly onChange?: (tags: string[]) => void;
+  readonly initialTags?: string[];
+};
 
 const TagContainerMobile = styled(Paper)(({ theme }) => ({
   display: "flex",

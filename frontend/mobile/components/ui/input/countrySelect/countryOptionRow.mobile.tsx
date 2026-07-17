@@ -3,9 +3,14 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import type { CountryOptionRowProps } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.types";
-import { getCountryDisplayName } from "@/frontend/common/lib/locale";
+import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
+import { type CountryType, getCountryDisplayName } from "@/frontend/common/lib/locale";
+
+export type CountryOptionRowProps = {
+  readonly country: CountryType;
+  readonly locale: string;
+  readonly showPhonePrefix?: boolean;
+};
 
 export function CountryOptionRowMobile({
   country,
@@ -14,7 +19,7 @@ export function CountryOptionRowMobile({
 }: CountryOptionRowProps): React.ReactNode {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%", minHeight: 44, py: 1 }}>
-      <LocaleEmoji emoji={country.emoji} />
+      <MobileLocaleEmoji emoji={country.emoji} />
       <Typography component="span" sx={{ flex: 1 }}>
         {getCountryDisplayName(country.code, locale)}
       </Typography>

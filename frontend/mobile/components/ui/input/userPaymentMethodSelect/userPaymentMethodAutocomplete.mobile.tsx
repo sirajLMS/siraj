@@ -9,11 +9,26 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useCallback, useMemo } from "react";
-import type { UserPaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/userPaymentMethodSelect/UserPaymentMethodAutocomplete";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { userPaymentMethodToOptionLabel } from "@/frontend/common/lib/user-payment-method";
 import { type PaymentMethodLabels, useAppTranslation } from "@/shared/locale";
+
+export type UserPaymentMethodAutocompleteProps = {
+  readonly value?: UserPaymentMethodFieldsFragment | null;
+  readonly options: readonly UserPaymentMethodFieldsFragment[];
+  readonly onChangeAction: (method: UserPaymentMethodFieldsFragment) => void;
+  readonly autoComplete?: string;
+  readonly fullWidth?: boolean;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly label?: string;
+  readonly placeholder?: string;
+  readonly error?: boolean;
+  readonly helperText?: string;
+  readonly onBlurAction?: () => void;
+  readonly style?: React.CSSProperties;
+};
 
 function createPaymentMethodResolver(
   tType: PaymentMethodLabels["type"],

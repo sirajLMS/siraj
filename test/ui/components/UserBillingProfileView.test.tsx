@@ -73,13 +73,13 @@ function DesktopView({ metrics, invoices, labels, searchQuery, onSearchChange }:
         onChange={(event: React.ChangeEvent<HTMLInputElement>) => onSearchChange?.(event.target.value)}
         aria-label="search"
       />
-      <div role="grid">
+      <table>
         {invoices.map(invoice => (
-          <div key={invoice.id} data-testid={`invoice-${invoice.id}`}>
-            {invoice.invoiceNumber}
-          </div>
+          <tr key={invoice.id} data-testid={`invoice-${invoice.id}`}>
+            <td>{invoice.invoiceNumber}</td>
+          </tr>
         ))}
-      </div>
+      </table>
     </div>
   );
 }
@@ -142,7 +142,7 @@ expect.extend(matchers);
 
 import { AppPermission, InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
+import type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
 import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
 import type { UserBillingProfileViewProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { UserBillingProfileView } from "@/frontend/common/views/dashboard/users/billing-profile/userBillingProfileView";

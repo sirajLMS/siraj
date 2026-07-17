@@ -51,9 +51,8 @@ export const MobileAppDatePicker: React.FC<MobileAppDatePickerProps> = ({
       required={required}
       error={error}
       helperText={helperText}
-      InputLabelProps={{ shrink: true }}
       sx={sx}
-      slotProps={slotProps}
+      {...slotProps?.textField}
     />
   );
 };

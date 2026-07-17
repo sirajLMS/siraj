@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { format, isValid } from "date-fns";
-import { AppDatePickerDesktop } from "@/frontend/desktop/components/ui/form/date/AppDatePicker.desktop";
+import { DesktopAppDatePicker } from "@/frontend/desktop/components/ui/form/date/DesktopAppDatePicker";
 import { rtlFlipIconSxDesktop } from "@/frontend/desktop/components/ui/utils/rtlFlipIconSx.desktop";
 import {
   getTodayScheduleFilterDateDesktop,
@@ -67,7 +67,7 @@ export function DateNavigatorDesktop({
         </StyledDateNavButton>
       </Tooltip>
 
-      <AppDatePicker
+      <DesktopAppDatePicker
         label={dateLabel}
         value={selectedDate}
         onChange={(date: Date | null) => {

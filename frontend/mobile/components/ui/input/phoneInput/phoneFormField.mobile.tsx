@@ -3,7 +3,7 @@
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import type { PhoneInputProps } from "@/frontend/mobile/components/ui/input/phoneInput/PhoneInput";
 
-import { PhoneInputMobile } from "@/frontend/mobile/components/ui/input/phoneInput/phoneInput.mobile";
+import { PhoneInput } from "@/frontend/mobile/components/ui/input/phoneInput/PhoneInput";
 
 type PhoneFormFieldMobileProps<T extends FieldValues> = Omit<
   PhoneInputProps,
@@ -23,7 +23,7 @@ export function PhoneFormFieldMobile<T extends FieldValues>({
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <PhoneInputMobile
+        <PhoneInput
           {...phoneInputProps}
           value={field.value || null}
           onChangeAction={value => {

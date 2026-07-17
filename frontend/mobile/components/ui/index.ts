@@ -1,5 +1,6 @@
 // Mobile UI components barrel - re-exports from per-group barrels
 export * from "@/frontend/mobile/components/ui/avatar";
+export * from "@/frontend/mobile/components/ui/badge";
 export * from "@/frontend/mobile/components/ui/button";
 export * from "@/frontend/mobile/components/ui/card";
 export * from "@/frontend/mobile/components/ui/container";

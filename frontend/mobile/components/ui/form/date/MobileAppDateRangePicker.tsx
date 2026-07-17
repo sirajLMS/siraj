@@ -120,7 +120,7 @@ export function MobileAppDateRangePicker({
           <MobileAppDatePicker
             label={fromLabel}
             value={selectedFrom}
-            onChange={handleFromChange}
+            onChangeAction={handleFromChange}
             slotProps={{
               textField: { size, fullWidth: true },
             }}
@@ -128,8 +128,7 @@ export function MobileAppDateRangePicker({
           <MobileAppDatePicker
             label={toLabel}
             value={selectedTo}
-            onChange={handleToChange}
-            minDate={selectedFrom ?? undefined}
+            onChangeAction={handleToChange}
             slotProps={{
               textField: { size, fullWidth: true },
             }}

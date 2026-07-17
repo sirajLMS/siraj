@@ -1,11 +1,22 @@
 "use client";
 
 import { Autocomplete, TextField } from "@mui/material";
-import type { MeetingConfigSelectProps } from "@/frontend/common/components/ui/input/meetingConfigSelect/MeetingConfigSelect";
 import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useAppTranslation } from "@/shared/locale";
+
+export type MeetingConfigSelectProps = {
+  readonly options: readonly MeetingConfigSelectOption[];
+  readonly value: MeetingConfigSelectOption | null;
+  readonly onChangeAction: (option: MeetingConfigSelectOption | null) => void;
+  readonly label?: string;
+  readonly placeholder?: string;
+  readonly disabled?: boolean;
+  readonly loading?: boolean;
+  readonly allowEmpty?: boolean;
+  readonly emptyOptionLabel?: string;
+};
 
 function formatOptionLabel(option: MeetingConfigSelectOption, locale: string): string {
   const providerName = option.provider?.name

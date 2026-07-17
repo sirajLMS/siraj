@@ -1,3 +1,4 @@
+import type { SxProps, Theme } from "@mui/material/styles";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
 
 export type LocalizedStringInputProps = {
@@ -19,4 +20,5 @@ export type LocalizedStringInputProps = {
   readonly drawerAutosave?: boolean;
   readonly drawerShowActions?: boolean;
   readonly drawerDismissAction?: "save" | "cancel";
+  readonly sx?: SxProps<Theme>;
 };
