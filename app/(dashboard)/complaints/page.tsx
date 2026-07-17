@@ -17,7 +17,7 @@ export async function generateMetadata({
   return { title: t.parent.pageTitle };
 }
 
-export default async function ComplaintsPage({ params }: { readonly params: Promise<{ locale: string }> }) {
+export default async function ComplaintsPage({ params }: { readonly params: Promise<{ readonly locale: string }> }) {
   const { userId } = await getServerUserContext();
   const { locale } = await params;
 
@@ -26,13 +26,12 @@ export default async function ComplaintsPage({ params }: { readonly params: Prom
     return;
   }
 
-  let parentId: string | null = null;
   try {
-    parentId = await getCachedParentIdForComplaints(userId, locale);
+    await getCachedParentIdForComplaints(userId, locale);
   } catch (error) {
     logger.warn("Failed to retrieve parent ID for complaints page. Redirecting to home dashboard.", { error });
     redirect({ href: "/", locale });
   }
 
-  return <ParentComplaintsContainer parentId={parentId ?? ""} />;
+  return <ParentComplaintsContainer />;
 }

@@ -1,9 +1,9 @@
 "use client";
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { AdminComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useAdminComplaintsViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { ComplaintQueueCardListDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintQueueCardList.desktop";
 import { ComplaintsMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintsMetricsRow.desktop";
 import { ComplaintsSearchBarDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintsSearchBar.desktop";
@@ -38,7 +38,7 @@ export function AdminComplaintsDesktopView({
 
       <ComplaintsMetricsRowDesktop summary={summary} labels={labels} />
 
-      <SectionPanel
+      <DesktopSectionPanel
         actions={
           <ComplaintsSearchBarDesktop
             value={searchQuery}
@@ -68,7 +68,7 @@ export function AdminComplaintsDesktopView({
           onDelete={onDelete}
           onPageChange={onPageChange}
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
 
       {canDelete ? (
         <Dialog open={deleteDialogOpen} onClose={onDeleteDialogClose} maxWidth="xs" fullWidth>

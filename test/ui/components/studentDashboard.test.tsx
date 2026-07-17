@@ -136,7 +136,7 @@ mock.module("@/frontend/common/views/dashboard/student/dashboard/studentDashboar
 // the ES imports), and the mock factory just re-exports it via closure — avoiding
 // `require()` and keeping the file lint-clean.
 mock.module("@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer", () => ({
-  StudentDashboardContainer: StudentDashboardContainerImpl,
+  StudentDashboardView: StudentDashboardContainerImpl,
 }));
 
 import { useQuery } from "@apollo/client/react";
@@ -152,8 +152,7 @@ import { pendingLessonReportsQueryDocument } from "@/frontend/common/graphql/sha
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useStudentDashboardStore } from "@/frontend/common/stores/studentDashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { StudentDashboardContainer } from "@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer";
-import { StudentDashboardView } from "@/frontend/common/views/dashboard/student/dashboard/studentDashboardView";
+import { StudentDashboardView } from "@/frontend/common/views/dashboard/student/dashboard/StudentDashboardView";
 import {
   isWithinNextDays,
   mapCreditBalance,
@@ -445,11 +444,11 @@ afterEach(() => {
   useStudentDashboardStore.setState({ selectedReportId: null, reflectionDialogOpen: false });
 });
 
-describe("StudentDashboardContainer", () => {
+describe("StudentDashboardView", () => {
   test("renders next class and recent lesson reports from mocked GraphQL data", async () => {
     useUserStore.setState({ name: "Ahmed Student" });
 
-    renderWithWrapper(<StudentDashboardContainer />, {
+    renderWithWrapper(<StudentDashboardView />, {
       locale: "en",
       themeMode: "dark",
       mocks: createMocks(),

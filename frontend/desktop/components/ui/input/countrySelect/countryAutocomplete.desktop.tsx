@@ -1,5 +1,6 @@
 "use client";
 
+import type { AutocompleteProps } from "@mui/material/Autocomplete";
 import Autocomplete, { type AutocompleteRenderInputParams } from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -56,7 +57,7 @@ const sameWidthModifier: Modifier<"sameWidth", Record<string, unknown>> = {
   },
 };
 
-function _getCountryAutocompletePopperSlotPropsDesktop(options: {
+function getCountryAutocompletePopperSlotProps(options: {
   readonly matchAnchorWidth: boolean;
   readonly disablePortal: boolean;
   readonly listAttached: boolean;
@@ -93,7 +94,7 @@ function _getCountryAutocompletePopperSlotPropsDesktop(options: {
   };
 }
 
-function _getCountryAutocompletePaperSlotPropsDesktop(listAttached: boolean): CountryAutocompleteSlotProps["paper"] {
+function getCountryAutocompletePaperSlotProps(listAttached: boolean): CountryAutocompleteSlotProps["paper"] {
   if (!listAttached) {
     return undefined;
   }
@@ -146,7 +147,7 @@ interface RenderInputConfig {
   readonly onBlur: (() => void) | undefined;
   readonly autoFocus: boolean | undefined;
   readonly autoComplete: string;
-  readonly country: CountryType | undefined;
+  readonly country: CountryType | null | undefined;
 }
 
 const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {

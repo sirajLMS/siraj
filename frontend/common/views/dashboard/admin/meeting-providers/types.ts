@@ -1,6 +1,5 @@
 import type { GridColDef } from "@mui/x-data-grid";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import type { MeetingProvidersLabels } from "@/shared/locale";
 
 export interface MeetingProvidersNotificationState {
   readonly errorOpen: boolean;
@@ -13,8 +12,33 @@ export interface MeetingProvidersNotificationState {
   readonly closeSuccess: () => void;
 }
 
+export interface MeetingProvidersColumnLabels {
+  readonly slug: string;
+  readonly name: string;
+  readonly active: string;
+  readonly inactive: string;
+  readonly actions: string;
+  readonly edit: string;
+  readonly delete: string;
+}
+
+export interface MeetingProvidersViewLabels extends MeetingProvidersColumnLabels {
+  readonly pageTitle: string;
+  readonly pageSubtitle: string;
+  readonly emptyCatalogTitle: string;
+  readonly emptyCatalogBody: string;
+  readonly addProvider: string;
+  readonly createSuccess: string;
+  readonly updateSuccess: string;
+  readonly deleteSuccess: string;
+  readonly deleteTitle: string;
+  readonly deleteConfirm: string;
+  readonly cancel: string;
+  readonly operationFailed: string;
+}
+
 export interface MeetingProvidersViewProps {
-  readonly t: MeetingProvidersLabels;
+  readonly t: MeetingProvidersViewLabels;
   readonly locale: string;
   readonly rows: readonly MeetingProviderFieldsFragment[];
   readonly columns: GridColDef<MeetingProviderFieldsFragment>[];

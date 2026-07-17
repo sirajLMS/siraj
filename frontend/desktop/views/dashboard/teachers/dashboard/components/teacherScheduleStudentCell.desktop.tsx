@@ -1,8 +1,8 @@
 "use client";
 
-import { PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/common/utils/profileHref";
+import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 
 /**
  * Desktop variant of the schedule-row student cell.
@@ -10,7 +10,7 @@ import { studentHref } from "@/frontend/common/utils/profileHref";
  */
 export function TeacherScheduleStudentCellDesktop({ row }: Readonly<{ row: TeacherScheduleRow }>) {
   return (
-    <PersonProfileLinkCell
+    <DesktopPersonProfileLinkCell
       href={row.studentId ? studentHref(row.studentId) : undefined}
       name={row.studentName}
       showAvatar

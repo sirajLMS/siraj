@@ -3,9 +3,9 @@
 import { Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssociatedStudentRow } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 interface AssociatedStudentsDataGridDesktopProps {
@@ -30,7 +30,7 @@ export function AssociatedStudentsDataGridDesktop({
         flex: 1.5,
         minWidth: 220,
         renderCell: params => (
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             href={params.row.id ? studentHref(params.row.id) : undefined}
             avatarUrl={params.row.studentAvatarUrl}
             name={params.row.name ?? tProfile.notSet}
@@ -46,7 +46,7 @@ export function AssociatedStudentsDataGridDesktop({
         renderCell: params => {
           const status = (params.row.status ?? "REGULAR").toLowerCase();
           const statusLabel = t.students.statusLabel[status as keyof typeof t.students.statusLabel];
-          return <StatusBadge category="studentAccount" status={status} label={statusLabel} />;
+          return <DesktopStatusBadge category="studentAccount" status={status} label={statusLabel} />;
         },
       },
       {
@@ -59,7 +59,7 @@ export function AssociatedStudentsDataGridDesktop({
           const href = params.row.teacherUserId ? profileHrefForUser(params.row.teacherUserId) : undefined;
 
           return (
-            <PersonProfileLinkCell
+            <DesktopPersonProfileLinkCell
               href={href}
               avatarUrl={params.row.teacherAvatarUrl}
               name={teacherName}
@@ -85,7 +85,7 @@ export function AssociatedStudentsDataGridDesktop({
   );
 
   return (
-    <AppDataGrid
+    <DesktopAppDataGrid
       rows={rows}
       columns={columns}
       loading={loading}

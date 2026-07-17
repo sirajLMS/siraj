@@ -5,7 +5,7 @@ import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import type { SupportedCurrenciesViewModel } from "@/frontend/common/views/dashboard/admin/billing/currencies/supportedCurrenciesView";
+import type { SupportedCurrenciesViewModel } from "@/frontend/common/views/dashboard/admin/billing/currencies/SupportedCurrenciesView";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 
 function SupportedCurrencyCard({

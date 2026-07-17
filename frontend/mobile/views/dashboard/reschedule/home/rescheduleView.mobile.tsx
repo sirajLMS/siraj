@@ -105,7 +105,7 @@ export function RescheduleViewMobile({
             </MobilePrimaryPageAction>
           </ActionContainer>
         </Box>
-      </SectionPanel>
+      </MobileSectionPanel>
 
       <NotificationPolicyCardMobile />
 

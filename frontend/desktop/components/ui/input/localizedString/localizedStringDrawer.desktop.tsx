@@ -16,13 +16,45 @@ import {
   Typography,
 } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { LocalizedStringDrawerProps } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringDrawer";
 import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
-import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { type LocalizedStringLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import type { LocalizedString } from "@/shared/types/localized-string";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
+
+export type LocalizedStringDrawerProps = {
+  readonly open: boolean;
+  readonly value: LocalizedString;
+  readonly title?: string;
+  readonly multiline?: boolean;
+  readonly minRows?: number;
+  readonly required?: boolean;
+  readonly requiredLocales?: readonly AppLocale[];
+  readonly onSaveAction: (next: LocalizedString) => void;
+  readonly onCancelAction: () => void;
+  /** Disable Save while parent is performing a save mutation. */
+  readonly saving?: boolean;
+  /**
+   * When `true`, each field edit commits to `onSaveAction` immediately.
+   * The footer is hidden unless `showActions` is explicitly `true`.
+   */
+  readonly autosave?: boolean;
+  /**
+   * Render Cancel/Save in the drawer footer.
+   * Defaults to `!autosave` (footer shown when not autosaving).
+   */
+  readonly showActions?: boolean;
+  /**
+   * What happens when the user dismisses via backdrop, Escape, or the header ×.
+   * `save` (default): commit the draft when valid, then close.
+   * `cancel`: close without saving (discard draft).
+   */
+  readonly dismissAction?: "save" | "cancel";
+  /** Override anchor side; defaults to `right` (desktop only — mobile always anchors bottom). */
+  readonly anchor?: "right" | "left" | "top" | "bottom";
+};
 
 type HelperTextParams = {
   readonly draft: LocalizedString;

@@ -2,147 +2,85 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
-import { formatDistanceToNow } from "date-fns";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import type { EffectiveMeeting } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   activateClassMutationDocument,
-  createTeacherManualClassEntryMutationDocument,
-  logTeacherSupportRequestMutationDocument,
-  submitLessonReportMutationDocument,
-  teacherDashboardQueryDocument,
-  teacherHandbookUrlQueryDocument,
   updateSessionStatusAbsentMutationDocument,
   updateSessionStatusLeaveMutationDocument,
   updateSessionStatusStartMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments";
+} from "@/frontend/common/graphql/sharedDocuments/scheduling/class-session.documents";
+import {
+  createTeacherManualClassEntryMutationDocument,
+  logTeacherSupportRequestMutationDocument,
+  teacherDashboardQueryDocument,
+  teacherHandbookUrlQueryDocument,
+} from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { StudentProgressFeedItem } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
-import { LessonReportSubmitDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/LessonReportSubmitDialog";
 import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
-import { TeacherDashboardView } from "@/frontend/common/views/dashboard/teachers/dashboard/teacherDashboardView";
-import type {
-  LessonReportFormLabels,
-  LessonReportFormSubmitInput,
-} from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
-import { buildStudentProgressFeedItems } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildStudentProgressFeedItems";
+import {
+  type TeacherDashboardViewModel,
+  type UseTeacherDashboardViewModelProps,
+  useTeacherDashboardViewModel,
+} from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
 import { buildTeacherActiveMetricItems } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardMetrics";
 import { useTeacherDashboardLastUpdated } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/useTeacherDashboardLastUpdated";
-import type { TeacherScheduleRow } from "@/frontend/common/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
-import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 import { useAppTranslation } from "@/shared/locale";
 
 type SupportRequestType = "COORDINATOR" | "SUPPORT";
 type SnackbarSeverity = "success" | "error" | "info";
-type StringOrDateOrNull = string | Date | null;
-
-const ACTIVATION_WINDOW_BEFORE_MINUTES = 5;
-const ABSENT_WAITING_MINUTES = 30;
 
 interface RawRow {
   readonly id?: string | null;
   readonly studentId?: string | null;
   readonly studentName?: string | null;
-  readonly scheduledStartAt?: StringOrDateOrNull;
-  readonly scheduledEndAt?: StringOrDateOrNull;
+  readonly scheduledStartAt?: string | Date | null;
   readonly durationMinutes?: number | null;
   readonly executionState?: string | null;
   readonly outcome?: string | null;
-  readonly isFrozen?: boolean | null;
-  readonly meetingJoinUrl?: string | null;
-  readonly effectiveMeeting?: EffectiveMeeting | null;
+  readonly zoomMeetingUrl?: string | null;
   readonly yourTimeFormatted?: string | null;
-}
-
-function resolveMeetingJoinUrl(
-  meetingJoinUrl?: string | null,
-  effectiveMeeting?: EffectiveMeeting | null
-): string | null {
-  const fromEffective = effectiveMeeting?.joinUrl?.trim();
-  const fromLegacy = meetingJoinUrl?.trim();
-  return fromEffective || fromLegacy || null;
 }
 
 interface RawFeedItem {
   readonly id?: string | null;
-  readonly studentId?: string | null;
-  readonly studentName?: string | null;
-  readonly scheduledTimeFormatted?: string | null;
-  readonly durationMinutes?: number | null;
-  readonly eventKind?: string | null;
-  readonly occurredAt?: StringOrDateOrNull;
+  readonly title?: string | null;
+  readonly type?: string | null;
 }
 
-function deriveRowStatus(
-  executionState: Types.ClassExecutionState,
-  outcome: Types.ClassOutcome,
-  activateEnabled: boolean,
-  now: Date,
-  endAt: Date
-): TeacherScheduleRow["status"] {
-  if (outcome === Types.ClassOutcome.Taken || executionState === Types.ClassExecutionState.Completed) {
-    return "completed";
-  }
-  if (outcome === Types.ClassOutcome.Absent || outcome === Types.ClassOutcome.Leave) {
-    return "missed";
-  }
-  if (executionState === Types.ClassExecutionState.Activated) {
-    return "activated";
-  }
-  if (executionState === Types.ClassExecutionState.Running) {
-    return "active";
-  }
-  if (executionState === Types.ClassExecutionState.NotActivated && outcome === Types.ClassOutcome.Pending) {
-    const missedDeadline = new Date(endAt.getTime() + DEFAULT_MISSED_GRACE_MINUTES * 60000);
-    if (now > missedDeadline) {
-      return "missed";
-    }
-    return activateEnabled ? "pending" : "upcoming";
-  }
-  return "upcoming";
-}
-
-function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: string): TeacherScheduleRow[] {
+function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: string) {
   if (!rows) return [];
   return rows.map((row, idx) => {
     const startAt = new Date(row.scheduledStartAt || todayDateStr);
-    const endAt = row.scheduledEndAt
-      ? new Date(row.scheduledEndAt)
-      : new Date(startAt.getTime() + (row.durationMinutes || 60) * 60000);
-    const startWindow = new Date(startAt.getTime() - ACTIVATION_WINDOW_BEFORE_MINUTES * 60000);
+    const endAt = new Date(startAt.getTime() + (row.durationMinutes || 60) * 60000);
+    const startWindow = new Date(startAt.getTime() - 5 * 60000);
     const now = new Date();
 
-    const executionState: Types.ClassExecutionState =
-      (row.executionState as Types.ClassExecutionState | null) ?? Types.ClassExecutionState.NotActivated;
-    const outcome: Types.ClassOutcome = (row.outcome as Types.ClassOutcome | null) ?? Types.ClassOutcome.Pending;
-    const activateEnabled =
-      now >= startWindow &&
-      now <= endAt &&
-      executionState === Types.ClassExecutionState.NotActivated &&
-      outcome === Types.ClassOutcome.Pending;
-
-    let activateDisabledReason: TeacherScheduleRow["activateDisabledReason"] = null;
-    if (
-      executionState === Types.ClassExecutionState.NotActivated &&
-      outcome === Types.ClassOutcome.Pending &&
-      !activateEnabled
+    let status: "upcoming" | "completed" | "missed" | "activated" | "active" = "upcoming";
+    if (row.outcome === "TAKEN" || row.outcome === "COMPLETED") {
+      status = "completed";
+    } else if (
+      row.outcome === "ABSENT" ||
+      row.outcome === "LEAVE" ||
+      row.outcome === "CANCELLED" ||
+      row.outcome === "MISSED"
     ) {
-      activateDisabledReason = now < startWindow ? "before_window" : "after_window";
+      status = "missed";
+    } else if (row.executionState === "ACTIVATED") {
+      status = "activated";
+    } else if (row.executionState === "IN_PROGRESS") {
+      status = "active";
     }
 
-    const isLiveSession =
-      executionState === Types.ClassExecutionState.Activated || executionState === Types.ClassExecutionState.Running;
-    const absentWaitingDeadline = new Date(startAt.getTime() + ABSENT_WAITING_MINUTES * 60000);
-    const markAbsentEnabled = !isLiveSession || now >= absentWaitingDeadline;
-
-    const status = deriveRowStatus(executionState, outcome, activateEnabled, now, endAt);
-
-    const joinUrl = resolveMeetingJoinUrl(row.meetingJoinUrl, row.effectiveMeeting);
+    const activateEnabled = now >= startWindow && now <= endAt && row.executionState === "NOT_ACTIVATED";
 
     return {
       id: row.id || `row-${idx}`,
@@ -160,32 +98,52 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
         : "ST",
       timeRange: row.yourTimeFormatted || startAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       status,
-      executionState,
-      outcome,
-      videoEnabled: Boolean(joinUrl),
+      videoEnabled: !!row.zoomMeetingUrl,
       activateEnabled,
-      activateDisabledReason,
-      markAbsentEnabled,
       durationMinutes: row.durationMinutes ?? undefined,
-      scheduledStartAt: row.scheduledStartAt ? new Date(row.scheduledStartAt) : undefined,
-      scheduledEndAt: row.scheduledEndAt ? new Date(row.scheduledEndAt) : endAt,
-      meetingJoinUrl: joinUrl,
-      effectiveMeeting: row.effectiveMeeting ?? null,
-      isFrozen: row.isFrozen ?? false,
-      isLive: isLiveSession,
-      isCurrent: isLiveSession,
+      zoomMeetingUrl: row.zoomMeetingUrl ?? null,
+      isLive: row.executionState === "ACTIVATED" || row.executionState === "IN_PROGRESS",
+      isCurrent: row.executionState === "ACTIVATED" || row.executionState === "IN_PROGRESS",
     };
   });
 }
 
-function mapProgressFeed(
-  feed: readonly RawFeedItem[] | null | undefined,
-  labels: ReturnType<typeof buildTeacherDashboardLabels>["progressFeed"],
-  durationTemplate: (minutes: number) => string,
-  formatRelativeTime: (value: Date) => string
-) {
-  return buildStudentProgressFeedItems(feed, labels, durationTemplate, formatRelativeTime);
+function mapProgressFeed(feed: readonly RawFeedItem[] | null | undefined) {
+  return (feed || []).map((f: RawFeedItem) => {
+    let icon: "grade" | "login" | "description" = "description";
+    const fType = f.type?.toLowerCase();
+    if (fType === "quiz") {
+      icon = "grade";
+    } else if (fType === "login") {
+      icon = "login";
+    }
+
+    return {
+      id: f.id || "",
+      studentId: f.id || "",
+      studentName: f.title ? f.title.split(" ")[0] : "Student",
+      studentInitials: f.title ? f.title.slice(0, 2).toUpperCase() : "ST",
+      summary: f.title || "",
+      scheduledTime: null,
+      durationMinutes: null,
+      eventKind: icon as any,
+      occurredAt: new Date(),
+      timeAgo: "1m ago",
+      infoTooltip: null,
+    };
+  });
 }
+
+const lazyViews = createLazyView<TeacherDashboardViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/teachers/dashboard/teacherDashboard.mobile").then(m => ({
+      default: m.TeacherDashboardMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/teachers/dashboard/teacherDashboard.desktop").then(m => ({
+      default: m.TeacherDashboardDesktopView,
+    }))
+);
 
 export function TeacherDashboardContainer() {
   const t = useAppTranslation().dashboardTranslations.teacherDashboard;
@@ -201,12 +159,10 @@ export function TeacherDashboardContainer() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<SnackbarSeverity>("info");
-  const [lessonReportOpen, setLessonReportOpen] = useState(false);
-  const [lessonReportClassInstanceId, setLessonReportClassInstanceId] = useState<string | null>(null);
 
   const { filterDate, setFilterDate, page, pageSize, setPage } = useTeacherDashboardStore();
 
-  const paginationArgs: Types.PaginationArgs = {
+  const paginationArgs = {
     first: pageSize,
     page: page + 1,
     after: null,
@@ -216,11 +172,7 @@ export function TeacherDashboardContainer() {
     skip: null,
   };
 
-  const {
-    data: dashboardData,
-    loading: dashboardLoading,
-    refetch,
-  } = useQuery(teacherDashboardQueryDocument, {
+  const { data: dashboardData, refetch } = useQuery(teacherDashboardQueryDocument, {
     variables: { date: filterDate, pagination: paginationArgs },
     fetchPolicy: "cache-and-network",
   });
@@ -259,41 +211,16 @@ export function TeacherDashboardContainer() {
   const [requestLeave] = useMutation(updateSessionStatusLeaveMutationDocument);
   const [createManualEntry] = useMutation(createTeacherManualClassEntryMutationDocument);
   const [logSupportRequest] = useMutation(logTeacherSupportRequestMutationDocument);
-  const [submitLessonReport] = useMutation(submitLessonReportMutationDocument);
 
   const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin.emptyTeacher);
-  const lessonReportI18n = useAppTranslation().dashboardTranslations.lmsLessonReports;
-  const lessonReportLabels: LessonReportFormLabels = useMemo(
-    () => ({
-      attendanceEvaluation: lessonReportI18n.attendanceEvaluation,
-      durationMinutes: lessonReportI18n.durationMinutes,
-      completionPercentage: lessonReportI18n.completionPercentage,
-      teacherNotes: lessonReportI18n.teacherNotes,
-      present: lessonReportI18n.present,
-      absent: lessonReportI18n.absent,
-      late: lessonReportI18n.late,
-      submit: lessonReportI18n.submit,
-      dialogTitle: lessonReportI18n.dialogTitle,
-      cancel: lessonReportI18n.cancel,
-      submitting: lessonReportI18n.submitting,
-      submitFailed: lessonReportI18n.submitFailed,
-      attendanceRequired: lessonReportI18n.attendanceRequired,
-      durationMin: lessonReportI18n.durationMin,
-      durationMax: lessonReportI18n.durationMax,
-      completionMin: lessonReportI18n.completionMin,
-      completionMax: lessonReportI18n.completionMax,
-    }),
-    [lessonReportI18n]
-  );
-  const canActivate = permissions.includes(Types.AppPermission.SessionActivateClass);
+  const canActivate = permissions.includes(AppPermission.SessionActivateClass);
 
   const dashboardId = dashboardData?.teacherDashboard?.id || "";
   const teacherId = dashboardId.split("-")[2] || "";
 
   const scheduleRows = mapRows(dashboardData?.teacherDashboard?.scheduleRows, filterDate);
-  const totalCount = dashboardData?.teacherDashboard ? (dashboardData.teacherDashboard.totalCount ?? 0) : undefined;
+  const totalCount = dashboardData?.teacherDashboard?.totalCount ?? 0;
   const dashboardMetrics = dashboardData?.teacherDashboard?.metrics;
-  const metricItems = buildTeacherActiveMetricItems(dashboardMetrics, labels.activeMetrics);
 
   const missedRow = scheduleRows.find(r => r.status === "missed");
   const missedAlert = missedRow
@@ -303,60 +230,11 @@ export function TeacherDashboardContainer() {
       }
     : null;
 
-  const progressFeed = useMemo(() => {
-    if (dataArrivedAt === null) {
-      return [];
-    }
+  const metricItems = buildTeacherActiveMetricItems(dashboardMetrics, labels.activeMetrics);
 
-    return mapProgressFeed(
-      dashboardData?.teacherDashboard?.progressFeed,
-      labels.progressFeed,
-      labels.schedule.durationValue,
-      value => formatDistanceToNow(new Date(value), { addSuffix: true, locale: undefined })
-    );
-  }, [
-    dashboardData?.teacherDashboard?.progressFeed,
-    dataArrivedAt,
-    labels.progressFeed,
-    labels.schedule.durationValue,
-  ]);
-
-  const handleDateChange = (date: string) => {
-    setFilterDate(date);
-  };
-
-  const handleMarkClassCompleted = (classInstanceId: string) => {
-    setLessonReportClassInstanceId(classInstanceId);
-    setLessonReportOpen(true);
-  };
-
-  const handleLessonReportClose = () => {
-    setLessonReportOpen(false);
-    setLessonReportClassInstanceId(null);
-  };
-
-  const handleLessonReportSubmit = async (input: LessonReportFormSubmitInput) => {
-    await submitLessonReport({
-      variables: {
-        classInstanceId: input.classInstanceId,
-        input: {
-          classInstanceId: input.classInstanceId,
-          attendanceEvaluation: input.attendanceEvaluation as Types.AttendanceEvaluation,
-          durationMinutes: input.durationMinutes,
-          completionPercentage: input.completionPercentage,
-          teacherNotes: input.teacherNotes ?? null,
-        },
-      },
-    });
-    setSnackbarMessage(lessonReportI18n.submitReport);
-    setSnackbarSeverity("success");
-    setSnackbarOpen(true);
-    await refetch();
-  };
-
-  const selectedLessonReportRow = lessonReportClassInstanceId
-    ? scheduleRows.find(r => r.classId === lessonReportClassInstanceId)
-    : null;
+  const progressFeed: readonly StudentProgressFeedItem[] = mapProgressFeed(
+    dashboardData?.teacherDashboard?.progressFeed
+  );
 
   const handleActivate = async (id: string) => {
     setActivationError(null);
@@ -392,7 +270,7 @@ export function TeacherDashboardContainer() {
           scheduledStartAt: data.scheduledStartAt,
           scheduledEndAt: data.scheduledEndAt,
           durationMinutes: data.durationMinutes,
-          classType: data.classType as Types.ClassType,
+          classType: data.classType as any,
         },
       },
     });
@@ -416,83 +294,104 @@ export function TeacherDashboardContainer() {
     }
   };
 
+  const lessonReportI18n = useAppTranslation().dashboardTranslations.lmsLessonReports;
+  const lessonReportLabels = {
+    attendanceEvaluation: lessonReportI18n.attendanceEvaluation,
+    durationMinutes: lessonReportI18n.durationMinutes,
+    completionPercentage: lessonReportI18n.completionPercentage,
+    teacherNotes: lessonReportI18n.teacherNotes,
+    present: lessonReportI18n.present,
+    absent: lessonReportI18n.absent,
+    late: lessonReportI18n.late,
+    submit: lessonReportI18n.submit,
+    dialogTitle: lessonReportI18n.dialogTitle,
+    cancel: lessonReportI18n.cancel,
+    submitting: lessonReportI18n.submitting,
+    submitFailed: lessonReportI18n.submitFailed,
+    attendanceRequired: lessonReportI18n.attendanceRequired,
+    durationMin: lessonReportI18n.durationMin,
+    durationMax: lessonReportI18n.durationMax,
+    completionMin: lessonReportI18n.completionMin,
+    completionMax: lessonReportI18n.completionMax,
+  };
+
+  const props: UseTeacherDashboardViewModelProps = {
+    userName,
+    metricItems,
+    scheduleRows,
+    progressFeed,
+    missedAlert,
+    welcomeDateSummary: filterDate,
+    activeSessionsCount: Number(metricItems.find(m => m.key === "activeSessions")?.count ?? 0),
+    labels,
+    lastUpdated,
+    activationError,
+    canActivate,
+    canManualEntry: canActivate,
+    canPrintSchedule: true,
+    loading: dashboardData === undefined,
+    onPrintSchedule: () => globalThis.print(),
+    onManualEntry: () => {
+      setManualEntryDefaultActive(false);
+      setManualEntryOpen(true);
+    },
+    onNewSession: () => {
+      setManualEntryDefaultActive(true);
+      setManualEntryOpen(true);
+    },
+    onActivate: handleActivate,
+    onStartSession: async (id: string) => {
+      try {
+        await startClass({ variables: { classInstanceId: id } });
+        await refetch();
+      } catch (err) {
+        logger.error("Error starting session:", err);
+      }
+    },
+    onMarkAbsent: async (id: string) => {
+      try {
+        await markAbsent({ variables: { classInstanceId: id } });
+        await refetch();
+      } catch (err) {
+        logger.error("Error marking absent:", err);
+      }
+    },
+    onRequestLeave: async (id: string) => {
+      try {
+        await requestLeave({
+          variables: { classInstanceId: id, leaveReason: "Teacher requested leave from teacher dashboard" },
+        });
+        await refetch();
+      } catch (err) {
+        logger.error("Error requesting leave:", err);
+      }
+    },
+    onViewAll: () => {
+      router.push("/schedule");
+    },
+    onDownloadHandbook: () => {
+      setHandbookRequested(true);
+    },
+    onContactCoordinator: () => handleSupportRequest("COORDINATOR"),
+    onSupport: () => handleSupportRequest("SUPPORT"),
+    dateValue: filterDate,
+    onDateChange: setFilterDate,
+    page,
+    pageSize,
+    totalCount,
+    onPageChange: setPage,
+    lessonReportDialogOpen: false,
+    lessonReportSelectedClassInstanceId: null,
+    lessonReportLabels,
+    onLessonReportDialogClose: () => {},
+    onLessonReportSubmit: async () => {},
+  };
+
+  const viewModel = useTeacherDashboardViewModel(props);
+
   return (
-    <RequirePermission permissions={[Types.AppPermission.TeacherViewDashboard]}>
-      <TeacherDashboardView
-        userName={userName}
-        metricItems={metricItems}
-        scheduleRows={scheduleRows}
-        progressFeed={progressFeed}
-        missedAlert={missedAlert}
-        welcomeDateSummary={filterDate}
-        activeSessionsCount={dashboardMetrics?.running ?? 0}
-        labels={labels}
-        lastUpdated={lastUpdated}
-        activationError={activationError}
-        canActivate={canActivate}
-        canManualEntry={canActivate}
-        canPrintSchedule={true}
-        loading={dashboardLoading}
-        onPrintSchedule={() => {
-          globalThis.print();
-        }}
-        onManualEntry={() => {
-          setManualEntryDefaultActive(false);
-          setManualEntryOpen(true);
-        }}
-        onNewSession={() => {
-          setManualEntryDefaultActive(true);
-          setManualEntryOpen(true);
-        }}
-        onActivate={handleActivate}
-        onStartSession={async id => {
-          try {
-            await startClass({ variables: { classInstanceId: id } });
-            await refetch();
-          } catch (err) {
-            logger.error("Error starting session:", err);
-          }
-        }}
-        onMarkAbsent={async id => {
-          try {
-            await markAbsent({ variables: { classInstanceId: id } });
-            await refetch();
-          } catch (err) {
-            logger.error("Error marking absent:", err);
-          }
-        }}
-        onRequestLeave={async id => {
-          try {
-            await requestLeave({
-              variables: { classInstanceId: id, leaveReason: "Teacher requested leave from teacher dashboard" },
-            });
-            await refetch();
-          } catch (err) {
-            logger.error("Error requesting leave:", err);
-          }
-        }}
-        onMarkClassCompleted={handleMarkClassCompleted}
-        onViewAll={() => {
-          router.push("/schedule");
-        }}
-        onDownloadHandbook={() => {
-          setHandbookRequested(true);
-        }}
-        onContactCoordinator={() => handleSupportRequest("COORDINATOR")}
-        onSupport={() => handleSupportRequest("SUPPORT")}
-        dateValue={filterDate}
-        onDateChange={handleDateChange}
-        page={page}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        onPageChange={setPage}
-        lessonReportDialogOpen={lessonReportOpen}
-        lessonReportSelectedClassInstanceId={lessonReportClassInstanceId}
-        lessonReportDefaultDurationMinutes={selectedLessonReportRow?.durationMinutes}
-        lessonReportLabels={lessonReportLabels}
-        onLessonReportDialogClose={handleLessonReportClose}
-        onLessonReportSubmit={handleLessonReportSubmit}
-      />
+    <RequirePermission permissions={[AppPermission.TeacherViewDashboard]}>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
       <ManualClassEntryDialog
         open={manualEntryOpen}
         onClose={() => setManualEntryOpen(false)}
@@ -500,16 +399,6 @@ export function TeacherDashboardContainer() {
         onSubmit={handleFormSubmit => handleManualEntrySubmit(handleFormSubmit)}
         defaultActive={manualEntryDefaultActive}
       />
-      {lessonReportClassInstanceId && (
-        <LessonReportSubmitDialog
-          open={lessonReportOpen}
-          onClose={handleLessonReportClose}
-          classInstanceId={lessonReportClassInstanceId}
-          defaultDurationMinutes={selectedLessonReportRow?.durationMinutes}
-          labels={lessonReportLabels}
-          onSubmit={handleLessonReportSubmit}
-        />
-      )}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}
@@ -523,3 +412,5 @@ export function TeacherDashboardContainer() {
     </RequirePermission>
   );
 }
+
+export type { TeacherDashboardViewModel, UseTeacherDashboardViewModelProps };

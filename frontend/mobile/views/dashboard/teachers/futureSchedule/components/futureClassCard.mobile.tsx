@@ -2,11 +2,11 @@
 
 import { BlockOutlined, EventBusyOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Stack, Tooltip, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { FutureClassCardProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -63,7 +63,7 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
           {item.courseName}
         </Typography>
-        {isRescheduled && <StatusBadge category="trackingStatus" status="rescheduled" label={t.reScheduled} />}
+        {isRescheduled && <MobileStatusBadge category="trackingStatus" status="rescheduled" label={t.reScheduled} />}
       </Box>
 
       <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap", gap: 1 }}>
@@ -75,7 +75,7 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
         </Box>
         <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.onSurfaceVariant })}>
           {isFutureClassJoinable(item) ? (
-            <MeetingJoinAction
+            <MobileMeetingJoinAction
               variant="icon"
               joinUrl={item.meetingJoinUrl}
               meeting={item.effectiveMeeting}
@@ -180,7 +180,7 @@ export function FutureClassCardMobile({ item, onRequestLeave }: Readonly<FutureC
   const isRescheduled = item.isRescheduled === true;
 
   return (
-    <BaseCard
+    <MobileBaseCard
       sx={theme => ({
         p: 2,
         "&:hover": { border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` },
@@ -194,6 +194,6 @@ export function FutureClassCardMobile({ item, onRequestLeave }: Readonly<FutureC
         </Stack>
         <ActionButtons item={item} onRequestLeave={onRequestLeave} />
       </Stack>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }

@@ -6,7 +6,7 @@ import type { ReactElement } from "react";
 
 export type MobileAppDatePickerProps = {
   readonly value: Date | null;
-  readonly onChangeAction: (date: Date | null) => void;
+  readonly onChange: (date: Date | null) => void;
   readonly label?: string;
   readonly disabled?: boolean;
   readonly required?: boolean;
@@ -25,7 +25,7 @@ export type MobileAppDatePickerProps = {
  */
 export const MobileAppDatePicker: React.FC<MobileAppDatePickerProps> = ({
   value,
-  onChangeAction,
+  onChange,
   label,
   disabled,
   required,
@@ -37,7 +37,7 @@ export const MobileAppDatePicker: React.FC<MobileAppDatePickerProps> = ({
 }): ReactElement => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value ? new Date(event.target.value) : null;
-    onChangeAction(newValue);
+    onChange(newValue);
   };
 
   return (

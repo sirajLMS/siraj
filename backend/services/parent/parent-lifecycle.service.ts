@@ -2,7 +2,7 @@ import { ParentRepository } from "@/backend/db";
 import { AppPermission, type ParentStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
-import type { ChangeParentLifecycleResult } from "@/backend/types";
+import type { ChangeParentLifecycleResult, ParentProfileResult } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace ParentLifecycleService {
@@ -37,5 +37,12 @@ export namespace ParentLifecycleService {
       });
       throw error;
     }
+  }
+
+  export async function getParentLifecycleData(
+    parentId: string,
+    _locale?: string
+  ): Promise<ParentProfileResult | null> {
+    return ParentRepository.getParentProfile(parentId);
   }
 }

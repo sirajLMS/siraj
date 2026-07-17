@@ -12,9 +12,9 @@ import {
   SensorsOutlined,
 } from "@mui/icons-material";
 import { Box, Paper, Stack, Tooltip, Typography } from "@mui/material";
-import { UserAvatar } from "@/frontend/common/components/ui";
 import type { StudentProgressFeedItem, TeacherProgressFeedEventKind } from "@/frontend/common/types/shared.types";
 import type { TeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar";
 
 interface StudentProgressFeedDesktopProps {
   readonly items: readonly StudentProgressFeedItem[];
@@ -57,9 +57,9 @@ export function StudentProgressFeedDesktop({ items, title, labels }: Readonly<St
             const EventIcon = resolveFeedIcon(item.eventKind);
             return (
               <Box key={item.id} sx={{ p: 2, display: "flex", alignItems: "flex-start", gap: 2 }}>
-                <UserAvatar label={item.studentName} size={40}>
+                <DesktopUserAvatar label={item.studentName} size={40}>
                   {item.studentInitials}
-                </UserAvatar>
+                </DesktopUserAvatar>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, alignItems: "flex-start" }}>
                     <Typography sx={{ typography: "bodyLg", fontWeight: 600 }}>{item.studentName}</Typography>

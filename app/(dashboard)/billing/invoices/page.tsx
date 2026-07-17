@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ParentBillingContainer } from "@/frontend/common/views/dashboard/billing/ParentBillingContainer";
+import { ParentBillingView } from "@/frontend/common/views/dashboard/billing/ParentBillingView";
 import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
@@ -13,5 +13,5 @@ export async function generateMetadata({
 }
 
 export default function ParentBillingInvoicesPage() {
-  return <ParentBillingContainer />;
+  return <ParentBillingView />;
 }

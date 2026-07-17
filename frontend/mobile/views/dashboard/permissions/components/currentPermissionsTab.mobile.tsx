@@ -141,7 +141,7 @@ export function CurrentPermissionsTabMobile({
                 </StyledRevokeButton>
               )}
             </Box>
-          </BaseCard>
+          </MobileBaseCard>
         );
       })}
     </Box>

@@ -115,7 +115,7 @@ export function SubjectDetailMobileView({
             ))}
           </List>
         )}
-      </SectionPanel>
+      </MobileSectionPanel>
     </MobilePageContainer>
   );
 }

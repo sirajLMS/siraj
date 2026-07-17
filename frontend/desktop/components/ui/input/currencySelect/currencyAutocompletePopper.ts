@@ -23,7 +23,7 @@ const sameWidthModifier: Modifier<"sameWidth", Record<string, unknown>> = {
 };
 
 /**
- * Desktop-tier duplicate of `@/frontend/common/components/ui/input/currencySelect/currencyAutocompletePopper`.
+ * Desktop-tier duplicate of this desktop file.
  */
 export function getCurrencyAutocompletePopperSlotPropsDesktop(options: {
   readonly matchAnchorWidth: boolean;

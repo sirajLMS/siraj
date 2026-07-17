@@ -1,7 +1,5 @@
-import { Box, CircularProgress } from "@mui/material";
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { StudentHistoryContainer } from "@/frontend/common/views/dashboard/student/history/StudentHistoryContainer";
+import { StudentHistoryContainer } from "@/frontend/common/views/dashboard/students/history/StudentHistoryContainer";
 import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
@@ -15,15 +13,5 @@ export async function generateMetadata({
 }
 
 export default function StudentHistoryPage() {
-  return (
-    <Suspense
-      fallback={
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-          <CircularProgress />
-        </Box>
-      }
-    >
-      <StudentHistoryContainer />
-    </Suspense>
-  );
+  return <StudentHistoryContainer studentId="me" />;
 }

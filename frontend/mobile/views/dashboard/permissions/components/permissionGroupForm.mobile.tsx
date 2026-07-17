@@ -1,5 +1,6 @@
 "use client";
 
+import { Close } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -20,6 +21,7 @@ import {
   permissionGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
+import { LocalizedStringFormFieldMobile } from "@/frontend/mobile/components/ui/input/localizedString";
 import { PermissionCategoryListMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionCategoryList.mobile";
 import { PermissionFilterBarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionFilterBar.mobile";
 import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
@@ -215,7 +217,7 @@ function PermissionGroupFormContentMobile({
       >
         <Grid container spacing={3}>
           <Grid size={{ xs: 12 }}>
-            <LocalizedStringFormField
+            <LocalizedStringFormFieldMobile
               name="name"
               control={control}
               label={t.groupNameLabel}
@@ -225,7 +227,7 @@ function PermissionGroupFormContentMobile({
             />
           </Grid>
           <Grid size={{ xs: 12 }}>
-            <LocalizedStringFormField
+            <LocalizedStringFormFieldMobile
               name="description"
               control={control}
               label={t.descriptionLabel}
@@ -259,7 +261,7 @@ function PermissionGroupFormContentMobile({
               t={t}
             />
           </Box>
-        </SectionPanel>
+        </MobileSectionPanel>
       </Box>
     </DialogContent>
   );

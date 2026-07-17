@@ -14,11 +14,8 @@ import {
   emptyRecurringMeetingConfigState,
   type RecurringMeetingConfigFormState,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import {
-  DesktopPageContainer,
-  DesktopPageHeader,
-  DesktopSectionPanel,
-} from "@/frontend/desktop/components/ui/container/page";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { RecurringClassFormDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/recurringClassForm.desktop";
 import type { CreateRecurringClassLabels } from "@/shared/locale";
 

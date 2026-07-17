@@ -4,8 +4,8 @@ import { Box, Checkbox } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { AddPermissionBulkBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/addPermissionBulkBar.desktop";
 import { AddPermissionFilterBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/addPermissionFilterBar.desktop";
 import { useAppTranslation } from "@/shared/locale";
@@ -106,8 +106,8 @@ export function AddPermissionsTabDesktop({
         />
       )}
 
-      <SectionPanel title={t.addPermissions}>
-        <AppDataGrid<Permission>
+      <DesktopSectionPanel title={t.addPermissions}>
+        <DesktopAppDataGrid<Permission>
           rows={filteredAvailablePermissions}
           columns={addPermissionsColumns}
           getRowId={row => row.id ?? row.key ?? ""}
@@ -115,7 +115,7 @@ export function AddPermissionsTabDesktop({
           loading={loading}
           autoHeight
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
     </StyledTabContainer>
   );
 }

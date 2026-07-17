@@ -15,8 +15,8 @@ import {
 import { useEffect } from "react";
 import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
-import { MobileFieldWrapper, standardInputSx } from "@/frontend/mobile/components/ui/form/field";
 import type { EditCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { MobileFieldWrapper, standardInputSx } from "@/frontend/mobile/components/ui/form/field";
 import { useAppTranslation } from "@/shared/locale";
 
 function slugify(text: string): string {

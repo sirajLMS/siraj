@@ -4,10 +4,10 @@ import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, StatusBadge } from "@/frontend/common/components/ui";
 import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SupportedMobileWalletFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import {
   DesktopCountryDisplay,
   DesktopCurrencyDisplay,
@@ -72,7 +72,7 @@ export function MobileWalletCatalogGridDesktop({
         headerName: pc.columns.status,
         width: 120,
         renderCell: ({ row }) => (
-          <StatusBadge
+          <DesktopStatusBadge
             category="paymentMethod"
             status={row.isActive ? "active" : "inactive"}
             label={row.isActive ? pc.active : pc.inactive}
@@ -120,7 +120,7 @@ export function MobileWalletCatalogGridDesktop({
 
   return (
     <Box sx={{ width: "100%", minHeight: 400, height: { xs: 480, md: 560 } }}>
-      <AppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
+      <DesktopAppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
     </Box>
   );
 }

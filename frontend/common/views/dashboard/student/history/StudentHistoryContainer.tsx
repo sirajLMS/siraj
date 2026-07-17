@@ -1,89 +1,26 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { useMemo } from "react";
-import { studentClassHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-history.documents";
-import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
-import { StudentHistoryView } from "@/frontend/common/views/dashboard/student/history/studentHistoryView";
-import type {
-  StudentHistoryMetrics,
-  StudentHistorySessionRow,
-} from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
-  mapStudentHistoryMetrics,
-  mapStudentHistorySessions,
-} from "@/frontend/common/views/dashboard/student/history/utils/studentHistoryMappers";
-import { useRouter } from "@/shared/i18n/routing";
-import { type StudentPortalHistoryLabels, useAppTranslation } from "@/shared/locale";
+  type StudentHistoryViewModel,
+  useStudentHistoryViewModel,
+} from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 
-function useStudentHistoryLabels(t: StudentPortalHistoryLabels): StudentPortalHistoryLabels {
-  return useMemo(
-    () => ({
-      pageTitle: t.pageTitle,
-      lessonHistory: t.lessonHistory,
-      sessionDate: t.sessionDate,
-      subject: t.subject,
-      instructor: t.instructor,
-      duration: t.duration,
-      status: t.status,
-      outcome: t.outcome,
-      notes: t.notes,
-      joinUrl: t.joinUrl,
-      noHistory: t.noHistory,
-      loadingMessage: t.loadingMessage,
-      filterBySubject: t.filterBySubject,
-      filterByDate: t.filterByDate,
-      filterByStatus: t.filterByStatus,
-      allSubjects: t.allSubjects,
-      allStatuses: t.allStatuses,
-      viewReport: t.viewReport,
-      addReflection: t.addReflection,
-    }),
-    [t]
-  );
+const lazyViews = createLazyView<StudentHistoryViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/student/history/studentHistory.mobile").then(m => ({
+      default: m.StudentHistoryMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/student/history/studentHistory.desktop").then(m => ({
+      default: m.StudentHistoryDesktopView,
+    }))
+);
+
+export function StudentHistoryView() {
+  const viewModel = useStudentHistoryViewModel({});
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export function StudentHistoryContainer() {
-  const t = useAppTranslation().dashboardTranslations.studentPortalHistory;
-  const router = useRouter();
-  const labels = useStudentHistoryLabels(t);
-
-  const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
-    variables: { studentId: null, year: null, month: null },
-    fetchPolicy: "cache-and-network",
-  });
-
-  const studentId = profileData?.studentProfile?.id ?? null;
-
-  const { data: historyData, loading: historyLoading } = useQuery(studentClassHistoryQueryDocument, {
-    variables: {
-      studentId: studentId ?? "",
-      year: new Date().getFullYear(),
-      month: new Date().getMonth() + 1,
-    },
-    skip: !studentId,
-    fetchPolicy: "cache-and-network",
-  });
-
-  const metrics: StudentHistoryMetrics = useMemo(
-    () => mapStudentHistoryMetrics(historyData?.studentClassHistory?.metrics ?? null),
-    [historyData]
-  );
-
-  const sessions: readonly StudentHistorySessionRow[] = useMemo(
-    () => mapStudentHistorySessions(historyData?.studentClassHistory?.sessions ?? null),
-    [historyData]
-  );
-
-  const loading = profileLoading || historyLoading;
-
-  return (
-    <StudentHistoryView
-      metrics={metrics}
-      sessions={sessions}
-      labels={labels}
-      loading={loading}
-      onBackToDashboard={() => router.push("/students/me")}
-    />
-  );
-}
+export type { StudentHistoryViewModel };

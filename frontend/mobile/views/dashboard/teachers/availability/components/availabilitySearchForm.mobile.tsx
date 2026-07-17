@@ -4,32 +4,25 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
-import {
-  labelSx,
-  outlinedInputSx,
-  timeInputOutlinedSx,
-} from "@/frontend/common/components/ui/form/field/formFieldStyles";
-import { AppTimePicker } from "@/frontend/common/components/ui/form/time/AppTimePicker";
 import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   AvailabilitySearchFormData,
   AvailabilitySearchFormProps,
   TimeFieldProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import { MobileFieldWrapper, standardInputSx } from "@/frontend/mobile/components/ui/form/field";
+import { MobileAppTimePicker } from "@/frontend/mobile/components/ui/form/time";
 import { useAppTranslation } from "@/shared/locale";
 
 function TimeField({ label, name }: Readonly<TimeFieldProps>) {
   const { control } = useFormContext<AvailabilitySearchFormData>();
   return (
-    <Box>
-      <Typography variant="labelSm" sx={labelSx}>
-        {label}
-      </Typography>
+    <MobileFieldWrapper label={label}>
       <Controller
         name={name}
         control={control}
         render={({ field }) => (
-          <AppTimePicker
+          <MobileAppTimePicker
             value={field.value}
             onChange={field.onChange}
             slotProps={{
@@ -37,13 +30,13 @@ function TimeField({ label, name }: Readonly<TimeFieldProps>) {
                 fullWidth: true,
                 size: "small",
                 variant: "outlined",
-                sx: timeInputOutlinedSx,
+                sx: standardInputSx,
               },
             }}
           />
         )}
       />
-    </Box>
+    </MobileFieldWrapper>
   );
 }
 
@@ -72,14 +65,14 @@ export function AvailabilitySearchFormMobile({ onSearch }: Readonly<Availability
       <TimeField label={t.to} name="toTime" />
 
       <Box>
-        <Typography variant="labelSm" sx={labelSx}>
+        <Typography variant="labelSm" sx={standardInputSx}>
           {t.gender}
         </Typography>
         <Controller
           name="gender"
           control={control}
           render={({ field }) => (
-            <Select {...field} fullWidth size="small" sx={outlinedInputSx}>
+            <Select {...field} fullWidth size="small" sx={standardInputSx}>
               <MenuItem value="">{t.any}</MenuItem>
               <MenuItem value={Gender.Male}>{t.male}</MenuItem>
               <MenuItem value={Gender.Female}>{t.female}</MenuItem>

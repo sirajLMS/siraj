@@ -3,11 +3,11 @@
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import type {
   StudentCreditRow,
   StudentCreditStatus,
 } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 
 interface StudentCreditCardListMobileLabels {
   readonly classesLeft: string;
@@ -87,7 +87,7 @@ export function StudentCreditCardListMobile({
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <StatusBadge
+                <MobileStatusBadge
                   category="invoice"
                   status={isNegative ? "OVERDUE" : "PAID"}
                   label={formatClassesLeft(row)}

@@ -1,74 +1,34 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { Stack, Typography } from "@mui/material";
-import { useParams } from "next/navigation";
-import { ErrorState, LoadingState, PageContainer, PageHeader } from "@/frontend/common/components/ui";
-import { recurringScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
-import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
-import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
-import { useAppTranslation } from "@/shared/locale";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  type RecurringScheduleDetailViewModel,
+  type UseRecurringScheduleDetailViewModelProps,
+  useRecurringScheduleDetailViewModel,
+} from "@/frontend/common/views/dashboard/classes/recurring/useRecurringScheduleDetailViewModel";
 
-export function RecurringScheduleDetailContainer() {
-  const t = useAppTranslation().uiTranslations.meetingConfigRecurringSchedule;
-  const tManager = useAppTranslation().uiTranslations.meetingConfigManager;
-  const params = useParams();
-  const rawId = params?.id;
-  const id = typeof rawId === "string" ? rawId : "";
+const lazyViews = createLazyView<RecurringScheduleDetailViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/classes/recurring/recurringScheduleDetailView.mobile").then(m => ({
+      default: m.RecurringScheduleDetailMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/classes/recurring/recurringScheduleDetailView.desktop").then(m => ({
+      default: m.RecurringScheduleDetailDesktopView,
+    }))
+);
 
-  const { data, loading, error, refetch } = useQuery(recurringScheduleQueryDocument, {
-    variables: { id },
-    skip: !id,
-  });
-
-  useDocumentTitle(data?.recurringSchedule?.studentName, "common", "title");
-
-  if (!id) {
-    return (
-      <PageContainer>
-        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t.invalidId}</Typography>
-      </PageContainer>
-    );
-  }
-
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  const schedule = data?.recurringSchedule;
-  if (error || !schedule) {
-    return (
-      <PageContainer>
-        <ErrorState
-          message={tManager.loadError}
-          retryLabel={tManager.retry}
-          onRetry={() => {
-            void refetch();
-          }}
-        />
-      </PageContainer>
-    );
-  }
-
-  const summary = t.scheduleSummary(
-    schedule.studentName ?? "",
-    schedule.teacherName ?? "",
-    String(schedule.durationMinutes ?? 0),
-    schedule.timezone ?? ""
-  );
-
-  const breadcrumbs = [
-    { label: t.breadcrumbDashboard, href: "/dashboard" },
-    { label: t.breadcrumbClasses, href: "/classes" },
-    { label: t.pageTitle },
-  ];
+export function RecurringScheduleDetailContainer(props: UseRecurringScheduleDetailViewModelProps) {
+  const viewModel = useRecurringScheduleDetailViewModel(props);
 
   return (
-    <PageContainer>
-      <Stack spacing={3}>
-        <PageHeader title={t.pageTitle} subtitle={summary} breadcrumbs={breadcrumbs} />
-        <ClassMeetingConfigsSection recurringScheduleId={schedule.id ?? id} />
-      </Stack>
-    </PageContainer>
+    <RequirePermission permissions={[AppPermission.ScheduleViewAll]} fallback={null}>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
+    </RequirePermission>
   );
 }
+
+export type { RecurringScheduleDetailViewModel, UseRecurringScheduleDetailViewModelProps };

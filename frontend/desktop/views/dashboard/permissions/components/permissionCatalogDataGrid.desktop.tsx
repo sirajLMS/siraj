@@ -3,9 +3,9 @@
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/common/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionCatalogDataGridDesktopProps {
@@ -58,7 +58,7 @@ function UsedInCell({ permission, groups }: Readonly<UsedInCellProps>) {
       {usedGroups.map(g => {
         if (!g.id || !g.name) return null;
         return (
-          <LocalizedStringDisplay
+          <DesktopLocalizedStringDisplay
             key={g.id}
             value={g.name}
             typographyVariant="labelMd"
@@ -134,7 +134,7 @@ export function PermissionCatalogDataGridDesktop({
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
-      <AppDataGrid<Permission>
+      <DesktopAppDataGrid<Permission>
         rows={permissions}
         columns={columns}
         getRowId={row => row.id ?? row.key ?? ""}

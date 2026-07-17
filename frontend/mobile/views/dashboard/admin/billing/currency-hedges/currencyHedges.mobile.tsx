@@ -6,7 +6,7 @@ import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import type {
   CurrencyHedgesViewModel,
   HedgeRow,
-} from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/currencyHedgesView";
+} from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/CurrencyHedgesView";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { useAppLocale } from "@/shared/locale";
 

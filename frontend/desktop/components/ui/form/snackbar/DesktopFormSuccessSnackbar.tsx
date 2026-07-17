@@ -12,7 +12,7 @@ export interface DesktopFormSuccessSnackbarProps {
 /**
  * Desktop-tier success snackbar for form submissions.
  * Self-contained — no shared base component.
- * Duplicate of `@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar`.
+ * Duplicate of this desktop file.
  */
 export function DesktopFormSuccessSnackbar({ open, message, onClose }: Readonly<DesktopFormSuccessSnackbarProps>) {
   return (

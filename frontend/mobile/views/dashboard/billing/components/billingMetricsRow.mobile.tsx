@@ -1,8 +1,8 @@
 "use client";
 
 import { Grid, Skeleton } from "@mui/material";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { BillingMetricsRowProps } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
+import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MetricCard";
 
 export type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
 
@@ -30,7 +30,7 @@ export function BillingMetricsRowMobile({
     <Grid container spacing={compact ? 1.5 : 2}>
       {metrics.map(metric => (
         <Grid key={metric.key} size={{ xs: 6, md: 3 }}>
-          <MetricCard
+          <MobileMetricCard
             icon={metric.icon}
             label={metric.label}
             value={metric.value}

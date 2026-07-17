@@ -3,8 +3,8 @@
 import { ChevronLeftOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import { alpha, Box, Grid, IconButton, Stack, Typography } from "@mui/material";
 import { useState } from "react";
-import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { MiniCalendarDate } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { useAppTranslation } from "@/shared/locale";
 
 interface MiniCalendarProps {
@@ -217,7 +217,7 @@ export function MiniCalendarMobile({ selectedDate, onSelectDate, classDates }: R
   };
 
   return (
-    <BaseCard sx={{ p: 2 }}>
+    <MobileBaseCard sx={{ p: 2 }}>
       <CalendarHeader monthName={monthName} year={year} onPrev={() => shiftMonth(-1)} onNext={() => shiftMonth(1)} />
       <Grid container columns={7} sx={{ textAlign: "center" }}>
         <CalendarWeekdays />
@@ -225,6 +225,6 @@ export function MiniCalendarMobile({ selectedDate, onSelectDate, classDates }: R
           <CalendarDayCell key={`date-${date.num}-${date.muted}`} date={date} onClick={handleDateClick} />
         ))}
       </Grid>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }

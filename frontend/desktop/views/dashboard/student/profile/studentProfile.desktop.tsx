@@ -13,7 +13,8 @@ import {
 import { Box, Button, Divider, Grid, Stack, Typography } from "@mui/material";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
-import { DesktopPageContainer, DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/page";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page";
 
 export function StudentProfileDesktopView({
   profile,

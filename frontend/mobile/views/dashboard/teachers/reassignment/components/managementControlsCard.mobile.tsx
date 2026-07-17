@@ -5,8 +5,6 @@ import { CheckCircleOutlined, InfoOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useState } from "react";
-import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
-import { labelSx, outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/common/utils/student-status-transitions";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/common/views/dashboard/admin/parents/students/types";
@@ -15,6 +13,9 @@ import type {
   ReassignmentSubmitInput,
   StatusChangeInput,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileFieldWrapper, standardInputSx } from "@/frontend/mobile/components/ui/form/field";
 import { useAppTranslation } from "@/shared/locale";
 
 function TeacherSelection({
@@ -28,17 +29,14 @@ function TeacherSelection({
 }>) {
   const t = useAppTranslation().dashboardTranslations.teacherReassignment.controls;
   return (
-    <Box>
-      <Box component="label" sx={labelSx}>
-        {t.assignTeacher}
-      </Box>
-      <FormControl fullWidth sx={{ mt: 1 }}>
+    <MobileFieldWrapper label={t.assignTeacher}>
+      <FormControl fullWidth>
         <Select
           displayEmpty
           value={selectedTeacherId}
           size="small"
           inputProps={{ "aria-label": "Without label" }}
-          sx={outlinedInputSx}
+          sx={standardInputSx}
           onChange={e => {
             const val = e.target.value;
             if (typeof val === "string") onTeacherChange(val);
@@ -60,7 +58,7 @@ function TeacherSelection({
       >
         {t.teacherAvailabilityNotice}
       </Typography>
-    </Box>
+    </MobileFieldWrapper>
   );
 }
 
@@ -80,15 +78,12 @@ function StatusUpdate({
   const allowedTargets = ALLOWED_TARGET_STATUSES[currentStatus] ?? [];
 
   return (
-    <Box>
-      <Box component="label" sx={labelSx}>
-        {t.statusUpdate}
-      </Box>
-      <FormControl fullWidth sx={{ mt: 1 }}>
+    <MobileFieldWrapper label={t.statusUpdate}>
+      <FormControl fullWidth>
         <Select
           value={selectedStatus}
           size="small"
-          sx={outlinedInputSx}
+          sx={standardInputSx}
           onChange={e => {
             const val = e.target.value;
             if (typeof val === "string") onStatusChange(val);
@@ -105,9 +100,9 @@ function StatusUpdate({
         <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
           {t.currentStatus("").replace(":", "").trim()}:
         </Typography>
-        <StatusBadge category="studentAccount" status={statusKey} label={currentStatus} />
+        <MobileStatusBadge category="studentAccount" status={statusKey} label={currentStatus} />
       </Box>
-    </Box>
+    </MobileFieldWrapper>
   );
 }
 
@@ -253,7 +248,7 @@ export function ManagementControlsCardMobile({
   };
 
   return (
-    <BaseCard sx={{ p: 3, boxShadow: theme => theme.palette.shadow.card }}>
+    <MobileBaseCard sx={{ p: 3, boxShadow: theme => theme.palette.shadow.card }}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700, mb: 0.5 })}>
           {t.controls.title}
@@ -276,6 +271,6 @@ export function ManagementControlsCardMobile({
         />
         <ActionButtons loading={isSubmitting} saved={saved} onCancel={onCancel} />
       </Stack>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }

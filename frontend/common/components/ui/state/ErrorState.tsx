@@ -1,5 +1,4 @@
-import { Alert, Button } from "@mui/material";
-import { PageContainer } from "@/frontend/common/components/ui/container/page/PageContainer";
+import { Alert, Box, Button } from "@mui/material";
 import { useAppTranslation } from "@/shared/locale";
 
 type ErrorStateProps = {
@@ -32,5 +31,5 @@ export function ErrorState({ message, onRetry, retryLabel, embedded = false }: E
     return alert;
   }
 
-  return <PageContainer>{alert}</PageContainer>;
+  return <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>{alert}</Box>;
 }

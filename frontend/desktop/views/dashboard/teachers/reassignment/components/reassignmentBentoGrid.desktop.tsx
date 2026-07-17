@@ -4,18 +4,18 @@
 import { HistoryOutlined, MailOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { BaseCard, UserAvatar } from "@/frontend/common/components/ui";
 import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   BentoCardProps,
   ReassignmentBentoGridProps,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
+import { DesktopBaseCard, DesktopUserAvatar } from "@/frontend/desktop/components/ui";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
 function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardProps>) {
   return (
-    <BaseCard
+    <DesktopBaseCard
       onClick={onClick}
       sx={theme => ({
         display: "flex",
@@ -26,7 +26,7 @@ function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardP
         transition: "box-shadow 0.2s",
       })}
     >
-      <UserAvatar
+      <DesktopUserAvatar
         size={48}
         sx={theme => ({
           border: `2px solid ${theme.palette.primary.main}`,
@@ -35,7 +35,7 @@ function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardP
         })}
       >
         <Icon />
-      </UserAvatar>
+      </DesktopUserAvatar>
       <Box>
         <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
           {title}
@@ -44,7 +44,7 @@ function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardP
           {subtitle}
         </Typography>
       </Box>
-    </BaseCard>
+    </DesktopBaseCard>
   );
 }
 

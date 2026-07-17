@@ -1,10 +1,10 @@
 "use client";
 
 import { Grid } from "@mui/material";
-import { BaseCard, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { ParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
 import { SubmissionSuccessBanner } from "@/frontend/common/views/dashboard/shared/SubmissionSuccessBanner";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopBaseCard, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { ComplaintFormFieldsDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintFormFields.desktop";
 import { ComplaintPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintPolicyPanel.desktop";
 import { ComplaintRecordCardListDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintRecordCardList.desktop";
@@ -35,22 +35,22 @@ export function ParentComplaintsDesktopView({
 
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, lg: 5 }}>
-          <BaseCard>
+          <DesktopBaseCard>
             <ComplaintFormFieldsDesktop
               control={control}
               errors={errors}
               labels={labels}
               studentOptions={studentOptions}
             />
-            <PrimaryPageAction
+            <DesktopPrimaryPageAction
               fullWidth
               disabled={!canSubmit || isSubmitting}
               onClick={onFormSubmit}
               sx={{ mt: 4, py: 2 }}
             >
               {labels.submit}
-            </PrimaryPageAction>
-          </BaseCard>
+            </DesktopPrimaryPageAction>
+          </DesktopBaseCard>
           <ComplaintPolicyPanelDesktop labels={labels} />
         </Grid>
 

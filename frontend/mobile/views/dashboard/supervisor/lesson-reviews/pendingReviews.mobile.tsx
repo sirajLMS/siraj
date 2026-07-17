@@ -3,8 +3,10 @@
 import { ChevronRightOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
-import type { PendingReviewsViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";
+import type {
+  PendingReviewRow,
+  PendingReviewsViewModel,
+} from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import {
   MobileCardList,
   MobileContentStack,
@@ -17,16 +19,21 @@ import {
 } from "@/frontend/mobile/components/ui";
 import { LessonReportDetailPanelMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/lessonReportDetailPanel.mobile";
 
-interface ReviewCardProps {
+function ReviewCard({
+  row,
+  labels,
+  approving,
+  onApprove,
+  onReject,
+  onSelect,
+}: Readonly<{
   readonly row: PendingReviewRow;
   readonly labels: PendingReviewsViewModel["labels"];
   readonly approving: boolean;
   readonly onApprove: (id: string) => void;
   readonly onReject: (row: PendingReviewRow) => void;
   readonly onSelect: (row: PendingReviewRow) => void;
-}
-
-function ReviewCard({ row, labels, approving, onApprove, onReject, onSelect }: Readonly<ReviewCardProps>) {
+}>) {
   return (
     <Box
       sx={theme => ({
@@ -101,18 +108,26 @@ function ReviewCard({ row, labels, approving, onApprove, onReject, onSelect }: R
   );
 }
 
-export function PendingReviewsMobileView({
-  rows,
-  selectedReport,
-  loading,
-  approving,
-  labels,
-  onTeacherFilterChange,
-  onStudentFilterChange,
-  onSelectReport,
-  onApprove,
-  onOpenRejectDialog,
-}: Readonly<PendingReviewsViewModel>) {
+export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel>) {
+  const {
+    rows,
+    selectedReport,
+    loading,
+    approving,
+    rejecting,
+    labels,
+    onTeacherFilterChange,
+    onStudentFilterChange,
+    onSelectReport,
+    onApprove,
+    onOpenRejectDialog,
+    onCloseRejectDialog,
+    onRejectReasonChange,
+    onConfirmReject,
+    rejectDialogOpen,
+    rejectReason,
+  } = props;
+
   const renderItem = (row: PendingReviewRow): ReactNode => (
     <ReviewCard
       row={row}

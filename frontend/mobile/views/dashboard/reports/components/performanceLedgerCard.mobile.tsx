@@ -2,8 +2,6 @@
 
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -11,6 +9,8 @@ import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { PerformanceLedgerCardLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { LedgerStatus, ReportLedgerRow } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import { formatReportPaidAmounts } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { useAppTranslation } from "@/shared/locale";
 
 export type PerformanceLedgerCardMobileLabels = PerformanceLedgerCardLabels;
@@ -78,7 +78,7 @@ export function PerformanceLedgerCardMobile({ row, labels, onClick }: Readonly<P
   );
 
   return (
-    <BaseCard
+    <MobileBaseCard
       onClick={
         onClick
           ? () => {
@@ -129,7 +129,7 @@ export function PerformanceLedgerCardMobile({ row, labels, onClick }: Readonly<P
             </Typography>
           </Box>
         </Box>
-        <StatusBadge
+        <MobileStatusBadge
           category="sessionTracking"
           status={getStatusBadgeStatus(row.status)}
           label={labels.statusLabels[row.status]}
@@ -171,6 +171,6 @@ export function PerformanceLedgerCardMobile({ row, labels, onClick }: Readonly<P
           </Box>
         )}
       </Box>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }

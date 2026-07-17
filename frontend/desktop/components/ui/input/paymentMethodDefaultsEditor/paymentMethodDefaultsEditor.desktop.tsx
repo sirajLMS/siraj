@@ -3,16 +3,47 @@
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
-import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentDirection, type PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopFieldWrapper } from "@/frontend/desktop/components/ui/form/field";
 import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/form/snackbar";
 import { CurrencySelectDesktop } from "@/frontend/desktop/components/ui/input/currencySelect";
 import { LocalizedStringDrawerDesktop } from "@/frontend/desktop/components/ui/input/localizedString";
 import { useAppTranslation } from "@/shared/locale";
+
+export type PaymentMethodDisplayData = {
+  readonly id?: string;
+  readonly type?: PaymentMethodType | null;
+  readonly direction?: PaymentDirection | null;
+  readonly label?: string | null;
+  readonly catalogName?: Record<string, string> | null;
+  readonly catalogSlug?: string | null;
+  readonly logoUrl?: string | null;
+  readonly details?: {
+    readonly phone?: string | null;
+    readonly url?: string | null;
+    readonly identifier?: string | null;
+    readonly iban?: string | null;
+    readonly bankName?: string | null;
+    readonly beneficiaryName?: string | null;
+    readonly note?: string | null;
+  } | null;
+  readonly countryCode?: string | null;
+  readonly currencyCode?: string | null;
+  readonly verifiedAt?: string | null;
+  readonly isActive?: boolean | null;
+  readonly isDefault?: boolean;
+  readonly masked?: boolean;
+};
+
+export type PaymentMethodRow = PaymentMethodDisplayData & {
+  readonly id: string;
+  readonly type: PaymentMethodType;
+  readonly direction: PaymentDirection;
+  readonly isDefault: boolean;
+};
 
 export type PaymentMethodDefaultsEditorProps = {
   readonly methods: readonly PaymentMethodRow[];
@@ -24,7 +55,7 @@ export type PaymentMethodDefaultsEditorProps = {
   readonly onInstructionsSaveAction?: (next: Record<string, string>) => void;
   readonly displayCurrency?: CurrencyOption | null;
   readonly onDisplayCurrencyChangeAction?: (currency: CurrencyOption) => void;
-  readonly allowedCurrencyCodes?: readonly string[];
+  readonly allowedCurrencyCodes?: readonly string[] | undefined;
   readonly disabled?: boolean;
   readonly successOpen?: boolean;
   readonly onSuccessCloseAction?: () => void;
@@ -175,7 +206,12 @@ export function PaymentMethodDefaultsEditorDesktop({
             >
               <Typography sx={{ flex: 1, typography: "bodyMd" }}>{formatMethodLabel(method)}</Typography>
               {method.isDefault ? (
-                <StatusBadge category="paymentMethod" status="active" label={t.display.defaultBadge} size="small" />
+                <DesktopStatusBadge
+                  category="paymentMethod"
+                  status="active"
+                  label={t.display.defaultBadge}
+                  size="small"
+                />
               ) : null}
             </Box>
           ))}

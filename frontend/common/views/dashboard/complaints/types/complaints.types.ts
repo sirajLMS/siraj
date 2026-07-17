@@ -13,7 +13,7 @@ export { ComplaintCategory } from "@/frontend/common/graphql/generated/gql/graph
 export { ComplaintStatus };
 
 // UI/Mock-specific view types (used by mock store and views)
-export type ComplaintTab = ComplaintStatus;
+export type ComplaintTab = ComplaintStatus | "all";
 
 export type ComplaintPriority = "urgent" | "general";
 

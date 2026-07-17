@@ -4,14 +4,22 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import { fromGraphqlIanaTimezone, getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
+import {
+  fromGraphqlIanaTimezone,
+  getTimezoneEmoji,
+  getTimezonePathLabel,
+  getTimezoneSelectLabel,
+} from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 
 export type MobileTimezoneDisplayProps = {
   readonly timezone?: string | null;
   readonly showOffset?: boolean;
   readonly fallback?: string;
   readonly typographyVariant?: TypographyProps["variant"];
+  /** Render shape: "label" (default) renders the textual label; "iconOnly" renders just the territory flag emoji. */
+  readonly displayType?: "label" | "iconOnly";
   readonly sx?: SxProps<Theme>;
 };
 
@@ -22,12 +30,15 @@ export type MobileTimezoneDisplayProps = {
  * - Default `typographyVariant="caption"` (vs desktop `"bodyMd"`) for compact
  *   mobile typography.
  * - `whiteSpace: "nowrap"` preserved to keep timezone label on a single line.
+ * - Supports `displayType="iconOnly"` for compact meta tiles where only the
+ *   territory flag emoji is desired.
  */
 export const MobileTimezoneDisplay: React.FC<MobileTimezoneDisplayProps> = ({
   timezone,
   showOffset = true,
   fallback,
   typographyVariant = "caption",
+  displayType = "label",
   sx,
 }): React.ReactNode => {
   const locale = useAppLocale();
@@ -37,6 +48,11 @@ export const MobileTimezoneDisplay: React.FC<MobileTimezoneDisplayProps> = ({
   }
 
   const normalizedTimezone = timezone.includes("/") ? timezone : fromGraphqlIanaTimezone(timezone);
+
+  if (displayType === "iconOnly") {
+    return <MobileLocaleEmoji emoji={getTimezoneEmoji(normalizedTimezone)} sx={sx} />;
+  }
+
   const display = showOffset
     ? getTimezoneSelectLabel(normalizedTimezone, locale)
     : getTimezonePathLabel(normalizedTimezone, locale);

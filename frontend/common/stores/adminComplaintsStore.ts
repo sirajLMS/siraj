@@ -1,11 +1,13 @@
 import { create } from "zustand";
-import { ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 const DEFAULT_PAGE_SIZE = 10;
 
+export type ComplaintTab = ComplaintStatus | "all";
+
 interface AdminComplaintsState {
   readonly searchQuery: string;
-  readonly activeTab: ComplaintStatus;
+  readonly activeTab: ComplaintTab;
   readonly draftResponses: Readonly<Record<string, string>>;
   readonly respondingToId: string;
   readonly isResponding: boolean;
@@ -15,7 +17,7 @@ interface AdminComplaintsState {
   readonly deleteComplaintId: string | null;
   readonly isDeletingComplaint: boolean;
   setSearchQuery: (query: string) => void;
-  setActiveTab: (tab: ComplaintStatus) => void;
+  setActiveTab: (tab: ComplaintTab) => void;
   setDraftResponse: (id: string, text: string) => void;
   clearDraftResponse: (id: string) => void;
   setRespondingToId: (id: string) => void;
@@ -31,7 +33,7 @@ interface AdminComplaintsState {
 
 export const useAdminComplaintsStore = create<AdminComplaintsState>(set => ({
   searchQuery: "",
-  activeTab: ComplaintStatus.Unanswered,
+  activeTab: "all",
   draftResponses: {},
   respondingToId: "",
   isResponding: false,

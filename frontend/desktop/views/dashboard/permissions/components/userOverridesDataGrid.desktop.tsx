@@ -6,11 +6,13 @@ import { Box, Button, CircularProgress, Tooltip, Typography } from "@mui/materia
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import type { PermissionGroup, User, UserOverride } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
+import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface UserOverridesDataGridDesktopProps {
@@ -261,7 +263,7 @@ export function UserOverridesDataGridDesktop({
           const user = params.row;
           return (
             <Box sx={{ display: "flex", alignItems: "center", py: 1, height: "100%" }}>
-              <PersonProfileLinkCell
+              <DesktopPersonProfileLinkCell
                 href={user.id ? profileHrefForUser(user.id) : undefined}
                 name={user.name ?? ""}
                 avatarUrl={user.avatarUrl}
@@ -363,13 +365,14 @@ export function UserOverridesDataGridDesktop({
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
-      <AppDataGrid<User>
+      <DesktopAppDataGrid<User>
         rows={users}
         columns={columns}
         getRowId={row => row.id ?? row.email ?? ""}
         emptyMessage={t.noPermissionsFound}
         loading={loading}
         autoHeight
+        slots={{ pagination: DesktopGridPagination }}
       />
     </Box>
   );

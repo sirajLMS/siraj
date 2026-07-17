@@ -2,10 +2,10 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { CategoriesSectionMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/categoriesSection.mobile";
 import { SubjectCardMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/subjectCard.mobile";
 import { useAppTranslation } from "@/shared/locale";
@@ -51,9 +51,9 @@ export function SubjectsViewMobile({
         subtitle={t.pageSubtitle}
         actions={
           canManageSubjects ? (
-            <PrimaryPageAction onClick={onAddSubject} startIcon={<AddOutlined />}>
+            <MobilePrimaryPageAction onClick={onAddSubject} startIcon={<AddOutlined />}>
               {t.addSubject}
-            </PrimaryPageAction>
+            </MobilePrimaryPageAction>
           ) : undefined
         }
       />

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ManualInvoiceContainer } from "@/frontend/common/views/dashboard/billing/manual/ManualInvoiceContainer";
+import { ManualInvoiceView } from "@/frontend/common/views/dashboard/billing/manual/ManualInvoiceView";
 import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
@@ -13,5 +13,5 @@ export async function generateMetadata({
 }
 
 export default function ManualInvoicePage() {
-  return <ManualInvoiceContainer />;
+  return <ManualInvoiceView />;
 }

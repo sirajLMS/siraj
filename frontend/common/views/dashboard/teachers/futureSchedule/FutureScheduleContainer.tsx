@@ -1,117 +1,27 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
-import { useNotifications } from "@toolpad/core/useNotifications";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
-  teacherFutureScheduleQueryDocument,
-  updateSessionStatusLeaveMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments";
-import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
-import { useFutureScheduleDateStore } from "@/frontend/common/stores/futureScheduleDateStore";
-import { logger } from "@/frontend/common/utils/logger";
-import { FutureScheduleView } from "@/frontend/common/views/dashboard/teachers/futureSchedule/FutureScheduleView";
-import type {
-  FutureScheduleContainerProps,
-  ImportantNoteItem,
-  SupportContactData,
-} from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
-import { useAppTranslation } from "@/shared/locale";
-import { getErrorMessage } from "@/shared/utils/error";
+  type FutureScheduleViewModel,
+  type UseFutureScheduleViewModelProps,
+  useFutureScheduleViewModel,
+} from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
 
-export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleContainerProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
-  const notifications = useNotifications();
-  useDocumentTitle(null, "dashboard.teacherFutureSchedule", "pageTitle");
-  const { data, loading, error, refetch } = useQuery(teacherFutureScheduleQueryDocument, {
-    variables: { teacherId },
-  });
-  const [requestLeave] = useMutation(updateSessionStatusLeaveMutationDocument);
+const lazyViews = createLazyView<FutureScheduleViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/teachers/futureSchedule/futureScheduleView.mobile").then(m => ({
+      default: m.FutureScheduleViewMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/teachers/futureSchedule/futureScheduleView.desktop").then(m => ({
+      default: m.FutureScheduleViewDesktop,
+    }))
+);
 
-  const selectedDate = useFutureScheduleDateStore(s => s.selectedDate);
-  const setSelectedDate = useFutureScheduleDateStore(s => s.setSelectedDate);
-
-  const schedule = data?.teacherFutureSchedule;
-
-  const handleRequestLeave = async (classInstanceId: string) => {
-    try {
-      await requestLeave({
-        variables: {
-          classInstanceId,
-          leaveReason: t.defaultLeaveReason,
-        },
-      });
-      await refetch();
-      notifications.show(t.notifications.leaveRequested, { severity: "success" });
-    } catch (err) {
-      const message = getErrorMessage(err);
-      logger.error({ caller: "FutureScheduleContainer" }, `Leave request failed: ${message}`);
-      if (message.includes("quota") || message.includes("Leave quota exceeded")) {
-        notifications.show(t.errors.quotaExceeded, { severity: "error" });
-      } else {
-        notifications.show(message || t.errors.leaveRequestFailed, { severity: "error" });
-      }
-    }
-  };
-
-  if (loading && !data) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 8 }}>
-        <Stack sx={{ alignItems: "center" }} spacing={2}>
-          <CircularProgress />
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {t.loading}
-          </Typography>
-        </Stack>
-      </Box>
-    );
-  }
-
-  if (error || !schedule) {
-    return (
-      <Box sx={{ py: 4, px: 3 }}>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main })}>
-          {t.errors.failedToLoad}
-        </Typography>
-      </Box>
-    );
-  }
-
-  const classes = (schedule.classes ?? []) as FutureClass[];
-  const notes: ImportantNoteItem[] = (schedule.importantNotes ?? []).map(n => ({
-    id: n.id ?? "",
-    title: n.title ?? "",
-    body: n.body,
-    priority: n.priority,
-    startsAt: n.startsAt,
-    expiresAt: n.expiresAt,
-  }));
-  const contact: SupportContactData | null = schedule.supportContact
-    ? {
-        id: schedule.supportContact.id,
-        name: schedule.supportContact.name,
-        role: schedule.supportContact.role,
-        avatarUrl: schedule.supportContact.avatarUrl,
-        phone: schedule.supportContact.phone,
-      }
-    : null;
-
-  return (
-    <RequirePermission permissions={[AppPermission.ScheduleViewAssigned]}>
-      <FutureScheduleView
-        classes={classes}
-        leaveQuotaUsed={schedule.leaveQuotaUsed ?? 0}
-        leaveQuotaTotal={schedule.leaveQuotaTotal ?? 0}
-        totalClasses={schedule.totalClasses ?? 0}
-        onRequestLeave={handleRequestLeave}
-        selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
-        notes={notes}
-        contact={contact}
-      />
-    </RequirePermission>
-  );
+export function FutureScheduleContainer(props: Readonly<UseFutureScheduleViewModelProps>) {
+  const viewModel = useFutureScheduleViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
+
+export type { FutureScheduleViewModel, UseFutureScheduleViewModelProps };

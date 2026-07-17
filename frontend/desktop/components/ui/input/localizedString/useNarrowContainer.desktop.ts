@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
  * adornments activate inside narrow desktop panels (dialogs, grid columns,
  * sidebars) as well as on phones.
  *
- * Duplicate of `@/frontend/common/components/ui/input/localizedString/useNarrowContainer`.
+ * Duplicate of this desktop file.
  */
 export function useNarrowContainer(
   containerRef: React.RefObject<HTMLElement | null>,

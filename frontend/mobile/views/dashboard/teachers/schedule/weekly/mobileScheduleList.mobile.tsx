@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import {
   AppPermission,
   ClassExecutionState,
@@ -23,6 +22,7 @@ import type {
   MobileScheduleListProps,
   ScheduledClass,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -87,7 +87,7 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {canJoin ? (
-            <MeetingJoinAction
+            <MobileMeetingJoinAction
               variant="icon"
               joinUrl={classItem.meetingJoinUrl}
               meeting={classItem.effectiveMeeting}

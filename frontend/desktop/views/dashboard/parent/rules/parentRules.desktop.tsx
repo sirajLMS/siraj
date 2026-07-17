@@ -1,9 +1,9 @@
 "use client";
 
 import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
-import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
 import type { ParentRulesViewModel } from "@/frontend/common/views/dashboard/parent/rules/useParentRulesViewModel";
-import { DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 export function ParentRulesDesktopView({
   labels,
@@ -11,14 +11,14 @@ export function ParentRulesDesktopView({
   onDownloadHandbook,
 }: Readonly<ParentRulesViewModel>) {
   return (
-    <PageContainer>
+    <DesktopPageContainer>
       <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
       {handbookLoading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress size={24} />
         </Box>
       ) : null}
-      <SectionPanel title={labels.sections.policies}>
+      <DesktopSectionPanel title={labels.sections.policies}>
         <Stack spacing={2}>
           <Typography sx={{ typography: "bodyLg", color: theme => theme.palette.text.secondary }}>
             {labels.policyIntro}
@@ -33,7 +33,7 @@ export function ParentRulesDesktopView({
             {labels.downloadHandbook}
           </Button>
         </Stack>
-      </SectionPanel>
-    </PageContainer>
+      </DesktopSectionPanel>
+    </DesktopPageContainer>
   );
 }

@@ -2,9 +2,9 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { OverrideEditControlsMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEditControls.mobile";
 import { OverrideEffectiveDisplayMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEffectiveDisplay.mobile";
 import { useAppTranslation } from "@/shared/locale";
@@ -83,7 +83,7 @@ export function OverridesDataGridMobile({
         }
 
         return (
-          <BaseCard key={key} sx={{ p: 2 }}>
+          <MobileBaseCard key={key} sx={{ p: 2 }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Box>
                 <StyledPermissionKeyText variant="bodyMd">{permission.key}</StyledPermissionKeyText>
@@ -119,7 +119,7 @@ export function OverridesDataGridMobile({
                 ) : null}
               </Box>
             </Box>
-          </BaseCard>
+          </MobileBaseCard>
         );
       })}
     </Box>

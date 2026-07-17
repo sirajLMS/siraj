@@ -1,23 +1,48 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { Box, CircularProgress } from "@mui/material";
-import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { classCategoriesQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-category.documents";
-import { classSubjectsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
-import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
-import { useUserStore } from "@/frontend/common/stores/userStore";
-import { SubjectDialogsView } from "@/frontend/common/views/dashboard/subjects/home/SubjectDialogsView";
-import { SubjectsView } from "@/frontend/common/views/dashboard/subjects/home/SubjectsView";
-import type { CategoryItem, SubjectItem } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useRouter } from "@/shared/i18n/routing";
+import {
+  type SubjectsViewModel,
+  useSubjectsViewModel,
+} from "@/frontend/common/views/dashboard/subjects/home/useSubjectsViewModel";
 
-const SUBJECT_PERMS = [AppPermission.SubjectsCreate, AppPermission.SubjectsUpdate, AppPermission.SubjectsDelete];
-const CATEGORY_PERMS = [AppPermission.CategoriesCreate, AppPermission.CategoriesUpdate, AppPermission.CategoriesDelete];
+const lazyViews = createLazyView<SubjectsViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/subjects/home/subjectsView.mobile").then(m => ({
+      default: m.SubjectsViewMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/subjects/home/subjectsView.desktop").then(m => ({
+      default: m.SubjectsViewDesktop,
+    }))
+);
 
-function buildActionHandlers(
+export function SubjectsContainer() {
+  const viewModel = useSubjectsViewModel({});
+
+  return (
+    <RequirePermission permissions={[AppPermission.SubjectsList]}>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
+    </RequirePermission>
+  );
+}
+
+export type {
+  SubjectsViewModel,
+  UseSubjectsViewModelProps,
+} from "@/frontend/common/views/dashboard/subjects/home/useSubjectsViewModel";
+
+export const SUBJECT_PERMS = [AppPermission.SubjectsCreate, AppPermission.SubjectsUpdate, AppPermission.SubjectsDelete];
+export const CATEGORY_PERMS = [
+  AppPermission.CategoriesCreate,
+  AppPermission.CategoriesUpdate,
+  AppPermission.CategoriesDelete,
+];
+
+export function buildActionHandlers(
   canManage: boolean,
   openCreate: () => void,
   openEdit: (id: string) => void,
@@ -26,104 +51,4 @@ function buildActionHandlers(
   return canManage
     ? { onAdd: openCreate, onEdit: openEdit, onDelete: openDelete }
     : { onAdd: () => {}, onEdit: () => {}, onDelete: () => {} };
-}
-
-export function SubjectsContainer() {
-  const router = useRouter();
-  const permissions = useUserStore(state => state.permissions);
-  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
-  const store = useSubjectManagementStore();
-
-  const { data: categoriesData, loading: categoriesLoading } = useQuery(classCategoriesQueryDocument);
-  const {
-    data: subjectsData,
-    loading: subjectsLoading,
-    refetch: refetchSubjects,
-  } = useQuery(classSubjectsQueryDocument, { variables: { categoryId: activeCategoryId } });
-
-  const categories = useMemo<readonly CategoryItem[]>(
-    () => categoriesData?.classCategories ?? [],
-    [categoriesData?.classCategories]
-  );
-
-  const subjects = useMemo(
-    () => (subjectsData?.classSubjects ?? []) as readonly SubjectItem[],
-    [subjectsData?.classSubjects]
-  );
-
-  const selectedSubject = useMemo(
-    () => subjects.find(s => s.id === store.selectedId) ?? null,
-    [subjects, store.selectedId]
-  );
-  const selectedCategory = useMemo(
-    () => categories.find(c => c.id === store.selectedId) ?? null,
-    [categories, store.selectedId]
-  );
-  const pendingDeleteSubject = useMemo(
-    () => subjects.find(s => s.id === store.pendingDeleteId) ?? null,
-    [subjects, store.pendingDeleteId]
-  );
-  const pendingDeleteCategory = useMemo(
-    () => categories.find(c => c.id === store.pendingDeleteId) ?? null,
-    [categories, store.pendingDeleteId]
-  );
-
-  const canManageSubjects = SUBJECT_PERMS.some(p => permissions.includes(p));
-  const canManageCategories = CATEGORY_PERMS.some(p => permissions.includes(p));
-
-  const subjectActions = buildActionHandlers(
-    canManageSubjects,
-    () => store.openCreateDialog("subject"),
-    (id: string) => store.openEditDialog(id, "subject"),
-    (id: string) => store.openDeleteDialog(id, "subject")
-  );
-
-  const categoryActions = buildActionHandlers(
-    canManageCategories,
-    () => store.openCreateDialog("category"),
-    (id: string) => store.openEditDialog(id, "category"),
-    (id: string) => store.openDeleteDialog(id, "category")
-  );
-
-  const isLoading = categoriesLoading && subjectsLoading;
-
-  if (isLoading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  return (
-    <RequirePermission permissions={[AppPermission.SubjectsList]}>
-      <SubjectsView
-        categories={categories}
-        subjects={subjects}
-        isLoading={false}
-        activeCategoryId={activeCategoryId}
-        onCategoryChange={setActiveCategoryId}
-        onAddSubject={subjectActions.onAdd}
-        onEditSubject={subjectActions.onEdit}
-        onDeleteSubject={subjectActions.onDelete}
-        onSubjectClick={(id: string) => router.push(`/subjects/${id}`)}
-        onCreateCategory={categoryActions.onAdd}
-        onEditCategory={categoryActions.onEdit}
-        onDeleteCategory={categoryActions.onDelete}
-        canManageSubjects={canManageSubjects}
-        canManageCategories={canManageCategories}
-      />
-
-      <SubjectDialogsView
-        categories={categories}
-        selectedSubject={selectedSubject}
-        selectedCategory={selectedCategory}
-        pendingDeleteSubject={pendingDeleteSubject}
-        pendingDeleteCategory={pendingDeleteCategory}
-        refetchSubjects={refetchSubjects}
-        activeCategoryId={activeCategoryId}
-        onCategoryReset={() => setActiveCategoryId(null)}
-      />
-    </RequirePermission>
-  );
 }

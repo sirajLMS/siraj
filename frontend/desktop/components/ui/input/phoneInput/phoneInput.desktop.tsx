@@ -8,12 +8,26 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
 import { useCallback, useState } from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import type { PhoneInputProps } from "@/frontend/common/components/ui/input/phoneInput/PhoneInput";
-import { usePhoneInput } from "@/frontend/common/components/ui/input/phoneInput/usePhoneInput";
 import { LtrScope } from "@/frontend/common/providers/theme/LtrScope";
+import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { PhoneCountryPickerDesktop } from "@/frontend/desktop/components/ui/input/phoneInput/phoneCountryPicker.desktop";
+import { usePhoneInput } from "@/frontend/desktop/components/ui/input/phoneInput/usePhoneInput.desktop";
 import { useAppTranslation } from "@/shared/locale";
+
+export type PhoneInputProps = {
+  readonly value: string | null;
+  readonly onChangeAction: (e164: string | null) => void;
+  readonly onBlurAction?: () => void;
+  readonly defaultRegion?: string;
+  readonly label?: string;
+  readonly placeholder?: string;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly fullWidth?: boolean;
+  readonly error?: boolean;
+  readonly helperText?: string;
+  readonly hideLabel?: boolean;
+};
 
 const slotInputSx = {
   border: "none",
@@ -80,7 +94,7 @@ const CountryAdornment: React.FC<CountryAdornmentProps> = ({
         marginInlineEnd: 0,
       }}
     >
-      <LocaleEmoji emoji={countryEmoji ?? "🌐"} />
+      <DesktopLocaleEmoji emoji={countryEmoji ?? "🌐"} />
     </IconButton>
     <Box
       component="input"

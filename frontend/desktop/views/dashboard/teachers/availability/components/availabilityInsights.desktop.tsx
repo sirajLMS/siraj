@@ -1,20 +1,17 @@
-// cspell:disable
-"use client";
-
 import { PersonSearchOutlined, PublicOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { AvatarGroup, Box, Tooltip, Typography } from "@mui/material";
-import { UserAvatar } from "@/frontend/common/components/ui";
-import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
-import { TimezoneDisplay } from "@/frontend/common/components/ui/display";
 import type {
   AvailabilityInsightsProps,
   InsightCardProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar";
+import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
+import { DesktopTimezoneDisplay } from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
 
 function InsightCard({ title, value, description, icon }: Readonly<InsightCardProps>) {
   return (
-    <BaseCard
+    <DesktopBaseCard
       sx={theme => ({
         p: theme.layout.cardPadding,
         display: "flex",
@@ -36,7 +33,7 @@ function InsightCard({ title, value, description, icon }: Readonly<InsightCardPr
           {description}
         </Typography>
       </Box>
-    </BaseCard>
+    </DesktopBaseCard>
   );
 }
 
@@ -45,7 +42,7 @@ function TimezoneInsight({
   labels,
 }: Readonly<{ timezones: readonly string[]; labels: { title: string; description: string } }>) {
   return (
-    <BaseCard
+    <DesktopBaseCard
       sx={theme => ({
         p: theme.layout.cardPadding,
         display: "flex",
@@ -84,8 +81,8 @@ function TimezoneInsight({
         })}
       >
         {timezones.map((tz, index) => (
-          <Tooltip key={tz} title={<TimezoneDisplay timezone={tz} />} arrow describeChild>
-            <UserAvatar
+          <Tooltip key={tz} title={<DesktopTimezoneDisplay timezone={tz} />} arrow describeChild>
+            <DesktopUserAvatar
               size={32}
               sx={theme => ({
                 backgroundColor: index === 0 ? theme.palette.primaryContainer : theme.palette.secondaryContainer,
@@ -93,7 +90,7 @@ function TimezoneInsight({
               })}
             >
               {tz}
-            </UserAvatar>
+            </DesktopUserAvatar>
           </Tooltip>
         ))}
       </AvatarGroup>
@@ -109,7 +106,7 @@ function TimezoneInsight({
       >
         <PublicOutlined sx={theme => ({ fontSize: 120, color: theme.palette.primary.main })} />
       </Box>
-    </BaseCard>
+    </DesktopBaseCard>
   );
 }
 

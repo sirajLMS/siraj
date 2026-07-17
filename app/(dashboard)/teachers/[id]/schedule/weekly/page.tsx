@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { getTeacherPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import TeacherWeeklyScheduleContainer from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleContainer";
+import { TeacherWeeklyScheduleContainer } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleContainer";
 import { getTranslations } from "@/shared/locale";
 
 interface PageProps {

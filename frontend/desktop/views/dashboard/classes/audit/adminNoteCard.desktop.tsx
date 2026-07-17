@@ -3,8 +3,8 @@
 import { AdminPanelSettingsOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 
 export interface AdminNoteCardDesktopProps {
   readonly note: AdminNoteInfo | null | undefined;
@@ -70,7 +70,7 @@ export function AdminNoteCardDesktop({ note, labels, onUpdate }: Readonly<AdminN
   const content = note?.content ?? "";
 
   return (
-    <BaseCard
+    <DesktopBaseCard
       sx={theme => ({
         backgroundColor: theme.palette.sidebar,
         color: theme.palette.onSidebar,
@@ -84,6 +84,6 @@ export function AdminNoteCardDesktop({ note, labels, onUpdate }: Readonly<AdminN
       </Typography>
 
       <NoteFooterDesktop lastUpdatedText={lastUpdatedText} updateLabel={labels.update} onUpdate={onUpdate} />
-    </BaseCard>
+    </DesktopBaseCard>
   );
 }

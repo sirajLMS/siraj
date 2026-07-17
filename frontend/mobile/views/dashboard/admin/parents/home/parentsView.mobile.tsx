@@ -6,7 +6,7 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
 import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
-import type { ParentsViewLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsView";
+import type { ParentsViewLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {

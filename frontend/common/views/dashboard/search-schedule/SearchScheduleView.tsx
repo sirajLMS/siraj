@@ -2,13 +2,7 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import {
-  type SearchScheduleViewModel,
-  type UseSearchScheduleViewModelProps,
-  useSearchScheduleViewModel,
-} from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
-
-export type { SearchScheduleViewModel };
+import type { SearchScheduleViewModel } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
 
 const lazyViews = createLazyView<SearchScheduleViewModel>(
   () =>
@@ -21,7 +15,8 @@ const lazyViews = createLazyView<SearchScheduleViewModel>(
     }))
 );
 
-export function SearchScheduleView(props: Readonly<UseSearchScheduleViewModelProps>) {
-  const viewModel = useSearchScheduleViewModel(props);
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+export function SearchScheduleView(props: Readonly<SearchScheduleViewModel>) {
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }
+
+export type { SearchScheduleViewModel };

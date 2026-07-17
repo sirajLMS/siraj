@@ -2,9 +2,12 @@
 
 import { Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
-import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
+import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 import { useAppTranslation } from "@/shared/locale";
 
 type AssignedStudentsDataGridProps = {
@@ -36,7 +39,7 @@ export function AssignedStudentsDataGrid({
       flex: 1.5,
       minWidth: 260,
       renderCell: params => (
-        <PersonProfileLinkCell
+        <DesktopPersonProfileLinkCell
           href={params.row.id ? studentHref(params.row.id) : undefined}
           avatarUrl={params.row.studentAvatarUrl}
           name={params.row.studentName}
@@ -50,7 +53,7 @@ export function AssignedStudentsDataGrid({
       flex: 1.5,
       minWidth: 260,
       renderCell: params => (
-        <PersonProfileLinkCell
+        <DesktopPersonProfileLinkCell
           href={profileHrefForParent({
             userId: params.row.parentUserId,
             parentId: params.row.parentId,
@@ -73,7 +76,7 @@ export function AssignedStudentsDataGrid({
       flex: 1,
       minWidth: 130,
       renderCell: params => (
-        <StatusBadge
+        <DesktopStatusBadge
           category="studentAccount"
           status={params.row.status.toLowerCase()}
           label={formatStatusLabel(params.row.status)}
@@ -105,7 +108,7 @@ export function AssignedStudentsDataGrid({
   ];
 
   return (
-    <AppDataGrid
+    <DesktopAppDataGrid
       rows={rows}
       columns={columns}
       loading={loading}
@@ -113,7 +116,7 @@ export function AssignedStudentsDataGrid({
       paginationModel={{ page, pageSize }}
       onPaginationModelChange={onPaginationModelChange}
       pageSizeOptions={[5, 10, 25]}
-      slots={{ pagination: GridPagination }}
+      slots={{ pagination: DesktopGridPagination }}
       sx={{ border: "none" }}
     />
   );

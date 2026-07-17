@@ -2,9 +2,9 @@
 
 import { FileDownloadOutlined, PrintOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
-import { BaseCard, FilterButton, SectionPanel } from "@/frontend/common/components/ui";
 import type { ReportsViewModel } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopBaseCard, DesktopFilterButton, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { EngagementRateCardDesktop } from "@/frontend/desktop/views/dashboard/reports/components/engagementRateCard.desktop";
 import { FinancialDistributionCardDesktop } from "@/frontend/desktop/views/dashboard/reports/components/financialDistributionCard.desktop";
 import { ReportFiltersFormDesktop } from "@/frontend/desktop/views/dashboard/reports/components/reportFiltersForm.desktop";
@@ -38,17 +38,17 @@ export function ReportsDesktopView({
         subtitle={labels.pageSubtitle}
         actions={
           <>
-            <FilterButton startIcon={<FileDownloadOutlined />} disabled={!canGenerate} onClick={onExportCsv}>
+            <DesktopFilterButton startIcon={<FileDownloadOutlined />} disabled={!canGenerate} onClick={onExportCsv}>
               {labels.exportCsv}
-            </FilterButton>
-            <FilterButton startIcon={<PrintOutlined />} disabled={!canGenerate} onClick={onPrintReport}>
+            </DesktopFilterButton>
+            <DesktopFilterButton startIcon={<PrintOutlined />} disabled={!canGenerate} onClick={onPrintReport}>
               {labels.printReport}
-            </FilterButton>
+            </DesktopFilterButton>
           </>
         }
       />
 
-      <BaseCard>
+      <DesktopBaseCard>
         <ReportFiltersFormDesktop
           fromDate={fromDate}
           toDate={toDate}
@@ -63,9 +63,9 @@ export function ReportsDesktopView({
           onReportTypeChange={onReportTypeChange}
           onSubmit={onSubmit}
         />
-      </BaseCard>
+      </DesktopBaseCard>
 
-      <SectionPanel>
+      <DesktopSectionPanel>
         <ReportsDataGridDesktop
           rows={rows}
           labels={labels.tableLabels}
@@ -74,7 +74,7 @@ export function ReportsDesktopView({
           onRowClick={onRowClick}
         />
         <ReportsTotalsSectionDesktop summary={summary} rows={rows} totalsLabel={labels.totalsLabel} />
-      </SectionPanel>
+      </DesktopSectionPanel>
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 4 }}>

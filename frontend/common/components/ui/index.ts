@@ -7,10 +7,6 @@ export { ActionIconLink } from "@/frontend/common/components/ui/button/ActionIco
 export * from "@/frontend/common/components/ui/card";
 export * from "@/frontend/common/components/ui/container";
 export { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
-export * from "@/frontend/common/components/ui/container/page";
-export { PageContainer } from "@/frontend/common/components/ui/container/page/PageContainer";
-export { PageHeader } from "@/frontend/common/components/ui/container/page/PageHeader";
-// Re-export individual components that existing code imports
 export { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 export * from "@/frontend/common/components/ui/dataGrid";
 export { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";

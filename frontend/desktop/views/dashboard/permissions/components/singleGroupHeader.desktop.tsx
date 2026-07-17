@@ -3,9 +3,9 @@
 import { ArrowBackOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledBreadcrumbNav = styled(Box)({
@@ -114,7 +114,7 @@ export function SingleGroupHeaderDesktop({ group, onBack, onEditGroup }: Readonl
         <StyledHeaderInfo>
           <StyledHeaderTitleRow>
             <StyledHeaderTitle variant="headlineMd">{groupName}</StyledHeaderTitle>
-            <StatusBadge
+            <DesktopStatusBadge
               category="session"
               status={group.isSystem ? "active" : "pending"}
               label={group.isSystem ? t.systemBadge : t.customBadge}

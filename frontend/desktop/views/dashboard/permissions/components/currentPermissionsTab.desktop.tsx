@@ -5,8 +5,8 @@ import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
@@ -131,7 +131,7 @@ export function CurrentPermissionsTabDesktop({
   }, [t, group.isSystem, onRevokePermission]);
 
   return (
-    <SectionPanel title={t.currentPermissions}>
+    <DesktopSectionPanel title={t.currentPermissions}>
       {permissionsCount === 0 && !loading ? (
         <StyledEmptyStateContainer>
           <StyledEmptyStateIconCircle>
@@ -146,7 +146,7 @@ export function CurrentPermissionsTabDesktop({
           )}
         </StyledEmptyStateContainer>
       ) : (
-        <AppDataGrid<Permission>
+        <DesktopAppDataGrid<Permission>
           rows={groupPermissions}
           columns={currentPermissionsColumns}
           getRowId={row => row.id ?? row.key ?? ""}
@@ -155,6 +155,6 @@ export function CurrentPermissionsTabDesktop({
           autoHeight
         />
       )}
-    </SectionPanel>
+    </DesktopSectionPanel>
   );
 }

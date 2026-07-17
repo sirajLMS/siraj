@@ -1,27 +1,22 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { parentOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { ParentSocialView } from "@/frontend/common/views/dashboard/parent/social/parentSocialView";
-import { useAppTranslation } from "@/shared/locale";
+import { ParentSocialView } from "@/frontend/common/views/dashboard/parent/social/ParentSocialView";
+import {
+  type ParentSocialViewModel,
+  type UseParentSocialViewModelProps,
+  useParentSocialViewModel,
+} from "@/frontend/common/views/dashboard/parent/social/useParentSocialViewModel";
 
-export function ParentSocialContainer() {
-  const t = useAppTranslation().dashboardTranslations.parentSocial;
-  const { data, loading, error } = useQuery(parentOwnProfileQueryDocument);
-  const profile = data?.parentOwnProfile
-    ? {
-        phone: data.parentOwnProfile.phone,
-        facebook: data.parentOwnProfile.facebook,
-        whatsapp: data.parentOwnProfile.whatsapp,
-        twitter: data.parentOwnProfile.twitter,
-      }
-    : null;
+export function ParentSocialContainer(_props: Readonly<UseParentSocialViewModelProps>) {
+  const viewModel = useParentSocialViewModel({});
 
   return (
-    <RequirePermission permissions={[AppPermission.ParentViewOwnProfile]}>
-      <ParentSocialView labels={t} loading={loading} error={Boolean(error)} profile={profile} />
+    <RequirePermission permissions={[AppPermission.ScheduleViewFamily]} fallback={null}>
+      <ParentSocialView {...viewModel} />
     </RequirePermission>
   );
 }
+
+export type { ParentSocialViewModel, UseParentSocialViewModelProps };

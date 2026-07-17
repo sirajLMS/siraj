@@ -2,7 +2,7 @@
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/useMonthlyReportsViewModel";
+import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
 import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
@@ -11,22 +11,23 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
-export function MonthlyReportsDesktopView({
-  reportType,
-  year,
-  month,
-  teacherId,
-  studentId,
-  metrics,
-  loading,
-  labels,
-  onReportTypeChange,
-  onYearChange,
-  onMonthChange,
-  onTeacherIdChange,
-  onStudentIdChange,
-  onGenerate,
-}: Readonly<MonthlyReportsViewModel>) {
+export function MonthlyReportsDesktopView(props: Readonly<MonthlyReportsViewModel>) {
+  const {
+    reportType,
+    year,
+    month,
+    teacherId,
+    studentId,
+    metrics,
+    loading,
+    labels,
+    onReportTypeChange,
+    onYearChange,
+    onMonthChange,
+    onTeacherIdChange,
+    onStudentIdChange,
+    onGenerate,
+  } = props;
   return (
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.pageTitle} />
@@ -56,7 +57,7 @@ export function MonthlyReportsDesktopView({
         </Stack>
 
         <Grid container spacing={2} sx={{ alignItems: "center" }}>
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               select
               fullWidth
@@ -71,7 +72,7 @@ export function MonthlyReportsDesktopView({
               ))}
             </TextField>
           </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               select
               fullWidth
@@ -86,25 +87,29 @@ export function MonthlyReportsDesktopView({
               ))}
             </TextField>
           </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
-            {reportType === "teacher" ? (
+
+          {reportType === "teacher" ? (
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label={labels.selectTeacher}
                 value={teacherId}
                 onChange={e => onTeacherIdChange(e.target.value)}
               />
-            ) : (
+            </Grid>
+          ) : (
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label={labels.selectStudent}
                 value={studentId}
                 onChange={e => onStudentIdChange(e.target.value)}
               />
-            )}
-          </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
-            <DesktopPrimaryPageAction onClick={onGenerate} startIcon={<CalendarMonthOutlined />}>
+            </Grid>
+          )}
+
+          <Grid size={12}>
+            <DesktopPrimaryPageAction onClick={onGenerate} startIcon={<CalendarMonthOutlined />} sx={{ px: 6, py: 2 }}>
               {labels.generateReport}
             </DesktopPrimaryPageAction>
           </Grid>
@@ -124,9 +129,9 @@ export function MonthlyReportsDesktopView({
       ) : null}
 
       {metrics.length > 0 ? (
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           {metrics.map(metric => (
-            <Grid key={metric.label} size={{ xs: 12, md: 4, lg: 3 }}>
+            <Grid key={metric.label} size={{ xs: 12, sm: 6, md: 3 }}>
               <DesktopMetricCard icon={CalendarMonthOutlined} label={metric.label} value={metric.value} />
             </Grid>
           ))}

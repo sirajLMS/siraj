@@ -3,13 +3,13 @@
 import { Fingerprint, HistoryOutlined, MailOutlineOutlined } from "@mui/icons-material";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useCallback } from "react";
-import { UserAvatar } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
 import { profileHrefForUser, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import type { StudentStatusHeaderProps } from "@/frontend/common/views/dashboard/students/status/types";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/display";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -36,7 +36,7 @@ function StudentAvatar({
 
   return (
     <Box sx={{ position: "relative" }}>
-      <UserAvatar
+      <DesktopUserAvatar
         src={student.avatarUrl}
         label={student.name}
         size={96}
@@ -69,7 +69,7 @@ function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["
           </Typography>
         ) : null}
         {showStatus ? (
-          <StatusBadge
+          <DesktopStatusBadge
             category="studentAccount"
             status={getBadgeStatusKey(student.status)}
             label={t.statusOptions[student.status]}

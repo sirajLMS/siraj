@@ -1,10 +1,67 @@
 "use client";
 
 import type * as React from "react";
-import type { PaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodAutocomplete";
-import type { PaymentMethodSelectProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodSelect";
-import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
+import type { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PaymentMethodAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodSelect/paymentMethodAutocomplete.desktop";
+
+export interface PaymentMethodCatalogOption {
+  readonly id: string;
+  readonly slug: string;
+  readonly displayName: string;
+  readonly logoUrl: string | null;
+}
+
+export type PaymentMethodAutocompleteProps = {
+  readonly option?: PaymentMethodCatalogOption | null;
+  readonly options: readonly PaymentMethodCatalogOption[];
+  readonly onChangeAction: (option: PaymentMethodCatalogOption) => void;
+  readonly type?: PaymentMethodType | null;
+  readonly autoComplete?: string;
+  readonly fullWidth?: boolean;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly label?: string;
+  readonly placeholder?: string;
+  readonly error?: boolean;
+  readonly helperText?: string;
+  readonly onBlurAction?: () => void;
+  readonly style?: React.CSSProperties;
+  readonly open?: boolean;
+  readonly onOpenAction?: () => void;
+  readonly onCloseAction?: () => void;
+  readonly autoFocus?: boolean;
+  readonly allowedSlugs?: readonly string[];
+  readonly matchAnchorWidth?: boolean;
+  readonly disablePortal?: boolean;
+  readonly listAttached?: boolean;
+  readonly showSlug?: boolean;
+};
+
+export interface PaymentMethodSelectProps {
+  readonly option?: PaymentMethodCatalogOption | null;
+  readonly setOptionAction: (option: PaymentMethodCatalogOption | null) => void;
+  readonly options: readonly PaymentMethodCatalogOption[];
+  readonly type?: PaymentMethodType | null;
+  readonly autoComplete?: string;
+  readonly fullWidth?: boolean;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly label?: string;
+  readonly placeholder?: string;
+  readonly error?: boolean;
+  readonly helperText?: string;
+  readonly onBlurAction?: () => void;
+  readonly style?: React.CSSProperties;
+  readonly open?: boolean;
+  readonly onOpenAction?: () => void;
+  readonly onCloseAction?: () => void;
+  readonly autoFocus?: boolean;
+  readonly allowedSlugs?: readonly string[];
+  readonly matchAnchorWidth?: boolean;
+  readonly disablePortal?: boolean;
+  readonly listAttached?: boolean;
+  readonly showSlug?: boolean;
+}
 
 export type PaymentMethodSelectDesktopProps = PaymentMethodSelectProps;
 
@@ -25,5 +82,3 @@ export const PaymentMethodSelectDesktop: React.FC<PaymentMethodSelectDesktopProp
 
   return <PaymentMethodAutocompleteDesktop {...autocompleteProps} />;
 };
-
-export type { PaymentMethodCatalogOption };

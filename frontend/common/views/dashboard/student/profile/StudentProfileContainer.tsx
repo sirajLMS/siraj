@@ -1,93 +1,26 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { useMemo } from "react";
-import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
-import { StudentProfileView } from "@/frontend/common/views/dashboard/student/profile/studentProfileView";
-import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
-import { useRouter } from "@/shared/i18n/routing";
-import { type StudentPortalProfileLabels, useAppTranslation } from "@/shared/locale";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import {
+  type StudentProfileViewModel,
+  useStudentProfileViewModel,
+} from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
 
-function useStudentProfileLabels(t: StudentPortalProfileLabels): StudentPortalProfileLabels {
-  return useMemo(
-    () => ({
-      pageTitle: t.pageTitle,
-      personalInfo: t.personalInfo,
-      fullName: t.fullName,
-      email: t.email,
-      phone: t.phone,
-      dateOfBirth: t.dateOfBirth,
-      gender: t.gender,
-      language: t.language,
-      parentInfo: t.parentInfo,
-      parentName: t.parentName,
-      parentEmail: t.parentEmail,
-      parentPhone: t.parentPhone,
-      academicInfo: t.academicInfo,
-      teacher: t.teacher,
-      hoursPerWeek: t.hoursPerWeek,
-      classesRemaining: t.classesRemaining,
-      classesTotal: t.classesTotal,
-      editProfile: t.editProfile,
-      saveChanges: t.saveChanges,
-      cancel: t.cancel,
-      loadingMessage: t.loadingMessage,
-      saveSuccess: t.saveSuccess,
-      saveError: t.saveError,
-    }),
-    [t]
-  );
+const lazyViews = createLazyView<StudentProfileViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/student/profile/studentProfile.mobile").then(m => ({
+      default: m.StudentProfileMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/student/profile/studentProfile.desktop").then(m => ({
+      default: m.StudentProfileDesktopView,
+    }))
+);
+
+export function StudentProfileView() {
+  const viewModel = useStudentProfileViewModel({});
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export function StudentProfileContainer() {
-  const t = useAppTranslation().dashboardTranslations.studentPortalProfile;
-  const router = useRouter();
-  const labels = useStudentProfileLabels(t);
-
-  const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
-    variables: { studentId: null, year: null, month: null },
-    fetchPolicy: "cache-and-network",
-  });
-
-  const profile: StudentProfileRow | null = useMemo(() => {
-    if (!profileData?.studentProfile) return null;
-    const p = profileData.studentProfile;
-    return {
-      id: p.id ?? "",
-      name: p.name ?? "",
-      status: p.status ?? "",
-      avatarUrl: p.avatarUrl ?? null,
-      dateOfBirth: p.dateOfBirth ?? null,
-      gender: p.gender ?? null,
-      language: p.language ?? null,
-      email: p.email ?? null,
-      phone: p.phone ?? null,
-      parentId: p.parentId ?? null,
-      parentUserId: p.parentUserId ?? null,
-      parentName: p.parentName ?? null,
-      parentEmail: p.parentEmail ?? null,
-      parentPhone: p.parentPhone ?? null,
-      isAssociatedViewer: p.isAssociatedViewer ?? false,
-      primaryTeacherId: p.primaryTeacherId ?? null,
-      teacherUserId: p.teacherUserId ?? null,
-      teacherName: p.teacherName ?? null,
-      hoursPerWeek: p.hoursPerWeek ?? null,
-      classesRemaining: p.classesRemaining ?? null,
-      classesTotal: p.classesTotal ?? null,
-      version: p.version ?? 0,
-      createdAt: p.createdAt ?? null,
-      updatedAt: p.updatedAt ?? null,
-    };
-  }, [profileData]);
-
-  const loading = profileLoading;
-
-  return (
-    <StudentProfileView
-      profile={profile}
-      labels={labels}
-      loading={loading}
-      onBackToDashboard={() => router.push("/students/me")}
-    />
-  );
-}
+export type { StudentProfileViewModel };

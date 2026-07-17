@@ -1,103 +1,37 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Box, CircularProgress, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type {
-  ParentAssignedStudentsQuery,
-  ParentComplaintsQuery,
-} from "@/frontend/common/graphql/generated/gql/operations";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import {
+  AppPermission,
+  type ComplaintCategory,
+  type ComplaintStatus,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   parentAssignedStudentsQueryDocument,
   parentComplaintsQueryDocument,
   submitComplaintMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useParentComplaintsStore } from "@/frontend/common/stores/parentComplaintsStore";
-import { logger } from "@/frontend/common/utils/logger";
-import { ParentComplaintsView } from "@/frontend/common/views/dashboard/complaints/parentComplaintsView";
-import type { ComplaintFormData } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
-import type {
-  ParentComplaintRecord,
-  ParentStudentOption,
-} from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
+import type { ParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
+import { useParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { useAppTranslation } from "@/shared/locale/client";
 
-const StyledErrorTypography = styled(Typography)(({ theme }) => ({
-  color: theme.palette.error.main,
-}));
+const lazyViews = createLazyView<ParentComplaintsViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/complaints/parentComplaints.mobile").then(m => ({
+      default: m.ParentComplaintsMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/complaints/parentComplaints.desktop").then(m => ({
+      default: m.ParentComplaintsDesktopView,
+    }))
+);
 
-export interface ParentComplaintsContainerProps {
-  readonly parentId?: string;
-}
-
-function mapStudentOptions(
-  students: ParentAssignedStudentsQuery["parentAssignedStudents"] | null | undefined
-): ParentStudentOption[] {
-  if (!students?.rows) return [];
-  return students.rows.map(student => ({
-    id: student.id ?? "",
-    label: student.name ?? "",
-  }));
-}
-
-function mapComplaintRecords(
-  complaints: ParentComplaintsQuery["parentComplaints"] | null | undefined
-): ParentComplaintRecord[] {
-  if (!complaints?.complaints) return [];
-  return complaints.complaints.map(record => ({
-    id: record.id ?? "",
-    regarding: record.studentName ? `Regarding: ${record.studentName}` : "General",
-    summary: record.body ?? "",
-    status: record.status ?? ComplaintStatus.Unanswered,
-    adminResponse:
-      record.responses && record.responses.length > 0
-        ? {
-            text: record.responses[0].body ?? "",
-            answeredAt: record.responses[0].createdAt ?? "",
-          }
-        : undefined,
-  }));
-}
-
-function buildComplaintInput(formData: ComplaintFormData) {
-  return {
-    input: {
-      studentId: formData.studentId,
-      submitterEmail: formData.contactEmail,
-      body: formData.complaintDetails,
-      category: formData.category,
-      files: null,
-    },
-  };
-}
-
-function LoadingView() {
-  return (
-    <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-      <CircularProgress />
-    </Box>
-  );
-}
-
-function ErrorView({ message }: { readonly message: string }) {
-  return <StyledErrorTypography>{message}</StyledErrorTypography>;
-}
-
-function AccessDeniedView() {
-  return (
-    <Box sx={{ p: 4 }}>
-      <StyledErrorTypography>
-        Access Denied: You must be logged in as an associated parent to view complaints.
-      </StyledErrorTypography>
-    </Box>
-  );
-}
-
-export function ParentComplaintsContainer({ parentId }: ParentComplaintsContainerProps) {
+export function ParentComplaintsContainer() {
   const t = useAppTranslation();
   const labels = buildComplaintsLabels(t.dashboardTranslations.complaints);
 
@@ -109,7 +43,7 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
   const pageSize = useParentComplaintsStore(state => state.pageSize);
   const setPage = useParentComplaintsStore(state => state.setPage);
 
-  const { data, loading, error, refetch } = useQuery(parentComplaintsQueryDocument, {
+  const { data, refetch } = useQuery(parentComplaintsQueryDocument, {
     variables: {
       paginationArgs: {
         first: pageSize,
@@ -121,7 +55,6 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
         maxCount: null,
       },
     },
-    skip: !parentId,
     fetchPolicy: "cache-and-network",
   });
 
@@ -138,45 +71,68 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
     },
   });
 
-  const studentOptions = useMemo(
-    () => mapStudentOptions(studentsData?.parentAssignedStudents),
-    [studentsData?.parentAssignedStudents]
-  );
+  const studentOptions =
+    studentsData?.parentAssignedStudents?.rows?.map(student => ({
+      id: student.id ?? "",
+      label: student.name ?? "",
+    })) ?? [];
 
-  const records = useMemo(() => mapComplaintRecords(data?.parentComplaints), [data?.parentComplaints]);
+  const records =
+    data?.parentComplaints?.complaints?.map(record => ({
+      id: record.id ?? "",
+      regarding: record.studentName ? `Regarding: ${record.studentName}` : "General",
+      summary: record.body ?? "",
+      status: (record.status ?? "Unanswered") as ComplaintStatus,
+      adminResponse:
+        record.responses && record.responses.length > 0
+          ? {
+              text: record.responses[0].body ?? "",
+              answeredAt: record.responses[0].createdAt ?? "",
+            }
+          : undefined,
+    })) ?? [];
 
-  if (!parentId) return <AccessDeniedView />;
-  if (loading && !data) return <LoadingView />;
-
-  if (error) {
-    logger.error("Error loading parent complaints:", { error });
-    return <ErrorView message={t.commonTranslations.loadFailed} />;
-  }
-
-  const handleSubmit = (formData: ComplaintFormData) => {
+  const onSubmit = (formData: {
+    studentId: string;
+    contactEmail: string;
+    complaintDetails: string;
+    category: string;
+  }) => {
     setSubmitting(true);
     resetSuccess();
-    void submitComplaint({ variables: buildComplaintInput(formData) });
+    void submitComplaint({
+      variables: {
+        input: {
+          studentId: formData.studentId,
+          submitterEmail: formData.contactEmail,
+          body: formData.complaintDetails,
+          category: formData.category as ComplaintCategory,
+          files: null,
+        },
+      },
+    });
   };
 
+  const viewModel = useParentComplaintsViewModel({
+    labels: labels.parent,
+    studentOptions,
+    records,
+    hasOlderRecords: data?.parentComplaints?.pageInfo?.hasMorePages ?? false,
+    isSubmitting,
+    showSuccess,
+    canSubmit: true,
+    onSubmit,
+    onDismissSuccess: resetSuccess,
+    onLoadOlderRecords: () => void refetch(),
+    page,
+    pageSize,
+    totalCount: data?.parentComplaints?.totalCount ?? 0,
+    onPageChange: setPage,
+  });
+
   return (
-    <RequirePermission permissions={[AppPermission.SupportSubmitComplaint]}>
-      <ParentComplaintsView
-        labels={labels.parent}
-        studentOptions={studentOptions}
-        records={records}
-        hasOlderRecords={data?.parentComplaints?.pageInfo?.hasMorePages ?? false}
-        isSubmitting={isSubmitting}
-        showSuccess={showSuccess}
-        canSubmit={true}
-        onSubmit={handleSubmit}
-        onDismissSuccess={resetSuccess}
-        onLoadOlderRecords={() => void refetch()}
-        page={page}
-        pageSize={pageSize}
-        totalCount={data?.parentComplaints?.totalCount ?? 0}
-        onPageChange={setPage}
-      />
+    <RequirePermission permissions={[AppPermission.SupportSubmitComplaint]} fallback={null}>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
     </RequirePermission>
   );
 }

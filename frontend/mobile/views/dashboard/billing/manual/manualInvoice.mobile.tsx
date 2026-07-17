@@ -2,9 +2,9 @@
 
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { ManualInvoiceViewModel } from "@/frontend/common/views/dashboard/billing/manual/useManualInvoiceViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { BillingMonthSelectorMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/billingMonthSelector.mobile";
 import { InvoiceDraftSummaryCardMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/invoiceDraftSummaryCard.mobile";
 import { ManualInvoiceActionsMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceActions.mobile";
@@ -63,9 +63,9 @@ export function ManualInvoiceMobileView({
             studentsLoading={studentsLoading}
           />
 
-          <BaseCard>
+          <MobileBaseCard>
             <BillingMonthSelectorMobile control={control} errors={errors} labels={labels} />
-          </BaseCard>
+          </MobileBaseCard>
 
           <InvoiceDraftSummaryCardMobile labels={labels} totalFormatted={totalFormatted} currency={draftCurrency} />
 

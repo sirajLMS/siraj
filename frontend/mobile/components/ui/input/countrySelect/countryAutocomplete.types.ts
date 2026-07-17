@@ -1,8 +1,8 @@
-import type { CountryOption } from "@/frontend/common/lib/locale";
+import type { CountryType } from "@/frontend/common/lib/locale";
 
 export type CountryAutocompleteProps = {
-  readonly country?: CountryOption | null;
-  readonly onChangeAction: (country: CountryOption) => void;
+  readonly country?: CountryType | null;
+  readonly onChangeAction: (country: CountryType) => void;
   readonly onClearAction?: () => void;
   readonly autoComplete?: string;
   readonly fullWidth?: boolean;

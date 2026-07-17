@@ -2,13 +2,13 @@
 
 import { Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
 } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
+import { MobilePaginationControls, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { ParentInvoiceRowActionsMobile } from "@/frontend/mobile/views/dashboard/billing/components/parentInvoiceRowActions.mobile";
 
 interface ParentInvoicesCardListMobileLabels {
@@ -103,7 +103,7 @@ export function ParentInvoicesCardListMobile({
                 </Typography>
                 <StyledMonthTypography variant="bodyMd">{row.month}</StyledMonthTypography>
               </Box>
-              <StatusBadge
+              <MobileStatusBadge
                 category="invoice"
                 status={row.status}
                 label={labels.statusLabels[row.status] ?? row.status}
@@ -142,8 +142,8 @@ export function ParentInvoicesCardListMobile({
           </StyledInvoiceCard>
         ))}
         {showPagination ? (
-          <PaginationControls
-            page={page}
+          <MobilePaginationControls
+            page={page + 1}
             pageCount={pageCount}
             rowCount={totalCount}
             pageSize={pageSize}

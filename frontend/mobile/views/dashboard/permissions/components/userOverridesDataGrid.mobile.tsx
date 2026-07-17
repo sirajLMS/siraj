@@ -4,11 +4,11 @@ import { useQuery } from "@apollo/client/react";
 import { CheckCircleOutlined, EditOutlined, WarningOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, CircularProgress, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { PermissionGroup, User, UserOverride } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -114,7 +114,7 @@ function UserOverridesCardMobile({ user, groups, onManageOverrides }: Readonly<U
   const { loading, info } = useUserOverridesInfo(userId, userGroups);
 
   return (
-    <BaseCard sx={{ p: 2 }}>
+    <MobileBaseCard sx={{ p: 2 }}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <StyledUserAvatar>
@@ -261,7 +261,7 @@ function UserOverridesCardMobile({ user, groups, onManageOverrides }: Readonly<U
           {t.editOverrides}
         </Button>
       </Box>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }
 

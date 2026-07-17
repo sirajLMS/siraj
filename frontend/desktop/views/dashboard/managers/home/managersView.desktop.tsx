@@ -1,3 +1,4 @@
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ManagersFilterBar } from "@/frontend/common/views/dashboard/managers/home/ManagersFilterBar";
 import { ManagersMetrics } from "@/frontend/common/views/dashboard/managers/home/ManagersMetrics";

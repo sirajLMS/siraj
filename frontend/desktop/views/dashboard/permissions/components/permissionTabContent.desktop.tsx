@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, CircularProgress } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { PermissionCatalogSectionDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCatalogSection.desktop";
 import { PermissionGroupsDataGridDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionGroupsDataGrid.desktop";
 import { UserOverridesDataGridDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/userOverridesDataGrid.desktop";
@@ -50,7 +50,7 @@ export function PermissionTabContentDesktop({
   return (
     <Box>
       {activeTab === "groups" && (
-        <SectionPanel title={t.groupsTab}>
+        <DesktopSectionPanel title={t.groupsTab}>
           <PermissionGroupsDataGridDesktop
             groups={groups}
             onViewGroup={setSelectedGroupId}
@@ -59,7 +59,7 @@ export function PermissionTabContentDesktop({
             onAssignGroup={openAssignDialog}
             loading={isLoading}
           />
-        </SectionPanel>
+        </DesktopSectionPanel>
       )}
 
       {activeTab === "catalog" && (
@@ -67,7 +67,7 @@ export function PermissionTabContentDesktop({
       )}
 
       {activeTab === "overrides" && (
-        <SectionPanel title={t.overridesTab}>
+        <DesktopSectionPanel title={t.overridesTab}>
           <UserOverridesDataGridDesktop
             users={users}
             groups={groups}
@@ -77,7 +77,7 @@ export function PermissionTabContentDesktop({
               openManageOverrides();
             }}
           />
-        </SectionPanel>
+        </DesktopSectionPanel>
       )}
     </Box>
   );

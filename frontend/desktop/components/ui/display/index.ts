@@ -1,3 +1,4 @@
+export * from "@/frontend/desktop/components/ui/avatar";
 export * from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLink.desktop";
 export * from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
 export * from "@/frontend/desktop/components/ui/display/countryDisplay/countryDisplay.desktop";

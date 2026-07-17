@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { type CurrencyOption, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import type { SupportedCurrenciesViewModel } from "@/frontend/common/views/dashboard/admin/billing/currencies/supportedCurrenciesView";
+import type { SupportedCurrenciesViewModel } from "@/frontend/common/views/dashboard/admin/billing/currencies/SupportedCurrenciesView";
 import { DesktopAppDataGrid, DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 
 type DesktopRow = CurrencyOption & { readonly id: string };

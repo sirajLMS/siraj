@@ -3,16 +3,33 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
 import { useMemo, useState } from "react";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
   markTeacherDuesPaidMutationDocument,
   teacherPendingDuesQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useTeacherDuesStore } from "@/frontend/common/stores/teacherDuesStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { TeacherDuesView } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/teacherDuesView";
 import type { TeacherDueRow } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
+import type { TeacherDuesViewModel } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/useTeacherDuesViewModel";
+import {
+  type UseTeacherDuesViewModelProps,
+  useTeacherDuesViewModel,
+} from "@/frontend/common/views/dashboard/supervisor/teacher-dues/useTeacherDuesViewModel";
 import type { SupervisorTeacherDuesLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
+
+const lazyViews = createLazyView<TeacherDuesViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/supervisor/teacher-dues/teacherDues.mobile").then(m => ({
+      default: m.TeacherDuesMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/supervisor/teacher-dues/teacherDues.desktop").then(m => ({
+      default: m.TeacherDuesDesktopView,
+    }))
+);
 
 type SnackbarSeverity = "success" | "error";
 
@@ -91,18 +108,21 @@ export function TeacherDuesContainer() {
     }
   };
 
+  const props: UseTeacherDuesViewModelProps = {
+    rows,
+    loading,
+    markingPaid,
+    selectedDueIds,
+    labels,
+    onSelectDues: setSelectedDueIds,
+    onToggleDue: toggleDueId,
+    onMarkPaid: handleMarkPaid,
+  };
+
+  const viewModel = useTeacherDuesViewModel(props);
+
   return (
     <>
-      <TeacherDuesView
-        rows={rows}
-        loading={loading}
-        markingPaid={markingPaid}
-        selectedDueIds={selectedDueIds}
-        labels={labels}
-        onSelectDues={setSelectedDueIds}
-        onToggleDue={toggleDueId}
-        onMarkPaid={handleMarkPaid}
-      />
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}
@@ -113,6 +133,12 @@ export function TeacherDuesContainer() {
           {snackbarMessage}
         </Alert>
       </Snackbar>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
     </>
   );
 }
+
+export type {
+  TeacherDuesViewModel,
+  UseTeacherDuesViewModelProps,
+} from "@/frontend/common/views/dashboard/supervisor/teacher-dues/useTeacherDuesViewModel";

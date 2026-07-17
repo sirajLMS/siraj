@@ -9,7 +9,6 @@ import {
 } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   getTrackingStatusIcon,
@@ -20,6 +19,7 @@ import type {
   TrackingRow,
 } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { MobileCardList, MobileCardListItem, MobileEmptyState } from "@/frontend/mobile/components/ui";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 
 function TrackingCardHeader({ row, onView }: { row: TrackingRow; onView: (id: string) => void }) {
   const rowId = row.id ?? "";
@@ -151,7 +151,7 @@ function TrackingCardFooter({
         </Typography>
       </Box>
 
-      <StatusBadge
+      <MobileStatusBadge
         category="trackingStatus"
         status={row.status ?? LeaveRequestStatus.Pending}
         label={

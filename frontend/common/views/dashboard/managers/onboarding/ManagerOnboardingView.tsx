@@ -2,9 +2,13 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/managers/onboarding/types";
+import {
+  type ManagerOnboardingViewModel,
+  type UseManagerOnboardingViewModelProps,
+  useManagerOnboardingViewModel,
+} from "@/frontend/common/views/dashboard/managers/onboarding/useManagerOnboardingViewModel";
 
-const lazyViews = createLazyView<ManagerOnboardingViewProps>(
+const lazyViews = createLazyView<ManagerOnboardingViewModel>(
   () =>
     import("@/frontend/mobile/views/dashboard/managers/onboarding/managerOnboarding.mobile").then(m => ({
       default: m.ManagerOnboardingMobileView,
@@ -15,6 +19,8 @@ const lazyViews = createLazyView<ManagerOnboardingViewProps>(
     }))
 );
 
-export function ManagerOnboardingView(props: Readonly<ManagerOnboardingViewProps>) {
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
+export function ManagerOnboardingView(props: Readonly<UseManagerOnboardingViewModelProps>) {
+  const viewModel = useManagerOnboardingViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
+export type { ManagerOnboardingViewModel, UseManagerOnboardingViewModelProps };

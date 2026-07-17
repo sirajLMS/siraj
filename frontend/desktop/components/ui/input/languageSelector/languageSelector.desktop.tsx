@@ -7,17 +7,10 @@ import TextField from "@mui/material/TextField";
 import type * as React from "react";
 import { useCallback } from "react";
 import { getLanguageDisplayName, languages } from "@/frontend/common/lib/locale";
+import type { LanguageType } from "@/frontend/common/lib/locale/language/types";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { useAppTranslation } from "@/shared/locale";
-
-export type LanguageType = {
-  readonly code: string;
-  readonly name: Record<string, string>;
-  readonly nativeName: string;
-  readonly emoji: string;
-  readonly dir: "ltr" | "rtl";
-};
 
 export type LanguageSelectorProps = {
   readonly language?: LanguageType | null;

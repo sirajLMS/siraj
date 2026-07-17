@@ -6,8 +6,9 @@ import { StaffInfoSection } from "@/frontend/common/views/dashboard/managers/onb
 import { SystemAccessSection } from "@/frontend/common/views/dashboard/managers/onboarding/SystemAccessSection";
 import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/managers/onboarding/types";
 import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
-import { DesktopFormSuccessSnackbar, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/form/snackbar";
 import { OnboardingMetricsOverviewDesktop } from "@/frontend/desktop/views/dashboard/managers/onboarding/components/onboardingMetricsOverview.desktop";
 import { useAppTranslation } from "@/shared/locale";
 

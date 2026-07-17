@@ -3,15 +3,13 @@
 import { LinearProgress } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { TeacherDueRow } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
-import type { TeacherDuesViewModel } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/useTeacherDuesViewModel";
+import type {
+  TeacherDueRow,
+  TeacherDuesViewModel,
+} from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
 import { DesktopAppDataGrid, DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
-
-interface TeacherDuesDesktopViewProps extends TeacherDuesViewModel {
-  readonly rows: readonly TeacherDueRow[];
-}
 
 export function TeacherDuesDesktopView({
   rows,
@@ -19,9 +17,9 @@ export function TeacherDuesDesktopView({
   markingPaid,
   selectedDueIds,
   labels,
-  onSelectDues,
   onMarkPaid,
-}: Readonly<TeacherDuesDesktopViewProps>) {
+  onSelectDues,
+}: Readonly<TeacherDuesViewModel>) {
   const columns = useMemo<GridColDef<TeacherDueRow>[]>(
     () => [
       {

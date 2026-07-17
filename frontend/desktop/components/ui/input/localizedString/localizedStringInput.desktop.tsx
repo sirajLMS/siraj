@@ -17,7 +17,7 @@ import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 /**
  * Desktop tier duplicate of LocalizedStringInputProps from common.
- * Keep in sync with `@/frontend/common/components/ui/input/localizedString/LocalizedStringInput`.
+ * Keep in sync with this desktop file.
  */
 export type LocalizedStringInputProps = {
   readonly value: LocalizedString;

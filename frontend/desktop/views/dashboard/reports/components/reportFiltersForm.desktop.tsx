@@ -4,10 +4,10 @@ import { QueryStatsOutlined } from "@mui/icons-material";
 import type { SelectChangeEvent } from "@mui/material";
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
-import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
 import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { ReportTeacherOption, ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
+import { DesktopAppDatePicker } from "@/frontend/desktop/components/ui/form/date";
 
 export type ReportFiltersFormDesktopLabels = ReportFiltersFormLabels;
 
@@ -71,7 +71,7 @@ export function ReportFiltersFormDesktop({
         alignItems: "end",
       }}
     >
-      <AppDatePicker
+      <DesktopAppDatePicker
         label={labels.fromDate}
         value={selectedFromDate}
         onChange={(date: Date | null) => {
@@ -86,7 +86,7 @@ export function ReportFiltersFormDesktop({
         }}
       />
 
-      <AppDatePicker
+      <DesktopAppDatePicker
         label={labels.toDate}
         value={selectedToDate}
         onChange={(date: Date | null) => {
@@ -130,9 +130,14 @@ export function ReportFiltersFormDesktop({
       </FormControl>
 
       <Box sx={{ gridColumn: { xs: "1 / -1", md: "1 / -1" }, pt: 1 }}>
-        <PrimaryPageAction startIcon={<QueryStatsOutlined />} disabled={!canGenerate} onClick={onSubmit} sx={{ px: 4 }}>
+        <DesktopPrimaryPageAction
+          startIcon={<QueryStatsOutlined />}
+          disabled={!canGenerate}
+          onClick={onSubmit}
+          sx={{ px: 4 }}
+        >
           {labels.submit}
-        </PrimaryPageAction>
+        </DesktopPrimaryPageAction>
       </Box>
     </Box>
   );

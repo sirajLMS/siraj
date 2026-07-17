@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { type Control, useForm, useWatch } from "react-hook-form";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import { LocalizedStringFormField } from "@/frontend/common/components/ui/input/localizedString";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
@@ -23,6 +22,7 @@ import {
   type PermissionGroupFormData,
   permissionGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { PermissionCategoryListDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCategoryList.desktop";
 import { PermissionFilterBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionFilterBar.desktop";
 import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
@@ -240,7 +240,7 @@ function PermissionGroupFormContentDesktop({
           </Grid>
         </Grid>
 
-        <SectionPanel title={t.addPermissions}>
+        <DesktopSectionPanel title={t.addPermissions}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <PermissionFilterBarDesktop
               searchTerm={searchTerm}
@@ -262,7 +262,7 @@ function PermissionGroupFormContentDesktop({
               t={t}
             />
           </Box>
-        </SectionPanel>
+        </DesktopSectionPanel>
       </Box>
     </DialogContent>
   );

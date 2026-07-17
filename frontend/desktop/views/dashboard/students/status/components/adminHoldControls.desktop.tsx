@@ -2,10 +2,14 @@
 
 import { Box, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
-import { AdminControlPanel, FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StatusUpdateFormData } from "@/frontend/common/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { AdminHoldControlsProps } from "@/frontend/common/views/dashboard/students/status/types";
+import {
+  DesktopAdminControlPanel,
+  DesktopFilterButton,
+  DesktopPrimaryPageAction,
+} from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 function StatusSelectionField() {
@@ -114,7 +118,7 @@ function ReasonEntryField() {
       />
       <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 1 }}>
         {quickReasons.map(reason => (
-          <FilterButton
+          <DesktopFilterButton
             key={reason.label}
             size="small"
             onClick={() => {
@@ -122,7 +126,7 @@ function ReasonEntryField() {
             }}
           >
             {reason.label}
-          </FilterButton>
+          </DesktopFilterButton>
         ))}
       </Box>
     </Box>
@@ -137,7 +141,7 @@ function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
   const isSuspended = currentStatus === StudentStatus.Suspended;
 
   return (
-    <PrimaryPageAction
+    <DesktopPrimaryPageAction
       type="submit"
       disabled={isUpdating}
       sx={theme => ({
@@ -150,7 +154,7 @@ function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
       })}
     >
       {t.actions.applyChange}
-    </PrimaryPageAction>
+    </DesktopPrimaryPageAction>
   );
 }
 
@@ -158,12 +162,12 @@ export function AdminHoldControlsDesktop({ isUpdating }: Readonly<AdminHoldContr
   const t = useAppTranslation().dashboardTranslations.studentStatus;
 
   return (
-    <AdminControlPanel title={t.sections.adminHold}>
+    <DesktopAdminControlPanel title={t.sections.adminHold}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <StatusSelectionField />
         <ReasonEntryField />
         <SubmitStatusButton isUpdating={isUpdating} />
       </Box>
-    </AdminControlPanel>
+    </DesktopAdminControlPanel>
   );
 }

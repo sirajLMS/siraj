@@ -2,17 +2,17 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/material";
-import { BaseCard, StatusBadge, UserAvatar } from "@/frontend/common/components/ui";
 import type { StudentContextCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
+import { DesktopBaseCard, DesktopStatusBadge, DesktopUserAvatar } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 export function StudentContextCardDesktop({ student }: Readonly<StudentContextCardProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherReassignment.studentContext;
 
   return (
-    <BaseCard>
+    <DesktopBaseCard>
       <Stack spacing={3} sx={{ alignItems: "center", textAlign: "center" }}>
-        <UserAvatar
+        <DesktopUserAvatar
           src={student.avatarUrl}
           label={student.name}
           size={96}
@@ -50,9 +50,9 @@ export function StudentContextCardDesktop({ student }: Readonly<StudentContextCa
           >
             {t.enrollment}
           </Typography>
-          <StatusBadge category="studentAccount" status={student.accountStatus} label={student.accountStatus} />
+          <DesktopStatusBadge category="studentAccount" status={student.accountStatus} label={student.accountStatus} />
         </Box>
       </Stack>
-    </BaseCard>
+    </DesktopBaseCard>
   );
 }

@@ -3,11 +3,14 @@
 import { AcUnitOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { Box, Stack, Tooltip, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { MeetingJoinAction, StatusBadge } from "@/frontend/common/components/ui";
-import { PersonProfileLinkCell } from "@/frontend/common/components/ui/display/personProfileLink/PersonProfileLinkCell";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import {
+  DesktopMeetingJoinAction,
+  DesktopPersonProfileLinkCell,
+  DesktopStatusBadge,
+} from "@/frontend/desktop/components/ui";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export interface ParentScheduleDesktopListItemProps {
@@ -69,7 +72,7 @@ export function ParentScheduleCardDesktop({ row, labels }: Readonly<ParentSchedu
               </Box>
             </Tooltip>
           ) : null}
-          <StatusBadge
+          <DesktopStatusBadge
             category={row.bookingStatus === "rescheduled" ? "trackingStatus" : "session"}
             status={row.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed"}
             label={labels.bookingStatus[row.bookingStatus]}
@@ -87,7 +90,7 @@ export function ParentScheduleCardDesktop({ row, labels }: Readonly<ParentSchedu
         })}
       >
         <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             href={studentProfileHref}
             name={row.studentName}
             avatarUrl={row.studentAvatarUrl}
@@ -97,7 +100,7 @@ export function ParentScheduleCardDesktop({ row, labels }: Readonly<ParentSchedu
             typographyVariant="bodyMd"
             fontWeight={700}
           />
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             href={teacherProfileHref}
             name={teacherLabel}
             avatarSize={32}
@@ -107,7 +110,7 @@ export function ParentScheduleCardDesktop({ row, labels }: Readonly<ParentSchedu
           />
         </Stack>
         {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen }) ? (
-          <MeetingJoinAction
+          <DesktopMeetingJoinAction
             variant="icon"
             joinUrl={row.meetingJoinUrl}
             meeting={row.effectiveMeeting}

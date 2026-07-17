@@ -2,28 +2,13 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type {
-  Manager,
-  ManagerRoleFilter,
-  ManagerStatusFilter,
-  NonNullableManagerDirectoryMetrics,
-} from "@/frontend/common/views/dashboard/managers/home/types";
+import {
+  type ManagersViewModel,
+  type UseManagersViewModelProps,
+  useManagersViewModel,
+} from "@/frontend/common/views/dashboard/managers/home/useManagersViewModel";
 
-interface ManagersViewProps {
-  readonly managers: readonly Manager[];
-  readonly metrics: NonNullableManagerDirectoryMetrics;
-  readonly totalManagers?: number;
-  readonly loading?: boolean;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly onPageChange?: (page: number) => void;
-  readonly roleFilter: ManagerRoleFilter;
-  readonly statusFilter: ManagerStatusFilter;
-  readonly onRoleFilterChange: (role: ManagerRoleFilter) => void;
-  readonly onStatusFilterChange: (status: ManagerStatusFilter) => void;
-}
-
-const lazyViews = createLazyView<ManagersViewProps>(
+const lazyViews = createLazyView<ManagersViewModel>(
   () =>
     import("@/frontend/mobile/views/dashboard/managers/home/managersView.mobile").then(m => ({
       default: m.ManagersViewMobile,
@@ -34,6 +19,8 @@ const lazyViews = createLazyView<ManagersViewProps>(
     }))
 );
 
-export function ManagersView(props: Readonly<ManagersViewProps>) {
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
+export function ManagersView(props: Readonly<UseManagersViewModelProps>) {
+  const viewModel = useManagersViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
+export type { ManagersViewModel, UseManagersViewModelProps };

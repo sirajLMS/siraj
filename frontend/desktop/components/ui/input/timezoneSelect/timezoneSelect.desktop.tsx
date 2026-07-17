@@ -7,8 +7,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useMemo } from "react";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import type { TimezoneSelectProps } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
+import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   fromGraphqlIanaTimezone,
   getTimezoneOptions,
@@ -16,7 +15,22 @@ import {
   toGraphqlIanaTimezone,
 } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { useAppTranslation } from "@/shared/locale";
+
+export type TimezoneSelectProps = {
+  readonly value: IanaTimezone | null;
+  readonly onChangeAction: (timezone: IanaTimezone | null) => void;
+  readonly onBlurAction?: () => void;
+  readonly label?: string;
+  readonly required?: boolean;
+  readonly fullWidth?: boolean;
+  readonly disabled?: boolean;
+  readonly autoComplete?: string;
+  readonly style?: React.CSSProperties;
+  readonly error?: boolean;
+  readonly helperText?: string;
+};
 
 export const TimezoneSelectDesktop: React.FC<TimezoneSelectProps> = ({
   value,
@@ -76,7 +90,7 @@ export const TimezoneSelectDesktop: React.FC<TimezoneSelectProps> = ({
             }}
             {...optionProps}
           >
-            <LocaleEmoji emoji={option.emoji} />
+            <DesktopLocaleEmoji emoji={option.emoji} />
             <Typography component="span" variant="bodyMd">
               {option.pathLabel}
             </Typography>
@@ -101,7 +115,7 @@ export const TimezoneSelectDesktop: React.FC<TimezoneSelectProps> = ({
               startAdornment: selectedOption ? (
                 <>
                   <InputAdornment position="start">
-                    <LocaleEmoji emoji={selectedOption.emoji} />
+                    <DesktopLocaleEmoji emoji={selectedOption.emoji} />
                   </InputAdornment>
                   {params.slotProps.input?.startAdornment}
                 </>

@@ -1,12 +1,12 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { UserAvatar } from "@/frontend/common/components/ui";
 import type {
   StudentAccountStatus,
   StudentDirectoryRowExtended,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
-import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 
 interface StudentDirectoryCardHeaderProps {
   readonly row: StudentDirectoryRowExtended;
@@ -17,7 +17,7 @@ export function StudentDirectoryCardHeader({ row, statusLabels }: Readonly<Stude
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <UserAvatar src={row.avatarUrl} label={row.name ?? ""} size={48} />
+        <MobileUserAvatar src={row.avatarUrl} label={row.name ?? ""} size={48} />
         <Box>
           <Typography
             variant="bodyLg"

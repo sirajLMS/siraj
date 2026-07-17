@@ -4,9 +4,10 @@ import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 import { OverrideEditControlsDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEditControls.desktop";
 import { OverrideEffectiveDisplayDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEffectiveDisplay.desktop";
 import { useAppTranslation } from "@/shared/locale";
@@ -143,12 +144,12 @@ export function OverridesDataGridDesktop({
   }, [t, userGroups, localOverrides, mode, isDialogLoading, handleOverrideChange]);
 
   return (
-    <AppDataGrid<Permission>
+    <DesktopAppDataGrid<Permission>
       rows={filteredPermissions as Permission[]}
       columns={columns}
       getRowId={row => row.id ?? row.key ?? ""}
       loading={isDialogLoading && filteredPermissions.length === 0}
-      slots={{ pagination: GridPagination }}
+      slots={{ pagination: DesktopGridPagination }}
       autoHeight
       ariaLabel="permissions overrides table"
     />

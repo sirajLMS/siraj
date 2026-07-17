@@ -5,8 +5,6 @@ import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import {
@@ -17,6 +15,10 @@ import type {
   RescheduleTrackingDataGridProps,
   TrackingRow,
 } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
+import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 
 export function RescheduleTrackingDataGridDesktop({
   rows,
@@ -48,7 +50,7 @@ export function RescheduleTrackingDataGridDesktop({
                 gap: 0.5,
               }}
             >
-              <PersonProfileLinkCell
+              <DesktopPersonProfileLinkCell
                 href={profileHrefForTeacher({ teacherId: row.teacherId })}
                 name={row.teacherName ?? ""}
                 avatarUrl={row.teacherAvatarUrl}
@@ -69,7 +71,7 @@ export function RescheduleTrackingDataGridDesktop({
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             href={row.studentId ? studentHref(row.studentId) : undefined}
             name={row.studentName ?? ""}
             avatarSize={36}
@@ -142,7 +144,7 @@ export function RescheduleTrackingDataGridDesktop({
         renderCell: ({ row }) => {
           const status = row.status ?? LeaveRequestStatus.Pending;
           return (
-            <StatusBadge
+            <DesktopStatusBadge
               category="trackingStatus"
               status={status}
               label={row.status !== null ? getTrackingStatusLabel(status, { ...labels, filterAll: "" }) : ""}
@@ -235,7 +237,7 @@ export function RescheduleTrackingDataGridDesktop({
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
 
   return (
-    <AppDataGrid<TrackingRow>
+    <DesktopAppDataGrid<TrackingRow>
       rows={rows}
       columns={columns}
       loading={loading}
@@ -253,7 +255,7 @@ export function RescheduleTrackingDataGridDesktop({
               onPageChange(model.page);
             },
             pageSizeOptions: [pageSize],
-            slots: { pagination: GridPagination },
+            slots: { pagination: DesktopGridPagination },
           }
         : {})}
     />

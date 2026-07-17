@@ -4,6 +4,7 @@ import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { ADMIN_METRIC_DEFINITIONS } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import { DashboardView } from "@/frontend/common/views/dashboard/dashboard/DashboardView";
+import type { DashboardRole } from "@/frontend/common/views/dashboard/dashboard/useDashboardViewModel";
 import type {
   MetricItem,
   ScheduleOverviewData,
@@ -47,6 +48,8 @@ export function isAdminMetricKey(key: string | null): key is AdminMetricKey {
   return ADMIN_METRIC_DEFINITIONS.some((def: { key: string }) => def.key === key);
 }
 
+const ADMIN_DASHBOARD_ROLE: DashboardRole = "admin";
+
 /** Renders the admin DashboardView using translation keys and the provided data/handlers. */
 export function renderAdminDashboardView(input: AdminDashboardViewInput) {
   const {
@@ -78,6 +81,8 @@ export function renderAdminDashboardView(input: AdminDashboardViewInput) {
 
   return (
     <DashboardView
+      role={ADMIN_DASHBOARD_ROLE}
+      userName=""
       loading={loading}
       todayClassesTitle={t.todayClasses}
       lastUpdated={lastUpdated}
@@ -85,7 +90,7 @@ export function renderAdminDashboardView(input: AdminDashboardViewInput) {
       onMetricClick={onMetricClick}
       selectedMetricKey={selectedMetricKey}
       scheduleTitle={t.scheduleOverview}
-      selectedMetricLabel={selectedMetricLabel}
+      selectedMetricLabel={selectedMetricLabel ?? undefined}
       todayLabel={t.today}
       previousDayLabel={t.previousDay}
       nextDayLabel={t.nextDay}

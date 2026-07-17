@@ -3,7 +3,6 @@
 import { Switch, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/common/components/ui";
 import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   buildPreferenceMap,
@@ -11,6 +10,7 @@ import {
   NOTIFICATION_EVENT_TYPES,
   type NotificationPrefRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { useAppTranslation } from "@/shared/locale";
 
 type PreferencesMatrixDesktopViewProps = {
@@ -123,7 +123,7 @@ export function PreferencesMatrixDesktopView({
   }, [t, disabled, onToggle]);
 
   return (
-    <AppDataGrid<PreferenceMatrixRow>
+    <DesktopAppDataGrid<PreferenceMatrixRow>
       rows={rows}
       columns={columns}
       getRowId={row => row.id}

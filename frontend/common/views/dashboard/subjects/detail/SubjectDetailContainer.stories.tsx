@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classSubjectByIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { SubjectDetailContainer } from "@/frontend/common/views/dashboard/subjects/detail/SubjectDetailContainer";
+import { SubjectDetailView } from "@/frontend/common/views/dashboard/subjects/detail/SubjectDetailContainer";
 import type { SubjectDetailData, SubjectResourceItem } from "@/frontend/common/views/dashboard/subjects/detail/types";
 
 const mockResources: SubjectResourceItem[] = [
@@ -83,9 +83,9 @@ function applyMockPerms() {
   });
 }
 
-const meta: Meta<typeof SubjectDetailContainer> = {
+const meta: Meta<typeof SubjectDetailView> = {
   title: "Views/dashboard/subjects/detail/SubjectDetailView",
-  component: SubjectDetailContainer,
+  component: SubjectDetailView,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
@@ -93,7 +93,7 @@ const meta: Meta<typeof SubjectDetailContainer> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof SubjectDetailContainer>;
+type Story = StoryObj<typeof SubjectDetailView>;
 
 export const Default: Story = {
   args: { subjectId: "subj-1" },

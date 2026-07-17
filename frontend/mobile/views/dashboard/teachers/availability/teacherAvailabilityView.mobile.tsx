@@ -4,7 +4,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, CircularProgress } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
-import { ExportButton, SectionPanel } from "@/frontend/common/components/ui";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
 import { availabilitySearchSchema } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
 import type {
@@ -12,7 +11,12 @@ import type {
   TeacherAvailabilityInsights,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
 import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileExportButton,
+  MobilePageContainer,
+  MobilePageHeader,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
 import { AvailabilitySearchFormMobile } from "@/frontend/mobile/views/dashboard/teachers/availability/components/availabilitySearchForm.mobile";
 import { WeeklyAvailabilityGridMobile } from "@/frontend/mobile/views/dashboard/teachers/availability/components/weeklyAvailabilityGrid.mobile";
 import { useAppTranslation } from "@/shared/locale";
@@ -57,15 +61,15 @@ export function TeacherAvailabilityMobileView({
           { label: t.breadcrumbs.teachers, href: "/teachers" },
           { label: t.breadcrumbs.availability, current: true },
         ]}
-        actions={<ExportButton onClick={onExportPdf}>{t.exportPdf}</ExportButton>}
+        actions={<MobileExportButton onClick={onExportPdf}>{t.exportPdf}</MobileExportButton>}
       />
 
       <Box sx={{ mb: 2 }}>
-        <SectionPanel title={t.searchTitle} edgeToEdge>
+        <MobileSectionPanel title={t.searchTitle} edgeToEdge>
           <FormProvider {...methods}>
             <AvailabilitySearchFormMobile onSearch={onSearch} />
           </FormProvider>
-        </SectionPanel>
+        </MobileSectionPanel>
       </Box>
 
       {loading && (

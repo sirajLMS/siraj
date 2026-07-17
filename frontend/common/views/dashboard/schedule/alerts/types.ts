@@ -43,3 +43,38 @@ export interface AlertsMetric {
   readonly icon: SvgIconComponent;
   readonly trend?: string;
 }
+
+export interface ScheduleAlertsLabels {
+  readonly pageTitle: string;
+  readonly pageSubtitle: string;
+  readonly alertMessages: {
+    readonly leave_quota_exceeded: string;
+    readonly missed_class_time: string;
+  };
+  readonly reportTitle: string;
+  readonly reportDescription: string;
+  readonly reportDescriptionMobile: string;
+  readonly downloadPdf: string;
+  readonly sectionTitle: string;
+  readonly sectionSubtitle: string;
+  readonly filter: string;
+  readonly export: string;
+  readonly className: string;
+  readonly instructor: string;
+  readonly time: string;
+  readonly room: string;
+  readonly status: string;
+  readonly joinSession: string;
+  readonly leaveClass: string;
+  readonly leaveDisabledReason: string;
+  readonly viewClassAudit: string;
+  readonly contactAdmin: string;
+  readonly showingOf: string;
+  readonly active: string;
+  readonly upcoming: string;
+  readonly missed: string;
+  readonly hold: string;
+  readonly endOfSchedule: string;
+  readonly noEntries: string;
+  readonly loading: string;
+}

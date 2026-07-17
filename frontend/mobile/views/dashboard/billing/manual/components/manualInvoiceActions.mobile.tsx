@@ -2,7 +2,7 @@
 
 import { MailOutlined } from "@mui/icons-material";
 import { Box, useTheme } from "@mui/material";
-import { ExportButton, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { MobileExportButton, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import type { BillingManualLabels } from "@/shared/locale";
 
 interface ManualInvoiceActionsMobileProps {
@@ -25,13 +25,13 @@ export function ManualInvoiceActionsMobile({
   const theme = useTheme();
 
   const submitButton = (
-    <PrimaryPageAction fullWidth disabled={!canCreate || isSubmitting} onClick={onSubmit} sx={{ height: 56 }}>
+    <MobilePrimaryPageAction fullWidth disabled={!canCreate || isSubmitting} onClick={onSubmit} sx={{ height: 56 }}>
       {labels.submit}
-    </PrimaryPageAction>
+    </MobilePrimaryPageAction>
   );
 
   const sendEmailButton = canSendEmail ? (
-    <ExportButton
+    <MobileExportButton
       fullWidth
       startIcon={<MailOutlined />}
       disabled={!canCreate || isSubmitting}
@@ -45,7 +45,7 @@ export function ManualInvoiceActionsMobile({
       }}
     >
       {labels.submitAndSendEmail}
-    </ExportButton>
+    </MobileExportButton>
   ) : null;
 
   return (

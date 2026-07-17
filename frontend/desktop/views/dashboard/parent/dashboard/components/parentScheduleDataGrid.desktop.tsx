@@ -4,8 +4,6 @@ import { AcUnitOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type {
@@ -13,6 +11,13 @@ import type {
   ParentScheduleRow,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import type { SchedulePagination } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
+import {
+  DesktopAppDataGrid,
+  DesktopGridPagination,
+  DesktopPersonProfileLinkCell,
+  DesktopStatusBadge,
+} from "@/frontend/desktop/components/ui";
+import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { ParentClassStatusIndicatorDesktop } from "@/frontend/desktop/views/dashboard/parent/dashboard/components/parentClassStatusIndicator.desktop";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
@@ -78,7 +83,7 @@ export function ParentScheduleDataGridDesktop({
         flex: 1.2,
         minWidth: 180,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             href={row.studentId ? studentHref(row.studentId) : undefined}
             name={row.studentName}
             avatarUrl={row.studentAvatarUrl}
@@ -96,7 +101,7 @@ export function ParentScheduleDataGridDesktop({
         flex: 1.2,
         minWidth: 180,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             href={row.teacherId ? profileHrefForTeacher({ teacherId: row.teacherId }) : undefined}
             name={row.teacherName}
             avatarUrl={row.teacherAvatarUrl}
@@ -137,7 +142,7 @@ export function ParentScheduleDataGridDesktop({
         renderCell: ({ row }) => {
           const badge = resolveBookingBadge(row.bookingStatus);
           return (
-            <StatusBadge
+            <DesktopStatusBadge
               category={badge.category}
               status={badge.status}
               label={labels.bookingStatus[row.bookingStatus]}
@@ -155,7 +160,7 @@ export function ParentScheduleDataGridDesktop({
         renderCell: ({ row }) => (
           <Box sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}>
             {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen }) ? (
-              <MeetingJoinAction
+              <DesktopMeetingJoinAction
                 variant="icon"
                 joinUrl={row.meetingJoinUrl}
                 meeting={row.effectiveMeeting}
@@ -186,7 +191,7 @@ export function ParentScheduleDataGridDesktop({
   const isServerPagination = pagination !== undefined;
 
   return (
-    <AppDataGrid<ParentScheduleRow>
+    <DesktopAppDataGrid<ParentScheduleRow>
       rows={rows}
       columns={columns}
       getRowId={row => row.id}
@@ -212,7 +217,7 @@ export function ParentScheduleDataGridDesktop({
               pagination.onPageChange(model.page);
             },
             pageSizeOptions: [pagination.pageSize],
-            slots: { pagination: GridPagination },
+            slots: { pagination: DesktopGridPagination },
           }
         : { hideFooter: rows.length <= 10 })}
     />

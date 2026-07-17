@@ -2,14 +2,12 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { ClassAuditViewProps } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
+import type {
+  ClassAuditViewModel,
+  UseClassAuditViewModelProps,
+} from "@/frontend/common/views/dashboard/classes/audit/useClassAuditViewModel";
 
-export type {
-  ClassAuditLabels,
-  ClassAuditViewProps,
-} from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
-
-const lazyViews = createLazyView<ClassAuditViewProps>(
+const lazyViews = createLazyView<ClassAuditViewModel>(
   () =>
     import("@/frontend/mobile/views/dashboard/classes/audit/classAuditView.mobile").then(m => ({
       default: m.ClassAuditViewMobile,
@@ -20,6 +18,8 @@ const lazyViews = createLazyView<ClassAuditViewProps>(
     }))
 );
 
-export function ClassAuditView(props: Readonly<ClassAuditViewProps>) {
+export function ClassAuditView(props: Readonly<ClassAuditViewModel>) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }
+
+export type { ClassAuditViewModel, UseClassAuditViewModelProps };

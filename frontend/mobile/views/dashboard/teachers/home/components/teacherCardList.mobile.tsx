@@ -1,11 +1,12 @@
 import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutlined } from "@mui/icons-material";
 import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
-import { PaginationControls, PersonProfileLink } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
+import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter";
 import { useRouter } from "@/shared/i18n/routing";
 import type { TeachersDirectoryLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
@@ -79,7 +80,7 @@ function TeacherCard({
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         <Box sx={{ flex: 1 }}>
-          <PersonProfileLink
+          <MobilePersonProfileLink
             href={profileHrefForTeacher({ userId: row.userId, teacherId: row.id })}
             name={row.name ?? ""}
             avatarUrl={row.avatarUrl}
@@ -91,7 +92,7 @@ function TeacherCard({
             {row.email}
           </Typography>
         </Box>
-        <StatusBadge
+        <MobileStatusBadge
           category="studentAccount"
           status={row.status === AccountStatus.Activated ? "regular" : "deactivated"}
           label={row.status === AccountStatus.Activated ? t.status.active : t.status.offline}
@@ -192,7 +193,7 @@ export function TeacherCardList({
       </Box>
 
       {onPageChange && totalCount !== undefined ? (
-        <PaginationControls
+        <MobilePaginationControls
           page={page}
           pageCount={pageCount}
           rowCount={totalCount}

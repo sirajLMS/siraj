@@ -2,6 +2,8 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
   lessonReportCountQueryDocument,
   pendingLessonReportsQueryDocument,
@@ -9,10 +11,12 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { SupervisorDashboardView } from "@/frontend/common/views/dashboard/supervisor/dashboard/supervisorDashboardView";
-import type { RecentApproval } from "@/frontend/common/views/dashboard/supervisor/dashboard/types/supervisorDashboardTypes";
+import {
+  type SupervisorDashboardViewModel,
+  type UseSupervisorDashboardViewModelProps,
+  useSupervisorDashboardViewModel,
+} from "@/frontend/common/views/dashboard/supervisor/dashboard/useSupervisorDashboardViewModel";
 import { useRouter } from "@/shared/i18n/routing";
-import type { SupervisorDashboardLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
 const MONTH_NAMES = [
@@ -39,9 +43,16 @@ function useCurrentMonth(): { year: number; month: number; label: string } {
   }, []);
 }
 
-function useLabels(t: SupervisorDashboardLabels) {
-  return useMemo(() => t, [t]);
-}
+const lazyViews = createLazyView<SupervisorDashboardViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/supervisor/dashboard/supervisorDashboard.mobile").then(m => ({
+      default: m.SupervisorDashboardMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/supervisor/dashboard/supervisorDashboard.desktop").then(m => ({
+      default: m.SupervisorDashboardDesktopView,
+    }))
+);
 
 export function SupervisorDashboardContainer() {
   const t = useAppTranslation().dashboardTranslations.supervisorPortalDashboard;
@@ -81,7 +92,7 @@ export function SupervisorDashboardContainer() {
     [duesSummaryData]
   );
 
-  const recentApprovals: RecentApproval[] = useMemo(() => {
+  const recentApprovals = useMemo(() => {
     const rows = recentData?.pendingLessonReports ?? [];
     return rows
       .filter(r => r?.status === "APPROVED")
@@ -95,7 +106,7 @@ export function SupervisorDashboardContainer() {
       .slice(0, 5);
   }, [recentData]);
 
-  const labels = useLabels(t);
+  const labels = t;
 
   const handlers = useMemo(
     () => ({
@@ -119,19 +130,23 @@ export function SupervisorDashboardContainer() {
     [router]
   );
 
-  return (
-    <SupervisorDashboardView
-      userName={userName}
-      pendingReviewCount={pendingReviewCount}
-      pendingDuesSummary={pendingDuesSummary}
-      monthlySnapshot={monthlySnapshot}
-      recentApprovals={recentApprovals}
-      labels={labels}
-      loading={loading}
-      onGoToReviews={handlers.handleGoToReviews}
-      onGoToDues={handlers.handleGoToDues}
-      onGoToMonthlyReports={handlers.handleGoToMonthlyReports}
-      onViewRecentApproval={handlers.handleViewRecentApproval}
-    />
-  );
+  const props: UseSupervisorDashboardViewModelProps = {
+    userName,
+    pendingReviewCount,
+    pendingDuesSummary,
+    monthlySnapshot,
+    recentApprovals,
+    labels,
+    loading,
+    onGoToReviews: handlers.handleGoToReviews,
+    onGoToDues: handlers.handleGoToDues,
+    onGoToMonthlyReports: handlers.handleGoToMonthlyReports,
+    onViewRecentApproval: handlers.handleViewRecentApproval,
+  };
+
+  const viewModel = useSupervisorDashboardViewModel(props);
+
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
+
+export type { SupervisorDashboardViewModel, UseSupervisorDashboardViewModelProps };

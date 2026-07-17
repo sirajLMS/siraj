@@ -8,7 +8,7 @@ import { useAppTranslation } from "@/shared/locale";
 
 /**
  * Labels for the PaymentMethodTypeSelector component — desktop tier duplicate of common type.
- * Keep in sync with `@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector`.
+ * Keep in sync with this desktop file.
  */
 export type PaymentMethodTypeSelectorLabels = {
   readonly title?: string;
@@ -23,7 +23,7 @@ export type PaymentMethodTypeSelectorLabels = {
 
 /**
  * Props for the PaymentMethodTypeSelectorDesktop component — desktop tier duplicate of common type.
- * Keep in sync with `@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector`.
+ * Keep in sync with this desktop file.
  */
 export type PaymentMethodTypeSelectorProps = {
   readonly type: PaymentMethodType | null;

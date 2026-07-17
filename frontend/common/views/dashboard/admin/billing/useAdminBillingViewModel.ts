@@ -57,6 +57,8 @@ function deriveInitials(name: string | null): string {
   return name.slice(0, 2).toUpperCase();
 }
 
+export type UseAdminBillingViewModelProps = Record<string, never>;
+
 export interface AdminBillingViewModel {
   readonly labels: ReturnType<typeof buildBillingLabels>;
   readonly summary: AdminBillingSummary;
@@ -109,7 +111,7 @@ export interface AdminBillingViewModel {
   readonly onCloseDeleteDialog: () => void;
 }
 
-export function useAdminBillingViewModel(): AdminBillingViewModel {
+export function useAdminBillingViewModel(_props: Readonly<UseAdminBillingViewModelProps>): AdminBillingViewModel {
   const t = useAppTranslation().dashboardTranslations.billing;
   const tProfile = useAppTranslation().profileTranslations.teacher;
   const tProfileRoot = useAppTranslation().profileTranslations.base;

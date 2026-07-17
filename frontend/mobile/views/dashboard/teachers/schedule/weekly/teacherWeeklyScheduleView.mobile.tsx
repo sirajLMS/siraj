@@ -14,11 +14,12 @@ import {
   Typography,
 } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
-import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
+import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MetricCard";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 import MobileScheduleList from "@/frontend/mobile/views/dashboard/teachers/schedule/weekly/mobileScheduleList.mobile";
 import { useAppTranslation } from "@/shared/locale";
@@ -55,9 +56,13 @@ export function TeacherWeeklyScheduleViewMobile({
           <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
             <Box sx={{ flex: 1 }}>
               <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
-                <PrimaryPageAction startIcon={<AddOutlined />} onClick={onAddClass} sx={{ width: "100%", py: 1.5 }}>
+                <MobilePrimaryPageAction
+                  startIcon={<AddOutlined />}
+                  onClick={onAddClass}
+                  sx={{ width: "100%", py: 1.5 }}
+                >
                   {t.actions.addSlot}
-                </PrimaryPageAction>
+                </MobilePrimaryPageAction>
               </RequirePermission>
             </Box>
             <RequirePermission permissions={[AppPermission.ScheduleClearWeekly]}>
@@ -80,7 +85,7 @@ export function TeacherWeeklyScheduleViewMobile({
 
       <RequirePermission permissions={[AppPermission.ScheduleViewWorkload]}>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr" }, gap: 2 }}>
-          <MetricCard
+          <MobileMetricCard
             icon={TimerOutlined}
             label={t.metrics.weeklyHoursWorked(Number(schedule.weeklyHoursWorked))}
             value={schedule.weeklyHoursWorked}
@@ -89,9 +94,9 @@ export function TeacherWeeklyScheduleViewMobile({
         </Box>
       </RequirePermission>
 
-      <SectionPanel>
+      <MobileSectionPanel>
         <MobileScheduleList classes={schedule.classes} onRemoveClass={onRemoveClass} />
-      </SectionPanel>
+      </MobileSectionPanel>
 
       <Box
         sx={{

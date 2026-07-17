@@ -1,10 +1,10 @@
 "use client";
 
 import { Box, CircularProgress, Grid, Link, Stack, Typography } from "@mui/material";
-import { PageContainer, PhoneDisplay, SectionPanel } from "@/frontend/common/components/ui";
 import { isSafeUrl } from "@/frontend/common/lib/safeRedirect";
 import type { ParentSocialViewModel } from "@/frontend/common/views/dashboard/parent/social/useParentSocialViewModel";
-import { DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopPageContainer, DesktopPhoneDisplay, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 function SocialLinkDesktop({ label, value }: { readonly label: string; readonly value: string | null | undefined }) {
   if (!value) return null;
@@ -58,7 +58,7 @@ function WhatsAppLinkDesktop({ label, value }: { readonly label: string; readonl
           typography: "bodyLg",
         })}
       >
-        <PhoneDisplay phone={value} typographyVariant="bodyLg" />
+        <DesktopPhoneDisplay phone={value} typographyVariant="bodyLg" />
       </Link>
     </Stack>
   );
@@ -66,7 +66,7 @@ function WhatsAppLinkDesktop({ label, value }: { readonly label: string; readonl
 
 export function ParentSocialDesktopView({ labels, loading, error, profile }: Readonly<ParentSocialViewModel>) {
   return (
-    <PageContainer>
+    <DesktopPageContainer>
       <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
@@ -79,28 +79,28 @@ export function ParentSocialDesktopView({ labels, loading, error, profile }: Rea
       {!loading && !error && profile ? (
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <SectionPanel title={labels.sections.contact}>
+            <DesktopSectionPanel title={labels.sections.contact}>
               <Stack spacing={2}>
                 <Stack spacing={0.5}>
                   <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
                     {labels.fields.phone}
                   </Typography>
-                  <PhoneDisplay phone={profile.phone ?? null} typographyVariant="bodyLg" />
+                  <DesktopPhoneDisplay phone={profile.phone ?? null} typographyVariant="bodyLg" />
                 </Stack>
               </Stack>
-            </SectionPanel>
+            </DesktopSectionPanel>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <SectionPanel title={labels.sections.social}>
+            <DesktopSectionPanel title={labels.sections.social}>
               <Stack spacing={2}>
                 <SocialLinkDesktop label={labels.fields.facebook} value={profile.facebook} />
                 <WhatsAppLinkDesktop label={labels.fields.whatsapp} value={profile.whatsapp} />
                 <SocialLinkDesktop label={labels.fields.twitter} value={profile.twitter} />
               </Stack>
-            </SectionPanel>
+            </DesktopSectionPanel>
           </Grid>
         </Grid>
       ) : null}
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

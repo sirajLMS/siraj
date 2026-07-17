@@ -2,8 +2,8 @@
 
 import { Box } from "@mui/material";
 import { useMemo, useState } from "react";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { PermissionCatalogDataGridDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCatalogDataGrid.desktop";
 import { PermissionCatalogToolbarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCatalogToolbar.desktop";
 import { useAppTranslation } from "@/shared/locale";
@@ -54,9 +54,9 @@ export function PermissionCatalogSectionDesktop({
         onSearchChange={setSearchQuery}
         onCategoryChange={setSelectedCategory}
       />
-      <SectionPanel title={t.catalogTab}>
+      <DesktopSectionPanel title={t.catalogTab}>
         <PermissionCatalogDataGridDesktop permissions={filteredPermissions} groups={groups} loading={loading} />
-      </SectionPanel>
+      </DesktopSectionPanel>
     </Box>
   );
 }

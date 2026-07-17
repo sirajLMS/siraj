@@ -2,9 +2,9 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { RescheduleTrackingViewProps } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
+import type { RescheduleTrackingViewModel } from "./useRescheduleTrackingViewModel";
 
-const lazyViews = createLazyView<RescheduleTrackingViewProps>(
+const lazyViews = createLazyView<RescheduleTrackingViewModel>(
   () =>
     import("@/frontend/mobile/views/dashboard/reschedule/tracking/rescheduleTrackingView.mobile").then(m => ({
       default: m.RescheduleTrackingViewMobile,
@@ -15,6 +15,8 @@ const lazyViews = createLazyView<RescheduleTrackingViewProps>(
     }))
 );
 
-export function RescheduleTrackingView(props: Readonly<RescheduleTrackingViewProps>) {
+export function RescheduleTrackingView(props: Readonly<RescheduleTrackingViewModel>) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }
+
+export type { RescheduleTrackingViewModel };

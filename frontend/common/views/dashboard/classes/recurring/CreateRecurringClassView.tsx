@@ -2,26 +2,12 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
-import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import type { CreateRecurringClassLabels } from "@/shared/locale";
+import type {
+  CreateRecurringClassViewModel,
+  UseCreateRecurringClassViewModelProps,
+} from "@/frontend/common/views/dashboard/classes/recurring/useCreateRecurringClassViewModel";
 
-export interface CreateRecurringClassViewProps {
-  readonly isSubmitting: boolean;
-  readonly showSuccess: boolean;
-  readonly errorMessage: string | null;
-  readonly meetingConfigWarning?: boolean;
-  readonly meetingConfigWarningMessage?: string;
-  readonly goToClassLabel?: string;
-  readonly onGoToCreatedClass?: () => void;
-  readonly labels: CreateRecurringClassLabels;
-  readonly onClose: () => void;
-  readonly onSubmit: (data: RecurringClassFormData, meetingConfig: RecurringMeetingConfigFormState) => void;
-  readonly onDismissSuccess: () => void;
-  readonly onDismissError: () => void;
-}
-
-const lazyViews = createLazyView<CreateRecurringClassViewProps>(
+const lazyViews = createLazyView<CreateRecurringClassViewModel>(
   () =>
     import("@/frontend/mobile/views/dashboard/classes/recurring/createRecurringClassView.mobile").then(m => ({
       default: m.CreateRecurringClassViewMobile,
@@ -32,6 +18,8 @@ const lazyViews = createLazyView<CreateRecurringClassViewProps>(
     }))
 );
 
-export function CreateRecurringClassView(props: Readonly<CreateRecurringClassViewProps>) {
+export function CreateRecurringClassView(props: Readonly<CreateRecurringClassViewModel>) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }
+
+export type { CreateRecurringClassViewModel, UseCreateRecurringClassViewModelProps };

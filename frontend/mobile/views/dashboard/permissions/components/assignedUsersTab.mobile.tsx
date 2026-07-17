@@ -4,9 +4,9 @@ import { DeleteOutlined, PersonAddOutlined, PersonRemoveOutlined } from "@mui/ic
 import { Avatar, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { GroupUser, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -162,7 +162,7 @@ export function AssignedUsersTabMobile({
             const profileHref = id ? profileHrefForUser(id) : undefined;
 
             return (
-              <BaseCard
+              <MobileBaseCard
                 key={(id || user.email) ?? ""}
                 sx={theme => ({
                   p: 2,
@@ -239,7 +239,7 @@ export function AssignedUsersTabMobile({
                     </StyledRemoveButton>
                   </Box>
                 </Box>
-              </BaseCard>
+              </MobileBaseCard>
             );
           })}
         </Box>

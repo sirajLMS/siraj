@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { StudentQuotaContainer } from "@/frontend/common/views/dashboard/students/quota/StudentQuotaContainer";
+import { StudentQuotaView } from "@/frontend/common/views/dashboard/students/quota/StudentQuotaContainer";
 
-const meta: Meta<typeof StudentQuotaContainer> = {
-  title: "Views/dashboard/students/quota/StudentQuotaContainer",
-  component: StudentQuotaContainer,
+const meta: Meta<typeof StudentQuotaView> = {
+  title: "Views/dashboard/students/quota/StudentQuotaView",
+  component: StudentQuotaView,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
@@ -11,7 +11,7 @@ const meta: Meta<typeof StudentQuotaContainer> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof StudentQuotaContainer>;
+type Story = StoryObj<typeof StudentQuotaView>;
 
 export const Default: Story = {
   args: {},

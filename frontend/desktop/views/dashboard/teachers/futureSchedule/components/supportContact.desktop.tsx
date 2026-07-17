@@ -3,11 +3,11 @@
 import { useMutation } from "@apollo/client/react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { UserAvatar } from "@/frontend/common/components/ui";
-import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
-import { PhoneDisplay } from "@/frontend/common/components/ui/display";
 import { logTeacherSupportRequestMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { SupportContactProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
+import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar";
+import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
+import { DesktopPhoneDisplay } from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
 
 export function SupportContactDesktop({ contact }: Readonly<SupportContactProps>) {
@@ -29,7 +29,7 @@ export function SupportContactDesktop({ contact }: Readonly<SupportContactProps>
   };
 
   return (
-    <BaseCard
+    <DesktopBaseCard
       sx={theme => ({
         p: 3,
         backgroundColor: theme.palette.background.paper,
@@ -49,7 +49,7 @@ export function SupportContactDesktop({ contact }: Readonly<SupportContactProps>
             alignItems: "center",
           }}
         >
-          <UserAvatar src={contact.avatarUrl} label={contact.name ?? ""} size={40} />
+          <DesktopUserAvatar src={contact.avatarUrl} label={contact.name ?? ""} size={40} />
           <Box>
             <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
               {contact.name}
@@ -57,7 +57,7 @@ export function SupportContactDesktop({ contact }: Readonly<SupportContactProps>
             <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
               {contact.role}
             </Typography>
-            <PhoneDisplay
+            <DesktopPhoneDisplay
               phone={contact.phone}
               typographyVariant="bodyMd"
               sx={theme => ({ color: theme.palette.onSurfaceVariant })}
@@ -87,6 +87,6 @@ export function SupportContactDesktop({ contact }: Readonly<SupportContactProps>
       >
         {t.contactAdmin}
       </Button>
-    </BaseCard>
+    </DesktopBaseCard>
   );
 }

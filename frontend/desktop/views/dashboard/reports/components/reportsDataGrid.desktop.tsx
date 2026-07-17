@@ -3,7 +3,6 @@
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -12,6 +11,7 @@ import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/prof
 import type { ReportsDataGridLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { ReportLedgerRow, ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import { formatReportPaidAmounts } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
+import { DesktopAppDataGrid, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 export type ReportsDataGridDesktopLabels = ReportsDataGridLabels;
@@ -77,7 +77,7 @@ export function ReportsDataGridDesktop({
         flex: 1.4,
         minWidth: 200,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             name={row.name}
             href={nameHrefForRow(row, reportType)}
             fallbackInitial={row.avatarInitials}
@@ -168,7 +168,7 @@ export function ReportsDataGridDesktop({
 
   return (
     <Box sx={{ px: { xs: 0, md: 1 }, pb: 1 }}>
-      <AppDataGrid
+      <DesktopAppDataGrid
         rows={rows}
         columns={columns}
         loading={loading}

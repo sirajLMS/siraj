@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from "react";
  * `LocaleAdornmentSwitchDesktop` (or to the parent `TextField` `sx`)
  * and auto-resets after 500ms.
  *
- * Duplicate of `@/frontend/common/components/ui/input/localizedString/useLocaleSwitchSuccess`.
+ * Duplicate of this desktop file.
  */
 export function useLocaleSwitchSuccess(): {
   readonly successSwitch: boolean;

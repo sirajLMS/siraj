@@ -6,9 +6,9 @@ import { alpha, styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
-import { AppDataGrid, SectionPanel } from "@/frontend/common/components/ui";
 import type { GroupUser, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
+import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -266,8 +266,8 @@ export function AssignedUsersTabDesktop({
         </StyledBulkActionBar>
       )}
 
-      <SectionPanel title={t.assignedGroupMembers}>
-        <AppDataGrid<GroupUser>
+      <DesktopSectionPanel title={t.assignedGroupMembers}>
+        <DesktopAppDataGrid<GroupUser>
           rows={filteredAssignedUsers}
           columns={assignedUsersColumns}
           getRowId={row => row.id ?? row.email ?? ""}
@@ -275,7 +275,7 @@ export function AssignedUsersTabDesktop({
           loading={loading}
           autoHeight
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
     </StyledTabContainer>
   );
 }

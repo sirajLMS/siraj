@@ -2,8 +2,8 @@
 
 import { CheckCircleOutlined } from "@mui/icons-material";
 import { alpha, Box, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { UpdatedSessionsDataGridDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/updatedSessionsDataGrid.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -56,7 +56,7 @@ export function UpdatedSessionsSectionDesktop({ sessions, successfulCount, loadi
             {t.sections.updated}
           </Typography>
         </Box>
-        <StatusBadge category="session" status="completed" label={t.table.sessionsCount(successfulCount)} />
+        <DesktopStatusBadge category="session" status="completed" label={t.table.sessionsCount(successfulCount)} />
       </Box>
       <Box sx={{ p: { xs: 2, lg: 0 } }}>
         <UpdatedSessionsDataGridDesktop sessions={sessions} loading={loading} />

@@ -1,25 +1,31 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
 import { CurrencyCode, IanaTimezone, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useCreateTeacherOnboarding } from "@/frontend/common/hooks/useCreateTeacherOnboarding";
+import { useTeacherOnboardingStore } from "@/frontend/common/stores/teacherOnboardingStore";
+import { logger } from "@/frontend/common/utils/logger";
+import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import { teacherOnboardingSchema } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import { CountryCode, Gender } from "@/frontend/common/views/dashboard/teachers/onboarding/types";
 import type { TeacherOnboardingLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 /**
  * TeacherOnboarding ViewModel.
  *
- * The container (`TeacherOnboardingContainer`) owns the create-teacher
- * mutation, the post-create meeting-config warning, and router navigation.
- * It passes a flat prop bag to this hook, which derives the form instance
- * (zodResolver + default values) and the snackbar-dismiss effect. The view
- * model exposes the same interface for both tiers; no viewport logic lives
- * here. The `FormProvider` is intentionally created in the switcher-side
- * consumers (mobile/desktop) so both tiers wrap the same form instance.
+ * Contains ALL business logic for teacher onboarding including:
+ * - Form management with Zod validation
+ * - Create teacher mutation
+ * - Post-create meeting-config warning handling
+ * - Router navigation
+ * - Success snackbar auto-dismiss
+ * The container (`TeacherOnboardingContainer`) is now a thin switcher that
+ * only wraps the view model in permission check and ResponsiveViewSwitch.
  */
 
 export interface TeacherOnboardingViewModel {
@@ -31,19 +37,30 @@ export interface TeacherOnboardingViewModel {
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
   readonly labels: TeacherOnboardingLabels;
-  readonly onSubmit: (data: TeacherOnboardingFormData) => void | Promise<void>;
+  readonly onSubmit: (data: TeacherOnboardingFormData) => Promise<void>;
   readonly onDismissSuccess: () => void;
+  readonly meetingConfigWarning: boolean;
+  readonly clearMeetingConfigWarning: () => void;
+  readonly meetingSetupHref: string | undefined;
+  readonly tMeeting: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigManager"];
+  readonly tJoin: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigJoin"];
 }
 
-export type UseTeacherOnboardingViewModelProps = Pick<
-  TeacherOnboardingViewModel,
-  "isSubmitting" | "showSuccess" | "labels" | "onSubmit" | "onDismissSuccess"
->;
+export type UseTeacherOnboardingViewModelProps = Record<string, never>;
 
-export function useTeacherOnboardingViewModel(
-  props: Readonly<UseTeacherOnboardingViewModelProps>
-): TeacherOnboardingViewModel {
-  const schema = teacherOnboardingSchema(props.labels.validation);
+export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
+  const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateTeacherOnboarding();
+  const createdTeacher = useTeacherOnboardingStore(state => state.result);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const labels = useAppTranslation().dashboardTranslations.teacherOnboarding;
+  const tMeeting = useAppTranslation().uiTranslations.meetingConfigManager;
+  const tJoin = useAppTranslation().uiTranslations.meetingConfigJoin;
+
+  const meetingSetupHref = createdTeacher
+    ? `${profileHrefForTeacher({ userId: createdTeacher.userId, teacherId: createdTeacher.id })}?tab=meeting`
+    : undefined;
+
+  const schema = teacherOnboardingSchema(labels.validation);
 
   const form = useForm<TeacherOnboardingFormData>({
     resolver: zodResolver(schema),
@@ -63,15 +80,29 @@ export function useTeacherOnboardingViewModel(
   const { register, control, handleSubmit, formState } = form;
   const errors = formState.errors;
 
+  const onSubmit = async (data: TeacherOnboardingFormData) => {
+    logger.info("Submitting teacher onboarding data:", data);
+    try {
+      await execute(data);
+      setShowSuccess(true);
+    } catch (error) {
+      logger.error("Failed to submit teacher onboarding form", { error });
+    }
+  };
+
+  const onDismissSuccess = () => {
+    setShowSuccess(false);
+  };
+
   useEffect(() => {
-    if (!props.showSuccess) return undefined;
+    if (!showSuccess) return undefined;
     const timer = setTimeout(() => {
-      props.onDismissSuccess();
+      onDismissSuccess();
     }, 3000);
     return () => {
       clearTimeout(timer);
     };
-  }, [props.showSuccess, props.onDismissSuccess]);
+  }, [showSuccess, onDismissSuccess]);
 
   return {
     form,
@@ -79,11 +110,16 @@ export function useTeacherOnboardingViewModel(
     control,
     errors,
     handleSubmit,
-    isSubmitting: props.isSubmitting,
-    showSuccess: props.showSuccess,
-    labels: props.labels,
-    onSubmit: props.onSubmit,
-    onDismissSuccess: props.onDismissSuccess,
+    isSubmitting: loading,
+    showSuccess,
+    labels,
+    onSubmit,
+    onDismissSuccess,
+    meetingConfigWarning,
+    clearMeetingConfigWarning,
+    meetingSetupHref,
+    tMeeting,
+    tJoin,
   };
 }
 

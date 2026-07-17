@@ -21,7 +21,7 @@ function MobileInactiveNote() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <SectionPanel title={t.sections.inactiveVerified} />
+      <MobileSectionPanel title={t.sections.inactiveVerified} />
       <Box
         sx={theme => ({
           p: 2,
@@ -50,7 +50,7 @@ function MobileConflictsHeader() {
 function MobileUpdatedHeader() {
   const t = useAppTranslation().dashboardTranslations.dstMigration;
 
-  return <SectionPanel title={t.sections.successfullyUpdated} />;
+  return <MobileSectionPanel title={t.sections.successfullyUpdated} />;
 }
 
 export function DstMigrationViewMobile({

@@ -5,7 +5,10 @@ import { FormProvider } from "react-hook-form";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
-import type { StudentStatusViewModel } from "@/frontend/common/views/dashboard/students/status/useStudentStatusViewModel";
+import type {
+  StudentStatusViewModel,
+  UpcomingClassDisplay,
+} from "@/frontend/common/views/dashboard/students/status/useStudentStatusViewModel";
 import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page/DesktopPageContainer";
 import { DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page/DesktopPageHeader";
 import { AdminHoldControlsDesktop } from "@/frontend/desktop/views/dashboard/students/status/components/adminHoldControls.desktop";
@@ -89,7 +92,7 @@ function StudentStatusRightColumnDesktop({
 }: Readonly<{
   canEditStatus: boolean;
   selectedStatus: StudentStatus;
-  classes: StudentStatusViewModel["student"]["upcomingClasses"];
+  classes: readonly UpcomingClassDisplay[];
   studentId: string;
 }>) {
   return (

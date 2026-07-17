@@ -2,8 +2,10 @@
 
 import { Box, Checkbox, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import type { TeacherDueRow } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
-import type { TeacherDuesViewModel } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/useTeacherDuesViewModel";
+import type {
+  TeacherDueRow,
+  TeacherDuesViewModel,
+} from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
 import {
   MobileCardList,
   MobileContentStack,
@@ -14,16 +16,21 @@ import {
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
 
-interface DueCardProps {
+function DueCard({
+  row,
+  labels,
+  selected,
+  markingPaid,
+  onToggle,
+  onMarkPaid,
+}: Readonly<{
   readonly row: TeacherDueRow;
   readonly labels: TeacherDuesViewModel["labels"];
   readonly selected: boolean;
   readonly markingPaid: boolean;
   readonly onToggle: (id: string) => void;
   readonly onMarkPaid: (ids: string[]) => void;
-}
-
-function DueCard({ row, labels, selected, markingPaid, onToggle, onMarkPaid }: Readonly<DueCardProps>) {
+}>) {
   return (
     <Box
       sx={theme => ({
@@ -87,19 +94,9 @@ function DueCard({ row, labels, selected, markingPaid, onToggle, onMarkPaid }: R
   );
 }
 
-interface TeacherDuesMobileViewProps extends TeacherDuesViewModel {
-  readonly toggleDueId?: (id: string) => void;
-}
+export function TeacherDuesMobileView(props: Readonly<TeacherDuesViewModel>) {
+  const { rows, loading, markingPaid, selectedDueIds, labels, onMarkPaid, onToggleDue } = props;
 
-export function TeacherDuesMobileView({
-  rows,
-  loading,
-  markingPaid,
-  selectedDueIds,
-  labels,
-  onMarkPaid,
-  onToggleDue,
-}: Readonly<TeacherDuesMobileViewProps>) {
   const renderItem = (row: TeacherDueRow): ReactNode => (
     <DueCard
       row={row}

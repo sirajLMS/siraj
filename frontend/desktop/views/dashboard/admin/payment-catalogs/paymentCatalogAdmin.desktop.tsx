@@ -2,9 +2,9 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Tab, Tabs } from "@mui/material";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
-import type { PaymentCatalogAdminViewModel } from "@/frontend/common/views/dashboard/admin/payment-catalogs/paymentCatalogAdminView";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import type { PaymentCatalogAdminViewModel } from "@/frontend/common/views/dashboard/admin/payment-catalogs/usePaymentCatalogAdminViewModel";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { MobileWalletCatalogGridDesktop } from "@/frontend/desktop/views/dashboard/admin/payment-catalogs/components/mobileWalletCatalogGrid.desktop";
 import { OnlineAccountCatalogGridDesktop } from "@/frontend/desktop/views/dashboard/admin/payment-catalogs/components/onlineAccountCatalogGrid.desktop";
 import { PaymentLinkCatalogGridDesktop } from "@/frontend/desktop/views/dashboard/admin/payment-catalogs/components/paymentLinkCatalogGrid.desktop";
@@ -29,9 +29,9 @@ export function PaymentCatalogAdminDesktopView({
         title={t.pageTitle}
         subtitle={t.pageSubtitle}
         actions={
-          <PrimaryPageAction onClick={onAdd} startIcon={<AddOutlined />}>
+          <DesktopPrimaryPageAction onClick={onAdd} startIcon={<AddOutlined />}>
             {t.addEntry}
-          </PrimaryPageAction>
+          </DesktopPrimaryPageAction>
         }
       />
 

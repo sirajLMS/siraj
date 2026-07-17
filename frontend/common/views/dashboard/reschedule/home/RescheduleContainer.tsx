@@ -5,15 +5,31 @@ import { Box, CircularProgress } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { AppPermission, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classInstanceQueryDocument, rescheduleClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { RescheduleView } from "@/frontend/common/views/dashboard/reschedule/home/RescheduleView";
-import type { RescheduleFormData } from "@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema";
+import {
+  type RescheduleViewModel,
+  type UseRescheduleViewModelProps,
+  useRescheduleViewModel,
+} from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
 import { combineDateTime } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
+
+const lazyViews = createLazyView<RescheduleViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/reschedule/home/rescheduleView.mobile").then(m => ({
+      default: m.RescheduleViewMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/reschedule/home/rescheduleView.desktop").then(m => ({
+      default: m.RescheduleViewDesktop,
+    }))
+);
 
 export function RescheduleContainer() {
   const router = useRouter();
@@ -72,7 +88,9 @@ export function RescheduleContainer() {
     return <Box sx={{ p: 3, textAlign: "center" }}>{t.classInstanceNotFound}</Box>;
   }
 
-  const onSubmit = async (formData: RescheduleFormData) => {
+  const onSubmit = async (
+    formData: import("@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema").RescheduleFormData
+  ) => {
     const startAt = combineDateTime(formData.newDate, formData.newTime);
     if (!startAt) {
       logger.error("Invalid date or time format for reschedule");
@@ -108,16 +126,23 @@ export function RescheduleContainer() {
     router.push(`/classes/${classInstanceId}`);
   };
 
+  const props = useMemo<UseRescheduleViewModelProps>(
+    () => ({
+      session,
+      defaultDate,
+      defaultTime,
+      isSubmitting,
+      onSubmit,
+      onCancel,
+    }),
+    [session, defaultDate, defaultTime, isSubmitting, onSubmit, onCancel]
+  );
+
+  const viewModel = useRescheduleViewModel(props);
   return (
     <RequirePermission permissions={[AppPermission.SessionReschedule]}>
-      <RescheduleView
-        session={session}
-        defaultDate={defaultDate}
-        defaultTime={defaultTime}
-        isSubmitting={isSubmitting}
-        onSubmit={onSubmit}
-        onCancel={onCancel}
-      />
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
     </RequirePermission>
   );
 }
+export type { RescheduleViewModel, UseRescheduleViewModelProps };

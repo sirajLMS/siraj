@@ -1,30 +1,27 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { parentAssignedStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { ParentStudentsView } from "@/frontend/common/views/dashboard/parent/students/parentStudentsView";
-import { useAppTranslation } from "@/shared/locale";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import {
+  type ParentStudentsViewModel,
+  type UseParentStudentsViewModelProps,
+  useParentStudentsViewModel,
+} from "@/frontend/common/views/dashboard/parent/students/useParentStudentsViewModel";
 
-export function ParentStudentsContainer() {
-  const t = useAppTranslation().dashboardTranslations.parentStudents;
-  const { data, loading, error } = useQuery(parentAssignedStudentsQueryDocument);
+export type { ParentStudentsViewModel, UseParentStudentsViewModelProps };
 
-  const rows =
-    data?.parentAssignedStudents?.rows?.map(row => ({
-      id: row?.id ?? "",
-      name: row?.name ?? "",
-      status: row?.status ?? "",
-      teacherName: row?.teacherName ?? null,
-      classesRemaining: row?.classesRemaining ?? null,
-      classesTotal: row?.classesTotal ?? null,
-      hoursPerWeek: row?.hoursPerWeek ?? null,
-    })) ?? [];
+const lazyViews = createLazyView<ParentStudentsViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/parent/students/parentStudents.mobile").then(m => ({
+      default: m.ParentStudentsMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/parent/students/parentStudents.desktop").then(m => ({
+      default: m.ParentStudentsDesktopView,
+    }))
+);
 
-  return (
-    <RequirePermission permissions={[AppPermission.ParentViewStudents]}>
-      <ParentStudentsView labels={t} loading={loading} error={Boolean(error)} rows={rows} />
-    </RequirePermission>
-  );
+export function ParentStudentsContainer(props: Readonly<UseParentStudentsViewModelProps>) {
+  const viewModel = useParentStudentsViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

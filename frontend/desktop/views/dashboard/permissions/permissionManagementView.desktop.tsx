@@ -3,11 +3,8 @@
 import { Alert, Box } from "@mui/material";
 import type { PermissionManagementViewModel } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
 import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
-import {
-  DesktopPageContainer,
-  DesktopPageHeader,
-  DesktopPrimaryPageAction,
-} from "@/frontend/desktop/components/ui/container/page";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { PermissionManagementDialogsDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionManagementDialogs.desktop";
 import { PermissionTabContentDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionTabContent.desktop";
 import { SingleGroupViewDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/singleGroupView.desktop";

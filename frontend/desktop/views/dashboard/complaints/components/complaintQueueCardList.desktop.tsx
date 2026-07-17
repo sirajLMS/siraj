@@ -2,8 +2,8 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PaginationControls } from "@/frontend/common/components/ui";
 import type { AdminComplaintRow } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
+import { DesktopPaginationControls } from "@/frontend/desktop/components/ui/filter";
 import { ComplaintQueueCardDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintQueueCard.desktop";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
 
@@ -79,7 +79,7 @@ export function ComplaintQueueCardListDesktop({
         ))}
       </StyledQueueCardContainer>
       {pageCount > 1 && (
-        <PaginationControls
+        <DesktopPaginationControls
           page={page}
           pageCount={pageCount}
           rowCount={totalCount}

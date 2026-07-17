@@ -147,7 +147,7 @@ function GroupCardMobile({
           </Typography>
         </Box>
       </Box>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }
 

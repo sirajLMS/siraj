@@ -2,11 +2,11 @@
 
 import { FilterListOutlined, IosShareOutlined } from "@mui/icons-material";
 import { Box, Grid, IconButton, Typography } from "@mui/material";
-import type { ScheduleAlertsLabels } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsView";
 import type {
   AcademicClassRow,
   AlertsMetric,
   ScheduleAlert,
+  ScheduleAlertsLabels,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import {
   MobileContentStack,

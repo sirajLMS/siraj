@@ -4,11 +4,12 @@ import { AcUnitOutlined } from "@mui/icons-material";
 import { Box, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination } from "@/frontend/common/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 import { TeacherScheduleSessionActionsCellDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherScheduleSessionActionsCell.desktop";
 import { TeacherScheduleStudentCellDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherScheduleStudentCell.desktop";
 
@@ -190,7 +191,7 @@ export function TeacherScheduleDataGridDesktop({
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
 
   return (
-    <AppDataGrid<TeacherScheduleRow>
+    <DesktopAppDataGrid<TeacherScheduleRow>
       rows={rows}
       columns={columns}
       getRowId={row => row.id}
@@ -213,7 +214,7 @@ export function TeacherScheduleDataGridDesktop({
               onPageChange(model.page);
             },
             pageSizeOptions: [pageSize],
-            slots: { pagination: GridPagination },
+            slots: { pagination: DesktopGridPagination },
           }
         : {})}
     />

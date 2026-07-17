@@ -3,8 +3,8 @@
 import { CheckCircleOutlined, EmailOutlined, RadioButtonUncheckedOutlined, SmsOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, CircularProgress, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 
 export interface CommunicationLogCardDesktopProps {
   readonly entries: readonly (CommunicationLogEntry | null)[] | null | undefined;
@@ -114,7 +114,7 @@ export function CommunicationLogCardDesktop({
 
   return (
     <Box>
-      <BaseCard sx={{ p: 3 }}>
+      <DesktopBaseCard sx={{ p: 3 }}>
         <StyledSectionTitle variant="titleLg" sx={{ mb: 2 }}>
           {labels.title}
         </StyledSectionTitle>
@@ -135,7 +135,7 @@ export function CommunicationLogCardDesktop({
         >
           {isResending ? <CircularProgress size={16} /> : labels.resendNotifications}
         </StyledDesktopResendButton>
-      </BaseCard>
+      </DesktopBaseCard>
     </Box>
   );
 }

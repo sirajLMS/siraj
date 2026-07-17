@@ -199,11 +199,11 @@ function StoryStatusTrackingContainer() {
 
   const rawMetrics = useStoryStatusTrackingStore(state => state.metrics);
   const rows = useStoryStatusTrackingStore(state => state.rows);
-  const totalSessions = useStoryStatusTrackingStore(state => state.totalSessions);
+  const _totalSessions = useStoryStatusTrackingStore(state => state.totalSessions);
   const activateSession = useStoryStatusTrackingStore(state => state.activateSession);
   const verifySession = useStoryStatusTrackingStore(state => state.verifySession);
 
-  const suspendedCount = Number(rawMetrics.find(m => m.key === "suspended")?.count ?? 0);
+  const _suspendedCount = Number(rawMetrics.find(m => m.key === "suspended")?.count ?? 0);
 
   const subLabelMap: Record<string, string> = {
     regular: t.subLabels.regular,
@@ -212,12 +212,12 @@ function StoryStatusTrackingContainer() {
     on_leave: t.subLabels.onLeave,
   };
 
-  const metrics: readonly RawMetric[] = rawMetrics.map(m => ({
+  const _metrics: readonly RawMetric[] = rawMetrics.map(m => ({
     ...m,
     subLabel: subLabelMap[m.key],
   }));
 
-  const labels = {
+  const _labels = {
     pageTitle: t.pageTitle,
     pageSubtitle: t.pageSubtitle,
     filters: t.filters,
@@ -286,11 +286,6 @@ function StoryStatusTrackingContainer() {
 
   return (
     <StatusTrackingView
-      metrics={metrics}
-      rows={rows}
-      totalSessions={totalSessions}
-      suspendedCount={suspendedCount}
-      labels={labels}
       onActivate={activateSession}
       onReschedule={handleReschedule}
       onVerify={verifySession}

@@ -1,15 +1,31 @@
 "use client";
-
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { submitSuggestionMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useParentSuggestionsStore } from "@/frontend/common/stores/parentSuggestionsStore";
-import { ParentSuggestionsView } from "@/frontend/common/views/dashboard/suggestions/parentSuggestionsView";
 import type { SuggestionFormData } from "@/frontend/common/views/dashboard/suggestions/schemas/suggestionFormSchema";
+import {
+  type ParentSuggestionsViewModel,
+  type UseParentSuggestionsViewModelProps,
+  useParentSuggestionsViewModel,
+} from "@/frontend/common/views/dashboard/suggestions/useParentSuggestionsViewModel";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 import { useAppTranslation } from "@/shared/locale";
+
+const lazyViews = createLazyView<ParentSuggestionsViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/suggestions/parentSuggestions.mobile").then(m => ({
+      default: m.ParentSuggestionsMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/suggestions/parentSuggestions.desktop").then(m => ({
+      default: m.ParentSuggestionsDesktopView,
+    }))
+);
 
 export function ParentSuggestionsContainer() {
   const t = useAppTranslation();
@@ -48,14 +64,20 @@ export function ParentSuggestionsContainer() {
     });
   };
 
+  const props: UseParentSuggestionsViewModelProps = {
+    labels: labels.parent,
+    isSubmitting,
+    canSubmit: true,
+    onSubmit: handleSubmit,
+  };
+
+  const viewModel = useParentSuggestionsViewModel(props);
+
   return (
     <RequirePermission permissions={[AppPermission.CommunicationSubmitSuggestion]}>
-      <ParentSuggestionsView
-        labels={labels.parent}
-        isSubmitting={isSubmitting}
-        canSubmit={true}
-        onSubmit={handleSubmit}
-      />
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
     </RequirePermission>
   );
 }
+
+export type { ParentSuggestionsViewModel, UseParentSuggestionsViewModelProps };

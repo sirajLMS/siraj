@@ -3,15 +3,15 @@
 
 import { AssignmentIndOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { BaseCard } from "@/frontend/common/components/ui";
 import type { CurrentTeacherCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { useAppTranslation } from "@/shared/locale";
 
 export function CurrentTeacherCardMobile({ currentTeacherName, teacherId }: Readonly<CurrentTeacherCardProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherReassignment.currentTeacher;
 
   return (
-    <BaseCard
+    <MobileBaseCard
       sx={theme => ({
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.onPrimary,
@@ -70,6 +70,6 @@ export function CurrentTeacherCardMobile({ currentTeacherName, teacherId }: Read
           color: theme.palette.onPrimary,
         })}
       />
-    </BaseCard>
+    </MobileBaseCard>
   );
 }

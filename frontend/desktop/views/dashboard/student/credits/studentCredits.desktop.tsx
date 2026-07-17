@@ -5,7 +5,8 @@ import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import type { StudentCreditTransactionRow } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
-import { DesktopPageContainer, DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/page";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page";
 
 function reasonLabel(reason: StudentCreditTransactionRow["reason"], labels: StudentCreditsViewModel["labels"]): string {
   if (!reason) return "";

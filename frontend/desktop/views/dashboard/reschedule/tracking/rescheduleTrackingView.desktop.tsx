@@ -2,13 +2,17 @@
 
 import { FileDownloadOutlined } from "@mui/icons-material";
 import { Box, MenuItem, Select, type SelectChangeEvent } from "@mui/material";
-import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import { ExportButton, SectionPanel } from "@/frontend/common/components/ui";
 import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getTrackingStatusLabel } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.helpers";
 import type { RescheduleTrackingViewProps } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { STATUS_FILTER_OPTIONS } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import {
+  DesktopExportButton,
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card";
 import { RescheduleTrackingDataGridDesktop } from "@/frontend/desktop/views/dashboard/reschedule/tracking/components/rescheduleTrackingDataGrid.desktop";
 
 export function RescheduleTrackingViewDesktop({
@@ -81,16 +85,16 @@ export function RescheduleTrackingViewDesktop({
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.pageTitle} />
 
-      <MetricCardGrid metrics={metrics} size={{ md: 4, lg: "grow" }} />
+      <DesktopMetricCardGrid metrics={metrics} size={{ md: 4, lg: "grow" }} />
 
-      <SectionPanel
+      <DesktopSectionPanel
         title={labels.sectionTitle}
         actions={
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
             {filterSelect}
-            <ExportButton id="tracking-export-btn" startIcon={<FileDownloadOutlined />} onClick={onExport}>
+            <DesktopExportButton id="tracking-export-btn" startIcon={<FileDownloadOutlined />} onClick={onExport}>
               {labels.exportData}
-            </ExportButton>
+            </DesktopExportButton>
           </Box>
         }
       >
@@ -107,7 +111,7 @@ export function RescheduleTrackingViewDesktop({
           onPageChange={onPageChange}
           loading={loading}
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
     </DesktopPageContainer>
   );
 }

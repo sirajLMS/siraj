@@ -3,18 +3,18 @@
 
 import { PersonSearchOutlined, PublicOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { AvatarGroup, Box, Tooltip, Typography } from "@mui/material";
-import { UserAvatar } from "@/frontend/common/components/ui";
-import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
-import { TimezoneDisplay } from "@/frontend/common/components/ui/display";
 import type {
   AvailabilityInsightsProps,
   InsightCardProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileTimezoneDisplay } from "@/frontend/mobile/components/ui/display/timezoneDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
 function InsightCard({ title, value, description, icon }: Readonly<InsightCardProps>) {
   return (
-    <BaseCard
+    <MobileBaseCard
       sx={theme => ({
         p: theme.layout.cardPadding,
         display: "flex",
@@ -37,7 +37,7 @@ function InsightCard({ title, value, description, icon }: Readonly<InsightCardPr
           {description}
         </Typography>
       </Box>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }
 
@@ -46,7 +46,7 @@ function TimezoneInsight({
   labels,
 }: Readonly<{ timezones: readonly string[]; labels: { title: string; description: string } }>) {
   return (
-    <BaseCard
+    <MobileBaseCard
       sx={theme => ({
         p: theme.layout.cardPadding,
         display: "flex",
@@ -86,8 +86,8 @@ function TimezoneInsight({
         })}
       >
         {timezones.map((tz, index) => (
-          <Tooltip key={tz} title={<TimezoneDisplay timezone={tz} />} arrow describeChild>
-            <UserAvatar
+          <Tooltip key={tz} title={<MobileTimezoneDisplay timezone={tz} />} arrow describeChild>
+            <MobileUserAvatar
               size={28}
               sx={theme => ({
                 backgroundColor: index === 0 ? theme.palette.primaryContainer : theme.palette.secondaryContainer,
@@ -95,7 +95,7 @@ function TimezoneInsight({
               })}
             >
               {tz}
-            </UserAvatar>
+            </MobileUserAvatar>
           </Tooltip>
         ))}
       </AvatarGroup>
@@ -111,7 +111,7 @@ function TimezoneInsight({
       >
         <PublicOutlined sx={theme => ({ fontSize: 96, color: theme.palette.primary.main })} />
       </Box>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }
 

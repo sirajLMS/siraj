@@ -1,6 +1,9 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
+import { parentOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-portal.documents";
 import type { ParentSocialLabels } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale";
 
 interface ParentSocialProfileShape {
   readonly phone?: string | null;
@@ -16,9 +19,22 @@ export interface ParentSocialViewModel {
   readonly profile: ParentSocialProfileShape | null;
 }
 
-export type UseParentSocialViewModelProps = ParentSocialViewModel;
+export type UseParentSocialViewModelProps = Record<string, never>;
 
-export function useParentSocialViewModel(props: Readonly<UseParentSocialViewModelProps>): ParentSocialViewModel {
-  const { labels, loading, error, profile } = props;
-  return { labels, loading, error, profile };
+export function useParentSocialViewModel(_props: Readonly<UseParentSocialViewModelProps>): ParentSocialViewModel {
+  const labels = useAppTranslation().dashboardTranslations.parentSocial;
+  const { data, loading, error } = useQuery(parentOwnProfileQueryDocument, {
+    fetchPolicy: "cache-and-network",
+  });
+
+  const profile = data?.parentOwnProfile
+    ? {
+        phone: data.parentOwnProfile.phone,
+        facebook: data.parentOwnProfile.facebook,
+        whatsapp: data.parentOwnProfile.whatsapp,
+        twitter: data.parentOwnProfile.twitter,
+      }
+    : null;
+
+  return { labels, loading, error: !!error, profile };
 }

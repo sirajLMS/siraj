@@ -4,9 +4,9 @@ import { DeleteOutlined, EditOutlined, MoreVertOutlined, PersonAddOutlined } fro
 import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo, useState } from "react";
-import { AppDataGrid, StatusBadge } from "@/frontend/common/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
+import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionGroupsDataGridDesktopProps {
@@ -97,7 +97,7 @@ export function PermissionGroupsDataGridDesktop({
         flex: 1.5,
         minWidth: 200,
         renderCell: params => (
-          <LocalizedStringDisplay
+          <DesktopLocalizedStringDisplay
             value={params.value}
             typographyVariant="bodyMd"
             onClick={() => params.row.id && onViewGroup(params.row.id)}
@@ -134,7 +134,7 @@ export function PermissionGroupsDataGridDesktop({
         headerName: t.columnType,
         width: 130,
         renderCell: params => (
-          <StatusBadge
+          <DesktopStatusBadge
             category="session"
             status={params.value ? "active" : "pending"}
             label={params.value ? t.systemBadge : t.customBadge}
@@ -170,7 +170,7 @@ export function PermissionGroupsDataGridDesktop({
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
-      <AppDataGrid<PermissionGroup>
+      <DesktopAppDataGrid<PermissionGroup>
         rows={groups}
         columns={columns}
         getRowId={row => row.id ?? row.slug ?? ""}

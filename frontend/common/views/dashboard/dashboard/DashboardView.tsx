@@ -2,13 +2,11 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import {
-  type DashboardViewModel,
-  type UseDashboardViewModelProps,
+import type {
+  DashboardViewModel,
+  UseDashboardViewModelProps,
   useDashboardViewModel,
 } from "@/frontend/common/views/dashboard/dashboard/useDashboardViewModel";
-
-export type { DashboardViewModel };
 
 const lazyViews = createLazyView<DashboardViewModel>(
   () =>
@@ -21,7 +19,7 @@ const lazyViews = createLazyView<DashboardViewModel>(
     }))
 );
 
-export function DashboardView(props: Readonly<UseDashboardViewModelProps>) {
-  const viewModel = useDashboardViewModel(props);
+export function DashboardView(viewModel: Readonly<DashboardViewModel>) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
+export type { DashboardViewModel, UseDashboardViewModelProps, useDashboardViewModel };

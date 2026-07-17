@@ -4,7 +4,7 @@ import { Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { AdminBillingView } from "@/frontend/common/views/dashboard/admin/billing/adminBillingView";
+import { AdminBillingView } from "@/frontend/common/views/dashboard/admin/billing/AdminBillingView";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/common/views/dashboard/components/FxConversionNote";

@@ -7,11 +7,8 @@ import { QuotaFormAccessProvider } from "@/frontend/common/views/dashboard/stude
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import type { FormActionsProps, StudentProfileData } from "@/frontend/common/views/dashboard/students/quota/types";
 import type { StudentQuotaViewModel } from "@/frontend/common/views/dashboard/students/quota/useStudentQuotaViewModel";
-import {
-  DesktopPageContainer,
-  DesktopPageHeader,
-  DesktopPrimaryPageAction,
-} from "@/frontend/desktop/components/ui/container/page";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { ContextualHelperCardsDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/contextualHelperCards.desktop";
 import { CourseDetailsSectionDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/courseDetailsSection.desktop";
 import { StudentInformationSectionDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/studentInformationSection.desktop";

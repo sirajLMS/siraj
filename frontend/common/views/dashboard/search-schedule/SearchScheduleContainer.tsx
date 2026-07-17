@@ -3,11 +3,19 @@
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { SearchScheduleView } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleView";
+import type {
+  SearchScheduleViewModel,
+  UseSearchScheduleViewModelProps,
+} from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
+import { useSearchScheduleViewModel } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
 
-export function SearchScheduleContainer() {
+export function SearchScheduleContainer(props: Readonly<UseSearchScheduleViewModelProps>) {
+  const viewModel = useSearchScheduleViewModel(props);
   return (
     <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
-      <SearchScheduleView requiredPermission={AppPermission.ScheduleSearchAvailability} />
+      <SearchScheduleView {...viewModel} />
     </RequirePermission>
   );
 }
+
+export type { SearchScheduleViewModel, UseSearchScheduleViewModelProps };

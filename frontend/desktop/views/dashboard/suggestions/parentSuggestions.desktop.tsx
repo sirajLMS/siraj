@@ -2,9 +2,9 @@
 
 import { SendOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { BaseCard, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { ParentSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useParentSuggestionsViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopBaseCard, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { SuggestionFormFieldsDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionFormFields.desktop";
 import { SuggestionHeroBannerDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionHeroBanner.desktop";
 import { SuggestionSocialProofDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionSocialProof.desktop";
@@ -25,7 +25,7 @@ export function ParentSuggestionsDesktopView({
       <SuggestionHeroBannerDesktop labels={labels} />
 
       <Box sx={{ maxWidth: 960, mx: "auto", width: "100%" }}>
-        <BaseCard>
+        <DesktopBaseCard>
           <SuggestionFormFieldsDesktop control={control} errors={errors} labels={labels} />
 
           <Box
@@ -38,17 +38,17 @@ export function ParentSuggestionsDesktopView({
               pt: 4,
             }}
           >
-            <PrimaryPageAction
+            <DesktopPrimaryPageAction
               endIcon={<SendOutlined />}
               disabled={!canSubmit || isSubmitting}
               onClick={onFormSubmit}
               sx={{ px: 6, py: 2 }}
             >
               {labels.submit}
-            </PrimaryPageAction>
+            </DesktopPrimaryPageAction>
             <SuggestionSocialProofDesktop labels={labels} />
           </Box>
-        </BaseCard>
+        </DesktopBaseCard>
 
         <SuggestionSupportCardsDesktop labels={labels} />
       </Box>

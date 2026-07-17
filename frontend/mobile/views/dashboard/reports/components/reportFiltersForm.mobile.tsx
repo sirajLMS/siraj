@@ -4,10 +4,10 @@ import { QueryStatsOutlined } from "@mui/icons-material";
 import type { SelectChangeEvent } from "@mui/material";
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
-import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
 import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { ReportTeacherOption, ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
+import { MobileAppDatePicker } from "@/frontend/mobile/components/ui/form/date";
 
 export type ReportFiltersFormMobileLabels = ReportFiltersFormLabels;
 
@@ -70,7 +70,7 @@ export function ReportFiltersFormMobile({
         gap: 2,
       }}
     >
-      <AppDatePicker
+      <MobileAppDatePicker
         label={labels.fromDate}
         value={selectedFromDate}
         onChange={(date: Date | null) => {
@@ -85,7 +85,7 @@ export function ReportFiltersFormMobile({
         }}
       />
 
-      <AppDatePicker
+      <MobileAppDatePicker
         label={labels.toDate}
         value={selectedToDate}
         onChange={(date: Date | null) => {
@@ -134,9 +134,14 @@ export function ReportFiltersFormMobile({
       </FormControl>
 
       <Box sx={{ pt: 1 }}>
-        <PrimaryPageAction startIcon={<QueryStatsOutlined />} disabled={!canGenerate} onClick={onSubmit} sx={{ px: 4 }}>
+        <MobilePrimaryPageAction
+          startIcon={<QueryStatsOutlined />}
+          disabled={!canGenerate}
+          onClick={onSubmit}
+          sx={{ px: 4 }}
+        >
           {labels.submit}
-        </PrimaryPageAction>
+        </MobilePrimaryPageAction>
       </Box>
     </Box>
   );

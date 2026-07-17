@@ -1,7 +1,10 @@
+"use client";
+
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CountryAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/countrySelect";
 import { CurrencySelectDesktop } from "@/frontend/desktop/components/ui/input/currencySelect";
@@ -11,9 +14,30 @@ import { PhoneFormFieldDesktop } from "@/frontend/desktop/components/ui/input/ph
 import { TagInputDesktop } from "@/frontend/desktop/components/ui/input/tagInput";
 import { useAppTranslation } from "@/shared/locale";
 
+export interface CurrencyOption {
+  readonly code: CurrencyCode;
+  readonly symbol: string;
+  readonly countryCode: string;
+  readonly flagEmoji: string;
+}
+
+export interface CountryType {
+  readonly code: string;
+  readonly phone: string;
+  readonly emoji: string;
+  readonly suggested?: boolean;
+}
+
+export interface PaymentMethodCatalogOption {
+  readonly id: string;
+  readonly slug: string;
+  readonly displayName: string;
+  readonly logoUrl: string | null;
+}
+
 /**
  * Payment method details form value — desktop tier duplicate of common type.
- * Keep in sync with `@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields`.
+ * Keep in sync with this desktop file.
  */
 export type PaymentMethodDetailsFormValue = {
   readonly walletId?: string;
@@ -33,7 +57,7 @@ export type PaymentMethodDetailsFormValue = {
 
 /**
  * Payment method catalog form value — desktop tier duplicate of common type.
- * Keep in sync with `@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields`.
+ * Keep in sync with this desktop file.
  */
 export type PaymentMethodCatalogFormValue = {
   readonly name?: Record<string, string>;
@@ -46,7 +70,7 @@ export type PaymentMethodCatalogFormValue = {
 
 /**
  * Props for the PaymentMethodTypeFieldsDesktop component — desktop tier duplicate of common type.
- * Keep in sync with `@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields`.
+ * Keep in sync with this desktop file.
  */
 export type PaymentMethodTypeFieldsProps<T extends FieldValues> = {
   readonly type: PaymentMethodType;
@@ -58,19 +82,14 @@ export type PaymentMethodTypeFieldsProps<T extends FieldValues> = {
   readonly selectedWallet?: PaymentMethodCatalogOption | null;
   readonly selectedPaymentLink?: PaymentMethodCatalogOption | null;
   readonly selectedOnlineAccount?: PaymentMethodCatalogOption | null;
-  readonly onWalletChangeAction?: (option: PaymentMethodCatalogOption) => void;
-  readonly onPaymentLinkChangeAction?: (option: PaymentMethodCatalogOption) => void;
-  readonly onOnlineAccountChangeAction?: (option: PaymentMethodCatalogOption) => void;
+  readonly onWalletChangeAction?: (option: PaymentMethodCatalogOption | null) => void;
+  readonly onPaymentLinkChangeAction?: (option: PaymentMethodCatalogOption | null) => void;
+  readonly onOnlineAccountChangeAction?: (option: PaymentMethodCatalogOption | null) => void;
   readonly allowedCurrencyCodes?: readonly CurrencyCode[];
   readonly showCatalogMetadata?: boolean;
   readonly detailsPrefix?: string;
   readonly catalogPrefix?: string;
 };
-
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { CurrencyOption } from "@/frontend/common/lib/currency";
-import type { CountryType } from "@/frontend/common/lib/locale";
-import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 
 function resolveFieldName<T extends FieldValues>(prefix: string | undefined, field: string): FieldPath<T> {
   return (prefix ? `${prefix}.${field}` : field) as FieldPath<T>;

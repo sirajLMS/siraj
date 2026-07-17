@@ -1,11 +1,12 @@
 "use client";
 
 import type * as React from "react";
+import type { CountryType } from "@/frontend/common/lib/locale";
 import { CountryAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/countrySelect/countryAutocomplete.desktop";
 
 export type CountryAutocompleteProps = {
-  readonly country?: { readonly code: string; readonly emoji: string; readonly phone: string } | null;
-  readonly onChangeAction: (country: { readonly code: string; readonly emoji: string; readonly phone: string }) => void;
+  readonly country?: CountryType | null;
+  readonly onChangeAction: (country: CountryType) => void;
   readonly onClearAction?: () => void;
   readonly autoComplete?: string;
   readonly fullWidth?: boolean;
@@ -27,10 +28,8 @@ export type CountryAutocompleteProps = {
 };
 
 export type CountrySelectProps = {
-  readonly country?: { readonly code: string; readonly emoji: string; readonly phone: string } | null;
-  readonly setCountryAction: (
-    country: { readonly code: string; readonly emoji: string; readonly phone: string } | null
-  ) => void;
+  readonly country?: CountryType | null;
+  readonly setCountryAction: (country: CountryType | null) => void;
 } & Partial<CountryAutocompleteProps>;
 
 /**

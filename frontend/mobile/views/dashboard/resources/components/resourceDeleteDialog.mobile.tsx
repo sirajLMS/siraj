@@ -1,7 +1,7 @@
 "use client";
 
-import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { ResourceDeleteDialogProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
+import { MobileBaseDeleteDialog } from "@/frontend/mobile/components/ui/dialog/MobileBaseDeleteDialog";
 
 export function ResourceDeleteDialogMobile({
   labels,
@@ -15,7 +15,7 @@ export function ResourceDeleteDialogMobile({
   const bodyText = labels.deleteDialog.body(titleName);
 
   return (
-    <BaseDeleteDialog
+    <MobileBaseDeleteDialog
       open={open}
       onClose={onCancel}
       onConfirm={onConfirm}

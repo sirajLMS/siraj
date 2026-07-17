@@ -2,7 +2,7 @@
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/useMonthlyReportsViewModel";
+import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
 import {
   MobileContentStack,
   MobileFilterButton,
@@ -16,22 +16,23 @@ import { MobileMetricCard } from "@/frontend/mobile/components/ui/card";
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
-export function MonthlyReportsMobileView({
-  reportType,
-  year,
-  month,
-  teacherId,
-  studentId,
-  metrics,
-  loading,
-  labels,
-  onReportTypeChange,
-  onYearChange,
-  onMonthChange,
-  onTeacherIdChange,
-  onStudentIdChange,
-  onGenerate,
-}: Readonly<MonthlyReportsViewModel>) {
+export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel>) {
+  const {
+    reportType,
+    year,
+    month,
+    teacherId,
+    studentId,
+    metrics,
+    loading,
+    labels,
+    onReportTypeChange,
+    onYearChange,
+    onMonthChange,
+    onTeacherIdChange,
+    onStudentIdChange,
+    onGenerate,
+  } = props;
   return (
     <MobilePageContainer>
       <MobileContentStack>

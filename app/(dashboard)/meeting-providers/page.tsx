@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { MeetingProvidersContainer } from "@/frontend/common/views/dashboard/admin/meeting-providers/MeetingProvidersContainer";
+import { MeetingProvidersView } from "@/frontend/common/views/dashboard/admin/meeting-providers/MeetingProvidersContainer";
 import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ readonly locale: string }>;
+  readonly params: Promise<{ readonly locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = getTranslations(locale).dashboardTranslations.meetingProviders;
@@ -28,5 +28,5 @@ export default async function MeetingProvidersPage({
     return;
   }
 
-  return <MeetingProvidersContainer />;
+  return <MeetingProvidersView />;
 }

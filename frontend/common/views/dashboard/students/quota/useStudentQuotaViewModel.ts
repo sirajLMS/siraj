@@ -1,8 +1,19 @@
 "use client";
 
+import { useMutation, useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useNotifications } from "@toolpad/core/useNotifications";
+import { formatDistanceToNow } from "date-fns";
+import { useEffect, useState } from "react";
 import { type UseFormReturn, useForm } from "react-hook-form";
+import {
+  studentByIdQueryDocument,
+  updateStudentQuotaMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
+import { logger } from "@/frontend/common/utils/logger";
+import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
+import type { StudentProfileQueryData } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext.types";
+import { canViewStudentProfileTab } from "@/frontend/common/views/dashboard/students/profile/studentProfileTabs";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import {
   createStudentQuotaSchema,
@@ -10,58 +21,156 @@ import {
   type StudentQuotaFormInput,
 } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import type { StudentProfileData } from "@/frontend/common/views/dashboard/students/quota/types";
-import { type StudentQuotaLabels, useAppTranslation } from "@/shared/locale";
+import { useRouter } from "@/shared/i18n/routing";
+import { type CommonLabels, useAppTranslation } from "@/shared/locale";
 
-export interface UseStudentQuotaViewModelProps {
-  readonly studentData: StudentProfileData | null;
-  readonly isSaving: boolean;
-  readonly isSaved: boolean;
-  readonly embedded?: boolean;
-  readonly readOnly?: boolean;
-  readonly onSave: (data: StudentQuotaFormData) => Promise<void>;
-  readonly onCancel: () => void;
-  readonly onEditAvatar?: () => void;
-  readonly isLoading?: boolean;
+function resolveGenderLabel(raw: string | null | undefined): "MALE" | "FEMALE" | null {
+  if (raw == null) return null;
+  const normalized = raw.toUpperCase();
+  if (normalized === "FEMALE") return "FEMALE";
+  if (normalized === "MALE") return "MALE";
+  return null;
 }
 
+function buildStudentQuotaData(
+  useUnifiedProfile: boolean,
+  profile: StudentProfileQueryData | null | undefined,
+  studentById:
+    | {
+        id: string | null;
+        name: string | null;
+        language?: string | null;
+        gender?: string | null;
+        teacherName?: string | null;
+        classesTotal?: number | null;
+        classesRemaining?: number | null;
+        updatedAt?: string | null;
+        primaryTeacherId?: string | null;
+        avatarUrl?: string | null;
+      }
+    | undefined,
+  tc: CommonLabels
+): StudentProfileData | null {
+  const s = useUnifiedProfile ? profile : studentById;
+  if (!s || typeof s.id !== "string" || s.id.length === 0) return null;
+
+  return {
+    id: s.id,
+    studentName: s.name ?? tc.notSet,
+    dateOfBirth: useUnifiedProfile && profile?.dateOfBirth ? String(profile.dateOfBirth) : "",
+    language: s.language === "en" ? "en" : "ar",
+    gender: resolveGenderLabel(s.gender) ?? "",
+    teacher: s.teacherName ?? "",
+    totalClasses: s.classesTotal ?? 0,
+    classesLeft: s.classesRemaining ?? 0,
+    profileImage: useUnifiedProfile ? (profile?.avatarUrl ?? "") : "",
+    lastEditedTime: s?.updatedAt ? formatDistanceToNow(new Date(s.updatedAt), { addSuffix: true }) : "",
+    primaryTeacherId: s.primaryTeacherId ?? null,
+  };
+}
+
+export interface UseStudentQuotaViewModelProps {
+  readonly studentId?: string;
+}
+
+export type StudentQuotaMethods = UseFormReturn<StudentQuotaFormInput, undefined, StudentQuotaFormData>;
+
 export interface StudentQuotaViewModel {
-  readonly t: StudentQuotaLabels;
+  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentQuota"];
+  readonly tc: CommonLabels;
   readonly studentData: StudentProfileData | null;
-  readonly embedded: boolean;
-  readonly readOnly: boolean;
   readonly isSaving: boolean;
   readonly isSaved: boolean;
-  readonly isLoading: boolean;
+  readonly embedded: boolean;
+  readonly readOnly: boolean;
   readonly canEditIdentity: boolean;
   readonly canEditQuota: boolean;
   readonly canViewQuota: boolean;
   readonly canViewTeacher: boolean;
-  readonly methods: UseFormReturn<StudentQuotaFormInput, undefined, StudentQuotaFormData>;
+  readonly isLoading: boolean;
+  readonly loadingState: "loading" | "missing" | "error" | "ready";
+  readonly errorMessage: string | null;
+  readonly methods: StudentQuotaMethods;
   readonly onSubmit: (data: StudentQuotaFormData) => Promise<void>;
   readonly onCancel: () => void;
-  readonly onEditAvatar?: () => void;
 }
 
 export function useStudentQuotaViewModel(props: Readonly<UseStudentQuotaViewModelProps>): StudentQuotaViewModel {
   const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const tc = useAppTranslation().commonTranslations;
+  const router = useRouter();
+  const notifications = useNotifications();
+  const profileContext = useStudentProfileContext();
+  const studentId = props.studentId ?? profileContext?.studentId ?? "";
+  const useUnifiedProfile = profileContext != null;
   const { canView, canEdit } = useStudentFieldAccess();
+  const canEditQuota = canEdit("student_quota_edit");
+  const _hasTabAccess = canViewStudentProfileTab("quota", canView);
 
-  const {
-    studentData,
-    isSaving,
-    isSaved,
-    embedded = false,
-    readOnly = false,
-    onSave,
-    onCancel,
-    onEditAvatar,
-    isLoading = false,
-  } = props;
+  const [isSaved, setIsSaved] = useState(false);
+
+  const { data, loading, error, refetch } = useQuery(studentByIdQueryDocument, {
+    variables: { studentId },
+    skip: !studentId || useUnifiedProfile,
+  });
+
+  const [updateQuota, { loading: saving }] = useMutation(updateStudentQuotaMutationDocument, {
+    onCompleted: () => {
+      setIsSaved(true);
+      notifications.show(t.actions.saveSuccess, { severity: "success", autoHideDuration: 4000 });
+      if (useUnifiedProfile) {
+        profileContext?.refetch({ year: null, month: null }).catch(() => undefined);
+      } else {
+        refetch().catch(() => undefined);
+      }
+      setTimeout(() => {
+        setIsSaved(false);
+      }, 2000);
+    },
+    onError: mutationError => {
+      logger.error("Update quota failed:", { mutationError });
+      notifications.show(tc.operationFailed, { severity: "error", autoHideDuration: 5000 });
+    },
+  });
+
+  const handleSave = async (formData: StudentQuotaFormData) => {
+    if (!studentId || !canEditQuota) return;
+    await updateQuota({
+      variables: {
+        studentId,
+        newClassesRemaining: formData.classesLeft,
+        expectedVersion: null,
+      },
+    });
+  };
+
+  const loadingState = (() => {
+    const unifiedLoading = Boolean(profileContext?.loading);
+    const unifiedProfileMissing = !profileContext?.profile;
+
+    if ((useUnifiedProfile ? unifiedLoading : loading) && !data && !profileContext?.profile) {
+      return "loading" as const;
+    }
+    if (useUnifiedProfile && !unifiedLoading && unifiedProfileMissing) {
+      return "missing" as const;
+    }
+    if (!useUnifiedProfile && error) {
+      return "error" as const;
+    }
+    return "ready" as const;
+  })();
+
+  const studentData = buildStudentQuotaData(
+    useUnifiedProfile,
+    profileContext?.profile ?? undefined,
+    data?.studentById ?? undefined,
+    tc
+  );
 
   const canEditIdentity = canEdit("student_identity");
-  const canEditQuota = canEdit("student_quota_edit");
-  const canViewQuota = canView("student_quota_edit");
-  const canViewTeacher = canView("student_teacher");
+  const canEditQuotaFlag = canEdit("student_quota_edit");
+  const canViewQuotaFlag = canView("student_quota_edit");
+  const canViewTeacherFlag = canView("student_teacher");
 
   const validationMessages = t.validation;
   const schema = createStudentQuotaSchema(validationMessages);
@@ -93,25 +202,35 @@ export function useStudentQuotaViewModel(props: Readonly<UseStudentQuotaViewMode
     }
   }, [studentData, methods]);
 
-  const onSubmit = async (data: StudentQuotaFormData) => {
-    await onSave(data);
+  const onSubmit = async (formData: StudentQuotaFormData) => {
+    await handleSave(formData);
+  };
+
+  const onCancel = () => {
+    if (useUnifiedProfile) {
+      router.replace(`/students/${studentId}/profile?tab=status`);
+      return;
+    }
+    router.back();
   };
 
   return {
     t,
+    tc,
     studentData,
-    embedded,
-    readOnly,
-    isSaving,
+    isSaving: saving,
     isSaved,
-    isLoading,
+    embedded: useUnifiedProfile,
+    readOnly: !canEditQuotaFlag,
     canEditIdentity,
-    canEditQuota,
-    canViewQuota,
-    canViewTeacher,
+    canEditQuota: canEditQuotaFlag,
+    canViewQuota: canViewQuotaFlag,
+    canViewTeacher: canViewTeacherFlag,
+    isLoading: loadingState === "loading",
+    loadingState,
+    errorMessage: loadingState === "error" ? tc.loadFailed : null,
     methods,
     onSubmit,
     onCancel,
-    onEditAvatar,
   };
 }

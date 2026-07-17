@@ -2,10 +2,7 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import {
-  type StudentHistoryViewModel,
-  useStudentHistoryViewModel,
-} from "@/frontend/common/views/dashboard/students/history/useStudentHistoryViewModel";
+import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryViewModel";
 
 export type { StudentHistoryViewModel };
 
@@ -21,6 +18,5 @@ const lazyViews = createLazyView<StudentHistoryViewModel>(
 );
 
 export function StudentHistoryView(props: Readonly<StudentHistoryViewModel>) {
-  const viewModel = useStudentHistoryViewModel(props);
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }

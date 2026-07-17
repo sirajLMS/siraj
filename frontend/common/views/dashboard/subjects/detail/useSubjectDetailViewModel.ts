@@ -2,13 +2,10 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
-import type { PageHeaderBreadcrumb } from "@/frontend/common/components/ui";
+import type { PageHeaderBreadcrumb } from "@/frontend/common/components/ui/container/page";
 import { classSubjectByIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
-import type {
-  SubjectDetailContainerProps,
-  SubjectDetailData,
-  SubjectResourceItem,
-} from "@/frontend/common/views/dashboard/subjects/detail/types";
+import type { SubjectDetailData, SubjectResourceItem } from "@/frontend/common/views/dashboard/subjects/detail/types";
+import { useAppTranslation } from "@/shared/locale";
 
 /**
  * View-model labels for the subject detail page used by both tiers.
@@ -27,8 +24,8 @@ export interface SubjectDetailViewModelLabels {
   readonly subjectsPageTitle: string;
 }
 
-export interface UseSubjectDetailViewModelProps extends SubjectDetailContainerProps {
-  readonly labels: SubjectDetailViewModelLabels;
+export interface UseSubjectDetailViewModelProps {
+  readonly subjectId: string;
 }
 
 export interface SubjectDetailViewModel {
@@ -46,10 +43,24 @@ export interface SubjectDetailViewModel {
  * mobile and desktop View components receive the resulting flat object — they
  * only render the loading / empty / notFound states and the resource list.
  */
-export function useSubjectDetailViewModel({
-  subjectId,
-  labels,
-}: Readonly<UseSubjectDetailViewModelProps>): SubjectDetailViewModel {
+export function useSubjectDetailViewModel(props: Readonly<UseSubjectDetailViewModelProps>): SubjectDetailViewModel {
+  const { subjectId } = props;
+  const { subjects } = useAppTranslation().dashboardTranslations;
+
+  const labels: SubjectDetailViewModelLabels = useMemo(
+    () => ({
+      pageTitle: subjects.detail.pageTitle,
+      notFound: subjects.detail.notFound,
+      resourcesTitle: subjects.detail.resourcesTitle,
+      resourcesSubtitle: subjects.detail.resourcesSubtitle,
+      noResources: subjects.detail.noResources,
+      download: subjects.detail.download,
+      untitledResource: subjects.detail.untitledResource,
+      subjectsPageTitle: subjects.pageTitle,
+    }),
+    [subjects]
+  );
+
   const { data, loading } = useQuery(classSubjectByIdQueryDocument, {
     variables: { id: subjectId },
     skip: !subjectId,

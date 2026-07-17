@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { StudentStatusContainer } from "@/frontend/common/views/dashboard/students/status/StudentStatusContainer";
+import { StudentStatusView } from "@/frontend/common/views/dashboard/students/status/StudentStatusContainer";
 
-const meta: Meta<typeof StudentStatusContainer> = {
-  title: "Views/dashboard/students/status/StudentStatusContainer",
-  component: StudentStatusContainer,
+const meta: Meta<typeof StudentStatusView> = {
+  title: "Views/dashboard/students/status/StudentStatusView",
+  component: StudentStatusView,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
@@ -11,7 +11,7 @@ const meta: Meta<typeof StudentStatusContainer> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof StudentStatusContainer>;
+type Story = StoryObj<typeof StudentStatusView>;
 
 export const Default: Story = {
   args: {},

@@ -3,6 +3,8 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
 import { useMemo, useState } from "react";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
   approveLessonReportMutationDocument,
   pendingLessonReportsQueryDocument,
@@ -10,44 +12,26 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { usePendingLessonReviewsStore } from "@/frontend/common/stores/pendingLessonReviewsStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { RejectReportDialog } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/components/RejectReportDialog";
-import { PendingReviewsView } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/pendingReviewsView";
-import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
-import type { PendingReviewsLabels } from "@/shared/locale";
+import type {
+  PendingReviewRow,
+  PendingReviewsViewModel,
+} from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
+import type { UsePendingReviewsViewModelProps } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";
+import { usePendingReviewsViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";
 import { useAppTranslation } from "@/shared/locale";
 
-type SnackbarSeverity = "success" | "error";
+const lazyViews = createLazyView<PendingReviewsViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/pendingReviews.mobile").then(m => ({
+      default: m.PendingReviewsMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/pendingReviews.desktop").then(m => ({
+      default: m.PendingReviewsDesktopView,
+    }))
+);
 
-function useLabels(t: PendingReviewsLabels) {
-  return useMemo(
-    () => ({
-      pageTitle: t.pageTitle,
-      filterByTeacher: t.filterByTeacher,
-      filterByStudent: t.filterByStudent,
-      allTeachers: t.allTeachers,
-      allStudents: t.allStudents,
-      lessonDateColumn: t.lessonDateColumn,
-      studentColumn: t.studentColumn,
-      teacherColumn: t.teacherColumn,
-      attendanceColumn: t.attendanceColumn,
-      completionColumn: t.completionColumn,
-      submittedAtColumn: t.submittedAtColumn,
-      statusColumn: t.statusColumn,
-      actionsColumn: t.actionsColumn,
-      reviewButton: t.reviewButton,
-      approveButton: t.approveButton,
-      rejectButton: t.rejectButton,
-      rejectDialogTitle: t.rejectDialogTitle,
-      rejectReasonLabel: t.rejectReasonLabel,
-      rejectReasonPlaceholder: t.rejectReasonPlaceholder,
-      rejectConfirm: t.rejectConfirm,
-      rejectCancel: t.rejectCancel,
-      noPendingReviews: t.noPendingReviews,
-      loadingMessage: t.loadingMessage,
-    }),
-    [t]
-  );
-}
+type SnackbarSeverity = "success" | "error";
 
 export function PendingReviewsContainer() {
   const t = useAppTranslation().dashboardTranslations.supervisorPortalPendingReviews;
@@ -102,7 +86,31 @@ export function PendingReviewsContainer() {
 
   const selectedReport = useMemo(() => rows.find(r => r.id === selectedReportId) ?? null, [rows, selectedReportId]);
 
-  const labels = useLabels(t);
+  const labels = {
+    pageTitle: t.pageTitle,
+    filterByTeacher: t.filterByTeacher,
+    filterByStudent: t.filterByStudent,
+    allTeachers: t.allTeachers,
+    allStudents: t.allStudents,
+    lessonDateColumn: t.lessonDateColumn,
+    studentColumn: t.studentColumn,
+    teacherColumn: t.teacherColumn,
+    attendanceColumn: t.attendanceColumn,
+    completionColumn: t.completionColumn,
+    submittedAtColumn: t.submittedAtColumn,
+    statusColumn: t.statusColumn,
+    actionsColumn: t.actionsColumn,
+    reviewButton: t.reviewButton,
+    approveButton: t.approveButton,
+    rejectButton: t.rejectButton,
+    rejectDialogTitle: t.rejectDialogTitle,
+    rejectReasonLabel: t.rejectReasonLabel,
+    rejectReasonPlaceholder: t.rejectReasonPlaceholder,
+    rejectConfirm: t.rejectConfirm,
+    rejectCancel: t.rejectCancel,
+    noPendingReviews: t.noPendingReviews,
+    loadingMessage: t.loadingMessage,
+  };
 
   const handleApprove = async (reportId: string) => {
     if (!reportId) return;
@@ -143,37 +151,31 @@ export function PendingReviewsContainer() {
     }
   };
 
+  const props: UsePendingReviewsViewModelProps = {
+    rows,
+    selectedReport,
+    rejectDialogOpen,
+    rejectReason,
+    teacherFilter,
+    studentFilter,
+    loading,
+    approving,
+    rejecting,
+    labels,
+    onTeacherFilterChange: setTeacherFilter,
+    onStudentFilterChange: setStudentFilter,
+    onSelectReport: (report: PendingReviewRow | null) => setSelectedReportId(report?.id ?? null),
+    onApprove: handleApprove,
+    onOpenRejectDialog: handleOpenRejectDialog,
+    onCloseRejectDialog: resetRejectDialog,
+    onRejectReasonChange: setRejectReason,
+    onConfirmReject: handleConfirmReject,
+  };
+
+  const viewModel = usePendingReviewsViewModel(props);
+
   return (
     <>
-      <PendingReviewsView
-        rows={rows}
-        selectedReport={selectedReport}
-        rejectDialogOpen={rejectDialogOpen}
-        rejectReason={rejectReason}
-        teacherFilter={teacherFilter}
-        studentFilter={studentFilter}
-        loading={loading}
-        approving={approving}
-        rejecting={rejecting}
-        labels={labels}
-        onTeacherFilterChange={setTeacherFilter}
-        onStudentFilterChange={setStudentFilter}
-        onSelectReport={(report: PendingReviewRow | null) => setSelectedReportId(report?.id ?? null)}
-        onApprove={handleApprove}
-        onOpenRejectDialog={handleOpenRejectDialog}
-        onCloseRejectDialog={resetRejectDialog}
-        onRejectReasonChange={setRejectReason}
-        onConfirmReject={handleConfirmReject}
-      />
-      <RejectReportDialog
-        open={rejectDialogOpen}
-        reason={rejectReason}
-        loading={rejecting}
-        labels={labels}
-        onReasonChange={setRejectReason}
-        onClose={resetRejectDialog}
-        onConfirm={handleConfirmReject}
-      />
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}
@@ -184,6 +186,12 @@ export function PendingReviewsContainer() {
           {snackbarMessage}
         </Alert>
       </Snackbar>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
     </>
   );
 }
+
+export type {
+  PendingReviewsViewModel,
+  UsePendingReviewsViewModelProps,
+} from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";

@@ -3,58 +3,15 @@
 import { AlternateEmailOutlined, CheckCircleOutlined, DeleteOutlineOutlined, SendOutlined } from "@mui/icons-material";
 import { Avatar, Box, Paper, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/common/components/ui";
 import {
   type AdminComplaintRow,
   type ComplaintPriority,
   ComplaintStatus,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
+import { DesktopFilterButton, DesktopPrimaryPageAction, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
 
-const StyledAnsweredResponseBox = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderRadius: theme.layout.radius.card,
-  backgroundColor: theme.palette.surfaceContainerLow,
-  border: `1px solid ${theme.palette.outlineVariant}`,
-}));
-
-const StyledAnsweredResponseHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  marginBottom: theme.spacing(1),
-}));
-
-const StyledAnsweredIcon = styled(CheckCircleOutlined)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  fontSize: 18,
-}));
-
-const StyledAnsweredResponseLabel = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  color: theme.palette.primary.main,
-}));
-
-const StyledAnsweredResponseTime = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  marginLeft: "auto",
-}));
-
-const StyledResponseInputLabel = styled(Typography)({
-  fontWeight: 700,
-  marginBottom: "0.5rem",
-  textTransform: "uppercase",
-});
-
-const StyledResponseActionsBox = styled(Box)(({ theme }) => ({
-  marginTop: theme.spacing(2),
-  display: "flex",
-  flexDirection: "row",
-  justifyContent: "flex-end",
-  gap: theme.spacing(1.5),
-}));
-
-const StyledEmailActionButton = styled(FilterButton)(({ theme }) => ({
+const StyledEmailActionButton = styled(DesktopFilterButton)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
   color: theme.palette.onPrimary,
   borderColor: theme.palette.primary.main,
@@ -120,10 +77,47 @@ const StyledComplaintTextBox = styled(Box, {
   borderLeft: `4px solid ${theme.palette.primary.main}`,
 }));
 
-const StyledDeleteButton = styled(FilterButton)(({ theme }) => ({
-  color: theme.palette.error.main,
-  borderColor: theme.palette.error.main,
-  "&:hover": { backgroundColor: theme.palette.errorContainer },
+const StyledAnsweredResponseBox = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: theme.layout.radius.card,
+  backgroundColor: theme.palette.surfaceContainerLow,
+  border: `1px solid ${theme.palette.outlineVariant}`,
+}));
+
+const StyledAnsweredResponseHeader = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledAnsweredIcon = styled(CheckCircleOutlined)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  fontSize: 18,
+}));
+
+const StyledAnsweredResponseLabel = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  color: theme.palette.primary.main,
+}));
+
+const StyledAnsweredResponseTime = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  marginLeft: "auto",
+}));
+
+const StyledResponseInputLabel = styled(Typography)({
+  fontWeight: 700,
+  marginBottom: "0.5rem",
+  textTransform: "uppercase",
+});
+
+const StyledResponseActionsBox = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  display: "flex",
+  flexDirection: "row",
+  justifyContent: "flex-end",
+  gap: theme.spacing(1.5),
 }));
 
 interface ComplaintQueueCardDesktopProps {
@@ -209,7 +203,7 @@ function ComplaintResponseSectionDesktop({
         slotProps={{ htmlInput: { autoComplete: "off" } }}
       />
       <StyledResponseActionsBox>
-        <PrimaryPageAction
+        <DesktopPrimaryPageAction
           startIcon={<SendOutlined />}
           disabled={draftResponse.trim().length === 0}
           onClick={() => {
@@ -217,7 +211,7 @@ function ComplaintResponseSectionDesktop({
           }}
         >
           {labels.queue.answer}
-        </PrimaryPageAction>
+        </DesktopPrimaryPageAction>
         <StyledEmailActionButton
           startIcon={<AlternateEmailOutlined />}
           disabled={draftResponse.trim().length === 0}
@@ -228,14 +222,14 @@ function ComplaintResponseSectionDesktop({
           {labels.queue.answerAndEmail}
         </StyledEmailActionButton>
         {canDelete ? (
-          <StyledDeleteButton
+          <DesktopFilterButton
             startIcon={<DeleteOutlineOutlined />}
             onClick={() => {
               onDelete();
             }}
           >
             {labels.queue.deleteConfirmConfirm}
-          </StyledDeleteButton>
+          </DesktopFilterButton>
         ) : null}
       </StyledResponseActionsBox>
     </Box>
@@ -267,7 +261,7 @@ export function ComplaintQueueCardDesktop({
           </Box>
         </StyledSubmitterInfoBox>
         <StyledQueueCardStatusBox>
-          <StatusBadge
+          <DesktopStatusBadge
             category="classStatus"
             status={mapPriorityForBadge(row.priority)}
             label={labels.priorityLabels[row.priority]}

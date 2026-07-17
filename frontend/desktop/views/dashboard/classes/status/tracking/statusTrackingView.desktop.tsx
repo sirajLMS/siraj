@@ -3,10 +3,15 @@
 import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Fab } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import { FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import type { DesktopLayoutProps } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import {
+  DesktopFilterButton,
+  DesktopMetricCardGrid,
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopPrimaryPageAction,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
 import { SuspensionAnalytics } from "@/frontend/desktop/views/dashboard/classes/status/tracking/components/suspensionAnalytics.desktop";
 import { StatusTrackingDataGridDesktop } from "@/frontend/desktop/views/dashboard/classes/status/tracking/statusTrackingDataGrid.desktop";
 
@@ -62,19 +67,19 @@ export function StatusTrackingDesktopView({
         subtitle={labels.pageSubtitle}
         actions={
           <>
-            <FilterButton id="status-filters-btn" startIcon={<FilterListOutlined />}>
+            <DesktopFilterButton id="status-filters-btn" startIcon={<FilterListOutlined />}>
               {labels.filters}
-            </FilterButton>
-            <PrimaryPageAction id="status-new-report-btn" startIcon={<AddOutlined />} onClick={onNewReport}>
+            </DesktopFilterButton>
+            <DesktopPrimaryPageAction id="status-new-report-btn" startIcon={<AddOutlined />} onClick={onNewReport}>
               {labels.newReport}
-            </PrimaryPageAction>
+            </DesktopPrimaryPageAction>
           </>
         }
       />
 
-      <MetricCardGrid metrics={metrics} size={{ md: 6, lg: "grow" }} />
+      <DesktopMetricCardGrid metrics={metrics} size={{ md: 6, lg: "grow" }} />
 
-      <SectionPanel
+      <DesktopSectionPanel
         title={labels.todaysClassSchedule}
         actions={<StyledTotalSessionsBadge>{labels.totalSessions(totalSessions)}</StyledTotalSessionsBadge>}
       >
@@ -106,7 +111,7 @@ export function StatusTrackingDesktopView({
           onReschedule={onReschedule}
           onVerify={onVerify}
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
 
       <SuspensionAnalytics labels={analyticsLabels} suspendedCount={suspendedCount} onOpenAuditLogs={onOpenAuditLogs} />
 

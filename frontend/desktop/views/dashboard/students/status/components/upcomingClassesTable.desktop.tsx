@@ -1,16 +1,16 @@
 import { VideocamOffOutlined } from "@mui/icons-material";
 import { Box, Paper, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { PersonProfileLink } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type {
   UpcomingClassDisplay,
   UpcomingClassesTableProps,
 } from "@/frontend/common/views/dashboard/students/status/types";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopPersonProfileLink } from "@/frontend/desktop/components/ui/display";
+import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale, useAppTranslation } from "@/shared/locale";
@@ -116,7 +116,7 @@ function InstructorCell({ row, minutesLabel }: Readonly<{ row: UpcomingClassDisp
   return (
     <Box sx={{ py: 1.5 }}>
       {instructorHref ? (
-        <PersonProfileLink
+        <DesktopPersonProfileLink
           href={instructorHref}
           name={row.instructor}
           showAvatar={false}
@@ -191,7 +191,7 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
       headerAlign: "center",
       renderCell: params =>
         isJoinableClassInstance(params.row.executionState, params.row.outcome, { isFrozen: params.row.isFrozen }) ? (
-          <MeetingJoinAction
+          <DesktopMeetingJoinAction
             variant="icon"
             joinUrl={params.row.meetingJoinUrl}
             meeting={params.row.effectiveMeeting}
@@ -214,7 +214,7 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
       flex: 1,
       renderCell: params => (
         <Box sx={{ py: 1.5 }}>
-          <StatusBadge
+          <DesktopStatusBadge
             category="classInstance"
             status={params.row.executionState}
             label={params.row.isFrozen ? t.table.frozen.toUpperCase() : params.row.executionState}
@@ -236,7 +236,7 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
       })}
     >
       <DesktopHeader studentId={studentId} pendingCount={classes.filter(c => c.isFrozen).length} />
-      <AppDataGrid
+      <DesktopAppDataGrid
         rows={classes}
         columns={columns}
         rowHeight={72}

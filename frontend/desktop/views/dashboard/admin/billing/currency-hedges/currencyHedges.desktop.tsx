@@ -8,7 +8,7 @@ import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import type {
   CurrencyHedgesViewModel,
   HedgeRow,
-} from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/currencyHedgesView";
+} from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/CurrencyHedgesView";
 import {
   DesktopAppDataGrid,
   DesktopPageContainer,

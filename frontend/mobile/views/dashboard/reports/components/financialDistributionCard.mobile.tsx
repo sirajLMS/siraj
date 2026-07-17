@@ -3,8 +3,8 @@
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { CurrencyDistributionSlice } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 
 interface FinancialDistributionCardMobileProps {
   readonly currencyDistribution: readonly CurrencyDistributionSlice[];
@@ -53,7 +53,7 @@ export function FinancialDistributionCardMobile({
   const hasDistribution = currencyDistribution.length > 0;
 
   return (
-    <BaseCard sx={{ p: 2 }}>
+    <MobileBaseCard sx={{ p: 2 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2, mb: 2 }}>
         <Box>
           <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
@@ -103,6 +103,6 @@ export function FinancialDistributionCardMobile({
           </Typography>
         )}
       </Box>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }

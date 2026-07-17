@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { ResourcesView } from "@/frontend/common/views/dashboard/resources/resourcesView";
+import { ResourcesView } from "@/frontend/common/views/dashboard/resources/ResourcesView";
 import type {
   ResourceFilterType,
   ResourceSortBy,
@@ -95,6 +95,8 @@ const baseArgs = {
   isUploading: false,
   isDeleting: false,
   canManage: true,
+  documentName: "",
+  selectedFileName: "",
   onSearchChange: (query: string) => {
     logger.info("onSearchChange:", query);
   },
@@ -103,6 +105,15 @@ const baseArgs = {
   },
   onSortByChange: (sort: ResourceSortBy) => {
     logger.info("onSortByChange:", sort);
+  },
+  onDocumentNameChange: (name: string) => {
+    logger.info("onDocumentNameChange:", name);
+  },
+  onFormSubmit: () => {
+    logger.info("onFormSubmit");
+  },
+  onFileSelect: (file: File) => {
+    logger.info("onFileSelect:", file);
   },
   onUpload: (data: { documentName: string; fileName: string }, _file: File) => {
     logger.info("onUpload:", data);

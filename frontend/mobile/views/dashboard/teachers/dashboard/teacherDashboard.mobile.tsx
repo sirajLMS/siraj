@@ -19,6 +19,7 @@ import {
   MobilePrimaryPageAction,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
+import { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter";
 import { ActivationPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/activationPolicyPanel.mobile";
 import { MissedClassAlertBannerMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.mobile";
 import { StudentProgressFeedMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/studentProgressFeed.mobile";
@@ -109,7 +110,7 @@ function MobileScheduleSection({
   return (
     <>
       <Box sx={teacherDashboardContentPaddingSx}>
-        <DateNavigator
+        <DateNavigatorMobile
           dateValue={dateValue}
           todayLabel={labels.dateFilter.today}
           previousDayLabel={labels.dateFilter.previousDay}

@@ -2,19 +2,36 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
   studentMonthlyReportQueryDocument,
   teacherMonthlyReportQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useSupervisorMonthlyReportsStore } from "@/frontend/common/stores/supervisorMonthlyReportsStore";
-import { MonthlyReportsView } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/monthlyReportsView";
 import type {
   MonthlyReportMetric,
   StudentMonthlyReportData,
   TeacherMonthlyReportData,
 } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
+import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/useMonthlyReportsViewModel";
+import {
+  type UseMonthlyReportsViewModelProps,
+  useMonthlyReportsViewModel,
+} from "@/frontend/common/views/dashboard/supervisor/monthly-reports/useMonthlyReportsViewModel";
 import type { SupervisorMonthlyReportsLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
+
+const lazyViews = createLazyView<MonthlyReportsViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/supervisor/monthly-reports/monthlyReports.mobile").then(m => ({
+      default: m.MonthlyReportsMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/supervisor/monthly-reports/monthlyReports.desktop").then(m => ({
+      default: m.MonthlyReportsDesktopView,
+    }))
+);
 
 function useLabels(t: SupervisorMonthlyReportsLabels) {
   return useMemo(
@@ -158,24 +175,31 @@ export function MonthlyReportsContainer() {
     // This handler exists for the manual Generate button click in the UI.
   };
 
-  return (
-    <MonthlyReportsView
-      reportType={reportType}
-      year={year}
-      month={month}
-      teacherId={teacherId}
-      studentId={studentId}
-      teacherReport={teacherReport}
-      studentReport={studentReport}
-      metrics={metrics}
-      loading={loading}
-      labels={labels}
-      onReportTypeChange={setReportType}
-      onYearChange={setYear}
-      onMonthChange={setMonth}
-      onTeacherIdChange={setTeacherId}
-      onStudentIdChange={setStudentId}
-      onGenerate={handleGenerate}
-    />
-  );
+  const props: UseMonthlyReportsViewModelProps = {
+    reportType,
+    year,
+    month,
+    teacherId,
+    studentId,
+    teacherReport,
+    studentReport,
+    metrics,
+    loading,
+    labels,
+    onReportTypeChange: setReportType,
+    onYearChange: setYear,
+    onMonthChange: setMonth,
+    onTeacherIdChange: setTeacherId,
+    onStudentIdChange: setStudentId,
+    onGenerate: handleGenerate,
+  };
+
+  const viewModel = useMonthlyReportsViewModel(props);
+
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
+
+export type {
+  MonthlyReportsViewModel,
+  UseMonthlyReportsViewModelProps,
+} from "@/frontend/common/views/dashboard/supervisor/monthly-reports/useMonthlyReportsViewModel";

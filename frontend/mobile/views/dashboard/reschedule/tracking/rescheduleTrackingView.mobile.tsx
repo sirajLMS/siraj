@@ -1,13 +1,13 @@
 "use client";
 
 import { Box, MenuItem, Select, type SelectChangeEvent } from "@mui/material";
-import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getTrackingStatusLabel } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.helpers";
 import type { RescheduleTrackingViewProps } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { STATUS_FILTER_OPTIONS } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card/MobileMetricCardGrid";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { RescheduleTrackingCardListMobile } from "@/frontend/mobile/views/dashboard/reschedule/tracking/components/rescheduleTrackingCardList.mobile";
 
 export function RescheduleTrackingViewMobile({
@@ -71,9 +71,9 @@ export function RescheduleTrackingViewMobile({
     <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} edgeToEdge={false} />
 
-      <MetricCardGrid metrics={metrics} size={{ md: 4, lg: "grow" }} />
+      <MobileMetricCardGrid metrics={metrics} />
 
-      <SectionPanel
+      <MobileSectionPanel
         title={labels.sectionTitle}
         actions={<Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>{filterSelect}</Box>}
       >
@@ -88,7 +88,7 @@ export function RescheduleTrackingViewMobile({
             onPageChange={onPageChange}
           />
         </Box>
-      </SectionPanel>
+      </MobileSectionPanel>
     </MobilePageContainer>
   );
 }

@@ -2,10 +2,11 @@
 
 import { Box, Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { DateNavigator, SectionPanel } from "@/frontend/common/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DateNavigatorDesktop } from "@/frontend/desktop/components/ui/filter";
 import { TeacherScheduleDataGridDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherScheduleDataGrid.desktop";
 
 const StyledDesktopPanel = styled(Paper)(({ theme }) => ({
@@ -75,9 +76,9 @@ export function TeacherDailyScheduleSectionDesktop({
 }: Readonly<TeacherDailyScheduleSectionDesktopProps>) {
   return (
     <StyledDesktopPanel elevation={0}>
-      <SectionPanel title={title}>
+      <DesktopSectionPanel title={title}>
         <StyledFilterContainer>
-          <DateNavigator
+          <DateNavigatorDesktop
             dateValue={dateValue}
             todayLabel={todayLabel}
             previousDayLabel={previousDayLabel}
@@ -103,7 +104,7 @@ export function TeacherDailyScheduleSectionDesktop({
           totalCount={totalCount}
           onPageChange={onPageChange}
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
     </StyledDesktopPanel>
   );
 }

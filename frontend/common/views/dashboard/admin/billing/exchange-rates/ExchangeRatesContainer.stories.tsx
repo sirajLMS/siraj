@@ -13,7 +13,7 @@ import {
   refreshExchangeRatesMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { ExchangeRatesContainer } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ExchangeRatesContainer";
+import { ExchangeRatesView } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ExchangeRatesView";
 
 const MOCK_RATES = [
   {
@@ -152,9 +152,9 @@ const buildMocks = (rates: typeof MOCK_RATES, syncRun: SyncRunMock) => [
   },
 ];
 
-const meta: Meta<typeof ExchangeRatesContainer> = {
-  title: "Views/dashboard/billing/ExchangeRatesContainer",
-  component: ExchangeRatesContainer,
+const meta: Meta<typeof ExchangeRatesView> = {
+  title: "Views/dashboard/billing/ExchangeRatesView",
+  component: ExchangeRatesView,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
@@ -172,7 +172,7 @@ const meta: Meta<typeof ExchangeRatesContainer> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof ExchangeRatesContainer>;
+type Story = StoryObj<typeof ExchangeRatesView>;
 
 export const Loaded: Story = {
   args: {},

@@ -1,70 +1,25 @@
 "use client";
 
-import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
-import { PermissionManagementView } from "@/frontend/common/views/dashboard/permissions/PermissionManagementView";
-import { usePermissionManagementData } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementData";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import {
+  type PermissionManagementViewModel,
+  type UsePermissionManagementViewModelProps,
+  usePermissionManagementViewModel,
+} from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
+
+const lazyViews = createLazyView<PermissionManagementViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/permissions/permissionManagementView.mobile").then(m => ({
+      default: m.PermissionManagementMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/permissions/permissionManagementView.desktop").then(m => ({
+      default: m.PermissionManagementDesktopView,
+    }))
+);
 
 export function PermissionManagementContainer() {
-  const store = usePermissionManagementStore();
-  const {
-    isLoading,
-    users,
-    handleCreateGroup,
-    handleUpdateGroup,
-    handleDeleteGroup,
-    handleAssignGroup,
-    handleRevokeGroup,
-    handleBulkAssign,
-    handleBulkRevoke,
-    handleUpdateOverrides,
-  } = usePermissionManagementData();
-
-  return (
-    <PermissionManagementView
-      permissions={store.permissions}
-      groups={store.groups}
-      overrides={store.overrides}
-      users={users}
-      selectedGroupId={store.selectedGroupId}
-      selectedGroupIds={store.selectedGroupIds}
-      selectedUserIds={store.selectedUserIds}
-      selectedPermissionIds={store.selectedPermissionIds}
-      isLoading={isLoading}
-      error={store.error}
-      isCreateDialogOpen={store.isCreateDialogOpen}
-      isEditDialogOpen={store.isEditDialogOpen}
-      isDeleteDialogOpen={store.isDeleteDialogOpen}
-      isAssignDialogOpen={store.isAssignDialogOpen}
-      isBulkRemoveUsersOpen={store.isBulkRemoveUsersOpen}
-      isManageOverridesOpen={store.isManageOverridesOpen}
-      setSelectedGroupId={store.setSelectedGroupId}
-      setSelectedGroupIds={store.setSelectedGroupIds}
-      setSelectedUserIds={store.setSelectedUserIds}
-      setSelectedPermissionIds={store.setSelectedPermissionIds}
-      openCreateDialog={store.openCreateDialog}
-      closeCreateDialog={store.closeCreateDialog}
-      openEditDialog={store.openEditDialog}
-      closeEditDialog={store.closeEditDialog}
-      openDeleteDialog={store.openDeleteDialog}
-      closeDeleteDialog={store.closeDeleteDialog}
-      openAssignDialog={store.openAssignDialog}
-      closeAssignDialog={store.closeAssignDialog}
-      openBulkRemoveUsers={store.openBulkRemoveUsers}
-      closeBulkRemoveUsers={store.closeBulkRemoveUsers}
-      openManageOverrides={store.openManageOverrides}
-      closeManageOverrides={store.closeManageOverrides}
-      onCreateGroup={handleCreateGroup}
-      onUpdateGroup={handleUpdateGroup}
-      onDeleteGroup={handleDeleteGroup}
-      onAssignGroup={handleAssignGroup}
-      onRevokeGroup={handleRevokeGroup}
-      onBulkAssign={handleBulkAssign}
-      onBulkRevoke={handleBulkRevoke}
-      onUpdateOverrides={handleUpdateOverrides}
-      activeTab={store.activeTab}
-      selectedUserIdForOverrides={store.selectedUserIdForOverrides}
-      setActiveTab={store.setActiveTab}
-      setSelectedUserIdForOverrides={store.setSelectedUserIdForOverrides}
-    />
-  );
+  const viewModel = usePermissionManagementViewModel({} as UsePermissionManagementViewModelProps);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

@@ -3,11 +3,11 @@
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { OnlineMeetingInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
+import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { useAppLocale } from "@/shared/locale";
 
 export interface OnlineMeetingCardDesktopProps {
@@ -129,7 +129,7 @@ export function OnlineMeetingCardDesktop({
   const meeting = toEffectiveMeeting(meetingInfo);
 
   return (
-    <BaseCard>
+    <DesktopBaseCard>
       <StyledSectionTitle variant="titleLg" sx={{ mb: 2 }}>
         {labels.title}
       </StyledSectionTitle>
@@ -166,7 +166,7 @@ export function OnlineMeetingCardDesktop({
           </Box>
         </StyledMeetingInfoContent>
         {showJoin ? (
-          <MeetingJoinAction
+          <DesktopMeetingJoinAction
             joinUrl={meetingInfo?.joinUrl}
             meeting={meeting}
             label={labels.joinMeeting}
@@ -175,6 +175,6 @@ export function OnlineMeetingCardDesktop({
           />
         ) : null}
       </StyledMeetingInfoRow>
-    </BaseCard>
+    </DesktopBaseCard>
   );
 }

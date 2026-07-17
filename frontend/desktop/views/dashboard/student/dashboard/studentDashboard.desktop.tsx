@@ -9,7 +9,8 @@ import type {
 } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
-import { DesktopPageContainer, DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/page";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page";
 import { NextClassJoinCard } from "@/frontend/desktop/views/dashboard/student/dashboard/components/nextClassJoinCard.desktop";
 
 interface DesktopUpcomingItemProps {

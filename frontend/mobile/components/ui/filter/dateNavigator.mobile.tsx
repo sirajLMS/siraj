@@ -40,6 +40,7 @@ export interface DateNavigatorMobileProps {
   readonly todayLabel: string;
   readonly previousDayLabel: string;
   readonly nextDayLabel: string;
+  readonly dateLabel?: string;
   readonly onDateChange: (date: string) => void;
 }
 
@@ -48,6 +49,7 @@ export function DateNavigatorMobile({
   todayLabel,
   previousDayLabel,
   nextDayLabel,
+  dateLabel,
   onDateChange,
 }: Readonly<DateNavigatorMobileProps>) {
   const selectedDate = parseScheduleFilterDate(dateValue);
@@ -66,8 +68,9 @@ export function DateNavigatorMobile({
       </Tooltip>
 
       <MobileAppDatePicker
+        label={dateLabel}
         value={selectedDate}
-        onChangeAction={(date: Date | null) => {
+        onChange={(date: Date | null) => {
           onDateChange(date && isValid(date) ? format(date, DATE_FILTER_FORMAT) : "");
         }}
         slotProps={{

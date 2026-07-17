@@ -108,8 +108,10 @@ const MOCK_ROWS: TrackingRow[] = [
   },
 ];
 
-export function MockRescheduleTrackingContainer() {
-  const labels = {
+const MOCK_VIEW_MODEL = {
+  metrics: MOCK_METRICS,
+  rows: MOCK_ROWS,
+  labels: {
     pageTitle: "Reschedule Tracking",
     sectionTitle: "All Rescheduled and Leave Classes",
     exportData: "Export Data",
@@ -133,30 +135,27 @@ export function MockRescheduleTrackingContainer() {
     statusRescheduled: "Rescheduled",
     statusApproved: "Approved",
     statusCancelled: "Cancelled",
-  };
+  },
+  loading: false,
+  totalCount: 20,
+  page: 0,
+  pageSize: 5,
+  statusFilter: null,
+  onApprove: () => {},
+  onReject: () => {},
+  onView: () => {},
+  onExport: () => {},
+  onFilterChange: () => {},
+  onPageChange: () => {},
+};
 
-  return (
-    <RescheduleTrackingView
-      metrics={MOCK_METRICS}
-      rows={MOCK_ROWS}
-      labels={labels}
-      onApprove={() => {}}
-      onReject={() => {}}
-      onView={() => {}}
-      onExport={() => {}}
-      onFilterChange={() => {}}
-      statusFilter={null}
-      page={0}
-      pageSize={5}
-      totalCount={20}
-      onPageChange={() => {}}
-    />
-  );
+export function MockRescheduleTrackingView() {
+  return <RescheduleTrackingView {...MOCK_VIEW_MODEL} />;
 }
 
-const meta: Meta<typeof MockRescheduleTrackingContainer> = {
-  title: "Views/dashboard/reschedule/tracking/RescheduleTrackingContainer",
-  component: MockRescheduleTrackingContainer,
+const meta: Meta<typeof MockRescheduleTrackingView> = {
+  title: "Views/dashboard/reschedule/tracking/RescheduleTrackingView",
+  component: MockRescheduleTrackingView,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
@@ -164,7 +163,7 @@ const meta: Meta<typeof MockRescheduleTrackingContainer> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof MockRescheduleTrackingContainer>;
+type Story = StoryObj<typeof MockRescheduleTrackingView>;
 
 export const Default: Story = {
   args: {},

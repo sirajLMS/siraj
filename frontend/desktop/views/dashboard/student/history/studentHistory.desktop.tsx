@@ -24,7 +24,8 @@ import {
 import type { Theme } from "@mui/material/styles";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
-import { DesktopPageContainer, DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/page";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page";
 
 function statusColor(status: string | null, theme: Theme): string {
   if (!status) return theme.palette.onSurfaceVariant;

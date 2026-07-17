@@ -1,4 +1,3 @@
-// cspell:disable
 "use client";
 
 import { useQuery } from "@apollo/client/react";
@@ -7,18 +6,24 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { addDays, format } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { logger } from "@/frontend/common/utils/logger";
-import { TeacherAvailabilityView } from "@/frontend/common/views/dashboard/teachers/availability/TeacherAvailabilityView";
 import type {
   AvailabilityEntry,
   AvailabilitySearchFormData,
   TeacherAvailabilityInsights,
   WeeklyAvailability,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import {
+  type TeacherAvailabilityViewModel,
+  type UseTeacherAvailabilityViewModelProps,
+  useTeacherAvailabilityViewModel,
+} from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
 import { useAppTranslation } from "@/shared/locale";
 
 function buildGraphQLInput(formData: AvailabilitySearchFormData) {
@@ -128,6 +133,17 @@ function computeInsights(data: AvailabilitySearchData | null | undefined): Teach
   };
 }
 
+const lazyViews = createLazyView<TeacherAvailabilityViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/teachers/availability/teacherAvailabilityView.mobile").then(m => ({
+      default: m.TeacherAvailabilityMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/teachers/availability/teacherAvailabilityView.desktop").then(m => ({
+      default: m.TeacherAvailabilityDesktopView,
+    }))
+);
+
 export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId: string }>) {
   const t = useAppTranslation().dashboardTranslations.teacherAvailability;
   const tc = useAppTranslation().commonTranslations;
@@ -207,17 +223,23 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
     );
   }
 
+  const props: UseTeacherAvailabilityViewModelProps = {
+    availability,
+    insights,
+    defaultFilters,
+    loading,
+    onExportPdf: handleExportPdf,
+    onSearch: handleSearch,
+    onBlockClick: handleBlockClick,
+  };
+
+  const viewModel = useTeacherAvailabilityViewModel(props);
+
   return (
     <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
-      <TeacherAvailabilityView
-        availability={availability}
-        insights={insights}
-        defaultFilters={defaultFilters}
-        loading={loading}
-        onExportPdf={handleExportPdf}
-        onSearch={handleSearch}
-        onBlockClick={handleBlockClick}
-      />
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
     </RequirePermission>
   );
 }
+
+export type { TeacherAvailabilityViewModel, UseTeacherAvailabilityViewModelProps };

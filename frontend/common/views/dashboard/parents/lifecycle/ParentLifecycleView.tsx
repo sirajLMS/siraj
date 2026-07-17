@@ -2,9 +2,15 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
+import {
+  type ParentLifecycleViewModel,
+  type UseParentLifecycleViewModelProps,
+  useParentLifecycleViewModel,
+} from "@/frontend/common/views/dashboard/parents/lifecycle/useParentLifecycleViewModel";
 
-const lazyViews = createLazyView<ParentLifecycleViewProps>(
+export type { ParentLifecycleViewModel };
+
+const lazyViews = createLazyView<ParentLifecycleViewModel>(
   () =>
     import("@/frontend/mobile/views/dashboard/parents/lifecycle/parentLifecycle.mobile").then(m => ({
       default: m.ParentLifecycleMobileView,
@@ -15,6 +21,9 @@ const lazyViews = createLazyView<ParentLifecycleViewProps>(
     }))
 );
 
-export function ParentLifecycleView(props: Readonly<ParentLifecycleViewProps>) {
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
+export function ParentLifecycleView(props: Readonly<UseParentLifecycleViewModelProps>) {
+  const viewModel = useParentLifecycleViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
+
+export type { UseParentLifecycleViewModelProps };

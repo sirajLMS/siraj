@@ -2,8 +2,13 @@
 
 import { FilterListOutlined } from "@mui/icons-material";
 import { Box, Grid } from "@mui/material";
-import { FilterButton, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import type { ParentDashboardViewModel } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
+import {
+  DesktopFilterButton,
+  DesktopPageContainer,
+  DesktopPrimaryPageAction,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
 import { AcademicProgressSummaryDesktop } from "@/frontend/desktop/views/dashboard/parent/dashboard/components/academicProgressSummary.desktop";
 import { ParentDashboardMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/parent/dashboard/components/parentDashboardMetrics.desktop";
 import { ParentScheduleDataGridDesktop } from "@/frontend/desktop/views/dashboard/parent/dashboard/components/parentScheduleDataGrid.desktop";
@@ -25,19 +30,19 @@ export function ParentDashboardDesktopView({
   onSupport,
 }: Readonly<ParentDashboardViewModel>) {
   return (
-    <PageContainer>
+    <DesktopPageContainer>
       <Box sx={{ mb: 4 }}>
         <ParentDashboardMetricsRowDesktop metrics={metrics} labels={labels.metrics} />
       </Box>
 
-      <SectionPanel
+      <DesktopSectionPanel
         title={labels.schedule.title}
         actions={
           <>
-            <FilterButton startIcon={<FilterListOutlined />} onClick={onFilter}>
+            <DesktopFilterButton startIcon={<FilterListOutlined />} onClick={onFilter}>
               {labels.schedule.filter}
-            </FilterButton>
-            <PrimaryPageAction onClick={onViewFullWeek}>{labels.schedule.viewFullWeek}</PrimaryPageAction>
+            </DesktopFilterButton>
+            <DesktopPrimaryPageAction onClick={onViewFullWeek}>{labels.schedule.viewFullWeek}</DesktopPrimaryPageAction>
           </>
         }
         sx={{ mb: 4 }}
@@ -48,7 +53,7 @@ export function ParentDashboardDesktopView({
           onHistory={onHistory}
           pagination={schedulePagination}
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
 
       <Grid container spacing={3}>
         {workshopPromo && (
@@ -66,6 +71,6 @@ export function ParentDashboardDesktopView({
       </Grid>
 
       <ParentSupportFabDesktop label={labels.support.liveSupport} onClick={onSupport} />
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }
