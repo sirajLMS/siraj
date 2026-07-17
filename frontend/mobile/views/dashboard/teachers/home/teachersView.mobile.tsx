@@ -2,13 +2,17 @@
 
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import type {
   TeacherDirectoryMetrics,
   TeacherDirectoryRow,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileContentStack,
+  MobilePageContainer,
+  MobilePageHeader,
+  MobilePrimaryPageAction,
+} from "@/frontend/mobile/components/ui";
 import { TeacherCardList } from "@/frontend/mobile/views/dashboard/teachers/home/components/teacherCardList.mobile";
 import { TeacherMetricsRow } from "@/frontend/mobile/views/dashboard/teachers/home/components/teacherMetricsRow.mobile";
 import { Link } from "@/shared/i18n/routing";
@@ -54,10 +58,14 @@ export function TeachersMobileView({
           <>
             <RequirePermission permissions={[AppPermission.TeachersCreate]}>
               <Link href="/teachers/onboarding" style={{ textDecoration: "none" }}>
-                <PrimaryPageAction startIcon={<PersonAddOutlined />}>{t.actions.addTeacher}</PrimaryPageAction>
+                <MobilePrimaryPageAction startIcon={<PersonAddOutlined />}>
+                  {t.actions.addTeacher}
+                </MobilePrimaryPageAction>
               </Link>
             </RequirePermission>
-            <PrimaryPageAction startIcon={<EditCalendarOutlined />}>{t.actions.updateSchedules}</PrimaryPageAction>
+            <MobilePrimaryPageAction startIcon={<EditCalendarOutlined />}>
+              {t.actions.updateSchedules}
+            </MobilePrimaryPageAction>
           </>
         }
       />

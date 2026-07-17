@@ -4,11 +4,11 @@ import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, Paper, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import { ScheduleOverviewDataGrid } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
+import { DesktopSectionPanel, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 
 const StyledDesktopPanel = styled(Paper)(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 2,
@@ -43,7 +43,7 @@ function ScheduleOverviewTitle({
     <>
       <StyledSectionTitle variant="titleLg">{title}</StyledSectionTitle>
       {selectedMetricLabel ? (
-        <StatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
+        <DesktopStatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
       ) : null}
     </>
   );
@@ -80,7 +80,7 @@ export function ScheduleOverviewDesktopView({
 }: Readonly<ScheduleOverviewViewModel>) {
   return (
     <StyledDesktopPanel elevation={0}>
-      <SectionPanel
+      <DesktopSectionPanel
         title={<ScheduleOverviewTitle title={title} selectedMetricLabel={selectedMetricLabel} />}
         actions={
           <RequirePermission permissions={[AppPermission.DashboardSearch]}>
@@ -141,7 +141,7 @@ export function ScheduleOverviewDesktopView({
           emptyMessage={emptyMessage}
           loading={loading}
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
     </StyledDesktopPanel>
   );
 }

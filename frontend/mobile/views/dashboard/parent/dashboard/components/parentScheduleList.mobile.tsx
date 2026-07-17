@@ -1,10 +1,9 @@
 "use client";
 
-import { PaginationControls } from "@/frontend/common/components/ui";
 import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import type { SchedulePagination } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
-import { MobileCardList } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobilePaginationControls } from "@/frontend/mobile/components/ui";
 import { ParentScheduleCardMobile } from "@/frontend/mobile/views/dashboard/parent/dashboard/components/parentScheduleCard.mobile";
 
 interface ParentScheduleListMobileProps {
@@ -31,7 +30,7 @@ export function ParentScheduleListMobile({
         renderItem={row => <ParentScheduleCardMobile row={row} labels={labels} />}
       />
       {pagination && pagination.totalCount > 0 && pageCount > 1 ? (
-        <PaginationControls
+        <MobilePaginationControls
           page={pagination.page}
           pageCount={pageCount}
           rowCount={pagination.totalCount}

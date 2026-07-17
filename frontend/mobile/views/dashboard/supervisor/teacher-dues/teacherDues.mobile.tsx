@@ -2,8 +2,6 @@
 
 import { Box, Checkbox, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { TeacherDueRow } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
 import type { TeacherDuesViewModel } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/useTeacherDuesViewModel";
 import {
@@ -11,6 +9,9 @@ import {
   MobileContentStack,
   MobilePageContainer,
   MobilePageHeader,
+  MobilePrimaryPageAction,
+  MobileSectionPanel,
+  MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
 
 interface DueCardProps {
@@ -44,7 +45,7 @@ function DueCard({ row, labels, selected, markingPaid, onToggle, onMarkPaid }: R
             {labels.studentColumn}: {row.studentId}
           </Typography>
         </Box>
-        <StatusBadge category="invoice" status={row.status ?? "PENDING"} label={row.status ?? "PENDING"} />
+        <MobileStatusBadge category="invoice" status={row.status ?? "PENDING"} label={row.status ?? "PENDING"} />
       </Stack>
 
       <Stack sx={{ flexDirection: "row", justifyContent: "space-between", gap: 1 }}>
@@ -74,14 +75,14 @@ function DueCard({ row, labels, selected, markingPaid, onToggle, onMarkPaid }: R
         </Box>
       </Stack>
 
-      <PrimaryPageAction
+      <MobilePrimaryPageAction
         size="small"
         onClick={() => onMarkPaid([row.id])}
         disabled={markingPaid}
         sx={{ alignSelf: "flex-start" }}
       >
         {labels.markAsPaidButton}
-      </PrimaryPageAction>
+      </MobilePrimaryPageAction>
     </Box>
   );
 }
@@ -121,7 +122,7 @@ export function TeacherDuesMobileView({
           </Typography>
         ) : null}
 
-        <SectionPanel>
+        <MobileSectionPanel>
           <MobileCardList<TeacherDueRow>
             rows={rows}
             emptyMessage={labels.noPendingDues}
@@ -130,7 +131,7 @@ export function TeacherDuesMobileView({
             getKey={row => row.id}
             renderItem={renderItem}
           />
-        </SectionPanel>
+        </MobileSectionPanel>
       </MobileContentStack>
     </MobilePageContainer>
   );

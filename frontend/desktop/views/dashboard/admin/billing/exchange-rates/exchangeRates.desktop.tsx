@@ -2,7 +2,6 @@
 
 import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppDataGrid, SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { formatExchangeRateTimestamp } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 import type {
@@ -13,7 +12,13 @@ import type {
 import { ManualOverrideDialog } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
 import { ProviderSettingsSection } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import {
+  DesktopAppDataGrid,
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopSectionPanel,
+  DesktopStatusBadge,
+} from "@/frontend/desktop/components/ui";
 import { ExchangeRateHistorySectionDesktop } from "@/frontend/desktop/views/dashboard/admin/billing/exchange-rates/components/exchangeRateHistorySection.desktop";
 
 function SyncStatusBadgeDesktop({
@@ -33,7 +38,7 @@ function SyncStatusBadgeDesktop({
   };
 
   return (
-    <StatusBadge
+    <DesktopStatusBadge
       category="syncStatus"
       status={normalized}
       label={statusLabels[normalized] ?? labels.statusUnknown}
@@ -199,9 +204,9 @@ export function ExchangeRatesDesktopView({
           </Alert>
         ) : null}
 
-        <SectionPanel title={labels.syncStatus.title}>
+        <DesktopSectionPanel title={labels.syncStatus.title}>
           <DesktopSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
-        </SectionPanel>
+        </DesktopSectionPanel>
 
         <ProviderSettingsSection
           labels={labels.providerSettings}
@@ -209,7 +214,7 @@ export function ExchangeRatesDesktopView({
           actionsDisabled={billingActionsDisabled}
         />
 
-        <SectionPanel title={labels.rateTable.title}>
+        <DesktopSectionPanel title={labels.rateTable.title}>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
             <RequirePermission permissions={AppPermission.BillingOverrideExchangeRates}>
               <Button variant="outlined" onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
@@ -217,7 +222,7 @@ export function ExchangeRatesDesktopView({
               </Button>
             </RequirePermission>
           </Box>
-          <AppDataGrid
+          <DesktopAppDataGrid
             rows={rates}
             columns={ratesColumns}
             loading={ratesLoading}
@@ -225,11 +230,11 @@ export function ExchangeRatesDesktopView({
             autoHeight
             disableColumnMenu
           />
-        </SectionPanel>
+        </DesktopSectionPanel>
 
-        <SectionPanel title={labels.history.title}>
+        <DesktopSectionPanel title={labels.history.title}>
           <ExchangeRateHistorySectionDesktop labels={labels} availablePairs={availablePairs} />
-        </SectionPanel>
+        </DesktopSectionPanel>
       </RequirePermission>
 
       <ManualOverrideDialog

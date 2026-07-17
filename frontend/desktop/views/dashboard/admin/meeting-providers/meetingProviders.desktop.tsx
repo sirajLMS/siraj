@@ -3,20 +3,21 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import {
-  AppDataGrid,
-  BaseDeleteDialog,
-  FormErrorSnackbar,
-  FormSuccessSnackbar,
-  PrimaryPageAction,
-} from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { CreateMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/CreateMeetingProviderDialog";
 import { EditMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/EditMeetingProviderDialog";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import {
+  DesktopAppDataGrid,
+  DesktopBaseDeleteDialog,
+  DesktopFormErrorSnackbar,
+  DesktopFormSuccessSnackbar,
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopPrimaryPageAction,
+} from "@/frontend/desktop/components/ui";
 
 function MeetingProvidersDesktopEmptyState({ title, body }: Readonly<{ title: string; body: string }>) {
   return (
@@ -55,9 +56,9 @@ export function MeetingProvidersDesktopView({
           title={t.pageTitle}
           subtitle={t.pageSubtitle}
           actions={
-            <PrimaryPageAction onClick={onCreateOpen} startIcon={<AddOutlined />}>
+            <DesktopPrimaryPageAction onClick={onCreateOpen} startIcon={<AddOutlined />}>
               {t.addProvider}
-            </PrimaryPageAction>
+            </DesktopPrimaryPageAction>
           }
         />
 
@@ -66,7 +67,7 @@ export function MeetingProvidersDesktopView({
         ) : null}
 
         <Box sx={{ height: 560 }}>
-          <AppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
+          <DesktopAppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
         </Box>
 
         <CreateMeetingProviderDialog
@@ -82,7 +83,7 @@ export function MeetingProvidersDesktopView({
           onSaved={onEditSaved}
           onError={notifications.showError}
         />
-        <BaseDeleteDialog
+        <DesktopBaseDeleteDialog
           open={Boolean(deleteProvider)}
           onClose={onDeleteClose}
           onConfirm={onDeleteConfirm}
@@ -96,12 +97,12 @@ export function MeetingProvidersDesktopView({
           confirmLabel={t.delete}
         />
 
-        <FormErrorSnackbar
+        <DesktopFormErrorSnackbar
           open={notifications.errorOpen}
           message={notifications.errorMsg}
           onClose={notifications.closeError}
         />
-        <FormSuccessSnackbar
+        <DesktopFormSuccessSnackbar
           open={notifications.successOpen}
           message={notifications.successMsg}
           onClose={notifications.closeSuccess}

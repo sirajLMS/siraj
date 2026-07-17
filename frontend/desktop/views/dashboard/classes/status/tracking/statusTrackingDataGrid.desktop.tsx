@@ -5,7 +5,7 @@ import { Box, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { PersonProfileLink, PersonProfileLinkCell } from "@/frontend/common/components/ui";
+import { DesktopPersonProfileLink, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
@@ -68,7 +68,7 @@ export function StatusTrackingDataGridDesktop({
           const teacherProfileHref = profileHrefForTeacher({ teacherId: row.teacherId });
           return (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, justifyContent: "center", height: "100%" }}>
-              <PersonProfileLinkCell
+              <DesktopPersonProfileLinkCell
                 href={studentProfileHref}
                 name={row.studentName ?? ""}
                 avatarUrl={row.studentAvatarUrl}
@@ -76,7 +76,7 @@ export function StatusTrackingDataGridDesktop({
                 typographyVariant="bodyMd"
                 fontWeight={700}
               />
-              <PersonProfileLink
+              <DesktopPersonProfileLink
                 href={teacherProfileHref}
                 name={row.teacherName ?? ""}
                 avatarUrl={row.teacherAvatarUrl}
@@ -95,7 +95,7 @@ export function StatusTrackingDataGridDesktop({
         flex: 1,
         minWidth: 140,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             href={profileHrefForTeacher({ teacherId: row.teacherId })}
             name={row.teacherName ?? ""}
             avatarUrl={row.teacherAvatarUrl}

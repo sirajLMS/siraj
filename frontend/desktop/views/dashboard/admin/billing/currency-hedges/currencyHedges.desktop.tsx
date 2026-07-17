@@ -4,13 +4,17 @@ import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import type {
   CurrencyHedgesViewModel,
   HedgeRow,
 } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/currencyHedgesView";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import {
+  DesktopAppDataGrid,
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopPrimaryPageAction,
+} from "@/frontend/desktop/components/ui";
 import { useAppLocale } from "@/shared/locale";
 
 function formatTimestamp(value: string | null | undefined, locale: string): string {
@@ -98,10 +102,10 @@ export function CurrencyHedgesDesktopView({
       <DesktopPageHeader
         title={pageTitle}
         subtitle={pageSubtitle}
-        actions={<PrimaryPageAction onClick={onAdd}>{addHedgeLabel}</PrimaryPageAction>}
+        actions={<DesktopPrimaryPageAction onClick={onAdd}>{addHedgeLabel}</DesktopPrimaryPageAction>}
       />
       <Box sx={{ height: 560 }}>
-        <AppDataGrid
+        <DesktopAppDataGrid
           rows={rows}
           columns={columns}
           loading={loading}

@@ -2,10 +2,16 @@
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import { FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/useMonthlyReportsViewModel";
-import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileContentStack,
+  MobileFilterButton,
+  MobilePageContainer,
+  MobilePageHeader,
+  MobilePrimaryPageAction,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
+import { MobileMetricCard } from "@/frontend/mobile/components/ui/card";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
@@ -31,10 +37,10 @@ export function MonthlyReportsMobileView({
       <MobileContentStack>
         <MobilePageHeader title={labels.pageTitle} />
 
-        <SectionPanel title={labels.reportTypeToggle}>
+        <MobileSectionPanel title={labels.reportTypeToggle}>
           <Stack sx={{ gap: 1.5 }}>
             <Stack sx={{ flexDirection: "row", gap: 1 }}>
-              <FilterButton
+              <MobileFilterButton
                 onClick={() => onReportTypeChange("teacher")}
                 sx={theme =>
                   reportType === "teacher"
@@ -43,8 +49,8 @@ export function MonthlyReportsMobileView({
                 }
               >
                 {labels.teacherReport}
-              </FilterButton>
-              <FilterButton
+              </MobileFilterButton>
+              <MobileFilterButton
                 onClick={() => onReportTypeChange("student")}
                 sx={theme =>
                   reportType === "student"
@@ -53,7 +59,7 @@ export function MonthlyReportsMobileView({
                 }
               >
                 {labels.studentReport}
-              </FilterButton>
+              </MobileFilterButton>
             </Stack>
 
             <Grid container spacing={1}>
@@ -105,11 +111,11 @@ export function MonthlyReportsMobileView({
               />
             )}
 
-            <PrimaryPageAction onClick={onGenerate} startIcon={<CalendarMonthOutlined />}>
+            <MobilePrimaryPageAction onClick={onGenerate} startIcon={<CalendarMonthOutlined />}>
               {labels.generateReport}
-            </PrimaryPageAction>
+            </MobilePrimaryPageAction>
           </Stack>
-        </SectionPanel>
+        </MobileSectionPanel>
 
         {loading ? (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -127,7 +133,12 @@ export function MonthlyReportsMobileView({
           <Grid container spacing={2}>
             {metrics.map(metric => (
               <Grid key={metric.label} size={6}>
-                <MetricCard icon={CalendarMonthOutlined} label={metric.label} value={metric.value} variant="compact" />
+                <MobileMetricCard
+                  icon={CalendarMonthOutlined}
+                  label={metric.label}
+                  value={metric.value}
+                  variant="compact"
+                />
               </Grid>
             ))}
           </Grid>

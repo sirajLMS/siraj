@@ -3,11 +3,15 @@
 import { CalendarMonthOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { SectionPanel } from "@/frontend/common/components/ui";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { UpcomingLessonRow } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
-import { MobileCardList, MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileContentStack,
+  MobileMetricCard,
+  MobilePageContainer,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
 import { NextClassJoinCard } from "@/frontend/mobile/views/dashboard/student/dashboard/components/nextClassJoinCard.mobile";
 
 interface MobileUpcomingItemProps {
@@ -148,7 +152,7 @@ export function StudentDashboardMobileView({
 
         <NextClassJoinCard lesson={nextLesson} labels={labels} onJoin={onJoinLesson} />
 
-        <SectionPanel title={labels.upcomingToday}>
+        <MobileSectionPanel title={labels.upcomingToday}>
           <MobileCardList<UpcomingLessonRow>
             rows={upcomingLessons.filter(l => {
               const today = new Date();
@@ -163,12 +167,12 @@ export function StudentDashboardMobileView({
             getKey={row => row.id}
             renderItem={row => <MobileUpcomingItem lesson={row} joinLabel={labels.joinNow} onJoin={onJoinLesson} />}
           />
-        </SectionPanel>
+        </MobileSectionPanel>
 
-        <SectionPanel title={labels.creditBalance}>
+        <MobileSectionPanel title={labels.creditBalance}>
           <Stack direction="row" spacing={2} sx={{ alignItems: "stretch" }}>
             <Box sx={{ flex: 1 }}>
-              <MetricCard
+              <MobileMetricCard
                 icon={PaymentsOutlined}
                 label={labels.classesRemaining}
                 value={creditBalance.classesRemaining}
@@ -176,7 +180,7 @@ export function StudentDashboardMobileView({
               />
             </Box>
             <Box sx={{ flex: 1 }}>
-              <MetricCard
+              <MobileMetricCard
                 icon={SchoolOutlined}
                 label={labels.classesTotal}
                 value={creditBalance.classesTotal}
@@ -187,16 +191,16 @@ export function StudentDashboardMobileView({
           <Button variant="text" sx={theme => ({ mt: 1, color: theme.palette.primary.main })} onClick={onViewCredits}>
             {labels.viewCredits}
           </Button>
-        </SectionPanel>
+        </MobileSectionPanel>
 
-        <SectionPanel title={labels.recentLessonReports}>
+        <MobileSectionPanel title={labels.recentLessonReports}>
           <MobileCardList<StudentDashboardViewModel["recentLessonReports"][number]>
             rows={recentLessonReports}
             emptyMessage={labels.noLessonReports}
             getKey={row => row.id}
             renderItem={row => <MobileReportItem report={row} labels={labels} onAddReflection={onAddReflection} />}
           />
-        </SectionPanel>
+        </MobileSectionPanel>
 
         <Button
           variant="outlined"

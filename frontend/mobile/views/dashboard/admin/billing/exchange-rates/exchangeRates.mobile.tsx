@@ -2,7 +2,6 @@
 
 import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { formatExchangeRateTimestamp } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 import type {
@@ -13,7 +12,13 @@ import type {
 import { ManualOverrideDialog } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
 import { ProviderSettingsSection } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
-import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileContentStack,
+  MobilePageContainer,
+  MobilePageHeader,
+  MobileSectionPanel,
+  MobileStatusBadge,
+} from "@/frontend/mobile/components/ui";
 import { ExchangeRateHistorySectionMobile } from "@/frontend/mobile/views/dashboard/admin/billing/exchange-rates/components/exchangeRateHistorySection.mobile";
 
 function SyncStatusLabel({
@@ -33,7 +38,7 @@ function SyncStatusLabel({
   };
 
   return (
-    <StatusBadge
+    <MobileStatusBadge
       category="syncStatus"
       status={normalized}
       label={statusLabelsMap[normalized] ?? statusLabels.statusUnknown}
@@ -199,9 +204,9 @@ export function ExchangeRatesMobileView({
             </Alert>
           ) : null}
 
-          <SectionPanel title={labels.syncStatus.title}>
+          <MobileSectionPanel title={labels.syncStatus.title}>
             <MobileSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
-          </SectionPanel>
+          </MobileSectionPanel>
 
           <ProviderSettingsSection
             labels={labels.providerSettings}
@@ -209,7 +214,7 @@ export function ExchangeRatesMobileView({
             actionsDisabled={billingActionsDisabled}
           />
 
-          <SectionPanel title={labels.rateTable.title}>
+          <MobileSectionPanel title={labels.rateTable.title}>
             <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
               <RequirePermission permissions={AppPermission.BillingOverrideExchangeRates}>
                 <Button variant="outlined" onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
@@ -248,11 +253,11 @@ export function ExchangeRatesMobileView({
                 </Box>
               ))
             )}
-          </SectionPanel>
+          </MobileSectionPanel>
 
-          <SectionPanel title={labels.history.title}>
+          <MobileSectionPanel title={labels.history.title}>
             <ExchangeRateHistorySectionMobile labels={labels} availablePairs={availablePairs} />
-          </SectionPanel>
+          </MobileSectionPanel>
         </RequirePermission>
 
         <ManualOverrideDialog

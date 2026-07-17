@@ -3,14 +3,13 @@
 import { PriorityHighOutlined as AlertIcon, SettingsOutlined as SettingsIcon } from "@mui/icons-material";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
-import { PaginationControls, PersonProfileLink } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type {
   ParentCardListLabels,
   ParentDirectoryRow,
 } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
+import { MobilePaginationControls, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileBaseCard } from "@/frontend/mobile/components/ui/card/MobileBaseCard";
 
 export type { ParentCardListLabels };
 
@@ -24,7 +23,7 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
   const hasUnpaid = row.unpaidInvoices > 0;
 
   return (
-    <BaseCard
+    <MobileBaseCard
       onClick={() => {
         onOpenSettings(row.id);
       }}
@@ -37,7 +36,7 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
         <Box sx={{ display: "flex", gap: 1.5 }}>
           <Stack>
-            <PersonProfileLink
+            <MobilePersonProfileLink
               href={profileHrefForParent({ userId: row.userId, parentId: row.id })}
               name={row.name}
               avatarUrl={row.avatarUrl}
@@ -67,12 +66,12 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
 
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
-          <StatusBadge
+          <MobileStatusBadge
             category="studentAccount"
             status={row.lifecycleStatus}
             label={labels.statusLabels[row.lifecycleStatus]}
           />
-          <StatusBadge
+          <MobileStatusBadge
             category="staffAccount"
             status={row.accountStatus}
             label={labels.accountStatusLabels[row.accountStatus]}
@@ -94,7 +93,7 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
           )}
         </Box>
       </Box>
-    </BaseCard>
+    </MobileBaseCard>
   );
 }
 
@@ -131,7 +130,7 @@ export function ParentCardListMobile({
         pageSize !== undefined &&
         totalCount !== undefined &&
         onPageChange !== undefined && (
-          <PaginationControls
+          <MobilePaginationControls
             page={page}
             pageCount={pageCount}
             rowCount={totalCount}

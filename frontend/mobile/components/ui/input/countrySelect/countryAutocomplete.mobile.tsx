@@ -6,14 +6,14 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
 import { useCallback, useState } from "react";
-import {
-  getCountryAutocompletePaperSlotProps,
-  getCountryAutocompletePopperSlotProps,
-} from "@/frontend/mobile/components/ui/input/countrySelect/countryAutocompletePopper";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
 import type { CountryAutocompleteProps } from "@/frontend/mobile/components/ui/input/countrySelect/countryAutocomplete.types";
+import {
+  getCountryAutocompletePaperSlotProps,
+  getCountryAutocompletePopperSlotProps,
+} from "@/frontend/mobile/components/ui/input/countrySelect/countryAutocompletePopper";
 import { CountryOptionRowMobile } from "@/frontend/mobile/components/ui/input/countrySelect/countryOptionRow.mobile";
 import { getCountryOptionLabel } from "@/frontend/mobile/components/ui/input/countrySelect/countryOptionRow.utils";
 import { useAppTranslation } from "@/shared/locale";

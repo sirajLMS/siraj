@@ -5,12 +5,16 @@ import { Box, InputAdornment, Stack, TextField, Typography, useTheme } from "@mu
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
-import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileCardListItem,
+  MobilePaginationControls,
+  MobileStatusBadge,
+} from "@/frontend/mobile/components/ui";
 import { ScheduleOverviewMobileCard } from "@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.mobile";
 
 const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
@@ -90,7 +94,7 @@ export function ScheduleOverviewMobileView({
         <StyledSectionTitleRow>
           <StyledSectionTitle variant="titleLg">{title}</StyledSectionTitle>
           {selectedMetricLabel ? (
-            <StatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
+            <MobileStatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
           ) : null}
         </StyledSectionTitleRow>
 
@@ -151,7 +155,7 @@ export function ScheduleOverviewMobileView({
         />
       </Box>
 
-      <PaginationControls
+      <MobilePaginationControls
         page={page}
         pageCount={pageCount}
         rowCount={totalCount ?? 0}

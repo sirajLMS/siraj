@@ -5,12 +5,12 @@ import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   StudentCreditRow,
   StudentCreditStatus,
 } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
+import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 
 export interface StudentCreditDataGridDesktopLabels {
   readonly student: string;
@@ -62,7 +62,12 @@ export function StudentCreditDataGridDesktop({
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell name={row.studentName} href={studentHref(row.id)} avatarSize={40} fontWeight={700} />
+          <DesktopPersonProfileLinkCell
+            name={row.studentName}
+            href={studentHref(row.id)}
+            avatarSize={40}
+            fontWeight={700}
+          />
         ),
       },
       {
@@ -88,7 +93,11 @@ export function StudentCreditDataGridDesktop({
           const isNegative = row.status === "negative_balance";
           return (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, height: "100%" }}>
-              <StatusBadge category="invoice" status={isNegative ? "OVERDUE" : "PAID"} label={formatClassesLeft(row)} />
+              <DesktopStatusBadge
+                category="invoice"
+                status={isNegative ? "OVERDUE" : "PAID"}
+                label={formatClassesLeft(row)}
+              />
               {isNegative && <StyledWarningIcon />}
             </Box>
           );
@@ -143,7 +152,7 @@ export function StudentCreditDataGridDesktop({
   );
 
   return (
-    <AppDataGrid
+    <DesktopAppDataGrid
       rows={rows}
       columns={columns}
       loading={loading}

@@ -3,8 +3,8 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 import { type CountryType, getCountryDisplayName } from "@/frontend/common/lib/locale";
+import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 
 export type CountryOptionRowProps = {
   readonly country: CountryType;

@@ -5,8 +5,6 @@ import type { Theme } from "@mui/material";
 import { Avatar, Box, Tooltip, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import type * as React from "react";
-import { ActionIconLink, TimezoneDisplay } from "@/frontend/common/components/ui";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { type ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
@@ -18,6 +16,8 @@ import {
   formatScheduleTimeOnly,
   formatScheduleYourTime,
 } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
+import { MobileActionIconLink, MobileTimezoneDisplay } from "@/frontend/mobile/components/ui";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig/MeetingJoinAction.mobile";
 import { Link } from "@/shared/i18n/routing";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
@@ -247,7 +247,7 @@ function ScheduleMetaStatBar({ items }: { readonly items: readonly MetaStatItem[
           <StyledMetaValue variant="bodyMd" tone={item.tone}>
             {item.value}
           </StyledMetaValue>
-          {item.timezone ? <TimezoneDisplay timezone={item.timezone} typographyVariant="labelMd" /> : null}
+          {item.timezone ? <MobileTimezoneDisplay timezone={item.timezone} displayType="iconOnly" /> : null}
         </StyledMetaTile>
       ))}
     </StyledMetaPanel>
@@ -331,7 +331,7 @@ function ScheduleCardActions({ row, headers, detailsLabel, studentId, classId }:
   return (
     <StyledCardActions>
       {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false }) ? (
-        <MeetingJoinAction
+        <MobileMeetingJoinAction
           variant="icon"
           joinUrl={row.meetingJoinUrl}
           meeting={row.effectiveMeeting}
@@ -341,16 +341,16 @@ function ScheduleCardActions({ row, headers, detailsLabel, studentId, classId }:
       ) : null}
       {studentId ? (
         <Tooltip title={headers.history}>
-          <ActionIconLink href={studentProfileTabHref(studentId, "history")} aria-label={headers.history}>
+          <MobileActionIconLink href={studentProfileTabHref(studentId, "history")} aria-label={headers.history}>
             <HistoryOutlined fontSize="small" />
-          </ActionIconLink>
+          </MobileActionIconLink>
         </Tooltip>
       ) : null}
       {classId ? (
         <Tooltip title={detailsLabel}>
-          <ActionIconLink href={`/classes/${classId}`} aria-label={detailsLabel}>
+          <MobileActionIconLink href={`/classes/${classId}`} aria-label={detailsLabel}>
             <VisibilityOutlined fontSize="small" />
-          </ActionIconLink>
+          </MobileActionIconLink>
         </Tooltip>
       ) : null}
     </StyledCardActions>

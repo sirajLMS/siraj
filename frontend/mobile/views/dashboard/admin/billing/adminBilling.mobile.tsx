@@ -4,7 +4,6 @@ import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
 import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
 import { BillingMobileSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingMobileSearchBar";
@@ -18,6 +17,7 @@ import {
   MobileFab,
   MobilePageContainer,
   MobilePageHeader,
+  MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { AdminInvoiceMobileCard } from "@/frontend/mobile/views/dashboard/admin/billing/components/adminInvoiceCard.mobile";
 import { Link } from "@/shared/i18n/routing";
@@ -99,14 +99,14 @@ function InvoicesSection({
 
   if (invoices.length === 0 && !invoicesLoading) {
     return (
-      <SectionPanel title={labels.sections.recentInvoices}>
+      <MobileSectionPanel title={labels.sections.recentInvoices}>
         <MobileEmptyState title={labels.parentTable.emptyTitle} subtitle={labels.adminTable.noEntries} />
-      </SectionPanel>
+      </MobileSectionPanel>
     );
   }
 
   return (
-    <SectionPanel title={labels.sections.recentInvoices}>
+    <MobileSectionPanel title={labels.sections.recentInvoices}>
       <MobileCardList<(typeof invoices)[number]>
         rows={invoicesList}
         renderItem={renderItem}
@@ -120,7 +120,7 @@ function InvoicesSection({
             : undefined
         }
       />
-    </SectionPanel>
+    </MobileSectionPanel>
   );
 }
 
@@ -148,7 +148,7 @@ function StudentCreditSection({
   readonly sendingReminderId?: string | null;
 }) {
   return (
-    <SectionPanel
+    <MobileSectionPanel
       id="student-credit-section"
       title={labels.sections.studentCreditStatus}
       subTitle={creditFilter === "negative_balance" ? labels.creditTable.showingNegativeBalanceOnly : undefined}
@@ -182,7 +182,7 @@ function StudentCreditSection({
           </Button>
         )}
       </StyledCreditFooterBox>
-    </SectionPanel>
+    </MobileSectionPanel>
   );
 }
 

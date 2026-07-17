@@ -1,10 +1,14 @@
 "use client";
 
 import { Box, CircularProgress, Link, Stack, Typography } from "@mui/material";
-import { PhoneDisplay, SectionPanel } from "@/frontend/common/components/ui";
 import { isSafeUrl } from "@/frontend/common/lib/safeRedirect";
 import type { ParentSocialViewModel } from "@/frontend/common/views/dashboard/parent/social/useParentSocialViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobilePageContainer,
+  MobilePageHeader,
+  MobilePhoneDisplay,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
 
 function SocialLinkMobile({ label, value }: { readonly label: string; readonly value: string | null | undefined }) {
   if (!value) return null;
@@ -58,7 +62,7 @@ function WhatsAppLinkMobile({ label, value }: { readonly label: string; readonly
           typography: "bodyMd",
         })}
       >
-        <PhoneDisplay phone={value} typographyVariant="bodyMd" />
+        <MobilePhoneDisplay phone={value} typographyVariant="bodyMd" />
       </Link>
     </Stack>
   );
@@ -78,23 +82,23 @@ export function ParentSocialMobileView({ labels, loading, error, profile }: Read
       ) : null}
       {!loading && !error && profile ? (
         <Stack spacing={2}>
-          <SectionPanel title={labels.sections.contact}>
+          <MobileSectionPanel title={labels.sections.contact}>
             <Stack spacing={2}>
               <Stack spacing={0.5} sx={{ width: "100%" }}>
                 <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
                   {labels.fields.phone}
                 </Typography>
-                <PhoneDisplay phone={profile.phone ?? null} typographyVariant="bodyMd" />
+                <MobilePhoneDisplay phone={profile.phone ?? null} typographyVariant="bodyMd" />
               </Stack>
             </Stack>
-          </SectionPanel>
-          <SectionPanel title={labels.sections.social}>
+          </MobileSectionPanel>
+          <MobileSectionPanel title={labels.sections.social}>
             <Stack spacing={2}>
               <SocialLinkMobile label={labels.fields.facebook} value={profile.facebook} />
               <WhatsAppLinkMobile label={labels.fields.whatsapp} value={profile.whatsapp} />
               <SocialLinkMobile label={labels.fields.twitter} value={profile.twitter} />
             </Stack>
-          </SectionPanel>
+          </MobileSectionPanel>
         </Stack>
       ) : null}
     </MobilePageContainer>

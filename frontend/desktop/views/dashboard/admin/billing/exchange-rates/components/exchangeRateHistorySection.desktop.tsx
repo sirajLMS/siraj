@@ -3,7 +3,6 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
-import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { CurrencyDisplay, CurrencyDisplayPart } from "@/frontend/common/components/ui/display/currencyDisplay";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { exchangeRateHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
@@ -12,6 +11,7 @@ import {
   buildExchangeRateColumns,
   type ExchangeRateRow,
 } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui";
 import type { ExchangeRatesLabels } from "@/shared/locale";
 
 const HISTORY_DAY_OPTIONS = [7, 30, 90] as const;
@@ -130,7 +130,7 @@ export function ExchangeRateHistorySectionDesktop({
         </FormControl>
       </Box>
 
-      <AppDataGrid
+      <DesktopAppDataGrid
         rows={rows}
         columns={columns}
         loading={loading}

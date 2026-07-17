@@ -3,8 +3,7 @@
 import { ChevronRightOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { MobileFilterButton, MobilePrimaryPageAction, MobileSectionPanel, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import type { PendingReviewsViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";
 import {
@@ -54,7 +53,7 @@ function ReviewCard({ row, labels, approving, onApprove, onReject, onSelect }: R
             {labels.teacherColumn}: {row.teacherId}
           </Typography>
         </Box>
-        <StatusBadge
+        <MobileStatusBadge
           category="classStatus"
           status={row.status ? row.status.toLowerCase() : "pending"}
           label={row.status ?? "PENDING"}
@@ -78,13 +77,13 @@ function ReviewCard({ row, labels, approving, onApprove, onReject, onSelect }: R
       </Stack>
 
       <Stack sx={{ flexDirection: "row", gap: 1, flexWrap: "wrap" }}>
-        <FilterButton size="small" onClick={() => onSelect(row)} startIcon={<ChevronRightOutlined />}>
+        <MobileFilterButton size="small" onClick={() => onSelect(row)} startIcon={<ChevronRightOutlined />}>
           {labels.reviewButton}
-        </FilterButton>
-        <PrimaryPageAction size="small" onClick={() => onApprove(row.id)} disabled={approving}>
+        </MobileFilterButton>
+        <MobilePrimaryPageAction size="small" onClick={() => onApprove(row.id)} disabled={approving}>
           {labels.approveButton}
-        </PrimaryPageAction>
-        <FilterButton
+        </MobilePrimaryPageAction>
+        <MobileFilterButton
           size="small"
           onClick={() => onReject(row)}
           sx={theme => ({
@@ -93,7 +92,7 @@ function ReviewCard({ row, labels, approving, onApprove, onReject, onSelect }: R
           })}
         >
           {labels.rejectButton}
-        </FilterButton>
+        </MobileFilterButton>
       </Stack>
     </Box>
   );
@@ -133,10 +132,10 @@ export function PendingReviewsMobileView({
           </Typography>
         ) : null}
 
-        <SectionPanel>
+        <MobileSectionPanel>
           <Stack sx={{ gap: 1.5, mb: 2 }}>
-            <FilterButton onClick={() => onTeacherFilterChange("")}>{labels.filterByTeacher}</FilterButton>
-            <FilterButton onClick={() => onStudentFilterChange("")}>{labels.filterByStudent}</FilterButton>
+            <MobileFilterButton onClick={() => onTeacherFilterChange("")}>{labels.filterByTeacher}</MobileFilterButton>
+            <MobileFilterButton onClick={() => onStudentFilterChange("")}>{labels.filterByStudent}</MobileFilterButton>
           </Stack>
 
           <MobileCardList<PendingReviewRow>
@@ -147,7 +146,7 @@ export function PendingReviewsMobileView({
             getKey={row => row.id}
             renderItem={renderItem}
           />
-        </SectionPanel>
+        </MobileSectionPanel>
 
         <LessonReportDetailPanelMobile report={selectedReport} labels={labels} />
       </MobileContentStack>

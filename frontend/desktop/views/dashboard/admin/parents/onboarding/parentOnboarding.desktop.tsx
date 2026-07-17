@@ -2,13 +2,17 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { FeesContractSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/FeesContractSection";
 import { ParentInfoSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentInfoSection";
 import { ParentMeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentMeetingConfigOnboardingSection";
 import { SocialCommsSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/SocialCommsSection";
 import type { ParentOnboardingViewProps } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import {
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopPrimaryPageAction,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 export function ParentOnboardingDesktopView({
@@ -56,7 +60,7 @@ export function ParentOnboardingDesktopView({
         <ParentInfoSection register={register} control={control} errors={errors} />
         <SocialCommsSection register={register} control={control} />
         <FeesContractSection register={register} control={control} errors={errors} />
-        <SectionPanel title={t.sections.meetingConfig}>
+        <DesktopSectionPanel title={t.sections.meetingConfig}>
           <ParentMeetingConfigOnboardingSection
             register={register}
             control={control}
@@ -75,7 +79,7 @@ export function ParentOnboardingDesktopView({
               },
             }}
           />
-        </SectionPanel>
+        </DesktopSectionPanel>
 
         <Box
           sx={theme => ({
@@ -89,7 +93,7 @@ export function ParentOnboardingDesktopView({
             gap: 2,
           })}
         >
-          <PrimaryPageAction
+          <DesktopPrimaryPageAction
             type="submit"
             disabled={isSubmitting}
             sx={{
@@ -101,7 +105,7 @@ export function ParentOnboardingDesktopView({
             }}
           >
             {isSubmitting ? t.actions.processing : t.actions.signup}
-          </PrimaryPageAction>
+          </DesktopPrimaryPageAction>
           <Typography variant="labelMd" sx={theme => ({ fontStyle: "italic", color: theme.palette.text.secondary })}>
             {t.privacyNote}
           </Typography>

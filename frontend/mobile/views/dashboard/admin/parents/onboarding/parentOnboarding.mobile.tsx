@@ -2,13 +2,17 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { FeesContractSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/FeesContractSection";
 import { ParentInfoSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentInfoSection";
 import { ParentMeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentMeetingConfigOnboardingSection";
 import { SocialCommsSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/SocialCommsSection";
 import type { ParentOnboardingViewProps } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobilePageContainer,
+  MobilePageHeader,
+  MobilePrimaryPageAction,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 export function ParentOnboardingMobileView({
@@ -57,7 +61,7 @@ export function ParentOnboardingMobileView({
         <ParentInfoSection register={register} control={control} errors={errors} />
         <SocialCommsSection register={register} control={control} />
         <FeesContractSection register={register} control={control} errors={errors} />
-        <SectionPanel title={t.sections.meetingConfig}>
+        <MobileSectionPanel title={t.sections.meetingConfig}>
           <ParentMeetingConfigOnboardingSection
             register={register}
             control={control}
@@ -76,7 +80,7 @@ export function ParentOnboardingMobileView({
               },
             }}
           />
-        </SectionPanel>
+        </MobileSectionPanel>
 
         <Box
           sx={theme => ({
@@ -89,7 +93,7 @@ export function ParentOnboardingMobileView({
             gap: 2,
           })}
         >
-          <PrimaryPageAction
+          <MobilePrimaryPageAction
             type="submit"
             disabled={isSubmitting}
             fullWidth
@@ -100,7 +104,7 @@ export function ParentOnboardingMobileView({
             }}
           >
             {isSubmitting ? t.actions.processing : t.actions.signup}
-          </PrimaryPageAction>
+          </MobilePrimaryPageAction>
           <Typography variant="labelMd" sx={theme => ({ fontStyle: "italic", color: theme.palette.text.secondary })}>
             {t.privacyNote}
           </Typography>

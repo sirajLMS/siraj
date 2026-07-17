@@ -3,13 +3,18 @@
 import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
 import { buildAdminMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import {
   getAdminInvoiceGridLabels,
   getStudentCreditGridLabels,
 } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
+import {
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopPrimaryPageAction,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
 import { AdminInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/admin/billing/components/adminInvoicesDataGrid.desktop";
 import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
 import { BillingSearchBarDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingSearchBar.desktop";
@@ -46,9 +51,9 @@ function AdminBillingHeaderActions({
         </Button>
       ) : null}
       {canCreate ? (
-        <PrimaryPageAction startIcon={<AddOutlined />} onClick={onManualInvoice}>
+        <DesktopPrimaryPageAction startIcon={<AddOutlined />} onClick={onManualInvoice}>
           {labels.manualInvoice}
-        </PrimaryPageAction>
+        </DesktopPrimaryPageAction>
       ) : null}
     </>
   );
@@ -80,7 +85,7 @@ function StudentCreditSection({
   const isNegativeFilter = creditFilter === "negative_balance";
 
   return (
-    <SectionPanel
+    <DesktopSectionPanel
       id="student-credit-section"
       title={labels.sections.studentCreditStatus}
       actions={
@@ -112,7 +117,7 @@ function StudentCreditSection({
           </Button>
         )}
       </StyledCreditFooterBox>
-    </SectionPanel>
+    </DesktopSectionPanel>
   );
 }
 
@@ -149,8 +154,8 @@ export function AdminBillingDesktopView({
   const adminMetrics = buildAdminMetrics(summary, labels);
 
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={labels.adminPageTitle}
         subtitle={labels.adminPageSubtitle}
         actions={
@@ -165,7 +170,7 @@ export function AdminBillingDesktopView({
 
       <BillingMetricsRowDesktop metrics={adminMetrics} loading={summaryLoading} />
 
-      <SectionPanel
+      <DesktopSectionPanel
         title={labels.sections.recentInvoices}
         actions={
           <BillingSearchBarDesktop
@@ -192,7 +197,7 @@ export function AdminBillingDesktopView({
           onPageChange={onPageChange}
           loading={isSearchPending || (invoicesLoading && invoices.length === 0)}
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
 
       {canManage && (
         <StudentCreditSection
@@ -208,6 +213,6 @@ export function AdminBillingDesktopView({
           sendingReminderId={sendingReminderId}
         />
       )}
-    </PageContainer>
+    </DesktopPageContainer>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { SectionPanel } from "@/frontend/common/components/ui";
 import type { ReportsViewModel } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
 import {
   MobileCardList,
@@ -8,6 +7,7 @@ import {
   MobileContentStack,
   MobilePageContainer,
   MobilePageHeader,
+  MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { EngagementRateCardMobile } from "@/frontend/mobile/views/dashboard/reports/components/engagementRateCard.mobile";
 import { FinancialDistributionCardMobile } from "@/frontend/mobile/views/dashboard/reports/components/financialDistributionCard.mobile";
@@ -68,7 +68,7 @@ export function ReportsMobileView({
           subtitle={labels.summaryLabels.financialSubtitle}
         />
 
-        <SectionPanel title={labels.ledgerTitle}>
+        <MobileSectionPanel title={labels.ledgerTitle}>
           <ReportsTotalsSectionMobile summary={summary} rows={rows} totalsLabel={labels.totalsLabel} />
 
           <MobileCardList
@@ -83,7 +83,7 @@ export function ReportsMobileView({
               </MobileCardListItem>
             )}
           />
-        </SectionPanel>
+        </MobileSectionPanel>
       </MobileContentStack>
     </MobilePageContainer>
   );

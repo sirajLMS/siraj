@@ -9,8 +9,7 @@ import {
 } from "@mui/icons-material";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/common/components/ui";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
+import { MobilePaginationControls, MobilePersonProfileLink, MobileStatusBadge, MobileMeetingJoinAction } from "@/frontend/mobile/components/ui";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import { ClassSessionActionButtonMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/components/classSessionActionButton.mobile";
@@ -83,7 +82,7 @@ function ClassCardHeader({ row, labels }: Readonly<{ row: AcademicClassRow; labe
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}>
           <PersonOutlined sx={theme => ({ fontSize: 14, color: theme.palette.text.secondary })} />
-          <PersonProfileLink
+          <MobilePersonProfileLink
             href={profileHrefForTeacher({ teacherId: row.instructorId })}
             name={row.instructor}
             avatarSize={32}
@@ -92,7 +91,7 @@ function ClassCardHeader({ row, labels }: Readonly<{ row: AcademicClassRow; labe
           />
         </Box>
       </Box>
-      <StatusBadge category="classSession" status={row.sessionStatus} label={statusLabels[row.sessionStatus]} />
+      <MobileStatusBadge category="classSession" status={row.sessionStatus} label={statusLabels[row.sessionStatus]} />
     </Box>
   );
 }
@@ -182,7 +181,7 @@ function ClassCardActions({
         fullWidth
       />
       {shouldShowScheduleAlertJoin(row) ? (
-        <MeetingJoinAction
+        <MobileMeetingJoinAction
           variant="icon"
           joinUrl={row.meetingJoinUrl}
           meeting={row.effectiveMeeting}
@@ -284,7 +283,7 @@ export function AcademicScheduleCardListMobile({
       ))}
       <EndOfSchedule label={labels.endOfSchedule} />
       {totalCountResolved > 0 && (
-        <PaginationControls
+        <MobilePaginationControls
           page={currentPage}
           pageCount={pageCount}
           rowCount={totalCountResolved}

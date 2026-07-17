@@ -5,7 +5,6 @@ import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { type ReactNode, useMemo } from "react";
-import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import type {
@@ -19,6 +18,12 @@ import {
   isPayableUnpaidStatus,
   shouldShowViewRejection,
 } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
+import {
+  DesktopAppDataGrid,
+  DesktopGridPagination,
+  DesktopPersonProfileLinkCell,
+  DesktopStatusBadge,
+} from "@/frontend/desktop/components/ui";
 
 export interface AdminInvoicesDataGridLabels {
   readonly invoiceId: string;
@@ -244,7 +249,7 @@ export function AdminInvoicesDataGridDesktop({
         flex: 1.2,
         minWidth: 200,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             name={row.studentName}
             href={row.studentId ? studentHref(row.studentId) : undefined}
             fallbackInitial={row.studentInitials}
@@ -276,7 +281,7 @@ export function AdminInvoicesDataGridDesktop({
         flex: 0.8,
         minWidth: 120,
         renderCell: ({ row }) => (
-          <StatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status]} />
+          <DesktopStatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status]} />
         ),
       },
       {
@@ -306,7 +311,7 @@ export function AdminInvoicesDataGridDesktop({
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
 
   return (
-    <AppDataGrid
+    <DesktopAppDataGrid
       rows={rows}
       columns={columns}
       getRowId={row => row.id}
@@ -321,7 +326,7 @@ export function AdminInvoicesDataGridDesktop({
               onPageChange(model.page);
             },
             pageSizeOptions: [pageSize],
-            slots: { pagination: GridPagination },
+            slots: { pagination: DesktopGridPagination },
           }
         : {})}
     />

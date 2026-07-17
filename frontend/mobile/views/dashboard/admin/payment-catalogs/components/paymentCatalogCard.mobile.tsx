@@ -2,12 +2,12 @@
 
 import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type {
   CatalogGridActionHandlers,
   PaymentCatalogRow,
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 function actionLabelForDirection(
@@ -45,7 +45,7 @@ export function PaymentCatalogCardMobile({ row, onEdit, onDelete }: Readonly<Pay
           </Typography>
           <LocalizedStringDisplay value={row.name} />
         </Box>
-        <StatusBadge
+        <MobileStatusBadge
           category="paymentMethod"
           status={row.isActive ? "active" : "inactive"}
           label={row.isActive ? t.active : t.inactive}

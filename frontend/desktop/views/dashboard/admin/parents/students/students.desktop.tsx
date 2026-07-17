@@ -2,11 +2,16 @@
 
 import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import { FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentsViewModel } from "@/frontend/common/views/dashboard/admin/parents/students/useStudentsViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import {
+  DesktopFilterButton,
+  DesktopMetricCardGrid,
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopPrimaryPageAction,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
 import { StudentDirectoryDataGrid } from "@/frontend/desktop/views/dashboard/admin/parents/students/components/studentDirectoryDataGrid.desktop";
 
 export function StudentsDesktopView({
@@ -44,20 +49,20 @@ export function StudentsDesktopView({
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
-      <MetricCardGrid metrics={metrics} size={{ md: 6, lg: "grow" }} />
+      <DesktopMetricCardGrid metrics={metrics} size={{ md: 6, lg: "grow" }} />
 
-      <SectionPanel
+      <DesktopSectionPanel
         title={labels.globalRecord}
         actions={
           <>
             <RequirePermission permissions={[AppPermission.StudentsCreate]}>
-              <PrimaryPageAction id="students-add-btn" startIcon={<AddOutlined />} onClick={onAddStudent}>
+              <DesktopPrimaryPageAction id="students-add-btn" startIcon={<AddOutlined />} onClick={onAddStudent}>
                 {labels.addStudent}
-              </PrimaryPageAction>
+              </DesktopPrimaryPageAction>
             </RequirePermission>
-            <FilterButton id="students-filters-btn" startIcon={<FilterListOutlined />} onClick={onFilterClick}>
+            <DesktopFilterButton id="students-filters-btn" startIcon={<FilterListOutlined />} onClick={onFilterClick}>
               {labels.filters}
-            </FilterButton>
+            </DesktopFilterButton>
           </>
         }
       >
@@ -72,7 +77,7 @@ export function StudentsDesktopView({
           onViewHistory={onViewHistory}
           loading={loading}
         />
-      </SectionPanel>
+      </DesktopSectionPanel>
     </DesktopPageContainer>
   );
 }

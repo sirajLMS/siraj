@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { PageContainer } from "@/frontend/common/components/ui";
+import { DesktopPageContainer } from "@/frontend/desktop/components/ui";
 import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
 import { LoadingState } from "@/frontend/common/components/ui/state/LoadingState";
 import type { ClassDetailsViewModel } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
@@ -33,7 +33,7 @@ export function ClassDetailsContainerDesktop({ viewModel }: { readonly viewModel
   }
 
   return (
-    <PageContainer>
+    <DesktopPageContainer>
       <ClassDetailsContentDesktop
         instance={viewModel.instance}
         canOverride={viewModel.canOverride}

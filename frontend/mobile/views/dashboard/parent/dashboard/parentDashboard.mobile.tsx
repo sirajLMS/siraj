@@ -1,9 +1,13 @@
 "use client";
 
-import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import type { ParentDashboardViewModel } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
-import { MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
+import {
+  MobileContentStack,
+  MobilePageContainer,
+  MobilePrimaryPageAction,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
 import { AcademicProgressSummaryMobile } from "@/frontend/mobile/views/dashboard/parent/dashboard/components/academicProgressSummary.mobile";
 import { ParentDashboardMetricsRowMobile } from "@/frontend/mobile/views/dashboard/parent/dashboard/components/parentDashboardMetrics.mobile";
 import { ParentScheduleListMobile } from "@/frontend/mobile/views/dashboard/parent/dashboard/components/parentScheduleList.mobile";
@@ -25,12 +29,12 @@ function MobileScheduleSection({
   pageCount,
 }: MobileScheduleSectionProps) {
   return (
-    <SectionPanel
+    <MobileSectionPanel
       title={labels.schedule.titleMobile}
       actions={
-        <PrimaryPageAction variant="text" onClick={onViewAll} sx={{ minWidth: "auto", px: 0 }}>
+        <MobilePrimaryPageAction variant="text" onClick={onViewAll} sx={{ minWidth: "auto", px: 0 }}>
           {labels.schedule.viewAll}
-        </PrimaryPageAction>
+        </MobilePrimaryPageAction>
       }
     >
       <ParentScheduleListMobile
@@ -39,7 +43,7 @@ function MobileScheduleSection({
         pagination={schedulePagination}
         pageCount={pageCount}
       />
-    </SectionPanel>
+    </MobileSectionPanel>
   );
 }
 

@@ -4,8 +4,6 @@ import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Alert, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { BaseDeleteDialog, FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
@@ -14,9 +12,12 @@ import { CreateMeetingProviderDialog } from "@/frontend/common/views/dashboard/a
 import { EditMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/EditMeetingProviderDialog";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import {
+  MobileBaseDeleteDialog,
   MobileCardList,
   MobileCardListItem,
   MobileFab,
+  MobileFormErrorSnackbar,
+  MobileFormSuccessSnackbar,
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
@@ -145,7 +146,7 @@ export function MeetingProvidersMobileView({
           onSaved={onEditSaved}
           onError={notifications.showError}
         />
-        <BaseDeleteDialog
+        <MobileBaseDeleteDialog
           open={Boolean(deleteProvider)}
           onClose={onDeleteClose}
           onConfirm={onDeleteConfirm}
@@ -159,12 +160,12 @@ export function MeetingProvidersMobileView({
           confirmLabel={t.delete}
         />
 
-        <FormErrorSnackbar
+        <MobileFormErrorSnackbar
           open={notifications.errorOpen}
           message={notifications.errorMsg}
           onClose={notifications.closeError}
         />
-        <FormSuccessSnackbar
+        <MobileFormSuccessSnackbar
           open={notifications.successOpen}
           message={notifications.successMsg}
           onClose={notifications.closeSuccess}

@@ -3,7 +3,7 @@
 import { HistoryOutlined, ReceiptLongOutlined, SecurityOutlined } from "@mui/icons-material";
 import { Box, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
+import { DesktopBaseCard } from "@/frontend/desktop/components/ui";
 import type { BillingManualLabels } from "@/shared/locale";
 
 interface ManualInvoiceSupportCardsDesktopProps {
@@ -29,13 +29,13 @@ export function ManualInvoiceSupportCardsDesktop({ labels }: Readonly<ManualInvo
         const Icon = card.icon;
 
         return (
-          <BaseCard key={card.key}>
+          <DesktopBaseCard key={card.key}>
             <Icon sx={{ color: theme.palette.primary.main, mb: 1.5 }} />
             <Typography variant="titleLg" sx={{ mb: 1 }}>
               {cardLabels.title}
             </Typography>
             <StyledSupportBody variant="bodyMd">{cardLabels.body}</StyledSupportBody>
-          </BaseCard>
+          </DesktopBaseCard>
         );
       })}
     </Box>

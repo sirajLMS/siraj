@@ -4,13 +4,13 @@ import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination, StatusBadge } from "@/frontend/common/components/ui";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
 } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
+import { DesktopAppDataGrid, DesktopGridPagination, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { ParentInvoiceRowActionsDesktop } from "@/frontend/desktop/views/dashboard/billing/components/parentInvoiceRowActions.desktop";
 
 export interface ParentInvoicesDataGridDesktopLabels {
@@ -155,7 +155,11 @@ export function ParentInvoicesDataGridDesktop({
         align: "center",
         headerAlign: "center",
         renderCell: ({ row }) => (
-          <StatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status] ?? row.status} />
+          <DesktopStatusBadge
+            category="invoice"
+            status={row.status}
+            label={labels.statusLabels[row.status] ?? row.status}
+          />
         ),
       },
       {
@@ -199,7 +203,7 @@ export function ParentInvoicesDataGridDesktop({
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
 
   return (
-    <AppDataGrid
+    <DesktopAppDataGrid
       rows={rows}
       columns={columns}
       loading={loading}
@@ -214,7 +218,7 @@ export function ParentInvoicesDataGridDesktop({
               onPageChange(model.page);
             },
             pageSizeOptions: [pageSize],
-            slots: { pagination: GridPagination },
+            slots: { pagination: DesktopGridPagination },
           }
         : {})}
     />

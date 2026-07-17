@@ -2,7 +2,8 @@
 
 import { Box, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { FilterButton, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { ClassAuditDetailsCard } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
 import type {
   ClassAuditDetailsLabels,
@@ -50,8 +51,8 @@ export function ClassAuditViewDesktop({
   const detailsLabels = buildDetailsLabels(labels);
 
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={labels.pageTitle}
         breadcrumbs={[
           { label: labels.breadcrumbs.dashboard, href: "/dashboard" },

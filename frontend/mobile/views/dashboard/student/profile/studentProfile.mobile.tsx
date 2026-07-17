@@ -8,10 +8,13 @@ import {
   SchoolOutlined,
 } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
-import { MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
+import {
+  MobileContentStack,
+  MobileMetricCard,
+  MobilePageContainer,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
 
 export function StudentProfileMobileView({
   profile,
@@ -32,7 +35,7 @@ export function StudentProfileMobileView({
   return (
     <MobilePageContainer>
       <MobileContentStack>
-        <SectionPanel title={labels.personalInfo}>
+        <MobileSectionPanel title={labels.personalInfo}>
           <Stack spacing={2}>
             <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
               <Box
@@ -90,10 +93,10 @@ export function StudentProfileMobileView({
               <Typography variant="bodyMd">{profile.language ?? "—"}</Typography>
             </Stack>
           </Stack>
-        </SectionPanel>
+        </MobileSectionPanel>
 
         {profile.parentName && (
-          <SectionPanel title={labels.parentInfo}>
+          <MobileSectionPanel title={labels.parentInfo}>
             <Stack spacing={2}>
               <Stack spacing={1}>
                 <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
@@ -114,13 +117,13 @@ export function StudentProfileMobileView({
                 <Typography variant="bodyMd">{profile.parentPhone ?? "—"}</Typography>
               </Stack>
             </Stack>
-          </SectionPanel>
+          </MobileSectionPanel>
         )}
 
-        <SectionPanel title={labels.academicInfo}>
+        <MobileSectionPanel title={labels.academicInfo}>
           <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap" }}>
             <Box sx={{ flex: "1 1 140px" }}>
-              <MetricCard
+              <MobileMetricCard
                 icon={SchoolOutlined}
                 label={labels.teacher}
                 value={profile.teacherName ?? "—"}
@@ -128,7 +131,7 @@ export function StudentProfileMobileView({
               />
             </Box>
             <Box sx={{ flex: "1 1 140px" }}>
-              <MetricCard
+              <MobileMetricCard
                 icon={CalendarTodayOutlined}
                 label={labels.hoursPerWeek}
                 value={profile.hoursPerWeek ?? 0}
@@ -136,7 +139,7 @@ export function StudentProfileMobileView({
               />
             </Box>
             <Box sx={{ flex: "1 1 140px" }}>
-              <MetricCard
+              <MobileMetricCard
                 icon={PersonOutlined}
                 label={labels.classesRemaining}
                 value={profile.classesRemaining ?? 0}
@@ -144,7 +147,7 @@ export function StudentProfileMobileView({
               />
             </Box>
             <Box sx={{ flex: "1 1 140px" }}>
-              <MetricCard
+              <MobileMetricCard
                 icon={AssignmentOutlined}
                 label={labels.classesTotal}
                 value={profile.classesTotal ?? 0}
@@ -152,7 +155,7 @@ export function StudentProfileMobileView({
               />
             </Box>
           </Stack>
-        </SectionPanel>
+        </MobileSectionPanel>
 
         <Button
           variant="outlined"

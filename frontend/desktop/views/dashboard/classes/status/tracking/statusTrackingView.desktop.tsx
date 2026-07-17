@@ -6,12 +6,11 @@ import { styled } from "@mui/material/styles";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
 import {
   FilterButton,
-  PageContainer,
-  PageHeader,
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/common/components/ui";
-import { StatusTrackingDataGrid } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusTrackingDataGrid";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { StatusTrackingDataGridDesktop } from "@/frontend/desktop/views/dashboard/classes/status/tracking/statusTrackingDataGrid.desktop";
 import type { DesktopLayoutProps } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { SuspensionAnalytics } from "@/frontend/desktop/views/dashboard/classes/status/tracking/components/suspensionAnalytics.desktop";
 
@@ -61,8 +60,8 @@ export function StatusTrackingDesktopView({
   onOpenAuditLogs,
 }: Readonly<DesktopLayoutProps>) {
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={labels.pageTitle}
         subtitle={labels.pageSubtitle}
         actions={
@@ -83,7 +82,7 @@ export function StatusTrackingDesktopView({
         title={labels.todaysClassSchedule}
         actions={<StyledTotalSessionsBadge>{labels.totalSessions(totalSessions)}</StyledTotalSessionsBadge>}
       >
-        <StatusTrackingDataGrid
+        <StatusTrackingDataGridDesktop
           rows={rows}
           labels={{
             studentClass: labels.studentClass,

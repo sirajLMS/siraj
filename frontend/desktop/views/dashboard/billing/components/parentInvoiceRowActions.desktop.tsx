@@ -2,7 +2,6 @@
 
 import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   MarkPaidInvoiceTarget,
@@ -13,6 +12,7 @@ import {
   isPayableUnpaidStatus,
   shouldShowViewRejection,
 } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
 
 export type ParentInvoiceRowActionLabels = {
   readonly payNow: string;
@@ -81,9 +81,9 @@ function PaymentPendingRowActionsDesktop({
 }): React.ReactNode {
   return (
     <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-      <PrimaryPageAction size="small" onClick={onOpenDetails}>
+      <DesktopPrimaryPageAction size="small" onClick={onOpenDetails}>
         {labels.viewSubmission}
-      </PrimaryPageAction>
+      </DesktopPrimaryPageAction>
     </Box>
   );
 }
@@ -115,14 +115,14 @@ function UnpaidRowActionsDesktop({
         </Button>
       ) : null}
       {showPayNow ? (
-        <PrimaryPageAction size="small" onClick={() => onPayNow(target)}>
+        <DesktopPrimaryPageAction size="small" onClick={() => onPayNow(target)}>
           {labels.payNow}
-        </PrimaryPageAction>
+        </DesktopPrimaryPageAction>
       ) : null}
       {showMarkAsPaid ? (
-        <PrimaryPageAction size="small" onClick={() => onMarkAsPaid?.(target)}>
+        <DesktopPrimaryPageAction size="small" onClick={() => onMarkAsPaid?.(target)}>
           {labels.markAsPaid}
-        </PrimaryPageAction>
+        </DesktopPrimaryPageAction>
       ) : null}
     </Box>
   );

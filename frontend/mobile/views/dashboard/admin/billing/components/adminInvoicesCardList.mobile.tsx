@@ -3,7 +3,6 @@
 import { VisibilityOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, CircularProgress, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   AdminInvoiceRow,
@@ -16,6 +15,7 @@ import {
   isPayableUnpaidStatus,
   shouldShowViewRejection,
 } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
+import { MobilePaginationControls, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 
 interface AdminInvoicesCardListLabels {
   readonly markAsPaid: string;
@@ -108,7 +108,7 @@ function InvoiceCard({
             <StyledInvoiceIdLabel variant="labelMd">{invoiceNumber}</StyledInvoiceIdLabel>
           </Box>
         </Box>
-        <StatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status]} />
+        <MobileStatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status]} />
       </Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <StyledDateTypography variant="bodyMd">{row.dateIssued}</StyledDateTypography>
@@ -241,7 +241,7 @@ export function AdminInvoicesCardListMobile({
         />
       ))}
       {onPageChange && totalCount !== undefined ? (
-        <PaginationControls
+        <MobilePaginationControls
           page={page}
           pageCount={pageCount}
           rowCount={totalCount}

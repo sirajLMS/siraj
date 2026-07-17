@@ -2,7 +2,7 @@
 
 import { FilterListOutlined, IosShareOutlined } from "@mui/icons-material";
 import { Box, Grid, IconButton, Typography } from "@mui/material";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
+import { MobileMetricCard } from "@/frontend/mobile/components/ui";
 import type { ScheduleAlertsLabels } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsView";
 import type {
   AcademicClassRow,
@@ -52,7 +52,7 @@ function MobileMetricsSection({
         const metricLabel = metricLabels[metric.key];
         return (
           <Grid key={metric.key} size={{ xs: 6 }}>
-            <MetricCard
+            <MobileMetricCard
               icon={metric.icon}
               label={metricLabel.label}
               value={metric.value}

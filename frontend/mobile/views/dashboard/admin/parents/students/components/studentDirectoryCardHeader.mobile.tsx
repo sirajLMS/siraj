@@ -2,11 +2,11 @@
 
 import { Box, Typography } from "@mui/material";
 import { UserAvatar } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type {
   StudentAccountStatus,
   StudentDirectoryRowExtended,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
 
 interface StudentDirectoryCardHeaderProps {
   readonly row: StudentDirectoryRowExtended;
@@ -38,7 +38,7 @@ export function StudentDirectoryCardHeader({ row, statusLabels }: Readonly<Stude
           </Typography>
         </Box>
       </Box>
-      <StatusBadge category="studentAccount" status={row.accountStatus} label={statusLabels[row.accountStatus]} />
+      <MobileStatusBadge category="studentAccount" status={row.accountStatus} label={statusLabels[row.accountStatus]} />
     </Box>
   );
 }

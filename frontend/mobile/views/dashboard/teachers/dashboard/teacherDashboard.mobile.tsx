@@ -3,7 +3,6 @@
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { DateNavigator, PaginationControls, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
@@ -12,7 +11,14 @@ import {
   teacherDashboardContentPaddingSx,
   teacherDashboardPageContainerSx,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
-import { MobileCardList, MobileContentStack, MobilePageContainer } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileContentStack,
+  MobilePageContainer,
+  MobilePaginationControls,
+  MobilePrimaryPageAction,
+  MobileSectionPanel,
+} from "@/frontend/mobile/components/ui";
 import { ActivationPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/activationPolicyPanel.mobile";
 import { MissedClassAlertBannerMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.mobile";
 import { StudentProgressFeedMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/studentProgressFeed.mobile";
@@ -83,9 +89,9 @@ function MobileScheduleSection({
   onPageChange,
 }: MobileScheduleSectionProps) {
   const schedulePanelActions = onViewAll ? (
-    <PrimaryPageAction variant="text" onClick={onViewAll} sx={{ minWidth: "auto", px: 0 }}>
+    <MobilePrimaryPageAction variant="text" onClick={onViewAll} sx={{ minWidth: "auto", px: 0 }}>
       {labels.schedule.viewAll}
-    </PrimaryPageAction>
+    </MobilePrimaryPageAction>
   ) : undefined;
 
   const renderItem = (row: TeacherScheduleRow): ReactNode => (
@@ -113,7 +119,7 @@ function MobileScheduleSection({
         />
       </Box>
 
-      <SectionPanel title={labels.schedule.titleToday} edgeToEdge actions={schedulePanelActions}>
+      <MobileSectionPanel title={labels.schedule.titleToday} edgeToEdge actions={schedulePanelActions}>
         <MobileCardList<TeacherScheduleRow>
           rows={scheduleRows}
           loading={loading}
@@ -123,10 +129,10 @@ function MobileScheduleSection({
           getKey={row => row.id}
           renderItem={renderItem}
         />
-      </SectionPanel>
+      </MobileSectionPanel>
 
       {totalCount !== undefined && onPageChange && pageCount > 1 && (
-        <PaginationControls
+        <MobilePaginationControls
           page={page}
           pageCount={pageCount}
           rowCount={totalCount}

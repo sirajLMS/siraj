@@ -2,8 +2,8 @@
 
 import { ChildCareOutlined, EventOutlined, PaymentsOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { ParentDashboardMetrics } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import { MobileMetricCard } from "@/frontend/mobile/components/ui";
 
 export interface ParentDashboardMetricsRowMobileProps {
   readonly metrics: ParentDashboardMetrics;
@@ -23,7 +23,7 @@ export function ParentDashboardMetricsRowMobile({ metrics, labels }: Readonly<Pa
   return (
     <Grid container spacing={2}>
       <Grid size={6}>
-        <MetricCard
+        <MobileMetricCard
           icon={ChildCareOutlined}
           label={labels.totalStudents}
           value={formatCount(metrics.totalStudents)}
@@ -31,7 +31,7 @@ export function ParentDashboardMetricsRowMobile({ metrics, labels }: Readonly<Pa
         />
       </Grid>
       <Grid size={6}>
-        <MetricCard
+        <MobileMetricCard
           icon={EventOutlined}
           label={labels.todaysClasses}
           value={formatCount(metrics.todaysClasses)}
@@ -39,7 +39,7 @@ export function ParentDashboardMetricsRowMobile({ metrics, labels }: Readonly<Pa
         />
       </Grid>
       <Grid size={6}>
-        <MetricCard
+        <MobileMetricCard
           icon={PaymentsOutlined}
           label={labels.pendingInvoices}
           value={metrics.pendingInvoicesAmount}
@@ -47,7 +47,7 @@ export function ParentDashboardMetricsRowMobile({ metrics, labels }: Readonly<Pa
         />
       </Grid>
       <Grid size={6}>
-        <MetricCard
+        <MobileMetricCard
           icon={TrendingUpOutlined}
           label={labels.performanceAvg}
           value={`${metrics.performanceAvgMobile}%`}

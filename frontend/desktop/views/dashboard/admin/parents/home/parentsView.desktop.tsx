@@ -3,20 +3,20 @@
 import { FilterListOutlined, SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import {
-  ExportButton,
-  FilterButton,
-  PageContainer,
-  PageHeader,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
 import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
 import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
 import type { ParentsViewLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsView";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import {
+  DesktopExportButton,
+  DesktopFilterButton,
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopPrimaryPageAction,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
 import { ParentsDataGridDesktop } from "@/frontend/desktop/views/dashboard/admin/parents/home/components/parentsDataGrid.desktop";
 
 export interface ParentsViewDesktopProps {
@@ -93,15 +93,15 @@ export function ParentsViewDesktop({
   onResetFilters,
 }: Readonly<ParentsViewDesktopProps>) {
   return (
-    <PageContainer>
-      <PageHeader
+    <DesktopPageContainer>
+      <DesktopPageHeader
         title={labels.pageTitle}
         subtitle={labels.pageSubtitle}
         actions={
           <>
             <ParentSearchField placeholder={labels.searchPlaceholder} onSearch={onSearch} />
             <RequirePermission permissions={[AppPermission.ParentsCreate]}>
-              <PrimaryPageAction onClick={onAddParent}>{labels.addParent}</PrimaryPageAction>
+              <DesktopPrimaryPageAction onClick={onAddParent}>{labels.addParent}</DesktopPrimaryPageAction>
             </RequirePermission>
           </>
         }
@@ -109,14 +109,14 @@ export function ParentsViewDesktop({
 
       <ParentsMetricGrid metrics={metrics} />
 
-      <SectionPanel
+      <DesktopSectionPanel
         title={labels.records}
         actions={
           <Box sx={{ display: "flex", gap: 1 }}>
-            <FilterButton startIcon={<FilterListOutlined />} onClick={onFilter}>
+            <DesktopFilterButton startIcon={<FilterListOutlined />} onClick={onFilter}>
               {labels.filterLabel}
-            </FilterButton>
-            <ExportButton onClick={onExport} />
+            </DesktopFilterButton>
+            <DesktopExportButton onClick={onExport} />
           </Box>
         }
       >
@@ -139,7 +139,7 @@ export function ParentsViewDesktop({
           onPageChange={onPageChange}
           loading={loading}
         />
-      </SectionPanel>
-    </PageContainer>
+      </DesktopSectionPanel>
+    </DesktopPageContainer>
   );
 }

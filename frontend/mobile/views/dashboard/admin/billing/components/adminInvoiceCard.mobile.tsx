@@ -3,7 +3,6 @@
 import { VisibilityOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
 import type {
@@ -16,6 +15,7 @@ import {
   isPayableUnpaidStatus,
   shouldShowViewRejection,
 } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
 
 const StyledStudentAvatar = styled(Avatar)(({ theme }) => ({
   width: 40,
@@ -75,7 +75,7 @@ export function AdminInvoiceMobileCard({
             <StyledInvoiceIdLabel variant="labelMd">{invoiceNumber}</StyledInvoiceIdLabel>
           </Box>
         </Box>
-        <StatusBadge category="invoice" status={row.status} label={labels.invoiceStatus[row.status]} />
+        <MobileStatusBadge category="invoice" status={row.status} label={labels.invoiceStatus[row.status]} />
       </Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <StyledDateTypography variant="bodyMd">{row.dateIssued}</StyledDateTypography>

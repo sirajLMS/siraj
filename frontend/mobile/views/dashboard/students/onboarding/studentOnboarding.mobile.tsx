@@ -2,9 +2,14 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { StudentOnboardingViewModel } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
-import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileContentStack,
+  MobileFormSuccessSnackbar,
+  MobilePageContainer,
+  MobilePageHeader,
+  MobilePrimaryPageAction,
+} from "@/frontend/mobile/components/ui";
 import { ParentAssignmentSection } from "@/frontend/mobile/views/dashboard/students/onboarding/components/parentAssignmentSection.mobile";
 import { StudentInfoSection } from "@/frontend/mobile/views/dashboard/students/onboarding/components/studentInfoSection.mobile";
 import { TeacherAssignmentSection } from "@/frontend/mobile/views/dashboard/students/onboarding/components/teacherAssignmentSection.mobile";
@@ -97,7 +102,7 @@ export function StudentOnboardingMobileView({
             }}
           />
 
-          <PrimaryPageAction
+          <MobilePrimaryPageAction
             type="submit"
             fullWidth
             disabled={isSubmitting}
@@ -107,11 +112,11 @@ export function StudentOnboardingMobileView({
             })}
           >
             {isSubmitting ? labels.processing : labels.create}
-          </PrimaryPageAction>
+          </MobilePrimaryPageAction>
         </Box>
       </MobileContentStack>
 
-      <FormSuccessSnackbar open={successOpen} message={successMessage} onClose={onCloseSuccess} />
+      <MobileFormSuccessSnackbar open={successOpen} message={successMessage} onClose={onCloseSuccess} />
     </MobilePageContainer>
   );
 }

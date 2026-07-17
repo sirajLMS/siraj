@@ -5,10 +5,14 @@ import { Box, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/common/components/ui";
-import { CountryDisplay, CurrencyDisplay, LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SupportedMobileWalletFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import {
+  DesktopCountryDisplay,
+  DesktopCurrencyDisplay,
+  DesktopLocalizedStringDisplay,
+} from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface MobileWalletCatalogGridDesktopProps extends CatalogGridActionHandlers {
@@ -37,19 +41,19 @@ export function MobileWalletCatalogGridDesktop({
         headerName: pc.columns.name,
         flex: 1.5,
         minWidth: 180,
-        renderCell: ({ row }) => <LocalizedStringDisplay value={row.name} />,
+        renderCell: ({ row }) => <DesktopLocalizedStringDisplay value={row.name} />,
       },
       {
         field: "countryCode",
         headerName: pc.columns.country,
         width: 140,
-        renderCell: ({ row }) => <CountryDisplay code={row.countryCode} />,
+        renderCell: ({ row }) => <DesktopCountryDisplay code={row.countryCode} />,
       },
       {
         field: "currencyCode",
         headerName: pc.columns.currency,
         width: 140,
-        renderCell: ({ row }) => <CurrencyDisplay code={row.currencyCode} />,
+        renderCell: ({ row }) => <DesktopCurrencyDisplay code={row.currencyCode} />,
       },
       {
         field: "supportedDirections",

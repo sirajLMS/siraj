@@ -5,14 +5,18 @@ import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import { ClassesLeftProgress } from "@/frontend/common/views/dashboard/admin/parents/students/components/ClassesLeftProgress";
 import type {
   StudentDirectoryDataGridLabels,
   StudentDirectoryRowExtended,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
+import {
+  DesktopAppDataGrid,
+  DesktopGridPagination,
+  DesktopPersonProfileLinkCell,
+} from "@/frontend/desktop/components/ui";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 
 interface StudentDirectoryDataGridProps {
   readonly rows: readonly StudentDirectoryRowExtended[];
@@ -60,7 +64,7 @@ export function StudentDirectoryDataGrid({
         flex: 1.2,
         minWidth: 200,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell
+          <DesktopPersonProfileLinkCell
             href={row.id ? studentHref(row.id) : undefined}
             name={row.name ?? ""}
             avatarUrl={row.avatarUrl}
@@ -86,7 +90,7 @@ export function StudentDirectoryDataGrid({
         headerName: labels.status,
         width: 140,
         renderCell: ({ row }) => (
-          <StatusBadge
+          <DesktopStatusBadge
             category="studentAccount"
             status={row.accountStatus}
             label={labels.statusLabels[row.accountStatus]}
@@ -176,7 +180,7 @@ export function StudentDirectoryDataGrid({
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
 
   return (
-    <AppDataGrid<StudentDirectoryRowExtended>
+    <DesktopAppDataGrid<StudentDirectoryRowExtended>
       rows={rows}
       columns={columns}
       getRowId={row => row.id ?? ""}
@@ -193,7 +197,7 @@ export function StudentDirectoryDataGrid({
               onPageChange(model.page);
             },
             pageSizeOptions: [pageSize],
-            slots: { pagination: GridPagination },
+            slots: { pagination: DesktopGridPagination },
           }
         : {})}
       onRowClick={(params: GridRowParams<StudentDirectoryRowExtended>) => {

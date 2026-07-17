@@ -3,12 +3,11 @@
 import { Alert } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/common/components/ui";
 import { type CurrencyOption, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { SupportedCurrenciesViewModel } from "@/frontend/common/views/dashboard/admin/billing/currencies/supportedCurrenciesView";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopAppDataGrid, DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 
 type DesktopRow = CurrencyOption & { readonly id: string };
 
@@ -58,7 +57,7 @@ export function SupportedCurrenciesDesktopView({
   return (
     <DesktopPageContainer>
       <DesktopPageHeader title={pageTitle} subtitle={pageSubtitle} />
-      <AppDataGrid
+      <DesktopAppDataGrid
         rows={rows as readonly DesktopRow[]}
         columns={columns}
         emptyMessage={emptyMessage}

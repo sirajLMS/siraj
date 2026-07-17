@@ -5,8 +5,8 @@ import { Box, Chip, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/common/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import { IdentifierKind, PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display";
 import type { SupportedOnlineAccountFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
 import { type PaymentCatalogsLabels, useAppTranslation } from "@/shared/locale";
@@ -51,7 +51,7 @@ export function OnlineAccountCatalogGridDesktop({
         headerName: pc.columns.name,
         flex: 1.5,
         minWidth: 180,
-        renderCell: ({ row }) => <LocalizedStringDisplay value={row.name} />,
+        renderCell: ({ row }) => <DesktopLocalizedStringDisplay value={row.name} />,
       },
       {
         field: "identifierKind",

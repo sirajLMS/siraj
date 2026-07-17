@@ -2,7 +2,7 @@
 
 import { SendOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { ExportButton, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { DesktopExportButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
 import type { BillingManualLabels } from "@/shared/locale";
 
 interface ManualInvoiceActionsDesktopProps {
@@ -23,20 +23,20 @@ export function ManualInvoiceActionsDesktop({
   onSubmitAndSendEmail,
 }: Readonly<ManualInvoiceActionsDesktopProps>) {
   const submitButton = (
-    <PrimaryPageAction disabled={!canCreate || isSubmitting} onClick={onSubmit} sx={{ flex: 1, py: 2 }}>
+    <DesktopPrimaryPageAction disabled={!canCreate || isSubmitting} onClick={onSubmit} sx={{ flex: 1, py: 2 }}>
       {labels.submit}
-    </PrimaryPageAction>
+    </DesktopPrimaryPageAction>
   );
 
   const sendEmailButton = canSendEmail ? (
-    <ExportButton
+    <DesktopExportButton
       startIcon={<SendOutlined />}
       disabled={!canCreate || isSubmitting}
       onClick={onSubmitAndSendEmail}
       sx={{ flex: 1, py: 2 }}
     >
       {labels.submitAndSendEmail}
-    </ExportButton>
+    </DesktopExportButton>
   ) : null;
 
   return (

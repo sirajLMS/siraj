@@ -1,11 +1,11 @@
 "use client";
 
 import { Box, CircularProgress } from "@mui/material";
-import { PaginationControls } from "@/frontend/common/components/ui";
 import type {
   StudentDirectoryCardListLabels,
   StudentDirectoryRowExtended,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
+import { MobilePaginationControls } from "@/frontend/mobile/components/ui";
 import { StudentDirectoryCardBase } from "@/frontend/mobile/views/dashboard/admin/parents/students/components/studentDirectoryCardBase.mobile";
 
 interface StudentDirectoryCardListProps {
@@ -45,7 +45,7 @@ export function StudentDirectoryCardList({
         <StudentDirectoryCardBase key={row.id} row={row} labels={labels} onViewProfile={onViewProfile} />
       ))}
       {onPageChange && totalCount !== undefined ? (
-        <PaginationControls
+        <MobilePaginationControls
           page={page}
           pageCount={pageCount}
           rowCount={totalCount}

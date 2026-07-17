@@ -12,15 +12,16 @@ import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
-import { GridPagination, PersonProfileLinkCell } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type {
   ParentDirectoryRow,
   ParentsDataGridLabels,
 } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
+import { DesktopGridPagination } from "@/frontend/desktop/components/ui";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 import { Link } from "@/shared/i18n/routing";
 
 export type { ParentsDataGridLabels };
@@ -66,7 +67,7 @@ export function ParentsDataGridDesktop({
         minWidth: 200,
         renderCell: ({ row }) => (
           <Stack sx={{ justifyContent: "center", height: "100%" }}>
-            <PersonProfileLinkCell
+            <DesktopPersonProfileLinkCell
               href={profileHrefForParent({ userId: row.userId, parentId: row.id })}
               name={row.name}
               avatarUrl={row.avatarUrl}
@@ -106,7 +107,7 @@ export function ParentsDataGridDesktop({
         headerName: labels.status,
         width: 130,
         renderCell: ({ row }) => (
-          <StatusBadge
+          <DesktopStatusBadge
             category="studentAccount"
             status={row.lifecycleStatus}
             label={labels.statusLabels[row.lifecycleStatus]}
@@ -118,7 +119,7 @@ export function ParentsDataGridDesktop({
         headerName: labels.accountStatus,
         width: 120,
         renderCell: ({ row }) => (
-          <StatusBadge
+          <DesktopStatusBadge
             category="staffAccount"
             status={row.accountStatus}
             label={labels.accountStatusLabels[row.accountStatus]}
@@ -213,7 +214,7 @@ export function ParentsDataGridDesktop({
   );
 
   return (
-    <AppDataGrid<ParentDirectoryRow>
+    <DesktopAppDataGrid<ParentDirectoryRow>
       rows={rows}
       columns={columns}
       getRowId={row => row.id}
@@ -233,7 +234,7 @@ export function ParentsDataGridDesktop({
               onPageChange(model.page);
             },
             pageSizeOptions: [10, 25, 50],
-            slots: { pagination: GridPagination },
+            slots: { pagination: DesktopGridPagination },
           }
         : {})}
       sx={{

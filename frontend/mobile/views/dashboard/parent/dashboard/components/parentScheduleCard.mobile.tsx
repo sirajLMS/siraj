@@ -3,12 +3,11 @@
 import { AcUnitOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { Box, Stack, Tooltip, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { MeetingJoinAction, StatusBadge } from "@/frontend/common/components/ui";
-import { PersonProfileLink } from "@/frontend/common/components/ui/display/personProfileLink/PersonProfileLink";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-import { MobileCardListItem } from "@/frontend/mobile/components/ui";
+import { MobileCardListItem, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig/MeetingJoinAction.mobile";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export interface ParentScheduleMobileCardItemProps {
@@ -64,7 +63,7 @@ export function ParentScheduleCardMobile({ row, labels }: Readonly<ParentSchedul
               </Box>
             </Tooltip>
           ) : null}
-          <StatusBadge
+          <MobileStatusBadge
             category={row.bookingStatus === "rescheduled" ? "trackingStatus" : "session"}
             status={row.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed"}
             label={labels.bookingStatus[row.bookingStatus]}
@@ -82,7 +81,7 @@ export function ParentScheduleCardMobile({ row, labels }: Readonly<ParentSchedul
         })}
       >
         <Stack spacing={0.25} sx={{ minWidth: 0 }}>
-          <PersonProfileLink
+          <MobilePersonProfileLink
             href={studentProfileHref}
             name={row.studentName}
             avatarUrl={row.studentAvatarUrl}
@@ -91,7 +90,7 @@ export function ParentScheduleCardMobile({ row, labels }: Readonly<ParentSchedul
             typographyVariant="bodyMd"
             fontWeight={700}
           />
-          <PersonProfileLink
+          <MobilePersonProfileLink
             href={teacherProfileHref}
             name={teacherLabel}
             avatarSize={32}
@@ -101,7 +100,7 @@ export function ParentScheduleCardMobile({ row, labels }: Readonly<ParentSchedul
           />
         </Stack>
         {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen }) ? (
-          <MeetingJoinAction
+          <MobileMeetingJoinAction
             variant="icon"
             joinUrl={row.meetingJoinUrl}
             meeting={row.effectiveMeeting}

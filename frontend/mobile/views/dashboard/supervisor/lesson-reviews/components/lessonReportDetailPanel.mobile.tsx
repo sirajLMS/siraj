@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import type { PendingReviewsLabels } from "@/shared/locale";
 
@@ -46,7 +46,7 @@ export function LessonReportDetailPanelMobile({ report, labels }: Readonly<Lesso
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
           {report.lessonDate}
         </Typography>
-        <StatusBadge
+        <MobileStatusBadge
           category="classStatus"
           status={report.status ? report.status.toLowerCase() : "pending"}
           label={report.status ?? "PENDING"}
