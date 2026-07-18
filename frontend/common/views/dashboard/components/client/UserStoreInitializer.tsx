@@ -16,9 +16,12 @@ function isValidPermission(value: string): value is AppPermission {
 export function UserStoreInitializer({ userProfile, isSuperAdmin }: UserStoreInitializerProps) {
   const setUser = useUserStore(state => state.setUser);
   const setActorIsSuperAdmin = useUserStore(state => state.setActorIsSuperAdmin);
-  const permissions = (userProfile.permissions || []).filter(isValidPermission);
 
   useEffect(() => {
+    // Filter inside the effect — a new `.filter()` array each render in the
+    // dependency list re-fires this effect after setUser notifies subscribers
+    // (e.g. DashboardClientBridge → useNotificationsDrawerViewModel).
+    const permissions = (userProfile.permissions || []).filter(isValidPermission);
     setActorIsSuperAdmin(isSuperAdmin);
     setUser({
       id: userProfile.id || "",
@@ -37,7 +40,7 @@ export function UserStoreInitializer({ userProfile, isSuperAdmin }: UserStoreIni
       phone: userProfile.phone ?? null,
       status: userProfile.status ?? null,
     });
-  }, [userProfile, setUser, setActorIsSuperAdmin, permissions, isSuperAdmin]);
+  }, [userProfile, setUser, setActorIsSuperAdmin, isSuperAdmin]);
 
   return null;
 }

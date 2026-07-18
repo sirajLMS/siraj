@@ -35,7 +35,12 @@ export const useUserStore = create<UserState>((set, get) => ({
       notificationCount: user?.notificationCount || 0,
       displayCurrency: user?.displayCurrency ?? null,
     }),
-  setActorIsSuperAdmin: actorIsSuperAdmin => set({ actorIsSuperAdmin }),
+  setActorIsSuperAdmin: actorIsSuperAdmin => {
+    if (get().actorIsSuperAdmin === actorIsSuperAdmin) {
+      return;
+    }
+    set({ actorIsSuperAdmin });
+  },
   hasPermission: permission => {
     const permissions = get().user?.permissions || get().permissions || [];
     return permissions.includes(permission);
