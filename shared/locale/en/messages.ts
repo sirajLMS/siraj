@@ -72,6 +72,7 @@ import { dashboardTeacherStudentsEn } from "@/shared/locale/en/dashboard/teacher
 import { dashboardTeacherWeeklyScheduleEn } from "@/shared/locale/en/dashboard/teachers/weeklySchedule";
 import { emailsEn } from "@/shared/locale/en/emails";
 import { errorsEn } from "@/shared/locale/en/errors";
+import { notificationsEn } from "@/shared/locale/en/notifications";
 import { profileEn } from "@/shared/locale/en/profile";
 import { profileNotificationsEn } from "@/shared/locale/en/profile/notifications";
 import { profileParentEn } from "@/shared/locale/en/profile/parent";
@@ -227,4 +228,5 @@ export const enMessages: Translations = {
     staff: profileStaffEn,
     notifications: profileNotificationsEn,
   },
+  notificationsTranslations: notificationsEn,
 };

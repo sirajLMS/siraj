@@ -1,4 +1,8 @@
-import { StudentRepository } from "@/backend/db/repo";
+import { ParentRepository, StudentRepository } from "@/backend/db/repo";
+import { NotificationEventType } from "@/backend/enum";
+import { logger } from "@/backend/lib/logger";
+import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
+import { buildStudentLifecyclePayloads } from "@/backend/services/notification/notification-payloads.builders";
 import { assertStudentFieldEdit, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -24,7 +28,8 @@ export namespace StudentManagementService {
     studentId: string,
     tErrors: ErrorsLabels,
     newClassesRemaining: number,
-    expectedVersion?: number
+    expectedVersion?: number,
+    locale?: string
   ): Promise<EditQuotaResult> {
     const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
     try {
@@ -54,6 +59,17 @@ export namespace StudentManagementService {
       expectedVersion
     );
 
+    await dispatchStudentQuotaOverriddenNotifications(studentId, updated.name, newClassesRemaining, locale).catch(
+      error => {
+        logger.error("Student quota override notification dispatch failed", {
+          actorUserId,
+          studentId,
+          newClassesRemaining,
+          error,
+        });
+      }
+    );
+
     return {
       id: updated.id,
       classesRemaining: updated.classesRemaining,
@@ -61,4 +77,31 @@ export namespace StudentManagementService {
       version: updated.version,
     };
   }
+}
+
+async function dispatchStudentQuotaOverriddenNotifications(
+  studentId: string,
+  studentName: string,
+  newClassesRemaining: number,
+  locale?: string
+): Promise<void> {
+  const student = await StudentRepository.findById(studentId);
+  if (!student) return;
+
+  const parentUserId = await ParentRepository.findUserIdByParentId(student.parentId);
+  if (!parentUserId) return;
+
+  const targetUserIds = [parentUserId];
+  const payloads = buildStudentLifecyclePayloads(
+    studentId,
+    NotificationEventType.STUDENT_QUOTA_OVERRIDDEN,
+    targetUserIds,
+    locale,
+    {
+      studentName,
+      newClassesRemaining: String(newClassesRemaining),
+    }
+  );
+
+  await dispatchWithPreferences(payloads, targetUserIds, locale);
 }

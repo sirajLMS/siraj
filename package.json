@@ -30,6 +30,7 @@
     "test:ui:components:coverage": "bun test --coverage test/ui/components/ --timeout=30000 --preload ./backend/db/test/logger-mock.ts --preload ./backend/db/test/ensure-env.ts --preload ./test/ui/components/happydom-preload.ts --preload ./test/ui/components/next-dynamic-mock.ts",
     "test:ui:e2e": "bun test test/ui/e2e/ --timeout=120000 --preload ./backend/db/test/logger-mock.ts --preload ./backend/db/test/ensure-env.ts --preload ./test/ui/components/happydom-preload.ts --preload ./test/ui/components/next-dynamic-mock.ts",
     "test:live-fx": "bun test --preload ./backend/services/fx/test/live-fx-preload.ts backend/services/fx/providers/ --timeout=120000",
+    "test:live-comm": "bun test --preload ./backend/services/communication/test/live-comm-preload.ts backend/services/communication/channels/ --timeout=120000",
     "codescene": "bun run scripts/health/codescene/main.ts --scan",
     "lint": "bun run scripts/lint-queue-client.ts",
     "lint:fix": "eslint . --fix --concurrency=auto --cache",

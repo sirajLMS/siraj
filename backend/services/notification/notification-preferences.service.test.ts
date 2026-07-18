@@ -6,6 +6,6 @@ describe("NotificationPreferencesService", () => {
     const channelCount = Object.values(NotificationChannel).length;
     const eventCount = Object.values(NotificationEventType).length;
 
-    expect(channelCount * eventCount).toBe(32);
+    expect(channelCount * eventCount).toBe(88);
   });
 });

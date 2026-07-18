@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository } from "@/backend/db/repo";
@@ -8,10 +9,12 @@ import {
   type RecurringScheduleUpsertInput,
   type ScheduleDayKey,
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
-import { AppPermission, type IanaTimezone } from "@/backend/enum";
+import { students } from "@/backend/db/schema";
+import { AppPermission, type IanaTimezone, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import type { RecurringScheduleDayEntity, RecurringScheduleEntity } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -31,9 +34,77 @@ export interface CreateRecurringClassInput {
   }[];
   classType?: "REGULAR" | "TRIAL" | "ADVANCE";
   generateInstancesForWeeks?: number;
+  /** Optional locale forwarded to `dispatchWithPreferences` for i18n. */
+  locale?: string;
 }
 
 export namespace RecurringClassService {
+  /**
+   * Resolve the student display name for the `metadata.studentName` channel
+   * of `buildClassLifecyclePayloads`. The pure builder never reads the DB
+   * (specs.md §5.1), so the parent of all instances in this recurring
+   * schedule is fetched once here and threaded into every dispatch.
+   */
+  async function resolveStudentName(studentId: string): Promise<string> {
+    const [row] = await db.select({ name: students.name }).from(students).where(eq(students.id, studentId)).limit(1);
+    return row?.name ?? "—";
+  }
+
+  /**
+   * Fire `CLASS_SCHEDULED` notifications for each newly-created instance.
+   * Errors are caught per-instance so one dispatch failure does NOT surface
+   * as a 500 to callers that just successfully created the recurring class
+   * (specs.md "Dispatch failures must NOT throw out of the action").
+   *
+   * The affected-user triplet is the same parent + teacher for every
+   * instance in this recurring schedule, so it is resolved once from the
+   * first instance and reused — saving `N` extra join queries.
+   */
+  async function dispatchClassScheduledNotifications(
+    classInstanceIds: readonly string[],
+    studentId: string,
+    locale?: string
+  ): Promise<void> {
+    const firstInstanceId = classInstanceIds[0];
+    if (!firstInstanceId) return;
+
+    let affected: Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceAffectedUsers>>;
+    let studentName: string;
+    try {
+      affected = await SchedulingRepository.getClassInstanceAffectedUsers(firstInstanceId);
+      studentName = await resolveStudentName(studentId);
+    } catch (error) {
+      logger.error("Class scheduled notification setup failed", {
+        firstInstanceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return;
+    }
+
+    if (!affected) return;
+
+    for (const instanceId of classInstanceIds) {
+      try {
+        const instance = await SchedulingRepository.getClassInstanceById(instanceId);
+        if (!instance) continue;
+
+        const payloads = buildClassLifecyclePayloads(
+          instance,
+          NotificationEventType.CLASS_SCHEDULED,
+          [affected.parentUserId, affected.teacherUserId],
+          locale,
+          { studentName }
+        );
+        await dispatchWithPreferences(payloads, [affected.parentUserId, affected.teacherUserId], locale);
+      } catch (error) {
+        logger.error("Class scheduled notification dispatch failed", {
+          classInstanceId: instanceId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+  }
+
   export async function createRecurringClass(userId: string, input: CreateRecurringClassInput, tErrors: ErrorsLabels) {
     try {
       const hasCreateAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
@@ -90,6 +161,8 @@ export namespace RecurringClassService {
 
         return created;
       });
+
+      await dispatchClassScheduledNotifications(result.classInstanceIds, input.studentId, input.locale);
 
       return {
         id: result.recurringScheduleId,

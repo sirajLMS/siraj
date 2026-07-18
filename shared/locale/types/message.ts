@@ -6,6 +6,7 @@ import type { CommonLabels } from "@/shared/locale/types/common";
 import type { DashboardTranslations } from "@/shared/locale/types/dashboard";
 import type { EmailsLabels } from "@/shared/locale/types/emails";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { NotificationsLabels } from "@/shared/locale/types/notifications";
 import type { ProfileTranslations } from "@/shared/locale/types/profile-translations";
 import type { SessionLabels } from "@/shared/locale/types/session";
 import type { SmsLabels } from "@/shared/locale/types/sms";
@@ -23,4 +24,5 @@ export type Translations = {
   uiTranslations: UiTranslations;
   dashboardTranslations: DashboardTranslations;
   profileTranslations: ProfileTranslations;
+  notificationsTranslations: NotificationsLabels;
 };

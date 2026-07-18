@@ -1,7 +1,14 @@
 import { createHash } from "node:crypto";
+import { and, eq, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { BillingRepository, InvoicePaymentSubmissionRepository, ParentRepository } from "@/backend/db/repo";
+import {
+  BillingRepository,
+  InvoicePaymentSubmissionRepository,
+  ParentRepository,
+  StudentRepository,
+} from "@/backend/db/repo";
+import { groupPermissions, invoices, permissions, userPermissionGroups } from "@/backend/db/schema";
 import { AppPermission, type CurrencyCode } from "@/backend/enum";
 import { logger, NotFoundError } from "@/backend/lib";
 import { parseInvoiceStatus, parseInvoiceType } from "@/backend/lib/enum";
@@ -14,6 +21,11 @@ import {
   recordProofPayment,
   validateProofFile,
 } from "@/backend/services/billing/billing-payment-proof.helpers";
+import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
+import {
+  buildInvoiceGeneratedPayloads,
+  buildInvoiceStatusChangedPayloads,
+} from "@/backend/services/notification/notification-payloads.builders";
 import type * as Types from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -101,7 +113,137 @@ async function syncNotificationsAfterPaymentChange(locale?: string): Promise<boo
   return syncResult !== null;
 }
 
-async function finalizePaymentStatusChange(
+/**
+ * Resolve the `users.id` for a parent row. Used as the notification
+ * recipient when an invoice event targets the parent (specs.md B1/B4/B5/B6).
+ * Returns `null` if the parent row is missing — the caller skips dispatch.
+ */
+async function resolveParentUserId(parentId: string): Promise<string | null> {
+  const parent = await ParentRepository.getParentProfile(parentId);
+  return parent?.userId ?? null;
+}
+
+/**
+ * Resolve userIds of all staff currently holding the given permission via
+ * their group memberships (super-admins are folded in). Exhausts the
+ * `user_permission_groups → group_permissions → permissions` join in one
+ * query. The `BILLING_UPDATE_STATUS_PAID` permission gates proof review,
+ * so its holders are the staff reviewers notified on `submitPaymentProof`
+ * (specs.md B3).
+ *
+ * Returns an empty array on any fetch error so the caller can early-return
+ * (no staff reviewers = no dispatch).
+ */
+async function resolveUsersWithPermission(permissionKey: AppPermission): Promise<string[]> {
+  try {
+    const rows = await db
+      .select({ userId: userPermissionGroups.userId })
+      .from(userPermissionGroups)
+      .innerJoin(groupPermissions, eq(groupPermissions.groupId, userPermissionGroups.groupId))
+      .innerJoin(permissions, eq(permissions.id, groupPermissions.permissionId))
+      .where(eq(permissions.key, permissionKey));
+    const unique = new Set<string>();
+    for (const row of rows) unique.add(row.userId);
+    return [...unique];
+  } catch (error) {
+    logger.error("resolveUsersWithPermission: lookup failed", { permissionKey, error });
+    return [];
+  }
+}
+
+/**
+ * Dispatch invoice-generated payloads to the parent non-blockingly: a
+ * dispatch failure must not roll back the invoice creation (specs.md B1).
+ * The tray-summary sync (`NotificationSyncService.syncUnpaidNotifications`)
+ * is preserved by the caller — this helper only emits the new dispatch.
+ */
+async function dispatchInvoiceGenerated(
+  parentUserId: string,
+  invoice: Types.InvoiceSelectType,
+  locale?: string
+): Promise<void> {
+  const payloads = buildInvoiceGeneratedPayloads(parentUserId, invoice, locale);
+  await dispatchWithPreferences(payloads, [parentUserId], locale).catch(err => {
+    logger.error("Invoice-generated notification dispatch failed", {
+      invoiceId: invoice.id,
+      parentUserId,
+      err,
+    });
+  });
+}
+
+async function dispatchInvoiceStatusChanged(
+  parentUserId: string,
+  action: "proofSubmitted" | "proofApproved" | "proofRejected" | "markedPaid",
+  invoice: Types.InvoiceSelectType,
+  locale?: string
+): Promise<void> {
+  const payloads = buildInvoiceStatusChangedPayloads(parentUserId, action, invoice, locale);
+  await dispatchWithPreferences(payloads, [parentUserId], locale).catch(err => {
+    logger.error("Invoice-status-changed notification dispatch failed", {
+      invoiceId: invoice.id,
+      parentUserId,
+      action,
+      err,
+    });
+  });
+}
+
+/**
+ * Fan the `proofSubmitted` notification out to all staff reviewers
+ * (specs.md B3). Each reviewer receives a payload keyed to their own
+ * `userId` so `dispatchWithPreferences` can apply per-user prefs. Dispatch
+ * is non-blocking and logged on failure.
+ */
+async function dispatchProofSubmittedToStaff(
+  staffUserIds: string[],
+  invoice: Types.InvoiceSelectType,
+  locale?: string
+): Promise<void> {
+  if (staffUserIds.length === 0) return;
+  const allPayloads: Types.CommunicationPayload[] = [];
+  for (const staffUserId of staffUserIds) {
+    const perUser = buildInvoiceStatusChangedPayloads(staffUserId, "proofSubmitted", invoice, locale);
+    allPayloads.push(...perUser);
+  }
+  await dispatchWithPreferences(allPayloads, staffUserIds, locale).catch(err => {
+    logger.error("proof-submitted staff notification dispatch failed", {
+      invoiceId: invoice.id,
+      staffCount: staffUserIds.length,
+      err,
+    });
+  });
+}
+
+/**
+ * Resolve the parent of a student, then dispatch `INVOICE_GENERATED`
+ * payloads for each of the parent's currently-unpaid invoices
+ * (specs.md B2 — real dispatch for `sendPaymentReminder`).
+ *
+ * The student→parent→user lookup chain is best-effort: if any link is
+ * missing we log and return without dispatching (the caller in
+ * `sendPaymentReminder` separately preserves the tray-summary sync).
+ */
+async function dispatchUnpaidInvoicesForStudent(studentId: string, locale?: string): Promise<void> {
+  const student = await StudentRepository.findById(studentId);
+  if (!student) return;
+  const parentId = student.parentId;
+  if (!parentId) return;
+
+  const parentUserId = await resolveParentUserId(parentId);
+  if (!parentUserId) return;
+
+  const unpaidInvoices = await db
+    .select()
+    .from(invoices)
+    .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
+
+  for (const invoice of unpaidInvoices) {
+    await dispatchInvoiceGenerated(parentUserId, invoice as Types.InvoiceSelectType, locale);
+  }
+}
+
+async function _finalizePaymentStatusChange(
   errorLabel: string,
   actorUserId: string,
   invoiceId: string,
@@ -112,6 +254,40 @@ async function finalizePaymentStatusChange(
   try {
     const updated = await db.transaction(tx => txnWork(tx, tErrors));
     const notificationSummaryUpdated = await syncNotificationsAfterPaymentChange(locale);
+    return mapMarkPaidResult(updated, notificationSummaryUpdated);
+  } catch (error) {
+    logger.error(errorLabel, { actorUserId, invoiceId, error });
+    throw error;
+  }
+}
+
+/**
+ * Wraps {@link finalizePaymentStatusChange} so the caller can fire a
+ * non-blocking notification dispatch AFTER the transaction commits but
+ * BEFORE the result is returned. The dispatch is best-effort: it catches
+ * and logs its own errors, never throwing back into the mutation path
+ * (specs.md B3/B4/B5/B6 — dispatch failure must not fail the mutation).
+ *
+ * Returns the unchanged {@link Types.MarkInvoicePaidResult} so callers can
+ * forward it transparently.
+ */
+async function finalizePaymentStatusChangeWithDispatch(
+  errorLabel: string,
+  actorUserId: string,
+  invoiceId: string,
+  txnWork: (tx: DBTransaction, tErrors: ErrorsLabels) => Promise<Types.InvoiceSelectType>,
+  tErrors: ErrorsLabels,
+  postCommitDispatch: (updatedInvoice: Types.InvoiceSelectType) => Promise<void>,
+  locale?: string
+): Promise<Types.MarkInvoicePaidResult> {
+  try {
+    const updated = await db.transaction(tx => txnWork(tx, tErrors));
+    const notificationSummaryUpdated = await syncNotificationsAfterPaymentChange(locale);
+
+    await postCommitDispatch(updated).catch(err => {
+      logger.error(`${errorLabel}: post-commit dispatch failed`, { actorUserId, invoiceId, err });
+    });
+
     return mapMarkPaidResult(updated, notificationSummaryUpdated);
   } catch (error) {
     logger.error(errorLabel, { actorUserId, invoiceId, error });
@@ -184,7 +360,8 @@ export namespace BillingManagementService {
   export async function createManualInvoice(
     actorUserId: string,
     input: Types.CreateManualInvoiceInput,
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    locale?: string
   ): Promise<Types.ManualInvoiceResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_CREATE_INVOICE, tErrors);
     await validateManualInvoiceInput(input, tErrors);
@@ -203,6 +380,11 @@ export namespace BillingManagementService {
 
       await syncNotificationAfterCreate(created.id, input.sendEmail);
 
+      const parentUserId = await resolveParentUserId(created.parentId);
+      if (parentUserId) {
+        await dispatchInvoiceGenerated(parentUserId, created, locale);
+      }
+
       logger.info("Manual invoice created", { actorUserId, invoiceId: created.id });
 
       return mapToManualInvoiceResult(created);
@@ -217,7 +399,8 @@ export namespace BillingManagementService {
     invoiceId: string,
     proofFileId: string,
     tErrors: ErrorsLabels,
-    expectedVersion?: number
+    expectedVersion?: number,
+    locale?: string
   ): Promise<Types.MarkInvoicePaidResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_SUBMIT_PAYMENT_PROOF, tErrors);
 
@@ -232,7 +415,7 @@ export namespace BillingManagementService {
       throw new Error(tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: existingInvoice.status }));
     }
 
-    return finalizePaymentStatusChange(
+    return finalizePaymentStatusChangeWithDispatch(
       "Failed to submit payment proof",
       actorUserId,
       invoiceId,
@@ -265,7 +448,12 @@ export namespace BillingManagementService {
         });
         return invoice;
       },
-      tErrors
+      tErrors,
+      async updated => {
+        const staffUserIds = await resolveUsersWithPermission(AppPermission.BILLING_UPDATE_STATUS_PAID);
+        await dispatchProofSubmittedToStaff(staffUserIds, updated, locale);
+      },
+      locale
     );
   }
 
@@ -273,7 +461,8 @@ export namespace BillingManagementService {
     actorUserId: string,
     invoiceId: string,
     tErrors: ErrorsLabels,
-    expectedVersion?: number
+    expectedVersion?: number,
+    locale?: string
   ): Promise<Types.MarkInvoicePaidResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, tErrors);
 
@@ -284,7 +473,7 @@ export namespace BillingManagementService {
       throw new Error(tErrors.billing.invoicePaymentProofNotFound(invoiceId));
     }
 
-    return finalizePaymentStatusChange(
+    return finalizePaymentStatusChangeWithDispatch(
       "Failed to approve payment proof",
       actorUserId,
       invoiceId,
@@ -308,7 +497,14 @@ export namespace BillingManagementService {
         );
         return invoice;
       },
-      tErrors
+      tErrors,
+      async updated => {
+        const parentUserId = await resolveParentUserId(updated.parentId);
+        if (parentUserId) {
+          await dispatchInvoiceStatusChanged(parentUserId, "proofApproved", updated, locale);
+        }
+      },
+      locale
     );
   }
 
@@ -317,13 +513,14 @@ export namespace BillingManagementService {
     invoiceId: string,
     tErrors: ErrorsLabels,
     rejectionReason?: string | null,
-    expectedVersion?: number
+    expectedVersion?: number,
+    locale?: string
   ): Promise<Types.MarkInvoicePaidResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, tErrors);
 
     await fetchInvoicePendingReview(invoiceId, tErrors);
 
-    return finalizePaymentStatusChange(
+    return finalizePaymentStatusChangeWithDispatch(
       "Failed to reject payment proof",
       actorUserId,
       invoiceId,
@@ -337,7 +534,14 @@ export namespace BillingManagementService {
         );
         return BillingRepository.updateInvoiceStatus(invoiceId, "UNPAID", tErrors, null, expectedVersion, tx);
       },
-      tErrors
+      tErrors,
+      async updated => {
+        const parentUserId = await resolveParentUserId(updated.parentId);
+        if (parentUserId) {
+          await dispatchInvoiceStatusChanged(parentUserId, "proofRejected", updated, locale);
+        }
+      },
+      locale
     );
   }
 
@@ -359,7 +563,8 @@ export namespace BillingManagementService {
     invoiceId: string,
     proofFileId: string,
     tErrors: ErrorsLabels,
-    expectedVersion?: number
+    expectedVersion?: number,
+    locale?: string
   ): Promise<Types.MarkInvoicePaidResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, tErrors);
 
@@ -376,13 +581,20 @@ export namespace BillingManagementService {
       throw new Error(tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: existingInvoice.status }));
     }
 
-    return finalizePaymentStatusChange(
+    return finalizePaymentStatusChangeWithDispatch(
       "Failed to mark invoice as paid",
       actorUserId,
       invoiceId,
       async (tx, tErrors) =>
         finalizeInvoicePaid(actorUserId, invoiceId, proofFileId, actorUserId, expectedVersion, tx, tErrors),
-      tErrors
+      tErrors,
+      async updated => {
+        const parentUserId = await resolveParentUserId(updated.parentId);
+        if (parentUserId) {
+          await dispatchInvoiceStatusChanged(parentUserId, "markedPaid", updated, locale);
+        }
+      },
+      locale
     );
   }
 
@@ -463,7 +675,8 @@ export namespace BillingManagementService {
   export async function sendPaymentReminder(
     actorUserId: string,
     studentId: string,
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    locale?: string
   ): Promise<Types.SendPaymentReminderResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID);
     if (!hasPermission) {
@@ -471,7 +684,18 @@ export namespace BillingManagementService {
     }
 
     try {
-      const syncResult = await NotificationSyncService.syncUnpaidNotifications();
+      // Tray-summary sync is preserved (specs.md F9).
+      const syncResult = await NotificationSyncService.syncUnpaidNotifications(locale).catch(err => {
+        logger.error("Notification sync failed during sendPaymentReminder", { studentId, err });
+        return null;
+      });
+
+      // Real dispatch: renotify the parent of each unpaid invoice of the
+      // student's parent using `INVOICE_GENERATED` (the existing event for
+      // this purpose — switching to INVOICE_STATUS_CHANGED was rejected).
+      await dispatchUnpaidInvoicesForStudent(studentId, locale).catch(err => {
+        logger.error("Payment reminder dispatch failed", { studentId, err });
+      });
 
       logger.info("Payment reminder sent", {
         actorUserId,

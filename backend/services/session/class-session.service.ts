@@ -4,10 +4,12 @@ import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-status-events.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, NotificationEventType } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
 import type {
@@ -77,6 +79,61 @@ export namespace ClassSessionService {
     return result;
   }
 
+  /**
+   * Dispatch a class-lifecycle notification to the parent + teacher of the
+   * given class instance. Spec.md requires every dispatch go through
+   * `dispatchWithPreferences` (rule #1), every payload through a pure
+   * builder (rule #2), and dispatch failures must NOT throw out of the
+   * caller — so this helper catches + logs everything (specs.md §5.2).
+   *
+   * Resolves the affected-user triplet via the S5 repo helper (parent /
+   * teacher user ids via `classInstances.studentId → students.parentId →
+   * parents.userId` and `classInstances.teacherId → teachers.userId`) and
+   * passes `metadata.studentName` so the pure builder can interpolate the
+   * student display name without reading the DB itself (specs.md §5.1).
+   *
+   * @param classInstanceId  The class instance row to dispatch about.
+   * @param eventType        One of the 10 CLASS_* lifecycle event types.
+   * @param affected         Pre-resolved affected user triplet (use this
+   *                        overload from actions that run the soft-delete
+   *                        BEFORE the dispatch — e.g. `deleteInstance` —
+   *                        so the `deletedAt IS NULL` filter in
+   *                        `getClassInstanceAffectedUsers` does not yield
+   *                        `null` after the soft-delete commit).
+   * @param metadata         Optional metadata bag (e.g. `override`, `newStartAt`).
+   * @param locale           Optional locale forwarded to `dispatchWithPreferences`.
+   */
+  async function notifyClassLifecycle(
+    classInstanceId: string,
+    eventType: NotificationEventType,
+    affected: { readonly parentUserId: string; readonly studentId: string; readonly teacherUserId: string } | null,
+    metadata?: Record<string, string>,
+    locale?: string
+  ): Promise<void> {
+    if (!affected) return;
+
+    try {
+      const instance = await SchedulingRepository.getClassInstanceById(classInstanceId);
+      if (!instance) return;
+
+      const studentName = instance.student?.name ?? "—";
+      const payloads = buildClassLifecyclePayloads(
+        instance,
+        eventType,
+        [affected.parentUserId, affected.teacherUserId],
+        locale,
+        { studentName, ...metadata }
+      );
+      await dispatchWithPreferences(payloads, [affected.parentUserId, affected.teacherUserId], locale);
+    } catch (error) {
+      logger.error("Class lifecycle notification dispatch failed", {
+        classInstanceId,
+        eventType,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
   async function refundCreditIfDeducted(
     instance: { id: string; studentId: string; quotaDeducted: boolean | null },
     actorUserId: string,
@@ -139,26 +196,51 @@ export namespace ClassSessionService {
     await assertPermission(userId, AppPermission.SESSION_ACTIVATE_CLASS, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
     await SystemRulesService.assertActivationTimeWindow(instance);
-    return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: false });
+    const result = await SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: false });
+
+    if (result) {
+      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
+      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_ACTIVATED, affected);
+    }
+    return result;
   }
 
   export async function activateOverride(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
     await assertPermission(userId, AppPermission.SESSION_ACTIVATE_OVERRIDE, tErrors);
     await getOrThrow(classInstanceId, tErrors);
-    return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: true });
+    const result = await SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: true });
+
+    if (result) {
+      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
+      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_ACTIVATED, affected, {
+        override: "true",
+      });
+    }
+    return result;
   }
 
   export async function stop(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
-    return SchedulingRepository.stopClassInstance(classInstanceId, userId);
+    const result = await SchedulingRepository.stopClassInstance(classInstanceId, userId);
+
+    if (result) {
+      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
+      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_COMPLETED, affected);
+    }
+    return result;
   }
 
   export async function deleteInstance(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
 
-    return db.transaction(async tx => {
+    // Resolve affected users BEFORE the soft-delete commits — the helper
+    // filters on `classInstances.deletedAt IS NULL`, so a post-delete
+    // resolve would yield `null`.
+    const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
+
+    const result = await db.transaction(async tx => {
       const deleted = await SchedulingRepository.softDeleteClassInstance(classInstanceId, userId, tx);
       if (!deleted) return false;
 
@@ -168,10 +250,17 @@ export namespace ClassSessionService {
       }
       return true;
     });
+
+    if (result) {
+      // Pass the pre-resolved triplet so the helper skips its own fetch (which
+      // would fail post-soft-delete on the `deletedAt IS NULL` filter).
+      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_CANCELLED, affected);
+    }
+    return result;
   }
 
-  export const updateStatusStart: ClassActionFn<ClassInstanceEntity> = (userId, classInstanceId, tErrors) =>
-    runActivatedClassAction(
+  export const updateStatusStart: ClassActionFn<ClassInstanceEntity> = async (userId, classInstanceId, tErrors) => {
+    const result = await runActivatedClassAction(
       userId,
       classInstanceId,
       AppPermission.SESSION_UPDATE_STATUS_START,
@@ -179,8 +268,15 @@ export namespace ClassSessionService {
       tErrors
     );
 
-  export const updateStatusAbsent: ClassActionFn<ClassInstanceEntity> = (userId, classInstanceId, tErrors) =>
-    runActivatedClassAction(
+    if (result) {
+      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
+      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_STARTED, affected);
+    }
+    return result;
+  };
+
+  export const updateStatusAbsent: ClassActionFn<ClassInstanceEntity> = async (userId, classInstanceId, tErrors) => {
+    const result = await runActivatedClassAction(
       userId,
       classInstanceId,
       AppPermission.SESSION_UPDATE_STATUS_ABSENT,
@@ -190,6 +286,13 @@ export namespace ClassSessionService {
       },
       tErrors
     );
+
+    if (result) {
+      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
+      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_MARKED_ABSENT, affected);
+    }
+    return result;
+  };
 
   export async function updateStatusLeave(
     userId: string,
@@ -202,13 +305,19 @@ export namespace ClassSessionService {
     await assertSessionActivated(instance, tErrors);
     await SystemRulesService.assertLeaveQuotaAvailable(instance.teacherId);
 
-    return db.transaction(async tx => {
-      const result = await SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId, tx);
+    const result = await db.transaction(async tx => {
+      const processed = await SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId, tx);
       if (instance.quotaDeducted) {
         await refundCreditIfDeducted(instance, userId, tErrors, tx);
       }
-      return result;
+      return processed;
     });
+
+    if (result) {
+      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
+      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_LEAVE_REQUESTED, affected);
+    }
+    return result;
   }
 
   export async function reschedule(
@@ -252,8 +361,8 @@ export namespace ClassSessionService {
     const finalRemarks = remarksParts.length > 0 ? remarksParts.join("\n") : null;
 
     const idempotencyKey = `manual-reschedule-${classInstanceId}-${input.scheduledStartAt.toISOString()}`;
-    return db.transaction(async tx => {
-      const created = await SchedulingRepository.rescheduleClassInstance(
+    const created = await db.transaction(async tx => {
+      const newInstance = await SchedulingRepository.rescheduleClassInstance(
         classInstanceId,
         {
           studentId: existing.studentId,
@@ -277,28 +386,51 @@ export namespace ClassSessionService {
       );
 
       if (existing.quotaDeducted && existing.deletedAt === null) {
-        const tErrors = getServerTranslations("ar").errorsTranslations;
-        await refundCreditIfDeducted(existing, userId, tErrors, tx);
+        const tErrorsLocal = getServerTranslations("ar").errorsTranslations;
+        await refundCreditIfDeducted(existing, userId, tErrorsLocal, tx);
       }
 
-      return created;
+      return newInstance;
     });
+
+    // Dispatch against the NEW (successor) instance — its `scheduledStartAt`
+    // carries the rescheduled time. Metadata carries `newStartAt` (ISO) +
+    // `originalInstanceId` so the body template can interpolate both.
+    await notifyClassLifecycle(
+      created.id,
+      NotificationEventType.CLASS_RESCHEDULED,
+      await SchedulingRepository.getClassInstanceAffectedUsers(created.id),
+      {
+        newStartAt: input.scheduledStartAt.toISOString(),
+        originalInstanceId: classInstanceId,
+      }
+    );
+
+    return created;
   }
 
   export async function reset(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.SESSION_RESET, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
 
-    return db.transaction(async tx => {
-      const resetInstance = await SchedulingRepository.resetClassInstance(classInstanceId, userId, tx);
-      if (!resetInstance) {
+    const resetInstance = await db.transaction(async tx => {
+      const resetResult = await SchedulingRepository.resetClassInstance(classInstanceId, userId, tx);
+      if (!resetResult) {
         throw new Error(tErrors.notFound);
       }
       if (instance.quotaDeducted) {
         await refundCreditIfDeducted(instance, userId, tErrors, tx);
       }
-      return resetInstance;
+      return resetResult;
     });
+
+    // Reset keeps the row live (deletedAt stays null); resolve post-commit.
+    await notifyClassLifecycle(
+      classInstanceId,
+      NotificationEventType.CLASS_RESET,
+      await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId)
+    );
+    return resetInstance;
   }
   export async function listClassInstancesByIdempotencyKeys(
     keys: readonly string[],

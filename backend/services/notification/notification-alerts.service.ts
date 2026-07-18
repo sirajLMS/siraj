@@ -1,5 +1,6 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
+import { NotificationRepository } from "@/backend/db/repo";
 import { complaints, notificationDeliveries } from "@/backend/db/schema";
 import { AppPermission, ComplaintStatus, NotificationDeliveryStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
@@ -78,6 +79,61 @@ export namespace NotificationAlertsService {
       };
     } catch (error) {
       logger.error("Error fetching notification alerts", { userId, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Mark all of `actorUserId`'s notification deliveries as OPENED.
+   *
+   * Permission-gated by `AppPermission.NOTIFICATION_VIEW_ALERTS` — the
+   * same permission that gates the dashboard notification panel. Rows
+   * that are already in `OPENED` status are skipped by the repo's status
+   * transition guard (`recordDeliveryOpened` -> `updateDeliveryStatus`).
+   *
+   * Per-row failures are caught and logged so a single delivery's failure
+   * does NOT poison the batch; the mutation returns the count of rows
+   * we attempted to mark (not the count that succeeded) so the caller can
+   * refresh its alert feed regardless. We intentionally do not collapse
+   * this to a single batch helper (which S8 doesn't own either) — see
+   * specs.md ownership matrix: the repo is out-of-scope to edit here.
+   */
+  export async function markAlertsRead(actorUserId: string, locale?: string): Promise<{ updatedCount: number }> {
+    try {
+      const canViewAlerts = await PermissionsService.hasPermission(actorUserId, AppPermission.NOTIFICATION_VIEW_ALERTS);
+      if (!canViewAlerts) {
+        const t = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(t.unauthorizedAction);
+      }
+
+      const recentNotifications = await db
+        .select({
+          id: notificationDeliveries.id,
+          status: notificationDeliveries.status,
+        })
+        .from(notificationDeliveries)
+        .where(eq(notificationDeliveries.userId, actorUserId))
+        .orderBy(desc(notificationDeliveries.createdAt))
+        .limit(20);
+
+      const candidates = recentNotifications.filter(n => n.status !== NotificationDeliveryStatus.OPENED);
+
+      let updatedCount = 0;
+      for (const candidate of candidates) {
+        try {
+          await NotificationRepository.recordDeliveryOpened(candidate.id, undefined, undefined, locale);
+          updatedCount++;
+        } catch (error) {
+          logger.warn("markAlertsRead: failed to mark delivery OPENED", {
+            deliveryId: candidate.id,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+
+      return { updatedCount };
+    } catch (error) {
+      logger.error("Error marking notification alerts as read", { userId: actorUserId, error });
       throw error;
     }
   }

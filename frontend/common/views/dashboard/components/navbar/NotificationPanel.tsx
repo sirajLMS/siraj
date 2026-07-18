@@ -1,21 +1,33 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { ErrorOutlined, InfoOutlined, NotificationsOutlined, WarningOutlined } from "@mui/icons-material";
+import { useMutation, useQuery } from "@apollo/client/react";
+import {
+  DoneAllOutlined,
+  ErrorOutlined,
+  InfoOutlined,
+  NotificationsOutlined,
+  WarningOutlined,
+} from "@mui/icons-material";
 import {
   Box,
   CircularProgress,
   Divider,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { notificationAlertsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/notifications/notification-alerts.documents";
+import {
+  markNotificationsReadMutationDocument,
+  notificationAlertsQueryDocument,
+} from "@/frontend/common/graphql/sharedDocuments/notifications/notification-alerts.documents";
+import { logger } from "@/frontend/common/utils/logger";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { UnpaidInvoicesSection } from "@/frontend/common/views/dashboard/components/navbar/UnpaidInvoicesSection";
 import { useAppTranslation } from "@/shared/locale/client";
@@ -44,6 +56,20 @@ export function NotificationPanel() {
   const t = useAppTranslation().dashboardTranslations.coreNotifications;
   const { data, loading, error } = useQuery(notificationAlertsQueryDocument);
 
+  const unreadCount = data?.notificationAlerts?.unreadCount ?? 0;
+
+  const [markRead, { loading: markingRead }] = useMutation(markNotificationsReadMutationDocument, {
+    refetchQueries: [{ query: notificationAlertsQueryDocument }],
+    onCompleted: () => {
+      logger.debug("NotificationPanel markNotificationsRead completed");
+    },
+    onError: err => {
+      logger.warn("NotificationPanel markNotificationsRead failed", {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    },
+  });
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
@@ -63,6 +89,17 @@ export function NotificationPanel() {
   }
 
   const alerts = data?.notificationAlerts?.alerts ?? [];
+  const markReadDisabled = unreadCount === 0 || markingRead || loading;
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markRead();
+    } catch (mutationError) {
+      logger.warn("NotificationPanel markRead threw", {
+        error: mutationError instanceof Error ? mutationError.message : String(mutationError),
+      });
+    }
+  };
 
   return (
     <Box sx={{ width: 360, maxHeight: 480, overflowY: "auto" }}>
@@ -70,9 +107,9 @@ export function NotificationPanel() {
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
           {t.title}
         </Typography>
-        {data?.notificationAlerts?.unreadCount !== undefined &&
-          data.notificationAlerts.unreadCount !== null &&
-          data.notificationAlerts.unreadCount > 0 && (
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {unreadCount > 0 && (
             <Typography
               variant="caption"
               sx={theme => ({
@@ -83,9 +120,22 @@ export function NotificationPanel() {
                 borderRadius: 1,
               })}
             >
-              {data.notificationAlerts.unreadCount}
+              {unreadCount}
             </Typography>
           )}
+
+          <Tooltip title={t.title}>
+            <IconButton
+              aria-label={t.title}
+              disabled={markReadDisabled}
+              onClick={handleMarkAllRead}
+              size="small"
+              sx={theme => ({ color: theme.palette.onSurface })}
+            >
+              <DoneAllOutlined fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
 
       <Divider />

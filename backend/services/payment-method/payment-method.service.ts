@@ -10,9 +10,12 @@ import {
 import { teacherPayments } from "@/backend/db/schema";
 import { AppPermission, ProfileScope } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import { logger } from "@/backend/lib/logger";
 import { parsePaymentMethodDetails, userPaymentMethodSubmitInputSchema } from "@/backend/lib/payment-method.validation";
 import { encryptBankTransferDetails } from "@/backend/lib/payment-method-jsonb";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
+import { buildPaymentMethodChangedPayloads } from "@/backend/services/notification/notification-payloads.builders";
 import {
   buildMaskedPaymentMethod,
   buildMaskedPaymentMethods,
@@ -125,6 +128,19 @@ async function assertActorCanManageTarget(
 }
 
 export namespace PaymentMethodService {
+  async function dispatchPaymentMethodNotification(
+    userId: string,
+    action: "created" | "updated" | "deleted" | "setDefault" | "verified",
+    locale: string | undefined,
+    metadata?: Record<string, string>
+  ): Promise<void> {
+    if (!userId) return;
+    const payloads = buildPaymentMethodChangedPayloads(userId, action, locale, metadata);
+    await dispatchWithPreferences(payloads, [userId], locale).catch(err => {
+      logger.error("Payment-method notification failed", { err, action, userId });
+    });
+  }
+
   export async function listUserPaymentMethods(
     actorUserId: string,
     userId: string,
@@ -240,10 +256,28 @@ export namespace PaymentMethodService {
       return buildMaskedPaymentMethod(created, true);
     };
 
-    return tx ? run(tx) : db.transaction(run);
+    const result = tx ? await run(tx) : await db.transaction(run);
+    await dispatchPaymentMethodNotification(parsed.userId, "created", undefined, {
+      identifier: result.id,
+    });
+    return result;
   }
 
   export async function updateUserPaymentMethod(
+    actorUserId: string,
+    id: string,
+    input: UpdateUserPaymentMethodInput,
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
+  ): Promise<UserPaymentMethodReturnType> {
+    const result = await updateUserPaymentMethodCore(actorUserId, id, input, tErrors, tx);
+    await dispatchPaymentMethodNotification(result.userId, "updated", undefined, {
+      identifier: result.id,
+    });
+    return result;
+  }
+
+  async function updateUserPaymentMethodCore(
     actorUserId: string,
     id: string,
     input: UpdateUserPaymentMethodInput,
@@ -303,6 +337,9 @@ export namespace PaymentMethodService {
 
     await assertActorCanManageTarget(actorUserId, existing.userId, tErrors);
     await UserPaymentMethodRepository.deleteById(id, tErrors, tx);
+    await dispatchPaymentMethodNotification(existing.userId, "deleted", undefined, {
+      identifier: existing.id,
+    });
   }
 
   export async function setDefaultUserPaymentMethod(
@@ -316,12 +353,18 @@ export namespace PaymentMethodService {
       throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
     }
 
-    return updateUserPaymentMethod(
+    const result = await updateUserPaymentMethodCore(
       actorUserId,
       id,
       { isDefault: true, direction: existing.direction as PaymentDirection },
-      tErrors
+      tErrors,
+      tx
     );
+    await dispatchPaymentMethodNotification(existing.userId, "setDefault", undefined, {
+      identifier: result.id,
+      newDefaultId: result.id,
+    });
+    return result;
   }
 
   export async function verifyBankTransferPaymentMethod(
@@ -348,7 +391,11 @@ export namespace PaymentMethodService {
     }
 
     const verified = await UserPaymentMethodRepository.setVerified(id, actorUserId, tErrors, tx);
-    return buildMaskedPaymentMethod(verified, true);
+    const result = buildMaskedPaymentMethod(verified, true);
+    await dispatchPaymentMethodNotification(existing.userId, "verified", undefined, {
+      identifier: result.id,
+    });
+    return result;
   }
 
   export async function recordPayin(

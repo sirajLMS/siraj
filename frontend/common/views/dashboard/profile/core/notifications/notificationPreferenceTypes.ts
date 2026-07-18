@@ -57,6 +57,21 @@ export const NOTIFICATION_EVENT_TYPES = [
   NotificationEventType.NewSuggestion,
   NotificationEventType.SuggestionAcknowledged,
   NotificationEventType.SuggestionDuplicateMarked,
+  // Notification Wiring v5 — 14 new event types (specs.md §4.1)
+  NotificationEventType.InvoiceStatusChanged,
+  NotificationEventType.ClassScheduled,
+  NotificationEventType.ClassActivated,
+  NotificationEventType.ClassStarted,
+  NotificationEventType.ClassCompleted,
+  NotificationEventType.ClassMarkedAbsent,
+  NotificationEventType.ClassMarkedMissed,
+  NotificationEventType.ClassLeaveRequested,
+  NotificationEventType.ClassRescheduled,
+  NotificationEventType.ClassCancelled,
+  NotificationEventType.ClassReset,
+  NotificationEventType.StudentTeacherReassigned,
+  NotificationEventType.StudentStatusChanged,
+  NotificationEventType.StudentQuotaOverridden,
 ] as const;
 
 export function preferenceKey(channel: NotificationChannel, eventType: NotificationEventType): string {

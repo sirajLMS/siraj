@@ -36,6 +36,7 @@ export * from "./dashboard/teachers";
 export * from "./emails";
 export * from "./errors";
 export * from "./message";
+export * from "./notifications";
 export * from "./profile";
 export * from "./profile-translations";
 export * from "./session";

@@ -72,6 +72,7 @@ import { dashboardTeacherStudentsAr } from "@/shared/locale/ar/dashboard/teacher
 import { dashboardTeacherWeeklyScheduleAr } from "@/shared/locale/ar/dashboard/teachers/weeklySchedule";
 import { emailsAr } from "@/shared/locale/ar/emails";
 import { errorsAr } from "@/shared/locale/ar/errors";
+import { notificationsAr } from "@/shared/locale/ar/notifications";
 import { profileAr } from "@/shared/locale/ar/profile";
 import { profileNotificationsAr } from "@/shared/locale/ar/profile/notifications";
 import { profileParentAr } from "@/shared/locale/ar/profile/parent";
@@ -227,4 +228,5 @@ export const arMessages: Translations = {
     staff: profileStaffAr,
     notifications: profileNotificationsAr,
   },
+  notificationsTranslations: notificationsAr,
 };
