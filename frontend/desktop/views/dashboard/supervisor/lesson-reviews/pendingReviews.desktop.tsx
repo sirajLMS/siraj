@@ -16,6 +16,7 @@ import {
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { LessonReportDetailPanelDesktop } from "@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/components/lessonReportDetailPanel.desktop";
+import { RejectReportDialogDesktop } from "@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/components/rejectReportDialog.desktop";
 
 export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewModel>) {
   const {
@@ -32,6 +33,11 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
     onSelectReport,
     onApprove,
     onOpenRejectDialog,
+    onCloseRejectDialog,
+    onRejectReasonChange,
+    onConfirmReject,
+    rejectDialogOpen,
+    rejectReason,
   } = props;
 
   const columns = useMemo<GridColDef<PendingReviewRow>[]>(
@@ -157,6 +163,16 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
       <Grid size={{ xs: 12, lg: 4 }}>
         <LessonReportDetailPanelDesktop report={selectedReport} labels={labels} />
       </Grid>
+
+      <RejectReportDialogDesktop
+        open={rejectDialogOpen}
+        reason={rejectReason}
+        loading={rejecting}
+        labels={labels}
+        onReasonChange={onRejectReasonChange}
+        onClose={onCloseRejectDialog}
+        onConfirm={onConfirmReject}
+      />
     </DesktopPageContainer>
   );
 }

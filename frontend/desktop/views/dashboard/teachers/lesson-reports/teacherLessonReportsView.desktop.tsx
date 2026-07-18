@@ -3,10 +3,8 @@
 import { Box, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type {
-  TeacherLessonReportRow,
-  TeacherLessonReportsViewModel,
-} from "@/frontend/common/views/dashboard/teachers/lesson-reports/useTeacherLessonReportsViewModel";
+import type { LessonReportCardProps } from "@/frontend/common/views/dashboard/teachers/lesson-reports/types";
+import type { TeacherLessonReportsViewModel } from "@/frontend/common/views/dashboard/teachers/lesson-reports/useTeacherLessonReportsViewModel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 export function TeacherLessonReportsDesktopView({
@@ -72,14 +70,7 @@ export function TeacherLessonReportsDesktopView({
   );
 }
 
-interface LessonReportCardDesktopProps {
-  readonly row: TeacherLessonReportRow;
-  readonly labels: TeacherLessonReportsViewModel["labels"];
-  readonly locale: TeacherLessonReportsViewModel["locale"];
-  readonly resolveStatusLabel: TeacherLessonReportsViewModel["resolveStatusLabel"];
-}
-
-function LessonReportCardDesktop({ row, labels, locale, resolveStatusLabel }: Readonly<LessonReportCardDesktopProps>) {
+function LessonReportCardDesktop({ row, labels, locale, resolveStatusLabel }: Readonly<LessonReportCardProps>) {
   return (
     <Box
       sx={theme => ({

@@ -1,12 +1,12 @@
 "use client";
 
 import { Box, Paper } from "@mui/material";
-import {
-  BOTTOM_NAV_SCROLL_THRESHOLD,
-  BottomNavItemView,
-} from "@/frontend/common/views/dashboard/components/BottomNavItemView";
 import { useNavLabels } from "@/frontend/common/views/dashboard/components/useNavLabels";
 import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import {
+  BOTTOM_NAV_SCROLL_THRESHOLD,
+  BottomNavItemViewMobile,
+} from "@/frontend/mobile/views/dashboard/components/bottomNavItemView.mobile";
 
 interface BottomNavbarMobileProps {
   readonly items: readonly NavItem[];
@@ -44,7 +44,7 @@ export function BottomNavbarMobile({ items, activeKey }: Readonly<BottomNavbarMo
         })}
       >
         {items.map(item => (
-          <BottomNavItemView
+          <BottomNavItemViewMobile
             key={item.key}
             itemKey={item.key}
             href={item.href}

@@ -5,12 +5,7 @@ import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { CurrencyDistributionSlice } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
-
-interface FinancialDistributionCardDesktopProps {
-  readonly currencyDistribution: readonly CurrencyDistributionSlice[];
-  readonly title: string;
-  readonly subtitle: string;
-}
+import type { FinancialDistributionCardProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 
 const SEGMENT_COLORS: readonly ((theme: Theme) => string)[] = [
   theme => theme.palette.primary.main,
@@ -49,7 +44,7 @@ export function FinancialDistributionCardDesktop({
   currencyDistribution,
   title,
   subtitle,
-}: Readonly<FinancialDistributionCardDesktopProps>) {
+}: Readonly<FinancialDistributionCardProps>) {
   const hasDistribution = currencyDistribution.length > 0;
 
   return (

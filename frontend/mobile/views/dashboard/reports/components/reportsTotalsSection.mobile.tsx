@@ -1,65 +1,10 @@
 "use client";
 
 import { Box, Stack, Tooltip, Typography } from "@mui/material";
-import { useMemo } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import {
-  type BillingCurrencyBucket,
-  formatBillingCurrencyTotals,
-} from "@/frontend/common/lib/formatBillingCurrencyTotals";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useUserStore } from "@/frontend/common/stores/userStore";
-import type { ReportLedgerRow, ReportsSummary } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
-import { aggregatePaidAmountTotals } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
-import { useAppTranslation } from "@/shared/locale";
+import type { ReportsTotalsSectionProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
+import type { ReportsTotalsDisplay } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
 
-interface ReportsTotalsSectionMobileProps {
-  readonly summary: ReportsSummary;
-  readonly rows: readonly ReportLedgerRow[];
-  readonly totalsLabel: string;
-}
-
-function useTotalsDisplay(rows: readonly ReportLedgerRow[]) {
-  const locale = useAppLocale();
-  const tProfile = useAppTranslation().profileTranslations.base;
-  const tErrors = useAppTranslation().errorsTranslations;
-
-  return useMemo(() => {
-    const paidTotals = aggregatePaidAmountTotals(rows);
-    if (paidTotals.length === 0) {
-      return { primary: "—", ariaLabel: tProfile.notSet };
-    }
-
-    const buckets: BillingCurrencyBucket[] = paidTotals.map(paid => ({
-      amount: paid.amount,
-      currency: paid.currency,
-      displayAmount: paid.displayAmount
-        ? {
-            amount: paid.displayAmount.amount,
-            currency: paid.displayAmount.currency,
-            stale: paid.displayAmount.stale,
-          }
-        : null,
-    }));
-
-    return formatBillingCurrencyTotals(
-      buckets,
-      locale,
-      buildFxDisplayMessages(
-        {
-          convertedAmount: tProfile.convertedAmount,
-        },
-        tErrors,
-        {
-          convertedTotalApprox: tProfile.convertedTotalApprox,
-        }
-      )
-    );
-  }, [rows, locale, tProfile, tErrors]);
-}
-
-function TotalsAmount({ display }: { readonly display: { primary: string; breakdown?: string; ariaLabel?: string } }) {
+function TotalsAmount({ display }: { readonly display: ReportsTotalsDisplay }) {
   if (!display.breakdown) {
     return (
       <Typography
@@ -98,11 +43,12 @@ function TotalsAmount({ display }: { readonly display: { primary: string; breakd
   );
 }
 
-export function ReportsTotalsSectionMobile({ summary, rows, totalsLabel }: Readonly<ReportsTotalsSectionMobileProps>) {
-  const { hasPermission } = useUserStore();
-  const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
-  const totalsDisplay = useTotalsDisplay(rows);
-
+export function ReportsTotalsSectionMobile({
+  summary,
+  totalsLabel,
+  totalsDisplay,
+  showFinancials,
+}: Readonly<ReportsTotalsSectionProps>) {
   if (!showFinancials) {
     return null;
   }

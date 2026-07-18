@@ -71,7 +71,7 @@ const StyledPaidCheckIcon = styled(CheckCircleOutlined)(({ theme }) => ({
   color: theme.palette.outlineVariant,
 }));
 
-function renderDeleteInvoiceButton(
+function RenderDeleteInvoiceButton(
   row: AdminInvoiceRow,
   labels: AdminInvoicesDataGridLabels,
   canDelete: boolean,
@@ -91,7 +91,7 @@ function renderDeleteInvoiceButton(
   );
 }
 
-function wrapInvoiceActions(primary: ReactNode, deleteButton: ReactNode) {
+function WrapInvoiceActions(primary: ReactNode, deleteButton: ReactNode) {
   if (!primary && !deleteButton) {
     return null;
   }
@@ -104,7 +104,7 @@ function wrapInvoiceActions(primary: ReactNode, deleteButton: ReactNode) {
   );
 }
 
-function renderInvoiceAction(
+function RenderInvoiceAction(
   row: AdminInvoiceRow,
   labels: AdminInvoicesDataGridLabels,
   canManage: boolean,
@@ -114,7 +114,7 @@ function renderInvoiceAction(
   onViewPaymentDetails?: (target: PaymentDetailsTarget) => void,
   onDeleteInvoice?: (invoiceId: string) => void
 ) {
-  const deleteButton = renderDeleteInvoiceButton(row, labels, canDelete, billingActionsDisabled, onDeleteInvoice);
+  const deleteButton = RenderDeleteInvoiceButton(row, labels, canDelete, billingActionsDisabled, onDeleteInvoice);
 
   if (row.status === InvoiceStatus.Paid) {
     const primary = onViewPaymentDetails ? (
@@ -133,11 +133,11 @@ function renderInvoiceAction(
       <StyledPaidCheckIcon />
     );
 
-    return wrapInvoiceActions(primary, deleteButton);
+    return WrapInvoiceActions(primary, deleteButton);
   }
 
   if (row.status === InvoiceStatus.PaymentPending && canManage && !billingActionsDisabled) {
-    return wrapInvoiceActions(
+    return WrapInvoiceActions(
       <Button
         variant="text"
         onClick={() => {
@@ -152,13 +152,13 @@ function renderInvoiceAction(
   }
 
   if (!canManage || billingActionsDisabled) {
-    return wrapInvoiceActions(null, deleteButton);
+    return WrapInvoiceActions(null, deleteButton);
   }
 
   const showViewRejection = shouldShowViewRejection(row.status, row.hasRejectedSubmission) && onViewPaymentDetails;
 
   if (showViewRejection) {
-    return wrapInvoiceActions(
+    return WrapInvoiceActions(
       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
         <Button
           variant="text"
@@ -191,7 +191,7 @@ function renderInvoiceAction(
   }
 
   if (isPayableUnpaidStatus(row.status)) {
-    return wrapInvoiceActions(
+    return WrapInvoiceActions(
       <Button
         variant="text"
         onClick={() => {
@@ -212,7 +212,7 @@ function renderInvoiceAction(
     );
   }
 
-  return wrapInvoiceActions(null, deleteButton);
+  return WrapInvoiceActions(null, deleteButton);
 }
 
 export function AdminInvoicesDataGridDesktop({
@@ -230,6 +230,7 @@ export function AdminInvoicesDataGridDesktop({
   onPageChange,
   loading = false,
 }: Readonly<AdminInvoicesDataGridProps>) {
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid
   const columns = useMemo<GridColDef<AdminInvoiceRow>[]>(
     () => [
       {
@@ -293,7 +294,7 @@ export function AdminInvoicesDataGridDesktop({
         align: "right",
         headerAlign: "right",
         renderCell: ({ row }) =>
-          renderInvoiceAction(
+          RenderInvoiceAction(
             row,
             labels,
             canManage,

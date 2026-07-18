@@ -2,8 +2,9 @@
 // local UI state (selected pair + max-days window), and derived option lists.
 // Lifted verbatim from the inline implementations that previously lived in
 // both exchangeRateHistorySection.mobile.tsx and .desktop.tsx (Class B
-// duplicate per specs.md §4.1). The hook returns plain values + setters;
-// the tier views simply render.
+// duplicate per specs.md §4.1). The hook is now composed by the parent
+// useExchangeRatesViewModel and passed down to the tier section as a prop
+// (specs §3 N26 + §6.1 — tier views never call *ViewModel hooks directly).
 import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -13,7 +14,6 @@ import type { ExchangeRateRow } from "@/frontend/common/views/dashboard/admin/bi
 import {
   EXCHANGE_RATE_HISTORY_DAY_OPTIONS,
   type ExchangeRateHistoryMaxDays,
-  type ExchangeRateHistoryProps,
 } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/types/exchangeRateHistory.types";
 
 export interface UseExchangeRateHistoryViewModel {
@@ -30,8 +30,14 @@ export interface UseExchangeRateHistoryViewModel {
   readonly onMaxDaysChange: (value: ExchangeRateHistoryMaxDays) => void;
 }
 
+// NEW FOR PLAN v5: dedicated input shape for the composed hook — accepts the
+// availablePairs derived in the parent ViewModel; the parent supplies it.
+export interface UseExchangeRateHistoryViewModelInput {
+  readonly availablePairs: ReadonlyArray<{ readonly from: CurrencyCode; readonly to: CurrencyCode }>;
+}
+
 export function useExchangeRateHistoryViewModel(
-  props: Readonly<ExchangeRateHistoryProps>
+  props: Readonly<UseExchangeRateHistoryViewModelInput>
 ): UseExchangeRateHistoryViewModel {
   const { availablePairs } = props;
   const defaultPair = availablePairs[0] ?? { from: CurrencyCode.Usd, to: CurrencyCode.Sar };

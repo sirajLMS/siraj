@@ -4,8 +4,10 @@ import { useQuery } from "@apollo/client/react";
 import { BlockOutlined, EventBusyOutlined, TimerOutlined, VerifiedUserOutlined } from "@mui/icons-material";
 import { useCallback } from "react";
 import type { AccountStatus, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { parentDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-directory.documents";
 import { useParentsStore } from "@/frontend/common/stores/parentsStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { exportParentDirectory } from "@/frontend/common/utils/excel-export/parent-directory-export";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import {
@@ -118,6 +120,10 @@ function useDirectoryLabels(t: ParentsDirectoryLabels): ParentsViewLabels {
     searchPlaceholder: t.searchPlaceholder,
     filterLabel: t.actions.filter,
     clearFilters: t.actions.clearFilters,
+    // NEW FOR PLAN v5: populate the lifted noEntries + manageLifecycle from the shared i18n schema
+    // (ParentsDirectoryLabels already carries these — see shared/locale/types/dashboard/parents/directory.ts).
+    noEntries: t.noEntries,
+    manageLifecycle: t.actions.manageLifecycle,
     table: t.table,
     card: t.card,
     statusLabels,
@@ -130,6 +136,13 @@ export type UseParentsViewModelProps = Record<string, never>;
 export function useParentsViewModel(_props: Readonly<UseParentsViewModelProps>): ParentsViewModel {
   const t = useAppTranslation().dashboardTranslations.parentsDirectory;
   const router = useRouter();
+
+  // NEW FOR PLAN v5: read the user's permissions ONCE in the ViewModel and
+  // expose boolean gates. Tier parents views no longer import `RequirePermission`
+  // or call `useUserStore()` (specs.md §3 N3).
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canParentsCreate = hasPermission(AppPermission.ParentsCreate);
+  const canParentManageStatus = hasPermission(AppPermission.ParentManageStatus);
 
   const {
     searchQuery,
@@ -227,5 +240,8 @@ export function useParentsViewModel(_props: Readonly<UseParentsViewModelProps>):
     onExport: handleExport,
     onLifecycleStatusFilterChange: setLifecycleStatusFilter,
     onResetFilters: resetFilters,
+    // NEW FOR PLAN v5: lifted permission booleans consumed by the tier views.
+    canParentsCreate,
+    canParentManageStatus,
   };
 }

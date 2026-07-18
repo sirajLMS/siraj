@@ -42,19 +42,19 @@ export function PermissionManagementMobileView({
   closeAssignDialog,
   openManageOverrides,
   closeManageOverrides,
-  onCreateGroup,
-  onUpdateGroup,
   onDeleteGroup,
   onAssignGroup,
-  onRevokeGroup,
-  onBulkAssign,
-  onBulkRevoke,
-  onUpdateOverrides,
   activeGroup,
   activeTab,
-  selectedUserIdForOverrides,
   setActiveTab,
   setSelectedUserIdForOverrides,
+  catalogFilter,
+  createGroupForm,
+  editGroupForm,
+  assignGroupForm,
+  singleGroupState,
+  manageOverridesState,
+  groupRowMenuAnchor,
 }: Readonly<PermissionManagementViewModel>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
@@ -81,10 +81,7 @@ export function PermissionManagementMobileView({
           onBack={() => setSelectedGroupId(null)}
           onEditGroup={openEditDialog}
           onAssignGroup={openAssignDialog}
-          onRevokeGroup={onRevokeGroup}
-          onBulkAssign={onBulkAssign}
-          onBulkRevoke={onBulkRevoke}
-          onUpdateGroup={onUpdateGroup}
+          singleGroupState={singleGroupState}
         />
       ) : (
         <>
@@ -107,19 +104,18 @@ export function PermissionManagementMobileView({
               openAssignDialog={openAssignDialog}
               openManageOverrides={openManageOverrides}
               setSelectedUserIdForOverrides={setSelectedUserIdForOverrides}
+              catalogFilter={catalogFilter}
+              groupRowMenuAnchor={groupRowMenuAnchor}
             />
           </Box>
         </>
       )}
 
       <PermissionManagementDialogsMobile
-        permissions={permissions}
-        groups={groups}
         users={users}
         isLoading={isLoading}
         activeGroup={activeGroup}
         selectedGroupId={selectedGroupId}
-        selectedUserIdForOverrides={selectedUserIdForOverrides}
         isCreateDialogOpen={isCreateDialogOpen}
         isEditDialogOpen={isEditDialogOpen}
         isDeleteDialogOpen={isDeleteDialogOpen}
@@ -131,11 +127,12 @@ export function PermissionManagementMobileView({
         closeAssignDialog={closeAssignDialog}
         closeManageOverrides={closeManageOverrides}
         setSelectedUserIdForOverrides={setSelectedUserIdForOverrides}
-        onCreateGroup={onCreateGroup}
-        onUpdateGroup={onUpdateGroup}
         onDeleteGroup={onDeleteGroup}
         onAssignGroup={onAssignGroup}
-        onUpdateOverrides={onUpdateOverrides}
+        createGroupForm={createGroupForm}
+        editGroupForm={editGroupForm}
+        assignGroupForm={assignGroupForm}
+        manageOverridesState={manageOverridesState}
       />
     </MobilePageContainer>
   );

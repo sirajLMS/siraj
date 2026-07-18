@@ -7,15 +7,9 @@ import type {
   CurrencyHedgesViewModel,
   HedgeRow,
 } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/CurrencyHedgesView";
+import { formatHedgeTimestamp } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/utils";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { useAppLocale } from "@/shared/locale";
-
-function formatTimestamp(value: string | null, locale: string): string {
-  if (!value) {
-    return "";
-  }
-  return new Date(value).toLocaleString(locale);
-}
 
 export function CurrencyHedgesMobileView({
   rows,
@@ -93,7 +87,7 @@ export function CurrencyHedgesMobileView({
               </Box>
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography sx={theme => ({ color: theme.palette.text.secondary })}>{updatedAtColumnLabel}</Typography>
-                <Typography>{formatTimestamp(row.updatedAt, locale)}</Typography>
+                <Typography>{formatHedgeTimestamp(row.updatedAt, locale)}</Typography>
               </Box>
             </Box>
           ))

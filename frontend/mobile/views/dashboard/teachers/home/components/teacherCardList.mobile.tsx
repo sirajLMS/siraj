@@ -7,7 +7,6 @@ import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter";
-import { useRouter } from "@/shared/i18n/routing";
 import type { TeachersDirectoryLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -19,6 +18,8 @@ interface TeacherCardListProps {
   readonly pageSize?: number;
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
+  readonly onNavigateToSchedule: (teacherId: string) => void;
+  readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
 
 function TeacherSearchField({
@@ -61,11 +62,13 @@ function TeacherSearchField({
 function TeacherCard({
   row,
   t,
-  router,
+  onNavigateToSchedule,
+  onNavigateToProfile,
 }: {
   readonly row: TeacherDirectoryRow;
   readonly t: TeachersDirectoryLabels;
-  readonly router: ReturnType<typeof useRouter>;
+  readonly onNavigateToSchedule: (teacherId: string) => void;
+  readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }) {
   return (
     <Box
@@ -119,47 +122,28 @@ function TeacherCard({
         >
           {t.actions.joinRoom}
         </Button>
-        <TeacherCardActions row={row} t={t} router={router} />
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+          {row.userId ? (
+            <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name ?? row.email ?? ""} />
+          ) : null}
+          <IconButton
+            sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
+            onClick={() => {
+              if (row.id) {
+                onNavigateToSchedule(row.id);
+              }
+            }}
+          >
+            <CalendarTodayOutlined sx={{ fontSize: 20 }} />
+          </IconButton>
+          <IconButton
+            sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
+            onClick={() => onNavigateToProfile(row)}
+          >
+            <MoreVertOutlined sx={{ fontSize: 20 }} />
+          </IconButton>
+        </Box>
       </Box>
-    </Box>
-  );
-}
-
-function TeacherCardActions({
-  row,
-  t: _t,
-  router,
-}: {
-  readonly row: TeacherDirectoryRow;
-  readonly t: TeachersDirectoryLabels;
-  readonly router: ReturnType<typeof useRouter>;
-}) {
-  return (
-    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-      {row.userId ? (
-        <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name ?? row.email ?? ""} />
-      ) : null}
-      <IconButton
-        sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
-        onClick={() => {
-          if (row.id) {
-            router.push(`/teachers/${row.id}/schedule/weekly`);
-          }
-        }}
-      >
-        <CalendarTodayOutlined sx={{ fontSize: 20 }} />
-      </IconButton>
-      <IconButton
-        sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
-        onClick={() => {
-          const href = profileHrefForTeacher({ userId: row.userId, teacherId: row.id });
-          if (href) {
-            router.push(href);
-          }
-        }}
-      >
-        <MoreVertOutlined sx={{ fontSize: 20 }} />
-      </IconButton>
     </Box>
   );
 }
@@ -172,9 +156,10 @@ export function TeacherCardList({
   pageSize = 10,
   totalCount,
   onPageChange,
+  onNavigateToSchedule,
+  onNavigateToProfile,
 }: Readonly<TeacherCardListProps>) {
   const t = useAppTranslation().dashboardTranslations.teachersDirectory;
-  const router = useRouter();
 
   const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
 
@@ -188,7 +173,13 @@ export function TeacherCardList({
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {rows.map(row => (
-          <TeacherCard key={row.id} row={row} t={t} router={router} />
+          <TeacherCard
+            key={row.id}
+            row={row}
+            t={t}
+            onNavigateToSchedule={onNavigateToSchedule}
+            onNavigateToProfile={onNavigateToProfile}
+          />
         ))}
       </Box>
 
@@ -204,3 +195,5 @@ export function TeacherCardList({
     </Box>
   );
 }
+
+export default TeacherCardList;

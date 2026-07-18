@@ -1,14 +1,9 @@
 "use client";
 
-import {
-  BlockOutlined,
-  EventRepeatOutlined,
-  PersonOutlined,
-  ScheduleOutlined,
-  WarningAmberOutlined,
-} from "@mui/icons-material";
-import { Box, Button, Card, CardContent, Typography, useTheme } from "@mui/material";
-import { styled, type Theme } from "@mui/material/styles";
+import { EventRepeatOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
+import { Box, Button, Card, CardContent, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { STATUS_LABEL_KEYS } from "@/frontend/common/views/dashboard/classes/status/tracking/constants/statusLabelKeys.constants";
 import {
   type CardListLabels,
   computeSessionStatus,
@@ -17,17 +12,14 @@ import {
   type StatusTrackingCardListProps,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
+import {
+  getStatusAvatarSx,
+  getStatusIcon,
+} from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale } from "@/shared/locale";
-
-const STATUS_LABEL_KEYS: Record<SessionStatus, "regular" | "suspendedPending" | "onLeave" | "pendingVerification"> = {
-  [SessionStatus.REGULAR]: "regular",
-  [SessionStatus.SUSPENDED_PENDING]: "suspendedPending",
-  [SessionStatus.ON_LEAVE]: "onLeave",
-  [SessionStatus.PENDING_VERIFICATION]: "pendingVerification",
-};
 
 const StyledCardActionButtonBase = styled(Button)(({ theme }) => ({
   fontFamily: theme.typography.labelUppercase.fontFamily,
@@ -83,41 +75,39 @@ const StyledSeeAllButton = styled(Button)(({ theme }) => ({
 }));
 
 const StyledStatusAvatar = styled(Box, {
-  shouldForwardProp: prop => prop !== "backgroundColorToken" && prop !== "colorToken",
-})<{ backgroundColorToken: string; colorToken: string }>(({ theme, backgroundColorToken, colorToken }) => ({
+  shouldForwardProp: prop => prop !== "avatarSx",
+})<{ avatarSx: ReturnType<typeof getStatusAvatarSx> }>(({ theme, avatarSx }) => ({
   width: 48,
   height: 48,
   borderRadius: "50%",
-  backgroundColor: backgroundColorToken,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   fontFamily: theme.typography.labelUppercase.fontFamily,
   fontSize: theme.typography.bodyMd.fontSize,
   fontWeight: 700,
-  color: colorToken,
   flexShrink: 0,
   border: `1px solid ${theme.palette.border.light}`,
+  ...(typeof avatarSx === "function"
+    ? (avatarSx as (t: typeof theme) => Record<string, unknown>)(theme)
+    : (avatarSx as Record<string, unknown>)),
 }));
 
-function getStatusIcon(sessionStatus: SessionStatus) {
-  if (sessionStatus === SessionStatus.SUSPENDED_PENDING) {
-    return <BlockOutlined sx={{ fontSize: 12 }} />;
-  }
-  if (sessionStatus === SessionStatus.PENDING_VERIFICATION) {
-    return <WarningAmberOutlined sx={{ fontSize: 12 }} />;
-  }
-  return undefined;
-}
-
-function getCardActionButton(
-  row: StatusTrackingRow,
-  sessionStatus: SessionStatus,
-  labels: CardListLabels,
-  onActivate: (id: string) => void,
-  onReschedule: (id: string) => void,
-  onVerify: (id: string) => void
-) {
+function CardActionButton({
+  row,
+  sessionStatus,
+  labels,
+  onActivate,
+  onReschedule,
+  onVerify,
+}: {
+  readonly row: StatusTrackingRow;
+  readonly sessionStatus: SessionStatus;
+  readonly labels: CardListLabels;
+  readonly onActivate: (id: string) => void;
+  readonly onReschedule: (id: string) => void;
+  readonly onVerify: (id: string) => void;
+}) {
   const rowId = row.id ?? "";
 
   if (sessionStatus === SessionStatus.REGULAR) {
@@ -188,31 +178,6 @@ function getCardActionButton(
   );
 }
 
-function getAvatarStyles(theme: Theme, sessionStatus: SessionStatus) {
-  if (sessionStatus === SessionStatus.SUSPENDED_PENDING) {
-    return {
-      backgroundColor: theme.palette.status.blockedContainer,
-      color: theme.palette.status.onBlockedContainer,
-    };
-  }
-  if (sessionStatus === SessionStatus.ON_LEAVE) {
-    return {
-      backgroundColor: theme.palette.secondaryContainer,
-      color: theme.palette.onSecondaryContainer,
-    };
-  }
-  if (sessionStatus === SessionStatus.PENDING_VERIFICATION) {
-    return {
-      backgroundColor: theme.palette.status.pendingContainer,
-      color: theme.palette.status.onPendingContainer,
-    };
-  }
-  return {
-    backgroundColor: theme.palette.status.activeContainer,
-    color: theme.palette.status.onActiveContainer,
-  };
-}
-
 function StatusTrackingCard({
   row,
   labels,
@@ -226,10 +191,8 @@ function StatusTrackingCard({
   readonly onReschedule: (id: string) => void;
   readonly onVerify: (id: string) => void;
 }) {
-  const theme = useTheme();
   const locale = useAppLocale();
   const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
-  const avatarStyles = getAvatarStyles(theme, sessionStatus);
   return (
     <Card
       elevation={0}
@@ -242,7 +205,7 @@ function StatusTrackingCard({
     >
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
         <Box sx={{ display: "flex", gap: 2 }}>
-          <StyledStatusAvatar backgroundColorToken={avatarStyles.backgroundColor} colorToken={avatarStyles.color}>
+          <StyledStatusAvatar avatarSx={getStatusAvatarSx(sessionStatus)}>
             {row.studentInitials ?? ""}
           </StyledStatusAvatar>
 
@@ -275,7 +238,14 @@ function StatusTrackingCard({
           </Box>
         </Box>
 
-        {getCardActionButton(row, sessionStatus, labels, onActivate, onReschedule, onVerify)}
+        <CardActionButton
+          row={row}
+          sessionStatus={sessionStatus}
+          labels={labels}
+          onActivate={onActivate}
+          onReschedule={onReschedule}
+          onVerify={onVerify}
+        />
       </CardContent>
     </Card>
   );

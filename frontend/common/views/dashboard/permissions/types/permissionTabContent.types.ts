@@ -1,5 +1,7 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
 import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionCatalogFilterResult } from "@/frontend/common/views/dashboard/permissions/components/usePermissionCatalogFilter";
+import type { RowMenuAnchor } from "@/frontend/common/views/dashboard/permissions/components/useRowMenuAnchor";
 
 export type PermissionTabKey = "groups" | "catalog" | "overrides";
 
@@ -15,4 +17,14 @@ export interface PermissionTabContentProps {
   readonly openAssignDialog: (id: string) => void;
   readonly openManageOverrides: () => void;
   readonly setSelectedUserIdForOverrides: (id: string | null) => void;
+  // NEW FOR PLAN v5: catalog filter bindings produced by the ViewModel from the
+  // common `usePermissionCatalogFilter` hook (NS-2 — lift of useState +
+  // useMemo derivation out of tier `permissionCatalogSection.*.tsx`).
+  readonly catalogFilter: PermissionCatalogFilterResult;
+  // NEW FOR PLAN v5: shared row-menu anchor for the group list popover (NS-3
+  // N7 lift). The ViewModel owns a single shared `useRowMenuAnchor()` because
+  // only one row popover is open at a time across the list — the tier
+  // card/grid row components receive `{ anchorEl, openMenu, closeMenu }` as
+  // plain props instead of calling `useState` themselves.
+  readonly groupRowMenuAnchor: RowMenuAnchor;
 }

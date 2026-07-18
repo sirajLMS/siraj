@@ -1,17 +1,12 @@
 "use client";
 
 import { Box } from "@mui/material";
-import type { ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classDetailsContentPaddingSx } from "@/frontend/common/views/dashboard/classes/details/classDetailsMobileLayout";
+import type { ClassDetailsHeaderProps } from "@/frontend/common/views/dashboard/classes/details/types";
 import { DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
-interface ClassDetailsHeaderDesktopProps {
-  readonly instance: ClassInstanceDetail;
-  readonly canOverride: boolean;
-}
-
-export function ClassDetailsHeaderDesktop({ instance, canOverride }: ClassDetailsHeaderDesktopProps) {
+export function ClassDetailsHeaderDesktop({ instance, canOverride }: Readonly<ClassDetailsHeaderProps>) {
   const t = useAppTranslation().dashboardTranslations.classDetails;
 
   return (

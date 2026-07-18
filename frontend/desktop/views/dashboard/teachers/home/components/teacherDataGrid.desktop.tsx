@@ -9,7 +9,6 @@ import {
   DesktopGridPagination,
   DesktopPersonProfileLinkCell,
 } from "@/frontend/desktop/components/ui";
-import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
 interface TeacherDataGridProps {
@@ -18,6 +17,8 @@ interface TeacherDataGridProps {
   readonly pageSize?: number;
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
+  readonly onNavigateToSchedule: (teacherId: string) => void;
+  readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
 
 interface TeacherActionButtonProps {
@@ -44,36 +45,16 @@ function TeacherActionButton({ icon, variant, onClick }: TeacherActionButtonProp
   );
 }
 
-function getActionCellRenderer(
-  icon: React.ReactNode,
-  variant: "primary" | "error",
-  router: ReturnType<typeof useRouter>,
-  getPath: (id: string) => string
-) {
-  return function ActionCell({ row }: GridRenderCellParams<TeacherDirectoryRow>) {
-    return (
-      <TeacherActionButton
-        icon={icon}
-        variant={variant}
-        onClick={() => {
-          if (row.id) {
-            router.push(getPath(row.id));
-          }
-        }}
-      />
-    );
-  };
-}
-
 export function TeacherDataGrid({
   rows,
   page = 0,
   pageSize = 10,
   totalCount,
   onPageChange,
+  onNavigateToSchedule,
+  onNavigateToProfile,
 }: Readonly<TeacherDataGridProps>) {
   const t = useAppTranslation().dashboardTranslations.teachersDirectory;
-  const router = useRouter();
 
   const columns: GridColDef<TeacherDirectoryRow>[] = [
     {
@@ -117,11 +98,16 @@ export function TeacherDataGrid({
       width: 120,
       align: "center",
       headerAlign: "center",
-      renderCell: getActionCellRenderer(
-        <CalendarMonthOutlined />,
-        "error",
-        router,
-        id => `/teachers/${id}/schedule/weekly`
+      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
+        <TeacherActionButton
+          icon={<CalendarMonthOutlined />}
+          variant="error"
+          onClick={() => {
+            if (params.row.id) {
+              onNavigateToSchedule(params.row.id);
+            }
+          }}
+        />
       ),
     },
     {
@@ -143,12 +129,7 @@ export function TeacherDataGrid({
           <TeacherActionButton
             icon={<SettingsOutlined />}
             variant="primary"
-            onClick={() => {
-              const href = profileHrefForTeacher({ userId: params.row.userId, teacherId: params.row.id });
-              if (href) {
-                router.push(href);
-              }
-            }}
+            onClick={() => onNavigateToProfile(params.row)}
           />
         </Box>
       ),
@@ -184,3 +165,5 @@ export function TeacherDataGrid({
     />
   );
 }
+
+export default TeacherDataGrid;

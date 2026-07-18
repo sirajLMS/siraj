@@ -2,14 +2,7 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
-
-interface BillingMobileSearchBarProps {
-  readonly value: string;
-  readonly placeholder: string;
-  readonly searchingLabel?: string;
-  readonly isSearching?: boolean;
-  readonly onChange: (value: string) => void;
-}
+import type { BillingSearchBarProps } from "@/frontend/common/views/dashboard/billing/types/billingSearchBar.types";
 
 export function BillingMobileSearchBarMobile({
   value,
@@ -17,7 +10,7 @@ export function BillingMobileSearchBarMobile({
   searchingLabel,
   isSearching = false,
   onChange,
-}: Readonly<BillingMobileSearchBarProps>) {
+}: Readonly<BillingSearchBarProps>) {
   return (
     <Box sx={{ display: "flex", gap: 1 }}>
       <TextField

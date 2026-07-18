@@ -19,25 +19,23 @@ import { useAppTranslation } from "@/shared/locale";
 export function StaffProfileMobileView({
   scope,
   mode,
-  targetUserId,
-  activeTab,
   isAdminScope,
   loading,
   error,
-  profile,
   isSaving,
   onSubmitOwn,
   onSubmitAdmin,
   staffData,
   avatarUrl,
   displayCurrency,
-  meetingTabHref,
+  permissionGroups,
+  permissionOverrides,
+  activeTab,
   canView,
 }: Readonly<StaffProfileViewModel>) {
   const t = useAppTranslation().profileTranslations.base;
   const st = useAppTranslation().profileTranslations.staff;
 
-  // Handle non-profile tabs
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
   }
@@ -46,10 +44,7 @@ export function StaffProfileMobileView({
     return (
       <MobilePageContainer>
         <MobilePageHeader title={st.sections.permissions} />
-        <PermissionsSection
-          permissionGroups={profile?.staffPermissionGroups ?? []}
-          permissionOverrides={profile?.staffPermissionOverrides ?? []}
-        />
+        <PermissionsSection permissionGroups={permissionGroups} permissionOverrides={permissionOverrides} />
       </MobilePageContainer>
     );
   }
@@ -59,10 +54,10 @@ export function StaffProfileMobileView({
   }
 
   // Profile tab content
-  if (loading && !profile) {
+  if (loading && !staffData) {
     return (
       <MobilePageContainer>
-        <MobilePageHeader title={st.pageTitle} subtitle={st.pageSubtitle} />
+        <MobilePageHeader title={st.subtitle} subtitle={st.ownSubtitle} />
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <div className="loading-spinner" />
         </Box>
@@ -70,10 +65,10 @@ export function StaffProfileMobileView({
     );
   }
 
-  if (error && !profile) {
+  if (error && !staffData) {
     return (
       <MobilePageContainer>
-        <MobilePageHeader title={st.pageTitle} subtitle={st.pageSubtitle} />
+        <MobilePageHeader title={st.subtitle} subtitle={st.ownSubtitle} />
         <Alert severity="error" sx={{ mx: 2, my: 2 }} onClose={() => {}}>
           {t.errors.failedToLoad}
           <Button color="inherit" size="small" onClick={() => {}}>
@@ -84,22 +79,20 @@ export function StaffProfileMobileView({
     );
   }
 
-  if (!profile?.staffProfile) {
+  if (!staffData) {
     const canViewIdentity = canView("core_identity");
     if (!canViewIdentity) {
       return <ProfileRestrictedSection />;
     }
     return (
       <MobilePageContainer>
-        <MobilePageHeader title={st.pageTitle} subtitle={st.pageSubtitle} />
+        <MobilePageHeader title={st.subtitle} subtitle={st.ownSubtitle} />
         <Alert severity="warning" sx={{ mx: 2, my: 2 }}>
           {t.errors.notFound}
         </Alert>
       </MobilePageContainer>
     );
   }
-
-  const adminData = staffData;
 
   const renderAccountSection = () => {
     if (!canView("core_identity") && !(isAdminScope && canView("staff_role"))) {
@@ -108,7 +101,7 @@ export function StaffProfileMobileView({
     return (
       <MobileSectionPanel title={st.sections.account}>
         <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-          <Avatar src={avatarUrl} sx={{ width: 60, height: 60 }} />
+          <Avatar src={avatarUrl ?? undefined} sx={{ width: 60, height: 60 }} />
           <Box sx={{ flex: 1 }}>
             <Typography variant="headlineMd">{staffData?.name ?? ""}</Typography>
             <Typography variant="bodyMd" color="text.secondary">
@@ -142,32 +135,8 @@ export function StaffProfileMobileView({
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                 {st.fields.hourlyRate}
               </Typography>
-              {adminData?.hourlyRate} {adminData?.rateCurrency}
+              {staffData?.hourlyRate} {staffData?.rateCurrency}
             </Typography>
-            {adminData?.totalClasses != null && (
-              <Typography variant="bodyMd">
-                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                  {st.stats.totalClasses}
-                </Typography>
-                {adminData.totalClasses}
-              </Typography>
-            )}
-            {isAdminScope && adminData?.avgEngagementScore != null && (
-              <Typography variant="bodyMd">
-                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                  {st.stats.avgEngagement}
-                </Typography>
-                {adminData.avgEngagementScore}
-              </Typography>
-            )}
-            {adminData?.qualifications && (
-              <Typography variant="bodyMd">
-                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                  {st.fields.qualifications}
-                </Typography>
-                {adminData.qualifications}
-              </Typography>
-            )}
           </Stack>
         </MobileSectionPanel>
       );
@@ -204,14 +173,6 @@ export function StaffProfileMobileView({
               {staffData.phone}
             </Typography>
           )}
-          {staffData?.timezone && (
-            <Typography variant="bodyMd">
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {st.fields.timezone}
-              </Typography>
-              {staffData.timezone}
-            </Typography>
-          )}
         </Stack>
       </MobileSectionPanel>
     );
@@ -223,7 +184,6 @@ export function StaffProfileMobileView({
         <MobilePageHeader
           title={staffData?.name ?? ""}
           subtitle={staffData?.email ?? ""}
-          avatar={avatarUrl}
           actions={[
             <Button
               key="edit"
@@ -259,7 +219,7 @@ export function StaffProfileMobileView({
         <MobilePageHeader title={t.actions.edit} />
         <MobileContentStack>
           <StaffProfileEditForm
-            staffData={staffData!}
+            staffData={staffData}
             displayCurrency={displayCurrency}
             isAdminScope={isAdminScope}
             isSaving={isSaving}
@@ -275,7 +235,7 @@ export function StaffProfileMobileView({
       <MobilePageHeader title={t.actions.edit} />
       <MobileContentStack>
         <StaffProfileEditForm
-          staffData={staffData!}
+          staffData={staffData}
           displayCurrency={displayCurrency}
           isAdminScope={isAdminScope}
           isSaving={isSaving}

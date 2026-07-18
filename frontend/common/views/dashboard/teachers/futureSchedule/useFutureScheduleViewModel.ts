@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
+  logTeacherSupportRequestMutationDocument,
   teacherFutureScheduleQueryDocument,
   updateSessionStatusLeaveMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
@@ -40,6 +41,17 @@ export interface FutureScheduleViewModel {
   readonly classDates: readonly string[];
   readonly loading: boolean;
   readonly error: unknown;
+  // NEW FOR PLAN v5: lifted support-contact action (previously owned inline
+  // by the tier-side `supportContact.{mobile,desktop}.tsx` via
+  // `useMutation(logTeacherSupportRequestMutationDocument)` +
+  // `useNotifications()` per specs.md §3 N1 + N17 + §6.2).
+  readonly onSupportContact: () => Promise<void>;
+  // NEW FOR PLAN v5: lifted labels consumed by the support-contact card so
+  // the tier view no longer calls `useAppTranslation` directly.
+  readonly supportContactLabels: {
+    readonly supportContact: string;
+    readonly contactAdmin: string;
+  };
 }
 
 export type UseFutureScheduleViewModelProps = {
@@ -57,6 +69,9 @@ export function useFutureScheduleViewModel(props: Readonly<UseFutureScheduleView
   });
 
   const [requestLeave] = useMutation(updateSessionStatusLeaveMutationDocument);
+  // NEW FOR PLAN v5: lifted support-contact mutation out of the tier-side
+  // `supportContact.{mobile,desktop}.tsx` files (specs.md §3 N1 + N17).
+  const [logSupportRequest] = useMutation(logTeacherSupportRequestMutationDocument);
 
   const selectedDate = useFutureScheduleDateStore(s => s.selectedDate);
   const setSelectedDate = useFutureScheduleDateStore(s => s.setSelectedDate);
@@ -107,6 +122,24 @@ export function useFutureScheduleViewModel(props: Readonly<UseFutureScheduleView
     .filter((c: FutureClass) => c.scheduledDate)
     .map((c: FutureClass) => c.scheduledDate as string);
 
+  // NEW FOR PLAN v5: lifted support-contact action (previously owned inline
+  // by the tier-side `supportContact.{mobile,desktop}.tsx` files). Performs
+  // the `logTeacherSupportRequest` mutation and surfaces success/failure
+  // via the `useNotifications` toast side-effect — neither of which lives
+  // in tier per specs.md §3 N1 + N17 + §6.2.
+  const handleSupportContact = async () => {
+    try {
+      await logSupportRequest({
+        variables: {
+          input: { reason: t.supportRequestReason },
+        },
+      });
+      notifications.show(t.notifications.supportRequestSent, { severity: "success" });
+    } catch {
+      notifications.show(t.errors.supportRequestFailed, { severity: "error" });
+    }
+  };
+
   return {
     classes,
     leaveQuotaUsed: schedule?.leaveQuotaUsed ?? 0,
@@ -120,5 +153,10 @@ export function useFutureScheduleViewModel(props: Readonly<UseFutureScheduleView
     classDates,
     loading,
     error,
+    onSupportContact: handleSupportContact,
+    supportContactLabels: {
+      supportContact: t.supportContact,
+      contactAdmin: t.contactAdmin,
+    },
   };
 }

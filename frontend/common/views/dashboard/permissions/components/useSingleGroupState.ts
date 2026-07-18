@@ -7,7 +7,10 @@ import { useGroupPermissionFilters } from "@/frontend/common/views/dashboard/per
 export type SubTabKey = "current" | "add" | "users";
 
 interface UseSingleGroupStateProps {
-  readonly group: PermissionGroup;
+  // NEW FOR PLAN v5: nullable so the ViewModel can call the hook unconditionally
+  // (rules-of-hooks) when no group is active — the consumer only reads the
+  // returned state when `group` is non-null.
+  readonly group: PermissionGroup | null;
   readonly permissions: readonly Permission[];
   readonly onRevokeGroup: (groupId: string, userId: string) => Promise<void>;
   readonly onBulkRevoke: (groupId: string, userIds: string[]) => Promise<void>;
@@ -19,6 +22,17 @@ interface UseSingleGroupStateProps {
   ) => Promise<void>;
 }
 
+/**
+ * Owns the single-group sub-view state (active sub-tab, search/category filter,
+ * per-tab selection sets) plus the derived filters/mutation actions for the
+ * `SingleGroupView{Mobile,Desktop}` components.
+ *
+ * Per specs §6.2 the ViewModel is the sole owner; tier views receive the
+ * returned bag as a plain prop. Accepts a nullable `group` so the ViewModel
+ * can call this hook unconditionally — when `group` is `null` the derivation
+ * helpers short-circuit to empty results (no consumer reads them in that
+ * state because the parent view switches to the list pane).
+ */
 export function useSingleGroupState({
   group,
   permissions,
@@ -32,10 +46,15 @@ export function useSingleGroupState({
   const [selectedAddPermissionIds, setSelectedAddPermissionIds] = useState<string[]>([]);
   const [selectedAssignedUserIds, setSelectedAssignedUserIds] = useState<string[]>([]);
 
-  const filters = useGroupPermissionFilters({ group, permissions, searchQuery, selectedCategory });
+  const filters = useGroupPermissionFilters({
+    group: group ?? EMPTY_GROUP,
+    permissions,
+    searchQuery,
+    selectedCategory,
+  });
 
   const mutationActions = useGroupMutationActions({
-    group,
+    group: group ?? EMPTY_GROUP,
     selectedAddPermissionIds,
     selectedAssignedUserIds,
     onRevokeGroup,
@@ -86,3 +105,18 @@ export function useSingleGroupState({
     handleSubTabChange,
   };
 }
+
+// Sentinel empty group used to short-circuit derivation hooks when no group is
+// active — keeps the call unconditional (rules-of-hooks).
+const EMPTY_GROUP: PermissionGroup = {
+  id: "",
+  slug: "",
+  name: {},
+  description: {},
+  permissionIds: [],
+  assignedUsers: [],
+  isSystem: false,
+} as unknown as PermissionGroup;
+
+// NEW FOR PLAN v5: inferred return-type alias for ViewModel consumption
+export type SingleGroupState = ReturnType<typeof useSingleGroupState>;

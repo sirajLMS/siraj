@@ -4,6 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
 import { studentClassHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-history.documents";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
+import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
 import type { StudentHistoryLabels } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryLabels";
 import type {
   StudentHistoryMetrics,
@@ -49,6 +50,7 @@ export interface StudentHistoryViewModel {
   readonly labels: StudentHistoryLabels;
   readonly loading: boolean;
   readonly onBackToDashboard: () => void;
+  readonly onOpenMeetingUrl: (url: string | null | undefined) => void;
 }
 
 export type UseStudentHistoryViewModelProps = Record<string, never>;
@@ -93,5 +95,6 @@ export function useStudentHistoryViewModel(_props: UseStudentHistoryViewModelPro
     labels,
     loading,
     onBackToDashboard: () => router.push("/students/me"),
+    onOpenMeetingUrl: (url: string | null | undefined) => safeOpenWindow(url),
   };
 }

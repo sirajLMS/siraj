@@ -3,17 +3,11 @@
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { OnlineMeetingInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import type { BaseOnlineMeetingCardProps } from "@/frontend/common/views/dashboard/classes/audit/onlineMeetingCard.types";
+import { resolveProviderDisplayName, toEffectiveMeeting } from "@/frontend/common/views/dashboard/classes/audit/utils";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { useAppLocale, useAppTranslation } from "@/shared/locale";
-
-export interface OnlineMeetingCardMobileProps {
-  readonly meetingInfo: OnlineMeetingInfo | null | undefined;
-  readonly showJoin?: boolean;
-}
 
 const StyledPreviewContainer = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.action.hover,
@@ -50,28 +44,6 @@ const StyledLocationText = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-function resolveProviderDisplayName(meetingInfo: OnlineMeetingInfo | null | undefined, locale: string): string | null {
-  if (!meetingInfo) return null;
-  if (meetingInfo.providerName) {
-    return resolveLocalizedString(meetingInfo.providerName, locale);
-  }
-  return meetingInfo.platform?.trim() || null;
-}
-
-function toEffectiveMeeting(meetingInfo: OnlineMeetingInfo | null | undefined): EffectiveMeetingFieldsFragment | null {
-  if (!meetingInfo) return null;
-  return {
-    joinUrl: meetingInfo.joinUrl,
-    logoUrl: meetingInfo.logoUrl,
-    providerName: meetingInfo.providerName,
-    source: meetingInfo.source,
-    providerSlug: meetingInfo.platform,
-    meetingId: meetingInfo.meetingId,
-    configId: null,
-    providerId: null,
-  };
-}
-
 function MeetingPreviewIcon({ logoUrl }: Readonly<{ logoUrl?: string | null }>) {
   if (logoUrl?.trim()) {
     return <Avatar src={logoUrl} alt="" sx={{ width: 48, height: 48 }} />;
@@ -79,7 +51,7 @@ function MeetingPreviewIcon({ logoUrl }: Readonly<{ logoUrl?: string | null }>) 
   return <StyledMobileVideoIcon />;
 }
 
-export function OnlineMeetingCardMobile({ meetingInfo, showJoin = false }: Readonly<OnlineMeetingCardMobileProps>) {
+export function OnlineMeetingCardMobile({ meetingInfo, showJoin = false }: Readonly<BaseOnlineMeetingCardProps>) {
   const t = useAppTranslation().dashboardTranslations.classAudit;
   const locale = useAppLocale();
   const providerName = resolveProviderDisplayName(meetingInfo, locale);

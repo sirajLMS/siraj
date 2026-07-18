@@ -1,17 +1,9 @@
 "use client";
 
-import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-import type { SchedulePagination } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
+import type { ParentScheduleListMobileProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentScheduleComponents.types";
 import { MobileCardList, MobilePaginationControls } from "@/frontend/mobile/components/ui";
 import { ParentScheduleCardMobile } from "@/frontend/mobile/views/dashboard/parent/dashboard/components/parentScheduleCard.mobile";
-
-interface ParentScheduleListMobileProps {
-  readonly rows: readonly ParentScheduleRow[];
-  readonly labels: ParentDashboardLabels;
-  readonly pagination?: SchedulePagination;
-  readonly pageCount: number;
-}
 
 export function ParentScheduleListMobile({
   rows,

@@ -97,6 +97,7 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
   );
 }
 
+// VARIANT JUSTIFICATION: Class C card-list vs data-grid sibling per specs §4.3 — `ParentCardListMobileProps` renders single-row mobile cards (taking the unified `ParentCardListLabels` shared with no desktop twin because desktop renders via `ParentsDataGridDesktop`). Layout-specific label type differs from the desktop data-grid variant, so a shared `BaseParentsListProps` row/contract already lives in `directory.ts`.
 interface ParentCardListMobileProps {
   readonly rows: readonly ParentDirectoryRow[];
   readonly labels: ParentCardListLabels;

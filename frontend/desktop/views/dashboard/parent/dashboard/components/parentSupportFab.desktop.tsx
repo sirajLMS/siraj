@@ -2,13 +2,9 @@
 
 import { SupportAgentOutlined } from "@mui/icons-material";
 import { Fab, Tooltip } from "@mui/material";
+import type { ParentSupportFabProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardComponents.types";
 
-interface ParentSupportFabDesktopProps {
-  readonly label: string;
-  readonly onClick: () => void;
-}
-
-export function ParentSupportFabDesktop({ label, onClick }: Readonly<ParentSupportFabDesktopProps>) {
+export function ParentSupportFabDesktop({ label, onClick }: Readonly<ParentSupportFabProps>) {
   return (
     <Tooltip title={label} placement="left">
       <Fab

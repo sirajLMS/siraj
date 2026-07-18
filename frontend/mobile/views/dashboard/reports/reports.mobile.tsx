@@ -32,6 +32,11 @@ export function ReportsMobileView({
   onReportTypeChange,
   onSubmit,
   onRowClick,
+  filtersExpanded,
+  onToggleFiltersExpanded,
+  showFinancials,
+  totalsDisplay,
+  formatPaidAmounts,
 }: Readonly<ReportsViewModel>) {
   return (
     <MobilePageContainer>
@@ -47,6 +52,8 @@ export function ReportsMobileView({
           teachers={teachers}
           labels={labels.filtersLabels}
           canGenerate={canGenerate}
+          expanded={filtersExpanded}
+          onToggleExpanded={onToggleFiltersExpanded}
           onFromDateChange={onFromDateChange}
           onToDateChange={onToDateChange}
           onTeacherChange={onTeacherChange}
@@ -69,7 +76,13 @@ export function ReportsMobileView({
         />
 
         <MobileSectionPanel title={labels.ledgerTitle}>
-          <ReportsTotalsSectionMobile summary={summary} rows={rows} totalsLabel={labels.totalsLabel} />
+          <ReportsTotalsSectionMobile
+            summary={summary}
+            rows={rows}
+            totalsLabel={labels.totalsLabel}
+            totalsDisplay={totalsDisplay}
+            showFinancials={showFinancials}
+          />
 
           <MobileCardList
             rows={rows}
@@ -79,7 +92,13 @@ export function ReportsMobileView({
             gap={2}
             renderItem={row => (
               <MobileCardListItem key={row.id} interactive={Boolean(onRowClick)}>
-                <PerformanceLedgerCardMobile row={row} labels={labels.ledgerLabels} onClick={onRowClick} />
+                <PerformanceLedgerCardMobile
+                  row={row}
+                  labels={labels.ledgerLabels}
+                  showFinancials={showFinancials}
+                  paidLabel={formatPaidAmounts(row.paidAmounts)}
+                  onClick={onRowClick}
+                />
               </MobileCardListItem>
             )}
           />

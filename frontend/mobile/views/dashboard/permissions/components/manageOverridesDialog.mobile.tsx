@@ -3,7 +3,6 @@
 import { CloseOutlined } from "@mui/icons-material";
 import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useManageOverridesState } from "@/frontend/common/views/dashboard/permissions/components/useManageOverridesState";
 import type { ManageOverridesDialogProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { OverridesDataGridMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overridesDataGrid.mobile";
 import { OverridesDialogFooterMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overridesDialogFooter.mobile";
@@ -41,13 +40,8 @@ const StyledRightContentArea = styled(Box)({
 
 export function ManageOverridesDialogMobile({
   open,
-  userId,
-  users,
-  groups,
-  permissions,
-  isLoading,
   onClose,
-  onSave,
+  manageOverridesState,
 }: Readonly<ManageOverridesDialogProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
@@ -64,7 +58,7 @@ export function ManageOverridesDialogMobile({
     handleSave,
     setMode,
     setSearchQuery,
-  } = useManageOverridesState({ userId, users, groups, permissions, isLoading, open, onClose, onSave });
+  } = manageOverridesState;
 
   if (!user) return null;
 

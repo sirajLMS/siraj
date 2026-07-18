@@ -1,8 +1,6 @@
 "use client";
 
 import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentsViewModel } from "@/frontend/common/views/dashboard/admin/parents/students/useStudentsViewModel";
 import {
   DesktopFilterButton,
@@ -27,6 +25,9 @@ export function StudentsDesktopView({
   onFilterClick,
   onViewProfile,
   onViewHistory,
+  // NEW FOR PLAN v5: lifted permission boolean consumed by the tier view
+  // instead of a `RequirePermission` wrapper.
+  canStudentsCreate,
 }: Readonly<StudentsViewModel>) {
   const tableLabels = {
     index: labels.index,
@@ -55,11 +56,11 @@ export function StudentsDesktopView({
         title={labels.globalRecord}
         actions={
           <>
-            <RequirePermission permissions={[AppPermission.StudentsCreate]}>
+            {canStudentsCreate ? (
               <DesktopPrimaryPageAction id="students-add-btn" startIcon={<AddOutlined />} onClick={onAddStudent}>
                 {labels.addStudent}
               </DesktopPrimaryPageAction>
-            </RequirePermission>
+            ) : null}
             <DesktopFilterButton id="students-filters-btn" startIcon={<FilterListOutlined />} onClick={onFilterClick}>
               {labels.filters}
             </DesktopFilterButton>

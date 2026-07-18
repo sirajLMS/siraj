@@ -51,11 +51,17 @@ export interface ScheduleOverviewViewModel {
   readonly pageCount: number;
   readonly showTimezones: boolean;
   readonly locale: string;
+  // NEW FOR PLAN v5: lifted permission booleans per specs.md §3 N3 + §6.1.
+  // Tier schedule-overview views no longer import `RequirePermission` or
+  // call `useUserStore()` — the ViewModel computes the gate ONCE and the
+  // tier view reads the boolean as a plain prop.
+  readonly canDashboardSearch: boolean;
+  readonly canScheduleFilterAdvanced: boolean;
 }
 
 export type UseScheduleOverviewViewModelProps = Omit<
   ScheduleOverviewViewModel,
-  "pageCount" | "showTimezones" | "locale"
+  "pageCount" | "showTimezones" | "locale" | "canDashboardSearch" | "canScheduleFilterAdvanced"
 >;
 
 function computePageCount(totalCount: number | undefined, pageSize: number): number {
@@ -66,10 +72,14 @@ export function useScheduleOverviewViewModel(props: UseScheduleOverviewViewModel
   const locale = useAppLocale();
   const { hasPermission } = useUserStore();
   const showTimezones = hasPermission(AppPermission.ScheduleViewTimezones);
+  // NEW FOR PLAN v5: compute the gates ONCE so the tier views no longer call
+  // `useUserStore()` directly (specs.md §3 N3).
+  const canDashboardSearch = hasPermission(AppPermission.DashboardSearch);
+  const canScheduleFilterAdvanced = hasPermission(AppPermission.ScheduleFilterAdvanced);
   const pageCount = useMemo(
     () => computePageCount(props.totalCount, props.pageSize),
     [props.totalCount, props.pageSize]
   );
 
-  return { ...props, pageCount, showTimezones, locale };
+  return { ...props, pageCount, showTimezones, locale, canDashboardSearch, canScheduleFilterAdvanced };
 }

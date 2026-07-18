@@ -1,27 +1,17 @@
 "use client";
 
-import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
-import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import {
-  type ManualInvoiceViewModel,
-  type UseManualInvoiceViewModelProps,
-  useManualInvoiceViewModel,
-} from "@/frontend/common/views/dashboard/billing/manual/useManualInvoiceViewModel";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ManualInvoiceView } from "@/frontend/common/views/dashboard/billing/manual/ManualInvoiceView";
+import type { UseManualInvoiceViewModelProps } from "@/frontend/common/views/dashboard/billing/manual/useManualInvoiceViewModel";
 
-const lazyViews = createLazyView<ManualInvoiceViewModel>(
-  () =>
-    import("@/frontend/mobile/views/dashboard/billing/manual/manualInvoice.mobile").then(m => ({
-      default: m.ManualInvoiceMobileView,
-    })),
-  () =>
-    import("@/frontend/desktop/views/dashboard/billing/manual/manualInvoice.desktop").then(m => ({
-      default: m.ManualInvoiceDesktopView,
-    }))
-);
-
-export function ManualInvoiceContainer(props: Readonly<UseManualInvoiceViewModelProps>) {
-  const viewModel = useManualInvoiceViewModel(props);
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+// NEW FOR PLAN v5 (manual-invoice wave): Container now accepts no props per
+// the §6.1 Server-Component contract — it renders the View, which invokes
+// the ViewModel internally.
+export function ManualInvoiceContainer(_props: Readonly<UseManualInvoiceViewModelProps> = {}) {
+  return (
+    <RequirePermission permissions={[AppPermission.BillingCreateInvoice]} fallback={null}>
+      <ManualInvoiceView />
+    </RequirePermission>
+  );
 }
-
-export type { ManualInvoiceViewModel, UseManualInvoiceViewModelProps };

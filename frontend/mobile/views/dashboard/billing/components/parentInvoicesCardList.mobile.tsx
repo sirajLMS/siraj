@@ -10,8 +10,8 @@ import type {
 import { MobilePaginationControls, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { ParentInvoiceRowActionsMobile } from "@/frontend/mobile/views/dashboard/billing/components/parentInvoiceRowActions.mobile";
 
+// VARIANT JUSTIFICATION: extra field labels — card list tier carries card-shaped labels (withPaymentproofHint + statusLabels); desktop data-grid uses a different labels shape
 interface ParentInvoicesCardListMobileProps extends BaseParentInvoicesListProps {
-  // VARIANT JUSTIFICATION: extra field labels — card list tier carries card-shaped labels (withPaymentproofHint + statusLabels); desktop data-grid uses a different labels shape
   readonly labels: ParentInvoicesCardListMobileLabels;
 }
 

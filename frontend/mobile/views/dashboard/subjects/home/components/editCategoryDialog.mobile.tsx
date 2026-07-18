@@ -1,6 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Box,
   Button,
@@ -12,31 +11,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect } from "react";
-import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+import { type Control, Controller, type FieldErrors } from "react-hook-form";
+import type { ClassCategoryUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { EditCategoryFormValues } from "@/frontend/common/views/dashboard/subjects/home/schemas/category.schema";
 import type { EditCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobileFieldWrapper, standardInputSx } from "@/frontend/mobile/components/ui/form/field";
-import { useAppTranslation } from "@/shared/locale";
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-const editCategorySchema = z.object({
-  name: z.string().min(1, "nameRequired"),
-  slug: z.string().min(1, "slugRequired"),
-  description: z.string().optional(),
-  isActive: z.boolean().optional(),
-});
-
-type EditCategoryFormValues = z.infer<typeof editCategorySchema>;
 
 function TextFieldController({
   name,
@@ -82,36 +61,36 @@ function TextFieldController({
 function CategoryFormFields({
   control,
   errors,
+  labels,
   disabled,
 }: Readonly<{
   control: Control<EditCategoryFormValues>;
   errors: FieldErrors<EditCategoryFormValues>;
+  labels: EditCategoryDialogProps["labels"];
   disabled: boolean;
 }>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
-
   return (
     <>
       <TextFieldController
         name="name"
         control={control}
-        label={t.nameLabel}
+        label={labels.nameLabel}
         required
-        error={errors.name ? t.nameRequired : undefined}
+        error={errors.name ? labels.nameRequired : undefined}
         disabled={disabled}
       />
       <TextFieldController
         name="slug"
         control={control}
-        label={t.slugLabel}
+        label={labels.slugLabel}
         required
-        error={errors.slug ? t.slugRequired : undefined}
+        error={errors.slug ? labels.slugRequired : undefined}
         disabled={disabled}
       />
       <TextFieldController
         name="description"
         control={control}
-        label={t.descriptionLabel}
+        label={labels.descriptionLabel}
         disabled={disabled}
         multiline
         rows={3}
@@ -122,7 +101,7 @@ function CategoryFormFields({
         render={({ field }) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Switch checked={field.value ?? true} onChange={field.onChange} disabled={disabled} />
-            <Typography variant="bodyMd">{t.activeLabel}</Typography>
+            <Typography variant="bodyMd">{labels.activeLabel}</Typography>
           </Box>
         )}
       />
@@ -133,11 +112,14 @@ function CategoryFormFields({
 const FORM_ID = "edit-category-form-mobile";
 
 /**
- * EditCategoryDialogMobile — full-screen edit-category dialog.
- *
- * Inline form fields + inline action buttons (kept in this file rather than
- * shared with the create dialog so the mobile action row can be tweaked
+ * EditCategoryDialogMobile — full-screen edit-category dialog with an inline
+ * stacked action row kept in this file (the mobile action row can be tweaked
  * independently, e.g. full-width stacked buttons on narrow screens).
+ *
+ * NEW FOR PLAN v5: form state (useForm/useWatch/useEffect/zodResolver/
+ * inline z.object) lifted to ViewModel. Pure prop passdown here — the dialog
+ * consumes `form` (with `control`/`errors`/`handleSubmit`) and `labels` via
+ * the props contract from `types.ts`.
  */
 export function EditCategoryDialogMobile({
   open,
@@ -145,53 +127,21 @@ export function EditCategoryDialogMobile({
   onSubmit,
   category,
   isLoading,
+  form,
+  labels,
 }: Readonly<EditCategoryDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
-
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<EditCategoryFormValues>({
-    resolver: zodResolver(editCategorySchema),
-    defaultValues: {
-      name: "",
-      slug: "",
-      description: "",
-      isActive: true,
-    },
-  });
-
-  useEffect(() => {
-    if (open && category) {
-      reset({
-        name: category.name ?? "",
-        slug: category.slug ?? "",
-        description: category.description ?? "",
-        isActive: category.isActive ?? true,
-      });
-    }
-  }, [open, category, reset]);
-
-  const nameValue = useWatch({ control, name: "name" });
-
-  useEffect(() => {
-    if (nameValue) {
-      setValue("slug", slugify(nameValue));
-    }
-  }, [nameValue, setValue]);
+  const { control, errors, handleSubmit } = form;
 
   const handleFormSubmit = (data: EditCategoryFormValues) => {
     if (!category?.id) return;
-    onSubmit(category.id, {
+    const input: ClassCategoryUpdateInput = {
       name: data.name,
       slug: data.slug,
       description: data.description || null,
       isActive: data.isActive ?? null,
       sortOrder: null,
-    });
+    };
+    onSubmit(category.id, input);
   };
 
   if (!category) return null;
@@ -203,7 +153,7 @@ export function EditCategoryDialogMobile({
       fullScreen
       aria-labelledby="edit-category-dialog-title-mobile"
     >
-      <DialogTitle id="edit-category-dialog-title-mobile">{t.editCategory}</DialogTitle>
+      <DialogTitle id="edit-category-dialog-title-mobile">{labels.editCategory}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Box
           component="form"
@@ -211,7 +161,7 @@ export function EditCategoryDialogMobile({
           onSubmit={handleSubmit(handleFormSubmit)}
           sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 3 }}
         >
-          <CategoryFormFields control={control} errors={errors} disabled={isLoading} />
+          <CategoryFormFields control={control} errors={errors} labels={labels} disabled={isLoading} />
         </Box>
       </DialogContent>
       <DialogActions
@@ -237,7 +187,7 @@ export function EditCategoryDialogMobile({
             "&:hover": { backgroundColor: theme.palette.primary.dark },
           })}
         >
-          {isLoading ? "..." : t.saveChanges}
+          {isLoading ? "..." : labels.saveChanges}
         </Button>
         <Button
           onClick={onClose}
@@ -251,7 +201,7 @@ export function EditCategoryDialogMobile({
             py: 1.5,
           })}
         >
-          {t.cancel}
+          {labels.cancel}
         </Button>
       </DialogActions>
     </Dialog>

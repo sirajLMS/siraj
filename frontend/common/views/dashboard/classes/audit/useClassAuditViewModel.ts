@@ -2,11 +2,10 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import {
   groupClassAuditQueryDocument,
   resendClassNotificationsMutationDocument,
-  updateClassAdminNoteMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
 import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
@@ -28,66 +27,26 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
   const rawId = params?.id;
   const id = typeof rawId === "string" ? rawId : "";
 
-  const [_noteDialogOpen, setNoteDialogOpen] = useState(false);
-  const [_noteContent, setNoteContent] = useState("");
-
   const { data, loading, error } = useQuery(groupClassAuditQueryDocument, {
     variables: { classInstanceId: id },
     skip: !id,
   });
 
-  const [_updateAdminNote] = useMutation(updateClassAdminNoteMutationDocument);
   const [resendNotifications, { loading: isResending }] = useMutation(resendClassNotificationsMutationDocument);
 
   const audit = data?.groupClassAudit;
 
   if (loading && !data) {
-    return {
-      status: "loading",
-      audit: null as any,
-      labels: {} as any,
-      onGenerateReport: () => {},
-      onEditClass: () => {},
-      onExportStudents: () => {},
-      onViewStudent: () => {},
-      onResendNotifications: () => {},
-      onUpdateAdminNote: () => {},
-      onEditAdminNote: () => {},
-      isResending: false,
-    };
+    return createStubClassAuditViewModel("loading");
   }
 
   if (!id) {
-    return {
-      status: "invalidId",
-      audit: null as any,
-      labels: {} as any,
-      onGenerateReport: () => {},
-      onEditClass: () => {},
-      onExportStudents: () => {},
-      onViewStudent: () => {},
-      onResendNotifications: () => {},
-      onUpdateAdminNote: () => {},
-      onEditAdminNote: () => {},
-      isResending: false,
-    };
+    return createStubClassAuditViewModel("invalidId");
   }
 
   if (error || !audit) {
     logger.error("Error fetching class audit:", error);
-    return {
-      status: "error",
-      audit: null as any,
-      labels: {} as any,
-      onGenerateReport: () => {},
-      onEditClass: () => {},
-      onExportStudents: () => {},
-      onViewStudent: () => {},
-      onResendNotifications: () => {},
-      onUpdateAdminNote: () => {},
-      onEditAdminNote: () => {},
-      isResending: false,
-    };
+    return createStubClassAuditViewModel("error");
   }
 
   const labels = {
@@ -171,11 +130,6 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
     resendNotifications({ variables: { classInstanceId: id } });
   }, [resendNotifications, id]);
 
-  const handleOpenNoteDialog = useCallback(() => {
-    setNoteContent(audit?.adminNote?.content ?? "");
-    setNoteDialogOpen(true);
-  }, [audit?.adminNote?.content]);
-
   return {
     status: "ready",
     audit,
@@ -185,9 +139,32 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
     onExportStudents: handleExportStudents,
     onViewStudent: handleViewStudent,
     onResendNotifications: handleResendNotifications,
-    onUpdateAdminNote: handleOpenNoteDialog,
-    onEditAdminNote: handleOpenNoteDialog,
+    onUpdateAdminNote: noopAdminNoteHandler,
+    onEditAdminNote: noopAdminNoteHandler,
     isResending,
+  };
+}
+
+const noopAdminNoteHandler = (): void => {
+  // Admin-note edit dialog wiring is intentionally a no-op for Plan v5 because
+  // the dedicated admin-note edit dialog component has not been lifted into the
+  // tier `/audit` folder yet. Implementing the dialog is tracked outside of
+  // Plan v5; touch `_noteDialogOpen`/`_noteContent` then.
+};
+
+function createStubClassAuditViewModel(status: "loading" | "invalidId" | "error"): ClassAuditViewModel {
+  return {
+    status,
+    audit: null as unknown as ClassAuditViewModel["audit"],
+    labels: {} as unknown as ClassAuditViewModel["labels"],
+    onGenerateReport: noopAdminNoteHandler,
+    onEditClass: noopAdminNoteHandler,
+    onExportStudents: noopAdminNoteHandler,
+    onViewStudent: noopAdminNoteHandler,
+    onResendNotifications: noopAdminNoteHandler,
+    onUpdateAdminNote: noopAdminNoteHandler,
+    onEditAdminNote: noopAdminNoteHandler,
+    isResending: false,
   };
 }
 

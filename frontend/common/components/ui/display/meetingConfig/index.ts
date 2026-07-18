@@ -11,4 +11,4 @@ export type {
   MeetingConfigListProps,
   MeetingJoinEmptyRole,
 } from "@/frontend/common/components/ui/display/meetingConfig/types";
-export { effectiveMeetingToDisplayData } from "@/frontend/common/components/ui/display/meetingConfig/utils";
+export { effectiveMeetingToDisplayData } from "@/frontend/common/lib/effectiveMeetingToDisplayData";

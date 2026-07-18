@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, type BoxProps, Divider, Link as MuiLink, Stack, styled } from "@mui/material";
-import { effectiveMeetingToDisplayData } from "@/frontend/common/components/ui/display/meetingConfig/utils";
+import { effectiveMeetingToDisplayData } from "@/frontend/common/lib/effectiveMeetingToDisplayData";
 import type { RescheduleViewModel } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
 import {
   MobilePageContainer,

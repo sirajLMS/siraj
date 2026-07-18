@@ -2,20 +2,17 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Link, Paper, Typography } from "@mui/material";
-import type { TeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
-
-interface ActivationPolicyPanelDesktopProps {
-  readonly labels: TeacherDashboardLabels["policy"];
-  readonly compact?: boolean;
-  readonly onDownloadHandbook: () => void;
-  readonly onContactCoordinator: () => void;
-  readonly actionLabels: TeacherDashboardLabels["actions"];
-}
+import type { ActivationPolicyPanelProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 
 /**
  * Desktop variant of the activation policy panel.
  * Defaults to the full layout (dashed border, long description, inline
  * handbook + coordinator action links). Desktop has room for the full copy.
+ *
+ * Plan v5: per specs.md §3 N15 + §4.1 Class B, the byte-identical inline
+ * `ActivationPolicyPanelDesktopProps` interface was deleted; both tiers now
+ * import the shared `ActivationPolicyPanelProps` declared once in
+ * `frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps.ts`.
  */
 export function ActivationPolicyPanelDesktop({
   labels,
@@ -23,7 +20,7 @@ export function ActivationPolicyPanelDesktop({
   onDownloadHandbook,
   onContactCoordinator,
   actionLabels,
-}: Readonly<ActivationPolicyPanelDesktopProps>) {
+}: Readonly<ActivationPolicyPanelProps>) {
   const description = compact ? labels.descriptionMobile : labels.description;
 
   return (

@@ -42,7 +42,11 @@ export function IdentitySection(props: IdentitySectionProps) {
               return (
                 <CountrySelect
                   country={selectedCountry}
-                  setCountryAction={country => field.onChange(country.code)}
+                  setCountryAction={country => {
+                    if (country) {
+                      field.onChange(country.code);
+                    }
+                  }}
                   label={t.fields.nationality}
                   error={Boolean(fieldState.error)}
                   helperText={fieldState.error?.message}

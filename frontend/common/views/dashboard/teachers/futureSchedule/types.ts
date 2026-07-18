@@ -17,6 +17,15 @@ export interface MiniCalendarDate {
   readonly dot?: boolean;
 }
 
+// NEW FOR PLAN v5: MiniCalendarProps — byte-identical pair lifted from the
+// mobile + desktop `futureSchedule/components/miniCalendar.*.tsx` tier files
+// per specs.md §4.1 Class B (UNIFIED ORIGINAL).
+export interface MiniCalendarProps {
+  readonly selectedDate: string;
+  readonly onSelectDate: (date: string) => void;
+  readonly classDates: readonly string[];
+}
+
 export interface JumpToDateHeaderProps {
   readonly leaveQuotaUsed: number;
   readonly leaveQuotaTotal: number;
@@ -36,6 +45,13 @@ export interface ImportantNotesProps {
 
 export interface SupportContactProps {
   readonly contact: SupportContactData | null;
+  // NEW FOR PLAN v5: lifted `onContactAdmin` action + labels out of the
+  // tier-side `supportContact.{mobile,desktop}.tsx` files per specs.md §3
+  // N1 + N17 + §6.2 (mutations + `useNotifications`/toast side-effects live
+  // in the ViewModel; the tier only receives the bound callback).
+  readonly onContactAdmin: () => void;
+  readonly supportContactLabel: string;
+  readonly contactAdminLabel: string;
 }
 
 export interface FutureScheduleViewProps {

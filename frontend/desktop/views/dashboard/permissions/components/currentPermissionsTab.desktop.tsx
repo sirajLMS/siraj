@@ -78,6 +78,7 @@ export function CurrentPermissionsTabDesktop({
 }: Readonly<CurrentPermissionsTabProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
   const currentPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {
     const cols: GridColDef<Permission>[] = [
       {

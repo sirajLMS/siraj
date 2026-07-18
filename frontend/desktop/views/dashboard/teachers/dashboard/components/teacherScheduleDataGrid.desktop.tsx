@@ -14,7 +14,7 @@ import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 import { TeacherScheduleSessionActionsCellDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherScheduleSessionActionsCell.desktop";
 import { TeacherScheduleStudentCellDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherScheduleStudentCell.desktop";
 
-interface TeacherScheduleDataGridDesktopProps extends TeacherScheduleDataGridProps {}
+type TeacherScheduleDataGridDesktopProps = TeacherScheduleDataGridProps;
 
 function formatRowNumber(value: number): string {
   return String(value).padStart(2, "0");

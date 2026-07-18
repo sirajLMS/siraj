@@ -18,6 +18,7 @@ import {
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
 import { LessonReportDetailPanelMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/lessonReportDetailPanel.mobile";
+import { RejectReportDialogMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/rejectReportDialog.mobile";
 
 function ReviewCard({
   row,
@@ -167,6 +168,16 @@ export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel
         </MobileSectionPanel>
 
         <LessonReportDetailPanelMobile report={selectedReport} labels={labels} />
+
+        <RejectReportDialogMobile
+          open={rejectDialogOpen}
+          reason={rejectReason}
+          loading={rejecting}
+          labels={labels}
+          onReasonChange={onRejectReasonChange}
+          onClose={onCloseRejectDialog}
+          onConfirm={onConfirmReject}
+        />
       </MobileContentStack>
     </MobilePageContainer>
   );

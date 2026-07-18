@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect, useMemo, useState } from "react";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   latestExchangeRatesQueryDocument,
   latestFxSyncRunQueryDocument,
@@ -11,29 +11,19 @@ import {
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 import { parseCurrencyCode } from "@/frontend/common/lib/currency";
 import { shouldShowFxStaleBanner } from "@/frontend/common/lib/fx-stale";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import {
   buildExchangeRateColumns,
   type ExchangeRateRow,
 } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
-import { useAppTranslation } from "@/shared/locale";
+import {
+  type UseExchangeRateHistoryViewModel,
+  useExchangeRateHistoryViewModel,
+} from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/hooks";
+import { type ExchangeRatesLabels, useAppTranslation } from "@/shared/locale";
 
 type FeedbackFn = (message: string, severity: "success" | "error") => void;
-
-type ExchangeRatesLabels = {
-  readonly rateTable: {
-    readonly fromCurrency: string;
-    readonly toCurrency: string;
-    readonly rate: string;
-    readonly source: string;
-    readonly effectiveDate: string;
-  };
-  readonly refreshSuccess: string;
-  readonly refreshFailed: string;
-  readonly manualOverride: {
-    readonly success: string;
-  };
-};
 
 export type ExchangeRatesSyncRun = {
   readonly finishedAt?: string | null;
@@ -62,6 +52,14 @@ export interface ExchangeRatesViewModel {
   readonly refreshing: boolean;
   readonly showStaleWarning: boolean;
   readonly billingActionsDisabled: boolean;
+  // NEW FOR PLAN v5: canRefresh — surfaced from RequirePermission(BillingRefreshExchangeRates)
+  // gate so the tier view can conditionally render the refresh action without a tier-side
+  // permission wrapper (specs §3 N3 — RequirePermission moved to Container).
+  readonly canRefresh: boolean;
+  // NEW FOR PLAN v5: canOverride — surfaced from RequirePermission(BillingOverrideExchangeRates)
+  // gate so the tier view can conditionally render the manual-override action without a
+  // tier-side permission wrapper (specs §3 N3).
+  readonly canOverride: boolean;
   readonly onRefresh: () => void;
   readonly onOpenManualOverride: () => void;
   readonly manualOverrideOpen: boolean;
@@ -75,6 +73,10 @@ export interface ExchangeRatesViewModel {
   readonly syncError?: Error | null;
   readonly refetchRates: () => void;
   readonly refetchSync: () => void;
+  // NEW FOR PLAN v5: historyViewModel — composed by the parent ViewModel so the tier
+  // ExchangeRateHistorySection sub-component does not call useExchangeRateHistoryViewModel
+  // itself (specs §3 N26 — tier views must receive view models as props, not call hooks).
+  readonly historyViewModel: UseExchangeRateHistoryViewModel;
 }
 
 export type UseExchangeRatesViewModelProps = Record<string, never>;
@@ -109,6 +111,10 @@ export function useExchangeRatesViewModel(_props: Readonly<UseExchangeRatesViewM
   const labels: ExchangeRatesLabels = t.exchangeRates;
   const { isImpersonating } = useImpersonation();
   const billingActionsDisabled = isImpersonating;
+  // NEW FOR PLAN v5: read hasPermission from userStore so we can surface granular permission
+  // flags (canRefresh / canOverride) to the tier view, removing the tier-side RequirePermission
+  // wrapper (specs §3 N3 — permission gating lives in Container/ViewModel, never in tier).
+  const hasPermission = useUserStore(state => state.hasPermission);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -179,6 +185,11 @@ export function useExchangeRatesViewModel(_props: Readonly<UseExchangeRatesViewM
   const columns = useMemo(() => buildExchangeRateColumns(labels.rateTable), [labels.rateTable]);
   const showStaleWarning = shouldShowFxStaleBanner(syncRun) && !refreshing;
 
+  // NEW FOR PLAN v5: compose the history sub-view-model here so the tier
+  // ExchangeRateHistorySection.{mobile,desktop}.tsx receives it as a prop
+  // (specs §3 N26 — tier views must not call *ViewModel hooks directly).
+  const historyViewModel = useExchangeRateHistoryViewModel({ availablePairs });
+
   return {
     labels,
     rates,
@@ -190,6 +201,12 @@ export function useExchangeRatesViewModel(_props: Readonly<UseExchangeRatesViewM
     refreshing,
     showStaleWarning,
     billingActionsDisabled,
+    // NEW FOR PLAN v5: canRefresh — surfaced from userStore.hasPermission(BillingRefreshExchangeRates)
+    // so the tier can render the refresh button conditionally without RequirePermission in tier.
+    canRefresh: hasPermission(AppPermission.BillingRefreshExchangeRates),
+    // NEW FOR PLAN v5: canOverride — surfaced from userStore.hasPermission(BillingOverrideExchangeRates)
+    // so the tier can render the manual-override button conditionally without RequirePermission in tier.
+    canOverride: hasPermission(AppPermission.BillingOverrideExchangeRates),
     onRefresh: () => void refreshMutation({ variables: { force: false } }),
     onOpenManualOverride,
     manualOverrideOpen,
@@ -206,5 +223,6 @@ export function useExchangeRatesViewModel(_props: Readonly<UseExchangeRatesViewM
     syncError: syncError ?? null,
     refetchRates,
     refetchSync,
+    historyViewModel,
   };
 }

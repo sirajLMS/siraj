@@ -34,7 +34,7 @@ export function ParentInfoSection({ register, control, errors }: Props) {
               return (
                 <CountrySelect
                   country={selectedCountry}
-                  setCountryAction={country => field.onChange(country.code)}
+                  setCountryAction={country => field.onChange(country?.code ?? "")}
                   label={t.fields.nationality}
                   error={!!errors.nationality}
                   helperText={errors.nationality?.message}

@@ -73,6 +73,10 @@ export function StudentStatusMobileView({
     return embedded ? restricted : <MobilePageContainer>{restricted}</MobilePageContainer>;
   }
 
+  if (!student) {
+    return null;
+  }
+
   const body = (
     <>
       {embedded ? null : (

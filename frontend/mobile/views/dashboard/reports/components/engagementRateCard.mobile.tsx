@@ -3,14 +3,7 @@
 import { TrendingUpOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
-
-interface EngagementRateCardMobileProps {
-  readonly rate: number;
-  readonly growth: number | null;
-  readonly title: string;
-  readonly subtitle: string;
-  readonly increaseLabel: string;
-}
+import type { EngagementRateCardProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 
 export function EngagementRateCardMobile({
   rate,
@@ -18,7 +11,7 @@ export function EngagementRateCardMobile({
   title,
   subtitle,
   increaseLabel,
-}: Readonly<EngagementRateCardMobileProps>) {
+}: Readonly<EngagementRateCardProps>) {
   return (
     <BaseCard
       sx={{

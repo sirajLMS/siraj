@@ -7,12 +7,15 @@ import {
   assignGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/assignGroup.schema";
 
-export interface AssignGroupFormState {
+export interface AssignGroupFormBindings {
   readonly control: Control<AssignGroupFormData>;
   readonly errors: FieldErrors<AssignGroupFormData>;
   readonly handleSubmit: ReturnType<typeof useForm<AssignGroupFormData>>["handleSubmit"];
   readonly reset: ReturnType<typeof useForm<AssignGroupFormData>>["reset"];
 }
+
+/** @deprecated alias kept for callers expecting the older name */
+export type AssignGroupFormState = AssignGroupFormBindings;
 
 interface UseAssignGroupFormParams {
   readonly open: boolean;
@@ -30,7 +33,7 @@ interface UseAssignGroupFormParams {
  * returned `{ control, errors, handleSubmit }` bag as props and only wire
  * <Controller> against them — no own `useForm`/`useEffect`.
  */
-export function useAssignGroupForm({ open }: UseAssignGroupFormParams): AssignGroupFormState {
+export function useAssignGroupForm({ open }: UseAssignGroupFormParams): AssignGroupFormBindings {
   const {
     control,
     handleSubmit,

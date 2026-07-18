@@ -13,8 +13,8 @@ import type {
 import { DesktopAppDataGrid, DesktopGridPagination, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { ParentInvoiceRowActionsDesktop } from "@/frontend/desktop/views/dashboard/billing/components/parentInvoiceRowActions.desktop";
 
+// VARIANT JUSTIFICATION: extra field labels — data-grid tier carries grid-shaped labels (column headers + statusLabels + empty-title/subtitle); mobile card list uses a different labels shape
 interface ParentInvoicesDataGridDesktopProps extends BaseParentInvoicesListProps {
-  // VARIANT JUSTIFICATION: extra field labels — data-grid tier carries grid-shaped labels (column headers + statusLabels + empty-title/subtitle); mobile card list uses a different labels shape
   readonly labels: ParentInvoicesDataGridDesktopLabels;
 }
 

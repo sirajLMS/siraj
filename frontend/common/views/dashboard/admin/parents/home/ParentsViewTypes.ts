@@ -61,6 +61,11 @@ export interface ParentsViewLabels {
   readonly records: string;
   readonly filterLabel: string;
   readonly clearFilters: string;
+  // NEW FOR PLAN v5: noEntries + manageLifecycle lifted onto the parent view-labels contract
+  // so the desktop data-grid and mobile card-list call sites can compose ParentsDataGridLabels /
+  // ParentCardListLabels without touching the shared i18n schema (see CROSS-FILE DEPENDENCY in MA11 NS-1 report).
+  readonly noEntries: string;
+  readonly manageLifecycle: string;
   readonly table: ParentsDirectoryLabels["table"];
   readonly card: ParentsDirectoryLabels["card"];
   readonly statusLabels: Record<ParentLifecycleStatus, string>;
@@ -85,6 +90,38 @@ export interface ParentsViewModel {
   readonly onExport: () => void;
   readonly onLifecycleStatusFilterChange: (status: ParentStatus | null) => void;
   readonly onResetFilters: () => void;
+  // NEW FOR PLAN v5: lifted permission booleans per specs.md §3 N3 + §6.1.
+  // Tier parents views (and the desktop data-grid child) no longer import
+  // `RequirePermission` or call `useUserStore()` — the ViewModel computes
+  // the gates ONCE and the tier views read the booleans as plain props.
+  readonly canParentsCreate: boolean;
+  readonly canParentManageStatus: boolean;
+}
+
+// NEW FOR PLAN v5: BaseParentsViewProps lifted per specs.md §4.1 Class C — desktop variant adds `loading?: boolean`
+// that the mobile variant omits (mobile uses sentinel rows / skeleton-in-list). Each tier interface extends this base
+// and tags itself with `// VARIANT JUSTIFICATION: extra field <name>` per §3 allowance table.
+export interface BaseParentsViewProps {
+  readonly metrics: readonly MetricItem[];
+  readonly rows: readonly ParentDirectoryRow[];
+  readonly labels: ParentsViewLabels;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly lifecycleStatusFilter: ParentStatus | null;
+  readonly filterPanelOpen: boolean;
+  readonly onAddParent: () => void;
+  readonly onOpenSettings: (id: string) => void;
+  readonly onSearch: (query: string) => void;
+  readonly onPageChange?: (page: number) => void;
+  readonly onFilter: () => void;
+  readonly onExport: () => void;
+  readonly onLifecycleStatusFilterChange: (status: ParentStatus | null) => void;
+  readonly onResetFilters: () => void;
+  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier views
+  // instead of `RequirePermission` wrappers (specs.md §3 N3).
+  readonly canParentsCreate: boolean;
+  readonly canParentManageStatus: boolean;
 }
 
 export type UseParentsViewModelProps = Record<string, never>;

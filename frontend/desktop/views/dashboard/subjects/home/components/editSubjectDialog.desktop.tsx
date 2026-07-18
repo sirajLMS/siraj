@@ -1,61 +1,22 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
-import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import type { ClassSubjectUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   ActiveToggleField,
   CategorySelectField,
   EntityFormDialogActions,
-  emptySubjectFormValues,
   LabeledTextField,
-  type SubjectFormValues,
-  slugify,
-  subjectFormSchema,
 } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__";
-import type { EditSubjectDialogProps, SubjectItem } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useAppTranslation } from "@/shared/locale";
+import type { SubjectFormValues } from "@/frontend/common/views/dashboard/subjects/home/schemas/subject.schema";
+import type { EditSubjectDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 
 const FORM_ID = "edit-subject-form-desktop";
 
-function useEditSubjectForm(open: boolean, subject: SubjectItem | null) {
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<SubjectFormValues>({
-    resolver: zodResolver(subjectFormSchema),
-    defaultValues: emptySubjectFormValues,
-  });
-
-  useEffect(() => {
-    if (open && subject) {
-      reset({
-        name: subject.name ?? "",
-        slug: subject.slug ?? "",
-        categoryId: subject.category?.id ?? "",
-        description: subject.description ?? "",
-        isActive: subject.isActive ?? true,
-      });
-    }
-  }, [open, subject, reset]);
-
-  const nameValue = useWatch({ control, name: "name" });
-
-  useEffect(() => {
-    if (nameValue) {
-      setValue("slug", slugify(nameValue));
-    }
-  }, [nameValue, setValue]);
-
-  return { control, errors, handleSubmit };
-}
-
 /**
  * EditSubjectDialogDesktop — `sm`-width centered edit-subject dialog.
+ *
+ * NEW FOR PLAN v5: form state lifted to ViewModel. Pure prop passdown here.
  */
 export function EditSubjectDialogDesktop({
   open,
@@ -64,13 +25,14 @@ export function EditSubjectDialogDesktop({
   subject,
   categories,
   isLoading,
+  form,
+  labels,
 }: Readonly<EditSubjectDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
-  const { control, errors, handleSubmit } = useEditSubjectForm(open, subject);
+  const { control, errors, handleSubmit } = form;
 
   const handleFormSubmit = (data: SubjectFormValues) => {
     if (!subject?.id) return;
-    onSubmit(subject.id, {
+    const input: ClassSubjectUpdateInput = {
       name: data.name,
       slug: data.slug,
       categoryId: data.categoryId,
@@ -78,7 +40,8 @@ export function EditSubjectDialogDesktop({
       isActive: data.isActive ?? null,
       sortOrder: null,
       avatarUrl: null,
-    });
+    };
+    onSubmit(subject.id, input);
   };
 
   if (!subject) return null;
@@ -91,7 +54,7 @@ export function EditSubjectDialogDesktop({
       maxWidth="sm"
       aria-labelledby="edit-subject-dialog-title-desktop"
     >
-      <DialogTitle id="edit-subject-dialog-title-desktop">{t.editSubject}</DialogTitle>
+      <DialogTitle id="edit-subject-dialog-title-desktop">{labels.editSubject}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Box
           component="form"
@@ -102,43 +65,43 @@ export function EditSubjectDialogDesktop({
           <LabeledTextField
             name="name"
             control={control}
-            label={t.nameLabel}
+            label={labels.nameLabel}
             required
-            error={errors.name ? t.nameRequired : undefined}
+            error={errors.name ? labels.nameRequired : undefined}
             disabled={isLoading}
           />
           <LabeledTextField
             name="slug"
             control={control}
-            label={t.slugLabel}
+            label={labels.slugLabel}
             required
-            error={errors.slug ? t.slugRequired : undefined}
+            error={errors.slug ? labels.slugRequired : undefined}
             disabled={isLoading}
           />
           <CategorySelectField
             name="categoryId"
             control={control}
-            label={t.categoryLabel}
-            placeholder={t.selectCategory}
-            error={errors.categoryId ? t.categoryRequired : undefined}
+            label={labels.categoryLabel}
+            placeholder={labels.selectCategory}
+            error={errors.categoryId ? labels.categoryRequired : undefined}
             disabled={isLoading}
             categories={categories}
           />
           <LabeledTextField
             name="description"
             control={control}
-            label={t.descriptionLabel}
+            label={labels.descriptionLabel}
             disabled={isLoading}
             multiline
             rows={3}
           />
-          <ActiveToggleField name="isActive" control={control} label={t.activeLabel} disabled={isLoading} />
+          <ActiveToggleField name="isActive" control={control} label={labels.activeLabel} disabled={isLoading} />
         </Box>
       </DialogContent>
       <EntityFormDialogActions
         formId={FORM_ID}
-        cancelLabel={t.cancel}
-        saveLabel={t.saveChanges}
+        cancelLabel={labels.cancel}
+        saveLabel={labels.saveChanges}
         onClose={onClose}
         isLoading={isLoading}
       />

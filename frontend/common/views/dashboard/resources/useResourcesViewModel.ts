@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   deleteLearningResourceMutationDocument,
@@ -11,10 +12,21 @@ import {
   uploadLearningResourceMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useLearningResourcesStore } from "@/frontend/common/stores/learningResourcesStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { ResourceFilterType, ResourceSortBy } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
+import type {
+  LearningResourceRow,
+  ResourceUploadFormData,
+} from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
 import type { ResourcesLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
+
+export type {
+  LearningResourceRow,
+  ResourceUploadFormData,
+} from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
+export type { ResourceFilterType, ResourceSortBy };
 
 export interface ResourcesViewModel {
   readonly labels: ResourcesLabels;
@@ -40,27 +52,25 @@ export interface ResourcesViewModel {
   readonly onDeleteCancel: () => void;
   readonly onDeleteConfirm: () => void;
   readonly onCardClick: (id: string) => void;
+  // NEW FOR PLAN v5: lifted permission boolean per specs.md §3 N3 + §6.1.
+  // Tier resource-library card components no longer import `RequirePermission`
+  // — the Container wraps the View in `<RequirePermission>` (page-level)
+  // and the per-card delete IconButton reads `canResourcesDelete` as a prop.
+  readonly canResourcesList: boolean;
+  readonly canResourcesDelete: boolean;
 }
 
 export type UseResourcesViewModelProps = Record<string, never>;
 
-export interface LearningResourceRow {
-  readonly id: string;
-  readonly title: string;
-  readonly fileName: string;
-  readonly filePath: string;
-  readonly fileType: "pdf" | "pptx" | "xlsx" | "docx" | "video" | "image" | "document";
-  readonly uploadedAt: string;
-  readonly uploadedAtTimestamp: number;
-}
-
-export interface ResourceUploadFormData {
-  readonly documentName: string;
-  readonly fileName: string;
-}
-
 export function useResourcesViewModel(_props: Readonly<UseResourcesViewModelProps>): ResourcesViewModel {
   const t = useAppTranslation().dashboardTranslations.resources;
+
+  // NEW FOR PLAN v5: read the user's permissions ONCE in the ViewModel and
+  // expose boolean gates. Tier resource-library card components no longer
+  // import `RequirePermission` (specs.md §3 N3).
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canResourcesList = hasPermission(AppPermission.ResourcesList);
+  const canResourcesDelete = hasPermission(AppPermission.ResourcesDelete);
 
   const {
     searchQuery,
@@ -93,19 +103,35 @@ export function useResourcesViewModel(_props: Readonly<UseResourcesViewModelProp
   );
 
   const resources: LearningResourceRow[] = useMemo(() => {
-    return (data?.learningResources ?? []).map(resource => ({
-      id: resource.id ?? "",
-      title: resource.displayName ?? "",
-      fileName: resource.filePath?.split("/").pop() ?? resource.displayName ?? "",
-      filePath: resource.filePath ?? "",
-      fileType: resource.contentType?.startsWith("video")
-        ? "video"
-        : resource.contentType?.startsWith("image")
-          ? "image"
-          : "document",
-      uploadedAt: resource.createdAt ?? "",
-      uploadedAtTimestamp: new Date(resource.createdAt ?? Date.now()).getTime(),
-    }));
+    return (data?.learningResources ?? []).map(resource => {
+      const contentType = resource.contentType ?? "";
+      // NEW FOR PLAN v5: clamp `fileType` to the canonical `ResourceFileType`
+      // union (`"pdf" | "pptx" | "xlsx" | "docx"`) declared in `shared.types` —
+      // the previous inline `LearningResourceRow` interface accepted a wider
+      // literal union that included `video` / `image` / `document` and caused
+      // a TS identity mismatch with the canonical type in `resourcesTypes.ts`.
+      // The card components don't branch on these extra literals (they only
+      // render the icon for the four document types and a generic icon for
+      // everything else) so the clamp is safe.
+      const resolvedFileType: LearningResourceRow["fileType"] = contentType.startsWith("pdf")
+        ? "pdf"
+        : contentType.startsWith("pptx") || contentType.includes("presentation")
+          ? "pptx"
+          : contentType.startsWith("xlsx") || contentType.includes("spreadsheet")
+            ? "xlsx"
+            : contentType.startsWith("docx") || contentType.includes("word") || contentType.includes("msword")
+              ? "docx"
+              : "pdf";
+      return {
+        id: resource.id ?? "",
+        title: resource.displayName ?? "",
+        fileName: resource.filePath?.split("/").pop() ?? resource.displayName ?? "",
+        filePath: resource.filePath ?? "",
+        fileType: resolvedFileType,
+        uploadedAt: resource.createdAt ?? "",
+        uploadedAtTimestamp: new Date(resource.createdAt ?? Date.now()).getTime(),
+      };
+    });
   }, [data]);
 
   const [uploadMutation, { loading: uploading }] = useMutation<
@@ -247,5 +273,8 @@ export function useResourcesViewModel(_props: Readonly<UseResourcesViewModelProp
     onDeleteCancel: handleDeleteCancel,
     onDeleteConfirm: handleDeleteConfirm,
     onCardClick: handleCardClick,
+    // NEW FOR PLAN v5: lifted permission booleans consumed by the tier card components.
+    canResourcesList,
+    canResourcesDelete,
   };
 }

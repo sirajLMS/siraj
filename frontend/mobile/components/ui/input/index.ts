@@ -7,7 +7,6 @@ export * from "@/frontend/mobile/components/ui/input/languageSelector";
 export * from "@/frontend/mobile/components/ui/input/localizedString";
 export * from "@/frontend/mobile/components/ui/input/meetingConfigSelect";
 export * from "@/frontend/mobile/components/ui/input/meetingConfigTypeFields";
-export * from "@/frontend/mobile/components/ui/input/meetingProviderSelect";
 export * from "@/frontend/mobile/components/ui/input/paymentMethodDefaultsEditor";
 export * from "@/frontend/mobile/components/ui/input/paymentMethodSelect";
 export * from "@/frontend/mobile/components/ui/input/paymentMethodTypeFields";

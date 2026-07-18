@@ -1,25 +1,23 @@
 "use client";
 
 import { Box } from "@mui/material";
-import type { ReportLedgerRow } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import type { PerformanceLedgerCardLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
+import type { PerformanceLedgerCardListProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import {
   PerformanceLedgerCardDesktop,
   type PerformanceLedgerCardDesktopLabels,
 } from "@/frontend/desktop/views/dashboard/reports/components/performanceLedgerCard.desktop";
 
-interface PerformanceLedgerCardListDesktopProps {
-  readonly rows: readonly ReportLedgerRow[];
-  readonly labels: PerformanceLedgerCardDesktopLabels;
-  readonly loading?: boolean;
-  readonly onRowClick?: (row: ReportLedgerRow) => void;
-}
+export type PerformanceLedgerCardListDesktopLabels = PerformanceLedgerCardLabels;
 
 export function PerformanceLedgerCardListDesktop({
   rows,
   labels,
   loading = false,
   onRowClick,
-}: Readonly<PerformanceLedgerCardListDesktopProps>) {
+  showFinancials,
+  formatPaidAmounts,
+}: Readonly<PerformanceLedgerCardListProps>) {
   if (loading && rows.length === 0) {
     return null;
   }
@@ -32,7 +30,14 @@ export function PerformanceLedgerCardListDesktop({
       }}
     >
       {rows.map(row => (
-        <PerformanceLedgerCardDesktop key={row.id} row={row} labels={labels} onClick={onRowClick} />
+        <PerformanceLedgerCardDesktop
+          key={row.id}
+          row={row}
+          labels={labels as PerformanceLedgerCardDesktopLabels}
+          showFinancials={showFinancials}
+          paidLabel={formatPaidAmounts(row.paidAmounts)}
+          onClick={onRowClick}
+        />
       ))}
     </Box>
   );

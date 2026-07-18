@@ -1,92 +1,18 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { CheckCircleOutlined, WarningOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, Tooltip, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { Box, Button, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { PermissionGroup, User, UserOverride } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
+import { OverridesCell } from "@/frontend/common/views/dashboard/permissions/components/OverridesCell";
 import type { UserOverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
+import { getUserGroupsForUser } from "@/frontend/common/views/dashboard/permissions/utils";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 import { useAppTranslation } from "@/shared/locale";
-
-interface OverridesInfo {
-  readonly grants: number;
-  readonly revokes: number;
-  readonly status: "healthy" | "conflict";
-  readonly conflictDetails: string[];
-}
-
-function useUserOverridesInfo(
-  userId: string,
-  userGroups: readonly PermissionGroup[]
-): {
-  readonly loading: boolean;
-  readonly error: Error | undefined;
-  readonly info: OverridesInfo | null;
-} {
-  const { data, loading, error } = useQuery(userOverridesQueryDocument, {
-    variables: { userId },
-    skip: !userId,
-  });
-
-  const info = useMemo<OverridesInfo | null>(() => {
-    if (!data?.userOverrides) return null;
-
-    const overrides = data.userOverrides;
-    const grants = overrides.filter((o: UserOverride) => o.state === "GRANTED").length;
-    const revokes = overrides.filter((o: UserOverride) => o.state === "DENIED").length;
-
-    const inheritedPermissionIds = new Set<string>();
-    for (const group of userGroups) {
-      if (group.permissionIds) {
-        for (const pid of group.permissionIds) {
-          inheritedPermissionIds.add(pid);
-        }
-      }
-    }
-
-    const conflictDetails = buildConflictDetails(overrides, inheritedPermissionIds);
-    const hasConflict = conflictDetails.length > 0;
-
-    return {
-      grants,
-      revokes,
-      status: hasConflict ? "conflict" : "healthy",
-      conflictDetails,
-    };
-  }, [data, userGroups]);
-
-  return { loading, error, info };
-}
-
-function buildConflictDetails(overrides: readonly UserOverride[], inheritedPermissionIds: Set<string>): string[] {
-  const details: string[] = [];
-  for (const override of overrides) {
-    if (!override.permissionId) continue;
-    const isInherited = inheritedPermissionIds.has(override.permissionId);
-    if (override.state === "DENIED" && isInherited) {
-      details.push(`Deny override for "${override.permissionId}" conflicts with inherited group permission.`);
-    } else if (override.state === "GRANTED" && isInherited) {
-      details.push(`Allow override for "${override.permissionId}" overlaps with inherited group permission.`);
-    }
-  }
-  return details;
-}
-
-function getUserGroupsForUser(
-  userId: string | undefined,
-  groups: readonly PermissionGroup[]
-): readonly PermissionGroup[] {
-  if (!userId) return [];
-  return groups.filter(g => g.assignedUsers?.some(au => au.id === userId));
-}
 
 interface UserGroupsCellProps {
   readonly userGroups: readonly PermissionGroup[];
@@ -128,116 +54,6 @@ function UserGroupsCell({ userGroups }: Readonly<UserGroupsCellProps>) {
   );
 }
 
-interface DynamicOverridesCellProps {
-  readonly userId: string;
-  readonly userGroups: readonly PermissionGroup[];
-  readonly type: "grants" | "revokes" | "status";
-}
-
-function DynamicOverridesCell({ userId, userGroups, type }: Readonly<DynamicOverridesCellProps>) {
-  const { loading, info } = useUserOverridesInfo(userId, userGroups);
-
-  if (loading) {
-    return <CircularProgress size={16} thickness={5} color="inherit" sx={{ opacity: 0.5 }} />;
-  }
-
-  if (!info) {
-    return <Typography variant="bodyMd">-</Typography>;
-  }
-
-  if (type === "grants") {
-    if (info.grants > 0) {
-      return (
-        <Box
-          sx={theme => ({
-            fontSize: theme.typography.bodyMd.fontSize,
-            fontWeight: "bold",
-            minWidth: 24,
-            height: 24,
-            borderRadius: 1,
-            px: 1,
-            backgroundColor: theme.palette.successContainer ?? alpha(theme.palette.success.main, 0.15),
-            color: theme.palette.success.main,
-            border: `1px solid ${theme.palette.success.light}`,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-          })}
-        >
-          {info.grants}
-        </Box>
-      );
-    }
-    return (
-      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-        {info.grants}
-      </Typography>
-    );
-  }
-
-  if (type === "revokes") {
-    if (info.revokes > 0) {
-      return (
-        <Box
-          sx={theme => ({
-            fontSize: theme.typography.bodyMd.fontSize,
-            fontWeight: "bold",
-            minWidth: 24,
-            height: 24,
-            borderRadius: 1,
-            px: 1,
-            backgroundColor: theme.palette.errorContainer ?? alpha(theme.palette.error.main, 0.15),
-            color: theme.palette.error.main,
-            border: `1px solid ${theme.palette.error.light}`,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-          })}
-        >
-          {info.revokes}
-        </Box>
-      );
-    }
-    return (
-      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-        {info.revokes}
-      </Typography>
-    );
-  }
-
-  // Type is status
-  if (info.status === "conflict") {
-    const tooltipTitle = info.conflictDetails.join("\n");
-    return (
-      <Tooltip title={tooltipTitle} arrow placement="top">
-        <Box
-          sx={theme => ({
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            color: theme.palette.warning.main,
-            cursor: "help",
-          })}
-        >
-          <WarningOutlined fontSize="small" />
-          <Typography variant="labelMd" sx={{ fontWeight: 600 }}>
-            Conflict
-          </Typography>
-        </Box>
-      </Tooltip>
-    );
-  }
-
-  return (
-    <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.success.main })}>
-      <CheckCircleOutlined fontSize="small" />
-      <Typography variant="labelMd" sx={{ fontWeight: 600 }}>
-        Healthy
-      </Typography>
-    </Box>
-  );
-}
-
 export function UserOverridesDataGridDesktop({
   users,
   groups,
@@ -246,6 +62,9 @@ export function UserOverridesDataGridDesktop({
 }: Readonly<UserOverridesDataGridProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing `columns` keeps
+  // the MUI DataGrid column-identity stable across re-renders so the grid does
+  // not remount/re-sort on each props change.
   const columns = useMemo<GridColDef<User>[]>(() => {
     return [
       {
@@ -292,7 +111,7 @@ export function UserOverridesDataGridDesktop({
           const userId = params.row.id;
           if (!userId) return null;
           const userGroups = getUserGroupsForUser(userId, groups);
-          return <DynamicOverridesCell userId={userId} userGroups={userGroups} type="grants" />;
+          return <OverridesCell userId={userId} userGroups={userGroups} type="grants" />;
         },
       },
       {
@@ -306,7 +125,7 @@ export function UserOverridesDataGridDesktop({
           const userId = params.row.id;
           if (!userId) return null;
           const userGroups = getUserGroupsForUser(userId, groups);
-          return <DynamicOverridesCell userId={userId} userGroups={userGroups} type="revokes" />;
+          return <OverridesCell userId={userId} userGroups={userGroups} type="revokes" />;
         },
       },
       {
@@ -318,7 +137,7 @@ export function UserOverridesDataGridDesktop({
           const userId = params.row.id;
           if (!userId) return null;
           const userGroups = getUserGroupsForUser(userId, groups);
-          return <DynamicOverridesCell userId={userId} userGroups={userGroups} type="status" />;
+          return <OverridesCell userId={userId} userGroups={userGroups} type="status" />;
         },
       },
       {

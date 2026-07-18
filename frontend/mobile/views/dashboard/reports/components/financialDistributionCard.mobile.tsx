@@ -4,13 +4,8 @@ import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { CurrencyDistributionSlice } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import type { FinancialDistributionCardProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
-
-interface FinancialDistributionCardMobileProps {
-  readonly currencyDistribution: readonly CurrencyDistributionSlice[];
-  readonly title: string;
-  readonly subtitle: string;
-}
 
 const SEGMENT_COLORS: readonly ((theme: Theme) => string)[] = [
   theme => theme.palette.primary.main,
@@ -49,7 +44,7 @@ export function FinancialDistributionCardMobile({
   currencyDistribution,
   title,
   subtitle,
-}: Readonly<FinancialDistributionCardMobileProps>) {
+}: Readonly<FinancialDistributionCardProps>) {
   const hasDistribution = currencyDistribution.length > 0;
 
   return (

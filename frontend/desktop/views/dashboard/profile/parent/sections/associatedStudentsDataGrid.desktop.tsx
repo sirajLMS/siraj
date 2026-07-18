@@ -4,15 +4,10 @@ import { Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profileHref";
+import type { AssociatedStudentsDataGridDesktopProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentScheduleComponents.types";
 import type { AssociatedStudentRow } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
-
-interface AssociatedStudentsDataGridDesktopProps {
-  readonly rows: readonly AssociatedStudentRow[];
-  readonly loading?: boolean;
-  readonly emptyMessage: string;
-}
 
 export function AssociatedStudentsDataGridDesktop({
   rows,

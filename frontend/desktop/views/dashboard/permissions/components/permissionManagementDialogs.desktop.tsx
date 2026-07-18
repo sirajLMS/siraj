@@ -8,13 +8,10 @@ import { ManageOverridesDialogDesktop } from "@/frontend/desktop/views/dashboard
 import { PermissionGroupFormDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionGroupForm.desktop";
 
 export function PermissionManagementDialogsDesktop({
-  permissions,
-  groups,
   users,
   isLoading,
   activeGroup,
   selectedGroupId,
-  selectedUserIdForOverrides,
   isCreateDialogOpen,
   isEditDialogOpen,
   isDeleteDialogOpen,
@@ -26,34 +23,59 @@ export function PermissionManagementDialogsDesktop({
   closeAssignDialog,
   closeManageOverrides,
   setSelectedUserIdForOverrides,
-  onCreateGroup,
-  onUpdateGroup,
   onDeleteGroup,
   onAssignGroup,
-  onUpdateOverrides,
+  createGroupForm,
+  editGroupForm,
+  assignGroupForm,
+  manageOverridesState,
 }: Readonly<PermissionManagementDialogsProps>) {
   return (
     <>
       <PermissionGroupFormDesktop
         open={isCreateDialogOpen}
         group={null}
-        permissions={permissions}
+        permissions={[]}
         isLoading={isLoading}
         onClose={closeCreateDialog}
-        onSave={onCreateGroup}
+        control={createGroupForm.control}
+        handleSubmit={createGroupForm.handleSubmit}
+        onSubmit={createGroupForm.onSubmit}
+        selectedPermissionIds={createGroupForm.selectedPermissionIds}
+        searchTerm={createGroupForm.searchTerm}
+        setSearchTerm={createGroupForm.setSearchTerm}
+        selectedCategory={createGroupForm.selectedCategory}
+        setSelectedCategory={createGroupForm.setSelectedCategory}
+        categories={createGroupForm.categories}
+        groupedPermissions={createGroupForm.groupedPermissions}
+        handleTogglePermission={createGroupForm.handleTogglePermission}
+        handleSelectAllCategory={createGroupForm.handleSelectAllCategory}
+        isGroupSelected={createGroupForm.isGroupSelected}
+        isGroupIndeterminate={createGroupForm.isGroupIndeterminate}
+        setValue={createGroupForm.setValue}
       />
 
       <PermissionGroupFormDesktop
         open={isEditDialogOpen}
         group={activeGroup}
-        permissions={permissions}
+        permissions={[]}
         isLoading={isLoading}
         onClose={closeEditDialog}
-        onSave={async (name, description, permissionIds) => {
-          if (selectedGroupId) {
-            await onUpdateGroup(selectedGroupId, name, description, permissionIds);
-          }
-        }}
+        control={editGroupForm.control}
+        handleSubmit={editGroupForm.handleSubmit}
+        onSubmit={editGroupForm.onSubmit}
+        selectedPermissionIds={editGroupForm.selectedPermissionIds}
+        searchTerm={editGroupForm.searchTerm}
+        setSearchTerm={editGroupForm.setSearchTerm}
+        selectedCategory={editGroupForm.selectedCategory}
+        setSelectedCategory={editGroupForm.setSelectedCategory}
+        categories={editGroupForm.categories}
+        groupedPermissions={editGroupForm.groupedPermissions}
+        handleTogglePermission={editGroupForm.handleTogglePermission}
+        handleSelectAllCategory={editGroupForm.handleSelectAllCategory}
+        isGroupSelected={editGroupForm.isGroupSelected}
+        isGroupIndeterminate={editGroupForm.isGroupIndeterminate}
+        setValue={editGroupForm.setValue}
       />
 
       <DeleteGroupDialogDesktop
@@ -79,20 +101,18 @@ export function PermissionManagementDialogsDesktop({
             await onAssignGroup(selectedGroupId, userId);
           }
         }}
+        control={assignGroupForm.control}
+        errors={assignGroupForm.errors}
+        handleSubmit={assignGroupForm.handleSubmit}
       />
 
       <ManageOverridesDialogDesktop
         open={isManageOverridesOpen}
-        userId={selectedUserIdForOverrides}
-        users={users}
-        groups={groups}
-        permissions={permissions}
-        isLoading={isLoading}
         onClose={() => {
           setSelectedUserIdForOverrides(null);
           closeManageOverrides();
         }}
-        onSave={onUpdateOverrides}
+        manageOverridesState={manageOverridesState}
       />
     </>
   );

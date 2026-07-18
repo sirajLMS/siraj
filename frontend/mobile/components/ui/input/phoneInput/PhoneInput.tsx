@@ -7,11 +7,10 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
-import { useCallback, useState } from "react";
+import { usePhoneInput } from "@/frontend/common/hooks/usePhoneInput";
 import { LtrScope } from "@/frontend/common/providers/theme/LtrScope";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
 import { PhoneCountryPickerMobile } from "@/frontend/mobile/components/ui/input/phoneInput/phoneCountryPicker.mobile";
-import { usePhoneInput } from "@/frontend/mobile/components/ui/input/phoneInput/usePhoneInput";
 import { useAppTranslation } from "@/shared/locale";
 
 export type PhoneInputProps = {
@@ -209,7 +208,6 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   hideLabel,
 }: PhoneInputProps): React.ReactNode => {
   const t = useAppTranslation().uiTranslations.phoneInput;
-  const [countryPickerOpen, setCountryPickerOpen] = useState(false);
 
   const {
     country,
@@ -219,7 +217,6 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
     activeSlot,
     prefixInvalid,
     phoneInvalid,
-    selectCountry,
     handlePrefixKeyDown,
     handleNationalKeyDown,
     handleNationalSelect,
@@ -229,30 +226,11 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
     nationalInputRef,
     maxPrefixDisplayLength,
     setActiveSlot,
-  } = usePhoneInput({ value, onChangeAction, defaultRegion });
-
-  const openCountryPicker = useCallback(
-    (event: React.MouseEvent<HTMLElement>) => {
-      event.stopPropagation();
-      if (disabled) {
-        return;
-      }
-      setCountryPickerOpen(current => !current);
-    },
-    [disabled]
-  );
-
-  const closeCountryPicker = useCallback(() => {
-    setCountryPickerOpen(false);
-  }, []);
-
-  const handleCountrySelect = useCallback(
-    (nextCountry: Parameters<typeof selectCountry>[0]) => {
-      selectCountry(nextCountry);
-      closeCountryPicker();
-    },
-    [closeCountryPicker, selectCountry]
-  );
+    countryPickerOpen,
+    openCountryPicker,
+    closeCountryPicker,
+    handleCountrySelect,
+  } = usePhoneInput({ value, onChangeAction, defaultRegion, disabled });
 
   const isEmpty = prefixDigits.length === 0 && nationalDigits.length === 0;
   const showRequiredError = Boolean(required) && isEmpty;

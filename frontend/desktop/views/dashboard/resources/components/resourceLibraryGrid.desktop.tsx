@@ -10,11 +10,15 @@ export function ResourceLibraryGridDesktop({
   labels,
   filterType,
   sortBy,
+  canManage,
   onFilterTypeChange,
   onSortByChange,
   onDeleteRequest,
   onCardClick,
-}: Readonly<Omit<ResourceLibraryGridProps, "canManage">>) {
+}: Readonly<ResourceLibraryGridProps>) {
+  // NEW FOR PLAN v5: thread `canManage` down to the resource-library card so
+  // the card can render the delete IconButton conditionally without importing
+  // `RequirePermission` or calling `useUserStore()` (specs.md §3 N3).
   return (
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2, gap: 2 }}>
@@ -42,6 +46,7 @@ export function ResourceLibraryGridDesktop({
             <Grid key={resource.id} size={{ xs: 12, md: 6 }}>
               <ResourceLibraryCardDesktop
                 resource={resource}
+                canManage={canManage}
                 onDeleteRequest={onDeleteRequest}
                 onCardClick={onCardClick}
               />

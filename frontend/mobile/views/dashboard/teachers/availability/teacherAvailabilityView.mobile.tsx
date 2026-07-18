@@ -1,11 +1,9 @@
-// cspell:disable
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, CircularProgress } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
-import { availabilitySearchSchema } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
+import { availabilitySearchResolver } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
 import type {
   AvailabilitySearchFormData,
   TeacherAvailabilityInsights,
@@ -48,7 +46,7 @@ export function TeacherAvailabilityMobileView({
   );
 
   const methods = useForm<AvailabilitySearchFormData>({
-    resolver: zodResolver(availabilitySearchSchema),
+    resolver: availabilitySearchResolver,
     defaultValues: resolveDefaultFilters(defaultFilters, storeFilters),
   });
 

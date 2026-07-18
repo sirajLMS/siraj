@@ -1,6 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Close } from "@mui/icons-material";
 import {
   Box,
@@ -13,114 +12,15 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
-import { type Control, useForm, useWatch } from "react-hook-form";
 import { LocalizedStringFormField } from "@/frontend/common/components/ui/input/localizedString";
-import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import {
-  type PermissionGroupFormData,
-  permissionGroupSchema,
-} from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
-import type { PermissionGroupFormProps } from "@/frontend/common/views/dashboard/permissions/types";
+import type {
+  PermissionGroupFormContentProps,
+  PermissionGroupFormProps,
+} from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { PermissionCategoryListDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCategoryList.desktop";
 import { PermissionFilterBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionFilterBar.desktop";
 import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
-
-type ValidPermission = Permission & { id: string; key: string; category: string };
-
-function usePermissionFilters(permissions: readonly Permission[], searchTerm: string, selectedCategory: string) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
-
-  const validPermissions = useMemo(
-    () => permissions.filter((p): p is ValidPermission => !!p.id && !!p.key && !!p.category),
-    [permissions]
-  );
-
-  const categories = useMemo(() => {
-    const cats = validPermissions.map(p => p.category).filter((c): c is string => c.trim() !== "");
-    return Array.from(new Set(cats));
-  }, [validPermissions]);
-
-  const filteredPermissions = useMemo(() => {
-    const q = searchTerm.toLowerCase();
-    return validPermissions.filter(perm => {
-      const matchesSearch =
-        perm.key.toLowerCase().includes(q) || (perm.description?.toLowerCase().includes(q) ?? false);
-      const matchesCategory = selectedCategory === "ALL" || perm.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [validPermissions, searchTerm, selectedCategory]);
-
-  const groupedPermissions = useMemo(
-    () =>
-      filteredPermissions.reduce<Record<string, ValidPermission[]>>((acc, perm) => {
-        const cat = perm.category || t.allCategoriesOption;
-        if (!acc[cat]) {
-          acc[cat] = [];
-        }
-        acc[cat].push(perm);
-        return acc;
-      }, {}),
-    [filteredPermissions, t]
-  );
-
-  return { categories, groupedPermissions };
-}
-
-function usePermissionSelection(
-  control: Control<PermissionGroupFormData>,
-  setValue: ReturnType<typeof useForm<PermissionGroupFormData>>["setValue"]
-) {
-  const selectedPermissionIds = useWatch({ control, name: "permissionIds" }) ?? [];
-
-  const handleTogglePermission = (permId: string, isSystem: boolean) => {
-    if (isSystem) return;
-    if (selectedPermissionIds.includes(permId)) {
-      setValue(
-        "permissionIds",
-        selectedPermissionIds.filter(id => id !== permId)
-      );
-    } else {
-      setValue("permissionIds", [...selectedPermissionIds, permId]);
-    }
-  };
-
-  const handleSelectAllCategory = (categoryPerms: Array<Permission & { id: string }>, checked: boolean) => {
-    const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
-    const modifiableIds = modifiablePerms.map(p => p.id);
-    if (checked) {
-      const merged = Array.from(new Set([...selectedPermissionIds, ...modifiableIds]));
-      setValue("permissionIds", merged);
-    } else {
-      setValue(
-        "permissionIds",
-        selectedPermissionIds.filter(id => !modifiableIds.includes(id))
-      );
-    }
-  };
-
-  const isGroupSelected = (categoryPerms: Array<Permission & { id: string }>) => {
-    const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
-    if (modifiablePerms.length === 0) return false;
-    return modifiablePerms.every(p => selectedPermissionIds.includes(p.id));
-  };
-
-  const isGroupIndeterminate = (categoryPerms: Array<Permission & { id: string }>) => {
-    const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
-    if (modifiablePerms.length === 0) return false;
-    const selectedInCategory = modifiablePerms.filter(p => selectedPermissionIds.includes(p.id));
-    return selectedInCategory.length > 0 && selectedInCategory.length < modifiablePerms.length;
-  };
-
-  return {
-    selectedPermissionIds,
-    handleTogglePermission,
-    handleSelectAllCategory,
-    isGroupSelected,
-    isGroupIndeterminate,
-  };
-}
 
 function PermissionGroupFormActionsDesktop({
   isLoading,
@@ -182,23 +82,7 @@ function PermissionGroupFormContentDesktop({
   handleTogglePermission,
   handleSubmitForm,
   t,
-}: {
-  readonly control: Control<PermissionGroupFormData>;
-  readonly isLoading: boolean;
-  readonly searchTerm: string;
-  readonly setSearchTerm: (v: string) => void;
-  readonly selectedCategory: string;
-  readonly setSelectedCategory: (v: string) => void;
-  readonly categories: string[];
-  readonly groupedPermissions: Record<string, ValidPermission[]>;
-  readonly selectedPermissionIds: string[];
-  readonly isGroupSelected: (perms: Array<Permission & { id: string }>) => boolean;
-  readonly isGroupIndeterminate: (perms: Array<Permission & { id: string }>) => boolean;
-  readonly handleSelectAllCategory: (perms: Array<Permission & { id: string }>, checked: boolean) => void;
-  readonly handleTogglePermission: (permId: string, isSystem: boolean) => void;
-  readonly handleSubmitForm: (e: React.SyntheticEvent<HTMLFormElement>) => void;
-  readonly t: PermissionsLabels;
-}) {
+}: Readonly<PermissionGroupFormContentProps>) {
   return (
     <DialogContent dividers sx={{ p: 3 }}>
       <Box
@@ -262,53 +146,24 @@ function PermissionGroupFormContentDesktop({
 export function PermissionGroupFormDesktop({
   open,
   group,
-  permissions,
   isLoading,
   onClose,
-  onSave,
+  control,
+  handleSubmit,
+  onSubmit,
+  selectedPermissionIds,
+  searchTerm,
+  setSearchTerm,
+  selectedCategory,
+  setSelectedCategory,
+  categories,
+  groupedPermissions,
+  handleTogglePermission,
+  handleSelectAllCategory,
+  isGroupSelected,
+  isGroupIndeterminate,
 }: Readonly<PermissionGroupFormProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("ALL");
-
-  const { control, handleSubmit, setValue, reset } = useForm<PermissionGroupFormData>({
-    resolver: zodResolver(permissionGroupSchema),
-    defaultValues: {
-      name: {},
-      description: {},
-      permissionIds: [],
-    },
-  });
-
-  useEffect(() => {
-    if (open) {
-      if (group) {
-        reset({
-          name: (group.name ?? {}) as PermissionGroupFormData["name"],
-          description: (group.description ?? {}) as PermissionGroupFormData["description"],
-          permissionIds: (group.permissionIds ?? []).filter((id): id is string => !!id),
-        });
-      } else {
-        reset({ name: {}, description: {}, permissionIds: [] });
-      }
-      setSearchTerm("");
-      setSelectedCategory("ALL");
-    }
-  }, [open, group, reset]);
-
-  const onSubmit = async (data: PermissionGroupFormData) => {
-    await onSave(data.name, data.description ?? {}, data.permissionIds);
-  };
-
-  const { categories, groupedPermissions } = usePermissionFilters(permissions, searchTerm, selectedCategory);
-  const {
-    selectedPermissionIds,
-    handleTogglePermission,
-    handleSelectAllCategory,
-    isGroupSelected,
-    isGroupIndeterminate,
-  } = usePermissionSelection(control, setValue);
 
   return (
     <Dialog
@@ -341,7 +196,7 @@ export function PermissionGroupFormDesktop({
         isGroupIndeterminate={isGroupIndeterminate}
         handleSelectAllCategory={handleSelectAllCategory}
         handleTogglePermission={handleTogglePermission}
-        handleSubmitForm={e => {
+        handleSubmitForm={(e: React.SyntheticEvent<HTMLFormElement>) => {
           e.preventDefault();
           handleSubmit(onSubmit)(e);
         }}

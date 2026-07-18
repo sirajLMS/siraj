@@ -4,10 +4,7 @@ import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, Stack, TextField, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
@@ -63,11 +60,15 @@ export function AdminDashboardMobileView({
   onSubmit,
   pageSize,
   pageCount,
+  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
+  // instead of the previous `RequirePermission` wrappers + `useUserStore()`.
+  canDashboardSearch,
+  canScheduleFilterAdvanced,
+  canScheduleViewTimezones,
 }: Readonly<AdminDashboardViewModel>) {
   const theme = useTheme();
   const locale = useAppLocale();
-  const { hasPermission } = useUserStore();
-  const showTimezones = hasPermission(AppPermission.ScheduleViewTimezones);
+  const showTimezones = canScheduleViewTimezones;
 
   const renderItem = (row: DailyScheduleRow): ReactNode => (
     <MobileCardListItem variant="edge-to-edge">
@@ -93,7 +94,7 @@ export function AdminDashboardMobileView({
         </StyledSectionTitleRow>
 
         <StyledMobileSectionBody>
-          <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>
+          {canScheduleFilterAdvanced ? (
             <ScheduleFilters
               dateLabel={t.listOfClassesOn}
               dateValue={dateValue}
@@ -108,9 +109,9 @@ export function AdminDashboardMobileView({
               onTeacherChange={onTeacherChange}
               onSubmit={onSubmit}
             />
-          </RequirePermission>
+          ) : null}
 
-          <RequirePermission permissions={[AppPermission.DashboardSearch]}>
+          {canDashboardSearch ? (
             <TextField
               placeholder={t.searchPlaceholder}
               value={searchValue}
@@ -135,7 +136,7 @@ export function AdminDashboardMobileView({
                 },
               }}
             />
-          </RequirePermission>
+          ) : null}
         </StyledMobileSectionBody>
 
         <MobileCardList<DailyScheduleRow>

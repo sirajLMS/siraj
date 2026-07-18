@@ -2,12 +2,8 @@
 
 import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
+import type { ParentClassStatusIndicatorProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardComponents.types";
 import type { ParentLiveClassStatus } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-
-export interface ParentClassStatusIndicatorMobileProps {
-  readonly status: ParentLiveClassStatus;
-  readonly label: string;
-}
 
 function resolveDotColor(status: ParentLiveClassStatus, theme: Theme): string {
   if (status === "starting_soon") {
@@ -23,7 +19,7 @@ function resolveTextColor(status: ParentLiveClassStatus, theme: Theme): string {
   return theme.palette.onSurfaceVariant;
 }
 
-export function ParentClassStatusIndicatorMobile({ status, label }: Readonly<ParentClassStatusIndicatorMobileProps>) {
+export function ParentClassStatusIndicatorMobile({ status, label }: Readonly<ParentClassStatusIndicatorProps>) {
   const shouldPulse = status === "starting_soon";
 
   return (

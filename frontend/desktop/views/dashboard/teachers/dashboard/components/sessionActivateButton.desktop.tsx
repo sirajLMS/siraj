@@ -1,21 +1,17 @@
 "use client";
 
 import { Button, CircularProgress, Tooltip } from "@mui/material";
-
-interface SessionActivateButtonDesktopProps {
-  readonly disabled: boolean;
-  readonly isConnecting: boolean;
-  readonly activateLabel: string;
-  readonly connectingLabel: string;
-  readonly tooltip: string;
-  readonly onActivate: () => void;
-  readonly fullWidth?: boolean;
-}
+import type { SessionActivateButtonProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 
 /**
  * Desktop variant of the session activate button.
  * Slightly tighter in shape — desktop status rows don't span full width —
  * so `fullWidth` defaults to `false`.
+ *
+ * Plan v5: per specs.md §3 N15 + §4.1 Class B, the byte-identical inline
+ * `SessionActivateButtonDesktopProps` interface was deleted; both tiers now
+ * import the shared `SessionActivateButtonProps` declared once in
+ * `frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps.ts`.
  */
 export function SessionActivateButtonDesktop({
   disabled,
@@ -25,7 +21,7 @@ export function SessionActivateButtonDesktop({
   tooltip,
   onActivate,
   fullWidth = false,
-}: Readonly<SessionActivateButtonDesktopProps>) {
+}: Readonly<SessionActivateButtonProps>) {
   if (isConnecting) {
     return (
       <Tooltip title={tooltip}>

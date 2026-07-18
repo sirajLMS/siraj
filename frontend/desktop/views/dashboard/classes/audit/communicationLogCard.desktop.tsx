@@ -1,47 +1,19 @@
 "use client";
 
-import { CheckCircleOutlined, EmailOutlined, RadioButtonUncheckedOutlined, SmsOutlined } from "@mui/icons-material";
+import { EmailOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, CircularProgress, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CommunicationLogCardProps } from "@/frontend/common/views/dashboard/classes/audit/communicationLogCard.types";
+import {
+  StyledDeliveredIcon,
+  StyledEntryDescription,
+  StyledEntryTimestamp,
+  StyledSectionTitle,
+  StyledUndeliveredIcon,
+} from "@/frontend/common/views/dashboard/classes/audit/components";
+import { COMMUNICATION_ICONS } from "@/frontend/common/views/dashboard/classes/audit/constants";
 import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
-
-export interface CommunicationLogCardDesktopProps {
-  readonly entries: readonly (CommunicationLogEntry | null)[] | null | undefined;
-  readonly labels: {
-    readonly title: string;
-    readonly resendNotifications: string;
-  };
-  readonly onResend: () => void;
-  readonly isResending: boolean;
-}
-
-type CommunicationType = "email" | "sms";
-
-const COMMUNICATION_ICONS: Record<CommunicationType, typeof EmailOutlined> = {
-  email: EmailOutlined,
-  sms: SmsOutlined,
-};
-
-const StyledDeliveredIcon = styled(CheckCircleOutlined)(({ theme }) => ({
-  color: theme.palette.success.main,
-}));
-
-const StyledUndeliveredIcon = styled(RadioButtonUncheckedOutlined)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-}));
-
-const StyledEntryDescription = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-}));
-
-const StyledEntryTimestamp = styled(Typography)(({ theme }) => ({
-  color: theme.palette.primary.main,
-}));
-
-const StyledSectionTitle = styled(Typography)(({ theme }) => ({
-  color: theme.palette.primary.main,
-}));
 
 const StyledDesktopResendButton = styled(Button)(({ theme }) => ({
   borderColor: theme.palette.border.light,
@@ -56,7 +28,7 @@ const StyledDesktopResendButton = styled(Button)(({ theme }) => ({
 }));
 
 function DesktopLogEntryItem({ entry }: Readonly<{ entry: CommunicationLogEntry }>) {
-  const type = (entry.type ?? "email") as CommunicationType;
+  const type = (entry.type ?? "email") as keyof typeof COMMUNICATION_ICONS;
   const Icon = COMMUNICATION_ICONS[type] ?? EmailOutlined;
 
   return (
@@ -109,7 +81,7 @@ export function CommunicationLogCardDesktop({
   labels,
   onResend,
   isResending,
-}: Readonly<CommunicationLogCardDesktopProps>) {
+}: Readonly<CommunicationLogCardProps>) {
   const validEntries = (entries ?? []).filter((e): e is CommunicationLogEntry => e != null);
 
   return (

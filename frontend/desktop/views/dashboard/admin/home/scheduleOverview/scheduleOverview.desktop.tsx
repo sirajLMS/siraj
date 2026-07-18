@@ -3,8 +3,6 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, Paper, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import { ScheduleOverviewDataGrid } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
@@ -77,13 +75,17 @@ export function ScheduleOverviewDesktopView({
   onTeacherChange,
   onSubmit,
   loading,
+  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
+  // instead of the previous `RequirePermission` wrappers.
+  canDashboardSearch,
+  canScheduleFilterAdvanced,
 }: Readonly<ScheduleOverviewViewModel>) {
   return (
     <StyledDesktopPanel elevation={0}>
       <DesktopSectionPanel
         title={<ScheduleOverviewTitle title={title} selectedMetricLabel={selectedMetricLabel} />}
         actions={
-          <RequirePermission permissions={[AppPermission.DashboardSearch]}>
+          canDashboardSearch ? (
             <TextField
               placeholder={searchPlaceholder}
               value={searchValue}
@@ -107,11 +109,11 @@ export function ScheduleOverviewDesktopView({
                 },
               }}
             />
-          </RequirePermission>
+          ) : null
         }
       >
-        <StyledFilterContainer>
-          <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>
+        {canScheduleFilterAdvanced ? (
+          <StyledFilterContainer>
             <ScheduleFilters
               dateLabel={dateLabel}
               dateValue={dateValue}
@@ -126,8 +128,8 @@ export function ScheduleOverviewDesktopView({
               onTeacherChange={onTeacherChange}
               onSubmit={onSubmit}
             />
-          </RequirePermission>
-        </StyledFilterContainer>
+          </StyledFilterContainer>
+        ) : null}
 
         <ScheduleOverviewDataGrid
           rows={rows}

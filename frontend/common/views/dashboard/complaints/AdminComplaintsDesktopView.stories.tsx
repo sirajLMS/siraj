@@ -89,6 +89,9 @@ interface AdminComplaintsDesktopStoryProps {
   readonly deleteDialogOpen: boolean;
   readonly deleteComplaintId: string | null;
   readonly isDeletingComplaint: boolean;
+  readonly loading: boolean;
+  readonly error: Error | null;
+  readonly onRefetch: () => void;
 }
 
 function AdminComplaintsDesktopStoryRenderer({
@@ -105,6 +108,9 @@ function AdminComplaintsDesktopStoryRenderer({
   deleteDialogOpen,
   deleteComplaintId,
   isDeletingComplaint,
+  loading,
+  error,
+  onRefetch,
 }: Readonly<AdminComplaintsDesktopStoryProps>) {
   const t = useAppTranslation();
   const labels = buildComplaintsLabels(t.dashboardTranslations.complaints).admin;
@@ -125,6 +131,9 @@ function AdminComplaintsDesktopStoryRenderer({
       deleteDialogOpen={deleteDialogOpen}
       deleteComplaintId={deleteComplaintId}
       isDeletingComplaint={isDeletingComplaint}
+      loading={loading}
+      error={error}
+      onRefetch={onRefetch}
       {...mockActions}
     />
   );
@@ -158,6 +167,11 @@ export const Default: Story = {
     deleteDialogOpen: false,
     deleteComplaintId: null,
     isDeletingComplaint: false,
+    loading: false,
+    error: null,
+    onRefetch: () => {
+      logger.info("onRefetch");
+    },
   },
 };
 

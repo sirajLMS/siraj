@@ -1,22 +1,18 @@
 "use client";
 
 import { Button, CircularProgress, Tooltip } from "@mui/material";
-
-interface SessionActivateButtonMobileProps {
-  readonly disabled: boolean;
-  readonly isConnecting: boolean;
-  readonly activateLabel: string;
-  readonly connectingLabel: string;
-  readonly tooltip: string;
-  readonly onActivate: () => void;
-  readonly fullWidth?: boolean;
-}
+import type { SessionActivateButtonProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 
 /**
  * Mobile variant of the session activate button.
  * Purely presentational — full-width outlined/contained button with a
  * connecting-state spinner. Mirrors the shared implementation but lives
  * under `frontend/mobile/views/...` so mobile code never imports common.
+ *
+ * Plan v5: per specs.md §3 N15 + §4.1 Class B, the byte-identical inline
+ * `SessionActivateButtonMobileProps` interface was deleted; both tiers now
+ * import the shared `SessionActivateButtonProps` declared once in
+ * `frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps.ts`.
  */
 export function SessionActivateButtonMobile({
   disabled,
@@ -26,7 +22,7 @@ export function SessionActivateButtonMobile({
   tooltip,
   onActivate,
   fullWidth = true,
-}: Readonly<SessionActivateButtonMobileProps>) {
+}: Readonly<SessionActivateButtonProps>) {
   if (isConnecting) {
     return (
       <Tooltip title={tooltip}>

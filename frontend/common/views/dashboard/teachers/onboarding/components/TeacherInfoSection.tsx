@@ -97,7 +97,7 @@ export function BasicInfoFields({ register, control, errors, labels }: Readonly<
             return (
               <CountrySelect
                 country={selectedCountry}
-                setCountryAction={country => field.onChange(country.code)}
+                setCountryAction={country => field.onChange(country?.code ?? "")}
                 label={labels.fields.nationality}
                 error={!!errors.nationality}
                 helperText={errors.nationality?.message}

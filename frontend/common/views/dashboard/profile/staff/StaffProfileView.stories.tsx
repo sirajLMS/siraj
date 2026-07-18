@@ -1,53 +1,13 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import type { ComponentProps } from "react";
-import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StaffProfileView } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileView";
-import { useAppTranslation } from "@/shared/locale";
 
-const staffProfile = {
-  id: "user-staff-1",
-  staffProfileId: "staff-profile-1",
-  name: "Robert Staff",
-  email: "robert.s@educore.edu",
-  avatarUrl: null,
-  phone: "+1 (555) 123-4567",
-  status: AccountStatus.Activated,
-  roleSlug: "senior-admin",
-  roleName: "Senior Administrator",
-  hourlyRate: null,
-  rateCurrency: null,
-  displayAmount: null,
-};
-
-type StaffProfileViewStoryProps = ComponentProps<typeof StaffProfileView> & {
-  readonly loading?: boolean;
-  readonly hasError?: boolean;
-};
-
-function StaffProfileViewStory({ loading, hasError, ...viewProps }: StaffProfileViewStoryProps) {
-  const tc = useAppTranslation().profileTranslations.base;
-
-  if (loading) {
-    return <Typography sx={{ color: theme => theme.palette.text.secondary }}>{tc.shell.loading}</Typography>;
-  }
-
-  if (hasError) {
-    return (
-      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>
-        {tc.errors.failedToLoad}
-      </Typography>
-    );
-  }
-
-  return <StaffProfileView {...viewProps} />;
-}
-
-const meta: Meta<typeof StaffProfileViewStory> = {
+const meta: Meta<typeof StaffProfileView> = {
   title: "Views/profile/staff",
-  component: StaffProfileViewStory,
+  component: StaffProfileView,
   tags: ["autodocs"],
   decorators: [
     Story => (
@@ -59,40 +19,36 @@ const meta: Meta<typeof StaffProfileViewStory> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof StaffProfileViewStory>;
+type Story = StoryObj<typeof StaffProfileView>;
 
-export const Default: Story = {
+export const OwnView: Story = {
   args: {
-    staffData: staffProfile,
-    isAdminScope: false,
-    loading: false,
-    hasError: false,
+    scope: ProfileScope.Own,
+    mode: ProfileMode.View,
+    targetUserId: "user-staff-1",
   },
 };
 
 export const AdminView: Story = {
   args: {
-    staffData: staffProfile,
-    isAdminScope: true,
-    loading: false,
-    hasError: false,
+    scope: ProfileScope.Other,
+    mode: ProfileMode.View,
+    targetUserId: "user-staff-1",
   },
 };
 
-export const Loading: Story = {
+export const EditOwnView: Story = {
   args: {
-    staffData: staffProfile,
-    isAdminScope: false,
-    loading: true,
-    hasError: false,
+    scope: ProfileScope.Own,
+    mode: ProfileMode.Edit,
+    targetUserId: "user-staff-1",
   },
 };
 
-export const ErrorState: Story = {
+export const EditAdminView: Story = {
   args: {
-    staffData: staffProfile,
-    isAdminScope: false,
-    loading: false,
-    hasError: true,
+    scope: ProfileScope.Other,
+    mode: ProfileMode.Edit,
+    targetUserId: "user-staff-1",
   },
 };

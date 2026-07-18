@@ -3,39 +3,17 @@
 import { QueryStatsOutlined } from "@mui/icons-material";
 import type { SelectChangeEvent } from "@mui/material";
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { format, isValid, parse } from "date-fns";
 import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
-import type { ReportTeacherOption, ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import type { ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import type { ReportFiltersFormProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
+import {
+  formatReportFilterDate,
+  parseReportFilterDate,
+} from "@/frontend/common/views/dashboard/reports/utils/reportFiltersDate.utils";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopAppDatePicker } from "@/frontend/desktop/components/ui/form/date";
 
 export type ReportFiltersFormDesktopLabels = ReportFiltersFormLabels;
-
-interface ReportFiltersFormDesktopProps {
-  readonly fromDate: string;
-  readonly toDate: string;
-  readonly teacherId: string;
-  readonly reportType: ReportType;
-  readonly teachers: readonly ReportTeacherOption[];
-  readonly labels: ReportFiltersFormDesktopLabels;
-  readonly canGenerate: boolean;
-  readonly onFromDateChange: (date: string) => void;
-  readonly onToDateChange: (date: string) => void;
-  readonly onTeacherChange: (teacherId: string) => void;
-  readonly onReportTypeChange: (reportType: ReportType) => void;
-  readonly onSubmit: () => void;
-}
-
-const DATE_FILTER_FORMAT = "yyyy-MM-dd";
-
-function parseFilterDate(date: string): Date | null {
-  if (date.length === 0) {
-    return null;
-  }
-
-  const parsedDate = parse(date, DATE_FILTER_FORMAT, new Date());
-  return isValid(parsedDate) ? parsedDate : null;
-}
 
 export function ReportFiltersFormDesktop({
   fromDate,
@@ -50,9 +28,9 @@ export function ReportFiltersFormDesktop({
   onTeacherChange,
   onReportTypeChange,
   onSubmit,
-}: Readonly<ReportFiltersFormDesktopProps>) {
-  const selectedFromDate = parseFilterDate(fromDate);
-  const selectedToDate = parseFilterDate(toDate);
+}: Readonly<ReportFiltersFormProps>) {
+  const selectedFromDate = parseReportFilterDate(fromDate);
+  const selectedToDate = parseReportFilterDate(toDate);
 
   const handleTeacherSelect = (event: SelectChangeEvent) => {
     onTeacherChange(event.target.value);
@@ -75,7 +53,7 @@ export function ReportFiltersFormDesktop({
         label={labels.fromDate}
         value={selectedFromDate}
         onChange={(date: Date | null) => {
-          onFromDateChange(date && isValid(date) ? format(date, DATE_FILTER_FORMAT) : "");
+          onFromDateChange(formatReportFilterDate(date));
         }}
         slotProps={{
           textField: {
@@ -90,7 +68,7 @@ export function ReportFiltersFormDesktop({
         label={labels.toDate}
         value={selectedToDate}
         onChange={(date: Date | null) => {
-          onToDateChange(date && isValid(date) ? format(date, DATE_FILTER_FORMAT) : "");
+          onToDateChange(formatReportFilterDate(date));
         }}
         slotProps={{
           textField: {

@@ -1,26 +1,25 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
-import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import type { ClassSubjectCreateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   ActiveToggleField,
   CategorySelectField,
   EntityFormDialogActions,
-  emptySubjectFormValues,
   LabeledTextField,
-  type SubjectFormValues,
-  slugify,
-  subjectFormSchema,
 } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__";
+import type { SubjectFormValues } from "@/frontend/common/views/dashboard/subjects/home/schemas/subject.schema";
 import type { CreateSubjectDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useAppTranslation } from "@/shared/locale";
 
 const FORM_ID = "create-subject-form-mobile";
 
 /**
  * CreateSubjectDialogMobile — full-screen create-subject dialog.
+ *
+ * NEW FOR PLAN v5: form state (useForm/useWatch/useEffect/zodResolver) was
+ * lifted to `useSubjectsViewModel` per specs.md §6.2. The dialog now receives
+ * `{ control, errors, handleSubmit, values, reset }` plus pre-fetched labels
+ * via the `form` + `labels` props and performs pure rendering + prop passdown.
  */
 export function CreateSubjectDialogMobile({
   open,
@@ -28,34 +27,13 @@ export function CreateSubjectDialogMobile({
   onSubmit,
   categories,
   isLoading,
+  form,
+  labels,
 }: Readonly<CreateSubjectDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
-
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<SubjectFormValues>({
-    resolver: zodResolver(subjectFormSchema),
-    defaultValues: emptySubjectFormValues,
-  });
-
-  const nameValue = useWatch({ control, name: "name" });
-
-  useEffect(() => {
-    if (open) {
-      reset(emptySubjectFormValues);
-    }
-  }, [open, reset]);
-
-  useEffect(() => {
-    setValue("slug", slugify(nameValue));
-  }, [nameValue, setValue]);
+  const { control, errors, handleSubmit } = form;
 
   const handleFormSubmit = (data: SubjectFormValues) => {
-    onSubmit({
+    const input: ClassSubjectCreateInput = {
       name: data.name,
       slug: data.slug,
       categoryId: data.categoryId,
@@ -63,7 +41,8 @@ export function CreateSubjectDialogMobile({
       isActive: data.isActive ?? null,
       sortOrder: null,
       avatarUrl: null,
-    });
+    };
+    onSubmit(input);
   };
 
   return (
@@ -73,7 +52,7 @@ export function CreateSubjectDialogMobile({
       fullScreen
       aria-labelledby="create-subject-dialog-title-mobile"
     >
-      <DialogTitle id="create-subject-dialog-title-mobile">{t.createSubject}</DialogTitle>
+      <DialogTitle id="create-subject-dialog-title-mobile">{labels.createSubject}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Box
           component="form"
@@ -84,43 +63,43 @@ export function CreateSubjectDialogMobile({
           <LabeledTextField
             name="name"
             control={control}
-            label={t.nameLabel}
+            label={labels.nameLabel}
             required
-            error={errors.name ? t.nameRequired : undefined}
+            error={errors.name ? labels.nameRequired : undefined}
             disabled={isLoading}
           />
           <LabeledTextField
             name="slug"
             control={control}
-            label={t.slugLabel}
+            label={labels.slugLabel}
             required
-            error={errors.slug ? t.slugRequired : undefined}
+            error={errors.slug ? labels.slugRequired : undefined}
             disabled={isLoading}
           />
           <CategorySelectField
             name="categoryId"
             control={control}
-            label={t.categoryLabel}
-            placeholder={t.selectCategory}
-            error={errors.categoryId ? t.categoryRequired : undefined}
+            label={labels.categoryLabel}
+            placeholder={labels.selectCategory}
+            error={errors.categoryId ? labels.categoryRequired : undefined}
             disabled={isLoading}
             categories={categories}
           />
           <LabeledTextField
             name="description"
             control={control}
-            label={t.descriptionLabel}
+            label={labels.descriptionLabel}
             disabled={isLoading}
             multiline
             rows={3}
           />
-          <ActiveToggleField name="isActive" control={control} label={t.activeLabel} disabled={isLoading} />
+          <ActiveToggleField name="isActive" control={control} label={labels.activeLabel} disabled={isLoading} />
         </Box>
       </DialogContent>
       <EntityFormDialogActions
         formId={FORM_ID}
-        cancelLabel={t.cancel}
-        saveLabel={t.createSubject}
+        cancelLabel={labels.cancel}
+        saveLabel={labels.createSubject}
         onClose={onClose}
         isLoading={isLoading}
       />

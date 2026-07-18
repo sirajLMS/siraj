@@ -6,11 +6,13 @@ import { Chip, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useCallback, useMemo, useState } from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display/localizedStringDisplay/LocalizedStringDisplay";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   deleteMeetingProviderMutationDocument,
   meetingProvidersQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
   MeetingProvidersNotificationState,
@@ -93,7 +95,13 @@ function useNotificationState(): MeetingProvidersNotificationState {
   return { errorOpen, errorMsg, successOpen, successMsg, showError, showSuccess, closeError, closeSuccess };
 }
 
-export type MeetingProvidersViewModel = MeetingProvidersViewProps;
+export type MeetingProvidersViewModel = MeetingProvidersViewProps & {
+  // NEW FOR PLAN v5: lifted permission boolean per specs.md §3 N3 + §6.1.
+  // Tier meeting-providers views no longer import `RequirePermission` or
+  // call `useUserStore()` — the Container wraps the View in
+  // `<RequirePermission>` and the tier view renders content unconditionally.
+  readonly canManageCatalog: boolean;
+};
 
 export type UseMeetingProvidersViewModelProps = Record<string, never>;
 
@@ -106,6 +114,14 @@ export function useMeetingProvidersViewModel(
   const [editProvider, setEditProvider] = useState<MeetingProviderFieldsFragment | null>(null);
   const [deleteProvider, setDeleteProvider] = useState<MeetingProviderFieldsFragment | null>(null);
   const notifications = useNotificationState();
+
+  // NEW FOR PLAN v5: read the user's permission ONCE in the ViewModel and
+  // expose a boolean gate. Tier meeting-providers views no longer import
+  // `RequirePermission` or call `useUserStore()` (specs.md §3 N3). The
+  // Container also wraps the View in `<RequirePermission>` so unauthorized
+  // users see the fallback (not a half-rendered page).
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canManageCatalog = hasPermission(AppPermission.MeetingProvidersManageCatalog);
 
   const { data, loading, refetch } = useQuery(meetingProvidersQueryDocument, {
     variables: { activeOnly: false },
@@ -193,5 +209,8 @@ export function useMeetingProvidersViewModel(
     onDeleteRow: setDeleteProvider,
     onDeleteClose: () => setDeleteProvider(null),
     onDeleteConfirm: handleDeleteConfirm,
+    // NEW FOR PLAN v5: lifted permission boolean consumed by the Container
+    // (which wraps the View in `<RequirePermission>`) and tier views.
+    canManageCatalog,
   };
 }

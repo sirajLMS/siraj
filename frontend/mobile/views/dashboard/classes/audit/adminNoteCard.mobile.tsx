@@ -3,21 +3,8 @@
 import { StickyNote2Outlined } from "@mui/icons-material";
 import { alpha, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AdminNoteCardMobileProps } from "@/frontend/common/views/dashboard/classes/audit/adminNoteCard.types";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
-
-export interface AdminNoteCardMobileProps {
-  readonly note: AdminNoteInfo | null | undefined;
-  readonly labels: {
-    readonly title: string;
-    readonly titleMobile: string;
-    readonly lastUpdated: string;
-    readonly update: string;
-    readonly edit: string;
-  };
-  readonly onUpdate: () => void;
-  readonly onEdit: () => void;
-}
 
 const StyledMobileEditButton = styled(Button)(({ theme }) => ({
   color: theme.palette.onSidebar,

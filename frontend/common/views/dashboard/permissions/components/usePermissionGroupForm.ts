@@ -8,18 +8,31 @@ import {
   type PermissionGroupFormData,
   permissionGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
+import type { ValidPermission } from "@/frontend/common/views/dashboard/permissions/types/validPermission.types";
 import { useAppTranslation } from "@/shared/locale";
 
-export type ValidPermission = Permission & { id: string; key: string; category: string };
+export type { ValidPermission };
+
+type SelectablePermission = Permission & { id: string };
+
+export interface GroupedPermissions {
+  readonly categories: string[];
+  readonly groupedPermissions: Record<string, ValidPermission[]>;
+}
+
+export interface PermissionGroupSelection {
+  readonly selectedPermissionIds: string[];
+  readonly handleTogglePermission: (permId: string, isSystem: boolean) => void;
+  readonly handleSelectAllCategory: (categoryPerms: readonly SelectablePermission[], checked: boolean) => void;
+  readonly isGroupSelected: (categoryPerms: readonly SelectablePermission[]) => boolean;
+  readonly isGroupIndeterminate: (categoryPerms: readonly SelectablePermission[]) => boolean;
+}
 
 export interface PermissionGroupFormState {
-  readonly open: boolean;
-  readonly group: PermissionGroup | null;
-  readonly permissions: readonly Permission[];
-  readonly isLoading: boolean;
   readonly control: Control<PermissionGroupFormData>;
   readonly setValue: UseFormSetValue<PermissionGroupFormData>;
   readonly handleSubmit: UseFormHandleSubmit<PermissionGroupFormData>;
+  readonly onSubmit: (data: PermissionGroupFormData) => Promise<void>;
   readonly selectedPermissionIds: string[];
   readonly searchTerm: string;
   readonly setSearchTerm: (term: string) => void;
@@ -28,10 +41,9 @@ export interface PermissionGroupFormState {
   readonly categories: string[];
   readonly groupedPermissions: Record<string, ValidPermission[]>;
   readonly handleTogglePermission: (permId: string, isSystem: boolean) => void;
-  readonly handleSelectAllCategory: (categoryPerms: readonly ValidPermission[], checked: boolean) => void;
-  readonly isGroupSelected: (categoryPerms: readonly ValidPermission[]) => boolean;
-  readonly isGroupIndeterminate: (categoryPerms: readonly ValidPermission[]) => boolean;
-  readonly onSubmit: (data: PermissionGroupFormData) => Promise<void>;
+  readonly handleSelectAllCategory: (categoryPerms: readonly SelectablePermission[], checked: boolean) => void;
+  readonly isGroupSelected: (categoryPerms: readonly SelectablePermission[]) => boolean;
+  readonly isGroupIndeterminate: (categoryPerms: readonly SelectablePermission[]) => boolean;
 }
 
 interface UsePermissionGroupFormParams {
@@ -45,7 +57,11 @@ interface UsePermissionGroupFormParams {
   ) => Promise<void>;
 }
 
-function usePermissionFormFilters(permissions: readonly Permission[], searchTerm: string, selectedCategory: string) {
+function usePermissionFormFilters(
+  permissions: readonly Permission[],
+  searchTerm: string,
+  selectedCategory: string
+): GroupedPermissions {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   const validPermissions = useMemo(
@@ -90,9 +106,9 @@ function usePermissionFormFilters(permissions: readonly Permission[], searchTerm
  * - `useEffect` to reset the form when the dialog opens (lifted per N6)
  * - the cross-tier `searchTerm` + `selectedCategory` filter state stored in
  *   `permissionManagementStore` (lifted per N7 — survives tier switches)
- * - `usePermissionFilters` + `usePermissionSelection` derived helpers (lifted
- *   per N25 — they were previously inline `function useX(...)` declarations
- *   duplicated inside both tier views)
+ * - `usePermissionFormFilters` + selection helpers (lifted per N25 — they were
+ *   previously inline `function useX(...)` declarations duplicated inside both
+ *   tier views)
  *
  * The tier `permissionGroupForm.{mobile,desktop}.tsx` files consume the
  * returned bag as props and render against it — no own state.
@@ -147,7 +163,7 @@ export function usePermissionGroupForm({
     }
   };
 
-  const handleSelectAllCategory = (categoryPerms: readonly ValidPermission[], checked: boolean) => {
+  const handleSelectAllCategory = (categoryPerms: readonly SelectablePermission[], checked: boolean) => {
     const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
     const modifiableIds = modifiablePerms.map(p => p.id);
     if (checked) {
@@ -161,13 +177,13 @@ export function usePermissionGroupForm({
     }
   };
 
-  const isGroupSelected = (categoryPerms: readonly ValidPermission[]) => {
+  const isGroupSelected = (categoryPerms: readonly SelectablePermission[]) => {
     const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
     if (modifiablePerms.length === 0) return false;
     return modifiablePerms.every(p => selectedPermissionIds.includes(p.id));
   };
 
-  const isGroupIndeterminate = (categoryPerms: readonly ValidPermission[]) => {
+  const isGroupIndeterminate = (categoryPerms: readonly SelectablePermission[]) => {
     const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
     if (modifiablePerms.length === 0) return false;
     const selectedInCategory = modifiablePerms.filter(p => selectedPermissionIds.includes(p.id));
@@ -181,13 +197,10 @@ export function usePermissionGroupForm({
   };
 
   return {
-    open,
-    group,
-    permissions,
-    isLoading: false,
     control,
     setValue,
     handleSubmit,
+    onSubmit,
     selectedPermissionIds,
     searchTerm,
     setSearchTerm,
@@ -199,6 +212,5 @@ export function usePermissionGroupForm({
     handleSelectAllCategory,
     isGroupSelected,
     isGroupIndeterminate,
-    onSubmit,
   };
 }

@@ -1,21 +1,12 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Select } from "@mui/material";
-import { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+import { Controller } from "react-hook-form";
 import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { AssignGroupDialogProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { useAppTranslation } from "@/shared/locale";
-
-const assignSchema = z.object({
-  userId: z.string().min(1, "userRequired"),
-});
-
-type AssignFormValues = z.infer<typeof assignSchema>;
 
 export function AssignGroupDialogDesktop({
   open,
@@ -24,26 +15,11 @@ export function AssignGroupDialogDesktop({
   isLoading,
   onClose,
   onAssign,
+  control,
+  errors,
+  handleSubmit,
 }: Readonly<AssignGroupDialogProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
-
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<AssignFormValues>({
-    resolver: zodResolver(assignSchema),
-    defaultValues: {
-      userId: "",
-    },
-  });
-
-  useEffect(() => {
-    if (open) {
-      reset({ userId: "" });
-    }
-  }, [open, reset]);
 
   if (!group) return null;
 
@@ -52,7 +28,7 @@ export function AssignGroupDialogDesktop({
     (user): user is User & { id: string } => !!user.id && !assignedUserIds.has(user.id)
   );
 
-  const onSubmit = (data: AssignFormValues) => {
+  const onSubmit = (data: { userId: string }) => {
     onAssign(data.userId);
   };
 

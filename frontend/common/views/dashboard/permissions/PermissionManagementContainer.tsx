@@ -4,7 +4,6 @@ import { createLazyView } from "@/frontend/common/components/ui/container/create
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
   type PermissionManagementViewModel,
-  type UsePermissionManagementViewModelProps,
   usePermissionManagementViewModel,
 } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
 
@@ -20,6 +19,6 @@ const lazyViews = createLazyView<PermissionManagementViewModel>(
 );
 
 export function PermissionManagementContainer() {
-  const viewModel = usePermissionManagementViewModel({} as UsePermissionManagementViewModelProps);
+  const viewModel = usePermissionManagementViewModel();
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

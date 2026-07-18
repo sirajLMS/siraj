@@ -26,8 +26,8 @@ const StyledDataGridWrapper = styled(Box)({
   width: "100%",
 });
 
+// VARIANT JUSTIFICATION: extra field loading — desktop data grid needs a `loading` prop because AppDataGrid accepts a loading slot while the mobile card list doesn't render a separate loading state (Class C variant per specs §4.3).
 interface ManagersDataGridDesktopProps extends BaseManagersListProps {
-  // VARIANT JUSTIFICATION: extra field loading — desktop data grid needs a `loading` prop because AppDataGrid accepts a loading slot while the mobile card list doesn't render a separate loading state (Class C variant per specs §4.3).
   readonly loading?: boolean;
 }
 

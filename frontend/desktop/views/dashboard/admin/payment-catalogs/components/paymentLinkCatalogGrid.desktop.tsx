@@ -4,13 +4,17 @@ import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SupportedPaymentLinkFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { resolvePaymentDirectionLabel } from "@/frontend/common/views/dashboard/admin/payment-catalogs/utils/paymentCatalogLabels.utils";
 import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
 
+// VARIANT JUSTIFICATION: extra field rows + loading — the mobile catalog has
+// no paired data-grid (it renders `PaymentCatalogCardMobile` inside a plain
+// `Box`); the typed row fragment differs from the other two grids. Local
+// controller of the data-grid column shape stays in this tier file.
 export interface PaymentLinkCatalogGridDesktopProps extends CatalogGridActionHandlers {
   readonly rows: readonly SupportedPaymentLinkFieldsFragment[];
   readonly loading?: boolean;
@@ -22,8 +26,11 @@ export function PaymentLinkCatalogGridDesktop({
   onEdit,
   onDelete,
 }: Readonly<PaymentLinkCatalogGridDesktopProps>) {
-  const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
-  const pc = t;
+  const pc = useAppTranslation().dashboardTranslations.paymentCatalogs;
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — `renderCell` closures
+  // capture labels; without memo every render produces a new column array
+  // identity and re-mounts virtualized rows. Memo only caches JSX identity;
+  // the column defs themselves are constant for a given label set.
   const columns = useMemo<GridColDef<SupportedPaymentLinkFieldsFragment>[]>(
     () => [
       {
@@ -59,13 +66,7 @@ export function PaymentLinkCatalogGridDesktop({
         field: "supportedDirections",
         headerName: pc.columns.supportedDirections,
         width: 120,
-        renderCell: ({ row }) => {
-          const dir = row.supportedDirections;
-          if (!dir) return pc.notSet;
-          if (dir === PaymentDirection.Payin) return pc.directions.payin;
-          if (dir === PaymentDirection.Payout) return pc.directions.payout;
-          return pc.directions.both;
-        },
+        renderCell: ({ row }) => resolvePaymentDirectionLabel(row.supportedDirections, pc),
       },
       {
         field: "isActive",
@@ -97,24 +98,7 @@ export function PaymentLinkCatalogGridDesktop({
         ),
       },
     ],
-    [
-      onDelete,
-      onEdit,
-      pc.notSet,
-      pc.inactive,
-      pc.edit,
-      pc.directions.payout,
-      pc.directions.payin,
-      pc.directions.both,
-      pc.columns.supportedDirections,
-      pc.delete,
-      pc.columns.status,
-      pc.columns.actions,
-      pc.columns.urlAllowlist,
-      pc.columns.slug,
-      pc.columns.name,
-      pc.active,
-    ]
+    [onDelete, onEdit, pc]
   );
 
   return (

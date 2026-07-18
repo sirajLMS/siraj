@@ -2,10 +2,8 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
 import { StatusBadge } from "@/frontend/common/components/ui";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import { ScheduleOverviewDataGrid } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
@@ -34,6 +32,10 @@ export function AdminDashboardDesktopView({
   onTeacherChange,
   onSubmit,
   pageSize,
+  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
+  // instead of the previous `RequirePermission` wrappers.
+  canDashboardSearch,
+  canScheduleFilterAdvanced,
 }: Readonly<AdminDashboardViewModel>) {
   return (
     <DesktopPageContainer>
@@ -43,7 +45,7 @@ export function AdminDashboardDesktopView({
         actions={
           <>
             <MetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
-            <RequirePermission permissions={[AppPermission.DashboardSearch]}>
+            {canDashboardSearch ? (
               <TextField
                 placeholder={t.searchPlaceholder}
                 value={searchValue}
@@ -62,7 +64,7 @@ export function AdminDashboardDesktopView({
                   },
                 }}
               />
-            </RequirePermission>
+            ) : null}
           </>
         }
       />
@@ -70,7 +72,7 @@ export function AdminDashboardDesktopView({
       <DesktopSectionPanel
         title={t.scheduleOverview}
         actions={
-          <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>
+          canScheduleFilterAdvanced ? (
             <ScheduleFilters
               dateLabel={t.listOfClassesOn}
               dateValue={dateValue}
@@ -85,7 +87,7 @@ export function AdminDashboardDesktopView({
               onTeacherChange={onTeacherChange}
               onSubmit={onSubmit}
             />
-          </RequirePermission>
+          ) : null
         }
       >
         {selectedMetricLabel ? (

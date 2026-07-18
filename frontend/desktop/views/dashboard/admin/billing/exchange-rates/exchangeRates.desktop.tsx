@@ -1,16 +1,14 @@
 "use client";
 
 import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { formatExchangeRateTimestamp } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
+import { ManualOverrideDialog } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
+import { ProviderSettingsSection } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
 import type {
   ExchangeRatesSnackbarState,
   ExchangeRatesSyncRun,
   ExchangeRatesViewModel,
-} from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesView";
-import { ManualOverrideDialog } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
-import { ProviderSettingsSection } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
+} from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/useExchangeRatesViewModel";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
 import {
   DesktopAppDataGrid,
@@ -137,12 +135,14 @@ export function ExchangeRatesDesktopView({
   rates,
   ratesColumns,
   ratesLoading,
-  availablePairs,
+  availablePairs: _availablePairs,
   syncRun,
   syncLoading,
   refreshing,
   showStaleWarning,
   billingActionsDisabled,
+  canRefresh,
+  canOverride,
   onRefresh,
   onOpenManualOverride,
   manualOverrideOpen,
@@ -155,6 +155,7 @@ export function ExchangeRatesDesktopView({
   syncError,
   refetchRates,
   refetchSync,
+  historyViewModel,
 }: Readonly<ExchangeRatesViewModel>) {
   return (
     <DesktopPageContainer>
@@ -163,79 +164,77 @@ export function ExchangeRatesDesktopView({
         title={labels.pageTitle}
         subtitle={labels.pageSubtitle}
         actions={
-          <RequirePermission permissions={AppPermission.BillingRefreshExchangeRates}>
+          canRefresh ? (
             <Button variant="contained" onClick={onRefresh} disabled={refreshing || billingActionsDisabled}>
               {refreshing ? labels.refreshing : labels.syncStatus.refresh}
             </Button>
-          </RequirePermission>
+          ) : null
         }
       />
 
-      <RequirePermission permissions={AppPermission.BillingViewExchangeRates}>
-        {ratesError ? (
-          <Alert
-            severity="warning"
-            sx={{ mb: 2 }}
-            action={
-              <Button color="inherit" size="small" onClick={() => void refetchRates()}>
-                {labels.errors.retry}
-              </Button>
-            }
-          >
-            {labels.errors.loadFailed}
-          </Alert>
-        ) : null}
-        {syncError ? (
-          <Alert
-            severity="warning"
-            sx={{ mb: 2 }}
-            action={
-              <Button color="inherit" size="small" onClick={() => void refetchSync()}>
-                {labels.errors.retry}
-              </Button>
-            }
-          >
-            {labels.errors.loadFailed}
-          </Alert>
-        ) : null}
-        {showStaleWarning ? (
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            {labels.staleWarning}
-          </Alert>
-        ) : null}
+      {ratesError ? (
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={() => void refetchRates()}>
+              {labels.errors.retry}
+            </Button>
+          }
+        >
+          {labels.errors.loadFailed}
+        </Alert>
+      ) : null}
+      {syncError ? (
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={() => void refetchSync()}>
+              {labels.errors.retry}
+            </Button>
+          }
+        >
+          {labels.errors.loadFailed}
+        </Alert>
+      ) : null}
+      {showStaleWarning ? (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          {labels.staleWarning}
+        </Alert>
+      ) : null}
 
-        <DesktopSectionPanel title={labels.syncStatus.title}>
-          <DesktopSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
-        </DesktopSectionPanel>
+      <DesktopSectionPanel title={labels.syncStatus.title}>
+        <DesktopSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
+      </DesktopSectionPanel>
 
-        <ProviderSettingsSection
-          labels={labels.providerSettings}
-          onFeedback={onSuccessManualOverride}
-          actionsDisabled={billingActionsDisabled}
+      <ProviderSettingsSection
+        labels={labels.providerSettings}
+        onFeedback={onSuccessManualOverride}
+        actionsDisabled={billingActionsDisabled}
+      />
+
+      <DesktopSectionPanel title={labels.rateTable.title}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+          {canOverride ? (
+            <Button variant="outlined" onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
+              {labels.manualOverride.title}
+            </Button>
+          ) : null}
+        </Box>
+        <DesktopAppDataGrid
+          rows={rates}
+          columns={ratesColumns}
+          loading={ratesLoading}
+          emptyMessage={labels.noRates}
+          autoHeight
+          disableColumnMenu
         />
+      </DesktopSectionPanel>
 
-        <DesktopSectionPanel title={labels.rateTable.title}>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-            <RequirePermission permissions={AppPermission.BillingOverrideExchangeRates}>
-              <Button variant="outlined" onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
-                {labels.manualOverride.title}
-              </Button>
-            </RequirePermission>
-          </Box>
-          <DesktopAppDataGrid
-            rows={rates}
-            columns={ratesColumns}
-            loading={ratesLoading}
-            emptyMessage={labels.noRates}
-            autoHeight
-            disableColumnMenu
-          />
-        </DesktopSectionPanel>
-
-        <DesktopSectionPanel title={labels.history.title}>
-          <ExchangeRateHistorySectionDesktop labels={labels} availablePairs={availablePairs} />
-        </DesktopSectionPanel>
-      </RequirePermission>
+      <DesktopSectionPanel title={labels.history.title}>
+        <ExchangeRateHistorySectionDesktop labels={labels} historyViewModel={historyViewModel} />
+      </DesktopSectionPanel>
 
       <ManualOverrideDialog
         open={manualOverrideOpen && !billingActionsDisabled}

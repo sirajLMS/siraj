@@ -3,41 +3,15 @@
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useUserStore } from "@/frontend/common/stores/userStore";
-import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { ReportsDataGridLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
-import type { ReportLedgerRow, ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
-import { formatReportPaidAmounts } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
+import type { ReportLedgerRow } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import type { ReportsDataGridProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
+import { reportNameHrefForRow } from "@/frontend/common/views/dashboard/reports/utils/reportNameHrefForRow.utils";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui";
-import { useAppTranslation } from "@/shared/locale";
 
 export type ReportsDataGridDesktopLabels = ReportsDataGridLabels;
 
-interface ReportsDataGridDesktopProps {
-  readonly rows: readonly ReportLedgerRow[];
-  readonly labels: ReportsDataGridDesktopLabels;
-  readonly reportType: ReportType;
-  readonly onRowClick?: (row: ReportLedgerRow) => void;
-  readonly loading?: boolean;
-}
-
-function nameHrefForRow(row: ReportLedgerRow, reportType: ReportType): string | undefined {
-  if (!row.entityId) {
-    return undefined;
-  }
-  if (reportType === "by_teacher") {
-    return profileHrefForTeacher({ teacherId: row.entityId });
-  }
-  if (reportType === "by_student") {
-    return studentHref(row.entityId);
-  }
-  return undefined;
-}
-
-function renderCountCell(value: number, tone: "default" | "error" | "primary" = "default") {
+function CountCell({ value, tone = "default" }: Readonly<{ value: number; tone?: "default" | "error" | "primary" }>) {
   return (
     <Typography
       variant="bodyMd"
@@ -62,13 +36,14 @@ export function ReportsDataGridDesktop({
   reportType,
   loading = false,
   onRowClick,
-}: Readonly<ReportsDataGridDesktopProps>) {
-  const locale = useAppLocale();
-  const t = useAppTranslation().dashboardTranslations.reports;
-  const tErrors = useAppTranslation().errorsTranslations;
-  const { hasPermission } = useUserStore();
-  const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
-
+  showFinancials,
+  formatPaidAmounts,
+}: Readonly<ReportsDataGridProps>) {
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — the columns array contains
+  // renderCell closures that capture labels/locale/handlers; without memo
+  // every render produces a new column-array identity and forces the data
+  // grid to re-mount its virtualized row slices. Memoizing preserves JSX
+  // identity ONLY; no data derivation happens here.
   const columns = useMemo<GridColDef<ReportLedgerRow>[]>(() => {
     const cols: GridColDef<ReportLedgerRow>[] = [
       {
@@ -79,7 +54,7 @@ export function ReportsDataGridDesktop({
         renderCell: ({ row }) => (
           <DesktopPersonProfileLinkCell
             name={row.name}
-            href={nameHrefForRow(row, reportType)}
+            href={reportNameHrefForRow(row, reportType)}
             fallbackInitial={row.avatarInitials}
             avatarSize={32}
             fontWeight={600}
@@ -92,7 +67,7 @@ export function ReportsDataGridDesktop({
         width: 90,
         align: "center",
         headerAlign: "center",
-        renderCell: ({ row }) => renderCountCell(row.taken, "primary"),
+        renderCell: ({ row }) => <CountCell value={row.taken} tone="primary" />,
       },
       {
         field: "absent",
@@ -100,7 +75,7 @@ export function ReportsDataGridDesktop({
         width: 90,
         align: "center",
         headerAlign: "center",
-        renderCell: ({ row }) => renderCountCell(row.absent, "error"),
+        renderCell: ({ row }) => <CountCell value={row.absent} tone="error" />,
       },
       {
         field: "leave",
@@ -108,7 +83,7 @@ export function ReportsDataGridDesktop({
         width: 90,
         align: "center",
         headerAlign: "center",
-        renderCell: ({ row }) => renderCountCell(row.leave),
+        renderCell: ({ row }) => <CountCell value={row.leave} />,
       },
       {
         field: "pending",
@@ -116,7 +91,7 @@ export function ReportsDataGridDesktop({
         width: 100,
         align: "center",
         headerAlign: "center",
-        renderCell: ({ row }) => renderCountCell(row.pending),
+        renderCell: ({ row }) => <CountCell value={row.pending} />,
       },
     ];
 
@@ -144,19 +119,7 @@ export function ReportsDataGridDesktop({
           sortable: false,
           renderCell: ({ row }) => (
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
-              {formatReportPaidAmounts(
-                row.paidAmounts,
-                locale,
-                buildFxDisplayMessages(
-                  {
-                    convertedAmount: t.convertedAmount,
-                  },
-                  tErrors,
-                  {
-                    convertedTotalApprox: t.convertedTotalApprox,
-                  }
-                )
-              )}
+              {formatPaidAmounts(row.paidAmounts)}
             </Typography>
           ),
         }
@@ -164,7 +127,7 @@ export function ReportsDataGridDesktop({
     }
 
     return cols;
-  }, [labels, locale, reportType, showFinancials, t, tErrors]);
+  }, [labels, reportType, showFinancials, formatPaidAmounts]);
 
   return (
     <Box sx={{ px: { xs: 0, md: 1 }, pb: 1 }}>

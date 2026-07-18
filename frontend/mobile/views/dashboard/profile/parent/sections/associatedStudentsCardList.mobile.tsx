@@ -2,20 +2,16 @@
 
 import { Paper, Stack, Typography } from "@mui/material";
 import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profileHref";
-import type { AssociatedStudentRow } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import type { BaseAssociatedStudentsListProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentScheduleComponents.types";
 import { MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
-
-interface AssociatedStudentsCardListMobileProps {
-  readonly rows: readonly AssociatedStudentRow[];
-}
 
 function formatStatusLabel(status: string): string {
   const normalized = status.replaceAll("_", " ").toLowerCase();
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
-export function AssociatedStudentsCardListMobile({ rows }: Readonly<AssociatedStudentsCardListMobileProps>) {
+export function AssociatedStudentsCardListMobile({ rows }: Readonly<BaseAssociatedStudentsListProps>) {
   const t = useAppTranslation().profileTranslations.parent;
   const tProfile = useAppTranslation().profileTranslations.base;
 

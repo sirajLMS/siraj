@@ -2,86 +2,73 @@
 
 import { ChevronLeftOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import { alpha, Box, Grid, IconButton, Stack, Typography } from "@mui/material";
-import { useState } from "react";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
-import type { MiniCalendarDate } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
+import {
+  getCalendarGrid,
+  MINI_CALENDAR_WEEKDAYS,
+  useViewingMonth,
+} from "@/frontend/common/views/dashboard/teachers/futureSchedule/hooks";
+import type {
+  MiniCalendarDate,
+  MiniCalendarProps,
+} from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 import { useAppTranslation } from "@/shared/locale";
 
-interface MiniCalendarProps {
-  readonly selectedDate: string;
-  readonly onSelectDate: (date: string) => void;
-  readonly classDates: readonly string[];
-}
+/**
+ * Desktop variant of the mini-calendar.
+ *
+ * Plan v5: per specs.md §3 N7 (state), N9 (pure-data helpers), N25
+ * (`function useX` declarations), and §5 (custom hooks live in common), the
+ * previously inline `useState`/`useViewingMonth`/`getCalendarGrid`/`DAYS`
+ * constant were lifted to
+ * `frontend/common/views/dashboard/teachers/futureSchedule/hooks/useMiniCalendar.hooks.ts`.
+ * Per specs.md §3 N15 + §4.1 Class B, the byte-identical inline
+ * `MiniCalendarProps` interface was lifted to
+ * `frontend/common/views/dashboard/teachers/futureSchedule/types.ts`.
+ */
+export function MiniCalendarDesktop({ selectedDate, onSelectDate, classDates }: Readonly<MiniCalendarProps>) {
+  const [{ year, month }, shiftMonth] = useViewingMonth(selectedDate);
+  const dates = getCalendarGrid(year, month, classDates, selectedDate);
+  const monthName = new Date(year, month).toLocaleString("en-US", { month: "long" });
 
-const DAYS = [
-  { id: "sun", label: "S" },
-  { id: "mon", label: "M" },
-  { id: "tue", label: "T" },
-  { id: "wed", label: "W" },
-  { id: "thu", label: "T" },
-  { id: "fri", label: "F" },
-  { id: "sat", label: "S" },
-];
-
-function getCalendarGrid(
-  year: number,
-  month: number,
-  classDates: readonly string[],
-  selectedDate: string
-): MiniCalendarDate[] {
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-  const classDateSet = new Set(classDates);
-  const dates: MiniCalendarDate[] = [];
-
-  for (let i = firstDay - 1; i >= 0; i--) {
-    dates.push({ num: daysInPrevMonth - i, muted: true });
-  }
-
-  const today = new Date();
-  const todayStr = today.toISOString().split("T")[0];
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-    dates.push({
-      num: d,
-      active: dateStr === todayStr,
-      selected: dateStr === selectedDate,
-      dot: classDateSet.has(dateStr),
-    });
-  }
-
-  const remaining = 7 - (dates.length % 7);
-  if (remaining < 7) {
-    for (let i = 1; i <= remaining; i++) {
-      dates.push({ num: i, muted: true });
-    }
-  }
-
-  return dates;
-}
-
-type ViewingMonth = { year: number; month: number };
-
-function useViewingMonth(selectedDate: string): [ViewingMonth, (delta: number) => void] {
-  const [viewingMonth, setViewingMonth] = useState<ViewingMonth>(() => {
-    const d = new Date(selectedDate + "T00:00:00");
-    return { year: d.getFullYear(), month: d.getMonth() };
-  });
-
-  const shiftMonth = (delta: number) => {
-    setViewingMonth(prev => {
-      const d = new Date(prev.year, prev.month + delta, 1);
-      return { year: d.getFullYear(), month: d.getMonth() };
-    });
+  const handleDateClick = (num: number, muted?: boolean) => {
+    if (muted) return;
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(num).padStart(2, "0")}`;
+    onSelectDate(dateStr);
   };
 
-  return [viewingMonth, shiftMonth];
+  return (
+    <BaseCard sx={{ p: 3 }}>
+      <MiniCalendarHeader
+        monthName={monthName}
+        year={year}
+        onPrev={() => shiftMonth(-1)}
+        onNext={() => shiftMonth(1)}
+      />
+      <Grid container columns={7} sx={{ textAlign: "center" }}>
+        {MINI_CALENDAR_WEEKDAYS.map(day => (
+          <Grid size={{ xs: 1 }} key={day.id}>
+            <Typography
+              variant="labelMd"
+              sx={theme => ({
+                fontWeight: 700,
+                color: theme.palette.onSurfaceVariant,
+                fontSize: 10,
+              })}
+            >
+              {day.label}
+            </Typography>
+          </Grid>
+        ))}
+        {dates.map(date => (
+          <MiniCalendarDayCell key={`date-${date.num}-${date.muted}`} date={date} onClick={handleDateClick} />
+        ))}
+      </Grid>
+    </BaseCard>
+  );
 }
 
-function CalendarHeader({
+function MiniCalendarHeader({
   monthName,
   year,
   onPrev,
@@ -118,28 +105,7 @@ function CalendarHeader({
   );
 }
 
-function CalendarWeekdays() {
-  return (
-    <>
-      {DAYS.map(day => (
-        <Grid size={{ xs: 1 }} key={day.id}>
-          <Typography
-            variant="labelMd"
-            sx={theme => ({
-              fontWeight: 700,
-              color: theme.palette.onSurfaceVariant,
-              fontSize: 10,
-            })}
-          >
-            {day.label}
-          </Typography>
-        </Grid>
-      ))}
-    </>
-  );
-}
-
-function CalendarDayCell({
+function MiniCalendarDayCell({
   date,
   onClick,
 }: {
@@ -202,29 +168,5 @@ function CalendarDayCell({
         )}
       </Box>
     </Grid>
-  );
-}
-
-export function MiniCalendarDesktop({ selectedDate, onSelectDate, classDates }: Readonly<MiniCalendarProps>) {
-  const [{ year, month }, shiftMonth] = useViewingMonth(selectedDate);
-  const dates = getCalendarGrid(year, month, classDates, selectedDate);
-  const monthName = new Date(year, month).toLocaleString("en-US", { month: "long" });
-
-  const handleDateClick = (num: number, muted?: boolean) => {
-    if (muted) return;
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(num).padStart(2, "0")}`;
-    onSelectDate(dateStr);
-  };
-
-  return (
-    <BaseCard sx={{ p: 3 }}>
-      <CalendarHeader monthName={monthName} year={year} onPrev={() => shiftMonth(-1)} onNext={() => shiftMonth(1)} />
-      <Grid container columns={7} sx={{ textAlign: "center" }}>
-        <CalendarWeekdays />
-        {dates.map(date => (
-          <CalendarDayCell key={`date-${date.num}-${date.muted}`} date={date} onClick={handleDateClick} />
-        ))}
-      </Grid>
-    </BaseCard>
   );
 }

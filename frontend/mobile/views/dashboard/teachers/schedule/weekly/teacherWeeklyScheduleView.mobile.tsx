@@ -11,10 +11,7 @@ import {
   DialogTitle,
   IconButton,
   Stack,
-  Typography,
 } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
@@ -29,6 +26,10 @@ export function TeacherWeeklyScheduleViewMobile({
   onRemoveClass,
   onClearSchedule,
   onAddClass,
+  hasScheduleCreateClass,
+  hasScheduleClearWeekly,
+  hasScheduleViewWorkload,
+  hasScheduleDeleteClass,
 }: Readonly<TeacherWeeklyScheduleViewProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
   const clearDialogOpen = useWeeklyScheduleStore(state => state.clearDialogOpen);
@@ -52,10 +53,11 @@ export function TeacherWeeklyScheduleViewMobile({
       <MobilePageHeader
         title={t.pageTitle(schedule.teacherName)}
         breadcrumbs={breadcrumbs}
+        edgeToEdge={false}
         actions={
           <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
             <Box sx={{ flex: 1 }}>
-              <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
+              {hasScheduleCreateClass ? (
                 <MobilePrimaryPageAction
                   startIcon={<AddOutlined />}
                   onClick={onAddClass}
@@ -63,9 +65,9 @@ export function TeacherWeeklyScheduleViewMobile({
                 >
                   {t.actions.addSlot}
                 </MobilePrimaryPageAction>
-              </RequirePermission>
+              ) : null}
             </Box>
-            <RequirePermission permissions={[AppPermission.ScheduleClearWeekly]}>
+            {hasScheduleClearWeekly ? (
               <IconButton
                 onClick={() => setClearDialogOpen(true)}
                 sx={theme => ({
@@ -78,12 +80,12 @@ export function TeacherWeeklyScheduleViewMobile({
               >
                 <DeleteOutlined />
               </IconButton>
-            </RequirePermission>
+            ) : null}
           </Stack>
         }
       />
 
-      <RequirePermission permissions={[AppPermission.ScheduleViewWorkload]}>
+      {hasScheduleViewWorkload ? (
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr" }, gap: 2 }}>
           <MobileMetricCard
             icon={TimerOutlined}
@@ -92,54 +94,15 @@ export function TeacherWeeklyScheduleViewMobile({
             variant="default"
           />
         </Box>
-      </RequirePermission>
+      ) : null}
 
       <MobileSectionPanel>
-        <MobileScheduleList classes={schedule.classes} onRemoveClass={onRemoveClass} />
+        <MobileScheduleList
+          classes={schedule.classes}
+          onRemoveClass={onRemoveClass}
+          hasScheduleDeleteClass={hasScheduleDeleteClass}
+        />
       </MobileSectionPanel>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: 2,
-          mt: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", flexDirection: "row", gap: 3, alignItems: "center" }}>
-          <Box sx={{ display: "flex", flexDirection: "row", gap: 1, alignItems: "center" }}>
-            <Box
-              sx={theme => ({
-                width: 12,
-                height: 12,
-                backgroundColor: theme.palette.primary.main,
-                borderRadius: 0.5,
-              })}
-            />
-            <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {t.grid.bookedClass}
-            </Typography>
-          </Box>
-          <Box sx={{ display: "flex", flexDirection: "row", gap: 1, alignItems: "center" }}>
-            <Box
-              sx={theme => ({
-                width: 12,
-                height: 12,
-                border: `1px solid ${theme.palette.border.light}`,
-                borderRadius: 0.5,
-              })}
-            />
-            <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {t.grid.availableSlot}
-            </Typography>
-          </Box>
-        </Box>
-        <Typography variant="caption" sx={theme => ({ color: theme.palette.text.disabled })}>
-          {t.grid.lastUpdated(schedule.lastUpdated)}
-        </Typography>
-      </Box>
 
       <Dialog open={clearDialogOpen} onClose={handleCancelClear}>
         <DialogTitle>{t.dialogs.clearScheduleTitle}</DialogTitle>
@@ -156,3 +119,5 @@ export function TeacherWeeklyScheduleViewMobile({
     </MobilePageContainer>
   );
 }
+
+export default TeacherWeeklyScheduleViewMobile;

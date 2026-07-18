@@ -52,7 +52,11 @@ const StyledSubmitButton = styled(Button)(({ theme }) => ({
 // (snackbar handled by Container-level ViewModel). Desktop variant adds the
 // `showSuccess` field for inline badge display (per specs.md §4.1 — Class-C
 // variant: structural/visual divergence between tiers is documented here).
-export interface RecurringClassFormMobileProps extends BaseRecurringClassFormProps {}
+// The mobile interface intentionally mirrors the base shape with no additions;
+// we keep it as a named type (rather than aliasing `BaseRecurringClassFormProps`
+// directly) so future mobile-only rendering additions land here without
+// touching call sites.
+export type RecurringClassFormMobileProps = BaseRecurringClassFormProps;
 
 export function RecurringClassFormMobile({
   register,

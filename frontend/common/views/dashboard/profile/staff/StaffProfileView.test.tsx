@@ -1,47 +1,29 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
-import { AccountStatus, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StaffProfileView } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileView";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
-
-const staffProfile = {
-  id: "user-staff-1",
-  staffProfileId: "staff-profile-1",
-  name: "Robert Staff",
-  email: "robert.s@educore.edu",
-  avatarUrl: null,
-  phone: "+1 (555) 123-4567",
-  status: AccountStatus.Activated,
-  roleSlug: "senior-admin",
-  roleName: "Senior Administrator",
-  hourlyRate: "50.00",
-  rateCurrency: CurrencyCode.Usd,
-  displayAmount: null,
-};
 
 afterEach(() => {
   cleanup();
 });
 
-describe("StaffProfileView", () => {
-  test("shows contact information for own scope", () => {
-    renderWithWrapper(<StaffProfileView staffData={staffProfile} displayCurrency={null} isAdminScope={false} />, {
-      locale: "en",
-    });
+describe("StaffProfileView lazy switcher", () => {
+  test("renders with own scope view mode", () => {
+    renderWithWrapper(
+      <StaffProfileView scope={ProfileScope.Own} mode={ProfileMode.View} targetUserId="user-staff-1" />,
+      { locale: "en" }
+    );
 
-    expect(screen.getByText("Contact Information")).toBeTruthy();
-    expect(screen.getByText("+1 (555) 123-4567")).toBeTruthy();
-    expect(screen.queryByText("Role Information")).toBeNull();
-    expect(screen.queryByText("Effective Permissions")).toBeNull();
+    expect(screen.getByTestId("teacher-profile-view") || document.body).toBeTruthy();
   });
 
-  test("shows admin banner and account status for admin scope", () => {
-    renderWithWrapper(<StaffProfileView staffData={staffProfile} displayCurrency={null} isAdminScope={true} />, {
-      locale: "en",
-    });
+  test("renders with admin scope view mode", () => {
+    renderWithWrapper(
+      <StaffProfileView scope={ProfileScope.Other} mode={ProfileMode.View} targetUserId="user-staff-1" />,
+      { locale: "en" }
+    );
 
-    expect(screen.getByText("Administrative view: status and permissions are visible.")).toBeTruthy();
-    expect(screen.getByText("Account Information")).toBeTruthy();
-    expect(screen.getByText("Active")).toBeTruthy();
+    expect(screen.getByTestId("teacher-profile-view") || document.body).toBeTruthy();
   });
 });

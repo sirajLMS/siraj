@@ -2,8 +2,8 @@
 
 import { DeleteOutlined, EditOutlined, MoreVertOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
-import { useState } from "react";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { RowMenuAnchor } from "@/frontend/common/views/dashboard/permissions/components/useRowMenuAnchor";
 import type { BasePermissionGroupListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
@@ -16,23 +16,23 @@ interface GroupCardProps {
   readonly onEditGroup: (id: string) => void;
   readonly onDeleteGroup: (id: string) => void;
   readonly onAssignGroup: (id: string) => void;
+  readonly rowMenuAnchor: RowMenuAnchor;
 }
 
-function GroupCardMobile({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGroup }: Readonly<GroupCardProps>) {
+function GroupCardMobile({
+  group,
+  onViewGroup,
+  onEditGroup,
+  onDeleteGroup,
+  onAssignGroup,
+  rowMenuAnchor,
+}: Readonly<GroupCardProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { anchorEl, openMenu, closeMenu } = rowMenuAnchor;
   const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleAction = (callback: (id: string) => void) => {
-    handleClose();
+    closeMenu();
     if (group.id) {
       callback(group.id);
     }
@@ -75,10 +75,10 @@ function GroupCardMobile({ group, onViewGroup, onEditGroup, onDeleteGroup, onAss
             </Typography>
           </Box>
           <Box>
-            <IconButton id={`group-card-actions-btn-${group.id}`} onClick={handleClick} size="small">
+            <IconButton id={`group-card-actions-btn-${group.id}`} onClick={openMenu} size="small">
               <MoreVertOutlined fontSize="small" />
             </IconButton>
-            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+            <Menu anchorEl={anchorEl} open={open} onClose={closeMenu}>
               <MenuItem onClick={() => handleAction(onAssignGroup)} id={`group-card-action-assign-${group.id}`}>
                 <PersonAddOutlined fontSize="small" sx={{ mr: 1 }} />
                 {t.actionAssign}
@@ -144,6 +144,7 @@ export function PermissionGroupCardListMobile({
   onEditGroup,
   onDeleteGroup,
   onAssignGroup,
+  groupRowMenuAnchor,
 }: Readonly<BasePermissionGroupListProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
@@ -167,6 +168,7 @@ export function PermissionGroupCardListMobile({
           onEditGroup={onEditGroup}
           onDeleteGroup={onDeleteGroup}
           onAssignGroup={onAssignGroup}
+          rowMenuAnchor={groupRowMenuAnchor}
         />
       ))}
     </Box>

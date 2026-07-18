@@ -30,6 +30,9 @@ export function ReportsDesktopView({
   onExportCsv,
   onPrintReport,
   onRowClick,
+  showFinancials,
+  totalsDisplay,
+  formatPaidAmounts,
 }: Readonly<ReportsViewModel>) {
   return (
     <DesktopPageContainer>
@@ -72,8 +75,16 @@ export function ReportsDesktopView({
           reportType={reportType}
           loading={loading}
           onRowClick={onRowClick}
+          showFinancials={showFinancials}
+          formatPaidAmounts={formatPaidAmounts}
         />
-        <ReportsTotalsSectionDesktop summary={summary} rows={rows} totalsLabel={labels.totalsLabel} />
+        <ReportsTotalsSectionDesktop
+          summary={summary}
+          rows={rows}
+          totalsLabel={labels.totalsLabel}
+          totalsDisplay={totalsDisplay}
+          showFinancials={showFinancials}
+        />
       </DesktopSectionPanel>
 
       <Grid container spacing={2}>

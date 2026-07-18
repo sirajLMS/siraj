@@ -11,13 +11,13 @@ import {
   Button as MuiButton,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import {
-  AppPermission,
-  ClassExecutionState,
-  ClassOutcome,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  isTerminalClassInstance,
+  useDeleteConfirmDialog,
+  useSelectedDayFilter,
+  WEEKLY_SCHEDULE_DAYS,
+  WEEKLY_SCHEDULE_TIMES,
+} from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
 import type {
   MobileScheduleListProps,
   ScheduledClass,
@@ -26,36 +26,20 @@ import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppTranslation } from "@/shared/locale";
 
-function isTerminalClassInstance(executionState?: ClassExecutionState | null, outcome?: ClassOutcome | null): boolean {
-  return (
-    executionState === ClassExecutionState.Completed ||
-    outcome === ClassOutcome.Taken ||
-    outcome === ClassOutcome.Absent ||
-    outcome === ClassOutcome.Leave
-  );
-}
-
 interface MobileSlotItemProps {
   readonly classItem: ScheduledClass;
   readonly onRemove: (id: string) => void;
+  readonly hasScheduleDeleteClass: boolean;
 }
 
-function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) {
-  const [open, setOpen] = useState(false);
+function MobileSlotItem({ classItem, onRemove, hasScheduleDeleteClass }: Readonly<MobileSlotItemProps>) {
+  const { open, openDialog, closeDialog } = useDeleteConfirmDialog();
   const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
   const tMeeting = useAppTranslation().uiTranslations.meetingConfig.join;
 
-  const handleDeleteClick = () => {
-    setOpen(true);
-  };
-
   const handleConfirm = () => {
-    setOpen(false);
+    closeDialog();
     onRemove(classItem.id ?? "");
-  };
-
-  const handleCancel = () => {
-    setOpen(false);
   };
 
   const canJoin = isJoinableClassInstance(classItem.executionState, classItem.outcome, {
@@ -100,32 +84,30 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
               {t.grid.sessionEnded}
             </Typography>
           ) : null}
-          {showDelete ? (
-            <RequirePermission permissions={[AppPermission.ScheduleDeleteClass]}>
-              <Box
-                component="span"
-                className="material-symbols-outlined"
-                sx={theme => ({
-                  fontSize: 20,
-                  cursor: "pointer",
-                  "&:hover": { color: theme.palette.error.light },
-                })}
-                onClick={handleDeleteClick}
-              >
-                delete
-              </Box>
-            </RequirePermission>
+          {showDelete && hasScheduleDeleteClass ? (
+            <Box
+              component="span"
+              className="material-symbols-outlined"
+              sx={theme => ({
+                fontSize: 20,
+                cursor: "pointer",
+                "&:hover": { color: theme.palette.error.light },
+              })}
+              onClick={openDialog}
+            >
+              delete
+            </Box>
           ) : null}
         </Box>
       </Box>
 
-      <Dialog open={open} onClose={handleCancel}>
+      <Dialog open={open} onClose={closeDialog}>
         <DialogTitle>{t.dialogs.deleteClassTitle}</DialogTitle>
         <DialogContent>
           <DialogContentText>{t.dialogs.deleteClassMessage}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <MuiButton onClick={handleCancel}>{t.dialogs.cancel}</MuiButton>
+          <MuiButton onClick={closeDialog}>{t.dialogs.cancel}</MuiButton>
           <MuiButton onClick={handleConfirm} color="error" variant="contained" autoFocus>
             {t.dialogs.confirmYes}
           </MuiButton>
@@ -134,19 +116,6 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
     </>
   );
 }
-
-const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
-const TIMES = [
-  "08:00 AM",
-  "09:00 AM",
-  "10:00 AM",
-  "11:00 AM",
-  "12:00 PM",
-  "01:00 PM",
-  "02:00 PM",
-  "03:00 PM",
-  "04:00 PM",
-];
 
 interface DaySelectorProps {
   readonly selectedDay: string;
@@ -168,7 +137,7 @@ function DaySelector({ selectedDay, onSelect }: Readonly<DaySelectorProps>) {
         scrollbarWidth: "none",
       }}
     >
-      {DAYS.map(day => {
+      {WEEKLY_SCHEDULE_DAYS.map(day => {
         const dayKey = day.slice(0, 3) as keyof typeof t.days;
         return (
           <Button
@@ -201,9 +170,10 @@ interface TimeSlotRowProps {
   readonly time: string;
   readonly slotClasses: readonly ScheduledClass[];
   readonly onRemoveClass: (id: string) => void;
+  readonly hasScheduleDeleteClass: boolean;
 }
 
-function TimeSlotRow({ time, slotClasses, onRemoveClass }: Readonly<TimeSlotRowProps>) {
+function TimeSlotRow({ time, slotClasses, onRemoveClass, hasScheduleDeleteClass }: Readonly<TimeSlotRowProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
   const isLunch = time === "12:00 PM";
 
@@ -238,7 +208,12 @@ function TimeSlotRow({ time, slotClasses, onRemoveClass }: Readonly<TimeSlotRowP
     content = (
       <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 1 }}>
         {slotClasses.map(c => (
-          <MobileSlotItem key={c.id} classItem={c} onRemove={onRemoveClass} />
+          <MobileSlotItem
+            key={c.id}
+            classItem={c}
+            onRemove={onRemoveClass}
+            hasScheduleDeleteClass={hasScheduleDeleteClass}
+          />
         ))}
       </Box>
     );
@@ -274,8 +249,12 @@ function TimeSlotRow({ time, slotClasses, onRemoveClass }: Readonly<TimeSlotRowP
   );
 }
 
-export default function MobileScheduleList({ classes, onRemoveClass }: Readonly<MobileScheduleListProps>) {
-  const [selectedDay, setSelectedDay] = useState<string>("monday");
+export default function MobileScheduleList({
+  classes,
+  onRemoveClass,
+  hasScheduleDeleteClass,
+}: Readonly<MobileScheduleListProps>) {
+  const { selectedDay, setSelectedDay } = useSelectedDayFilter("monday");
 
   const getClassesForSlot = (day: string, time: string) => {
     return classes.filter(c => c.day?.toLowerCase() === day && c.startTime === time);
@@ -296,12 +275,13 @@ export default function MobileScheduleList({ classes, onRemoveClass }: Readonly<
           border: `1px solid ${theme.palette.border.light}`,
         })}
       >
-        {TIMES.map(time => (
+        {WEEKLY_SCHEDULE_TIMES.map(time => (
           <TimeSlotRow
             key={time}
             time={time}
             slotClasses={getClassesForSlot(selectedDay, time)}
             onRemoveClass={onRemoveClass}
+            hasScheduleDeleteClass={hasScheduleDeleteClass}
           />
         ))}
       </Box>

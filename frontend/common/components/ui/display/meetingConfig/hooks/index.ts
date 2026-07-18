@@ -1,2 +1,2 @@
-// NEW FOR PLAN v5 (barrel for lifted meetingConfig display hooks)
-export { useJoinContext } from "@/frontend/common/components/ui/display/meetingConfig/hooks/meetingConfigDisplay.hooks";
+// NEW FOR PLAN v5: barrel now re-exports via the §2.4-allowlisted common hooks/lib paths.
+export { useJoinContext } from "@/frontend/common/hooks/useJoinContext";

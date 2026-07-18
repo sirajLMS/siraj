@@ -5,7 +5,6 @@ import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/c
 import type { DaysScheduleLabels } from "@/frontend/common/views/dashboard/classes/recurring/utils/buildDaysScheduleLabels";
 import type { RecurringClassFormLabels } from "@/frontend/common/views/dashboard/classes/recurring/utils/buildRecurringClassFormLabels";
 import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import type { CreateRecurringClassLabels } from "@/shared/locale";
 
 export type DayScheduleConfig = BaseDayScheduleConfig<DayOfWeek>;
 
@@ -111,7 +110,6 @@ export interface RecurringClassFormFieldsProps {
 
 export interface BaseRecurringClassFormProps {
   readonly isSubmitting: boolean;
-  readonly labels: CreateRecurringClassLabels;
   readonly formLabels: RecurringClassFormLabels;
   readonly register: UseFormRegister<RecurringClassFormData>;
   readonly errors: FieldErrors<RecurringClassFormData>;

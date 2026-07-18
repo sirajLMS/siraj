@@ -3,10 +3,11 @@
 import { useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useEffect, useMemo } from "react";
-import type { StudentFilterArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, type StudentFilterArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentDirectoryQuery } from "@/frontend/common/graphql/generated/gql/operations";
 import { studentDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-directory.documents";
 import { useStudentDirectoryStore } from "@/frontend/common/stores/studentDirectoryStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   StudentDirectoryRowExtended,
@@ -86,6 +87,10 @@ export interface StudentsViewModel {
   readonly onAddStudent: () => void;
   readonly onViewProfile: (id: string) => void;
   readonly onViewHistory: (id: string) => void;
+  // NEW FOR PLAN v5: lifted permission boolean per specs.md §3 N3 + §6.1.
+  // Tier student-directory views no longer import `RequirePermission`; the
+  // ViewModel computes the gate ONCE and the tier view reads the boolean.
+  readonly canStudentsCreate: boolean;
 }
 
 type StudentDirectoryTranslator = StudentDirectoryLabels;
@@ -155,6 +160,12 @@ export function useStudentsViewModel(): StudentsViewModel {
   const router = useRouter();
   const notifications = useNotifications();
 
+  // NEW FOR PLAN v5: read the user's permission ONCE and expose it as a boolean.
+  // Tier student-directory views no longer import `RequirePermission` or call
+  // `useUserStore()` (specs.md §3 N3).
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canStudentsCreate = hasPermission(AppPermission.StudentsCreate);
+
   const searchQuery = useStudentDirectoryStore(state => state.searchQuery);
   const setSearchQuery = useStudentDirectoryStore(state => state.setSearchQuery);
   const page = useStudentDirectoryStore(state => state.page);
@@ -200,5 +211,7 @@ export function useStudentsViewModel(): StudentsViewModel {
     onAddStudent: handleAddStudent,
     onViewProfile: handleViewProfile,
     onViewHistory: handleViewHistory,
+    // NEW FOR PLAN v5: lifted permission boolean consumed by the tier view.
+    canStudentsCreate,
   };
 }

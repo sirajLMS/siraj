@@ -108,6 +108,7 @@ export function AssignedUsersTabDesktop({
 }: Readonly<AssignedUsersTabProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
   const assignedUsersColumns = useMemo<GridColDef<GroupUser>[]>(() => {
     return [
       {

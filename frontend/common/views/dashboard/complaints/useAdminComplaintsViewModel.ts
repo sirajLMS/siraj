@@ -18,11 +18,12 @@ import type {
   ComplaintTab,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
+import type { ComplaintsAdminLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export interface AdminComplaintsViewModel {
-  readonly labels: ReturnType<typeof buildComplaintsLabels>;
-  readonly summary: AdminComplaintsSummary | null;
+  readonly labels: ComplaintsAdminLabels;
+  readonly summary: AdminComplaintsSummary;
   readonly rows: readonly AdminComplaintRow[];
   readonly searchQuery: string;
   readonly activeTab: ComplaintTab;
@@ -50,9 +51,9 @@ export interface AdminComplaintsViewModel {
 
 export type UseAdminComplaintsViewModelProps = {};
 
-function buildLabels(): ReturnType<typeof buildComplaintsLabels> {
+function buildLabels(): ComplaintsAdminLabels {
   const t = useAppTranslation().dashboardTranslations.complaints;
-  return buildComplaintsLabels(t);
+  return buildComplaintsLabels(t).admin;
 }
 
 export function useAdminComplaintsViewModel(
@@ -103,7 +104,7 @@ export function useAdminComplaintsViewModel(
   const [respondToComplaintMutation] = useMutation(respondToComplaintMutationDocument);
   const [deleteComplaintMutation] = useMutation(deleteComplaintMutationDocument);
 
-  const summary: AdminComplaintsSummary | null = useMemo(
+  const summary: AdminComplaintsSummary = useMemo(
     () =>
       data?.adminComplaintQueue?.metrics
         ? {
@@ -111,7 +112,7 @@ export function useAdminComplaintsViewModel(
             answered: data.adminComplaintQueue.metrics.answered ?? 0,
             avgResolutionHours: data.adminComplaintQueue.metrics.avgResolutionTime ?? "0.0 Hours",
           }
-        : null,
+        : { unanswered: 0, answered: 0, avgResolutionHours: "0.0 Hours" },
     [data?.adminComplaintQueue?.metrics]
   );
   const rows: readonly AdminComplaintRow[] = useMemo(

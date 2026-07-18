@@ -20,6 +20,8 @@ export function PermissionTabContentMobile({
   openAssignDialog,
   openManageOverrides,
   setSelectedUserIdForOverrides,
+  catalogFilter,
+  groupRowMenuAnchor,
 }: Readonly<PermissionTabContentProps>) {
   if (isLoading && !groups) {
     return (
@@ -38,11 +40,22 @@ export function PermissionTabContentMobile({
           onEditGroup={openEditDialog}
           onDeleteGroup={openDeleteDialog}
           onAssignGroup={openAssignDialog}
+          groupRowMenuAnchor={groupRowMenuAnchor}
         />
       )}
 
       {activeTab === "catalog" && (
-        <PermissionCatalogSectionMobile permissions={permissions} groups={groups} loading={isLoading} />
+        <PermissionCatalogSectionMobile
+          permissions={permissions}
+          groups={groups}
+          searchQuery={catalogFilter.searchQuery}
+          setSearchQuery={catalogFilter.setSearchQuery}
+          selectedCategory={catalogFilter.selectedCategory}
+          setSelectedCategory={catalogFilter.setSelectedCategory}
+          categories={catalogFilter.categories}
+          filteredPermissions={catalogFilter.filteredPermissions}
+          loading={isLoading}
+        />
       )}
 
       {activeTab === "overrides" && (

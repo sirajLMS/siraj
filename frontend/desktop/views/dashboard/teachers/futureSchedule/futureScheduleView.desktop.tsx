@@ -21,6 +21,8 @@ export function FutureScheduleViewDesktop({
   notes,
   contact,
   classDates,
+  onSupportContact,
+  supportContactLabels,
 }: Readonly<FutureScheduleViewModel>) {
   const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
 
@@ -91,7 +93,12 @@ export function FutureScheduleViewDesktop({
           <Stack spacing={3}>
             <MiniCalendarDesktop selectedDate={selectedDate} onSelectDate={onDateChange} classDates={classDates} />
             <ImportantNotesDesktop notes={notes} />
-            <SupportContactDesktop contact={contact} />
+            <SupportContactDesktop
+              contact={contact}
+              onContactAdmin={onSupportContact}
+              supportContactLabel={supportContactLabels.supportContact}
+              contactAdminLabel={supportContactLabels.contactAdmin}
+            />
           </Stack>
         </Grid>
       </Grid>

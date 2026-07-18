@@ -2,24 +2,14 @@
 
 import { ChildCareOutlined, EventOutlined, PaymentsOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
-import type { ParentDashboardMetrics } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import type { ParentDashboardMetricsRowProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardComponents.types";
 import { MobileMetricCard } from "@/frontend/mobile/components/ui";
-
-export interface ParentDashboardMetricsRowMobileProps {
-  readonly metrics: ParentDashboardMetrics;
-  readonly labels: {
-    readonly totalStudents: string;
-    readonly todaysClasses: string;
-    readonly pendingInvoices: string;
-    readonly performanceAvg: string;
-  };
-}
 
 function formatCount(value: number): string {
   return String(value).padStart(2, "0");
 }
 
-export function ParentDashboardMetricsRowMobile({ metrics, labels }: Readonly<ParentDashboardMetricsRowMobileProps>) {
+export function ParentDashboardMetricsRowMobile({ metrics, labels }: Readonly<ParentDashboardMetricsRowProps>) {
   return (
     <Grid container spacing={2}>
       <Grid size={6}>

@@ -4,14 +4,11 @@ import { Box } from "@mui/material";
 import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
 import { LoadingState } from "@/frontend/common/components/ui/state/LoadingState";
 import type { ClassDetailsViewModel } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
+import type { InvalidIdStateProps } from "@/frontend/common/views/dashboard/classes/details/types";
 import { DesktopPageContainer } from "@/frontend/desktop/components/ui";
 import { ClassDetailsContentDesktop } from "@/frontend/desktop/views/dashboard/classes/details/components/classDetailsContent.desktop";
 
-interface InvalidIdStateProps {
-  readonly t: ClassDetailsViewModel["t"];
-}
-
-function InvalidIdState({ t }: InvalidIdStateProps) {
+function InvalidIdState({ t }: Readonly<InvalidIdStateProps>) {
   return (
     <Box sx={theme => ({ p: 3, textAlign: "center", color: theme.palette.onSurfaceVariant })}>{t.invalidClassId}</Box>
   );
@@ -38,6 +35,7 @@ export function ClassDetailsContainerDesktop({ viewModel }: { readonly viewModel
         instance={viewModel.instance}
         canOverride={viewModel.canOverride}
         isParentView={viewModel.isParentView}
+        canViewSessionDetails={viewModel.canViewSessionDetails}
         isWarningDismissed={viewModel.isWarningDismissed}
         onDismissWarning={() => viewModel.setIsWarningDismissed(true)}
         handlers={viewModel.handlers}

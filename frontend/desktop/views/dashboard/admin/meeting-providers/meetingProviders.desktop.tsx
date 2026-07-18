@@ -2,8 +2,6 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { CreateMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/CreateMeetingProviderDialog";
@@ -50,64 +48,62 @@ export function MeetingProvidersDesktopView({
   onDeleteConfirm,
 }: Readonly<MeetingProvidersViewProps>) {
   return (
-    <RequirePermission permissions={AppPermission.MeetingProvidersManageCatalog}>
-      <DesktopPageContainer>
-        <DesktopPageHeader
-          title={t.pageTitle}
-          subtitle={t.pageSubtitle}
-          actions={
-            <DesktopPrimaryPageAction onClick={onCreateOpen} startIcon={<AddOutlined />}>
-              {t.addProvider}
-            </DesktopPrimaryPageAction>
-          }
-        />
+    <DesktopPageContainer>
+      <DesktopPageHeader
+        title={t.pageTitle}
+        subtitle={t.pageSubtitle}
+        actions={
+          <DesktopPrimaryPageAction onClick={onCreateOpen} startIcon={<AddOutlined />}>
+            {t.addProvider}
+          </DesktopPrimaryPageAction>
+        }
+      />
 
-        {!loading && rows.length === 0 ? (
-          <MeetingProvidersDesktopEmptyState title={t.emptyCatalogTitle} body={t.emptyCatalogBody} />
-        ) : null}
+      {!loading && rows.length === 0 ? (
+        <MeetingProvidersDesktopEmptyState title={t.emptyCatalogTitle} body={t.emptyCatalogBody} />
+      ) : null}
 
-        <Box sx={{ height: 560 }}>
-          <DesktopAppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
-        </Box>
+      <Box sx={{ height: 560 }}>
+        <DesktopAppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
+      </Box>
 
-        <CreateMeetingProviderDialog
-          open={createOpen}
-          onClose={onCreateClose}
-          onSaved={onCreateSaved}
-          onError={notifications.showError}
-        />
-        <EditMeetingProviderDialog
-          open={Boolean(editProvider)}
-          provider={editProvider}
-          onClose={onEditClose}
-          onSaved={onEditSaved}
-          onError={notifications.showError}
-        />
-        <DesktopBaseDeleteDialog
-          open={Boolean(deleteProvider)}
-          onClose={onDeleteClose}
-          onConfirm={onDeleteConfirm}
-          isLoading={deleting}
-          title={t.deleteTitle}
-          body={`${t.deleteConfirm} ${resolveLocalizedString(
-            (deleteProvider?.name as LocalizedString | null | undefined) ?? null,
-            locale
-          )}`}
-          cancelLabel={t.cancel}
-          confirmLabel={t.delete}
-        />
+      <CreateMeetingProviderDialog
+        open={createOpen}
+        onClose={onCreateClose}
+        onSaved={onCreateSaved}
+        onError={notifications.showError}
+      />
+      <EditMeetingProviderDialog
+        open={Boolean(editProvider)}
+        provider={editProvider}
+        onClose={onEditClose}
+        onSaved={onEditSaved}
+        onError={notifications.showError}
+      />
+      <DesktopBaseDeleteDialog
+        open={Boolean(deleteProvider)}
+        onClose={onDeleteClose}
+        onConfirm={onDeleteConfirm}
+        isLoading={deleting}
+        title={t.deleteTitle}
+        body={`${t.deleteConfirm} ${resolveLocalizedString(
+          (deleteProvider?.name as LocalizedString | null | undefined) ?? null,
+          locale
+        )}`}
+        cancelLabel={t.cancel}
+        confirmLabel={t.delete}
+      />
 
-        <DesktopFormErrorSnackbar
-          open={notifications.errorOpen}
-          message={notifications.errorMsg}
-          onClose={notifications.closeError}
-        />
-        <DesktopFormSuccessSnackbar
-          open={notifications.successOpen}
-          message={notifications.successMsg}
-          onClose={notifications.closeSuccess}
-        />
-      </DesktopPageContainer>
-    </RequirePermission>
+      <DesktopFormErrorSnackbar
+        open={notifications.errorOpen}
+        message={notifications.errorMsg}
+        onClose={notifications.closeError}
+      />
+      <DesktopFormSuccessSnackbar
+        open={notifications.successOpen}
+        message={notifications.successMsg}
+        onClose={notifications.closeSuccess}
+      />
+    </DesktopPageContainer>
   );
 }

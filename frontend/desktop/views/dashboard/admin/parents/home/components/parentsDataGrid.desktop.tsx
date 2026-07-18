@@ -10,9 +10,7 @@ import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type {
   ParentDirectoryRow,
@@ -26,6 +24,11 @@ import { Link } from "@/shared/i18n/routing";
 
 export type { ParentsDataGridLabels };
 
+// VARIANT JUSTIFICATION: Class C card-list vs data-grid sibling per specs §4.3 — `ParentsDataGridDesktopProps` renders a desktop data grid (taking the type-specific `ParentsDataGridLabels`). The mobile twin is the `ParentCardListMobile` rendering single-row mobile cards with a different label contract. The shared row shape (`ParentDirectoryRow`) already lives once in `directory.ts`.
+//
+// NEW FOR PLAN v5: added the `canParentManageStatus` boolean (lifted from the
+// previously-inline `<RequirePermission permissions={[AppPermission.ParentManageStatus]}>`
+// wrapper per specs.md §3 N3 + §6.1).
 interface ParentsDataGridDesktopProps {
   readonly rows: readonly ParentDirectoryRow[];
   readonly labels: ParentsDataGridLabels;
@@ -35,6 +38,7 @@ interface ParentsDataGridDesktopProps {
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
   readonly loading?: boolean;
+  readonly canParentManageStatus: boolean;
 }
 
 export function ParentsDataGridDesktop({
@@ -46,6 +50,10 @@ export function ParentsDataGridDesktop({
   totalCount,
   onPageChange,
   loading = false,
+  // NEW FOR PLAN v5: replaces the inline `<RequirePermission>` wrapper that
+  // used to enclose the lifecycle-management IconButton. The gate is computed
+  // once by the ViewModel (`useParentsViewModel`) and handed down as a prop.
+  canParentManageStatus,
 }: Readonly<ParentsDataGridDesktopProps>) {
   const columns = useMemo<GridColDef<ParentDirectoryRow>[]>(
     () => [
@@ -165,7 +173,7 @@ export function ParentsDataGridDesktop({
             {row.userId ? (
               <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name} />
             ) : null}
-            <RequirePermission permissions={[AppPermission.ParentManageStatus]}>
+            {canParentManageStatus ? (
               <Tooltip title={labels.manageLifecycle}>
                 <IconButton
                   component={Link}
@@ -187,7 +195,7 @@ export function ParentsDataGridDesktop({
                   <LifecycleIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-            </RequirePermission>
+            ) : null}
             <IconButton
               size="small"
               onClick={e => {
@@ -210,7 +218,7 @@ export function ParentsDataGridDesktop({
         ),
       },
     ],
-    [labels, onOpenSettings]
+    [labels, onOpenSettings, canParentManageStatus]
   );
 
   return (

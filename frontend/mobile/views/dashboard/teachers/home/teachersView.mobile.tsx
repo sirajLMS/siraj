@@ -1,12 +1,10 @@
 "use client";
 
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type {
   TeacherDirectoryMetrics,
   TeacherDirectoryRow,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   MobileContentStack,
   MobilePageContainer,
@@ -19,6 +17,7 @@ import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface TeachersMobileViewProps {
+  // VARIANT JUSTIFICATION: extra fields searchQuery / onSearchChange (mobile-only search-input lives on the card list header; the desktop twin surfaces search via the data-grid toolbar).
   readonly metrics: TeacherDirectoryMetrics | null | undefined;
   readonly rows: readonly TeacherDirectoryRow[];
   readonly searchQuery: string;
@@ -27,6 +26,10 @@ export interface TeachersMobileViewProps {
   readonly pageSize: number;
   readonly totalCount: number;
   readonly onPageChange: (page: number) => void;
+  readonly totalTeachers: number;
+  readonly canCreateTeacher: boolean;
+  readonly onNavigateToSchedule: (teacherId: string) => void;
+  readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
 
 /**
@@ -45,6 +48,9 @@ export function TeachersMobileView({
   pageSize,
   totalCount,
   onPageChange,
+  canCreateTeacher,
+  onNavigateToSchedule,
+  onNavigateToProfile,
 }: Readonly<TeachersMobileViewProps>) {
   const t = useAppTranslation().dashboardTranslations.teachersDirectory;
 
@@ -56,13 +62,13 @@ export function TeachersMobileView({
         edgeToEdge={false}
         actions={
           <>
-            <RequirePermission permissions={[AppPermission.TeachersCreate]}>
+            {canCreateTeacher ? (
               <Link href="/teachers/onboarding" style={{ textDecoration: "none" }}>
                 <MobilePrimaryPageAction startIcon={<PersonAddOutlined />}>
                   {t.actions.addTeacher}
                 </MobilePrimaryPageAction>
               </Link>
-            </RequirePermission>
+            ) : null}
             <MobilePrimaryPageAction startIcon={<EditCalendarOutlined />}>
               {t.actions.updateSchedules}
             </MobilePrimaryPageAction>
@@ -81,8 +87,12 @@ export function TeachersMobileView({
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
+          onNavigateToSchedule={onNavigateToSchedule}
+          onNavigateToProfile={onNavigateToProfile}
         />
       </MobileContentStack>
     </MobilePageContainer>
   );
 }
+
+export default TeachersMobileView;

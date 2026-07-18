@@ -3,14 +3,9 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import { type CurrencyOption, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
+import type { CurrencyOptionRowProps } from "@/frontend/common/components/ui/input/currencySelect/currencyOptionRow.types";
+import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
-
-export type CurrencyOptionRowProps = {
-  readonly currency: CurrencyOption;
-  readonly locale: string;
-  readonly showSymbol?: boolean;
-};
 
 export function CurrencyOptionRowDesktop({
   currency,

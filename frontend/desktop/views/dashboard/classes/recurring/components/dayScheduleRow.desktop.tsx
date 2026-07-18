@@ -5,7 +5,12 @@ import { Box, Checkbox, FormControlLabel, IconButton, Typography } from "@mui/ma
 import { styled } from "@mui/material/styles";
 import { AppTimePicker } from "@/frontend/common/components/ui/form";
 import type { DayScheduleRowProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
-import { formatTimeValue, parseTimeValue } from "@/frontend/common/views/dashboard/classes/recurring/utils";
+import {
+  formatTimeValue,
+  overrideTimePickerInputSx,
+  overrideTimePickerTextFieldSx,
+  parseTimeValue,
+} from "@/frontend/common/views/dashboard/classes/recurring/utils";
 import { WeekendDayRow } from "@/frontend/common/views/dashboard/classes/recurring/WeekendDayRow";
 
 const StyledDayScheduleRowContainer = styled(Box, {
@@ -49,19 +54,6 @@ const StyledDayLabelTypography = styled(Typography, {
   fontWeight: 600,
   color: isActiveOverride ? theme.palette.sidebar : theme.palette.primary.main,
 }));
-
-const overrideTimePickerTextFieldSx = (theme: { palette: { sidebar: string } }) => ({
-  width: 150,
-  "& .MuiOutlinedInput-root": {
-    borderColor: theme.palette.sidebar,
-    borderWidth: 2,
-  },
-});
-
-const overrideTimePickerInputSx = (theme: { palette: { sidebar: string } }) => ({
-  fontWeight: 700,
-  color: theme.palette.sidebar,
-});
 
 export function DayScheduleRowDesktop({
   day,

@@ -5,12 +5,11 @@ import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
-import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type {
   ParentBookingStatus,
   ParentScheduleRow,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-import type { SchedulePagination } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
+import type { ParentScheduleDataGridDesktopProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentScheduleComponents.types";
 import {
   DesktopAppDataGrid,
   DesktopGridPagination,
@@ -20,13 +19,6 @@ import {
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { ParentClassStatusIndicatorDesktop } from "@/frontend/desktop/views/dashboard/parent/dashboard/components/parentClassStatusIndicator.desktop";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-
-interface ParentScheduleDataGridDesktopProps {
-  readonly rows: readonly ParentScheduleRow[];
-  readonly labels: ParentDashboardLabels;
-  readonly onHistory: (id: string) => void;
-  readonly pagination?: SchedulePagination;
-}
 
 function resolveBookingBadge(status: ParentBookingStatus): { category: "session" | "trackingStatus"; status: string } {
   if (status === "rescheduled") {

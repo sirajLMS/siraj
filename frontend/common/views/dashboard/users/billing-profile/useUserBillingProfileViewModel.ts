@@ -39,6 +39,8 @@ export type UserBillingProfileViewModel = UserBillingProfileViewProps;
 
 export type UseUserBillingProfileViewModelProps = Pick<UserBillingProfileViewModel, "userId">;
 
+type SnackbarSeverity = "success" | "error" | "info";
+
 export function useUserBillingProfileViewModel(
   props: Readonly<UseUserBillingProfileViewModelProps>
 ): UserBillingProfileViewModel {
@@ -57,14 +59,15 @@ export function useUserBillingProfileViewModel(
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
   const [proofTarget, setProofTarget] = useState<MarkPaidInvoiceTarget | null>(null);
   const [proofMode, setProofMode] = useState<"submit" | "markPaid">("submit");
   const [detailsTarget, setDetailsTarget] = useState<PaymentDetailsTarget | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "info">("success");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<SnackbarSeverity>("success");
 
-  const showFeedback = useCallback((message: string, severity: "success" | "error" | "info") => {
+  const showFeedback = useCallback((message: string, severity: SnackbarSeverity) => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
@@ -94,7 +97,6 @@ export function useUserBillingProfileViewModel(
   const {
     data: summaryData,
     loading: summaryLoading,
-    error: summaryError,
     refetch: refetchSummary,
   } = useQuery(userBillingProfileSummaryQueryDocument, {
     variables: { userId, parentId: null },
@@ -102,7 +104,7 @@ export function useUserBillingProfileViewModel(
     pollInterval,
   });
 
-  const { data, loading, error, refetch } = useQuery(userBillingProfileInvoiceHistoryQueryDocument, {
+  const { data, loading, refetch } = useQuery(userBillingProfileInvoiceHistoryQueryDocument, {
     variables: {
       userId,
       parentId: null,
@@ -192,7 +194,10 @@ export function useUserBillingProfileViewModel(
     };
   }, [summaryData?.parentBillingSummary, locale, fxMessages]);
 
-  const _isLoading = summaryLoading || loading || isSearchPending;
+  // `summaryLoading || loading || isSearchPending` previously fed an unused
+  // local — tsgo flagged it. The loading status actually surfaced to the
+  // view lives in the returned `loading: loading || isSearchPending` field
+  // (see the return shape), so no local derivation is required here.
 
   const metrics = useMemo(() => buildParentMetrics(summary, labels), [summary, labels]);
 
@@ -355,7 +360,7 @@ export function useUserBillingProfileViewModel(
     readonly detailsTarget: PaymentDetailsTarget | null;
     readonly snackbarOpen: boolean;
     readonly snackbarMessage: string;
-    readonly snackbarSeverity: "success" | "error" | "info";
+    readonly snackbarSeverity: SnackbarSeverity;
     readonly setProofTarget: (target: MarkPaidInvoiceTarget | null) => void;
     readonly setProofMode: (mode: "submit" | "markPaid") => void;
     readonly setDetailsTarget: (target: PaymentDetailsTarget | null) => void;

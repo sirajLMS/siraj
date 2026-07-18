@@ -5,9 +5,6 @@ import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
-import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
-import { BillingMobileSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingMobileSearchBar";
-import { StudentCreditCardList } from "@/frontend/common/views/dashboard/billing/components/StudentCreditCardList";
 import { buildAdminMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import {
   MobileCardList,
@@ -20,6 +17,9 @@ import {
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { AdminInvoiceMobileCard } from "@/frontend/mobile/views/dashboard/admin/billing/components/adminInvoiceCard.mobile";
+import { BillingMetricsRowMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMetricsRow.mobile";
+import { BillingMobileSearchBarMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMobileSearchBar.mobile";
+import { StudentCreditCardListMobile } from "@/frontend/mobile/views/dashboard/billing/components/studentCreditCardList.mobile";
 import { Link } from "@/shared/i18n/routing";
 
 const StyledCreditFooterBox = styled(Box)(({ theme }) => ({
@@ -158,7 +158,7 @@ function StudentCreditSection({
         ) : undefined
       }
     >
-      <StudentCreditCardList
+      <StudentCreditCardListMobile
         rows={creditRows}
         canManage={canManage}
         billingActionsDisabled={billingActionsDisabled}
@@ -222,8 +222,8 @@ export function AdminBillingMobileView({
         <MobilePageHeader title={labels.adminPageTitle} subtitle={labels.adminPageSubtitle} edgeToEdge={false} />
         <MobileContentStack gap={3} paddingBottom={4}>
           {canViewExchangeRates ? <ExchangeRatesLink labels={labels} /> : null}
-          <BillingMetricsRow metrics={buildAdminMetrics(summary, labels)} compact loading={summaryLoading} />
-          <BillingMobileSearchBar
+          <BillingMetricsRowMobile metrics={buildAdminMetrics(summary, labels)} compact loading={summaryLoading} />
+          <BillingMobileSearchBarMobile
             value={searchQuery}
             placeholder={labels.search.invoicesPlaceholder}
             searchingLabel={labels.search.searching}

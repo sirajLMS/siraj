@@ -11,8 +11,8 @@ export interface UpcomingClassDisplay {
   readonly executionState: string;
   readonly outcome: string | null;
   readonly isFrozen: boolean;
-  readonly meetingJoinUrl?: string | null;
-  readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
+  readonly meetingJoinUrl: string | null | undefined;
+  readonly effectiveMeeting: EffectiveMeetingFieldsFragment | null | undefined;
 }
 
 export interface StudentStatusPageData {

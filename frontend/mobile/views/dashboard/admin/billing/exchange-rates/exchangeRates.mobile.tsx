@@ -1,16 +1,14 @@
 "use client";
 
 import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { formatExchangeRateTimestamp } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
+import { ManualOverrideDialog } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
+import { ProviderSettingsSection } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
 import type {
   ExchangeRatesSnackbarState,
   ExchangeRatesSyncRun,
   ExchangeRatesViewModel,
-} from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesView";
-import { ManualOverrideDialog } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
-import { ProviderSettingsSection } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
+} from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/useExchangeRatesViewModel";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
 import {
   MobileContentStack,
@@ -136,12 +134,14 @@ export function ExchangeRatesMobileView({
   labels,
   rates,
   ratesLoading,
-  availablePairs,
+  availablePairs: _availablePairs,
   syncRun,
   syncLoading,
   refreshing,
   showStaleWarning,
   billingActionsDisabled,
+  canRefresh,
+  canOverride,
   onRefresh,
   onOpenManualOverride,
   manualOverrideOpen,
@@ -154,6 +154,7 @@ export function ExchangeRatesMobileView({
   syncError,
   refetchRates,
   refetchSync,
+  historyViewModel,
 }: Readonly<ExchangeRatesViewModel>) {
   return (
     <MobilePageContainer>
@@ -163,102 +164,100 @@ export function ExchangeRatesMobileView({
         subtitle={labels.pageSubtitle}
         edgeToEdge={false}
         actions={
-          <RequirePermission permissions={AppPermission.BillingRefreshExchangeRates}>
+          canRefresh ? (
             <Button variant="contained" onClick={onRefresh} disabled={refreshing || billingActionsDisabled}>
               {refreshing ? labels.refreshing : labels.syncStatus.refresh}
             </Button>
-          </RequirePermission>
+          ) : null
         }
       />
       <MobileContentStack gap={3} paddingBottom={4}>
-        <RequirePermission permissions={AppPermission.BillingViewExchangeRates}>
-          {ratesError ? (
-            <Alert
-              severity="warning"
-              sx={{ mb: 2 }}
-              action={
-                <Button color="inherit" size="small" onClick={() => void refetchRates()}>
-                  {labels.errors.retry}
-                </Button>
-              }
-            >
-              {labels.errors.loadFailed}
-            </Alert>
-          ) : null}
-          {syncError ? (
-            <Alert
-              severity="warning"
-              sx={{ mb: 2 }}
-              action={
-                <Button color="inherit" size="small" onClick={() => void refetchSync()}>
-                  {labels.errors.retry}
-                </Button>
-              }
-            >
-              {labels.errors.loadFailed}
-            </Alert>
-          ) : null}
-          {showStaleWarning ? (
-            <Alert severity="warning" sx={{ mb: 2 }}>
-              {labels.staleWarning}
-            </Alert>
-          ) : null}
+        {ratesError ? (
+          <Alert
+            severity="warning"
+            sx={{ mb: 2 }}
+            action={
+              <Button color="inherit" size="small" onClick={() => void refetchRates()}>
+                {labels.errors.retry}
+              </Button>
+            }
+          >
+            {labels.errors.loadFailed}
+          </Alert>
+        ) : null}
+        {syncError ? (
+          <Alert
+            severity="warning"
+            sx={{ mb: 2 }}
+            action={
+              <Button color="inherit" size="small" onClick={() => void refetchSync()}>
+                {labels.errors.retry}
+              </Button>
+            }
+          >
+            {labels.errors.loadFailed}
+          </Alert>
+        ) : null}
+        {showStaleWarning ? (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {labels.staleWarning}
+          </Alert>
+        ) : null}
 
-          <MobileSectionPanel title={labels.syncStatus.title}>
-            <MobileSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
-          </MobileSectionPanel>
+        <MobileSectionPanel title={labels.syncStatus.title}>
+          <MobileSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
+        </MobileSectionPanel>
 
-          <ProviderSettingsSection
-            labels={labels.providerSettings}
-            onFeedback={(_message, _severity) => onSuccessManualOverride()}
-            actionsDisabled={billingActionsDisabled}
-          />
+        <ProviderSettingsSection
+          labels={labels.providerSettings}
+          onFeedback={(_message, _severity) => onSuccessManualOverride()}
+          actionsDisabled={billingActionsDisabled}
+        />
 
-          <MobileSectionPanel title={labels.rateTable.title}>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-              <RequirePermission permissions={AppPermission.BillingOverrideExchangeRates}>
-                <Button variant="outlined" onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
-                  {labels.manualOverride.title}
-                </Button>
-              </RequirePermission>
-            </Box>
-            {ratesLoading && rates.length === 0 ? (
-              <Typography sx={theme => ({ color: theme.palette.text.secondary, py: 2 })}>{labels.noRates}</Typography>
-            ) : rates.length === 0 ? (
-              <Typography sx={theme => ({ color: theme.palette.text.secondary, py: 2 })}>{labels.noRates}</Typography>
-            ) : (
-              rates.map(row => (
-                <Box
-                  key={row.id}
-                  sx={{
-                    py: 1.5,
-                    borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 0.25,
-                  }}
-                >
-                  <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                    <Typography sx={{ fontWeight: 700 }}>
-                      {row.fromCurrency} → {row.toCurrency}
-                    </Typography>
-                    <Typography sx={{ fontWeight: 700 }}>{row.rate}</Typography>
-                  </Box>
-                  <Typography variant="bodyMd" color="textSecondary">
-                    {row.source ?? "—"}
+        <MobileSectionPanel title={labels.rateTable.title}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+            {canOverride ? (
+              <Button variant="outlined" onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
+                {labels.manualOverride.title}
+              </Button>
+            ) : null}
+          </Box>
+          {ratesLoading && rates.length === 0 ? (
+            <Typography sx={theme => ({ color: theme.palette.text.secondary, py: 2 })}>{labels.noRates}</Typography>
+          ) : rates.length === 0 ? (
+            <Typography sx={theme => ({ color: theme.palette.text.secondary, py: 2 })}>{labels.noRates}</Typography>
+          ) : (
+            rates.map(row => (
+              <Box
+                key={row.id}
+                sx={{
+                  py: 1.5,
+                  borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0.25,
+                }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                  <Typography sx={{ fontWeight: 700 }}>
+                    {row.fromCurrency} → {row.toCurrency}
                   </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    {formatExchangeRateTimestamp(row.effectiveDate)}
-                  </Typography>
+                  <Typography sx={{ fontWeight: 700 }}>{row.rate}</Typography>
                 </Box>
-              ))
-            )}
-          </MobileSectionPanel>
+                <Typography variant="bodyMd" color="textSecondary">
+                  {row.source ?? "—"}
+                </Typography>
+                <Typography variant="caption" color="textSecondary">
+                  {formatExchangeRateTimestamp(row.effectiveDate)}
+                </Typography>
+              </Box>
+            ))
+          )}
+        </MobileSectionPanel>
 
-          <MobileSectionPanel title={labels.history.title}>
-            <ExchangeRateHistorySectionMobile labels={labels} availablePairs={availablePairs} />
-          </MobileSectionPanel>
-        </RequirePermission>
+        <MobileSectionPanel title={labels.history.title}>
+          <ExchangeRateHistorySectionMobile labels={labels} historyViewModel={historyViewModel} />
+        </MobileSectionPanel>
 
         <ManualOverrideDialog
           open={manualOverrideOpen && !billingActionsDisabled}

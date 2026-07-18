@@ -219,7 +219,7 @@ export function ParentProfileDesktopView({
   const renderAccountSection = () => (
     <DesktopSectionPanel title={pt.sections.account}>
       <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-        <Avatar src={avatarUrl} sx={{ width: 80, height: 80 }} />
+        <Avatar src={avatarUrl ?? undefined} sx={{ width: 80, height: 80 }} />
         <Box sx={{ flex: 1 }}>
           <Typography variant="headlineMd">{parentData?.name ?? ""}</Typography>
           <Typography variant="bodyMd" color="text.secondary">
@@ -298,7 +298,6 @@ export function ParentProfileDesktopView({
         <DesktopPageHeader
           title={parentData?.name ?? ""}
           subtitle={parentData?.email ?? ""}
-          avatar={avatarUrl}
           actions={[
             <Button
               key="edit"
@@ -325,13 +324,6 @@ export function ParentProfileDesktopView({
             {renderSocialSection()}
             {renderIdentitySection()}
             {renderBillingSection()}
-            {targetUserId && canView("meeting_configs") && (
-              <DesktopSectionPanel title={pt.sections.meetingConfigs}>
-                <Typography variant="bodyMd" color="text.secondary">
-                  {pt.sections.meetingConfigs}
-                </Typography>
-              </DesktopSectionPanel>
-            )}
             {renderStudentsSection()}
           </Grid>
         </Grid>

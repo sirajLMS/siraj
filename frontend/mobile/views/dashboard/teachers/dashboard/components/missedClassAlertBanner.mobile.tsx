@@ -2,25 +2,19 @@
 
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Alert, Box, Typography } from "@mui/material";
-import type { MissedClassAlert } from "@/frontend/common/stores/teacherDashboardTypes";
-import type { TeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
-
-interface MissedClassAlertBannerMobileProps {
-  readonly alert: MissedClassAlert;
-  readonly labels: TeacherDashboardLabels["alert"];
-  readonly fixed?: boolean;
-}
+import type { MissedClassAlertBannerProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 
 /**
  * Mobile variant of the missed-class alert banner.
  * Mobile renders inline (not fixed) inside the page's edge-to-edge stack —
  * `fixed` is accepted for API parity but typically not used on mobile.
+ *
+ * Plan v5: per specs.md §3 N15 + §4.1 Class B, the byte-identical inline
+ * `MissedClassAlertBannerMobileProps` interface was deleted; both tiers now
+ * import the shared `MissedClassAlertBannerProps` declared once in
+ * `frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps.ts`.
  */
-export function MissedClassAlertBannerMobile({
-  alert,
-  labels,
-  fixed = false,
-}: Readonly<MissedClassAlertBannerMobileProps>) {
+export function MissedClassAlertBannerMobile({ alert, labels, fixed = false }: Readonly<MissedClassAlertBannerProps>) {
   const description = labels.description(alert.classId, alert.scheduledTime);
 
   return (

@@ -6,9 +6,10 @@ import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type {
-  StudentStatusViewModel,
+  StudentStatusPageData,
   UpcomingClassDisplay,
-} from "@/frontend/common/views/dashboard/students/status/useStudentStatusViewModel";
+} from "@/frontend/common/views/dashboard/students/status/types";
+import type { StudentStatusViewModel } from "@/frontend/common/views/dashboard/students/status/useStudentStatusViewModel";
 import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page/DesktopPageContainer";
 import { DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page/DesktopPageHeader";
 import { AdminHoldControlsDesktop } from "@/frontend/desktop/views/dashboard/students/status/components/adminHoldControls.desktop";
@@ -63,7 +64,13 @@ function StudentStatusLeftColumnDesktop({
   methods,
   handleSubmit,
   student,
-}: Readonly<Pick<StudentStatusViewModel, "canEditStatus" | "isUpdating" | "methods" | "handleSubmit" | "student">>) {
+}: Readonly<{
+  canEditStatus: boolean;
+  isUpdating: boolean;
+  methods: StudentStatusViewModel["methods"];
+  handleSubmit: StudentStatusViewModel["handleSubmit"];
+  student: StudentStatusPageData;
+}>) {
   if (!canEditStatus) {
     return <ReadOnlyStatusCardDesktop status={student.status} />;
   }
@@ -114,7 +121,22 @@ function StudentStatusBodyDesktop({
   selectedStatus,
   methods,
   handleSubmit,
-}: Readonly<StudentStatusViewModel>) {
+}: Readonly<
+  Pick<
+    StudentStatusViewModel,
+    | "t"
+    | "embedded"
+    | "isUpdating"
+    | "canEditStatus"
+    | "hasLeftColumn"
+    | "hasRightColumn"
+    | "selectedStatus"
+    | "methods"
+    | "handleSubmit"
+  > & {
+    readonly student: StudentStatusPageData;
+  }
+>) {
   return (
     <>
       {embedded ? null : (
@@ -176,6 +198,10 @@ export function StudentStatusDesktopView({
     return embedded ? restricted : <DesktopPageContainer>{restricted}</DesktopPageContainer>;
   }
 
+  if (!student) {
+    return null;
+  }
+
   const body = (
     <StudentStatusBodyDesktop
       t={t}
@@ -185,9 +211,6 @@ export function StudentStatusDesktopView({
       canEditStatus={canEditStatus}
       hasLeftColumn={hasLeftColumn}
       hasRightColumn={hasRightColumn}
-      hasContent={hasContent}
-      hasTabAccess={hasTabAccess}
-      canViewSchedule={false}
       selectedStatus={selectedStatus}
       methods={methods}
       handleSubmit={handleSubmit}

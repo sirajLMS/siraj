@@ -2,12 +2,10 @@
 
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type {
   TeacherDirectoryMetrics,
   TeacherDirectoryRow,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { TeacherDataGrid } from "@/frontend/desktop/views/dashboard/teachers/home/components/teacherDataGrid.desktop";
@@ -23,6 +21,9 @@ export interface TeachersDesktopViewProps {
   readonly pageSize: number;
   readonly totalCount: number;
   readonly onPageChange: (page: number) => void;
+  readonly canCreateTeacher: boolean;
+  readonly onNavigateToSchedule: (teacherId: string) => void;
+  readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
 
 /**
@@ -40,6 +41,9 @@ export function TeachersDesktopView({
   pageSize,
   totalCount,
   onPageChange,
+  canCreateTeacher,
+  onNavigateToSchedule,
+  onNavigateToProfile,
 }: Readonly<TeachersDesktopViewProps>) {
   const t = useAppTranslation().dashboardTranslations.teachersDirectory;
 
@@ -50,13 +54,13 @@ export function TeachersDesktopView({
         subtitle={t.pageSubtitle}
         actions={
           <>
-            <RequirePermission permissions={[AppPermission.TeachersCreate]}>
+            {canCreateTeacher ? (
               <Link href="/teachers/onboarding" style={{ textDecoration: "none" }}>
                 <DesktopPrimaryPageAction startIcon={<PersonAddOutlined />}>
                   {t.actions.addTeacher}
                 </DesktopPrimaryPageAction>
               </Link>
-            </RequirePermission>
+            ) : null}
             <DesktopPrimaryPageAction startIcon={<EditCalendarOutlined />}>
               {t.actions.updateSchedules}
             </DesktopPrimaryPageAction>
@@ -75,8 +79,12 @@ export function TeachersDesktopView({
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
+          onNavigateToSchedule={onNavigateToSchedule}
+          onNavigateToProfile={onNavigateToProfile}
         />
       </DesktopSectionPanel>
     </DesktopPageContainer>
   );
 }
+
+export default TeachersDesktopView;

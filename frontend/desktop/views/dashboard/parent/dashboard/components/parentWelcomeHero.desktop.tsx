@@ -2,20 +2,14 @@
 
 import { InfoOutlined, SchoolOutlined } from "@mui/icons-material";
 import { alpha, Box, Typography } from "@mui/material";
-
-interface ParentWelcomeHeroDesktopProps {
-  readonly userName: string;
-  readonly welcomeBackLabel: string;
-  readonly pendingMessagesLabel: (count: number) => string;
-  readonly pendingMessagesCount: number;
-}
+import type { ParentWelcomeHeroProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardComponents.types";
 
 export function ParentWelcomeHeroDesktop({
   userName,
   welcomeBackLabel,
   pendingMessagesLabel,
   pendingMessagesCount,
-}: Readonly<ParentWelcomeHeroDesktopProps>) {
+}: Readonly<ParentWelcomeHeroProps>) {
   return (
     <Box
       sx={theme => ({

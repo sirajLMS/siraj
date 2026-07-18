@@ -1,8 +1,8 @@
 "use client";
 
 import { CheckCircleOutlined, CloseOutlined, ErrorOutlined } from "@mui/icons-material";
-import { alpha, Box, IconButton, Snackbar, Typography, useTheme } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, IconButton, Snackbar, Typography } from "@mui/material";
+import { alpha, styled } from "@mui/material/styles";
 import type { CreateRecurringClassViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useCreateRecurringClassViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
@@ -103,7 +103,6 @@ function ErrorSnackbar({
 }
 
 export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurringClassViewModel>) {
-  const theme = useTheme();
   const {
     isSubmitting,
     showSuccess,
@@ -146,9 +145,9 @@ export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurri
 
       <Box sx={{ pb: 12 }}>
         <MobileSectionPanel
-          sx={{
+          sx={theme => ({
             backgroundColor: alpha(theme.palette.surfaceContainer, 0.2),
-          }}
+          })}
         >
           <RecurringClassFormMobile
             register={register}

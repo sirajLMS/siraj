@@ -1,15 +1,12 @@
 "use client";
 
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission, type ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ClassDetailsAdminView } from "@/frontend/common/views/dashboard/classes/details/admin/ClassDetailsAdminView";
 import { ActionFeedbackAlert } from "@/frontend/common/views/dashboard/classes/details/components/ActionFeedbackAlert";
 import { DeleteConfirmationDialog } from "@/frontend/common/views/dashboard/classes/details/components/DeleteConfirmationDialog";
-import type { useClassActionHandlers } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassActionHandlers";
 import { ClassDetailsTeacherView } from "@/frontend/common/views/dashboard/classes/details/teacher/ClassDetailsTeacherView";
 import type {
-  ActionFeedbackState,
   AdminViewProps,
+  ClassDetailsContentProps,
   TeacherViewProps,
 } from "@/frontend/common/views/dashboard/classes/details/types";
 import {
@@ -17,7 +14,6 @@ import {
   useTeacherViewLabels,
 } from "@/frontend/common/views/dashboard/classes/details/useClassDetailsLabels";
 import { ClassDetailsHeaderMobile } from "@/frontend/mobile/views/dashboard/classes/details/components/classDetailsHeader.mobile";
-import type { ClassDetailsLabels } from "@/shared/locale";
 
 const AdminView = (props: AdminViewProps) => {
   const labels = useAdminViewLabels(props.instance.studentTimezone ?? "");
@@ -29,51 +25,26 @@ const TeacherView = (props: TeacherViewProps) => {
   return <ClassDetailsTeacherView {...props} labels={labels} />;
 };
 
-interface SessionActionProps {
-  readonly onStart: () => Promise<void>;
-  readonly onAbsent: () => Promise<void>;
-  readonly onLeave: (reason: string) => Promise<void>;
-  readonly onReset: () => Promise<void>;
-  readonly isStarting: boolean;
-  readonly isMarkingAbsent: boolean;
-  readonly isProcessingLeave: boolean;
-  readonly isResetting: boolean;
-  readonly error: null;
-}
+export function ClassDetailsContentMobile(props: Readonly<ClassDetailsContentProps>) {
+  const {
+    instance,
+    canOverride,
+    isParentView,
+    canViewSessionDetails,
+    isWarningDismissed,
+    onDismissWarning,
+    handlers,
+    sessionActionProps,
+    feedbackState,
+    deleteDialogOpen,
+    onCloseDeleteDialog,
+    onConfirmDelete,
+    t,
+    formattedScheduledDate,
+    formattedStartTime,
+    formattedEndTime,
+  } = props;
 
-export function ClassDetailsContentMobile({
-  instance,
-  canOverride,
-  isParentView,
-  isWarningDismissed,
-  onDismissWarning,
-  handlers,
-  sessionActionProps,
-  feedbackState,
-  deleteDialogOpen,
-  onCloseDeleteDialog,
-  onConfirmDelete,
-  t,
-  formattedScheduledDate,
-  formattedStartTime,
-  formattedEndTime,
-}: {
-  readonly instance: ClassInstanceDetail;
-  readonly canOverride: boolean;
-  readonly isParentView: boolean;
-  readonly isWarningDismissed: boolean;
-  readonly onDismissWarning: () => void;
-  readonly handlers: ReturnType<typeof useClassActionHandlers>;
-  readonly sessionActionProps: SessionActionProps;
-  readonly feedbackState: ActionFeedbackState | null;
-  readonly deleteDialogOpen: boolean;
-  readonly onCloseDeleteDialog: () => void;
-  readonly onConfirmDelete: () => Promise<void>;
-  readonly t: ClassDetailsLabels;
-  readonly formattedScheduledDate: string;
-  readonly formattedStartTime: string;
-  readonly formattedEndTime: string;
-}) {
   return (
     <>
       <ClassDetailsHeaderMobile instance={instance} canOverride={canOverride} />
@@ -93,24 +64,22 @@ export function ClassDetailsContentMobile({
           formattedEndTime={formattedEndTime}
           {...sessionActionProps}
         />
-      ) : (
-        <RequirePermission permissions={AppPermission.SessionViewDetails}>
-          <TeacherView
-            instance={instance}
-            viewMode={isParentView ? "parent" : "teacher"}
-            isWarningDismissed={isWarningDismissed}
-            onDismissWarning={onDismissWarning}
-            onActivate={handlers.handleActivate}
-            onStop={handlers.handleStop}
-            onInfoEdit={handlers.handleInfoEdit}
-            onDelete={() => {}}
-            formattedScheduledDate={formattedScheduledDate}
-            formattedStartTime={formattedStartTime}
-            formattedEndTime={formattedEndTime}
-            {...sessionActionProps}
-          />
-        </RequirePermission>
-      )}
+      ) : canViewSessionDetails ? (
+        <TeacherView
+          instance={instance}
+          viewMode={isParentView ? "parent" : "teacher"}
+          isWarningDismissed={isWarningDismissed}
+          onDismissWarning={onDismissWarning}
+          onActivate={handlers.handleActivate}
+          onStop={handlers.handleStop}
+          onInfoEdit={handlers.handleInfoEdit}
+          onDelete={() => {}}
+          formattedScheduledDate={formattedScheduledDate}
+          formattedStartTime={formattedStartTime}
+          formattedEndTime={formattedEndTime}
+          {...sessionActionProps}
+        />
+      ) : null}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
         onClose={onCloseDeleteDialog}

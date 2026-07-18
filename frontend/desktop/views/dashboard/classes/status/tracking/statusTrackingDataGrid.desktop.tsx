@@ -1,6 +1,6 @@
 "use client";
 
-import { BlockOutlined, VideocamOffOutlined, WarningAmberOutlined } from "@mui/icons-material";
+import { VideocamOffOutlined } from "@mui/icons-material";
 import { Box, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
@@ -10,6 +10,7 @@ import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGri
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
+import { STATUS_LABEL_KEYS } from "@/frontend/common/views/dashboard/classes/status/tracking/constants/statusLabelKeys.constants";
 import { StatusAction } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {
   computeSessionStatus,
@@ -18,25 +19,9 @@ import {
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
+import { getStatusIcon } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
 import { DesktopPersonProfileLink, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-
-const STATUS_LABEL_KEYS: Record<SessionStatus, "regular" | "suspendedPending" | "onLeave" | "pendingVerification"> = {
-  [SessionStatus.REGULAR]: "regular",
-  [SessionStatus.SUSPENDED_PENDING]: "suspendedPending",
-  [SessionStatus.ON_LEAVE]: "onLeave",
-  [SessionStatus.PENDING_VERIFICATION]: "pendingVerification",
-};
-
-function getStatusIcon(sessionStatus: SessionStatus) {
-  if (sessionStatus === SessionStatus.SUSPENDED_PENDING) {
-    return <BlockOutlined sx={{ fontSize: 12 }} />;
-  }
-  if (sessionStatus === SessionStatus.PENDING_VERIFICATION) {
-    return <WarningAmberOutlined sx={{ fontSize: 12 }} />;
-  }
-  return undefined;
-}
 
 export function StatusTrackingDataGridDesktop({
   rows,
@@ -47,6 +32,7 @@ export function StatusTrackingDataGridDesktop({
   loading = false,
 }: StatusTrackingDataGridProps) {
   const locale = useAppLocale();
+  // RENDER OPT JUSTIFICATION: cache `useMemo` to maintain stable column array identity for the MUI AppDataGrid consumer (prevents column re-allocation across renders when labels/locale props are unchanged)
   const columns = useMemo<GridColDef<StatusTrackingRow>[]>(() => {
     const actionLabels = {
       joinSession: labels.joinSession,

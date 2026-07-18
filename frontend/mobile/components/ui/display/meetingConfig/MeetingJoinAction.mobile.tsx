@@ -5,16 +5,12 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import VideocamOffOutlinedIcon from "@mui/icons-material/VideocamOffOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Alert, Avatar, alpha, Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
-import { useJoinContext } from "@/frontend/common/components/ui/display/meetingConfig/hooks";
 import type {
   MeetingJoinActionProps,
   MeetingJoinEmptyRole,
 } from "@/frontend/common/components/ui/display/meetingConfig/types";
-import {
-  type JoinContext,
-  makeHandleJoin,
-  resolveEmptyMessage,
-} from "@/frontend/common/components/ui/display/meetingConfig/utils";
+import { useJoinContext } from "@/frontend/common/hooks/useJoinContext";
+import { type JoinContext, makeHandleJoin, resolveEmptyMessage } from "@/frontend/common/lib/meetingJoinAction";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button/MobileActionButtons";
 import { Link } from "@/shared/i18n/routing";
 

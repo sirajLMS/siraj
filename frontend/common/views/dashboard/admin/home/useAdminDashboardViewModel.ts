@@ -1,4 +1,6 @@
 "use client";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import {
   ADMIN_DASHBOARD_PAGE_SIZE,
   useAdminDashboardHandlers,
@@ -42,6 +44,13 @@ export interface AdminDashboardViewModel {
   readonly loadingLabel?: string;
   readonly emptyLabel?: string;
   readonly pageCount: number;
+  // NEW FOR PLAN v5: lifted permission booleans per specs.md §3 N3 + §6.1.
+  // Tier admin-dashboard views no longer import `RequirePermission` or call
+  // `useUserStore()` — the ViewModel computes the gates ONCE and the tier
+  // view reads them as plain props.
+  readonly canDashboardSearch: boolean;
+  readonly canScheduleFilterAdvanced: boolean;
+  readonly canScheduleViewTimezones: boolean;
 }
 
 function isAdminMetricKey(key: string | null): key is string {
@@ -51,6 +60,15 @@ function isAdminMetricKey(key: string | null): key is string {
 export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardViewModelProps>): AdminDashboardViewModel {
   const t = useAppTranslation().dashboardTranslations.admin;
   const { headers, statusLabels } = useAdminDashboardLabels();
+
+  // NEW FOR PLAN v5: read the user's permissions ONCE in the ViewModel and
+  // expose boolean gates. Tier admin-dashboard files no longer call
+  // `useUserStore()` directly (specs.md §3 N3); they read the booleans and
+  // conditionally render the gated sections.
+  const { hasPermission } = useUserStore();
+  const canDashboardSearch = hasPermission(AppPermission.DashboardSearch);
+  const canScheduleFilterAdvanced = hasPermission(AppPermission.ScheduleFilterAdvanced);
+  const canScheduleViewTimezones = hasPermission(AppPermission.ScheduleViewTimezones);
 
   const { dashboardData, loading, refetch, page, setPage } = useAdminScheduleQuery();
   const teachers = useTeachers();
@@ -100,5 +118,9 @@ export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardVie
     onSubmit: handleSubmit,
     pageSize: ADMIN_DASHBOARD_PAGE_SIZE,
     pageCount,
+    // NEW FOR PLAN v5: lifted permission booleans consumed by the tier views.
+    canDashboardSearch,
+    canScheduleFilterAdvanced,
+    canScheduleViewTimezones,
   };
 }

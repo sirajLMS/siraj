@@ -1,28 +1,17 @@
 "use client";
 
 import { Button, ButtonGroup } from "@mui/material";
-import { alpha, styled, type Theme } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import type { OverrideEditControlsProps } from "@/frontend/common/views/dashboard/permissions/types";
-
-type OverrideColorVariant = "inherit" | "allow" | "deny";
-
-function getVariantColors(variant: OverrideColorVariant, theme: Theme) {
-  if (variant === "inherit") {
-    return { bg: theme.palette.primaryContainer, color: theme.palette.onPrimaryContainer };
-  }
-  if (variant === "allow") {
-    return {
-      bg: theme.palette.successContainer ?? alpha(theme.palette.success.main, 0.15),
-      color: theme.palette.success.main,
-    };
-  }
-  return { bg: theme.palette.errorContainer ?? alpha(theme.palette.error.main, 0.15), color: theme.palette.error.main };
-}
+import {
+  getOverrideVariantColors,
+  type OverrideColorVariant,
+} from "@/frontend/common/views/dashboard/permissions/utils";
 
 const StyledOverrideButton = styled(Button, {
   shouldForwardProp: prop => prop !== "isActive" && prop !== "colorVariant",
 })<{ isActive: boolean; colorVariant: OverrideColorVariant }>(({ theme, isActive, colorVariant }) => {
-  const { bg: activeBg, color: activeColor } = getVariantColors(colorVariant, theme);
+  const { bg: activeBg, color: activeColor } = getOverrideVariantColors(colorVariant, theme);
 
   return {
     fontSize: theme.typography.labelMd.fontSize,

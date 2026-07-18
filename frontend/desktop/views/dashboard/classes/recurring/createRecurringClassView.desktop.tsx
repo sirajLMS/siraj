@@ -1,8 +1,8 @@
 "use client";
 
 import { CloseOutlined } from "@mui/icons-material";
-import { alpha, Box, IconButton, useTheme } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, IconButton } from "@mui/material";
+import { alpha, styled } from "@mui/material/styles";
 import type { CreateRecurringClassViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useCreateRecurringClassViewModel";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
@@ -13,7 +13,6 @@ const StyledHeaderCloseButton = styled(IconButton)(({ theme }) => ({
 }));
 
 export function CreateRecurringClassViewDesktop(viewModel: Readonly<CreateRecurringClassViewModel>) {
-  const theme = useTheme();
   const {
     isSubmitting,
     showSuccess,
@@ -61,9 +60,9 @@ export function CreateRecurringClassViewDesktop(viewModel: Readonly<CreateRecurr
 
       <Box>
         <DesktopSectionPanel
-          sx={{
+          sx={theme => ({
             backgroundColor: alpha(theme.palette.surfaceContainer, 0.2),
-          }}
+          })}
         >
           <RecurringClassFormDesktop
             register={register}

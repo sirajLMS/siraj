@@ -10,14 +10,13 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import {
-  AppPermission,
-  ClassExecutionState,
-  ClassOutcome,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  isTerminalClassInstance,
+  useDeleteConfirmDialog,
+  WEEKLY_SCHEDULE_DAYS,
+  WEEKLY_SCHEDULE_TIMES,
+} from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
 import type {
   ScheduledClass,
   WeeklyScheduleGridProps,
@@ -25,49 +24,20 @@ import type {
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppTranslation } from "@/shared/locale";
 
-function isTerminalClassInstance(executionState?: ClassExecutionState | null, outcome?: ClassOutcome | null): boolean {
-  return (
-    executionState === ClassExecutionState.Completed ||
-    outcome === ClassOutcome.Taken ||
-    outcome === ClassOutcome.Absent ||
-    outcome === ClassOutcome.Leave
-  );
-}
-
-const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
-const TIMES = [
-  "08:00 AM",
-  "09:00 AM",
-  "10:00 AM",
-  "11:00 AM",
-  "12:00 PM",
-  "01:00 PM",
-  "02:00 PM",
-  "03:00 PM",
-  "04:00 PM",
-];
-
 interface SlotItemProps {
   readonly classItem: ScheduledClass;
   readonly onRemove: (id: string) => void;
+  readonly hasScheduleDeleteClass: boolean;
 }
 
-function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
-  const [open, setOpen] = useState(false);
+function SlotItem({ classItem, onRemove, hasScheduleDeleteClass }: Readonly<SlotItemProps>) {
+  const { open, openDialog, closeDialog } = useDeleteConfirmDialog();
   const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
   const tMeeting = useAppTranslation().uiTranslations.meetingConfig.join;
 
-  const handleDeleteClick = () => {
-    setOpen(true);
-  };
-
   const handleConfirm = () => {
-    setOpen(false);
+    closeDialog();
     onRemove(classItem.id ?? "");
-  };
-
-  const handleCancel = () => {
-    setOpen(false);
   };
 
   const canJoin = isJoinableClassInstance(classItem.executionState, classItem.outcome, {
@@ -111,32 +81,30 @@ function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
               {t.grid.sessionEnded}
             </Typography>
           ) : null}
-          {showDelete ? (
-            <RequirePermission permissions={[AppPermission.ScheduleDeleteClass]}>
-              <Box
-                component="span"
-                className="material-symbols-outlined"
-                sx={theme => ({
-                  fontSize: 18,
-                  cursor: "pointer",
-                  "&:hover": { color: theme.palette.error.main },
-                })}
-                onClick={handleDeleteClick}
-              >
-                delete
-              </Box>
-            </RequirePermission>
+          {showDelete && hasScheduleDeleteClass ? (
+            <Box
+              component="span"
+              className="material-symbols-outlined"
+              sx={theme => ({
+                fontSize: 18,
+                cursor: "pointer",
+                "&:hover": { color: theme.palette.error.main },
+              })}
+              onClick={openDialog}
+            >
+              delete
+            </Box>
           ) : null}
         </Box>
       </Box>
 
-      <Dialog open={open} onClose={handleCancel}>
+      <Dialog open={open} onClose={closeDialog}>
         <DialogTitle>{t.dialogs.deleteClassTitle}</DialogTitle>
         <DialogContent>
           <DialogContentText>{t.dialogs.deleteClassMessage}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel}>{t.dialogs.cancel}</Button>
+          <Button onClick={closeDialog}>{t.dialogs.cancel}</Button>
           <Button onClick={handleConfirm} color="error" variant="contained" autoFocus>
             {t.dialogs.confirmYes}
           </Button>
@@ -171,7 +139,7 @@ function GridHeader() {
       >
         <Typography variant="labelUppercase">{t.grid.teacherTime}</Typography>
       </Box>
-      {DAYS.map(day => (
+      {WEEKLY_SCHEDULE_DAYS.map(day => (
         <Box
           key={day}
           sx={theme => ({
@@ -193,9 +161,10 @@ interface GridRowProps {
   readonly time: string;
   readonly classes: readonly ScheduledClass[];
   readonly onRemoveClass: (id: string) => void;
+  readonly hasScheduleDeleteClass: boolean;
 }
 
-function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
+function GridRow({ time, classes, onRemoveClass, hasScheduleDeleteClass }: Readonly<GridRowProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
 
   const getClassesForSlot = (day: string) => {
@@ -226,7 +195,7 @@ function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
         </Typography>
       </Box>
 
-      {DAYS.map(day => {
+      {WEEKLY_SCHEDULE_DAYS.map(day => {
         const slotClasses = getClassesForSlot(day);
         const isLunch = time === "12:00 PM";
 
@@ -257,7 +226,14 @@ function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
                 </Typography>
               </Box>
             ) : (
-              slotClasses.map(c => <SlotItem key={c.id} classItem={c} onRemove={onRemoveClass} />)
+              slotClasses.map(c => (
+                <SlotItem
+                  key={c.id}
+                  classItem={c}
+                  onRemove={onRemoveClass}
+                  hasScheduleDeleteClass={hasScheduleDeleteClass}
+                />
+              ))
             )}
           </Box>
         );
@@ -266,7 +242,11 @@ function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
   );
 }
 
-export default function WeeklyScheduleGrid({ classes, onRemoveClass }: Readonly<WeeklyScheduleGridProps>) {
+export default function WeeklyScheduleGrid({
+  classes,
+  onRemoveClass,
+  hasScheduleDeleteClass,
+}: Readonly<WeeklyScheduleGridProps>) {
   return (
     <Box
       sx={theme => ({
@@ -279,8 +259,14 @@ export default function WeeklyScheduleGrid({ classes, onRemoveClass }: Readonly<
       })}
     >
       <GridHeader />
-      {TIMES.map(time => (
-        <GridRow key={time} time={time} classes={classes} onRemoveClass={onRemoveClass} />
+      {WEEKLY_SCHEDULE_TIMES.map(time => (
+        <GridRow
+          key={time}
+          time={time}
+          classes={classes}
+          onRemoveClass={onRemoveClass}
+          hasScheduleDeleteClass={hasScheduleDeleteClass}
+        />
       ))}
     </Box>
   );

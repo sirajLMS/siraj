@@ -4,11 +4,11 @@ import { EditOutlined } from "@mui/icons-material";
 import { Box, Button, FormHelperText, IconButton, TextField } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import { useRef } from "react";
-import { useLocalizedStringInputState } from "@/frontend/common/components/ui/input/localizedString/hooks";
 import { LocaleAdornmentSwitch } from "@/frontend/common/components/ui/input/localizedString/LocaleAdornmentSwitch";
 import { LocalizedStringDrawer } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringDrawer";
 import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/input/localizedString/types";
-import type { LocalizedStringLabels } from "@/shared/locale";
+import { useLocalizedStringInputState } from "@/frontend/common/hooks/useLocalizedStringInputState";
+import { type LocalizedStringLabels, useAppTranslation } from "@/shared/locale";
 
 /**
  * Inline single-locale editor for a JSONB `LocalizedString` map.
@@ -82,6 +82,7 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
   drawerDismissAction = "save",
   sx,
 }) => {
+  const t = useAppTranslation().uiTranslations.localizedString;
   const containerRef = useRef<HTMLDivElement>(null);
   const {
     isCompact,

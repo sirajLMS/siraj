@@ -4,9 +4,9 @@ import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SupportedMobileWalletFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { resolvePaymentDirectionLabel } from "@/frontend/common/views/dashboard/admin/payment-catalogs/utils/paymentCatalogLabels.utils";
 import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import {
   DesktopCountryDisplay,
@@ -15,6 +15,10 @@ import {
 } from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
 
+// VARIANT JUSTIFICATION: extra field rows + loading — the mobile catalog has
+// no paired data-grid (it renders `PaymentCatalogCardMobile` inside a plain
+// `Box`); the typed row fragment differs from the other two grids. Local
+// controller of the data-grid column shape stays in this tier file.
 export interface MobileWalletCatalogGridDesktopProps extends CatalogGridActionHandlers {
   readonly rows: readonly SupportedMobileWalletFieldsFragment[];
   readonly loading?: boolean;
@@ -28,6 +32,10 @@ export function MobileWalletCatalogGridDesktop({
 }: Readonly<MobileWalletCatalogGridDesktopProps>) {
   const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
   const pc = t;
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — `renderCell` closures
+  // capture the labels; without memo every render produces a new column
+  // array identity and re-mounts virtualized rows. Memo only caches JSX
+  // identity; the column defs themselves are constant for a given label set.
   const columns = useMemo<GridColDef<SupportedMobileWalletFieldsFragment>[]>(
     () => [
       {
@@ -59,13 +67,7 @@ export function MobileWalletCatalogGridDesktop({
         field: "supportedDirections",
         headerName: pc.columns.supportedDirections,
         width: 120,
-        renderCell: ({ row }) => {
-          const dir = row.supportedDirections;
-          if (!dir) return pc.notSet;
-          if (dir === PaymentDirection.Payin) return pc.directions.payin;
-          if (dir === PaymentDirection.Payout) return pc.directions.payout;
-          return pc.directions.both;
-        },
+        renderCell: ({ row }) => resolvePaymentDirectionLabel(row.supportedDirections, pc),
       },
       {
         field: "isActive",
@@ -97,25 +99,7 @@ export function MobileWalletCatalogGridDesktop({
         ),
       },
     ],
-    [
-      onDelete,
-      onEdit,
-      pc.notSet,
-      pc.inactive,
-      pc.edit,
-      pc.directions.payout,
-      pc.directions.payin,
-      pc.directions.both,
-      pc.delete,
-      pc.columns.slug,
-      pc.columns.supportedDirections,
-      pc.columns.name,
-      pc.columns.actions,
-      pc.columns.status,
-      pc.columns.currency,
-      pc.columns.country,
-      pc.active,
-    ]
+    [onDelete, onEdit, pc]
   );
 
   return (

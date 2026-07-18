@@ -2,18 +2,8 @@
 
 import { AnalyticsOutlined, DownloadOutlined } from "@mui/icons-material";
 import { Box, Button, LinearProgress, Paper, Stack, Typography } from "@mui/material";
+import type { AcademicProgressSummaryProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardComponents.types";
 import type { StudentProgressItem } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-
-interface AcademicProgressSummaryMobileProps {
-  readonly studentProgress: readonly StudentProgressItem[];
-  readonly labels: {
-    readonly title: string;
-    readonly subtitle: string;
-    readonly completion: (percent: number) => string;
-    readonly downloadReport: string;
-  };
-  readonly onDownloadReport: () => void;
-}
 
 function ProgressRowMobile({
   student,
@@ -53,7 +43,7 @@ export function AcademicProgressSummaryMobile({
   studentProgress,
   labels,
   onDownloadReport,
-}: Readonly<AcademicProgressSummaryMobileProps>) {
+}: Readonly<AcademicProgressSummaryProps>) {
   return (
     <Paper
       elevation={0}

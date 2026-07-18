@@ -4,29 +4,11 @@ import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { PerformanceLedgerCardLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
-import type { LedgerStatus, ReportLedgerRow } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
-import { formatReportPaidAmounts } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
-import { useAppTranslation } from "@/shared/locale";
+import type { PerformanceLedgerCardProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
+import { getLedgerBadgeStatus } from "@/frontend/common/views/dashboard/reports/utils/performanceLedgerStatus.utils";
 
 export type PerformanceLedgerCardDesktopLabels = PerformanceLedgerCardLabels;
-
-interface PerformanceLedgerCardDesktopProps {
-  readonly row: ReportLedgerRow;
-  readonly labels: PerformanceLedgerCardDesktopLabels;
-  readonly onClick?: (row: ReportLedgerRow) => void;
-}
-
-function getStatusBadgeStatus(status: LedgerStatus): string {
-  if (status === "active") {
-    return "regular";
-  }
-  return "on_leave";
-}
 
 function StatCell({
   label,
@@ -56,27 +38,13 @@ function StatCell({
   );
 }
 
-export function PerformanceLedgerCardDesktop({ row, labels, onClick }: Readonly<PerformanceLedgerCardDesktopProps>) {
-  const locale = useAppLocale();
-  const t = useAppTranslation().dashboardTranslations.reports;
-  const tErrors = useAppTranslation().errorsTranslations;
-  const { hasPermission } = useUserStore();
-  const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
-
-  const paidLabel = formatReportPaidAmounts(
-    row.paidAmounts,
-    locale,
-    buildFxDisplayMessages(
-      {
-        convertedAmount: t.convertedAmount,
-      },
-      tErrors,
-      {
-        convertedTotalApprox: t.convertedTotalApprox,
-      }
-    )
-  );
-
+export function PerformanceLedgerCardDesktop({
+  row,
+  labels,
+  showFinancials,
+  paidLabel,
+  onClick,
+}: Readonly<PerformanceLedgerCardProps>) {
   return (
     <BaseCard
       onClick={
@@ -130,7 +98,7 @@ export function PerformanceLedgerCardDesktop({ row, labels, onClick }: Readonly<
         </Box>
         <StatusBadge
           category="sessionTracking"
-          status={getStatusBadgeStatus(row.status)}
+          status={getLedgerBadgeStatus(row.status)}
           label={labels.statusLabels[row.status]}
           size="small"
         />

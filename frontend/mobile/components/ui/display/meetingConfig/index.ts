@@ -2,7 +2,7 @@ export type {
   MeetingConfigDisplayData as MobileMeetingConfigDisplayData,
   MeetingConfigDisplayProps as MobileMeetingConfigDisplayProps,
 } from "@/frontend/common/components/ui/display/meetingConfig/types";
-export { effectiveMeetingToDisplayData } from "@/frontend/common/components/ui/display/meetingConfig/utils";
+export { effectiveMeetingToDisplayData } from "@/frontend/common/lib/effectiveMeetingToDisplayData";
 export { MobileMeetingConfigDisplay } from "@/frontend/mobile/components/ui/display/meetingConfig/MeetingConfigDisplay.mobile";
 export {
   MobileMeetingConfigList,

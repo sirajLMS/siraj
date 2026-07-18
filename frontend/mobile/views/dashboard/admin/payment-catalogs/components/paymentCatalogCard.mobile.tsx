@@ -7,26 +7,21 @@ import type {
   CatalogGridActionHandlers,
   PaymentCatalogRow,
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
+import { resolvePaymentDirectionLabel } from "@/frontend/common/views/dashboard/admin/payment-catalogs/utils/paymentCatalogLabels.utils";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
-function actionLabelForDirection(
-  dir: string | null | undefined,
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["paymentCatalogs"]
-): string {
-  if (!dir) return t.notSet;
-  if (dir === "PAYIN") return t.directions.payin;
-  if (dir === "PAYOUT") return t.directions.payout;
-  return t.directions.both;
-}
-
+// VARIANT JUSTIFICATION: extra field none — desktop has no paired data-grid
+// twin for this card; the desktop catalog uses typed `*CatalogGridDesktop`
+// components instead. The `MobileProps` suffix is kept for symmetry with the
+// other tier variants and the contract is local to the mobile card list.
 export interface PaymentCatalogCardMobileProps extends CatalogGridActionHandlers {
   readonly row: PaymentCatalogRow;
 }
 
 export function PaymentCatalogCardMobile({ row, onEdit, onDelete }: Readonly<PaymentCatalogCardMobileProps>) {
   const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
-  const dirLabel = actionLabelForDirection(row.supportedDirections, t);
+  const dirLabel = resolvePaymentDirectionLabel(row.supportedDirections, t);
 
   return (
     <Box

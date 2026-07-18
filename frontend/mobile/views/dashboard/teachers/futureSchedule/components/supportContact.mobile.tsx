@@ -1,33 +1,27 @@
 "use client";
 
-import { useMutation } from "@apollo/client/react";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { useNotifications } from "@toolpad/core/useNotifications";
-import { logTeacherSupportRequestMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { SupportContactProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { MobilePhoneDisplay } from "@/frontend/mobile/components/ui/display/phoneDisplay";
-import { useAppTranslation } from "@/shared/locale";
 
-export function SupportContactMobile({ contact }: Readonly<SupportContactProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
-  const notifications = useNotifications();
-  const [logSupportRequest] = useMutation(logTeacherSupportRequestMutationDocument);
-
-  const handleContactAdmin = async () => {
-    try {
-      await logSupportRequest({
-        variables: {
-          input: { reason: t.supportRequestReason },
-        },
-      });
-      notifications.show(t.notifications.supportRequestSent, { severity: "success" });
-    } catch {
-      notifications.show(t.errors.supportRequestFailed, { severity: "error" });
-    }
-  };
-
+/**
+ * Mobile variant of the support-contact card.
+ *
+ * Plan v5: per specs.md §3 N1 + N17 + §6.2, the tier-side
+ * `useMutation(logTeacherSupportRequestMutationDocument)` +
+ * `useNotifications()` side-effects were lifted into
+ * `useFutureScheduleViewModel` (which now exposes `onSupportContact` + the
+ * support-contact labels). The tier is purely presentational and consumes
+ * the bound callback + labels from props.
+ */
+export function SupportContactMobile({
+  contact,
+  onContactAdmin,
+  supportContactLabel,
+  contactAdminLabel,
+}: Readonly<SupportContactProps>) {
   return (
     <MobileBaseCard
       sx={theme => ({
@@ -38,7 +32,7 @@ export function SupportContactMobile({ contact }: Readonly<SupportContactProps>)
       })}
     >
       <Typography variant="labelMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main, mb: 1.5 })}>
-        {t.supportContact}
+        {supportContactLabel}
       </Typography>
 
       {contact && (
@@ -69,7 +63,7 @@ export function SupportContactMobile({ contact }: Readonly<SupportContactProps>)
       <Button
         fullWidth
         variant="outlined"
-        onClick={handleContactAdmin}
+        onClick={onContactAdmin}
         sx={theme => ({
           mt: 2,
           borderRadius: 1.5,
@@ -85,7 +79,7 @@ export function SupportContactMobile({ contact }: Readonly<SupportContactProps>)
           },
         })}
       >
-        {t.contactAdmin}
+        {contactAdminLabel}
       </Button>
     </MobileBaseCard>
   );

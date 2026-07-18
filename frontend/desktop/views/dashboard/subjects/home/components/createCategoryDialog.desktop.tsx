@@ -1,68 +1,41 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
-import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import type { ClassCategoryCreateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   ActiveToggleField,
-  type CategoryFormValues,
-  categoryFormSchema,
   EntityFormDialogActions,
-  emptyCategoryFormValues,
   LabeledTextField,
-  slugify,
 } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__";
+import type { CategoryFormValues } from "@/frontend/common/views/dashboard/subjects/home/schemas/category.schema";
 import type { CreateCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useAppTranslation } from "@/shared/locale";
 
 const FORM_ID = "create-category-form-desktop";
 
 /**
  * CreateCategoryDialogDesktop — `sm`-width centered create-category dialog.
  *
- * Desktop dialogs render inline at a fixed `max-width: sm` and the form fields
- * sit at desktop default spacing.
+ * NEW FOR PLAN v5: form state lifted to ViewModel. Pure prop passdown here.
  */
 export function CreateCategoryDialogDesktop({
   open,
   onClose,
   onSubmit,
   isLoading,
+  form,
+  labels,
 }: Readonly<CreateCategoryDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
-
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<CategoryFormValues>({
-    resolver: zodResolver(categoryFormSchema),
-    defaultValues: emptyCategoryFormValues,
-  });
-
-  const nameValue = useWatch({ control, name: "name" });
-
-  useEffect(() => {
-    if (open) {
-      reset(emptyCategoryFormValues);
-    }
-  }, [open, reset]);
-
-  useEffect(() => {
-    setValue("slug", slugify(nameValue));
-  }, [nameValue, setValue]);
+  const { control, errors, handleSubmit } = form;
 
   const handleFormSubmit = (data: CategoryFormValues) => {
-    onSubmit({
+    const input: ClassCategoryCreateInput = {
       name: data.name,
       slug: data.slug,
       description: data.description || null,
       isActive: data.isActive ?? null,
       sortOrder: null,
-    });
+    };
+    onSubmit(input);
   };
 
   return (
@@ -73,7 +46,7 @@ export function CreateCategoryDialogDesktop({
       maxWidth="sm"
       aria-labelledby="create-category-dialog-title-desktop"
     >
-      <DialogTitle id="create-category-dialog-title-desktop">{t.createCategory}</DialogTitle>
+      <DialogTitle id="create-category-dialog-title-desktop">{labels.createCategory}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Box
           component="form"
@@ -84,34 +57,34 @@ export function CreateCategoryDialogDesktop({
           <LabeledTextField
             name="name"
             control={control}
-            label={t.nameLabel}
+            label={labels.nameLabel}
             required
-            error={errors.name ? t.nameRequired : undefined}
+            error={errors.name ? labels.nameRequired : undefined}
             disabled={isLoading}
           />
           <LabeledTextField
             name="slug"
             control={control}
-            label={t.slugLabel}
+            label={labels.slugLabel}
             required
-            error={errors.slug ? t.slugRequired : undefined}
+            error={errors.slug ? labels.slugRequired : undefined}
             disabled={isLoading}
           />
           <LabeledTextField
             name="description"
             control={control}
-            label={t.descriptionLabel}
+            label={labels.descriptionLabel}
             disabled={isLoading}
             multiline
             rows={3}
           />
-          <ActiveToggleField name="isActive" control={control} label={t.activeLabel} disabled={isLoading} />
+          <ActiveToggleField name="isActive" control={control} label={labels.activeLabel} disabled={isLoading} />
         </Box>
       </DialogContent>
       <EntityFormDialogActions
         formId={FORM_ID}
-        cancelLabel={t.cancel}
-        saveLabel={t.createCategory}
+        cancelLabel={labels.cancel}
+        saveLabel={labels.createCategory}
         onClose={onClose}
         isLoading={isLoading}
       />

@@ -1,5 +1,44 @@
 import type { GroupClassAudit } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
+export interface MeetingInfoLabels {
+  readonly title: string;
+  readonly joinMeeting: string;
+  readonly capacityBadge: string;
+  readonly capacity: string;
+  readonly meetingIdLabel: string;
+  readonly online: string;
+  readonly meetingIdNA: string;
+}
+
+export interface CommunicationLogLabels {
+  readonly title: string;
+  readonly resendNotifications: string;
+}
+
+export interface AdminNoteLabels {
+  readonly title: string;
+  readonly titleMobile: string;
+  readonly lastUpdated: string;
+  readonly update: string;
+  readonly edit: string;
+}
+
+export interface RegisteredStudentsLabels {
+  readonly title: string;
+  readonly exportList: string;
+  readonly studentName: string;
+  readonly idNumber: string;
+  readonly attendanceStatus: string;
+  readonly actions: string;
+  readonly student: string;
+  readonly status: string;
+  readonly viewAll: string;
+  readonly pending: string;
+  readonly present: string;
+  readonly absent: string;
+  readonly noEntries: string;
+}
+
 export interface ClassAuditLabels {
   readonly breadcrumbs: {
     readonly dashboard: string;
@@ -19,41 +58,10 @@ export interface ClassAuditLabels {
   readonly auditTrailTitle: string;
   readonly statusRescheduled: string;
   readonly classDetails: string;
-  readonly registeredStudents: {
-    readonly title: string;
-    readonly exportList: string;
-    readonly studentName: string;
-    readonly idNumber: string;
-    readonly attendanceStatus: string;
-    readonly actions: string;
-    readonly student: string;
-    readonly status: string;
-    readonly viewAll: string;
-    readonly pending: string;
-    readonly present: string;
-    readonly absent: string;
-    readonly noEntries: string;
-  };
-  readonly meetingInfo: {
-    readonly title: string;
-    readonly joinMeeting: string;
-    readonly capacityBadge: string;
-    readonly capacity: string;
-    readonly meetingIdLabel: string;
-    readonly online: string;
-    readonly meetingIdNA: string;
-  };
-  readonly communicationLog: {
-    readonly title: string;
-    readonly resendNotifications: string;
-  };
-  readonly adminNote: {
-    readonly title: string;
-    readonly titleMobile: string;
-    readonly lastUpdated: string;
-    readonly update: string;
-    readonly edit: string;
-  };
+  readonly registeredStudents: RegisteredStudentsLabels;
+  readonly meetingInfo: MeetingInfoLabels;
+  readonly communicationLog: CommunicationLogLabels;
+  readonly adminNote: AdminNoteLabels;
 }
 
 export interface ClassAuditViewProps {

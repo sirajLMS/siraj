@@ -86,6 +86,7 @@ export function PermissionCatalogDataGridDesktop({
 }: Readonly<PermissionCatalogDataGridDesktopProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
   const columns = useMemo<GridColDef<Permission>[]>(() => {
     return [
       {

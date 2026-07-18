@@ -36,6 +36,7 @@ type FeedbackState = { readonly message: string; readonly severity: "success" | 
 type CommonViewModelFields = {
   readonly canOverride: boolean;
   readonly isParentView: boolean;
+  readonly canViewSessionDetails: boolean;
   readonly isWarningDismissed: boolean;
   readonly setIsWarningDismissed: (value: boolean) => void;
   readonly handlers: Handlers;
@@ -69,6 +70,7 @@ type EarlyReturnSharedFields = {
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
   readonly t: Translations;
+  readonly canViewSessionDetails: boolean;
 };
 
 function buildEarlyReturnViewModel(status: EarlyReturnStatus, shared: EarlyReturnSharedFields): ClassDetailsViewModel {
@@ -77,6 +79,7 @@ function buildEarlyReturnViewModel(status: EarlyReturnStatus, shared: EarlyRetur
     instance: null,
     canOverride: false,
     isParentView: false,
+    canViewSessionDetails: shared.canViewSessionDetails,
     isWarningDismissed: shared.isWarningDismissed,
     setIsWarningDismissed: shared.setIsWarningDismissed,
     handlers: shared.handlers,
@@ -120,6 +123,7 @@ type ReadyInputs = {
   readonly instance: ClassInstanceDetail;
   readonly canOverride: boolean;
   readonly isParentView: boolean;
+  readonly canViewSessionDetails: boolean;
   readonly isWarningDismissed: boolean;
   readonly setIsWarningDismissed: (value: boolean) => void;
   readonly handlers: Handlers;
@@ -139,6 +143,7 @@ function buildReadyViewModel(inputs: ReadyInputs): ClassDetailsViewModel {
     instance: inputs.instance,
     canOverride: inputs.canOverride,
     isParentView: inputs.isParentView,
+    canViewSessionDetails: inputs.canViewSessionDetails,
     isWarningDismissed: inputs.isWarningDismissed,
     setIsWarningDismissed: inputs.setIsWarningDismissed,
     handlers: inputs.handlers,
@@ -158,6 +163,7 @@ export interface ClassDetailsViewModel {
   readonly instance: ClassInstanceDetail | null;
   readonly canOverride: boolean;
   readonly isParentView: boolean;
+  readonly canViewSessionDetails: boolean;
   readonly isWarningDismissed: boolean;
   readonly setIsWarningDismissed: (value: boolean) => void;
   readonly handlers: ReturnType<typeof useClassActionHandlers>;
@@ -211,7 +217,7 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
   });
 
   const handlers = useClassActionHandlers(id, mutations, router, setFeedbackState, t);
-  const { canOverride, isParentView } = useClassDetailsPermissions(hasPermission);
+  const { canOverride, isParentView, canViewSessionDetails } = useClassDetailsPermissions(hasPermission);
 
   const earlyReturnShared = {
     isWarningDismissed,
@@ -221,6 +227,7 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
     deleteDialogOpen,
     setDeleteDialogOpen,
     t,
+    canViewSessionDetails,
   };
 
   if (loading) {
@@ -244,6 +251,7 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
     instance,
     canOverride,
     isParentView,
+    canViewSessionDetails,
     isWarningDismissed,
     setIsWarningDismissed,
     handlers,

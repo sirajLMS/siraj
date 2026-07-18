@@ -6,7 +6,6 @@ import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboard
 import { logger } from "@/frontend/common/utils/logger";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type { ParentOnboardingViewProps } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
-import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface ParentOnboardingViewModel {
@@ -35,7 +34,6 @@ export function useParentOnboardingViewModel(): ParentOnboardingViewModel {
   const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateParentOnboarding();
   const createdParent = useParentOnboardingStore(state => state.result);
   const [showSuccess, setShowSuccess] = useState(false);
-  const _router = useRouter();
 
   const meetingSetupHref = createdParent
     ? `${profileHrefForParent({ userId: createdParent.userId, parentId: createdParent.parentId })}?tab=meeting`
@@ -55,10 +53,10 @@ export function useParentOnboardingViewModel(): ParentOnboardingViewModel {
   };
 
   return {
-    register: undefined as any,
-    control: undefined as any,
-    errors: undefined as any,
-    handleSubmit: undefined as any,
+    register: undefined as unknown as ParentOnboardingViewProps["register"],
+    control: undefined as unknown as ParentOnboardingViewProps["control"],
+    errors: undefined as unknown as ParentOnboardingViewProps["errors"],
+    handleSubmit: undefined as unknown as ParentOnboardingViewProps["handleSubmit"],
     isSubmitting: loading,
     onSubmit,
     meetingConfigWarning,

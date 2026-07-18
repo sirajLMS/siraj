@@ -2,21 +2,18 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Link, Paper, Typography } from "@mui/material";
-import type { TeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
-
-interface ActivationPolicyPanelMobileProps {
-  readonly labels: TeacherDashboardLabels["policy"];
-  readonly compact?: boolean;
-  readonly onDownloadHandbook: () => void;
-  readonly onContactCoordinator: () => void;
-  readonly actionLabels: TeacherDashboardLabels["actions"];
-}
+import type { ActivationPolicyPanelProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 
 /**
  * Mobile variant of the activation policy panel.
  * Uses the compact layout by default (mobile shows a shorter description and
  * no inline action links — handlers are exposed for callers that want them
  * via the FAB/footer).
+ *
+ * Plan v5: per specs.md §3 N15 + §4.1 Class B, the byte-identical inline
+ * `ActivationPolicyPanelMobileProps` interface was deleted; both tiers now
+ * import the shared `ActivationPolicyPanelProps` declared once in
+ * `frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps.ts`.
  */
 export function ActivationPolicyPanelMobile({
   labels,
@@ -24,7 +21,7 @@ export function ActivationPolicyPanelMobile({
   onDownloadHandbook,
   onContactCoordinator,
   actionLabels,
-}: Readonly<ActivationPolicyPanelMobileProps>) {
+}: Readonly<ActivationPolicyPanelProps>) {
   const description = compact ? labels.descriptionMobile : labels.description;
 
   return (

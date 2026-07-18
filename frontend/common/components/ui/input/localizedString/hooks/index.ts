@@ -1,7 +1,8 @@
-// NEW FOR PLAN v5: lifted state hook out of tier localizedStringInput renderers; tier files now import this common hook.
-
+// NEW FOR PLAN v5 (barrel migration): re-export from §2.4-allowlisted path. The old
+//   useLocalizedStringInputState.ts has been removed; canonical hook now lives at
+//   frontend/common/hooks/useLocalizedStringInputState.ts.
 export type {
   LocalizedStringInputState,
   LocalizedStringInputStateProps,
-} from "./useLocalizedStringInputState";
-export { useLocalizedStringInputState } from "./useLocalizedStringInputState";
+} from "@/frontend/common/hooks/useLocalizedStringInputState";
+export { useLocalizedStringInputState } from "@/frontend/common/hooks/useLocalizedStringInputState";

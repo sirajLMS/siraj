@@ -3,14 +3,9 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
+import type { CountryOptionRowProps } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.types";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
-
-export type CountryOptionRowProps = {
-  readonly country: { readonly code: string; readonly emoji: string; readonly phone: string };
-  readonly locale: string;
-  readonly showPhonePrefix?: boolean;
-};
 
 export function CountryOptionRowDesktop({
   country,

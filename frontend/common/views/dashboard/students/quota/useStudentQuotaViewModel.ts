@@ -13,7 +13,6 @@ import {
 import { logger } from "@/frontend/common/utils/logger";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import type { StudentProfileQueryData } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext.types";
-import { canViewStudentProfileTab } from "@/frontend/common/views/dashboard/students/profile/studentProfileTabs";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import {
   createStudentQuotaSchema,
@@ -105,7 +104,6 @@ export function useStudentQuotaViewModel(props: Readonly<UseStudentQuotaViewMode
   const useUnifiedProfile = profileContext != null;
   const { canView, canEdit } = useStudentFieldAccess();
   const canEditQuota = canEdit("student_quota_edit");
-  const _hasTabAccess = canViewStudentProfileTab("quota", canView);
 
   const [isSaved, setIsSaved] = useState(false);
 

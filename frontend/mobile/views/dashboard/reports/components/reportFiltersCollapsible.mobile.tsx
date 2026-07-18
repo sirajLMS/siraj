@@ -2,9 +2,9 @@
 
 import { ExpandMoreOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Collapse, IconButton, Typography } from "@mui/material";
-import { useState } from "react";
 import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { ReportTeacherOption, ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import type { ReportFiltersCollapsibleProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import {
   ReportFiltersFormMobile,
   type ReportFiltersFormMobileLabels,
@@ -12,22 +12,11 @@ import {
 
 export type ReportFiltersCollapsibleMobileLabels = ReportFiltersFormLabels;
 
-interface ReportFiltersCollapsibleMobileProps {
-  readonly title: string;
-  readonly fromDate: string;
-  readonly toDate: string;
-  readonly teacherId: string;
-  readonly reportType: ReportType;
-  readonly teachers: readonly ReportTeacherOption[];
-  readonly labels: ReportFiltersFormMobileLabels;
-  readonly canGenerate: boolean;
-  readonly onFromDateChange: (date: string) => void;
-  readonly onToDateChange: (date: string) => void;
-  readonly onTeacherChange: (teacherId: string) => void;
-  readonly onReportTypeChange: (reportType: ReportType) => void;
-  readonly onSubmit: () => void;
-}
-
+// VARIANT JUSTIFICATION: extra fields title, expanded, onToggleExpanded —
+// the desktop twin of this component is a permanently-expanded panel that
+// has no collapse chrome and hence no `title`/`expanded`/`onToggleExpanded`
+// fields. The shared `ReportFiltersCollapsibleProps` extends
+// `ReportFiltersFormProps` with only these three collapse-specific extras.
 export function ReportFiltersCollapsibleMobile({
   title,
   fromDate,
@@ -37,14 +26,14 @@ export function ReportFiltersCollapsibleMobile({
   teachers,
   labels,
   canGenerate,
+  expanded,
+  onToggleExpanded,
   onFromDateChange,
   onToDateChange,
   onTeacherChange,
   onReportTypeChange,
   onSubmit,
-}: Readonly<ReportFiltersCollapsibleMobileProps>) {
-  const [expanded, setExpanded] = useState(false);
-
+}: Readonly<ReportFiltersCollapsibleProps>) {
   return (
     <Box
       sx={theme => ({
@@ -58,9 +47,7 @@ export function ReportFiltersCollapsibleMobile({
       <Box
         component="button"
         type="button"
-        onClick={() => {
-          setExpanded(current => !current);
-        }}
+        onClick={onToggleExpanded}
         sx={{
           width: "100%",
           display: "flex",
@@ -117,3 +104,7 @@ export function ReportFiltersCollapsibleMobile({
     </Box>
   );
 }
+
+export type _CollapsibleLabelsUnused = ReportFiltersFormMobileLabels;
+export type _CollapsibleReportTypeUnused = ReportType;
+export type _CollapsibleTeacherOptionUnused = ReportTeacherOption;

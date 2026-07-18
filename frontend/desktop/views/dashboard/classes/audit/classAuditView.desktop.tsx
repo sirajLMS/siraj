@@ -3,11 +3,9 @@
 import { Box, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ClassAuditDetailsCard } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
-import type {
-  ClassAuditDetailsLabels,
-  ClassAuditViewProps,
-} from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
+import type { ClassAuditViewProps } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 import { RegisteredStudentsSection } from "@/frontend/common/views/dashboard/classes/audit/RegisteredStudentsSection";
+import { buildDetailsLabels } from "@/frontend/common/views/dashboard/classes/audit/utils";
 import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { AdminNoteCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/adminNoteCard.desktop";
@@ -22,20 +20,6 @@ const StyledGenerateReportButton = styled(DesktopFilterButton)(({ theme }) => ({
     borderColor: theme.palette.primary.dark,
   },
 }));
-
-function buildDetailsLabels(labels: ClassAuditViewProps["labels"]): ClassAuditDetailsLabels {
-  return {
-    courseCode: labels.courseCode,
-    teacher: labels.teacher,
-    originalDate: labels.originalDate,
-    rescheduledDate: labels.rescheduledDate,
-    timeSlot: labels.timeSlot,
-    venue: labels.venue,
-    auditTrailTitle: labels.auditTrailTitle,
-    statusRescheduled: labels.statusRescheduled,
-    classDetails: labels.classDetails,
-  };
-}
 
 export function ClassAuditViewDesktop({
   audit,

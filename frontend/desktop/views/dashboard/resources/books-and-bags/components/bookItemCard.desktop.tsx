@@ -1,12 +1,8 @@
 "use client";
 
-import { useMutation } from "@apollo/client/react";
 import { DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
-import { useNotifications } from "@toolpad/core/useNotifications";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission, AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { deleteBookMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   BookItemCardProps,
   BooksAndBagsLabels,
@@ -23,24 +19,13 @@ const statusPaletteKey: Record<AvailabilityStatus, "active" | "blocked"> = {
 };
 
 export function BookItemCardDesktop({ book, labels, onDelete }: Readonly<BookItemCardProps>) {
-  const [deleteBook] = useMutation(deleteBookMutationDocument);
-  const notifications = useNotifications();
-
+  // NEW FOR PLAN v5: the inline `useMutation(deleteBookMutationDocument)` +
+  // `useNotifications()` + `<RequirePermission permissions={ResourcesDelete}>`
+  // previously in this file was lifted to the page-level ViewModel
+  // (`useBooksAndBagsViewModel`) per specs.md §3 N1 + N17 + §6.2; deletion
+  // here is now a plain prop callback owned by the ViewModel.
   const handleDelete = () => {
-    deleteBook({ variables: { id: book.id } })
-      .then(() => {
-        onDelete(book.id);
-        notifications.show(labels.deleteSuccess, {
-          severity: "success",
-          autoHideDuration: 3000,
-        });
-      })
-      .catch(() => {
-        notifications.show(labels.deleteFailed, {
-          severity: "error",
-          autoHideDuration: 5000,
-        });
-      });
+    void onDelete(book.id);
   };
 
   const paletteKey = statusPaletteKey[book.availabilityStatus];
@@ -67,15 +52,9 @@ export function BookItemCardDesktop({ book, labels, onDelete }: Readonly<BookIte
         <Typography variant="bodyLg" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
           {book.name}
         </Typography>
-        <RequirePermission permissions={AppPermission.ResourcesDelete}>
-          <IconButton
-            aria-label="Delete book"
-            onClick={handleDelete}
-            sx={theme => ({ color: theme.palette.error.main })}
-          >
-            <DeleteOutlined />
-          </IconButton>
-        </RequirePermission>
+        <IconButton aria-label="Delete book" onClick={handleDelete} sx={theme => ({ color: theme.palette.error.main })}>
+          <DeleteOutlined />
+        </IconButton>
       </Box>
       <Box
         component="span"

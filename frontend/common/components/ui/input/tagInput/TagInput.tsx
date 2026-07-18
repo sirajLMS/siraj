@@ -3,10 +3,7 @@
 import { Box, Chip, InputBase, Paper, styled, Typography, useTheme } from "@mui/material";
 import type React from "react";
 import { type KeyboardEvent, type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
-import {
-  useTagInputDeletion,
-  useTagInputEditing,
-} from "@/frontend/common/components/ui/input/tagInput/useTagInputEditing";
+import { useTagInputDeletion, useTagInputEditing } from "@/frontend/common/hooks/useTagInputEditing";
 import { useAppTranslation } from "@/shared/locale";
 
 export type TagInputProps = {

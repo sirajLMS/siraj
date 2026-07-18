@@ -83,3 +83,6 @@ export function useManageOverridesState({
     setSearchQuery,
   };
 }
+
+// NEW FOR PLAN v5: inferred return-type alias for ViewModel consumption
+export type ManageOverridesState = ReturnType<typeof useManageOverridesState>;

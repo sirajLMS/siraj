@@ -47,6 +47,7 @@ export function StudentHistoryDesktopView({
   labels,
   loading,
   onBackToDashboard,
+  onOpenMeetingUrl,
 }: Readonly<StudentHistoryViewModel>) {
   if (loading && metrics.totalClasses === 0) {
     return (
@@ -136,7 +137,7 @@ export function StudentHistoryDesktopView({
                               size="small"
                               variant="outlined"
                               startIcon={<VisibilityOutlined />}
-                              onClick={() => window.open(row.meetingJoinUrl ?? "", "_blank", "noopener,noreferrer")}
+                              onClick={() => onOpenMeetingUrl(row.meetingJoinUrl)}
                             >
                               {labels.viewReport}
                             </Button>

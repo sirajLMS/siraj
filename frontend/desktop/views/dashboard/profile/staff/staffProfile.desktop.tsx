@@ -14,25 +14,23 @@ import { useAppTranslation } from "@/shared/locale";
 export function StaffProfileDesktopView({
   scope,
   mode,
-  targetUserId,
-  activeTab,
   isAdminScope,
   loading,
   error,
-  profile,
   isSaving,
   onSubmitOwn,
   onSubmitAdmin,
   staffData,
   avatarUrl,
   displayCurrency,
-  meetingTabHref,
+  permissionGroups,
+  permissionOverrides,
+  activeTab,
   canView,
 }: Readonly<StaffProfileViewModel>) {
   const t = useAppTranslation().profileTranslations.base;
   const st = useAppTranslation().profileTranslations.staff;
 
-  // Handle non-profile tabs
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
   }
@@ -41,10 +39,7 @@ export function StaffProfileDesktopView({
     return (
       <DesktopPageContainer>
         <DesktopPageHeader title={st.sections.permissions} />
-        <PermissionsSection
-          permissionGroups={profile?.staffPermissionGroups ?? []}
-          permissionOverrides={profile?.staffPermissionOverrides ?? []}
-        />
+        <PermissionsSection permissionGroups={permissionGroups} permissionOverrides={permissionOverrides} />
       </DesktopPageContainer>
     );
   }
@@ -54,10 +49,10 @@ export function StaffProfileDesktopView({
   }
 
   // Profile tab content
-  if (loading && !profile) {
+  if (loading && !staffData) {
     return (
       <DesktopPageContainer>
-        <DesktopPageHeader title={st.pageTitle} subtitle={st.pageSubtitle} />
+        <DesktopPageHeader title={st.subtitle} subtitle={st.ownSubtitle} />
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <div className="loading-spinner" />
         </Box>
@@ -65,10 +60,10 @@ export function StaffProfileDesktopView({
     );
   }
 
-  if (error && !profile) {
+  if (error && !staffData) {
     return (
       <DesktopPageContainer>
-        <DesktopPageHeader title={st.pageTitle} subtitle={st.pageSubtitle} />
+        <DesktopPageHeader title={st.subtitle} subtitle={st.ownSubtitle} />
         <Alert severity="error" sx={{ mx: 3, my: 2 }} onClose={() => {}}>
           {t.errors.failedToLoad}
           <Button color="inherit" size="small" onClick={() => {}}>
@@ -79,22 +74,20 @@ export function StaffProfileDesktopView({
     );
   }
 
-  if (!profile?.staffProfile) {
+  if (!staffData) {
     const canViewIdentity = canView("core_identity");
     if (!canViewIdentity) {
       return <ProfileRestrictedSection />;
     }
     return (
       <DesktopPageContainer>
-        <DesktopPageHeader title={st.pageTitle} subtitle={st.pageSubtitle} />
+        <DesktopPageHeader title={st.subtitle} subtitle={st.ownSubtitle} />
         <Alert severity="warning" sx={{ mx: 3, my: 2 }}>
           {t.errors.notFound}
         </Alert>
       </DesktopPageContainer>
     );
   }
-
-  const adminData = staffData;
 
   const renderAccountSection = () => {
     if (!canView("core_identity") && !(isAdminScope && canView("staff_role"))) {
@@ -103,7 +96,7 @@ export function StaffProfileDesktopView({
     return (
       <DesktopSectionPanel title={st.sections.account}>
         <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-          <Avatar src={avatarUrl} sx={{ width: 80, height: 80 }} />
+          <Avatar src={avatarUrl ?? undefined} sx={{ width: 80, height: 80 }} />
           <Box sx={{ flex: 1 }}>
             <Typography variant="headlineMd">{staffData?.name ?? ""}</Typography>
             <Typography variant="bodyMd" color="text.secondary">
@@ -137,32 +130,8 @@ export function StaffProfileDesktopView({
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                 {st.fields.hourlyRate}
               </Typography>
-              {adminData?.hourlyRate} {adminData?.rateCurrency}
+              {staffData?.hourlyRate} {staffData?.rateCurrency}
             </Typography>
-            {adminData?.totalClasses != null && (
-              <Typography variant="bodyLg">
-                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                  {st.stats.totalClasses}
-                </Typography>
-                {adminData.totalClasses}
-              </Typography>
-            )}
-            {isAdminScope && adminData?.avgEngagementScore != null && (
-              <Typography variant="bodyLg">
-                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                  {st.stats.avgEngagement}
-                </Typography>
-                {adminData.avgEngagementScore}
-              </Typography>
-            )}
-            {adminData?.qualifications && (
-              <Typography variant="bodyLg">
-                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                  {st.fields.qualifications}
-                </Typography>
-                {adminData.qualifications}
-              </Typography>
-            )}
           </Stack>
         </DesktopSectionPanel>
       );
@@ -199,14 +168,6 @@ export function StaffProfileDesktopView({
               {staffData.phone}
             </Typography>
           )}
-          {staffData?.timezone && (
-            <Typography variant="bodyLg">
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {st.fields.timezone}
-              </Typography>
-              {staffData.timezone}
-            </Typography>
-          )}
         </Stack>
       </DesktopSectionPanel>
     );
@@ -218,7 +179,6 @@ export function StaffProfileDesktopView({
         <DesktopPageHeader
           title={staffData?.name ?? ""}
           subtitle={staffData?.email ?? ""}
-          avatar={avatarUrl}
           actions={[
             <Button
               key="edit"
@@ -256,7 +216,7 @@ export function StaffProfileDesktopView({
         <DesktopPageHeader title={t.actions.edit} />
         <Stack spacing={3}>
           <StaffProfileEditForm
-            staffData={staffData!}
+            staffData={staffData}
             displayCurrency={displayCurrency}
             isAdminScope={isAdminScope}
             isSaving={isSaving}
@@ -272,7 +232,7 @@ export function StaffProfileDesktopView({
       <DesktopPageHeader title={t.actions.edit} />
       <Stack spacing={3}>
         <StaffProfileEditForm
-          staffData={staffData!}
+          staffData={staffData}
           displayCurrency={displayCurrency}
           isAdminScope={isAdminScope}
           isSaving={isSaving}

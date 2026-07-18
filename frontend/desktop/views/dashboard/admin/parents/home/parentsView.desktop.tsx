@@ -2,13 +2,9 @@
 
 import { FilterListOutlined, SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
 import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
-import type { ParentsViewLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
+import type { BaseParentsViewProps } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   DesktopExportButton,
   DesktopFilterButton,
@@ -19,24 +15,10 @@ import {
 } from "@/frontend/desktop/components/ui";
 import { ParentsDataGridDesktop } from "@/frontend/desktop/views/dashboard/admin/parents/home/components/parentsDataGrid.desktop";
 
-export interface ParentsViewDesktopProps {
-  readonly metrics: readonly MetricItem[];
-  readonly rows: readonly ParentDirectoryRow[];
-  readonly labels: ParentsViewLabels;
+// VARIANT JUSTIFICATION: extra field loading — desktop tier renders a grid-level loading overlay via
+// DesktopAppDataGrid's `loading` prop; mobile twin has no equivalent overlay (renders sentinel rows).
+export interface ParentsViewDesktopProps extends BaseParentsViewProps {
   readonly loading?: boolean;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly lifecycleStatusFilter: ParentStatus | null;
-  readonly filterPanelOpen: boolean;
-  readonly onAddParent: () => void;
-  readonly onOpenSettings: (id: string) => void;
-  readonly onSearch: (query: string) => void;
-  readonly onPageChange?: (page: number) => void;
-  readonly onFilter: () => void;
-  readonly onExport: () => void;
-  readonly onLifecycleStatusFilterChange: (status: ParentStatus | null) => void;
-  readonly onResetFilters: () => void;
 }
 
 function ParentSearchField({
@@ -91,6 +73,10 @@ export function ParentsViewDesktop({
   onExport,
   onLifecycleStatusFilterChange,
   onResetFilters,
+  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
+  // instead of `RequirePermission` wrappers (specs.md §3 N3).
+  canParentsCreate,
+  canParentManageStatus,
 }: Readonly<ParentsViewDesktopProps>) {
   return (
     <DesktopPageContainer>
@@ -100,9 +86,9 @@ export function ParentsViewDesktop({
         actions={
           <>
             <ParentSearchField placeholder={labels.searchPlaceholder} onSearch={onSearch} />
-            <RequirePermission permissions={[AppPermission.ParentsCreate]}>
+            {canParentsCreate ? (
               <DesktopPrimaryPageAction onClick={onAddParent}>{labels.addParent}</DesktopPrimaryPageAction>
-            </RequirePermission>
+            ) : null}
           </>
         }
       />
@@ -131,13 +117,22 @@ export function ParentsViewDesktop({
         />
         <ParentsDataGridDesktop
           rows={rows}
-          labels={labels.table}
+          labels={{
+            ...labels.table,
+            noEntries: labels.noEntries,
+            statusLabels: labels.statusLabels,
+            accountStatusLabels: labels.accountStatusLabels,
+            manageLifecycle: labels.manageLifecycle,
+          }}
           onOpenSettings={onOpenSettings}
           page={page}
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
           loading={loading}
+          // NEW FOR PLAN v5: lifted permission boolean consumed by the data-grid
+          // child instead of an inline `RequirePermission` wrapper.
+          canParentManageStatus={canParentManageStatus}
         />
       </DesktopSectionPanel>
     </DesktopPageContainer>

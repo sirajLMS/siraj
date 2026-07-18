@@ -1,6 +1,5 @@
 "use client";
 
-import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import CloseOutlined from "@mui/icons-material/CloseOutlined";
 import {
   Alert,
@@ -22,163 +21,44 @@ import {
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
-import { useNotifications } from "@toolpad/core/useNotifications";
-import { useCallback, useEffect, useState } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import {
-  AppPermission,
-  ClassType as ClassTypeEnum,
-  type CreateRecurringClassInput,
-  type DayOfWeek,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { createRecurringClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-class.documents";
-import { studentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student.documents";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
-import { useCreateRecurringClassStore } from "@/frontend/common/stores/createRecurringClassStore";
-import { logger } from "@/frontend/common/utils/logger";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
 import { CLASS_TYPE_OPTIONS, type DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import {
-  emptyRecurringMeetingConfigState,
-  postCreateRecurringMeetingConfig,
-  type RecurringMeetingConfigFormState,
-} from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import {
-  getRecurringMeetingConfigErrorKey,
-  isRecurringMeetingConfigValid,
-  resolveRecurringMeetingConfigErrorMessage,
-} from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
-import type { CreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
-import { TimezoneSelectMobile } from "@/frontend/mobile/components/ui/input/timezoneSelect";
-import { useRouter } from "@/shared/i18n/routing";
+  buildClassTypeLabels,
+  buildDayLabels,
+} from "@/frontend/common/views/dashboard/teachers/schedule/weekly/constants";
+import type { CreateRecurringClassDialogFormState } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
 import type {
-  MeetingConfigClassScopeLabels,
+  ClassTypeEnum,
+  CreateRecurringClassDialogProps,
+  CreateRecurringClassDialogStudent,
+  CreateRecurringClassDialogViewModel,
+  DayOfWeek,
+} from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import { TimezoneSelectMobile } from "@/frontend/mobile/components/ui/input/timezoneSelect";
+import type {
   MeetingConfigManagerLabels,
   MeetingConfigRecurringScheduleLabels,
+  TeacherCreateRecurringClassLabels,
 } from "@/shared/locale";
-import { type TeacherCreateRecurringClassLabels, useAppTranslation } from "@/shared/locale";
 
-function buildCreateRecurringClassInput(
-  studentId: string,
-  teacherId: string,
-  duration: number,
-  defaultStartTime: string,
-  timezone: string,
-  classType: ClassTypeEnum,
-  days: readonly DayScheduleConfig[]
-): CreateRecurringClassInput {
-  const activeDays = days.filter(d => d.enabled);
-  return {
-    studentId,
-    teacherId,
-    durationMinutes: Number(duration),
-    defaultStartTime,
-    timezone: toGraphqlIanaTimezone(timezone),
-    classType,
-    days: activeDays.map(d => ({
-      dayOfWeek: d.day,
-      startTime: d.showOverride ? d.timeOverride : defaultStartTime,
-      isActive: true,
-    })),
-    generateInstancesForWeeks: 4,
-    effectiveFrom: null,
-    effectiveUntil: null,
-  };
-}
-
-function useDialogFormState(isDialogOpen: boolean, resetDays: () => void) {
-  const [studentId, setStudentId] = useState("");
-  const [duration, setDuration] = useState(60);
-  const [defaultStartTime, setDefaultStartTime] = useState("09:00");
-  const [timezone, setTimezone] = useState("Africa/Cairo");
-  const [classType, setClassType] = useState<ClassTypeEnum>(ClassTypeEnum.Regular);
-  const [meetingConfig, setMeetingConfig] = useState<RecurringMeetingConfigFormState>(emptyRecurringMeetingConfigState);
-  const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
-  const [createdClassInstanceId, setCreatedClassInstanceId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isDialogOpen) {
-      setStudentId("");
-      setDuration(60);
-      setDefaultStartTime("09:00");
-      setTimezone("Africa/Cairo");
-      setClassType(ClassTypeEnum.Regular);
-      setMeetingConfig(emptyRecurringMeetingConfigState());
-      setMeetingConfigWarning(false);
-      setCreatedClassInstanceId(null);
-      resetDays();
-    }
-  }, [isDialogOpen, resetDays]);
-
-  return {
-    studentId,
-    setStudentId,
-    duration,
-    setDuration,
-    defaultStartTime,
-    setDefaultStartTime,
-    timezone,
-    setTimezone,
-    classType,
-    setClassType,
-    meetingConfig,
-    setMeetingConfig,
-    meetingConfigWarning,
-    setMeetingConfigWarning,
-    createdClassInstanceId,
-    setCreatedClassInstanceId,
-  };
-}
-
-function useValidation(
-  state: ReturnType<typeof useDialogFormState>,
-  days: readonly DayScheduleConfig[],
-  notifications: ReturnType<typeof useNotifications>,
-  t: TeacherCreateRecurringClassLabels,
-  tClassScope: MeetingConfigClassScopeLabels,
-  tMeeting: MeetingConfigManagerLabels
-) {
-  return useCallback((): boolean => {
-    if (!state.studentId) {
-      notifications.show(t.errors.noStudentSelected, { severity: "error" });
-      return false;
-    }
-
-    const activeDays = days.filter(d => d.enabled);
-    if (activeDays.length === 0) {
-      notifications.show(t.errors.noDaysSelected, { severity: "error" });
-      return false;
-    }
-
-    if (state.duration <= 0) {
-      notifications.show(t.errors.durationMustBePositive, { severity: "error" });
-      return false;
-    }
-
-    if (!isRecurringMeetingConfigValid(state.meetingConfig)) {
-      const errorKey = getRecurringMeetingConfigErrorKey(state.meetingConfig);
-      const message = resolveRecurringMeetingConfigErrorMessage(errorKey, {
-        recurringFieldsRequired: tClassScope.recurringFieldsRequired,
-        urlNotAllowed: tMeeting.urlNotAllowed,
-      });
-      notifications.show(message ?? tMeeting.urlNotAllowed, { severity: "error" });
-      return false;
-    }
-
-    return true;
-  }, [state.studentId, state.duration, state.meetingConfig, days, notifications, t, tClassScope, tMeeting]);
-}
+/* Plan v5 reconciliation (RC-1): every data layer hook (see specs.md §3 N1,
+ * N3, N6, N8, N17 + §6.2 — GraphQL reads/writes, routing, toasts, logging
+ * and the permission gate) has been lifted out of this tier file into
+ * `useTeacherWeeklyScheduleViewModel`. This file is now RENDERING ONLY —
+ * it consumes the ViewModel-supplied `viewModel` prop. */
 
 function MeetingConfigWarningAlert({
   createdClassInstanceId,
   tMeeting,
   tRecurringSchedule,
-  router,
+  onGoToCreatedClass,
 }: {
   readonly createdClassInstanceId: string | null;
   readonly tMeeting: MeetingConfigManagerLabels;
   readonly tRecurringSchedule: MeetingConfigRecurringScheduleLabels;
-  readonly router: ReturnType<typeof useRouter>;
+  readonly onGoToCreatedClass: () => void;
 }) {
   return (
     <Alert
@@ -186,7 +66,7 @@ function MeetingConfigWarningAlert({
       sx={{ mt: 2 }}
       action={
         createdClassInstanceId ? (
-          <Button color="inherit" size="small" onClick={() => router.push(`/classes/${createdClassInstanceId}`)}>
+          <Button color="inherit" size="small" onClick={onGoToCreatedClass}>
             {tRecurringSchedule.goToClass}
           </Button>
         ) : undefined
@@ -207,7 +87,7 @@ function StudentSelectField({
 }: {
   readonly studentId: string;
   readonly setStudentId: (value: string) => void;
-  readonly students: readonly { readonly id: string; readonly name: string }[];
+  readonly students: readonly CreateRecurringClassDialogStudent[];
   readonly loadingStudents: boolean;
   readonly mutationLoading: boolean;
   readonly t: TeacherCreateRecurringClassLabels;
@@ -290,11 +170,7 @@ function TimezoneClassTypeFields({
   readonly mutationLoading: boolean;
   readonly t: TeacherCreateRecurringClassLabels;
 }) {
-  const classTypeLabels: Record<string, string> = {
-    REGULAR: t.classTypes.REGULAR,
-    TRIAL: t.classTypes.TRIAL,
-    ADVANCE: t.classTypes.ADVANCE,
-  };
+  const classTypeLabels = buildClassTypeLabels(t);
   return (
     <Stack sx={{ flexDirection: "column", gap: 2 }}>
       <TimezoneSelectMobile
@@ -343,15 +219,7 @@ function DayScheduleItem({
   readonly t: TeacherCreateRecurringClassLabels;
 }) {
   const d = dayConfig;
-  const dayLabels: Record<string, string> = {
-    monday: t.days.monday,
-    tuesday: t.days.tuesday,
-    wednesday: t.days.wednesday,
-    thursday: t.days.thursday,
-    friday: t.days.friday,
-    saturday: t.days.saturday,
-    sunday: t.days.sunday,
-  };
+  const dayLabels = buildDayLabels(t);
   return (
     <Box
       key={d.day}
@@ -453,15 +321,15 @@ function DialogFormContent({
   t,
   tMeeting,
   tRecurringSchedule,
-  router,
+  onGoToCreatedClass,
 }: {
   readonly teacherId: string;
-  readonly state: ReturnType<typeof useDialogFormState>;
+  readonly state: CreateRecurringClassDialogFormState;
   readonly days: readonly DayScheduleConfig[];
   readonly toggleDay: (day: DayOfWeek) => void;
   readonly toggleTimeOverride: (day: DayOfWeek) => void;
   readonly setTimeOverride: (day: DayOfWeek, time: string) => void;
-  readonly students: readonly { readonly id: string; readonly name: string }[];
+  readonly students: readonly CreateRecurringClassDialogStudent[];
   readonly loadingStudents: boolean;
   readonly mutationLoading: boolean;
   readonly meetingConfigWarning: boolean;
@@ -469,7 +337,7 @@ function DialogFormContent({
   readonly t: TeacherCreateRecurringClassLabels;
   readonly tMeeting: MeetingConfigManagerLabels;
   readonly tRecurringSchedule: MeetingConfigRecurringScheduleLabels;
-  readonly router: ReturnType<typeof useRouter>;
+  readonly onGoToCreatedClass: () => void;
 }) {
   return (
     <DialogContent>
@@ -479,7 +347,7 @@ function DialogFormContent({
             createdClassInstanceId={createdClassInstanceId}
             tMeeting={tMeeting}
             tRecurringSchedule={tRecurringSchedule}
-            router={router}
+            onGoToCreatedClass={onGoToCreatedClass}
           />
         ) : null}
         <StudentSelectField
@@ -525,107 +393,33 @@ function DialogFormContent({
   );
 }
 
-export function CreateRecurringClassDialogMobile({ teacherId, onRefetch }: Readonly<CreateRecurringClassDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherCreateRecurringClass;
-  const tMeeting = useAppTranslation().uiTranslations.meetingConfigManager;
-  const tRecurringSchedule = useAppTranslation().uiTranslations.meetingConfigRecurringSchedule;
-  const tClassScope = useAppTranslation().uiTranslations.meetingConfigClassScope;
-  const notifications = useNotifications();
-  const client = useApolloClient();
-  const router = useRouter();
-  const { isDialogOpen, closeDialog, days, toggleDay, setTimeOverride, toggleTimeOverride, resetDays } =
-    useCreateRecurringClassStore();
-
-  const state = useDialogFormState(isDialogOpen, resetDays);
-
-  const { data: studentsData, loading: loadingStudents } = useQuery(studentsQueryDocument, {
-    variables: {
-      filterArgs: null,
-      paginationArgs: {
-        first: 100,
-        skip: 0,
-        after: null,
-        before: null,
-        last: null,
-        maxCount: null,
-        page: null,
-      },
-      orderBy: null,
-    },
-    skip: !isDialogOpen,
-  });
-
-  const [createClassMutation, { loading: mutationLoading }] = useMutation(createRecurringClassMutationDocument);
-
-  const students = studentsData?.students?.data || [];
-  const validateBeforeSubmit = useValidation(state, days, notifications, t, tClassScope, tMeeting);
-
-  const completeSuccessfulCreate = useCallback(
-    async (result: NonNullable<Awaited<ReturnType<typeof createClassMutation>>["data"]>["createRecurringClass"]) => {
-      if (!result) {
-        return;
-      }
-
-      const recurringScheduleId = result.recurringScheduleId;
-      const firstClassInstanceId = result.classInstanceIds?.[0] ?? null;
-      let meetingConfigSaved = true;
-
-      if (recurringScheduleId) {
-        const meetingResult = await postCreateRecurringMeetingConfig(client, recurringScheduleId, state.meetingConfig);
-        meetingConfigSaved = meetingResult.success;
-        if (!meetingResult.success) {
-          state.setMeetingConfigWarning(true);
-          state.setCreatedClassInstanceId(firstClassInstanceId);
-        }
-      }
-
-      notifications.show(t.success.description(result.classInstanceCount ?? 0), {
-        severity: "success",
-      });
-      logger.info("Recurring class created successfully", { id: result.id });
-
-      if (onRefetch) {
-        onRefetch();
-      }
-
-      if (meetingConfigSaved) {
-        closeDialog();
-      }
-    },
-    [client, state, notifications, t, onRefetch, closeDialog]
-  );
-
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!validateBeforeSubmit()) {
-      return;
-    }
-
-    try {
-      const input = buildCreateRecurringClassInput(
-        state.studentId,
-        teacherId,
-        state.duration,
-        state.defaultStartTime,
-        state.timezone,
-        state.classType,
-        days
-      );
-
-      const { data } = await createClassMutation({
-        variables: { input },
-      });
-
-      if (data?.createRecurringClass) {
-        await completeSuccessfulCreate(data.createRecurringClass);
-      }
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      logger.error("Failed to create recurring class", { err: error });
-      notifications.show(t.errors.creationFailed, { severity: "error" });
-    }
-  };
+function CreateRecurringClassDialogMobileBody({
+  teacherId,
+  viewModel,
+}: {
+  readonly teacherId: string;
+  readonly viewModel: CreateRecurringClassDialogViewModel;
+}) {
+  const {
+    formState: state,
+    days,
+    toggleDay,
+    toggleTimeOverride,
+    setTimeOverride,
+    students,
+    loadingStudents,
+    mutationLoading,
+    meetingConfigWarning,
+    completedClassInstanceId,
+    isDialogOpen,
+    closeDialog,
+    handleSubmit,
+    hasSessionCreateClass,
+    labels: t,
+    meetingLabels: tMeeting,
+    recurringScheduleLabels: tRecurringSchedule,
+    onGoToCreatedClass,
+  } = viewModel;
 
   return (
     <Dialog open={isDialogOpen} onClose={closeDialog} fullScreen>
@@ -650,24 +444,31 @@ export function CreateRecurringClassDialogMobile({ teacherId, onRefetch }: Reado
           students={students}
           loadingStudents={loadingStudents}
           mutationLoading={mutationLoading}
-          meetingConfigWarning={state.meetingConfigWarning}
-          createdClassInstanceId={state.createdClassInstanceId}
+          meetingConfigWarning={meetingConfigWarning}
+          createdClassInstanceId={completedClassInstanceId}
           t={t}
           tMeeting={tMeeting}
           tRecurringSchedule={tRecurringSchedule}
-          router={router}
+          onGoToCreatedClass={onGoToCreatedClass}
         />
         <DialogActions>
           <Button onClick={closeDialog} disabled={mutationLoading}>
             {t.actions.cancel}
           </Button>
-          <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
+          {hasSessionCreateClass ? (
             <Button type="submit" variant="contained" color="primary" disabled={mutationLoading}>
               {mutationLoading ? t.actions.submitting : t.actions.create}
             </Button>
-          </RequirePermission>
+          ) : null}
         </DialogActions>
       </form>
     </Dialog>
   );
+}
+
+export function CreateRecurringClassDialogMobile({ teacherId, viewModel }: Readonly<CreateRecurringClassDialogProps>) {
+  if (!viewModel) {
+    return null;
+  }
+  return <CreateRecurringClassDialogMobileBody teacherId={teacherId} viewModel={viewModel} />;
 }

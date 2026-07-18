@@ -2,13 +2,9 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { InputAdornment, Stack, TextField } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
 import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
-import type { ParentsViewLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
+import type { BaseParentsViewProps } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileContentStack,
   MobileExportButton,
@@ -20,24 +16,12 @@ import {
 } from "@/frontend/mobile/components/ui";
 import { ParentCardListMobile } from "@/frontend/mobile/views/dashboard/admin/parents/home/components/parentCardList.mobile";
 
-export interface ParentsViewMobileProps {
-  readonly metrics: readonly MetricItem[];
-  readonly rows: readonly ParentDirectoryRow[];
-  readonly labels: ParentsViewLabels;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly lifecycleStatusFilter: ParentStatus | null;
-  readonly filterPanelOpen: boolean;
-  readonly onAddParent: () => void;
-  readonly onOpenSettings: (id: string) => void;
-  readonly onSearch: (query: string) => void;
-  readonly onPageChange?: (page: number) => void;
-  readonly onFilter: () => void;
-  readonly onExport: () => void;
-  readonly onLifecycleStatusFilterChange: (status: ParentStatus | null) => void;
-  readonly onResetFilters: () => void;
-}
+// VARIANT JUSTIFICATION: ParentsViewMobileProps is structurally identical to BaseParentsViewProps
+// — the mobile tier supplies no extra fields beyond the shared contract. The mobile view renders
+// sentinel rows / in-list skeletons instead of the desktop grid-level loading overlay, so
+// `loading` is omitted (kept on the desktop twin only). Implemented as a `type` alias to satisfy
+// `@typescript-eslint/no-empty-object-type` while still keeping a tier-suffixed public name.
+export type ParentsViewMobileProps = BaseParentsViewProps;
 
 function ParentMobileSearchField({
   placeholder,
@@ -91,6 +75,9 @@ export function ParentsViewMobile({
   onExport,
   onLifecycleStatusFilterChange,
   onResetFilters,
+  // NEW FOR PLAN v5: lifted permission boolean consumed by the tier view
+  // instead of a `RequirePermission` wrapper (specs.md §3 N3).
+  canParentsCreate,
 }: Readonly<ParentsViewMobileProps>) {
   return (
     <MobilePageContainer>
@@ -99,9 +86,9 @@ export function ParentsViewMobile({
         subtitle={labels.pageSubtitle}
         edgeToEdge={false}
         actions={
-          <RequirePermission permissions={[AppPermission.ParentsCreate]}>
+          canParentsCreate ? (
             <MobilePrimaryPageAction onClick={onAddParent}>{labels.addParent}</MobilePrimaryPageAction>
-          </RequirePermission>
+          ) : undefined
         }
       />
 
@@ -132,7 +119,11 @@ export function ParentsViewMobile({
           />
           <ParentCardListMobile
             rows={rows}
-            labels={labels.card}
+            labels={{
+              ...labels.card,
+              statusLabels: labels.statusLabels,
+              accountStatusLabels: labels.accountStatusLabels,
+            }}
             onOpenSettings={onOpenSettings}
             page={page}
             pageSize={pageSize}

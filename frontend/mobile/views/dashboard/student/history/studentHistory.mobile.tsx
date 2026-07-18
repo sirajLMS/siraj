@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowBackOutlined, AssignmentOutlined, SchoolOutlined } from "@mui/icons-material";
+import { ArrowBackOutlined, AssignmentOutlined, SchoolOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, type Theme, Typography } from "@mui/material";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
@@ -49,9 +49,11 @@ function StatusChip({ status }: { status: string }) {
 function MobileSessionItem({
   row,
   labels,
+  onOpenMeetingUrl,
 }: {
   row: StudentHistorySessionRow;
   labels: StudentHistoryViewModel["labels"];
+  onOpenMeetingUrl: StudentHistoryViewModel["onOpenMeetingUrl"];
 }): import("react").ReactNode {
   return (
     <Box
@@ -84,6 +86,18 @@ function MobileSessionItem({
           {row.notes}
         </Typography>
       ) : null}
+      {row.meetingJoinUrl ? (
+        <Box sx={{ mt: 1 }}>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<VisibilityOutlined />}
+            onClick={() => onOpenMeetingUrl(row.meetingJoinUrl)}
+          >
+            {labels.viewReport}
+          </Button>
+        </Box>
+      ) : null}
     </Box>
   );
 }
@@ -94,6 +108,7 @@ export function StudentHistoryMobileView({
   labels,
   loading,
   onBackToDashboard,
+  onOpenMeetingUrl,
 }: Readonly<StudentHistoryViewModel>) {
   if (loading && metrics.totalClasses === 0) {
     return (
@@ -133,7 +148,7 @@ export function StudentHistoryMobileView({
               rows={sessions}
               emptyMessage={labels.noHistory}
               getKey={row => row.id}
-              renderItem={row => <MobileSessionItem row={row} labels={labels} />}
+              renderItem={row => <MobileSessionItem row={row} labels={labels} onOpenMeetingUrl={onOpenMeetingUrl} />}
             />
           </Stack>
         </MobileSectionPanel>

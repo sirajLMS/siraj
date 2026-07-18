@@ -1,27 +1,17 @@
 "use client";
 
-import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
-import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import {
-  type ParentBillingViewModel,
-  type UseParentBillingViewModelProps,
-  useParentBillingViewModel,
-} from "@/frontend/common/views/dashboard/billing/useParentBillingViewModel";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ParentBillingView } from "@/frontend/common/views/dashboard/billing/ParentBillingView";
+import type { UseParentBillingViewModelProps } from "@/frontend/common/views/dashboard/billing/useParentBillingViewModel";
 
-const lazyViews = createLazyView<ParentBillingViewModel>(
-  () =>
-    import("@/frontend/mobile/views/dashboard/billing/parentBilling.mobile").then(m => ({
-      default: m.ParentBillingMobileView,
-    })),
-  () =>
-    import("@/frontend/desktop/views/dashboard/billing/parentBilling.desktop").then(m => ({
-      default: m.ParentBillingDesktopView,
-    }))
-);
-
-export function ParentBillingView(props: Readonly<UseParentBillingViewModelProps>) {
-  const viewModel = useParentBillingViewModel(props);
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+// NEW FOR PLAN v5 (parent-billing wave): Container now accepts no props per
+// the §6.1 Server-Component contract — it simply renders the View, which
+// invokes the ViewModel internally.
+export function ParentBillingContainer(_props: Readonly<UseParentBillingViewModelProps> = {}) {
+  return (
+    <RequirePermission permissions={[AppPermission.BillingViewHistory]} fallback={null}>
+      <ParentBillingView />
+    </RequirePermission>
+  );
 }
-
-export type { ParentBillingViewModel, UseParentBillingViewModelProps };

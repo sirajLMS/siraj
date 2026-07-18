@@ -11,6 +11,11 @@ export interface UserOverrideInfo {
   readonly conflictDetails: string[];
 }
 
+export interface UserOverrideRowData {
+  readonly loading: boolean;
+  readonly info: UserOverrideInfo | null;
+}
+
 export interface UserOverridesDataResult {
   readonly loading: boolean;
   readonly error: Error | undefined;
@@ -50,12 +55,12 @@ function getUserGroupsForUser(userId: string, groups: readonly PermissionGroup[]
 }
 
 /**
- * Common hook that fetches a single user's overrides via `userOverridesQueryDocument`
- * and derives the grants/revokes/conflict summary that the
- * `UserOverridesDataGrid{Mobile,Desktop}` tier components render.
+ * Fetches a single user's overrides via `userOverridesQueryDocument` and derives
+ * the grants/revokes/conflict summary that the `UserOverridesDataGrid{Mobile,Desktop}`
+ * tier row renderers consume.
  *
- * Lifted out of the tier views (Plan v5 NS-2 — N1 lift) so the tier files only
- * receive already-computed `info` objects as props.
+ * Lifted out of `userOverridesDataGrid.{mobile,desktop}.tsx` (NS-2 — N1 lift) so
+ * the tier files receive already-computed `info` objects as props.
  */
 export function useUserOverridesData(userId: string, groups: readonly PermissionGroup[]): UserOverridesDataResult {
   const { data, loading, error } = useQuery(userOverridesQueryDocument, {

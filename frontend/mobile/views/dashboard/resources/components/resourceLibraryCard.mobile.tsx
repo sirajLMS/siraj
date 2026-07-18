@@ -2,8 +2,6 @@
 
 import { AttachFileOutlined, DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ResourceLibraryCardProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
 import { ResourceFileTypeIconMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceFileTypeIcon.mobile";
 
@@ -14,6 +12,12 @@ export function ResourceLibraryCardMobile({
   onDeleteRequest,
   onCardClick,
 }: Readonly<Omit<ResourceLibraryCardProps, "variant">>) {
+  // NEW FOR PLAN v5: the inline `<RequirePermission permissions={AppPermission.ResourcesDelete}>`
+  // wrapper that previously lived here was lifted to the page-level ViewModel
+  // per specs.md §3 N3 + §6.1. The card now consumes the `canManage` prop
+  // (Threaded from `useResourcesViewModel.canResourcesDelete` via the grid)
+  // and renders the delete IconButton conditionally — no permission hook is
+  // called inside the tier module.
   return (
     <Paper
       elevation={0}
@@ -69,7 +73,7 @@ export function ResourceLibraryCardMobile({
         </Typography>
       </Box>
 
-      <RequirePermission permissions={AppPermission.ResourcesDelete}>
+      {canManage ? (
         <IconButton
           aria-label="Delete resource"
           onClick={e => {
@@ -80,7 +84,7 @@ export function ResourceLibraryCardMobile({
         >
           <DeleteOutlined />
         </IconButton>
-      </RequirePermission>
+      ) : null}
     </Paper>
   );
 }

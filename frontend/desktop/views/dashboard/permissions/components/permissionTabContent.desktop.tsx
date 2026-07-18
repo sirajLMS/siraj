@@ -22,6 +22,8 @@ export function PermissionTabContentDesktop({
   openAssignDialog,
   openManageOverrides,
   setSelectedUserIdForOverrides,
+  catalogFilter,
+  groupRowMenuAnchor,
 }: Readonly<PermissionTabContentProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
@@ -43,13 +45,24 @@ export function PermissionTabContentDesktop({
             onEditGroup={openEditDialog}
             onDeleteGroup={openDeleteDialog}
             onAssignGroup={openAssignDialog}
+            groupRowMenuAnchor={groupRowMenuAnchor}
             loading={isLoading}
           />
         </DesktopSectionPanel>
       )}
 
       {activeTab === "catalog" && (
-        <PermissionCatalogSectionDesktop permissions={permissions} groups={groups} loading={isLoading} />
+        <PermissionCatalogSectionDesktop
+          permissions={permissions}
+          groups={groups}
+          searchQuery={catalogFilter.searchQuery}
+          setSearchQuery={catalogFilter.setSearchQuery}
+          selectedCategory={catalogFilter.selectedCategory}
+          setSelectedCategory={catalogFilter.setSelectedCategory}
+          categories={catalogFilter.categories}
+          filteredPermissions={catalogFilter.filteredPermissions}
+          loading={isLoading}
+        />
       )}
 
       {activeTab === "overrides" && (

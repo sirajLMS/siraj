@@ -169,7 +169,6 @@ function QuotaFormCardMobile({
   canEditQuota,
   canViewQuota,
   canViewTeacher,
-  onEditAvatar,
 }: Readonly<
   Pick<
     StudentQuotaViewModel,
@@ -184,17 +183,16 @@ function QuotaFormCardMobile({
     | "canEditQuota"
     | "canViewQuota"
     | "canViewTeacher"
-    | "onEditAvatar"
   > & {
     readonly studentData: StudentProfileData;
   }
 >) {
-  const showAvatarEdit = !embedded && !readOnly && canEditIdentity && Boolean(onEditAvatar);
+  const showAvatarEdit = false;
 
   return (
     <>
       {!embedded ? (
-        <MobileProfileHeader studentData={studentData} showAvatarEdit={showAvatarEdit} onEditAvatar={onEditAvatar} />
+        <MobileProfileHeader studentData={studentData} showAvatarEdit={showAvatarEdit} onEditAvatar={undefined} />
       ) : null}
 
       <Box
@@ -268,7 +266,6 @@ export function StudentQuotaMobileView({
   methods,
   onSubmit,
   onCancel,
-  onEditAvatar,
 }: Readonly<StudentQuotaViewModel>) {
   if (!studentData) {
     const loadingContent = (
@@ -293,7 +290,6 @@ export function StudentQuotaMobileView({
       canEditQuota={canEditQuota}
       canViewQuota={canViewQuota}
       canViewTeacher={canViewTeacher}
-      onEditAvatar={onEditAvatar}
     />
   );
 

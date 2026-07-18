@@ -13,10 +13,8 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
@@ -28,6 +26,10 @@ export function TeacherWeeklyScheduleViewDesktop({
   onRemoveClass,
   onClearSchedule,
   onAddClass,
+  hasScheduleCreateClass,
+  hasScheduleClearWeekly,
+  hasScheduleViewWorkload,
+  hasScheduleDeleteClass,
 }: Readonly<TeacherWeeklyScheduleViewProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
   const clearDialogOpen = useWeeklyScheduleStore(state => state.clearDialogOpen);
@@ -53,12 +55,12 @@ export function TeacherWeeklyScheduleViewDesktop({
         breadcrumbs={breadcrumbs}
         actions={
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
+            {hasScheduleCreateClass ? (
               <PrimaryPageAction startIcon={<AddOutlined />} onClick={onAddClass}>
                 {t.actions.addSlot}
               </PrimaryPageAction>
-            </RequirePermission>
-            <RequirePermission permissions={[AppPermission.ScheduleClearWeekly]}>
+            ) : null}
+            {hasScheduleClearWeekly ? (
               <IconButton
                 onClick={() => setClearDialogOpen(true)}
                 sx={theme => ({
@@ -70,12 +72,12 @@ export function TeacherWeeklyScheduleViewDesktop({
               >
                 <DeleteOutlined />
               </IconButton>
-            </RequirePermission>
+            ) : null}
           </Stack>
         }
       />
 
-      <RequirePermission permissions={[AppPermission.ScheduleViewWorkload]}>
+      {hasScheduleViewWorkload ? (
         <Box sx={{ display: "grid", gridTemplateColumns: { md: "repeat(4, 1fr)" }, gap: 2 }}>
           <MetricCard
             icon={TimerOutlined}
@@ -84,10 +86,14 @@ export function TeacherWeeklyScheduleViewDesktop({
             variant="default"
           />
         </Box>
-      </RequirePermission>
+      ) : null}
 
       <SectionPanel>
-        <WeeklyScheduleGrid classes={schedule.classes} onRemoveClass={onRemoveClass} />
+        <WeeklyScheduleGrid
+          classes={schedule.classes}
+          onRemoveClass={onRemoveClass}
+          hasScheduleDeleteClass={hasScheduleDeleteClass}
+        />
       </SectionPanel>
 
       <Box
@@ -148,3 +154,5 @@ export function TeacherWeeklyScheduleViewDesktop({
     </DesktopPageContainer>
   );
 }
+
+export default TeacherWeeklyScheduleViewDesktop;

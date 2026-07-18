@@ -36,7 +36,7 @@ export function OfficialDetailsSection({ control, errors, labels }: Readonly<Off
             return (
               <CountrySelect
                 country={selectedCountry}
-                setCountryAction={country => field.onChange(country.code as CountryCode)}
+                setCountryAction={country => field.onChange((country?.code ?? "") as CountryCode)}
                 label={`${labels.fields.country} *`}
                 required
                 error={!!errors.countryCode}

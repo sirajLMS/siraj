@@ -3,17 +3,8 @@
 import { ChildCareOutlined, EventOutlined, PaymentsOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
+import type { ParentDashboardMetricsRowProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardComponents.types";
 import type { ParentDashboardMetrics } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-
-export interface ParentDashboardMetricsRowDesktopProps {
-  readonly metrics: ParentDashboardMetrics;
-  readonly labels: {
-    readonly totalStudents: string;
-    readonly todaysClasses: string;
-    readonly pendingInvoices: string;
-    readonly performanceAvg: string;
-  };
-}
 
 function formatCount(value: number): string {
   return String(value).padStart(2, "0");
@@ -27,7 +18,7 @@ function formatPendingInvoicesDesktop(metrics: ParentDashboardMetrics): string {
   return String(metrics.pendingInvoicesCount).padStart(2, "0");
 }
 
-export function ParentDashboardMetricsRowDesktop({ metrics, labels }: Readonly<ParentDashboardMetricsRowDesktopProps>) {
+export function ParentDashboardMetricsRowDesktop({ metrics, labels }: Readonly<ParentDashboardMetricsRowProps>) {
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>

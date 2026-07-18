@@ -15,7 +15,7 @@ const lazyViews = createLazyView<ReportsViewModel>(
 );
 
 export function ReportsContainer() {
-  const viewModel = useReportsViewModel({} as Readonly<UseReportsViewModelProps>);
+  const viewModel = useReportsViewModel();
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 export type { ReportsViewModel, UseReportsViewModelProps };

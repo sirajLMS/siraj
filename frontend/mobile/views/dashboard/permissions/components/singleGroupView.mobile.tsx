@@ -2,7 +2,6 @@
 
 import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
 import type { SubTabKey } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
-import { useSingleGroupState } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
 import type { SingleGroupViewProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { AddPermissionsTabMobile } from "@/frontend/mobile/views/dashboard/permissions/components/addPermissionsTab.mobile";
 import { AssignedUsersTabMobile } from "@/frontend/mobile/views/dashboard/permissions/components/assignedUsersTab.mobile";
@@ -17,9 +16,7 @@ export function SingleGroupViewMobile({
   onBack,
   onEditGroup,
   onAssignGroup,
-  onRevokeGroup,
-  onBulkRevoke,
-  onUpdateGroup,
+  singleGroupState,
 }: Readonly<SingleGroupViewProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
   const {
@@ -44,7 +41,7 @@ export function SingleGroupViewMobile({
     handleAddPermissionToggle,
     handleAssignedUserToggle,
     handleSubTabChange,
-  } = useSingleGroupState({ group, permissions, onRevokeGroup, onBulkRevoke, onUpdateGroup });
+  } = singleGroupState;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>

@@ -4,8 +4,6 @@ import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, Stack, TextField, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
@@ -72,6 +70,10 @@ export function ScheduleOverviewMobileView({
   pageCount,
   showTimezones,
   locale,
+  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
+  // instead of the previous `RequirePermission` wrappers.
+  canDashboardSearch,
+  canScheduleFilterAdvanced,
 }: Readonly<ScheduleOverviewViewModel>) {
   const theme = useTheme();
 
@@ -99,7 +101,7 @@ export function ScheduleOverviewMobileView({
         </StyledSectionTitleRow>
 
         <StyledMobileSectionBody>
-          <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>
+          {canScheduleFilterAdvanced ? (
             <ScheduleFilters
               dateLabel={dateLabel}
               dateValue={dateValue}
@@ -114,9 +116,9 @@ export function ScheduleOverviewMobileView({
               onTeacherChange={onTeacherChange}
               onSubmit={onSubmit}
             />
-          </RequirePermission>
+          ) : null}
 
-          <RequirePermission permissions={[AppPermission.DashboardSearch]}>
+          {canDashboardSearch ? (
             <TextField
               placeholder={searchPlaceholder}
               value={searchValue}
@@ -141,7 +143,7 @@ export function ScheduleOverviewMobileView({
                 },
               }}
             />
-          </RequirePermission>
+          ) : null}
         </StyledMobileSectionBody>
 
         <MobileCardList<DailyScheduleRow>

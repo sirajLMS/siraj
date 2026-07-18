@@ -3,8 +3,6 @@
 import { AddOutlined, FilterListOutlined, PersonAddAltOutlined, SearchOutlined } from "@mui/icons-material";
 import { Box, IconButton, InputAdornment, TextField } from "@mui/material";
 import type { ReactNode } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentsViewModel } from "@/frontend/common/views/dashboard/admin/parents/students/useStudentsViewModel";
 import {
   MobileCardList,
@@ -30,6 +28,9 @@ export function StudentsMobileView({
   onFilterClick,
   onViewProfile,
   onPageChange,
+  // NEW FOR PLAN v5: lifted permission boolean consumed by the tier view
+  // instead of a `RequirePermission` wrapper.
+  canStudentsCreate,
 }: Readonly<StudentsViewModel>) {
   const cardListLabels = {
     weeklyHours: labels.weeklyHours,
@@ -91,7 +92,7 @@ export function StudentsMobileView({
           >
             <FilterListOutlined />
           </IconButton>
-          <RequirePermission permissions={[AppPermission.StudentsCreate]}>
+          {canStudentsCreate ? (
             <IconButton
               id="students-add-mobile-btn"
               aria-label={labels.addStudent}
@@ -106,7 +107,7 @@ export function StudentsMobileView({
             >
               <PersonAddAltOutlined />
             </IconButton>
-          </RequirePermission>
+          ) : null}
         </Box>
 
         <MobileCardList<(typeof rows)[number]>
@@ -124,9 +125,9 @@ export function StudentsMobileView({
           }
         />
 
-        <RequirePermission permissions={[AppPermission.StudentsCreate]}>
+        {canStudentsCreate ? (
           <MobileFab icon={<AddOutlined />} label={labels.addStudent} onClick={onAddStudent} />
-        </RequirePermission>
+        ) : null}
       </MobileContentStack>
     </MobilePageContainer>
   );

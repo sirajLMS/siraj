@@ -3,8 +3,9 @@
 import { DeleteOutlined, EditOutlined, MoreVertOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { RowMenuAnchor } from "@/frontend/common/views/dashboard/permissions/components/useRowMenuAnchor";
 import type { BasePermissionGroupListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display/localizedStringDisplay";
@@ -20,23 +21,22 @@ interface RowActionsProps {
   readonly onEditGroup: (id: string) => void;
   readonly onDeleteGroup: (id: string) => void;
   readonly onAssignGroup: (id: string) => void;
+  readonly rowMenuAnchor: RowMenuAnchor;
 }
 
-function RowActionsDesktop({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readonly<RowActionsProps>) {
+function RowActionsDesktop({
+  group,
+  onEditGroup,
+  onDeleteGroup,
+  onAssignGroup,
+  rowMenuAnchor,
+}: Readonly<RowActionsProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { anchorEl, openMenu, closeMenu } = rowMenuAnchor;
   const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleAction = (callback: (id: string) => void) => {
-    handleClose();
+    closeMenu();
     if (group.id) {
       callback(group.id);
     }
@@ -44,10 +44,10 @@ function RowActionsDesktop({ group, onEditGroup, onDeleteGroup, onAssignGroup }:
 
   return (
     <>
-      <IconButton id={`group-actions-btn-${group.id}`} onClick={handleClick} size="small">
+      <IconButton id={`group-actions-btn-${group.id}`} onClick={openMenu} size="small">
         <MoreVertOutlined fontSize="small" />
       </IconButton>
-      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+      <Menu anchorEl={anchorEl} open={open} onClose={closeMenu}>
         <MenuItem onClick={() => handleAction(onAssignGroup)} id={`group-action-assign-${group.id}`}>
           <PersonAddOutlined fontSize="small" sx={{ mr: 1 }} />
           {t.actionAssign}
@@ -82,10 +82,14 @@ export function PermissionGroupsDataGridDesktop({
   onEditGroup,
   onDeleteGroup,
   onAssignGroup,
+  groupRowMenuAnchor,
   loading = false,
 }: Readonly<PermissionGroupsDataGridDesktopProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing `columns` keeps
+  // the MUI DataGrid column-identity stable across re-renders so the grid does
+  // not remount/re-sort on each props change.
   const columns = useMemo<GridColDef<PermissionGroup>[]>(() => {
     return [
       {
@@ -159,11 +163,12 @@ export function PermissionGroupsDataGridDesktop({
             onEditGroup={onEditGroup}
             onDeleteGroup={onDeleteGroup}
             onAssignGroup={onAssignGroup}
+            rowMenuAnchor={groupRowMenuAnchor}
           />
         ),
       },
     ];
-  }, [t, onEditGroup, onDeleteGroup, onAssignGroup, onViewGroup]);
+  }, [t, onEditGroup, onDeleteGroup, onAssignGroup, onViewGroup, groupRowMenuAnchor]);
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>

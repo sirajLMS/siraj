@@ -25,8 +25,10 @@ import {
   createStatusUpdateSchema,
   type StatusUpdateFormData,
 } from "@/frontend/common/views/dashboard/students/status/schemas/statusUpdateSchema";
-import type { StudentStatusPageData } from "@/frontend/common/views/dashboard/students/status/types";
-import { useRouter } from "@/shared/i18n/routing";
+import type {
+  StudentStatusPageData,
+  UpcomingClassDisplay,
+} from "@/frontend/common/views/dashboard/students/status/types";
 import { type CommonLabels, type StudentStatusLabels, useAppTranslation } from "@/shared/locale";
 
 type UpcomingClassInput = {
@@ -42,20 +44,6 @@ type UpcomingClassInput = {
   readonly meetingJoinUrl?: string | null;
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
 };
-
-export interface UpcomingClassDisplay {
-  readonly id: string;
-  readonly instructor: string;
-  readonly teacherId: string | null;
-  readonly scheduledStartAt: string;
-  readonly scheduledEndAt: string;
-  readonly durationMinutes: number;
-  readonly executionState: string;
-  readonly outcome: string | null;
-  readonly isFrozen: boolean;
-  readonly meetingJoinUrl: string | null | undefined;
-  readonly effectiveMeeting: EffectiveMeetingFieldsFragment | null;
-}
 
 function mapUpcomingClasses(classes: readonly UpcomingClassInput[] | null | undefined): UpcomingClassDisplay[] {
   return (classes ?? []).map(cls => ({
@@ -140,7 +128,6 @@ export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewMo
   const tc = useAppTranslation().commonTranslations;
   const params = useParams();
   const profileContext = useStudentProfileContext();
-  const _router = useRouter();
   const notifications = useNotifications();
   const studentId = props.studentId ?? profileContext?.studentId ?? (typeof params?.id === "string" ? params.id : "");
   const useUnifiedProfile = profileContext != null;
@@ -263,7 +250,6 @@ export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewMo
   );
 
   const unifiedLoading = useUnifiedProfile ? Boolean(profileContext?.loading) : studentLoading || upcomingLoading;
-  const _hasProfile = useUnifiedProfile ? Boolean(profileContext?.profile) : Boolean(studentData?.studentById);
 
   const error = !studentId || (!useUnifiedProfile && (studentError || upcomingError)) ? tc.loadFailed : null;
 

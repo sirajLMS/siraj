@@ -22,7 +22,10 @@ export type { PermissionCatalogToolbarProps } from "./permissionCatalogToolbar.t
 export type { PermissionCategoryGroupProps } from "./permissionCategoryGroup.types";
 export type { PermissionCategoryListProps } from "./permissionCategoryList.types";
 export type { PermissionFilterBarProps } from "./permissionFilterBar.types";
-export type { PermissionGroupFormProps } from "./permissionGroupForm.types";
+export type {
+  PermissionGroupFormContentProps,
+  PermissionGroupFormProps,
+} from "./permissionGroupForm.types";
 export type { BasePermissionGroupListProps } from "./permissionGroupList.types";
 export type { PermissionManagementDialogsProps } from "./permissionManagementDialogs.types";
 export type { PermissionRowProps } from "./permissionRow.types";

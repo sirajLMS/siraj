@@ -62,6 +62,7 @@ export function ResourcesDesktopView({
             labels={labels}
             filterType={filterType}
             sortBy={sortBy}
+            canManage={canManage}
             onFilterTypeChange={onFilterTypeChange}
             onSortByChange={onSortByChange}
             onDeleteRequest={onDeleteRequest}

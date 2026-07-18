@@ -2,18 +2,9 @@
 
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Chip, Typography } from "@mui/material";
-import type { WorkshopPromo } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import type { WorkshopPromoCardProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardComponents.types";
 
-interface WorkshopPromoCardMobileProps {
-  readonly promo: WorkshopPromo;
-  readonly labels: {
-    readonly badge: string;
-    readonly learnMore: string;
-  };
-  readonly onLearnMore: () => void;
-}
-
-export function WorkshopPromoCardMobile({ promo, labels, onLearnMore }: Readonly<WorkshopPromoCardMobileProps>) {
+export function WorkshopPromoCardMobile({ promo, labels, onLearnMore }: Readonly<WorkshopPromoCardProps>) {
   return (
     <Box
       sx={{

@@ -3,10 +3,10 @@
 import { ArrowDropDown } from "@mui/icons-material";
 import { Box, IconButton, Popover, Stack, styled, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
+import type { LocaleAdornmentSwitchProps } from "@/frontend/common/components/ui/input/localizedString/types";
 import { getLanguageDisplayName, getLanguageEmoji, languages } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
-import type { LocaleAdornmentSwitchProps } from "@/frontend/mobile/components/ui/input/localizedString/localeAdornmentSwitch.types";
 import type { AppLocale } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 

@@ -3,21 +3,8 @@
 import { AdminPanelSettingsOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AdminNoteCardDesktopProps } from "@/frontend/common/views/dashboard/classes/audit/adminNoteCard.types";
 import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
-
-export interface AdminNoteCardDesktopProps {
-  readonly note: AdminNoteInfo | null | undefined;
-  readonly labels: {
-    readonly title: string;
-    readonly titleMobile: string;
-    readonly lastUpdated: string;
-    readonly update: string;
-    readonly edit: string;
-  };
-  readonly onUpdate: () => void;
-  readonly onEdit?: () => void;
-}
 
 const StyledDesktopFooter = styled(Box)(({ theme }) => ({
   pt: 2,
