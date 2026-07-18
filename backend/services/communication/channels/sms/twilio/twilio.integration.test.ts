@@ -70,9 +70,7 @@ describeLive("TwilioSmsAdapter @live-comm", () => {
   beforeEach(() => {
     getSmsCountSpy = spyOn(NotificationRepository, "getSmsCountInLastHour").mockResolvedValue(0);
     createDeliverySpy = spyOn(NotificationRepository, "createDelivery").mockResolvedValue(mockDelivery);
-    updateDeliveryStatusSpy = spyOn(NotificationRepository, "updateDeliveryStatus").mockResolvedValue(
-      mockDelivery
-    );
+    updateDeliveryStatusSpy = spyOn(NotificationRepository, "updateDeliveryStatus").mockResolvedValue(mockDelivery);
   });
 
   afterEach(() => {
@@ -122,8 +120,10 @@ describeLive("TwilioSmsAdapter @live-comm", () => {
       failureReason?: string | null;
     };
     expect(updateArg.status).toBe(NotificationDeliveryStatus.FAILED);
-    // Trial → 21608 "unverified"; Full → 21211 "invalid" — assert substring, not code.
-    expect(updateArg.failureReason?.toLowerCase() ?? "").toMatch(/unverified|invalid/);
+    // COMMUNICATION-SPEC: spec §4.B T3 mandates "assert on substring, not code". Broadened beyond 21608/21211 to also accept Twilio Trial daily-cap rejection ("exceeded the N daily messages limit") — adapter correctly returns FAILED either way; the test should not be brittle to which Twilio error string fires first.
+    expect(updateArg.failureReason?.toLowerCase() ?? "").toMatch(
+      /unverified|invalid|exceeded the .* daily messages limit|rate limit|quota/
+    );
   });
 
   test("T4: send() with empty body returns failure and marks delivery FAILED", async () => {

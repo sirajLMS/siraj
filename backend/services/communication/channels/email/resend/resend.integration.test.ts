@@ -59,9 +59,7 @@ describeLive("ResendEmailAdapter @live-comm", () => {
 
   beforeEach(() => {
     createDeliverySpy = spyOn(NotificationRepository, "createDelivery").mockResolvedValue(mockDelivery);
-    updateDeliveryStatusSpy = spyOn(NotificationRepository, "updateDeliveryStatus").mockResolvedValue(
-      mockDelivery
-    );
+    updateDeliveryStatusSpy = spyOn(NotificationRepository, "updateDeliveryStatus").mockResolvedValue(mockDelivery);
   });
 
   afterEach(() => {

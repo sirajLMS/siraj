@@ -11,12 +11,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { deleteApp, getApp, getApps } from "firebase-admin/app";
 import { NotificationRepository } from "@/backend/db/repo";
-import {
-  DevicePlatform,
-  NotificationChannel,
-  NotificationDeliveryStatus,
-  NotificationEventType,
-} from "@/backend/enum";
+import { DevicePlatform, NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import { FcmPushAdapter } from "@/backend/services/communication/channels/push/fcm/FcmPushAdapter";
 import {
   FCM_INVALID_TOKEN_ERROR,

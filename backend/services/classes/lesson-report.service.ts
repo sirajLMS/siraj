@@ -6,6 +6,8 @@ import { classInstances, teachers } from "@/backend/db/schema";
 import { AppPermission, type AttendanceEvaluation, ClassExecutionState, LessonReportStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { CreditService } from "@/backend/services/billing/credit.service";
+import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 import type {
   LessonReportReturnType,
   LessonReportSelectType,
@@ -21,12 +23,8 @@ import { getServerTranslations } from "@/shared/locale";
  *
  * State machine:
  *   submitReport   → PENDING_REVIEW
- *   approveReport  → PENDING_REVIEW → APPROVED
- *   rejectReport   → PENDING_REVIEW → REJECTED
- *
- * Side effects (wired in later work streams):
- *   - approveReport: TeacherDuesService.createDueEntry(classInstanceId, actorUserId, tx)  (Work Stream 4)
- *   - rejectReport:  CreditService.refundOnCancel(studentId, classInstanceId, actorUserId, idempotencyKey, tx)  (Work Stream 2)
+ *   approveReport  → PENDING_REVIEW → APPROVED    (side effect: TeacherDueService.createDueEntry)
+ *   rejectReport   → PENDING_REVIEW → REJECTED    (side effect: CreditService.refundOnCancel)
  */
 export namespace LessonReportService {
   function toReturnType(row: LessonReportSelectType): LessonReportReturnType {
@@ -233,6 +231,7 @@ export namespace LessonReportService {
     locale?: string
   ): Promise<LessonReportReturnType> {
     await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_APPROVE, locale);
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const report = await LessonReportRepository.findById(reportId);
     if (!report) {
@@ -242,10 +241,39 @@ export namespace LessonReportService {
       throw new Error("lessonReport.alreadyReviewed");
     }
 
-    const updated = await LessonReportRepository.updateStatus(reportId, LessonReportStatus.APPROVED, actorUserId, null);
+    // Wrap the status transition + teacher-due creation in a single transaction so
+    // the side effect only commits if the report flips to APPROVED successfully,
+    // and vice-versa (avoids orphan dues on a rollback).
+    const updated = await db.transaction(async tx => {
+      const approved = await LessonReportRepository.updateStatus(
+        reportId,
+        LessonReportStatus.APPROVED,
+        actorUserId,
+        null,
+        tx
+      );
 
-    // Trigger side effect: create a teacher due entry.
-    // Wired in Work Stream 4: TeacherDuesService.createDueEntry(report.classInstanceId, actorUserId, tx)
+      // Side effect (Work Stream 4): create a TeacherDue row so the teacher is
+      // owed for this approved lesson. Idempotent at the DB level via the
+      // unique (class_instance_id) index on teacher_dues.
+      await TeacherDueService.createDueEntry(
+        report.classInstanceId,
+        report.teacherId,
+        report.studentId,
+        actorUserId,
+        tx,
+        locale
+      );
+
+      return approved;
+    });
+
+    logger.info("Lesson report approved and teacher due entry created", {
+      reportId,
+      classInstanceId: report.classInstanceId,
+      teacherId: report.teacherId,
+      actorUserId,
+    });
 
     return toReturnType(updated);
   }
@@ -269,17 +297,71 @@ export namespace LessonReportService {
       throw new Error(tErrors.invalidInput);
     }
 
-    const updated = await LessonReportRepository.updateStatus(
-      input.reportId,
-      LessonReportStatus.REJECTED,
-      actorUserId,
-      input.rejectionReason
-    );
+    // Wrap the status transition + credit refund in a single transaction so a
+    // refund failure rolls back the rejection (and a rejection failure never
+    // leaves a dangling refund).
+    const updated = await db.transaction(async tx => {
+      const rejected = await LessonReportRepository.updateStatus(
+        input.reportId,
+        LessonReportStatus.REJECTED,
+        actorUserId,
+        input.rejectionReason,
+        tx
+      );
 
-    // Trigger side effect: refund the student's reserved credit.
-    // Wired in Work Stream 2: CreditService.refundOnCancel(report.studentId, report.classInstanceId, actorUserId, report.idempotencyKey, tx)
+      // Side effect (Work Stream 2): refund the student's reserved credit for
+      // the rejected lesson. The refund is idempotent on the booking key
+      // (derived from classInstanceId), so re-running approve/reject cycles
+      // never double-refunds.
+      const refundIdempotencyKey = `credit-refund:${report.classInstanceId}`;
+      await CreditService.refundOnCancel(
+        report.studentId,
+        report.classInstanceId,
+        actorUserId,
+        refundIdempotencyKey,
+        tx,
+        tErrors
+      );
+
+      return rejected;
+    });
+
+    logger.info("Lesson report rejected and credit refunded", {
+      reportId: input.reportId,
+      classInstanceId: report.classInstanceId,
+      studentId: report.studentId,
+      actorUserId,
+    });
 
     return toReturnType(updated);
+  }
+
+  export async function getReportById(
+    actorUserId: string,
+    reportId: string,
+    locale?: string
+  ): Promise<LessonReportReturnType | null> {
+    await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_REVIEW, locale);
+    const row = await LessonReportRepository.findById(reportId);
+    return row ? toReturnType(row) : null;
+  }
+
+  /**
+   * Return the most-recently APPROVED lesson reports for the supervisor
+   * dashboard's "Recent Approvals" panel. Supervisors need
+   * LESSON_REPORTS_REVIEW permission (already covers read access). Limited to
+   * a small `limit` (defaults to 5) — callers should never request more than
+   * 50 to keep the response payload small.
+   */
+  export async function getRecentApprovedLessonReports(
+    actorUserId: string,
+    limit = 5,
+    locale?: string
+  ): Promise<LessonReportReturnType[]> {
+    await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_REVIEW, locale);
+    const safeLimit = Math.min(Math.max(1, limit), 50);
+    const rows = await LessonReportRepository.findRecentApproved(safeLimit);
+    return rows.map(toReturnType);
   }
 
   export async function getReportByClassId(

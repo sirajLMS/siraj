@@ -94,6 +94,16 @@ const LMS_PERMISSION_SEEDS: readonly LmsPermissionSeed[] = [
     category: { en: "Teacher Dues", ar: "مستحقات المعلمين" },
   },
   {
+    key: AppPermission.TEACHER_DUES_MARK_PAID,
+    resource: "teacher_dues",
+    action: "mark_paid",
+    description: {
+      en: "Mark teacher dues entries as paid (single or bulk)",
+      ar: "تعليم مستحقات المعلمين كمدفوعة (مفردة أو دفعة)",
+    },
+    category: { en: "Teacher Dues", ar: "مستحقات المعلمين" },
+  },
+  {
     key: AppPermission.MONTHLY_REPORTS_VIEW,
     resource: "monthly_reports",
     action: "view",
@@ -112,6 +122,7 @@ const SUPERVISOR_GROUP_PERMISSIONS: readonly AppPermission[] = [
   AppPermission.SUPERVISOR_VIEW_DASHBOARD,
   AppPermission.MONTHLY_REPORTS_VIEW,
   AppPermission.TEACHER_DUES_VIEW,
+  AppPermission.TEACHER_DUES_MARK_PAID,
   // Visibility over the schedule, sessions, and history so supervisors can
   // triage lesson reports across teachers.
   AppPermission.DASHBOARD_VIEW,

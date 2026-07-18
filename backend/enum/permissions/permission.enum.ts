@@ -244,6 +244,8 @@ export enum AppPermission {
   CREDITS_MANAGE = "credits.manage",
   // LMS — Teacher dues ledger
   TEACHER_DUES_VIEW = "teacher_dues.view",
+  // LMS — Mark teacher dues as paid (separate from view access)
+  TEACHER_DUES_MARK_PAID = "teacher_dues.mark_paid",
   // LMS — Monthly reports
   MONTHLY_REPORTS_VIEW = "monthly_reports.view",
 }

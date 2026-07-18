@@ -24,7 +24,7 @@ export namespace TeacherDueService {
     const ownTeacher = await TeacherRepository.findByUserId(actorUserId);
     if (ownTeacher && ownTeacher.id === teacherId) return;
 
-    const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+    const t = getServerTranslations(locale ?? "en").errorsTranslations;
     throw new Error(t.unauthorizedAction);
   }
 
@@ -33,7 +33,8 @@ export namespace TeacherDueService {
     teacherId: string,
     studentId: string,
     approvedByUserId: string,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<TeacherDueReturnType> {
     logger.info("Creating teacher due entry", { classInstanceId, teacherId, studentId });
 
@@ -45,14 +46,14 @@ export namespace TeacherDueService {
       .where(eq(classInstances.id, classInstanceId))
       .limit(1);
     if (!classInstance) {
-      const t = getServerTranslations("ar").errorsTranslations;
-      throw new Error(t.classInstanceNotFound({ id: classInstanceId }));
+      const t = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(t.scheduling.classInstanceNotFound({ id: classInstanceId }));
     }
 
     const teacher = await TeacherRepository.findById(teacherId, tx);
     if (!teacher) {
-      const t = getServerTranslations("ar").errorsTranslations;
-      throw new Error(t.teacherNotFound(teacherId));
+      const t = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(t.teacher.teacherNotFound(teacherId));
     }
 
     const hourlyRateStr = teacher.hourlyRate ?? "0";
@@ -169,7 +170,7 @@ export namespace TeacherDueService {
   ): Promise<TeacherPendingDuesSummaryReturnType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.TEACHER_DUES_VIEW);
     if (!hasPermission) {
-      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      const t = getServerTranslations(locale ?? "en").errorsTranslations;
       throw new Error(t.insufficientPermissions);
     }
     return TeacherDueRepository.getPendingDuesSummary();
@@ -181,9 +182,9 @@ export namespace TeacherDueService {
     teacherPaymentId: string,
     locale?: string
   ): Promise<TeacherDueReturnType[]> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.TEACHER_DUES_VIEW);
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.TEACHER_DUES_MARK_PAID);
     if (!hasPermission) {
-      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      const t = getServerTranslations(locale ?? "en").errorsTranslations;
       throw new Error(t.insufficientPermissions);
     }
     const updated = await TeacherDueRepository.markAsPaid([...dueIds], teacherPaymentId);
