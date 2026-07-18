@@ -32,11 +32,10 @@ async function warmUpAndLogin(
   // loginAsDemoUser navigates to "/ar/dashboard" which 404s (the real route is "/dashboard").
   // Re-navigate to the actual dashboard route so the page renders real content.
   // Use "commit" (the earliest non-interactive state) so we don't block on slow initial compile.
-  await page.goto(`${getTestBaseUrl()}/dashboard`, { waitUntil: "commit" }).catch(async (err: unknown) => {
+  await page.goto(`${getTestBaseUrl()}/dashboard`, { waitUntil: "commit" }).catch(async (_err: unknown) => {
     // First navigation may trigger Turbopack compile; retry with a longer wait.
     await page.waitForTimeout(2000);
     await page.goto(`${getTestBaseUrl()}/dashboard`, { waitUntil: "domcontentloaded" }).catch(() => {});
-    void err;
   });
   if (process.env.E2E_DEBUG === "1") {
     const slug = groupSlug.replace(/[^a-zA-Z0-9]/g, "_");

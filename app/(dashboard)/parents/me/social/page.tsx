@@ -14,13 +14,7 @@ export async function generateMetadata({
   return { title: t.pageTitle };
 }
 
-interface PageProps {
-  readonly params: Promise<{ readonly locale: string }>;
-}
-
-export default async function ParentMeSocialPage({ params }: PageProps) {
-  const { locale: _locale } = await params;
-
+export default async function ParentMeSocialPage() {
   const { userId } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();

@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
@@ -75,56 +75,46 @@ export function RescheduleContainer() {
   const defaultDate = classInstance?.scheduledDate ?? "";
   const defaultTime = classInstance?.startTime ?? "";
 
-  if (loading && !data) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (!classInstanceId || !classInstance) {
-    logger.error("Error fetching class details for rescheduling:", error);
-    return <Box sx={{ p: 3, textAlign: "center" }}>{t.classInstanceNotFound}</Box>;
-  }
-
-  const onSubmit = async (
-    formData: import("@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema").RescheduleFormData
-  ) => {
-    const startAt = combineDateTime(formData.newDate, formData.newTime);
-    if (!startAt) {
-      logger.error("Invalid date or time format for reschedule");
-      return;
-    }
-    const durationMinutes = classInstance.durationMinutes ?? 60;
-    const endAt = new Date(startAt.getTime() + durationMinutes * 60 * 1000);
-
-    try {
-      const { data: mutationResult } = await rescheduleClass({
-        variables: {
-          classInstanceId,
-          input: {
-            scheduledStartAt: startAt.toISOString(),
-            scheduledEndAt: endAt.toISOString(),
-            durationMinutes,
-          },
-        },
-      });
-
-      if (mutationResult?.rescheduleClass?.id) {
-        setShowSuccess(true);
-        setTimeout(() => {
-          router.push(`/classes/${mutationResult.rescheduleClass?.id}`);
-        }, 1500);
+  const onSubmit = useCallback(
+    async (
+      formData: import("@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema").RescheduleFormData
+    ) => {
+      const startAt = combineDateTime(formData.newDate, formData.newTime);
+      if (!startAt) {
+        logger.error("Invalid date or time format for reschedule");
+        return;
       }
-    } catch (err) {
-      logger.error("Failed to reschedule class:", err);
-    }
-  };
+      const durationMinutes = classInstance?.durationMinutes ?? 60;
+      const endAt = new Date(startAt.getTime() + durationMinutes * 60 * 1000);
 
-  const onCancel = () => {
+      try {
+        const { data: mutationResult } = await rescheduleClass({
+          variables: {
+            classInstanceId,
+            input: {
+              scheduledStartAt: startAt.toISOString(),
+              scheduledEndAt: endAt.toISOString(),
+              durationMinutes,
+            },
+          },
+        });
+
+        if (mutationResult?.rescheduleClass?.id) {
+          setShowSuccess(true);
+          setTimeout(() => {
+            router.push(`/classes/${mutationResult.rescheduleClass?.id}`);
+          }, 1500);
+        }
+      } catch (err) {
+        logger.error("Failed to reschedule class:", err);
+      }
+    },
+    [classInstance, rescheduleClass, classInstanceId, setShowSuccess, router]
+  );
+
+  const onCancel = useCallback(() => {
     router.push(`/classes/${classInstanceId}`);
-  };
+  }, [router, classInstanceId]);
 
   const props = useMemo<UseRescheduleViewModelProps>(
     () => ({
@@ -139,6 +129,20 @@ export function RescheduleContainer() {
   );
 
   const viewModel = useRescheduleViewModel(props);
+
+  if (loading && !data) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!classInstanceId || !classInstance) {
+    logger.error("Error fetching class details for rescheduling:", error);
+    return <Box sx={{ p: 3, textAlign: "center" }}>{t.classInstanceNotFound}</Box>;
+  }
+
   return (
     <RequirePermission permissions={[AppPermission.SessionReschedule]}>
       <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />

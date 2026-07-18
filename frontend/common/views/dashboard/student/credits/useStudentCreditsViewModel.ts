@@ -62,7 +62,7 @@ export interface StudentCreditsViewModel {
   readonly onBackToDashboard: () => void;
 }
 
-export type UseStudentCreditsViewModelProps = {};
+export type UseStudentCreditsViewModelProps = Record<string, never>;
 
 export function useStudentCreditsViewModel(): StudentCreditsViewModel {
   const t = useAppTranslation().dashboardTranslations.studentPortalCredits;

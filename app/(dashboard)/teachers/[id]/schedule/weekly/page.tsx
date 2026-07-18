@@ -27,7 +27,7 @@ export async function generateMetadata({
 }
 
 export default async function TeacherWeeklySchedulePage({ params }: PageProps) {
-  const { id, locale: _locale } = await params;
+  const { id } = await params;
 
   const { userId } = await getServerUserContext();
 

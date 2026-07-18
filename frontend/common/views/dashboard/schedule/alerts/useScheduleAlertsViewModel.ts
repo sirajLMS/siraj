@@ -171,7 +171,7 @@ export function useScheduleAlertsViewModel(): ScheduleAlertsViewModel {
   const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
 
   const alerts: ScheduleAlert[] = [];
-  const metrics: AlertsMetric[] = [];
+  const metrics: AlertsMetric[] = useMemo(() => [], []);
   const labels = buildScheduleLabels(t);
 
   const metricLabels: Record<string, { label: string; subLabel: string }> = useMemo(

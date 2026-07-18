@@ -3347,12 +3347,26 @@ export enum NotificationChannel {
 }
 
 export enum NotificationEventType {
+  ClassActivated = 'CLASS_ACTIVATED',
+  ClassCancelled = 'CLASS_CANCELLED',
+  ClassCompleted = 'CLASS_COMPLETED',
+  ClassLeaveRequested = 'CLASS_LEAVE_REQUESTED',
+  ClassMarkedAbsent = 'CLASS_MARKED_ABSENT',
+  ClassMarkedMissed = 'CLASS_MARKED_MISSED',
   ClassReminder = 'CLASS_REMINDER',
+  ClassRescheduled = 'CLASS_RESCHEDULED',
+  ClassReset = 'CLASS_RESET',
+  ClassScheduled = 'CLASS_SCHEDULED',
+  ClassStarted = 'CLASS_STARTED',
   ComplaintResponse = 'COMPLAINT_RESPONSE',
   InvoiceGenerated = 'INVOICE_GENERATED',
+  InvoiceStatusChanged = 'INVOICE_STATUS_CHANGED',
   NewComplaint = 'NEW_COMPLAINT',
   NewSuggestion = 'NEW_SUGGESTION',
   PaymentMethodChanged = 'PAYMENT_METHOD_CHANGED',
+  StudentQuotaOverridden = 'STUDENT_QUOTA_OVERRIDDEN',
+  StudentStatusChanged = 'STUDENT_STATUS_CHANGED',
+  StudentTeacherReassigned = 'STUDENT_TEACHER_REASSIGNED',
   SuggestionAcknowledged = 'SUGGESTION_ACKNOWLEDGED',
   SuggestionDuplicateMarked = 'SUGGESTION_DUPLICATE_MARKED'
 }

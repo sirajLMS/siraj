@@ -212,17 +212,6 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
     notifications.show(t.exportPdfComingSoon, { severity: "info", autoHideDuration: 4000 });
   }, [notifications, t]);
 
-  if (error) {
-    logger.error("Error loading teacher availability:", { error });
-    return (
-      <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
-        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <Typography sx={theme => ({ color: theme.palette.error.main })}>{tc.loadFailed}</Typography>
-        </Box>
-      </RequirePermission>
-    );
-  }
-
   const props: UseTeacherAvailabilityViewModelProps = {
     availability,
     insights,
@@ -234,6 +223,17 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
   };
 
   const viewModel = useTeacherAvailabilityViewModel(props);
+
+  if (error) {
+    logger.error("Error loading teacher availability:", { error });
+    return (
+      <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+          <Typography sx={theme => ({ color: theme.palette.error.main })}>{tc.loadFailed}</Typography>
+        </Box>
+      </RequirePermission>
+    );
+  }
 
   return (
     <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>

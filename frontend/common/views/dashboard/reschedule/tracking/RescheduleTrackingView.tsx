@@ -2,7 +2,7 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { RescheduleTrackingViewModel } from "./useRescheduleTrackingViewModel";
+import type { RescheduleTrackingViewModel } from "@/frontend/common/views/dashboard/reschedule/tracking/useRescheduleTrackingViewModel";
 
 const lazyViews = createLazyView<RescheduleTrackingViewModel>(
   () =>

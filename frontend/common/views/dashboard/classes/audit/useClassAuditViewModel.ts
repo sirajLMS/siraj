@@ -36,6 +36,31 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
 
   const audit = data?.groupClassAudit;
 
+  const csvHeaders = [t.students.studentName, t.students.idNumber, t.students.attendanceStatus] as const;
+
+  const handleGenerateReport = useCallback(() => {
+    exportToCsv(audit?.students ?? [], "class-audit", id, csvHeaders);
+  }, [audit?.students, id, csvHeaders]);
+
+  const handleEditClass = useCallback(() => {
+    router.push(`/reschedule?classInstanceId=${id}`);
+  }, [router, id]);
+
+  const handleExportStudents = useCallback(() => {
+    exportToCsv(audit?.students ?? [], "students", id, csvHeaders);
+  }, [audit?.students, id, csvHeaders]);
+
+  const handleViewStudent = useCallback(
+    (studentId: string) => {
+      router.push(studentProfileTabHref(studentId, "status"));
+    },
+    [router]
+  );
+
+  const handleResendNotifications = useCallback(() => {
+    resendNotifications({ variables: { classInstanceId: id } });
+  }, [resendNotifications, id]);
+
   if (loading && !data) {
     return createStubClassAuditViewModel("loading");
   }
@@ -104,31 +129,6 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
       edit: t.adminNote.edit,
     },
   };
-
-  const csvHeaders = [t.students.studentName, t.students.idNumber, t.students.attendanceStatus] as const;
-
-  const handleGenerateReport = useCallback(() => {
-    exportToCsv(audit?.students ?? [], "class-audit", id, csvHeaders);
-  }, [audit?.students, id, csvHeaders]);
-
-  const handleEditClass = useCallback(() => {
-    router.push(`/reschedule?classInstanceId=${id}`);
-  }, [router, id]);
-
-  const handleExportStudents = useCallback(() => {
-    exportToCsv(audit?.students ?? [], "students", id, csvHeaders);
-  }, [audit?.students, id, csvHeaders]);
-
-  const handleViewStudent = useCallback(
-    (studentId: string) => {
-      router.push(studentProfileTabHref(studentId, "status"));
-    },
-    [router]
-  );
-
-  const handleResendNotifications = useCallback(() => {
-    resendNotifications({ variables: { classInstanceId: id } });
-  }, [resendNotifications, id]);
 
   return {
     status: "ready",

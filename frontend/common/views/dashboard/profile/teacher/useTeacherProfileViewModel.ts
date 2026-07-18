@@ -8,7 +8,11 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import type { TeacherAdminData, TeacherOwnData, TeacherViewData } from "./sections/teacherProfileTypes";
+import type {
+  TeacherAdminData,
+  TeacherOwnData,
+  TeacherViewData,
+} from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 

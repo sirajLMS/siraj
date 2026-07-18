@@ -11,25 +11,36 @@ import type { StaffProfileViewModel } from "@/frontend/common/views/dashboard/pr
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
-export function StaffProfileDesktopView({
-  scope,
-  mode,
-  isAdminScope,
-  loading,
-  error,
-  isSaving,
-  onSubmitOwn,
-  onSubmitAdmin,
-  staffData,
-  avatarUrl,
-  displayCurrency,
-  permissionGroups,
-  permissionOverrides,
-  activeTab,
-  canView,
-}: Readonly<StaffProfileViewModel>) {
-  const t = useAppTranslation().profileTranslations.base;
-  const st = useAppTranslation().profileTranslations.staff;
+type StaffProfileTranslations = ReturnType<typeof useAppTranslation>["profileTranslations"];
+
+interface StaffProfileDesktopGuardProps {
+  readonly activeTab: string;
+  readonly scope: ProfileScope;
+  readonly isAdminScope: boolean;
+  readonly loading: boolean;
+  readonly error: Error | undefined;
+  readonly staffData: StaffProfileViewModel["staffData"] | null | undefined;
+  readonly permissionGroups: StaffProfileViewModel["permissionGroups"];
+  readonly permissionOverrides: StaffProfileViewModel["permissionOverrides"];
+  readonly canView: StaffProfileViewModel["canView"];
+  readonly translations: StaffProfileTranslations;
+}
+
+function StaffProfileDesktopGuard(props: Readonly<StaffProfileDesktopGuardProps>) {
+  const {
+    activeTab,
+    scope,
+    isAdminScope,
+    loading,
+    error,
+    staffData,
+    permissionGroups,
+    permissionOverrides,
+    canView,
+    translations,
+  } = props;
+  const t = translations.base;
+  const st = translations.staff;
 
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
@@ -48,7 +59,6 @@ export function StaffProfileDesktopView({
     return null;
   }
 
-  // Profile tab content
   if (loading && !staffData) {
     return (
       <DesktopPageContainer>
@@ -87,6 +97,48 @@ export function StaffProfileDesktopView({
         </Alert>
       </DesktopPageContainer>
     );
+  }
+
+  return null;
+}
+
+export function StaffProfileDesktopView({
+  scope,
+  mode,
+  isAdminScope,
+  loading,
+  error,
+  isSaving,
+  onSubmitOwn,
+  onSubmitAdmin,
+  staffData,
+  avatarUrl,
+  displayCurrency,
+  permissionGroups,
+  permissionOverrides,
+  activeTab,
+  canView,
+}: Readonly<StaffProfileViewModel>) {
+  const translations = useAppTranslation().profileTranslations;
+  const t = translations.base;
+  const st = translations.staff;
+
+  const guard = (
+    <StaffProfileDesktopGuard
+      activeTab={activeTab}
+      scope={scope}
+      isAdminScope={isAdminScope}
+      loading={loading}
+      error={error}
+      staffData={staffData}
+      permissionGroups={permissionGroups}
+      permissionOverrides={permissionOverrides}
+      canView={canView}
+      translations={translations}
+    />
+  );
+  if (guard !== null) {
+    return guard;
   }
 
   const renderAccountSection = () => {
@@ -220,7 +272,7 @@ export function StaffProfileDesktopView({
             displayCurrency={displayCurrency}
             isAdminScope={isAdminScope}
             isSaving={isSaving}
-            onSubmit={onSubmitOwn as any}
+            onSubmit={values => onSubmitOwn(values)}
           />
         </Stack>
       </DesktopPageContainer>
@@ -236,7 +288,7 @@ export function StaffProfileDesktopView({
           displayCurrency={displayCurrency}
           isAdminScope={isAdminScope}
           isSaving={isSaving}
-          onSubmit={onSubmitAdmin as any}
+          onSubmit={values => onSubmitAdmin(values)}
         />
       </Stack>
     </DesktopPageContainer>

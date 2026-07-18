@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, type ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   activateClassMutationDocument,
   updateSessionStatusAbsentMutationDocument,
@@ -21,7 +21,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import type { StudentProgressFeedItem } from "@/frontend/common/types/shared.types";
+import type { StudentProgressFeedItem, TeacherProgressFeedEventKind } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
 import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import {
@@ -126,7 +126,7 @@ function mapProgressFeed(feed: readonly RawFeedItem[] | null | undefined) {
       summary: f.title || "",
       scheduledTime: null,
       durationMinutes: null,
-      eventKind: icon as any,
+      eventKind: icon as unknown as TeacherProgressFeedEventKind,
       occurredAt: new Date(),
       timeAgo: "1m ago",
       infoTooltip: null,
@@ -318,7 +318,7 @@ export function TeacherDashboardContainer() {
           scheduledStartAt: data.scheduledStartAt,
           scheduledEndAt: data.scheduledEndAt,
           durationMinutes: data.durationMinutes,
-          classType: data.classType as any,
+          classType: data.classType as unknown as ClassType | null,
         },
       },
     });

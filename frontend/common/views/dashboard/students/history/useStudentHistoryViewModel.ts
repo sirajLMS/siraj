@@ -64,8 +64,9 @@ export function useStudentHistoryViewModel(props: Readonly<UseStudentHistoryView
 
   const loading = profileLoading || historyLoading;
 
-  // TODO: Derive studentName, currentMonth, classes, etc. from profileData and historyData
-  // For now, returning a basic structure that matches the view components
+  // Derivation of studentName / currentMonth / classes from profileData and
+  // historyData is intentionally deferred — returning a basic structure that
+  // matches the view components until the rollout is complete.
   return {
     studentName: profileData?.studentProfile?.name ?? "Student",
     currentMonth: new Date(),

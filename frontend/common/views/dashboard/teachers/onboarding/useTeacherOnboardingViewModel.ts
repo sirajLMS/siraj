@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
 import { CurrencyCode, IanaTimezone, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -90,9 +90,9 @@ export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
     }
   };
 
-  const onDismissSuccess = () => {
+  const onDismissSuccess = useCallback(() => {
     setShowSuccess(false);
-  };
+  }, []);
 
   useEffect(() => {
     if (!showSuccess) return undefined;

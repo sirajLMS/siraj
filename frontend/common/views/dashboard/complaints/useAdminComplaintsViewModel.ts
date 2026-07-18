@@ -49,17 +49,19 @@ export interface AdminComplaintsViewModel {
   readonly onRefetch: () => void;
 }
 
-export type UseAdminComplaintsViewModelProps = {};
+export type UseAdminComplaintsViewModelProps = Record<string, never>;
 
-function buildLabels(): ComplaintsAdminLabels {
-  const t = useAppTranslation().dashboardTranslations.complaints;
+function buildLabels(
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["complaints"]
+): ComplaintsAdminLabels {
   return buildComplaintsLabels(t).admin;
 }
 
 export function useAdminComplaintsViewModel(
   _props: Readonly<UseAdminComplaintsViewModelProps>
 ): AdminComplaintsViewModel {
-  const labels = useMemo(() => buildLabels(), []);
+  const complaintsT = useAppTranslation().dashboardTranslations.complaints;
+  const labels = useMemo(() => buildLabels(complaintsT), [complaintsT]);
   const hasPermission = useUserStore(state => state.hasPermission);
   const canManage = hasPermission(AppPermission.ComplaintsRespond);
   const canDelete = hasPermission(AppPermission.ComplaintsDelete);

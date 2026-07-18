@@ -2,8 +2,11 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { ParentsViewModel, UseParentsViewModelProps } from "./ParentsViewTypes";
-import { useParentsViewModel } from "./useParentsViewModel";
+import type {
+  ParentsViewModel,
+  UseParentsViewModelProps,
+} from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
+import { useParentsViewModel } from "@/frontend/common/views/dashboard/admin/parents/home/useParentsViewModel";
 
 const lazyViews = createLazyView<ParentsViewModel>(
   () =>

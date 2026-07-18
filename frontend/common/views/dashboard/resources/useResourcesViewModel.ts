@@ -129,7 +129,7 @@ export function useResourcesViewModel(_props: Readonly<UseResourcesViewModelProp
         filePath: resource.filePath ?? "",
         fileType: resolvedFileType,
         uploadedAt: resource.createdAt ?? "",
-        uploadedAtTimestamp: new Date(resource.createdAt ?? Date.now()).getTime(),
+        uploadedAtTimestamp: resource.createdAt ? new Date(resource.createdAt).getTime() : 0,
       };
     });
   }, [data]);

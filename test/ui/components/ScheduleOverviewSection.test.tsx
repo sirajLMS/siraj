@@ -47,9 +47,16 @@ mock.module("@/frontend/common/components/auth/RequirePermission", () => ({
   },
 }));
 
-// Mock the entire ScheduleOverviewView to render desktop directly
-mock.module("@/frontend/common/views/dashboard/admin/home/scheduleOverview/scheduleOverviewView", () => ({
-  ScheduleOverviewView: (props: UseScheduleOverviewViewModelProps) => {
+// Mock the entire ScheduleOverviewView to render desktop directly.
+// NOTE: The common standalone `ScheduleOverviewView` switcher was removed by the
+// Plan v5 mobile/desktop refactor — the section is now composed inline by
+// `AdminDashboardView` (common switcher) which delegates to
+// `ScheduleOverviewDesktopView` / `ScheduleOverviewMobileView` tier views. The
+// mock-module target path below redirects to the canonical desktop tier module
+// (real file) so the import in this file resolves at type-check time; at runtime
+// the mock factory still substitutes our hand-rolled stub for assertion control.
+mock.module("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/scheduleOverview.desktop", () => ({
+  ScheduleOverviewDesktopView: (props: UseScheduleOverviewViewModelProps) => {
     const hasSearchPermission = useUserStore.getState().hasPermission?.(AppPermission.DashboardSearch) ?? false;
     return (
       <div data-testid="desktop-view">
@@ -80,8 +87,11 @@ import {
   ClassOutcome,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { ScheduleOverviewView } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/scheduleOverviewView";
-import type { UseScheduleOverviewViewModelProps } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
+import type {
+  ScheduleOverviewViewModel,
+  UseScheduleOverviewViewModelProps,
+} from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
+import { ScheduleOverviewDesktopView as ScheduleOverviewView } from "@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/scheduleOverview.desktop";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -100,48 +110,64 @@ const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
   [ClassExecutionState.Completed]: "Completed",
 };
 
-const createMockProps = (
-  overrides: Partial<UseScheduleOverviewViewModelProps> = {}
-): UseScheduleOverviewViewModelProps => ({
-  title: "Schedule Overview",
-  searchPlaceholder: "Search by student name",
-  searchValue: "",
-  rows: [],
-  headers: {
-    student: "Student",
-    teacher: "Teacher",
-    time: "Time",
-    yourTime: "Your Time",
-    teacherTime: "Teacher Time",
-    studentTime: "Student Time",
-    duration: "Duration",
-    status: "Status",
-    actions: "Actions",
-    history: "History",
-    joinVideo: "Join Video",
-  },
-  statusLabels,
-  detailsLabel: "View Details",
-  emptyMessage: "No classes scheduled",
-  todayLabel: "Today",
-  previousDayLabel: "Previous day",
-  nextDayLabel: "Next day",
-  dateLabel: "Date",
-  dateValue: "2026-06-20",
-  teacherPlaceholder: "Filter by teacher",
-  teacherValue: "",
-  submitLabel: "Apply",
-  teachers: [],
-  page: 0,
-  pageSize: 10,
-  totalCount: 0,
-  onPageChange: mock(() => {}),
-  onSearchChange: mock(() => {}),
-  onDateChange: mock(() => {}),
-  onTeacherChange: mock(() => {}),
-  onSubmit: mock(() => {}),
-  ...overrides,
-});
+const createMockProps = (overrides: Partial<UseScheduleOverviewViewModelProps> = {}): ScheduleOverviewViewModel => {
+  // Plan v5: the section's standalone `ScheduleOverviewView` switcher was removed
+  // by the mobile/desktop refactor; the section is now rendered inline by tier
+  // switchers (`ScheduleOverviewDesktopView` / `ScheduleOverviewMobileView`).
+  // Those tier views take the full `ScheduleOverviewViewModel` (incl. the fields
+  // the common `useScheduleOverviewViewModel` hook derives at runtime). The
+  // runtime mocks below override the entire module so only the prop fields the
+  // stub consumes matter, but we still surface a type-complete view model here
+  // so `React.createElement(ScheduleOverviewView, props)` passes type-check.
+  const base: UseScheduleOverviewViewModelProps = {
+    title: "Schedule Overview",
+    searchPlaceholder: "Search by student name",
+    searchValue: "",
+    rows: [],
+    headers: {
+      student: "Student",
+      teacher: "Teacher",
+      time: "Time",
+      yourTime: "Your Time",
+      teacherTime: "Teacher Time",
+      studentTime: "Student Time",
+      duration: "Duration",
+      status: "Status",
+      actions: "Actions",
+      history: "History",
+      joinVideo: "Join Video",
+    },
+    statusLabels,
+    detailsLabel: "View Details",
+    emptyMessage: "No classes scheduled",
+    todayLabel: "Today",
+    previousDayLabel: "Previous day",
+    nextDayLabel: "Next day",
+    dateLabel: "Date",
+    dateValue: "2026-06-20",
+    teacherPlaceholder: "Filter by teacher",
+    teacherValue: "",
+    submitLabel: "Apply",
+    teachers: [],
+    page: 0,
+    pageSize: 10,
+    totalCount: 0,
+    onPageChange: mock(() => {}),
+    onSearchChange: mock(() => {}),
+    onDateChange: mock(() => {}),
+    onTeacherChange: mock(() => {}),
+    onSubmit: mock(() => {}),
+    ...overrides,
+  };
+  return {
+    ...base,
+    pageCount: 0,
+    showTimezones: false,
+    locale: "en",
+    canDashboardSearch: false,
+    canScheduleFilterAdvanced: false,
+  };
+};
 
 describe("ScheduleOverviewSection", () => {
   test("search input visible with DashboardSearch permission", () => {

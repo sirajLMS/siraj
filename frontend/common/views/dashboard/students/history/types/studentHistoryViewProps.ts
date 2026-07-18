@@ -1,6 +1,6 @@
-import type { ClassSession } from "../types";
+import type { ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 
-import type { StudentHistoryMetrics } from "./studentHistoryTypes";
+import type { StudentHistoryMetrics } from "@/frontend/common/views/dashboard/students/history/types/studentHistoryTypes";
 
 export interface StudentHistoryViewProps {
   readonly studentName: string;

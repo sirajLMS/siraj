@@ -21,33 +21,6 @@ async function expectVisible(locator: Locator): Promise<void> {
   expect(await locator.first().isVisible()).toBe(true);
 }
 
-async function _expectHaveText(locator: Locator, text: string): Promise<void> {
-  expect(await locator.first().textContent()).toBe(text);
-}
-
-async function _expectContainText(locator: Locator, text: string): Promise<void> {
-  const content = await locator.first().textContent();
-  expect(content).toBeTruthy();
-  expect(content as string).toContain(text);
-}
-
-async function _expectHaveAttribute(locator: Locator, attr: string, value: string): Promise<void> {
-  expect(await locator.first().getAttribute(attr)).toBe(value);
-}
-
-async function _expectHaveCount(locator: Locator, count: number): Promise<void> {
-  expect(await locator.count()).toBe(count);
-}
-
-async function _expectUrl(page: Page, url: string, exact = true): Promise<void> {
-  const current = page.url();
-  if (exact) {
-    expect(current).toBe(url);
-  } else {
-    expect(current).toContain(url);
-  }
-}
-
 describe("Student Portal E2E", () => {
   test("Student login → dashboard loads with NextClassJoinCard hero", async () => {
     context = await createContext();

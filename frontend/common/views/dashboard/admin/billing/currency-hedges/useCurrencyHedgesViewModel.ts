@@ -1,14 +1,9 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import {
-  createCurrencyHedgeMutationDocument,
-  currencyHedgesQueryDocument,
-  deleteCurrencyHedgeMutationDocument,
-  updateCurrencyHedgeMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments";
+import { currencyHedgesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAppTranslation } from "@/shared/locale";
 
 export type HedgeRow = {
@@ -21,7 +16,7 @@ export type HedgeRow = {
 };
 
 const HEDGE_TYPE_LONG = "LONG";
-const _HEDGE_TYPE_SHORT = "SHORT";
+const INITIAL_HEDGE_TYPE = "SHORT";
 
 export type UseCurrencyHedgesViewModelProps = Record<string, never>;
 
@@ -47,26 +42,18 @@ export interface CurrencyHedgesViewModel {
 
 export function useCurrencyHedgesViewModel(_props: Readonly<UseCurrencyHedgesViewModelProps>): CurrencyHedgesViewModel {
   const t = useAppTranslation().dashboardTranslations.billingCurrencyHedges;
-  const [_dialogOpen, _setDialogOpen] = useState(false);
-  const [_deleteOpen, _setDeleteOpen] = useState(false);
-  const [_editingRow, _setEditingRow] = useState<HedgeRow | null>(null);
-  const [_deletingRow, _setDeletingRow] = useState<HedgeRow | null>(null);
-  const [_currency, _setCurrency] = useState<CurrencyCode>(CurrencyCode.Usd);
-  const [_amount, _setAmount] = useState("");
-  const [_hedgeType, _setHedgeType] = useState(_HEDGE_TYPE_SHORT);
-  const [_notes, _setNotes] = useState("");
+  const [, setDialogOpen] = useState(false);
+  const [, setDeleteOpen] = useState(false);
+  const [, setEditingRow] = useState<HedgeRow | null>(null);
+  const [, setDeletingRow] = useState<HedgeRow | null>(null);
+  const [, setCurrency] = useState<CurrencyCode>(CurrencyCode.Usd);
+  const [, setAmount] = useState("");
+  const [, setHedgeType] = useState(INITIAL_HEDGE_TYPE);
+  const [, setNotes] = useState("");
 
-  const {
-    data,
-    loading,
-    refetch: _refetch,
-  } = useQuery(currencyHedgesQueryDocument, {
+  const { data, loading } = useQuery(currencyHedgesQueryDocument, {
     fetchPolicy: "cache-and-network",
   });
-
-  const [_createHedge] = useMutation(createCurrencyHedgeMutationDocument);
-  const [_updateHedge] = useMutation(updateCurrencyHedgeMutationDocument);
-  const [_deleteHedge] = useMutation(deleteCurrencyHedgeMutationDocument);
 
   const rows = useMemo<HedgeRow[]>(
     () =>
@@ -84,30 +71,30 @@ export function useCurrencyHedgesViewModel(_props: Readonly<UseCurrencyHedgesVie
   );
 
   const resetForm = () => {
-    _setCurrency(CurrencyCode.Usd);
-    _setAmount("");
-    _setHedgeType(HEDGE_TYPE_LONG);
-    _setNotes("");
-    _setEditingRow(null);
+    setCurrency(CurrencyCode.Usd);
+    setAmount("");
+    setHedgeType(HEDGE_TYPE_LONG);
+    setNotes("");
+    setEditingRow(null);
   };
 
   const onAdd = () => {
     resetForm();
-    _setDialogOpen(true);
+    setDialogOpen(true);
   };
 
   const onEdit = useCallback((row: HedgeRow) => {
-    _setEditingRow(row);
-    _setCurrency(row.currency);
-    _setAmount(row.amount);
-    _setHedgeType(row.hedgeType);
-    _setNotes(row.notes ?? "");
-    _setDialogOpen(true);
+    setEditingRow(row);
+    setCurrency(row.currency);
+    setAmount(row.amount);
+    setHedgeType(row.hedgeType);
+    setNotes(row.notes ?? "");
+    setDialogOpen(true);
   }, []);
 
   const onDelete = (row: HedgeRow) => {
-    _setDeletingRow(row);
-    _setDeleteOpen(true);
+    setDeletingRow(row);
+    setDeleteOpen(true);
   };
 
   return {

@@ -27,7 +27,7 @@ export async function generateMetadata({
 }
 
 export default async function FutureSchedulePage({ params }: PageProps) {
-  const { id, locale: _locale } = await params;
+  const { id } = await params;
 
   const { userId } = await getServerUserContext();
 

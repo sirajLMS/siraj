@@ -4,10 +4,6 @@ import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { TeacherRulesContainer } from "@/frontend/common/views/dashboard/teachers/rules/TeacherRulesContainer";
 import { getTranslations } from "@/shared/locale";
 
-interface PageProps {
-  readonly params: Promise<{ readonly locale: string }>;
-}
-
 export async function generateMetadata({
   params,
 }: {
@@ -18,9 +14,7 @@ export async function generateMetadata({
   return { title: t.rules.pageTitle };
 }
 
-export default async function TeacherRulesPage({ params }: PageProps) {
-  const { locale: _locale } = await params;
-
+export default async function TeacherRulesPage() {
   const { userId } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();

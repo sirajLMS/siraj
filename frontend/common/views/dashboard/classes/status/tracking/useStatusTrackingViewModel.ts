@@ -3,6 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useMemo } from "react";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/schedule.documents";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -100,7 +101,7 @@ export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingView
 
   const handleActivate = useCallback(
     (id: string) => {
-      if (!hasPermission("ScheduleActivateClass" as any)) {
+      if (!hasPermission(AppPermission.SessionActivateClass)) {
         return;
       }
       const row = rows.find(session => session.id === id);

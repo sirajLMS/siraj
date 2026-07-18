@@ -24,7 +24,7 @@ export default async function SubjectDetailPage({
 }: {
   readonly params: Promise<{ readonly id: string; readonly locale: string }>;
 }) {
-  const { id, locale: _locale } = await params;
+  const { id } = await params;
 
   const { userId } = await getServerUserContext();
 

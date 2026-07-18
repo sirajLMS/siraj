@@ -44,13 +44,7 @@ const resolveStudentsAudience = cache(
   }
 );
 
-interface PageProps {
-  readonly params: Promise<{ readonly locale: string }>;
-}
-
-export default async function StudentsPage({ params }: PageProps) {
-  const { locale: _locale } = await params;
-
+export default async function StudentsPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();

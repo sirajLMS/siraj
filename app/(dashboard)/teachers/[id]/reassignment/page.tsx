@@ -14,13 +14,7 @@ export async function generateMetadata({
   return { title: t.pageTitle };
 }
 
-export default async function TeacherReassignmentPage({
-  params,
-}: {
-  readonly params: Promise<{ readonly locale: string; readonly id: string }>;
-}) {
-  const { locale: _locale } = await params;
-
+export default async function TeacherReassignmentPage() {
   const { userId } = await getServerUserContext();
 
   if (!userId) {
