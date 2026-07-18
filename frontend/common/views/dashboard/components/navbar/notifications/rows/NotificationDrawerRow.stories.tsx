@@ -64,46 +64,45 @@ const invoiceProofPendingAlert: NotificationDrawerAlert = {
   readAt: null,
 };
 
-function createMockVm(overrides?: Partial<NotificationsDrawerViewModel>): NotificationsDrawerViewModel {
+function createMockViewModel(): NotificationsDrawerViewModel {
   return {
     alerts: [],
-    unreadCount: 0,
-    totalCount: 0,
+    unreadCount: 1,
+    totalCount: 1,
     loading: false,
     error: undefined,
     drawerOpen: true,
     openDrawer: () => {
-      logger.info("Storybook openDrawer");
+      logger.info("Storybook open drawer");
     },
     closeDrawer: () => {
-      logger.info("Storybook closeDrawer");
+      logger.info("Storybook close drawer");
     },
     markOneRead: async deliveryId => {
-      logger.info("Storybook markOneRead", { deliveryId });
+      logger.info("Storybook mark read", { deliveryId });
     },
     markAllRead: async () => {
-      logger.info("Storybook markAllRead");
+      logger.info("Storybook mark all read");
     },
     handleViewEntity: metadata => {
-      logger.info("Storybook handleViewEntity", { entityKind: metadata.entityKind, entityId: metadata.entityId });
+      logger.info("Storybook view entity", { metadata });
     },
     handleReschedule: classInstanceId => {
-      logger.info("Storybook handleReschedule", { classInstanceId });
+      logger.info("Storybook reschedule", { classInstanceId });
     },
     handleApproveInvoice: async (deliveryId, invoiceId) => {
-      logger.info("Storybook handleApproveInvoice", { deliveryId, invoiceId });
+      logger.info("Storybook approve invoice", { deliveryId, invoiceId });
     },
     handleRejectInvoice: async (deliveryId, invoiceId) => {
-      logger.info("Storybook handleRejectInvoice", { deliveryId, invoiceId });
+      logger.info("Storybook reject invoice", { deliveryId, invoiceId });
     },
     handleManagePreferences: () => {
-      logger.info("Storybook handleManagePreferences");
+      logger.info("Storybook manage preferences");
     },
-    ...overrides,
   };
 }
 
-const mockVm = createMockVm();
+const mockViewModel = createMockViewModel();
 
 const meta: Meta<typeof NotificationDrawerRow> = {
   title: "Dashboard/Notifications/NotificationDrawerRow",
@@ -127,20 +126,20 @@ type Story = StoryObj<typeof NotificationDrawerRow>;
 export const UnreadInfo: Story = {
   args: {
     alert: unreadInfoAlert,
-    vm: mockVm,
+    vm: mockViewModel,
   },
 };
 
 export const ClassRescheduled: Story = {
   args: {
     alert: classRescheduledAlert,
-    vm: mockVm,
+    vm: mockViewModel,
   },
 };
 
 export const InvoiceProofPending: Story = {
   args: {
     alert: invoiceProofPendingAlert,
-    vm: mockVm,
+    vm: mockViewModel,
   },
 };
