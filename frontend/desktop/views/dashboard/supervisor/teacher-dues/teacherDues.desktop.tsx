@@ -15,36 +15,34 @@ export function TeacherDuesDesktopView({
   rows,
   loading,
   markingPaid,
+  canMarkPaid,
   selectedDueIds,
   labels,
   onMarkPaid,
   onSelectDues,
 }: Readonly<TeacherDuesViewModel>) {
-  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid re-renders the entire grid (including
-  // checkbox selection state and pagination) whenever the parent re-renders with a new
-  // `columns` array identity. Caching the columns array with its ViewModel-scoped
-  // dependency set (labels + callbacks) keeps the array reference stable across parent
-  // renders that don't change those inputs, preventing the grid from resetting its
-  // internal state.
   const columns = useMemo<GridColDef<TeacherDueRow>[]>(
     () => [
       {
-        field: "teacherId",
+        field: "teacherName",
         headerName: labels.teacherNameColumn,
         flex: 1,
         minWidth: 150,
+        valueGetter: (_, row) => row.teacherName || row.teacherId,
       },
       {
-        field: "classInstanceId",
+        field: "classDate",
         headerName: labels.classDateColumn,
         flex: 1,
         minWidth: 150,
+        valueGetter: (_, row) => row.classDate || "-",
       },
       {
-        field: "studentId",
+        field: "studentName",
         headerName: labels.studentColumn,
         flex: 1,
         minWidth: 150,
+        valueGetter: (_, row) => row.studentName || row.studentId,
       },
       {
         field: "hours",
@@ -55,7 +53,7 @@ export function TeacherDuesDesktopView({
         field: "amount",
         headerName: labels.amountColumn,
         width: 120,
-        valueGetter: (_, row) => `${row.currency} ${row.amount}`,
+        valueGetter: (_, row) => `${row.currency ?? ""} ${row.amount}`.trim(),
       },
       {
         field: "currency",
@@ -88,14 +86,16 @@ export function TeacherDuesDesktopView({
         width: 140,
         align: "center",
         headerAlign: "center",
-        renderCell: params => (
-          <DesktopPrimaryPageAction size="small" onClick={() => onMarkPaid([params.row.id])} disabled={markingPaid}>
-            {labels.markAsPaidButton}
-          </DesktopPrimaryPageAction>
-        ),
+        sortable: false,
+        renderCell: params =>
+          canMarkPaid ? (
+            <DesktopPrimaryPageAction size="small" onClick={() => onMarkPaid([params.row.id])} disabled={markingPaid}>
+              {labels.markAsPaidButton}
+            </DesktopPrimaryPageAction>
+          ) : null,
       },
     ],
-    [labels, markingPaid, onMarkPaid]
+    [labels, markingPaid, onMarkPaid, canMarkPaid]
   );
 
   return (
@@ -103,7 +103,7 @@ export function TeacherDuesDesktopView({
       <DesktopPageHeader
         title={labels.pageTitle}
         actions={
-          selectedDueIds.length > 0 ? (
+          canMarkPaid && selectedDueIds.length > 0 ? (
             <DesktopPrimaryPageAction onClick={() => onMarkPaid(selectedDueIds)} disabled={markingPaid}>
               {labels.markAsPaidButton}
             </DesktopPrimaryPageAction>
@@ -122,7 +122,7 @@ export function TeacherDuesDesktopView({
           loading={loading}
           autoHeight
           rowHeight={64}
-          checkboxSelection
+          checkboxSelection={canMarkPaid}
           onRowSelectionModelChange={model => {
             const selectedIds = "ids" in model ? Array.from(model.ids).map(String) : [];
             onSelectDues(selectedIds);

@@ -2,9 +2,10 @@ import type { StudentPortalCreditsLabels } from "@/shared/locale/types/dashboard
 
 export const dashboardStudentPortalCreditsAr: StudentPortalCreditsLabels = {
   pageTitle: "رصيدي",
+  pageSubtitle: "تتبع رصيدك وسجل المعاملات",
   currentBalance: "الرصيد الحالي",
-  hoursRemaining: "الساعات المتبقية",
-  hoursTotal: "إجمالي الساعات",
+  hoursRemaining: "الرصيد المتبقي",
+  hoursTotal: "إجمالي الرصيد",
   transactionHistory: "سجل المعاملات",
   dateColumn: "التاريخ",
   typeColumn: "النوع",
@@ -14,6 +15,7 @@ export const dashboardStudentPortalCreditsAr: StudentPortalCreditsLabels = {
   deduction: "خصم",
   refund: "استرداد",
   adjustment: "تسوية",
+  filterAll: "الكل",
   noTransactions: "لا توجد معاملات بعد",
   backToDashboard: "العودة إلى لوحة التحكم",
 };

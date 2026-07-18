@@ -14,4 +14,7 @@ export const dashboardSupervisorPortalTeacherDuesAr: SupervisorTeacherDuesLabels
   noPendingDues: "لا توجد مستحقات معلقة",
   loadingMessage: "جارٍ التحميل...",
   markPaidConfirm: "تحديد المستحقات المختارة كمدفوعة؟",
+  markPaidSuccess: "تم تحديد المستحقات المختارة كمدفوعة",
+  markPaidError: "فشل تحديد المستحقات كمدفوعة",
+  markPaidMissingPayment: "المستحقات المختارة غير مرتبطة بدفعة",
 };

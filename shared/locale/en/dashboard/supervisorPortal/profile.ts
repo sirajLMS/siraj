@@ -1,0 +1,24 @@
+import type { SupervisorPortalProfileLabels } from "@/shared/locale/types/dashboard/supervisorPortal/profile";
+
+export const dashboardSupervisorPortalProfileEn: SupervisorPortalProfileLabels = {
+  pageTitle: "My Profile",
+  pageSubtitle: "View your account and contact details.",
+  notSet: "Not set",
+  loadingMessage: "Loading...",
+  sections: {
+    account: "Account Information",
+    contact: "Contact Information",
+    role: "Role Information",
+  },
+  fields: {
+    fullName: "Full Name",
+    email: "Email",
+    phone: "Phone",
+    roleName: "Role",
+    status: "Account Status",
+  },
+  errors: {
+    failedToLoad: "Failed to load profile.",
+    notFound: "Profile not found.",
+  },
+};

@@ -21,6 +21,7 @@ function DueCard({
   labels,
   selected,
   markingPaid,
+  canMarkPaid,
   onToggle,
   onMarkPaid,
 }: Readonly<{
@@ -28,6 +29,7 @@ function DueCard({
   readonly labels: TeacherDuesViewModel["labels"];
   readonly selected: boolean;
   readonly markingPaid: boolean;
+  readonly canMarkPaid: boolean;
   readonly onToggle: (id: string) => void;
   readonly onMarkPaid: (ids: string[]) => void;
 }>) {
@@ -43,13 +45,16 @@ function DueCard({
       })}
     >
       <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
-        <Checkbox checked={selected} onChange={() => onToggle(row.id)} size="small" />
+        {canMarkPaid ? <Checkbox checked={selected} onChange={() => onToggle(row.id)} size="small" /> : null}
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface, fontWeight: 500 })}>
-            {row.teacherId}
+            {row.teacherName || row.teacherId}
           </Typography>
           <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.studentColumn}: {row.studentId}
+            {labels.studentColumn}: {row.studentName || row.studentId}
+          </Typography>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+            {labels.classDateColumn}: {row.classDate || "-"}
           </Typography>
         </Box>
         <MobileStatusBadge category="invoice" status={row.status ?? "PENDING"} label={row.status ?? "PENDING"} />
@@ -82,20 +87,22 @@ function DueCard({
         </Box>
       </Stack>
 
-      <MobilePrimaryPageAction
-        size="small"
-        onClick={() => onMarkPaid([row.id])}
-        disabled={markingPaid}
-        sx={{ alignSelf: "flex-start" }}
-      >
-        {labels.markAsPaidButton}
-      </MobilePrimaryPageAction>
+      {canMarkPaid ? (
+        <MobilePrimaryPageAction
+          size="small"
+          onClick={() => onMarkPaid([row.id])}
+          disabled={markingPaid}
+          sx={{ alignSelf: "flex-start" }}
+        >
+          {labels.markAsPaidButton}
+        </MobilePrimaryPageAction>
+      ) : null}
     </Box>
   );
 }
 
 export function TeacherDuesMobileView(props: Readonly<TeacherDuesViewModel>) {
-  const { rows, loading, markingPaid, selectedDueIds, labels, onMarkPaid, onToggleDue } = props;
+  const { rows, loading, markingPaid, canMarkPaid, selectedDueIds, labels, onMarkPaid, onToggleDue } = props;
 
   const renderItem = (row: TeacherDueRow): ReactNode => (
     <DueCard
@@ -103,6 +110,7 @@ export function TeacherDuesMobileView(props: Readonly<TeacherDuesViewModel>) {
       labels={labels}
       selected={selectedDueIds.includes(row.id)}
       markingPaid={markingPaid}
+      canMarkPaid={canMarkPaid}
       onToggle={onToggleDue}
       onMarkPaid={onMarkPaid}
     />
@@ -111,7 +119,16 @@ export function TeacherDuesMobileView(props: Readonly<TeacherDuesViewModel>) {
   return (
     <MobilePageContainer>
       <MobileContentStack>
-        <MobilePageHeader title={labels.pageTitle} />
+        <MobilePageHeader
+          title={labels.pageTitle}
+          actions={
+            canMarkPaid && selectedDueIds.length > 0 ? (
+              <MobilePrimaryPageAction onClick={() => onMarkPaid(selectedDueIds)} disabled={markingPaid}>
+                {labels.markAsPaidButton}
+              </MobilePrimaryPageAction>
+            ) : null
+          }
+        />
 
         {loading ? (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>

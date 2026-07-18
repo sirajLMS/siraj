@@ -14,4 +14,7 @@ export const dashboardSupervisorPortalTeacherDuesEn: SupervisorTeacherDuesLabels
   noPendingDues: "No pending dues",
   loadingMessage: "Loading...",
   markPaidConfirm: "Mark selected dues as paid?",
+  markPaidSuccess: "Selected dues marked as paid",
+  markPaidError: "Failed to mark dues as paid",
+  markPaidMissingPayment: "Selected dues are missing a payment link",
 };

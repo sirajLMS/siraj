@@ -4,8 +4,15 @@ import { OnAppChannel } from "@/backend/services";
 import { emailChannel } from "@/backend/services/communication/channels/email";
 import { pushChannel } from "@/backend/services/communication/channels/push";
 import { smsChannel } from "@/backend/services/communication/channels/sms";
-import type { ChannelDispatchResult, CommunicationPayload } from "@/backend/types";
+import type { ChannelDispatchResult, CommunicationPayload, NotificationMetadata } from "@/backend/types";
 import type { NotificationDeliverySelectType } from "@/backend/types/notifications/notificationDeliveries.types";
+
+function asNotificationMetadata(metadata: Record<string, unknown> | undefined): NotificationMetadata | null {
+  if (!metadata || typeof metadata.entityKind !== "string" || typeof metadata.entityId !== "string") {
+    return null;
+  }
+  return metadata as unknown as NotificationMetadata;
+}
 
 export namespace CommunicationService {
   async function dispatchOnApp(payload: CommunicationPayload, locale?: string): Promise<ChannelDispatchResult> {
@@ -18,7 +25,12 @@ export namespace CommunicationService {
     locale?: string
   ): Promise<ChannelDispatchResult> {
     const to = (payload.metadata?.to as string) ?? "";
-    const commonFields = { to, eventType: payload.eventType, userId: payload.userId };
+    const commonFields = {
+      to,
+      eventType: payload.eventType,
+      userId: payload.userId,
+      metadata: asNotificationMetadata(payload.metadata),
+    };
 
     const isEmail = payload.channel === "email";
     const result = isEmail
@@ -41,6 +53,7 @@ export namespace CommunicationService {
         body: payload.body ?? "",
         data: payload.metadata?.data as Record<string, string> | undefined,
         eventType: payload.eventType,
+        metadata: asNotificationMetadata(payload.metadata),
       },
       locale
     );

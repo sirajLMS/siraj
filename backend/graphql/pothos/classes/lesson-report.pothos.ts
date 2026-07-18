@@ -15,6 +15,8 @@ export const LessonReportPothosObject = LessonReportRef.implement({
     classInstanceId: t.exposeString("classInstanceId"),
     studentId: t.exposeString("studentId"),
     teacherId: t.exposeString("teacherId"),
+    teacherName: t.exposeString("teacherName", { nullable: true }),
+    studentName: t.exposeString("studentName", { nullable: true }),
     lessonDate: t.expose("lessonDate", { type: "DateTime" }),
     durationMinutes: t.exposeInt("durationMinutes"),
     attendanceEvaluation: t.expose("attendanceEvaluation", { type: AttendanceEvaluationPothosEnum }),
@@ -68,5 +70,23 @@ export const PendingReviewCountPothosObject = PendingReviewCountRef.implement({
   description: "Count of pending lesson reports awaiting review",
   fields: t => ({
     pendingCount: t.exposeInt("pendingCount"),
+  }),
+});
+
+// ─── PendingLessonReportsPayload (paginated list wrapper) ─────────────────────
+
+type PendingLessonReportsPayload = {
+  rows: LessonReportReturnType[];
+  totalCount: number;
+};
+
+const PendingLessonReportsPayloadRef =
+  gqlSchemaBuilder.objectRef<PendingLessonReportsPayload>("PendingLessonReportsPayload");
+
+export const PendingLessonReportsPayloadPothosObject = PendingLessonReportsPayloadRef.implement({
+  description: "Paginated pending lesson reports awaiting review, with total count",
+  fields: t => ({
+    rows: t.expose("rows", { type: [LessonReportPothosObject] }),
+    totalCount: t.exposeInt("totalCount"),
   }),
 });

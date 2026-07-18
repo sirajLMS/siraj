@@ -1,9 +1,10 @@
 "use client";
 
 import { ChevronRightOutlined } from "@mui/icons-material";
-import { Box, Stack, Typography } from "@mui/material";
+import { Autocomplete, Box, Stack, TextField, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import type {
+  DirectoryPersonOption,
   PendingReviewRow,
   PendingReviewsViewModel,
 } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
@@ -58,10 +59,10 @@ function ReviewCard({
             {row.lessonDate}
           </Typography>
           <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.studentColumn}: {row.studentId}
+            {labels.studentColumn}: {row.studentName || row.studentId}
           </Typography>
           <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.teacherColumn}: {row.teacherId}
+            {labels.teacherColumn}: {row.teacherName || row.teacherId}
           </Typography>
         </Box>
         <MobileStatusBadge
@@ -113,6 +114,10 @@ export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel
   const {
     rows,
     selectedReport,
+    teacherFilter,
+    studentFilter,
+    teacherOptions,
+    studentOptions,
     loading,
     approving,
     rejecting,
@@ -128,6 +133,9 @@ export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel
     rejectDialogOpen,
     rejectReason,
   } = props;
+
+  const selectedTeacher = teacherOptions.find(o => o.id === teacherFilter) ?? null;
+  const selectedStudent = studentOptions.find(o => o.id === studentFilter) ?? null;
 
   const renderItem = (row: PendingReviewRow): ReactNode => (
     <ReviewCard
@@ -153,8 +161,36 @@ export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel
 
         <MobileSectionPanel>
           <Stack sx={{ gap: 1.5, mb: 2 }}>
-            <MobileFilterButton onClick={() => onTeacherFilterChange("")}>{labels.filterByTeacher}</MobileFilterButton>
-            <MobileFilterButton onClick={() => onStudentFilterChange("")}>{labels.filterByStudent}</MobileFilterButton>
+            <Autocomplete<DirectoryPersonOption>
+              options={[...teacherOptions]}
+              value={selectedTeacher}
+              onChange={(_, option) => onTeacherFilterChange(option?.id ?? "")}
+              getOptionLabel={option => option.name}
+              isOptionEqualToValue={(a, b) => a.id === b.id}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label={labels.filterByTeacher}
+                  placeholder={labels.teacherSearchPlaceholder}
+                  size="small"
+                />
+              )}
+            />
+            <Autocomplete<DirectoryPersonOption>
+              options={[...studentOptions]}
+              value={selectedStudent}
+              onChange={(_, option) => onStudentFilterChange(option?.id ?? "")}
+              getOptionLabel={option => option.name}
+              isOptionEqualToValue={(a, b) => a.id === b.id}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label={labels.filterByStudent}
+                  placeholder={labels.studentSearchPlaceholder}
+                  size="small"
+                />
+              )}
+            />
           </Stack>
 
           <MobileCardList<PendingReviewRow>

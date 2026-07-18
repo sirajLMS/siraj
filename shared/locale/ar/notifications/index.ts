@@ -112,4 +112,20 @@ export const notificationsAr: NotificationsLabels = {
     body: ({ studentName, newClassesRemaining }) =>
       `العدد المتبقي من حصص ${studentName} هو الآن ${newClassesRemaining}.`,
   },
+  drawerTitle: "الإشعارات",
+  managePreferences: "إدارة التفضيلات",
+  markAllRead: "تعليم الكل كمقروء",
+  markAsRead: "تعليم كمقروء",
+  reschedule: "إعادة الجدولة",
+  viewEntity: "عرض",
+  approveInvoice: "الموافقة على الفاتورة",
+  rejectInvoice: "رفض الفاتورة",
+  noNotifications: "لا توجد إشعارات",
+  unreadCount: count => {
+    if (count === 0) return "لا توجد إشعارات غير مقروءة";
+    if (count === 1) return "إشعار واحد غير مقروء";
+    if (count === 2) return "إشعاران غير مقروءان";
+    if (count >= 3 && count <= 10) return `${count} إشعارات غير مقروءة`;
+    return `${count} إشعاراً غير مقروءاً`;
+  },
 };

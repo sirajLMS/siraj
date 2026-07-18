@@ -15,13 +15,14 @@ import type {
   UpcomingLessonRow,
 } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import {
+  isToday,
   isWithinNextDays,
   mapCreditBalance,
   mapRecentLessonReports,
   mapUpcomingLessons,
 } from "@/frontend/common/views/dashboard/student/dashboard/utils/studentDashboardMappers";
 import { useRouter } from "@/shared/i18n/routing";
-import { type StudentPortalDashboardLabels, useAppTranslation } from "@/shared/locale";
+import { type AppLocale, type StudentPortalDashboardLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 function useStudentDashboardLabels(t: StudentPortalDashboardLabels): StudentDashboardLabels {
   return useMemo(
@@ -38,6 +39,10 @@ function useStudentDashboardLabels(t: StudentPortalDashboardLabels): StudentDash
       viewAllHistory: t.viewAllHistory,
       viewCredits: t.viewCredits,
       addReflection: t.addReflection,
+      reflectionDialogTitle: t.reflectionDialogTitle,
+      reflectionNotesLabel: t.reflectionNotesLabel,
+      reflectionNotesPlaceholder: t.reflectionNotesPlaceholder,
+      reflectionSaveError: t.reflectionSaveError,
       upcomingToday: t.upcomingToday,
       upcomingThisWeek: t.upcomingThisWeek,
       noLessonReports: t.noLessonReports,
@@ -49,8 +54,9 @@ function useStudentDashboardLabels(t: StudentPortalDashboardLabels): StudentDash
 
 export interface StudentDashboardViewModel {
   readonly userName: string | null;
+  readonly locale: AppLocale;
   readonly nextLesson: UpcomingLessonRow | null;
-  readonly upcomingLessons: readonly UpcomingLessonRow[];
+  readonly upcomingTodayCount: number;
   readonly creditBalance: StudentCreditBalanceRow;
   readonly recentLessonReports: readonly RecentLessonReportRow[];
   readonly labels: StudentDashboardLabels;
@@ -58,7 +64,8 @@ export interface StudentDashboardViewModel {
   readonly onJoinLesson: (id: string) => void;
   readonly onViewHistory: () => void;
   readonly onViewCredits: () => void;
-  readonly onAddReflection: (lessonReportId: string) => void;
+  /** Opens the reflection dialog; `classInstanceId` is stored as `selectedReportId`. */
+  readonly onAddReflection: (classInstanceId: string) => void;
   readonly onEditProfile: () => void;
 }
 
@@ -66,6 +73,7 @@ export type UseStudentDashboardViewModelProps = Record<string, never>;
 
 export function useStudentDashboardViewModel(_props: UseStudentDashboardViewModelProps): StudentDashboardViewModel {
   const t = useAppTranslation().dashboardTranslations.studentPortalDashboard;
+  const locale = useAppLocale();
   const router = useRouter();
   const userName = useUserStore(state => state.name);
   const setSelectedReportId = useStudentDashboardStore(state => state.setSelectedReportId);
@@ -116,13 +124,18 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
     return joinable ?? upcomingLessons[0] ?? null;
   }, [upcomingLessons]);
 
+  const upcomingTodayCount = useMemo(
+    () => upcomingLessons.filter(l => isToday(l.scheduledStartAt)).length,
+    [upcomingLessons]
+  );
+
   const creditBalance: StudentCreditBalanceRow = useMemo(
     () => mapCreditBalance(balanceData?.studentCreditBalance),
     [balanceData]
   );
 
   const recentLessonReports: readonly RecentLessonReportRow[] = useMemo(
-    () => mapRecentLessonReports(reportsData?.pendingLessonReports),
+    () => mapRecentLessonReports(reportsData?.pendingLessonReports?.rows),
     [reportsData]
   );
 
@@ -145,8 +158,8 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
       handleViewCredits: () => {
         router.push("/students/me/credits");
       },
-      handleAddReflection: (lessonReportId: string) => {
-        setSelectedReportId(lessonReportId);
+      handleAddReflection: (classInstanceId: string) => {
+        setSelectedReportId(classInstanceId);
         setReflectionDialogOpen(true);
       },
       handleEditProfile: () => {
@@ -158,8 +171,9 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
 
   return {
     userName: userName || null,
+    locale,
     nextLesson,
-    upcomingLessons,
+    upcomingTodayCount,
     creditBalance,
     recentLessonReports,
     labels,

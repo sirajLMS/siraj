@@ -1,6 +1,7 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   LessonReportPothosObject,
+  PendingLessonReportsPayloadPothosObject,
   PendingReviewCountPothosObject,
 } from "@/backend/graphql/pothos/classes/lesson-report.pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
@@ -24,9 +25,25 @@ gqlSchemaBuilder.queryField("lessonReport", t =>
   })
 );
 
+gqlSchemaBuilder.queryField("lessonReportById", t =>
+  t.field({
+    type: LessonReportPothosObject,
+    nullable: true,
+    description: "Get a lesson report by its ID",
+    authScopes: { loggedIn: true },
+    args: {
+      reportId: t.arg.id({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return LessonReportService.getReportById(actorUserId, args.reportId, ctx.locale);
+    },
+  })
+);
+
 gqlSchemaBuilder.queryField("pendingLessonReports", t =>
   t.field({
-    type: [LessonReportPothosObject],
+    type: PendingLessonReportsPayloadPothosObject,
     description: "Get pending lesson reports awaiting review with optional teacher/student filters and pagination",
     authScopes: { loggedIn: true },
     args: {
@@ -55,8 +72,22 @@ gqlSchemaBuilder.queryField("pendingLessonReports", t =>
         pagination = new PaginationArgs();
       }
 
-      const result = await LessonReportService.getPendingReviews(actorUserId, filters, pagination, ctx.locale);
-      return result.rows;
+      return LessonReportService.getPendingReviews(actorUserId, filters, pagination, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("recentApprovedLessonReports", t =>
+  t.field({
+    type: [LessonReportPothosObject],
+    description: "Get the most recently approved lesson reports for the supervisor dashboard",
+    authScopes: { loggedIn: true },
+    args: {
+      limit: t.arg.int({ required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return LessonReportService.getRecentApprovedLessonReports(actorUserId, args.limit ?? 5, ctx.locale);
     },
   })
 );

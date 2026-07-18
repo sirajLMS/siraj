@@ -68,6 +68,9 @@ export function PreferencesMatrixDesktopView({
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoize the columns array so the DataGrid keeps stable column identity across prop-driven row updates; MUI X DataGrid re-runs row-height calc and virtualization when the columns reference changes, so an inline array would force re-layout on every parent re-render. Memo keys (`t`, `disabled`, `onToggle`) all come from container props; inline cells would rebuild the render tree each render.
   const columns = useMemo<GridColDef<PreferenceMatrixRow>[]>(() => {
+    const eventLabels = t.events as Record<string, string>;
+    const getEventLabel = (eventType: NotificationEventType): string => eventLabels[eventType] ?? eventType;
+
     const channelColumns: GridColDef<PreferenceMatrixRow>[] = NOTIFICATION_CHANNELS.map(channel => ({
       field: channel,
       headerName: t.channels[channel],
@@ -83,7 +86,7 @@ export function PreferencesMatrixDesktopView({
             channel={channel}
             disabled={disabled}
             channelLabel={t.channels[channel]}
-            eventLabel={t.events[row.eventType]}
+            eventLabel={getEventLabel(row.eventType)}
             onToggle={onToggle}
           />
         );
@@ -99,7 +102,7 @@ export function PreferencesMatrixDesktopView({
         sortable: false,
         renderCell: params => {
           const row = params.row as PreferenceMatrixRow;
-          return <EventTypeCell label={t.events[row.eventType]} />;
+          return <EventTypeCell label={getEventLabel(row.eventType)} />;
         },
       },
       ...channelColumns,

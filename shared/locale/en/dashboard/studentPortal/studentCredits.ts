@@ -2,9 +2,10 @@ import type { StudentPortalCreditsLabels } from "@/shared/locale/types/dashboard
 
 export const dashboardStudentPortalCreditsEn: StudentPortalCreditsLabels = {
   pageTitle: "My Credits",
+  pageSubtitle: "Track your credit balance and transaction history",
   currentBalance: "Current Balance",
-  hoursRemaining: "Hours Remaining",
-  hoursTotal: "Total Hours",
+  hoursRemaining: "Credits Remaining",
+  hoursTotal: "Total Credits",
   transactionHistory: "Transaction History",
   dateColumn: "Date",
   typeColumn: "Type",
@@ -14,6 +15,7 @@ export const dashboardStudentPortalCreditsEn: StudentPortalCreditsLabels = {
   deduction: "Deduction",
   refund: "Refund",
   adjustment: "Adjustment",
+  filterAll: "All",
   noTransactions: "No transactions yet",
   backToDashboard: "Back to Dashboard",
 };

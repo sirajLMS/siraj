@@ -30,12 +30,16 @@ import type {
   CommunicationPayload,
   InvoiceSelectType,
 } from "@/backend/types";
+import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
 import { getServerTranslations } from "@/shared/locale";
 import type {
   ClassLifecycleBodyParams,
   NotificationsLabels,
   StudentTeacherReassignmentRecipient,
 } from "@/shared/locale/notifications";
+
+/** Structured notification metadata plus channel-adapter bag fields (`to`, `data`, etc.). */
+type PayloadMetadata = NotificationMetadata & Record<string, unknown>;
 
 // ─── Helpers ───────────────────────────────────────────────────────────
 
@@ -78,7 +82,7 @@ function buildPerChannel(
   eventType: NotificationEventType,
   title: string,
   body: string,
-  metadata: Record<string, unknown> | undefined
+  metadata: PayloadMetadata
 ): CommunicationPayload[] {
   if (!userId) return [];
   const payloads: CommunicationPayload[] = [];
@@ -235,6 +239,10 @@ export function buildInvoiceGeneratedPayloads(
   const { amount, currency } = formatInvoiceAmount(invoice);
   const body = labels.body({ invoiceId: invoice.id, amount, currency });
   return buildPerChannel(parentUserId, NotificationEventType.INVOICE_GENERATED, labels.title, body, {
+    entityKind: "invoice",
+    entityId: invoice.id,
+    amount,
+    currency,
     invoiceId: invoice.id,
   });
 }
@@ -256,10 +264,17 @@ export function buildInvoiceStatusChangedPayloads(
 ): CommunicationPayload[] {
   if (!parentUserId) return [];
   const labels = labelsFor(locale).invoiceStatusChanged[action];
+  const { amount, currency } = formatInvoiceAmount(invoice);
   const body = labels.body({ invoiceId: invoice.id });
   return buildPerChannel(parentUserId, NotificationEventType.INVOICE_STATUS_CHANGED, labels.title, body, {
+    entityKind: "invoice",
+    entityId: invoice.id,
     invoiceId: invoice.id,
     action,
+    newStatus: action === "markedPaid" ? "PAID" : undefined,
+    proofPending: action === "proofSubmitted",
+    amount,
+    currency,
   });
 }
 
@@ -287,6 +302,8 @@ export function buildPaymentMethodChangedPayloads(
   const identifier = metadata?.identifier ?? "—";
   const body = labels.body({ identifier });
   return buildPerChannel(userId, NotificationEventType.PAYMENT_METHOD_CHANGED, labels.title, body, {
+    entityKind: "paymentMethod",
+    entityId: metadata?.paymentMethodId ?? metadata?.identifier ?? "unknown",
     action,
     identifier,
     ...metadata,
@@ -349,9 +366,13 @@ export function buildClassLifecyclePayloads(
   if (!rendered) return [];
   const { title, body } = rendered;
 
-  const sharedMetadata: Record<string, unknown> = {
+  const sharedMetadata: PayloadMetadata = {
+    entityKind: "class",
+    entityId: classInstance.id,
     classInstanceId: classInstance.id,
     studentName,
+    scheduledStartAt: baseParams.scheduledStartAt,
+    newStartAt: metadata?.newStartAt,
     totalRecipients: affectedUserIds.length,
     ...metadata,
   };
@@ -416,9 +437,13 @@ export function buildStudentLifecyclePayloads(
   if (!rendered) return [];
   const { title, body } = rendered;
 
-  const sharedMetadata: Record<string, unknown> = {
+  const sharedMetadata: PayloadMetadata = {
+    entityKind: "student",
+    entityId: studentId,
     studentId,
     studentName,
+    oldStatus: metadata?.oldStatus,
+    newStatus: metadata?.newStatus,
     totalRecipients: affectedUserIds.length,
     ...metadata,
   };

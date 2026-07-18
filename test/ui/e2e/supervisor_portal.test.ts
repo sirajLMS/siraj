@@ -34,6 +34,29 @@ describe("Supervisor Portal E2E", () => {
     expect(await page.getByRole("button", { name: /انتقل إلى المراجعات/i }).isVisible()).toBe(true);
   });
 
+  test("Supervisor dashboard shows Recent Approvals section (not empty-state-only)", async () => {
+    context = await createContext();
+    page = await context.newPage();
+    await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
+    await page.waitForLoadState("networkidle");
+
+    expect(await page.getByText(/الموافقات الأخيرة|Recent Approvals/i).isVisible()).toBe(true);
+
+    const emptyState = page.getByText(/لا توجد موافقات حديثة|No recent approvals/i);
+    const approvalRow = page.locator("button").filter({ hasText: /·/ });
+
+    const hasEmptyState = await emptyState.isVisible().catch(() => false);
+    const hasApprovals = (await approvalRow.count()) > 0;
+
+    // Section must render meaningful content: either approval rows or the empty label
+    expect(hasApprovals || hasEmptyState).toBe(true);
+    // When seed data has approvals, prefer asserting rows (not empty-state-only)
+    if (hasApprovals) {
+      expect(hasEmptyState).toBe(false);
+      expect(await approvalRow.first().isVisible()).toBe(true);
+    }
+  });
+
   test("Supervisor dashboard shows teacher dues summary", async () => {
     context = await createContext();
     page = await context.newPage();
@@ -71,9 +94,9 @@ describe("Supervisor Portal E2E", () => {
     // Pending reviews page title
     expect(await page.getByRole("heading", { name: /مراجعات الحصص المعلقة/i }).isVisible()).toBe(true);
 
-    // Filter dropdowns
-    expect(await page.getByRole("combobox", { name: /تصفية حسب المعلم/i }).isVisible()).toBe(true);
-    expect(await page.getByRole("combobox", { name: /تصفية حسب الطالب/i }).isVisible()).toBe(true);
+    // Filter Autocomplete fields
+    expect(await page.getByLabel(/تصفية حسب المعلم|Filter by Teacher/i).isVisible()).toBe(true);
+    expect(await page.getByLabel(/تصفية حسب الطالب|Filter by Student/i).isVisible()).toBe(true);
   });
 
   test("Pending reviews page shows queue with approve/reject buttons or empty state", async () => {
@@ -86,9 +109,9 @@ describe("Supervisor Portal E2E", () => {
     await page.waitForLoadState("networkidle");
 
     // Check for either approve/reject buttons OR empty state message
-    const approveButton = page.getByRole("button", { name: /قبول/i });
-    const rejectButton = page.getByRole("button", { name: /رفض/i });
-    const emptyState = page.getByText(/لا توجد مراجعات معلقة/i);
+    const approveButton = page.getByRole("button", { name: /قبول|Approve/i });
+    const rejectButton = page.getByRole("button", { name: /رفض|Reject/i });
+    const emptyState = page.getByText(/لا توجد مراجعات معلقة|No pending reviews/i);
 
     // At least one of these should be visible
     const hasButtons =
@@ -98,7 +121,7 @@ describe("Supervisor Portal E2E", () => {
     expect(hasButtons || hasEmptyState).toBe(true);
   });
 
-  test("Supervisor can navigate to teacher dues page", async () => {
+  test("Supervisor can navigate to teacher dues page with Mark as Paid", async () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
@@ -112,8 +135,16 @@ describe("Supervisor Portal E2E", () => {
     // Teacher dues page title
     expect(await page.getByRole("heading", { name: /مستحقات المعلمين/i }).isVisible()).toBe(true);
 
-    // Mark as paid button (batch action)
-    expect(await page.getByRole("button", { name: /تحديد كمدفوع/i }).isVisible()).toBe(true);
+    // Mark as Paid — column header and/or row action button (permission-gated)
+    const markPaidHeader = page.getByRole("columnheader", { name: /تحديد كمدفوع|Mark as Paid/i });
+    const markPaidButton = page.getByRole("button", { name: /تحديد كمدفوع|Mark as Paid/i });
+    const hasMarkPaid =
+      (await markPaidHeader.isVisible().catch(() => false)) ||
+      (await markPaidButton
+        .first()
+        .isVisible()
+        .catch(() => false));
+    expect(hasMarkPaid).toBe(true);
 
     // Table columns
     expect(await page.getByRole("columnheader", { name: /المعلم/i }).isVisible()).toBe(true);
@@ -122,7 +153,7 @@ describe("Supervisor Portal E2E", () => {
     expect(await page.getByRole("columnheader", { name: /الحالة/i }).isVisible()).toBe(true);
   });
 
-  test("Supervisor can navigate to monthly reports page", async () => {
+  test("Supervisor can navigate to monthly reports page with Generate and Autocomplete", async () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
@@ -137,14 +168,17 @@ describe("Supervisor Portal E2E", () => {
     expect(await page.getByRole("heading", { name: /التقارير الشهرية/i }).isVisible()).toBe(true);
 
     // Report type toggle
-    expect(await page.getByRole("button", { name: /نوع التقرير/i }).isVisible()).toBe(true);
+    expect(await page.getByText(/نوع التقرير/i).isVisible()).toBe(true);
 
     // Generate report button
     expect(await page.getByRole("button", { name: /إنشاء التقرير/i }).isVisible()).toBe(true);
 
     // Year/Month selectors
-    expect(await page.getByRole("combobox", { name: /السنة/i }).isVisible()).toBe(true);
-    expect(await page.getByRole("combobox", { name: /الشهر/i }).isVisible()).toBe(true);
+    expect(await page.getByLabel(/السنة/i).isVisible()).toBe(true);
+    expect(await page.getByLabel(/الشهر/i).isVisible()).toBe(true);
+
+    // Teacher Autocomplete (default report type is teacher)
+    expect(await page.getByLabel(/اختر المعلم|Select Teacher/i).isVisible()).toBe(true);
   });
 
   test("Supervisor can navigate to profile page", async () => {
@@ -177,5 +211,8 @@ describe("Supervisor Portal E2E", () => {
 
     // Monthly reports shortcut visible
     expect(await page.getByRole("button", { name: /عرض التقارير الشهرية/i }).isVisible()).toBe(true);
+
+    // Recent Approvals section
+    expect(await page.getByText(/الموافقات الأخيرة/i).isVisible()).toBe(true);
   });
 });

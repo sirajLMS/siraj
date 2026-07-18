@@ -1,7 +1,9 @@
 "use client";
 
 import { ArrowBackOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
+import type { ReactNode } from "react";
+import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import type { StudentCreditTransactionRow } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
 import {
@@ -9,31 +11,21 @@ import {
   MobileContentStack,
   MobileMetricCard,
   MobilePageContainer,
+  MobilePageHeader,
+  MobilePaginationControls,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 
 interface MobileTransactionItemProps {
   readonly row: StudentCreditTransactionRow;
-  readonly labels: StudentCreditsViewModel["labels"];
+  readonly locale: StudentCreditsViewModel["locale"];
+  readonly reasonLabel: StudentCreditsViewModel["reasonLabel"];
 }
 
-function reasonLabel(reason: StudentCreditTransactionRow["reason"], labels: StudentCreditsViewModel["labels"]): string {
-  if (!reason) return "";
-  switch (reason) {
-    case "PURCHASE":
-      return labels.purchase;
-    case "DEDUCTION":
-      return labels.deduction;
-    case "REFUND":
-      return labels.refund;
-    case "ADJUSTMENT":
-      return labels.adjustment;
-    default:
-      return reason;
-  }
-}
+function MobileTransactionItem({ row, locale, reasonLabel }: MobileTransactionItemProps): ReactNode {
+  const positive = row.changeAmount >= 0;
+  const sign = positive ? "+" : "";
 
-function MobileTransactionItem({ row, labels }: MobileTransactionItemProps): import("react").ReactNode {
   return (
     <Box
       sx={theme => ({
@@ -43,23 +35,23 @@ function MobileTransactionItem({ row, labels }: MobileTransactionItemProps): imp
         border: `1px solid ${theme.palette.outlineVariant}`,
       })}
     >
-      <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
-        <Box>
+      <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+        <Box sx={{ minWidth: 0 }}>
           <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {reasonLabel(row.reason, labels)}
+            {reasonLabel(row.reason)}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
-            {row.createdAt ?? "—"}
+            {row.createdAt ? formatDate(row.createdAt, locale) : "—"}
           </Typography>
         </Box>
         <Typography
           variant="bodyMd"
           sx={theme => ({
             fontWeight: 700,
-            color: row.changeAmount >= 0 ? theme.palette.primary.main : theme.palette.error.main,
+            color: positive ? theme.palette.success.main : theme.palette.error.main,
           })}
         >
-          {row.changeAmount >= 0 ? "+" : ""}
+          {sign}
           {row.changeAmount}
         </Typography>
       </Stack>
@@ -75,52 +67,89 @@ function MobileTransactionItem({ row, labels }: MobileTransactionItemProps): imp
 export function StudentCreditsMobileView({
   balance,
   transactions,
+  totalCount,
+  reasonFilter,
+  reasonOptions,
+  page,
+  pageSize,
+  locale,
   labels,
   loading,
+  onReasonFilterChange,
+  onPageChange,
   onBackToDashboard,
+  reasonLabel,
 }: Readonly<StudentCreditsViewModel>) {
-  if (loading && balance.classesTotal === 0) {
-    return (
-      <MobilePageContainer>
-        <Typography variant="bodyMd" sx={{ p: 3 }}>
-          {labels.pageTitle}
-        </Typography>
-      </MobilePageContainer>
-    );
-  }
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
     <MobilePageContainer>
       <MobileContentStack>
-        <MobileSectionPanel title={labels.currentBalance}>
-          <Stack direction="row" spacing={2} sx={{ alignItems: "stretch" }}>
-            <Box sx={{ flex: 1 }}>
-              <MobileMetricCard
-                icon={PaymentsOutlined}
-                label={labels.hoursRemaining}
-                value={balance.classesRemaining}
-                variant="compact"
+        <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+
+        <Stack direction="row" spacing={2} sx={{ alignItems: "stretch" }}>
+          <Box sx={{ flex: 1 }}>
+            <MobileMetricCard
+              icon={PaymentsOutlined}
+              label={labels.hoursRemaining}
+              value={balance.classesRemaining}
+              variant="compact"
+            />
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            <MobileMetricCard
+              icon={SchoolOutlined}
+              label={labels.hoursTotal}
+              value={balance.classesTotal}
+              variant="compact"
+            />
+          </Box>
+        </Stack>
+
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+          {reasonOptions.map(option => {
+            const selected = reasonFilter === option.value;
+            return (
+              <Chip
+                key={option.value}
+                label={option.label}
+                size="small"
+                clickable
+                onClick={() => onReasonFilterChange(option.value)}
+                sx={theme => ({
+                  backgroundColor: selected ? theme.palette.primary.main : theme.palette.surfaceContainerHigh,
+                  color: selected ? theme.palette.onPrimary : theme.palette.onSurfaceVariant,
+                  fontWeight: selected ? 700 : 500,
+                })}
               />
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <MobileMetricCard
-                icon={SchoolOutlined}
-                label={labels.hoursTotal}
-                value={balance.classesTotal}
-                variant="compact"
-              />
-            </Box>
-          </Stack>
-        </MobileSectionPanel>
+            );
+          })}
+        </Stack>
 
         <MobileSectionPanel title={labels.transactionHistory}>
-          <MobileCardList<StudentCreditTransactionRow>
-            rows={transactions}
-            emptyMessage={labels.noTransactions}
-            getKey={row => row.id}
-            renderItem={row => <MobileTransactionItem row={row} labels={labels} />}
-          />
+          {loading && transactions.length === 0 ? (
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {labels.pageTitle}
+            </Typography>
+          ) : (
+            <MobileCardList<StudentCreditTransactionRow>
+              rows={transactions}
+              emptyMessage={labels.noTransactions}
+              getKey={row => row.id}
+              renderItem={row => <MobileTransactionItem row={row} locale={locale} reasonLabel={reasonLabel} />}
+            />
+          )}
         </MobileSectionPanel>
+
+        {totalCount > pageSize ? (
+          <MobilePaginationControls
+            page={page}
+            pageCount={totalPages}
+            rowCount={totalCount}
+            pageSize={pageSize}
+            onPageChange={onPageChange}
+          />
+        ) : null}
 
         <Button
           variant="outlined"

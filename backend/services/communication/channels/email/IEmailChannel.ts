@@ -1,4 +1,5 @@
 import type { NotificationEventType } from "@/backend/enum";
+import type { NotificationMetadata } from "@/backend/types";
 
 export interface EmailPayload {
   readonly to: string;
@@ -6,6 +7,7 @@ export interface EmailPayload {
   readonly html: string;
   readonly eventType: NotificationEventType;
   readonly userId: string;
+  readonly metadata?: NotificationMetadata | null;
 }
 
 export interface EmailSendResult {

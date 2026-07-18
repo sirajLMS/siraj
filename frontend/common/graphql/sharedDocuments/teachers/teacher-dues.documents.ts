@@ -10,8 +10,11 @@ export const teacherPendingDuesQueryDocument: TypedDocumentNode<
     teacherPendingDues(teacherId: $teacherId) {
       id
       teacherId
+      teacherName
       classInstanceId
       studentId
+      studentName
+      classDate
       hours
       amount
       currency
@@ -64,8 +67,11 @@ export const markTeacherDuesPaidMutationDocument: TypedDocumentNode<
     markTeacherDuesPaid(dueIds: $dueIds, teacherPaymentId: $teacherPaymentId) {
       id
       teacherId
+      teacherName
       classInstanceId
       studentId
+      studentName
+      classDate
       hours
       amount
       currency

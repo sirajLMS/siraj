@@ -1,4 +1,4 @@
-import { and, count, eq, inArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { lessonReports } from "@/backend/db/schema";
@@ -48,6 +48,16 @@ export namespace LessonReportRepository {
       .orderBy(lessonReports.submittedAt)
       .limit(paginationArgs.perPage)
       .offset(paginationArgs.offset);
+  }
+
+  export async function findRecentApproved(limit: number, tx?: DBTransaction): Promise<LessonReportSelectType[]> {
+    const queryDb = tx ?? db;
+    return queryDb
+      .select()
+      .from(lessonReports)
+      .where(eq(lessonReports.status, LessonReportStatus.APPROVED))
+      .orderBy(desc(lessonReports.reviewedAt))
+      .limit(limit);
   }
 
   export async function create(input: LessonReportInsertType, tx?: DBTransaction): Promise<LessonReportSelectType> {

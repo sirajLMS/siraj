@@ -1,8 +1,11 @@
 "use client";
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
-import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
+import { Autocomplete, Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import type {
+  DirectoryPersonOption,
+  MonthlyReportsViewModel,
+} from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
 import {
   MobileContentStack,
   MobileFilterButton,
@@ -13,7 +16,6 @@ import {
 } from "@/frontend/mobile/components/ui";
 import { MobileMetricCard } from "@/frontend/mobile/components/ui/card";
 
-const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
 export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel>) {
@@ -23,6 +25,8 @@ export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel
     month,
     teacherId,
     studentId,
+    teacherOptions,
+    studentOptions,
     metrics,
     loading,
     labels,
@@ -33,6 +37,10 @@ export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel
     onStudentIdChange,
     onGenerate,
   } = props;
+
+  const selectedTeacher = teacherOptions.find(o => o.id === teacherId) ?? null;
+  const selectedStudent = studentOptions.find(o => o.id === studentId) ?? null;
+
   return (
     <MobilePageContainer>
       <MobileContentStack>
@@ -87,9 +95,9 @@ export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel
                   value={month}
                   onChange={e => onMonthChange(Number(e.target.value))}
                 >
-                  {MONTHS.map(m => (
-                    <MenuItem key={m} value={m}>
-                      {m}
+                  {labels.monthNames.map((name, index) => (
+                    <MenuItem key={name} value={index + 1}>
+                      {name}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -97,18 +105,26 @@ export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel
             </Grid>
 
             {reportType === "teacher" ? (
-              <TextField
-                fullWidth
-                label={labels.selectTeacher}
-                value={teacherId}
-                onChange={e => onTeacherIdChange(e.target.value)}
+              <Autocomplete<DirectoryPersonOption>
+                options={[...teacherOptions]}
+                value={selectedTeacher}
+                onChange={(_, option) => onTeacherIdChange(option?.id ?? "")}
+                getOptionLabel={option => option.name}
+                isOptionEqualToValue={(a, b) => a.id === b.id}
+                renderInput={params => (
+                  <TextField {...params} label={labels.selectTeacher} placeholder={labels.teacherSearchPlaceholder} />
+                )}
               />
             ) : (
-              <TextField
-                fullWidth
-                label={labels.selectStudent}
-                value={studentId}
-                onChange={e => onStudentIdChange(e.target.value)}
+              <Autocomplete<DirectoryPersonOption>
+                options={[...studentOptions]}
+                value={selectedStudent}
+                onChange={(_, option) => onStudentIdChange(option?.id ?? "")}
+                getOptionLabel={option => option.name}
+                isOptionEqualToValue={(a, b) => a.id === b.id}
+                renderInput={params => (
+                  <TextField {...params} label={labels.selectStudent} placeholder={labels.studentSearchPlaceholder} />
+                )}
               />
             )}
 
@@ -134,12 +150,7 @@ export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel
           <Grid container spacing={2}>
             {metrics.map(metric => (
               <Grid key={metric.label} size={6}>
-                <MobileMetricCard
-                  icon={CalendarMonthOutlined}
-                  label={metric.label}
-                  value={metric.value}
-                  variant="compact"
-                />
+                <MobileMetricCard icon={metric.icon} label={metric.label} value={metric.value} variant="compact" />
               </Grid>
             ))}
           </Grid>

@@ -30,11 +30,11 @@ describe("Student Portal E2E", () => {
     await page.waitForURL("**/ar/dashboard**");
     await page.waitForLoadState("networkidle");
 
-    await expectVisible(page.getByRole("heading", { name: /Next Class|Next Class|الفصل القادم/i }));
-    await expectVisible(page.getByRole("button", { name: /Join Now|انضم الآن/i }));
+    await expectVisible(page.getByText(/Next Class|الحصة القادمة/i));
+    await expectVisible(page.getByRole("button", { name: /^(Join|انضم)$/i }));
   });
 
-  test("Student dashboard shows credit balance section", async () => {
+  test("Student dashboard shows credit balance metrics", async () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
@@ -42,7 +42,6 @@ describe("Student Portal E2E", () => {
     await page.waitForURL("**/ar/dashboard**");
     await page.waitForLoadState("networkidle");
 
-    await expectVisible(page.getByText(/Credit Balance|رصيد الكريديت|الرصيد/i));
     await expectVisible(page.getByText(/Classes Remaining|الحصص المتبقية/i));
     await expectVisible(page.getByText(/Total Classes|إجمالي الحصص/i));
   });
@@ -55,8 +54,8 @@ describe("Student Portal E2E", () => {
     await page.waitForURL("**/ar/dashboard**");
     await page.waitForLoadState("networkidle");
 
-    await expectVisible(page.getByRole("heading", { name: /Recent Lesson Reports|تقارير الدروس الأخيرة/i }));
-    await expectVisible(page.getByRole("link", { name: /View All History|عرض كامل السجل/i }));
+    await expectVisible(page.getByText(/Recent Lesson Reports|تقارير الحصص الأخيرة/i));
+    await expectVisible(page.getByRole("button", { name: /View All History|عرض كل السجل/i }));
   });
 
   test("Student can navigate to credits page via sidebar", async () => {
@@ -98,9 +97,7 @@ describe("Student Portal E2E", () => {
     await page.waitForURL("**/ar/dashboard**");
     await page.waitForLoadState("networkidle");
 
-    const cardList = page
-      .locator('[class*="MuiPaper-root"]')
-      .filter({ hasText: /Next Class|Next Class|الفصل القادم/i });
+    const cardList = page.locator('[class*="MuiPaper-root"]').filter({ hasText: /Next Class|الحصة القادمة/i });
     await expectVisible(cardList.first());
   });
 
@@ -112,7 +109,7 @@ describe("Student Portal E2E", () => {
     await page.waitForURL("**/ar/dashboard**");
     await page.waitForLoadState("networkidle");
 
-    await expectVisible(page.getByRole("link", { name: /Today's Classes|صفوف اليوم/i }));
+    await expectVisible(page.getByRole("link", { name: /Today's Classes|صفوف اليوم|حصص اليوم/i }));
     await expectVisible(page.getByRole("link", { name: /My Schedule|جدولي/i }));
     await expectVisible(page.getByRole("link", { name: /My Credits|كريديتاتي|رصيدي/i }));
     await expectVisible(page.getByRole("link", { name: /My Profile|ملفي الشخصي/i }));

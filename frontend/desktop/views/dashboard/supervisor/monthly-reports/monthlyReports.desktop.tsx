@@ -1,14 +1,16 @@
 "use client";
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
-import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
+import { Autocomplete, Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import type {
+  DirectoryPersonOption,
+  MonthlyReportsViewModel,
+} from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
 import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
-const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
 export function MonthlyReportsDesktopView(props: Readonly<MonthlyReportsViewModel>) {
@@ -18,6 +20,8 @@ export function MonthlyReportsDesktopView(props: Readonly<MonthlyReportsViewMode
     month,
     teacherId,
     studentId,
+    teacherOptions,
+    studentOptions,
     metrics,
     loading,
     labels,
@@ -28,6 +32,10 @@ export function MonthlyReportsDesktopView(props: Readonly<MonthlyReportsViewMode
     onStudentIdChange,
     onGenerate,
   } = props;
+
+  const selectedTeacher = teacherOptions.find(o => o.id === teacherId) ?? null;
+  const selectedStudent = studentOptions.find(o => o.id === studentId) ?? null;
+
   return (
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.pageTitle} />
@@ -80,9 +88,9 @@ export function MonthlyReportsDesktopView(props: Readonly<MonthlyReportsViewMode
               value={month}
               onChange={e => onMonthChange(Number(e.target.value))}
             >
-              {MONTHS.map(m => (
-                <MenuItem key={m} value={m}>
-                  {m}
+              {labels.monthNames.map((name, index) => (
+                <MenuItem key={name} value={index + 1}>
+                  {name}
                 </MenuItem>
               ))}
             </TextField>
@@ -90,20 +98,28 @@ export function MonthlyReportsDesktopView(props: Readonly<MonthlyReportsViewMode
 
           {reportType === "teacher" ? (
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={labels.selectTeacher}
-                value={teacherId}
-                onChange={e => onTeacherIdChange(e.target.value)}
+              <Autocomplete<DirectoryPersonOption>
+                options={[...teacherOptions]}
+                value={selectedTeacher}
+                onChange={(_, option) => onTeacherIdChange(option?.id ?? "")}
+                getOptionLabel={option => option.name}
+                isOptionEqualToValue={(a, b) => a.id === b.id}
+                renderInput={params => (
+                  <TextField {...params} label={labels.selectTeacher} placeholder={labels.teacherSearchPlaceholder} />
+                )}
               />
             </Grid>
           ) : (
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={labels.selectStudent}
-                value={studentId}
-                onChange={e => onStudentIdChange(e.target.value)}
+              <Autocomplete<DirectoryPersonOption>
+                options={[...studentOptions]}
+                value={selectedStudent}
+                onChange={(_, option) => onStudentIdChange(option?.id ?? "")}
+                getOptionLabel={option => option.name}
+                isOptionEqualToValue={(a, b) => a.id === b.id}
+                renderInput={params => (
+                  <TextField {...params} label={labels.selectStudent} placeholder={labels.studentSearchPlaceholder} />
+                )}
               />
             </Grid>
           )}
@@ -132,7 +148,7 @@ export function MonthlyReportsDesktopView(props: Readonly<MonthlyReportsViewMode
         <Grid container spacing={2}>
           {metrics.map(metric => (
             <Grid key={metric.label} size={{ xs: 12, sm: 6, md: 3 }}>
-              <DesktopMetricCard icon={CalendarMonthOutlined} label={metric.label} value={metric.value} />
+              <DesktopMetricCard icon={metric.icon} label={metric.label} value={metric.value} />
             </Grid>
           ))}
         </Grid>

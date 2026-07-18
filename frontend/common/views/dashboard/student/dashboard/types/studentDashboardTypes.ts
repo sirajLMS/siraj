@@ -22,6 +22,7 @@ export interface UpcomingLessonRow {
 export interface RecentLessonReportRow {
   readonly id: string;
   readonly classInstanceId: string | null;
+  readonly teacherName: string | null;
   readonly lessonDate: string | null;
   readonly durationMinutes: number;
   readonly status: LessonReportStatus | null;

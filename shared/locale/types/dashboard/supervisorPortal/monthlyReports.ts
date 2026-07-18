@@ -27,4 +27,20 @@ export interface SupervisorMonthlyReportsLabels {
   readonly creditsBalance: string;
   readonly noDataAvailable: string;
   readonly loadingMessage: string;
+  readonly monthNames: readonly [
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+  ];
+  readonly teacherSearchPlaceholder: string;
+  readonly studentSearchPlaceholder: string;
 }

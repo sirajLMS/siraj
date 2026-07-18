@@ -19,6 +19,7 @@ export interface StudentPortalProfileLabels {
   readonly editProfile: string;
   readonly saveChanges: string;
   readonly cancel: string;
+  readonly backToDashboard: string;
   readonly loadingMessage: string;
   readonly saveSuccess: string;
   readonly saveError: string;

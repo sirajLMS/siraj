@@ -12,4 +12,7 @@ export interface SupervisorTeacherDuesLabels {
   readonly noPendingDues: string;
   readonly loadingMessage: string;
   readonly markPaidConfirm: string;
+  readonly markPaidSuccess: string;
+  readonly markPaidError: string;
+  readonly markPaidMissingPayment: string;
 }

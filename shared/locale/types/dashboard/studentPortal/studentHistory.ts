@@ -18,4 +18,13 @@ export interface StudentPortalHistoryLabels {
   readonly allStatuses: string;
   readonly viewReport: string;
   readonly addReflection: string;
+  readonly previousMonth: string;
+  readonly nextMonth: string;
+  readonly totalClasses: string;
+  readonly attendanceRate: string;
+  readonly hoursStudied: string;
+  readonly performance: string;
+  readonly backToDashboard: string;
+  readonly weeklyAttendance: string;
+  readonly week: (number: number) => string;
 }

@@ -13,4 +13,5 @@ export * from "./scheduling";
 export * from "./shared";
 export * from "./students";
 export * from "./suggestions";
+export * from "./supervisor";
 export * from "./teachers";

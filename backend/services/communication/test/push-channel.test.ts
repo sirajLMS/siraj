@@ -42,6 +42,7 @@ const mockDelivery: NotificationDeliverySelectType = {
   providerMessageId: null,
   failureReason: null,
   webhookPayload: null,
+  metadata: null,
   sentAt: null,
   deliveredAt: null,
   openedAt: null,

@@ -26,8 +26,9 @@ frontend/common/graphql/sharedDocuments/
 │                         availability-search, dst-migration, class-session
 ├── shared/               test-helper, translation
 ├── students/             student, student-directory, student-history, student-lifecycle,
-│                         student-status, student-onboarding
+│                         student-status, student-onboarding, student-profile
 ├── suggestions/          suggestion
+├── supervisor/           supervisor-dashboard
 └── teachers/             teacher, teacher-dashboard, teacher-notes, teacher-onboarding,
                           teacher-portal, staff-profile, staff-directory, manager-onboarding
 ```

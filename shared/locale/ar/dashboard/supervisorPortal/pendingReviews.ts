@@ -24,4 +24,10 @@ export const dashboardSupervisorPortalPendingReviewsAr: PendingReviewsLabels = {
   rejectCancel: "إلغاء",
   noPendingReviews: "لا توجد مراجعات معلقة",
   loadingMessage: "جارٍ التحميل...",
+  approveSuccess: "تم قبول تقرير الحصة",
+  approveError: "فشل قبول التقرير",
+  rejectSuccess: "تم رفض تقرير الحصة",
+  rejectError: "فشل رفض التقرير",
+  teacherSearchPlaceholder: "ابحث عن معلمين…",
+  studentSearchPlaceholder: "ابحث عن طلاب…",
 };

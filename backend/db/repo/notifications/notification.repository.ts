@@ -210,6 +210,7 @@ export namespace NotificationRepository {
           status: NotificationDeliveryStatus.PENDING,
           title: input.title ?? null,
           body: input.body ?? null,
+          metadata: input.metadata ?? null,
           createdAt: now,
           updatedAt: now,
         })
@@ -478,6 +479,7 @@ export namespace NotificationRepository {
         status: NotificationDeliveryStatus.PENDING,
         title: input.title ?? null,
         body: input.body ?? null,
+        metadata: input.metadata ?? null,
         createdAt: now,
         updatedAt: now,
       }));

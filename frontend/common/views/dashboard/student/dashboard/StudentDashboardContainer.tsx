@@ -1,7 +1,9 @@
 "use client";
 
+import { Fragment } from "react";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import { ReflectionDialog } from "@/frontend/common/views/dashboard/student/dashboard/components/ReflectionDialog";
 import {
   type StudentDashboardViewModel,
   useStudentDashboardViewModel,
@@ -20,7 +22,12 @@ const lazyViews = createLazyView<StudentDashboardViewModel>(
 
 export function StudentDashboardContainer() {
   const viewModel = useStudentDashboardViewModel({});
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+  return (
+    <Fragment>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
+      <ReflectionDialog />
+    </Fragment>
+  );
 }
 
 export type { StudentDashboardViewModel };

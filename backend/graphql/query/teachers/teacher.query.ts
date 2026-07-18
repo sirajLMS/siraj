@@ -1,3 +1,4 @@
+import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { TeacherDirectoryPothosObject } from "@/backend/graphql/pothos/teachers/staff-directory.pothos";
@@ -27,7 +28,7 @@ gqlSchemaBuilder.queryField("teacherDirectory", t =>
       search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
-    authScopes: { loggedIn: true },
+    authScopes: { permission: AppPermission.TEACHERS_LIST },
     resolve: async (_parent, args, ctx) => {
       let pagination: PaginationArgs | null = null;
       if (args.paginationArgs) {

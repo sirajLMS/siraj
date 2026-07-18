@@ -238,6 +238,7 @@ export type AppPermission =
   | 'TEACHERS_EDIT'
   | 'TEACHERS_LIST'
   | 'TEACHERS_MANAGE_SCHEDULE'
+  | 'TEACHER_DUES_MARK_PAID'
   | 'TEACHER_DUES_VIEW'
   | 'TEACHER_EDIT_OWN_PROFILE'
   | 'TEACHER_VIEW_DASHBOARD'
@@ -1589,6 +1590,14 @@ export type StudentOnboardingInput = {
   timezone: IanaTimezone | null | undefined;
 };
 
+export type StudentProfileEditInput = {
+  dateOfBirth: string | null | undefined;
+  gender: Gender | null | undefined;
+  language: AppLanguage | null | undefined;
+  parentPhone: string | null | undefined;
+  phone: string | null | undefined;
+};
+
 export type StudentStatus =
   | 'DEACTIVATED'
   | 'ON_LEAVE'
@@ -2916,7 +2925,7 @@ export type ResendClassNotificationsMutationVariables = Exact<{
 
 export type ResendClassNotificationsMutation = ResendClassNotificationsMutation_Mutation;
 
-export type LessonReportQuery_lessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+export type LessonReportQuery_lessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type LessonReportQuery_Query = { lessonReport: LessonReportQuery_lessonReport_LessonReport | null };
 
@@ -2928,9 +2937,23 @@ export type LessonReportQueryVariables = Exact<{
 
 export type LessonReportQuery = LessonReportQuery_Query;
 
-export type PendingLessonReportsQuery_pendingLessonReports_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+export type LessonReportByIdQuery_lessonReportById_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type PendingLessonReportsQuery_Query = { pendingLessonReports: Array<PendingLessonReportsQuery_pendingLessonReports_LessonReport> | null };
+export type LessonReportByIdQuery_Query = { lessonReportById: LessonReportByIdQuery_lessonReportById_LessonReport | null };
+
+
+export type LessonReportByIdQueryVariables = Exact<{
+  reportId: string | number;
+}>;
+
+
+export type LessonReportByIdQuery = LessonReportByIdQuery_Query;
+
+export type PendingLessonReportsQuery_pendingLessonReports_PendingLessonReportsPayload_rows_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type PendingLessonReportsQuery_pendingLessonReports_PendingLessonReportsPayload = { totalCount: number | null, rows: Array<PendingLessonReportsQuery_pendingLessonReports_PendingLessonReportsPayload_rows_LessonReport> | null };
+
+export type PendingLessonReportsQuery_Query = { pendingLessonReports: PendingLessonReportsQuery_pendingLessonReports_PendingLessonReportsPayload | null };
 
 
 export type PendingLessonReportsQueryVariables = Exact<{
@@ -2941,6 +2964,18 @@ export type PendingLessonReportsQueryVariables = Exact<{
 
 
 export type PendingLessonReportsQuery = PendingLessonReportsQuery_Query;
+
+export type RecentApprovedLessonReportsQuery_recentApprovedLessonReports_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type RecentApprovedLessonReportsQuery_Query = { recentApprovedLessonReports: Array<RecentApprovedLessonReportsQuery_recentApprovedLessonReports_LessonReport> | null };
+
+
+export type RecentApprovedLessonReportsQueryVariables = Exact<{
+  limit: number | null | undefined;
+}>;
+
+
+export type RecentApprovedLessonReportsQuery = RecentApprovedLessonReportsQuery_Query;
 
 export type LessonReportCountQuery_lessonReportCount_PendingReviewCount = { pendingCount: number | null };
 
@@ -2955,7 +2990,7 @@ export type LessonReportCountQueryVariables = Exact<{
 
 export type LessonReportCountQuery = LessonReportCountQuery_Query;
 
-export type SubmitLessonReportMutation_submitLessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+export type SubmitLessonReportMutation_submitLessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type SubmitLessonReportMutation_Mutation = { submitLessonReport: SubmitLessonReportMutation_submitLessonReport_LessonReport | null };
 
@@ -2968,7 +3003,7 @@ export type SubmitLessonReportMutationVariables = Exact<{
 
 export type SubmitLessonReportMutation = SubmitLessonReportMutation_Mutation;
 
-export type ApproveLessonReportMutation_approveLessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+export type ApproveLessonReportMutation_approveLessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type ApproveLessonReportMutation_Mutation = { approveLessonReport: ApproveLessonReportMutation_approveLessonReport_LessonReport | null };
 
@@ -2980,7 +3015,7 @@ export type ApproveLessonReportMutationVariables = Exact<{
 
 export type ApproveLessonReportMutation = ApproveLessonReportMutation_Mutation;
 
-export type RejectLessonReportMutation_rejectLessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+export type RejectLessonReportMutation_rejectLessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type RejectLessonReportMutation_Mutation = { rejectLessonReport: RejectLessonReportMutation_rejectLessonReport_LessonReport | null };
 
@@ -2993,7 +3028,7 @@ export type RejectLessonReportMutationVariables = Exact<{
 
 export type RejectLessonReportMutation = RejectLessonReportMutation_Mutation;
 
-export type SubmitStudentLessonReportReflectionMutation_submitStudentLessonReportReflection_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+export type SubmitStudentLessonReportReflectionMutation_submitStudentLessonReportReflection_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type SubmitStudentLessonReportReflectionMutation_Mutation = { submitStudentLessonReportReflection: SubmitStudentLessonReportReflectionMutation_submitStudentLessonReportReflection_LessonReport | null };
 
@@ -3298,7 +3333,7 @@ export type SetDefaultClassMeetingConfigMutationVariables = Exact<{
 
 export type SetDefaultClassMeetingConfigMutation = SetDefaultClassMeetingConfigMutation_Mutation;
 
-export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert = { id: string | null, type: string | null, title: string | null, body: string | null, createdAt: string | null, severity: string | null };
+export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert = { id: string | null, deliveryId: string | null, type: string | null, eventType: Types.NotificationEventType | null, channel: Types.NotificationChannel | null, metadata: unknown, title: string | null, body: string | null, createdAt: string | null, severity: string | null, readAt: string | null };
 
 export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult = { id: string | null, totalCount: number | null, unreadCount: number | null, alerts: Array<NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert> | null };
 
@@ -3309,6 +3344,24 @@ export type NotificationAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type NotificationAlertsQuery = NotificationAlertsQuery_Query;
+
+export type MarkNotificationsReadMutation_Mutation = { markNotificationsRead: number | null };
+
+
+export type MarkNotificationsReadMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MarkNotificationsReadMutation = MarkNotificationsReadMutation_Mutation;
+
+export type MarkNotificationReadMutation_Mutation = { markNotificationRead: boolean | null };
+
+
+export type MarkNotificationReadMutationVariables = Exact<{
+  deliveryId: string | number;
+}>;
+
+
+export type MarkNotificationReadMutation = MarkNotificationReadMutation_Mutation;
 
 export type NotificationPreferencesQuery_notificationPreferences_NotificationPreference = { id: string | null, channel: Types.NotificationChannel | null, eventType: Types.NotificationEventType | null, enabled: boolean | null };
 
@@ -4459,6 +4512,19 @@ export type StudentDirectoryQueryVariables = Exact<{
 
 export type StudentDirectoryQuery = StudentDirectoryQuery_Query;
 
+export type StudentsDirectoryQuery_studentsDirectory_StudentDirectoryRow = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentsDirectoryQuery_Query = { studentsDirectory: Array<StudentsDirectoryQuery_studentsDirectory_StudentDirectoryRow> };
+
+
+export type StudentsDirectoryQueryVariables = Exact<{
+  search: string | null | undefined;
+  limit: number | null | undefined;
+}>;
+
+
+export type StudentsDirectoryQuery = StudentsDirectoryQuery_Query;
+
 export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
 
 export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
@@ -4560,6 +4626,18 @@ export type StudentProfileQueryVariables = Exact<{
 
 
 export type StudentProfileQuery = StudentProfileQuery_Query;
+
+export type RecordStudentProfileEditMutation_recordStudentProfileEdit_StudentProfile = { id: string | null, name: string | null, status: Types.StudentStatus | null, avatarUrl: string | null, dateOfBirth: string | null, gender: Types.Gender | null, language: Types.AppLanguage | null, email: string | null, phone: string | null, parentPhone: string | null, version: number | null, updatedAt: string | null };
+
+export type RecordStudentProfileEditMutation_Mutation = { recordStudentProfileEdit: RecordStudentProfileEditMutation_recordStudentProfileEdit_StudentProfile | null };
+
+
+export type RecordStudentProfileEditMutationVariables = Exact<{
+  input: Types.StudentProfileEditInput;
+}>;
+
+
+export type RecordStudentProfileEditMutation = RecordStudentProfileEditMutation_Mutation;
 
 export type StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
 
@@ -4707,6 +4785,22 @@ export type SuggestionContributorStatsQueryVariables = Exact<{
 
 
 export type SuggestionContributorStatsQuery = SuggestionContributorStatsQuery_Query;
+
+export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_pendingDuesSummary_TeacherPendingDuesSummary = { totalCount: number | null, totalAmount: number | null, currency: Types.CurrencyCode | null };
+
+export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_recentApprovals_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedAt: string | null, reviewedAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_monthlySnapshot_SupervisorMonthlySnapshot = { year: number | null, month: number | null, label: string | null };
+
+export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard = { supervisorName: string | null, pendingReviewCount: number | null, pendingDuesSummary: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_pendingDuesSummary_TeacherPendingDuesSummary | null, recentApprovals: Array<SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_recentApprovals_LessonReport> | null, monthlySnapshot: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_monthlySnapshot_SupervisorMonthlySnapshot | null };
+
+export type SupervisorDashboardQuery_Query = { supervisorDashboard: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard | null };
+
+
+export type SupervisorDashboardQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SupervisorDashboardQuery = SupervisorDashboardQuery_Query;
 
 export type CreateManagerMutation_createManager_ManagerOnboardingResult = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, status: string | null, assignedGroupSlug: string | null };
 
@@ -4884,7 +4978,7 @@ export type TeacherHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TeacherHandbookUrlQuery = TeacherHandbookUrlQuery_Query;
 
-export type TeacherPendingDuesQuery_teacherPendingDues_TeacherDue = { id: string | null, teacherId: string | null, classInstanceId: string | null, studentId: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
+export type TeacherPendingDuesQuery_teacherPendingDues_TeacherDue = { id: string | null, teacherId: string | null, teacherName: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type TeacherPendingDuesQuery_Query = { teacherPendingDues: Array<TeacherPendingDuesQuery_teacherPendingDues_TeacherDue> | null };
 
@@ -4920,7 +5014,7 @@ export type TeacherMonthlyReportQueryVariables = Exact<{
 
 export type TeacherMonthlyReportQuery = TeacherMonthlyReportQuery_Query;
 
-export type MarkTeacherDuesPaidMutation_markTeacherDuesPaid_TeacherDue = { id: string | null, teacherId: string | null, classInstanceId: string | null, studentId: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
+export type MarkTeacherDuesPaidMutation_markTeacherDuesPaid_TeacherDue = { id: string | null, teacherId: string | null, teacherName: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type MarkTeacherDuesPaidMutation_Mutation = { markTeacherDuesPaid: Array<MarkTeacherDuesPaidMutation_markTeacherDuesPaid_TeacherDue> | null };
 

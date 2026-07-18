@@ -1,5 +1,3 @@
-import { AttendanceEvaluation, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-
 mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
 }));
@@ -16,20 +14,46 @@ mock.module("@/shared/i18n/routing", () => ({
 }));
 
 import { afterEach, describe, expect, mock, test } from "bun:test";
+
+// Bypass ResponsiveViewSwitch / next/dynamic preload races (same pattern as studentDashboard).
+mock.module("@/frontend/common/views/dashboard/supervisor/lesson-reviews/PendingReviewsContainer", () => ({
+  PendingReviewsContainer: PendingReviewsContainerImpl,
+}));
+
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
+import { AttendanceEvaluation, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   approveLessonReportMutationDocument,
   pendingLessonReportsQueryDocument,
   rejectLessonReportMutationDocument,
+  studentsDirectoryQueryDocument,
+  teacherDirectoryQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { usePendingLessonReviewsStore } from "@/frontend/common/stores/pendingLessonReviewsStore";
-import { PendingReviewsContainer } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/PendingReviewsContainer";
+import { PendingReviewsContainer as PendingReviewsEntry } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/PendingReviewsContainer";
+import { usePendingReviewsViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";
+import { PendingReviewsDesktopView } from "@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/pendingReviews.desktop";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+function PendingReviewsContainerImpl() {
+  const viewModel = usePendingReviewsViewModel({});
+  return <PendingReviewsDesktopView {...viewModel} />;
+}
+
+const DIRECTORY_PAGINATION = {
+  first: 100,
+  page: 1,
+  after: null,
+  before: null,
+  last: null,
+  maxCount: null,
+  skip: null,
+};
 
 const MOCK_REPORTS = [
   {
@@ -37,6 +61,8 @@ const MOCK_REPORTS = [
     classInstanceId: "cls-1",
     studentId: "student-1",
     teacherId: "teacher-1",
+    teacherName: "Teacher One",
+    studentName: "Student One",
     lessonDate: "2025-01-15T10:00:00Z",
     durationMinutes: 60,
     attendanceEvaluation: AttendanceEvaluation.Present,
@@ -58,6 +84,8 @@ const MOCK_REPORTS = [
     classInstanceId: "cls-2",
     studentId: "student-2",
     teacherId: "teacher-2",
+    teacherName: "Teacher Two",
+    studentName: "Student Two",
     lessonDate: "2025-01-14T14:00:00Z",
     durationMinutes: 45,
     attendanceEvaluation: AttendanceEvaluation.Late,
@@ -84,10 +112,93 @@ function createMocks(): MockLink.MockedResponse[] {
         variables: {
           teacherId: null,
           studentId: null,
-          paginationArgs: { first: 50, page: 1, after: null, before: null, last: null, maxCount: null, skip: null },
+          paginationArgs: { first: 25, page: 1, after: null, before: null, last: null, maxCount: null, skip: null },
         },
       },
-      result: { data: { pendingLessonReports: MOCK_REPORTS } },
+      result: { data: { pendingLessonReports: { rows: MOCK_REPORTS, totalCount: MOCK_REPORTS.length } } },
+    },
+    {
+      request: {
+        query: teacherDirectoryQueryDocument,
+        variables: { search: null, paginationArgs: DIRECTORY_PAGINATION },
+      },
+      result: {
+        data: {
+          teacherDirectory: {
+            id: "dir",
+            metrics: { id: "m", activated: 0, deactivated: 0 },
+            rows: [
+              {
+                id: "teacher-1",
+                userId: "user-t1",
+                index: 1,
+                name: "Teacher One",
+                status: "ACTIVE",
+                email: null,
+                avatarUrl: null,
+              },
+              {
+                id: "teacher-2",
+                userId: "user-t2",
+                index: 2,
+                name: "Teacher Two",
+                status: "ACTIVE",
+                email: null,
+                avatarUrl: null,
+              },
+            ],
+            totalTeachers: 2,
+            pageInfo: {
+              count: 2,
+              currentPage: 1,
+              firstItem: null,
+              hasMorePages: false,
+              lastItem: null,
+              lastPage: 1,
+              perPage: 100,
+              total: 2,
+            },
+          },
+        },
+      },
+    },
+    {
+      request: {
+        query: studentsDirectoryQueryDocument,
+        variables: { search: null, limit: 100 },
+      },
+      result: {
+        data: {
+          studentsDirectory: [
+            {
+              id: "student-1",
+              name: "Student One",
+              email: null,
+              avatarUrl: null,
+              status: "ACTIVE",
+              classesRemaining: null,
+              classesTotal: null,
+              hoursPerWeek: null,
+              teacherName: null,
+              createdAt: null,
+              updatedAt: null,
+            },
+            {
+              id: "student-2",
+              name: "Student Two",
+              email: null,
+              avatarUrl: null,
+              status: "ACTIVE",
+              classesRemaining: null,
+              classesTotal: null,
+              hoursPerWeek: null,
+              teacherName: null,
+              createdAt: null,
+              updatedAt: null,
+            },
+          ],
+        },
+      },
     },
     {
       request: {
@@ -122,12 +233,14 @@ afterEach(() => {
     selectedReportId: null,
     rejectDialogOpen: false,
     rejectReason: "",
+    page: 0,
+    pageSize: 25,
   });
 });
 
 describe("PendingReviewsContainer", () => {
-  test("renders pending review rows from mocked query", async () => {
-    renderWithWrapper(<PendingReviewsContainer />, {
+  test("renders pending review rows with teacher/student names, filters, and totalCount", async () => {
+    renderWithWrapper(<PendingReviewsEntry />, {
       locale: "en",
       permissions: [],
       viewport: "desktop",
@@ -136,14 +249,26 @@ describe("PendingReviewsContainer", () => {
 
     await screen.findByText("Pending Lesson Reviews");
 
-    expect(await screen.findByText("student-1")).toBeVisible();
-    expect(await screen.findByText("teacher-1")).toBeVisible();
-    expect(await screen.findByText("student-2")).toBeVisible();
-    expect(await screen.findByText("teacher-2")).toBeVisible();
+    // Name columns (not raw UUIDs)
+    expect(await screen.findByText("Student One")).toBeVisible();
+    expect(await screen.findByText("Teacher One")).toBeVisible();
+    expect(await screen.findByText("Student Two")).toBeVisible();
+    expect(await screen.findByText("Teacher Two")).toBeVisible();
+    expect(screen.queryByText("student-1")).not.toBeInTheDocument();
+    expect(screen.queryByText("teacher-1")).not.toBeInTheDocument();
+
+    // Filter Autocomplete fields
+    expect(screen.getByLabelText("Filter by Teacher")).toBeVisible();
+    expect(screen.getByLabelText("Filter by Student")).toBeVisible();
+
+    // Server pagination driven by totalCount (2 rows)
+    await waitFor(() => {
+      expect(screen.getByText(/1[–-]2 of 2/i)).toBeVisible();
+    });
   });
 
   test("renders an approve button for each pending review row", async () => {
-    renderWithWrapper(<PendingReviewsContainer />, {
+    renderWithWrapper(<PendingReviewsEntry />, {
       locale: "en",
       permissions: [],
       viewport: "desktop",
@@ -157,7 +282,7 @@ describe("PendingReviewsContainer", () => {
   });
 
   test("renders a reject button for each pending review row", async () => {
-    renderWithWrapper(<PendingReviewsContainer />, {
+    renderWithWrapper(<PendingReviewsEntry />, {
       locale: "en",
       permissions: [],
       viewport: "desktop",

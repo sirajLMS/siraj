@@ -1,5 +1,6 @@
 export interface StudentPortalCreditsLabels {
   readonly pageTitle: string;
+  readonly pageSubtitle: string;
   readonly currentBalance: string;
   readonly hoursRemaining: string;
   readonly hoursTotal: string;
@@ -12,6 +13,7 @@ export interface StudentPortalCreditsLabels {
   readonly deduction: string;
   readonly refund: string;
   readonly adjustment: string;
+  readonly filterAll: string;
   readonly noTransactions: string;
   readonly backToDashboard: string;
 }

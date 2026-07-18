@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
+import { CircularProgress, Dialog, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
 import { MobileFilterButton, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import type { PendingReviewsLabels } from "@/shared/locale";
 
@@ -75,7 +75,7 @@ export function RejectReportDialogMobile({
             "&:hover": { backgroundColor: theme.palette.error.dark },
           })}
         >
-          {loading ? "..." : labels.rejectConfirm}
+          {loading ? <CircularProgress size={20} color="inherit" /> : labels.rejectConfirm}
         </MobilePrimaryPageAction>
       </DialogContent>
     </Dialog>

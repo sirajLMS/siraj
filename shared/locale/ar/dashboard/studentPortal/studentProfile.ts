@@ -21,6 +21,7 @@ export const dashboardStudentPortalProfileAr: StudentPortalProfileLabels = {
   editProfile: "تعديل الملف",
   saveChanges: "حفظ التغييرات",
   cancel: "إلغاء",
+  backToDashboard: "العودة إلى لوحة التحكم",
   loadingMessage: "جاري التحميل...",
   saveSuccess: "تم تحديث الملف بنجاح",
   saveError: "فشل تحديث الملف",

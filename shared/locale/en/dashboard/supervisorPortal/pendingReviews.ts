@@ -24,4 +24,10 @@ export const dashboardSupervisorPortalPendingReviewsEn: PendingReviewsLabels = {
   rejectCancel: "Cancel",
   noPendingReviews: "No pending reviews",
   loadingMessage: "Loading...",
+  approveSuccess: "Lesson report approved",
+  approveError: "Failed to approve report",
+  rejectSuccess: "Lesson report rejected",
+  rejectError: "Failed to reject report",
+  teacherSearchPlaceholder: "Search teachers…",
+  studentSearchPlaceholder: "Search students…",
 };

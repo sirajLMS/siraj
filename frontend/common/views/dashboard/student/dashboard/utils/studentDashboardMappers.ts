@@ -45,12 +45,15 @@ export function mapUpcomingLessons(
   return classes.map(mapUpcomingLesson);
 }
 
-type PendingReportItem = NonNullable<Operations.PendingLessonReportsQuery["pendingLessonReports"]>[number];
+type PendingReportItem = NonNullable<
+  NonNullable<NonNullable<Operations.PendingLessonReportsQuery["pendingLessonReports"]>["rows"]>[number]
+>;
 
 export function mapRecentLessonReport(raw: PendingReportItem): RecentLessonReportRow {
   return {
     id: raw.id ?? "",
     classInstanceId: raw.classInstanceId ?? null,
+    teacherName: raw.teacherName ?? null,
     lessonDate: raw.lessonDate ?? null,
     durationMinutes: raw.durationMinutes ?? 0,
     status: (raw.status ?? null) as LessonReportStatus | null,
@@ -62,7 +65,7 @@ export function mapRecentLessonReport(raw: PendingReportItem): RecentLessonRepor
 }
 
 export function mapRecentLessonReports(
-  reports: Operations.PendingLessonReportsQuery["pendingLessonReports"] | undefined
+  reports: NonNullable<Operations.PendingLessonReportsQuery["pendingLessonReports"]>["rows"] | undefined
 ): RecentLessonReportRow[] {
   if (!reports) return [];
   return reports.map(mapRecentLessonReport);

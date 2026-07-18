@@ -7,6 +7,9 @@ export type TeacherDueInsertType = typeof teacherDues.$inferInsert;
 export type TeacherDueReturnType = Omit<TeacherDueSelectType, "status" | "currency"> & {
   status: TeacherDueStatus;
   currency: CurrencyCode;
+  teacherName?: string | null;
+  studentName?: string | null;
+  classDate?: Date | null;
 };
 
 export interface TeacherMonthlyReportReturnType {

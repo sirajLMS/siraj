@@ -1,5 +1,6 @@
 import type { notificationDeliveries } from "@/backend/db/schema";
 import type { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
+import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
 export type NotificationDeliverySelectType = typeof notificationDeliveries.$inferSelect;
 export type NotificationDeliveryInsertType = typeof notificationDeliveries.$inferInsert;
 
@@ -54,6 +55,7 @@ export type CreateNotificationDeliveryInput = Pick<
   deviceTokenId?: string | null;
   title?: string | null;
   body?: string | null;
+  metadata?: NotificationMetadata | null;
 };
 
 export type UpdateDeliveryStatusInput = {

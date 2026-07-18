@@ -56,6 +56,7 @@ import { dashboardSubjectsAr } from "@/shared/locale/ar/dashboard/subjects/main"
 import { dashboardSuggestionsAr } from "@/shared/locale/ar/dashboard/suggestions/main";
 import { dashboardSupervisorPortalMonthlyReportsAr } from "@/shared/locale/ar/dashboard/supervisorPortal/monthlyReports";
 import { dashboardSupervisorPortalPendingReviewsAr } from "@/shared/locale/ar/dashboard/supervisorPortal/pendingReviews";
+import { dashboardSupervisorPortalProfileAr } from "@/shared/locale/ar/dashboard/supervisorPortal/profile";
 import { dashboardSupervisorPortalDashboardAr } from "@/shared/locale/ar/dashboard/supervisorPortal/supervisorDashboard";
 import { dashboardSupervisorPortalTeacherDuesAr } from "@/shared/locale/ar/dashboard/supervisorPortal/teacherDues";
 import { dashboardTeacherAvailabilityAr } from "@/shared/locale/ar/dashboard/teachers/availability";
@@ -206,6 +207,7 @@ export const arMessages: Translations = {
     suggestions: dashboardSuggestionsAr,
     supervisorPortalDashboard: dashboardSupervisorPortalDashboardAr,
     supervisorPortalPendingReviews: dashboardSupervisorPortalPendingReviewsAr,
+    supervisorPortalProfile: dashboardSupervisorPortalProfileAr,
     supervisorPortalMonthlyReports: dashboardSupervisorPortalMonthlyReportsAr,
     supervisorPortalTeacherDues: dashboardSupervisorPortalTeacherDuesAr,
     teacherAvailability: dashboardTeacherAvailabilityAr,

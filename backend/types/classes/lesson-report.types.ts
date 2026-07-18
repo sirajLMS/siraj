@@ -7,6 +7,8 @@ export type LessonReportInsertType = typeof lessonReports.$inferInsert;
 export type LessonReportReturnType = Omit<LessonReportSelectType, "status" | "attendanceEvaluation"> & {
   status: LessonReportStatus;
   attendanceEvaluation: AttendanceEvaluation;
+  teacherName?: string | null;
+  studentName?: string | null;
 };
 
 export interface LessonReportSubmitInput {

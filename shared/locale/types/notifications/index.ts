@@ -169,4 +169,16 @@ export interface NotificationsLabels {
   readonly studentTeacherReassigned: StudentTeacherReassignedLabels;
   readonly studentStatusChanged: StudentStatusChangedLabels;
   readonly studentQuotaOverridden: StudentQuotaOverriddenLabels;
+
+  // Drawer UI keys
+  readonly drawerTitle: string;
+  readonly managePreferences: string;
+  readonly markAllRead: string;
+  readonly markAsRead: string;
+  readonly reschedule: string;
+  readonly viewEntity: string;
+  readonly approveInvoice: string;
+  readonly rejectInvoice: string;
+  readonly noNotifications: string;
+  readonly unreadCount: (count: number) => string;
 }

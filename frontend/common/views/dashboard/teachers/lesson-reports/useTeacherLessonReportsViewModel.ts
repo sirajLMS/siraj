@@ -45,7 +45,9 @@ export interface UseTeacherLessonReportsViewModelProps {
   readonly teacherId: string;
 }
 
-type PendingLessonReportsRow = NonNullable<NonNullable<PendingLessonReportsQuery["pendingLessonReports"]>[number]>;
+type PendingLessonReportsRow = NonNullable<
+  NonNullable<NonNullable<PendingLessonReportsQuery["pendingLessonReports"]>["rows"]>[number]
+>;
 
 const STATUS_OPTION_KEYS: readonly StatusFilterValue[] = [
   "ALL",
@@ -77,7 +79,7 @@ export function useTeacherLessonReportsViewModel({
   );
 
   const rows = useMemo<readonly TeacherLessonReportRow[]>(() => {
-    const source = data?.pendingLessonReports ?? [];
+    const source = data?.pendingLessonReports?.rows ?? [];
     if (statusFilter === "ALL") {
       return source.map(toRow);
     }

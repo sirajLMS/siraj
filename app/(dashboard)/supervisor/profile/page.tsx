@@ -1,6 +1,9 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
+import { SupervisorProfileContainer } from "@/frontend/common/views/dashboard/supervisor/profile/SupervisorProfileContainer";
 import { getTranslations } from "@/shared/locale";
 
 export async function generateMetadata({
@@ -9,11 +12,17 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = getTranslations(locale).commonTranslations;
-  return { title: t.title };
+  const t = getTranslations(locale).dashboardTranslations.supervisorPortalProfile;
+  return { title: t.pageTitle };
 }
 
-export default function SupervisorProfilePage() {
+export default async function SupervisorProfilePage() {
+  const { userId } = await getServerUserContext();
+  if (!userId) {
+    await redirectToLogin();
+    return;
+  }
+
   return (
     <Suspense
       fallback={
@@ -22,12 +31,7 @@ export default function SupervisorProfilePage() {
         </Box>
       }
     >
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4">Supervisor Profile</Typography>
-        <Typography variant="body1" sx={{ mt: 2 }}>
-          Coming soon...
-        </Typography>
-      </Box>
+      <SupervisorProfileContainer targetUserId={userId} />
     </Suspense>
   );
 }

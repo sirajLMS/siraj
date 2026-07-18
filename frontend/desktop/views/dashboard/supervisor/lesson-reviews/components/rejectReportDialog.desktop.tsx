@@ -1,7 +1,15 @@
 "use client";
 
 import type { SxProps } from "@mui/material";
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
+import {
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Typography,
+} from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import type { PendingReviewsLabels } from "@/shared/locale";
@@ -63,7 +71,7 @@ export function RejectReportDialogDesktop({
           disabled={loading || reason.trim().length === 0}
           sx={confirmSx}
         >
-          {loading ? "..." : labels.rejectConfirm}
+          {loading ? <CircularProgress size={20} color="inherit" /> : labels.rejectConfirm}
         </DesktopPrimaryPageAction>
       </DialogActions>
     </Dialog>

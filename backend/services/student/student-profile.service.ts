@@ -1,15 +1,16 @@
-import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db";
+import { ParentRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
 import { AppPermission, StudentStatus } from "@/backend/enum";
 import { parseAppLanguage, parseGender, parseStudentStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
 import {
+  canEditStudentFieldGroup,
   filterStudentProfileByFieldGroups,
   type StudentFieldFilterContext,
 } from "@/backend/services/profile/profile-field-filter";
 import { StudentStatusService } from "@/backend/services/student/student-status.service";
 import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
-import type { StudentProfileReturnType } from "@/backend/types/students/student-profile.types";
+import type { StudentProfileEditInput, StudentProfileReturnType } from "@/backend/types/students/student-profile.types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 type GetProfileOptions = {
@@ -167,4 +168,130 @@ export namespace StudentProfileService {
       filterCtx
     );
   }
+
+  /**
+   * Lets a student update their own editable profile fields.
+   * Gated by fine-grained student field-group edit_own permissions:
+   * - phone / dateOfBirth / gender / language → `student_identity` (STUDENT_IDENTITY_EDIT_OWN)
+   * - parentPhone (when linked) → `student_parent` (STUDENT_PARENT_EDIT_OWN)
+   * Rejects email, teacher assignment, and quota/credit changes (not accepted on input).
+   */
+  export async function recordStudentProfileEdit(
+    actorUserId: string,
+    input: StudentProfileEditInput,
+    tErrors: ErrorsLabels,
+    locale?: string
+  ): Promise<StudentProfileReturnType> {
+    const studentId = await resolveOwnStudentId(actorUserId, tErrors);
+    const profile = await requireOwnStudentProfile(actorUserId, studentId, tErrors);
+
+    const submittedGroups = collectStudentProfileEditGroups(input);
+    if (submittedGroups.length === 0) {
+      throw new Error(tErrors.invalidInput);
+    }
+
+    await assertCanEditSubmittedGroups(actorUserId, studentId, submittedGroups, tErrors);
+    await applyStudentProfileEdit(actorUserId, studentId, profile, input, tErrors, locale);
+
+    return getProfile(actorUserId, studentId, {}, tErrors);
+  }
+}
+
+async function resolveOwnStudentId(actorUserId: string, tErrors: ErrorsLabels): Promise<string> {
+  const studentId = await StudentRepository.getStudentIdByUserId(actorUserId);
+  if (!studentId) {
+    throw new Error(tErrors.studentNotFound(actorUserId));
+  }
+  return studentId;
+}
+
+async function requireOwnStudentProfile(
+  actorUserId: string,
+  studentId: string,
+  tErrors: ErrorsLabels
+): Promise<NonNullable<Awaited<ReturnType<typeof StudentRepository.findProfileById>>>> {
+  const profile = await StudentRepository.findProfileById(studentId);
+  if (!profile) {
+    throw new Error(tErrors.studentNotFound(studentId));
+  }
+  if (profile.userId !== actorUserId) {
+    throw new Error(tErrors.insufficientPermissions);
+  }
+  return profile;
+}
+
+async function assertCanEditSubmittedGroups(
+  actorUserId: string,
+  studentId: string,
+  submittedGroups: readonly string[],
+  tErrors: ErrorsLabels
+): Promise<void> {
+  const permissionContext = await PermissionsService.getUserContext(actorUserId);
+  const filterCtx: StudentFieldFilterContext = {
+    actorUserId,
+    studentId,
+    isAssociatedViewer: true,
+    permissions: new Set(permissionContext.permissions),
+  };
+
+  for (const groupKey of submittedGroups) {
+    if (!canEditStudentFieldGroup(filterCtx, groupKey)) {
+      throw new Error(tErrors.insufficientPermissions);
+    }
+  }
+}
+
+async function applyStudentProfileEdit(
+  actorUserId: string,
+  studentId: string,
+  profile: NonNullable<Awaited<ReturnType<typeof StudentRepository.findProfileById>>>,
+  input: StudentProfileEditInput,
+  tErrors: ErrorsLabels,
+  locale?: string
+): Promise<void> {
+  const hasIdentityUpdate =
+    input.dateOfBirth !== undefined || input.gender !== undefined || input.language !== undefined;
+  if (hasIdentityUpdate) {
+    await StudentRepository.partiallyUpdate(
+      {
+        id: studentId,
+        ...(input.dateOfBirth !== undefined ? { dateOfBirth: input.dateOfBirth } : {}),
+        ...(input.gender !== undefined ? { gender: input.gender } : {}),
+        ...(input.language !== undefined ? { language: input.language } : {}),
+      },
+      tErrors,
+      locale
+    );
+  }
+
+  if (input.phone !== undefined) {
+    await UserRepository.updateProfileFields(actorUserId, { phone: input.phone }, locale);
+  }
+
+  if (input.parentPhone !== undefined) {
+    if (!profile.parentUserId) {
+      throw new Error(tErrors.invalidInput);
+    }
+    await UserRepository.updateProfileFields(profile.parentUserId, { phone: input.parentPhone }, locale);
+  }
+}
+
+function collectStudentProfileEditGroups(input: StudentProfileEditInput): string[] {
+  const groups: string[] = [];
+
+  // Phone lives on users but is gated with identity edit_own (no separate student contact group).
+  if (
+    input.phone !== undefined ||
+    input.dateOfBirth !== undefined ||
+    input.gender !== undefined ||
+    input.language !== undefined
+  ) {
+    groups.push("student_identity");
+  }
+
+  if (input.parentPhone !== undefined) {
+    groups.push("student_parent");
+  }
+
+  return groups;
 }

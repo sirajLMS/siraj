@@ -1,9 +1,11 @@
 "use client";
 
-import { Grid } from "@mui/material";
+import { Autocomplete, Grid, TextField } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { getServerPaginationProps } from "@/frontend/common/components/ui/filter/serverPaginationProps";
 import type {
+  DirectoryPersonOption,
   PendingReviewRow,
   PendingReviewsViewModel,
 } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
@@ -21,15 +23,21 @@ import { RejectReportDialogDesktop } from "@/frontend/desktop/views/dashboard/su
 export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewModel>) {
   const {
     rows,
+    totalCount,
+    page,
+    pageSize,
     selectedReport,
     teacherFilter,
     studentFilter,
+    teacherOptions,
+    studentOptions,
     loading,
     approving,
     rejecting,
     labels,
     onTeacherFilterChange,
     onStudentFilterChange,
+    onPageChange,
     onSelectReport,
     onApprove,
     onOpenRejectDialog,
@@ -40,6 +48,9 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
     rejectReason,
   } = props;
 
+  const selectedTeacher = teacherOptions.find(o => o.id === teacherFilter) ?? null;
+  const selectedStudent = studentOptions.find(o => o.id === studentFilter) ?? null;
+
   const columns = useMemo<GridColDef<PendingReviewRow>[]>(
     () => [
       {
@@ -49,16 +60,18 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
         minWidth: 150,
       },
       {
-        field: "studentId",
+        field: "studentName",
         headerName: labels.studentColumn,
         flex: 1,
         minWidth: 150,
+        valueGetter: (_, row) => row.studentName || row.studentId,
       },
       {
-        field: "teacherId",
+        field: "teacherName",
         headerName: labels.teacherColumn,
         flex: 1,
         minWidth: 150,
+        valueGetter: (_, row) => row.teacherName || row.teacherId,
       },
       {
         field: "attendanceEvaluation",
@@ -97,6 +110,7 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
         width: 280,
         align: "center",
         headerAlign: "center",
+        sortable: false,
         renderCell: params => (
           <Grid container spacing={1} sx={{ flexWrap: "nowrap" }}>
             <Grid>
@@ -128,40 +142,73 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
     [labels, approving, onSelectReport, onApprove, onOpenRejectDialog]
   );
 
+  const paginationProps = getServerPaginationProps({ page, pageSize }, totalCount, onPageChange);
+
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
         title={labels.pageTitle}
         actions={
-          <Grid container spacing={1}>
-            <Grid>
-              <DesktopFilterButton onClick={() => onTeacherFilterChange(teacherFilter ? "" : "active")}>
-                {labels.filterByTeacher}
-              </DesktopFilterButton>
+          <Grid container spacing={1} sx={{ minWidth: { md: 480 } }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Autocomplete<DirectoryPersonOption>
+                options={[...teacherOptions]}
+                value={selectedTeacher}
+                onChange={(_, option) => onTeacherFilterChange(option?.id ?? "")}
+                getOptionLabel={option => option.name}
+                isOptionEqualToValue={(a, b) => a.id === b.id}
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    label={labels.filterByTeacher}
+                    placeholder={labels.teacherSearchPlaceholder}
+                    size="small"
+                  />
+                )}
+              />
             </Grid>
-            <Grid>
-              <DesktopFilterButton onClick={() => onStudentFilterChange(studentFilter ? "" : "active")}>
-                {labels.filterByStudent}
-              </DesktopFilterButton>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Autocomplete<DirectoryPersonOption>
+                options={[...studentOptions]}
+                value={selectedStudent}
+                onChange={(_, option) => onStudentFilterChange(option?.id ?? "")}
+                getOptionLabel={option => option.name}
+                isOptionEqualToValue={(a, b) => a.id === b.id}
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    label={labels.filterByStudent}
+                    placeholder={labels.studentSearchPlaceholder}
+                    size="small"
+                  />
+                )}
+              />
             </Grid>
           </Grid>
         }
       />
 
-      <DesktopSectionPanel sx={{ flex: 1 }}>
-        <DesktopAppDataGrid<PendingReviewRow>
-          rows={rows}
-          columns={columns}
-          getRowId={row => row.id}
-          emptyMessage={labels.noPendingReviews}
-          loading={loading}
-          autoHeight
-          rowHeight={64}
-        />
-      </DesktopSectionPanel>
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, lg: selectedReport ? 8 : 12 }}>
+          <DesktopSectionPanel sx={{ flex: 1 }}>
+            <DesktopAppDataGrid<PendingReviewRow>
+              rows={rows}
+              columns={columns}
+              getRowId={row => row.id}
+              emptyMessage={labels.noPendingReviews}
+              loading={loading}
+              autoHeight
+              rowHeight={64}
+              {...paginationProps}
+            />
+          </DesktopSectionPanel>
+        </Grid>
 
-      <Grid size={{ xs: 12, lg: 4 }}>
-        <LessonReportDetailPanelDesktop report={selectedReport} labels={labels} />
+        {selectedReport ? (
+          <Grid size={{ xs: 12, lg: 4 }}>
+            <LessonReportDetailPanelDesktop report={selectedReport} labels={labels} />
+          </Grid>
+        ) : null}
       </Grid>
 
       <RejectReportDialogDesktop

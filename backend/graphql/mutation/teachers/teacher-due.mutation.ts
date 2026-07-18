@@ -16,7 +16,7 @@ gqlSchemaBuilder.mutationField("markTeacherDuesPaid", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.TEACHER_DUES_VIEW);
+      const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.TEACHER_DUES_MARK_PAID);
       if (!hasPermission) {
         const tErrors = ctx.t().errorsTranslations;
         throw new Error(tErrors.insufficientPermissions);

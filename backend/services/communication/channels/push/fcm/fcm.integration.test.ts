@@ -58,6 +58,7 @@ function buildMockDelivery(id: string, deviceTokenId: string | null = null): Not
     providerMessageId: null,
     failureReason: null,
     webhookPayload: null,
+    metadata: null,
     sentAt: null,
     deliveredAt: null,
     openedAt: null,

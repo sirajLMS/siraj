@@ -23,6 +23,7 @@ export function SupervisorDashboardMobileView({
   onGoToReviews,
   onGoToDues,
   onGoToMonthlyReports,
+  onViewRecentApproval,
 }: Readonly<SupervisorDashboardViewModel>) {
   return (
     <MobilePageContainer>
@@ -49,6 +50,7 @@ export function SupervisorDashboardMobileView({
             </Box>
             <Box
               component="button"
+              type="button"
               onClick={onGoToMonthlyReports}
               sx={theme => ({
                 background: "none",
@@ -76,10 +78,20 @@ export function SupervisorDashboardMobileView({
               {recentApprovals.map(item => (
                 <Box
                   key={item.id}
+                  component="button"
+                  type="button"
+                  onClick={() => onViewRecentApproval(item.id)}
                   sx={{
                     display: "flex",
                     alignItems: "center",
                     gap: 1,
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    textAlign: "start",
+                    fontFamily: "inherit",
+                    color: "inherit",
                   }}
                 >
                   <CheckCircleOutlined
@@ -87,6 +99,9 @@ export function SupervisorDashboardMobileView({
                     sx={theme => ({ color: theme.palette.status.activeContainer })}
                   />
                   <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
+                    {item.studentName || item.studentId} · {item.teacherName || item.teacherId}
+                  </Typography>
+                  <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                     {item.lessonDate}
                   </Typography>
                 </Box>

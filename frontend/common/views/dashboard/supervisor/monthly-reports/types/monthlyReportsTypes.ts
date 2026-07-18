@@ -1,4 +1,10 @@
+import type { SvgIconComponent } from "@mui/icons-material";
 import type { SupervisorMonthlyReportsLabels } from "@/shared/locale";
+
+export interface DirectoryPersonOption {
+  readonly id: string;
+  readonly name: string;
+}
 
 export interface TeacherMonthlyReportData {
   readonly teacherId: string;
@@ -36,6 +42,7 @@ export interface StudentMonthlyReportData {
 export interface MonthlyReportMetric {
   readonly label: string;
   readonly value: string | number;
+  readonly icon: SvgIconComponent;
 }
 
 export interface MonthlyReportsViewModel {
@@ -44,6 +51,8 @@ export interface MonthlyReportsViewModel {
   readonly month: number;
   readonly teacherId: string;
   readonly studentId: string;
+  readonly teacherOptions: readonly DirectoryPersonOption[];
+  readonly studentOptions: readonly DirectoryPersonOption[];
   readonly teacherReport: TeacherMonthlyReportData | null;
   readonly studentReport: StudentMonthlyReportData | null;
   readonly metrics: MonthlyReportMetric[];
@@ -57,4 +66,4 @@ export interface MonthlyReportsViewModel {
   readonly onGenerate: () => void;
 }
 
-export type UseMonthlyReportsViewModelProps = MonthlyReportsViewModel;
+export type UseMonthlyReportsViewModelProps = Record<string, never>;

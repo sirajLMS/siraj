@@ -121,4 +121,15 @@ export const notificationsEn: NotificationsLabels = {
     body: ({ studentName, newClassesRemaining }) =>
       `${studentName}'s remaining class quota is now ${newClassesRemaining}.`,
   },
+  drawerTitle: "Notifications",
+  managePreferences: "Manage preferences",
+  markAllRead: "Mark all as read",
+  markAsRead: "Mark as read",
+  reschedule: "Reschedule",
+  viewEntity: "View",
+  approveInvoice: "Approve invoice",
+  rejectInvoice: "Reject invoice",
+  noNotifications: "No notifications",
+  unreadCount: count =>
+    count === 0 ? "No unread notifications" : count === 1 ? "1 unread notification" : `${count} unread notifications`,
 };

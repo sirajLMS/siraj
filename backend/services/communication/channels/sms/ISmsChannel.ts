@@ -1,10 +1,12 @@
 import type { NotificationEventType } from "@/backend/enum";
+import type { NotificationMetadata } from "@/backend/types";
 
 export interface SmsPayload {
   readonly to: string;
   readonly body: string;
   readonly eventType: NotificationEventType;
   readonly userId: string;
+  readonly metadata?: NotificationMetadata | null;
 }
 
 export interface SmsSendResult {

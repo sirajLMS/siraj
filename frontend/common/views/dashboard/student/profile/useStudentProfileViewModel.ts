@@ -1,11 +1,39 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
-import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
+import { formatDate } from "@/frontend/common/components/intl/dateFormat";
+import type { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  recordStudentProfileEditMutationDocument,
+  studentProfileQueryDocument,
+} from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import {
+  type StudentPortalProfileEditDraft,
+  useStudentPortalProfileStore,
+} from "@/frontend/common/stores/studentPortalProfileStore";
+import { logger } from "@/frontend/common/utils/logger";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import { useRouter } from "@/shared/i18n/routing";
 import { type StudentPortalProfileLabels, useAppTranslation } from "@/shared/locale";
+
+function toDateInputValue(value: string | null | undefined): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
+}
+
+function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDraft {
+  return {
+    phone: profile.phone ?? "",
+    dateOfBirth: toDateInputValue(profile.dateOfBirth),
+    gender: (profile.gender as Gender | null) ?? "",
+    language: (profile.language as AppLanguage | null) ?? "",
+    parentPhone: profile.parentPhone ?? "",
+  };
+}
 
 function useStudentProfileLabels(t: StudentPortalProfileLabels): StudentPortalProfileLabels {
   return useMemo(
@@ -30,6 +58,7 @@ function useStudentProfileLabels(t: StudentPortalProfileLabels): StudentPortalPr
       editProfile: t.editProfile,
       saveChanges: t.saveChanges,
       cancel: t.cancel,
+      backToDashboard: t.backToDashboard,
       loadingMessage: t.loadingMessage,
       saveSuccess: t.saveSuccess,
       saveError: t.saveError,
@@ -42,7 +71,19 @@ export interface StudentProfileViewModel {
   readonly profile: StudentProfileRow | null;
   readonly labels: StudentPortalProfileLabels;
   readonly loading: boolean;
+  readonly saving: boolean;
+  readonly isEditing: boolean;
+  readonly draft: StudentPortalProfileEditDraft;
+  readonly formattedDateOfBirth: string;
+  readonly snackbarOpen: boolean;
+  readonly snackbarMessage: string;
+  readonly snackbarSeverity: "success" | "error";
   readonly onBackToDashboard: () => void;
+  readonly onStartEdit: () => void;
+  readonly onCancelEdit: () => void;
+  readonly onDraftChange: (patch: Partial<StudentPortalProfileEditDraft>) => void;
+  readonly onSave: () => Promise<void>;
+  readonly onSnackbarClose: () => void;
 }
 
 export type UseStudentProfileViewModelProps = Record<string, never>;
@@ -50,12 +91,29 @@ export type UseStudentProfileViewModelProps = Record<string, never>;
 export function useStudentProfileViewModel(_props: UseStudentProfileViewModelProps): StudentProfileViewModel {
   const t = useAppTranslation().dashboardTranslations.studentPortalProfile;
   const router = useRouter();
+  const locale = useAppLocale();
   const labels = useStudentProfileLabels(t);
 
-  const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
+  const isEditing = useStudentPortalProfileStore(s => s.isEditing);
+  const draft = useStudentPortalProfileStore(s => s.draft);
+  const snackbar = useStudentPortalProfileStore(s => s.snackbar);
+  const setIsEditing = useStudentPortalProfileStore(s => s.setIsEditing);
+  const setDraft = useStudentPortalProfileStore(s => s.setDraft);
+  const patchDraft = useStudentPortalProfileStore(s => s.patchDraft);
+  const showSnackbar = useStudentPortalProfileStore(s => s.showSnackbar);
+  const closeSnackbar = useStudentPortalProfileStore(s => s.closeSnackbar);
+  const resetEdit = useStudentPortalProfileStore(s => s.resetEdit);
+
+  const {
+    data: profileData,
+    loading: profileLoading,
+    refetch,
+  } = useQuery(studentProfileQueryDocument, {
     variables: { studentId: null, year: null, month: null },
     fetchPolicy: "cache-and-network",
   });
+
+  const [recordEdit, { loading: saving }] = useMutation(recordStudentProfileEditMutationDocument);
 
   const profile: StudentProfileRow | null = useMemo(() => {
     if (!profileData?.studentProfile) return null;
@@ -88,12 +146,63 @@ export function useStudentProfileViewModel(_props: UseStudentProfileViewModelPro
     };
   }, [profileData]);
 
-  const loading = profileLoading;
+  const formattedDateOfBirth = useMemo(() => {
+    if (!profile?.dateOfBirth) return "—";
+    try {
+      return formatDate(profile.dateOfBirth, locale);
+    } catch {
+      return profile.dateOfBirth;
+    }
+  }, [profile?.dateOfBirth, locale]);
+
+  const onStartEdit = () => {
+    if (!profile) return;
+    setDraft(profileToDraft(profile));
+    setIsEditing(true);
+  };
+
+  const onCancelEdit = () => {
+    resetEdit();
+  };
+
+  const onSave = async () => {
+    try {
+      await recordEdit({
+        variables: {
+          input: {
+            phone: draft.phone.trim() || null,
+            dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString() : null,
+            gender: draft.gender || null,
+            language: draft.language || null,
+            parentPhone: draft.parentPhone.trim() || null,
+          },
+        },
+      });
+      await refetch();
+      resetEdit();
+      showSnackbar(labels.saveSuccess, "success");
+    } catch (error) {
+      logger.error("Failed to save student profile", { error });
+      showSnackbar(labels.saveError, "error");
+    }
+  };
 
   return {
     profile,
     labels,
-    loading,
+    loading: profileLoading,
+    saving,
+    isEditing,
+    draft,
+    formattedDateOfBirth,
+    snackbarOpen: snackbar.open,
+    snackbarMessage: snackbar.message,
+    snackbarSeverity: snackbar.severity,
     onBackToDashboard: () => router.push("/students/me"),
+    onStartEdit,
+    onCancelEdit,
+    onDraftChange: patchDraft,
+    onSave,
+    onSnackbarClose: closeSnackbar,
   };
 }

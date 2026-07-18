@@ -85,3 +85,57 @@ export const studentProfileQueryDocument: TypedDocumentNode<
     }
   }
 `;
+
+// NOTE: `Operations.RecordStudentProfileEditMutation` /
+// `Types.MutationRecordStudentProfileEditArgs` are produced by GraphQL Code
+// Generator after codegen. Until then, use a temporary local type mirroring
+// the expected codegen shape. Replace after
+// `bun run generate:gqlSchema && bun codegen` regenerates `operations.ts`.
+interface RecordStudentProfileEditMutationShape {
+  recordStudentProfileEdit: {
+    id: string | null;
+    name: string | null;
+    status: string | null;
+    avatarUrl: string | null;
+    dateOfBirth: string | null;
+    gender: string | null;
+    language: string | null;
+    email: string | null;
+    phone: string | null;
+    parentPhone: string | null;
+    version: number | null;
+    updatedAt: string | null;
+  } | null;
+}
+
+interface RecordStudentProfileEditMutationArgs {
+  input: {
+    phone?: string | null;
+    dateOfBirth?: string | null;
+    gender?: string | null;
+    language?: string | null;
+    parentPhone?: string | null;
+  };
+}
+
+export const recordStudentProfileEditMutationDocument: TypedDocumentNode<
+  RecordStudentProfileEditMutationShape,
+  RecordStudentProfileEditMutationArgs
+> = gql`
+  mutation RecordStudentProfileEdit($input: StudentProfileEditInput!) {
+    recordStudentProfileEdit(input: $input) {
+      id
+      name
+      status
+      avatarUrl
+      dateOfBirth
+      gender
+      language
+      email
+      phone
+      parentPhone
+      version
+      updatedAt
+    }
+  }
+`;

@@ -30,3 +30,16 @@ export type StudentProfileReturnType = {
   readonly upcomingClasses: StudentUpcomingClassesResult | null;
   readonly classHistory: StudentClassHistory | null;
 };
+
+/**
+ * Own-profile edit payload for LMS students.
+ * Excludes email, teacher assignment, academic/quota fields, and parent reassignment.
+ */
+export type StudentProfileEditInput = {
+  readonly phone?: string | null;
+  readonly dateOfBirth?: Date | null;
+  readonly gender?: Gender | null;
+  readonly language?: AppLanguage | null;
+  /** Updates linked parent user phone when the student has a parent link. */
+  readonly parentPhone?: string | null;
+};

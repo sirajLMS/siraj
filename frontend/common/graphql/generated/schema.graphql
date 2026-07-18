@@ -274,6 +274,7 @@ enum AppPermission {
   TEACHERS_EDIT
   TEACHERS_LIST
   TEACHERS_MANAGE_SCHEDULE
+  TEACHER_DUES_MARK_PAID
   TEACHER_DUES_VIEW
   TEACHER_EDIT_OWN_PROFILE
   TEACHER_VIEW_DASHBOARD
@@ -2126,10 +2127,12 @@ type LessonReport {
   reviewedByUserId: String
   status: LessonReportStatus
   studentId: String
+  studentName: String
   studentNotes: String
   submittedAt: DateTime
   submittedByUserId: String
   teacherId: String
+  teacherName: String
   teacherNotes: String
   updatedAt: DateTime
 }
@@ -2449,6 +2452,8 @@ type Mutation {
   login(input: LoginInput!): LoginResponse
   logout: Boolean
   markInvoicePaid(expectedVersion: Int, invoiceId: String!, proofFileId: ID!): MarkInvoicePaidResult
+  markNotificationRead(deliveryId: ID!): Boolean
+  markNotificationsRead: Int
 
   """Marks a suggestion as a duplicate of another suggestion (admin only)."""
   markSuggestionDuplicate(input: MarkSuggestionDuplicateInput!): Suggestion
@@ -2467,6 +2472,7 @@ type Mutation {
   """Record a credit purchase for a student (adds classes to their balance)"""
   recordCreditPurchase(hours: Int!, notes: String, studentId: ID!): CreditPurchaseResult
   recordPayment(amount: String!, currency: CurrencyCode!, invoiceId: ID!, transactionId: String, userPaymentMethodId: ID!): Payment
+  recordStudentProfileEdit(input: StudentProfileEditInput!): StudentProfile
   refreshExchangeRates(force: Boolean = false): RefreshExchangeRatesResult
   refreshToken: RefreshTokenResponse
 
@@ -2997,6 +3003,12 @@ enum PaymentMethodType {
   PROOF_UPLOAD
 }
 
+"""Paginated pending lesson reports awaiting review, with total count"""
+type PendingLessonReportsPayload {
+  rows: [LessonReport!]
+  totalCount: Int
+}
+
 """Count of pending lesson reports awaiting review"""
 type PendingReviewCount {
   pendingCount: Int
@@ -3111,6 +3123,9 @@ type Query {
   """
   lessonReport(classInstanceId: ID!): LessonReport
 
+  """Get a lesson report by its ID"""
+  lessonReportById(reportId: ID!): LessonReport
+
   """
   Get the count of pending lesson reports awaiting review with optional filters
   """
@@ -3150,7 +3165,7 @@ type Query {
   """
   Get pending lesson reports awaiting review with optional teacher/student filters and pagination
   """
-  pendingLessonReports(paginationArgs: PaginationArgs, studentId: ID, teacherId: ID): [LessonReport!]
+  pendingLessonReports(paginationArgs: PaginationArgs, studentId: ID, teacherId: ID): PendingLessonReportsPayload
 
   """Fetch a single permission group by ID."""
   permissionGroup(id: String!): PermissionGroup
@@ -3162,6 +3177,11 @@ type Query {
   """List all permission catalog entries."""
   permissions: [Permission!]
   profileByUserId(userId: String!): UnifiedProfile
+
+  """
+  Get the most recently approved lesson reports for the supervisor dashboard
+  """
+  recentApprovedLessonReports(limit: Int): [LessonReport!]
   recurringMeetingConfigs(recurringScheduleId: ID!): [ClassMeetingConfig!]
   recurringSchedule(id: ID!): RecurringScheduleDetail
   rescheduleTrackingMetrics: RescheduleTrackingMetrics
@@ -3218,10 +3238,14 @@ type Query {
   studentUpcomingClasses(studentId: String!): StudentUpcomingClassesResult
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
 
+  """Lightweight student list for autocomplete (id, name, avatarUrl)."""
+  studentsDirectory(limit: Int, search: String): [StudentDirectoryRow!]!
+
   """
   Returns contributor statistics for the suggestion social proof display.
   """
   suggestionContributorStats(days: Int!): SuggestionContributorStats
+  supervisorDashboard: SupervisorDashboard
   supportedCurrencies(activeOnly: Boolean): [SupportedCurrency!]
   supportedMobileWallets(activeOnly: Boolean = true, countryCode: CountryCode, direction: PaymentDirection): [SupportedMobileWallet!]
   supportedOnlineAccounts(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedOnlineAccount!]
@@ -3741,6 +3765,14 @@ type StudentProfile {
   version: Int
 }
 
+input StudentProfileEditInput {
+  dateOfBirth: DateTime
+  gender: Gender
+  language: AppLanguage
+  parentPhone: String
+  phone: String
+}
+
 type StudentProgress {
   completionPercent: Int
   id: String
@@ -3902,6 +3934,22 @@ enum SuggestionStatus {
   REVIEWED
 }
 
+"""Aggregated supervisor portal dashboard data"""
+type SupervisorDashboard {
+  monthlySnapshot: SupervisorMonthlySnapshot
+  pendingDuesSummary: TeacherPendingDuesSummary
+  pendingReviewCount: Int
+  recentApprovals: [LessonReport!]
+  supervisorName: String
+}
+
+"""Current calendar month snapshot for the supervisor dashboard"""
+type SupervisorMonthlySnapshot {
+  label: String
+  month: Int
+  year: Int
+}
+
 type SupportContact {
   avatarUrl: String
   id: String
@@ -4046,8 +4094,13 @@ input SupportedPaymentLinkUpdateInput {
 
 type SystemAlert {
   body: String
+  channel: NotificationChannel
   createdAt: DateTime
+  deliveryId: String
+  eventType: NotificationEventType
   id: String
+  metadata: JSON
+  readAt: DateTime
   severity: String
   title: String
   type: String
@@ -4175,6 +4228,7 @@ type TeacherDue {
   amount: String
   approvedAt: DateTime
   approvedByUserId: String
+  classDate: DateTime
   classInstanceId: String
   createdAt: DateTime
   currency: CurrencyCode
@@ -4182,7 +4236,9 @@ type TeacherDue {
   id: String
   status: TeacherDueStatus
   studentId: String
+  studentName: String
   teacherId: String
+  teacherName: String
   teacherPaymentId: String
   updatedAt: DateTime
 }

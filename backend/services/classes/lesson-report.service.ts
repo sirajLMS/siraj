@@ -231,7 +231,6 @@ export namespace LessonReportService {
     locale?: string
   ): Promise<LessonReportReturnType> {
     await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_APPROVE, locale);
-    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const report = await LessonReportRepository.findById(reportId);
     if (!report) {
@@ -305,7 +304,7 @@ export namespace LessonReportService {
         input.reportId,
         LessonReportStatus.REJECTED,
         actorUserId,
-        input.rejectionReason,
+        input.rejectionReason ?? null,
         tx
       );
 

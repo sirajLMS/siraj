@@ -16,7 +16,9 @@ export interface RecentApproval {
   readonly id: string;
   readonly lessonDate: string;
   readonly studentId: string;
+  readonly studentName: string;
   readonly teacherId: string;
+  readonly teacherName: string;
   readonly reviewedAt: string;
 }
 
@@ -34,4 +36,4 @@ export interface SupervisorDashboardViewModel {
   readonly onViewRecentApproval: (id: string) => void;
 }
 
-export type UseSupervisorDashboardViewModelProps = SupervisorDashboardViewModel;
+export type UseSupervisorDashboardViewModelProps = Record<string, never>;

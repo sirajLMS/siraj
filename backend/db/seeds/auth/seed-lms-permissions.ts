@@ -144,6 +144,9 @@ const STUDENT_GROUP_PERMISSIONS: readonly AppPermission[] = [
   AppPermission.SESSION_VIEW_DETAILS,
   AppPermission.HISTORY_VIEW_CALENDAR,
   AppPermission.HISTORY_VIEW_DETAILS,
+  // Rows come from seed-profile-field-permissions; grant only.
+  AppPermission.STUDENT_IDENTITY_EDIT_OWN,
+  AppPermission.STUDENT_PARENT_EDIT_OWN,
 ];
 
 const ADMIN_GROUP_SLUGS: readonly string[] = ["super_admin", "academy_admin"];

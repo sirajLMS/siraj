@@ -63,6 +63,8 @@ export function PreferencesChannelTabsMobileView({
   onChannelChange,
 }: Readonly<PreferencesChannelTabsMobileViewProps>) {
   const t = useAppTranslation().profileTranslations.notifications;
+  const eventLabels = t.events as Record<string, string>;
+  const getEventLabel = (eventType: NotificationEventType): string => eventLabels[eventType] ?? eventType;
 
   const handleChannelChange = (_: SyntheticEvent, value: ChannelId) => {
     const nextIndex = NOTIFICATION_CHANNELS.indexOf(value);
@@ -150,7 +152,7 @@ export function PreferencesChannelTabsMobileView({
                       }}
                     />
                   }
-                  label={<Typography sx={{ typography: "bodyMd" }}>{t.events[eventType]}</Typography>}
+                  label={<Typography sx={{ typography: "bodyMd" }}>{getEventLabel(eventType)}</Typography>}
                   labelPlacement="start"
                   sx={theme => ({
                     mx: 0,

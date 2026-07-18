@@ -112,6 +112,7 @@ export type {
 export * from "@/backend/types/meeting";
 // Communications types
 export * from "@/backend/types/notifications/communications.types";
+export * from "@/backend/types/notifications/notification-alerts.metadata.types";
 export type {
   NotificationAlertReturnType as SystemAlert,
   NotificationAlertsPaginatedReturnType as NotificationAlertsResult,
@@ -172,3 +173,5 @@ export * from "@/backend/types/teachers/teacher-onboarding.types";
 export type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types/users/user.types";
 export * from "@/backend/types/users/userDeviceTokens.types";
 export * from "@/backend/types/users/userNotificationPreferences.types";
+
+export * from "./supervisor";

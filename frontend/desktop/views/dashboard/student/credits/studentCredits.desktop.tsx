@@ -1,126 +1,85 @@
 "use client";
 
 import { ArrowBackOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
-import { Box, Button, Grid, Stack, Typography } from "@mui/material";
-import type { StudentCreditTransactionRow } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
+import { Box, Button, Chip, Grid, Stack } from "@mui/material";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
-import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page";
-
-function reasonLabel(reason: StudentCreditTransactionRow["reason"], labels: StudentCreditsViewModel["labels"]): string {
-  if (!reason) return "";
-  switch (reason) {
-    case "PURCHASE":
-      return labels.purchase;
-    case "DEDUCTION":
-      return labels.deduction;
-    case "REFUND":
-      return labels.refund;
-    case "ADJUSTMENT":
-      return labels.adjustment;
-    default:
-      return reason;
-  }
-}
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import { StudentCreditsDataGrid } from "@/frontend/desktop/views/dashboard/student/credits/components/studentCreditsDataGrid.desktop";
 
 export function StudentCreditsDesktopView({
   balance,
   transactions,
+  totalCount,
+  reasonFilter,
+  reasonOptions,
+  page,
+  pageSize,
+  locale,
   labels,
   loading,
+  onReasonFilterChange,
+  onPageChange,
+  onPageSizeChange,
   onBackToDashboard,
+  reasonLabel,
 }: Readonly<StudentCreditsViewModel>) {
-  if (loading && balance.classesTotal === 0) {
-    return (
-      <DesktopPageContainer>
-        <Typography variant="bodyMd" sx={{ p: 3 }}>
-          {labels.pageTitle}
-        </Typography>
-      </DesktopPageContainer>
-    );
-  }
-
   return (
     <DesktopPageContainer>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="headlineLg" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
-          {labels.pageTitle}
-        </Typography>
-      </Box>
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <DesktopSectionPanel title={labels.currentBalance} sx={{ height: "100%" }}>
-            <Stack spacing={2}>
-              <DesktopMetricCard
-                icon={PaymentsOutlined}
-                label={labels.hoursRemaining}
-                value={balance.classesRemaining}
-                variant="compact"
-              />
-              <DesktopMetricCard
-                icon={SchoolOutlined}
-                label={labels.hoursTotal}
-                value={balance.classesTotal}
-                variant="compact"
-              />
-            </Stack>
-          </DesktopSectionPanel>
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <DesktopMetricCard
+            icon={PaymentsOutlined}
+            label={labels.hoursRemaining}
+            value={balance.classesRemaining}
+            subLabel={`${balance.classesTotal} ${labels.hoursTotal.toLowerCase()}`}
+          />
         </Grid>
-
-        <Grid size={{ xs: 12, md: 8 }}>
-          <DesktopSectionPanel title={labels.transactionHistory}>
-            <Stack spacing={2}>
-              {transactions.length === 0 ? (
-                <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                  {labels.noTransactions}
-                </Typography>
-              ) : (
-                transactions.map(row => (
-                  <Box
-                    key={row.id}
-                    sx={theme => ({
-                      p: 2,
-                      borderRadius: 2,
-                      backgroundColor: theme.palette.surfaceContainer,
-                      border: `1px solid ${theme.palette.outlineVariant}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 2,
-                    })}
-                  >
-                    <Box>
-                      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                        {reasonLabel(row.reason, labels)}
-                      </Typography>
-                      <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
-                        {row.createdAt ?? "—"}
-                      </Typography>
-                      {row.notes ? (
-                        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                          {row.notes}
-                        </Typography>
-                      ) : null}
-                    </Box>
-                    <Typography
-                      variant="headlineMd"
-                      sx={theme => ({
-                        fontWeight: 700,
-                        color: row.changeAmount >= 0 ? theme.palette.primary.main : theme.palette.error.main,
-                      })}
-                    >
-                      {row.changeAmount >= 0 ? "+" : ""}
-                      {row.changeAmount}
-                    </Typography>
-                  </Box>
-                ))
-              )}
-            </Stack>
-          </DesktopSectionPanel>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <DesktopMetricCard icon={SchoolOutlined} label={labels.hoursTotal} value={balance.classesTotal} />
         </Grid>
       </Grid>
+
+      <DesktopSectionPanel
+        title={labels.transactionHistory}
+        actions={
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+            {reasonOptions.map(option => {
+              const selected = reasonFilter === option.value;
+              return (
+                <Chip
+                  key={option.value}
+                  label={option.label}
+                  size="small"
+                  clickable
+                  onClick={() => onReasonFilterChange(option.value)}
+                  sx={theme => ({
+                    backgroundColor: selected ? theme.palette.primary.main : theme.palette.surfaceContainerHigh,
+                    color: selected ? theme.palette.onPrimary : theme.palette.onSurfaceVariant,
+                    fontWeight: selected ? 700 : 500,
+                  })}
+                />
+              );
+            })}
+          </Stack>
+        }
+      >
+        <StudentCreditsDataGrid
+          rows={transactions}
+          totalCount={totalCount}
+          page={page}
+          pageSize={pageSize}
+          locale={locale}
+          labels={labels}
+          loading={loading}
+          reasonLabel={reasonLabel}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+        />
+      </DesktopSectionPanel>
 
       <Box sx={{ mt: 3 }}>
         <Button

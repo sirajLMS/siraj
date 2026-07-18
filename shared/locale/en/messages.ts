@@ -56,6 +56,7 @@ import { dashboardSubjectsEn } from "@/shared/locale/en/dashboard/subjects/main"
 import { dashboardSuggestionsEn } from "@/shared/locale/en/dashboard/suggestions/main";
 import { dashboardSupervisorPortalMonthlyReportsEn } from "@/shared/locale/en/dashboard/supervisorPortal/monthlyReports";
 import { dashboardSupervisorPortalPendingReviewsEn } from "@/shared/locale/en/dashboard/supervisorPortal/pendingReviews";
+import { dashboardSupervisorPortalProfileEn } from "@/shared/locale/en/dashboard/supervisorPortal/profile";
 import { dashboardSupervisorPortalDashboardEn } from "@/shared/locale/en/dashboard/supervisorPortal/supervisorDashboard";
 import { dashboardSupervisorPortalTeacherDuesEn } from "@/shared/locale/en/dashboard/supervisorPortal/teacherDues";
 import { dashboardTeacherAvailabilityEn } from "@/shared/locale/en/dashboard/teachers/availability";
@@ -206,6 +207,7 @@ export const enMessages: Translations = {
     suggestions: dashboardSuggestionsEn,
     supervisorPortalDashboard: dashboardSupervisorPortalDashboardEn,
     supervisorPortalPendingReviews: dashboardSupervisorPortalPendingReviewsEn,
+    supervisorPortalProfile: dashboardSupervisorPortalProfileEn,
     supervisorPortalMonthlyReports: dashboardSupervisorPortalMonthlyReportsEn,
     supervisorPortalTeacherDues: dashboardSupervisorPortalTeacherDuesEn,
     teacherAvailability: dashboardTeacherAvailabilityEn,

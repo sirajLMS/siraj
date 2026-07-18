@@ -243,26 +243,8 @@ async function dispatchUnpaidInvoicesForStudent(studentId: string, locale?: stri
   }
 }
 
-async function _finalizePaymentStatusChange(
-  errorLabel: string,
-  actorUserId: string,
-  invoiceId: string,
-  txnWork: (tx: DBTransaction, tErrors: ErrorsLabels) => Promise<Types.InvoiceSelectType>,
-  tErrors: ErrorsLabels,
-  locale?: string
-): Promise<Types.MarkInvoicePaidResult> {
-  try {
-    const updated = await db.transaction(tx => txnWork(tx, tErrors));
-    const notificationSummaryUpdated = await syncNotificationsAfterPaymentChange(locale);
-    return mapMarkPaidResult(updated, notificationSummaryUpdated);
-  } catch (error) {
-    logger.error(errorLabel, { actorUserId, invoiceId, error });
-    throw error;
-  }
-}
-
 /**
- * Wraps {@link finalizePaymentStatusChange} so the caller can fire a
+ * Wraps payment status finalization so the caller can fire a
  * non-blocking notification dispatch AFTER the transaction commits but
  * BEFORE the result is returned. The dispatch is best-effort: it catches
  * and logs its own errors, never throwing back into the mutation path

@@ -55,6 +55,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
       eventType: payload.eventType,
       title: "SMS",
       body: payload.to,
+      metadata: payload.metadata ?? null,
     });
 
     return this.sendTwilioMessage(payload, delivery.id);

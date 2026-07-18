@@ -15,4 +15,5 @@ import "./scheduling";
 import "./shared";
 import "./storage";
 import "./students";
+import "./supervisor";
 import "./teachers";

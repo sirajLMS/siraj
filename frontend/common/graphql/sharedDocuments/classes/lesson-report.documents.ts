@@ -10,6 +10,39 @@ export const lessonReportQueryDocument: TypedDocumentNode<Operations.LessonRepor
       classInstanceId
       studentId
       teacherId
+      teacherName
+      studentName
+      lessonDate
+      durationMinutes
+      attendanceEvaluation
+      teacherNotes
+      studentNotes
+      completionPercentage
+      status
+      submittedByUserId
+      submittedAt
+      reviewedByUserId
+      reviewedAt
+      rejectionReason
+      idempotencyKey
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const lessonReportByIdQueryDocument: TypedDocumentNode<
+  Operations.LessonReportByIdQuery,
+  Types.QueryLessonReportByIdArgs
+> = gql`
+  query LessonReportById($reportId: ID!) {
+    lessonReportById(reportId: $reportId) {
+      id
+      classInstanceId
+      studentId
+      teacherId
+      teacherName
+      studentName
       lessonDate
       durationMinutes
       attendanceEvaluation
@@ -35,10 +68,46 @@ export const pendingLessonReportsQueryDocument: TypedDocumentNode<
 > = gql`
   query PendingLessonReports($teacherId: ID, $studentId: ID, $paginationArgs: PaginationArgs) {
     pendingLessonReports(teacherId: $teacherId, studentId: $studentId, paginationArgs: $paginationArgs) {
+      totalCount
+      rows {
+        id
+        classInstanceId
+        studentId
+        teacherId
+        teacherName
+        studentName
+        lessonDate
+        durationMinutes
+        attendanceEvaluation
+        teacherNotes
+        studentNotes
+        completionPercentage
+        status
+        submittedByUserId
+        submittedAt
+        reviewedByUserId
+        reviewedAt
+        rejectionReason
+        idempotencyKey
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const recentApprovedLessonReportsQueryDocument: TypedDocumentNode<
+  Operations.RecentApprovedLessonReportsQuery,
+  Types.QueryRecentApprovedLessonReportsArgs
+> = gql`
+  query RecentApprovedLessonReports($limit: Int) {
+    recentApprovedLessonReports(limit: $limit) {
       id
       classInstanceId
       studentId
       teacherId
+      teacherName
+      studentName
       lessonDate
       durationMinutes
       attendanceEvaluation
@@ -79,6 +148,8 @@ export const submitLessonReportMutationDocument: TypedDocumentNode<
       classInstanceId
       studentId
       teacherId
+      teacherName
+      studentName
       lessonDate
       durationMinutes
       attendanceEvaluation
@@ -108,6 +179,8 @@ export const approveLessonReportMutationDocument: TypedDocumentNode<
       classInstanceId
       studentId
       teacherId
+      teacherName
+      studentName
       lessonDate
       durationMinutes
       attendanceEvaluation
@@ -137,6 +210,8 @@ export const rejectLessonReportMutationDocument: TypedDocumentNode<
       classInstanceId
       studentId
       teacherId
+      teacherName
+      studentName
       lessonDate
       durationMinutes
       attendanceEvaluation
@@ -166,6 +241,8 @@ export const submitStudentReflectionMutationDocument: TypedDocumentNode<
       classInstanceId
       studentId
       teacherId
+      teacherName
+      studentName
       lessonDate
       durationMinutes
       attendanceEvaluation

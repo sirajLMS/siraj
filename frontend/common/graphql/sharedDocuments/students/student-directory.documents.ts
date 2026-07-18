@@ -66,3 +66,40 @@ export const studentDirectoryQueryDocument: TypedDocumentNode<
     }
   }
 `;
+
+// NOTE: `Operations.StudentsDirectoryQuery` / `Types.QueryStudentsDirectoryArgs`
+// are produced by GraphQL Code Generator after codegen. Until then, use a
+// temporary local type mirroring the expected codegen shape. Replace after
+// `bun run generate:gqlSchema && bun codegen` regenerates `operations.ts`.
+interface StudentsDirectoryQueryShape {
+  studentsDirectory: Array<{
+    id: string | null;
+    name: string | null;
+    email: string | null;
+    avatarUrl: string | null;
+    status: string | null;
+    classesRemaining: number | null;
+    classesTotal: number | null;
+    hoursPerWeek: number | null;
+    teacherName: string | null;
+    createdAt: string | null;
+    updatedAt: string | null;
+  }>;
+}
+
+interface StudentsDirectoryQueryArgs {
+  search?: string | null;
+  limit?: number | null;
+}
+
+export const studentsDirectoryQueryDocument: TypedDocumentNode<
+  StudentsDirectoryQueryShape,
+  StudentsDirectoryQueryArgs
+> = gql`
+  ${studentDirectoryRowFragment}
+  query studentsDirectory($search: String, $limit: Int) {
+    studentsDirectory(search: $search, limit: $limit) {
+      ...StudentDirectoryRowFragment
+    }
+  }
+`;

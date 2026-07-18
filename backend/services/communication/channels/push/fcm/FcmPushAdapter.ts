@@ -77,6 +77,7 @@ export class FcmPushAdapter implements IPushChannel {
         deviceTokenId: dt.id,
         title: payload.title,
         body: payload.body,
+        metadata: payload.metadata ?? null,
       }))
     );
 

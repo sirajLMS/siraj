@@ -302,6 +302,7 @@ export enum AppPermission {
   TeachersEdit = 'TEACHERS_EDIT',
   TeachersList = 'TEACHERS_LIST',
   TeachersManageSchedule = 'TEACHERS_MANAGE_SCHEDULE',
+  TeacherDuesMarkPaid = 'TEACHER_DUES_MARK_PAID',
   TeacherDuesView = 'TEACHER_DUES_VIEW',
   TeacherEditOwnProfile = 'TEACHER_EDIT_OWN_PROFILE',
   TeacherViewDashboard = 'TEACHER_VIEW_DASHBOARD',
@@ -2198,10 +2199,12 @@ export type LessonReport = {
   reviewedByUserId: Maybe<Scalars['String']['output']>;
   status: Maybe<LessonReportStatus>;
   studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
   studentNotes: Maybe<Scalars['String']['output']>;
   submittedAt: Maybe<Scalars['DateTime']['output']>;
   submittedByUserId: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
   teacherNotes: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
@@ -2505,6 +2508,8 @@ export type Mutation = {
   login: Maybe<LoginResponse>;
   logout: Maybe<Scalars['Boolean']['output']>;
   markInvoicePaid: Maybe<MarkInvoicePaidResult>;
+  markNotificationRead: Maybe<Scalars['Boolean']['output']>;
+  markNotificationsRead: Maybe<Scalars['Int']['output']>;
   /** Marks a suggestion as a duplicate of another suggestion (admin only). */
   markSuggestionDuplicate: Maybe<Suggestion>;
   /** Marks a suggestion as reviewed (admin only). */
@@ -2519,6 +2524,7 @@ export type Mutation = {
   /** Record a credit purchase for a student (adds classes to their balance) */
   recordCreditPurchase: Maybe<CreditPurchaseResult>;
   recordPayment: Maybe<Payment>;
+  recordStudentProfileEdit: Maybe<StudentProfile>;
   refreshExchangeRates: Maybe<RefreshExchangeRatesResult>;
   refreshToken: Maybe<RefreshTokenResponse>;
   /** Reject a pending lesson report with a rejection reason (supervisor/manager action) */
@@ -2975,6 +2981,11 @@ export type MutationMarkInvoicePaidArgs = {
 };
 
 
+export type MutationMarkNotificationReadArgs = {
+  deliveryId: Scalars['ID']['input'];
+};
+
+
 export type MutationMarkSuggestionDuplicateArgs = {
   input: MarkSuggestionDuplicateInput;
 };
@@ -3031,6 +3042,11 @@ export type MutationRecordPaymentArgs = {
   invoiceId: Scalars['ID']['input'];
   transactionId: InputMaybe<Scalars['String']['input']>;
   userPaymentMethodId: Scalars['ID']['input'];
+};
+
+
+export type MutationRecordStudentProfileEditArgs = {
+  input: StudentProfileEditInput;
 };
 
 
@@ -3808,6 +3824,13 @@ export enum PaymentMethodType {
   ProofUpload = 'PROOF_UPLOAD'
 }
 
+/** Paginated pending lesson reports awaiting review, with total count */
+export type PendingLessonReportsPayload = {
+  __typename?: 'PendingLessonReportsPayload';
+  rows: Maybe<Array<LessonReport>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
 /** Count of pending lesson reports awaiting review */
 export type PendingReviewCount = {
   __typename?: 'PendingReviewCount';
@@ -3906,6 +3929,8 @@ export type Query = {
   learningResources: Maybe<Array<LearningResourceRow>>;
   /** Get the lesson report for a specific class instance (if one has been submitted) */
   lessonReport: Maybe<LessonReport>;
+  /** Get a lesson report by its ID */
+  lessonReportById: Maybe<LessonReport>;
   /** Get the count of pending lesson reports awaiting review with optional filters */
   lessonReportCount: Maybe<PendingReviewCount>;
   listFiles: Maybe<StorageObjectList>;
@@ -3934,7 +3959,7 @@ export type Query = {
   /** Returns the authenticated parent's suggestion history with review status. */
   parentSuggestions: Maybe<Array<Suggestion>>;
   /** Get pending lesson reports awaiting review with optional teacher/student filters and pagination */
-  pendingLessonReports: Maybe<Array<LessonReport>>;
+  pendingLessonReports: Maybe<PendingLessonReportsPayload>;
   /** Fetch a single permission group by ID. */
   permissionGroup: Maybe<PermissionGroup>;
   permissionGroupSimulationStatus: Maybe<PermissionGroupSimulationStatus>;
@@ -3943,6 +3968,8 @@ export type Query = {
   /** List all permission catalog entries. */
   permissions: Maybe<Array<Permission>>;
   profileByUserId: Maybe<UnifiedProfile>;
+  /** Get the most recently approved lesson reports for the supervisor dashboard */
+  recentApprovedLessonReports: Maybe<Array<LessonReport>>;
   recurringMeetingConfigs: Maybe<Array<ClassMeetingConfig>>;
   recurringSchedule: Maybe<RecurringScheduleDetail>;
   rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
@@ -3970,8 +3997,11 @@ export type Query = {
   studentProfile: Maybe<StudentProfile>;
   studentUpcomingClasses: Maybe<StudentUpcomingClassesResult>;
   students: StudentsWithFiltersResponse;
+  /** Lightweight student list for autocomplete (id, name, avatarUrl). */
+  studentsDirectory: Array<StudentDirectoryRow>;
   /** Returns contributor statistics for the suggestion social proof display. */
   suggestionContributorStats: Maybe<SuggestionContributorStats>;
+  supervisorDashboard: Maybe<SupervisorDashboard>;
   supportedCurrencies: Maybe<Array<SupportedCurrency>>;
   supportedMobileWallets: Maybe<Array<SupportedMobileWallet>>;
   supportedOnlineAccounts: Maybe<Array<SupportedOnlineAccount>>;
@@ -4143,6 +4173,11 @@ export type QueryLessonReportArgs = {
 };
 
 
+export type QueryLessonReportByIdArgs = {
+  reportId: Scalars['ID']['input'];
+};
+
+
 export type QueryLessonReportCountArgs = {
   studentId: InputMaybe<Scalars['ID']['input']>;
   teacherId: InputMaybe<Scalars['ID']['input']>;
@@ -4238,6 +4273,11 @@ export type QueryPermissionGroupArgs = {
 
 export type QueryProfileByUserIdArgs = {
   userId: Scalars['String']['input'];
+};
+
+
+export type QueryRecentApprovedLessonReportsArgs = {
+  limit: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -4352,6 +4392,12 @@ export type QueryStudentsArgs = {
   filterArgs: InputMaybe<StudentFilterArgs>;
   orderBy: InputMaybe<Array<StudentsOrderByClause>>;
   paginationArgs: InputMaybe<PaginationArgs>;
+};
+
+
+export type QueryStudentsDirectoryArgs = {
+  limit: InputMaybe<Scalars['Int']['input']>;
+  search: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -4971,6 +5017,14 @@ export type StudentProfile = {
   version: Maybe<Scalars['Int']['output']>;
 };
 
+export type StudentProfileEditInput = {
+  dateOfBirth: InputMaybe<Scalars['DateTime']['input']>;
+  gender: InputMaybe<Gender>;
+  language: InputMaybe<AppLanguage>;
+  parentPhone: InputMaybe<Scalars['String']['input']>;
+  phone: InputMaybe<Scalars['String']['input']>;
+};
+
 export type StudentProgress = {
   __typename?: 'StudentProgress';
   completionPercent: Maybe<Scalars['Int']['output']>;
@@ -5141,6 +5195,24 @@ export enum SuggestionStatus {
   Reviewed = 'REVIEWED'
 }
 
+/** Aggregated supervisor portal dashboard data */
+export type SupervisorDashboard = {
+  __typename?: 'SupervisorDashboard';
+  monthlySnapshot: Maybe<SupervisorMonthlySnapshot>;
+  pendingDuesSummary: Maybe<TeacherPendingDuesSummary>;
+  pendingReviewCount: Maybe<Scalars['Int']['output']>;
+  recentApprovals: Maybe<Array<LessonReport>>;
+  supervisorName: Maybe<Scalars['String']['output']>;
+};
+
+/** Current calendar month snapshot for the supervisor dashboard */
+export type SupervisorMonthlySnapshot = {
+  __typename?: 'SupervisorMonthlySnapshot';
+  label: Maybe<Scalars['String']['output']>;
+  month: Maybe<Scalars['Int']['output']>;
+  year: Maybe<Scalars['Int']['output']>;
+};
+
 export type SupportContact = {
   __typename?: 'SupportContact';
   avatarUrl: Maybe<Scalars['String']['output']>;
@@ -5292,8 +5364,13 @@ export type SupportedPaymentLinkUpdateInput = {
 export type SystemAlert = {
   __typename?: 'SystemAlert';
   body: Maybe<Scalars['String']['output']>;
+  channel: Maybe<NotificationChannel>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
+  deliveryId: Maybe<Scalars['String']['output']>;
+  eventType: Maybe<NotificationEventType>;
   id: Maybe<Scalars['String']['output']>;
+  metadata: Maybe<Scalars['JSON']['output']>;
+  readAt: Maybe<Scalars['DateTime']['output']>;
   severity: Maybe<Scalars['String']['output']>;
   title: Maybe<Scalars['String']['output']>;
   type: Maybe<Scalars['String']['output']>;
@@ -5432,6 +5509,7 @@ export type TeacherDue = {
   amount: Maybe<Scalars['String']['output']>;
   approvedAt: Maybe<Scalars['DateTime']['output']>;
   approvedByUserId: Maybe<Scalars['String']['output']>;
+  classDate: Maybe<Scalars['DateTime']['output']>;
   classInstanceId: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   currency: Maybe<CurrencyCode>;
@@ -5439,7 +5517,9 @@ export type TeacherDue = {
   id: Maybe<Scalars['String']['output']>;
   status: Maybe<TeacherDueStatus>;
   studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
   teacherPaymentId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };

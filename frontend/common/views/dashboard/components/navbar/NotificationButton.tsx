@@ -1,12 +1,11 @@
 "use client";
 
 import { NotificationsOutlined } from "@mui/icons-material";
-import { Badge, type IconButtonProps, Popover } from "@mui/material";
-import { type MouseEvent, useState } from "react";
+import { Badge, type IconButtonProps } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useNotificationsDrawerStore } from "@/frontend/common/stores/notificationsDrawerStore";
 import { NavbarIcon } from "@/frontend/common/views/dashboard/components/navbar/NavbarIcon";
-import { NotificationPanel } from "@/frontend/common/views/dashboard/components/navbar/NotificationPanel";
 import { useAppTranslation } from "@/shared/locale/client";
 
 interface NotificationButtonProps extends Omit<IconButtonProps, "children" | "title"> {
@@ -15,14 +14,9 @@ interface NotificationButtonProps extends Omit<IconButtonProps, "children" | "ti
 
 export function NotificationButton({ notificationCount, ...props }: Readonly<NotificationButtonProps>) {
   const t = useAppTranslation().commonTranslations;
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const handleClick = (event: MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleClick = () => {
+    useNotificationsDrawerStore.getState().openDrawer();
   };
 
   return (
@@ -41,27 +35,6 @@ export function NotificationButton({ notificationCount, ...props }: Readonly<Not
           <NotificationsOutlined />
         </Badge>
       </NavbarIcon>
-
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        slotProps={{
-          paper: {
-            elevation: 4,
-            sx: theme => ({
-              mt: 1,
-              borderRadius: 2,
-              border: `1px solid ${theme.palette.outlineVariant}`,
-              backgroundColor: theme.palette.surface,
-            }),
-          },
-        }}
-      >
-        <NotificationPanel />
-      </Popover>
     </RequirePermission>
   );
 }

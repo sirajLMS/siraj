@@ -21,6 +21,7 @@ export const dashboardStudentPortalProfileEn: StudentPortalProfileLabels = {
   editProfile: "Edit Profile",
   saveChanges: "Save Changes",
   cancel: "Cancel",
+  backToDashboard: "Back to Dashboard",
   loadingMessage: "Loading...",
   saveSuccess: "Profile updated successfully",
   saveError: "Failed to update profile",

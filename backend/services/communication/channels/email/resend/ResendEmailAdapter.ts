@@ -38,6 +38,7 @@ export class ResendEmailAdapter implements IEmailChannel {
       eventType: payload.eventType,
       title: payload.subject,
       body: payload.to,
+      metadata: payload.metadata ?? null,
     });
 
     try {

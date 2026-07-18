@@ -1,0 +1,24 @@
+import type { SupervisorPortalProfileLabels } from "@/shared/locale/types/dashboard/supervisorPortal/profile";
+
+export const dashboardSupervisorPortalProfileAr: SupervisorPortalProfileLabels = {
+  pageTitle: "الملف الشخصي",
+  pageSubtitle: "اعرض بيانات حسابك ومعلومات الاتصال.",
+  notSet: "غير محدد",
+  loadingMessage: "جارٍ التحميل...",
+  sections: {
+    account: "معلومات الحساب",
+    contact: "معلومات الاتصال",
+    role: "معلومات الدور",
+  },
+  fields: {
+    fullName: "الاسم الكامل",
+    email: "البريد الإلكتروني",
+    phone: "الهاتف",
+    roleName: "الدور",
+    status: "حالة الحساب",
+  },
+  errors: {
+    failedToLoad: "فشل تحميل الملف الشخصي.",
+    notFound: "الملف الشخصي غير موجود.",
+  },
+};

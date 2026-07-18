@@ -55,6 +55,7 @@ import type { SubjectsLabels } from "@/shared/locale/types/dashboard/subjects/ma
 import type { SuggestionsLabels } from "@/shared/locale/types/dashboard/suggestions";
 import type { SupervisorMonthlyReportsLabels } from "@/shared/locale/types/dashboard/supervisorPortal/monthlyReports";
 import type { PendingReviewsLabels } from "@/shared/locale/types/dashboard/supervisorPortal/pendingReviews";
+import type { SupervisorPortalProfileLabels } from "@/shared/locale/types/dashboard/supervisorPortal/profile";
 import type { SupervisorDashboardLabels } from "@/shared/locale/types/dashboard/supervisorPortal/supervisorDashboard";
 import type { SupervisorTeacherDuesLabels } from "@/shared/locale/types/dashboard/supervisorPortal/teacherDues";
 import type { TeacherAvailabilityLabels } from "@/shared/locale/types/dashboard/teachers/availability";
@@ -127,6 +128,7 @@ export interface DashboardTranslations {
   suggestions: SuggestionsLabels;
   supervisorPortalMonthlyReports: SupervisorMonthlyReportsLabels;
   supervisorPortalPendingReviews: PendingReviewsLabels;
+  supervisorPortalProfile: SupervisorPortalProfileLabels;
   supervisorPortalDashboard: SupervisorDashboardLabels;
   supervisorPortalTeacherDues: SupervisorTeacherDuesLabels;
   teacherAvailability: TeacherAvailabilityLabels;

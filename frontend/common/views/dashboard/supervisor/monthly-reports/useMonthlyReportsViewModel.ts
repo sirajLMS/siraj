@@ -1,28 +1,223 @@
 "use client";
 
-import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
+import { useQuery } from "@apollo/client/react";
+import {
+  AccessTimeOutlined,
+  AccountBalanceOutlined,
+  AccountBalanceWalletOutlined,
+  CancelOutlined,
+  CheckCircleOutlined,
+  CreditScoreOutlined,
+  PaymentsOutlined,
+  PersonOffOutlined,
+  PersonOutlined,
+  ScheduleOutlined,
+  SchoolOutlined,
+} from "@mui/icons-material";
+import { useMemo } from "react";
+import {
+  studentMonthlyReportQueryDocument,
+  studentsDirectoryQueryDocument,
+  teacherDirectoryQueryDocument,
+  teacherMonthlyReportQueryDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useSupervisorMonthlyReportsStore } from "@/frontend/common/stores/supervisorMonthlyReportsStore";
+import type {
+  DirectoryPersonOption,
+  MonthlyReportMetric,
+  MonthlyReportsViewModel,
+  StudentMonthlyReportData,
+  TeacherMonthlyReportData,
+  UseMonthlyReportsViewModelProps,
+} from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
+import { useAppTranslation } from "@/shared/locale";
 
-export type { MonthlyReportsViewModel };
+export type { MonthlyReportsViewModel, UseMonthlyReportsViewModelProps };
 
-export type UseMonthlyReportsViewModelProps = MonthlyReportsViewModel;
+export function useMonthlyReportsViewModel(
+  _props: Readonly<UseMonthlyReportsViewModelProps> = {}
+): MonthlyReportsViewModel {
+  const t = useAppTranslation().dashboardTranslations.supervisorPortalMonthlyReports;
 
-export function useMonthlyReportsViewModel(props: Readonly<UseMonthlyReportsViewModelProps>): MonthlyReportsViewModel {
+  const reportType = useSupervisorMonthlyReportsStore(s => s.reportType);
+  const year = useSupervisorMonthlyReportsStore(s => s.year);
+  const month = useSupervisorMonthlyReportsStore(s => s.month);
+  const teacherId = useSupervisorMonthlyReportsStore(s => s.teacherId);
+  const studentId = useSupervisorMonthlyReportsStore(s => s.studentId);
+  const setReportType = useSupervisorMonthlyReportsStore(s => s.setReportType);
+  const setYear = useSupervisorMonthlyReportsStore(s => s.setYear);
+  const setMonth = useSupervisorMonthlyReportsStore(s => s.setMonth);
+  const setTeacherId = useSupervisorMonthlyReportsStore(s => s.setTeacherId);
+  const setStudentId = useSupervisorMonthlyReportsStore(s => s.setStudentId);
+
+  const skipTeacher = reportType !== "teacher" || teacherId.trim().length === 0;
+  const skipStudent = reportType !== "student" || studentId.trim().length === 0;
+
+  const {
+    data: teacherData,
+    loading: teacherLoading,
+    refetch: refetchTeacher,
+  } = useQuery(teacherMonthlyReportQueryDocument, {
+    variables: { teacherId: teacherId || "0", year, month },
+    fetchPolicy: "cache-and-network",
+    skip: skipTeacher,
+  });
+
+  const {
+    data: studentData,
+    loading: studentLoading,
+    refetch: refetchStudent,
+  } = useQuery(studentMonthlyReportQueryDocument, {
+    variables: { studentId: studentId || "0", year, month },
+    fetchPolicy: "cache-and-network",
+    skip: skipStudent,
+  });
+
+  const { data: teacherDirectoryData } = useQuery(teacherDirectoryQueryDocument, {
+    variables: {
+      search: null,
+      paginationArgs: {
+        first: 100,
+        page: 1,
+        after: null,
+        before: null,
+        last: null,
+        maxCount: null,
+        skip: null,
+      },
+    },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const { data: studentsDirectoryData } = useQuery(studentsDirectoryQueryDocument, {
+    variables: { search: null, limit: 100 },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const teacherOptions: DirectoryPersonOption[] = useMemo(() => {
+    const directoryRows = teacherDirectoryData?.teacherDirectory?.rows ?? [];
+    return directoryRows
+      .filter((r): r is NonNullable<typeof r> => Boolean(r?.id))
+      .map(r => ({ id: r.id ?? "", name: r.name ?? r.id ?? "" }));
+  }, [teacherDirectoryData]);
+
+  const studentOptions: DirectoryPersonOption[] = useMemo(() => {
+    const directoryRows = studentsDirectoryData?.studentsDirectory ?? [];
+    return directoryRows
+      .filter((r): r is NonNullable<typeof r> => Boolean(r?.id))
+      .map(r => ({ id: r.id ?? "", name: r.name ?? r.id ?? "" }));
+  }, [studentsDirectoryData]);
+
+  const teacherReport: TeacherMonthlyReportData | null = useMemo(() => {
+    if (reportType !== "teacher") return null;
+    const r = teacherData?.teacherMonthlyReport;
+    if (!r) return null;
+    return {
+      teacherId: r.teacherId ?? "",
+      teacherName: r.teacherName ?? "",
+      year: r.year ?? year,
+      month: r.month ?? month,
+      lessonsTaught: r.lessonsTaught ?? 0,
+      approvedCount: r.approvedCount ?? 0,
+      cancelledCount: r.cancelledCount ?? 0,
+      totalAccruedHours: String(r.totalAccruedHours ?? "0"),
+      totalDueAmount: String(r.totalDueAmount ?? "0"),
+      totalPaidAmount: String(r.totalPaidAmount ?? "0"),
+      currency: r.currency ?? "USD",
+    };
+  }, [reportType, teacherData, year, month]);
+
+  const studentReport: StudentMonthlyReportData | null = useMemo(() => {
+    if (reportType !== "student") return null;
+    const r = studentData?.studentMonthlyReport;
+    if (!r) return null;
+    return {
+      id: r.id ?? "",
+      studentId: r.studentId ?? "",
+      studentName: r.studentName ?? "",
+      year: r.year ?? year,
+      month: r.month ?? month,
+      totalLessons: r.totalLessons ?? 0,
+      completedLessons: r.completedLessons ?? 0,
+      cancelledLessons: r.cancelledLessons ?? 0,
+      presentCount: r.presentCount ?? 0,
+      absentCount: r.absentCount ?? 0,
+      lateCount: r.lateCount ?? 0,
+      totalHours: String(r.totalHours ?? "0"),
+      creditsPurchased: String(r.creditsPurchased ?? "0"),
+      creditsDeducted: String(r.creditsDeducted ?? "0"),
+      creditsRefunded: String(r.creditsRefunded ?? "0"),
+      creditsBalance: String(r.creditsBalance ?? "0"),
+    };
+  }, [reportType, studentData, year, month]);
+
+  const metrics: MonthlyReportMetric[] = useMemo(() => {
+    if (reportType === "teacher" && teacherReport) {
+      return [
+        { label: t.lessonsTaught, value: teacherReport.lessonsTaught, icon: SchoolOutlined },
+        { label: t.approvedCount, value: teacherReport.approvedCount, icon: CheckCircleOutlined },
+        { label: t.cancelledCount, value: teacherReport.cancelledCount, icon: CancelOutlined },
+        { label: t.totalAccruedHours, value: teacherReport.totalAccruedHours, icon: ScheduleOutlined },
+        {
+          label: t.totalDueAmount,
+          value: `${teacherReport.currency} ${teacherReport.totalDueAmount}`,
+          icon: PaymentsOutlined,
+        },
+        {
+          label: t.totalPaidAmount,
+          value: `${teacherReport.currency} ${teacherReport.totalPaidAmount}`,
+          icon: AccountBalanceWalletOutlined,
+        },
+      ];
+    }
+    if (reportType === "student" && studentReport) {
+      return [
+        { label: t.totalLessons, value: studentReport.totalLessons, icon: SchoolOutlined },
+        { label: t.completedLessons, value: studentReport.completedLessons, icon: CheckCircleOutlined },
+        { label: t.cancelledLessons, value: studentReport.cancelledLessons, icon: CancelOutlined },
+        { label: t.presentCount, value: studentReport.presentCount, icon: PersonOutlined },
+        { label: t.absentCount, value: studentReport.absentCount, icon: PersonOffOutlined },
+        { label: t.lateCount, value: studentReport.lateCount, icon: AccessTimeOutlined },
+        { label: t.totalHours, value: studentReport.totalHours, icon: ScheduleOutlined },
+        { label: t.creditsPurchased, value: studentReport.creditsPurchased, icon: CreditScoreOutlined },
+        { label: t.creditsDeducted, value: studentReport.creditsDeducted, icon: AccountBalanceOutlined },
+        { label: t.creditsRefunded, value: studentReport.creditsRefunded, icon: AccountBalanceWalletOutlined },
+        { label: t.creditsBalance, value: studentReport.creditsBalance, icon: PaymentsOutlined },
+      ];
+    }
+    return [];
+  }, [reportType, teacherReport, studentReport, t]);
+
+  const loading = reportType === "teacher" ? teacherLoading : studentLoading;
+
+  const handleGenerate = () => {
+    if (reportType === "teacher" && !skipTeacher) {
+      void refetchTeacher();
+      return;
+    }
+    if (reportType === "student" && !skipStudent) {
+      void refetchStudent();
+    }
+  };
+
   return {
-    reportType: props.reportType,
-    year: props.year,
-    month: props.month,
-    teacherId: props.teacherId,
-    studentId: props.studentId,
-    teacherReport: props.teacherReport,
-    studentReport: props.studentReport,
-    metrics: props.metrics,
-    loading: props.loading,
-    labels: props.labels,
-    onReportTypeChange: props.onReportTypeChange,
-    onYearChange: props.onYearChange,
-    onMonthChange: props.onMonthChange,
-    onTeacherIdChange: props.onTeacherIdChange,
-    onStudentIdChange: props.onStudentIdChange,
-    onGenerate: props.onGenerate,
+    reportType,
+    year,
+    month,
+    teacherId,
+    studentId,
+    teacherOptions,
+    studentOptions,
+    teacherReport,
+    studentReport,
+    metrics,
+    loading,
+    labels: t,
+    onReportTypeChange: setReportType,
+    onYearChange: setYear,
+    onMonthChange: setMonth,
+    onTeacherIdChange: setTeacherId,
+    onStudentIdChange: setStudentId,
+    onGenerate: handleGenerate,
   };
 }

@@ -23,6 +23,7 @@ import {
 import { parents } from "@/backend/db/schema/parents/parents";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
+import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
 
 /**
  * User Notification Preferences table.
@@ -107,6 +108,7 @@ export const notificationDeliveries = pgTable(
     providerMessageId: varchar("provider_message_id", { length: 255 }),
     failureReason: text("failure_reason"),
     webhookPayload: jsonb("webhook_payload"),
+    metadata: jsonb("metadata").$type<NotificationMetadata | null>(),
     sentAt: timestamp("sent_at", { withTimezone: true, precision: 3 }),
     deliveredAt: timestamp("delivered_at", { withTimezone: true, precision: 3 }),
     openedAt: timestamp("opened_at", { withTimezone: true, precision: 3 }),

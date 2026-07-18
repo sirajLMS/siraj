@@ -20,4 +20,13 @@ export const dashboardStudentPortalHistoryEn: StudentPortalHistoryLabels = {
   allStatuses: "All Statuses",
   viewReport: "View Report",
   addReflection: "Add Reflection",
+  previousMonth: "Previous month",
+  nextMonth: "Next month",
+  totalClasses: "Total Classes",
+  attendanceRate: "Attendance Rate",
+  hoursStudied: "Hours Studied",
+  performance: "Performance",
+  backToDashboard: "Back to Dashboard",
+  weeklyAttendance: "Weekly Attendance",
+  week: number => `Week ${number}`,
 };

@@ -19,6 +19,7 @@ export function SupervisorDashboardDesktopView({
   onGoToReviews,
   onGoToDues,
   onGoToMonthlyReports,
+  onViewRecentApproval,
 }: Readonly<SupervisorDashboardViewModel>) {
   return (
     <DesktopPageContainer>
@@ -63,14 +64,28 @@ export function SupervisorDashboardDesktopView({
             {recentApprovals.map(item => (
               <Box
                 key={item.id}
+                component="button"
+                type="button"
+                onClick={() => onViewRecentApproval(item.id)}
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   gap: 1.5,
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  textAlign: "start",
+                  fontFamily: "inherit",
+                  color: "inherit",
+                  "&:hover": { opacity: 0.85 },
                 }}
               >
                 <CheckCircleOutlined fontSize="small" sx={theme => ({ color: theme.palette.status.activeContainer })} />
                 <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
+                  {item.studentName || item.studentId} · {item.teacherName || item.teacherId}
+                </Typography>
+                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                   {item.lessonDate}
                 </Typography>
                 <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>

@@ -19,4 +19,5 @@ export * from "@/backend/graphql/pothos/scheduling";
 export * from "@/backend/graphql/pothos/shared";
 export * from "@/backend/graphql/pothos/storage";
 export * from "@/backend/graphql/pothos/students";
+export * from "@/backend/graphql/pothos/supervisor";
 export * from "@/backend/graphql/pothos/teachers";

@@ -2,10 +2,17 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { NotificationRepository } from "@/backend/db/repo";
 import { complaints, notificationDeliveries } from "@/backend/db/schema";
-import { AppPermission, ComplaintStatus, NotificationDeliveryStatus } from "@/backend/enum";
+import {
+  AppPermission,
+  ComplaintStatus,
+  type NotificationChannel,
+  NotificationDeliveryStatus,
+  type NotificationEventType,
+} from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { NotificationAlertReturnType, NotificationAlertsPaginatedReturnType } from "@/backend/types";
+import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace NotificationAlertsService {
@@ -37,6 +44,10 @@ export namespace NotificationAlertsService {
           body: notificationDeliveries.body,
           createdAt: notificationDeliveries.createdAt,
           status: notificationDeliveries.status,
+          eventType: notificationDeliveries.eventType,
+          channel: notificationDeliveries.channel,
+          metadata: notificationDeliveries.metadata,
+          openedAt: notificationDeliveries.openedAt,
         })
         .from(notificationDeliveries)
         .where(eq(notificationDeliveries.userId, userId))
@@ -48,22 +59,32 @@ export namespace NotificationAlertsService {
       for (const complaint of unansweredComplaints) {
         alerts.push({
           id: `complaint-${complaint.id}`,
+          deliveryId: null,
           type: "complaint",
+          eventType: null,
+          channel: null,
+          metadata: { entityKind: "complaint", entityId: complaint.id },
           title: tNotifications.newUnansweredComplaint,
           body: complaint.body.length > 100 ? `${complaint.body.substring(0, 100)}...` : complaint.body,
           createdAt: complaint.createdAt,
           severity: "warning",
+          readAt: null,
         });
       }
 
       for (const notification of recentNotifications) {
         alerts.push({
           id: `notification-${notification.id}`,
+          deliveryId: notification.id,
           type: "notification",
+          eventType: notification.eventType as NotificationEventType,
+          channel: notification.channel as NotificationChannel,
+          metadata: notification.metadata as NotificationMetadata | null,
           title: notification.title ?? tNotifications.defaultSystemNotification,
           body: notification.body,
           createdAt: notification.createdAt,
           severity: notification.status === NotificationDeliveryStatus.FAILED ? "error" : "info",
+          readAt: notification.openedAt ?? null,
         });
       }
 
@@ -134,6 +155,32 @@ export namespace NotificationAlertsService {
       return { updatedCount };
     } catch (error) {
       logger.error("Error marking notification alerts as read", { userId: actorUserId, error });
+      throw error;
+    }
+  }
+
+  export async function markOneAlertRead(actorUserId: string, deliveryId: string, locale?: string): Promise<void> {
+    try {
+      const canViewAlerts = await PermissionsService.hasPermission(actorUserId, AppPermission.NOTIFICATION_VIEW_ALERTS);
+      if (!canViewAlerts) {
+        const t = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(t.unauthorizedAction);
+      }
+
+      const [delivery] = await db
+        .select({ id: notificationDeliveries.id })
+        .from(notificationDeliveries)
+        .where(and(eq(notificationDeliveries.id, deliveryId), eq(notificationDeliveries.userId, actorUserId)))
+        .limit(1);
+
+      if (!delivery) {
+        const t = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(t.notFound);
+      }
+
+      await NotificationRepository.recordDeliveryOpened(deliveryId, undefined, undefined, locale);
+    } catch (error) {
+      logger.error("Error marking notification alert as read", { userId: actorUserId, deliveryId, error });
       throw error;
     }
   }

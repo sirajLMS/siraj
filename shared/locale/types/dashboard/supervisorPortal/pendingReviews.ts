@@ -22,4 +22,10 @@ export interface PendingReviewsLabels {
   readonly rejectCancel: string;
   readonly noPendingReviews: string;
   readonly loadingMessage: string;
+  readonly approveSuccess: string;
+  readonly approveError: string;
+  readonly rejectSuccess: string;
+  readonly rejectError: string;
+  readonly teacherSearchPlaceholder: string;
+  readonly studentSearchPlaceholder: string;
 }

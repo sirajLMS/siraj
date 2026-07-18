@@ -8,6 +8,8 @@ import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/
 import { logger } from "@/frontend/common/utils/logger";
 import { UserStoreInitializer } from "@/frontend/common/views/dashboard/components/client/UserStoreInitializer";
 import { DashboardLayout } from "@/frontend/common/views/dashboard/components/DashboardLayout";
+import { NotificationDrawer } from "@/frontend/common/views/dashboard/components/navbar/notifications/NotificationDrawer";
+import { useNotificationsDrawerViewModel } from "@/frontend/common/views/dashboard/components/navbar/notifications/useNotificationsDrawerViewModel";
 import { getDashboardLayoutData } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
 
 interface DashboardClientBridgeProps {
@@ -47,7 +49,7 @@ function useNotificationCountRefetch(): void {
   useEffect(() => {
     const intervalId = setInterval(() => {
       client.refetchQueries({ include: [meQueryDocument] }).catch(error => {
-        logger.warn("NotificationPanel notificationCount refetch failed", {
+        logger.warn("Notification drawer notificationCount refetch failed", {
           error: error instanceof Error ? error.message : String(error),
         });
       });
@@ -66,6 +68,7 @@ export function DashboardClientBridge({
   roleLabel,
 }: Readonly<DashboardClientBridgeProps>) {
   useNotificationCountRefetch();
+  const notificationsDrawerVm = useNotificationsDrawerViewModel();
 
   const permissions = (userProfile.permissions || []).filter(isValidPermission);
   const { sidebarItems, bottomNavItems } = getDashboardLayoutData(permissions);
@@ -85,6 +88,7 @@ export function DashboardClientBridge({
       >
         {children}
       </DashboardLayout>
+      <NotificationDrawer vm={notificationsDrawerVm} />
     </NotificationsProvider>
   );
 }

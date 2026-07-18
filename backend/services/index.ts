@@ -11,3 +11,5 @@ export * from "@/backend/services/storage";
 export * from "@/backend/services/student";
 export * from "@/backend/services/system";
 export * from "@/backend/services/teacher";
+
+export * from "./supervisor";

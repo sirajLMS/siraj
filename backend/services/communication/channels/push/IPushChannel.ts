@@ -1,4 +1,5 @@
 import type { NotificationEventType } from "@/backend/enum";
+import type { NotificationMetadata } from "@/backend/types";
 
 export interface PushPayload {
   readonly userId: string;
@@ -6,6 +7,7 @@ export interface PushPayload {
   readonly body: string;
   readonly data?: Record<string, string>;
   readonly eventType: NotificationEventType;
+  readonly metadata?: NotificationMetadata | null;
 }
 
 export interface PushSendResult {

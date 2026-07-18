@@ -11,6 +11,10 @@ export interface StudentPortalDashboardLabels {
   readonly viewAllHistory: string;
   readonly viewCredits: string;
   readonly addReflection: string;
+  readonly reflectionDialogTitle: string;
+  readonly reflectionNotesLabel: string;
+  readonly reflectionNotesPlaceholder: string;
+  readonly reflectionSaveError: string;
   readonly upcomingToday: string;
   readonly upcomingThisWeek: string;
   readonly noLessonReports: string;

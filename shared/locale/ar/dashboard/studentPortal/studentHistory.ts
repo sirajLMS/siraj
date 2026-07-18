@@ -20,4 +20,13 @@ export const dashboardStudentPortalHistoryAr: StudentPortalHistoryLabels = {
   allStatuses: "جميع الحالات",
   viewReport: "عرض التقرير",
   addReflection: "إضافة تأمل",
+  previousMonth: "الشهر السابق",
+  nextMonth: "الشهر التالي",
+  totalClasses: "إجمالي الحصص",
+  attendanceRate: "معدل الحضور",
+  hoursStudied: "ساعات الدراسة",
+  performance: "الأداء",
+  backToDashboard: "العودة إلى لوحة التحكم",
+  weeklyAttendance: "الحضور الأسبوعي",
+  week: number => `الأسبوع ${number}`,
 };
