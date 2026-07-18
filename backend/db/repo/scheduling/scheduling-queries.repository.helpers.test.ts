@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo";
+import { classLifecycleAffectedUserIds } from "@/backend/db/repo/scheduling/scheduling-queries.repository.helpers";
 import { classInstances } from "@/backend/db/schema";
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
@@ -20,7 +21,7 @@ import { runInRollback } from "@/backend/db/test/test-utils";
  *   - Never mix `db`-backed repo calls inside `runInRollback`.
  */
 describe("SchedulingQueriesRepositoryHelpers — getClassInstanceAffectedUsers", () => {
-  test("resolves parentUserId + studentId + teacherUserId for a live class instance", async () => {
+  test("resolves parentUserId + studentId + studentUserId + teacherUserId for a live class instance", async () => {
     await runInRollback(async tx => {
       const { parentUser, student, teacherUser, teacher, instance } = await setupTestEntities(tx, "Affected1");
       if (!instance) throw new Error("setupTestEntities did not create an instance");
@@ -28,10 +29,13 @@ describe("SchedulingQueriesRepositoryHelpers — getClassInstanceAffectedUsers",
       const resolved = await SchedulingRepository.getClassInstanceAffectedUsers(instance.id, tx);
 
       expect(resolved).not.toBeNull();
-      expect(resolved?.parentUserId).toBe(parentUser.id);
-      expect(resolved?.studentId).toBe(student.id);
-      expect(resolved?.teacherUserId).toBe(teacherUser.id);
+      if (!resolved) return;
+      expect(resolved.parentUserId).toBe(parentUser.id);
+      expect(resolved.studentId).toBe(student.id);
+      expect(resolved.studentUserId).toBe(student.userId);
+      expect(resolved.teacherUserId).toBe(teacherUser.id);
       expect(teacher.userId).toBe(teacherUser.id);
+      expect(classLifecycleAffectedUserIds(resolved)).toEqual([parentUser.id, teacherUser.id, student.userId]);
     });
   });
 
@@ -50,7 +54,7 @@ describe("SchedulingQueriesRepositoryHelpers — getClassInstanceAffectedUsers",
     });
   });
 
-  test("resolves the triplet for a one-off instance (no recurringScheduleId)", async () => {
+  test("resolves the set for a one-off instance (no recurringScheduleId)", async () => {
     await runInRollback(async tx => {
       const { parentUser, student, teacherUser, teacher } = await setupTestEntities(tx, "AffectedOneOff", {
         skipInstance: true,
@@ -64,6 +68,7 @@ describe("SchedulingQueriesRepositoryHelpers — getClassInstanceAffectedUsers",
       expect(resolved).not.toBeNull();
       expect(resolved?.parentUserId).toBe(parentUser.id);
       expect(resolved?.studentId).toBe(student.id);
+      expect(resolved?.studentUserId).toBe(student.userId);
       expect(resolved?.teacherUserId).toBe(teacherUser.id);
     });
   });
@@ -97,6 +102,7 @@ describe("SchedulingQueriesRepositoryHelpers — getClassInstanceAffectedUsers",
       expect(resolved).not.toBeNull();
       expect(resolved?.parentUserId).toBe(parentUser.id);
       expect(resolved?.studentId).toBe(student.id);
+      expect(resolved?.studentUserId).toBe(student.userId);
       expect(resolved?.teacherUserId).toBe(teacherUser.id);
     });
   });

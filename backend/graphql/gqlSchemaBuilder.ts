@@ -13,11 +13,17 @@ import { GraphQLError } from "graphql";
 import { type DrizzleRelations, db, relations } from "@/backend/db/drizzleDb";
 import type { AppPermission } from "@/backend/enum";
 import type { AuthContexts, BaseContext } from "@/backend/graphql/gqlContext";
+import { enablePothosDevHmr } from "@/backend/graphql/pothos-hmr";
 import type { Email } from "@/backend/lib";
 import logger from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { PhoneNumber } from "@/shared/lib/phone";
 import type { LocalizedString } from "@/shared/types/localized-string";
+
+// Allow Pothos plugins to re-register during Turbopack/Webpack HMR.
+if (process.env.NODE_ENV !== "production") {
+  SchemaBuilder.allowPluginReRegistration = true;
+}
 
 export interface PothosTypes {
   DrizzleRelations: DrizzleRelations;
@@ -63,6 +69,9 @@ export interface PothosTypes {
   };
 }
 
+// Always create a fresh builder when this module evaluates. Do NOT cache on
+// globalThis — that keeps a stale ConfigStore across HMR and causes either
+// Duplicate typename errors or broken onConfig patches.
 export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
   plugins: [
     DrizzlePlugin,
@@ -139,3 +148,22 @@ export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
       }),
   },
 });
+
+enablePothosDevHmr(gqlSchemaBuilder as never);
+
+// Drop any builder cached by earlier HMR experiments so a stuck process can recover.
+if (process.env.NODE_ENV !== "production") {
+  const globalForPothos = globalThis as typeof globalThis & {
+    __sirajGqlSchemaBuilder?: unknown;
+  };
+  delete globalForPothos.__sirajGqlSchemaBuilder;
+}
+
+// HMR dependency edge (hayes/pothos#49): when any schema definition module
+// changes, invalidate this builder module too so type registration runs against
+// a fresh SchemaBuilder instead of throwing Duplicate typename.
+if (process.env.NODE_ENV !== "production") {
+  import("@/backend/graphql/gqlSchema.definitions").catch(error => {
+    logger.error("Failed to load GraphQL schema definitions for HMR edge", error);
+  });
+}

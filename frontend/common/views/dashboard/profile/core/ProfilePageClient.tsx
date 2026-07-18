@@ -16,7 +16,10 @@ import { ParentAccountActions } from "@/frontend/common/views/dashboard/profile/
 import { ParentProfileContainer } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileContainer";
 import { StaffProfileContainer } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileContainer";
 import { TeacherProfileContainer } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileContainer";
+import { StudentProfileContainer } from "@/frontend/common/views/dashboard/student/profile/StudentProfileContainer";
 import { useAppTranslation } from "@/shared/locale";
+
+const PROFILE_AUDIENCE_STUDENT = "STUDENT" as ProfileAudience;
 
 export type ProfilePageClientProps = {
   readonly scope: ProfileScope;
@@ -28,7 +31,10 @@ export type ProfilePageClientProps = {
 export function ProfilePageClient({ scope, mode, audience, targetUserId }: ProfilePageClientProps) {
   const t = useAppTranslation().profileTranslations.base;
   const searchParams = useSearchParams();
-  const [currentTab, setCurrentTab] = useState(searchParams.get("tab") ?? "");
+  // Prefer the URL tab; fall back to "profile" only for the initial paint before
+  // ProfileTabNav normalizes a missing/invalid ?tab=. Do not feed a default
+  // "profile" back into the URL — that raced with hydration and caused redirects.
+  const [currentTab, setCurrentTab] = useState(() => searchParams.get("tab") ?? "profile");
 
   const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
@@ -53,7 +59,7 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
 
   useRefetchOnWindowFocus(refetchProfileOnFocus);
 
-  const activeTab = currentTab || "profile";
+  const activeTab = currentTab;
 
   // Dynamic i18n lookup: `audience` is a bounded union (ProfileAudience) whose
   // string values map onto keys of `t.role`, so we cast into the typed role
@@ -133,6 +139,9 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
     }
     if (audience === ProfileAudience.Parent) {
       return <ParentProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
+    }
+    if (audience === PROFILE_AUDIENCE_STUDENT) {
+      return <StudentProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
     }
     return <StaffProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
   }

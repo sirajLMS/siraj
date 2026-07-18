@@ -9,6 +9,7 @@ import { useAppTranslation } from "@/shared/locale";
 export function NotificationPreferencesTabMobile({
   preferences,
   preferenceMap,
+  eventTypes,
   onToggle,
   disabled,
   loading,
@@ -41,6 +42,7 @@ export function NotificationPreferencesTabMobile({
       <PreferencesChannelTabsMobileView
         preferences={preferences}
         preferenceMap={preferenceMap ?? new Map()}
+        eventTypes={eventTypes}
         onToggle={onToggle}
         disabled={disabled}
         loading={loading}

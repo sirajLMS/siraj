@@ -30,6 +30,7 @@ export type ProfilePageContext = {
   readonly teacherId?: string;
   readonly parentId?: string;
   readonly staffProfileId?: string;
+  readonly studentId?: string;
   readonly allowedPermissions: readonly AppPermission[];
 };
 

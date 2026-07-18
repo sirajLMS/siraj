@@ -20,22 +20,33 @@ export namespace NotificationAlertsService {
     try {
       const canViewAlerts = await PermissionsService.hasPermission(userId, AppPermission.NOTIFICATION_VIEW_ALERTS);
       if (!canViewAlerts) {
-        const t = getServerTranslations(locale ?? "en").errorsTranslations;
-        throw new Error(t.unauthorizedAction);
+        // Navbar always queries this field for logged-in users. Return an empty
+        // feed instead of throwing so missing permission does not surface as a
+        // GraphQL error on every page load.
+        return {
+          id: `notification-alerts-${userId}`,
+          alerts: [],
+          totalCount: 0,
+          unreadCount: 0,
+        };
       }
 
       const tNotifications = getServerTranslations(locale ?? "en").dashboardTranslations.coreNotifications;
 
-      const unansweredComplaints = await db
-        .select({
-          id: complaints.id,
-          body: complaints.body,
-          createdAt: complaints.createdAt,
-        })
-        .from(complaints)
-        .where(and(eq(complaints.status, ComplaintStatus.UNANSWERED), isNull(complaints.deletedAt)))
-        .orderBy(desc(complaints.createdAt))
-        .limit(20);
+      const canListComplaints = await PermissionsService.hasPermission(userId, AppPermission.COMPLAINTS_LIST);
+
+      const unansweredComplaints = canListComplaints
+        ? await db
+            .select({
+              id: complaints.id,
+              body: complaints.body,
+              createdAt: complaints.createdAt,
+            })
+            .from(complaints)
+            .where(and(eq(complaints.status, ComplaintStatus.UNANSWERED), isNull(complaints.deletedAt)))
+            .orderBy(desc(complaints.createdAt))
+            .limit(20)
+        : [];
 
       const recentNotifications = await db
         .select({

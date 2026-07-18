@@ -9,7 +9,7 @@ mock.module("next/navigation", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/supervisor/profile",
+  usePathname: () => "/profile",
   useSearchParams: () => new URLSearchParams(),
   redirect: () => {},
 }));
@@ -25,7 +25,7 @@ mock.module("@/shared/i18n/routing", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/supervisor/profile",
+  usePathname: () => "/profile",
   Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
     <a href={href} {...rest}>
       {children}

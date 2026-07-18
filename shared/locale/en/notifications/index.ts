@@ -121,6 +121,19 @@ export const notificationsEn: NotificationsLabels = {
     body: ({ studentName, newClassesRemaining }) =>
       `${studentName}'s remaining class quota is now ${newClassesRemaining}.`,
   },
+  lessonReportSubmitted: {
+    title: "Lesson Report Submitted",
+    body: ({ reportId, teacherName }) => `${teacherName} submitted lesson report ${reportId} for your review.`,
+  },
+  lessonReportReviewed: {
+    title: "Lesson Report Reviewed",
+    body: ({ reportId, teacherName, decision }) =>
+      `Your lesson report ${reportId} from ${teacherName} has been ${decision}.`,
+  },
+  newComplaint: {
+    title: "New Complaint",
+    body: ({ complaintId, category }) => `A new ${category} complaint (${complaintId}) has been submitted.`,
+  },
   drawerTitle: "Notifications",
   managePreferences: "Manage preferences",
   markAllRead: "Mark all as read",

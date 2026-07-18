@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { AppPermission, ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { getVisibleProfileTabs } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
+import { getVisibleProfileTabs, resolveProfileTab } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
 
 function hasPermissions(permissions: readonly AppPermission[]) {
   const set = new Set(permissions);
@@ -48,13 +48,35 @@ describe("getVisibleProfileTabs", () => {
     expect(tabs.some(tab => tab.id === "meeting")).toBe(true);
   });
 
-  test("hides meeting tab without view or manage permission", () => {
+  test("shows notifications tab for student own scope", () => {
     const tabs = getVisibleProfileTabs({
-      audience: ProfileAudience.Teacher,
+      audience: "STUDENT" as ProfileAudience,
       scope: ProfileScope.Own,
       hasPermission: hasPermissions([AppPermission.AuthViewOwnProfile]),
     });
 
-    expect(tabs.some(tab => tab.id === "meeting")).toBe(false);
+    expect(tabs.some(tab => tab.id === "notifications")).toBe(true);
+    expect(tabs.some(tab => tab.id === "profile")).toBe(true);
+    expect(tabs.some(tab => tab.id === "paymentMethods")).toBe(false);
+  });
+});
+
+describe("resolveProfileTab", () => {
+  const tabs = getVisibleProfileTabs({
+    audience: ProfileAudience.Teacher,
+    scope: ProfileScope.Own,
+    hasPermission: hasPermissions([AppPermission.AuthViewOwnProfile]),
+  });
+
+  test("keeps a valid tab param", () => {
+    expect(resolveProfileTab("notifications", tabs)).toBe("notifications");
+  });
+
+  test("falls back to the first visible tab when param is missing", () => {
+    expect(resolveProfileTab(null, tabs)).toBe("profile");
+  });
+
+  test("falls back when param is not visible", () => {
+    expect(resolveProfileTab("permissions", tabs)).toBe("profile");
   });
 });

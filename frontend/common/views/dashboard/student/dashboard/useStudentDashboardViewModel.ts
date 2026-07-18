@@ -163,7 +163,7 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
         setReflectionDialogOpen(true);
       },
       handleEditProfile: () => {
-        router.push("/students/me/profile");
+        router.push("/profile");
       },
     }),
     [upcomingLessons, router, setSelectedReportId, setReflectionDialogOpen]

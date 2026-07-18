@@ -2,7 +2,9 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
+import { formatDate, formatDateTime } from "@/frontend/common/components/intl/dateFormat";
 import { supervisorDashboardQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
@@ -19,6 +21,7 @@ export function useSupervisorDashboardViewModel(
   _props: Readonly<UseSupervisorDashboardViewModelProps> = {}
 ): SupervisorDashboardViewModel {
   const t = useAppTranslation().dashboardTranslations.supervisorPortalDashboard;
+  const locale = useAppLocale();
   const router = useRouter();
   const userName = useUserStore(state => state.name);
 
@@ -56,14 +59,14 @@ export function useSupervisorDashboardViewModel(
     const rows = dashboard?.recentApprovals ?? [];
     return rows.map(r => ({
       id: r?.id ?? "",
-      lessonDate: r?.lessonDate ?? "",
+      lessonDate: r?.lessonDate ? formatDate(r.lessonDate, locale) : "",
       studentId: r?.studentId ?? "",
-      studentName: r?.studentName ?? "",
+      studentName: r?.studentName?.trim() || "",
       teacherId: r?.teacherId ?? "",
-      teacherName: r?.teacherName ?? "",
-      reviewedAt: r?.reviewedAt ?? "",
+      teacherName: r?.teacherName?.trim() || "",
+      reviewedAt: r?.reviewedAt ? formatDateTime(r.reviewedAt, locale) : "",
     }));
-  }, [dashboard?.recentApprovals]);
+  }, [dashboard?.recentApprovals, locale]);
 
   return {
     userName: dashboard?.supervisorName ?? userName,
@@ -77,10 +80,10 @@ export function useSupervisorDashboardViewModel(
       router.push("/lesson-reports");
     },
     onGoToDues: () => {
-      router.push("/supervisor/teacher-dues");
+      router.push("/teacher-dues");
     },
     onGoToMonthlyReports: () => {
-      router.push("/supervisor/monthly-reports");
+      router.push("/monthly-reports");
     },
     onViewRecentApproval: (id: string) => {
       if (!id) {

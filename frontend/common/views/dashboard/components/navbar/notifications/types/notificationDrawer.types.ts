@@ -7,7 +7,8 @@ export type NotificationEntityKind =
   | "complaint"
   | "suggestion"
   | "paymentMethod"
-  | "schedule";
+  | "schedule"
+  | "lessonReport";
 
 export interface NotificationMetadataBase {
   readonly entityKind: NotificationEntityKind;
@@ -53,6 +54,12 @@ export interface ScheduleMetadata extends NotificationMetadataBase {
   readonly entityKind: "schedule";
 }
 
+export interface LessonReportMetadata extends NotificationMetadataBase {
+  readonly entityKind: "lessonReport";
+  readonly classInstanceId?: string;
+  readonly decision?: "approved" | "rejected";
+}
+
 /** Frontend mirror of backend `NotificationMetadata` discriminated union (parsed from GraphQL `metadata` JSON). */
 export type NotificationMetadata =
   | InvoiceMetadata
@@ -61,7 +68,8 @@ export type NotificationMetadata =
   | ComplaintMetadata
   | SuggestionMetadata
   | PaymentMethodMetadata
-  | ScheduleMetadata;
+  | ScheduleMetadata
+  | LessonReportMetadata;
 
 /** Alert row shape for the drawer (mirrors SystemAlert selection). */
 export interface NotificationDrawerAlert {

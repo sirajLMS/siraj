@@ -1,6 +1,16 @@
 // NEW FOR PLAN v5 (notificationPreferences extended props)
-import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  NotificationChannel,
+  NotificationEventType,
+  ProfileAudience,
+  UserRole,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  isEventAllowedForRole,
+  type NotificationPreferenceRole,
+  resolveNotificationEventAllowlist,
+} from "@/shared/constants/notification-event-allowlists";
 
 export type NotificationPrefRow = NonNullable<
   Operations.NotificationPreferencesQuery["notificationPreferences"]
@@ -39,6 +49,8 @@ export interface NotificationPreferencesTabVariantProps {
   // NEW FOR PLAN v5: pre-shaped desktop matrix rows lifted out of the desktop
   // tier (data-shaping belongs in the ViewModel). Desktop only reads them.
   readonly matrixRows?: readonly PreferenceMatrixRow[];
+  /** Role-filtered event types for the prefs matrix (mobile should iterate these). */
+  readonly eventTypes?: readonly NotificationEventType[];
 }
 
 export const NOTIFICATION_CHANNELS = [
@@ -48,6 +60,7 @@ export const NOTIFICATION_CHANNELS = [
   NotificationChannel.OnApp,
 ] as const;
 
+/** Full event catalog — staff/parent/teacher/admin matrices use this when allowlist is ALL. */
 export const NOTIFICATION_EVENT_TYPES = [
   NotificationEventType.ClassReminder,
   NotificationEventType.InvoiceGenerated,
@@ -72,7 +85,62 @@ export const NOTIFICATION_EVENT_TYPES = [
   NotificationEventType.StudentTeacherReassigned,
   NotificationEventType.StudentStatusChanged,
   NotificationEventType.StudentQuotaOverridden,
+  // Student/supervisor notification integration
+  NotificationEventType.LessonReportSubmitted,
+  NotificationEventType.LessonReportReviewed,
 ] as const;
+
+/**
+ * Maps viewer `UserRole` / `ProfileAudience` to the shared prefs allowlist role.
+ * Prefer `role` from the auth user store; fall back to profile audience.
+ */
+export function resolveNotificationPreferenceRole(params: {
+  readonly role?: string | null;
+  readonly audience?: ProfileAudience | null;
+}): NotificationPreferenceRole {
+  const { role, audience } = params;
+
+  switch (role) {
+    case UserRole.Student:
+      return "student";
+    case UserRole.Supervisor:
+      return "supervisor";
+    case UserRole.Parent:
+      return "parent";
+    case UserRole.Teacher:
+      return "teacher";
+    case UserRole.Staff:
+      return "staff";
+    case UserRole.SuperAdmin:
+    case UserRole.AcademyAdmin:
+      return "admin";
+    default:
+      break;
+  }
+
+  switch (audience) {
+    case ProfileAudience.Student:
+      return "student";
+    case ProfileAudience.Parent:
+      return "parent";
+    case ProfileAudience.Teacher:
+      return "teacher";
+    case ProfileAudience.Staff:
+      return "staff";
+    default:
+      return "staff";
+  }
+}
+
+/** Event types visible in the prefs matrix for a prefs role. */
+export function getNotificationEventTypesForRole(role: NotificationPreferenceRole): readonly NotificationEventType[] {
+  const allowlist = resolveNotificationEventAllowlist(role);
+  if (allowlist === "ALL") {
+    return NOTIFICATION_EVENT_TYPES;
+  }
+
+  return NOTIFICATION_EVENT_TYPES.filter(eventType => isEventAllowedForRole(role, eventType));
+}
 
 export function preferenceKey(channel: NotificationChannel, eventType: NotificationEventType): string {
   return `${channel}:${eventType}`;
@@ -94,9 +162,10 @@ export function buildPreferenceMap(preferences: readonly NotificationPrefRow[]):
 // desktop matrix grid. Lifted to common so the desktop tier view no longer
 // derives data (specs.md §6.1 — the ViewModel owns data shaping).
 export function buildPreferenceMatrixRows(
-  preferenceMap: ReadonlyMap<string, NotificationPrefRow>
+  preferenceMap: ReadonlyMap<string, NotificationPrefRow>,
+  eventTypes: readonly NotificationEventType[] = NOTIFICATION_EVENT_TYPES
 ): PreferenceMatrixRow[] {
-  return NOTIFICATION_EVENT_TYPES.map(eventType => {
+  return eventTypes.map(eventType => {
     const enabledMap: Record<string, boolean> = {};
     for (const channel of NOTIFICATION_CHANNELS) {
       const pref = preferenceMap.get(preferenceKey(channel, eventType));
@@ -104,4 +173,17 @@ export function buildPreferenceMatrixRows(
     }
     return { id: eventType, eventType, enabledMap };
   });
+}
+
+export function buildDefaultPreferences(
+  eventTypes: readonly NotificationEventType[] = NOTIFICATION_EVENT_TYPES
+): NotificationPrefRow[] {
+  return NOTIFICATION_CHANNELS.flatMap(channel =>
+    eventTypes.map(eventType => ({
+      id: preferenceKey(channel, eventType),
+      channel,
+      eventType,
+      enabled: true,
+    }))
+  );
 }

@@ -94,7 +94,20 @@ export function DashboardLayoutMobile({
 
       <SidebarShell navItems={translatedNavItems} activeKey={activeNavKey} sidebarWidth={sidebarWidth} />
 
-      <MobileMainScrollArea>{children}</MobileMainScrollArea>
+      {/* NavbarChrome is position:fixed — offset content like desktop (pt: navbarHeight) */}
+      <Box
+        sx={theme => ({
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          minHeight: 0,
+          minWidth: 0,
+          pt: theme.layout.navbarHeight,
+          boxSizing: "border-box",
+        })}
+      >
+        <MobileMainScrollArea>{children}</MobileMainScrollArea>
+      </Box>
 
       <BottomNavbarMobile items={bottomNavItems} activeKey={activeNavKey} />
     </Box>

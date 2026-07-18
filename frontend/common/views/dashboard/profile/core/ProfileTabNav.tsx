@@ -7,7 +7,7 @@ import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/
 import type { ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { ProfileTabNavVariantProps } from "@/frontend/common/views/dashboard/profile/core/profileTabNavTypes";
-import { getVisibleProfileTabs } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
+import { getVisibleProfileTabs, resolveProfileTab } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
 
 export type ProfileTabNavProps = {
   readonly audience: ProfileAudience;
@@ -27,6 +27,12 @@ const lazyViews = createLazyView<ProfileTabNavVariantProps>(
     }))
 );
 
+function buildTabHref(pathname: string, searchParams: URLSearchParams, tab: string): string {
+  const params = new URLSearchParams(searchParams.toString());
+  params.set("tab", tab);
+  return `${pathname}?${params.toString()}`;
+}
+
 export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Readonly<ProfileTabNavProps>) {
   const router = useRouter();
   const pathname = usePathname();
@@ -38,30 +44,35 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Read
     [audience, scope, hasPermission]
   );
 
-  useEffect(() => {
-    const tabParam = searchParams.get("tab");
-    const nextTab = tabParam && availableTabs.some(tab => tab.id === tabParam) ? tabParam : availableTabs[0]?.id;
+  const tabParam = searchParams.get("tab");
+  const resolvedTab = resolveProfileTab(tabParam, availableTabs);
 
-    if (nextTab && nextTab !== currentTab) {
-      onTabChange(nextTab);
+  // URL is the source of truth. Sync parent state from the resolved URL tab only —
+  // never write parent state back into the URL (that raced with useSearchParams
+  // hydration and caused an infinite profile ↔ notifications replace loop).
+  useEffect(() => {
+    if (resolvedTab && resolvedTab !== currentTab) {
+      onTabChange(resolvedTab);
     }
-  }, [searchParams, availableTabs, onTabChange, currentTab]);
+  }, [resolvedTab, currentTab, onTabChange]);
 
+  // Normalize missing/invalid ?tab= to the first visible tab.
   useEffect(() => {
-    if (!currentTab) {
+    if (!resolvedTab || tabParam === resolvedTab) {
       return;
     }
+    router.replace(buildTabHref(pathname, searchParams, resolvedTab), { scroll: false });
+  }, [resolvedTab, tabParam, pathname, router, searchParams]);
 
-    const params = new URLSearchParams(searchParams.toString());
-    if (params.get("tab") === currentTab) {
+  const handleTabChange = (tab: string) => {
+    onTabChange(tab);
+    if (tabParam === tab) {
       return;
     }
+    router.replace(buildTabHref(pathname, searchParams, tab), { scroll: false });
+  };
 
-    params.set("tab", currentTab);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [currentTab, pathname, router, searchParams]);
-
-  if (availableTabs.length === 0) {
+  if (availableTabs.length === 0 || !resolvedTab) {
     return null;
   }
 
@@ -69,7 +80,7 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Read
     <ResponsiveViewSwitch
       mobile={lazyViews.mobile}
       desktop={lazyViews.desktop}
-      props={{ availableTabs, currentTab, onTabChange }}
+      props={{ availableTabs, currentTab: resolvedTab, onTabChange: handleTabChange }}
     />
   );
 }

@@ -49,6 +49,16 @@ export const EVENT_CHANNEL_ALLOWLIST: Partial<Record<NotificationEventType, Noti
   [NotificationEventType.CLASS_RESET]: [NotificationChannel.ON_APP, NotificationChannel.EMAIL],
   [NotificationEventType.STUDENT_STATUS_CHANGED]: [NotificationChannel.ON_APP, NotificationChannel.EMAIL],
   [NotificationEventType.STUDENT_QUOTA_OVERRIDDEN]: [NotificationChannel.ON_APP, NotificationChannel.EMAIL],
+  [NotificationEventType.LESSON_REPORT_SUBMITTED]: [
+    NotificationChannel.ON_APP,
+    NotificationChannel.PUSH,
+    NotificationChannel.EMAIL,
+  ],
+  [NotificationEventType.LESSON_REPORT_REVIEWED]: [
+    NotificationChannel.ON_APP,
+    NotificationChannel.PUSH,
+    NotificationChannel.EMAIL,
+  ],
 };
 
 // ─── Channel comparison helper ────────────────────────────────────────

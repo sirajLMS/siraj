@@ -1,36 +1,13 @@
-import { Box, CircularProgress } from "@mui/material";
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { SupervisorDashboardContainer } from "@/frontend/common/views/dashboard/supervisor/dashboard/SupervisorDashboardContainer";
-import { getTranslations } from "@/shared/locale";
+import { redirect } from "next/navigation";
+import { getServerUserContext } from "@/backend/lib";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 
-export async function generateMetadata({
-  params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = getTranslations(locale).dashboardTranslations.supervisorPortalDashboard;
-  return { title: t.pageTitle };
-}
+export default async function SupervisorDashboardRedirectPage() {
+  const { userId } = await getServerUserContext();
+  if (!userId) {
+    await redirectToLogin();
+    return;
+  }
 
-export default function SupervisorDashboardPage() {
-  return (
-    <Suspense
-      fallback={
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "50vh",
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      }
-    >
-      <SupervisorDashboardContainer />
-    </Suspense>
-  );
+  redirect("/dashboard");
 }

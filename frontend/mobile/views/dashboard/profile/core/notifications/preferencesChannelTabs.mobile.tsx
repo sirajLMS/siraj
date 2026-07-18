@@ -26,6 +26,8 @@ interface PreferencesChannelTabsMobileViewProps {
   // container so the tier view stays render-only (no `buildPreferenceMap`
   // invocation, no `useMemo` derivation in tier — specs.md §6.1).
   readonly preferenceMap: ReadonlyMap<string, NotificationPrefRow>;
+  /** Role-filtered event catalog; defaults to full matrix when omitted. */
+  readonly eventTypes?: readonly NotificationEventType[];
   readonly onToggle: (channel: NotificationChannelType, eventType: NotificationEventType, enabled: boolean) => void;
   readonly disabled?: boolean;
   readonly loading?: boolean;
@@ -55,6 +57,7 @@ function ChannelTabsSkeleton() {
 export function PreferencesChannelTabsMobileView({
   preferences,
   preferenceMap,
+  eventTypes = NOTIFICATION_EVENT_TYPES,
   onToggle,
   disabled = false,
   loading = false,
@@ -135,7 +138,7 @@ export function PreferencesChannelTabsMobileView({
       <Box sx={{ overflow: "hidden" }}>
         <Slide key={activeChannel} direction={slideDirection} in appear mountOnEnter unmountOnExit timeout={220}>
           <Stack spacing={0}>
-            {NOTIFICATION_EVENT_TYPES.map((eventType, index) => {
+            {eventTypes.map((eventType, index) => {
               const pref = preferenceMap.get(`${activeChannel}:${eventType}`);
               const enabled = pref?.enabled ?? true;
 

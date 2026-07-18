@@ -31,5 +31,7 @@ export function toGqlProfileAudience(audience: ProfileAudience): GqlProfileAudie
       return GqlProfileAudience.Parent;
     case ProfileAudience.STAFF:
       return GqlProfileAudience.Staff;
+    case ProfileAudience.STUDENT:
+      return "STUDENT" as GqlProfileAudience;
   }
 }

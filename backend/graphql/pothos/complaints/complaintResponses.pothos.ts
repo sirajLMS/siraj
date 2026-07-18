@@ -1,3 +1,4 @@
+import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintResponseService } from "@/backend/services";
 import type { ComplaintResponseReturnType, ComplaintResponseSubmitInput } from "@/backend/types";
@@ -29,7 +30,7 @@ export const RespondToComplaintInputPothosObject = gqlSchemaBuilder
 gqlSchemaBuilder.mutationField("respondToComplaint", t =>
   t.field({
     type: ComplaintResponsePothosObject,
-    authScopes: { superAdmin: true },
+    authScopes: { permission: AppPermission.COMPLAINTS_RESPOND },
     description: "Creates a response to an existing complaint (admin only).",
     args: {
       input: t.arg({ type: RespondToComplaintInputPothosObject, required: true }),

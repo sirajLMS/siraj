@@ -177,11 +177,37 @@ describe("ProfileTabNav", () => {
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Own,
       permissions: [AppPermission.AuthViewOwnProfile],
+      currentTab: "profile",
       onTabChange,
       moduleOverrides: { useSearchParams: () => new URLSearchParams("tab=notifications") },
     });
 
     expect(onTabChange).toHaveBeenCalledWith("notifications");
+    expect(mockRouterReplace).not.toHaveBeenCalled();
+  });
+
+  test("does not rewrite URL when tab param already matches resolved tab", () => {
+    renderTabNav({
+      audience: ProfileAudience.Teacher,
+      scope: ProfileScope.Own,
+      permissions: [AppPermission.AuthViewOwnProfile],
+      currentTab: "notifications",
+      moduleOverrides: { useSearchParams: () => new URLSearchParams("tab=notifications") },
+    });
+
+    expect(mockRouterReplace).not.toHaveBeenCalled();
+  });
+
+  test("normalizes missing tab param to first visible tab", () => {
+    renderTabNav({
+      audience: ProfileAudience.Teacher,
+      scope: ProfileScope.Own,
+      permissions: [AppPermission.AuthViewOwnProfile],
+      currentTab: "profile",
+      moduleOverrides: { useSearchParams: () => new URLSearchParams() },
+    });
+
+    expect(mockRouterReplace).toHaveBeenCalledWith("/profile?tab=profile", { scroll: false });
   });
 
   test("renders chip labels alongside desktop tabs", () => {

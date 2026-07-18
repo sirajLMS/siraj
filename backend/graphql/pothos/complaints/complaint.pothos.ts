@@ -1,4 +1,4 @@
-import { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
+import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintResponsePothosObject } from "@/backend/graphql/pothos/complaints/complaintResponses.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
@@ -199,7 +199,7 @@ gqlSchemaBuilder.queryField("parentComplaints", t =>
 gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
   t.field({
     type: ComplaintQueueResultPothosObject,
-    authScopes: { superAdmin: true },
+    authScopes: { permission: AppPermission.COMPLAINTS_LIST },
     description: "Returns the paginated admin complaint queue with metrics.",
     args: {
       filter: t.arg({ type: ComplaintQueueFilterPothosObject, required: true }),
@@ -313,7 +313,7 @@ gqlSchemaBuilder.mutationField("submitComplaint", t =>
 gqlSchemaBuilder.mutationField("deleteComplaint", t =>
   t.field({
     type: "Boolean",
-    authScopes: { superAdmin: true },
+    authScopes: { permission: AppPermission.COMPLAINTS_DELETE },
     description: "Soft-deletes a complaint (admin only). Returns true on success.",
     args: {
       complaintId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),

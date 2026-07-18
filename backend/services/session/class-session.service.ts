@@ -1,7 +1,11 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
-import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import {
+  type ClassInstanceAffectedUsers,
+  classLifecycleAffectedUserIds,
+  SchedulingRepository,
+} from "@/backend/db/repo/scheduling";
 import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-status-events.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { AppPermission, NotificationEventType } from "@/backend/enum";
@@ -106,7 +110,7 @@ export namespace ClassSessionService {
   async function notifyClassLifecycle(
     classInstanceId: string,
     eventType: NotificationEventType,
-    affected: { readonly parentUserId: string; readonly studentId: string; readonly teacherUserId: string } | null,
+    affected: ClassInstanceAffectedUsers | null,
     metadata?: Record<string, string>,
     locale?: string
   ): Promise<void> {
@@ -117,14 +121,12 @@ export namespace ClassSessionService {
       if (!instance) return;
 
       const studentName = instance.student?.name ?? "—";
-      const payloads = buildClassLifecyclePayloads(
-        instance,
-        eventType,
-        [affected.parentUserId, affected.teacherUserId],
-        locale,
-        { studentName, ...metadata }
-      );
-      await dispatchWithPreferences(payloads, [affected.parentUserId, affected.teacherUserId], locale);
+      const affectedUserIds = classLifecycleAffectedUserIds(affected);
+      const payloads = buildClassLifecyclePayloads(instance, eventType, affectedUserIds, locale, {
+        studentName,
+        ...metadata,
+      });
+      await dispatchWithPreferences(payloads, affectedUserIds, locale);
     } catch (error) {
       logger.error("Class lifecycle notification dispatch failed", {
         classInstanceId,

@@ -5,6 +5,7 @@ import * as Recurring from "@/backend/db/repo/scheduling/recurring";
 import { RecurringScheduleRepository } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { findUpcomingInstances } from "@/backend/db/repo/scheduling/scheduling-queries.repository.findUpcoming";
 import {
+  classLifecycleAffectedUserIds,
   getClassInstanceAffectedUsers,
   getClassInstanceAffectedUsersForTeacher,
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository.helpers";
@@ -16,6 +17,7 @@ export type {
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository.helpers";
 export {
   ClassStatusEventsRepository,
+  classLifecycleAffectedUserIds,
   findUpcomingInstances,
   getClassInstanceAffectedUsers,
   getClassInstanceAffectedUsersForTeacher,

@@ -46,6 +46,7 @@ import userEvent from "@testing-library/user-event";
 
 expect.extend(matchers);
 
+import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useStudentPortalProfileStore } from "@/frontend/common/stores/studentPortalProfileStore";
 import { useStudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
@@ -59,7 +60,12 @@ const studentId = "student-profile-1";
  * Bypasses ResponsiveViewSwitch / next/dynamic (not preloaded for this view).
  */
 function StudentProfileContainerImpl() {
-  const viewModel = useStudentProfileViewModel({});
+  const viewModel = useStudentProfileViewModel({
+    scope: ProfileScope.Own,
+    mode: ProfileMode.View,
+    targetUserId: "student-user-1",
+    activeTab: "profile",
+  });
   return <StudentProfileDesktopView {...viewModel} />;
 }
 

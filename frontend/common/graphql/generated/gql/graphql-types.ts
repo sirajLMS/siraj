@@ -3377,6 +3377,8 @@ export enum NotificationEventType {
   ComplaintResponse = 'COMPLAINT_RESPONSE',
   InvoiceGenerated = 'INVOICE_GENERATED',
   InvoiceStatusChanged = 'INVOICE_STATUS_CHANGED',
+  LessonReportReviewed = 'LESSON_REPORT_REVIEWED',
+  LessonReportSubmitted = 'LESSON_REPORT_SUBMITTED',
   NewComplaint = 'NEW_COMPLAINT',
   NewSuggestion = 'NEW_SUGGESTION',
   PaymentMethodChanged = 'PAYMENT_METHOD_CHANGED',
@@ -3873,6 +3875,7 @@ export type PermissionGroupSimulationStatus = {
 export enum ProfileAudience {
   Parent = 'PARENT',
   Staff = 'STAFF',
+  Student = 'STUDENT',
   Teacher = 'TEACHER'
 }
 

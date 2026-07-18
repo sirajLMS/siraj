@@ -24,12 +24,12 @@ export function PendingReviewsHeroCardDesktop({
         p: 3,
         display: "flex",
         flexDirection: "column",
-        gap: 2,
+        gap: 2.5,
         height: "100%",
         border: `1px solid ${theme.palette.outlineVariant}`,
       })}
     >
-      <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+      <Stack sx={{ flexDirection: "row", alignItems: "flex-start", gap: 2, flex: 1 }}>
         <Box
           sx={theme => ({
             width: 48,
@@ -45,17 +45,17 @@ export function PendingReviewsHeroCardDesktop({
         >
           <PendingActionsOutlined fontSize="medium" />
         </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface, mb: 0.5 })}>
+        <Stack sx={{ flex: 1, minWidth: 0, gap: 0.75 }}>
+          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
             {labels.pendingReviewsHero(count)}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
             {labels.pendingReviewsSubtitle}
           </Typography>
-        </Box>
+        </Stack>
       </Stack>
       {count > 0 ? (
-        <DesktopPrimaryPageAction onClick={onGoToReviews} sx={{ alignSelf: "flex-start" }}>
+        <DesktopPrimaryPageAction onClick={onGoToReviews} sx={{ alignSelf: "flex-start", mt: "auto" }}>
           {labels.goToReviews}
         </DesktopPrimaryPageAction>
       ) : null}

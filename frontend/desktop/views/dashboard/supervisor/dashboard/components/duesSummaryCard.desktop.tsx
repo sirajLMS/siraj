@@ -26,12 +26,12 @@ export function DuesSummaryCardDesktop({ summary, labels, onGoToDues }: Readonly
         p: 3,
         display: "flex",
         flexDirection: "column",
-        gap: 2,
+        gap: 2.5,
         height: "100%",
         border: `1px solid ${theme.palette.outlineVariant}`,
       })}
     >
-      <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+      <Stack sx={{ flexDirection: "row", alignItems: "flex-start", gap: 2 }}>
         <Box
           sx={theme => ({
             width: 48,
@@ -47,37 +47,32 @@ export function DuesSummaryCardDesktop({ summary, labels, onGoToDues }: Readonly
         >
           <PaymentsOutlined fontSize="medium" />
         </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface, mb: 0.5 })}>
+        <Stack sx={{ flex: 1, minWidth: 0, gap: 0.75 }}>
+          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
             {labels.teacherDuesSummary}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
             {labels.totalPendingDues}
           </Typography>
-        </Box>
+        </Stack>
       </Stack>
-      <Stack
-        sx={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          gap: 2,
-        }}
-      >
-        <Box>
-          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant, mb: 0.5 })}>
+
+      <Stack sx={{ flexDirection: "row", alignItems: "flex-end", gap: 4, flex: 1 }}>
+        <Stack sx={{ gap: 0.5, minWidth: 0 }}>
+          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
             {labels.totalPendingDues}
           </Typography>
           <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
             {formattedAmount}
           </Typography>
-        </Box>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+        </Stack>
+        <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, lineHeight: 1.33 })}>
           {String(summary.totalCount)}
         </Typography>
       </Stack>
+
       {summary.totalCount > 0 ? (
-        <DesktopPrimaryPageAction onClick={onGoToDues} sx={{ alignSelf: "flex-start" }}>
+        <DesktopPrimaryPageAction onClick={onGoToDues} sx={{ alignSelf: "flex-start", mt: "auto" }}>
           {labels.goToDues}
         </DesktopPrimaryPageAction>
       ) : null}

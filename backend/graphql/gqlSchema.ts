@@ -1,7 +1,4 @@
-import "@/backend/graphql/pothos";
-import "@/backend/graphql/query";
-import "@/backend/graphql/mutation";
-import "@/backend/graphql/pothos/schema.types";
+import "@/backend/graphql/gqlSchema.definitions";
 
 import { extendSchema, parse } from "graphql";
 import { DateResolver, DateTimeResolver } from "graphql-scalars";

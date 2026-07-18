@@ -1,17 +1,13 @@
-import type { Metadata } from "next";
-import { StudentProfileView } from "@/frontend/common/views/dashboard/student/profile/StudentProfileContainer";
-import { getTranslations } from "@/shared/locale";
+import { redirect } from "next/navigation";
+import { getServerUserContext } from "@/backend/lib";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 
-export async function generateMetadata({
-  params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = getTranslations(locale).dashboardTranslations.studentPortalProfile;
-  return { title: t.pageTitle };
-}
+export default async function StudentMeProfileRedirectPage() {
+  const { userId } = await getServerUserContext();
+  if (!userId) {
+    await redirectToLogin();
+    return;
+  }
 
-export default function StudentProfilePage() {
-  return <StudentProfileView />;
+  redirect("/profile");
 }

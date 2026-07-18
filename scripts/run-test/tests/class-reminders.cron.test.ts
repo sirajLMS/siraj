@@ -85,6 +85,7 @@ beforeEach(() => {
   getAffectedUsersSpy = spyOn(SchedulingRepository, "getClassInstanceAffectedUsers").mockResolvedValue({
     parentUserId: PARENT_USER_ID,
     studentId: STUDENT_ID,
+    studentUserId: null,
     teacherUserId: TEACHER_USER_ID,
   });
   findStudentSpy = spyOn(StudentRepository, "findById").mockResolvedValue({
@@ -152,6 +153,7 @@ describe("ClassReminderService — daily cron orchestration", () => {
       return {
         parentUserId: PARENT_USER_ID,
         studentId: STUDENT_ID,
+        studentUserId: null,
         teacherUserId: TEACHER_USER_ID,
       };
     });

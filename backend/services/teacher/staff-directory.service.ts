@@ -8,7 +8,10 @@ import { getServerTranslations } from "@/shared/locale";
 
 export namespace StaffDirectoryService {
   async function assertDirectoryAccess(userId: string, locale?: string): Promise<void> {
-    const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.STAFF_VIEW_DIRECTORY);
+    const isAuthorized = await PermissionsService.hasAnyPermission(userId, [
+      AppPermission.TEACHERS_LIST,
+      AppPermission.STAFF_VIEW_DIRECTORY,
+    ]);
     if (!isAuthorized) {
       const t = getServerTranslations(locale ?? "ar").errorsTranslations;
       throw new Error(t.unauthorizedAction);

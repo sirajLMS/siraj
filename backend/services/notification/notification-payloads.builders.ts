@@ -455,6 +455,114 @@ export function buildStudentLifecyclePayloads(
   return payloads;
 }
 
+// ─── Lesson report event builders ─────────────────────────────────────
+
+/**
+ * Build payloads for `LESSON_REPORT_SUBMITTED` — fans out to supervisors
+ * (or any users with `LESSON_REPORTS_REVIEW`) when a teacher submits a report.
+ *
+ * @param reportId          The lesson report id (metadata.entityId).
+ * @param affectedUserIds   Reviewer user ids to notify.
+ * @param locale            Optional locale code.
+ * @param metadata          Context bag: `teacherName` (required for body),
+ *                          optional `classInstanceId`.
+ */
+export function buildLessonReportSubmittedPayloads(
+  reportId: string,
+  affectedUserIds: string[],
+  locale?: string,
+  metadata?: { teacherName?: string; classInstanceId?: string }
+): CommunicationPayload[] {
+  if (!reportId || affectedUserIds.length === 0) return [];
+
+  const labels = labelsFor(locale).lessonReportSubmitted;
+  const teacherName = metadata?.teacherName ?? "—";
+  const body = labels.body({ reportId, teacherName });
+
+  const sharedMetadata: PayloadMetadata = {
+    entityKind: "lessonReport",
+    entityId: reportId,
+    classInstanceId: metadata?.classInstanceId,
+    teacherName,
+    totalRecipients: affectedUserIds.length,
+  };
+
+  const payloads: CommunicationPayload[] = [];
+  for (const userId of affectedUserIds) {
+    payloads.push(
+      ...buildPerChannel(userId, NotificationEventType.LESSON_REPORT_SUBMITTED, labels.title, body, sharedMetadata)
+    );
+  }
+  return payloads;
+}
+
+/**
+ * Build payloads for `LESSON_REPORT_REVIEWED` — notifies the submitting
+ * teacher when a report is approved or rejected.
+ *
+ * @param reportId   The lesson report id.
+ * @param teacherUserId  Submitting teacher's user id.
+ * @param decision   `"approved"` | `"rejected"` (also stored in metadata).
+ * @param locale     Optional locale code.
+ * @param metadata   Context bag: `teacherName`, optional `classInstanceId`.
+ */
+export function buildLessonReportReviewedPayloads(
+  reportId: string,
+  teacherUserId: string,
+  decision: "approved" | "rejected",
+  locale?: string,
+  metadata?: { teacherName?: string; classInstanceId?: string }
+): CommunicationPayload[] {
+  if (!reportId || !teacherUserId) return [];
+
+  const labels = labelsFor(locale).lessonReportReviewed;
+  const teacherName = metadata?.teacherName ?? "—";
+  const body = labels.body({ reportId, teacherName, decision });
+
+  return buildPerChannel(teacherUserId, NotificationEventType.LESSON_REPORT_REVIEWED, labels.title, body, {
+    entityKind: "lessonReport",
+    entityId: reportId,
+    classInstanceId: metadata?.classInstanceId,
+    decision,
+    teacherName,
+  });
+}
+
+/**
+ * Build payloads for `NEW_COMPLAINT` — fans out to users with
+ * `COMPLAINTS_LIST` when a parent files a complaint.
+ *
+ * @param complaintId       The complaint row id.
+ * @param affectedUserIds   Reviewer user ids to notify.
+ * @param locale            Optional locale code.
+ * @param metadata          Optional context (`category`, etc.).
+ */
+export function buildNewComplaintPayloads(
+  complaintId: string,
+  affectedUserIds: string[],
+  locale?: string,
+  metadata?: { category?: string }
+): CommunicationPayload[] {
+  if (!complaintId || affectedUserIds.length === 0) return [];
+
+  const labels = labelsFor(locale).newComplaint;
+  const category = metadata?.category ?? "—";
+  const body = labels.body({ complaintId, category });
+
+  const sharedMetadata: PayloadMetadata = {
+    entityKind: "complaint",
+    entityId: complaintId,
+    category,
+    totalRecipients: affectedUserIds.length,
+  };
+
+  const payloads: CommunicationPayload[] = [];
+  for (const userId of affectedUserIds) {
+    payloads.push(...buildPerChannel(userId, NotificationEventType.NEW_COMPLAINT, labels.title, body, sharedMetadata));
+  }
+  return payloads;
+}
+
 // Re-exported type so consumers can typehint dispatch results without
 // reaching into `@/backend/types` directly from this module.
 export type { ChannelDispatchResult };

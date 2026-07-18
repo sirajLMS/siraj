@@ -106,12 +106,12 @@ let isRedirectingToLogin = false;
 function handleAuthError(error: unknown, operationName: string | undefined): boolean {
   if (!CombinedGraphQLErrors.is(error)) return false;
 
-  const isAuthError = error.errors.some(err => {
-    const code = err.extensions?.code;
-    return code === "UNAUTHENTICATED" || code === "FORBIDDEN";
-  });
+  // Only UNAUTHENTICATED means the session is gone. FORBIDDEN is a permission
+  // denial for an authenticated user — redirecting to login causes a loop
+  // when the auth layout bounces them back to the page that triggered it.
+  const isUnauthenticated = error.errors.some(err => err.extensions?.code === "UNAUTHENTICATED");
 
-  if (!isAuthError) return false;
+  if (!isUnauthenticated) return false;
   if (operationName === "login" || operationName === "demoLogin" || operationName === "refreshToken") return false;
 
   if (globalThis.window !== undefined) {
@@ -130,7 +130,7 @@ function handleAuthError(error: unknown, operationName: string | undefined): boo
       { caller: "ApolloErrorLink.handleAuthError" },
       "[AuthRedirect] GraphQL auth error — redirecting to login",
       {
-        reason: "operation returned UNAUTHENTICATED or FORBIDDEN",
+        reason: "operation returned UNAUTHENTICATED",
         operationName,
         errorCodes: error.errors.map(err => err.extensions?.code ?? "unknown"),
         from: currentUrl,

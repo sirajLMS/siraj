@@ -1,5 +1,6 @@
 import { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo";
+import { type ClassInstanceAffectedUsers, classLifecycleAffectedUserIds } from "@/backend/db/repo/scheduling";
 import { AppPermission, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -9,21 +10,18 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ScheduleDeletionService {
   /**
-   * Dispatch `CLASS_CANCELLED` to the parent + teacher of a now-deleted
-   * class instance. The affected-user triplet MUST be resolved BEFORE the
-   * soft-delete commits because `getClassInstanceAffectedUsers` filters on
-   * `classInstances.deletedAt IS NULL` (per the helper's contract). All
-   * dispatch failures are caught + logged so a notification hiccup never
-   * surfaces as a 500 to callers that just successfully deleted the class
-   * (specs.md "Dispatch failures must NOT throw out of the action").
+   * Dispatch `CLASS_CANCELLED` to the parent + teacher + student of a
+   * now-deleted class instance. The affected-user set MUST be resolved
+   * BEFORE the soft-delete commits because `getClassInstanceAffectedUsers`
+   * filters on `classInstances.deletedAt IS NULL` (per the helper's
+   * contract). All dispatch failures are caught + logged so a notification
+   * hiccup never surfaces as a 500 to callers that just successfully
+   * deleted the class (specs.md "Dispatch failures must NOT throw out of
+   * the action").
    */
   async function notifyClassCancelled(
     classInstanceId: string,
-    affected: {
-      readonly parentUserId: string;
-      readonly studentId: string;
-      readonly teacherUserId: string;
-    } | null,
+    affected: ClassInstanceAffectedUsers | null,
     locale?: string
   ): Promise<void> {
     if (!affected) return;
@@ -33,14 +31,15 @@ export namespace ScheduleDeletionService {
       if (!instance) return;
 
       const studentName = instance.student?.name ?? "—";
+      const affectedUserIds = classLifecycleAffectedUserIds(affected);
       const payloads = buildClassLifecyclePayloads(
         instance,
         NotificationEventType.CLASS_CANCELLED,
-        [affected.parentUserId, affected.teacherUserId],
+        affectedUserIds,
         locale,
         { studentName }
       );
-      await dispatchWithPreferences(payloads, [affected.parentUserId, affected.teacherUserId], locale);
+      await dispatchWithPreferences(payloads, affectedUserIds, locale);
     } catch (error) {
       logger.error("Class cancelled notification dispatch failed", {
         classInstanceId,

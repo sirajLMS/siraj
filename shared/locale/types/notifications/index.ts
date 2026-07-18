@@ -145,6 +145,26 @@ export interface StudentQuotaOverriddenLabels {
   readonly body: (params: { studentName: string; newClassesRemaining: number }) => string;
 }
 
+// ─── Lesson report event keys ───────────────────────────────────────────
+
+/** Labels for the `LESSON_REPORT_SUBMITTED` event — notifies supervisors of a new report. */
+export interface LessonReportSubmittedLabels {
+  readonly title: string;
+  readonly body: (params: { reportId: string; teacherName: string }) => string;
+}
+
+/** Labels for the `LESSON_REPORT_REVIEWED` event — notifies students when a report is reviewed. */
+export interface LessonReportReviewedLabels {
+  readonly title: string;
+  readonly body: (params: { reportId: string; teacherName: string; decision: string }) => string;
+}
+
+/** Labels for the `NEW_COMPLAINT` event — notifies supervisors/staff of a new complaint. */
+export interface NewComplaintLabels {
+  readonly title: string;
+  readonly body: (params: { complaintId: string; category: string }) => string;
+}
+
 // ─── Top-level namespace ────────────────────────────────────────────────
 
 /**
@@ -169,6 +189,9 @@ export interface NotificationsLabels {
   readonly studentTeacherReassigned: StudentTeacherReassignedLabels;
   readonly studentStatusChanged: StudentStatusChangedLabels;
   readonly studentQuotaOverridden: StudentQuotaOverriddenLabels;
+  readonly lessonReportSubmitted: LessonReportSubmittedLabels;
+  readonly lessonReportReviewed: LessonReportReviewedLabels;
+  readonly newComplaint: NewComplaintLabels;
 
   // Drawer UI keys
   readonly drawerTitle: string;

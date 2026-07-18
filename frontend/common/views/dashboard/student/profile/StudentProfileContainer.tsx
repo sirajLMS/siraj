@@ -4,8 +4,11 @@ import { createLazyView } from "@/frontend/common/components/ui/container/create
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
   type StudentProfileViewModel,
+  type UseStudentProfileViewModelProps,
   useStudentProfileViewModel,
 } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
+
+export type { StudentProfileViewModel, UseStudentProfileViewModelProps };
 
 const lazyViews = createLazyView<StudentProfileViewModel>(
   () =>
@@ -18,9 +21,7 @@ const lazyViews = createLazyView<StudentProfileViewModel>(
     }))
 );
 
-export function StudentProfileView() {
-  const viewModel = useStudentProfileViewModel({});
+export function StudentProfileContainer(props: Readonly<UseStudentProfileViewModelProps>) {
+  const viewModel = useStudentProfileViewModel(props);
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { StudentProfileViewModel };

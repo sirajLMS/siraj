@@ -69,7 +69,7 @@ export function syncSubjectProfileCache(
 
   client
     .refetchQueries({
-      include: [profileByUserIdQueryDocument, userQueryDocument, meQueryDocument],
+      include: [{ query: profileByUserIdQueryDocument }, { query: userQueryDocument }, { query: meQueryDocument }],
     })
     .catch(() => {
       // refetch failures are non-fatal for cache sync

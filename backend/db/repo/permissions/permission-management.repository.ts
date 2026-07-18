@@ -603,4 +603,30 @@ export namespace PermissionManagementRepository {
       throw error;
     }
   }
+
+  /**
+   * Resolve user ids that hold `permissionKey` via group membership
+   * (group_permissions → user_permission_groups). Does not hardcode group
+   * slugs. Returns unique user ids; empty array on error is the caller's
+   * responsibility (this method throws — callers that prefer soft-fail
+   * should catch).
+   */
+  export async function listUserIdsWithPermission(permissionKey: AppPermission, tx?: DBTransaction): Promise<string[]> {
+    try {
+      const client = tx ?? db;
+      const rows = await client
+        .select({ userId: userPermissionGroups.userId })
+        .from(userPermissionGroups)
+        .innerJoin(groupPermissions, eq(groupPermissions.groupId, userPermissionGroups.groupId))
+        .innerJoin(permissions, eq(permissions.id, groupPermissions.permissionId))
+        .where(eq(permissions.key, permissionKey));
+
+      const unique = new Set<string>();
+      for (const row of rows) unique.add(row.userId);
+      return [...unique];
+    } catch (error) {
+      logger.error(`Error listing user ids with permission ${permissionKey}:`, error);
+      throw error;
+    }
+  }
 }

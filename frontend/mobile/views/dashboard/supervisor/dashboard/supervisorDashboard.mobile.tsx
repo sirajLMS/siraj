@@ -99,7 +99,7 @@ export function SupervisorDashboardMobileView({
                     sx={theme => ({ color: theme.palette.status.activeContainer })}
                   />
                   <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
-                    {item.studentName || item.studentId} · {item.teacherName || item.teacherId}
+                    {[item.studentName, item.teacherName].filter(Boolean).join(" · ") || "—"}
                   </Typography>
                   <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                     {item.lessonDate}

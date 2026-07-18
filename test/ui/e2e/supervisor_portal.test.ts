@@ -88,7 +88,7 @@ describe("Supervisor Portal E2E", () => {
 
     // Click go to reviews button
     await page.getByRole("button", { name: /انتقل إلى المراجعات/i }).click();
-    await page.waitForURL("**/supervisor/lesson-reports**");
+    await page.waitForURL("**/lesson-reports**");
     await page.waitForLoadState("networkidle");
 
     // Pending reviews page title
@@ -105,7 +105,7 @@ describe("Supervisor Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     await page.waitForLoadState("networkidle");
 
-    await page.goto("/ar/supervisor/lesson-reports");
+    await page.goto("/ar/lesson-reports");
     await page.waitForLoadState("networkidle");
 
     // Check for either approve/reject buttons OR empty state message
@@ -129,7 +129,7 @@ describe("Supervisor Portal E2E", () => {
 
     // Click go to dues button
     await page.getByRole("button", { name: /عرض مستحقات المعلمين/i }).click();
-    await page.waitForURL("**/supervisor/teacher-dues**");
+    await page.waitForURL("**/teacher-dues**");
     await page.waitForLoadState("networkidle");
 
     // Teacher dues page title
@@ -161,7 +161,7 @@ describe("Supervisor Portal E2E", () => {
 
     // Click go to monthly reports button
     await page.getByRole("button", { name: /عرض التقارير الشهرية/i }).click();
-    await page.waitForURL("**/supervisor/monthly-reports**");
+    await page.waitForURL("**/monthly-reports**");
     await page.waitForLoadState("networkidle");
 
     // Monthly reports page title
@@ -187,11 +187,11 @@ describe("Supervisor Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     await page.waitForLoadState("networkidle");
 
-    await page.goto("/ar/supervisor/profile");
+    await page.goto("/ar/profile");
     await page.waitForLoadState("networkidle");
 
-    // Profile page loads (title may vary)
-    expect(await page.getByRole("heading", { name: /الملف الشخصي|الملف/i }).isVisible()).toBe(true);
+    // Canonical own-profile route (same as teachers/students)
+    expect(await page.getByRole("heading", { name: /الملف الشخصي|الملف|Profile/i }).isVisible()).toBe(true);
   });
 
   test("Mobile viewport: supervisor dashboard renders mobile view", async () => {

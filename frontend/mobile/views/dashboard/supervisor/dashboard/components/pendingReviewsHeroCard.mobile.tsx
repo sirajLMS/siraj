@@ -28,7 +28,7 @@ export function PendingReviewsHeroCardMobile({
         border: `1px solid ${theme.palette.outlineVariant}`,
       })}
     >
-      <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.5 }}>
+      <Stack sx={{ flexDirection: "row", alignItems: "flex-start", gap: 1.5 }}>
         <Box
           sx={theme => ({
             width: 40,
@@ -44,14 +44,14 @@ export function PendingReviewsHeroCardMobile({
         >
           <PendingActionsOutlined fontSize="small" />
         </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface, mb: 0.5 })}>
+        <Stack sx={{ flex: 1, minWidth: 0, gap: 0.5 }}>
+          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
             {labels.pendingReviewsHero(count)}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
             {labels.pendingReviewsSubtitle}
           </Typography>
-        </Box>
+        </Stack>
       </Stack>
       {count > 0 ? (
         <MobilePrimaryPageAction onClick={onGoToReviews} sx={{ alignSelf: "flex-start" }}>

@@ -13,12 +13,14 @@ export type ProfileTabDefinition = {
 
 type TabVisibilityKey = `${ProfileAudience}-${ProfileScope}`;
 
+const STUDENT_OWN: TabVisibilityKey = "STUDENT-OWN" as TabVisibilityKey;
+
 const TAB_VISIBILITY: Record<ProfileTabId, readonly TabVisibilityKey[]> = {
-  profile: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER", "STAFF-OWN", "STAFF-OTHER"],
+  profile: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER", "STAFF-OWN", "STAFF-OTHER", STUDENT_OWN],
   paymentMethods: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER"],
   meeting: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER"],
   students: ["TEACHER-OTHER"],
-  notifications: ["TEACHER-OWN", "PARENT-OWN", "STAFF-OWN"],
+  notifications: ["TEACHER-OWN", "PARENT-OWN", "STAFF-OWN", STUDENT_OWN],
   permissions: ["STAFF-OTHER"],
 };
 
@@ -106,4 +108,14 @@ export function getVisibleProfileTabs({
     }
     return isTabPermitted(tab, audience, scope, hasPermission);
   });
+}
+
+export function resolveProfileTab(
+  tabParam: string | null,
+  availableTabs: readonly ProfileTabDefinition[]
+): ProfileTabId | undefined {
+  if (tabParam && availableTabs.some(tab => tab.id === tabParam)) {
+    return tabParam as ProfileTabId;
+  }
+  return availableTabs[0]?.id;
 }

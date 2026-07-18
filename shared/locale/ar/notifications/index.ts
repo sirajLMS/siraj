@@ -112,6 +112,18 @@ export const notificationsAr: NotificationsLabels = {
     body: ({ studentName, newClassesRemaining }) =>
       `العدد المتبقي من حصص ${studentName} هو الآن ${newClassesRemaining}.`,
   },
+  lessonReportSubmitted: {
+    title: "تم تقديم تقرير حصة",
+    body: ({ reportId, teacherName }) => `قدّم ${teacherName} تقرير الحصة ${reportId} لمراجعتك.`,
+  },
+  lessonReportReviewed: {
+    title: "تمت مراجعة تقرير الحصة",
+    body: ({ reportId, teacherName, decision }) => `تم ${decision} تقرير حصتك ${reportId} من ${teacherName}.`,
+  },
+  newComplaint: {
+    title: "شكوى جديدة",
+    body: ({ complaintId, category }) => `تم تقديم شكوى جديدة من نوع ${category} (${complaintId}).`,
+  },
   drawerTitle: "الإشعارات",
   managePreferences: "إدارة التفضيلات",
   markAllRead: "تعليم الكل كمقروء",

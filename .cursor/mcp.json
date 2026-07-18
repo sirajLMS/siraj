@@ -15,6 +15,10 @@
     },
     "storybook": {
       "url": "http://localhost:6006/mcp"
+    },
+    "next-devtools": {
+      "command": "/home/ahmed/.bun/bin/bun",
+      "args": ["x", "-y", "next-devtools-mcp@0.4.0"]
     }
   }
 }

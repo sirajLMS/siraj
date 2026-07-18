@@ -6,11 +6,12 @@ import {
 } from "@/frontend/common/views/dashboard/config/navigationConfig";
 
 const STUDENT_PERMISSIONS: AppPermission[] = [
-  AppPermission.DashboardView,
   AppPermission.StudentViewOwnDashboard,
-  AppPermission.SessionViewDetails,
-  AppPermission.SessionUpdateStatusLeave,
   AppPermission.AuthViewOwnProfile,
+  AppPermission.ScheduleViewAssigned,
+  AppPermission.SessionViewDetails,
+  AppPermission.HistoryViewCalendar,
+  AppPermission.HistoryViewDetails,
 ];
 
 describe("student sidebar navigation", () => {
@@ -23,6 +24,9 @@ describe("student sidebar navigation", () => {
     expect(keys).toContain("student-credits");
     expect(keys).toContain("student-profile");
     expect(keys).toContain("logout");
+
+    const profile = items.find(item => item.key === "student-profile");
+    expect(profile?.href).toBe("/profile");
 
     expect(keys).not.toContain("home");
     expect(keys).not.toContain("search-schedule");

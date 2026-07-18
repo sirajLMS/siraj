@@ -1,3 +1,4 @@
+import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   TeacherDuePothosObject,
@@ -10,7 +11,7 @@ gqlSchemaBuilder.queryField("teacherPendingDues", t =>
   t.field({
     type: [TeacherDuePothosObject],
     description: "Get pending (unpaid) teacher due entries, optionally filtered by teacher",
-    authScopes: { loggedIn: true },
+    authScopes: { permission: AppPermission.TEACHER_DUES_VIEW },
     args: {
       teacherId: t.arg.id({ required: false }),
     },
@@ -25,7 +26,7 @@ gqlSchemaBuilder.queryField("teacherPendingDuesSummary", t =>
   t.field({
     type: TeacherPendingDuesSummaryPothosObject,
     description: "Get summary of pending teacher dues (count + total amount)",
-    authScopes: { loggedIn: true },
+    authScopes: { permission: AppPermission.TEACHER_DUES_VIEW },
     resolve: async (_root, _args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       return TeacherDueService.getPendingDuesSummary(actorUserId, ctx.locale);

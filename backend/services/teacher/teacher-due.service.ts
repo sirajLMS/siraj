@@ -155,6 +155,12 @@ export namespace TeacherDueService {
   ): Promise<TeacherDueReturnType[]> {
     if (teacherId) {
       await assertCanViewDues(actorUserId, teacherId, locale);
+    } else {
+      const canViewAll = await PermissionsService.hasPermission(actorUserId, AppPermission.TEACHER_DUES_VIEW);
+      if (!canViewAll) {
+        const t = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(t.unauthorizedAction);
+      }
     }
     const rows = await TeacherDueRepository.getPendingDues(teacherId);
     return rows.map(row => ({

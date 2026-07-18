@@ -1366,6 +1366,8 @@ export type NotificationEventType =
   | 'COMPLAINT_RESPONSE'
   | 'INVOICE_GENERATED'
   | 'INVOICE_STATUS_CHANGED'
+  | 'LESSON_REPORT_REVIEWED'
+  | 'LESSON_REPORT_SUBMITTED'
   | 'NEW_COMPLAINT'
   | 'NEW_SUGGESTION'
   | 'PAYMENT_METHOD_CHANGED'
@@ -1475,6 +1477,7 @@ export type PaymentMethodType =
 export type ProfileAudience =
   | 'PARENT'
   | 'STAFF'
+  | 'STUDENT'
   | 'TEACHER';
 
 export type ProfileScope =

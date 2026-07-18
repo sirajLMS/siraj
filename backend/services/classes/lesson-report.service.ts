@@ -2,11 +2,17 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { LessonReportRepository, type PendingReviewFilters } from "@/backend/db/repo/classes/lesson-report.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
+import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { classInstances, teachers } from "@/backend/db/schema";
 import { AppPermission, type AttendanceEvaluation, ClassExecutionState, LessonReportStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
+import {
+  buildLessonReportReviewedPayloads,
+  buildLessonReportSubmittedPayloads,
+} from "@/backend/services/notification/notification-payloads.builders";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 import type {
   LessonReportReturnType,
@@ -27,11 +33,15 @@ import { getServerTranslations } from "@/shared/locale";
  *   rejectReport   → PENDING_REVIEW → REJECTED    (side effect: CreditService.refundOnCancel)
  */
 export namespace LessonReportService {
-  function toReturnType(row: LessonReportSelectType): LessonReportReturnType {
+  function toReturnType(
+    row: LessonReportSelectType & { teacherName?: string | null; studentName?: string | null }
+  ): LessonReportReturnType {
     return {
       ...row,
       status: row.status as LessonReportStatus,
       attendanceEvaluation: row.attendanceEvaluation as AttendanceEvaluation,
+      teacherName: row.teacherName ?? null,
+      studentName: row.studentName ?? null,
     };
   }
 
@@ -69,6 +79,64 @@ export namespace LessonReportService {
       throw new Error(tErrors.teacher.teacherNotFound(userId));
     }
     return teacher.id;
+  }
+
+  async function resolveUserDisplayName(userId: string): Promise<string> {
+    const user = await UserRepository.findById(userId);
+    return user?.name ?? "—";
+  }
+
+  /**
+   * Notify users with `LESSON_REPORTS_REVIEW` that a report was submitted.
+   * Fire-and-forget: dispatch failure must not roll back the submit.
+   */
+  async function dispatchLessonReportSubmitted(
+    report: LessonReportSelectType,
+    teacherName: string,
+    locale?: string
+  ): Promise<void> {
+    const reviewerUserIds = await PermissionsService.getUserIdsWithPermission(AppPermission.LESSON_REPORTS_REVIEW);
+    const affectedUserIds = reviewerUserIds.filter(id => id !== report.submittedByUserId);
+    if (affectedUserIds.length === 0) return;
+
+    const payloads = buildLessonReportSubmittedPayloads(report.id, affectedUserIds, locale, {
+      teacherName,
+      classInstanceId: report.classInstanceId,
+    });
+    await dispatchWithPreferences(payloads, affectedUserIds, locale).catch(err => {
+      logger.error("Lesson-report-submitted notification dispatch failed", {
+        reportId: report.id,
+        classInstanceId: report.classInstanceId,
+        err,
+      });
+    });
+  }
+
+  /**
+   * Notify the submitting teacher that their report was approved or rejected.
+   * Fire-and-forget: dispatch failure must not roll back the review.
+   */
+  async function dispatchLessonReportReviewed(
+    report: LessonReportSelectType,
+    decision: "approved" | "rejected",
+    locale?: string
+  ): Promise<void> {
+    const teacherUserId = report.submittedByUserId;
+    if (!teacherUserId) return;
+
+    const teacherName = await resolveUserDisplayName(teacherUserId);
+    const payloads = buildLessonReportReviewedPayloads(report.id, teacherUserId, decision, locale, {
+      teacherName,
+      classInstanceId: report.classInstanceId,
+    });
+    await dispatchWithPreferences(payloads, [teacherUserId], locale).catch(err => {
+      logger.error("Lesson-report-reviewed notification dispatch failed", {
+        reportId: report.id,
+        decision,
+        teacherUserId,
+        err,
+      });
+    });
   }
 
   export async function submitReport(
@@ -135,6 +203,10 @@ export namespace LessonReportService {
         createdAt: now,
         updatedAt: now,
       });
+
+      const teacherName = await resolveUserDisplayName(actorUserId);
+      await dispatchLessonReportSubmitted(created, teacherName, locale);
+
       return toReturnType(created);
     } catch (error) {
       logger.error("Failed to submit lesson report", { classInstanceId: input.classInstanceId, error });
@@ -274,6 +346,8 @@ export namespace LessonReportService {
       actorUserId,
     });
 
+    await dispatchLessonReportReviewed(report, "approved", locale);
+
     return toReturnType(updated);
   }
 
@@ -331,6 +405,8 @@ export namespace LessonReportService {
       studentId: report.studentId,
       actorUserId,
     });
+
+    await dispatchLessonReportReviewed(report, "rejected", locale);
 
     return toReturnType(updated);
   }

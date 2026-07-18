@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useMemo } from "react";
-import { AppPermission, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, type NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
 import {
@@ -18,7 +18,8 @@ import {
 import { useNotificationsDrawerStore } from "@/frontend/common/stores/notificationsDrawerStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { classHref, ownProfileHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
+import { ownProfileHref } from "@/frontend/common/utils/profileHref";
+import { resolveNotificationDeepLink } from "@/frontend/common/views/dashboard/components/navbar/notifications/notificationDeepLinks";
 import type {
   NotificationDrawerAlert,
   NotificationMetadata,
@@ -27,17 +28,7 @@ import type {
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 
-const REFETCH_QUERIES = [notificationAlertsQueryDocument, meQueryDocument] as const;
-
-function isParentViewer(permissions: readonly AppPermission[]): boolean {
-  return (
-    permissions.includes(AppPermission.ScheduleViewFamily) && !permissions.includes(AppPermission.DashboardViewMetrics)
-  );
-}
-
-function isAdminViewer(permissions: readonly AppPermission[]): boolean {
-  return permissions.includes(AppPermission.DashboardViewMetrics) || permissions.includes(AppPermission.ComplaintsList);
-}
+const REFETCH_QUERIES = [{ query: notificationAlertsQueryDocument }, { query: meQueryDocument }] as const;
 
 function isNotificationMetadata(value: unknown): value is NotificationMetadata {
   if (!value || typeof value !== "object") {
@@ -88,7 +79,11 @@ export function useNotificationsDrawerViewModel(): NotificationsDrawerViewModel 
   const openDrawer = useNotificationsDrawerStore(state => state.openDrawer);
   const closeDrawer = useNotificationsDrawerStore(state => state.closeDrawer);
 
-  const { data, loading, error } = useQuery(notificationAlertsQueryDocument);
+  const canViewAlerts = hasPermission(AppPermission.NotificationViewAlerts);
+
+  const { data, loading, error } = useQuery(notificationAlertsQueryDocument, {
+    skip: !canViewAlerts,
+  });
 
   const [markOneReadMutation] = useMutation(markNotificationReadMutationDocument, {
     refetchQueries: [...REFETCH_QUERIES],
@@ -137,44 +132,13 @@ export function useNotificationsDrawerViewModel(): NotificationsDrawerViewModel 
 
   const handleViewEntity = useCallback(
     (metadata: NotificationMetadata, eventType?: NotificationEventType | null) => {
-      switch (metadata.entityKind) {
-        case "invoice": {
-          router.push(isParentViewer(permissions) ? "/billing/invoices" : "/billing");
-          return;
-        }
-        case "class": {
-          const classInstanceId = metadata.classInstanceId ?? metadata.entityId;
-          router.push(classHref(classInstanceId));
-          return;
-        }
-        case "student": {
-          const tab = eventType === NotificationEventType.StudentQuotaOverridden ? "quota" : "status";
-          router.push(studentProfileTabHref(metadata.entityId, tab));
-          return;
-        }
-        case "complaint": {
-          router.push(isAdminViewer(permissions) ? "/complaints/manage" : "/complaints");
-          return;
-        }
-        case "suggestion": {
-          router.push("/suggestions");
-          return;
-        }
-        case "paymentMethod": {
-          router.push(ownProfileHref());
-          return;
-        }
-        case "schedule": {
-          router.push("/schedule");
-          return;
-        }
-        default: {
-          logger.warn("useNotificationsDrawerViewModel.handleViewEntity unknown entityKind", {
-            entityKind: (metadata as NotificationMetadata).entityKind,
-          });
-          router.push("/");
-        }
+      const href = resolveNotificationDeepLink(metadata, permissions, eventType);
+      if (href === "/") {
+        logger.warn("useNotificationsDrawerViewModel.handleViewEntity unknown entityKind", {
+          entityKind: metadata.entityKind,
+        });
       }
+      router.push(href);
     },
     [permissions, router]
   );

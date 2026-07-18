@@ -123,10 +123,13 @@ const SUPERVISOR_GROUP_PERMISSIONS: readonly AppPermission[] = [
   AppPermission.MONTHLY_REPORTS_VIEW,
   AppPermission.TEACHER_DUES_VIEW,
   AppPermission.TEACHER_DUES_MARK_PAID,
+  // Own profile (/profile + supervisor profile nav). Do NOT grant
+  // DASHBOARD_VIEW_METRICS — that flag marks admin users and hides the
+  // supervisor portal sidebar/dashboard.
+  AppPermission.AUTH_VIEW_OWN_PROFILE,
   // Visibility over the schedule, sessions, and history so supervisors can
   // triage lesson reports across teachers.
   AppPermission.DASHBOARD_VIEW,
-  AppPermission.DASHBOARD_VIEW_METRICS,
   AppPermission.SCHEDULE_VIEW_LIST,
   AppPermission.SCHEDULE_VIEW_ASSIGNED,
   AppPermission.SESSION_VIEW_DETAILS,
@@ -136,10 +139,12 @@ const SUPERVISOR_GROUP_PERMISSIONS: readonly AppPermission[] = [
   AppPermission.STUDENTS_LIST,
   AppPermission.COMPLAINTS_LIST,
   AppPermission.COMPLAINTS_RESPOND,
+  AppPermission.NOTIFICATION_VIEW_ALERTS,
 ];
 
 const STUDENT_GROUP_PERMISSIONS: readonly AppPermission[] = [
   AppPermission.STUDENT_VIEW_OWN_DASHBOARD,
+  AppPermission.AUTH_VIEW_OWN_PROFILE,
   AppPermission.SCHEDULE_VIEW_ASSIGNED,
   AppPermission.SESSION_VIEW_DETAILS,
   AppPermission.HISTORY_VIEW_CALENDAR,
@@ -147,6 +152,7 @@ const STUDENT_GROUP_PERMISSIONS: readonly AppPermission[] = [
   // Rows come from seed-profile-field-permissions; grant only.
   AppPermission.STUDENT_IDENTITY_EDIT_OWN,
   AppPermission.STUDENT_PARENT_EDIT_OWN,
+  AppPermission.NOTIFICATION_VIEW_ALERTS,
 ];
 
 const ADMIN_GROUP_SLUGS: readonly string[] = ["super_admin", "academy_admin"];
@@ -180,6 +186,11 @@ export async function seedOrGet() {
   await PermissionManagementService.ensureSystemPermissionGroup(STUDENT_DEFAULT_SYSTEM_GROUP);
 
   await PermissionManagementService.ensureGroupPermissionsForGroups(ADMIN_GROUP_SLUGS, ALL_PERMISSION_KEYS);
+  // Withdraw admin-metrics from supervisor_default if an earlier seed granted it —
+  // that key makes portal detection treat supervisors as admins (broken sidebar).
+  await PermissionManagementService.revokeGroupPermissions(SystemPermissionGroupSlug.SUPERVISOR_DEFAULT, [
+    AppPermission.DASHBOARD_VIEW_METRICS,
+  ]);
   await PermissionManagementService.ensureGroupPermissionsForGroups(
     [SystemPermissionGroupSlug.SUPERVISOR_DEFAULT],
     SUPERVISOR_GROUP_PERMISSIONS

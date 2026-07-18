@@ -1,5 +1,6 @@
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
+import { PermissionManagementRepository } from "@/backend/db/repo/permissions/permission-management.repository";
 import { groupPermissions, permissionGroups, permissions, userPermissionGroups, users } from "@/backend/db/schema";
 import { type AppPermission, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
@@ -134,6 +135,21 @@ export namespace PermissionsService {
       }
       logger.error("Failed to get permission group context", { groupSlug, error });
       throw error;
+    }
+  }
+
+  /**
+   * Resolve user ids that currently hold `permissionKey` via permission-group
+   * membership (not by hardcoding group slugs). Soft-fails to `[]` on lookup
+   * errors so notification producers can early-return without aborting the
+   * domain mutation.
+   */
+  export async function getUserIdsWithPermission(permissionKey: AppPermission): Promise<string[]> {
+    try {
+      return await PermissionManagementRepository.listUserIdsWithPermission(permissionKey);
+    } catch (error) {
+      logger.error("getUserIdsWithPermission: lookup failed", { permissionKey, error });
+      return [];
     }
   }
 }

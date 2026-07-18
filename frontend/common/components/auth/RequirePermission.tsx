@@ -36,7 +36,7 @@ export function RequirePermission({ children, permissions, fallback = null }: Re
     : hasPermission(permissions as AppPermission);
 
   if (!isAuthorized) {
-    logger.info({ caller: "RequirePermissionProps" }, `Not authorized, access denied to ${permissions}`);
+    logger.debug({ caller: "RequirePermission" }, `Access denied for ${String(permissions)}`);
     return <>{fallback}</>;
   }
 

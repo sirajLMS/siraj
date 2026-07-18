@@ -4,7 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { classInstances, parents, students, teachers, users } from "@/backend/db/schema";
 
 /**
- * Affected-user triplet resolved for a single class instance.
+ * Affected-user set resolved for a single class instance.
  *
  *   - `parentUserId`   — the parent's `users.id` (the legal guardian who
  *                        receives most class lifecycle notifications).
@@ -13,6 +13,11 @@ import { classInstances, parents, students, teachers, users } from "@/backend/db
  *                        and passes it as `metadata.studentName` to the pure
  *                        builder, since builders must not read the DB —
  *                        specs.md §5.1).
+ *   - `studentUserId`  — the student's login `users.id` from `students.userId`
+ *                        (nullable for defensive typing; LMS students are
+ *                        expected to always have a linked user). Included in
+ *                        CLASS_* / CLASS_REMINDER fan-out only — not invoice /
+ *                        payment-method / parent-owned student-lifecycle events.
  *   - `teacherUserId`  — the teacher's `users.id`.
  *
  * `null` is returned when the class instance is not found (already
@@ -21,14 +26,15 @@ import { classInstances, parents, students, teachers, users } from "@/backend/db
 export interface ClassInstanceAffectedUsers {
   readonly parentUserId: string;
   readonly studentId: string;
+  readonly studentUserId: string | null;
   readonly teacherUserId: string;
 }
 
 /**
- * Pairing of a class-instance id with its affected-user triplet — used by
+ * Pairing of a class-instance id with its affected-user set — used by
  * batch helpers (e.g. `getClassInstanceAffectedUsersForTeacher`) so a
  * caller can fan out per-instance dispatch without re-resolving each
- * triplet separately.
+ * set separately.
  */
 export interface ClassInstanceWithAffectedUsers {
   readonly classInstanceId: string;
@@ -36,13 +42,24 @@ export interface ClassInstanceWithAffectedUsers {
 }
 
 /**
- * Resolve the notification-affected user triplet for a given class instance.
+ * Build the `affectedUserIds` list for CLASS_* / CLASS_REMINDER fan-out:
+ * parent + teacher always, student when `studentUserId` is present.
+ */
+export function classLifecycleAffectedUserIds(affected: ClassInstanceAffectedUsers): string[] {
+  const ids = [affected.parentUserId, affected.teacherUserId];
+  if (affected.studentUserId) ids.push(affected.studentUserId);
+  return ids;
+}
+
+/**
+ * Resolve the notification-affected users for a given class instance.
  *
  * Join path used (`classInstances.{studentId,teacherId}` are non-nullable FKs
  * — see `backend/db/schema/classes/scheduling.ts` — so we prefer the
  * simpler direct path over going via `recurringSchedules`):
  *
  *   - `classInstances.studentId → students.id`
+ *       → `students.userId` (student's `users.id`, selected directly)
  *       → `students.parentId → parents.id`
  *       → `parents.userId → users.id` (parent's `users.id`)
  *   - `classInstances.teacherId → teachers.id`
@@ -60,7 +77,7 @@ export interface ClassInstanceWithAffectedUsers {
  *   - Soft-deletes are filtered out (we only resolve users for live
  *     instances). Dispatch sites that fire notifications AFTER a soft-delete
  *     (e.g. `ClassSessionService.deleteInstance` → `CLASS_CANCELLED`) MUST
- *     resolve the triplet BEFORE invoking the soft-delete commit.
+ *     resolve the affected users BEFORE invoking the soft-delete commit.
  *   - Accepts an optional `tx` so callers inside a transaction (e.g. the
  *     `recurring-class.service.ts` batch creation loop) can read
  *     freshly-inserted rows before commit.
@@ -69,7 +86,7 @@ export interface ClassInstanceWithAffectedUsers {
  * @param classInstanceId  The `classInstances.id` to resolve affected users for.
  * @param tx               Optional transaction — use when calling inside a
  *                        `db.transaction(...)` so reads see uncommitted rows.
- * @returns The affected-user triplet, or `null` if the instance is not found
+ * @returns The affected-user set, or `null` if the instance is not found
  *          (or has been soft-deleted).
  */
 export async function getClassInstanceAffectedUsers(
@@ -84,6 +101,7 @@ export async function getClassInstanceAffectedUsers(
   const [parentRow] = await queryDb
     .select({
       studentId: classInstances.studentId,
+      studentUserId: students.userId,
       parentUserId: users.id,
     })
     .from(classInstances)
@@ -109,6 +127,7 @@ export async function getClassInstanceAffectedUsers(
   return {
     parentUserId: parentRow.parentUserId,
     studentId: parentRow.studentId,
+    studentUserId: parentRow.studentUserId ?? null,
     teacherUserId: teacherRow.teacherUserId,
   };
 }
@@ -160,6 +179,7 @@ export async function getClassInstanceAffectedUsersForTeacher(
     .select({
       classInstanceId: classInstances.id,
       studentId: classInstances.studentId,
+      studentUserId: students.userId,
       parentUserId: users.id,
     })
     .from(classInstances)
@@ -182,6 +202,7 @@ export async function getClassInstanceAffectedUsersForTeacher(
     affected: {
       parentUserId: row.parentUserId,
       studentId: row.studentId,
+      studentUserId: row.studentUserId ?? null,
       teacherUserId: teacherUser.teacherUserId,
     },
   }));

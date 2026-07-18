@@ -465,6 +465,28 @@ export namespace PermissionManagementService {
       await ensureGroupPermissions(groupSlug, permissionKeys);
     }
   }
+
+  /**
+   * Removes specific permissions from a group by slug (idempotent).
+   * Used by seeds when a previously granted key must be withdrawn.
+   */
+  export async function revokeGroupPermissions(
+    groupSlug: string,
+    permissionKeys: readonly AppPermission[]
+  ): Promise<void> {
+    if (permissionKeys.length === 0) return;
+
+    for (const key of permissionKeys) {
+      await db.execute(sql`
+        DELETE FROM group_permissions gp
+        USING permission_groups g, permissions p
+        WHERE gp.group_id = g.id
+          AND gp.permission_id = p.id
+          AND g.slug = ${groupSlug}
+          AND p.key = ${key}::app_permission
+      `);
+    }
+  }
   /**
    * Idempotent single user permission override (seed / bootstrap use).
    */

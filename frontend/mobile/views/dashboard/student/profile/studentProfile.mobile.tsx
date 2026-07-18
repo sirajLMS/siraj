@@ -9,7 +9,8 @@ import {
   SchoolOutlined,
 } from "@mui/icons-material";
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
-import { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppLanguage, Gender, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
 import {
   MobileContentStack,
@@ -44,6 +45,8 @@ export function StudentProfileMobileView({
   snackbarOpen,
   snackbarMessage,
   snackbarSeverity,
+  scope,
+  activeTab,
   onBackToDashboard,
   onStartEdit,
   onCancelEdit,
@@ -51,6 +54,14 @@ export function StudentProfileMobileView({
   onSave,
   onSnackbarClose,
 }: Readonly<StudentProfileViewModel>) {
+  if (activeTab === "notifications" && scope === ProfileScope.Own) {
+    return <NotificationPreferencesTab isActive />;
+  }
+
+  if (activeTab !== "profile") {
+    return null;
+  }
+
   if (loading || !profile) {
     return (
       <MobilePageContainer>

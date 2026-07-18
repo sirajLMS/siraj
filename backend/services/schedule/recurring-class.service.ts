@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository } from "@/backend/db/repo";
-import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import { classLifecycleAffectedUserIds, SchedulingRepository } from "@/backend/db/repo/scheduling";
 import {
   type RecurringScheduleDayUpsertInput,
   RecurringScheduleRepository,
@@ -56,7 +56,7 @@ export namespace RecurringClassService {
    * as a 500 to callers that just successfully created the recurring class
    * (specs.md "Dispatch failures must NOT throw out of the action").
    *
-   * The affected-user triplet is the same parent + teacher for every
+   * The affected-user set is the same parent + teacher + student for every
    * instance in this recurring schedule, so it is resolved once from the
    * first instance and reused — saving `N` extra join queries.
    */
@@ -83,6 +83,8 @@ export namespace RecurringClassService {
 
     if (!affected) return;
 
+    const affectedUserIds = classLifecycleAffectedUserIds(affected);
+
     for (const instanceId of classInstanceIds) {
       try {
         const instance = await SchedulingRepository.getClassInstanceById(instanceId);
@@ -91,11 +93,11 @@ export namespace RecurringClassService {
         const payloads = buildClassLifecyclePayloads(
           instance,
           NotificationEventType.CLASS_SCHEDULED,
-          [affected.parentUserId, affected.teacherUserId],
+          affectedUserIds,
           locale,
           { studentName }
         );
-        await dispatchWithPreferences(payloads, [affected.parentUserId, affected.teacherUserId], locale);
+        await dispatchWithPreferences(payloads, affectedUserIds, locale);
       } catch (error) {
         logger.error("Class scheduled notification dispatch failed", {
           classInstanceId: instanceId,

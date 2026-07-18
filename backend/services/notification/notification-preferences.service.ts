@@ -1,11 +1,15 @@
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
-import { AppPermission, NotificationChannel, NotificationEventType } from "@/backend/enum";
+import { AppPermission, NotificationChannel, NotificationEventType, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   NotificationPreferenceReturnType,
   NotificationPreferenceUpdateInput,
 } from "@/backend/types/notifications/notification-preferences.types";
 import type { UserNotificationPreferenceSelectType } from "@/backend/types/users/userNotificationPreferences.types";
+import {
+  type NotificationPreferenceRole,
+  resolveNotificationEventAllowlist,
+} from "@/shared/constants/notification-event-allowlists";
 import { getServerTranslations } from "@/shared/locale";
 
 const ALL_CHANNELS = Object.values(NotificationChannel);
@@ -15,13 +19,47 @@ function preferenceKey(channel: NotificationChannel, eventType: NotificationEven
   return `${channel}:${eventType}`;
 }
 
-function mergeWithDefaults(stored: UserNotificationPreferenceSelectType[]): NotificationPreferenceReturnType[] {
+function resolvePreferenceRole(userRole: UserRole): NotificationPreferenceRole {
+  switch (userRole) {
+    case UserRole.STUDENT:
+      return "student";
+    case UserRole.SUPERVISOR:
+      return "supervisor";
+    case UserRole.PARENT:
+      return "parent";
+    case UserRole.TEACHER:
+      return "teacher";
+    case UserRole.STAFF:
+      return "staff";
+    case UserRole.SUPER_ADMIN:
+    case UserRole.ACADEMY_ADMIN:
+      return "admin";
+    default:
+      // USER / GUEST — preserve full staff-style matrix (no regression)
+      return "staff";
+  }
+}
+
+function eventTypesForRole(role: NotificationPreferenceRole): NotificationEventType[] {
+  const allowlist = resolveNotificationEventAllowlist(role);
+  if (allowlist === "ALL") {
+    return ALL_EVENT_TYPES;
+  }
+
+  const allowed = new Set<string>(allowlist);
+  return ALL_EVENT_TYPES.filter(eventType => allowed.has(eventType));
+}
+
+function mergeWithDefaults(
+  stored: UserNotificationPreferenceSelectType[],
+  eventTypes: readonly NotificationEventType[]
+): NotificationPreferenceReturnType[] {
   const storedMap = new Map(
     stored.map(row => [preferenceKey(row.channel as NotificationChannel, row.eventType as NotificationEventType), row])
   );
 
   return ALL_CHANNELS.flatMap(channel =>
-    ALL_EVENT_TYPES.map(eventType => {
+    eventTypes.map(eventType => {
       const existing = storedMap.get(preferenceKey(channel, eventType));
 
       if (existing) {
@@ -43,12 +81,25 @@ function mergeWithDefaults(stored: UserNotificationPreferenceSelectType[]): Noti
   );
 }
 
+function filterUpdatesToAllowlist(
+  input: NotificationPreferenceUpdateInput[],
+  eventTypes: readonly NotificationEventType[]
+): NotificationPreferenceUpdateInput[] {
+  const allowed = new Set<NotificationEventType>(eventTypes);
+  return input.filter(row => allowed.has(row.eventType));
+}
+
 async function assertOwnProfileAccess(actorUserId: string, locale?: string): Promise<void> {
   const canView = await PermissionsService.hasPermission(actorUserId, AppPermission.AUTH_VIEW_OWN_PROFILE);
   if (!canView) {
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
     throw new Error(tErrors.unauthorizedAction);
   }
+}
+
+async function resolveEventTypesForUser(userId: string): Promise<NotificationEventType[]> {
+  const context = await PermissionsService.getUserContext(userId);
+  return eventTypesForRole(resolvePreferenceRole(context.role));
 }
 
 export namespace NotificationPreferencesService {
@@ -58,8 +109,9 @@ export namespace NotificationPreferencesService {
   ): Promise<NotificationPreferenceReturnType[]> {
     await assertOwnProfileAccess(actorUserId, locale);
 
+    const eventTypes = await resolveEventTypesForUser(actorUserId);
     const stored = await NotificationPreferencesRepository.getByUserId(actorUserId);
-    return mergeWithDefaults(stored);
+    return mergeWithDefaults(stored, eventTypes);
   }
 
   export async function updatePreferences(
@@ -69,10 +121,15 @@ export namespace NotificationPreferencesService {
   ): Promise<NotificationPreferenceReturnType[]> {
     await assertOwnProfileAccess(actorUserId, locale);
 
-    await NotificationPreferencesRepository.batchUpsert(actorUserId, input);
+    const eventTypes = await resolveEventTypesForUser(actorUserId);
+    const allowedInput = filterUpdatesToAllowlist(input, eventTypes);
+
+    if (allowedInput.length > 0) {
+      await NotificationPreferencesRepository.batchUpsert(actorUserId, allowedInput);
+    }
 
     const stored = await NotificationPreferencesRepository.getByUserId(actorUserId);
-    return mergeWithDefaults(stored);
+    return mergeWithDefaults(stored, eventTypes);
   }
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────

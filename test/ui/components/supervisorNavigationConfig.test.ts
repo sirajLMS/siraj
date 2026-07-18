@@ -5,6 +5,7 @@ import {
   SIDEBAR_NAV_ITEMS,
 } from "@/frontend/common/views/dashboard/config/navigationConfig";
 
+/** Mirrors SUPERVISOR_DEFAULT seed grants (without admin metrics). */
 const SUPERVISOR_PERMISSIONS: AppPermission[] = [
   AppPermission.DashboardView,
   AppPermission.SupervisorViewDashboard,
@@ -14,6 +15,15 @@ const SUPERVISOR_PERMISSIONS: AppPermission[] = [
   AppPermission.TeacherDuesView,
   AppPermission.MonthlyReportsView,
   AppPermission.AuthViewOwnProfile,
+  AppPermission.ScheduleViewList,
+  AppPermission.ScheduleViewAssigned,
+  AppPermission.SessionViewDetails,
+  AppPermission.HistoryViewCalendar,
+  AppPermission.HistoryViewDetails,
+  AppPermission.TeachersList,
+  AppPermission.StudentsList,
+  AppPermission.ComplaintsList,
+  AppPermission.ComplaintsRespond,
 ];
 
 describe("supervisor sidebar navigation", () => {
@@ -33,6 +43,9 @@ describe("supervisor sidebar navigation", () => {
     expect(keys).not.toContain("search-schedule");
     expect(keys).not.toContain("schedule-tracking");
     expect(keys).not.toContain("status-tracking");
+    expect(keys).not.toContain("schedule-alerts");
+    expect(keys).not.toContain("students");
+    expect(keys).not.toContain("complaints-manage");
 
     expect(keys).not.toContain("today-classes");
     expect(keys).not.toContain("regular-schedule");
@@ -44,5 +57,17 @@ describe("supervisor sidebar navigation", () => {
     expect(keys).not.toContain("billing-parent");
     expect(keys).not.toContain("student-today-classes");
     expect(keys).not.toContain("student-credits");
+  });
+
+  test("does not treat supervisors with admin metrics as portal users", () => {
+    const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, [
+      ...SUPERVISOR_PERMISSIONS,
+      AppPermission.DashboardViewMetrics,
+    ]);
+    const keys = items.map(item => item.key);
+
+    expect(keys).not.toContain("supervisor-home");
+    expect(keys).not.toContain("pending-reviews");
+    expect(keys).toContain("home");
   });
 });

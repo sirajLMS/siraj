@@ -3,7 +3,12 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
-import type { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  AppLanguage,
+  Gender,
+  ProfileMode,
+  ProfileScope,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   recordStudentProfileEditMutationDocument,
   studentProfileQueryDocument,
@@ -78,6 +83,10 @@ export interface StudentProfileViewModel {
   readonly snackbarOpen: boolean;
   readonly snackbarMessage: string;
   readonly snackbarSeverity: "success" | "error";
+  readonly scope: ProfileScope;
+  readonly mode: ProfileMode;
+  readonly targetUserId: string;
+  readonly activeTab: string;
   readonly onBackToDashboard: () => void;
   readonly onStartEdit: () => void;
   readonly onCancelEdit: () => void;
@@ -86,9 +95,19 @@ export interface StudentProfileViewModel {
   readonly onSnackbarClose: () => void;
 }
 
-export type UseStudentProfileViewModelProps = Record<string, never>;
+export interface UseStudentProfileViewModelProps {
+  readonly scope: ProfileScope;
+  readonly mode: ProfileMode;
+  readonly targetUserId: string;
+  readonly activeTab?: string;
+}
 
-export function useStudentProfileViewModel(_props: UseStudentProfileViewModelProps): StudentProfileViewModel {
+export function useStudentProfileViewModel({
+  scope,
+  mode,
+  targetUserId: _targetUserId,
+  activeTab = "profile",
+}: UseStudentProfileViewModelProps): StudentProfileViewModel {
   const t = useAppTranslation().dashboardTranslations.studentPortalProfile;
   const router = useRouter();
   const locale = useAppLocale();
@@ -198,6 +217,10 @@ export function useStudentProfileViewModel(_props: UseStudentProfileViewModelPro
     snackbarOpen: snackbar.open,
     snackbarMessage: snackbar.message,
     snackbarSeverity: snackbar.severity,
+    scope,
+    mode,
+    targetUserId: _targetUserId,
+    activeTab,
     onBackToDashboard: () => router.push("/students/me"),
     onStartEdit,
     onCancelEdit,

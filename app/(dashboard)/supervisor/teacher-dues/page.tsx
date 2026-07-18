@@ -1,29 +1,13 @@
-import { Box, CircularProgress } from "@mui/material";
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { TeacherDuesContainer } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/TeacherDuesContainer";
-import { getTranslations } from "@/shared/locale";
+import { redirect } from "next/navigation";
+import { getServerUserContext } from "@/backend/lib";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 
-export async function generateMetadata({
-  params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = getTranslations(locale).commonTranslations;
-  return { title: t.title };
-}
+export default async function SupervisorTeacherDuesRedirectPage() {
+  const { userId } = await getServerUserContext();
+  if (!userId) {
+    await redirectToLogin();
+    return;
+  }
 
-export default function TeacherDuesPage() {
-  return (
-    <Suspense
-      fallback={
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-          <CircularProgress />
-        </Box>
-      }
-    >
-      <TeacherDuesContainer />
-    </Suspense>
-  );
+  redirect("/teacher-dues");
 }

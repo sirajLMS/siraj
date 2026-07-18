@@ -1,4 +1,5 @@
 import { SchedulingRepository, StudentRepository } from "@/backend/db/repo";
+import { classLifecycleAffectedUserIds } from "@/backend/db/repo/scheduling";
 import { NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
@@ -102,7 +103,7 @@ async function dispatchForInstance(instance: ClassInstanceSelectType, locale: st
   // hard-purged. Skip without throwing so the loop continues.
   if (!affected) return 0;
 
-  const { parentUserId, studentId, teacherUserId } = affected;
+  const { studentId } = affected;
 
   const student = await StudentRepository.findById(studentId);
   const studentName = (student?.name as string | undefined) ?? "—";
@@ -114,7 +115,7 @@ async function dispatchForInstance(instance: ClassInstanceSelectType, locale: st
   const idempotencyKey = `class-reminder-${instance.id}-${new Date().toISOString().slice(0, 10)}`;
 
   const metadata: Record<string, string> = { studentName, idempotencyKey };
-  const affectedUserIds = [parentUserId, teacherUserId];
+  const affectedUserIds = classLifecycleAffectedUserIds(affected);
 
   const payloads = buildClassLifecyclePayloads(
     instance,

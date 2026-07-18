@@ -25,7 +25,8 @@ import {
   Typography,
 } from "@mui/material";
 import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
-import { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppLanguage, Gender, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
@@ -56,6 +57,8 @@ export function StudentProfileDesktopView({
   snackbarOpen,
   snackbarMessage,
   snackbarSeverity,
+  scope,
+  activeTab,
   onBackToDashboard,
   onStartEdit,
   onCancelEdit,
@@ -63,6 +66,14 @@ export function StudentProfileDesktopView({
   onSave,
   onSnackbarClose,
 }: Readonly<StudentProfileViewModel>) {
+  if (activeTab === "notifications" && scope === ProfileScope.Own) {
+    return <NotificationPreferencesTab isActive />;
+  }
+
+  if (activeTab !== "profile") {
+    return null;
+  }
+
   if (loading || !profile) {
     return (
       <DesktopPageContainer>

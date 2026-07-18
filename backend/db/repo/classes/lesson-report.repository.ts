@@ -1,7 +1,7 @@
 import { and, count, desc, eq, inArray } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { lessonReports } from "@/backend/db/schema";
+import { lessonReports, students, teachers, users } from "@/backend/db/schema";
 import { LessonReportStatus } from "@/backend/enum";
 import type { LessonReportInsertType, LessonReportSelectType } from "@/backend/types";
 import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
@@ -11,53 +11,104 @@ export interface PendingReviewFilters {
   studentId?: string;
 }
 
+type LessonReportWithNames = LessonReportSelectType & {
+  teacherName: string | null;
+  studentName: string | null;
+};
+
+function mapReportWithNames(row: {
+  report: LessonReportSelectType;
+  teacherName: string | null;
+  studentName: string | null;
+}): LessonReportWithNames {
+  return {
+    ...row.report,
+    teacherName: row.teacherName,
+    studentName: row.studentName,
+  };
+}
+
 export namespace LessonReportRepository {
   export async function findByClassInstanceId(
     classInstanceId: string,
     tx?: DBTransaction
-  ): Promise<LessonReportSelectType | null> {
+  ): Promise<LessonReportWithNames | null> {
     const queryDb = tx ?? db;
     const [row] = await queryDb
-      .select()
+      .select({
+        report: lessonReports,
+        teacherName: users.name,
+        studentName: students.name,
+      })
       .from(lessonReports)
+      .innerJoin(students, eq(lessonReports.studentId, students.id))
+      .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
       .where(eq(lessonReports.classInstanceId, classInstanceId))
       .limit(1);
-    return row ?? null;
+    return row ? mapReportWithNames(row) : null;
   }
 
-  export async function findById(reportId: string, tx?: DBTransaction): Promise<LessonReportSelectType | null> {
+  export async function findById(reportId: string, tx?: DBTransaction): Promise<LessonReportWithNames | null> {
     const queryDb = tx ?? db;
-    const [row] = await queryDb.select().from(lessonReports).where(eq(lessonReports.id, reportId)).limit(1);
-    return row ?? null;
+    const [row] = await queryDb
+      .select({
+        report: lessonReports,
+        teacherName: users.name,
+        studentName: students.name,
+      })
+      .from(lessonReports)
+      .innerJoin(students, eq(lessonReports.studentId, students.id))
+      .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .where(eq(lessonReports.id, reportId))
+      .limit(1);
+    return row ? mapReportWithNames(row) : null;
   }
 
   export async function findPendingReviews(
     filters: PendingReviewFilters,
     paginationArgs: PaginationArgs,
     tx?: DBTransaction
-  ): Promise<LessonReportSelectType[]> {
+  ): Promise<LessonReportWithNames[]> {
     const queryDb = tx ?? db;
     const conditions = [eq(lessonReports.status, LessonReportStatus.PENDING_REVIEW)];
     if (filters.teacherId) conditions.push(eq(lessonReports.teacherId, filters.teacherId));
     if (filters.studentId) conditions.push(eq(lessonReports.studentId, filters.studentId));
 
-    return queryDb
-      .select()
+    const rows = await queryDb
+      .select({
+        report: lessonReports,
+        teacherName: users.name,
+        studentName: students.name,
+      })
       .from(lessonReports)
+      .innerJoin(students, eq(lessonReports.studentId, students.id))
+      .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
       .where(and(...conditions))
       .orderBy(lessonReports.submittedAt)
       .limit(paginationArgs.perPage)
       .offset(paginationArgs.offset);
+    return rows.map(mapReportWithNames);
   }
 
-  export async function findRecentApproved(limit: number, tx?: DBTransaction): Promise<LessonReportSelectType[]> {
+  export async function findRecentApproved(limit: number, tx?: DBTransaction): Promise<LessonReportWithNames[]> {
     const queryDb = tx ?? db;
-    return queryDb
-      .select()
+    const rows = await queryDb
+      .select({
+        report: lessonReports,
+        teacherName: users.name,
+        studentName: students.name,
+      })
       .from(lessonReports)
+      .innerJoin(students, eq(lessonReports.studentId, students.id))
+      .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
       .where(eq(lessonReports.status, LessonReportStatus.APPROVED))
       .orderBy(desc(lessonReports.reviewedAt))
       .limit(limit);
+    return rows.map(mapReportWithNames);
   }
 
   export async function create(input: LessonReportInsertType, tx?: DBTransaction): Promise<LessonReportSelectType> {

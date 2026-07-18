@@ -10,8 +10,9 @@ export interface MobilePageContainerProps {
 }
 
 /**
- * Mobile page wrapper. No navbar loading bar (mobile has no fixed 64px navbar).
- * Outer padding/edge-to-edge layout is handled by DashboardLayout.pageMargin.
+ * Mobile page wrapper. Navbar offset is handled by DashboardLayoutMobile
+ * (pt: navbarHeight for the fixed AppBar) — do not re-add it here.
+ * Outer edge-to-edge layout is handled by DashboardLayoutMobile page padding.
  * Structurally simpler than DesktopPageContainer — no LinearProgress overlay.
  */
 export function MobilePageContainer({ sx, children }: MobilePageContainerProps) {

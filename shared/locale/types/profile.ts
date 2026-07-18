@@ -21,6 +21,7 @@ export interface ProfileRoleLabels {
   readonly teacher: string;
   readonly parent: string;
   readonly staff: string;
+  readonly student: string;
 }
 
 export interface ProfileActionsLabels {
@@ -308,6 +309,20 @@ export interface ProfileNotificationsLabels {
     readonly NEW_SUGGESTION: string;
     readonly SUGGESTION_ACKNOWLEDGED: string;
     readonly SUGGESTION_DUPLICATE_MARKED: string;
+    // Student matrix (class lifecycle)
+    readonly CLASS_SCHEDULED: string;
+    readonly CLASS_ACTIVATED: string;
+    readonly CLASS_STARTED: string;
+    readonly CLASS_COMPLETED: string;
+    readonly CLASS_MARKED_ABSENT: string;
+    readonly CLASS_MARKED_MISSED: string;
+    readonly CLASS_LEAVE_REQUESTED: string;
+    readonly CLASS_RESCHEDULED: string;
+    readonly CLASS_CANCELLED: string;
+    readonly CLASS_RESET: string;
+    // Supervisor / lesson-report matrix
+    readonly LESSON_REPORT_SUBMITTED: string;
+    readonly LESSON_REPORT_REVIEWED: string;
   };
 }
 

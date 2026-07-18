@@ -7,6 +7,7 @@ import {
   EventBusyOutlined,
   EventOutlined,
   ExitToAppOutlined,
+  FactCheckOutlined,
   ForumOutlined,
   LightbulbOutlined,
   PaymentOutlined,
@@ -14,6 +15,7 @@ import {
   PersonOutlined,
   PlayArrowOutlined,
   PlayCircleOutlined,
+  RateReviewOutlined,
   ReceiptLongOutlined,
   ReceiptOutlined,
   ReportProblemOutlined,
@@ -34,7 +36,15 @@ export type { NotificationDrawerAlert };
 
 /** Frontend-safe metadata mirror until GraphQL codegen exposes NotificationMetadata. */
 export interface NotificationMetadata {
-  readonly entityKind: "invoice" | "class" | "student" | "complaint" | "suggestion" | "paymentMethod" | "schedule";
+  readonly entityKind:
+    | "invoice"
+    | "class"
+    | "student"
+    | "complaint"
+    | "suggestion"
+    | "paymentMethod"
+    | "schedule"
+    | "lessonReport";
   readonly entityId: string;
   readonly amount?: string;
   readonly currency?: string;
@@ -45,6 +55,7 @@ export interface NotificationMetadata {
   readonly scheduledStartAt?: string;
   readonly newStartAt?: string;
   readonly oldStatus?: string;
+  readonly decision?: "approved" | "rejected";
 }
 
 export interface EventVariantConfig {
@@ -169,6 +180,16 @@ export const EVENT_VARIANT_CONFIG: Record<NotificationEventType, EventVariantCon
     icon: <SwapHorizOutlined fontSize="small" />,
     iconColor: infoAccent,
     accentColor: infoAccent,
+  },
+  [NotificationEventType.LessonReportSubmitted]: {
+    icon: <RateReviewOutlined fontSize="small" />,
+    iconColor: warningAccent,
+    accentColor: warningAccent,
+  },
+  [NotificationEventType.LessonReportReviewed]: {
+    icon: <FactCheckOutlined fontSize="small" />,
+    iconColor: successAccent,
+    accentColor: successAccent,
   },
 };
 

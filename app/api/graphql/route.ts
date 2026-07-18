@@ -24,36 +24,52 @@ const envConfig = getEnvironmentConfig();
 const isProduction = envConfig.nodeEnv === "production";
 const MAX_GRAPHQL_DEPTH = 7;
 
-const cache = new ApolloCacheAdapter();
-const server = new ApolloServer({
-  schema: graphQLSchema,
-  plugins: [
-    // Install a landing page plugin based on NODE_ENV
-    isProduction
-      ? ApolloServerPluginLandingPageDisabled()
-      : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
-    // Enforce @constraint directive validation at query time
-    createApollo4QueryValidationPlugin(),
-  ],
-  validationRules: [depthLimit(MAX_GRAPHQL_DEPTH)],
-  hideSchemaDetailsFromClientErrors: isProduction,
-  includeStacktraceInErrorResponses: !isProduction,
-  logger: logger,
-  csrfPrevention: {
-    requestHeaders: ["x-apollo-operation-name", "apollo-require-preflight", "x-csrf-token"],
-  },
-  introspection: !isProduction,
-  persistedQueries: {
-    cache: cache,
-    ttl: null, // Store indefinitely
-  },
-  cache: new ApolloCacheAdapter(),
-});
+function createApolloServer(schema: typeof graphQLSchema) {
+  return new ApolloServer({
+    schema,
+    plugins: [
+      // Install a landing page plugin based on NODE_ENV
+      isProduction
+        ? ApolloServerPluginLandingPageDisabled()
+        : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+      // Enforce @constraint directive validation at query time
+      createApollo4QueryValidationPlugin(),
+    ],
+    validationRules: [depthLimit(MAX_GRAPHQL_DEPTH)],
+    hideSchemaDetailsFromClientErrors: isProduction,
+    includeStacktraceInErrorResponses: !isProduction,
+    logger: logger,
+    csrfPrevention: {
+      requestHeaders: ["x-apollo-operation-name", "apollo-require-preflight", "x-csrf-token"],
+    },
+    introspection: !isProduction,
+    persistedQueries: {
+      cache: new ApolloCacheAdapter(),
+      ttl: null, // Store indefinitely
+    },
+    cache: new ApolloCacheAdapter(),
+  });
+}
 
-const handler = startServerAndCreateNextHandler<NextRequest>(server, {
-  context: createGraphQLContext,
-});
+function createGraphqlHandler(server: ApolloServer) {
+  return startServerAndCreateNextHandler<NextRequest>(server, {
+    context: createGraphQLContext,
+  });
+}
 
+let activeSchema = graphQLSchema;
+let server = createApolloServer(activeSchema);
+let handler = createGraphqlHandler(server);
+
+function getHandler() {
+  // After Turbopack HMR rebuilds the Pothos schema, swap Apollo onto the new schema.
+  if (!isProduction && graphQLSchema !== activeSchema) {
+    activeSchema = graphQLSchema;
+    server = createApolloServer(activeSchema);
+    handler = createGraphqlHandler(server);
+  }
+  return handler;
+}
 /**
  * Health check handler
  * Lightweight HEAD handler for connectivity checks
@@ -173,7 +189,7 @@ async function withIdempotency(
  */
 export async function POST(request: NextRequest) {
   try {
-    return await withRateLimit(request, req => withIdempotency(req, handler));
+    return await withRateLimit(request, req => withIdempotency(req, getHandler()));
   } catch (error) {
     logger.error("Unhandled error in GraphQL POST handler", error);
     const errorsTranslations = getServerTranslations("ar").errorsTranslations;

@@ -9,6 +9,8 @@ import {
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
+import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
+import { buildNewComplaintPayloads } from "@/backend/services/notification/notification-payloads.builders";
 import type {
   ComplaintFileReturnType,
   ComplaintQueueFilter,
@@ -21,6 +23,21 @@ import type {
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
+
+async function dispatchNewComplaint(complaint: ComplaintSelectType, locale?: string): Promise<void> {
+  const reviewerUserIds = await PermissionsService.getUserIdsWithPermission(AppPermission.COMPLAINTS_LIST);
+  if (reviewerUserIds.length === 0) return;
+
+  const payloads = buildNewComplaintPayloads(complaint.id, reviewerUserIds, locale, {
+    category: complaint.category,
+  });
+  await dispatchWithPreferences(payloads, reviewerUserIds, locale).catch(err => {
+    logger.error("New-complaint notification dispatch failed", {
+      complaintId: complaint.id,
+      err,
+    });
+  });
+}
 
 export namespace ComplaintService {
   export async function getParentIdForComplaints(actorUserId: string, locale?: string): Promise<string> {
@@ -100,9 +117,11 @@ export namespace ComplaintService {
         actorUserId,
         complaintId: created.id,
         parentId: parent.id,
-        category: input.category,
+        category: created.category,
         fileCount: files.length,
       });
+
+      await dispatchNewComplaint(created, locale);
 
       return created;
     } catch (error) {

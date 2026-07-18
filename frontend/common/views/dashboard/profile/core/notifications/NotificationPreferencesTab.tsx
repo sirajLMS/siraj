@@ -14,15 +14,18 @@ import {
   notificationPreferencesQueryDocument,
   updateNotificationPreferencesMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import {
+  buildDefaultPreferences,
   buildPreferenceMap,
   buildPreferenceMatrixRows,
+  getNotificationEventTypesForRole,
   NOTIFICATION_CHANNELS,
-  NOTIFICATION_EVENT_TYPES,
   type NotificationPreferencesTabVariantProps,
   type NotificationPrefRow,
   preferenceKey,
+  resolveNotificationPreferenceRole,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -31,17 +34,6 @@ type NotificationPreferencesTabProps = {
 };
 
 type PendingChange = NotificationPreferenceInput;
-
-function buildDefaultPreferences(): NotificationPrefRow[] {
-  return NOTIFICATION_CHANNELS.flatMap(channel =>
-    NOTIFICATION_EVENT_TYPES.map(eventType => ({
-      id: preferenceKey(channel, eventType),
-      channel,
-      eventType,
-      enabled: true,
-    }))
-  );
-}
 
 const lazyViews = createLazyView<NotificationPreferencesTabVariantProps>(
   () =>
@@ -58,7 +50,14 @@ const lazyViews = createLazyView<NotificationPreferencesTabVariantProps>(
 
 export function NotificationPreferencesTab({ isActive }: Readonly<NotificationPreferencesTabProps>) {
   const t = useAppTranslation().profileTranslations.notifications;
-  const [localPreferences, setLocalPreferences] = useState<NotificationPrefRow[]>(buildDefaultPreferences);
+  const viewerRole = useUserStore(state => state.role);
+
+  const preferenceRole = useMemo(() => resolveNotificationPreferenceRole({ role: viewerRole }), [viewerRole]);
+  const eventTypes = useMemo(() => getNotificationEventTypesForRole(preferenceRole), [preferenceRole]);
+
+  const [localPreferences, setLocalPreferences] = useState<NotificationPrefRow[]>(() =>
+    buildDefaultPreferences(eventTypes)
+  );
   const pendingChangesRef = useRef<Map<string, PendingChange>>(new Map());
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -81,8 +80,10 @@ export function NotificationPreferencesTab({ isActive }: Readonly<NotificationPr
     if (data?.notificationPreferences) {
       setLocalPreferences(data.notificationPreferences);
       pendingChangesRef.current.clear();
+      return;
     }
-  }, [data?.notificationPreferences]);
+    setLocalPreferences(buildDefaultPreferences(eventTypes));
+  }, [data?.notificationPreferences, eventTypes]);
 
   // NEW FOR PLAN v5: pre-computed lookup map for the mobile tier so the
   // tier view stays render-only (no `buildPreferenceMap` call inside tier).
@@ -90,7 +91,7 @@ export function NotificationPreferencesTab({ isActive }: Readonly<NotificationPr
 
   // NEW FOR PLAN v5: pre-shaped desktop matrix rows lifted out of the
   // desktop tier (specs.md §6.1 — ViewModel owns data shaping).
-  const matrixRows = useMemo(() => buildPreferenceMatrixRows(preferenceMap), [preferenceMap]);
+  const matrixRows = useMemo(() => buildPreferenceMatrixRows(preferenceMap, eventTypes), [preferenceMap, eventTypes]);
 
   const flushPendingChanges = useCallback(async () => {
     const pending = Array.from(pendingChangesRef.current.values());
@@ -157,6 +158,9 @@ export function NotificationPreferencesTab({ isActive }: Readonly<NotificationPr
     // NEW FOR PLAN v5: pre-shaped desktop matrix rows lifted out of the
     // desktop tier (specs.md §6.1 — ViewModel owns data shaping).
     matrixRows,
+    // Role-filtered event types — mobile should iterate these instead of
+    // the full NOTIFICATION_EVENT_TYPES catalog.
+    eventTypes,
     onToggle: handleToggle,
     disabled: saving,
     loading,

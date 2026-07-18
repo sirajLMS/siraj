@@ -9,7 +9,7 @@ gqlSchemaBuilder.mutationField("markTeacherDuesPaid", t =>
   t.field({
     type: [TeacherDuePothosObject],
     description: "Mark pending teacher dues as paid (batch operation)",
-    authScopes: { loggedIn: true },
+    authScopes: { permission: AppPermission.TEACHER_DUES_MARK_PAID },
     args: {
       dueIds: t.arg.idList({ required: true }),
       teacherPaymentId: t.arg.id({ required: true }),

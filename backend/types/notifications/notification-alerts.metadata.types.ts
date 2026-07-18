@@ -5,7 +5,8 @@ export type NotificationEntityKind =
   | "complaint"
   | "suggestion"
   | "paymentMethod"
-  | "schedule";
+  | "schedule"
+  | "lessonReport";
 
 export interface NotificationMetadataBase {
   readonly entityKind: NotificationEntityKind;
@@ -44,6 +45,11 @@ export interface PaymentMethodMetadata extends NotificationMetadataBase {
 export interface ScheduleMetadata extends NotificationMetadataBase {
   readonly entityKind: "schedule";
 }
+export interface LessonReportMetadata extends NotificationMetadataBase {
+  readonly entityKind: "lessonReport";
+  readonly classInstanceId?: string;
+  readonly decision?: "approved" | "rejected";
+}
 export type NotificationMetadata =
   | InvoiceMetadata
   | ClassMetadata
@@ -51,4 +57,5 @@ export type NotificationMetadata =
   | ComplaintMetadata
   | SuggestionMetadata
   | PaymentMethodMetadata
-  | ScheduleMetadata;
+  | ScheduleMetadata
+  | LessonReportMetadata;

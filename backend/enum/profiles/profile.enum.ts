@@ -2,6 +2,7 @@ export enum ProfileAudience {
   TEACHER = "teacher",
   PARENT = "parent",
   STAFF = "staff",
+  STUDENT = "student",
 }
 
 export enum ProfileScope {

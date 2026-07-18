@@ -42,6 +42,7 @@ type ResolvedRoleIds = {
   readonly teacherId?: string;
   readonly parentId?: string;
   readonly staffProfileId?: string;
+  readonly studentId?: string;
 };
 
 async function resolveRoleIdsForUser(userId: string): Promise<ResolvedRoleIds | null> {
@@ -58,6 +59,11 @@ async function resolveRoleIdsForUser(userId: string): Promise<ResolvedRoleIds | 
   const staff = await StaffProfileRepository.findByUserId(userId);
   if (staff) {
     return { audience: ProfileAudience.STAFF, staffProfileId: staff.staffProfileId };
+  }
+
+  const studentId = await StudentRepository.getStudentIdByUserId(userId);
+  if (studentId) {
+    return { audience: ProfileAudience.STUDENT, studentId };
   }
 
   return null;
@@ -99,7 +105,7 @@ const VIEW_OWN_PERMISSIONS: OwnScopePermissionSet = {
     [ProfileAudience.TEACHER]: AppPermission.TEACHER_VIEW_OWN_PROFILE,
     [ProfileAudience.PARENT]: AppPermission.PARENT_VIEW_OWN_PROFILE,
   },
-  audienceBypass: [ProfileAudience.STAFF],
+  audienceBypass: [ProfileAudience.STAFF, ProfileAudience.STUDENT],
 };
 
 const VIEW_OTHER_PERMISSIONS: OtherScopePermissionSet = {
@@ -116,7 +122,7 @@ const EDIT_OWN_PERMISSIONS: OwnScopePermissionSet = {
     [ProfileAudience.TEACHER]: AppPermission.TEACHER_EDIT_OWN_PROFILE,
     [ProfileAudience.PARENT]: AppPermission.PARENT_EDIT_OWN_PROFILE,
   },
-  audienceBypass: [ProfileAudience.STAFF],
+  audienceBypass: [ProfileAudience.STAFF, ProfileAudience.STUDENT],
 };
 
 const EDIT_OTHER_PERMISSIONS: OtherScopePermissionSet = {
@@ -399,6 +405,7 @@ export namespace ProfileService {
       teacherId: roleIds.teacherId,
       parentId: roleIds.parentId,
       staffProfileId: roleIds.staffProfileId,
+      studentId: roleIds.studentId,
       allowedPermissions: actorPermissions,
     };
 
