@@ -3,16 +3,12 @@
 import { Box, Skeleton } from "@mui/material";
 import { edgeToEdgeCardShellSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
-
-interface SearchScheduleResultsSkeletonMobileProps {
-  readonly columnCount: number;
-  readonly cardCount?: number;
-}
+import type { SearchScheduleResultsSkeletonProps } from "@/frontend/common/views/dashboard/search-schedule/types";
 
 export function SearchScheduleResultsSkeletonMobile({
   columnCount,
   cardCount = 3,
-}: Readonly<SearchScheduleResultsSkeletonMobileProps>) {
+}: Readonly<SearchScheduleResultsSkeletonProps>) {
   const pillCount = Math.min(columnCount, 7);
 
   return (

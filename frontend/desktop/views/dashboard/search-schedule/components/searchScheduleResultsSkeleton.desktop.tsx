@@ -2,16 +2,12 @@
 
 import { Box, Skeleton } from "@mui/material";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
-
-interface SearchScheduleResultsSkeletonDesktopProps {
-  readonly columnCount: number;
-  readonly cardCount?: number;
-}
+import type { SearchScheduleResultsSkeletonProps } from "@/frontend/common/views/dashboard/search-schedule/types";
 
 export function SearchScheduleResultsSkeletonDesktop({
   columnCount,
   cardCount = 3,
-}: Readonly<SearchScheduleResultsSkeletonDesktopProps>) {
+}: Readonly<SearchScheduleResultsSkeletonProps>) {
   const pillCount = Math.min(columnCount, 7);
 
   return (

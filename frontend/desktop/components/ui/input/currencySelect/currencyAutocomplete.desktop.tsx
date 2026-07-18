@@ -8,7 +8,8 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { getCurrencyOptionRowLabel } from "@/frontend/common/components/ui/input/currencySelect/currencyOptionRow.utils";
+import type { CurrencyAutocompleteProps } from "@/frontend/common/components/ui/input/currencySelect/types";
 import { useCurrencyCatalog } from "@/frontend/common/hooks/useCurrencyCatalog";
 import { type CurrencyOption, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -18,40 +19,11 @@ import {
   getCurrencyAutocompletePopperSlotPropsDesktop,
 } from "@/frontend/desktop/components/ui/input/currencySelect/currencyAutocompletePopper";
 import { CurrencyOptionRowDesktop } from "@/frontend/desktop/components/ui/input/currencySelect/currencyOptionRow.desktop";
-import { getCurrencyOptionRowLabelDesktop } from "@/frontend/desktop/components/ui/input/currencySelect/currencyOptionRow.utils";
 import { useAppTranslation } from "@/shared/locale";
-
-export type CurrencyAutocompleteProps = {
-  readonly currency?: CurrencyOption | null;
-  readonly onChangeAction: (currency: CurrencyOption) => void;
-  readonly onClearAction?: () => void;
-  readonly autoComplete?: string;
-  readonly fullWidth?: boolean;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly label?: string;
-  readonly placeholder?: string;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly onBlurAction?: () => void;
-  readonly style?: React.CSSProperties;
-  readonly open?: boolean;
-  readonly onOpenAction?: () => void;
-  readonly onCloseAction?: () => void;
-  readonly autoFocus?: boolean;
-  /**
-   * Filter the visible options to a subset of ISO 4217 codes.
-   */
-  readonly allowedCodes?: readonly CurrencyCode[];
-  readonly matchAnchorWidth?: boolean;
-  readonly disablePortal?: boolean;
-  readonly listAttached?: boolean;
-  readonly showSymbol?: boolean;
-};
 
 const filterOptions = createFilterOptions<CurrencyOption>({
   matchFrom: "any",
-  stringify: option => `${option.code as string} ${option.symbol} ${getCurrencyOptionRowLabelDesktop(option, "en")}`,
+  stringify: option => `${option.code as string} ${option.symbol} ${getCurrencyOptionRowLabel(option, "en")}`,
 });
 
 type RenderInputParams = {
@@ -211,10 +183,7 @@ export const CurrencyAutocompleteDesktop: React.FC<CurrencyAutocompleteProps> = 
     return allOptions.filter(option => allowedCodes.includes(option.code));
   }, [allOptions, allowedCodes, catalogLoaded, currency]);
 
-  const getOptionLabel = useCallback(
-    (option: CurrencyOption) => getCurrencyOptionRowLabelDesktop(option, locale),
-    [locale]
-  );
+  const getOptionLabel = useCallback((option: CurrencyOption) => getCurrencyOptionRowLabel(option, locale), [locale]);
 
   const handleOpen = useCallback(() => {
     if (openProp === undefined) {

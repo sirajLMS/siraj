@@ -13,32 +13,10 @@ import {
   getCountryAutocompletePopperSlotProps,
 } from "@/frontend/common/components/ui/input/countrySelect/countryAutocompletePopper";
 import { getCountryOptionLabel } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.utils";
+import type { CountryAutocompleteProps } from "@/frontend/common/components/ui/input/countrySelect/types";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useAppTranslation } from "@/shared/locale";
-
-export type CountryAutocompleteProps = {
-  readonly country?: CountryType;
-  readonly onChangeAction: (country: CountryType) => void;
-  readonly onClearAction?: () => void;
-  readonly autoComplete?: string;
-  readonly fullWidth?: boolean;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly label?: string;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly onBlurAction?: () => void;
-  readonly style?: React.CSSProperties;
-  readonly open?: boolean;
-  readonly onOpenAction?: () => void;
-  readonly onCloseAction?: () => void;
-  readonly autoFocus?: boolean;
-  readonly showPhonePrefix?: boolean;
-  readonly matchAnchorWidth?: boolean;
-  readonly disablePortal?: boolean;
-  readonly listAttached?: boolean;
-};
 
 const buildSxProp = (
   style: React.CSSProperties | undefined,
@@ -69,7 +47,7 @@ interface RenderInputConfig {
   readonly onBlur: (() => void) | undefined;
   readonly autoFocus: boolean | undefined;
   readonly autoComplete: string;
-  readonly country: CountryType | undefined;
+  readonly country: CountryType | null | undefined;
 }
 
 const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {

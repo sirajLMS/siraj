@@ -3,47 +3,19 @@
 import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MarkPaidInvoiceTarget } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import type {
-  MarkPaidInvoiceTarget,
-  PaymentDetailsTarget,
-} from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
-import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
+  ParentInvoiceRowActionLabels,
+  ParentInvoiceRowActionsProps,
+} from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
 import {
   isPayableUnpaidStatus,
   shouldShowViewRejection,
 } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
+import { buildInvoiceTarget } from "@/frontend/common/views/dashboard/billing/utils/parentInvoiceFormatters";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
 
-export type ParentInvoiceRowActionLabels = {
-  readonly payNow: string;
-  readonly viewSubmission: string;
-  readonly viewFeedback: string;
-  readonly viewDetails: string;
-  readonly downloadPdf: string;
-  readonly markAsPaid: string;
-};
-
-type ParentInvoiceRowActionsDesktopProps = {
-  readonly row: ParentInvoiceRow;
-  readonly labels: ParentInvoiceRowActionLabels;
-  readonly canView: boolean;
-  readonly canSubmitProof: boolean;
-  readonly canManage?: boolean;
-  readonly billingActionsDisabled?: boolean;
-  readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onMarkAsPaid?: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
-  readonly onDownloadPdf: (id: string) => void;
-};
-
-function buildInvoiceTarget(row: ParentInvoiceRow): MarkPaidInvoiceTarget {
-  return {
-    id: row.id,
-    amount: row.fee,
-    dueDate: row.dueDate,
-    invoiceNumber: row.invoiceNumber,
-  };
-}
+export type { ParentInvoiceRowActionLabels } from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
 
 function PaidRowActionsDesktop({
   labels,
@@ -139,7 +111,7 @@ export function ParentInvoiceRowActionsDesktop({
   onMarkAsPaid,
   onViewPaymentDetails,
   onDownloadPdf,
-}: Readonly<ParentInvoiceRowActionsDesktopProps>): React.ReactNode {
+}: Readonly<ParentInvoiceRowActionsProps>): React.ReactNode {
   if (!canView) {
     return null;
   }

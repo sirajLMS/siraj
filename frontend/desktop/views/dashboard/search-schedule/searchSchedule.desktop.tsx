@@ -1,30 +1,30 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { differenceInCalendarDays, parse } from "date-fns";
 import type {
   SearchScheduleResultItem,
   SearchScheduleResultSummary,
   SearchScheduleViewModel,
 } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
+import {
+  buildDateColumns,
+  getColumnCount,
+  groupGapsByDate,
+} from "@/frontend/common/views/dashboard/search-schedule/utils";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { SearchScheduleFormDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/searchScheduleForm.desktop";
 import { SearchSchedulePaginationFooterDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/searchSchedulePaginationFooter.desktop";
 import { SearchScheduleResultsSkeletonDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/searchScheduleResultsSkeleton.desktop";
 import { TeacherAvailabilityGridDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/teacherAvailabilityGrid.desktop";
+import { TeacherAvailabilityMonthDrawerDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.desktop";
 import { useAppTranslation } from "@/shared/locale";
-
-function getColumnCount(fromDate: string, toDate: string): number {
-  const start = parse(fromDate, "yyyy-MM-dd", new Date());
-  const end = parse(toDate, "yyyy-MM-dd", new Date());
-  return Math.max(differenceInCalendarDays(end, start) + 1, 1);
-}
 
 interface SearchScheduleDesktopResultsProps {
   readonly searchResult: SearchScheduleResultSummary | null | undefined;
   readonly fromDate: string;
   readonly toDate: string;
   readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreSearchSchedule"];
+  readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
 }
 
 function SearchScheduleDesktopResults({
@@ -32,6 +32,7 @@ function SearchScheduleDesktopResults({
   fromDate,
   toDate,
   t,
+  onOpenMonthDrawer,
 }: Readonly<SearchScheduleDesktopResultsProps>) {
   if (!searchResult) {
     return null;
@@ -53,26 +54,28 @@ function SearchScheduleDesktopResults({
     );
   }
 
+  const dateColumns = buildDateColumns(fromDate, toDate);
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-      <Typography
-        variant="titleLg"
-        sx={theme => ({
-          color: theme.palette.text.secondary,
-        })}
-      >
+      <Typography variant="titleLg" sx={theme => ({ color: theme.palette.text.secondary })}>
         {t.resultsCount(searchResult.totalCount ?? activeTeachers.length, totalGaps)}
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        {activeTeachers.map(teacher => (
-          <TeacherAvailabilityGridDesktop
-            key={teacher.id ?? ""}
-            teacher={teacher}
-            fromDate={fromDate}
-            toDate={toDate}
-          />
-        ))}
+        {activeTeachers.map(teacher => {
+          const gapsByDate = groupGapsByDate(teacher.gaps);
+          return (
+            <TeacherAvailabilityGridDesktop
+              key={teacher.id ?? ""}
+              teacher={teacher}
+              fromDate={fromDate}
+              dateColumns={dateColumns}
+              gapsByDate={gapsByDate}
+              onOpenMonthDrawer={onOpenMonthDrawer}
+            />
+          );
+        })}
       </Box>
     </Box>
   );
@@ -91,6 +94,29 @@ export function SearchScheduleDesktopView({
   onDraftChange,
   onSearch,
   onPageChange,
+  teacherSearchInput,
+  selectedTeacher,
+  teacherOptions,
+  teacherSearchLoading,
+  shouldSearchTeachers,
+  onTeacherSearchInputChange,
+  onSelectTeacher,
+  formFilterDrawerOpen,
+  onOpenFormFilterDrawer,
+  onCloseFormFilterDrawer,
+  sortMenuAnchorEl,
+  onSortMenuOpen,
+  onSortMenuClose,
+  onSortChange,
+  monthDrawerOpen,
+  monthDrawerTeacher,
+  monthDrawerCurrentMonth,
+  monthDrawerLoading,
+  monthDrawerError,
+  monthDrawerDaysByDate,
+  onOpenMonthDrawer,
+  onCloseMonthDrawer,
+  onMonthDrawerChangeMonth,
 }: Readonly<SearchScheduleViewModel>) {
   const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const columnCount = getColumnCount(fromDate, toDate);
@@ -121,6 +147,20 @@ export function SearchScheduleDesktopView({
           isSearching={isInitialLoading}
           onDraftChange={onDraftChange}
           onSearch={onSearch}
+          formFilterDrawerOpen={formFilterDrawerOpen}
+          onOpenFormFilterDrawer={onOpenFormFilterDrawer}
+          onCloseFormFilterDrawer={onCloseFormFilterDrawer}
+          sortMenuAnchorEl={sortMenuAnchorEl}
+          onSortMenuOpen={onSortMenuOpen}
+          onSortMenuClose={onSortMenuClose}
+          onSortChange={onSortChange}
+          teacherSearchInput={teacherSearchInput}
+          selectedTeacher={selectedTeacher}
+          teacherOptions={teacherOptions}
+          teacherSearchLoading={teacherSearchLoading}
+          shouldSearchTeachers={shouldSearchTeachers}
+          onTeacherSearchInputChange={onTeacherSearchInputChange}
+          onSelectTeacher={onSelectTeacher}
         />
 
         {error ? <Typography color="error">{t.errorLoading}</Typography> : null}
@@ -128,7 +168,13 @@ export function SearchScheduleDesktopView({
         {isInitialLoading ? (
           <SearchScheduleResultsSkeletonDesktop columnCount={columnCount} />
         ) : searchResult || undefined ? (
-          <SearchScheduleDesktopResults searchResult={searchResult} fromDate={fromDate} toDate={toDate} t={t} />
+          <SearchScheduleDesktopResults
+            searchResult={searchResult}
+            fromDate={fromDate}
+            toDate={toDate}
+            t={t}
+            onOpenMonthDrawer={onOpenMonthDrawer}
+          />
         ) : null}
 
         {showPaginationFooter && pageInfo ? (
@@ -139,6 +185,17 @@ export function SearchScheduleDesktopView({
           />
         ) : null}
       </Box>
+
+      <TeacherAvailabilityMonthDrawerDesktop
+        open={monthDrawerOpen}
+        teacher={monthDrawerTeacher}
+        currentMonth={monthDrawerCurrentMonth}
+        monthDrawerLoading={monthDrawerLoading}
+        monthDrawerError={monthDrawerError}
+        daysByDate={monthDrawerDaysByDate}
+        onClose={onCloseMonthDrawer}
+        onMonthChange={onMonthDrawerChangeMonth}
+      />
     </DesktopPageContainer>
   );
 }

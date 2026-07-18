@@ -1,137 +1,33 @@
 "use client";
 
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import type { AutocompleteProps } from "@mui/material/Autocomplete";
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import type { Modifier } from "@popperjs/core";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
+import {
+  getPaymentMethodAutocompletePaperSlotProps,
+  getPaymentMethodAutocompletePopperSlotProps,
+} from "@/frontend/common/components/ui/input/paymentMethodSelect/paymentMethodAutocompletePopper";
+import type { PaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
 import type { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  getPaymentMethodCatalogOptionLabel,
+  type PaymentMethodCatalogOption,
+} from "@/frontend/common/lib/payment-method";
 import { PaymentMethodOptionRowDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
-export interface PaymentMethodCatalogOption {
-  readonly id: string;
-  readonly slug: string;
-  readonly displayName: string;
-  readonly logoUrl: string | null;
-}
-
-export type PaymentMethodAutocompleteProps = {
-  readonly option?: PaymentMethodCatalogOption | null;
-  readonly options: readonly PaymentMethodCatalogOption[];
-  readonly onChangeAction: (option: PaymentMethodCatalogOption) => void;
-  readonly type?: "payin" | "payout" | "both" | null;
-  readonly autoComplete?: string;
-  readonly fullWidth?: boolean;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly label?: string;
-  readonly placeholder?: string;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly onBlurAction?: () => void;
-  readonly style?: React.CSSProperties;
-  readonly open?: boolean;
-  readonly onOpenAction?: () => void;
-  readonly onCloseAction?: () => void;
-  readonly autoFocus?: boolean;
-  readonly allowedSlugs?: readonly string[];
-  readonly matchAnchorWidth?: boolean;
-  readonly disablePortal?: boolean;
-  readonly listAttached?: boolean;
-  readonly showSlug?: boolean;
-};
+export type { PaymentMethodCatalogOption };
 
 const filterOptions = createFilterOptions<PaymentMethodCatalogOption>({
   matchFrom: "any",
   stringify: option => `${option.displayName} ${option.slug}`,
 });
-
-function getPaymentMethodCatalogOptionLabel(option: PaymentMethodCatalogOption): string {
-  return option.displayName;
-}
-
-const sameWidthModifier: Modifier<"sameWidth", Record<string, unknown>> = {
-  name: "sameWidth",
-  enabled: true,
-  phase: "beforeWrite",
-  requires: ["computeStyles"],
-  fn: ({ state }) => {
-    const anchor = state.rects.reference;
-    if (anchor) {
-      state.styles.popper = {
-        ...state.styles.popper,
-        width: `${anchor.width}px`,
-        minWidth: `${anchor.width}px`,
-      };
-    }
-  },
-};
-
-type PaymentMethodAutocompleteSlotProps = NonNullable<
-  AutocompleteProps<PaymentMethodCatalogOption, false, false, false>["slotProps"]
->;
-
-function getPaymentMethodAutocompletePopperSlotProps(options: {
-  readonly matchAnchorWidth: boolean;
-  readonly disablePortal: boolean;
-  readonly listAttached: boolean;
-}): NonNullable<PaymentMethodAutocompleteSlotProps["popper"]> {
-  const { matchAnchorWidth, disablePortal, listAttached } = options;
-
-  return {
-    disablePortal,
-    placement: "bottom-start",
-    modifiers: matchAnchorWidth
-      ? [
-          sameWidthModifier,
-          {
-            name: "offset",
-            options: {
-              offset: [0, listAttached ? 0 : 4],
-            },
-          },
-        ]
-      : [
-          {
-            name: "offset",
-            options: {
-              offset: [0, listAttached ? 0 : 4],
-            },
-          },
-        ],
-    sx: matchAnchorWidth
-      ? {
-          width: "fit-content",
-          minWidth: "fit-content",
-        }
-      : undefined,
-  };
-}
-
-function getPaymentMethodAutocompletePaperSlotProps(
-  listAttached: boolean
-): PaymentMethodAutocompleteSlotProps["paper"] {
-  if (!listAttached) {
-    return undefined;
-  }
-
-  return {
-    sx: (theme: import("@mui/material/styles").Theme) => ({
-      mt: 0,
-      borderTopLeftRadius: 0,
-      borderTopRightRadius: 0,
-      borderTopWidth: 0,
-      boxShadow: theme.shadows[4],
-    }),
-  };
-}
 
 const PaymentMethodOption: React.FC<{
   readonly props: React.HTMLAttributes<HTMLLIElement> & { readonly key?: React.Key };
@@ -146,24 +42,6 @@ const PaymentMethodOption: React.FC<{
     </Box>
   );
 };
-
-const buildAutocompleteSx = (
-  style: React.CSSProperties | undefined,
-  listAttached: boolean,
-  isOpen: boolean
-): React.CSSProperties => ({
-  ...style,
-  ...(listAttached && {
-    "& .MuiOutlinedInput-root": {
-      borderTopLeftRadius: 0,
-      borderTopRightRadius: 0,
-      ...(isOpen && {
-        borderBottomLeftRadius: 0,
-        borderBottomRightRadius: 0,
-      }),
-    },
-  }),
-});
 
 const StartAdornment: React.FC<{
   readonly option?: PaymentMethodCatalogOption | null;
@@ -278,6 +156,7 @@ export const PaymentMethodAutocompleteDesktop: React.FC<PaymentMethodAutocomplet
   showSlug = true,
 }: PaymentMethodAutocompleteProps): React.ReactNode => {
   const t = useAppTranslation().uiTranslations.paymentMethod.select;
+  // EXCEPTION: documented in frontend/desktop/AGENTS.md (purely ephemeral autocomplete open state — tier-paired primitives mirror mobile allowance per common/components/ui/AGENTS.md)
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;
 
@@ -330,7 +209,26 @@ export const PaymentMethodAutocompleteDesktop: React.FC<PaymentMethodAutocomplet
   const resolvedLabel = listAttached ? undefined : (label ?? t.selectMethod);
   const resolvedPlaceholder = listAttached ? (label ?? t.selectMethod) : (placeholder ?? t.searchByNameOrSlug);
 
-  const autocompleteSx = useMemo(() => buildAutocompleteSx(style, listAttached, isOpen), [style, listAttached, isOpen]);
+  const listAttachedSx = useMemo<React.CSSProperties>(
+    () => ({
+      ...(style ?? {}),
+      ...(listAttached
+        ? {
+            "& .MuiOutlinedInput-root": {
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+              ...(isOpen
+                ? {
+                    borderBottomLeftRadius: 0,
+                    borderBottomRightRadius: 0,
+                  }
+                : {}),
+            },
+          }
+        : {}),
+    }),
+    [style, listAttached, isOpen]
+  );
 
   const slotProps = useMemo(
     () => ({
@@ -354,7 +252,7 @@ export const PaymentMethodAutocompleteDesktop: React.FC<PaymentMethodAutocomplet
       onOpen={handleOpen}
       onClose={handleClose}
       value={option ?? null}
-      sx={autocompleteSx}
+      sx={listAttachedSx}
       onChange={handleChange}
       onBlur={onBlur}
       isOptionEqualToValue={(left, right) => left.id === right.id}

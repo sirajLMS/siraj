@@ -1,47 +1,38 @@
 "use client";
 
-import EmailOutlined from "@mui/icons-material/EmailOutlined";
-import NotificationsActiveOutlined from "@mui/icons-material/NotificationsActiveOutlined";
-import PhoneIphoneOutlined from "@mui/icons-material/PhoneIphoneOutlined";
-import SmsOutlined from "@mui/icons-material/SmsOutlined";
 import { Box, FormControlLabel, Skeleton, Slide, Stack, Switch, Tab, Tabs, Typography } from "@mui/material";
-import { type SyntheticEvent, useRef, useState } from "react";
-import {
-  NotificationChannel,
-  type NotificationChannel as NotificationChannelType,
-  type NotificationEventType,
+import type { SyntheticEvent } from "react";
+import type {
+  NotificationChannel as NotificationChannelType,
+  NotificationEventType,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
-  buildPreferenceMap,
+  NOTIFICATION_CHANNEL_ACCENTS,
+  NOTIFICATION_CHANNEL_ICONS,
+  type NotificationChannelAccent,
+} from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferencesConstants";
+import {
   NOTIFICATION_CHANNELS,
   NOTIFICATION_EVENT_TYPES,
   type NotificationPrefRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { useAppTranslation } from "@/shared/locale";
 
-type PreferencesChannelTabsMobileViewProps = {
+type ChannelId = (typeof NOTIFICATION_CHANNELS)[number];
+
+interface PreferencesChannelTabsMobileViewProps {
   readonly preferences: readonly NotificationPrefRow[];
+  // NEW FOR PLAN v5: pre-computed preference lookup map passed from the
+  // container so the tier view stays render-only (no `buildPreferenceMap`
+  // invocation, no `useMemo` derivation in tier — specs.md §6.1).
+  readonly preferenceMap: ReadonlyMap<string, NotificationPrefRow>;
   readonly onToggle: (channel: NotificationChannelType, eventType: NotificationEventType, enabled: boolean) => void;
   readonly disabled?: boolean;
   readonly loading?: boolean;
-};
-
-type ChannelId = (typeof NOTIFICATION_CHANNELS)[number];
-type ChannelAccent = "primary" | "info" | "warning" | "secondary";
-
-const CHANNEL_ICONS: Record<ChannelId, typeof EmailOutlined> = {
-  [NotificationChannel.Email]: EmailOutlined,
-  [NotificationChannel.Sms]: SmsOutlined,
-  [NotificationChannel.Push]: NotificationsActiveOutlined,
-  [NotificationChannel.OnApp]: PhoneIphoneOutlined,
-};
-
-const CHANNEL_ACCENTS: Record<ChannelId, ChannelAccent> = {
-  [NotificationChannel.Email]: "primary",
-  [NotificationChannel.Sms]: "info",
-  [NotificationChannel.Push]: "warning",
-  [NotificationChannel.OnApp]: "secondary",
-};
+  readonly activeChannel: NotificationChannelType;
+  readonly slideDirection: "left" | "right";
+  readonly onChannelChange: (channel: NotificationChannelType, slideDirection: "left" | "right") => void;
+}
 
 function ChannelTabsSkeleton() {
   return (
@@ -63,28 +54,28 @@ function ChannelTabsSkeleton() {
 
 export function PreferencesChannelTabsMobileView({
   preferences,
+  preferenceMap,
   onToggle,
   disabled = false,
   loading = false,
+  activeChannel,
+  slideDirection,
+  onChannelChange,
 }: Readonly<PreferencesChannelTabsMobileViewProps>) {
   const t = useAppTranslation().profileTranslations.notifications;
-  const [activeChannel, setActiveChannel] = useState<ChannelId>(NOTIFICATION_CHANNELS[0]);
-  const [slideDirection, setSlideDirection] = useState<"left" | "right">("left");
-  const previousIndexRef = useRef(0);
-  const preferenceMap = buildPreferenceMap(preferences);
 
   const handleChannelChange = (_: SyntheticEvent, value: ChannelId) => {
     const nextIndex = NOTIFICATION_CHANNELS.indexOf(value);
-    setSlideDirection(nextIndex > previousIndexRef.current ? "left" : "right");
-    previousIndexRef.current = nextIndex;
-    setActiveChannel(value);
+    const prevIndex = NOTIFICATION_CHANNELS.indexOf(activeChannel as ChannelId);
+    const direction: "left" | "right" = nextIndex > prevIndex ? "left" : "right";
+    onChannelChange(value, direction);
   };
 
   if (loading && preferences.length === 0) {
     return <ChannelTabsSkeleton />;
   }
 
-  const activeAccent = CHANNEL_ACCENTS[activeChannel];
+  const activeAccent: NotificationChannelAccent = NOTIFICATION_CHANNEL_ACCENTS[activeChannel as ChannelId];
 
   return (
     <Box
@@ -117,8 +108,8 @@ export function PreferencesChannelTabsMobileView({
         })}
       >
         {NOTIFICATION_CHANNELS.map(channel => {
-          const Icon = CHANNEL_ICONS[channel];
-          const accent = CHANNEL_ACCENTS[channel];
+          const Icon = NOTIFICATION_CHANNEL_ICONS[channel];
+          const accent = NOTIFICATION_CHANNEL_ACCENTS[channel];
           const isActive = activeChannel === channel;
           return (
             <Tab

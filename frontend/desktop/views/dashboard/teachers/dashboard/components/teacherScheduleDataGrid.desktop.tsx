@@ -7,28 +7,14 @@ import { useMemo } from "react";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
+import type { TeacherScheduleDataGridProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 import { TeacherScheduleSessionActionsCellDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherScheduleSessionActionsCell.desktop";
 import { TeacherScheduleStudentCellDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherScheduleStudentCell.desktop";
 
-interface TeacherScheduleDataGridDesktopProps {
-  readonly rows: readonly TeacherScheduleRow[];
-  readonly labels: TeacherDashboardViewLabels;
-  readonly instanceStatusLabels: Record<ClassOutcome | ClassExecutionState, string>;
-  readonly canActivate: boolean;
-  readonly emptyMessage: string;
-  readonly onActivate?: (id: string) => void;
-  readonly onStartSession?: (id: string) => void;
-  readonly onMarkAbsent?: (id: string) => void;
-  readonly onRequestLeave?: (id: string) => void;
-  readonly loading?: boolean;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
-}
+interface TeacherScheduleDataGridDesktopProps extends TeacherScheduleDataGridProps {}
 
 function formatRowNumber(value: number): string {
   return String(value).padStart(2, "0");

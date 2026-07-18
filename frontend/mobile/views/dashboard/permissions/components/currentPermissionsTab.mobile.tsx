@@ -3,7 +3,7 @@
 import { RemoveCircleOutlined, SecurityOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrentPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -65,15 +65,6 @@ const StyledPermissionKeyChip = styled(Box)(({ theme }) => ({
   display: "inline-block",
 }));
 
-interface CurrentPermissionsTabMobileProps {
-  readonly group: PermissionGroup;
-  readonly groupPermissions: readonly Permission[];
-  readonly permissionsCount: number;
-  readonly onRevokePermission: (permissionId: string) => Promise<void>;
-  readonly onSwitchToAddTab: () => void;
-  readonly loading?: boolean;
-}
-
 export function CurrentPermissionsTabMobile({
   group,
   groupPermissions,
@@ -81,7 +72,7 @@ export function CurrentPermissionsTabMobile({
   onRevokePermission,
   onSwitchToAddTab,
   loading = false,
-}: Readonly<CurrentPermissionsTabMobileProps>) {
+}: Readonly<CurrentPermissionsTabProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   if (permissionsCount === 0 && !loading) {

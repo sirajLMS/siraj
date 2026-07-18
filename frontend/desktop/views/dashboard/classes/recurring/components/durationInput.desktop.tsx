@@ -2,9 +2,9 @@
 
 import { Box, FormHelperText, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { durationBoxSx, labelSx } from "@/frontend/common/components/ui/form";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
+import type { DurationInputProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 
 const StyledDurationUnitLabel = styled(Typography)(({ theme }) => ({
   ...theme.typography.labelMd,
@@ -12,20 +12,7 @@ const StyledDurationUnitLabel = styled(Typography)(({ theme }) => ({
   textTransform: "uppercase",
 }));
 
-export interface DurationInputDesktopProps {
-  readonly register: UseFormRegister<RecurringClassFormData>;
-  readonly errors: FieldErrors<RecurringClassFormData>;
-  readonly isSubmitting: boolean;
-  readonly labels: {
-    readonly duration: string;
-    readonly durationHours: string;
-    readonly durationMinutes: string;
-    readonly hours: string;
-    readonly minutes: string;
-  };
-}
-
-export function DurationInputDesktop({ register, errors, isSubmitting, labels }: DurationInputDesktopProps) {
+export function DurationInputDesktop({ register, errors, isSubmitting, labels }: DurationInputProps) {
   const mainLabel = labels.duration;
 
   return (
@@ -63,7 +50,7 @@ export function DurationInputDesktop({ register, errors, isSubmitting, labels }:
 }
 
 interface DurationFieldProps {
-  readonly register: UseFormRegister<RecurringClassFormData>;
+  readonly register: import("react-hook-form").UseFormRegister<RecurringClassFormData>;
   readonly fieldName: "durationHours" | "durationMinutes";
   readonly label: string;
   readonly unit: string;
@@ -87,8 +74,6 @@ function DurationField({ register, fieldName, unit, max, isSubmitting, error }: 
               sx: { textAlign: "center", p: 1, border: undefined },
             },
           }}
-          variant="standard"
-          sx={{ flex: 1 }}
         />
         <StyledDurationUnitLabel>{unit}</StyledDurationUnitLabel>
       </Box>

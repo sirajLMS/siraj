@@ -4,46 +4,17 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
+import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import { FieldWrapper } from "@/frontend/common/components/ui/form/field/FieldWrapper";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { LocalizedStringDrawer } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringDrawer";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { CurrencyOption } from "@/frontend/common/lib/currency";
+import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
+import { filterMethodsForDirection } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/utils";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { useAppTranslation } from "@/shared/locale";
 
-export type PaymentMethodDefaultsEditorProps = {
-  readonly methods: readonly PaymentMethodRow[];
-  readonly payinDefaultId: string | null;
-  readonly payoutDefaultId: string | null;
-  readonly onPayinDefaultChangeAction: (id: string | null) => void;
-  readonly onPayoutDefaultChangeAction: (id: string | null) => void;
-  readonly instructions?: LocalizedString;
-  readonly onInstructionsSaveAction?: (value: LocalizedString) => void;
-  readonly displayCurrency?: CurrencyOption | null;
-  readonly onDisplayCurrencyChangeAction?: (currency: CurrencyOption) => void;
-  readonly allowedCurrencyCodes?: readonly CurrencyCode[];
-  readonly disabled?: boolean;
-  readonly successOpen?: boolean;
-  readonly onSuccessCloseAction?: () => void;
-};
-
-function filterMethodsForDirection(
-  methods: readonly PaymentMethodRow[],
-  direction: "payin" | "payout"
-): readonly PaymentMethodRow[] {
-  return methods.filter(method => {
-    if (!method.direction) return false;
-    if (method.direction === PaymentDirection.Both) return true;
-    return direction === "payin"
-      ? method.direction === PaymentDirection.Payin
-      : method.direction === PaymentDirection.Payout;
-  });
-}
+export type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
 
 export function PaymentMethodDefaultsEditor({
   methods,
@@ -59,27 +30,37 @@ export function PaymentMethodDefaultsEditor({
   disabled = false,
   successOpen = false,
   onSuccessCloseAction,
-}: PaymentMethodDefaultsEditorProps) {
+  instructionsOpen: instructionsOpenProp,
+  onInstructionsOpenChangeAction,
+}: Readonly<PaymentMethodDefaultsEditorProps>) {
   const t = useAppTranslation().uiTranslations.paymentMethod;
   const tDefaults = t.defaultsEditor;
-  const [instructionsOpen, setInstructionsOpen] = useState(false);
+  // EXCEPTION: documented in frontend/common/components/ui/AGENTS.md (purely ephemeral instructions drawer open state — viewport-agnostic primitives may use local useState with controlled-prop fallback)
+  const [internalInstructionsOpen, setInternalInstructionsOpen] = useState(false);
+  const instructionsOpen = instructionsOpenProp ?? internalInstructionsOpen;
 
   const payinMethods = filterMethodsForDirection(methods, "payin");
   const payoutMethods = filterMethodsForDirection(methods, "payout");
 
   const formatMethodLabel = useCallback(
     (method: PaymentMethodRow) => {
-      const typeLabel = method.type
-        ? getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "")
-        : "";
-      const directionLabel = method.direction
-        ? getPaymentMethodDirectionLabel(method.direction, key => t.direction[key as keyof typeof t.direction] ?? "")
-        : "";
+      const typeLabel = getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "");
+      const directionLabel = getPaymentMethodDirectionLabel(
+        method.direction,
+        key => t.direction[key as keyof typeof t.direction] ?? ""
+      );
       const base = method.label?.trim() || method.catalogSlug || typeLabel;
       return directionLabel ? `${base} (${directionLabel})` : base;
     },
     [t]
   );
+
+  const setInstructionsOpen = (open: boolean) => {
+    if (instructionsOpenProp === undefined) {
+      setInternalInstructionsOpen(open);
+    }
+    onInstructionsOpenChangeAction?.(open);
+  };
 
   return (
     <Stack spacing={2}>

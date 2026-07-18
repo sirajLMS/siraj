@@ -4,6 +4,8 @@ import { EditOutlined } from "@mui/icons-material";
 import { Box, Button, FormHelperText, IconButton, type SxProps, TextField, type Theme } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocaleSwitchSuccess } from "@/frontend/common/components/ui/input/localizedString/useLocaleSwitchSuccess";
+import { useNarrowContainer } from "@/frontend/common/components/ui/input/localizedString/useNarrowContainer";
 import { getLanguageDisplayName } from "@/frontend/common/lib/locale";
 import { pickInitialActiveLocale, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -11,8 +13,6 @@ import type { AppLocale, LocalizedString } from "@/frontend/common/types/localiz
 import { LocaleAdornmentSwitchMobile } from "@/frontend/mobile/components/ui/input/localizedString/localeAdornmentSwitch.mobile";
 import { LocalizedStringDrawerMobile } from "@/frontend/mobile/components/ui/input/localizedString/localizedStringDrawer.mobile";
 import type { LocalizedStringInputProps } from "@/frontend/mobile/components/ui/input/localizedString/localizedStringInput.types";
-import { useLocaleSwitchSuccess } from "@/frontend/mobile/components/ui/input/localizedString/useLocaleSwitchSuccess";
-import { useNarrowContainer } from "@/frontend/mobile/components/ui/input/localizedString/useNarrowContainer";
 import { type LocalizedStringLabels, useAppTranslation } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 

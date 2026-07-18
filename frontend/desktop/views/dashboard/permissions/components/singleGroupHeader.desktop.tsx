@@ -3,8 +3,8 @@
 import { ArrowBackOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import type { SingleGroupHeaderProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -89,13 +89,7 @@ const StyledEditButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-interface SingleGroupHeaderDesktopProps {
-  readonly group: PermissionGroup;
-  readonly onBack: () => void;
-  readonly onEditGroup: (id: string) => void;
-}
-
-export function SingleGroupHeaderDesktop({ group, onBack, onEditGroup }: Readonly<SingleGroupHeaderDesktopProps>) {
+export function SingleGroupHeaderDesktop({ group, onBack, onEditGroup }: Readonly<SingleGroupHeaderProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
   const groupName = resolveLocalizedString(group.name);
   const groupDescription = resolveLocalizedString(group.description);

@@ -19,8 +19,11 @@ export type SubjectResourceItem = NonNullable<ClassSubject["resources"]>[number]
 export interface SubjectsViewProps {
   readonly categories: readonly CategoryItem[];
   readonly subjects: readonly SubjectItem[];
+  readonly filteredSubjects: readonly SubjectItem[];
   readonly isLoading: boolean;
   readonly activeCategoryId: string | null;
+  readonly categoriesSectionOpen: boolean;
+  readonly onToggleCategoriesSection: () => void;
   readonly onCategoryChange: (categoryId: string | null) => void;
   readonly onAddSubject: () => void;
   readonly onEditSubject: (id: string) => void;

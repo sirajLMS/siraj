@@ -8,7 +8,6 @@ export * from "@/frontend/desktop/components/ui/display/localeEmoji";
 export * from "@/frontend/desktop/components/ui/display/localizedStringDisplay";
 export * from "@/frontend/desktop/components/ui/display/meetingConfig";
 export * from "@/frontend/desktop/components/ui/display/paymentMethod/paymentMethodDisplay.desktop";
-export * from "@/frontend/desktop/components/ui/display/paymentMethod/paymentMethodDisplay.types";
 export * from "@/frontend/desktop/components/ui/display/paymentMethod/paymentMethodList.desktop";
 export * from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLink.desktop";
 export * from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";

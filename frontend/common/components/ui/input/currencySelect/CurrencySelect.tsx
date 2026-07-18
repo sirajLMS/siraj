@@ -1,33 +1,11 @@
 "use client";
 
 import type * as React from "react";
-import {
-  CurrencyAutocomplete,
-  type CurrencyAutocompleteProps,
-} from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocomplete";
-import type { CurrencyOption } from "@/frontend/common/lib/currency";
-
-export type CurrencySelectProps = {
-  readonly currency?: CurrencyOption | null;
-  readonly setCurrencyAction: (currency: CurrencyOption) => void;
-  readonly onClearAction?: () => void;
-  readonly autoComplete?: string;
-  readonly fullWidth?: boolean;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly label?: string;
-  readonly placeholder?: string;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly onBlurAction?: () => void;
-  readonly style?: React.CSSProperties;
-  readonly open?: boolean;
-  readonly onOpenAction?: () => void;
-  readonly onCloseAction?: () => void;
-  readonly autoFocus?: boolean;
-  readonly allowedCodes?: CurrencyAutocompleteProps["allowedCodes"];
-  readonly showSymbol?: boolean;
-};
+import { CurrencyAutocomplete } from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocomplete";
+import type {
+  CurrencyAutocompleteProps,
+  CurrencySelectProps,
+} from "@/frontend/common/components/ui/input/currencySelect/types";
 
 /**
  * CurrencySelect allows the operator to pick an ISO 4217 currency from a

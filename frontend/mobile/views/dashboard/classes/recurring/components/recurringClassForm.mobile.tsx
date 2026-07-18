@@ -3,59 +3,8 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Alert, alpha, Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type {
-  Control,
-  FieldErrors,
-  UseFormHandleSubmit,
-  UseFormRegister,
-  UseFormSetValue,
-  UseFormWatch,
-} from "react-hook-form";
-import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
-import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
+import type { BaseRecurringClassFormProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { RecurringClassFormFieldsMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/recurringClassFormFields.mobile";
-import type { CreateRecurringClassLabels } from "@/shared/locale";
-
-interface RecurringClassFormMobileProps {
-  readonly register: UseFormRegister<RecurringClassFormData>;
-  readonly errors: FieldErrors<RecurringClassFormData>;
-  readonly watch: UseFormWatch<RecurringClassFormData>;
-  readonly setValue: UseFormSetValue<RecurringClassFormData>;
-  readonly control: Control<RecurringClassFormData>;
-  readonly handleSubmit: UseFormHandleSubmit<RecurringClassFormData>;
-  readonly isSubmitting: boolean;
-  readonly meetingConfigWarning?: boolean;
-  readonly meetingConfigWarningMessage?: string;
-  readonly goToClassLabel?: string;
-  readonly onGoToCreatedClass?: () => void;
-  readonly labels: {
-    readonly add: string;
-    readonly addClass: string;
-    readonly addedSuccessfully: string;
-    readonly students: string;
-    readonly studentsPlaceholder: string;
-    readonly teacher: string;
-    readonly teacherPlaceholder: string;
-    readonly defaultStartTime: string;
-    readonly duration: string;
-    readonly durationHours: string;
-    readonly durationMinutes: string;
-    readonly hours: string;
-    readonly minutes: string;
-    readonly daysSelection: string;
-    readonly classSchedule: string;
-    readonly weekendOff: string;
-    readonly timeOverride: string;
-    readonly timezone: string;
-    readonly timezonePlaceholder: string;
-    readonly classType: string;
-    readonly classTypePlaceholder: string;
-    readonly days: CreateRecurringClassLabels["days"];
-  };
-  readonly onSubmit: (data: RecurringClassFormData) => void;
-  readonly meetingConfig: RecurringMeetingConfigFormState;
-  readonly onMeetingConfigChangeAction: (next: RecurringMeetingConfigFormState) => void;
-}
 
 const StyledScrollableFormBody = styled(Box)(({ theme }) => ({
   flex: 1,
@@ -99,6 +48,12 @@ const StyledSubmitButton = styled(Button)(({ theme }) => ({
   maxWidth: 480,
 }));
 
+// VARIANT JUSTIFICATION: Mobile tier does not render the success badge inline
+// (snackbar handled by Container-level ViewModel). Desktop variant adds the
+// `showSuccess` field for inline badge display (per specs.md §4.1 — Class-C
+// variant: structural/visual divergence between tiers is documented here).
+export interface RecurringClassFormMobileProps extends BaseRecurringClassFormProps {}
+
 export function RecurringClassFormMobile({
   register,
   errors,
@@ -111,10 +66,14 @@ export function RecurringClassFormMobile({
   meetingConfigWarningMessage,
   goToClassLabel,
   onGoToCreatedClass,
-  labels,
+  formLabels,
   onSubmit,
   meetingConfig,
   onMeetingConfigChangeAction,
+  students,
+  teachers,
+  studentsLoading,
+  teachersLoading,
 }: RecurringClassFormMobileProps) {
   return (
     <Box
@@ -133,9 +92,13 @@ export function RecurringClassFormMobile({
           setValue={setValue}
           control={control}
           isSubmitting={isSubmitting}
-          labels={labels}
+          labels={formLabels}
           meetingConfig={meetingConfig}
           onMeetingConfigChangeAction={onMeetingConfigChangeAction}
+          students={students}
+          teachers={teachers}
+          studentsLoading={studentsLoading}
+          teachersLoading={teachersLoading}
         />
       </StyledScrollableFormBody>
 
@@ -162,7 +125,7 @@ export function RecurringClassFormMobile({
           endIcon={<AddOutlined />}
           fullWidth
         >
-          {labels.addClass}
+          {formLabels.addClass}
         </StyledSubmitButton>
       </StyledFormFooter>
     </Box>

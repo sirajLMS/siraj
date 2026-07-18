@@ -2,9 +2,9 @@
 
 import { Box, Button, ButtonGroup, Typography } from "@mui/material";
 import type * as React from "react";
-import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { buildPaymentMethodTypeLabelByType } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/constants";
+import type { PaymentMethodTypeSelectorProps } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
 import { PAYMENT_METHOD_TYPES } from "@/frontend/common/lib/payment-method";
-import type { PaymentMethodTypeSelectorProps } from "@/frontend/mobile/components/ui/input/paymentMethodTypeFields/paymentMethodTypeFields.types";
 import { useAppTranslation } from "@/shared/locale";
 
 export const PaymentMethodTypeSelectorMobile: React.FC<PaymentMethodTypeSelectorProps> = ({
@@ -21,14 +21,7 @@ export const PaymentMethodTypeSelectorMobile: React.FC<PaymentMethodTypeSelector
   const title = labels?.title ?? t.title;
   const ariaLabel = labels?.ariaLabel ?? t.ariaLabel;
 
-  const labelByType: Record<PaymentMethodType, string> = {
-    [PaymentMethodType.MobileWallet]: labels?.mobileWallet ?? t.mobileWallet,
-    [PaymentMethodType.PaymentLink]: labels?.paymentLink ?? t.paymentLink,
-    [PaymentMethodType.OnlineAccount]: labels?.onlineAccount ?? t.onlineAccount,
-    [PaymentMethodType.BankTransfer]: labels?.bankTransfer ?? t.bankTransfer,
-    [PaymentMethodType.Cash]: labels?.cash ?? t.cash,
-    [PaymentMethodType.ProofUpload]: "Proof upload",
-  };
+  const labelByType = buildPaymentMethodTypeLabelByType(labels, t);
 
   const visibleTypes = allowedTypes ?? PAYMENT_METHOD_TYPES;
   const buttons = visibleTypes.map(value => ({ value, label: labelByType[value] }));
@@ -97,5 +90,3 @@ export const PaymentMethodTypeSelectorMobile: React.FC<PaymentMethodTypeSelector
     </Box>
   );
 };
-
-export type { PaymentMethodTypeSelectorLabels };

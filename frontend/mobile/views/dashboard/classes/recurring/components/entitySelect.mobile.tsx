@@ -3,17 +3,7 @@
 import { ExpandMoreOutlined } from "@mui/icons-material";
 import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { labelSx } from "@/frontend/common/components/ui/form";
-import type { SimpleEntity } from "@/frontend/common/views/dashboard/classes/recurring/types";
-
-export interface EntitySelectMobileProps {
-  readonly value: string;
-  readonly entities: readonly SimpleEntity[];
-  readonly isSubmitting: boolean;
-  readonly label: string;
-  readonly placeholder: string;
-  readonly error?: string;
-  readonly onChange: (value: string) => void;
-}
+import type { EntitySelectProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 
 export function EntitySelectMobile({
   value,
@@ -23,7 +13,7 @@ export function EntitySelectMobile({
   placeholder,
   error,
   onChange,
-}: EntitySelectMobileProps) {
+}: EntitySelectProps) {
   return (
     <>
       <Box component="label" sx={labelSx}>

@@ -1,29 +1,11 @@
 "use client";
 
 import type * as React from "react";
-import {
-  CountryAutocomplete,
-  type CountryAutocompleteProps,
-} from "@/frontend/common/components/ui/input/countrySelect/CountryAutocomplete";
-import type { CountryType } from "@/frontend/common/lib/locale";
-
-export type CountrySelectProps = {
-  readonly country?: CountryType;
-  readonly setCountryAction: (country: CountryType) => void;
-  readonly autoComplete?: string;
-  readonly fullWidth?: boolean;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly label?: string;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly onBlurAction?: () => void;
-  readonly style?: React.CSSProperties;
-  readonly open?: boolean;
-  readonly onOpenAction?: () => void;
-  readonly onCloseAction?: () => void;
-  readonly autoFocus?: boolean;
-};
+import { CountryAutocomplete } from "@/frontend/common/components/ui/input/countrySelect/CountryAutocomplete";
+import type {
+  CountryAutocompleteProps,
+  CountrySelectProps,
+} from "@/frontend/common/components/ui/input/countrySelect/types";
 
 /**
  * CountrySelect component allows users to select a country from a dropdown list.

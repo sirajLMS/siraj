@@ -4,9 +4,28 @@ import type { ErrorLike } from "@apollo/client";
 import { NetworkStatus } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { useEffect, useMemo } from "react";
-import { AppPermission, type AvailabilitySearchInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { type SearchScheduleDraftFilters, useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
+import {
+  AppPermission,
+  type AvailabilitySearchInput,
+  AvailabilitySearchSortBy,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  searchTeacherAvailabilityQueryDocument,
+  teachersQueryDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
+import {
+  type SearchScheduleDraftFilters,
+  type SearchScheduleMonthDrawerTeacher,
+  type SearchScheduleTeacherOption,
+  useSearchScheduleStore,
+} from "@/frontend/common/stores/searchScheduleStore";
+import { buildTeacherMonthAvailabilityInput } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
+import type { TeacherAvailabilityGapItem } from "@/frontend/common/views/dashboard/search-schedule/types";
+import {
+  formatIsoDate,
+  groupGapsByDayOfMonth,
+  parseIsoDate,
+} from "@/frontend/common/views/dashboard/search-schedule/utils";
 
 export interface SearchScheduleResultItem {
   readonly id?: string | null;
@@ -51,6 +70,7 @@ export interface UseSearchScheduleViewModelProps {
 }
 
 export interface SearchScheduleViewModel {
+  // Existing search-result state (viewport-agnostic).
   readonly searchResult: SearchScheduleResultSummary | null | undefined;
   readonly fromDate: string;
   readonly toDate: string;
@@ -67,11 +87,69 @@ export interface SearchScheduleViewModel {
   readonly onSearch: () => void;
   readonly onPageChange: (page: number) => void;
   readonly requiredPermission: AppPermission;
+
+  // NEW FOR PLAN v5: teacher autocomplete (lifted from searchScheduleTeacherAutocomplete tier).
+  readonly teacherSearchInput: string;
+  readonly selectedTeacher: SearchScheduleTeacherOption | null;
+  readonly teacherOptions: readonly SearchScheduleTeacherOption[];
+  readonly teacherSearchLoading: boolean;
+  readonly shouldSearchTeachers: boolean;
+  readonly onTeacherSearchInputChange: (input: string) => void;
+  readonly onSelectTeacher: (teacher: SearchScheduleTeacherOption | null) => void;
+
+  // NEW FOR PLAN v5: form-filter drawer (lifted from searchScheduleForm tier).
+  readonly formFilterDrawerOpen: boolean;
+  readonly onOpenFormFilterDrawer: () => void;
+  readonly onCloseFormFilterDrawer: () => void;
+
+  // NEW FOR PLAN v5: sort menu (lifted from searchScheduleSortMenu tier).
+  readonly sortMenuAnchorEl: HTMLElement | null;
+  readonly onSortMenuOpen: (event: { readonly currentTarget: HTMLElement }) => void;
+  readonly onSortMenuClose: () => void;
+  readonly onSortChange: (sortBy: AvailabilitySearchSortBy) => void;
+
+  // NEW FOR PLAN v5: month drawer (lifted from teacherAvailabilityGrid + teacherAvailabilityMonthDrawer tier).
+  readonly monthDrawerOpen: boolean;
+  readonly monthDrawerTeacher: SearchScheduleResultItem | null;
+  readonly monthDrawerCurrentMonth: Date;
+  readonly monthDrawerLoading: boolean;
+  readonly monthDrawerError: unknown;
+  readonly monthDrawerDaysByDate: Readonly<Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>>;
+  readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
+  readonly onCloseMonthDrawer: () => void;
+  readonly onMonthDrawerChangeMonth: (next: Date) => void;
 }
+
+const TEACHER_SEARCH_DEBOUNCE_MS = 300;
+const TEACHER_SEARCH_MIN_LENGTH = 2;
+const TEACHER_SEARCH_LIMIT = 10;
+
+const EMPTY_INPUT: AvailabilitySearchInput = {
+  fromDate: "",
+  toDate: "",
+  fromTime: "",
+  toTime: "",
+  gender: null,
+  minAvailableDays: null,
+  minTotalGaps: null,
+  teacherNameSearch: null,
+  daysOfWeek: null,
+  sortBy: AvailabilitySearchSortBy.MostAvailableDays,
+  paginationArgs: {
+    first: null,
+    page: null,
+    skip: null,
+    after: null,
+    before: null,
+    last: null,
+    maxCount: null,
+  },
+};
 
 export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleViewModelProps>): SearchScheduleViewModel {
   const requiredPermission = props?.requiredPermission ?? AppPermission.ScheduleSearchAvailability;
 
+  // Existing search-result state subscription.
   const draft = useSearchScheduleStore(state => state.draft);
   const setDraft = useSearchScheduleStore(state => state.setDraft);
   const activeInput = useSearchScheduleStore(state => state.activeInput);
@@ -79,6 +157,29 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
   const setPage = useSearchScheduleStore(state => state.setPage);
   const hasSearched = useSearchScheduleStore(state => state.hasSearched);
   const hasHydrated = useSearchScheduleStore(state => state._hasHydrated);
+
+  // NEW FOR PLAN v5: subscribe to lifted teacher autocomplete state.
+  const teacherSearchInput = useSearchScheduleStore(state => state.teacherSearchInput);
+  const debouncedTeacherSearch = useSearchScheduleStore(state => state.debouncedTeacherSearch);
+  const selectedTeacher = useSearchScheduleStore(state => state.selectedTeacher);
+  const setTeacherSearchInput = useSearchScheduleStore(state => state.setTeacherSearchInput);
+  const setDebouncedTeacherSearch = useSearchScheduleStore(state => state.setDebouncedTeacherSearch);
+  const setSelectedTeacher = useSearchScheduleStore(state => state.setSelectedTeacher);
+
+  // NEW FOR PLAN v5: subscribe to lifted form-filter drawer + sort menu state.
+  const formFilterDrawerOpen = useSearchScheduleStore(state => state.formFilterDrawerOpen);
+  const setFormFilterDrawerOpen = useSearchScheduleStore(state => state.setFormFilterDrawerOpen);
+  const sortMenuAnchorEl = useSearchScheduleStore(state => state.sortMenuAnchorEl);
+  const setSortMenuAnchorEl = useSearchScheduleStore(state => state.setSortMenuAnchorEl);
+
+  // NEW FOR PLAN v5: subscribe to lifted month drawer state.
+  const monthDrawerOpen = useSearchScheduleStore(state => state.monthDrawerOpen);
+  const monthDrawerAnchorFromDate = useSearchScheduleStore(state => state.monthDrawerAnchorFromDate);
+  const monthDrawerCurrentMonthIso = useSearchScheduleStore(state => state.monthDrawerCurrentMonth);
+  const monthDrawerTeacher = useSearchScheduleStore(state => state.monthDrawerTeacher);
+  const openMonthDrawer = useSearchScheduleStore(state => state.openMonthDrawer);
+  const closeMonthDrawer = useSearchScheduleStore(state => state.closeMonthDrawer);
+  const setMonthDrawerCurrentMonth = useSearchScheduleStore(state => state.setMonthDrawerCurrentMonth);
 
   useEffect(() => {
     if (!hasHydrated || hasSearched) {
@@ -88,6 +189,70 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
     commitSearch();
   }, [commitSearch, hasHydrated, hasSearched]);
 
+  // NEW FOR PLAN v5: debounce teacher search input → debouncedTeacherSearch. Tier files no longer
+  // own the setTimeout/effector — the ViewModel is the SOLE owner (specs.md §6.2 + N18 closure).
+  useEffect(() => {
+    const trimmed = teacherSearchInput.trim();
+    const timer = window.setTimeout(() => {
+      setDebouncedTeacherSearch(trimmed);
+    }, TEACHER_SEARCH_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [teacherSearchInput, setDebouncedTeacherSearch]);
+
+  const shouldSearchTeachers = debouncedTeacherSearch.length >= TEACHER_SEARCH_MIN_LENGTH;
+
+  // NEW FOR PLAN v5: teacher autocomplete query lives in the ViewModel (F1/N1 closure).
+  const { data: teacherSearchData, loading: teacherSearchLoading } = useQuery(teachersQueryDocument, {
+    variables: {
+      search: debouncedTeacherSearch,
+      limit: TEACHER_SEARCH_LIMIT,
+    },
+    skip: !shouldSearchTeachers,
+    fetchPolicy: "cache-and-network",
+  });
+
+  const teacherOptions = useMemo((): readonly SearchScheduleTeacherOption[] => {
+    const teachers =
+      teacherSearchData?.teachers?.map(teacher => ({
+        id: teacher.id ?? "",
+        name: teacher.name ?? "",
+      })) ?? [];
+
+    if (selectedTeacher && !teachers.some(teacher => teacher.id === selectedTeacher.id)) {
+      return [selectedTeacher, ...teachers];
+    }
+
+    return teachers;
+  }, [teacherSearchData?.teachers, selectedTeacher]);
+
+  const onTeacherSearchInputChange = (input: string) => {
+    setTeacherSearchInput(input);
+    if (selectedTeacher && input !== selectedTeacher.name) {
+      setSelectedTeacher(null);
+    }
+  };
+
+  const onSelectTeacher = (teacher: SearchScheduleTeacherOption | null) => {
+    setSelectedTeacher(teacher);
+  };
+
+  // NEW FOR PLAN v5: form-filter drawer open/close handlers.
+  const onOpenFormFilterDrawer = () => setFormFilterDrawerOpen(true);
+  const onCloseFormFilterDrawer = () => setFormFilterDrawerOpen(false);
+
+  // NEW FOR PLAN v5: sort menu open/close handlers. The Menu's anchorEl is set from the click
+  // event's currentTarget.
+  const onSortMenuOpen = (event: { readonly currentTarget: HTMLElement }) => {
+    setSortMenuAnchorEl(event.currentTarget);
+  };
+  const onSortMenuClose = () => setSortMenuAnchorEl(null);
+  const onSortChange = (sortBy: AvailabilitySearchSortBy) => {
+    setDraft({ sortBy });
+    setSortMenuAnchorEl(null);
+  };
+
+  // Main search query (existing behavior — kept unchanged).
   const { data, loading, error, networkStatus, previousData } = useQuery(searchTeacherAvailabilityQueryDocument, {
     variables: activeInput ? { input: activeInput } : { input: {} as AvailabilitySearchInput },
     skip: activeInput === null,
@@ -113,6 +278,73 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
   const teacherCount = searchResult?.teachers?.length ?? 0;
   const showPaginationFooter = Boolean(pageInfo && (pageInfo.total ?? 0) > 0);
 
+  // NEW FOR PLAN v5: month drawer query — uses the same draft + a teacher-specific month window.
+  // This was previously an inline custom hook `useMonthDrawerQuery` in the tier files (N25 violation).
+  const monthDrawerCurrentDate = useMemo(() => {
+    if (!monthDrawerCurrentMonthIso) {
+      // Fall back to the anchor date or today when no month has been navigated yet.
+      const fallback = monthDrawerAnchorFromDate || activeFromDate || formatIsoDate(new Date());
+      return parseIsoDate(fallback);
+    }
+    return parseIsoDate(monthDrawerCurrentMonthIso);
+  }, [monthDrawerCurrentMonthIso, monthDrawerAnchorFromDate, activeFromDate]);
+
+  const monthDrawerInput = useMemo((): AvailabilitySearchInput | null => {
+    const teacher = monthDrawerTeacher;
+    if (!teacher?.id || !teacher.name) {
+      return null;
+    }
+
+    // Adapt the minimal store shape into the SearchScheduleTeacherOption that buildTeacherMonthAvailabilityInput expects.
+    return buildTeacherMonthAvailabilityInput(draft, { id: teacher.id, name: teacher.name }, monthDrawerCurrentDate);
+  }, [draft, monthDrawerCurrentDate, monthDrawerTeacher]);
+
+  const {
+    data: monthDrawerData,
+    loading: monthDrawerLoading,
+    error: monthDrawerError,
+  } = useQuery(searchTeacherAvailabilityQueryDocument, {
+    variables: monthDrawerInput ? { input: monthDrawerInput } : { input: EMPTY_INPUT },
+    skip: !monthDrawerOpen || monthDrawerInput === null,
+    fetchPolicy: "cache-and-network",
+  });
+
+  const monthDrawerResultItem: SearchScheduleResultItem | null = useMemo(() => {
+    const teachers = monthDrawerData?.searchTeacherAvailability?.teachers ?? [];
+    const teacherId = monthDrawerTeacher?.id;
+    const matchedById = teacherId ? teachers.find(item => item?.id === teacherId) : null;
+    return (matchedById ?? teachers[0] ?? null) as SearchScheduleResultItem | null;
+  }, [monthDrawerData?.searchTeacherAvailability?.teachers, monthDrawerTeacher?.id]);
+
+  const monthDrawerGaps = (monthDrawerResultItem?.gaps ?? null) as
+    | readonly (TeacherAvailabilityGapItem | null)[]
+    | null
+    | undefined;
+
+  const monthDrawerDaysByDate = useMemo(
+    () => groupGapsByDayOfMonth(monthDrawerGaps, monthDrawerCurrentDate),
+    [monthDrawerGaps, monthDrawerCurrentDate]
+  );
+
+  const onOpenMonthDrawer = (teacher: SearchScheduleResultItem, anchorFromDate: string) => {
+    // Adapt SearchScheduleResultItem → the minimal persisted store shape.
+    const storeTeacher: SearchScheduleMonthDrawerTeacher = {
+      id: teacher.id ?? null,
+      name: teacher.name ?? null,
+      gender: teacher.gender ?? null,
+      timezone: teacher.timezone ?? null,
+      availableDaysCount: teacher.availableDaysCount ?? null,
+      gaps: (teacher.gaps ?? null) as SearchScheduleMonthDrawerTeacher["gaps"],
+    };
+    openMonthDrawer(storeTeacher, anchorFromDate);
+  };
+
+  const onCloseMonthDrawer = () => closeMonthDrawer();
+
+  const onMonthDrawerChangeMonth = (next: Date) => {
+    setMonthDrawerCurrentMonth(formatIsoDate(next));
+  };
+
   return {
     searchResult,
     fromDate: activeFromDate,
@@ -130,5 +362,32 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
     onSearch: commitSearch,
     onPageChange: setPage,
     requiredPermission,
+    // NEW FOR PLAN v5: teacher autocomplete.
+    teacherSearchInput,
+    selectedTeacher,
+    teacherOptions,
+    teacherSearchLoading,
+    shouldSearchTeachers,
+    onTeacherSearchInputChange,
+    onSelectTeacher,
+    // NEW FOR PLAN v5: form-filter drawer.
+    formFilterDrawerOpen,
+    onOpenFormFilterDrawer,
+    onCloseFormFilterDrawer,
+    // NEW FOR PLAN v5: sort menu.
+    sortMenuAnchorEl,
+    onSortMenuOpen,
+    onSortMenuClose,
+    onSortChange,
+    // NEW FOR PLAN v5: month drawer.
+    monthDrawerOpen,
+    monthDrawerTeacher: monthDrawerResultItem,
+    monthDrawerCurrentMonth: monthDrawerCurrentDate,
+    monthDrawerLoading,
+    monthDrawerError,
+    monthDrawerDaysByDate,
+    onOpenMonthDrawer,
+    onCloseMonthDrawer,
+    onMonthDrawerChangeMonth,
   };
 }

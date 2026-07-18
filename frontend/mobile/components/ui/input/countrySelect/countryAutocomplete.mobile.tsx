@@ -6,16 +6,16 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
 import { useCallback, useState } from "react";
+import { getCountryOptionLabel } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.utils";
+import type { CountryAutocompleteProps } from "@/frontend/common/components/ui/input/countrySelect/types";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
-import type { CountryAutocompleteProps } from "@/frontend/mobile/components/ui/input/countrySelect/countryAutocomplete.types";
 import {
   getCountryAutocompletePaperSlotProps,
   getCountryAutocompletePopperSlotProps,
 } from "@/frontend/mobile/components/ui/input/countrySelect/countryAutocompletePopper";
 import { CountryOptionRowMobile } from "@/frontend/mobile/components/ui/input/countrySelect/countryOptionRow.mobile";
-import { getCountryOptionLabel } from "@/frontend/mobile/components/ui/input/countrySelect/countryOptionRow.utils";
 import { useAppTranslation } from "@/shared/locale";
 
 const buildSxProp = (
@@ -47,7 +47,7 @@ interface RenderInputConfig {
   readonly onBlur: (() => void) | undefined;
   readonly autoFocus: boolean | undefined;
   readonly autoComplete: string;
-  readonly country: CountryType | undefined;
+  readonly country: CountryType | null | undefined;
 }
 
 const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {

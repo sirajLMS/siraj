@@ -1,15 +1,8 @@
 "use client";
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import type { DeleteGroupDialogProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { useAppTranslation } from "@/shared/locale";
-
-interface DeleteGroupDialogMobileProps {
-  readonly open: boolean;
-  readonly groupName: string;
-  readonly isLoading: boolean;
-  readonly onClose: () => void;
-  readonly onConfirm: () => void;
-}
 
 /**
  * DeleteGroupDialogMobile — mobile tier-paired confirmation dialog.
@@ -20,7 +13,7 @@ export function DeleteGroupDialogMobile({
   isLoading,
   onClose,
   onConfirm,
-}: Readonly<DeleteGroupDialogMobileProps>) {
+}: Readonly<DeleteGroupDialogProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (

@@ -1,33 +1,11 @@
 "use client";
 
 import { Box, FormHelperText } from "@mui/material";
-import type { FieldErrors, UseFormSetValue, UseFormWatch } from "react-hook-form";
-import { labelSx } from "@/frontend/common/components/ui/form";
-import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
+import { resolveDayLabelKey } from "@/frontend/common/views/dashboard/classes/recurring/constants";
+import type { DaysScheduleSectionProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { DayScheduleRowDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/dayScheduleRow.desktop";
-import type { CreateRecurringClassLabels } from "@/shared/locale";
 
-interface DaysScheduleSectionDesktopProps {
-  readonly watch: UseFormWatch<RecurringClassFormData>;
-  readonly setValue: UseFormSetValue<RecurringClassFormData>;
-  readonly errors: FieldErrors<RecurringClassFormData>;
-  readonly labels: Pick<
-    CreateRecurringClassLabels,
-    "daysSelection" | "classSchedule" | "weekendOff" | "timeOverride" | "days"
-  >;
-}
-
-const DAY_LABEL_KEY_MAP: Record<string, keyof CreateRecurringClassLabels["days"]> = {
-  MONDAY: "monday",
-  TUESDAY: "tuesday",
-  WEDNESDAY: "wednesday",
-  THURSDAY: "thursday",
-  FRIDAY: "friday",
-  SATURDAY: "saturday",
-  SUNDAY: "sunday",
-};
-
-export function DaysScheduleSectionDesktop({ watch, setValue, errors, labels }: DaysScheduleSectionDesktopProps) {
+export function DaysScheduleSectionDesktop({ watch, setValue, errors, labels }: DaysScheduleSectionProps) {
   const days = watch("days");
 
   const handleToggleDay = (index: number, enabled: boolean) => {
@@ -49,18 +27,20 @@ export function DaysScheduleSectionDesktop({ watch, setValue, errors, labels }: 
 
   return (
     <Box>
-      <Box component="label" sx={labelSx}>
-        {labels.daysSelection}
+      <Box component="label" sx={{ typography: "labelLg", color: theme => theme.palette.onSurfaceVariant, mb: 1 }}>
+        {labels.classSchedule}
       </Box>
+      <Box sx={{ mb: 1, display: "flex", alignItems: "center", typography: "labelLg" }}>{labels.daysSelection}</Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         {days.map((day, index) => {
-          const labelKey = DAY_LABEL_KEY_MAP[day.day];
+          const labelKey = resolveDayLabelKey(day.day);
+          const dayLabel = labelKey ? labels.days[labelKey] : day.day;
           return (
             <DayScheduleRowDesktop
               key={day.day}
               day={day}
               index={index}
-              dayLabel={labelKey ? labels.days[labelKey] : day.day}
+              dayLabel={dayLabel}
               weekendOffLabel={labels.weekendOff}
               timeOverrideLabel={labels.timeOverride}
               onToggleDay={handleToggleDay}

@@ -1,7 +1,6 @@
 export {
   PaymentMethodAutocomplete,
   type PaymentMethodAutocompleteProps,
-  type PaymentMethodCatalogOption,
 } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodAutocomplete";
 export { PaymentMethodOptionRow } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodOptionRow";
 export {
@@ -12,5 +11,6 @@ export {
   getPaymentMethodAutocompletePaperSlotProps,
   getPaymentMethodAutocompletePopperSlotProps,
 } from "@/frontend/common/components/ui/input/paymentMethodSelect/paymentMethodAutocompletePopper";
-export type { PaymentMethodOptionRowProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.types";
 export { getPaymentMethodOptionRowLabel } from "@/frontend/common/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.utils";
+export type { PaymentMethodOptionRowProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
+export { resolvePaymentMethodTypeIcon } from "@/frontend/common/components/ui/input/paymentMethodSelect/utils";

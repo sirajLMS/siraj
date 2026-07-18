@@ -8,16 +8,10 @@ import type { PermissionGroup, User, UserOverride } from "@/frontend/common/grap
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
+import type { UserOverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
-
-export interface UserOverridesDataGridMobileProps {
-  readonly users: readonly User[];
-  readonly groups: readonly PermissionGroup[];
-  readonly onManageOverrides: (userId: string) => void;
-  readonly loading?: boolean;
-}
 
 interface OverridesInfo {
   readonly grants: number;
@@ -101,13 +95,13 @@ const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
   fontWeight: 600,
 }));
 
-interface UserOverridesCardMobileProps {
+interface UserOverridesCardProps {
   readonly user: User;
   readonly groups: readonly PermissionGroup[];
   readonly onManageOverrides: (userId: string) => void;
 }
 
-function UserOverridesCardMobile({ user, groups, onManageOverrides }: Readonly<UserOverridesCardMobileProps>) {
+function UserOverridesCardMobile({ user, groups, onManageOverrides }: Readonly<UserOverridesCardProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
   const userId = user.id ?? "";
   const userGroups = getUserGroupsForUser(userId, groups);
@@ -270,7 +264,7 @@ export function UserOverridesDataGridMobile({
   groups,
   onManageOverrides,
   loading = false,
-}: Readonly<UserOverridesDataGridMobileProps>) {
+}: Readonly<UserOverridesDataGridProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   if (users.length === 0 && !loading) {

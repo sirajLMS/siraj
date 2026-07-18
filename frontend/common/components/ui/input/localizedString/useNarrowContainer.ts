@@ -3,6 +3,8 @@
 import { useTheme } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 
+// NEW FOR PLAN v5: consolidated byte-identical tier twin (mobile/desktop) useNarrowContainer into a single common source.
+
 /**
  * Returns `true` when the observed element's layout width is below the theme
  * `sm` breakpoint (default 600px).

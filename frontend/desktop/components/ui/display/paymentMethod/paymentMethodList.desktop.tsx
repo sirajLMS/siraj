@@ -6,13 +6,13 @@ import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopPaymentMethodDisplay } from "@/frontend/desktop/components/ui/display/paymentMethod/paymentMethodDisplay.desktop";
-import type { PaymentMethodRow } from "@/frontend/desktop/components/ui/display/paymentMethod/paymentMethodDisplay.types";
 import { useAppTranslation } from "@/shared/locale";
 
 export type { PaymentMethodRow };

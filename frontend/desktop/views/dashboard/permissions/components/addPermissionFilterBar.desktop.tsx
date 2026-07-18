@@ -3,7 +3,7 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { InputAdornment, MenuItem, Select, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { PermissionsLabels } from "@/shared/locale";
+import type { AddPermissionFilterBarProps } from "@/frontend/common/views/dashboard/permissions/types";
 
 const StyledFilterContainer = styled("div")(({ theme }) => ({
   padding: theme.spacing(2),
@@ -25,15 +25,6 @@ const StyledCategorySelect = styled(Select<string>)(() => ({
   width: 200,
 }));
 
-interface AddPermissionFilterBarDesktopProps {
-  readonly searchQuery: string;
-  readonly onSearchChange: (value: string) => void;
-  readonly selectedCategory: string;
-  readonly onCategoryChange: (value: string) => void;
-  readonly addCategories: readonly string[];
-  readonly t: PermissionsLabels;
-}
-
 export function AddPermissionFilterBarDesktop({
   searchQuery,
   onSearchChange,
@@ -41,7 +32,7 @@ export function AddPermissionFilterBarDesktop({
   onCategoryChange,
   addCategories,
   t,
-}: Readonly<AddPermissionFilterBarDesktopProps>) {
+}: Readonly<AddPermissionFilterBarProps>) {
   return (
     <StyledFilterContainer>
       <StyledSearchField

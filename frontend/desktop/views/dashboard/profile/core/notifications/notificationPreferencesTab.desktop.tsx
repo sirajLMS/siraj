@@ -5,10 +5,8 @@ import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/v
 import { PreferencesMatrixDesktopView } from "@/frontend/desktop/views/dashboard/profile/core/notifications/preferencesMatrix.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
-export type NotificationPreferencesTabDesktopProps = NotificationPreferencesTabVariantProps;
-
 export function NotificationPreferencesTabDesktop({
-  preferences,
+  matrixRows,
   onToggle,
   disabled,
   loading,
@@ -17,7 +15,7 @@ export function NotificationPreferencesTabDesktop({
   snackbarSeverity,
   onSnackbarClose,
   errorLoading,
-}: Readonly<NotificationPreferencesTabDesktopProps>) {
+}: Readonly<NotificationPreferencesTabVariantProps>) {
   const t = useAppTranslation().profileTranslations.notifications;
 
   if (errorLoading) {
@@ -36,7 +34,7 @@ export function NotificationPreferencesTabDesktop({
       </Box>
 
       <PreferencesMatrixDesktopView
-        preferences={preferences}
+        matrixRows={matrixRows ?? []}
         onToggle={onToggle}
         disabled={disabled}
         loading={loading}

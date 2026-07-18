@@ -2,17 +2,11 @@
 
 import { Box } from "@mui/material";
 import { useMemo, useState } from "react";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionCatalogSectionProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { PermissionCatalogCardListMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionCatalogCardList.mobile";
 import { PermissionCatalogToolbarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionCatalogToolbar.mobile";
 
-export interface PermissionCatalogSectionMobileProps {
-  readonly permissions: readonly Permission[];
-  readonly groups: readonly PermissionGroup[];
-  readonly loading?: boolean;
-}
-
-export function PermissionCatalogSectionMobile({ permissions, groups }: Readonly<PermissionCatalogSectionMobileProps>) {
+export function PermissionCatalogSectionMobile({ permissions, groups }: Readonly<PermissionCatalogSectionProps>) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 

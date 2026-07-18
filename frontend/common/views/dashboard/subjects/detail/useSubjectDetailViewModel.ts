@@ -35,6 +35,7 @@ export interface SubjectDetailViewModel {
   readonly loading: boolean;
   readonly notFound: boolean;
   readonly labels: SubjectDetailViewModelLabels;
+  readonly onDownloadResource: (resource: SubjectResourceItem) => void;
 }
 
 /**
@@ -83,6 +84,13 @@ export function useSubjectDetailViewModel(props: Readonly<UseSubjectDetailViewMo
 
   const notFound = !loading && !subject;
 
+  // NEW FOR PLAN v5: onDownloadResource exposed by the ViewModel so the tier views no longer call `window.open` directly (was a window.open-in-tier violation per specs §3 N19).
+  const onDownloadResource = (resource: SubjectResourceItem) => {
+    if (resource.filePath) {
+      window.open(`/api/storage/files/${resource.filePath}`, "_blank", "noopener,noreferrer");
+    }
+  };
+
   return {
     subject,
     resources,
@@ -90,5 +98,6 @@ export function useSubjectDetailViewModel(props: Readonly<UseSubjectDetailViewMo
     loading,
     notFound,
     labels,
+    onDownloadResource,
   };
 }

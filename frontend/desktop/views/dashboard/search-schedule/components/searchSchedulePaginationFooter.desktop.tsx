@@ -2,19 +2,13 @@
 
 import { Box } from "@mui/material";
 import { PaginationControls } from "@/frontend/common/components/ui/filter/PaginationControls";
-import type { SearchSchedulePageInfo } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
-
-interface SearchSchedulePaginationFooterDesktopProps {
-  readonly pageInfo: SearchSchedulePageInfo;
-  readonly teacherCount: number;
-  readonly onPageChange: (page: number) => void;
-}
+import type { SearchSchedulePaginationFooterProps } from "@/frontend/common/views/dashboard/search-schedule/types";
 
 export function SearchSchedulePaginationFooterDesktop({
   pageInfo,
   teacherCount,
   onPageChange,
-}: Readonly<SearchSchedulePaginationFooterDesktopProps>) {
+}: Readonly<SearchSchedulePaginationFooterProps>) {
   const total = pageInfo.total ?? 0;
   if (total <= 0) {
     return null;

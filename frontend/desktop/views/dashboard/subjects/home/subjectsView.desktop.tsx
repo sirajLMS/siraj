@@ -10,9 +10,11 @@ import { useAppTranslation } from "@/shared/locale";
 
 export function SubjectsViewDesktop({
   categories,
-  subjects,
+  filteredSubjects,
   isLoading,
   activeCategoryId,
+  categoriesSectionOpen: _categoriesSectionOpen,
+  onToggleCategoriesSection: _onToggleCategoriesSection,
   onCategoryChange,
   onAddSubject,
   onEditSubject,
@@ -25,8 +27,6 @@ export function SubjectsViewDesktop({
   canManageCategories,
 }: Readonly<SubjectsViewProps>) {
   const t = useAppTranslation().dashboardTranslations.subjects;
-
-  const filteredSubjects = activeCategoryId ? subjects.filter(s => s.category?.id === activeCategoryId) : subjects;
 
   const categoriesSection = (
     <CategoriesSectionDesktop

@@ -11,29 +11,18 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-import { useState } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { TeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
-
-interface TeacherActiveSessionControlsDesktopProps {
-  readonly labels: TeacherDashboardLabels["activeControls"];
-  readonly showStart?: boolean;
-  readonly showMarkAbsent?: boolean;
-  readonly showRequestLeave?: boolean;
-  readonly startTooltip?: string;
-  readonly markAbsentTooltip?: string;
-  readonly requestLeaveTooltip?: string;
-  readonly markAbsentDisabled?: boolean;
-  readonly onStart: () => void;
-  readonly onMarkAbsent: () => void;
-  readonly onRequestLeave: () => void;
-}
+import type { TeacherActiveSessionControlsProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 
 /**
  * Desktop variant of the active-session controls row.
  * Slightly lighter visual weight (32×32) than the mobile variant — desktop rows
  * are denser and the controls live inline with the rest of the action cell.
+ *
+ * Plan v5: per specs.md §3 N3 + N7 + §6.4, `useState(absentDialogOpen)` and
+ * the per-button `<RequirePermission>` wrappers were lifted to the
+ * `TeacherDashboardContainer` + `teacherDashboardStore`. The component now
+ * receives `hasSessionUpdateStatus*` booleans and a lifted `absentDialogOpen`
+ * state with `onAbsentDialogOpen` / `onAbsentDialogClose` callbacks as props.
  */
 export function TeacherActiveSessionControlsDesktop({
   labels,
@@ -47,12 +36,16 @@ export function TeacherActiveSessionControlsDesktop({
   onStart,
   onMarkAbsent,
   onRequestLeave,
-}: Readonly<TeacherActiveSessionControlsDesktopProps>) {
-  const [absentDialogOpen, setAbsentDialogOpen] = useState(false);
-
+  hasSessionUpdateStatusStart,
+  hasSessionUpdateStatusAbsent,
+  hasSessionUpdateStatusLeave,
+  absentDialogOpen,
+  onAbsentDialogOpen,
+  onAbsentDialogClose,
+}: Readonly<TeacherActiveSessionControlsProps>) {
   const handleAbsentConfirm = () => {
     onMarkAbsent();
-    setAbsentDialogOpen(false);
+    onAbsentDialogClose?.();
   };
 
   const resolvedStartTooltip = startTooltip ?? labels.startSession;
@@ -61,85 +54,79 @@ export function TeacherActiveSessionControlsDesktop({
 
   return (
     <>
-      {showStart ? (
-        <RequirePermission permissions={[AppPermission.SessionUpdateStatusStart]}>
-          <Tooltip title={resolvedStartTooltip}>
-            <IconButton
-              size="small"
-              onClick={onStart}
-              aria-label={labels.startSession}
-              sx={theme => ({
-                width: 32,
-                height: 32,
-                backgroundColor: theme.palette.secondaryContainer,
-                color: theme.palette.onSecondaryContainer,
-                "&:hover": { backgroundColor: theme.palette.secondaryContainer },
-              })}
-            >
-              <PlayArrowOutlined fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </RequirePermission>
+      {showStart && (hasSessionUpdateStatusStart ?? true) ? (
+        <Tooltip title={resolvedStartTooltip}>
+          <IconButton
+            size="small"
+            onClick={onStart}
+            aria-label={labels.startSession}
+            sx={theme => ({
+              width: 32,
+              height: 32,
+              backgroundColor: theme.palette.secondaryContainer,
+              color: theme.palette.onSecondaryContainer,
+              "&:hover": { backgroundColor: theme.palette.secondaryContainer },
+            })}
+          >
+            <PlayArrowOutlined fontSize="small" />
+          </IconButton>
+        </Tooltip>
       ) : null}
 
-      {showMarkAbsent ? (
-        <RequirePermission permissions={[AppPermission.SessionUpdateStatusAbsent]}>
-          <Tooltip title={resolvedMarkAbsentTooltip}>
-            <span>
-              <IconButton
-                size="small"
-                disabled={markAbsentDisabled}
-                onClick={() => {
-                  if (!markAbsentDisabled) {
-                    setAbsentDialogOpen(true);
-                  }
-                }}
-                aria-label={labels.markAbsent}
-                sx={theme => ({
-                  width: 32,
-                  height: 32,
-                  backgroundColor: theme.palette.surfaceContainerLowest,
-                  border: `2px solid ${theme.palette.error.main}`,
-                  color: theme.palette.error.main,
-                  opacity: markAbsentDisabled ? 0.5 : 1,
-                })}
-              >
-                <LogoutOutlined fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
-        </RequirePermission>
-      ) : null}
-
-      {showRequestLeave ? (
-        <RequirePermission permissions={[AppPermission.SessionUpdateStatusLeave]}>
-          <Tooltip title={resolvedRequestLeaveTooltip}>
+      {showMarkAbsent && (hasSessionUpdateStatusAbsent ?? true) ? (
+        <Tooltip title={resolvedMarkAbsentTooltip}>
+          <span>
             <IconButton
               size="small"
-              onClick={onRequestLeave}
-              aria-label={labels.requestLeave}
+              disabled={markAbsentDisabled}
+              onClick={() => {
+                if (!markAbsentDisabled) {
+                  onAbsentDialogOpen?.();
+                }
+              }}
+              aria-label={labels.markAbsent}
               sx={theme => ({
                 width: 32,
                 height: 32,
                 backgroundColor: theme.palette.surfaceContainerLowest,
-                border: `2px solid ${theme.palette.onSurfaceVariant}`,
-                color: theme.palette.onSurfaceVariant,
+                border: `2px solid ${theme.palette.error.main}`,
+                color: theme.palette.error.main,
+                opacity: markAbsentDisabled ? 0.5 : 1,
               })}
             >
-              <CalendarTodayOutlined fontSize="small" />
+              <LogoutOutlined fontSize="small" />
             </IconButton>
-          </Tooltip>
-        </RequirePermission>
+          </span>
+        </Tooltip>
       ) : null}
 
-      {showMarkAbsent ? (
-        <Dialog open={absentDialogOpen} onClose={() => setAbsentDialogOpen(false)}>
+      {showRequestLeave && (hasSessionUpdateStatusLeave ?? true) ? (
+        <Tooltip title={resolvedRequestLeaveTooltip}>
+          <IconButton
+            size="small"
+            onClick={onRequestLeave}
+            aria-label={labels.requestLeave}
+            sx={theme => ({
+              width: 32,
+              height: 32,
+              backgroundColor: theme.palette.surfaceContainerLowest,
+              border: `2px solid ${theme.palette.onSurfaceVariant}`,
+              color: theme.palette.onSurfaceVariant,
+            })}
+          >
+            <CalendarTodayOutlined fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      ) : null}
+
+      {showMarkAbsent && (hasSessionUpdateStatusAbsent ?? true) ? (
+        <Dialog open={absentDialogOpen ?? false} onClose={onAbsentDialogClose}>
           <DialogTitle>{labels.markAbsentDialogTitle}</DialogTitle>
           <DialogContent>
             <DialogContentText>{labels.markAbsentConfirmation}</DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setAbsentDialogOpen(false)}>{labels.cancel}</Button>
+            <Button onClick={onAbsentDialogClose}>{labels.cancel}</Button>
             <Button onClick={handleAbsentConfirm} variant="contained" color="warning">
               {labels.markAbsentConfirm}
             </Button>

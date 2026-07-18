@@ -20,6 +20,12 @@ export function TeacherDuesDesktopView({
   onMarkPaid,
   onSelectDues,
 }: Readonly<TeacherDuesViewModel>) {
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid re-renders the entire grid (including
+  // checkbox selection state and pagination) whenever the parent re-renders with a new
+  // `columns` array identity. Caching the columns array with its ViewModel-scoped
+  // dependency set (labels + callbacks) keeps the array reference stable across parent
+  // renders that don't change those inputs, preventing the grid from resetting its
+  // internal state.
   const columns = useMemo<GridColDef<TeacherDueRow>[]>(
     () => [
       {

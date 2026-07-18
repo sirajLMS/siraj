@@ -14,6 +14,7 @@ import {
   getPaymentMethodAutocompletePaperSlotProps,
   getPaymentMethodAutocompletePopperSlotProps,
 } from "@/frontend/common/components/ui/input/paymentMethodSelect/paymentMethodAutocompletePopper";
+import type { PaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
 import type { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   getPaymentMethodCatalogOptionLabel,
@@ -21,31 +22,8 @@ import {
 } from "@/frontend/common/lib/payment-method";
 import { useAppTranslation } from "@/shared/locale";
 
-export type PaymentMethodAutocompleteProps = {
-  readonly option?: PaymentMethodCatalogOption | null;
-  readonly options: readonly PaymentMethodCatalogOption[];
-  readonly onChangeAction: (option: PaymentMethodCatalogOption) => void;
-  readonly type?: PaymentMethodType | null;
-  readonly autoComplete?: string;
-  readonly fullWidth?: boolean;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly label?: string;
-  readonly placeholder?: string;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly onBlurAction?: () => void;
-  readonly style?: React.CSSProperties;
-  readonly open?: boolean;
-  readonly onOpenAction?: () => void;
-  readonly onCloseAction?: () => void;
-  readonly autoFocus?: boolean;
-  readonly allowedSlugs?: readonly string[];
-  readonly matchAnchorWidth?: boolean;
-  readonly disablePortal?: boolean;
-  readonly listAttached?: boolean;
-  readonly showSlug?: boolean;
-};
+export type { PaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
+export type { PaymentMethodCatalogOption };
 
 const filterOptions = createFilterOptions<PaymentMethodCatalogOption>({
   matchFrom: "any",
@@ -65,24 +43,6 @@ const PaymentMethodOption: React.FC<{
     </Box>
   );
 };
-
-const buildAutocompleteSx = (
-  style: React.CSSProperties | undefined,
-  listAttached: boolean,
-  isOpen: boolean
-): React.CSSProperties => ({
-  ...style,
-  ...(listAttached && {
-    "& .MuiOutlinedInput-root": {
-      borderTopLeftRadius: 0,
-      borderTopRightRadius: 0,
-      ...(isOpen && {
-        borderBottomLeftRadius: 0,
-        borderBottomRightRadius: 0,
-      }),
-    },
-  }),
-});
 
 const StartAdornment: React.FC<{
   readonly option?: PaymentMethodCatalogOption | null;
@@ -197,6 +157,7 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
   showSlug = true,
 }: PaymentMethodAutocompleteProps): React.ReactNode => {
   const t = useAppTranslation().uiTranslations.paymentMethod.select;
+  // EXCEPTION: documented in frontend/common/components/ui/AGENTS.md (purely ephemeral autocomplete open state — allowed in viewport-agnostic primitives)
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;
 
@@ -249,7 +210,26 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
   const resolvedLabel = listAttached ? undefined : (label ?? t.selectMethod);
   const resolvedPlaceholder = listAttached ? (label ?? t.selectMethod) : (placeholder ?? t.searchByNameOrSlug);
 
-  const autocompleteSx = useMemo(() => buildAutocompleteSx(style, listAttached, isOpen), [style, listAttached, isOpen]);
+  const listAttachedSx = useMemo<React.CSSProperties>(
+    () => ({
+      ...(style ?? {}),
+      ...(listAttached
+        ? {
+            "& .MuiOutlinedInput-root": {
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+              ...(isOpen
+                ? {
+                    borderBottomLeftRadius: 0,
+                    borderBottomRightRadius: 0,
+                  }
+                : {}),
+            },
+          }
+        : {}),
+    }),
+    [style, listAttached, isOpen]
+  );
 
   const slotProps = useMemo(
     () => ({
@@ -273,7 +253,7 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
       onOpen={handleOpen}
       onClose={handleClose}
       value={option ?? null}
-      sx={autocompleteSx}
+      sx={listAttachedSx}
       onChange={handleChange}
       onBlur={onBlur}
       isOptionEqualToValue={(left, right) => left.id === right.id}
@@ -298,5 +278,3 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
     />
   );
 };
-
-export type { PaymentMethodCatalogOption };

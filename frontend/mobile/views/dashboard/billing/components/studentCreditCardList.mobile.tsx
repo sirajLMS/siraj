@@ -3,31 +3,9 @@
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type {
-  StudentCreditRow,
-  StudentCreditStatus,
-} from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
+import type { StudentCreditCardListMobileProps } from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
+import { formatClassesLeft } from "@/frontend/common/views/dashboard/billing/utils/parentInvoiceFormatters";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
-
-interface StudentCreditCardListMobileLabels {
-  readonly classesLeft: string;
-  readonly sendReminder: string;
-  readonly creditStatusLabels: Record<StudentCreditStatus, string>;
-}
-
-interface StudentCreditCardListMobileProps {
-  readonly rows: readonly StudentCreditRow[];
-  readonly labels: StudentCreditCardListMobileLabels;
-  readonly canManage: boolean;
-  readonly billingActionsDisabled?: boolean;
-  readonly onSendReminder: (id: string) => void;
-  readonly loading?: boolean;
-  readonly sendingReminderId?: string | null;
-}
-
-function formatClassesLeft(row: StudentCreditRow): string {
-  return `${row.classesLeft} / ${row.classesTotal}`;
-}
 
 const StyledCreditCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),

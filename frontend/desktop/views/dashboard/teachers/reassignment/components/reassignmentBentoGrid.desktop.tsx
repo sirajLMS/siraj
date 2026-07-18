@@ -3,14 +3,11 @@
 
 import { HistoryOutlined, MailOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
-import { useNotifications } from "@toolpad/core/useNotifications";
-import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   BentoCardProps,
   ReassignmentBentoGridProps,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { DesktopBaseCard, DesktopUserAvatar } from "@/frontend/desktop/components/ui";
-import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
 function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardProps>) {
@@ -49,13 +46,13 @@ function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardP
 }
 
 export function ReassignmentBentoGridDesktop({
-  studentId,
+  studentId: _studentId,
   lastUpdated,
   pendingNotificationCount,
+  onOpenChangeHistory,
+  onOpenParentContact,
 }: Readonly<ReassignmentBentoGridProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherReassignment.historyAndContact;
-  const router = useRouter();
-  const notifications = useNotifications();
 
   const formattedDate = lastUpdated
     ? new Date(lastUpdated).toLocaleDateString("en-US", { month: "short", year: "2-digit" })
@@ -68,7 +65,7 @@ export function ReassignmentBentoGridDesktop({
           icon={HistoryOutlined}
           title={t.changeHistory}
           subtitle={t.lastUpdated(formattedDate)}
-          onClick={() => router.push(studentProfileTabHref(studentId, "history"))}
+          onClick={onOpenChangeHistory}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -76,7 +73,7 @@ export function ReassignmentBentoGridDesktop({
           icon={MailOutlined}
           title={t.parentContact}
           subtitle={t.pendingNotifications(pendingNotificationCount)}
-          onClick={() => notifications.show(t.parentContact, { severity: "info", autoHideDuration: 4000 })}
+          onClick={onOpenParentContact}
         />
       </Grid>
     </Grid>

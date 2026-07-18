@@ -3,7 +3,7 @@
 import { BlockOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
+import type { OverrideEffectiveDisplayProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledEffectiveContainer = styled(Box)({
@@ -40,15 +40,10 @@ const StyledOverrideLabel = styled(Typography)(({ theme }) => ({
   marginLeft: theme.spacing(1),
 }));
 
-interface OverrideEffectiveDisplayMobileProps {
-  readonly effectiveState: "allowed" | "denied" | "not_set";
-  readonly overrideState: OverrideState;
-}
-
 export function OverrideEffectiveDisplayMobile({
   effectiveState,
   overrideState,
-}: Readonly<OverrideEffectiveDisplayMobileProps>) {
+}: Readonly<OverrideEffectiveDisplayProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (

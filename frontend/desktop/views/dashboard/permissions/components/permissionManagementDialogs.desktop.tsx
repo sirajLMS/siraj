@@ -1,50 +1,11 @@
 "use client";
 
-import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import type { PermissionManagementDialogsProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { AssignGroupDialogDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/assignGroupDialog.desktop";
 import { DeleteGroupDialogDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/deleteGroupDialog.desktop";
 import { ManageOverridesDialogDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/manageOverridesDialog.desktop";
 import { PermissionGroupFormDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionGroupForm.desktop";
-
-export interface PermissionManagementDialogsDesktopProps {
-  readonly permissions: readonly Permission[];
-  readonly groups: readonly PermissionGroup[];
-  readonly users: readonly User[];
-  readonly isLoading: boolean;
-  readonly activeGroup: PermissionGroup | null;
-  readonly selectedGroupId: string | null;
-  readonly selectedUserIdForOverrides: string | null;
-  readonly isCreateDialogOpen: boolean;
-  readonly isEditDialogOpen: boolean;
-  readonly isDeleteDialogOpen: boolean;
-  readonly isAssignDialogOpen: boolean;
-  readonly isManageOverridesOpen: boolean;
-  readonly closeCreateDialog: () => void;
-  readonly closeEditDialog: () => void;
-  readonly closeDeleteDialog: () => void;
-  readonly closeAssignDialog: () => void;
-  readonly closeManageOverrides: () => void;
-  readonly setSelectedUserIdForOverrides: (id: string | null) => void;
-  readonly onCreateGroup: (
-    name: LocalizedString,
-    description: LocalizedString,
-    permissionIds: string[]
-  ) => Promise<void>;
-  readonly onUpdateGroup: (
-    id: string,
-    name: LocalizedString,
-    description: LocalizedString,
-    permissionIds: string[]
-  ) => Promise<void>;
-  readonly onDeleteGroup: (id: string) => Promise<void>;
-  readonly onAssignGroup: (groupId: string, userId: string) => Promise<void>;
-  readonly onUpdateOverrides: (
-    userId: string,
-    overrides: Array<{ permissionId: string; state: string }>
-  ) => Promise<void>;
-}
 
 export function PermissionManagementDialogsDesktop({
   permissions,
@@ -70,7 +31,7 @@ export function PermissionManagementDialogsDesktop({
   onDeleteGroup,
   onAssignGroup,
   onUpdateOverrides,
-}: Readonly<PermissionManagementDialogsDesktopProps>) {
+}: Readonly<PermissionManagementDialogsProps>) {
   return (
     <>
       <PermissionGroupFormDesktop

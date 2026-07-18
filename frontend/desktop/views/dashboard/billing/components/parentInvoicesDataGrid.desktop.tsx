@@ -5,52 +5,17 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type {
-  MarkPaidInvoiceTarget,
-  PaymentDetailsTarget,
-} from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
+import type {
+  BaseParentInvoicesListProps,
+  ParentInvoicesDataGridDesktopLabels,
+} from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
 import { DesktopAppDataGrid, DesktopGridPagination, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { ParentInvoiceRowActionsDesktop } from "@/frontend/desktop/views/dashboard/billing/components/parentInvoiceRowActions.desktop";
 
-export interface ParentInvoicesDataGridDesktopLabels {
-  readonly invoiceNumber: string;
-  readonly month: string;
-  readonly issueDate: string;
-  readonly dueDate: string;
-  readonly paidDate: string;
-  readonly fee: string;
-  readonly status: string;
-  readonly options: string;
-  readonly viewDetails: string;
-  readonly viewSubmission: string;
-  readonly viewFeedback: string;
-  readonly downloadPdf: string;
-  readonly payNow: string;
-  readonly markAsPaid: string;
-  readonly hasPaymentProofHint: string;
-  readonly noEntries: string;
-  readonly emptyTitle?: string;
-  readonly emptySubtitle?: string;
-  readonly statusLabels: Record<string, string>;
-}
-
-interface ParentInvoicesDataGridDesktopProps {
-  readonly rows: readonly ParentInvoiceRow[];
+interface ParentInvoicesDataGridDesktopProps extends BaseParentInvoicesListProps {
+  // VARIANT JUSTIFICATION: extra field labels — data-grid tier carries grid-shaped labels (column headers + statusLabels + empty-title/subtitle); mobile card list uses a different labels shape
   readonly labels: ParentInvoicesDataGridDesktopLabels;
-  readonly canView: boolean;
-  readonly canSubmitProof: boolean;
-  readonly canManage?: boolean;
-  readonly billingActionsDisabled?: boolean;
-  readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onMarkAsPaid?: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
-  readonly onDownloadPdf: (id: string) => void;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
-  readonly loading?: boolean;
 }
 
 const StyledFeeTypography = styled(Typography)(({ theme }) => ({
@@ -75,21 +40,10 @@ export function ParentInvoicesDataGridDesktop({
   onPageChange,
   loading = false,
 }: Readonly<ParentInvoicesDataGridDesktopProps>) {
-  const actionLabels = useMemo(
-    () => ({
-      payNow: labels.payNow,
-      viewSubmission: labels.viewSubmission,
-      viewFeedback: labels.viewFeedback,
-      viewDetails: labels.viewDetails,
-      downloadPdf: labels.downloadPdf,
-      markAsPaid: labels.markAsPaid,
-    }),
-    [labels]
-  );
-
   const emptyMessage =
     labels.emptyTitle && labels.emptySubtitle ? `${labels.emptyTitle} ${labels.emptySubtitle}` : labels.noEntries;
 
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoize the columns array so the DataGrid keeps stable column identity across prop-driven row updates; MUI X DataGrid re-runs row-height calc and virtualization when columns reference changes, so an inline array would force re-layout on every parent re-render
   const columns = useMemo<GridColDef<ParentInvoiceRow>[]>(
     () => [
       {
@@ -173,7 +127,7 @@ export function ParentInvoicesDataGridDesktop({
         renderCell: ({ row }) => (
           <ParentInvoiceRowActionsDesktop
             row={row}
-            labels={actionLabels}
+            labels={labels}
             canView={canView}
             canSubmitProof={canSubmitProof}
             canManage={canManage}
@@ -187,7 +141,6 @@ export function ParentInvoicesDataGridDesktop({
       },
     ],
     [
-      actionLabels,
       billingActionsDisabled,
       canManage,
       canSubmitProof,

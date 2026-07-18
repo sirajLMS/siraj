@@ -2,9 +2,7 @@
 
 import { Box, Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
-import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import type { TeacherDailyScheduleSectionProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DateNavigatorDesktop } from "@/frontend/desktop/components/ui/filter";
 import { TeacherScheduleDataGridDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherScheduleDataGrid.desktop";
@@ -22,34 +20,15 @@ const StyledFilterContainer = styled(Box)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.border.light}`,
 }));
 
-interface TeacherDailyScheduleSectionDesktopProps {
-  readonly title: string;
-  readonly dateValue: string;
-  readonly todayLabel: string;
-  readonly previousDayLabel: string;
-  readonly nextDayLabel: string;
-  readonly dateLabel: string;
-  readonly onDateChange: (date: string) => void;
-  readonly rows: readonly TeacherScheduleRow[];
-  readonly labels: TeacherDashboardViewLabels;
-  readonly instanceStatusLabels: Record<ClassOutcome | ClassExecutionState, string>;
-  readonly canActivate: boolean;
-  readonly loading?: boolean;
-  readonly emptyMessage: string;
-  readonly onActivate?: (id: string) => void;
-  readonly onStartSession?: (id: string) => void;
-  readonly onMarkAbsent?: (id: string) => void;
-  readonly onRequestLeave?: (id: string) => void;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
-}
-
 /**
  * Desktop variant of the daily schedule section.
  * Wraps the desktop-only schedule data grid with the desktop filter bar
  * (DateNavigator) and a styled panel chrome.
+ *
+ * Plan v5: per specs.md §4.1, the inline `TeacherDailyScheduleSectionDesktopProps`
+ * interface was lifted to `frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps.ts`
+ * (renamed without the `Desktop` suffix since the component is single-tier
+ * desktop-only and the contract lives once in common).
  */
 export function TeacherDailyScheduleSectionDesktop({
   title,
@@ -73,7 +52,7 @@ export function TeacherDailyScheduleSectionDesktop({
   pageSize,
   totalCount,
   onPageChange,
-}: Readonly<TeacherDailyScheduleSectionDesktopProps>) {
+}: Readonly<TeacherDailyScheduleSectionProps>) {
   return (
     <StyledDesktopPanel elevation={0}>
       <DesktopSectionPanel title={title}>

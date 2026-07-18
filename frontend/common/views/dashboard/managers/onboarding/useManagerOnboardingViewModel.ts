@@ -12,6 +12,7 @@ export interface ManagerOnboardingViewModel {
   readonly onSubmit: ManagerOnboardingViewProps["onSubmit"];
   readonly onCancel: ManagerOnboardingViewProps["onCancel"];
   readonly onDismissSuccess: ManagerOnboardingViewProps["onDismissSuccess"];
+  readonly metricsModel: ManagerOnboardingViewProps["metricsModel"];
 }
 
 export type UseManagerOnboardingViewModelProps = ManagerOnboardingViewModel;

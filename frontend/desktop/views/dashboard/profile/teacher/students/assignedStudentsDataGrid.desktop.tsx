@@ -4,6 +4,7 @@ import { Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
+import { formatStatusLabel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsStatusFormatters";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
@@ -17,11 +18,6 @@ type AssignedStudentsDataGridProps = {
   readonly pageSize: number;
   readonly onPaginationModelChange: (model: GridPaginationModel) => void;
 };
-
-function formatStatusLabel(status: string): string {
-  const normalized = status.replaceAll("_", " ").toLowerCase();
-  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-}
 
 export function AssignedStudentsDataGrid({
   rows,

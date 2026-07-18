@@ -1,13 +1,8 @@
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+"use client";
+
 import { ManagersFilterBar } from "@/frontend/common/views/dashboard/managers/home/ManagersFilterBar";
 import { ManagersMetrics } from "@/frontend/common/views/dashboard/managers/home/ManagersMetrics";
-import type {
-  Manager,
-  ManagerRoleFilter,
-  ManagerStatusFilter,
-  NonNullableManagerDirectoryMetrics,
-} from "@/frontend/common/views/dashboard/managers/home/types";
+import type { ManagersViewProps } from "@/frontend/common/views/dashboard/managers/home/types";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
@@ -15,62 +10,35 @@ import { ManagersCardListMobile } from "@/frontend/mobile/views/dashboard/manage
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
-interface ManagersViewMobileProps {
-  readonly managers: readonly Manager[];
-  readonly metrics: NonNullableManagerDirectoryMetrics;
-  readonly totalManagers?: number;
-  readonly loading?: boolean;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly onPageChange?: (page: number) => void;
-  readonly roleFilter: ManagerRoleFilter;
-  readonly statusFilter: ManagerStatusFilter;
-  readonly onRoleFilterChange: (role: ManagerRoleFilter) => void;
-  readonly onStatusFilterChange: (status: ManagerStatusFilter) => void;
-}
-
-export function ManagersViewMobile({
-  managers,
-  metrics,
-  totalManagers,
-  page,
-  pageSize,
-  onPageChange,
-  roleFilter,
-  statusFilter,
-  onRoleFilterChange,
-  onStatusFilterChange,
-}: Readonly<ManagersViewMobileProps>) {
+export function ManagersViewMobile(props: Readonly<ManagersViewProps>) {
   const t = useAppTranslation().dashboardTranslations.managersDirectory;
 
-  const actions = (
-    <RequirePermission permissions={[AppPermission.StaffCreate]}>
-      <Link href="/managers/onboarding" style={{ textDecoration: "none" }}>
-        <MobilePrimaryPageAction>{t.actions.addManager}</MobilePrimaryPageAction>
-      </Link>
-    </RequirePermission>
-  );
+  const actions = props.canCreateManager ? (
+    <Link href="/managers/onboarding" style={{ textDecoration: "none" }}>
+      <MobilePrimaryPageAction>{t.actions.addManager}</MobilePrimaryPageAction>
+    </Link>
+  ) : undefined;
 
   return (
     <MobilePageContainer>
       <MobilePageHeader title={t.mobileTitle} subtitle={t.pageSubtitle} actions={actions} />
 
-      <ManagersMetrics metrics={metrics} />
+      <ManagersMetrics metrics={props.metrics} />
 
       <MobileSectionPanel>
         <ManagersFilterBar
-          roleFilter={roleFilter}
-          statusFilter={statusFilter}
-          onRoleFilterChange={onRoleFilterChange}
-          onStatusFilterChange={onStatusFilterChange}
+          roleFilter={props.roleFilter}
+          statusFilter={props.statusFilter}
+          onRoleFilterChange={props.onRoleFilterChange}
+          onStatusFilterChange={props.onStatusFilterChange}
         />
 
         <ManagersCardListMobile
-          managers={managers as Manager[]}
-          page={page}
-          pageSize={pageSize}
-          totalCount={totalManagers}
-          onPageChange={onPageChange}
+          managers={[...props.managers]}
+          page={props.page}
+          pageSize={props.pageSize}
+          totalCount={props.totalManagers}
+          onPageChange={props.onPageChange}
         />
       </MobileSectionPanel>
     </MobilePageContainer>

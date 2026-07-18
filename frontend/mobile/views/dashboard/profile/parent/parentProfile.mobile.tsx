@@ -9,9 +9,13 @@ import type {
   ParentAdminData,
   ParentProfileViewModel,
 } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
+import {
+  hasParentBillingData,
+  hasParentIdentityData,
+  hasParentSocialData,
+} from "@/frontend/common/views/dashboard/profile/parent/utils";
 import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
-import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { MeetingConfigsTab } from "@/frontend/common/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import {
   MobileContentStack,
@@ -20,24 +24,6 @@ import {
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
-
-function hasParentSocialData(parentData: ParentProfileViewModel["parentData"]): boolean {
-  return Boolean(parentData?.facebook?.trim() || parentData?.whatsapp?.trim() || parentData?.twitter?.trim());
-}
-
-function hasParentIdentityData(adminData: ParentAdminData): boolean {
-  return Boolean(adminData?.nationality?.trim() || adminData?.address?.trim());
-}
-
-function hasParentBillingData(adminData: ParentAdminData): boolean {
-  return Boolean(
-    adminData?.invoiceType?.trim() ||
-      adminData?.feeAmount?.trim() ||
-      adminData?.currency ||
-      adminData?.timezone?.trim() ||
-      adminData?.lifecycleStatus
-  );
-}
 
 export function ParentProfileMobileView({
   scope,
@@ -54,13 +40,13 @@ export function ParentProfileMobileView({
   editData,
   avatarUrl,
   displayCurrency,
-  parentId,
-  meetingTabHref,
-  associatedStudents,
+  parentId: _parentId,
+  meetingTabHref: _meetingTabHref,
+  associatedStudents: _associatedStudents,
+  canView,
 }: Readonly<ParentProfileViewModel>) {
   const t = useAppTranslation().profileTranslations.base;
   const pt = useAppTranslation().profileTranslations.parent;
-  const { canView } = useProfileFieldAccess({ scope });
 
   // Handle non-profile tabs
   if (activeTab === "notifications" && scope === ProfileScope.Own) {

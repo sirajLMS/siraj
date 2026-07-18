@@ -5,15 +5,15 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import {
   CURRENCY_DISPLAY_PART_ORDER,
   CurrencyDisplayPart,
   type CurrencyDisplayPartValue,
   resolveCurrencyDisplayParts,
-} from "@/frontend/mobile/components/ui/display/currencyDisplay/currencyDisplay.constants";
+} from "@/frontend/common/components/ui/display/currencyDisplay/constants";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 
 export type MobileCurrencyDisplayProps = {

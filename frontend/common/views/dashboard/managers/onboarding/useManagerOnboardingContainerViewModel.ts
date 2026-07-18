@@ -10,6 +10,8 @@ import {
   managerOnboardingSchema,
 } from "@/frontend/common/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
 import { ManagerAccountType } from "@/frontend/common/views/dashboard/managers/onboarding/types";
+import type { OnboardingMetricsViewModel } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
+import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
 import { useRouter } from "@/shared/i18n/routing";
 
 const defaultValues: ManagerOnboardingFormData = {
@@ -30,9 +32,11 @@ export interface ManagerOnboardingContainerViewModel {
   readonly onSubmit: (data: ManagerOnboardingFormData) => void | Promise<void>;
   readonly onCancel: () => void;
   readonly onDismissSuccess: () => void;
+  // NEW FOR PLAN v5: metricsModel exposed by the Container VM so the tier views no longer call `useOnboardingMetrics` directly (was a GraphQL-in-tier violation per specs §3 N1 / §6.2).
+  readonly metricsModel: OnboardingMetricsViewModel;
 }
 
-export type UseManagerOnboardingContainerViewModelProps = {};
+export type UseManagerOnboardingContainerViewModelProps = Record<string, never>;
 
 export function useManagerOnboardingContainerViewModel(
   _props: Readonly<UseManagerOnboardingContainerViewModelProps>
@@ -40,6 +44,7 @@ export function useManagerOnboardingContainerViewModel(
   const router = useRouter();
   const { execute, loading } = useCreateManagerOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
+  const metricsModel = useOnboardingMetrics();
 
   const {
     register,
@@ -89,5 +94,6 @@ export function useManagerOnboardingContainerViewModel(
     onSubmit,
     onCancel,
     onDismissSuccess: () => setShowSuccess(false),
+    metricsModel,
   };
 }

@@ -3,20 +3,17 @@
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
-import { Controller, type FieldPath, type FieldValues } from "react-hook-form";
+import { Controller, type FieldValues } from "react-hook-form";
+import type { PaymentMethodTypeFieldsProps } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
+import { resolveFieldName } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/utils";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CountryAutocompleteMobile } from "@/frontend/mobile/components/ui/input/countrySelect";
 import { CurrencySelectMobile } from "@/frontend/mobile/components/ui/input/currencySelect";
 import { LocalizedStringFormFieldMobile } from "@/frontend/mobile/components/ui/input/localizedString";
 import { PaymentMethodSelectMobile } from "@/frontend/mobile/components/ui/input/paymentMethodSelect";
-import type { PaymentMethodTypeFieldsProps } from "@/frontend/mobile/components/ui/input/paymentMethodTypeFields/paymentMethodTypeFields.types";
 import { PhoneFormFieldMobile } from "@/frontend/mobile/components/ui/input/phoneInput";
 import { TagInputMobile } from "@/frontend/mobile/components/ui/input/tagInput";
 import { useAppTranslation } from "@/shared/locale";
-
-function resolveFieldName<T extends FieldValues>(prefix: string | undefined, field: string): FieldPath<T> {
-  return (prefix ? `${prefix}.${field}` : field) as FieldPath<T>;
-}
 
 export function PaymentMethodTypeFieldsMobile<T extends FieldValues>({
   type,
@@ -35,7 +32,7 @@ export function PaymentMethodTypeFieldsMobile<T extends FieldValues>({
   showCatalogMetadata = false,
   detailsPrefix,
   catalogPrefix,
-}: PaymentMethodTypeFieldsProps<T>): React.ReactNode {
+}: Readonly<PaymentMethodTypeFieldsProps<T>>): React.ReactNode {
   const t = useAppTranslation().uiTranslations.paymentMethod;
   const tTypeFields = t.typeFields;
 

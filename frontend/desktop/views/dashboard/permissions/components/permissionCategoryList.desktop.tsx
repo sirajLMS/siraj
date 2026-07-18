@@ -1,23 +1,8 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionCategoryListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { PermissionCategoryGroupDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCategoryGroup.desktop";
-import type { PermissionsLabels } from "@/shared/locale";
-
-type ValidPermission = Permission & { id: string; key: string; category: string };
-
-interface PermissionCategoryListDesktopProps {
-  readonly groupedPermissions: Record<string, ValidPermission[]>;
-  readonly selectedPermissionIds: readonly string[];
-  readonly isGroupSelected: (categoryPerms: Array<Permission & { id: string }>) => boolean;
-  readonly isGroupIndeterminate: (categoryPerms: Array<Permission & { id: string }>) => boolean;
-  readonly onSelectAllCategory: (categoryPerms: Array<Permission & { id: string }>, checked: boolean) => void;
-  readonly onTogglePermission: (permId: string, isSystem: boolean) => void;
-  readonly isLoading: boolean;
-  readonly t: PermissionsLabels;
-}
-
 export function PermissionCategoryListDesktop({
   groupedPermissions,
   selectedPermissionIds,
@@ -27,7 +12,7 @@ export function PermissionCategoryListDesktop({
   onTogglePermission,
   isLoading,
   t,
-}: Readonly<PermissionCategoryListDesktopProps>) {
+}: Readonly<PermissionCategoryListProps>) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       {Object.keys(groupedPermissions).length === 0 ? (

@@ -2,23 +2,17 @@
 
 import { Box } from "@mui/material";
 import { useMemo, useState } from "react";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionCatalogSectionProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { PermissionCatalogDataGridDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCatalogDataGrid.desktop";
 import { PermissionCatalogToolbarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCatalogToolbar.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
-export interface PermissionCatalogSectionDesktopProps {
-  readonly permissions: readonly Permission[];
-  readonly groups: readonly PermissionGroup[];
-  readonly loading?: boolean;
-}
-
 export function PermissionCatalogSectionDesktop({
   permissions,
   groups,
   loading = false,
-}: Readonly<PermissionCatalogSectionDesktopProps>) {
+}: Readonly<PermissionCatalogSectionProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");

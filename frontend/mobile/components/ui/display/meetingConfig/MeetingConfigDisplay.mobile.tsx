@@ -3,14 +3,14 @@
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import type { TypographyProps } from "@mui/material/Typography";
 import type * as React from "react";
+import type {
+  MeetingConfigDisplayData,
+  MeetingConfigDisplayProps,
+} from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay/localizedStringDisplay.mobile";
-import type {
-  MeetingConfigDisplayData,
-  MeetingConfigDisplayProps,
-} from "@/frontend/mobile/components/ui/display/meetingConfig/meetingConfigDisplay.types";
 import { type MeetingConfigDisplayLabels, useAppTranslation } from "@/shared/locale";
 
 function DetailRow({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {

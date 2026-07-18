@@ -3,16 +3,10 @@
 
 import { CheckCircleOutlined, InfoOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
-import { useNotifications } from "@toolpad/core/useNotifications";
-import { useState } from "react";
 import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/common/utils/student-status-transitions";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/common/views/dashboard/admin/parents/students/types";
-import type {
-  ManagementControlsCardProps,
-  ReassignmentSubmitInput,
-  StatusChangeInput,
-} from "@/frontend/common/views/dashboard/teachers/reassignment/types";
+import type { ManagementControlsCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 import { labelSx, outlinedInputSx } from "@/frontend/desktop/components/ui/form/field/formFieldStyles.desktop";
@@ -204,52 +198,20 @@ function ActionButtons({
 export function ManagementControlsCardDesktop({
   teachers,
   currentStatus,
-  studentId,
-  version,
+  studentId: _studentId,
+  version: _version,
   isSubmitting,
-  onReassign,
-  onStatusChange,
+  onReassign: _onReassign,
+  onStatusChange: _onStatusChange,
   onCancel,
+  selectedTeacherId,
+  selectedNewStatus,
+  saved,
+  onSelectedTeacherIdChange,
+  onSelectedNewStatusChange,
+  onSubmitForm,
 }: Readonly<ManagementControlsCardProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherReassignment;
-  const notifications = useNotifications();
-  const [selectedTeacherId, setSelectedTeacherId] = useState("");
-  const [selectedNewStatus, setSelectedNewStatus] = useState<StudentStatus | "">("");
-  const [saved, setSaved] = useState(false);
-
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-
-    if (!selectedTeacherId && !selectedNewStatus) {
-      notifications.show(t.actions.info, { severity: "warning", autoHideDuration: 4000 });
-      return;
-    }
-
-    const bothChanged = !!selectedTeacherId && !!selectedNewStatus;
-
-    if (selectedTeacherId) {
-      const input: ReassignmentSubmitInput = {
-        studentId,
-        newTeacherId: selectedTeacherId,
-        expectedVersion: version ?? undefined,
-      };
-      await onReassign(input);
-    }
-
-    if (selectedNewStatus) {
-      const input: StatusChangeInput = {
-        studentId,
-        newStatus: selectedNewStatus,
-        expectedVersion: bothChanged ? undefined : (version ?? undefined),
-      };
-      await onStatusChange(input);
-    }
-
-    setSaved(true);
-    setTimeout(() => {
-      setSaved(false);
-    }, 2000);
-  };
 
   return (
     <DesktopBaseCard sx={{ p: 4, boxShadow: theme => theme.palette.shadow.card }}>
@@ -262,16 +224,16 @@ export function ManagementControlsCardDesktop({
         </Typography>
       </Box>
 
-      <Stack component="form" spacing={4} onSubmit={handleSubmit}>
+      <Stack component="form" spacing={4} onSubmit={onSubmitForm}>
         <TeacherSelection
           teachers={teachers}
           selectedTeacherId={selectedTeacherId}
-          onTeacherChange={setSelectedTeacherId}
+          onTeacherChange={onSelectedTeacherIdChange}
         />
         <StatusUpdate
           currentStatus={currentStatus}
           selectedStatus={selectedNewStatus}
-          onStatusChange={setSelectedNewStatus}
+          onStatusChange={onSelectedNewStatusChange}
         />
         <ActionButtons loading={isSubmitting} saved={saved} onCancel={onCancel} />
       </Stack>

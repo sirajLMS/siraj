@@ -1,21 +1,14 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { BasePermissionCatalogListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileCardList } from "@/frontend/mobile/components/ui";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
-export interface PermissionCatalogCardListMobileProps {
-  readonly permissions: readonly Permission[];
-  readonly groups: readonly PermissionGroup[];
-}
-
-export function PermissionCatalogCardListMobile({
-  permissions,
-  groups,
-}: Readonly<PermissionCatalogCardListMobileProps>) {
+export function PermissionCatalogCardListMobile({ permissions, groups }: Readonly<BasePermissionCatalogListProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (

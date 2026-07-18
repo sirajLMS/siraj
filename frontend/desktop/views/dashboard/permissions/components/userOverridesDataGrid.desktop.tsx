@@ -10,17 +10,11 @@ import type { PermissionGroup, User, UserOverride } from "@/frontend/common/grap
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
+import type { UserOverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 import { useAppTranslation } from "@/shared/locale";
-
-export interface UserOverridesDataGridDesktopProps {
-  readonly users: readonly User[];
-  readonly groups: readonly PermissionGroup[];
-  readonly onManageOverrides: (userId: string) => void;
-  readonly loading?: boolean;
-}
 
 interface OverridesInfo {
   readonly grants: number;
@@ -249,7 +243,7 @@ export function UserOverridesDataGridDesktop({
   groups,
   onManageOverrides,
   loading = false,
-}: Readonly<UserOverridesDataGridDesktopProps>) {
+}: Readonly<UserOverridesDataGridProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   const columns = useMemo<GridColDef<User>[]>(() => {

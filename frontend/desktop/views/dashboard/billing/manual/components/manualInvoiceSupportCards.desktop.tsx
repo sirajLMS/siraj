@@ -3,12 +3,8 @@
 import { HistoryOutlined, ReceiptLongOutlined, SecurityOutlined } from "@mui/icons-material";
 import { Box, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import type { ManualInvoiceSupportCardsProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceSupportCards.types";
 import { DesktopBaseCard } from "@/frontend/desktop/components/ui";
-import type { BillingManualLabels } from "@/shared/locale";
-
-interface ManualInvoiceSupportCardsDesktopProps {
-  readonly labels: BillingManualLabels;
-}
 
 const SUPPORT_CARDS = [
   { key: "secureBilling", icon: SecurityOutlined },
@@ -20,7 +16,7 @@ const StyledSupportBody = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export function ManualInvoiceSupportCardsDesktop({ labels }: Readonly<ManualInvoiceSupportCardsDesktopProps>) {
+export function ManualInvoiceSupportCardsDesktop({ labels }: Readonly<ManualInvoiceSupportCardsProps>) {
   const theme = useTheme();
   return (
     <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: 3, mt: 4 }}>

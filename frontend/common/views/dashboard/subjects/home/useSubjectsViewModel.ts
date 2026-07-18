@@ -16,8 +16,11 @@ import { useRouter } from "@/shared/i18n/routing";
 export interface SubjectsViewModel {
   readonly categories: readonly CategoryItem[];
   readonly subjects: readonly SubjectItem[];
+  readonly filteredSubjects: readonly SubjectItem[];
   readonly isLoading: boolean;
   readonly activeCategoryId: string | null;
+  readonly categoriesSectionOpen: boolean;
+  readonly onToggleCategoriesSection: () => void;
   readonly onCategoryChange: (categoryId: string | null) => void;
   readonly onAddSubject: () => void;
   readonly onEditSubject: (id: string) => void;
@@ -39,6 +42,8 @@ export function useSubjectsViewModel(_props: Readonly<UseSubjectsViewModelProps>
   const permissions = useUserStore(state => state.permissions);
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const store = useSubjectManagementStore();
+  const categoriesSectionOpen = store.categoriesSectionOpen;
+  const onToggleCategoriesSection = store.toggleCategoriesSection;
 
   const { data: categoriesData, loading: categoriesLoading } = useQuery(classCategoriesQueryDocument);
   const { data: subjectsData, loading: subjectsLoading } = useQuery(classSubjectsQueryDocument, {
@@ -53,6 +58,12 @@ export function useSubjectsViewModel(_props: Readonly<UseSubjectsViewModelProps>
   const subjects = useMemo(
     () => (subjectsData?.classSubjects ?? []) as readonly SubjectItem[],
     [subjectsData?.classSubjects]
+  );
+
+  // NEW FOR PLAN v5: filteredSubjects lifted out of tier views into the ViewModel so the tier views no longer derive data inline.
+  const filteredSubjects = useMemo<readonly SubjectItem[]>(
+    () => (activeCategoryId ? subjects.filter(s => s.category?.id === activeCategoryId) : subjects),
+    [subjects, activeCategoryId]
   );
 
   const canManageSubjects = SUBJECT_PERMS.some(p => permissions.includes(p));
@@ -77,8 +88,11 @@ export function useSubjectsViewModel(_props: Readonly<UseSubjectsViewModelProps>
   return {
     categories,
     subjects,
+    filteredSubjects,
     isLoading,
     activeCategoryId,
+    categoriesSectionOpen,
+    onToggleCategoriesSection,
     onCategoryChange: setActiveCategoryId,
     onAddSubject: subjectActions.onAdd,
     onEditSubject: subjectActions.onEdit,

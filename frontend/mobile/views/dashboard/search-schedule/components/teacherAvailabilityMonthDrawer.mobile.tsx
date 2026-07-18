@@ -1,119 +1,15 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import { CalendarToday, ChevronLeft, ChevronRight, CloseOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, Drawer, IconButton, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import { addMonths, parse, subMonths } from "date-fns";
-import { useEffect, useMemo, useState } from "react";
-import {
-  type AvailabilitySearchInput,
-  AvailabilitySearchSortBy,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
-import { buildTeacherMonthAvailabilityInput } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
-import type { SearchScheduleResultItem } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
+import type {
+  TeacherAvailabilityGapItem,
+  TeacherAvailabilityMonthDrawerProps,
+} from "@/frontend/common/views/dashboard/search-schedule/types";
+import { shiftMonth } from "@/frontend/common/views/dashboard/search-schedule/utils";
 import { TeacherAvailabilityCalendarGridMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityCalendarGrid.mobile";
-import type { TeacherAvailabilityGapItem } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityDayPill.mobile";
 import { useAppTranslation } from "@/shared/locale";
-
-interface TeacherAvailabilityMonthDrawerMobileProps {
-  readonly open: boolean;
-  readonly teacher: SearchScheduleResultItem | null;
-  readonly anchorFromDate: string;
-  readonly onClose: () => void;
-}
-
-function groupGapsByDayOfMonth(
-  gaps: readonly TeacherAvailabilityGapItem[] | null | undefined,
-  month: Date
-): Partial<Record<number, readonly TeacherAvailabilityGapItem[]>> {
-  const grouped: Record<number, TeacherAvailabilityGapItem[]> = {};
-
-  for (const gap of gaps ?? []) {
-    if (!gap) {
-      continue;
-    }
-
-    const calendarDate = gap.calendarDate;
-    if (!calendarDate) {
-      continue;
-    }
-
-    const parsed = parse(calendarDate, "yyyy-MM-dd", new Date());
-    if (parsed.getMonth() !== month.getMonth() || parsed.getFullYear() !== month.getFullYear()) {
-      continue;
-    }
-
-    const day = parsed.getDate();
-    grouped[day] = [...(grouped[day] ?? []), gap];
-  }
-
-  return grouped;
-}
-
-const EMPTY_INPUT: AvailabilitySearchInput = {
-  fromDate: "",
-  toDate: "",
-  fromTime: "",
-  toTime: "",
-  gender: null,
-  minAvailableDays: null,
-  minTotalGaps: null,
-  teacherNameSearch: null,
-  daysOfWeek: null,
-  sortBy: AvailabilitySearchSortBy.MostAvailableDays,
-  paginationArgs: {
-    first: null,
-    page: null,
-    skip: null,
-    after: null,
-    before: null,
-    last: null,
-    maxCount: null,
-  },
-};
-
-interface MonthDrawerQueryResult {
-  readonly daysByDate: Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>;
-  readonly loading: boolean;
-  readonly error: unknown;
-}
-
-function useMonthDrawerQuery(
-  open: boolean,
-  teacher: SearchScheduleResultItem | null,
-  currentMonth: Date
-): MonthDrawerQueryResult {
-  const draft = useSearchScheduleStore(state => state.draft);
-
-  const monthInput = useMemo((): AvailabilitySearchInput | null => {
-    if (!teacher?.id || !teacher.name) {
-      return null;
-    }
-
-    return buildTeacherMonthAvailabilityInput(draft, { id: teacher.id, name: teacher.name }, currentMonth);
-  }, [currentMonth, draft, teacher?.id, teacher?.name]);
-
-  const { data, loading, error } = useQuery(searchTeacherAvailabilityQueryDocument, {
-    variables: monthInput ? { input: monthInput } : { input: EMPTY_INPUT },
-    skip: !open || monthInput === null,
-    fetchPolicy: "cache-and-network",
-  });
-
-  const monthTeacher = useMemo(() => {
-    const teachers = data?.searchTeacherAvailability?.teachers ?? [];
-    return teachers.find(item => item?.id === teacher?.id) ?? teachers[0] ?? null;
-  }, [data?.searchTeacherAvailability?.teachers, teacher?.id]);
-
-  const daysByDate = useMemo(
-    () => groupGapsByDayOfMonth(monthTeacher?.gaps, currentMonth),
-    [currentMonth, monthTeacher?.gaps]
-  );
-
-  return { daysByDate, loading, error };
-}
 
 function DrawerHeader({ title, onClose }: { readonly title: string; readonly onClose: () => void }) {
   const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
@@ -147,7 +43,7 @@ function MonthNavigator({
   onMonthChange,
 }: {
   readonly currentMonth: Date;
-  readonly onMonthChange: (fn: (prev: Date) => Date) => void;
+  readonly onMonthChange: (next: Date) => void;
 }) {
   const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
@@ -159,7 +55,7 @@ function MonthNavigator({
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, py: 2 }}>
-      <IconButton aria-label={t.previousMonth} onClick={() => onMonthChange(prev => subMonths(prev, 1))} sx={flipSx}>
+      <IconButton aria-label={t.previousMonth} onClick={() => onMonthChange(shiftMonth(currentMonth, -1))} sx={flipSx}>
         <ChevronLeft />
       </IconButton>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -168,7 +64,7 @@ function MonthNavigator({
           {monthStr} {yearStr}
         </Typography>
       </Box>
-      <IconButton aria-label={t.nextMonth} onClick={() => onMonthChange(prev => addMonths(prev, 1))} sx={flipSx}>
+      <IconButton aria-label={t.nextMonth} onClick={() => onMonthChange(shiftMonth(currentMonth, 1))} sx={flipSx}>
         <ChevronRight />
       </IconButton>
     </Box>
@@ -184,7 +80,7 @@ function DrawerContent({
   readonly loading: boolean;
   readonly error: unknown;
   readonly currentMonth: Date;
-  readonly daysByDate: Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>;
+  readonly daysByDate: Readonly<Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>>;
 }) {
   const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   return (
@@ -211,20 +107,14 @@ function DrawerContent({
 export function TeacherAvailabilityMonthDrawerMobile({
   open,
   teacher,
-  anchorFromDate,
+  currentMonth,
+  monthDrawerLoading,
+  monthDrawerError,
+  daysByDate,
   onClose,
-}: Readonly<TeacherAvailabilityMonthDrawerMobileProps>) {
+  onMonthChange,
+}: Readonly<TeacherAvailabilityMonthDrawerProps>) {
   const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
-
-  const [currentMonth, setCurrentMonth] = useState(() => parse(anchorFromDate, "yyyy-MM-dd", new Date()));
-
-  useEffect(() => {
-    if (open) {
-      setCurrentMonth(parse(anchorFromDate, "yyyy-MM-dd", new Date()));
-    }
-  }, [anchorFromDate, open]);
-
-  const { daysByDate, loading, error } = useMonthDrawerQuery(open, teacher, currentMonth);
 
   return (
     <Drawer
@@ -244,8 +134,13 @@ export function TeacherAvailabilityMonthDrawerMobile({
     >
       <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <DrawerHeader title={t.monthScheduleTitle(teacher?.name ?? "")} onClose={onClose} />
-        <MonthNavigator currentMonth={currentMonth} onMonthChange={setCurrentMonth} />
-        <DrawerContent loading={loading} error={error} currentMonth={currentMonth} daysByDate={daysByDate} />
+        <MonthNavigator currentMonth={currentMonth} onMonthChange={onMonthChange} />
+        <DrawerContent
+          loading={monthDrawerLoading}
+          error={monthDrawerError}
+          currentMonth={currentMonth}
+          daysByDate={daysByDate}
+        />
       </Box>
     </Drawer>
   );

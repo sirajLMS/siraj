@@ -2,6 +2,10 @@
 
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import type * as React from "react";
+import type {
+  PaymentMethodDisplayData,
+  PaymentMethodDisplayProps,
+} from "@/frontend/common/components/ui/display/paymentMethod/types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
@@ -11,10 +15,6 @@ import {
   DesktopLocalizedStringDisplay,
   DesktopPhoneDisplay,
 } from "@/frontend/desktop/components/ui/display";
-import type {
-  PaymentMethodDisplayData,
-  PaymentMethodDisplayProps,
-} from "@/frontend/desktop/components/ui/display/paymentMethod/paymentMethodDisplay.types";
 import {
   type PaymentMethodDirectionLabels,
   type PaymentMethodDisplayLabels,

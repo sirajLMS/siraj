@@ -4,13 +4,13 @@ import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { BasePermissionCatalogListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
-export interface PermissionCatalogDataGridDesktopProps {
-  readonly permissions: readonly Permission[];
-  readonly groups: readonly PermissionGroup[];
+export interface PermissionCatalogDataGridDesktopProps extends BasePermissionCatalogListProps {
+  // VARIANT JUSTIFICATION: extra field loading — desktop data-grid renders an async-loaded table; mobile card list is always synchronous
   readonly loading?: boolean;
 }
 

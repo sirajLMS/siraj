@@ -4,23 +4,15 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
-import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import type { ClassMeetingConfigFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import type { MeetingConfigListProps } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useAppTranslation } from "@/shared/locale";
 
-export type MeetingConfigListItem = UserMeetingConfigFieldsFragment | ClassMeetingConfigFieldsFragment;
-
-export type MeetingConfigListProps = {
-  readonly configs: readonly MeetingConfigListItem[];
-  readonly title?: string;
-  readonly loading?: boolean;
-  readonly onSetDefaultAction?: (id: string) => void;
-  readonly onEditAction?: (config: MeetingConfigListItem) => void;
-  readonly onDeleteAction?: (id: string) => void;
-  readonly emptyMessage?: string;
-};
+export type {
+  MeetingConfigListItem,
+  MeetingConfigListProps,
+} from "@/frontend/common/components/ui/display/meetingConfig/types";
 
 export function MeetingConfigList({
   configs,

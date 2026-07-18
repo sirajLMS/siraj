@@ -4,40 +4,15 @@ import { Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
-  MarkPaidInvoiceTarget,
-  PaymentDetailsTarget,
-} from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
-import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
+  BaseParentInvoicesListProps,
+  ParentInvoicesCardListMobileLabels,
+} from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
 import { MobilePaginationControls, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { ParentInvoiceRowActionsMobile } from "@/frontend/mobile/views/dashboard/billing/components/parentInvoiceRowActions.mobile";
 
-interface ParentInvoicesCardListMobileLabels {
-  readonly viewDetails: string;
-  readonly viewSubmission: string;
-  readonly viewFeedback: string;
-  readonly downloadPdf: string;
-  readonly payNow: string;
-  readonly markAsPaid: string;
-  readonly hasPaymentProofHint: string;
-  readonly statusLabels: Record<string, string>;
-}
-
-interface ParentInvoicesCardListMobileProps {
-  readonly rows: readonly ParentInvoiceRow[];
+interface ParentInvoicesCardListMobileProps extends BaseParentInvoicesListProps {
+  // VARIANT JUSTIFICATION: extra field labels — card list tier carries card-shaped labels (withPaymentproofHint + statusLabels); desktop data-grid uses a different labels shape
   readonly labels: ParentInvoicesCardListMobileLabels;
-  readonly canView: boolean;
-  readonly canSubmitProof: boolean;
-  readonly canManage?: boolean;
-  readonly billingActionsDisabled?: boolean;
-  readonly loading?: boolean;
-  readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onMarkAsPaid?: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
-  readonly onDownloadPdf: (id: string) => void;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
 }
 
 const StyledInvoiceCard = styled(Paper)(({ theme }) => ({

@@ -6,7 +6,7 @@ import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display"
 import type {
   MeetingConfigDisplayData,
   MeetingConfigDisplayProps,
-} from "@/frontend/common/components/ui/display/meetingConfig/meetingConfigDisplay.types";
+} from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";

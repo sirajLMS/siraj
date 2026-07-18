@@ -3,8 +3,8 @@
 import { CloseOutlined } from "@mui/icons-material";
 import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useManageOverridesState } from "@/frontend/common/views/dashboard/permissions/components/useManageOverridesState";
+import type { ManageOverridesDialogProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { OverridesDataGridMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overridesDataGrid.mobile";
 import { OverridesDialogFooterMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overridesDialogFooter.mobile";
 import { OverridesToolbarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overridesToolbar.mobile";
@@ -39,17 +39,6 @@ const StyledRightContentArea = styled(Box)({
   minHeight: 0,
 });
 
-interface ManageOverridesDialogMobileProps {
-  readonly open: boolean;
-  readonly userId: string | null;
-  readonly users: readonly User[];
-  readonly groups: readonly PermissionGroup[];
-  readonly permissions: readonly Permission[];
-  readonly isLoading: boolean;
-  readonly onClose: () => void;
-  readonly onSave: (userId: string, overrides: Array<{ permissionId: string; state: string }>) => Promise<void>;
-}
-
 export function ManageOverridesDialogMobile({
   open,
   userId,
@@ -59,7 +48,7 @@ export function ManageOverridesDialogMobile({
   isLoading,
   onClose,
   onSave,
-}: Readonly<ManageOverridesDialogMobileProps>) {
+}: Readonly<ManageOverridesDialogProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   const {

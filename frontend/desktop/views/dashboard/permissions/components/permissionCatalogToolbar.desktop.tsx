@@ -2,15 +2,8 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, FormControl, InputAdornment, MenuItem, Select, TextField } from "@mui/material";
+import type { PermissionCatalogToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { useAppTranslation } from "@/shared/locale";
-
-export interface PermissionCatalogToolbarDesktopProps {
-  readonly searchQuery: string;
-  readonly selectedCategory: string;
-  readonly categories: readonly string[];
-  readonly onSearchChange: (value: string) => void;
-  readonly onCategoryChange: (value: string) => void;
-}
 
 export function PermissionCatalogToolbarDesktop({
   searchQuery,
@@ -18,7 +11,7 @@ export function PermissionCatalogToolbarDesktop({
   categories,
   onSearchChange,
   onCategoryChange,
-}: Readonly<PermissionCatalogToolbarDesktopProps>) {
+}: Readonly<PermissionCatalogToolbarProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (

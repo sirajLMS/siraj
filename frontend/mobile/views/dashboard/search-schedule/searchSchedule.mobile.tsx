@@ -1,30 +1,28 @@
-"use client";
-
 import { Box, Typography } from "@mui/material";
-import { differenceInCalendarDays, parse } from "date-fns";
 import type {
   SearchScheduleResultItem,
   SearchScheduleResultSummary,
   SearchScheduleViewModel,
 } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
+import {
+  buildDateColumns,
+  getColumnCount,
+  groupGapsByDate,
+} from "@/frontend/common/views/dashboard/search-schedule/utils";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { SearchScheduleFormMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleForm.mobile";
 import { SearchSchedulePaginationFooterMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchSchedulePaginationFooter.mobile";
 import { SearchScheduleResultsSkeletonMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleResultsSkeleton.mobile";
 import { TeacherAvailabilityGridMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityGrid.mobile";
+import { TeacherAvailabilityMonthDrawerMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.mobile";
 import { useAppTranslation } from "@/shared/locale";
-
-function getColumnCount(fromDate: string, toDate: string): number {
-  const start = parse(fromDate, "yyyy-MM-dd", new Date());
-  const end = parse(toDate, "yyyy-MM-dd", new Date());
-  return Math.max(differenceInCalendarDays(end, start) + 1, 1);
-}
 
 interface SearchScheduleMobileResultsProps {
   readonly searchResult: SearchScheduleResultSummary | null | undefined;
   readonly fromDate: string;
   readonly toDate: string;
   readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreSearchSchedule"];
+  readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
 }
 
 function SearchScheduleMobileResults({
@@ -32,6 +30,7 @@ function SearchScheduleMobileResults({
   fromDate,
   toDate,
   t,
+  onOpenMonthDrawer,
 }: Readonly<SearchScheduleMobileResultsProps>) {
   if (!searchResult) {
     return null;
@@ -53,6 +52,8 @@ function SearchScheduleMobileResults({
     );
   }
 
+  const dateColumns = buildDateColumns(fromDate, toDate);
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Typography
@@ -67,7 +68,14 @@ function SearchScheduleMobileResults({
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {activeTeachers.map(teacher => (
-          <TeacherAvailabilityGridMobile key={teacher.id ?? ""} teacher={teacher} fromDate={fromDate} toDate={toDate} />
+          <TeacherAvailabilityGridMobile
+            key={teacher.id ?? ""}
+            teacher={teacher}
+            fromDate={fromDate}
+            dateColumns={dateColumns}
+            gapsByDate={groupGapsByDate(teacher.gaps)}
+            onOpenMonthDrawer={onOpenMonthDrawer}
+          />
         ))}
       </Box>
     </Box>
@@ -87,6 +95,29 @@ export function SearchScheduleMobileView({
   onDraftChange,
   onSearch,
   onPageChange,
+  teacherSearchInput,
+  selectedTeacher,
+  teacherOptions,
+  teacherSearchLoading,
+  shouldSearchTeachers,
+  onTeacherSearchInputChange,
+  onSelectTeacher,
+  formFilterDrawerOpen,
+  onOpenFormFilterDrawer,
+  onCloseFormFilterDrawer,
+  sortMenuAnchorEl,
+  onSortMenuOpen,
+  onSortMenuClose,
+  onSortChange,
+  monthDrawerOpen,
+  monthDrawerTeacher,
+  monthDrawerCurrentMonth,
+  monthDrawerLoading,
+  monthDrawerError,
+  monthDrawerDaysByDate,
+  onOpenMonthDrawer,
+  onCloseMonthDrawer,
+  onMonthDrawerChangeMonth,
 }: Readonly<SearchScheduleViewModel>) {
   const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const columnCount = getColumnCount(fromDate, toDate);
@@ -117,6 +148,20 @@ export function SearchScheduleMobileView({
           isSearching={isInitialLoading}
           onDraftChange={onDraftChange}
           onSearch={onSearch}
+          formFilterDrawerOpen={formFilterDrawerOpen}
+          onOpenFormFilterDrawer={onOpenFormFilterDrawer}
+          onCloseFormFilterDrawer={onCloseFormFilterDrawer}
+          sortMenuAnchorEl={sortMenuAnchorEl}
+          onSortMenuOpen={onSortMenuOpen}
+          onSortMenuClose={onSortMenuClose}
+          onSortChange={onSortChange}
+          teacherSearchInput={teacherSearchInput}
+          selectedTeacher={selectedTeacher}
+          teacherOptions={teacherOptions}
+          teacherSearchLoading={teacherSearchLoading}
+          shouldSearchTeachers={shouldSearchTeachers}
+          onTeacherSearchInputChange={onTeacherSearchInputChange}
+          onSelectTeacher={onSelectTeacher}
         />
 
         {error ? (
@@ -128,7 +173,13 @@ export function SearchScheduleMobileView({
         {isInitialLoading ? (
           <SearchScheduleResultsSkeletonMobile columnCount={columnCount} />
         ) : searchResult || undefined ? (
-          <SearchScheduleMobileResults searchResult={searchResult} fromDate={fromDate} toDate={toDate} t={t} />
+          <SearchScheduleMobileResults
+            searchResult={searchResult}
+            fromDate={fromDate}
+            toDate={toDate}
+            t={t}
+            onOpenMonthDrawer={onOpenMonthDrawer}
+          />
         ) : null}
 
         {showPaginationFooter && pageInfo ? (
@@ -139,6 +190,17 @@ export function SearchScheduleMobileView({
           />
         ) : null}
       </Box>
+
+      <TeacherAvailabilityMonthDrawerMobile
+        open={monthDrawerOpen}
+        teacher={monthDrawerTeacher}
+        currentMonth={monthDrawerCurrentMonth}
+        monthDrawerLoading={monthDrawerLoading}
+        monthDrawerError={monthDrawerError}
+        daysByDate={monthDrawerDaysByDate}
+        onClose={onCloseMonthDrawer}
+        onMonthChange={onMonthDrawerChangeMonth}
+      />
     </MobilePageContainer>
   );
 }

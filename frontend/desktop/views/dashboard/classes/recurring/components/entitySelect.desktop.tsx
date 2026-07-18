@@ -3,17 +3,7 @@
 import { ExpandMoreOutlined } from "@mui/icons-material";
 import { Box, FormControl, FormHelperText, MenuItem, Select } from "@mui/material";
 import { labelSx, standardInputSx } from "@/frontend/common/components/ui/form";
-import type { SimpleEntity } from "@/frontend/common/views/dashboard/classes/recurring/types";
-
-export interface EntitySelectDesktopProps {
-  readonly value: string;
-  readonly entities: readonly SimpleEntity[];
-  readonly isSubmitting: boolean;
-  readonly label: string;
-  readonly placeholder: string;
-  readonly error?: string;
-  readonly onChange: (value: string) => void;
-}
+import type { EntitySelectProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 
 export function EntitySelectDesktop({
   value,
@@ -23,7 +13,7 @@ export function EntitySelectDesktop({
   placeholder,
   error,
   onChange,
-}: EntitySelectDesktopProps) {
+}: EntitySelectProps) {
   return (
     <>
       <Box component="label" sx={labelSx}>

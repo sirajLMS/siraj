@@ -57,6 +57,22 @@ export interface TeacherDashboardViewModel {
   readonly onDownloadHandbook: () => void;
   readonly onContactCoordinator: () => void;
   readonly onSupport: () => void;
+  // NEW FOR PLAN v5: lifted permission booleans and `absentDialog` state —
+  // previously owned by the tier-side `RequirePermission`/`useState` patterns
+  // in teacherActiveSessionControls.*, teacherScheduleStatusContent.mobile,
+  // teacherScheduleSessionActionsCell.desktop — see specs.md §3 N3 + N7 + §6.4.
+  // `onAbsentDialogOpen` is the bound `() => void` form consumed by the
+  // `TeacherActiveSessionControls*` components; the schedule cards own the
+  // binding to a specific row via `onAbsentDialogOpenForClass(row.id)`.
+  readonly hasSessionUpdateStatusStart: boolean;
+  readonly hasSessionUpdateStatusAbsent: boolean;
+  readonly hasSessionUpdateStatusLeave: boolean;
+  readonly hasSessionActivateClass: boolean;
+  readonly absentDialogOpen: boolean;
+  readonly onAbsentDialogOpen: () => void;
+  readonly onAbsentDialogOpenForClass: (classInstanceId: string) => void;
+  readonly onAbsentDialogClose: () => void;
+  readonly onAbsentDialogConfirm: () => void;
   readonly dateValue: string;
   readonly onDateChange: (date: string) => void;
   readonly page?: number;

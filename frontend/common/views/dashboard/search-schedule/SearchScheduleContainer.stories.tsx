@@ -110,6 +110,13 @@ const meta: Meta<typeof SearchScheduleContainer> = {
         debouncedTeacherSearch: "",
         selectedTeacher: null,
         _hasHydrated: true,
+        // NEW FOR PLAN v5: reset lifted UI state in the storybook decorator.
+        formFilterDrawerOpen: false,
+        sortMenuAnchorEl: null,
+        monthDrawerOpen: false,
+        monthDrawerAnchorFromDate: "",
+        monthDrawerCurrentMonth: "",
+        monthDrawerTeacher: null,
       });
       return (
         <StoryBookPageContainer>

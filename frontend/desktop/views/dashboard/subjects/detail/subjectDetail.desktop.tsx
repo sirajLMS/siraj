@@ -21,25 +21,24 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 function ResourceItemDesktop({
   resource,
   labels,
-}: Readonly<{ resource: SubjectResourceItem; labels: SubjectDetailViewModel["labels"] }>) {
-  const handleDownload = () => {
-    if (resource.filePath) {
-      window.open(`/api/storage/files/${resource.filePath}`, "_blank", "noopener,noreferrer");
-    }
-  };
-
+  onDownload,
+}: Readonly<{
+  resource: SubjectResourceItem;
+  labels: SubjectDetailViewModel["labels"];
+  onDownload: (resource: SubjectResourceItem) => void;
+}>) {
   return (
     <ListItem
       disablePadding
       secondaryAction={
         resource.filePath ? (
-          <IconButton edge="end" onClick={handleDownload} aria-label={labels.download}>
+          <IconButton edge="end" onClick={() => onDownload(resource)} aria-label={labels.download}>
             <DownloadOutlined />
           </IconButton>
         ) : undefined
       }
     >
-      <ListItemButton onClick={handleDownload} disabled={!resource.filePath}>
+      <ListItemButton onClick={() => onDownload(resource)} disabled={!resource.filePath}>
         <ListItemIcon sx={{ minWidth: 40 }}>
           <FolderOutlined />
         </ListItemIcon>
@@ -66,6 +65,7 @@ export function SubjectDetailDesktopView({
   loading,
   notFound,
   labels,
+  onDownloadResource,
 }: Readonly<SubjectDetailViewModel>) {
   if (loading) {
     return (
@@ -115,7 +115,12 @@ export function SubjectDetailDesktopView({
         ) : (
           <List disablePadding>
             {resources.map(resource => (
-              <ResourceItemDesktop key={resource.id ?? ""} resource={resource} labels={labels} />
+              <ResourceItemDesktop
+                key={resource.id ?? ""}
+                resource={resource}
+                labels={labels}
+                onDownload={onDownloadResource}
+              />
             ))}
           </List>
         )}

@@ -2,30 +2,36 @@
 
 import { FilterListOutlined, SearchOutlined } from "@mui/icons-material";
 import { Badge, Box, Button, CircularProgress, IconButton, Tooltip } from "@mui/material";
-import { type SyntheticEvent, useState } from "react";
+import type { SyntheticEvent } from "react";
 import { AppDateRangePicker, AppTimeRangePicker } from "@/frontend/common/components/ui/form";
-import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
 import { countActiveDrawerFilters } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
+import type { SearchScheduleFormProps } from "@/frontend/common/views/dashboard/search-schedule/types";
 import { SearchScheduleSortMenuMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleSortMenu.mobile";
 import { SearchScheduleTeacherAutocompleteMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleTeacherAutocomplete.mobile";
 import { SearchScheduleFilterDrawerMobile } from "@/frontend/mobile/views/dashboard/search-schedule/searchScheduleFilterDrawer.mobile";
 import { useAppTranslation } from "@/shared/locale";
-
-interface SearchScheduleFormMobileProps {
-  readonly draft: SearchScheduleDraftFilters;
-  readonly isSearching: boolean;
-  readonly onDraftChange: (draft: Partial<SearchScheduleDraftFilters>) => void;
-  readonly onSearch: () => void;
-}
 
 export function SearchScheduleFormMobile({
   draft,
   isSearching,
   onDraftChange,
   onSearch,
-}: Readonly<SearchScheduleFormMobileProps>) {
+  formFilterDrawerOpen,
+  onOpenFormFilterDrawer,
+  onCloseFormFilterDrawer,
+  sortMenuAnchorEl,
+  onSortMenuOpen,
+  onSortMenuClose,
+  onSortChange,
+  teacherSearchInput,
+  selectedTeacher,
+  teacherOptions,
+  teacherSearchLoading,
+  shouldSearchTeachers,
+  onTeacherSearchInputChange,
+  onSelectTeacher,
+}: Readonly<SearchScheduleFormProps>) {
   const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const activeFilterCount = countActiveDrawerFilters(draft);
 
   const handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
@@ -81,15 +87,30 @@ export function SearchScheduleFormMobile({
         </Box>
 
         <Box sx={{ flex: "1 1 100%" }}>
-          <SearchScheduleTeacherAutocompleteMobile size="small" />
+          <SearchScheduleTeacherAutocompleteMobile
+            size="small"
+            teacherSearchInput={teacherSearchInput}
+            selectedTeacher={selectedTeacher}
+            teacherOptions={teacherOptions}
+            teacherSearchLoading={teacherSearchLoading}
+            shouldSearchTeachers={shouldSearchTeachers}
+            onTeacherSearchInputChange={onTeacherSearchInputChange}
+            onSelectTeacher={onSelectTeacher}
+          />
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 0.5 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <SearchScheduleSortMenuMobile sortBy={draft.sortBy} onSortChange={sortBy => onDraftChange({ sortBy })} />
+            <SearchScheduleSortMenuMobile
+              sortBy={draft.sortBy}
+              sortMenuAnchorEl={sortMenuAnchorEl}
+              onSortMenuOpen={onSortMenuOpen}
+              onSortMenuClose={onSortMenuClose}
+              onSortChange={onSortChange}
+            />
 
             <Tooltip title={t.filters}>
-              <IconButton aria-label={t.filters} size="small" onClick={() => setDrawerOpen(true)}>
+              <IconButton aria-label={t.filters} size="small" onClick={onOpenFormFilterDrawer}>
                 <Badge badgeContent={activeFilterCount} color="primary" invisible={activeFilterCount === 0}>
                   <FilterListOutlined fontSize="small" />
                 </Badge>
@@ -110,9 +131,9 @@ export function SearchScheduleFormMobile({
       </Box>
 
       <SearchScheduleFilterDrawerMobile
-        open={drawerOpen}
+        open={formFilterDrawerOpen}
         draft={draft}
-        onClose={() => setDrawerOpen(false)}
+        onClose={onCloseFormFilterDrawer}
         onDraftChange={onDraftChange}
         onApply={handleApplyFilters}
       />

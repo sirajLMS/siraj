@@ -1,13 +1,17 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { managerDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
 import { useManagersDirectoryStore } from "@/frontend/common/stores/managersDirectoryStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
   Manager,
   ManagerRole,
+  ManagerRoleFilter,
   ManagerStatus,
+  ManagerStatusFilter,
   NonNullableManagerDirectoryMetrics,
 } from "@/frontend/common/views/dashboard/managers/home/types";
 
@@ -33,14 +37,13 @@ export interface ManagersContainerViewModel {
   readonly statusFilter: ManagerStatusFilter;
   readonly onRoleFilterChange: (role: ManagerRoleFilter) => void;
   readonly onStatusFilterChange: (status: ManagerStatusFilter) => void;
+  // NEW FOR PLAN v5: canCreateManager exposed by the Container VM so the tier views no longer wrap a RequirePermission around the action button.
+  readonly canCreateManager: boolean;
 }
 
 export interface UseManagersContainerViewModelProps {
   readonly onRetry?: () => void;
 }
-
-type ManagerRoleFilter = "all" | "admin" | "staff";
-type ManagerStatusFilter = "all" | "active" | "offline";
 
 export function useManagersContainerViewModel(
   _props: Readonly<UseManagersContainerViewModelProps>
@@ -52,6 +55,8 @@ export function useManagersContainerViewModel(
   const page = useManagersDirectoryStore(state => state.page);
   const pageSize = useManagersDirectoryStore(state => state.pageSize);
   const setPage = useManagersDirectoryStore(state => state.setPage);
+  const permissions = useUserStore(state => state.permissions);
+  const canCreateManager = permissions.includes(AppPermission.StaffCreate);
 
   const resolvedRoleFilter = roleFilter !== "all" ? roleFilter : null;
   const resolvedStatusFilter = statusFilter !== "all" ? statusFilter : null;
@@ -122,5 +127,6 @@ export function useManagersContainerViewModel(
     statusFilter,
     onRoleFilterChange: setRoleFilter,
     onStatusFilterChange: setStatusFilter,
+    canCreateManager,
   };
 }

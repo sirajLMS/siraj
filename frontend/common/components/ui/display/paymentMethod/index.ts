@@ -7,4 +7,4 @@ export type {
   PaymentMethodDisplayData,
   PaymentMethodDisplayProps,
   PaymentMethodRow,
-} from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
+} from "@/frontend/common/components/ui/display/paymentMethod/types";

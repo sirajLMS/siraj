@@ -6,8 +6,9 @@ import { alpha, styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
-import type { GroupUser, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { GroupUser } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
+import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
@@ -93,19 +94,6 @@ const StyledRemoveButton = styled(Button)(() => ({
   typography: "labelMd",
 }));
 
-interface AssignedUsersTabDesktopProps {
-  readonly group: PermissionGroup;
-  readonly filteredAssignedUsers: readonly GroupUser[];
-  readonly selectedAssignedUserIds: readonly string[];
-  readonly searchQuery: string;
-  readonly onBulkRevokeUsers: () => void;
-  readonly onRevokeUser: (userId: string) => void;
-  readonly onUserToggle: (id: string, checked: boolean) => void;
-  readonly onSearchChange: (value: string) => void;
-  readonly onAssignGroup: (id: string) => void;
-  readonly loading?: boolean;
-}
-
 export function AssignedUsersTabDesktop({
   group,
   filteredAssignedUsers,
@@ -117,7 +105,7 @@ export function AssignedUsersTabDesktop({
   onSearchChange,
   onAssignGroup,
   loading = false,
-}: Readonly<AssignedUsersTabDesktopProps>) {
+}: Readonly<AssignedUsersTabProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   const assignedUsersColumns = useMemo<GridColDef<GroupUser>[]>(() => {

@@ -3,8 +3,8 @@
 import { CloseOutlined } from "@mui/icons-material";
 import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useManageOverridesState } from "@/frontend/common/views/dashboard/permissions/components/useManageOverridesState";
+import type { ManageOverridesDialogProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { OverridesDataGridDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overridesDataGrid.desktop";
 import { OverridesDialogFooterDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overridesDialogFooter.desktop";
 import { OverridesToolbarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overridesToolbar.desktop";
@@ -39,17 +39,6 @@ const StyledRightContentArea = styled(Box)({
   minHeight: 0,
 });
 
-interface ManageOverridesDialogDesktopProps {
-  readonly open: boolean;
-  readonly userId: string | null;
-  readonly users: readonly User[];
-  readonly groups: readonly PermissionGroup[];
-  readonly permissions: readonly Permission[];
-  readonly isLoading: boolean;
-  readonly onClose: () => void;
-  readonly onSave: (userId: string, overrides: Array<{ permissionId: string; state: string }>) => Promise<void>;
-}
-
 export function ManageOverridesDialogDesktop({
   open,
   userId,
@@ -59,7 +48,7 @@ export function ManageOverridesDialogDesktop({
   isLoading,
   onClose,
   onSave,
-}: Readonly<ManageOverridesDialogDesktopProps>) {
+}: Readonly<ManageOverridesDialogProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   const {

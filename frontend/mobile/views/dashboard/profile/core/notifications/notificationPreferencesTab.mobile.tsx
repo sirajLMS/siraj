@@ -1,14 +1,14 @@
 "use client";
 
 import { Alert, Box, Snackbar, Typography } from "@mui/material";
+import { NotificationChannel } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { PreferencesChannelTabsMobileView } from "@/frontend/mobile/views/dashboard/profile/core/notifications/preferencesChannelTabs.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
-export type NotificationPreferencesTabMobileProps = NotificationPreferencesTabVariantProps;
-
 export function NotificationPreferencesTabMobile({
   preferences,
+  preferenceMap,
   onToggle,
   disabled,
   loading,
@@ -17,7 +17,10 @@ export function NotificationPreferencesTabMobile({
   snackbarSeverity,
   onSnackbarClose,
   errorLoading,
-}: Readonly<NotificationPreferencesTabMobileProps>) {
+  activeChannel,
+  slideDirection,
+  onChannelChange,
+}: Readonly<NotificationPreferencesTabVariantProps>) {
   const t = useAppTranslation().profileTranslations.notifications;
 
   if (errorLoading) {
@@ -37,9 +40,13 @@ export function NotificationPreferencesTabMobile({
 
       <PreferencesChannelTabsMobileView
         preferences={preferences}
+        preferenceMap={preferenceMap ?? new Map()}
         onToggle={onToggle}
         disabled={disabled}
         loading={loading}
+        activeChannel={activeChannel ?? NotificationChannel.Email}
+        slideDirection={slideDirection ?? "left"}
+        onChannelChange={onChannelChange ?? (() => undefined)}
       />
 
       <Snackbar

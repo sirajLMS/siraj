@@ -18,6 +18,8 @@ export function TeacherReassignmentViewMobile({
   onReassign,
   onStatusChange,
   onCancel,
+  controls,
+  bento,
 }: Readonly<TeacherReassignmentViewModel>) {
   const t = useAppTranslation().dashboardTranslations.teacherReassignment;
 
@@ -60,12 +62,20 @@ export function TeacherReassignmentViewMobile({
             onReassign={onReassign}
             onStatusChange={onStatusChange}
             onCancel={onCancel}
+            selectedTeacherId={controls.selectedTeacherId}
+            selectedNewStatus={controls.selectedNewStatus}
+            saved={controls.saved}
+            onSelectedTeacherIdChange={controls.onSelectedTeacherIdChange}
+            onSelectedNewStatusChange={controls.onSelectedNewStatusChange}
+            onSubmitForm={controls.onSubmitForm}
           />
 
           <ReassignmentBentoGridMobile
             studentId={student.id}
             lastUpdated={student.updatedAt}
             pendingNotificationCount={0}
+            onOpenChangeHistory={bento.onOpenChangeHistory}
+            onOpenParentContact={bento.onOpenParentContact}
           />
         </Box>
       </MobileContentStack>

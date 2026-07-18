@@ -7,7 +7,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { profileHrefForStaff } from "@/frontend/common/utils/profileHref";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
-import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
+import type { BaseManagersListProps, Manager } from "@/frontend/common/views/dashboard/managers/home/types";
 import { DesktopAppDataGrid, DesktopGridPagination } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopPersonProfileLinkCell, DesktopPhoneDisplay } from "@/frontend/desktop/components/ui/display";
@@ -26,12 +26,8 @@ const StyledDataGridWrapper = styled(Box)({
   width: "100%",
 });
 
-interface ManagersDataGridDesktopProps {
-  managers: Manager[];
-  page?: number;
-  pageSize?: number;
-  totalCount?: number;
-  onPageChange?: (page: number) => void;
+interface ManagersDataGridDesktopProps extends BaseManagersListProps {
+  // VARIANT JUSTIFICATION: extra field loading — desktop data grid needs a `loading` prop because AppDataGrid accepts a loading slot while the mobile card list doesn't render a separate loading state (Class C variant per specs §4.3).
   readonly loading?: boolean;
 }
 
@@ -45,6 +41,7 @@ export function ManagersDataGridDesktop({
 }: Readonly<ManagersDataGridDesktopProps>) {
   const t = useAppTranslation().dashboardTranslations.managersDirectory;
 
+  // RENDER OPT JUSTIFICATION: AppDataGrid re-renders excessively when its `columns` prop identity changes between renders; this useMemo preserves a stable column-array reference keyed on the translated labels so cells don't recompute unnecessarily.
   const columns = useMemo<GridColDef<Manager>[]>(
     () => [
       {

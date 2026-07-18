@@ -10,7 +10,7 @@ import {
   CurrencyDisplayPart,
   type CurrencyDisplayPartValue,
   resolveCurrencyDisplayParts,
-} from "@/frontend/common/components/ui/display/currencyDisplay/currencyDisplay.constants";
+} from "@/frontend/common/components/ui/display/currencyDisplay/constants";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";

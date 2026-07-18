@@ -1,4 +1,4 @@
-import type { PageHeaderBreadcrumb } from "@/frontend/common/components/ui";
+import type { PageHeaderBreadcrumb } from "@/frontend/common/components/ui/container/page";
 import type { ClassSubjectByIdQuery } from "@/frontend/common/graphql/generated/gql/operations";
 
 export type SubjectDetailData = NonNullable<ClassSubjectByIdQuery["classSubject"]>;
@@ -13,6 +13,7 @@ export interface SubjectDetailViewProps {
   readonly subject: SubjectDetailData;
   readonly resources: readonly SubjectResourceItem[];
   readonly breadcrumbs: readonly PageHeaderBreadcrumb[];
+  readonly onDownloadResource: (resource: SubjectResourceItem) => void;
 }
 
 export interface SubjectDetailContainerProps {

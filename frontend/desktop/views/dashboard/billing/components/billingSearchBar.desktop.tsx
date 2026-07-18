@@ -1,14 +1,7 @@
 "use client";
 
 import { Box, TextField } from "@mui/material";
-
-interface BillingSearchBarDesktopProps {
-  readonly value: string;
-  readonly placeholder: string;
-  readonly searchingLabel?: string;
-  readonly isSearching?: boolean;
-  readonly onChange: (value: string) => void;
-}
+import type { BillingSearchBarProps } from "@/frontend/common/views/dashboard/billing/types/billingSearchBar.types";
 
 export function BillingSearchBarDesktop({
   value,
@@ -16,7 +9,7 @@ export function BillingSearchBarDesktop({
   searchingLabel,
   isSearching = false,
   onChange,
-}: Readonly<BillingSearchBarDesktopProps>) {
+}: Readonly<BillingSearchBarProps>) {
   return (
     <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
       <TextField

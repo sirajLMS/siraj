@@ -5,4 +5,4 @@ export {
   type CurrencyDisplayPartValue,
   DEFAULT_CURRENCY_DISPLAY_PARTS,
   resolveCurrencyDisplayParts,
-} from "./currencyDisplay.constants";
+} from "./constants";

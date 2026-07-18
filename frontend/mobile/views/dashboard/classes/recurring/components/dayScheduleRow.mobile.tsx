@@ -3,7 +3,7 @@
 import { TuneOutlined } from "@mui/icons-material";
 import { Box, Checkbox, FormControlLabel, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import type { DayScheduleRowProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { WeekendDayRow } from "@/frontend/common/views/dashboard/classes/recurring/WeekendDayRow";
 import { MobileDayOverrideRow } from "@/frontend/mobile/views/dashboard/classes/recurring/components/dayOverrideRow.mobile";
 
@@ -49,17 +49,6 @@ const StyledDayLabelTypography = styled(Typography, {
   color: isActiveOverride ? theme.palette.sidebar : theme.palette.primary.main,
 }));
 
-export interface DayScheduleRowMobileProps {
-  readonly day: DayScheduleConfig;
-  readonly dayLabel: string;
-  readonly weekendOffLabel: string;
-  readonly timeOverrideLabel: string;
-  readonly index: number;
-  readonly onToggleDay: (index: number, enabled: boolean) => void;
-  readonly onToggleOverride: (index: number) => void;
-  readonly onTimeOverrideChange: (index: number, time: string) => void;
-}
-
 export function DayScheduleRowMobile({
   day,
   dayLabel,
@@ -69,7 +58,7 @@ export function DayScheduleRowMobile({
   onToggleDay,
   onToggleOverride,
   onTimeOverrideChange,
-}: DayScheduleRowMobileProps) {
+}: DayScheduleRowProps) {
   const isActiveOverride = day.showOverride && day.enabled && !day.isWeekend;
 
   if (day.isWeekend) {

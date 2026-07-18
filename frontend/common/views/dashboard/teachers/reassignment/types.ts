@@ -51,6 +51,14 @@ export interface ManagementControlsCardProps {
   readonly onReassign: (input: ReassignmentSubmitInput) => Promise<void>;
   readonly onStatusChange: (input: StatusChangeInput) => Promise<void>;
   readonly onCancel: () => void;
+  // NEW FOR PLAN v5: form state + actions previously held in tier useState/useNotifications/setTimeout
+  // (specs.md §3 N7, N17, N18). Lifted into the ViewModel so the tier component stays pure-render.
+  readonly selectedTeacherId: string;
+  readonly selectedNewStatus: StudentStatus | "";
+  readonly saved: boolean;
+  readonly onSelectedTeacherIdChange: (id: string) => void;
+  readonly onSelectedNewStatusChange: (status: StudentStatus | "") => void;
+  readonly onSubmitForm: (e: React.SyntheticEvent<HTMLFormElement>) => Promise<void>;
 }
 
 export interface StudentContextCardProps {
@@ -73,4 +81,8 @@ export interface ReassignmentBentoGridProps {
   readonly studentId: string;
   readonly lastUpdated: string | null;
   readonly pendingNotificationCount: number;
+  // NEW FOR PLAN v5: navigation + notification actions previously invoked via tier
+  // useRouter/useNotifications (specs.md §3 N8, N17). Lifted into the ViewModel.
+  readonly onOpenChangeHistory: () => void;
+  readonly onOpenParentContact: () => void;
 }

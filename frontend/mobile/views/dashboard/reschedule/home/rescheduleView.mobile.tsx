@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, type BoxProps, Divider, Link as MuiLink, Stack, styled } from "@mui/material";
+import { effectiveMeetingToDisplayData } from "@/frontend/common/components/ui/display/meetingConfig/utils";
 import type { RescheduleViewModel } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
 import {
   MobilePageContainer,
@@ -9,7 +10,6 @@ import {
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { MobileMeetingConfigDisplay } from "@/frontend/mobile/components/ui/display/meetingConfig";
-import { effectiveMeetingToDisplayData } from "@/frontend/mobile/components/ui/display/meetingConfig/meetingConfigDisplay.types";
 import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar";
 import { ClassParticipantsSectionMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/classParticipantsSection.mobile";
 import { NotificationPolicyCardMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/notificationPolicyCard.mobile";

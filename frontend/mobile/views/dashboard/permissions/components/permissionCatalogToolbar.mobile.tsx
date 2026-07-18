@@ -2,6 +2,7 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
+import type { PermissionCatalogToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { useAppTranslation } from "@/shared/locale";
 
 interface CategoryChipProps {
@@ -34,21 +35,13 @@ function CategoryChip({ label, active, onClick }: Readonly<CategoryChipProps>) {
   );
 }
 
-export interface PermissionCatalogToolbarMobileProps {
-  readonly searchQuery: string;
-  readonly selectedCategory: string;
-  readonly categories: readonly string[];
-  readonly onSearchChange: (value: string) => void;
-  readonly onCategoryChange: (value: string) => void;
-}
-
 export function PermissionCatalogToolbarMobile({
   searchQuery,
   selectedCategory,
   categories,
   onSearchChange,
   onCategoryChange,
-}: Readonly<PermissionCatalogToolbarMobileProps>) {
+}: Readonly<PermissionCatalogToolbarProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (

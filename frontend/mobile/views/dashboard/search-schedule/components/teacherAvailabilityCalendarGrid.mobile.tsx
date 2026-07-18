@@ -2,27 +2,17 @@
 
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, Chip, Typography } from "@mui/material";
+import type {
+  TeacherAvailabilityCalendarGridProps,
+  TeacherAvailabilityGapItem,
+} from "@/frontend/common/views/dashboard/search-schedule/types";
+import { formatGapLabel } from "@/frontend/common/views/dashboard/search-schedule/utils";
 import {
   CalendarGridContainer,
   CalendarWeekdayHeader,
 } from "@/frontend/common/views/dashboard/shared/CalendarGridShared";
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
-import type { TeacherAvailabilityGapItem } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityDayPill.mobile";
 import { useAppTranslation } from "@/shared/locale";
-
-export interface TeacherAvailabilityCalendarDay {
-  readonly day: number;
-  readonly gaps: readonly TeacherAvailabilityGapItem[];
-}
-
-interface TeacherAvailabilityCalendarGridMobileProps {
-  readonly currentMonth: Date;
-  readonly daysByDate: Readonly<Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>>;
-}
-
-function formatGapLabel(gap: TeacherAvailabilityGapItem): string {
-  return `${gap.gapStartTime ?? ""} - ${gap.gapEndTime ?? ""}`;
-}
 
 function CalendarDayCell({ day, gaps }: Readonly<{ day: number; gaps: readonly TeacherAvailabilityGapItem[] }>) {
   const hasGaps = gaps.length > 0;
@@ -77,7 +67,7 @@ function EmptyCell({ day }: Readonly<{ day: number }>) {
 export function TeacherAvailabilityCalendarGridMobile({
   currentMonth,
   daysByDate,
-}: Readonly<TeacherAvailabilityCalendarGridMobileProps>) {
+}: Readonly<TeacherAvailabilityCalendarGridProps>) {
   const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const { daysInMonth, emptyStartDays, emptyEndDays } = computeCalendarGridLayout(currentMonth);
 

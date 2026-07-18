@@ -1,33 +1,14 @@
 "use client";
 
 import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import type { SubTabKey } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
 import { useSingleGroupState } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
+import type { SingleGroupViewProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { AddPermissionsTabDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/addPermissionsTab.desktop";
 import { AssignedUsersTabDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/assignedUsersTab.desktop";
 import { CurrentPermissionsTabDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/currentPermissionsTab.desktop";
 import { SingleGroupHeaderDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/singleGroupHeader.desktop";
 import { useAppTranslation } from "@/shared/locale";
-
-interface SingleGroupViewDesktopProps {
-  readonly group: PermissionGroup;
-  readonly permissions: readonly Permission[];
-  readonly isLoading: boolean;
-  readonly onBack: () => void;
-  readonly onEditGroup: (id: string) => void;
-  readonly onAssignGroup: (id: string) => void;
-  readonly onRevokeGroup: (groupId: string, userId: string) => Promise<void>;
-  readonly onBulkAssign: (groupId: string, userIds: string[]) => Promise<void>;
-  readonly onBulkRevoke: (groupId: string, userIds: string[]) => Promise<void>;
-  readonly onUpdateGroup: (
-    id: string,
-    name: LocalizedString,
-    description: LocalizedString,
-    permissionIds: string[]
-  ) => Promise<void>;
-}
 
 export function SingleGroupViewDesktop({
   group,
@@ -39,7 +20,7 @@ export function SingleGroupViewDesktop({
   onRevokeGroup,
   onBulkRevoke,
   onUpdateGroup,
-}: Readonly<SingleGroupViewDesktopProps>) {
+}: Readonly<SingleGroupViewProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
   const {
     activeSubTab,

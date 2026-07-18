@@ -9,34 +9,13 @@ import TextField from "@mui/material/TextField";
 import type { Modifier } from "@popperjs/core";
 import type * as React from "react";
 import { useCallback, useState } from "react";
-import { type CountryType, countries, getCountryDisplayName } from "@/frontend/common/lib/locale";
+import { getCountryOptionLabel } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.utils";
+import type { CountryAutocompleteProps } from "@/frontend/common/components/ui/input/countrySelect/types";
+import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { CountryOptionRowDesktop } from "@/frontend/desktop/components/ui/input/countrySelect/countryOptionRow.desktop";
 import { useAppTranslation } from "@/shared/locale";
-
-export type CountryAutocompleteProps = {
-  readonly country?: CountryType | null;
-  readonly onChangeAction: (country: CountryType) => void;
-  readonly onClearAction?: () => void;
-  readonly autoComplete?: string;
-  readonly fullWidth?: boolean;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly label?: string;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly onBlurAction?: () => void;
-  readonly style?: React.CSSProperties;
-  readonly open?: boolean;
-  readonly onOpenAction?: () => void;
-  readonly onCloseAction?: () => void;
-  readonly autoFocus?: boolean;
-  readonly showPhonePrefix?: boolean;
-  readonly matchAnchorWidth?: boolean;
-  readonly disablePortal?: boolean;
-  readonly listAttached?: boolean;
-};
 
 type CountryAutocompleteSlotProps = NonNullable<AutocompleteProps<CountryType, false, false, false>["slotProps"]>;
 
@@ -108,14 +87,6 @@ function getCountryAutocompletePaperSlotProps(listAttached: boolean): CountryAut
       boxShadow: theme.shadows[4],
     }),
   };
-}
-
-function getCountryOptionLabel(country: CountryType, locale: string, showPhonePrefix = true): string {
-  const name = getCountryDisplayName(country.code, locale);
-  if (!showPhonePrefix) {
-    return name;
-  }
-  return `${name} (+${country.phone})`;
 }
 
 const buildSxProp = (

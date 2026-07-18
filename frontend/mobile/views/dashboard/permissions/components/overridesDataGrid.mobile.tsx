@@ -2,8 +2,8 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
+import type { OverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { OverrideEditControlsMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEditControls.mobile";
 import { OverrideEffectiveDisplayMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEffectiveDisplay.mobile";
@@ -27,15 +27,6 @@ const StyledBaselineText = styled(Typography, {
   color: isAllowed ? theme.palette.success.main : theme.palette.text.secondary,
 }));
 
-interface OverridesDataGridMobileProps {
-  readonly filteredPermissions: readonly Permission[];
-  readonly userGroups: readonly PermissionGroup[];
-  readonly localOverrides: Record<string, OverrideState>;
-  readonly mode: "effective" | "edit";
-  readonly isDialogLoading: boolean;
-  readonly handleOverrideChange: (permissionId: string, state: OverrideState) => void;
-}
-
 export function OverridesDataGridMobile({
   filteredPermissions,
   userGroups,
@@ -43,7 +34,7 @@ export function OverridesDataGridMobile({
   mode,
   isDialogLoading,
   handleOverrideChange,
-}: Readonly<OverridesDataGridMobileProps>) {
+}: Readonly<OverridesDataGridProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   if (filteredPermissions.length === 0) {

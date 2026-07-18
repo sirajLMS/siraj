@@ -2,9 +2,10 @@
 
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import { useCallback, useState } from "react";
-import { PaymentDirection, type PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { CurrencyOption } from "@/frontend/common/lib/currency";
+import { useCallback } from "react";
+import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
+import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
+import { filterMethodsForDirection } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/utils";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopFieldWrapper } from "@/frontend/desktop/components/ui/form/field";
@@ -12,67 +13,6 @@ import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/for
 import { CurrencySelectDesktop } from "@/frontend/desktop/components/ui/input/currencySelect";
 import { LocalizedStringDrawerDesktop } from "@/frontend/desktop/components/ui/input/localizedString";
 import { useAppTranslation } from "@/shared/locale";
-
-export type PaymentMethodDisplayData = {
-  readonly id?: string;
-  readonly type?: PaymentMethodType | null;
-  readonly direction?: PaymentDirection | null;
-  readonly label?: string | null;
-  readonly catalogName?: Record<string, string> | null;
-  readonly catalogSlug?: string | null;
-  readonly logoUrl?: string | null;
-  readonly details?: {
-    readonly phone?: string | null;
-    readonly url?: string | null;
-    readonly identifier?: string | null;
-    readonly iban?: string | null;
-    readonly bankName?: string | null;
-    readonly beneficiaryName?: string | null;
-    readonly note?: string | null;
-  } | null;
-  readonly countryCode?: string | null;
-  readonly currencyCode?: string | null;
-  readonly verifiedAt?: string | null;
-  readonly isActive?: boolean | null;
-  readonly isDefault?: boolean;
-  readonly masked?: boolean;
-};
-
-export type PaymentMethodRow = PaymentMethodDisplayData & {
-  readonly id: string;
-  readonly type: PaymentMethodType;
-  readonly direction: PaymentDirection;
-  readonly isDefault: boolean;
-};
-
-export type PaymentMethodDefaultsEditorProps = {
-  readonly methods: readonly PaymentMethodRow[];
-  readonly payinDefaultId: string | null;
-  readonly payoutDefaultId: string | null;
-  readonly onPayinDefaultChangeAction: (id: string | null) => void;
-  readonly onPayoutDefaultChangeAction: (id: string | null) => void;
-  readonly instructions?: Record<string, string>;
-  readonly onInstructionsSaveAction?: (next: Record<string, string>) => void;
-  readonly displayCurrency?: CurrencyOption | null;
-  readonly onDisplayCurrencyChangeAction?: (currency: CurrencyOption) => void;
-  readonly allowedCurrencyCodes?: readonly string[] | undefined;
-  readonly disabled?: boolean;
-  readonly successOpen?: boolean;
-  readonly onSuccessCloseAction?: () => void;
-};
-
-function filterMethodsForDirection(
-  methods: readonly PaymentMethodRow[],
-  direction: "payin" | "payout"
-): readonly PaymentMethodRow[] {
-  return methods.filter(method => {
-    if (!method.direction) return false;
-    if (method.direction === PaymentDirection.Both) return true;
-    return direction === "payin"
-      ? method.direction === PaymentDirection.Payin
-      : method.direction === PaymentDirection.Payout;
-  });
-}
 
 export function PaymentMethodDefaultsEditorDesktop({
   methods,
@@ -88,27 +28,31 @@ export function PaymentMethodDefaultsEditorDesktop({
   disabled = false,
   successOpen = false,
   onSuccessCloseAction,
-}: PaymentMethodDefaultsEditorProps) {
+  instructionsOpen = false,
+  onInstructionsOpenChangeAction,
+}: Readonly<PaymentMethodDefaultsEditorProps>) {
   const t = useAppTranslation().uiTranslations.paymentMethod;
   const tDefaults = t.defaultsEditor;
-  const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   const payinMethods = filterMethodsForDirection(methods, "payin");
   const payoutMethods = filterMethodsForDirection(methods, "payout");
 
   const formatMethodLabel = useCallback(
     (method: PaymentMethodRow) => {
-      const typeLabel = method.type
-        ? getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "")
-        : "";
-      const directionLabel = method.direction
-        ? getPaymentMethodDirectionLabel(method.direction, key => t.direction[key as keyof typeof t.direction] ?? "")
-        : "";
+      const typeLabel = getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "");
+      const directionLabel = getPaymentMethodDirectionLabel(
+        method.direction,
+        key => t.direction[key as keyof typeof t.direction] ?? ""
+      );
       const base = method.label?.trim() || method.catalogSlug || typeLabel;
       return directionLabel ? `${base} (${directionLabel})` : base;
     },
     [t]
   );
+
+  const setInstructionsOpen = (open: boolean) => {
+    onInstructionsOpenChangeAction?.(open);
+  };
 
   return (
     <Stack spacing={2}>

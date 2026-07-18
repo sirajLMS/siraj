@@ -32,6 +32,16 @@ interface PermissionManagementState {
   activeTab: PermissionManagementTab;
   selectedUserIdForOverrides: string | null;
 
+  // NEW FOR PLAN v5: cross-tier filter state lifted out of tier views.
+  // Permissions catalog tab (PermissionCatalogSection) — search query + selected
+  // category previously held as `useState` inside the tier `*.tsx` files.
+  permissionCatalogSearchQuery: string;
+  permissionCatalogSelectedCategory: string;
+  // Permission group create/edit dialog — searchTerm + selectedCategory
+  // previously held as `useState` inside the tier `permissionGroupForm.*.tsx`.
+  permissionGroupFormSearchTerm: string;
+  permissionGroupFormSelectedCategory: string;
+
   // Setters
   setPermissions: (permissions: Permission[]) => void;
   setGroups: (groups: PermissionGroup[]) => void;
@@ -64,6 +74,12 @@ interface PermissionManagementState {
   setActiveTab: (tab: PermissionManagementTab) => void;
   setSelectedUserIdForOverrides: (id: string | null) => void;
 
+  // NEW FOR PLAN v5: lifted-from-tier filter state setters
+  setPermissionCatalogSearchQuery: (query: string) => void;
+  setPermissionCatalogSelectedCategory: (category: string) => void;
+  setPermissionGroupFormSearchTerm: (term: string) => void;
+  setPermissionGroupFormSelectedCategory: (category: string) => void;
+
   reset: () => void;
 }
 
@@ -86,6 +102,11 @@ const initialState = {
   isManageOverridesOpen: false,
   activeTab: "groups" as PermissionManagementTab,
   selectedUserIdForOverrides: null,
+  // NEW FOR PLAN v5: initial values for the lifted-from-tier filter state
+  permissionCatalogSearchQuery: "",
+  permissionCatalogSelectedCategory: "all",
+  permissionGroupFormSearchTerm: "",
+  permissionGroupFormSelectedCategory: "ALL",
 };
 
 export const usePermissionManagementStore = create<PermissionManagementState>(set => ({
@@ -122,6 +143,12 @@ export const usePermissionManagementStore = create<PermissionManagementState>(se
 
   setActiveTab: tab => set({ activeTab: tab }),
   setSelectedUserIdForOverrides: id => set({ selectedUserIdForOverrides: id }),
+
+  // NEW FOR PLAN v5: lifted-from-tier filter state setters
+  setPermissionCatalogSearchQuery: query => set({ permissionCatalogSearchQuery: query }),
+  setPermissionCatalogSelectedCategory: category => set({ permissionCatalogSelectedCategory: category }),
+  setPermissionGroupFormSearchTerm: term => set({ permissionGroupFormSearchTerm: term }),
+  setPermissionGroupFormSelectedCategory: category => set({ permissionGroupFormSelectedCategory: category }),
 
   reset: () => set(initialState),
 }));

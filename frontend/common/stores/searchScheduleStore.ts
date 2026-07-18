@@ -16,6 +16,30 @@ export interface SearchScheduleTeacherOption {
   readonly name: string;
 }
 
+// NEW FOR PLAN v5 (newly created for the migration wave): minimal serializable shape for the
+// month-drawer's selected teacher. Matches the runtime subset of SearchScheduleResultItem
+// used by TeacherAvailabilityMonthDrawer (id + name + timezone + gender + availableDaysCount +
+// gaps). Kept in the store so the drawer state survives tier switches. Nullable to structurally
+// satisfy SearchScheduleResultItem's optional-null field shapes from the GraphQL layer.
+export interface SearchScheduleMonthDrawerTeacher {
+  readonly id?: string | null;
+  readonly name?: string | null;
+  readonly gender?: string | null;
+  readonly timezone?: string | null;
+  readonly availableDaysCount?: number | null;
+  readonly gaps?: readonly ({
+    readonly id?: string | null;
+    readonly teacherId?: string | null;
+    readonly teacherName?: string | null;
+    readonly teacherGender?: string | null;
+    readonly dayOfWeek?: string | null;
+    readonly calendarDate?: string | null;
+    readonly gapStartTime?: string | null;
+    readonly gapEndTime?: string | null;
+    readonly timezone?: string | null;
+  } | null)[];
+}
+
 function getDefaultFromDate(): string {
   return format(new Date(), DATE_FILTER_FORMAT);
 }
@@ -49,6 +73,13 @@ interface PersistedSearchScheduleState {
   readonly teacherSearchInput: string;
   readonly selectedTeacher: SearchScheduleTeacherOption | null;
   readonly pageSize: number;
+  // NEW FOR PLAN v5: persisted lifted UI state. sortMenuAnchorEl is intentionally absent
+  // (DOM element — non-serializable; reset to null on rehydrate).
+  readonly formFilterDrawerOpen: boolean;
+  readonly monthDrawerOpen: boolean;
+  readonly monthDrawerAnchorFromDate: string;
+  readonly monthDrawerCurrentMonth: string;
+  readonly monthDrawerTeacher: SearchScheduleMonthDrawerTeacher | null;
 }
 
 function createDefaultDraftFilters(): SearchScheduleDraftFilters {
@@ -136,6 +167,19 @@ interface SearchScheduleState {
   readonly debouncedTeacherSearch: string;
   readonly selectedTeacher: SearchScheduleTeacherOption | null;
   readonly _hasHydrated: boolean;
+  // NEW FOR PLAN v5: form-filter drawer open state (lifted from searchScheduleForm.{mobile,desktop}.tsx).
+  readonly formFilterDrawerOpen: boolean;
+  // NEW FOR PLAN v5: sort menu anchor element (lifted from searchScheduleSortMenu.{mobile,desktop}.tsx).
+  // Non-serializable DOM element — excluded from persist via partialize below.
+  readonly sortMenuAnchorEl: HTMLElement | null;
+  // NEW FOR PLAN v5: month drawer open flag (lifted from teacherAvailabilityGrid.{mobile,desktop}.tsx drawerOpen + teacherAvailabilityMonthDrawer.{mobile,desktop}.tsx open).
+  readonly monthDrawerOpen: boolean;
+  // NEW FOR PLAN v5: anchor ISO date (yyyy-MM-dd) the month drawer opened from.
+  readonly monthDrawerAnchorFromDate: string;
+  // NEW FOR PLAN v5: ISO date (yyyy-MM-dd) representing the month drawer's currently navigated month.
+  readonly monthDrawerCurrentMonth: string;
+  // NEW FOR PLAN v5: teacher selected for the month drawer (lifted from teacherAvailabilityMonthDrawer.{mobile,desktop}.tsx).
+  readonly monthDrawerTeacher: SearchScheduleMonthDrawerTeacher | null;
   setDraft: (draft: Partial<SearchScheduleDraftFilters>) => void;
   setTeacherSearchInput: (input: string) => void;
   setDebouncedTeacherSearch: (query: string) => void;
@@ -145,6 +189,12 @@ interface SearchScheduleState {
   setPage: (page: number) => void;
   clearFilters: () => void;
   buildActiveInput: () => AvailabilitySearchInput | null;
+  // NEW FOR PLAN v5: setters for the lifted drawer/menu/month state.
+  setFormFilterDrawerOpen: (open: boolean) => void;
+  setSortMenuAnchorEl: (anchor: HTMLElement | null) => void;
+  openMonthDrawer: (teacher: SearchScheduleMonthDrawerTeacher, anchorFromDate: string) => void;
+  closeMonthDrawer: () => void;
+  setMonthDrawerCurrentMonth: (isoMonth: string) => void;
 }
 
 export const useSearchScheduleStore = create<SearchScheduleState>()(
@@ -159,6 +209,16 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
       debouncedTeacherSearch: "",
       selectedTeacher: null,
       _hasHydrated: false,
+      // NEW FOR PLAN v5 (newly created for the migration wave): default values for the lifted
+      // drawer/menu/month state. formFilterDrawerOpen stays false until the toolbar opens it.
+      // sortMenuAnchorEl is a non-serializable DOM element — excluded from persist.
+      // monthDrawer* fields default to closed with empty anchor.
+      formFilterDrawerOpen: false,
+      sortMenuAnchorEl: null,
+      monthDrawerOpen: false,
+      monthDrawerAnchorFromDate: "",
+      monthDrawerCurrentMonth: "",
+      monthDrawerTeacher: null,
       setDraft: draft =>
         set(state => ({
           draft: { ...state.draft, ...draft },
@@ -171,6 +231,23 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
           teacherSearchInput: selectedTeacher?.name ?? "",
         }),
       setHasHydrated: hasHydrated => set({ _hasHydrated: hasHydrated }),
+      // NEW FOR PLAN v5: form-filter drawer setter — toggles the mobile/desktop filter drawer.
+      setFormFilterDrawerOpen: formFilterDrawerOpen => set({ formFilterDrawerOpen }),
+      // NEW FOR PLAN v5: sort menu anchor setter — opens/closes the popover menu.
+      setSortMenuAnchorEl: sortMenuAnchorEl => set({ sortMenuAnchorEl }),
+      // NEW FOR PLAN v5: openMonthDrawer — opens the drawer with the selected teacher and
+      // seeds monthDrawerCurrentMonth from the anchor date.
+      openMonthDrawer: (teacher, anchorFromDate) =>
+        set({
+          monthDrawerOpen: true,
+          monthDrawerTeacher: teacher,
+          monthDrawerAnchorFromDate: anchorFromDate,
+          monthDrawerCurrentMonth: anchorFromDate,
+        }),
+      // NEW FOR PLAN v5: closeMonthDrawer — closes the drawer (keeps the last teacher/month).
+      closeMonthDrawer: () => set({ monthDrawerOpen: false }),
+      // NEW FOR PLAN v5: setMonthDrawerCurrentMonth — advances the drawer's navigated month.
+      setMonthDrawerCurrentMonth: monthDrawerCurrentMonth => set({ monthDrawerCurrentMonth }),
       commitSearch: () => {
         const { draft, pageSize, selectedTeacher, teacherSearchInput } = get();
         const teacherNameSearch = resolveTeacherNameSearch(selectedTeacher, teacherSearchInput);
@@ -197,6 +274,13 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
           teacherSearchInput: "",
           debouncedTeacherSearch: "",
           selectedTeacher: null,
+          // NEW FOR PLAN v5: also reset all lifted UI state on clearFilters.
+          formFilterDrawerOpen: false,
+          sortMenuAnchorEl: null,
+          monthDrawerOpen: false,
+          monthDrawerAnchorFromDate: "",
+          monthDrawerCurrentMonth: "",
+          monthDrawerTeacher: null,
         }),
       buildActiveInput: () => {
         const { draft, page, pageSize, activeInput, selectedTeacher, teacherSearchInput } = get();
@@ -214,6 +298,13 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
         teacherSearchInput: state.teacherSearchInput,
         selectedTeacher: state.selectedTeacher,
         pageSize: state.pageSize,
+        // NEW FOR PLAN v5: include the lifted UI state. sortMenuAnchorEl is excluded because it
+        // is a DOM element (non-serializable); the menu closes on rehydrate.
+        formFilterDrawerOpen: state.formFilterDrawerOpen,
+        monthDrawerOpen: state.monthDrawerOpen,
+        monthDrawerAnchorFromDate: state.monthDrawerAnchorFromDate,
+        monthDrawerCurrentMonth: state.monthDrawerCurrentMonth,
+        monthDrawerTeacher: state.monthDrawerTeacher,
       }),
       merge: (persistedState, currentState) => {
         const persisted = persistedState as PersistedSearchScheduleState | undefined;
@@ -226,6 +317,14 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
           selectedTeacher: persisted?.selectedTeacher ?? null,
           debouncedTeacherSearch: teacherSearchInput.trim(),
           pageSize: persisted?.pageSize ?? currentState.pageSize,
+          // NEW FOR PLAN v5: restore lifted UI state from persistence. sortMenuAnchorEl stays
+          // null (non-serializable DOM element — menu starts closed after refresh).
+          formFilterDrawerOpen: persisted?.formFilterDrawerOpen ?? false,
+          sortMenuAnchorEl: null,
+          monthDrawerOpen: persisted?.monthDrawerOpen ?? false,
+          monthDrawerAnchorFromDate: persisted?.monthDrawerAnchorFromDate ?? "",
+          monthDrawerCurrentMonth: persisted?.monthDrawerCurrentMonth ?? "",
+          monthDrawerTeacher: persisted?.monthDrawerTeacher ?? null,
         };
       },
       onRehydrateStorage: () => state => {

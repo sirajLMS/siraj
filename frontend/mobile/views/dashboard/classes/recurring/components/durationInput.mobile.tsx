@@ -1,24 +1,11 @@
 "use client";
 
 import { Box, FormHelperText, TextField } from "@mui/material";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { durationBoxSx, labelSx } from "@/frontend/common/components/ui/form";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
+import type { DurationInputProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 
-export interface DurationInputMobileProps {
-  readonly register: UseFormRegister<RecurringClassFormData>;
-  readonly errors: FieldErrors<RecurringClassFormData>;
-  readonly isSubmitting: boolean;
-  readonly labels: {
-    readonly duration: string;
-    readonly durationHours: string;
-    readonly durationMinutes: string;
-    readonly hours: string;
-    readonly minutes: string;
-  };
-}
-
-export function DurationInputMobile({ register, errors, isSubmitting, labels }: DurationInputMobileProps) {
+export function DurationInputMobile({ register, errors, isSubmitting, labels }: DurationInputProps) {
   const mainLabel = labels.durationHours.replace("(Hrs)", "").trim();
 
   return (
@@ -54,7 +41,7 @@ export function DurationInputMobile({ register, errors, isSubmitting, labels }: 
 }
 
 interface DurationFieldProps {
-  readonly register: UseFormRegister<RecurringClassFormData>;
+  readonly register: import("react-hook-form").UseFormRegister<RecurringClassFormData>;
   readonly fieldName: "durationHours" | "durationMinutes";
   readonly label: string;
   readonly max: number;
@@ -80,8 +67,6 @@ function DurationField({ register, fieldName, label, max, isSubmitting, error }:
               sx: { textAlign: "center", p: 1, border: undefined },
             },
           }}
-          variant="standard"
-          sx={{ flex: 1 }}
         />
       </Box>
     </Box>

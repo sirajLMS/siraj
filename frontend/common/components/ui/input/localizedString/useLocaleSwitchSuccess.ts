@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+// NEW FOR PLAN v5: consolidated byte-identical tier twin (mobile/desktop) useLocaleSwitchSuccess into a single common source.
+
 /**
  * Hook that drives a 500ms green-tint flash after a successful locale switch.
  *

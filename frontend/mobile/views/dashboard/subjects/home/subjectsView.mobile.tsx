@@ -2,7 +2,6 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
@@ -12,9 +11,11 @@ import { useAppTranslation } from "@/shared/locale";
 
 export function SubjectsViewMobile({
   categories,
-  subjects,
+  filteredSubjects,
   isLoading,
   activeCategoryId,
+  categoriesSectionOpen,
+  onToggleCategoriesSection,
   onCategoryChange,
   onAddSubject,
   onEditSubject,
@@ -27,10 +28,6 @@ export function SubjectsViewMobile({
   canManageCategories,
 }: Readonly<SubjectsViewProps>) {
   const t = useAppTranslation().dashboardTranslations.subjects;
-  const categoriesSectionOpen = useSubjectManagementStore(state => state.categoriesSectionOpen);
-  const toggleCategoriesSection = useSubjectManagementStore(state => state.toggleCategoriesSection);
-
-  const filteredSubjects = activeCategoryId ? subjects.filter(s => s.category?.id === activeCategoryId) : subjects;
 
   const categoriesSection = (
     <CategoriesSectionMobile
@@ -59,7 +56,7 @@ export function SubjectsViewMobile({
       />
 
       {canManageCategories && (
-        <Button variant="outlined" onClick={toggleCategoriesSection} sx={{ alignSelf: "flex-start" }}>
+        <Button variant="outlined" onClick={onToggleCategoriesSection} sx={{ alignSelf: "flex-start" }}>
           {categoriesSectionOpen ? t.hideCategories : t.manageCategories}
         </Button>
       )}

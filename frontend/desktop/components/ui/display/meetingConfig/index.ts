@@ -1,3 +1,8 @@
+export type {
+  MeetingConfigDisplayData as DesktopMeetingConfigDisplayData,
+  MeetingConfigDisplayProps as DesktopMeetingConfigDisplayProps,
+} from "@/frontend/common/components/ui/display/meetingConfig/types";
+export { effectiveMeetingToDisplayData } from "@/frontend/common/components/ui/display/meetingConfig/utils";
 export { DesktopMeetingConfigDisplay } from "@/frontend/desktop/components/ui/display/meetingConfig/MeetingConfigDisplay.desktop";
 export {
   DesktopMeetingConfigList,
@@ -9,8 +14,3 @@ export {
   type DesktopMeetingJoinActionProps,
   type DesktopMeetingJoinEmptyRole,
 } from "@/frontend/desktop/components/ui/display/meetingConfig/MeetingJoinAction.desktop";
-export {
-  effectiveMeetingToDisplayData,
-  type MeetingConfigDisplayData as DesktopMeetingConfigDisplayData,
-  type MeetingConfigDisplayProps as DesktopMeetingConfigDisplayProps,
-} from "@/frontend/desktop/components/ui/display/meetingConfig/meetingConfigDisplay.types";

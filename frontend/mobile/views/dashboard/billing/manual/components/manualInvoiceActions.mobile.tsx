@@ -2,17 +2,8 @@
 
 import { MailOutlined } from "@mui/icons-material";
 import { Box, useTheme } from "@mui/material";
+import type { ManualInvoiceActionsProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceActions.types";
 import { MobileExportButton, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
-import type { BillingManualLabels } from "@/shared/locale";
-
-interface ManualInvoiceActionsMobileProps {
-  readonly labels: BillingManualLabels;
-  readonly canCreate: boolean;
-  readonly canSendEmail: boolean;
-  readonly isSubmitting: boolean;
-  readonly onSubmit: () => void;
-  readonly onSubmitAndSendEmail: () => void;
-}
 
 export function ManualInvoiceActionsMobile({
   labels,
@@ -21,7 +12,7 @@ export function ManualInvoiceActionsMobile({
   isSubmitting,
   onSubmit,
   onSubmitAndSendEmail,
-}: Readonly<ManualInvoiceActionsMobileProps>) {
+}: Readonly<ManualInvoiceActionsProps>) {
   const theme = useTheme();
 
   const submitButton = (

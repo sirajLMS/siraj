@@ -4,20 +4,13 @@ import { DeleteOutlined, EditOutlined, MoreVertOutlined, PersonAddOutlined } fro
 import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import { useState } from "react";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { BasePermissionGroupListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
-export interface PermissionGroupCardListMobileProps {
-  readonly groups: readonly PermissionGroup[];
-  readonly onViewGroup: (id: string) => void;
-  readonly onEditGroup: (id: string) => void;
-  readonly onDeleteGroup: (id: string) => void;
-  readonly onAssignGroup: (id: string) => void;
-}
-
-interface GroupCardMobileProps {
+interface GroupCardProps {
   readonly group: PermissionGroup;
   readonly onViewGroup: (id: string) => void;
   readonly onEditGroup: (id: string) => void;
@@ -25,13 +18,7 @@ interface GroupCardMobileProps {
   readonly onAssignGroup: (id: string) => void;
 }
 
-function GroupCardMobile({
-  group,
-  onViewGroup,
-  onEditGroup,
-  onDeleteGroup,
-  onAssignGroup,
-}: Readonly<GroupCardMobileProps>) {
+function GroupCardMobile({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGroup }: Readonly<GroupCardProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -157,7 +144,7 @@ export function PermissionGroupCardListMobile({
   onEditGroup,
   onDeleteGroup,
   onAssignGroup,
-}: Readonly<PermissionGroupCardListMobileProps>) {
+}: Readonly<BasePermissionGroupListProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   if (groups.length === 0) {

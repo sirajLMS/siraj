@@ -4,6 +4,7 @@ import { Search } from "@mui/icons-material";
 import { Box, Input, InputAdornment, MenuItem, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { standardInputSx } from "@/frontend/common/components/ui/form";
+import type { PermissionFilterBarProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledFilterContainer = styled(Box)(({ theme }) => ({
@@ -34,16 +35,6 @@ const StyledSelectedCountBadge = styled(Box)(({ theme }) => ({
   alignSelf: "flex-start",
 }));
 
-interface PermissionFilterBarMobileProps {
-  readonly searchTerm: string;
-  readonly onSearchChange: (value: string) => void;
-  readonly selectedCategory: string;
-  readonly onCategoryChange: (value: string) => void;
-  readonly categories: readonly string[];
-  readonly selectedCount: number;
-  readonly isLoading: boolean;
-}
-
 export function PermissionFilterBarMobile({
   searchTerm,
   onSearchChange,
@@ -52,7 +43,7 @@ export function PermissionFilterBarMobile({
   categories,
   selectedCount,
   isLoading,
-}: Readonly<PermissionFilterBarMobileProps>) {
+}: Readonly<PermissionFilterBarProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (

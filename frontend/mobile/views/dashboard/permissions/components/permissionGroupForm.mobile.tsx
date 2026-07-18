@@ -1,5 +1,6 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Close } from "@mui/icons-material";
 import {
   Box,
@@ -14,12 +15,12 @@ import {
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { type Control, useForm, useWatch } from "react-hook-form";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type PermissionGroupFormData,
   permissionGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
+import type { PermissionGroupFormProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { LocalizedStringFormFieldMobile } from "@/frontend/mobile/components/ui/input/localizedString";
 import { PermissionCategoryListMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionCategoryList.mobile";
@@ -27,15 +28,6 @@ import { PermissionFilterBarMobile } from "@/frontend/mobile/views/dashboard/per
 import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
 
 type ValidPermission = Permission & { id: string; key: string; category: string };
-
-interface PermissionGroupFormMobileProps {
-  readonly open: boolean;
-  readonly group: PermissionGroup | null;
-  readonly permissions: readonly Permission[];
-  readonly isLoading: boolean;
-  readonly onClose: () => void;
-  readonly onSave: (name: LocalizedString, description: LocalizedString, permissionIds: string[]) => Promise<void>;
-}
 
 function usePermissionFilters(permissions: readonly Permission[], searchTerm: string, selectedCategory: string) {
   const t = useAppTranslation().dashboardTranslations.permissions;
@@ -274,7 +266,7 @@ export function PermissionGroupFormMobile({
   isLoading,
   onClose,
   onSave,
-}: Readonly<PermissionGroupFormMobileProps>) {
+}: Readonly<PermissionGroupFormProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   const [searchTerm, setSearchTerm] = useState("");

@@ -1,31 +1,19 @@
 "use client";
 
 import { Autocomplete, Box, Skeleton, TextField } from "@mui/material";
-import type { Control, FieldErrors } from "react-hook-form";
+import type { Control } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 import type { ManualInvoiceFormData } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
-import type {
-  ParentInvoiceOption,
-  StudentOption,
-} from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
+import type { BaseManualInvoiceFormFieldsProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceFormFields.types";
+import type { StudentOption } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
 import { ManualInvoiceDateFieldDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceDateField.desktop";
 import { ManualInvoiceFeeFieldDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceFeeField.desktop";
 import { FieldLabelDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceFormLayout.desktop";
 import { ManualInvoiceParentFieldDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceParentField.desktop";
 import type { BillingManualLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
-
-interface ManualInvoiceFormFieldsDesktopProps {
-  readonly control: Control<ManualInvoiceFormData>;
-  readonly errors: FieldErrors<ManualInvoiceFormData>;
-  readonly labels: BillingManualLabels;
-  readonly parentOptions: readonly ParentInvoiceOption[];
-  readonly studentOptions: readonly StudentOption[];
-  readonly parentsLoading?: boolean;
-  readonly studentsLoading?: boolean;
-}
 
 function CurrencyField({
   control,
@@ -110,7 +98,7 @@ export function ManualInvoiceFormFieldsDesktop({
   studentOptions,
   parentsLoading = false,
   studentsLoading = false,
-}: Readonly<ManualInvoiceFormFieldsDesktopProps>) {
+}: Readonly<BaseManualInvoiceFormFieldsProps>) {
   const tProfile = useAppTranslation().profileTranslations.parent;
   const currencyLabel = tProfile.fields.currency;
 

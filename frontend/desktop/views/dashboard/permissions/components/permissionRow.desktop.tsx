@@ -3,7 +3,7 @@
 import { Lock } from "@mui/icons-material";
 import { Box, Checkbox, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionRowProps } from "@/frontend/common/views/dashboard/permissions/types";
 
 const StyledPermissionRowContainer = styled(Box, {
   shouldForwardProp: prop => prop !== "isSystem" && prop !== "isChecked",
@@ -47,24 +47,13 @@ const StyledPermissionDescription = styled(Typography, {
   color: isChecked ? theme.palette.onPrimaryContainer : theme.palette.text.secondary,
   marginTop: theme.spacing(0.5),
 }));
-
-type ValidPermission = Permission & { id: string; key: string; category: string };
-
-interface PermissionRowDesktopProps {
-  readonly perm: ValidPermission;
-  readonly isChecked: boolean;
-  readonly onTogglePermission: (permId: string, isSystem: boolean) => void;
-  readonly isLoading: boolean;
-  readonly t: import("@/shared/locale/types/dashboard/permissions").PermissionsLabels;
-}
-
 export function PermissionRowDesktop({
   perm,
   isChecked,
   onTogglePermission,
   isLoading,
   t,
-}: Readonly<PermissionRowDesktopProps>) {
+}: Readonly<PermissionRowProps>) {
   return (
     <StyledPermissionRowContainer
       isSystem={!!perm.isSystem}

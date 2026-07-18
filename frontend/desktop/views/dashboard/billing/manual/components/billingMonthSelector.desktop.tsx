@@ -2,24 +2,17 @@
 
 import { Box, Checkbox, FormControlLabel, FormHelperText, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { BILLING_MONTH_IDS } from "@/frontend/common/views/dashboard/billing/manual/constants/billingMonths";
-import type { ManualInvoiceFormData } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
+import type { BillingMonthSelectorProps } from "@/frontend/common/views/dashboard/billing/manual/types/billingMonthSelector.types";
 import type { BillingManualLabels } from "@/shared/locale";
-
-interface BillingMonthSelectorDesktopProps {
-  readonly control: Control<ManualInvoiceFormData>;
-  readonly errors: FieldErrors<ManualInvoiceFormData>;
-  readonly labels: BillingManualLabels;
-}
 
 const StyledSectionLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
   textTransform: "uppercase",
 }));
 
-export function BillingMonthSelectorDesktop({ control, errors, labels }: Readonly<BillingMonthSelectorDesktopProps>) {
+export function BillingMonthSelectorDesktop({ control, errors, labels }: Readonly<BillingMonthSelectorProps>) {
   const sectionLabel = labels.billingMonths;
 
   return (

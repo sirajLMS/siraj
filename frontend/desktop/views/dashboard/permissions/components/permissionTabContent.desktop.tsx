@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, CircularProgress } from "@mui/material";
-import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionTabContentProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { PermissionCatalogSectionDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCatalogSection.desktop";
 import { PermissionGroupsDataGridDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionGroupsDataGrid.desktop";
@@ -9,20 +9,6 @@ import { UserOverridesDataGridDesktop } from "@/frontend/desktop/views/dashboard
 import { useAppTranslation } from "@/shared/locale";
 
 export type TabKey = "groups" | "catalog" | "overrides";
-
-export interface PermissionTabContentDesktopProps {
-  readonly activeTab: TabKey;
-  readonly isLoading: boolean;
-  readonly permissions: readonly Permission[];
-  readonly groups: readonly PermissionGroup[];
-  readonly users: readonly User[];
-  readonly setSelectedGroupId: (id: string | null) => void;
-  readonly openEditDialog: (id: string) => void;
-  readonly openDeleteDialog: (id: string) => void;
-  readonly openAssignDialog: (id: string) => void;
-  readonly openManageOverrides: () => void;
-  readonly setSelectedUserIdForOverrides: (id: string | null) => void;
-}
 
 export function PermissionTabContentDesktop({
   activeTab,
@@ -36,7 +22,7 @@ export function PermissionTabContentDesktop({
   openAssignDialog,
   openManageOverrides,
   setSelectedUserIdForOverrides,
-}: Readonly<PermissionTabContentDesktopProps>) {
+}: Readonly<PermissionTabContentProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   if (isLoading && !groups) {

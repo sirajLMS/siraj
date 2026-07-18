@@ -3,18 +3,8 @@
 import { FamilyRestroomOutlined } from "@mui/icons-material";
 import { Autocomplete, InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import type { ManualInvoiceFormData } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
-import type { ParentInvoiceOption } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
-import type { BillingManualLabels } from "@/shared/locale";
-
-interface ManualInvoiceParentFieldDesktopProps {
-  readonly control: Control<ManualInvoiceFormData>;
-  readonly errors: FieldErrors<ManualInvoiceFormData>;
-  readonly labels: BillingManualLabels;
-  readonly parentOptions: readonly ParentInvoiceOption[];
-}
+import type { ManualInvoiceParentFieldProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceParentField.types";
 
 const StyledParentIcon = styled(FamilyRestroomOutlined)(({ theme }) => ({
   color: theme.palette.primary.main,
@@ -25,7 +15,7 @@ export function ManualInvoiceParentFieldDesktop({
   errors,
   labels,
   parentOptions,
-}: Readonly<ManualInvoiceParentFieldDesktopProps>) {
+}: Readonly<ManualInvoiceParentFieldProps>) {
   return (
     <Controller
       name="parentId"

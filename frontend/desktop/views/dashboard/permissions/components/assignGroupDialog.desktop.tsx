@@ -6,18 +6,10 @@ import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
-import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import type { AssignGroupDialogProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { useAppTranslation } from "@/shared/locale";
-
-interface AssignGroupDialogDesktopProps {
-  readonly open: boolean;
-  readonly group: PermissionGroup | null;
-  readonly users: readonly User[];
-  readonly isLoading: boolean;
-  readonly onClose: () => void;
-  readonly onAssign: (userId: string) => void;
-}
 
 const assignSchema = z.object({
   userId: z.string().min(1, "userRequired"),
@@ -32,7 +24,7 @@ export function AssignGroupDialogDesktop({
   isLoading,
   onClose,
   onAssign,
-}: Readonly<AssignGroupDialogDesktopProps>) {
+}: Readonly<AssignGroupDialogProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   const {

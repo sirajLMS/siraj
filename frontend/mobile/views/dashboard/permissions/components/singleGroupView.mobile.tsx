@@ -1,33 +1,14 @@
 "use client";
 
 import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import type { SubTabKey } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
 import { useSingleGroupState } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
+import type { SingleGroupViewProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { AddPermissionsTabMobile } from "@/frontend/mobile/views/dashboard/permissions/components/addPermissionsTab.mobile";
 import { AssignedUsersTabMobile } from "@/frontend/mobile/views/dashboard/permissions/components/assignedUsersTab.mobile";
 import { CurrentPermissionsTabMobile } from "@/frontend/mobile/views/dashboard/permissions/components/currentPermissionsTab.mobile";
 import { SingleGroupHeaderMobile } from "@/frontend/mobile/views/dashboard/permissions/components/singleGroupHeader.mobile";
 import { useAppTranslation } from "@/shared/locale";
-
-interface SingleGroupViewMobileProps {
-  readonly group: PermissionGroup;
-  readonly permissions: readonly Permission[];
-  readonly isLoading: boolean;
-  readonly onBack: () => void;
-  readonly onEditGroup: (id: string) => void;
-  readonly onAssignGroup: (id: string) => void;
-  readonly onRevokeGroup: (groupId: string, userId: string) => Promise<void>;
-  readonly onBulkAssign: (groupId: string, userIds: string[]) => Promise<void>;
-  readonly onBulkRevoke: (groupId: string, userIds: string[]) => Promise<void>;
-  readonly onUpdateGroup: (
-    id: string,
-    name: LocalizedString,
-    description: LocalizedString,
-    permissionIds: string[]
-  ) => Promise<void>;
-}
 
 export function SingleGroupViewMobile({
   group,
@@ -39,7 +20,7 @@ export function SingleGroupViewMobile({
   onRevokeGroup,
   onBulkRevoke,
   onUpdateGroup,
-}: Readonly<SingleGroupViewMobileProps>) {
+}: Readonly<SingleGroupViewProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
   const {
     activeSubTab,

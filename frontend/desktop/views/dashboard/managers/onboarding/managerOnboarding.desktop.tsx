@@ -5,7 +5,6 @@ import { styled } from "@mui/material/styles";
 import { StaffInfoSection } from "@/frontend/common/views/dashboard/managers/onboarding/StaffInfoSection";
 import { SystemAccessSection } from "@/frontend/common/views/dashboard/managers/onboarding/SystemAccessSection";
 import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/managers/onboarding/types";
-import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/form/snackbar";
@@ -38,9 +37,9 @@ export function ManagerOnboardingDesktopView({
   onSubmit,
   onCancel,
   onDismissSuccess,
+  metricsModel,
 }: Readonly<ManagerOnboardingViewProps>) {
   const t = useAppTranslation().dashboardTranslations.managerOnboarding;
-  const metricsModel = useOnboardingMetrics();
 
   return (
     <DesktopPageContainer>

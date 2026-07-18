@@ -2,7 +2,7 @@
 
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { PermissionsLabels } from "@/shared/locale";
+import type { AddPermissionBulkBarProps } from "@/frontend/common/views/dashboard/permissions/types";
 
 const StyledBulkBarContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -33,17 +33,11 @@ const StyledAssignButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-interface AddPermissionBulkBarMobileProps {
-  readonly selectedCount: number;
-  readonly onAssignPermissions: () => void;
-  readonly t: PermissionsLabels;
-}
-
 export function AddPermissionBulkBarMobile({
   selectedCount,
   onAssignPermissions,
   t,
-}: Readonly<AddPermissionBulkBarMobileProps>) {
+}: Readonly<AddPermissionBulkBarProps>) {
   return (
     <StyledBulkBarContainer>
       <StyledSelectionLabel variant="titleLg">{t.itemsSelectedLabel(selectedCount)}</StyledSelectionLabel>

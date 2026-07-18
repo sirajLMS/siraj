@@ -1,26 +1,12 @@
 "use client";
 
 import { Box, CircularProgress } from "@mui/material";
-import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionTabContentProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { PermissionCatalogSectionMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionCatalogSection.mobile";
 import { PermissionGroupCardListMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionGroupCardList.mobile";
 import { UserOverridesDataGridMobile } from "@/frontend/mobile/views/dashboard/permissions/components/userOverridesDataGrid.mobile";
 
 export type TabKey = "groups" | "catalog" | "overrides";
-
-export interface PermissionTabContentMobileProps {
-  readonly activeTab: TabKey;
-  readonly isLoading: boolean;
-  readonly permissions: readonly Permission[];
-  readonly groups: readonly PermissionGroup[];
-  readonly users: readonly User[];
-  readonly setSelectedGroupId: (id: string | null) => void;
-  readonly openEditDialog: (id: string) => void;
-  readonly openDeleteDialog: (id: string) => void;
-  readonly openAssignDialog: (id: string) => void;
-  readonly openManageOverrides: () => void;
-  readonly setSelectedUserIdForOverrides: (id: string | null) => void;
-}
 
 export function PermissionTabContentMobile({
   activeTab,
@@ -34,7 +20,7 @@ export function PermissionTabContentMobile({
   openAssignDialog,
   openManageOverrides,
   setSelectedUserIdForOverrides,
-}: Readonly<PermissionTabContentMobileProps>) {
+}: Readonly<PermissionTabContentProps>) {
   if (isLoading && !groups) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>

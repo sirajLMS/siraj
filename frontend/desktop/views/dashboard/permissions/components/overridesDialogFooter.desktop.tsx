@@ -2,7 +2,7 @@
 
 import { Button, CircularProgress, DialogActions } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { PermissionsLabels } from "@/shared/locale";
+import type { OverridesDialogFooterProps } from "@/frontend/common/views/dashboard/permissions/types";
 
 const StyledFooterContainer = styled(DialogActions)(({ theme }) => ({
   borderTop: `1px solid ${theme.palette.divider}`,
@@ -25,21 +25,13 @@ const StyledSaveButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-interface OverridesDialogFooterDesktopProps {
-  readonly onClose: () => void;
-  readonly handleSave: () => Promise<void>;
-  readonly isDialogLoading: boolean;
-  readonly isSaving: boolean;
-  readonly t: PermissionsLabels;
-}
-
 export function OverridesDialogFooterDesktop({
   onClose,
   handleSave,
   isDialogLoading,
   isSaving,
   t,
-}: Readonly<OverridesDialogFooterDesktopProps>) {
+}: Readonly<OverridesDialogFooterProps>) {
   return (
     <StyledFooterContainer>
       <StyledCancelButton onClick={onClose} disabled={isDialogLoading} variant="text">

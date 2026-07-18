@@ -19,6 +19,8 @@ export interface ManagersViewModel {
   readonly statusFilter: ManagerStatusFilter;
   readonly onRoleFilterChange: (role: ManagerRoleFilter) => void;
   readonly onStatusFilterChange: (status: ManagerStatusFilter) => void;
+  // NEW FOR PLAN v5: canCreateManager flows down from the Container VM through the switcher so tier views render the add-manager button without calling RequirePermission in tier.
+  readonly canCreateManager: boolean;
 }
 
 export type UseManagersViewModelProps = ManagersViewModel;

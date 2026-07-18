@@ -4,38 +4,13 @@ import { EditOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
-  isTeacherAdminData,
-  type TeacherAdminData,
-} from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
-import type {
-  TeacherProfileViewModel,
-  TeacherViewData,
-} from "@/frontend/common/views/dashboard/profile/teacher/useTeacherProfileViewModel";
+  hasTeacherIdentityData,
+  hasTeacherProfessionalData,
+} from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileSectionPredicates";
+import { isTeacherAdminData } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import type { TeacherProfileViewModel } from "@/frontend/common/views/dashboard/profile/teacher/useTeacherProfileViewModel";
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
-
-function hasTeacherProfessionalData(teacherData: TeacherViewData): boolean {
-  const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
-  const qualifications = "qualifications" in teacherData ? teacherData.qualifications : null;
-  return Boolean(
-    qualifications?.trim() ||
-      teacherData.hourlyRate?.trim() ||
-      teacherData.rateCurrency ||
-      teacherData.totalClasses != null ||
-      adminData?.avgEngagementScore != null
-  );
-}
-
-function hasTeacherIdentityData(adminData: TeacherAdminData): boolean {
-  return Boolean(
-    adminData.nationalId?.trim() ||
-      adminData.dateOfBirth?.trim() ||
-      adminData.gender ||
-      adminData.address?.trim() ||
-      adminData.timezone?.trim() ||
-      adminData.status
-  );
-}
 
 export function TeacherProfileDesktopView({
   teacherData,

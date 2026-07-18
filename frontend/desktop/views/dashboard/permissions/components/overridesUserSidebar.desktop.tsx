@@ -3,7 +3,7 @@
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
-import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { OverridesUserSidebarProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledSidebarContainer = styled(Box)(({ theme }) => ({
@@ -62,12 +62,7 @@ const StyledGroupName = styled(Typography)({
   fontWeight: 500,
 });
 
-interface OverridesUserSidebarDesktopProps {
-  readonly user: User;
-  readonly userGroups: readonly PermissionGroup[];
-}
-
-export function OverridesUserSidebarDesktop({ user, userGroups }: Readonly<OverridesUserSidebarDesktopProps>) {
+export function OverridesUserSidebarDesktop({ user, userGroups }: Readonly<OverridesUserSidebarProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (

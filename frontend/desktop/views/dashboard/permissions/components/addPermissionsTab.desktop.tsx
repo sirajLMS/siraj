@@ -5,6 +5,7 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AddPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { AddPermissionBulkBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/addPermissionBulkBar.desktop";
 import { AddPermissionFilterBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/addPermissionFilterBar.desktop";
@@ -26,19 +27,6 @@ const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
   display: "inline-block",
 }));
 
-interface AddPermissionsTabDesktopProps {
-  readonly filteredAvailablePermissions: readonly Permission[];
-  readonly selectedAddPermissionIds: readonly string[];
-  readonly searchQuery: string;
-  readonly selectedCategory: string;
-  readonly addCategories: readonly string[];
-  readonly onAssignPermissions: () => void;
-  readonly onPermissionToggle: (id: string, checked: boolean) => void;
-  readonly onSearchChange: (value: string) => void;
-  readonly onCategoryChange: (value: string) => void;
-  readonly loading?: boolean;
-}
-
 export function AddPermissionsTabDesktop({
   filteredAvailablePermissions,
   selectedAddPermissionIds,
@@ -50,7 +38,7 @@ export function AddPermissionsTabDesktop({
   onSearchChange,
   onCategoryChange,
   loading = false,
-}: Readonly<AddPermissionsTabDesktopProps>) {
+}: Readonly<AddPermissionsTabProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   const addPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {

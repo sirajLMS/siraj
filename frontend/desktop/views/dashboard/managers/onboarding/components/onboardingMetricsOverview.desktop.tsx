@@ -3,10 +3,8 @@
 import { GroupsOutlined, PendingActionsOutlined, SpeedOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
-import type {
-  OnboardingMetricKey,
-  OnboardingMetricsViewModel,
-} from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
+import type { OnboardingMetricsOverviewProps } from "@/frontend/common/views/dashboard/managers/onboarding/types";
+import type { OnboardingMetricKey } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
 import { resolveMetricValue } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -16,11 +14,7 @@ const METRIC_ITEMS = [
   { key: "avgOnboarding", icon: SpeedOutlined },
 ] as const satisfies ReadonlyArray<{ readonly key: OnboardingMetricKey; readonly icon: typeof GroupsOutlined }>;
 
-export interface OnboardingMetricsOverviewDesktopProps {
-  readonly model: OnboardingMetricsViewModel;
-}
-
-export function OnboardingMetricsOverviewDesktop({ model }: Readonly<OnboardingMetricsOverviewDesktopProps>) {
+export function OnboardingMetricsOverviewDesktop({ model }: Readonly<OnboardingMetricsOverviewProps>) {
   const t = useAppTranslation().dashboardTranslations.managerOnboarding.metrics;
   const { metrics, loading } = model;
 

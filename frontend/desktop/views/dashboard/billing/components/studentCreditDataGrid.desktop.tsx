@@ -6,39 +6,10 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { studentHref } from "@/frontend/common/utils/profileHref";
-import type {
-  StudentCreditRow,
-  StudentCreditStatus,
-} from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
+import type { StudentCreditRow } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
+import type { StudentCreditDataGridDesktopProps } from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
+import { formatClassesLeft } from "@/frontend/common/views/dashboard/billing/utils/parentInvoiceFormatters";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
-
-export interface StudentCreditDataGridDesktopLabels {
-  readonly student: string;
-  readonly parentContact: string;
-  readonly planType: string;
-  readonly classesLeft: string;
-  readonly status: string;
-  readonly quickAction: string;
-  readonly sendReminder: string;
-  readonly negativeBalance: string;
-  readonly activeCredit: string;
-  readonly noEntries: string;
-  readonly creditStatusLabels: Record<StudentCreditStatus, string>;
-}
-
-interface StudentCreditDataGridDesktopProps {
-  readonly rows: readonly StudentCreditRow[];
-  readonly labels: StudentCreditDataGridDesktopLabels;
-  readonly canManage: boolean;
-  readonly billingActionsDisabled?: boolean;
-  readonly onSendReminder: (id: string) => void;
-  readonly loading?: boolean;
-  readonly sendingReminderId?: string | null;
-}
-
-function formatClassesLeft(row: StudentCreditRow): string {
-  return `${row.classesLeft} / ${row.classesTotal}`;
-}
 
 const StyledWarningIcon = styled(WarningAmberOutlined)(({ theme }) => ({
   fontSize: 16,
@@ -54,6 +25,7 @@ export function StudentCreditDataGridDesktop({
   loading = false,
   sendingReminderId = null,
 }: Readonly<StudentCreditDataGridDesktopProps>) {
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoize the columns array so the DataGrid keeps stable column identity across prop-driven row updates; MUI X DataGrid re-runs row-height calc and virtualization when columns reference changes, so an inline array would force re-layout on every parent re-render
   const columns = useMemo<GridColDef<StudentCreditRow>[]>(
     () => [
       {

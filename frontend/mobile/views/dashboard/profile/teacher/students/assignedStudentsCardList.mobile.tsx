@@ -3,17 +3,13 @@
 import { Chip, Paper, Stack, Typography } from "@mui/material";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
+import { formatStatusLabel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsStatusFormatters";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 import { useAppTranslation } from "@/shared/locale";
 
 type AssignedStudentsCardListProps = {
   readonly rows: readonly AssignedStudentsRow[];
 };
-
-function formatStatusLabel(status: string): string {
-  const normalized = status.replaceAll("_", " ").toLowerCase();
-  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-}
 
 export function AssignedStudentsCardList({ rows }: Readonly<AssignedStudentsCardListProps>) {
   const t = useAppTranslation().profileTranslations.base.students;

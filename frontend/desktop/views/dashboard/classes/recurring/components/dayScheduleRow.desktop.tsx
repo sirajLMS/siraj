@@ -3,18 +3,10 @@
 import { TuneOutlined } from "@mui/icons-material";
 import { Box, Checkbox, FormControlLabel, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { format, isValid, parse } from "date-fns";
 import { AppTimePicker } from "@/frontend/common/components/ui/form";
-import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import type { DayScheduleRowProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import { formatTimeValue, parseTimeValue } from "@/frontend/common/views/dashboard/classes/recurring/utils";
 import { WeekendDayRow } from "@/frontend/common/views/dashboard/classes/recurring/WeekendDayRow";
-
-const TIME_FORMAT = "HH:mm";
-
-function parseTimeValue(timeStr: string): Date | null {
-  if (!timeStr) return null;
-  const parsed = parse(timeStr, TIME_FORMAT, new Date());
-  return isValid(parsed) ? parsed : null;
-}
 
 const StyledDayScheduleRowContainer = styled(Box, {
   shouldForwardProp: prop => prop !== "isActiveOverride",
@@ -71,17 +63,6 @@ const overrideTimePickerInputSx = (theme: { palette: { sidebar: string } }) => (
   color: theme.palette.sidebar,
 });
 
-export interface DayScheduleRowDesktopProps {
-  readonly day: DayScheduleConfig;
-  readonly dayLabel: string;
-  readonly weekendOffLabel: string;
-  readonly timeOverrideLabel: string;
-  readonly index: number;
-  readonly onToggleDay: (index: number, enabled: boolean) => void;
-  readonly onToggleOverride: (index: number) => void;
-  readonly onTimeOverrideChange: (index: number, time: string) => void;
-}
-
 export function DayScheduleRowDesktop({
   day,
   dayLabel,
@@ -91,7 +72,7 @@ export function DayScheduleRowDesktop({
   onToggleDay,
   onToggleOverride,
   onTimeOverrideChange,
-}: DayScheduleRowDesktopProps) {
+}: DayScheduleRowProps) {
   const isActiveOverride = day.showOverride && day.enabled && !day.isWeekend;
 
   if (day.isWeekend) {
@@ -114,7 +95,7 @@ export function DayScheduleRowDesktop({
           <AppTimePicker
             value={parseTimeValue(day.timeOverride)}
             onChange={(date: Date | null) => {
-              onTimeOverrideChange(index, date && isValid(date) ? format(date, TIME_FORMAT) : "");
+              onTimeOverrideChange(index, formatTimeValue(date));
             }}
             slotProps={{
               textField: {

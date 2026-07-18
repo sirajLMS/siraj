@@ -1,3 +1,8 @@
+export {
+  CURRENCY_DISPLAY_PART_ORDER,
+  CurrencyDisplayPart,
+  type CurrencyDisplayPartValue,
+} from "@/frontend/common/components/ui/display/currencyDisplay/constants";
 export * from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 export * from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLinkCell.mobile";
 export { MobileCountryDisplay } from "@/frontend/mobile/components/ui/display/countryDisplay/countryDisplay.mobile";
@@ -5,11 +10,6 @@ export {
   MobileCurrencyDisplay,
   type MobileCurrencyDisplayProps,
 } from "@/frontend/mobile/components/ui/display/currencyDisplay/CurrencyDisplay.mobile";
-export {
-  CURRENCY_DISPLAY_PART_ORDER,
-  CurrencyDisplayPart,
-  type CurrencyDisplayPartValue,
-} from "@/frontend/mobile/components/ui/display/currencyDisplay/currencyDisplay.constants";
 export { MobileLanguageDisplay } from "@/frontend/mobile/components/ui/display/language/languageDisplay.mobile";
 export { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 export { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay/localizedStringDisplay.mobile";

@@ -1,34 +1,15 @@
 "use client";
 
 import type * as React from "react";
-import {
-  PaymentMethodAutocomplete,
-  type PaymentMethodAutocompleteProps,
-} from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodAutocomplete";
+import { PaymentMethodAutocomplete } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodAutocomplete";
+import type {
+  PaymentMethodAutocompleteProps,
+  PaymentMethodSelectProps,
+} from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 
-export type PaymentMethodSelectProps = {
-  readonly option?: PaymentMethodCatalogOption | null;
-  readonly options: readonly PaymentMethodCatalogOption[];
-  readonly setOptionAction: (option: PaymentMethodCatalogOption) => void;
-  readonly autoComplete?: string;
-  readonly fullWidth?: boolean;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly label?: string;
-  readonly placeholder?: string;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly onBlurAction?: () => void;
-  readonly style?: React.CSSProperties;
-  readonly open?: boolean;
-  readonly onOpenAction?: () => void;
-  readonly onCloseAction?: () => void;
-  readonly autoFocus?: boolean;
-  readonly allowedSlugs?: PaymentMethodAutocompleteProps["allowedSlugs"];
-  readonly type?: PaymentMethodAutocompleteProps["type"];
-  readonly showSlug?: boolean;
-};
+export type { PaymentMethodSelectProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
+export type { PaymentMethodCatalogOption };
 
 /**
  * PaymentMethodSelect allows the operator to pick a catalog-backed payment

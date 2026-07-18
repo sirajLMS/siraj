@@ -5,19 +5,11 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuIte
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import type { AssignGroupDialogProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileFieldWrapper, standardInputSx } from "@/frontend/mobile/components/ui/form/field";
 import { useAppTranslation } from "@/shared/locale";
-
-interface AssignGroupDialogMobileProps {
-  readonly open: boolean;
-  readonly group: PermissionGroup | null;
-  readonly users: readonly User[];
-  readonly isLoading: boolean;
-  readonly onClose: () => void;
-  readonly onAssign: (userId: string) => void;
-}
 
 const assignSchema = z.object({
   userId: z.string().min(1, "userRequired"),
@@ -32,7 +24,7 @@ export function AssignGroupDialogMobile({
   isLoading,
   onClose,
   onAssign,
-}: Readonly<AssignGroupDialogMobileProps>) {
+}: Readonly<AssignGroupDialogProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   const {

@@ -3,6 +3,7 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, Button, InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import type { OverridesToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledToolbarContainer = styled(Box)(({ theme }) => ({
@@ -36,19 +37,12 @@ const StyledModeToggleButton = styled(Button, {
   },
 }));
 
-interface OverridesToolbarMobileProps {
-  readonly mode: "effective" | "edit";
-  readonly onModeChange: (mode: "effective" | "edit") => void;
-  readonly searchQuery: string;
-  readonly onSearchChange: (query: string) => void;
-}
-
 export function OverridesToolbarMobile({
   mode,
   onModeChange,
   searchQuery,
   onSearchChange,
-}: Readonly<OverridesToolbarMobileProps>) {
+}: Readonly<OverridesToolbarProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (

@@ -4,8 +4,8 @@ import { DeleteOutlined, PersonAddOutlined, PersonRemoveOutlined } from "@mui/ic
 import { Avatar, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
-import type { GroupUser, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
+import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
@@ -73,20 +73,6 @@ const StyledRemoveButton = styled(Button)(() => ({
   typography: "labelMd",
 }));
 
-interface AssignedUsersTabMobileProps {
-  readonly group: PermissionGroup;
-  readonly filteredAssignedUsers: readonly GroupUser[];
-  readonly selectedAssignedUserIds: readonly string[];
-  readonly searchQuery: string;
-  readonly selectedCount?: number;
-  readonly onBulkRevokeUsers: () => void;
-  readonly onRevokeUser: (userId: string) => void;
-  readonly onUserToggle: (id: string, checked: boolean) => void;
-  readonly onSearchChange: (value: string) => void;
-  readonly onAssignGroup: (id: string) => void;
-  readonly loading?: boolean;
-}
-
 export function AssignedUsersTabMobile({
   group,
   filteredAssignedUsers,
@@ -98,7 +84,7 @@ export function AssignedUsersTabMobile({
   onSearchChange,
   onAssignGroup,
   loading = false,
-}: Readonly<AssignedUsersTabMobileProps>) {
+}: Readonly<AssignedUsersTabProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (

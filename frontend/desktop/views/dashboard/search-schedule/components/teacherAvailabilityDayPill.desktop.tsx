@@ -1,32 +1,13 @@
 "use client";
 
 import { Box, Chip, Typography } from "@mui/material";
-import { format, parse } from "date-fns";
+import type { TeacherAvailabilityDayPillProps } from "@/frontend/common/views/dashboard/search-schedule/types";
+import { formatDayPillLabel, formatGapLabel } from "@/frontend/common/views/dashboard/search-schedule/utils";
 
 const MAX_VISIBLE_GAPS = 2;
 
-export interface TeacherAvailabilityGapItem {
-  readonly id?: string | null;
-  readonly calendarDate?: string | null;
-  readonly gapStartTime?: string | null;
-  readonly gapEndTime?: string | null;
-}
-
-interface TeacherAvailabilityDayPillDesktopProps {
-  readonly calendarDate: string;
-  readonly gaps: readonly TeacherAvailabilityGapItem[];
-}
-
-function formatGapLabel(gap: TeacherAvailabilityGapItem): string {
-  return `${gap.gapStartTime ?? ""} - ${gap.gapEndTime ?? ""}`;
-}
-
-export function TeacherAvailabilityDayPillDesktop({
-  calendarDate,
-  gaps,
-}: Readonly<TeacherAvailabilityDayPillDesktopProps>) {
-  const parsedDate = parse(calendarDate, "yyyy-MM-dd", new Date());
-  const dayLabel = format(parsedDate, "EEE d MMM").toUpperCase();
+export function TeacherAvailabilityDayPillDesktop({ calendarDate, gaps }: Readonly<TeacherAvailabilityDayPillProps>) {
+  const dayLabel = formatDayPillLabel(calendarDate);
   const hasGaps = gaps.length > 0;
   const visibleGaps = gaps.slice(0, MAX_VISIBLE_GAPS);
   const overflowCount = gaps.length - MAX_VISIBLE_GAPS;

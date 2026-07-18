@@ -1,10 +1,8 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
-import {
-  CountrySelect,
-  type CountrySelectProps,
-} from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
+import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
+import type { CountrySelectProps } from "@/frontend/common/components/ui/input/countrySelect/types";
 import { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 
@@ -12,7 +10,7 @@ function CountrySelectStory({
   initialCountryCode,
   ...props
 }: Readonly<Partial<CountrySelectProps> & { initialCountryCode?: CountryCode }>) {
-  const [country, setCountry] = useState<CountryType | undefined>(() =>
+  const [country, setCountry] = useState<CountryType | null | undefined>(() =>
     initialCountryCode ? countries.find(entry => entry.code === initialCountryCode) : undefined
   );
 

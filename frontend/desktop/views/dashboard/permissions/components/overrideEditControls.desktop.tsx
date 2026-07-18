@@ -2,7 +2,7 @@
 
 import { Button, ButtonGroup } from "@mui/material";
 import { alpha, styled, type Theme } from "@mui/material/styles";
-import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
+import type { OverrideEditControlsProps } from "@/frontend/common/views/dashboard/permissions/types";
 
 type OverrideColorVariant = "inherit" | "allow" | "deny";
 
@@ -37,19 +37,12 @@ const StyledOverrideButton = styled(Button, {
   };
 });
 
-interface OverrideEditControlsDesktopProps {
-  readonly permissionId: string;
-  readonly overrideState: OverrideState;
-  readonly isDialogLoading: boolean;
-  readonly handleOverrideChange: (permissionId: string, state: OverrideState) => void;
-}
-
 export function OverrideEditControlsDesktop({
   permissionId,
   overrideState,
   isDialogLoading,
   handleOverrideChange,
-}: Readonly<OverrideEditControlsDesktopProps>) {
+}: Readonly<OverrideEditControlsProps>) {
   return (
     <ButtonGroup variant="outlined" size="small" fullWidth disabled={isDialogLoading}>
       <StyledOverrideButton

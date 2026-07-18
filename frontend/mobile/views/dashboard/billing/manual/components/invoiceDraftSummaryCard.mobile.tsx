@@ -3,14 +3,7 @@
 import { ReceiptLongOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { BillingManualLabels } from "@/shared/locale";
-
-interface InvoiceDraftSummaryCardMobileProps {
-  readonly labels: BillingManualLabels;
-  readonly totalFormatted: string;
-  readonly currency: CurrencyCode;
-}
+import type { InvoiceDraftSummaryCardProps } from "@/frontend/common/views/dashboard/billing/manual/types/invoiceDraftSummaryCard.types";
 
 const StyledMobileSummaryContainer = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.primaryContainer,
@@ -38,7 +31,7 @@ export function InvoiceDraftSummaryCardMobile({
   labels,
   totalFormatted,
   currency,
-}: Readonly<InvoiceDraftSummaryCardMobileProps>) {
+}: Readonly<InvoiceDraftSummaryCardProps>) {
   return (
     <StyledMobileSummaryContainer>
       <Box>

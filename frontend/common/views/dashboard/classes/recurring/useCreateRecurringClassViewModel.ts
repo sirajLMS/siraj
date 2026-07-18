@@ -1,14 +1,28 @@
 "use client";
 
-import { useApolloClient, useMutation } from "@apollo/client/react";
-import { useCallback, useState } from "react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { type Resolver, useForm } from "react-hook-form";
 import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createRecurringClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-class.documents";
+import { studentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student.documents";
+import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher.documents";
+import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { useCreateRecurringClassStore } from "@/frontend/common/stores/createRecurringClassStore";
 import { logger } from "@/frontend/common/utils/logger";
-import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
+import {
+  createRecurringClassSchema,
+  type RecurringClassFormData,
+} from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
+import { DEFAULT_DAY_SCHEDULE, type SimpleEntity } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import {
+  buildRecurringClassFormLabels,
+  type RecurringClassFormLabels,
+} from "@/frontend/common/views/dashboard/classes/recurring/utils/buildRecurringClassFormLabels";
 import { mapFormDataToInput } from "@/frontend/common/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";
 import {
+  emptyRecurringMeetingConfigState,
   postCreateRecurringMeetingConfig,
   type RecurringMeetingConfigFormState,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
@@ -25,6 +39,11 @@ import type {
 } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
+// Form-instance bag returned by `react-hook-form`. Decoupling the type keeps the
+// ViewModel interface stable while letting both tiers reference the same shared
+// shape (specs §6.3 — ViewModel owns the form; tier views consume via props).
+type RecurringClassFormInstance = ReturnType<typeof useForm<RecurringClassFormData>>;
+
 export interface CreateRecurringClassViewModel {
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
@@ -34,10 +53,23 @@ export interface CreateRecurringClassViewModel {
   readonly goToClassLabel: string;
   readonly onGoToCreatedClass: () => void;
   readonly labels: CreateRecurringClassLabels;
+  readonly formLabels: RecurringClassFormLabels;
   readonly onClose: () => void;
   readonly onSubmit: (data: RecurringClassFormData, meetingConfig: RecurringMeetingConfigFormState) => void;
   readonly onDismissSuccess: () => void;
   readonly onDismissError: () => void;
+  readonly students: readonly SimpleEntity[];
+  readonly teachers: readonly SimpleEntity[];
+  readonly studentsLoading: boolean;
+  readonly teachersLoading: boolean;
+  readonly meetingConfig: RecurringMeetingConfigFormState;
+  readonly onMeetingConfigChange: (next: RecurringMeetingConfigFormState) => void;
+  readonly register: RecurringClassFormInstance["register"];
+  readonly handleSubmit: RecurringClassFormInstance["handleSubmit"];
+  readonly watch: RecurringClassFormInstance["watch"];
+  readonly setValue: RecurringClassFormInstance["setValue"];
+  readonly control: RecurringClassFormInstance["control"];
+  readonly errors: RecurringClassFormInstance["formState"]["errors"];
 }
 
 export type UseCreateRecurringClassViewModelProps = Record<string, never>;
@@ -162,6 +194,10 @@ export function useCreateRecurringClassViewModel(
   const client = useApolloClient();
   const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
   const [createdClassInstanceId, setCreatedClassInstanceId] = useState<string | null>(null);
+  // NEW FOR PLAN v5: meetingConfig form-state lifted out of the tier view (specs N7).
+  const [meetingConfig, setMeetingConfig] = useState<RecurringMeetingConfigFormState>(
+    emptyRecurringMeetingConfigState()
+  );
 
   const isSubmitting = useCreateRecurringClassStore(state => state.isSubmitting);
   const showSuccess = useCreateRecurringClassStore(state => state.showSuccess);
@@ -174,11 +210,57 @@ export function useCreateRecurringClassViewModel(
 
   const [createClassMutation] = useMutation(createRecurringClassMutationDocument);
 
+  // NEW FOR PLAN v5: GraphQL useQuery for students/teachers lifted out of tier
+  // (specs N1 — no `useQuery` in tier files).
+  const { data: studentsData, loading: studentsLoading } = useQuery(studentsQueryDocument, {
+    variables: {
+      filterArgs: null,
+      paginationArgs: { first: 100, skip: 0, after: null, before: null, last: null, maxCount: null, page: null },
+      orderBy: null,
+    },
+  });
+  const { data: teachersData, loading: teachersLoading } = useQuery(teachersQueryDocument, {
+    variables: { search: "", limit: 50 },
+  });
+
+  // NEW FOR PLAN v5: `useMemo` data derivations lifted out of tier (specs N11).
+  const students = useMemo<readonly SimpleEntity[]>(
+    () => studentsData?.students?.data?.map(s => ({ id: s.id ?? "", name: s.name ?? "" })) ?? [],
+    [studentsData?.students?.data]
+  );
+  const teachers = useMemo<readonly SimpleEntity[]>(
+    () => teachersData?.teachers?.map(t => ({ id: t.id ?? "", name: t.name ?? "" })) ?? [],
+    [teachersData?.teachers]
+  );
+
+  const formLabels = useMemo(() => buildRecurringClassFormLabels(labels), [labels]);
+  const schema = useMemo(() => createRecurringClassSchema(labels.validation), [labels.validation]);
+
+  // NEW FOR PLAN v5: `useForm` instantiation + `zodResolver` lifted out of the
+  // tier view (specs N4 + §6.2 — ViewModel is the SOLE owner of the form).
+  const formInstance = useForm<RecurringClassFormData>({
+    resolver: zodResolver(schema) as unknown as Resolver<RecurringClassFormData>,
+    defaultValues: {
+      studentId: "",
+      teacherId: "",
+      defaultStartTime: "09:00",
+      durationHours: 0,
+      durationMinutes: 45,
+      timezone: resolveBrowserIanaTimezoneId(),
+      classType: undefined,
+      effectiveFrom: undefined,
+      effectiveUntil: undefined,
+      generateInstancesForWeeks: 4,
+      days: DEFAULT_DAY_SCHEDULE.map(day => ({ ...day })),
+    },
+  });
+  const { register, handleSubmit, watch, setValue, control, formState } = formInstance;
+
   const handleClose = useCallback(() => {
     router.push("/dashboard");
   }, [router]);
 
-  const handleSubmit = useRecurringClassSubmit({
+  const handleSubmitInternal = useRecurringClassSubmit({
     t: labels,
     tMeeting,
     tClassScope,
@@ -194,11 +276,44 @@ export function useCreateRecurringClassViewModel(
     setCreatedClassInstanceId,
   });
 
+  const onSubmit = useCallback(
+    (data: RecurringClassFormData, currentMeetingConfig: RecurringMeetingConfigFormState) => {
+      void handleSubmitInternal(data, currentMeetingConfig);
+    },
+    [handleSubmitInternal]
+  );
+
+  const handleMeetingConfigChange = useCallback((next: RecurringMeetingConfigFormState) => {
+    setMeetingConfig(next);
+  }, []);
+
   const handleGoToCreatedClass = useCallback(() => {
     if (createdClassInstanceId) {
       router.push(`/classes/${createdClassInstanceId}`);
     }
   }, [createdClassInstanceId, router]);
+
+  // NEW FOR PLAN v5: snackbar auto-dismiss timers lifted out of tier views
+  // (specs N6 + N18 — data/side-effect timing belongs to the ViewModel).
+  useEffect(() => {
+    if (!showSuccess || meetingConfigWarning) return undefined;
+    const timer = setTimeout(() => {
+      resetSuccess();
+    }, 3000);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [showSuccess, meetingConfigWarning, resetSuccess]);
+
+  useEffect(() => {
+    if (!errorMessage) return undefined;
+    const timer = setTimeout(() => {
+      clearError();
+    }, 5000);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [errorMessage, clearError]);
 
   const goToClassLabel = tRecurringSchedule.goToClass;
 
@@ -211,9 +326,22 @@ export function useCreateRecurringClassViewModel(
     goToClassLabel,
     onGoToCreatedClass: handleGoToCreatedClass,
     labels,
+    formLabels,
     onClose: handleClose,
-    onSubmit: handleSubmit,
+    onSubmit,
     onDismissSuccess: resetSuccess,
     onDismissError: clearError,
+    students,
+    teachers,
+    studentsLoading,
+    teachersLoading,
+    meetingConfig,
+    onMeetingConfigChange: handleMeetingConfigChange,
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    control,
+    errors: formState.errors,
   };
 }

@@ -5,7 +5,8 @@ import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrentPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -67,15 +68,6 @@ const StyledAssignFirstButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-interface CurrentPermissionsTabDesktopProps {
-  readonly group: PermissionGroup;
-  readonly groupPermissions: readonly Permission[];
-  readonly permissionsCount: number;
-  readonly onRevokePermission: (permissionId: string) => Promise<void>;
-  readonly onSwitchToAddTab: () => void;
-  readonly loading?: boolean;
-}
-
 export function CurrentPermissionsTabDesktop({
   group,
   groupPermissions,
@@ -83,7 +75,7 @@ export function CurrentPermissionsTabDesktop({
   onRevokePermission,
   onSwitchToAddTab,
   loading = false,
-}: Readonly<CurrentPermissionsTabDesktopProps>) {
+}: Readonly<CurrentPermissionsTabProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   const currentPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {

@@ -16,27 +16,18 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { type Control, useForm, useWatch } from "react-hook-form";
 import { LocalizedStringFormField } from "@/frontend/common/components/ui/input/localizedString";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type PermissionGroupFormData,
   permissionGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
+import type { PermissionGroupFormProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { PermissionCategoryListDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCategoryList.desktop";
 import { PermissionFilterBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionFilterBar.desktop";
 import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
 
 type ValidPermission = Permission & { id: string; key: string; category: string };
-
-interface PermissionGroupFormDesktopProps {
-  readonly open: boolean;
-  readonly group: PermissionGroup | null;
-  readonly permissions: readonly Permission[];
-  readonly isLoading: boolean;
-  readonly onClose: () => void;
-  readonly onSave: (name: LocalizedString, description: LocalizedString, permissionIds: string[]) => Promise<void>;
-}
 
 function usePermissionFilters(permissions: readonly Permission[], searchTerm: string, selectedCategory: string) {
   const t = useAppTranslation().dashboardTranslations.permissions;
@@ -275,7 +266,7 @@ export function PermissionGroupFormDesktop({
   isLoading,
   onClose,
   onSave,
-}: Readonly<PermissionGroupFormDesktopProps>) {
+}: Readonly<PermissionGroupFormProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   const [searchTerm, setSearchTerm] = useState("");

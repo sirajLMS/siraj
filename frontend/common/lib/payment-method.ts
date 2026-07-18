@@ -9,7 +9,7 @@
  * imports so it can be unit-tested and tree-shaken.
  */
 
-import type { PaymentMethodDisplayData } from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
+import type { PaymentMethodDisplayData } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import {
   IdentifierKind,
   PaymentDirection,

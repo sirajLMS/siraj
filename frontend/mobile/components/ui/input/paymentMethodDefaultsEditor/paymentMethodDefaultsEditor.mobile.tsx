@@ -2,32 +2,17 @@
 
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import { useCallback, useState } from "react";
-import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useCallback } from "react";
+import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
+import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
+import { filterMethodsForDirection } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/utils";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge/MobileStatusBadge";
 import { MobileFieldWrapper } from "@/frontend/mobile/components/ui/form/field/MobileFieldWrapper";
 import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar/MobileFormSuccessSnackbar";
 import { CurrencySelectMobile } from "@/frontend/mobile/components/ui/input/currencySelect";
 import { LocalizedStringDrawerMobile } from "@/frontend/mobile/components/ui/input/localizedString";
-import type {
-  PaymentMethodDefaultsEditorProps,
-  PaymentMethodRow,
-} from "@/frontend/mobile/components/ui/input/paymentMethodDefaultsEditor/paymentMethodDefaultsEditor.types";
 import { useAppTranslation } from "@/shared/locale";
-
-function filterMethodsForDirection(
-  methods: readonly PaymentMethodRow[],
-  direction: "payin" | "payout"
-): readonly PaymentMethodRow[] {
-  return methods.filter(method => {
-    if (!method.direction) return false;
-    if (method.direction === PaymentDirection.Both) return true;
-    return direction === "payin"
-      ? method.direction === PaymentDirection.Payin
-      : method.direction === PaymentDirection.Payout;
-  });
-}
 
 export function PaymentMethodDefaultsEditorMobile({
   methods,
@@ -43,27 +28,31 @@ export function PaymentMethodDefaultsEditorMobile({
   disabled = false,
   successOpen = false,
   onSuccessCloseAction,
-}: PaymentMethodDefaultsEditorProps) {
+  instructionsOpen = false,
+  onInstructionsOpenChangeAction,
+}: Readonly<PaymentMethodDefaultsEditorProps>) {
   const t = useAppTranslation().uiTranslations.paymentMethod;
   const tDefaults = t.defaultsEditor;
-  const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   const payinMethods = filterMethodsForDirection(methods, "payin");
   const payoutMethods = filterMethodsForDirection(methods, "payout");
 
   const formatMethodLabel = useCallback(
     (method: PaymentMethodRow) => {
-      const typeLabel = method.type
-        ? getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "")
-        : "";
-      const directionLabel = method.direction
-        ? getPaymentMethodDirectionLabel(method.direction, key => t.direction[key as keyof typeof t.direction] ?? "")
-        : "";
+      const typeLabel = getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "");
+      const directionLabel = getPaymentMethodDirectionLabel(
+        method.direction,
+        key => t.direction[key as keyof typeof t.direction] ?? ""
+      );
       const base = method.label?.trim() || method.catalogSlug || typeLabel;
       return directionLabel ? `${base} (${directionLabel})` : base;
     },
     [t]
   );
+
+  const setInstructionsOpen = (open: boolean) => {
+    onInstructionsOpenChangeAction?.(open);
+  };
 
   return (
     <Stack sx={{ gap: 2 }}>

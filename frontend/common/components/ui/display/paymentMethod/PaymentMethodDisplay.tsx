@@ -12,7 +12,7 @@ import {
 import type {
   PaymentMethodDisplayData,
   PaymentMethodDisplayProps,
-} from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodDisplay.types";
+} from "@/frontend/common/components/ui/display/paymentMethod/types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import {

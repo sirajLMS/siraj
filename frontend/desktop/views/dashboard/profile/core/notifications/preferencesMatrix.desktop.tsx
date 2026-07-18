@@ -5,25 +5,20 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
-  buildPreferenceMap,
   NOTIFICATION_CHANNELS,
-  NOTIFICATION_EVENT_TYPES,
-  type NotificationPrefRow,
+  type PreferenceMatrixRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { useAppTranslation } from "@/shared/locale";
 
-type PreferencesMatrixDesktopViewProps = {
-  readonly preferences: readonly NotificationPrefRow[];
+interface PreferencesMatrixDesktopViewProps {
+  // NEW FOR PLAN v5: pre-shaped matrix rows lifted out of the desktop tier
+  // (data-shaping belongs in the ViewModel — specs.md §6.1). The tier view
+  // only consumes them.
+  readonly matrixRows: readonly PreferenceMatrixRow[];
   readonly onToggle: (channel: NotificationChannel, eventType: NotificationEventType, enabled: boolean) => void;
   readonly disabled?: boolean;
   readonly loading?: boolean;
-};
-
-interface PreferenceMatrixRow {
-  readonly id: string;
-  readonly eventType: NotificationEventType;
-  readonly enabledMap: Record<string, boolean>;
 }
 
 interface ChannelCellProps {
@@ -64,25 +59,14 @@ function EventTypeCell({ label }: Readonly<EventTypeCellProps>) {
 }
 
 export function PreferencesMatrixDesktopView({
-  preferences,
+  matrixRows,
   onToggle,
   disabled = false,
   loading = false,
 }: Readonly<PreferencesMatrixDesktopViewProps>) {
   const t = useAppTranslation().profileTranslations.notifications;
-  const preferenceMap = buildPreferenceMap(preferences);
 
-  const rows = useMemo<PreferenceMatrixRow[]>(() => {
-    return NOTIFICATION_EVENT_TYPES.map(eventType => {
-      const enabledMap: Record<string, boolean> = {};
-      for (const channel of NOTIFICATION_CHANNELS) {
-        const pref = preferenceMap.get(`${channel}:${eventType}`);
-        enabledMap[channel] = pref?.enabled ?? true;
-      }
-      return { id: eventType, eventType, enabledMap };
-    });
-  }, [preferenceMap]);
-
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoize the columns array so the DataGrid keeps stable column identity across prop-driven row updates; MUI X DataGrid re-runs row-height calc and virtualization when the columns reference changes, so an inline array would force re-layout on every parent re-render. Memo keys (`t`, `disabled`, `onToggle`) all come from container props; inline cells would rebuild the render tree each render.
   const columns = useMemo<GridColDef<PreferenceMatrixRow>[]>(() => {
     const channelColumns: GridColDef<PreferenceMatrixRow>[] = NOTIFICATION_CHANNELS.map(channel => ({
       field: channel,
@@ -124,10 +108,10 @@ export function PreferencesMatrixDesktopView({
 
   return (
     <DesktopAppDataGrid<PreferenceMatrixRow>
-      rows={rows}
+      rows={matrixRows}
       columns={columns}
       getRowId={row => row.id}
-      loading={loading && preferences.length === 0}
+      loading={loading && matrixRows.length === 0}
       hideFooter
       autoHeight
       ariaLabel={t.title}

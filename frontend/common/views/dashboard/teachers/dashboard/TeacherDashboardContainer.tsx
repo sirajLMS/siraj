@@ -153,6 +153,51 @@ export function TeacherDashboardContainer() {
   const permissions = useUserStore(state => state.permissions);
   const userName = useUserStore(state => state.name);
 
+  // NEW FOR PLAN v5: derived per-action permission booleans (specs.md §3 N3).
+  // The Container owns the permission check; the resulting `has*` flags are
+  // pushed into the TeacherDashboard Zustand store so the existing tier
+  // consumers (teacherScheduleMobileCard / teacherScheduleDataGrid / etc.)
+  // can keep reading from the store — and they are also passed through the
+  // ViewModel as explicit props for the `TeacherActiveSessionControls*`,
+  // `TeacherScheduleStatusContentMobile`, and
+  // `TeacherScheduleSessionActionsCellDesktop` sub-components.
+  const hasSessionUpdateStatusStart = permissions.includes(AppPermission.SessionUpdateStatusStart);
+  const hasSessionUpdateStatusAbsent = permissions.includes(AppPermission.SessionUpdateStatusAbsent);
+  const hasSessionUpdateStatusLeave = permissions.includes(AppPermission.SessionUpdateStatusLeave);
+  const hasSessionActivateClass = permissions.includes(AppPermission.SessionActivateClass);
+
+  const setSessionPermissionBooleans = useTeacherDashboardStore(state => state.setSessionPermissionBooleans);
+  useEffect(() => {
+    setSessionPermissionBooleans({
+      hasSessionUpdateStatusStart,
+      hasSessionUpdateStatusAbsent,
+      hasSessionUpdateStatusLeave,
+      hasSessionActivateClass,
+    });
+  }, [
+    hasSessionUpdateStatusStart,
+    hasSessionUpdateStatusAbsent,
+    hasSessionUpdateStatusLeave,
+    hasSessionActivateClass,
+    setSessionPermissionBooleans,
+  ]);
+
+  // NEW FOR PLAN v5: lifted `absentDialogOpen` state from the tier-side
+  // teacherActiveSessionControls.{mobile,desktop}.tsx components (specs.md
+  // §3 N7 + §6.4). The store owns the boolean; the Container exposes
+  // open/close callbacks through the ViewModel so tier views never call
+  // `useState`. We read these via granular selectors alongside the
+  // existing single destructure below to keep re-renders scoped.
+  const absentDialogOpen = useTeacherDashboardStore(state => state.absentDialogOpen);
+  const setAbsentDialogOpen = useTeacherDashboardStore(state => state.setAbsentDialogOpen);
+  // NEW FOR PLAN v5: the controls' `onAbsentDialogOpen()` (no-arg) opens the
+  // shared dialog with the captured row identity; the schedule cards push
+  // `row.id` into the store via `onAbsentDialogOpenForClass`. The Container
+  // then routes the confirm through `markAbsent(classInstanceId)` per the
+  // captured identity, preserving per-row dispatch through shared state.
+  const openAbsentDialogForClass = useTeacherDashboardStore(state => state.openAbsentDialogForClass);
+  const absentDialogClassInstanceId = useTeacherDashboardStore(state => state.absentDialogClassInstanceId);
+
   const [activationError, setActivationError] = useState<string | null>(null);
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
   const [manualEntryDefaultActive, setManualEntryDefaultActive] = useState(false);
@@ -161,6 +206,9 @@ export function TeacherDashboardContainer() {
   const [snackbarSeverity, setSnackbarSeverity] = useState<SnackbarSeverity>("info");
 
   const { filterDate, setFilterDate, page, pageSize, setPage } = useTeacherDashboardStore();
+  // Note: absentDialogOpen + setAbsentDialogOpen were extracted above via
+  // granular selectors (specs.md §6.4 prefers selector subscriptions over
+  // whole-store destructure to keep re-renders scoped).
 
   const paginationArgs = {
     first: pageSize,
@@ -385,6 +433,26 @@ export function TeacherDashboardContainer() {
     lessonReportLabels,
     onLessonReportDialogClose: () => {},
     onLessonReportSubmit: async () => {},
+    // NEW FOR PLAN v5: lifted permission booleans + absent-dialog state.
+    hasSessionUpdateStatusStart,
+    hasSessionUpdateStatusAbsent,
+    hasSessionUpdateStatusLeave,
+    hasSessionActivateClass,
+    absentDialogOpen,
+    onAbsentDialogOpen: () => openAbsentDialogForClass(absentDialogClassInstanceId ?? ""),
+    onAbsentDialogOpenForClass: (id: string) => openAbsentDialogForClass(id),
+    onAbsentDialogClose: () => setAbsentDialogOpen(false),
+    onAbsentDialogConfirm: async () => {
+      if (absentDialogClassInstanceId) {
+        try {
+          await markAbsent({ variables: { classInstanceId: absentDialogClassInstanceId } });
+          await refetch();
+        } catch (err) {
+          logger.error("Error marking absent from dialog:", err);
+        }
+      }
+      setAbsentDialogOpen(false);
+    },
   };
 
   const viewModel = useTeacherDashboardViewModel(props);

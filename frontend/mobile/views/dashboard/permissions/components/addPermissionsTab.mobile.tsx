@@ -3,6 +3,7 @@
 import { Box, Checkbox, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AddPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { AddPermissionBulkBarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/addPermissionBulkBar.mobile";
@@ -14,19 +15,6 @@ const StyledTabContainer = styled(Box)({
   flexDirection: "column",
   gap: 16,
 });
-
-interface AddPermissionsTabMobileProps {
-  readonly filteredAvailablePermissions: readonly Permission[];
-  readonly selectedAddPermissionIds: readonly string[];
-  readonly searchQuery: string;
-  readonly selectedCategory: string;
-  readonly addCategories: readonly string[];
-  readonly onAssignPermissions: () => void;
-  readonly onPermissionToggle: (id: string, checked: boolean) => void;
-  readonly onSearchChange: (value: string) => void;
-  readonly onCategoryChange: (value: string) => void;
-  readonly loading?: boolean;
-}
 
 interface PermissionCardProps {
   readonly permission: Permission;
@@ -89,7 +77,7 @@ export function AddPermissionsTabMobile({
   onSearchChange,
   onCategoryChange,
   loading = false,
-}: Readonly<AddPermissionsTabMobileProps>) {
+}: Readonly<AddPermissionsTabProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (

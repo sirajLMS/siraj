@@ -1,49 +1,23 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircleOutlined, CloseOutlined, ErrorOutlined } from "@mui/icons-material";
 import { alpha, Box, IconButton, Snackbar, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
-import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
-import { createRecurringClassSchema } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
-import { DEFAULT_DAY_SCHEDULE } from "@/frontend/common/views/dashboard/classes/recurring/types";
-import {
-  emptyRecurringMeetingConfigState,
-  type RecurringMeetingConfigFormState,
-} from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
+import type { CreateRecurringClassViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useCreateRecurringClassViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { RecurringClassFormMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/recurringClassForm.mobile";
-import type { CreateRecurringClassLabels } from "@/shared/locale";
-
-interface CreateRecurringClassViewMobileProps {
-  readonly isSubmitting: boolean;
-  readonly showSuccess: boolean;
-  readonly errorMessage: string | null;
-  readonly meetingConfigWarning?: boolean;
-  readonly meetingConfigWarningMessage?: string;
-  readonly goToClassLabel?: string;
-  readonly onGoToCreatedClass?: () => void;
-  readonly labels: CreateRecurringClassLabels;
-  readonly onClose: () => void;
-  readonly onSubmit: (data: RecurringClassFormData, meetingConfig: RecurringMeetingConfigFormState) => void;
-  readonly onDismissSuccess: () => void;
-  readonly onDismissError: () => void;
-}
 
 const StyledSuccessSnackbarContent = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: theme.spacing(1.5),
-  paddingInline: theme.spacing(3),
-  paddingBlock: theme.spacing(1.5),
   borderRadius: 10,
   backgroundColor: theme.palette.sidebarContainer,
   color: theme.palette.onSidebarContainer,
   boxShadow: theme.palette.shadow.card,
+  paddingInline: theme.spacing(3),
+  paddingBlock: theme.spacing(1.5),
 }));
 
 const StyledSuccessCheckIcon = styled(CheckCircleOutlined)(({ theme }) => ({
@@ -61,12 +35,12 @@ const StyledErrorSnackbarContent = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: theme.spacing(1.5),
-  paddingInline: theme.spacing(3),
-  paddingBlock: theme.spacing(1.5),
   borderRadius: 10,
   backgroundColor: theme.palette.errorContainer,
   color: theme.palette.onErrorContainer,
   boxShadow: theme.palette.shadow.card,
+  paddingInline: theme.spacing(3),
+  paddingBlock: theme.spacing(1.5),
 }));
 
 const StyledErrorIcon = styled(ErrorOutlined)(({ theme }) => ({
@@ -75,33 +49,6 @@ const StyledErrorIcon = styled(ErrorOutlined)(({ theme }) => ({
   borderRadius: "50%",
   padding: theme.spacing(0.5),
 }));
-
-function buildFormLabels(labels: CreateRecurringClassLabels) {
-  return {
-    add: labels.add,
-    addClass: labels.addClass,
-    addedSuccessfully: labels.addedSuccessfully,
-    students: labels.students,
-    studentsPlaceholder: labels.studentsPlaceholder,
-    teacher: labels.teacher,
-    teacherPlaceholder: labels.teacherPlaceholder,
-    defaultStartTime: labels.defaultStartTime,
-    duration: labels.duration,
-    durationHours: labels.durationHours,
-    durationMinutes: labels.durationMinutes,
-    hours: labels.hours,
-    minutes: labels.minutes,
-    daysSelection: labels.daysSelection,
-    classSchedule: labels.classSchedule,
-    timeOverride: labels.timeOverride,
-    weekendOff: labels.weekendOff,
-    timezone: labels.timezone,
-    timezonePlaceholder: labels.timezonePlaceholder,
-    classType: labels.classType,
-    classTypePlaceholder: labels.classTypePlaceholder,
-    days: labels.days,
-  };
-}
 
 function SuccessSnackbar({
   open,
@@ -121,13 +68,7 @@ function SuccessSnackbar({
     >
       <StyledSuccessSnackbarContent>
         <StyledSuccessCheckIcon />
-        <Typography
-          variant="labelUppercase"
-          sx={{
-            fontWeight: 700,
-            whiteSpace: "nowrap",
-          }}
-        >
+        <Typography variant="labelUppercase" sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
           {labels}
         </Typography>
       </StyledSuccessSnackbarContent>
@@ -153,13 +94,7 @@ function ErrorSnackbar({
     >
       <StyledErrorSnackbarContent>
         <StyledErrorIcon />
-        <Typography
-          variant="labelUppercase"
-          sx={{
-            fontWeight: 700,
-            whiteSpace: "nowrap",
-          }}
-        >
+        <Typography variant="labelUppercase" sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
           {message}
         </Typography>
       </StyledErrorSnackbarContent>
@@ -167,68 +102,35 @@ function ErrorSnackbar({
   );
 }
 
-export function CreateRecurringClassViewMobile({
-  isSubmitting,
-  showSuccess,
-  errorMessage,
-  meetingConfigWarning = false,
-  meetingConfigWarningMessage,
-  goToClassLabel,
-  onGoToCreatedClass,
-  labels,
-  onClose,
-  onSubmit,
-  onDismissSuccess,
-  onDismissError,
-}: Readonly<CreateRecurringClassViewMobileProps>) {
+export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurringClassViewModel>) {
   const theme = useTheme();
-  const schema = useMemo(() => createRecurringClassSchema(labels.validation), [labels.validation]);
-  const formLabels = useMemo(() => buildFormLabels(labels), [labels]);
-  const [meetingConfig, setMeetingConfig] = useState<RecurringMeetingConfigFormState>(emptyRecurringMeetingConfigState);
-
   const {
+    isSubmitting,
+    showSuccess,
+    errorMessage,
+    meetingConfigWarning,
+    meetingConfigWarningMessage,
+    goToClassLabel,
+    onGoToCreatedClass,
+    labels,
+    onClose,
+    onSubmit,
+    onDismissSuccess,
+    onDismissError,
+    formLabels,
     register,
     handleSubmit,
     watch,
     setValue,
     control,
-    formState: { errors },
-  } = useForm<RecurringClassFormData>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      studentId: "",
-      teacherId: "",
-      defaultStartTime: "09:00",
-      durationHours: 0,
-      durationMinutes: 45,
-      timezone: resolveBrowserIanaTimezoneId(),
-      classType: undefined,
-      effectiveFrom: undefined,
-      effectiveUntil: undefined,
-      generateInstancesForWeeks: 4,
-      days: DEFAULT_DAY_SCHEDULE.map(day => ({ ...day })),
-    },
-  });
-
-  useEffect(() => {
-    if (!showSuccess || meetingConfigWarning) return undefined;
-    const timer = setTimeout(() => {
-      onDismissSuccess();
-    }, 3000);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [showSuccess, meetingConfigWarning, onDismissSuccess]);
-
-  useEffect(() => {
-    if (!errorMessage) return undefined;
-    const timer = setTimeout(() => {
-      onDismissError();
-    }, 5000);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [errorMessage, onDismissError]);
+    errors,
+    meetingConfig,
+    onMeetingConfigChange,
+    students,
+    teachers,
+    studentsLoading,
+    teachersLoading,
+  } = viewModel;
 
   return (
     <MobilePageContainer>
@@ -260,9 +162,13 @@ export function CreateRecurringClassViewMobile({
             meetingConfigWarningMessage={meetingConfigWarningMessage}
             goToClassLabel={goToClassLabel}
             onGoToCreatedClass={onGoToCreatedClass}
-            labels={formLabels}
+            formLabels={formLabels}
             meetingConfig={meetingConfig}
-            onMeetingConfigChangeAction={setMeetingConfig}
+            onMeetingConfigChangeAction={onMeetingConfigChange}
+            students={students}
+            teachers={teachers}
+            studentsLoading={studentsLoading}
+            teachersLoading={teachersLoading}
             onSubmit={data => onSubmit(data, meetingConfig)}
           />
         </MobileSectionPanel>

@@ -5,27 +5,24 @@ import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo, useState } from "react";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { BasePermissionGroupListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
-export interface PermissionGroupsDataGridDesktopProps {
-  readonly groups: readonly PermissionGroup[];
-  readonly onViewGroup: (id: string) => void;
-  readonly onEditGroup: (id: string) => void;
-  readonly onDeleteGroup: (id: string) => void;
-  readonly onAssignGroup: (id: string) => void;
+export interface PermissionGroupsDataGridDesktopProps extends BasePermissionGroupListProps {
+  // VARIANT JUSTIFICATION: extra field loading — desktop data-grid supports async row-loading state; mobile card list renders synchronously
   readonly loading?: boolean;
 }
 
-interface RowActionsDesktopProps {
+interface RowActionsProps {
   readonly group: PermissionGroup;
   readonly onEditGroup: (id: string) => void;
   readonly onDeleteGroup: (id: string) => void;
   readonly onAssignGroup: (id: string) => void;
 }
 
-function RowActionsDesktop({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readonly<RowActionsDesktopProps>) {
+function RowActionsDesktop({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readonly<RowActionsProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);

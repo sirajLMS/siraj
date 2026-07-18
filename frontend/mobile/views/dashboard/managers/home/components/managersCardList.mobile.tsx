@@ -4,7 +4,7 @@ import { MailOutlined, PhoneOutlined } from "@mui/icons-material";
 import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
-import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
+import type { BaseManagersListProps } from "@/frontend/common/views/dashboard/managers/home/types";
 import {
   MobileBaseCard,
   MobilePaginationControls,
@@ -69,13 +69,8 @@ const StyledContactItemBox = styled(Stack)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-interface ManagersCardListMobileProps {
-  managers: Manager[];
-  page?: number;
-  pageSize?: number;
-  totalCount?: number;
-  onPageChange?: (page: number) => void;
-}
+// VARIANT JUSTIFICATION: mobile card list uses the shared base shape with no extra fields; aliased as a named type for tier call-site clarity (Class C variant per specs §4.3).
+export type ManagersCardListMobileProps = BaseManagersListProps;
 
 export function ManagersCardListMobile({
   managers,

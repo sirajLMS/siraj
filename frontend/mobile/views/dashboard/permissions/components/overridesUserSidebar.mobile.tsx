@@ -2,7 +2,7 @@
 
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { OverridesUserSidebarProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -62,12 +62,7 @@ const StyledGroupName = styled(Typography)({
   fontWeight: 500,
 });
 
-interface OverridesUserSidebarMobileProps {
-  readonly user: User;
-  readonly userGroups: readonly PermissionGroup[];
-}
-
-export function OverridesUserSidebarMobile({ user, userGroups }: Readonly<OverridesUserSidebarMobileProps>) {
+export function OverridesUserSidebarMobile({ user, userGroups }: Readonly<OverridesUserSidebarProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
   return (
