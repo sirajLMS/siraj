@@ -18,6 +18,7 @@ export const profileEn: ProfileLabels = {
   pageTitle: "Profile",
   editTitle: "Edit Profile",
   editAvatarTitle: "Edit Profile Avatar",
+  avatar: "Avatar",
   notSet: "Not set",
   adminEditHint: "Use the staff profile tools for full administrative editing.",
   role: {

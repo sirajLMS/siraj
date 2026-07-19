@@ -6,9 +6,9 @@ export const dashboardAdminViewEn: AdminViewLabels = {
     roleLabel: "Admin Role",
   },
   timezone: {
-    title: "Timezone",
-    prefix: "Local time",
-    suffix: "GMT+3",
+    title: "Timezone Conflict Detected",
+    message: (studentTimezone, teacherTimezone) =>
+      `Student's local time (${studentTimezone}) differs from the teacher's (${teacherTimezone}). Attendance logging may lag.`,
   },
   adminActions: {
     administrativeActions: "Administrative Actions",

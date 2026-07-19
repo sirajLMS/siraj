@@ -2,6 +2,7 @@
 
 import { Box, Button, Skeleton, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { ProfileAvatarView } from "@/frontend/common/components/ui/input/avatarImageField";
 import {
   type ProfileAudience,
   ProfileMode,
@@ -81,13 +82,17 @@ function renderBody(
           <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>{actions}</Box>
         ) : null
       ) : (
-        <ProfileHeader
-          name={name ?? ""}
-          email={email ?? ""}
-          roleLabel={roleLabel}
-          avatarUrl={avatarUrl}
-          actions={actions}
-        />
+        <>
+          <ProfileAvatarView imageUrl={avatarUrl} label={name ?? t.avatar} title={name ?? t.avatar} />
+          <ProfileHeader
+            name={name ?? ""}
+            email={email ?? ""}
+            roleLabel={roleLabel}
+            avatarUrl={avatarUrl}
+            showAvatar={false}
+            actions={actions}
+          />
+        </>
       )}
       {showTabs ? (
         <ProfileTabNav

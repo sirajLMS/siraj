@@ -9,8 +9,7 @@ import {
   SchoolOutlined,
 } from "@mui/icons-material";
 import { Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
-import { UserAvatar } from "@/frontend/common/components/ui";
-import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
+import { AvatarImageField, ProfileAvatarView } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AppLanguage, Gender, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
@@ -134,20 +133,19 @@ export function StudentProfileMobileView({
             onUploadAvatar={onUploadAvatar}
             disabled={saving}
           />
-        ) : null}
+        ) : (
+          <ProfileAvatarView imageUrl={profile.avatarUrl} label={profile.name} title={profile.name} />
+        )}
 
         <MobileSectionPanel title={labels.personalInfo}>
           <Stack spacing={2}>
-            <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-              {isEditing ? null : <UserAvatar src={profile.avatarUrl} label={profile.name} size={48} />}
-              <Stack>
-                <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
-                  {profile.name}
-                </Typography>
-                <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                  {profile.status}
-                </Typography>
-              </Stack>
+            <Stack>
+              <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
+                {profile.name}
+              </Typography>
+              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+                {profile.status}
+              </Typography>
             </Stack>
 
             {isEditing ? (

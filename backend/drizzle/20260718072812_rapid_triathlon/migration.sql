@@ -80,22 +80,22 @@ CREATE TABLE "teacher_dues" (
 );
 --> statement-breakpoint
 ALTER TABLE "students" ADD COLUMN "user_id" uuid NOT NULL;--> statement-breakpoint
-CREATE UNIQUE INDEX "impersonation_sessions_one_active_per_actor" ON "impersonation_sessions" ("actor_user_id") WHERE "is_active" = true;--> statement-breakpoint
-CREATE UNIQUE INDEX "credit_transactions_idempotency_key_unique_idx" ON "credit_transactions" ("idempotency_key");--> statement-breakpoint
-CREATE INDEX "credit_transactions_student_id_idx" ON "credit_transactions" ("student_id");--> statement-breakpoint
-CREATE INDEX "credit_transactions_reason_idx" ON "credit_transactions" ("reason");--> statement-breakpoint
-CREATE INDEX "credit_transactions_class_instance_id_idx" ON "credit_transactions" ("class_instance_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "lesson_reports_class_instance_id_unique_idx" ON "lesson_reports" ("class_instance_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "lesson_reports_idempotency_key_unique_idx" ON "lesson_reports" ("idempotency_key");--> statement-breakpoint
-CREATE INDEX "lesson_reports_status_idx" ON "lesson_reports" ("status");--> statement-breakpoint
-CREATE INDEX "lesson_reports_teacher_id_idx" ON "lesson_reports" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "lesson_reports_student_id_idx" ON "lesson_reports" ("student_id");--> statement-breakpoint
-CREATE INDEX "students_user_id_idx" ON "students" ("user_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "students_user_id_unique_idx" ON "students" ("user_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "teacher_dues_class_instance_id_unique_idx" ON "teacher_dues" ("class_instance_id");--> statement-breakpoint
-CREATE INDEX "teacher_dues_teacher_id_idx" ON "teacher_dues" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "teacher_dues_status_idx" ON "teacher_dues" ("status");--> statement-breakpoint
-CREATE INDEX "teacher_dues_approved_at_idx" ON "teacher_dues" ("approved_at");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "impersonation_sessions_one_active_per_actor" ON "impersonation_sessions" ("actor_user_id") WHERE "is_active" = true;--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "credit_transactions_idempotency_key_unique_idx" ON "credit_transactions" ("idempotency_key");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "credit_transactions_student_id_idx" ON "credit_transactions" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "credit_transactions_reason_idx" ON "credit_transactions" ("reason");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "credit_transactions_class_instance_id_idx" ON "credit_transactions" ("class_instance_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "lesson_reports_class_instance_id_unique_idx" ON "lesson_reports" ("class_instance_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "lesson_reports_idempotency_key_unique_idx" ON "lesson_reports" ("idempotency_key");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_status_idx" ON "lesson_reports" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_teacher_id_idx" ON "lesson_reports" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_student_id_idx" ON "lesson_reports" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "students_user_id_idx" ON "students" ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "students_user_id_unique_idx" ON "students" ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "teacher_dues_class_instance_id_unique_idx" ON "teacher_dues" ("class_instance_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_dues_teacher_id_idx" ON "teacher_dues" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_dues_status_idx" ON "teacher_dues" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_dues_approved_at_idx" ON "teacher_dues" ("approved_at");--> statement-breakpoint
 ALTER TABLE "credit_transactions" ADD CONSTRAINT "credit_transactions_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "credit_transactions" ADD CONSTRAINT "credit_transactions_source_payment_id_payments_id_fkey" FOREIGN KEY ("source_payment_id") REFERENCES "payments"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "credit_transactions" ADD CONSTRAINT "credit_transactions_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE SET NULL;--> statement-breakpoint

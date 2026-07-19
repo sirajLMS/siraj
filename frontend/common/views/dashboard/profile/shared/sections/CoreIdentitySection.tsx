@@ -5,7 +5,7 @@ import PersonOutlined from "@mui/icons-material/PersonOutlined";
 import { Stack, TextField } from "@mui/material";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { SectionPanel, UserAvatar } from "@/frontend/common/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -90,7 +90,6 @@ export function CoreIdentitySection(props: CoreIdentitySectionProps) {
   }
 
   const hasIdentityFields =
-    showField(props.avatarUrl ?? props.name, "core_identity") ||
     showField(props.name, "core_identity") ||
     showField(props.email, "core_identity") ||
     showField(props.displayCurrency, "core_identity");
@@ -102,9 +101,6 @@ export function CoreIdentitySection(props: CoreIdentitySectionProps) {
   return (
     <SectionPanel title={props.sectionTitle}>
       <Stack spacing={1}>
-        {showField(props.avatarUrl ?? props.name, "core_identity") ? (
-          <UserAvatar src={props.avatarUrl} label={props.name ?? props.nameLabel} size={64} />
-        ) : null}
         {showField(props.name, "core_identity") ? (
           <ProfileFieldRow icon={PersonOutlined} label={props.nameLabel} value={props.name ?? t.notSet} />
         ) : null}

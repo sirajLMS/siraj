@@ -9,8 +9,8 @@ export const dashboardClassDetailsAr: ClassDetailsLabels = {
   },
   timezone: {
     title: "تم اكتشاف تعارض في المنطقة الزمنية",
-    prefix: "التوقيت المحلي للطالب (",
-    suffix: ") يختلف عن إعداد الخادم (UTC). قد يكون تسجيل الحضور متأخراً.",
+    message: (studentTimezone, teacherTimezone) =>
+      `التوقيت المحلي للطالب (${studentTimezone}) يختلف عن توقيت المعلم (${teacherTimezone}). قد يكون تسجيل الحضور متأخراً.`,
   },
   adminActions: {
     administrativeActions: "الإجراءات الإدارية",

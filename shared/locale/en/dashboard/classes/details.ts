@@ -9,8 +9,8 @@ export const dashboardClassDetailsEn: ClassDetailsLabels = {
   },
   timezone: {
     title: "Timezone Conflict Detected",
-    prefix: "Student's local time (",
-    suffix: ") differs from server setting (UTC). Attendance logging may lag.",
+    message: (studentTimezone, teacherTimezone) =>
+      `Student's local time (${studentTimezone}) differs from the teacher's (${teacherTimezone}). Attendance logging may lag.`,
   },
   adminActions: {
     administrativeActions: "Administrative Actions",

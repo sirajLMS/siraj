@@ -7,8 +7,7 @@ export interface ClassDetailsLabels {
   };
   readonly timezone: {
     readonly title: string;
-    readonly prefix: string;
-    readonly suffix: string;
+    readonly message: (studentTimezone: string, teacherTimezone: string) => string;
   };
   readonly adminActions: {
     readonly administrativeActions: string;

@@ -5,8 +5,7 @@ import { type AdminViewLabels, useAppTranslation } from "@/shared/locale";
 export interface TeacherViewLabels {
   readonly timezone: {
     readonly title: string;
-    readonly prefix: string;
-    readonly suffix: string;
+    readonly message: (studentTimezone: string, teacherTimezone: string) => string;
   };
   readonly instanceDetails: {
     readonly classInstanceDetails: string;
@@ -55,8 +54,7 @@ export const useAdminViewLabels = (_timezone: string): AdminViewLabels => {
       },
       timezone: {
         title: t.timezone.title,
-        prefix: t.timezone.prefix,
-        suffix: t.timezone.suffix,
+        message: t.timezone.message,
       },
       adminActions: {
         administrativeActions: t.adminActions.administrativeActions,
@@ -130,8 +128,7 @@ export const useTeacherViewLabels = (_timezone: string): TeacherViewLabels => {
     return {
       timezone: {
         title: t.timezone.title,
-        prefix: t.timezone.prefix,
-        suffix: t.timezone.suffix,
+        message: t.timezone.message,
       },
       instanceDetails: {
         classInstanceDetails: t.instanceDetails.classInstanceDetails,

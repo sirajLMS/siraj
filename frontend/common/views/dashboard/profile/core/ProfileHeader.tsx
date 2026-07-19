@@ -9,10 +9,18 @@ export type ProfileHeaderProps = {
   readonly email: string;
   readonly roleLabel?: string;
   readonly avatarUrl?: string | null;
+  readonly showAvatar?: boolean;
   readonly actions?: ReactNode;
 };
 
-export function ProfileHeader({ name, email, roleLabel, avatarUrl, actions }: ProfileHeaderProps) {
+export function ProfileHeader({
+  name,
+  email,
+  roleLabel,
+  avatarUrl,
+  showAvatar = true,
+  actions,
+}: ProfileHeaderProps) {
   return (
     <Stack
       direction={{ xs: "column", sm: "row" }}
@@ -32,7 +40,7 @@ export function ProfileHeader({ name, email, roleLabel, avatarUrl, actions }: Pr
           minWidth: 0,
         }}
       >
-        <UserAvatar src={avatarUrl} label={name} size={64} />
+        {showAvatar ? <UserAvatar src={avatarUrl} label={name} size={64} /> : null}
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Stack

@@ -24,8 +24,7 @@ export interface ClassDetailsToolbarAreaProps {
   readonly labels: {
     readonly timezone: {
       readonly title: string;
-      readonly prefix: string;
-      readonly suffix: string;
+      readonly message: (studentTimezone: string, teacherTimezone: string) => string;
     };
   };
   readonly onStart: () => void;
@@ -80,15 +79,19 @@ export function ClassDetailsToolbarArea({
 
   return (
     <Box sx={classDetailsSectionStackSx}>
-      {!isWarningDismissed && instance.hasTimezoneMismatch && (
-        <RequirePermission permissions={[AppPermission.ScheduleViewTimezones]}>
-          <TimezoneWarningBanner
-            studentTimezone={instance.studentTimezone ?? ""}
-            onDismiss={onDismissWarning}
-            labels={labels.timezone}
-          />
-        </RequirePermission>
-      )}
+      {!isWarningDismissed &&
+        instance.hasTimezoneMismatch &&
+        instance.studentTimezone &&
+        instance.teacherTimezone && (
+          <RequirePermission permissions={[AppPermission.ScheduleViewTimezones]}>
+            <TimezoneWarningBanner
+              studentTimezone={instance.studentTimezone}
+              teacherTimezone={instance.teacherTimezone}
+              onDismiss={onDismissWarning}
+              labels={labels.timezone}
+            />
+          </RequirePermission>
+        )}
 
       {showJoin ? (
         <Stack direction="row" sx={classDetailsContentPaddingSx}>
