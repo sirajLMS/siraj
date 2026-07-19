@@ -1,7 +1,6 @@
 "use client";
 
-import { EditOutlined } from "@mui/icons-material";
-import { Alert, Avatar, Box, Button, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Stack, Typography } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ParentProfileEditForm } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileEditForm";
@@ -17,12 +16,7 @@ import {
 import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { MeetingConfigsTab } from "@/frontend/common/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
-import {
-  MobileContentStack,
-  MobilePageContainer,
-  MobilePageHeader,
-  MobileSectionPanel,
-} from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobileSectionPanel } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 export function ParentProfileMobileView({
@@ -39,7 +33,6 @@ export function ParentProfileMobileView({
   parentData,
   editData,
   avatarUrl,
-  displayCurrency,
   parentId: _parentId,
   meetingTabHref: _meetingTabHref,
   associatedStudents: _associatedStudents,
@@ -48,7 +41,6 @@ export function ParentProfileMobileView({
   const t = useAppTranslation().profileTranslations.base;
   const pt = useAppTranslation().profileTranslations.parent;
 
-  // Handle non-profile tabs
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
   }
@@ -65,40 +57,30 @@ export function ParentProfileMobileView({
     return null;
   }
 
-  // Profile tab content
   if (loading && !parentData) {
     return (
-      <MobilePageContainer>
-        <MobilePageHeader title={pt.subtitle} subtitle={pt.ownSubtitle} />
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <div className="loading-spinner" />
-        </Box>
-      </MobilePageContainer>
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <div className="loading-spinner" />
+      </Box>
     );
   }
 
   if (error && !parentData) {
     return (
-      <MobilePageContainer>
-        <MobilePageHeader title={pt.subtitle} subtitle={pt.ownSubtitle} />
-        <Alert severity="error" sx={{ mx: 2, my: 2 }} onClose={() => {}}>
-          {t.errors.failedToLoad}
-          <Button color="inherit" size="small" onClick={onRetry}>
-            {t.actions.retry}
-          </Button>
-        </Alert>
-      </MobilePageContainer>
+      <Alert severity="error" sx={{ my: 2 }} onClose={() => {}}>
+        {t.errors.failedToLoad}
+        <Button color="inherit" size="small" onClick={onRetry}>
+          {t.actions.retry}
+        </Button>
+      </Alert>
     );
   }
 
   if (!parentData) {
     return (
-      <MobilePageContainer>
-        <MobilePageHeader title={pt.subtitle} subtitle={pt.ownSubtitle} />
-        <Alert severity="warning" sx={{ mx: 2, my: 2 }}>
-          {t.errors.notFound}
-        </Alert>
-      </MobilePageContainer>
+      <Alert severity="warning" sx={{ my: 2 }}>
+        {t.errors.notFound}
+      </Alert>
     );
   }
 
@@ -221,30 +203,6 @@ export function ParentProfileMobileView({
     );
   };
 
-  const renderAccountSection = () => (
-    <MobileSectionPanel title={pt.sections.account}>
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-        <Avatar src={avatarUrl ?? undefined} sx={{ width: 60, height: 60 }} />
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="headlineMd">{parentData?.name ?? ""}</Typography>
-          <Typography variant="bodyMd" color="text.secondary">
-            {parentData?.email ?? ""}
-          </Typography>
-          {parentData?.phone && (
-            <Typography variant="bodyMd" color="text.secondary">
-              {parentData.phone}
-            </Typography>
-          )}
-          {displayCurrency && (
-            <Typography variant="labelMd" color="text.secondary">
-              {pt.fields.displayCurrency}: {displayCurrency}
-            </Typography>
-          )}
-        </Box>
-      </Stack>
-    </MobileSectionPanel>
-  );
-
   const renderContactSection = () => (
     <MobileSectionPanel title={pt.sections.contact}>
       <Stack spacing={1}>
@@ -254,30 +212,6 @@ export function ParentProfileMobileView({
               {pt.fields.phone}
             </Typography>
             {parentData.phone}
-          </Typography>
-        )}
-        {parentData?.facebook && (
-          <Typography variant="bodyMd">
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {pt.fields.facebook}
-            </Typography>
-            {parentData.facebook}
-          </Typography>
-        )}
-        {parentData?.whatsapp && (
-          <Typography variant="bodyMd">
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {pt.fields.whatsapp}
-            </Typography>
-            {parentData.whatsapp}
-          </Typography>
-        )}
-        {parentData?.twitter && (
-          <Typography variant="bodyMd">
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {pt.fields.twitter}
-            </Typography>
-            {parentData.twitter}
           </Typography>
         )}
       </Stack>
@@ -299,55 +233,29 @@ export function ParentProfileMobileView({
 
   if (mode === ProfileMode.View) {
     return (
-      <MobilePageContainer>
-        <MobilePageHeader
-          title={parentData?.name ?? ""}
-          subtitle={parentData?.email ?? ""}
-          actions={[
-            <Button
-              key="edit"
-              variant="outlined"
-              startIcon={<EditOutlined />}
-              onClick={() => {
-                // Navigation to edit mode handled by container
-              }}
-            >
-              {t.actions.edit}
-            </Button>,
-          ]}
-        />
-        <MobileContentStack>
-          {isAdminScope ? (
-            <Typography sx={{ typography: "labelMd", color: theme => theme.palette.primary.main }}>
-              {pt.adminBanner}
-            </Typography>
-          ) : null}
-
-          {renderAccountSection()}
-          {renderContactSection()}
-          {renderSocialSection()}
-          {renderIdentitySection()}
-          {renderBillingSection()}
-          {renderStudentsSection()}
-        </MobileContentStack>
-      </MobilePageContainer>
+      <MobileContentStack>
+        {isAdminScope ? (
+          <Typography sx={{ typography: "labelMd", color: theme => theme.palette.primary.main }}>
+            {pt.adminBanner}
+          </Typography>
+        ) : null}
+        {renderContactSection()}
+        {renderSocialSection()}
+        {renderIdentitySection()}
+        {renderBillingSection()}
+        {renderStudentsSection()}
+      </MobileContentStack>
     );
   }
 
-  // Edit mode
   return (
-    <MobilePageContainer>
-      <MobilePageHeader title={t.actions.edit} />
-      <MobileContentStack>
-        <ParentProfileEditForm
-          parentData={editData}
-          avatarUrl={avatarUrl}
-          isAdminScope={isAdminScope}
-          targetUserId={isAdminScope ? targetUserId : undefined}
-          isSaving={isSaving}
-          onSubmit={onSubmit}
-        />
-      </MobileContentStack>
-    </MobilePageContainer>
+    <ParentProfileEditForm
+      parentData={editData}
+      avatarUrl={avatarUrl}
+      isAdminScope={isAdminScope}
+      targetUserId={isAdminScope ? targetUserId : undefined}
+      isSaving={isSaving}
+      onSubmit={onSubmit}
+    />
   );
 }

@@ -35,6 +35,10 @@ type UpcomingClassInput = {
   readonly id?: string | null;
   readonly instructor?: string | null;
   readonly teacherId?: string | null;
+  readonly teacherAvatarUrl?: string | null;
+  readonly subjectId?: string | null;
+  readonly subjectName?: string | null;
+  readonly avatarUrl?: string | null;
   readonly scheduledStartAt?: string | null;
   readonly scheduledEndAt?: string | null;
   readonly durationMinutes?: number | null;
@@ -50,6 +54,10 @@ function mapUpcomingClasses(classes: readonly UpcomingClassInput[] | null | unde
     id: cls?.id ?? "",
     instructor: cls?.instructor ?? "",
     teacherId: cls?.teacherId ?? null,
+    teacherAvatarUrl: cls?.teacherAvatarUrl ?? null,
+    subjectId: cls?.subjectId ?? null,
+    subjectName: cls?.subjectName ?? null,
+    avatarUrl: cls?.avatarUrl ?? null,
     scheduledStartAt: cls?.scheduledStartAt ?? "",
     scheduledEndAt: cls?.scheduledEndAt ?? "",
     durationMinutes: cls?.durationMinutes ?? 0,
@@ -255,7 +263,7 @@ export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewMo
 
   const hasLeftColumn = canEditStatus || (canViewStatus && !canEditStatus);
   const hasRightColumn = canViewSchedule;
-  const hasContent = hasLeftColumn || hasRightColumn;
+  const hasContent = hasLeftColumn;
 
   return {
     t,

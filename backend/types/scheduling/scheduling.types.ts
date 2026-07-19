@@ -222,6 +222,10 @@ export type UpcomingClassRow = {
   id: string;
   instructor: string;
   teacherId: string;
+  teacherAvatarUrl: string | null;
+  subjectId: string | null;
+  subjectName: string | null;
+  avatarUrl: string | null;
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;

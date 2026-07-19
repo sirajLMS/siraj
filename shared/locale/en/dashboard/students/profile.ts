@@ -10,6 +10,7 @@ export const dashboardStudentProfileEn: StudentProfileLabels = {
   notFoundDescription: "We couldn't find this student. They may have been removed or you may not have access.",
   tabs: {
     status: "Status",
+    classes: "Classes",
     quota: "Quota",
     history: "History",
   },

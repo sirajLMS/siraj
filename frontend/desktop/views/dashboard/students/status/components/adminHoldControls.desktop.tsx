@@ -163,7 +163,7 @@ export function AdminHoldControlsDesktop({ isUpdating }: Readonly<AdminHoldContr
 
   return (
     <DesktopAdminControlPanel title={t.sections.adminHold}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <StatusSelectionField />
         <ReasonEntryField />
         <SubmitStatusButton isUpdating={isUpdating} />

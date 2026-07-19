@@ -18,6 +18,10 @@ export const studentUpcomingClassesQueryDocument: TypedDocumentNode<
         id
         instructor
         teacherId
+        teacherAvatarUrl
+        subjectId
+        subjectName
+        avatarUrl
         scheduledStartAt
         scheduledEndAt
         durationMinutes

@@ -8,15 +8,16 @@ import type {
 import { isTeacherAdminData } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 
 export function hasTeacherProfessionalData(teacherData: TeacherViewData): boolean {
+  return hasTeacherCompensationData(teacherData) || hasTeacherStatsData(teacherData);
+}
+
+export function hasTeacherCompensationData(teacherData: TeacherViewData): boolean {
+  return Boolean(teacherData.hourlyRate?.trim() || teacherData.rateCurrency);
+}
+
+export function hasTeacherStatsData(teacherData: TeacherViewData): boolean {
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
-  const qualifications = "qualifications" in teacherData ? teacherData.qualifications : null;
-  return Boolean(
-    qualifications?.trim() ||
-      teacherData.hourlyRate?.trim() ||
-      teacherData.rateCurrency ||
-      teacherData.totalClasses != null ||
-      adminData?.avgEngagementScore != null
-  );
+  return teacherData.totalClasses != null || adminData?.avgEngagementScore != null;
 }
 
 export function hasTeacherIdentityData(adminData: TeacherAdminData): boolean {
@@ -25,6 +26,7 @@ export function hasTeacherIdentityData(adminData: TeacherAdminData): boolean {
       adminData.dateOfBirth?.trim() ||
       adminData.gender ||
       adminData.address?.trim() ||
+      adminData.qualifications?.trim() ||
       adminData.timezone?.trim() ||
       adminData.status
   );

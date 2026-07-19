@@ -64,7 +64,12 @@ export interface StudentProfilePageViewModel {
   readonly loadingLabel: string;
   readonly notFoundTitle: string;
   readonly notFoundDescription: string;
-  readonly tabLabels: { readonly status: string; readonly quota: string; readonly history: string };
+  readonly tabLabels: {
+    readonly status: string;
+    readonly classes: string;
+    readonly quota: string;
+    readonly history: string;
+  };
   readonly onTabChange: (event: React.SyntheticEvent, nextTab: StudentProfileTab) => void;
 }
 

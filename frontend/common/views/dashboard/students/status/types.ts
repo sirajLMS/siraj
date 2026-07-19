@@ -5,6 +5,10 @@ export interface UpcomingClassDisplay {
   readonly id: string;
   readonly instructor: string;
   readonly teacherId: string | null;
+  readonly teacherAvatarUrl: string | null;
+  readonly subjectId: string | null;
+  readonly subjectName: string | null;
+  readonly avatarUrl: string | null;
   readonly scheduledStartAt: string;
   readonly scheduledEndAt: string;
   readonly durationMinutes: number;

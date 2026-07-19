@@ -39,10 +39,14 @@ export interface StudentStatusLabels {
     readonly viewAll: string;
   };
   readonly table: {
+    readonly subject: string;
+    readonly instructor: string;
     readonly subjectInstructor: string;
     readonly dateTime: string;
+    readonly duration: string;
     readonly holdStatus: string;
     readonly status: string;
+    readonly join: string;
     readonly pendingHolds: (count: number) => string;
     readonly footerInfo: (id: string) => string;
     readonly noUpcomingClasses: string;

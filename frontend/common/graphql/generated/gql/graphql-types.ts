@@ -5101,6 +5101,7 @@ export enum StudentStatus {
 
 export type StudentUpcomingClass = {
   __typename?: 'StudentUpcomingClass';
+  avatarUrl: Maybe<Scalars['String']['output']>;
   durationMinutes: Maybe<Scalars['Int']['output']>;
   effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
@@ -5111,6 +5112,9 @@ export type StudentUpcomingClass = {
   outcome: Maybe<ClassOutcome>;
   scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
   scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
+  subjectId: Maybe<Scalars['String']['output']>;
+  subjectName: Maybe<Scalars['String']['output']>;
+  teacherAvatarUrl: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
 };
 

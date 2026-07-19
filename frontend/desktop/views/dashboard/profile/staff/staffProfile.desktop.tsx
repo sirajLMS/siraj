@@ -1,14 +1,13 @@
 "use client";
 
-import { EditOutlined } from "@mui/icons-material";
-import { Alert, Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { StaffProfileEditForm } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileEditForm";
 import { PermissionsSection } from "@/frontend/common/views/dashboard/profile/staff/sections/PermissionsSection";
 import type { StaffProfileViewModel } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileViewModel";
-import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 type StaffProfileTranslations = ReturnType<typeof useAppTranslation>["profileTranslations"];
@@ -40,19 +39,13 @@ function StaffProfileDesktopGuard(props: Readonly<StaffProfileDesktopGuardProps>
     translations,
   } = props;
   const t = translations.base;
-  const st = translations.staff;
 
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
   }
 
   if (activeTab === "permissions" && isAdminScope) {
-    return (
-      <DesktopPageContainer>
-        <DesktopPageHeader title={st.sections.permissions} />
-        <PermissionsSection permissionGroups={permissionGroups} permissionOverrides={permissionOverrides} />
-      </DesktopPageContainer>
-    );
+    return <PermissionsSection permissionGroups={permissionGroups} permissionOverrides={permissionOverrides} />;
   }
 
   if (activeTab !== "profile") {
@@ -61,26 +54,20 @@ function StaffProfileDesktopGuard(props: Readonly<StaffProfileDesktopGuardProps>
 
   if (loading && !staffData) {
     return (
-      <DesktopPageContainer>
-        <DesktopPageHeader title={st.subtitle} subtitle={st.ownSubtitle} />
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <div className="loading-spinner" />
-        </Box>
-      </DesktopPageContainer>
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <div className="loading-spinner" />
+      </Box>
     );
   }
 
   if (error && !staffData) {
     return (
-      <DesktopPageContainer>
-        <DesktopPageHeader title={st.subtitle} subtitle={st.ownSubtitle} />
-        <Alert severity="error" sx={{ mx: 3, my: 2 }} onClose={() => {}}>
-          {t.errors.failedToLoad}
-          <Button color="inherit" size="small" onClick={() => {}}>
-            {t.actions.retry}
-          </Button>
-        </Alert>
-      </DesktopPageContainer>
+      <Alert severity="error" sx={{ my: 2 }} onClose={() => {}}>
+        {t.errors.failedToLoad}
+        <Button color="inherit" size="small" onClick={() => {}}>
+          {t.actions.retry}
+        </Button>
+      </Alert>
     );
   }
 
@@ -90,12 +77,9 @@ function StaffProfileDesktopGuard(props: Readonly<StaffProfileDesktopGuardProps>
       return <ProfileRestrictedSection />;
     }
     return (
-      <DesktopPageContainer>
-        <DesktopPageHeader title={st.subtitle} subtitle={st.ownSubtitle} />
-        <Alert severity="warning" sx={{ mx: 3, my: 2 }}>
-          {t.errors.notFound}
-        </Alert>
-      </DesktopPageContainer>
+      <Alert severity="warning" sx={{ my: 2 }}>
+        {t.errors.notFound}
+      </Alert>
     );
   }
 
@@ -112,7 +96,6 @@ export function StaffProfileDesktopView({
   onSubmitOwn,
   onSubmitAdmin,
   staffData,
-  avatarUrl,
   displayCurrency,
   permissionGroups,
   permissionOverrides,
@@ -120,7 +103,6 @@ export function StaffProfileDesktopView({
   canView,
 }: Readonly<StaffProfileViewModel>) {
   const translations = useAppTranslation().profileTranslations;
-  const t = translations.base;
   const st = translations.staff;
 
   const guard = (
@@ -140,35 +122,6 @@ export function StaffProfileDesktopView({
   if (guard !== null) {
     return guard;
   }
-
-  const renderAccountSection = () => {
-    if (!canView("core_identity") && !(isAdminScope && canView("staff_role"))) {
-      return null;
-    }
-    return (
-      <DesktopSectionPanel title={st.sections.account}>
-        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-          <Avatar src={avatarUrl ?? undefined} sx={{ width: 80, height: 80 }} />
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="headlineMd">{staffData?.name ?? ""}</Typography>
-            <Typography variant="bodyMd" color="text.secondary">
-              {staffData?.email ?? ""}
-            </Typography>
-            {staffData?.phone && (
-              <Typography variant="bodyMd" color="text.secondary">
-                {staffData.phone}
-              </Typography>
-            )}
-            {displayCurrency && (
-              <Typography variant="labelMd" color="text.secondary">
-                {st.fields.displayCurrency}: {displayCurrency}
-              </Typography>
-            )}
-          </Box>
-        </Stack>
-      </DesktopSectionPanel>
-    );
-  };
 
   const renderCompensationSection = () => {
     if (!canView("staff_role")) {
@@ -227,70 +180,41 @@ export function StaffProfileDesktopView({
 
   if (mode === ProfileMode.View) {
     return (
-      <DesktopPageContainer>
-        <DesktopPageHeader
-          title={staffData?.name ?? ""}
-          subtitle={staffData?.email ?? ""}
-          actions={[
-            <Button
-              key="edit"
-              variant="outlined"
-              startIcon={<EditOutlined />}
-              onClick={() => {
-                // Navigation to edit mode handled by container
-              }}
-            >
-              {t.actions.edit}
-            </Button>,
-          ]}
-        />
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 6 }}>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Stack spacing={3}>
             {isAdminScope ? (
               <Typography sx={{ typography: "labelMd", color: theme => theme.palette.primary.main }}>
                 {st.adminBanner}
               </Typography>
             ) : null}
-
-            {renderAccountSection()}
             {renderContactSection()}
             {renderCompensationSection()}
-          </Grid>
+          </Stack>
         </Grid>
-      </DesktopPageContainer>
+      </Grid>
     );
   }
 
-  // Edit mode
   if (scope === ProfileScope.Own) {
     return (
-      <DesktopPageContainer>
-        <DesktopPageHeader title={t.actions.edit} />
-        <Stack spacing={3}>
-          <StaffProfileEditForm
-            staffData={staffData}
-            displayCurrency={displayCurrency}
-            isAdminScope={isAdminScope}
-            isSaving={isSaving}
-            onSubmit={values => onSubmitOwn(values)}
-          />
-        </Stack>
-      </DesktopPageContainer>
+      <StaffProfileEditForm
+        staffData={staffData}
+        displayCurrency={displayCurrency}
+        isAdminScope={isAdminScope}
+        isSaving={isSaving}
+        onSubmit={values => onSubmitOwn(values)}
+      />
     );
   }
 
   return (
-    <DesktopPageContainer>
-      <DesktopPageHeader title={t.actions.edit} />
-      <Stack spacing={3}>
-        <StaffProfileEditForm
-          staffData={staffData}
-          displayCurrency={displayCurrency}
-          isAdminScope={isAdminScope}
-          isSaving={isSaving}
-          onSubmit={values => onSubmitAdmin(values)}
-        />
-      </Stack>
-    </DesktopPageContainer>
+    <StaffProfileEditForm
+      staffData={staffData}
+      displayCurrency={displayCurrency}
+      isAdminScope={isAdminScope}
+      isSaving={isSaving}
+      onSubmit={values => onSubmitAdmin(values)}
+    />
   );
 }

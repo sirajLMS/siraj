@@ -43,6 +43,10 @@ export const studentProfileQueryDocument: TypedDocumentNode<
           id
           instructor
           teacherId
+          teacherAvatarUrl
+          subjectId
+          subjectName
+          avatarUrl
           scheduledStartAt
           scheduledEndAt
           durationMinutes

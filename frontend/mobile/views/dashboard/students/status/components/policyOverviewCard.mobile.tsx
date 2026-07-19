@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircleOutlined, GavelOutlined, InfoOutlined } from "@mui/icons-material";
-import { Box, Divider, Typography } from "@mui/material";
+import { Box, Divider, Paper, Typography } from "@mui/material";
 import { useAppTranslation } from "@/shared/locale";
 
 function PolicyItem({ title, description }: Readonly<{ readonly title: string; readonly description: string }>) {
@@ -31,43 +31,33 @@ export function PolicyOverviewCardMobile() {
   const t = useAppTranslation().dashboardTranslations.studentStatus;
 
   return (
-    <Box
+    <Paper
+      elevation={0}
       sx={theme => ({
         backgroundColor: theme.palette.background.paper,
         borderRadius: "xl",
         boxShadow: theme.palette.shadow.card,
-        p: 2.5,
         border: `1px solid ${theme.palette.border.main}`,
-        position: "relative",
         overflow: "hidden",
+        width: "100%",
+        position: "relative",
       })}
     >
       <Box
-        sx={{
-          position: "absolute",
-          right: -16,
-          bottom: -16,
-          opacity: 0.05,
-          transform: "rotate(-10deg)",
-        }}
-      >
-        <InfoOutlined sx={{ fontSize: 120 }} />
-      </Box>
-
-      <Box
-        sx={{
+        sx={theme => ({
+          px: 2.5,
+          py: 2,
+          borderBottom: `1px solid ${theme.palette.border.main}`,
           display: "flex",
           alignItems: "center",
-          gap: 1.5,
-          mb: 3,
-          position: "relative",
-          zIndex: 1,
-        }}
+          gap: 1,
+          backgroundColor: theme.palette.background.default,
+        })}
       >
-        <GavelOutlined sx={theme => ({ color: theme.palette.primary.main })} />
+        <GavelOutlined sx={theme => ({ color: theme.palette.primary.main, fontSize: 20 })} />
         <Typography
-          variant="titleLg"
           sx={theme => ({
+            typography: "titleMd",
             color: theme.palette.primary.main,
             fontWeight: 700,
             textTransform: "uppercase",
@@ -78,20 +68,27 @@ export function PolicyOverviewCardMobile() {
         </Typography>
       </Box>
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2.5,
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <PolicyItem title={t.policies.suspensionTitle} description={t.policies.suspensionDesc} />
-        <Divider />
-        <PolicyItem title={t.policies.onLeaveTitle} description={t.policies.onLeaveDesc} />
+      <Box sx={{ p: 2.5, position: "relative" }}>
+        <Box
+          sx={{
+            position: "absolute",
+            right: -16,
+            bottom: -16,
+            opacity: 0.05,
+            transform: "rotate(-10deg)",
+            pointerEvents: "none",
+          }}
+        >
+          <InfoOutlined sx={{ fontSize: 100 }} />
+        </Box>
+
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, position: "relative", zIndex: 1 }}>
+          <PolicyItem title={t.policies.suspensionTitle} description={t.policies.suspensionDesc} />
+          <Divider />
+          <PolicyItem title={t.policies.onLeaveTitle} description={t.policies.onLeaveDesc} />
+        </Box>
       </Box>
-    </Box>
+    </Paper>
   );
 }
 
@@ -104,15 +101,11 @@ export function SuspensionWarningBannerMobile() {
         backgroundColor: theme.palette.errorContainer,
         borderRadius: "xl",
         p: 2.5,
+        border: `1px solid ${theme.palette.error.main}`,
         borderLeft: `4px solid ${theme.palette.error.main}`,
         display: "flex",
         alignItems: "flex-start",
         gap: 2,
-        animation: "fadeIn 0.3s ease-out",
-        "@keyframes fadeIn": {
-          from: { opacity: 0, transform: "translateY(-10px)" },
-          to: { opacity: 1, transform: "translateY(0)" },
-        },
       })}
     >
       <Box

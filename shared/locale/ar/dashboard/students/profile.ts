@@ -10,6 +10,7 @@ export const dashboardStudentProfileAr: StudentProfileLabels = {
   notFoundDescription: "تعذّر العثور على هذا الطالب. ربما تمت إزالته أو لا تملك صلاحية الوصول إليه.",
   tabs: {
     status: "الحالة",
+    classes: "الحصص القادمة",
     quota: "الحصص",
     history: "السجل",
   },

@@ -6,6 +6,10 @@
  * Students use the unified profile shell at `/students/{studentId}/profile?tab=...`.
  */
 
+import type { StudentProfileTab } from "@/frontend/common/views/dashboard/students/profile/studentProfileTabs";
+
+export type { StudentProfileTab } from "@/frontend/common/views/dashboard/students/profile/studentProfileTabs";
+
 export function profileHrefForUser(userId: string): string {
   return `/users/${userId}/profile`;
 }
@@ -44,8 +48,6 @@ export function profileHrefForStaff(ids: { readonly userId?: string | null }): s
   }
   return undefined;
 }
-
-export type StudentProfileTab = "status" | "quota" | "history";
 
 export function studentHref(studentId: string): string {
   return `/students/${studentId}/profile?tab=status`;

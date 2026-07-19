@@ -14,7 +14,6 @@ import {
   SuspensionWarningBannerMobile,
 } from "@/frontend/mobile/views/dashboard/students/status/components/policyOverviewCard.mobile";
 import { StudentStatusHeaderMobile } from "@/frontend/mobile/views/dashboard/students/status/components/studentStatusHeader.mobile";
-import { UpcomingClassesTableMobile } from "@/frontend/mobile/views/dashboard/students/status/components/upcomingClassesTable.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
 const STATUS_BADGE_MAP: Record<string, string> = {
@@ -39,17 +38,30 @@ function ReadOnlyStatusCardMobile({ status }: Readonly<{ status: StudentStatus }
         backgroundColor: theme.palette.background.paper,
         borderRadius: "xl",
         boxShadow: theme.palette.shadow.card,
-        p: "cardPadding",
         border: `1px solid ${theme.palette.border.main}`,
+        overflow: "hidden",
+        width: "100%",
       })}
     >
-      <Typography
-        variant="labelMd"
-        sx={theme => ({ color: theme.palette.onSurfaceVariant, mb: 1.5, display: "block" })}
+      <Box
+        sx={theme => ({
+          px: 2.5,
+          py: 2,
+          borderBottom: `1px solid ${theme.palette.border.main}`,
+          backgroundColor: theme.palette.background.default,
+        })}
       >
-        {t.fields.accountStatus}
-      </Typography>
-      <MobileStatusBadge category="studentAccount" status={getBadgeStatusKey(status)} label={t.statusOptions[status]} />
+        <Typography sx={theme => ({ typography: "titleMd", color: theme.palette.primary.main, fontWeight: 700 })}>
+          {t.fields.accountStatus}
+        </Typography>
+      </Box>
+      <Box sx={{ p: 2.5 }}>
+        <MobileStatusBadge
+          category="studentAccount"
+          status={getBadgeStatusKey(status)}
+          label={t.statusOptions[status]}
+        />
+      </Box>
     </Paper>
   );
 }
@@ -62,13 +74,12 @@ export function StudentStatusMobileView({
   canEditStatus,
   hasTabAccess,
   hasLeftColumn,
-  hasRightColumn,
   hasContent,
   selectedStatus,
   methods,
   handleSubmit,
 }: Readonly<StudentStatusViewModel>) {
-  if (!hasTabAccess || !hasContent) {
+  if (!hasTabAccess || !hasContent || !hasLeftColumn) {
     const restricted = <ProfileRestrictedSection title={t.pageTitle} />;
     return embedded ? restricted : <MobilePageContainer>{restricted}</MobilePageContainer>;
   }
@@ -92,32 +103,25 @@ export function StudentStatusMobileView({
       )}
       <StudentStatusHeaderMobile student={student} embedded={embedded} />
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}>
-        {hasLeftColumn ? (
-          canEditStatus ? (
-            <Box
-              component="form"
-              onSubmit={e => {
-                methods.handleSubmit(handleSubmit)(e);
-              }}
-              sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}
-            >
-              <FormProvider {...methods}>
-                <AdminHoldControlsMobile isUpdating={isUpdating} />
-              </FormProvider>
-              <PolicyOverviewCardMobile />
-            </Box>
-          ) : (
-            <ReadOnlyStatusCardMobile status={student.status} />
-          )
-        ) : null}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        {canEditStatus && selectedStatus === StudentStatus.Suspended ? <SuspensionWarningBannerMobile /> : null}
 
-        {hasRightColumn ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}>
-            {canEditStatus && selectedStatus === StudentStatus.Suspended ? <SuspensionWarningBannerMobile /> : null}
-            <UpcomingClassesTableMobile classes={student.upcomingClasses} studentId={student.id} />
+        {canEditStatus ? (
+          <Box
+            component="form"
+            onSubmit={e => {
+              methods.handleSubmit(handleSubmit)(e);
+            }}
+            sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+          >
+            <FormProvider {...methods}>
+              <AdminHoldControlsMobile isUpdating={isUpdating} />
+            </FormProvider>
+            <PolicyOverviewCardMobile />
           </Box>
-        ) : null}
+        ) : (
+          <ReadOnlyStatusCardMobile status={student.status} />
+        )}
       </Box>
     </>
   );

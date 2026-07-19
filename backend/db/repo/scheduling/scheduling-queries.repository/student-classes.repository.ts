@@ -1,7 +1,8 @@
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { classInstances, teachers, users } from "@/backend/db/schema";
+import { classInstances, classSubjects, recurringSchedules, teachers, users } from "@/backend/db/schema";
+import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { UpcomingClassRow } from "@/backend/types/scheduling/scheduling.types";
 
 export const bulkFreezeStudentClasses = async (
@@ -114,10 +115,17 @@ export const getUpcomingClassesForStudent = async (
       isFrozen: classInstances.isFrozen,
       instructor: users.name,
       teacherId: classInstances.teacherId,
+      teacherAvatarUrl: users.avatarUrl,
+      subjectId: classInstances.subjectId,
+      subjectName: classSubjects.name,
+      subjectAvatarUrl: classSubjects.avatarUrl,
+      recurringAvatarUrl: recurringSchedules.avatarUrl,
     })
     .from(classInstances)
     .innerJoin(teachers, eq(classInstances.teacherId, teachers.id))
     .innerJoin(users, eq(teachers.userId, users.id))
+    .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
+    .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
     .where(
       and(
         eq(classInstances.studentId, studentId),
@@ -128,5 +136,20 @@ export const getUpcomingClassesForStudent = async (
     )
     .orderBy(classInstances.scheduledStartAt)
     .limit(100);
-  return rows;
+
+  return rows.map(r => ({
+    id: r.id,
+    scheduledStartAt: r.scheduledStartAt,
+    scheduledEndAt: r.scheduledEndAt,
+    durationMinutes: r.durationMinutes,
+    executionState: r.executionState,
+    outcome: r.outcome,
+    isFrozen: r.isFrozen,
+    instructor: r.instructor,
+    teacherId: r.teacherId,
+    teacherAvatarUrl: r.teacherAvatarUrl ?? null,
+    subjectId: r.subjectId ?? null,
+    subjectName: r.subjectName ?? null,
+    avatarUrl: resolveClassAvatarUrl(r.recurringAvatarUrl, r.subjectAvatarUrl),
+  }));
 };

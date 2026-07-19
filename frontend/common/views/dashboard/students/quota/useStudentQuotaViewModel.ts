@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { formatDistanceToNow } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type UseFormReturn, useForm } from "react-hook-form";
 import {
   studentByIdQueryDocument,
@@ -48,14 +48,14 @@ function buildStudentQuotaData(
         avatarUrl?: string | null;
       }
     | undefined,
-  tc: CommonLabels
+  notSetLabel: string
 ): StudentProfileData | null {
   const s = useUnifiedProfile ? profile : studentById;
   if (!s || typeof s.id !== "string" || s.id.length === 0) return null;
 
   return {
     id: s.id,
-    studentName: s.name ?? tc.notSet,
+    studentName: s.name ?? notSetLabel,
     dateOfBirth: useUnifiedProfile && profile?.dateOfBirth ? String(profile.dateOfBirth) : "",
     language: s.language === "en" ? "en" : "ar",
     gender: resolveGenderLabel(s.gender) ?? "",
@@ -63,7 +63,7 @@ function buildStudentQuotaData(
     totalClasses: s.classesTotal ?? 0,
     classesLeft: s.classesRemaining ?? 0,
     profileImage: useUnifiedProfile ? (profile?.avatarUrl ?? "") : "",
-    lastEditedTime: s?.updatedAt ? formatDistanceToNow(new Date(s.updatedAt), { addSuffix: true }) : "",
+    lastEditedTime: s.updatedAt ? formatDistanceToNow(new Date(s.updatedAt), { addSuffix: true }) : "",
     primaryTeacherId: s.primaryTeacherId ?? null,
   };
 }
@@ -158,11 +158,16 @@ export function useStudentQuotaViewModel(props: Readonly<UseStudentQuotaViewMode
     return "ready" as const;
   })();
 
-  const studentData = buildStudentQuotaData(
-    useUnifiedProfile,
-    profileContext?.profile ?? undefined,
-    data?.studentById ?? undefined,
-    tc
+  const notSetLabel = tc.notSet;
+  const studentData = useMemo(
+    () =>
+      buildStudentQuotaData(
+        useUnifiedProfile,
+        profileContext?.profile ?? undefined,
+        data?.studentById ?? undefined,
+        notSetLabel
+      ),
+    [useUnifiedProfile, profileContext?.profile, data?.studentById, notSetLabel]
   );
 
   const canEditIdentity = canEdit("student_identity");
@@ -185,20 +190,20 @@ export function useStudentQuotaViewModel(props: Readonly<UseStudentQuotaViewMode
       classesLeft: 0,
     },
   });
+  const { reset } = methods;
 
   useEffect(() => {
-    if (studentData) {
-      methods.reset({
-        studentName: studentData.studentName,
-        dateOfBirth: studentData.dateOfBirth,
-        language: studentData.language,
-        gender: studentData.gender,
-        teacher: studentData.teacher,
-        totalClasses: studentData.totalClasses,
-        classesLeft: studentData.classesLeft,
-      });
-    }
-  }, [studentData, methods]);
+    if (!studentData) return;
+    reset({
+      studentName: studentData.studentName,
+      dateOfBirth: studentData.dateOfBirth,
+      language: studentData.language,
+      gender: studentData.gender,
+      teacher: studentData.teacher,
+      totalClasses: studentData.totalClasses,
+      classesLeft: studentData.classesLeft,
+    });
+  }, [studentData, reset]);
 
   const onSubmit = async (formData: StudentQuotaFormData) => {
     await handleSave(formData);

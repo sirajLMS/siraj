@@ -1,16 +1,17 @@
 import { VideocamOffOutlined } from "@mui/icons-material";
 import { Box, Paper, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
+import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
-import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type {
   UpcomingClassDisplay,
   UpcomingClassesTableProps,
 } from "@/frontend/common/views/dashboard/students/status/types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
-import { DesktopPersonProfileLink } from "@/frontend/desktop/components/ui/display";
+import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
+import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale, useAppTranslation } from "@/shared/locale";
@@ -31,23 +32,6 @@ function formatTime(locale: string, dateStr: string): string {
   } catch {
     return dateStr;
   }
-}
-
-function RenderCellWrapper({
-  primary,
-  secondary,
-  primaryBold = false,
-}: Readonly<{ primary: string; secondary: string; primaryBold?: boolean }>) {
-  return (
-    <Box sx={{ py: 1.5 }}>
-      <Typography variant="bodyMd" sx={{ fontWeight: primaryBold ? 700 : 400 }}>
-        {primary}
-      </Typography>
-      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-        {secondary}
-      </Typography>
-    </Box>
-  );
 }
 
 function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string; pendingCount: number }>) {
@@ -110,82 +94,94 @@ function DesktopFooter({ studentId }: Readonly<{ studentId: string }>) {
   );
 }
 
-function InstructorCell({ row, minutesLabel }: Readonly<{ row: UpcomingClassDisplay; minutesLabel: string }>) {
-  const instructorHref = profileHrefForTeacher({ teacherId: row.teacherId });
-
-  return (
-    <Box sx={{ py: 1.5 }}>
-      {instructorHref ? (
-        <DesktopPersonProfileLink
-          href={instructorHref}
-          name={row.instructor}
-          showAvatar={false}
-          typographyVariant="bodyMd"
-          fontWeight={700}
-        />
-      ) : (
-        <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-          {row.instructor}
-        </Typography>
-      )}
-      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-        {minutesLabel}
-      </Typography>
-    </Box>
-  );
-}
-
 export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
   const t = useAppTranslation().dashboardTranslations.studentStatus;
   const locale = useAppLocale();
 
   const columns: GridColDef<UpcomingClassDisplay>[] = [
     {
-      field: "instructor",
-      headerName: t.table.subjectInstructor,
-      flex: 1.5,
+      field: "subjectName",
+      headerName: t.table.subject,
+      flex: 1.4,
+      minWidth: 180,
       renderCell: params => (
-        <InstructorCell row={params.row} minutesLabel={t.table.minutesShort(params.row.durationMinutes)} />
+        <DesktopClassProfileLinkCell
+          href={classHref(params.row.id)}
+          name={params.row.subjectName?.trim() || t.table.subject}
+          avatarUrl={params.row.avatarUrl}
+          avatarSize={40}
+          typographyVariant="bodyMd"
+          fontWeight={700}
+        />
+      ),
+    },
+    {
+      field: "instructor",
+      headerName: t.table.instructor,
+      flex: 1.3,
+      minWidth: 180,
+      renderCell: params => (
+        <DesktopPersonProfileLinkCell
+          href={profileHrefForTeacher({ teacherId: params.row.teacherId })}
+          name={params.row.instructor}
+          avatarUrl={params.row.teacherAvatarUrl}
+          avatarSize={36}
+          typographyVariant="bodyMd"
+          fontWeight={700}
+        />
       ),
     },
     {
       field: "scheduledStartAt",
       headerName: t.table.dateTime,
-      flex: 1.2,
+      flex: 1.3,
+      minWidth: 180,
       renderCell: params => (
-        <RenderCellWrapper
-          primary={formatDateTime(locale, params.row.scheduledStartAt)}
-          secondary={`${formatTime(locale, params.row.scheduledStartAt)} - ${formatTime(locale, params.row.scheduledEndAt)}`}
-        />
+        <Box sx={{ py: 1.5 }}>
+          <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
+            {formatDateTime(locale, params.row.scheduledStartAt)}
+          </Typography>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+            {`${formatTime(locale, params.row.scheduledStartAt)} - ${formatTime(locale, params.row.scheduledEndAt)}`}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      field: "durationMinutes",
+      headerName: t.table.duration,
+      flex: 0.7,
+      minWidth: 100,
+      renderCell: params => (
+        <Typography variant="bodyMd">{t.table.minutesShort(params.row.durationMinutes)}</Typography>
       ),
     },
     {
       field: "isFrozen",
       headerName: t.table.holdStatus,
-      flex: 1,
+      flex: 0.9,
+      minWidth: 130,
       renderCell: params => (
-        <Box sx={{ py: 1.5 }}>
-          <Box
-            sx={theme => ({
-              backgroundColor: params.row.isFrozen ? theme.palette.errorContainer : theme.palette.background.default,
-              color: params.row.isFrozen ? theme.palette.onErrorContainer : theme.palette.onSurfaceVariant,
-              px: 1,
-              py: 0.5,
-              borderRadius: 1,
-              display: "inline-block",
-            })}
-          >
-            <Typography variant="labelMd" sx={{ fontWeight: 600 }}>
-              {params.row.isFrozen ? t.table.frozen : t.table.active}
-            </Typography>
-          </Box>
+        <Box
+          sx={theme => ({
+            backgroundColor: params.row.isFrozen ? theme.palette.errorContainer : theme.palette.background.default,
+            color: params.row.isFrozen ? theme.palette.onErrorContainer : theme.palette.onSurfaceVariant,
+            px: 1,
+            py: 0.5,
+            borderRadius: 1,
+            display: "inline-block",
+          })}
+        >
+          <Typography variant="labelMd" sx={{ fontWeight: 600 }}>
+            {params.row.isFrozen ? t.table.frozen : t.table.active}
+          </Typography>
         </Box>
       ),
     },
     {
       field: "join",
-      headerName: "",
-      width: 56,
+      headerName: t.table.join,
+      width: 88,
       sortable: false,
       align: "center",
       headerAlign: "center",
@@ -212,14 +208,13 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
       field: "executionState",
       headerName: t.table.status,
       flex: 1,
+      minWidth: 140,
       renderCell: params => (
-        <Box sx={{ py: 1.5 }}>
-          <DesktopStatusBadge
-            category="classInstance"
-            status={params.row.executionState}
-            label={params.row.isFrozen ? t.table.frozen.toUpperCase() : params.row.executionState}
-          />
-        </Box>
+        <DesktopStatusBadge
+          category="classInstance"
+          status={params.row.executionState}
+          label={params.row.isFrozen ? t.table.frozen.toUpperCase() : params.row.executionState}
+        />
       ),
     },
   ];
@@ -233,6 +228,7 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
         boxShadow: theme.palette.shadow.card,
         border: `1px solid ${theme.palette.border.main}`,
         overflow: "hidden",
+        width: "100%",
       })}
     >
       <DesktopHeader studentId={studentId} pendingCount={classes.filter(c => c.isFrozen).length} />
@@ -240,10 +236,12 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
         rows={classes}
         columns={columns}
         rowHeight={72}
-        paginationOptions={false}
+        autoHeight
+        paginationOptions={{ mode: "client", pageSize: 10 }}
         disableRowSelectionOnClick
         sx={theme => ({
           border: "none",
+          width: "100%",
           "& .MuiDataGrid-columnHeader": {
             backgroundColor: theme.palette.background.default,
             color: theme.palette.onSurfaceVariant,

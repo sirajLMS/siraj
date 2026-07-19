@@ -3831,6 +3831,7 @@ enum StudentStatus {
 }
 
 type StudentUpcomingClass {
+  avatarUrl: String
   durationMinutes: Int
   effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
@@ -3841,6 +3842,9 @@ type StudentUpcomingClass {
   outcome: ClassOutcome
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
+  subjectId: String
+  subjectName: String
+  teacherAvatarUrl: String
   teacherId: String
 }
 

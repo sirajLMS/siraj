@@ -2,7 +2,7 @@
 
 import type { SvgIconComponent } from "@mui/icons-material";
 import { AdminPanelSettingsOutlined } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 
 export interface DesktopAdminControlPanelProps {
@@ -12,8 +12,8 @@ export interface DesktopAdminControlPanelProps {
 }
 
 /**
- * Desktop card-style panel with an admin icon header row.
- * Uses shadow + 4-unit padding tuned for desktop spacing.
+ * Desktop card panel matching Upcoming Classes card chrome
+ * (header bar on `background.default` + bordered paper body).
  */
 export function DesktopAdminControlPanel({
   title,
@@ -21,22 +21,34 @@ export function DesktopAdminControlPanel({
   children,
 }: DesktopAdminControlPanelProps) {
   return (
-    <Box
+    <Paper
+      elevation={0}
       sx={theme => ({
         backgroundColor: theme.palette.background.paper,
         borderRadius: "xl",
         boxShadow: theme.palette.shadow.card,
-        p: 4,
         border: `1px solid ${theme.palette.border.main}`,
+        overflow: "hidden",
+        width: "100%",
       })}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 4 }}>
+      <Box
+        sx={theme => ({
+          px: 3,
+          py: 2.5,
+          borderBottom: `1px solid ${theme.palette.border.main}`,
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          backgroundColor: theme.palette.background.default,
+        })}
+      >
         <Icon sx={theme => ({ color: theme.palette.primary.main })} />
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
           {title}
         </Typography>
       </Box>
-      {children}
-    </Box>
+      <Box sx={{ p: 3 }}>{children}</Box>
+    </Paper>
   );
 }

@@ -1,16 +1,17 @@
 import type { StudentFieldGroupKey } from "@/shared/constants/profile-field-groups";
 
-export const STUDENT_PROFILE_TABS = ["status", "quota", "history"] as const;
+export const STUDENT_PROFILE_TABS = ["status", "classes", "quota", "history"] as const;
 
 export type StudentProfileTab = (typeof STUDENT_PROFILE_TABS)[number];
 
 const STATUS_TAB_GROUPS: readonly StudentFieldGroupKey[] = [
   "student_identity",
   "student_academic",
-  "student_schedule",
   "student_teacher",
   "student_parent",
 ];
+
+const CLASSES_TAB_GROUPS: readonly StudentFieldGroupKey[] = ["student_schedule"];
 
 const QUOTA_TAB_GROUPS: readonly StudentFieldGroupKey[] = ["student_identity", "student_quota_edit", "student_teacher"];
 
@@ -18,6 +19,7 @@ const HISTORY_TAB_GROUPS: readonly StudentFieldGroupKey[] = ["student_history"];
 
 const TAB_GROUP_MAP: Record<StudentProfileTab, readonly StudentFieldGroupKey[]> = {
   status: STATUS_TAB_GROUPS,
+  classes: CLASSES_TAB_GROUPS,
   quota: QUOTA_TAB_GROUPS,
   history: HISTORY_TAB_GROUPS,
 };

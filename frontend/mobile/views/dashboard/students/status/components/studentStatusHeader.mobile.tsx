@@ -165,11 +165,12 @@ function HeaderActions({ student }: Readonly<{ student: StudentStatusHeaderProps
           onClick={handleViewHistory}
           sx={theme => ({
             borderRadius: "button",
-            color: theme.palette.secondary.main,
-            borderColor: theme.palette.border.main,
+            color: theme.palette.primary.main,
+            borderColor: theme.palette.primary.main,
             "&:hover": {
-              borderColor: theme.palette.secondary.main,
-              backgroundColor: theme.palette.surfaceContainerHigh,
+              borderColor: theme.palette.primary.dark,
+              backgroundColor: theme.palette.primaryContainer,
+              color: theme.palette.onPrimaryContainer,
             },
           })}
         >
@@ -184,11 +185,12 @@ function HeaderActions({ student }: Readonly<{ student: StudentStatusHeaderProps
           onClick={handleContactParent}
           sx={theme => ({
             borderRadius: "button",
-            color: theme.palette.secondary.main,
-            borderColor: theme.palette.border.main,
+            color: theme.palette.primary.main,
+            borderColor: theme.palette.primary.main,
             "&:hover": {
-              borderColor: theme.palette.secondary.main,
-              backgroundColor: theme.palette.surfaceContainerHigh,
+              borderColor: theme.palette.primary.dark,
+              backgroundColor: theme.palette.primaryContainer,
+              color: theme.palette.onPrimaryContainer,
             },
           })}
         >
