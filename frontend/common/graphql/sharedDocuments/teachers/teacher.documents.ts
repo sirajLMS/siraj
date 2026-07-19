@@ -7,6 +7,7 @@ export const teachersQueryDocument: TypedDocumentNode<Operations.TeachersQuery, 
     teachers(search: $search, limit: $limit) {
       id
       name
+      avatarUrl
     }
   }
 `;

@@ -79,19 +79,40 @@ export function useStudentAutocomplete(args?: {
       switch (mode) {
         case "associated": {
           const typed = data as {
-            parentAssociatedStudents?: readonly { id?: string | null; name?: string | null }[];
+            parentAssociatedStudents?: readonly {
+              id?: string | null;
+              name?: string | null;
+              avatarUrl?: string | null;
+            }[];
           } | null;
           return typed?.parentAssociatedStudents ?? [];
         }
         case "viewerAssigned": {
           const typed = data as {
-            parentAssignedStudents?: readonly { id?: string | null; name?: string | null }[];
+            parentAssignedStudents?: {
+              rows?: readonly {
+                id?: string | null;
+                name?: string | null;
+                studentAvatarUrl?: string | null;
+              }[];
+            } | null;
           } | null;
-          return typed?.parentAssignedStudents ?? [];
+          const rows = typed?.parentAssignedStudents?.rows ?? [];
+          return rows.map(row => ({
+            id: row.id,
+            name: row.name,
+            avatarUrl: row.studentAvatarUrl ?? null,
+          }));
         }
         case "teacherFiltered": {
           const typed = data as {
-            students?: { data?: readonly { id?: string | null; name?: string | null }[] | null } | null;
+            students?: {
+              data?: readonly {
+                id?: string | null;
+                name?: string | null;
+                avatarUrl?: string | null;
+              }[] | null;
+            } | null;
           } | null;
           return typed?.students?.data ?? [];
         }

@@ -14,7 +14,9 @@ export function useTeacherAutocomplete(args?: {
   readonly skip?: boolean;
 }): UseAudienceAutocompleteResult {
   const extractRows = useCallback((data: unknown) => {
-    const typed = data as { teachers?: readonly { id?: string | null; name?: string | null }[] } | null;
+    const typed = data as {
+      teachers?: readonly { id?: string | null; name?: string | null; avatarUrl?: string | null }[];
+    } | null;
     return typed?.teachers ?? [];
   }, []);
 

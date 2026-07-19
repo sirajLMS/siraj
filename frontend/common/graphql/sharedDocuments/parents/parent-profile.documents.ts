@@ -50,6 +50,7 @@ export const parentAssociatedStudentsQueryDocument: TypedDocumentNode<
     parentAssociatedStudents(parentId: $parentId) {
       id
       name
+      avatarUrl
       status
       primaryTeacherId
       teacherUserId

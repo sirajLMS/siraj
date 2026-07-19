@@ -1,7 +1,9 @@
 "use client";
 
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type MonthlyReportsViewModel,
   useMonthlyReportsViewModel,
@@ -20,7 +22,11 @@ const lazyViews = createLazyView<MonthlyReportsViewModel>(
 
 export function MonthlyReportsContainer() {
   const viewModel = useMonthlyReportsViewModel({});
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+  return (
+    <RequirePermission permissions={[AppPermission.MonthlyReportsView]} fallback={null}>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
+    </RequirePermission>
+  );
 }
 
 export type { MonthlyReportsViewModel };

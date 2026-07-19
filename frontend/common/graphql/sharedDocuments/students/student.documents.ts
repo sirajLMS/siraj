@@ -16,6 +16,7 @@ export const studentsQueryDocument: TypedDocumentNode<Operations.StudentsQuery, 
       data {
         id
         name
+        avatarUrl
       }
       pageInfo {
         total

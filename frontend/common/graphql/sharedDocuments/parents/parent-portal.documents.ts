@@ -9,6 +9,7 @@ export const parentAssignedStudentsQueryDocument: TypedDocumentNode<Operations.P
       rows {
         id
         name
+        studentAvatarUrl
         status
         teacherName
         hoursPerWeek
