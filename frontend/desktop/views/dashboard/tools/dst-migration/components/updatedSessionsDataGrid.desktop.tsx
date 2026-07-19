@@ -80,7 +80,7 @@ export function UpdatedSessionsDataGridDesktop({ sessions, loading = false }: Re
       rows={sessions}
       columns={columns}
       getRowId={row => row.id}
-      hideFooter
+      paginationOptions={false}
       ariaLabel="dst-updated-sessions-table"
       emptyMessage={t.sections.updated}
       loading={loading}

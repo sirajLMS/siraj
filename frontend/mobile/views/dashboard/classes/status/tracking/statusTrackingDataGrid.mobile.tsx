@@ -198,6 +198,7 @@ export function StatusTrackingDataGridMobile({
           },
         },
       }}
+      paginationOptions={{ mode: "client" }}
     />
   );
 }

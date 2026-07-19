@@ -12,11 +12,12 @@ import {
 } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import { ExportButton } from "@/frontend/common/components/ui/button";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryViewModel";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { CalendarGridDesktop } from "@/frontend/desktop/views/dashboard/students/history/components/calendarGrid.desktop";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { useAppTranslation } from "@/shared/locale";
@@ -94,30 +95,41 @@ export function StudentHistoryDesktopView({
         </IconButton>
       </Box>
 
-      <Box sx={theme => ({ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: theme.layout.gutter, mb: 4 })}>
-        <MetricCard
-          icon={School}
-          label={t.metrics.totalClasses(metrics.totalClasses)}
-          value={metrics.totalClasses}
-          variant="default"
-        />
-        <MetricCard
-          icon={VerifiedUser}
-          label={t.metrics.attendanceRate(metrics.attendanceRate)}
-          value={`${metrics.attendanceRate}%`}
-          variant="default"
-        />
-        <MetricCard
-          icon={Timer}
-          label={t.metrics.hoursStudied(metrics.hoursStudied)}
-          value={`${metrics.hoursStudied}h`}
-          variant="default"
-        />
-        <MetricCard
-          icon={TrendingUp}
-          label={t.metrics.performance(metrics.performance)}
-          value={`${metrics.performance}%`}
-          variant="default"
+      <Box sx={{ mb: 4 }}>
+        <DesktopMetricCardGrid
+          metrics={
+            [
+              {
+                key: "total-classes",
+                count: metrics.totalClasses,
+                labelKey: "total-classes",
+                label: t.metrics.totalClasses(metrics.totalClasses),
+                icon: School,
+              },
+              {
+                key: "attendance-rate",
+                count: `${metrics.attendanceRate}%`,
+                labelKey: "attendance-rate",
+                label: t.metrics.attendanceRate(metrics.attendanceRate),
+                icon: VerifiedUser,
+              },
+              {
+                key: "hours-studied",
+                count: `${metrics.hoursStudied}h`,
+                labelKey: "hours-studied",
+                label: t.metrics.hoursStudied(metrics.hoursStudied),
+                icon: Timer,
+              },
+              {
+                key: "performance",
+                count: `${metrics.performance}%`,
+                labelKey: "performance",
+                label: t.metrics.performance(metrics.performance),
+                icon: TrendingUp,
+              },
+            ] satisfies MetricItem[]
+          }
+          size={{ xs: 12, sm: 6, md: 3 }}
         />
       </Box>
 

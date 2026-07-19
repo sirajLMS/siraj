@@ -2,6 +2,7 @@
 
 import { AddCardOutlined } from "@mui/icons-material";
 import { Typography } from "@mui/material";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { ParentBillingViewModel } from "@/frontend/common/views/dashboard/billing/useParentBillingViewModel";
 import { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
@@ -76,10 +77,16 @@ export function ParentBillingMobileView({
                 ...getParentInvoiceGridLabels(labels),
                 hasPaymentProofHint: labels.hasPaymentProofHint,
               }}
-              page={page}
-              pageSize={pageSize}
-              totalCount={totalCount}
-              onPageChange={onPageChange}
+              paginationOptions={
+                totalCount !== undefined && onPageChange !== undefined
+                  ? buildServerPaginationOptions({
+                      page: page ?? 0,
+                      pageSize: pageSize ?? 10,
+                      totalCount,
+                      onPageChange,
+                    })
+                  : false
+              }
             />
           )}
         </MobileContentStack>

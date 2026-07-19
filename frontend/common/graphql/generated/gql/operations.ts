@@ -2980,6 +2980,20 @@ export type RecentApprovedLessonReportsQueryVariables = Exact<{
 
 export type RecentApprovedLessonReportsQuery = RecentApprovedLessonReportsQuery_Query;
 
+export type StudentRecentLessonReportsQuery_studentRecentLessonReports_PendingLessonReportsPayload_rows_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentRecentLessonReportsQuery_studentRecentLessonReports_PendingLessonReportsPayload = { totalCount: number | null, rows: Array<StudentRecentLessonReportsQuery_studentRecentLessonReports_PendingLessonReportsPayload_rows_LessonReport> | null };
+
+export type StudentRecentLessonReportsQuery_Query = { studentRecentLessonReports: StudentRecentLessonReportsQuery_studentRecentLessonReports_PendingLessonReportsPayload | null };
+
+
+export type StudentRecentLessonReportsQueryVariables = Exact<{
+  paginationArgs: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type StudentRecentLessonReportsQuery = StudentRecentLessonReportsQuery_Query;
+
 export type LessonReportCountQuery_lessonReportCount_PendingReviewCount = { pendingCount: number | null };
 
 export type LessonReportCountQuery_Query = { lessonReportCount: LessonReportCountQuery_lessonReportCount_PendingReviewCount | null };

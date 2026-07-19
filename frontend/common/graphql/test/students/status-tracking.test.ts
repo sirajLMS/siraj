@@ -5,6 +5,7 @@ import { changeStudentStatusMutationDocument } from "@/frontend/common/graphql/s
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
+  createManualClassEntry,
   loginDemoUser,
   provisionTestEntities,
   provisionTestSuperAdmin,
@@ -62,6 +63,8 @@ describe("GraphQL: statusTrackingSchedule query", () => {
 
   let adminToken = "";
   let studentId = "";
+  let teacherId = "";
+  let teacherToken = "";
   let superAdminToken = "";
   let superAdminUserId = "";
   const testDate = new Date().toISOString().split("T")[0];
@@ -74,6 +77,8 @@ describe("GraphQL: statusTrackingSchedule query", () => {
     if (!entities.studentId) throw new Error("No studentId provisioned");
     if (!entities.teacherId) throw new Error("No teacherId provisioned");
     studentId = entities.studentId;
+    teacherId = entities.teacherId;
+    teacherToken = entities.teacherToken;
 
     const sa = await provisionTestSuperAdmin(adminToken, "s10statusSa");
     superAdminToken = sa.token;
@@ -174,6 +179,31 @@ describe("GraphQL: statusTrackingSchedule query", () => {
 
     expect(data.statusTrackingSchedule).toBeDefined();
     expect(Array.isArray(data.statusTrackingSchedule)).toBeTrue();
+  });
+
+  test("filters by date — class on date A is excluded on date B", async () => {
+    if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
+
+    const dateA = "2032-03-15";
+    const dateB = "2032-03-16";
+    const startAt = new Date(`${dateA}T10:00:00.000Z`);
+    const endAt = new Date(`${dateA}T11:00:00.000Z`);
+
+    const createRes = await createManualClassEntry(
+      teacherToken,
+      studentId,
+      teacherId,
+      startAt.toISOString(),
+      endAt.toISOString()
+    );
+    const createdId = createRes.data?.createTeacherManualClassEntry?.id;
+    expect(createdId).toBeTruthy();
+
+    const onDateA = await fetchStatusTracking(adminToken, dateA);
+    expect(onDateA.statusTrackingSchedule?.some(r => r?.id === createdId)).toBeTrue();
+
+    const onDateB = await fetchStatusTracking(adminToken, dateB);
+    expect(onDateB.statusTrackingSchedule?.some(r => r?.id === createdId)).toBeFalse();
   });
 
   // ─── Security Threat Tests ────────────────────────────────────────────────────

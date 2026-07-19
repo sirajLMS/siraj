@@ -53,6 +53,7 @@ const meta: Meta<typeof MobileCardList<SampleRow>> = {
     ),
     layout: "edge-to-edge",
     gap: 2,
+    paginationOptions: { mode: "client" },
   },
 };
 
@@ -77,11 +78,11 @@ export const Empty: Story = {
 
 export const WithPagination: Story = {
   args: {
-    pagination: {
-      page: 2,
-      pageCount: 5,
-      rowCount: 48,
+    paginationOptions: {
+      mode: "server",
+      page: 1,
       pageSize: 10,
+      totalCount: 48,
       onPageChange: () => {},
     },
   },

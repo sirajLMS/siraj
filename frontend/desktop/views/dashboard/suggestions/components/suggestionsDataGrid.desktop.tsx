@@ -176,6 +176,7 @@ export function SuggestionsDataGridDesktop({
       getRowId={row => row.id}
       emptyMessage={labels.table.noEntries}
       loading={loading}
+      paginationOptions={{ mode: "client" }}
     />
   );
 }

@@ -71,7 +71,12 @@ function DurationField({ register, fieldName, unit, max, isSubmitting, error }: 
           slotProps={{
             htmlInput: { min: 0, max },
             input: {
-              sx: { textAlign: "center", p: 1, border: undefined },
+              sx: {
+                textAlign: "center",
+                p: 1,
+                backgroundColor: "transparent",
+                "& fieldset": { border: "none" },
+              },
             },
           }}
         />

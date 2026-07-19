@@ -4,6 +4,7 @@ import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { resolveViewerTimezone } from "@/backend/services/schedule/resolve-viewer-timezone";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**
@@ -50,7 +51,11 @@ export namespace ScheduleQueryService {
       throw new Error(tErrors.unauthorizedAction);
     }
 
-    const rows = await SchedulingRepository.getStatusTrackingRows(date, options);
+    const viewerTimezone = options?.viewerTimezone ?? (await resolveViewerTimezone(actorUserId));
+    const rows = await SchedulingRepository.getStatusTrackingRows(date, {
+      ...options,
+      viewerTimezone,
+    });
 
     return Promise.all(
       rows.map(async row => {

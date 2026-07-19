@@ -16,6 +16,7 @@ export function PermissionCatalogCardListMobile({ permissions, groups }: Readonl
       rows={permissions as Permission[]}
       getKey={permission => permission.id ?? permission.key ?? ""}
       emptyMessage={t.noPermissionsFound}
+      paginationOptions={{ mode: "client" }}
       renderItem={permission => {
         const usedGroups = groups.filter(g => {
           const ids = g.permissionIds ?? [];

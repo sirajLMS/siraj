@@ -130,6 +130,7 @@ export function StudentCreditDataGridDesktop({
       loading={loading}
       getRowId={row => row.id}
       emptyMessage={labels.noEntries}
+      paginationOptions={{ mode: "client" }}
     />
   );
 }

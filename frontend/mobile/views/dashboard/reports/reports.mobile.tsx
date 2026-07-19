@@ -90,6 +90,7 @@ export function ReportsMobileView({
             loading={loading}
             emptyMessage={labels.tableLabels.noEntries}
             gap={2}
+            paginationOptions={{ mode: "client" }}
             renderItem={row => (
               <MobileCardListItem key={row.id} interactive={Boolean(onRowClick)}>
                 <PerformanceLedgerCardMobile

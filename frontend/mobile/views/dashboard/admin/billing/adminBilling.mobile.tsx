@@ -4,6 +4,7 @@ import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
 import { buildAdminMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import {
@@ -80,7 +81,6 @@ function InvoicesSection({
 >) {
   const invoicesList = invoices as readonly (typeof invoices)[number][];
   const loading = isSearchPending || (invoicesLoading && invoices.length === 0);
-  const pageCount = totalCount !== undefined && pageSize && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
 
   const renderItem = (row: (typeof invoices)[number]): ReactNode => (
     <MobileCardListItem variant="edge-to-edge">
@@ -114,10 +114,15 @@ function InvoicesSection({
         loading={loading}
         gap={2}
         layout="edge-to-edge"
-        pagination={
+        paginationOptions={
           totalCount !== undefined
-            ? { page: (page ?? 0) + 1, pageCount, rowCount: totalCount, pageSize: pageSize ?? 10, onPageChange }
-            : undefined
+            ? buildServerPaginationOptions({
+                page: page ?? 0,
+                pageSize: pageSize ?? 10,
+                totalCount,
+                onPageChange,
+              })
+            : { mode: "client" }
         }
       />
     </MobileSectionPanel>

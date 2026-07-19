@@ -263,6 +263,7 @@ export function AssignedUsersTabDesktop({
           emptyMessage={t.noAssignedUsers}
           loading={loading}
           autoHeight
+          paginationOptions={{ mode: "client" }}
         />
       </DesktopSectionPanel>
     </StyledTabContainer>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { ParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
 import { SubmissionSuccessBanner } from "@/frontend/common/views/dashboard/shared/SubmissionSuccessBanner";
 import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
@@ -62,10 +63,16 @@ export function ParentComplaintsMobileView({
             labels={labels}
             hasOlderRecords={hasOlderRecords}
             onLoadOlderRecords={onLoadOlderRecords}
-            page={page}
-            pageSize={pageSize}
-            totalCount={totalCount}
-            onPageChange={onPageChange}
+            paginationOptions={
+              totalCount !== undefined && onPageChange !== undefined
+                ? buildServerPaginationOptions({
+                    page: page ?? 0,
+                    pageSize: pageSize ?? 10,
+                    totalCount,
+                    onPageChange,
+                  })
+                : false
+            }
           />
 
           <ComplaintPolicyPanelMobile labels={labels} />

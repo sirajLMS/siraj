@@ -10,6 +10,7 @@ import {
 import { Box, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import {
   getTrackingStatusIcon,
   getTrackingStatusLabel,
@@ -203,16 +204,15 @@ export function RescheduleTrackingCardListMobile({
           </MobileCardListItem>
         );
       }}
-      pagination={
-        totalCount !== undefined && onPageChange !== undefined && totalCount > 0
-          ? {
-              page: (page ?? 0) + 1,
-              pageCount: Math.ceil(totalCount / (pageSize ?? 10)),
-              rowCount: totalCount,
+      paginationOptions={
+        totalCount !== undefined && onPageChange !== undefined
+          ? buildServerPaginationOptions({
+              page: page ?? 0,
               pageSize: pageSize ?? 10,
-              onPageChange: p => onPageChange(p - 1),
-            }
-          : undefined
+              totalCount,
+              onPageChange,
+            })
+          : { mode: "client" }
       }
     />
   );

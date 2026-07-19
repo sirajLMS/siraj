@@ -131,7 +131,10 @@ interface ComplaintQueueCardDesktopProps {
   readonly onDelete: () => void;
 }
 
-function getInitials(name: string): string {
+function getInitials(name: string | null | undefined): string {
+  if (!name) {
+    return "";
+  }
   return name
     .split(" ")
     .map(part => part.charAt(0))

@@ -1,17 +1,14 @@
 "use client";
 
 import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Box, Chip, IconButton, Stack } from "@mui/material";
+import { Box, Chip, IconButton } from "@mui/material";
 import type { CategoriesSectionProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
+import { MobileHorizontalScrollRow, MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { useAppTranslation } from "@/shared/locale";
 
 /**
- * CategoriesSectionMobile — mobile-tier category management panel.
- *
- * Renders a horizontally-wrapping Chip list full-bleed so chips touch the
- * screen edge on narrow viewports (no inset padding around the chip row,
- * unlike the desktop variant which adds interior padding).
+ * CategoriesSectionMobile — mobile-tier category filter strip.
+ * Horizontal scroll row so chips stay on one swipeable line.
  */
 export function CategoriesSectionMobile({
   categories,
@@ -35,21 +32,13 @@ export function CategoriesSectionMobile({
         ) : undefined
       }
     >
-      <Stack
-        sx={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          gap: 1,
-          px: 2,
-          py: 2,
-          width: "100%",
-        }}
-      >
+      <MobileHorizontalScrollRow sx={{ py: 2 }}>
         <Chip
           label={t.allCategories}
           variant={activeCategoryId === null ? "filled" : "outlined"}
           color={activeCategoryId === null ? "primary" : "default"}
           onClick={() => onCategoryChange(null)}
+          sx={{ flexShrink: 0 }}
         />
         {categories.map(cat => (
           <Chip
@@ -76,9 +65,10 @@ export function CategoriesSectionMobile({
                 </Box>
               ) : undefined
             }
+            sx={{ flexShrink: 0 }}
           />
         ))}
-      </Stack>
+      </MobileHorizontalScrollRow>
     </MobileSectionPanel>
   );
 }

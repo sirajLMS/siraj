@@ -3998,6 +3998,8 @@ export type Query = {
   /** Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity. */
   studentMonthlyReport: Maybe<StudentMonthlyReport>;
   studentProfile: Maybe<StudentProfile>;
+  /** Paginated lesson reports for the logged-in student (student portal dashboard) */
+  studentRecentLessonReports: Maybe<PendingLessonReportsPayload>;
   studentUpcomingClasses: Maybe<StudentUpcomingClassesResult>;
   students: StudentsWithFiltersResponse;
   /** Lightweight student list for autocomplete (id, name, avatarUrl). */
@@ -4383,6 +4385,11 @@ export type QueryStudentProfileArgs = {
   month: InputMaybe<Scalars['Int']['input']>;
   studentId: InputMaybe<Scalars['String']['input']>;
   year: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryStudentRecentLessonReportsArgs = {
+  paginationArgs: InputMaybe<PaginationArgs>;
 };
 
 

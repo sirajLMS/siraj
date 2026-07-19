@@ -179,6 +179,7 @@ export function PermissionGroupsDataGridDesktop({
         emptyMessage={t.noPermissionsFound}
         loading={loading}
         autoHeight
+        paginationOptions={{ mode: "client" }}
       />
     </Box>
   );

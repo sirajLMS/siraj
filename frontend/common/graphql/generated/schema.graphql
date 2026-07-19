@@ -3238,6 +3238,11 @@ type Query {
   """
   studentMonthlyReport(month: Int!, studentId: ID!, year: Int!): StudentMonthlyReport
   studentProfile(month: Int, studentId: String, year: Int): StudentProfile
+
+  """
+  Paginated lesson reports for the logged-in student (student portal dashboard)
+  """
+  studentRecentLessonReports(paginationArgs: PaginationArgs): PendingLessonReportsPayload
   studentUpcomingClasses(studentId: String!): StudentUpcomingClassesResult
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
 

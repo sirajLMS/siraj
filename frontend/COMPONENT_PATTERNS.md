@@ -61,39 +61,52 @@ DashboardLayout (pageMargin only)
 
 ---
 
-## Tables — AppDataGrid
+## Tables — AppDataGrid / MobileCardList
 
-**Default:** Use `@mui/x-data-grid` via [`AppDataGrid`](@/frontend/common/components/ui/dataGrid/AppDataGrid.tsx). Do **not** hand-build MUI `Table` for list pages.
+**Default:** Use owned list primitives — never hand-build MUI `Table` / `Pagination`, and never import `DataGrid` from `@mui/x-data-grid` outside the wrappers.
+
+| Tier | Primitive | Pagination |
+|------|-----------|------------|
+| Desktop / shared | `AppDataGrid` / `DesktopAppDataGrid` | Required `paginationOptions` — wrapper owns footer UI |
+| Mobile | `MobileCardList` (preferred) | Required `paginationOptions` — list owns pager UI |
+| Mobile (rare) | `MobileAppDataGrid` | Same `paginationOptions` API |
+
+### `paginationOptions` (required)
+
+```ts
+type ListPaginationOptions =
+  | false // no pager
+  | { mode: "client"; pageSize?: number; pageSizeOptions?: readonly number[] }
+  | {
+      mode: "server";
+      page: number;
+      pageSize: number;
+      totalCount: number;
+      onPageChange: (page: number) => void;
+      onPageSizeChange?: (pageSize: number) => void;
+      pageSizeOptions?: readonly number[];
+    };
+```
+
+- **Client:** parent passes full `rows`; primitive slices / pages internally.
+- **Server:** parent owns page in Zustand; pass one page of rows + `totalCount` + `onPageChange`. Prefer `buildServerPaginationOptions(...)`.
+- **Do not** pass `slots.pagination`, `hideFooter`, `paginationMode`, or flat MUI pagination props.
+- **Mobile:** do not render sibling `MobilePaginationControls` next to a list — fold into `paginationOptions`. Feature card lists use `MobileListPagination` + `paginationOptions`.
+- **Desktop ad-hoc card lists** (e.g. complaints) may keep sibling `DesktopPaginationControls` when intentional.
+- **Non-list footers** (e.g. search-schedule sticky bar) may use standalone `PaginationControls`.
 
 ### Wrapper features
 
 - Themed headers (`palette.table.header`)
-- Built-in pagination (client or server mode)
+- Owned pagination UI via `paginationOptions`
 - Empty state overlay (`emptyMessage` prop)
 - Loading overlay (`loading` prop)
 - `disableRowSelectionOnClick` by default
 
-### Page-specific DataGrid components
-
-Place column definitions in `frontend/common/views/dashboard/<feature>/components/*DataGrid.tsx`:
-
-| Component                    | Route                           | Pagination                         |
-| ---------------------------- | ------------------------------- | ---------------------------------- |
-| `StudentDirectoryDataGrid`   | `/students`                     | Client                             |
-| `AcademicScheduleDataGrid`   | `/schedule/alerts`              | Server (`paginationMode="server"`) |
-| `StatusTrackingDataGrid`     | `/schedule/tracking/status`     | Client                             |
-| `RescheduleTrackingDataGrid` | `/schedule/tracking/reschedule` | Client                             |
-| `ScheduleOverviewDataGrid`   | `/dashboard`                    | Client                             |
-
 ### Mobile strategy
 
-- **Desktop (`≥ md`):** `AppDataGrid` inside `SectionPanel`
-- **Mobile (`< md`):** Keep existing `*CardList` components — do not force DataGrid on small screens
-
-### Exceptions (keep MUI Table)
-
-- `RegisteredStudentsSection` on class audit — embedded 2/4-column section inside a card
-- Style these tables to match `palette.table.header` tokens
+- **Desktop:** `*AppDataGrid` inside `SectionPanel`
+- **Mobile:** `MobileCardList` / feature `*CardList` — do not force DataGrid on small screens
 
 ---
 
@@ -274,7 +287,8 @@ When building or refactoring a dashboard page:
 - [ ] Add `PageHeader` with title + subtitle + actions
 - [ ] Use `MetricCard` for stat rows
 - [ ] Use `SectionPanel` for table/list sections
-- [ ] Desktop table → feature `*DataGrid` wrapping `AppDataGrid`
+- [ ] Desktop table → feature `*DataGrid` wrapping `AppDataGrid` / `DesktopAppDataGrid` with `paginationOptions`
+- [ ] Mobile list → `MobileCardList` (or feature card list) with `paginationOptions` — no sibling mobile pagers
 - [ ] Mobile → existing or new `*CardList`
 - [ ] Status cells → shared `StatusBadge`
 - [ ] Pass i18n `noEntries` / `noClasses` to DataGrid `emptyMessage`

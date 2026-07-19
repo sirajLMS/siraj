@@ -21,6 +21,7 @@
   () => import("@/frontend/desktop/views/dashboard/<domain>/xx.desktop").then(m => ({ default: m.XxDesktopView })),
   ```
 - **Mobile/desktop views are pure presentation**: `.mobile.tsx` and `.desktop.tsx` files (in `frontend/mobile/views/` and `frontend/desktop/views/`) contain ZERO business logic, ZERO hooks (except for purely local UI state), and ZERO viewport branching. They only render the props passed from the view model.
+- **Metric cards:** Tier views must never import or render `MetricCard` / `MobileMetricCard` / `DesktopMetricCard`. Use only `MobileMetricCardGrid` (mobile) or `DesktopMetricCardGrid` (desktop), including when there is a single metric.
 - **Directory structure** (per domain, across the three top-level modules):
   ```
   frontend/common/views/dashboard/<domain>/   # tier-neutral home

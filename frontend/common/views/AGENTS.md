@@ -11,6 +11,7 @@ This document governs the **tier-neutral home** for switchers, Containers, ViewM
   - `@/backend/types/...` (canonical type definitions)
 - **MUST NOT import statically** from `@/frontend/mobile/...` or `@/frontend/desktop/...` — tier views are consumed via dynamic `import()` in switchers only
 - **Tier views import their ViewModel type** from `@/frontend/common/views/dashboard/<domain>/useXxViewModel` (type-only imports are fine)
+- **Metric cards:** Presentation lives in tier views — they must use only `MobileMetricCardGrid` / `DesktopMetricCardGrid` (never the card primitives). See `frontend/mobile/AGENTS.md` and `frontend/desktop/AGENTS.md`.
 
 ## Directory Structure per Domain
 

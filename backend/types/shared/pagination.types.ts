@@ -84,3 +84,9 @@ export type PaginationInput = {
   page?: number | null;
   maxCount?: number | null;
 };
+
+/** Default GraphQL PaginationArgs values (also used by repositories — keep out of pothos). */
+export const PaginationArgsDefault = {
+  first: 10,
+  maxCount: 100,
+} as const;

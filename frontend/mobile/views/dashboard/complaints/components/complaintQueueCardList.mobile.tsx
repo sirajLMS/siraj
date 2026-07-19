@@ -2,6 +2,7 @@
 
 import { Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { AdminComplaintRow } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { MobileCardList } from "@/frontend/mobile/components/ui";
 import { ComplaintQueueCardMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintQueueCard.mobile";
@@ -47,25 +48,18 @@ export function ComplaintQueueCardListMobile({
     return <StyledEmptyStateMessage variant="bodyMd">{labels.queue.noEntries}</StyledEmptyStateMessage>;
   }
 
-  const pageCount = Math.ceil(totalCount / pageSize);
-
   return (
     <MobileCardList
       rows={rows}
       getKey={row => row.id}
       layout="rounded"
       gap={2}
-      pagination={
-        pageCount > 1
-          ? {
-              page: page + 1,
-              pageCount,
-              rowCount: totalCount,
-              pageSize,
-              onPageChange,
-            }
-          : undefined
-      }
+      paginationOptions={buildServerPaginationOptions({
+        page,
+        pageSize,
+        totalCount,
+        onPageChange,
+      })}
       renderItem={row => (
         <ComplaintQueueCardMobile
           row={row}

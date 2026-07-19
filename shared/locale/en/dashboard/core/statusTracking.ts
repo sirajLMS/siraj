@@ -14,6 +14,12 @@ export const dashboardCoreStatusTrackingEn: StatusTrackingLabels = {
   todaysSchedule: "Today's Schedule",
   administrativeHold: "Administrative Hold",
   holdDescription: "Account suspended due to overdue balance or policy violation. Contact Billing.",
+  dateFilter: {
+    today: "Today",
+    previousDay: "Previous Day",
+    nextDay: "Next Day",
+    dateLabel: "Date",
+  },
   metrics: {
     regular: "Regular",
     pending: "Pending",

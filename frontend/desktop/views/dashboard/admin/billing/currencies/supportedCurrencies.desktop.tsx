@@ -44,6 +44,7 @@ export function SupportedCurrenciesDesktopView({
         emptyMessage={emptyMessage}
         getRowId={row => row.id}
         autoHeight
+        paginationOptions={{ mode: "client" }}
       />
       <Alert severity="info" sx={{ mt: 2 }}>
         {footerNote}

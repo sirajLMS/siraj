@@ -3,6 +3,7 @@
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
@@ -15,7 +16,6 @@ import {
   MobileCardList,
   MobileContentStack,
   MobilePageContainer,
-  MobilePaginationControls,
   MobilePrimaryPageAction,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
@@ -67,7 +67,6 @@ interface MobileScheduleSectionProps {
   readonly page: number;
   readonly pageSize: number;
   readonly totalCount?: number;
-  readonly pageCount: number;
   readonly onPageChange?: (page: number) => void;
 }
 
@@ -86,7 +85,6 @@ function MobileScheduleSection({
   page,
   pageSize,
   totalCount,
-  pageCount,
   onPageChange,
 }: MobileScheduleSectionProps) {
   const schedulePanelActions = onViewAll ? (
@@ -129,18 +127,18 @@ function MobileScheduleSection({
           layout="edge-to-edge"
           getKey={row => row.id}
           renderItem={renderItem}
+          paginationOptions={
+            totalCount !== undefined && onPageChange
+              ? buildServerPaginationOptions({
+                  page,
+                  pageSize,
+                  totalCount,
+                  onPageChange,
+                })
+              : { mode: "client" }
+          }
         />
       </MobileSectionPanel>
-
-      {totalCount !== undefined && onPageChange && pageCount > 1 && (
-        <MobilePaginationControls
-          page={page}
-          pageCount={pageCount}
-          rowCount={totalCount}
-          pageSize={pageSize}
-          onPageChange={onPageChange}
-        />
-      )}
     </>
   );
 }
@@ -200,7 +198,6 @@ export function TeacherDashboardMobileView({
   pageSize = 10,
   totalCount,
   onPageChange,
-  pageCount,
   welcomeMobileSummary,
 }: Readonly<TeacherDashboardViewModel>) {
   return (
@@ -247,7 +244,6 @@ export function TeacherDashboardMobileView({
             page={page}
             pageSize={pageSize}
             totalCount={totalCount}
-            pageCount={pageCount}
             onPageChange={onPageChange}
           />
 

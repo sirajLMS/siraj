@@ -240,7 +240,7 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
         rows={classes}
         columns={columns}
         rowHeight={72}
-        hideFooter
+        paginationOptions={false}
         disableRowSelectionOnClick
         sx={theme => ({
           border: "none",

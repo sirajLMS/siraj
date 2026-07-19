@@ -1,46 +1,50 @@
 "use client";
 
 import { ChildCareOutlined, EventOutlined, PaymentsOutlined, TrendingUpOutlined } from "@mui/icons-material";
-import { Grid } from "@mui/material";
+import { useMemo } from "react";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { ParentDashboardMetricsRowProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardComponents.types";
-import { MobileMetricCard } from "@/frontend/mobile/components/ui";
+import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 
 function formatCount(value: number): string {
   return String(value).padStart(2, "0");
 }
 
 export function ParentDashboardMetricsRowMobile({ metrics, labels }: Readonly<ParentDashboardMetricsRowProps>) {
-  return (
-    <Grid container spacing={2}>
-      <Grid size={6}>
-        <MobileMetricCard
-          icon={ChildCareOutlined}
-          label={labels.totalStudents}
-          value={formatCount(metrics.totalStudents)}
-        />
-      </Grid>
-      <Grid size={6}>
-        <MobileMetricCard
-          icon={EventOutlined}
-          label={labels.todaysClasses}
-          value={formatCount(metrics.todaysClasses)}
-        />
-      </Grid>
-      <Grid size={6}>
-        <MobileMetricCard
-          icon={PaymentsOutlined}
-          label={labels.pendingInvoices}
-          value={metrics.pendingInvoicesAmount}
-          variant="error"
-        />
-      </Grid>
-      <Grid size={6}>
-        <MobileMetricCard
-          icon={TrendingUpOutlined}
-          label={labels.performanceAvg}
-          value={`${metrics.performanceAvgMobile}%`}
-        />
-      </Grid>
-    </Grid>
+  const metricItems: readonly MetricItem[] = useMemo(
+    () => [
+      {
+        key: "totalStudents",
+        label: labels.totalStudents,
+        count: formatCount(metrics.totalStudents),
+        icon: ChildCareOutlined,
+        labelKey: "totalStudents",
+      },
+      {
+        key: "todaysClasses",
+        label: labels.todaysClasses,
+        count: formatCount(metrics.todaysClasses),
+        icon: EventOutlined,
+        labelKey: "todaysClasses",
+      },
+      {
+        key: "pendingInvoices",
+        label: labels.pendingInvoices,
+        count: metrics.pendingInvoicesAmount,
+        icon: PaymentsOutlined,
+        labelKey: "pendingInvoices",
+        variant: "error",
+      },
+      {
+        key: "performanceAvg",
+        label: labels.performanceAvg,
+        count: `${metrics.performanceAvgMobile}%`,
+        icon: TrendingUpOutlined,
+        labelKey: "performanceAvg",
+      },
+    ],
+    [labels, metrics]
   );
+
+  return <MobileMetricCardGrid metrics={metricItems} />;
 }

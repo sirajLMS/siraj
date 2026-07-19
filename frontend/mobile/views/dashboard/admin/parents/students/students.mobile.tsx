@@ -3,6 +3,7 @@
 import { AddOutlined, FilterListOutlined, PersonAddAltOutlined, SearchOutlined } from "@mui/icons-material";
 import { Box, IconButton, InputAdornment, TextField } from "@mui/material";
 import type { ReactNode } from "react";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { StudentsViewModel } from "@/frontend/common/views/dashboard/admin/parents/students/useStudentsViewModel";
 import {
   MobileCardList,
@@ -44,8 +45,6 @@ export function StudentsMobileView({
   const renderItem = (row: (typeof rows)[number]): ReactNode => (
     <StudentDirectoryMobileCard row={row} labels={cardListLabels} onViewProfile={onViewProfile} />
   );
-
-  const pageCount = totalStudents !== undefined && pageSize > 0 ? Math.ceil(totalStudents / pageSize) : 0;
 
   return (
     <MobilePageContainer>
@@ -118,10 +117,15 @@ export function StudentsMobileView({
           emptyMessage={labels.noEntries}
           gap={2}
           layout="rounded"
-          pagination={
+          paginationOptions={
             totalStudents !== undefined
-              ? { page, pageCount, rowCount: totalStudents, pageSize, onPageChange }
-              : undefined
+              ? buildServerPaginationOptions({
+                  page,
+                  pageSize,
+                  totalCount: totalStudents,
+                  onPageChange,
+                })
+              : { mode: "client" }
           }
         />
 

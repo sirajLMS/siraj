@@ -9,11 +9,12 @@ import {
 } from "@mui/icons-material";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import {
   MobileMeetingJoinAction,
-  MobilePaginationControls,
+  MobileListPagination,
   MobilePersonProfileLink,
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
@@ -42,13 +43,10 @@ export interface AcademicScheduleCardListMobileLabels {
 
 interface AcademicScheduleCardListMobileProps {
   readonly rows: readonly AcademicClassRow[];
-  readonly totalCount?: number;
-  readonly currentPage: number;
-  readonly pageSize: number;
   readonly labels: AcademicScheduleCardListMobileLabels;
+  readonly paginationOptions: ListPaginationOptions;
   readonly onLeave: (id: string) => void;
   readonly onViewClassAudit: (id: string) => void;
-  readonly onPageChange: (page: number) => void;
 }
 
 function getRoomIcon(room: string) {
@@ -216,7 +214,7 @@ const AcademicClassCard = ({
     <Card
       elevation={0}
       sx={theme => ({
-        borderRadius: 3,
+        borderRadius: 0,
         backgroundColor: theme.palette.background.paper,
         boxShadow: theme.palette.shadow.card,
         opacity: isMissed ? 0.8 : 1,
@@ -243,7 +241,7 @@ const EndOfSchedule = ({ label }: Readonly<{ label: string }>) => {
         sx={theme => ({
           width: "100%",
           height: 192,
-          borderRadius: 4,
+          borderRadius: 0,
           backgroundColor: theme.palette.action.hover,
           border: `1px solid ${theme.palette.border.light}`,
           mb: 2,
@@ -264,17 +262,11 @@ const EndOfSchedule = ({ label }: Readonly<{ label: string }>) => {
 
 export function AcademicScheduleCardListMobile({
   rows,
-  totalCount,
-  currentPage,
-  pageSize,
   labels,
+  paginationOptions,
   onLeave,
   onViewClassAudit,
-  onPageChange,
 }: AcademicScheduleCardListMobileProps) {
-  const totalCountResolved = totalCount ?? 0;
-  const pageCount = totalCountResolved > 0 ? Math.ceil(totalCountResolved / pageSize) : 0;
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       {rows.map(row => (
@@ -287,15 +279,7 @@ export function AcademicScheduleCardListMobile({
         />
       ))}
       <EndOfSchedule label={labels.endOfSchedule} />
-      {totalCountResolved > 0 && (
-        <MobilePaginationControls
-          page={currentPage}
-          pageCount={pageCount}
-          rowCount={totalCountResolved}
-          pageSize={pageSize}
-          onPageChange={onPageChange}
-        />
-      )}
+      <MobileListPagination paginationOptions={paginationOptions} />
     </Box>
   );
 }

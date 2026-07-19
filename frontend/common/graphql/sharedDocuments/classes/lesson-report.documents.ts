@@ -127,6 +127,40 @@ export const recentApprovedLessonReportsQueryDocument: TypedDocumentNode<
   }
 `;
 
+export const studentRecentLessonReportsQueryDocument: TypedDocumentNode<
+  Operations.StudentRecentLessonReportsQuery,
+  Types.QueryStudentRecentLessonReportsArgs
+> = gql`
+  query StudentRecentLessonReports($paginationArgs: PaginationArgs) {
+    studentRecentLessonReports(paginationArgs: $paginationArgs) {
+      totalCount
+      rows {
+        id
+        classInstanceId
+        studentId
+        teacherId
+        teacherName
+        studentName
+        lessonDate
+        durationMinutes
+        attendanceEvaluation
+        teacherNotes
+        studentNotes
+        completionPercentage
+        status
+        submittedByUserId
+        submittedAt
+        reviewedByUserId
+        reviewedAt
+        rejectionReason
+        idempotencyKey
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
 export const lessonReportCountQueryDocument: TypedDocumentNode<
   Operations.LessonReportCountQuery,
   Types.QueryLessonReportCountArgs

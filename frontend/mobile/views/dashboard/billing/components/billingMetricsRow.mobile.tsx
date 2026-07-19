@@ -1,8 +1,10 @@
 "use client";
 
-import { Grid, Skeleton } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
+import { useMemo } from "react";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { BillingMetricsRowProps } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
-import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MetricCard";
+import { MobileHorizontalScrollRow, MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 
 export type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
 
@@ -11,35 +13,41 @@ export function BillingMetricsRowMobile({
   compact = false,
   loading = false,
 }: Readonly<BillingMetricsRowProps>) {
+  const metricItems: readonly MetricItem[] = useMemo(
+    () =>
+      metrics.map(metric => ({
+        key: metric.key,
+        label: metric.label,
+        count: metric.value,
+        icon: metric.icon,
+        labelKey: metric.key,
+        subLabel: metric.subLabel,
+        variant: metric.variant,
+      })),
+    [metrics]
+  );
+
   if (loading) {
     const skeletonKeys =
       metrics.length > 0 ? metrics.map(metric => metric.key) : ["outstanding", "paid", "next-due", "active-students"];
 
     return (
-      <Grid container spacing={compact ? 1.5 : 2}>
+      <MobileHorizontalScrollRow>
         {skeletonKeys.map(key => (
-          <Grid key={`billing-metric-skeleton-${key}`} size={{ xs: 6, md: 3 }}>
+          <Box
+            key={`billing-metric-skeleton-${key}`}
+            sx={{
+              flex: "0 0 148px",
+              minWidth: 148,
+              scrollSnapAlign: "start",
+            }}
+          >
             <Skeleton variant="rounded" height={compact ? 88 : 120} sx={{ borderRadius: 2 }} />
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </MobileHorizontalScrollRow>
     );
   }
 
-  return (
-    <Grid container spacing={compact ? 1.5 : 2}>
-      {metrics.map(metric => (
-        <Grid key={metric.key} size={{ xs: 6, md: 3 }}>
-          <MobileMetricCard
-            icon={metric.icon}
-            label={metric.label}
-            value={metric.value}
-            subLabel={metric.subLabel}
-            variant={metric.variant}
-            sx={compact ? { "& .MuiTypography-headlineLg": { typography: "titleLg" } } : undefined}
-          />
-        </Grid>
-      ))}
-    </Grid>
-  );
+  return <MobileMetricCardGrid metrics={metricItems} />;
 }

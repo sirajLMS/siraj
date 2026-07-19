@@ -5,13 +5,25 @@ import { DataGrid, type DataGridProps, type GridValidRowModel } from "@mui/x-dat
 import { useMemo } from "react";
 import { AppDataGridLoadingOverlay } from "@/frontend/common/components/ui/dataGrid/AppDataGridLoadingOverlay";
 import { AppDataGridNoRowsOverlay } from "@/frontend/common/components/ui/dataGrid/AppDataGridNoRowsOverlay";
+import { mapPaginationOptionsToDataGridProps } from "@/frontend/common/components/ui/dataGrid/mapPaginationOptionsToDataGridProps";
+import { GridPagination } from "@/frontend/common/components/ui/filter/PaginationControls";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
-const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
+type OmittedDataGridProps =
+  | "paginationMode"
+  | "paginationModel"
+  | "onPaginationModelChange"
+  | "rowCount"
+  | "hideFooter"
+  | "pageSizeOptions"
+  | "slots";
 
-export interface AppDataGridProps<R extends GridValidRowModel> extends DataGridProps<R> {
+export interface AppDataGridProps<R extends GridValidRowModel> extends Omit<DataGridProps<R>, OmittedDataGridProps> {
   readonly emptyMessage?: string;
   readonly ariaLabel?: string;
+  readonly paginationOptions: ListPaginationOptions;
+  readonly slots?: Omit<NonNullable<DataGridProps<R>["slots"]>, "pagination">;
 }
 
 function createNoRowsOverlay(message: string) {
@@ -23,7 +35,7 @@ function createNoRowsOverlay(message: string) {
 export function AppDataGrid<R extends GridValidRowModel>({
   emptyMessage = "No entries found",
   ariaLabel,
-  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
+  paginationOptions,
   initialState,
   slots,
   slotProps,
@@ -42,20 +54,26 @@ export function AppDataGrid<R extends GridValidRowModel>({
   };
 
   const NoRowsOverlay = useMemo(() => createNoRowsOverlay(emptyMessage), [emptyMessage]);
+  const paginationProps = mapPaginationOptionsToDataGridProps(paginationOptions);
 
   return (
     <Box sx={{ width: "100%" }} aria-label={ariaLabel}>
       <DataGrid<R>
         disableRowSelectionOnClick
-        pageSizeOptions={pageSizeOptions}
+        {...paginationProps}
         initialState={{
-          pagination: { paginationModel: { pageSize: 10 } },
+          ...paginationProps.initialState,
           ...initialState,
+          pagination: {
+            ...paginationProps.initialState?.pagination,
+            ...initialState?.pagination,
+          },
         }}
         slots={{
           noRowsOverlay: NoRowsOverlay,
           loadingOverlay: AppDataGridLoadingOverlay,
           ...slots,
+          pagination: GridPagination,
         }}
         slotProps={slotProps}
         sx={mergeSx(defaultGridSx, sx)}

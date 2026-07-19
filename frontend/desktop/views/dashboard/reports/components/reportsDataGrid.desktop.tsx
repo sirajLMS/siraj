@@ -138,6 +138,7 @@ export function ReportsDataGridDesktop({
         emptyMessage={labels.noEntries}
         autoHeight
         disableColumnMenu
+        paginationOptions={{ mode: "client" }}
         onRowClick={
           onRowClick
             ? params => {

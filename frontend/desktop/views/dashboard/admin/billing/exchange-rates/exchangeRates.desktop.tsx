@@ -229,6 +229,7 @@ export function ExchangeRatesDesktopView({
           emptyMessage={labels.noRates}
           autoHeight
           disableColumnMenu
+          paginationOptions={{ mode: "client" }}
         />
       </DesktopSectionPanel>
 

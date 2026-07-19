@@ -11,9 +11,9 @@ import type {
   StudentDirectoryDataGridLabels,
   StudentDirectoryRowExtended,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import {
   DesktopAppDataGrid,
-  DesktopGridPagination,
   DesktopPersonProfileLinkCell,
 } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
@@ -188,18 +188,17 @@ export function StudentDirectoryDataGrid({
       autoHeight
       ariaLabel="student-directory-table"
       emptyMessage={labels.noEntries}
-      {...(isServerPagination
-        ? {
-            paginationMode: "server" as const,
-            rowCount: totalCount,
-            paginationModel: { page, pageSize },
-            onPaginationModelChange: model => {
-              onPageChange(model.page);
-            },
-            pageSizeOptions: [pageSize],
-            slots: { pagination: DesktopGridPagination },
-          }
-        : {})}
+      paginationOptions={
+        isServerPagination
+          ? buildServerPaginationOptions({
+              page,
+              pageSize,
+              totalCount,
+              onPageChange,
+              pageSizeOptions: [pageSize],
+            })
+          : { mode: "client" }
+      }
       onRowClick={(params: GridRowParams<StudentDirectoryRowExtended>) => {
         onViewProfile(params.row.id ?? "");
       }}

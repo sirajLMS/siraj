@@ -25,12 +25,13 @@ import {
 } from "@mui/material";
 import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import {
   MobileCardList,
   MobileContentStack,
-  MobileMetricCard,
+  MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
   MobileSectionPanel,
@@ -171,6 +172,40 @@ export function StudentHistoryMobileView({
     return filteredSessions.filter(s => s.dayOfMonth === selectedDay);
   }, [filteredSessions, selectedDay]);
 
+  const metricItems: readonly MetricItem[] = useMemo(
+    () => [
+      {
+        key: "totalClasses",
+        label: labels.totalClasses,
+        count: metrics.totalClasses,
+        icon: SchoolOutlined,
+        labelKey: "totalClasses",
+      },
+      {
+        key: "attendanceRate",
+        label: labels.attendanceRate,
+        count: `${metrics.attendanceRate}%`,
+        icon: VerifiedUserOutlined,
+        labelKey: "attendanceRate",
+      },
+      {
+        key: "hoursStudied",
+        label: labels.hoursStudied,
+        count: `${metrics.hoursStudied}h`,
+        icon: TimerOutlined,
+        labelKey: "hoursStudied",
+      },
+      {
+        key: "performance",
+        label: labels.performance,
+        count: `${metrics.performance}%`,
+        icon: TrendingUpOutlined,
+        labelKey: "performance",
+      },
+    ],
+    [labels, metrics]
+  );
+
   if (loading && metrics.totalClasses === 0) {
     return (
       <MobilePageContainer>
@@ -214,16 +249,7 @@ export function StudentHistoryMobileView({
           </Button>
         </Box>
 
-        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
-          <MobileMetricCard icon={SchoolOutlined} label={labels.totalClasses} value={metrics.totalClasses} />
-          <MobileMetricCard
-            icon={VerifiedUserOutlined}
-            label={labels.attendanceRate}
-            value={`${metrics.attendanceRate}%`}
-          />
-          <MobileMetricCard icon={TimerOutlined} label={labels.hoursStudied} value={`${metrics.hoursStudied}h`} />
-          <MobileMetricCard icon={TrendingUpOutlined} label={labels.performance} value={`${metrics.performance}%`} />
-        </Box>
+        <MobileMetricCardGrid metrics={metricItems} />
 
         <HistoryWeeklyScrollerMobile
           selectedWeek={selectedWeek}
@@ -275,6 +301,7 @@ export function StudentHistoryMobileView({
               rows={listRows}
               emptyMessage={labels.noHistory}
               getKey={row => row.id}
+              paginationOptions={{ mode: "client" }}
               renderItem={row => (
                 <MobileSessionItem row={row} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
               )}

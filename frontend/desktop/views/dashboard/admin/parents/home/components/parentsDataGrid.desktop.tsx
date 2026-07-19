@@ -16,7 +16,7 @@ import type {
   ParentDirectoryRow,
   ParentsDataGridLabels,
 } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
-import { DesktopGridPagination } from "@/frontend/desktop/components/ui";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
@@ -233,18 +233,17 @@ export function ParentsDataGridDesktop({
       onRowClick={(params: GridRowParams<ParentDirectoryRow>) => {
         onOpenSettings(params.row.id);
       }}
-      {...(totalCount !== undefined && page !== undefined && pageSize !== undefined && onPageChange
-        ? {
-            paginationMode: "server",
-            rowCount: totalCount,
-            paginationModel: { page, pageSize },
-            onPaginationModelChange: model => {
-              onPageChange(model.page);
-            },
-            pageSizeOptions: [10, 25, 50],
-            slots: { pagination: DesktopGridPagination },
-          }
-        : {})}
+      paginationOptions={
+        totalCount !== undefined && page !== undefined && pageSize !== undefined && onPageChange
+          ? buildServerPaginationOptions({
+              page,
+              pageSize,
+              totalCount,
+              onPageChange,
+              pageSizeOptions: [10, 25, 50],
+            })
+          : { mode: "client" }
+      }
       sx={{
         "& .MuiDataGrid-row": { cursor: "pointer" },
       }}

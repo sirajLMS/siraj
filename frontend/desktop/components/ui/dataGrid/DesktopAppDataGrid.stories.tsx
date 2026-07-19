@@ -40,6 +40,7 @@ export const Default: Story = {
   args: {
     rows,
     columns,
+    paginationOptions: { mode: "client" },
   },
 };
 
@@ -48,6 +49,7 @@ export const Loading: Story = {
     rows: [],
     columns,
     loading: true,
+    paginationOptions: { mode: "client" },
   },
 };
 
@@ -56,5 +58,6 @@ export const Empty: Story = {
     rows: [],
     columns,
     emptyMessage: "No users found in the system.",
+    paginationOptions: { mode: "client" },
   },
 };

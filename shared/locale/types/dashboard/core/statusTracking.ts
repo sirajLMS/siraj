@@ -22,6 +22,14 @@ export interface StatusTrackingLabels {
   readonly administrativeHold: string;
   readonly holdDescription: string;
 
+  // ─── Date filter ────────────────────────────────────────────────────
+  readonly dateFilter: {
+    readonly today: string;
+    readonly previousDay: string;
+    readonly nextDay: string;
+    readonly dateLabel: string;
+  };
+
   // ─── Metrics ────────────────────────────────────────────────────────
   readonly metrics: {
     readonly regular: string;

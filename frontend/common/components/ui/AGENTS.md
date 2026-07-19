@@ -157,7 +157,9 @@ export function AppDataGridView() {
 
 Shared components (no suffix) are for truly viewport-agnostic UI primitives that render identically on mobile and desktop. Both tiers import them from `@/frontend/common/components/ui`.
 
-**Examples:** `AppDataGrid`, `PageHeader`, `SectionPanel`, `StatusBadge`, `BaseCard`, `PageContainer`, `MetricCard`, `MetricCardGrid`, `ActionIconLink`, `PersonProfileLink`, `PaginationControls`.
+**Examples:** `AppDataGrid`, `PageHeader`, `SectionPanel`, `StatusBadge`, `BaseCard`, `PageContainer`, `ActionIconLink`, `PersonProfileLink`, `PaginationControls`.
+
+**Metric cards:** Common `MetricCard` / `MetricCardGrid` exist as shared/grid primitives, but **views must not import the card**. Mobile views use only `MobileMetricCardGrid`; desktop views use only `DesktopMetricCardGrid` (including single-metric cases). Cards are internal to the grid (+ Storybook).
 
 **Rules:**
 - **ONLY** create a non-suffixed component in `common` when it has **zero** viewport-dependent rendering

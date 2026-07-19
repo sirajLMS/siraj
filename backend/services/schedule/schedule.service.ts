@@ -2,19 +2,13 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
-import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission, ClassOutcome } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import {
-  parseClassExecutionState,
-  parseClassOutcome,
-  parseClassTypeOrNull,
-  parseIanaTimezone,
-} from "@/backend/lib/enum";
+import { parseClassExecutionState, parseClassOutcome, parseClassTypeOrNull } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { resolveViewerTimezone } from "@/backend/services/schedule/resolve-viewer-timezone";
 import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
 import type {
   FutureClassRow,
@@ -28,16 +22,6 @@ import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ScheduleService {
-  async function resolveViewerTimezone(userId: string): Promise<IanaTimezone> {
-    const user = await UserRepository.findById(userId);
-    if (user?.timezone) {
-      return parseIanaTimezone(user.timezone);
-    }
-
-    const defaultTimezone = await SystemSettingsRepository.getStringValue("default_timezone", "UTC");
-    return parseIanaTimezone(defaultTimezone);
-  }
-
   async function mapDailyScheduleListItem(item: DailyScheduleResult, tErrors: ErrorsLabels) {
     const unknownName = tErrors.unknownName;
     const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(item.id, tErrors);

@@ -85,7 +85,7 @@ export function AssociatedStudentsDataGridDesktop({
       columns={columns}
       loading={loading}
       getRowId={row => row.id ?? `associated-${row.name ?? "student"}`}
-      hideFooter
+      paginationOptions={false}
       emptyMessage={emptyMessage}
       sx={{ border: "none" }}
     />

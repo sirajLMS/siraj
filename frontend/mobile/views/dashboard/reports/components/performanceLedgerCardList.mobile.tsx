@@ -25,6 +25,7 @@ export function PerformanceLedgerCardListMobile({
         getKey={row => row.id}
         loading={loading}
         gap={2}
+        paginationOptions={{ mode: "client" }}
         renderItem={row => (
           <MobileCardListItem key={row.id} interactive={Boolean(onRowClick)}>
             <PerformanceLedgerCardMobile

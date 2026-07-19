@@ -64,7 +64,7 @@ export function MeetingProvidersDesktopView({
       ) : null}
 
       <Box sx={{ height: 560 }}>
-        <DesktopAppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
+        <DesktopAppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} paginationOptions={{ mode: "client" }} />
       </Box>
 
       <CreateMeetingProviderDialog

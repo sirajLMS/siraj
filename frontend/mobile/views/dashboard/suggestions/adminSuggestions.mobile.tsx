@@ -205,6 +205,7 @@ function SuggestionCardListSection({
       getKey={row => row.id}
       gap={1.5}
       layout="rounded"
+      paginationOptions={{ mode: "client" }}
       renderItem={row => (
         <SuggestionCardItem
           row={row}

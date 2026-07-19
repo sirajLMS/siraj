@@ -83,6 +83,7 @@ export function CurrencyHedgesDesktopView({
           loading={loading}
           emptyMessage={emptyMessage}
           getRowId={row => row.id}
+          paginationOptions={{ mode: "client" }}
         />
       </Box>
     </DesktopPageContainer>

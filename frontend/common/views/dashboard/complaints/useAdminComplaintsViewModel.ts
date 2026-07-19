@@ -18,6 +18,7 @@ import type {
   ComplaintTab,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
+import { mapAdminComplaintRows } from "@/frontend/common/views/dashboard/complaints/utils/mapAdminComplaintRows";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale/client";
 
@@ -118,8 +119,8 @@ export function useAdminComplaintsViewModel(
     [data?.adminComplaintQueue?.metrics]
   );
   const rows: readonly AdminComplaintRow[] = useMemo(
-    () => (data?.adminComplaintQueue?.rows as unknown as AdminComplaintRow[]) ?? [],
-    [data?.adminComplaintQueue?.rows]
+    () => mapAdminComplaintRows(data?.adminComplaintQueue?.rows, labels),
+    [data?.adminComplaintQueue?.rows, labels]
   );
   const totalCount = data?.adminComplaintQueue?.totalCount ?? 0;
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { ManagersFilterBar } from "@/frontend/common/views/dashboard/managers/home/ManagersFilterBar";
 import { ManagersMetrics } from "@/frontend/common/views/dashboard/managers/home/ManagersMetrics";
 import type { ManagersViewProps } from "@/frontend/common/views/dashboard/managers/home/types";
@@ -35,10 +36,16 @@ export function ManagersViewMobile(props: Readonly<ManagersViewProps>) {
 
         <ManagersCardListMobile
           managers={[...props.managers]}
-          page={props.page}
-          pageSize={props.pageSize}
-          totalCount={props.totalManagers}
-          onPageChange={props.onPageChange}
+          paginationOptions={
+            props.totalManagers !== undefined && props.onPageChange !== undefined
+              ? buildServerPaginationOptions({
+                  page: props.page ?? 0,
+                  pageSize: props.pageSize ?? 10,
+                  totalCount: props.totalManagers,
+                  onPageChange: props.onPageChange,
+                })
+              : false
+          }
         />
       </MobileSectionPanel>
     </MobilePageContainer>

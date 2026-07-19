@@ -3,7 +3,7 @@
 import { Autocomplete, Grid, TextField } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { getServerPaginationProps } from "@/frontend/common/components/ui/filter/serverPaginationProps";
+import { getServerPaginationOptions } from "@/frontend/common/components/ui/filter/serverPaginationProps";
 import type {
   DirectoryPersonOption,
   PendingReviewRow,
@@ -142,7 +142,9 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
     [labels, approving, onSelectReport, onApprove, onOpenRejectDialog]
   );
 
-  const paginationProps = getServerPaginationProps({ page, pageSize }, totalCount, onPageChange);
+  const paginationOptions = getServerPaginationOptions({ page, pageSize }, totalCount, onPageChange) || {
+    mode: "client",
+  };
 
   return (
     <DesktopPageContainer>
@@ -199,7 +201,7 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
               loading={loading}
               autoHeight
               rowHeight={64}
-              {...paginationProps}
+              paginationOptions={paginationOptions}
             />
           </DesktopSectionPanel>
         </Grid>

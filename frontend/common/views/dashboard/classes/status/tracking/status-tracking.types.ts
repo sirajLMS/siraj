@@ -57,6 +57,12 @@ export interface StatusTrackingLabels {
   readonly errorAuditLogsComingSoon: string;
   readonly errorFailedToLoad: string;
   readonly days: readonly string[];
+  readonly dateFilter: {
+    readonly today: string;
+    readonly previousDay: string;
+    readonly nextDay: string;
+    readonly dateLabel: string;
+  };
 }
 
 export interface StatusTrackingDataGridLabels {
@@ -89,12 +95,12 @@ export interface CardListLabels {
   readonly verifyDocuments: string;
   readonly sessionLocked: string;
   readonly sessionEnded: string;
-  readonly seeAll: string;
   readonly todaysSchedule: string;
   readonly regular: string;
   readonly suspendedPending: string;
   readonly onLeave: string;
   readonly pendingVerification: string;
+  readonly noEntries: string;
 }
 
 export interface SuspensionAnalyticsLabels {
@@ -139,12 +145,13 @@ export interface StatusTrackingViewProps {
   readonly totalSessions: number;
   readonly suspendedCount: number;
   readonly labels: StatusTrackingLabels;
+  readonly dateValue: string;
+  readonly onDateChange: (date: string) => void;
   readonly onActivate: (id: string) => void;
   readonly onReschedule: (id: string) => void;
   readonly onVerify: (id: string) => void;
   readonly onNewReport: () => void;
   readonly onOpenAuditLogs: () => void;
-  readonly onSeeAll: () => void;
 }
 
 export interface StatusTrackingDataGridProps {
@@ -163,7 +170,6 @@ export interface StatusTrackingCardListProps {
   readonly onActivate: (id: string) => void;
   readonly onReschedule: (id: string) => void;
   readonly onVerify: (id: string) => void;
-  readonly onSeeAll: () => void;
 }
 
 export interface SuspensionAnalyticsProps {
@@ -180,9 +186,9 @@ export interface StatusActionProps {
   readonly onVerify: (id: string) => void;
 }
 
-export interface MobileLayoutProps extends Omit<StatusTrackingViewProps, "suspendedCount"> {
+export interface MobileLayoutProps extends StatusTrackingViewProps {
   readonly cardListLabels: CardListLabels;
-  readonly totalSessions: number;
+  readonly analyticsLabels: SuspensionAnalyticsLabels;
 }
 
 export interface DesktopLayoutProps extends StatusTrackingViewProps {

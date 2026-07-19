@@ -1,10 +1,11 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
 import type { MobileLayoutProps } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
-import { MobileContentStack, MobileFab, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileContentStack, MobileFab, MobileMetricCardGrid, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter";
 import { StatusTrackingCardList } from "@/frontend/mobile/views/dashboard/classes/status/tracking/components/statusTrackingCardList.mobile";
+import { SuspensionAnalyticsMobile } from "@/frontend/mobile/views/dashboard/classes/status/tracking/components/suspensionAnalytics.mobile";
 
 /**
  * Mobile variant of the Status Tracking dashboard view.
@@ -17,20 +18,33 @@ export function StatusTrackingMobileView({
   metrics,
   rows,
   totalSessions,
+  suspendedCount,
   labels,
   cardListLabels,
+  analyticsLabels,
+  dateValue,
+  onDateChange,
   onActivate,
   onReschedule,
   onVerify,
   onNewReport,
-  onSeeAll,
+  onOpenAuditLogs,
 }: Readonly<MobileLayoutProps>) {
   return (
     <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={3} paddingBottom={12}>
-        <MetricCardGrid metrics={metrics} />
+        <DateNavigatorMobile
+          dateValue={dateValue}
+          todayLabel={labels.dateFilter.today}
+          previousDayLabel={labels.dateFilter.previousDay}
+          nextDayLabel={labels.dateFilter.nextDay}
+          dateLabel={labels.dateFilter.dateLabel}
+          onDateChange={onDateChange}
+        />
+
+        <MobileMetricCardGrid metrics={metrics} />
 
         <StatusTrackingCardList
           rows={rows}
@@ -39,7 +53,12 @@ export function StatusTrackingMobileView({
           onActivate={onActivate}
           onReschedule={onReschedule}
           onVerify={onVerify}
-          onSeeAll={onSeeAll}
+        />
+
+        <SuspensionAnalyticsMobile
+          labels={analyticsLabels}
+          suspendedCount={suspendedCount}
+          onOpenAuditLogs={onOpenAuditLogs}
         />
       </MobileContentStack>
 

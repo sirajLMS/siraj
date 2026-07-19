@@ -52,7 +52,7 @@ export function MobileCardListItem({
 
   const baseSx: SxProps<Theme> = (theme: Theme) => ({
     padding: isEdgeToEdge ? theme.spacing(2) : theme.spacing(2.5),
-    borderRadius: isEdgeToEdge ? 0 : theme.shape.borderRadius,
+    borderRadius: 0,
     boxShadow: isEdgeToEdge ? "none" : theme.shadows[1],
     backgroundColor: isEdgeToEdge ? theme.palette.surfaceContainerLowest : theme.palette.background.paper,
     border: isEdgeToEdge ? "none" : `1px solid ${theme.palette.divider}`,

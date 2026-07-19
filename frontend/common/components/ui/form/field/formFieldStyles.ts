@@ -36,7 +36,7 @@ export const durationBoxSx =
     gap: 1,
     px: isMobile ? 2 : 1.5,
     py: isMobile ? 1.5 : 0,
-    borderRadius: isMobile ? 3 : 2,
+    borderRadius: 1,
     border: 1,
     borderStyle: "solid",
     borderColor: theme.palette.outlineVariant,

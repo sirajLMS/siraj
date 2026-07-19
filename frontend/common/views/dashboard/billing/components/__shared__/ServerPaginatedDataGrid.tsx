@@ -1,7 +1,8 @@
 "use client";
 
 import type { GridColDef, GridValidRowModel } from "@mui/x-data-grid";
-import { AppDataGrid, GridPagination } from "@/frontend/common/components/ui";
+import { AppDataGrid } from "@/frontend/common/components/ui";
+import { getServerPaginationOptions } from "@/frontend/common/components/ui/filter/serverPaginationProps";
 
 export interface ServerPaginatedDataGridProps<R extends GridValidRowModel> {
   readonly rows: readonly R[];
@@ -28,8 +29,6 @@ export function ServerPaginatedDataGrid<R extends GridValidRowModel>({
   onPageChange,
   loading = false,
 }: Readonly<ServerPaginatedDataGridProps<R>>) {
-  const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
-
   return (
     <AppDataGrid<R>
       rows={rows as R[]}
@@ -38,18 +37,9 @@ export function ServerPaginatedDataGrid<R extends GridValidRowModel>({
       getRowId={getRowId}
       emptyMessage={emptyMessage}
       ariaLabel={ariaLabel}
-      {...(isServerPagination
-        ? {
-            paginationMode: "server" as const,
-            rowCount: totalCount,
-            paginationModel: { page, pageSize },
-            onPaginationModelChange: model => {
-              onPageChange(model.page);
-            },
-            pageSizeOptions: [pageSize],
-            slots: { pagination: GridPagination },
-          }
-        : {})}
+      paginationOptions={
+        getServerPaginationOptions({ page, pageSize }, totalCount, onPageChange) || { mode: "client" }
+      }
     />
   );
 }

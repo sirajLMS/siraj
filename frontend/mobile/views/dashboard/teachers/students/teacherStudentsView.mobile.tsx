@@ -54,6 +54,7 @@ export function TeacherStudentsMobileView({ rows, loading, error, labels }: Read
           getKey={row => row.id ?? String(row.name ?? "")}
           renderItem={row => <StudentCard row={row} labels={labels} />}
           emptyMessage={labels.noStudents}
+          paginationOptions={{ mode: "client" }}
         />
       ) : null}
     </MobilePageContainer>

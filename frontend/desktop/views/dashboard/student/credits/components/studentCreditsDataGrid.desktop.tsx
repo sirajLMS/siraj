@@ -1,8 +1,9 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
+import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import type { CreditReason } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentCreditTransactionRow } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
@@ -97,16 +98,6 @@ export function StudentCreditsDataGrid({
     [labels, locale, reasonLabel]
   );
 
-  const handlePaginationModelChange = (model: GridPaginationModel) => {
-    if (model.pageSize !== pageSize) {
-      onPageSizeChange(model.pageSize);
-      return;
-    }
-    if (model.page !== page) {
-      onPageChange(model.page);
-    }
-  };
-
   return (
     <Box sx={{ width: "100%" }}>
       <DesktopAppDataGrid
@@ -116,11 +107,14 @@ export function StudentCreditsDataGrid({
         loading={loading}
         emptyMessage={labels.noTransactions}
         autoHeight
-        paginationMode="server"
-        rowCount={totalCount}
-        paginationModel={{ page, pageSize }}
-        onPaginationModelChange={handlePaginationModelChange}
-        pageSizeOptions={[10, 25, 50]}
+        paginationOptions={buildServerPaginationOptions({
+          page,
+          pageSize,
+          totalCount,
+          onPageChange,
+          onPageSizeChange,
+          pageSizeOptions: [10, 25, 50],
+        })}
         ariaLabel={labels.transactionHistory}
       />
     </Box>

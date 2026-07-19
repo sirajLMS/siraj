@@ -129,6 +129,7 @@ export function MeetingProvidersMobileView({
         layout="edge-to-edge"
         getKey={row => row.id ?? ""}
         renderItem={renderItem}
+        paginationOptions={{ mode: "client" }}
       />
 
       <CreateMeetingProviderDialog

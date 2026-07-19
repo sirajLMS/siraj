@@ -26,6 +26,7 @@ export function BooksAndBagsGridMobile({ books, labels, onDelete }: Readonly<Boo
       emptyMessage={labels.noEntries}
       gap={2}
       layout="rounded"
+      paginationOptions={false}
       renderItem={book => <BookItemCardMobile book={book} labels={labels} onDelete={onDelete} />}
     />
   );

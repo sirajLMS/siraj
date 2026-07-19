@@ -1,22 +1,11 @@
 "use client";
 
-import {
-  Box,
-  CircularProgress,
-  Pagination as MuiPagination,
-  type SxProps,
-  type Theme,
-  Typography,
-} from "@mui/material";
-import type { ReactNode } from "react";
+import { Box, CircularProgress, type SxProps, type Theme, Typography } from "@mui/material";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter/paginationControls.mobile";
 
-export interface PaginationConfig {
-  readonly page: number;
-  readonly pageCount: number;
-  readonly rowCount: number;
-  readonly pageSize: number;
-  readonly onPageChange: (page: number) => void;
-}
+const DEFAULT_CLIENT_PAGE_SIZE = 10;
 
 export interface MobileCardListProps<T> {
   readonly rows: readonly T[];
@@ -26,7 +15,7 @@ export interface MobileCardListProps<T> {
   readonly emptyMessage?: string;
   readonly gap?: number;
   readonly layout?: "edge-to-edge" | "rounded";
-  readonly pagination?: PaginationConfig;
+  readonly paginationOptions: ListPaginationOptions;
   readonly sx?: SxProps<Theme>;
 }
 
@@ -38,10 +27,34 @@ export function MobileCardList<T>({
   emptyMessage = "No entries found",
   gap = 2,
   layout = "edge-to-edge",
-  pagination,
+  paginationOptions,
   sx,
 }: MobileCardListProps<T>) {
   const isEdgeToEdge = layout === "edge-to-edge";
+  const clientPageSize =
+    paginationOptions !== false && paginationOptions.mode === "client"
+      ? (paginationOptions.pageSize ?? DEFAULT_CLIENT_PAGE_SIZE)
+      : DEFAULT_CLIENT_PAGE_SIZE;
+
+  const [clientPage, setClientPage] = useState(0);
+
+  useEffect(() => {
+    if (paginationOptions === false || paginationOptions.mode !== "client") {
+      return;
+    }
+    const pageCount = Math.max(1, Math.ceil(rows.length / clientPageSize));
+    if (clientPage >= pageCount) {
+      setClientPage(Math.max(0, pageCount - 1));
+    }
+  }, [clientPage, clientPageSize, paginationOptions, rows.length]);
+
+  const visibleRows = useMemo(() => {
+    if (paginationOptions === false || paginationOptions.mode === "server") {
+      return rows;
+    }
+    const start = clientPage * clientPageSize;
+    return rows.slice(start, start + clientPageSize);
+  }, [clientPage, clientPageSize, paginationOptions, rows]);
 
   if (loading && rows.length === 0) {
     return (
@@ -61,6 +74,42 @@ export function MobileCardList<T>({
     );
   }
 
+  const paginationControls = (() => {
+    if (paginationOptions === false) {
+      return null;
+    }
+    if (paginationOptions.mode === "server") {
+      const pageCount = Math.max(1, Math.ceil(paginationOptions.totalCount / paginationOptions.pageSize));
+      if (paginationOptions.totalCount <= 0 || pageCount <= 1) {
+        return null;
+      }
+      return (
+        <MobilePaginationControls
+          embedded
+          page={paginationOptions.page}
+          pageCount={pageCount}
+          rowCount={paginationOptions.totalCount}
+          pageSize={paginationOptions.pageSize}
+          onPageChange={paginationOptions.onPageChange}
+        />
+      );
+    }
+    const pageCount = Math.max(1, Math.ceil(rows.length / clientPageSize));
+    if (rows.length <= 0 || pageCount <= 1) {
+      return null;
+    }
+    return (
+      <MobilePaginationControls
+        embedded
+        page={clientPage}
+        pageCount={pageCount}
+        rowCount={rows.length}
+        pageSize={clientPageSize}
+        onPageChange={setClientPage}
+      />
+    );
+  })();
+
   return (
     <Box
       sx={{
@@ -71,21 +120,10 @@ export function MobileCardList<T>({
         ...sx,
       }}
     >
-      {rows.map((row, index) => (
+      {visibleRows.map((row, index) => (
         <Box key={getKey(row)}>{renderItem(row, index)}</Box>
       ))}
-
-      {pagination && (
-        <MuiPagination
-          page={pagination.page}
-          count={pagination.pageCount}
-          onChange={(_e, page) => pagination.onPageChange(page)}
-          color="primary"
-          variant="outlined"
-          shape="rounded"
-          sx={{ mt: 2, "& .MuiPaginationItem-root": { borderRadius: 2 } }}
-        />
-      )}
+      {paginationControls}
     </Box>
   );
 }

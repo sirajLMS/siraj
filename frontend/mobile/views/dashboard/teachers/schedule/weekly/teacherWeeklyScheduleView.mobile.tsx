@@ -2,7 +2,6 @@
 
 import { AddOutlined, DeleteOutlined, TimerOutlined } from "@mui/icons-material";
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
@@ -13,9 +12,10 @@ import {
   Stack,
 } from "@mui/material";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
-import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MetricCard";
+import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 import MobileScheduleList from "@/frontend/mobile/views/dashboard/teachers/schedule/weekly/mobileScheduleList.mobile";
@@ -48,6 +48,17 @@ export function TeacherWeeklyScheduleViewMobile({
 
   const breadcrumbs = [{ label: t.breadcrumbs.teachers, href: "/teachers" }, { label: t.breadcrumbs.schedule }];
 
+  const workloadMetrics: readonly MetricItem[] = [
+    {
+      key: "weeklyHoursWorked",
+      label: t.metrics.weeklyHoursWorked(Number(schedule.weeklyHoursWorked)),
+      count: schedule.weeklyHoursWorked,
+      icon: TimerOutlined,
+      labelKey: "weeklyHoursWorked",
+      variant: "default",
+    },
+  ];
+
   return (
     <MobilePageContainer>
       <MobilePageHeader
@@ -56,7 +67,7 @@ export function TeacherWeeklyScheduleViewMobile({
         edgeToEdge={false}
         actions={
           <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-            <Box sx={{ flex: 1 }}>
+            <Stack sx={{ flex: 1 }}>
               {hasScheduleCreateClass ? (
                 <MobilePrimaryPageAction
                   startIcon={<AddOutlined />}
@@ -66,7 +77,7 @@ export function TeacherWeeklyScheduleViewMobile({
                   {t.actions.addSlot}
                 </MobilePrimaryPageAction>
               ) : null}
-            </Box>
+            </Stack>
             {hasScheduleClearWeekly ? (
               <IconButton
                 onClick={() => setClearDialogOpen(true)}
@@ -85,16 +96,7 @@ export function TeacherWeeklyScheduleViewMobile({
         }
       />
 
-      {hasScheduleViewWorkload ? (
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr" }, gap: 2 }}>
-          <MobileMetricCard
-            icon={TimerOutlined}
-            label={t.metrics.weeklyHoursWorked(Number(schedule.weeklyHoursWorked))}
-            value={schedule.weeklyHoursWorked}
-            variant="default"
-          />
-        </Box>
-      ) : null}
+      {hasScheduleViewWorkload ? <MobileMetricCardGrid metrics={workloadMetrics} /> : null}
 
       <MobileSectionPanel>
         <MobileScheduleList

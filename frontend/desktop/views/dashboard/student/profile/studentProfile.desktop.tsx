@@ -28,7 +28,8 @@ import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/compon
 import { AppLanguage, Gender, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
-import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopAppDatePicker } from "@/frontend/desktop/components/ui/form/date/DesktopAppDatePicker";
@@ -239,36 +240,41 @@ export function StudentProfileDesktopView({
           )}
 
           <DesktopSectionPanel title={labels.academicInfo} sx={{ mb: 3 }}>
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <DesktopMetricCard
-                  icon={SchoolOutlined}
-                  label={labels.teacher}
-                  value={profile.teacherName ?? "—"}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <DesktopMetricCard
-                  icon={CalendarTodayOutlined}
-                  label={labels.hoursPerWeek}
-                  value={profile.hoursPerWeek ?? 0}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <DesktopMetricCard
-                  icon={PersonOutlined}
-                  label={labels.classesRemaining}
-                  value={profile.classesRemaining ?? 0}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <DesktopMetricCard
-                  icon={AssignmentOutlined}
-                  label={labels.classesTotal}
-                  value={profile.classesTotal ?? 0}
-                />
-              </Grid>
-            </Grid>
+            <DesktopMetricCardGrid
+              metrics={
+                [
+                  {
+                    key: "teacher",
+                    count: profile.teacherName ?? "—",
+                    labelKey: "teacher",
+                    label: labels.teacher,
+                    icon: SchoolOutlined,
+                  },
+                  {
+                    key: "hours-per-week",
+                    count: profile.hoursPerWeek ?? 0,
+                    labelKey: "hours-per-week",
+                    label: labels.hoursPerWeek,
+                    icon: CalendarTodayOutlined,
+                  },
+                  {
+                    key: "classes-remaining",
+                    count: profile.classesRemaining ?? 0,
+                    labelKey: "classes-remaining",
+                    label: labels.classesRemaining,
+                    icon: PersonOutlined,
+                  },
+                  {
+                    key: "classes-total",
+                    count: profile.classesTotal ?? 0,
+                    labelKey: "classes-total",
+                    label: labels.classesTotal,
+                    icon: AssignmentOutlined,
+                  },
+                ] satisfies MetricItem[]
+              }
+              size={{ xs: 12, md: 4 }}
+            />
           </DesktopSectionPanel>
         </Grid>
       </Grid>

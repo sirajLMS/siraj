@@ -182,6 +182,7 @@ export function StatusTrackingDataGridDesktop({
       rowHeight={100}
       ariaLabel="status-tracking-table"
       emptyMessage={labels.noEntries}
+      paginationOptions={{ mode: "client" }}
       getRowClassName={({ row }) =>
         computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState) === SessionStatus.SUSPENDED_PENDING
           ? "status-row-suspended"

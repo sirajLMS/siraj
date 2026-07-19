@@ -6,7 +6,8 @@ import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
-import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { MobileListPagination } from "@/frontend/mobile/components/ui/filter";
 import type { TeachersDirectoryLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -14,10 +15,7 @@ interface TeacherCardListProps {
   readonly rows: readonly TeacherDirectoryRow[];
   readonly searchQuery: string;
   readonly onSearchChange: (query: string) => void;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
+  readonly paginationOptions: ListPaginationOptions;
   readonly onNavigateToSchedule: (teacherId: string) => void;
   readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
@@ -50,7 +48,7 @@ function TeacherSearchField({
             />
           ),
           sx: theme => ({
-            borderRadius: "xl",
+            borderRadius: 0,
             backgroundColor: theme.palette.background.paper,
           }),
         },
@@ -74,7 +72,7 @@ function TeacherCard({
     <Box
       sx={theme => ({
         backgroundColor: theme.palette.background.paper,
-        borderRadius: "xl",
+        borderRadius: 0,
         p: 2,
         boxShadow: theme.palette.shadow.card,
         border: `1px solid ${theme.palette.border.main}`,
@@ -152,16 +150,11 @@ export function TeacherCardList({
   rows,
   searchQuery,
   onSearchChange,
-  page = 0,
-  pageSize = 10,
-  totalCount,
-  onPageChange,
+  paginationOptions,
   onNavigateToSchedule,
   onNavigateToProfile,
 }: Readonly<TeacherCardListProps>) {
   const t = useAppTranslation().dashboardTranslations.teachersDirectory;
-
-  const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -183,15 +176,7 @@ export function TeacherCardList({
         ))}
       </Box>
 
-      {onPageChange && totalCount !== undefined ? (
-        <MobilePaginationControls
-          page={page}
-          pageCount={pageCount}
-          rowCount={totalCount}
-          pageSize={pageSize}
-          onPageChange={onPageChange}
-        />
-      ) : null}
+      <MobileListPagination paginationOptions={paginationOptions} />
     </Box>
   );
 }

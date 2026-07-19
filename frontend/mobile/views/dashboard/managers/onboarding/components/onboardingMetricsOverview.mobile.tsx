@@ -1,11 +1,12 @@
 "use client";
 
 import { GroupsOutlined, PendingActionsOutlined, SpeedOutlined } from "@mui/icons-material";
-import { Box } from "@mui/material";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
+import { useMemo } from "react";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { OnboardingMetricsOverviewProps } from "@/frontend/common/views/dashboard/managers/onboarding/types";
 import type { OnboardingMetricKey } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
 import { resolveMetricValue } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
+import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 const METRIC_ITEMS = [
@@ -18,30 +19,18 @@ export function OnboardingMetricsOverviewMobile({ model }: Readonly<OnboardingMe
   const t = useAppTranslation().dashboardTranslations.managerOnboarding.metrics;
   const { metrics, loading } = model;
 
-  return (
-    <Box
-      sx={theme => ({
-        display: "flex",
-        gap: theme.spacing(2),
-        overflowX: "auto",
-        paddingBottom: theme.spacing(1),
-        marginLeft: -0.5,
-        paddingLeft: 0.5,
-        mt: 4,
-        "::-webkit-scrollbar": { display: "none" },
-      })}
-    >
-      {METRIC_ITEMS.map((item, index) => (
-        <Box key={item.key} sx={{ flexShrink: 0, width: 192 }}>
-          <MetricCard
-            label={t[item.key]}
-            value={resolveMetricValue(metrics, item.key, loading)}
-            icon={item.icon}
-            variant="default"
-            animationIndex={index}
-          />
-        </Box>
-      ))}
-    </Box>
+  const metricItems: readonly MetricItem[] = useMemo(
+    () =>
+      METRIC_ITEMS.map(item => ({
+        key: item.key,
+        label: t[item.key],
+        count: resolveMetricValue(metrics, item.key, loading),
+        icon: item.icon,
+        labelKey: item.key,
+        variant: "default" as const,
+      })),
+    [loading, metrics, t]
   );
+
+  return <MobileMetricCardGrid metrics={metricItems} sx={{ mt: 4 }} />;
 }

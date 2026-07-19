@@ -12,6 +12,7 @@ import {
   toDateString,
   toTimeString,
 } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
+import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
 import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
@@ -53,7 +54,7 @@ export function QuickAdjustSectionMobile({ setValue, getValues }: Readonly<Props
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mb: 1.5, display: "block" })}>
         {t.label}:
       </Typography>
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
+      <MobileHorizontalScrollRow sx={{ paddingInlineStart: 0, paddingInlineEnd: 0 }}>
         {QUICK_OPTIONS.map(option => (
           <Button
             key={option.key}
@@ -64,6 +65,7 @@ export function QuickAdjustSectionMobile({ setValue, getValues }: Readonly<Props
               applyQuickAdjust(getValues, setValue, option.apply);
             }}
             sx={theme => ({
+              flexShrink: 0,
               borderRadius: 99,
               textTransform: "none",
               fontWeight: 700,
@@ -79,7 +81,7 @@ export function QuickAdjustSectionMobile({ setValue, getValues }: Readonly<Props
             {t[option.key]}
           </Button>
         ))}
-      </Box>
+      </MobileHorizontalScrollRow>
     </Box>
   );
 }

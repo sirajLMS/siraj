@@ -15,10 +15,10 @@ import type {
   RescheduleTrackingDataGridProps,
   TrackingRow,
 } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
-import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 
 export function RescheduleTrackingDataGridDesktop({
   rows,
@@ -246,18 +246,17 @@ export function RescheduleTrackingDataGridDesktop({
       ariaLabel="reschedule-tracking-table"
       emptyMessage={labels.noEntries}
       rowHeight={80}
-      {...(isServerPagination
-        ? {
-            paginationMode: "server" as const,
-            rowCount: totalCount,
-            paginationModel: { page, pageSize },
-            onPaginationModelChange: model => {
-              onPageChange(model.page);
-            },
-            pageSizeOptions: [pageSize],
-            slots: { pagination: DesktopGridPagination },
-          }
-        : {})}
+      paginationOptions={
+        isServerPagination
+          ? buildServerPaginationOptions({
+              page,
+              pageSize,
+              totalCount,
+              onPageChange,
+              pageSizeOptions: [pageSize],
+            })
+          : { mode: "client" }
+      }
     />
   );
 }

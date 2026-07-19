@@ -2,12 +2,12 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
-import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import { ScheduleOverviewDataGrid } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 
 export function AdminDashboardDesktopView({
   t,
@@ -44,7 +44,11 @@ export function AdminDashboardDesktopView({
         subtitle={lastUpdated}
         actions={
           <>
-            <MetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
+            <DesktopMetricCardGrid
+              metrics={metrics}
+              onMetricClick={onMetricClick}
+              selectedKey={selectedMetricKey}
+            />
             {canDashboardSearch ? (
               <TextField
                 placeholder={t.searchPlaceholder}

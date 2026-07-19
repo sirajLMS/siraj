@@ -6,7 +6,7 @@ import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repos
 import { users } from "@/backend/db/schema";
 import type { AccountStatus } from "@/backend/enum";
 import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
-import { PaginationArgsDefault } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { PaginationArgsDefault } from "@/backend/types/shared/pagination.types";
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { parseAccountStatus } from "@/backend/lib/enum";
 import logger from "@/backend/lib/logger";

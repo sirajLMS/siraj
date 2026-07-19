@@ -115,7 +115,7 @@ export function PreferencesMatrixDesktopView({
       columns={columns}
       getRowId={row => row.id}
       loading={loading && matrixRows.length === 0}
-      hideFooter
+      paginationOptions={false}
       autoHeight
       ariaLabel={t.title}
     />

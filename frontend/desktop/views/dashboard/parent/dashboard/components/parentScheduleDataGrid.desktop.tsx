@@ -10,9 +10,9 @@ import type {
   ParentScheduleRow,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import type { ParentScheduleDataGridDesktopProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentScheduleComponents.types";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import {
   DesktopAppDataGrid,
-  DesktopGridPagination,
   DesktopPersonProfileLinkCell,
   DesktopStatusBadge,
 } from "@/frontend/desktop/components/ui";
@@ -200,18 +200,19 @@ export function ParentScheduleDataGridDesktop({
           },
         },
       }}
-      {...(isServerPagination
-        ? {
-            paginationMode: "server" as const,
-            rowCount: pagination.totalCount,
-            paginationModel: { page: pagination.page, pageSize: pagination.pageSize },
-            onPaginationModelChange: model => {
-              pagination.onPageChange(model.page);
-            },
-            pageSizeOptions: [pagination.pageSize],
-            slots: { pagination: DesktopGridPagination },
-          }
-        : { hideFooter: rows.length <= 10 })}
+      paginationOptions={
+        isServerPagination
+          ? buildServerPaginationOptions({
+              page: pagination.page,
+              pageSize: pagination.pageSize,
+              totalCount: pagination.totalCount,
+              onPageChange: pagination.onPageChange,
+              pageSizeOptions: [pagination.pageSize],
+            })
+          : rows.length <= 10
+            ? false
+            : { mode: "client" }
+      }
     />
   );
 }

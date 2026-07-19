@@ -7,13 +7,9 @@ import type { ReactNode } from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
-import {
-  MobileCardList,
-  MobileCardListItem,
-  MobilePaginationControls,
-  MobileStatusBadge,
-} from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { ScheduleOverviewMobileCard } from "@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.mobile";
 
 const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
@@ -59,7 +55,6 @@ export function AdminDashboardMobileView({
   onTeacherChange,
   onSubmit,
   pageSize,
-  pageCount,
   // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
   // instead of the previous `RequirePermission` wrappers + `useUserStore()`.
   canDashboardSearch,
@@ -147,16 +142,14 @@ export function AdminDashboardMobileView({
           layout="edge-to-edge"
           getKey={row => row.id ?? ""}
           renderItem={renderItem}
+          paginationOptions={buildServerPaginationOptions({
+            page,
+            pageSize,
+            totalCount: totalCount ?? 0,
+            onPageChange,
+          })}
         />
       </Box>
-
-      <MobilePaginationControls
-        page={page}
-        pageCount={pageCount}
-        rowCount={totalCount ?? 0}
-        pageSize={pageSize}
-        onPageChange={onPageChange}
-      />
     </Stack>
   );
 }

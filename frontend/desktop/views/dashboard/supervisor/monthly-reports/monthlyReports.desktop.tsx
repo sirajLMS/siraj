@@ -7,7 +7,8 @@ import type {
   MonthlyReportsViewModel,
 } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
 import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
-import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
@@ -145,13 +146,18 @@ export function MonthlyReportsDesktopView(props: Readonly<MonthlyReportsViewMode
       ) : null}
 
       {metrics.length > 0 ? (
-        <Grid container spacing={2}>
-          {metrics.map(metric => (
-            <Grid key={metric.label} size={{ xs: 12, sm: 6, md: 3 }}>
-              <DesktopMetricCard icon={metric.icon} label={metric.label} value={metric.value} />
-            </Grid>
-          ))}
-        </Grid>
+        <DesktopMetricCardGrid
+          metrics={
+            metrics.map((metric, index) => ({
+              key: `${metric.label}-${index}`,
+              count: metric.value,
+              labelKey: metric.label,
+              label: metric.label,
+              icon: metric.icon,
+            })) satisfies MetricItem[]
+          }
+          size={{ xs: 12, sm: 6, md: 3 }}
+        />
       ) : null}
     </DesktopPageContainer>
   );

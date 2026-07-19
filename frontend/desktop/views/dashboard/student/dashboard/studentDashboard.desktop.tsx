@@ -1,9 +1,10 @@
 "use client";
 
 import { HistoryOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
-import { Box, Button, Grid, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
-import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { NextClassJoinCard } from "@/frontend/desktop/views/dashboard/student/dashboard/components/nextClassJoinCard.desktop";
@@ -42,23 +43,42 @@ export function StudentDashboardDesktopView({
         <NextClassJoinCard lesson={nextLesson} labels={labels} locale={locale} onJoin={onJoinLesson} />
       </Box>
 
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <DesktopMetricCard
-            icon={PaymentsOutlined}
-            label={labels.classesRemaining}
-            value={creditBalance.classesRemaining}
-            subLabel={`${creditBalance.classesTotal} ${labels.classesTotal.toLowerCase()}`}
-            onClick={onViewCredits}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <DesktopMetricCard icon={SchoolOutlined} label={labels.classesTotal} value={creditBalance.classesTotal} />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <DesktopMetricCard icon={HistoryOutlined} label={labels.upcomingToday} value={upcomingTodayCount} />
-        </Grid>
-      </Grid>
+      <Box sx={{ mb: 3 }}>
+        <DesktopMetricCardGrid
+          metrics={
+            [
+              {
+                key: "classes-remaining",
+                count: creditBalance.classesRemaining,
+                labelKey: "classes-remaining",
+                label: labels.classesRemaining,
+                icon: PaymentsOutlined,
+                subLabel: `${creditBalance.classesTotal} ${labels.classesTotal.toLowerCase()}`,
+              },
+              {
+                key: "classes-total",
+                count: creditBalance.classesTotal,
+                labelKey: "classes-total",
+                label: labels.classesTotal,
+                icon: SchoolOutlined,
+              },
+              {
+                key: "upcoming-today",
+                count: upcomingTodayCount,
+                labelKey: "upcoming-today",
+                label: labels.upcomingToday,
+                icon: HistoryOutlined,
+              },
+            ] satisfies MetricItem[]
+          }
+          size={{ xs: 12, md: 4 }}
+          onMetricClick={key => {
+            if (key === "classes-remaining") {
+              onViewCredits();
+            }
+          }}
+        />
+      </Box>
 
       <DesktopSectionPanel
         title={labels.recentLessonReports}

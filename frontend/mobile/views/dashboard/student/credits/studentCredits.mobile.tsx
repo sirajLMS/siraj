@@ -3,16 +3,19 @@
 import { ArrowBackOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { StudentCreditTransactionRow } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
 import {
   MobileCardList,
   MobileContentStack,
-  MobileMetricCard,
+  MobileHorizontalScrollRow,
+  MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
-  MobilePaginationControls,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 
@@ -80,31 +83,34 @@ export function StudentCreditsMobileView({
   onBackToDashboard,
   reasonLabel,
 }: Readonly<StudentCreditsViewModel>) {
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const metrics: readonly MetricItem[] = useMemo(
+    () => [
+      {
+        key: "hoursRemaining",
+        label: labels.hoursRemaining,
+        count: balance.classesRemaining,
+        icon: PaymentsOutlined,
+        labelKey: "hoursRemaining",
+      },
+      {
+        key: "hoursTotal",
+        label: labels.hoursTotal,
+        count: balance.classesTotal,
+        icon: SchoolOutlined,
+        labelKey: "hoursTotal",
+      },
+    ],
+    [balance.classesRemaining, balance.classesTotal, labels.hoursRemaining, labels.hoursTotal]
+  );
 
   return (
     <MobilePageContainer>
       <MobileContentStack>
         <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
-        <Stack direction="row" spacing={2} sx={{ alignItems: "stretch" }}>
-          <Box sx={{ flex: 1 }}>
-            <MobileMetricCard
-              icon={PaymentsOutlined}
-              label={labels.hoursRemaining}
-              value={balance.classesRemaining}
-            />
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <MobileMetricCard
-              icon={SchoolOutlined}
-              label={labels.hoursTotal}
-              value={balance.classesTotal}
-            />
-          </Box>
-        </Stack>
+        <MobileMetricCardGrid metrics={metrics} />
 
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+        <MobileHorizontalScrollRow>
           {reasonOptions.map(option => {
             const selected = reasonFilter === option.value;
             return (
@@ -115,6 +121,7 @@ export function StudentCreditsMobileView({
                 clickable
                 onClick={() => onReasonFilterChange(option.value)}
                 sx={theme => ({
+                  flexShrink: 0,
                   backgroundColor: selected ? theme.palette.primary.main : theme.palette.surfaceContainerHigh,
                   color: selected ? theme.palette.onPrimary : theme.palette.onSurfaceVariant,
                   fontWeight: selected ? 700 : 500,
@@ -122,7 +129,7 @@ export function StudentCreditsMobileView({
               />
             );
           })}
-        </Stack>
+        </MobileHorizontalScrollRow>
 
         <MobileSectionPanel title={labels.transactionHistory}>
           {loading && transactions.length === 0 ? (
@@ -135,19 +142,15 @@ export function StudentCreditsMobileView({
               emptyMessage={labels.noTransactions}
               getKey={row => row.id}
               renderItem={row => <MobileTransactionItem row={row} locale={locale} reasonLabel={reasonLabel} />}
+              paginationOptions={buildServerPaginationOptions({
+                page,
+                pageSize,
+                totalCount,
+                onPageChange,
+              })}
             />
           )}
         </MobileSectionPanel>
-
-        {totalCount > pageSize ? (
-          <MobilePaginationControls
-            page={page}
-            pageCount={totalPages}
-            rowCount={totalCount}
-            pageSize={pageSize}
-            onPageChange={onPageChange}
-          />
-        ) : null}
 
         <Button
           variant="outlined"

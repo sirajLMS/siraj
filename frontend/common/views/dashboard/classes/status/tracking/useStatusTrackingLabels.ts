@@ -49,5 +49,11 @@ export function useStatusTrackingLabels() {
     errorAuditLogsComingSoon: t.errors.auditLogsComingSoon,
     errorFailedToLoad: t.errors.failedToLoad,
     days: [t.days.mon, t.days.tue, t.days.wed, t.days.thu, t.days.fri, t.days.sat, t.days.sun] as const,
+    dateFilter: {
+      today: t.dateFilter.today,
+      previousDay: t.dateFilter.previousDay,
+      nextDay: t.dateFilter.nextDay,
+      dateLabel: t.dateFilter.dateLabel,
+    },
   };
 }

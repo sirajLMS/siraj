@@ -103,6 +103,7 @@ export function AddPermissionsTabDesktop({
           emptyMessage={t.noPermissionsFound}
           loading={loading}
           autoHeight
+          paginationOptions={{ mode: "client" }}
         />
       </DesktopSectionPanel>
     </StyledTabContainer>

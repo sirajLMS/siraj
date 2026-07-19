@@ -3,15 +3,28 @@
 import { Box } from "@mui/material";
 import { DataGrid, type DataGridProps, type GridValidRowModel } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { mapPaginationOptionsToDataGridProps } from "@/frontend/common/components/ui/dataGrid/mapPaginationOptionsToDataGridProps";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { MobileAppDataGridLoadingOverlay } from "@/frontend/mobile/components/ui/dataGrid/MobileAppDataGridLoadingOverlay";
 import { MobileAppDataGridNoRowsOverlay } from "@/frontend/mobile/components/ui/dataGrid/MobileAppDataGridNoRowsOverlay";
+import { MobileGridPagination } from "@/frontend/mobile/components/ui/filter/paginationControls.mobile";
 
-const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25] as const;
+type OmittedDataGridProps =
+  | "paginationMode"
+  | "paginationModel"
+  | "onPaginationModelChange"
+  | "rowCount"
+  | "hideFooter"
+  | "pageSizeOptions"
+  | "slots";
 
-export interface MobileAppDataGridProps<R extends GridValidRowModel> extends DataGridProps<R> {
+export interface MobileAppDataGridProps<R extends GridValidRowModel>
+  extends Omit<DataGridProps<R>, OmittedDataGridProps> {
   readonly emptyMessage?: string;
   readonly ariaLabel?: string;
+  readonly paginationOptions: ListPaginationOptions;
+  readonly slots?: Omit<NonNullable<DataGridProps<R>["slots"]>, "pagination">;
 }
 
 function createNoRowsOverlay(message: string) {
@@ -23,7 +36,7 @@ function createNoRowsOverlay(message: string) {
 export function MobileAppDataGrid<R extends GridValidRowModel>({
   emptyMessage = "No entries found",
   ariaLabel,
-  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
+  paginationOptions,
   getRowHeight,
   initialState,
   slots,
@@ -49,6 +62,7 @@ export function MobileAppDataGrid<R extends GridValidRowModel>({
   };
 
   const NoRowsOverlay = useMemo(() => createNoRowsOverlay(emptyMessage), [emptyMessage]);
+  const paginationProps = mapPaginationOptionsToDataGridProps(paginationOptions);
 
   return (
     <Box sx={{ width: "100%" }} aria-label={ariaLabel}>
@@ -56,15 +70,20 @@ export function MobileAppDataGrid<R extends GridValidRowModel>({
         density="compact"
         disableRowSelectionOnClick
         getRowHeight={getRowHeight ?? (() => 56)}
-        pageSizeOptions={pageSizeOptions}
+        {...paginationProps}
         initialState={{
-          pagination: { paginationModel: { pageSize: 10 } },
+          ...paginationProps.initialState,
           ...initialState,
+          pagination: {
+            ...paginationProps.initialState?.pagination,
+            ...initialState?.pagination,
+          },
         }}
         slots={{
           noRowsOverlay: NoRowsOverlay,
           loadingOverlay: MobileAppDataGridLoadingOverlay,
           ...slots,
+          pagination: MobileGridPagination,
         }}
         slotProps={slotProps}
         sx={mergeSx(defaultGridSx, sx)}

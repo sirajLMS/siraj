@@ -1,8 +1,9 @@
 "use client";
 
 import { Grid, Skeleton } from "@mui/material";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { BillingMetricsRowProps } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 
 export type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
 
@@ -22,19 +23,15 @@ export function BillingMetricsRowDesktop({ metrics, loading = false }: Readonly<
     );
   }
 
-  return (
-    <Grid container spacing={2}>
-      {metrics.map(metric => (
-        <Grid key={metric.key} size={{ xs: 6, md: 3 }}>
-          <MetricCard
-            icon={metric.icon}
-            label={metric.label}
-            value={metric.value}
-            subLabel={metric.subLabel}
-            variant={metric.variant}
-          />
-        </Grid>
-      ))}
-    </Grid>
-  );
+  const metricItems: MetricItem[] = metrics.map(metric => ({
+    key: metric.key,
+    count: metric.value,
+    labelKey: metric.key,
+    label: metric.label,
+    icon: metric.icon,
+    subLabel: metric.subLabel,
+    variant: metric.variant,
+  }));
+
+  return <DesktopMetricCardGrid metrics={metricItems} size={{ xs: 6, md: 3 }} />;
 }

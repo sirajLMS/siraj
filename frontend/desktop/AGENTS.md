@@ -6,7 +6,7 @@ This document provides essential context for AI agents working in the `frontend/
 
 The `frontend/desktop/` module is the **desktop-only UI layer** containing:
 - **Desktop UIKit primitives** (`components/ui/`) - ONLY the 3 tier-paired `.desktop.*` variants (`DateNavigatorDesktop`, `LocaleAdornmentSwitchDesktop`, `LocalizedStringDrawerDesktop`). No standalone `Desktop*`-prefixed primitives exist, and none use `useViewport`/null-return (the parent switcher already guarantees the tier).
-- **Desktop view components** (`views/dashboard/**/`) - complete page-level desktop views, mirroring the `frontend/common/views/dashboard/` hierarchy minus the `desktop/` segment. Desktop views consume shared primitives directly from `@/frontend/common/components/ui` (`AppDataGrid`, `PageHeader`, `SectionPanel`, `MetricCardGrid`, `StatusBadge`, `BaseCard`, `PageContainer`, …).
+- **Desktop view components** (`views/dashboard/**/`) - complete page-level desktop views, mirroring the `frontend/common/views/dashboard/` hierarchy minus the `desktop/` segment. Desktop views consume shared primitives from `@/frontend/common/components/ui` (`AppDataGrid`, `PageHeader`, `SectionPanel`, `StatusBadge`, `BaseCard`, `PageContainer`, …) and tier metric rows from `DesktopMetricCardGrid` (`@/frontend/desktop/components/ui/card/MetricCardGrid`).
 
 ## Architecture Rules
 
@@ -25,6 +25,7 @@ The `frontend/desktop/` module is the **desktop-only UI layer** containing:
 - Each `.desktop.tsx` file moved from `frontend/views/**/desktop/` → `frontend/desktop/views/**/`
 - Import paths rewritten: `@/frontend/views/**/desktop/...` → `@/frontend/desktop/views/**/...`
 - Switchers in `frontend/common/views/...` dynamically import from `@/frontend/desktop/views/...`
+- **Metric cards:** Views must never import or render `DesktopMetricCard`, common `MetricCard`, or common `MetricCardGrid`. Use only `DesktopMetricCardGrid` (including when there is a single metric). `DesktopMetricCard` is internal to the grid (+ Storybook).
 
 ### 3. Import Conventions
 ```typescript
@@ -33,6 +34,9 @@ import { DateNavigatorDesktop } from "@/frontend/desktop/components/ui/filter";
 
 // ✅ CORRECT - Desktop views ALSO consume shared (viewport-agnostic) primitives from common
 import { AppDataGrid, PageHeader, SectionPanel, StatusBadge, BaseCard, PageContainer } from "@/frontend/common/components/ui";
+
+// ✅ CORRECT - Metric rows via tier grid only
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 
 // ✅ CORRECT - Mobile views import common primitives (non-Mobile*)
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";

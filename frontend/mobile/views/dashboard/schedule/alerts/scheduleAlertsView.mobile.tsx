@@ -1,7 +1,10 @@
 "use client";
 
 import { FilterListOutlined, IosShareOutlined } from "@mui/icons-material";
-import { Box, Grid, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { useMemo } from "react";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type {
   AcademicClassRow,
   AlertsMetric,
@@ -10,7 +13,7 @@ import type {
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import {
   MobileContentStack,
-  MobileMetricCard,
+  MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
@@ -50,30 +53,32 @@ function MobileMetricsSection({
   readonly labels: ScheduleAlertsLabels;
   readonly onDownloadReport: () => void;
 }) {
-  return (
-    <Grid container spacing={2}>
-      {metrics.map(metric => {
+  const metricItems: readonly MetricItem[] = useMemo(
+    () =>
+      metrics.map(metric => {
         const metricLabel = metricLabels[metric.key];
-        return (
-          <Grid key={metric.key} size={{ xs: 6 }}>
-            <MobileMetricCard
-              icon={metric.icon}
-              label={metricLabel.label}
-              value={metric.value}
-              subLabel={metricLabel.subLabel}
-            />
-          </Grid>
-        );
-      })}
-      <Grid size={{ xs: 12 }}>
-        <InstitutionalReportCardMobile
-          title={labels.reportTitle}
-          description={labels.reportDescriptionMobile}
-          downloadLabel={labels.downloadPdf}
-          onDownload={onDownloadReport}
-        />
-      </Grid>
-    </Grid>
+        return {
+          key: metric.key,
+          count: metric.value,
+          label: metricLabel.label,
+          subLabel: metricLabel.subLabel,
+          icon: metric.icon,
+          labelKey: metric.labelKey,
+        };
+      }),
+    [metricLabels, metrics]
+  );
+
+  return (
+    <Stack spacing={2}>
+      <MobileMetricCardGrid metrics={metricItems} />
+      <InstitutionalReportCardMobile
+        title={labels.reportTitle}
+        description={labels.reportDescriptionMobile}
+        downloadLabel={labels.downloadPdf}
+        onDownload={onDownloadReport}
+      />
+    </Stack>
   );
 }
 
@@ -158,13 +163,15 @@ function MobileAlertsBody({
       </Box>
       <AcademicScheduleCardListMobile
         rows={classes}
-        totalCount={totalClasses}
-        currentPage={currentPage}
-        pageSize={pageSize}
         labels={cardListLabels}
+        paginationOptions={buildServerPaginationOptions({
+          page: currentPage,
+          pageSize,
+          totalCount: totalClasses ?? 0,
+          onPageChange,
+        })}
         onLeave={onLeave}
         onViewClassAudit={onViewClassAudit}
-        onPageChange={onPageChange}
       />
     </Box>
   );

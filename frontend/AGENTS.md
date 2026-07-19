@@ -186,13 +186,12 @@ bun quality-gate
 **Use [.github/CODE_REVIEW_CHECKLIST.md](.github/CODE_REVIEW_CHECKLIST.md) when reviewing code.**
 
 - **Layout:** Use `PageContainer` inside views — never add outer `p: 2/3` (double-padding with `DashboardLayout.pageMargin`).
-- **Tables:** Use `AppDataGrid` (`@mui/x-data-grid`) via feature `*DataGrid` wrappers for desktop list pages. Mobile uses `*CardList` components (from `@/frontend/mobile/components/ui`).
-- **Metrics:** Use shared `MetricCard` from `@/frontend/components/ui` — do not create per-feature metric card components.
+- **Lists / tables:** Desktop → `AppDataGrid` / `DesktopAppDataGrid` with required `paginationOptions`. Mobile → `MobileCardList` (or feature card lists) with required `paginationOptions`. List primitives own pager UI — never pass `slots.pagination` or sibling `MobilePaginationControls` next to a list. Desktop ad-hoc card lists may use sibling `DesktopPaginationControls` when intentional. Do not use MUI `Table` / `Pagination`.
+- **Metrics:** Views must never import or render `MetricCard` / `MobileMetricCard` / `DesktopMetricCard`. Use only `MobileMetricCardGrid` (mobile) or `DesktopMetricCardGrid` (desktop), including when there is a single metric. Cards are internal to the grid (+ Storybook).
 - **Status:** Use shared `StatusBadge` with the correct `category` prop — no inline status chips.
 - **Headers:** Use `PageHeader` + `SectionPanel` — not ad-hoc flex title blocks.
 - **Actions:** Use `PrimaryPageAction`, `FilterButton`, `ExportButton` presets.
 - **Typography:** Use theme variants (`headlineLg`, `titleLg`, `labelUppercase`, `bodyMd`) — avoid hardcoded font `sx`.
-- **Exceptions:** Embedded tables (e.g. `RegisteredStudentsSection`) may use MUI `Table` styled to `palette.table.header` tokens.
 
 ## Mobile vs Desktop Isolation
 
@@ -203,7 +202,7 @@ bun quality-gate
 - **No cross-imports**: `.mobile.tsx` must not import `.desktop.tsx` and vice versa (ESLint enforced).
 - **ViewModel pattern**: Business logic lives in `useXxViewModel()` hooks. All mutable state in Zustand stores (survives viewport tier switching). `File` objects in `useRef` in the hook, not Zustand (serialization safety).
 - **Switcher uses `ResponsiveViewSwitch` with lazy loading**: The `xxView.tsx` switcher calls `createLazyView()` at module top level (static import paths required by `next/dynamic`) and passes lazy component refs to `<ResponsiveViewSwitch>`. Only the matching tier's code is downloaded. `ResponsiveViewSwitch` internally reads `useViewport()` and wraps in `Suspense` + `ErrorBoundary`.
-- **Shared components**: Non-versioned components (e.g., `StatusBadge`, `MetricCard`, `BaseCard`) used by both tiers. They contain NO `useMediaQuery` and NO viewport logic.
+- **Shared components**: Non-versioned components (e.g., `StatusBadge`, `BaseCard`) used by both tiers. They contain NO `useMediaQuery` and NO viewport logic. Metric **cards** are not imported by views — use tier `*MetricCardGrid` instead.
 - **Component directory convention**:
   ```
   <domain>/

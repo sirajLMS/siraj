@@ -11,10 +11,11 @@ import {
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { AppLanguage, Gender, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
 import {
   MobileContentStack,
-  MobileMetricCard,
+  MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
   MobileSectionPanel,
@@ -71,6 +72,37 @@ export function StudentProfileMobileView({
       </MobilePageContainer>
     );
   }
+
+  const academicMetrics: readonly MetricItem[] = [
+    {
+      key: "teacher",
+      label: labels.teacher,
+      count: profile.teacherName ?? "—",
+      icon: SchoolOutlined,
+      labelKey: "teacher",
+    },
+    {
+      key: "hoursPerWeek",
+      label: labels.hoursPerWeek,
+      count: profile.hoursPerWeek ?? 0,
+      icon: CalendarTodayOutlined,
+      labelKey: "hoursPerWeek",
+    },
+    {
+      key: "classesRemaining",
+      label: labels.classesRemaining,
+      count: profile.classesRemaining ?? 0,
+      icon: PersonOutlined,
+      labelKey: "classesRemaining",
+    },
+    {
+      key: "classesTotal",
+      label: labels.classesTotal,
+      count: profile.classesTotal ?? 0,
+      icon: AssignmentOutlined,
+      labelKey: "classesTotal",
+    },
+  ];
 
   return (
     <MobilePageContainer>
@@ -194,36 +226,7 @@ export function StudentProfileMobileView({
         )}
 
         <MobileSectionPanel title={labels.academicInfo}>
-          <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap" }}>
-            <Box sx={{ flex: "1 1 140px" }}>
-              <MobileMetricCard
-                icon={SchoolOutlined}
-                label={labels.teacher}
-                value={profile.teacherName ?? "—"}
-              />
-            </Box>
-            <Box sx={{ flex: "1 1 140px" }}>
-              <MobileMetricCard
-                icon={CalendarTodayOutlined}
-                label={labels.hoursPerWeek}
-                value={profile.hoursPerWeek ?? 0}
-              />
-            </Box>
-            <Box sx={{ flex: "1 1 140px" }}>
-              <MobileMetricCard
-                icon={PersonOutlined}
-                label={labels.classesRemaining}
-                value={profile.classesRemaining ?? 0}
-              />
-            </Box>
-            <Box sx={{ flex: "1 1 140px" }}>
-              <MobileMetricCard
-                icon={AssignmentOutlined}
-                label={labels.classesTotal}
-                value={profile.classesTotal ?? 0}
-              />
-            </Box>
-          </Stack>
+          <MobileMetricCardGrid metrics={academicMetrics} />
         </MobileSectionPanel>
 
         {isEditing ? (

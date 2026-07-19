@@ -8,7 +8,6 @@ import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 import type { OverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
-import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 import { OverrideEditControlsDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEditControls.desktop";
 import { OverrideEffectiveDisplayDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEffectiveDisplay.desktop";
 import { useAppTranslation } from "@/shared/locale";
@@ -142,7 +141,7 @@ export function OverridesDataGridDesktop({
       columns={columns}
       getRowId={row => row.id ?? row.key ?? ""}
       loading={isDialogLoading && filteredPermissions.length === 0}
-      slots={{ pagination: DesktopGridPagination }}
+      paginationOptions={{ mode: "client" }}
       autoHeight
       ariaLabel="permissions overrides table"
     />

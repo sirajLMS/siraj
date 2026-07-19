@@ -14,6 +14,12 @@ export const dashboardCoreStatusTrackingAr: StatusTrackingLabels = {
   todaysSchedule: "جدول اليوم",
   administrativeHold: "تعليق إداري",
   holdDescription: "تم تعليق الحساب بسبب رصيد مستحق أو مخالفة للسياسة. تواصل مع الفوترة.",
+  dateFilter: {
+    today: "اليوم",
+    previousDay: "اليوم السابق",
+    nextDay: "اليوم التالي",
+    dateLabel: "التاريخ",
+  },
   metrics: {
     regular: "عادي",
     pending: "معلّق",

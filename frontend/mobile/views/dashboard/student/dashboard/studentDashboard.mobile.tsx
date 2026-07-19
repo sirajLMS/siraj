@@ -3,13 +3,15 @@
 import { HistoryOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
 import {
   MobileCardList,
   MobileContentStack,
-  MobileMetricCard,
+  MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
   MobileSectionPanel,
@@ -93,6 +95,33 @@ export function StudentDashboardMobileView({
   onViewCredits,
   onAddReflection,
 }: Readonly<StudentDashboardViewModel>) {
+  const metrics: readonly MetricItem[] = useMemo(
+    () => [
+      {
+        key: "remaining",
+        label: labels.classesRemaining,
+        count: creditBalance.classesRemaining,
+        icon: PaymentsOutlined,
+        labelKey: "remaining",
+      },
+      {
+        key: "classesTotal",
+        label: labels.classesTotal,
+        count: creditBalance.classesTotal,
+        icon: SchoolOutlined,
+        labelKey: "classesTotal",
+      },
+      {
+        key: "upcomingToday",
+        label: labels.upcomingToday,
+        count: upcomingTodayCount,
+        icon: HistoryOutlined,
+        labelKey: "upcomingToday",
+      },
+    ],
+    [creditBalance.classesRemaining, creditBalance.classesTotal, labels, upcomingTodayCount]
+  );
+
   if (loading && !nextLesson && recentLessonReports.length === 0) {
     return (
       <MobilePageContainer>
@@ -110,28 +139,11 @@ export function StudentDashboardMobileView({
 
         <NextClassJoinCard lesson={nextLesson} labels={labels} locale={locale} onJoin={onJoinLesson} />
 
-        <Stack direction="row" spacing={2} sx={{ alignItems: "stretch" }}>
-          <Box sx={{ flex: 1 }}>
-            <MobileMetricCard
-              icon={PaymentsOutlined}
-              label={labels.classesRemaining}
-              value={creditBalance.classesRemaining}
-              onClick={onViewCredits}
-            />
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <MobileMetricCard
-              icon={SchoolOutlined}
-              label={labels.classesTotal}
-              value={creditBalance.classesTotal}
-            />
-          </Box>
-        </Stack>
-
-        <MobileMetricCard
-          icon={HistoryOutlined}
-          label={labels.upcomingToday}
-          value={upcomingTodayCount}
+        <MobileMetricCardGrid
+          metrics={metrics}
+          onMetricClick={key => {
+            if (key === "remaining") onViewCredits();
+          }}
         />
 
         <MobileSectionPanel title={labels.recentLessonReports}>
@@ -139,6 +151,7 @@ export function StudentDashboardMobileView({
             rows={recentLessonReports}
             emptyMessage={labels.noLessonReports}
             getKey={row => row.id}
+            paginationOptions={{ mode: "client" }}
             renderItem={row => (
               <MobileReportItem report={row} labels={labels} locale={locale} onAddReflection={onAddReflection} />
             )}

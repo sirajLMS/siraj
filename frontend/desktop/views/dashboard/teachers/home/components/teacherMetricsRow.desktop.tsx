@@ -1,6 +1,6 @@
 import { CancelOutlined, CheckCircleOutlined } from "@mui/icons-material";
-import { Box } from "@mui/material";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { useAppTranslation } from "@/shared/locale";
 
 interface TeacherMetricsRowProps {
@@ -16,10 +16,22 @@ interface TeacherMetricsRowProps {
 export function TeacherMetricsRow({ metrics }: Readonly<TeacherMetricsRowProps>) {
   const t = useAppTranslation().dashboardTranslations.teachersDirectory.metrics;
 
-  return (
-    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: "gutter" }}>
-      <MetricCard icon={CheckCircleOutlined} label={t.activated} value={metrics?.activated ?? 0} variant="default" />
-      <MetricCard icon={CancelOutlined} label={t.deactivated} value={metrics?.deactivated ?? 0} variant="default" />
-    </Box>
-  );
+  const metricItems: MetricItem[] = [
+    {
+      key: "activated",
+      count: metrics?.activated ?? 0,
+      labelKey: "activated",
+      label: t.activated,
+      icon: CheckCircleOutlined,
+    },
+    {
+      key: "deactivated",
+      count: metrics?.deactivated ?? 0,
+      labelKey: "deactivated",
+      label: t.deactivated,
+      icon: CancelOutlined,
+    },
+  ];
+
+  return <DesktopMetricCardGrid metrics={metricItems} size={{ xs: 12, sm: 6 }} />;
 }

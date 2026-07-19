@@ -3,11 +3,12 @@
 import { MailOutlined, PhoneOutlined } from "@mui/icons-material";
 import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
-import type { BaseManagersListProps } from "@/frontend/common/views/dashboard/managers/home/types";
+import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
 import {
   MobileBaseCard,
-  MobilePaginationControls,
+  MobileListPagination,
   MobilePhoneDisplay,
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
@@ -70,18 +71,16 @@ const StyledContactItemBox = styled(Stack)(({ theme }) => ({
 }));
 
 // VARIANT JUSTIFICATION: mobile card list uses the shared base shape with no extra fields; aliased as a named type for tier call-site clarity (Class C variant per specs §4.3).
-export type ManagersCardListMobileProps = BaseManagersListProps;
+export interface ManagersCardListMobileProps {
+  readonly managers: readonly Manager[];
+  readonly paginationOptions: ListPaginationOptions;
+}
 
 export function ManagersCardListMobile({
   managers,
-  page = 0,
-  pageSize = 10,
-  totalCount,
-  onPageChange,
+  paginationOptions,
 }: Readonly<ManagersCardListMobileProps>) {
   const t = useAppTranslation().dashboardTranslations.managersDirectory;
-
-  const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
 
   if (managers.length === 0) {
     return (
@@ -143,15 +142,7 @@ export function ManagersCardListMobile({
         );
       })}
 
-      {onPageChange && totalCount !== undefined ? (
-        <MobilePaginationControls
-          page={page}
-          pageCount={pageCount}
-          rowCount={totalCount}
-          pageSize={pageSize}
-          onPageChange={onPageChange}
-        />
-      ) : null}
+      <MobileListPagination paginationOptions={paginationOptions} />
     </StyledCardListWrapper>
   );
 }

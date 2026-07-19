@@ -3,8 +3,9 @@
 import { ExpandMoreOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { ParentComplaintRecord } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter";
+import { MobileListPagination } from "@/frontend/mobile/components/ui/filter";
 import { ComplaintRecordCardMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintRecordCard.mobile";
 import type { ComplaintsParentLabels } from "@/shared/locale";
 
@@ -54,10 +55,7 @@ interface ComplaintRecordCardListMobileProps {
   readonly labels: ComplaintsParentLabels;
   readonly hasOlderRecords: boolean;
   readonly onLoadOlderRecords: () => void;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
+  readonly paginationOptions: ListPaginationOptions;
 }
 
 export function ComplaintRecordCardListMobile({
@@ -65,14 +63,14 @@ export function ComplaintRecordCardListMobile({
   labels,
   hasOlderRecords,
   onLoadOlderRecords,
-  page = 0,
-  pageSize = 10,
-  totalCount,
-  onPageChange,
+  paginationOptions,
 }: Readonly<ComplaintRecordCardListMobileProps>) {
-  const totalLabel = labels.totalRecords(totalCount ?? records.length);
-  const showPagination = totalCount !== undefined && onPageChange !== undefined && totalCount > 0;
-  const pageCount = pageSize > 0 ? Math.ceil((totalCount ?? 0) / pageSize) : 0;
+  const totalLabel = labels.totalRecords(
+    paginationOptions !== false && paginationOptions.mode === "server"
+      ? paginationOptions.totalCount
+      : records.length,
+  );
+  const showPagination = paginationOptions !== false && paginationOptions.mode === "server";
 
   return (
     <Box>
@@ -91,13 +89,7 @@ export function ComplaintRecordCardListMobile({
       </StyledCardListContainer>
 
       {showPagination ? (
-        <MobilePaginationControls
-          page={page}
-          pageCount={pageCount}
-          rowCount={totalCount ?? 0}
-          pageSize={pageSize}
-          onPageChange={onPageChange}
-        />
+        <MobileListPagination paginationOptions={paginationOptions} />
       ) : (
         hasOlderRecords && (
           <StyledLoadMoreContainer>

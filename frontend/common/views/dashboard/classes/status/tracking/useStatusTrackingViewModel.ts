@@ -5,7 +5,9 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useMemo } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/schedule.documents";
+import { resolveBrowserIanaTimezoneId, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
+import { useStatusTrackingStore } from "@/frontend/common/stores/statusTrackingStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
@@ -28,7 +30,6 @@ export interface UseStatusTrackingViewModelProps {
   readonly onVerify?: (id: string) => void;
   readonly onNewReport?: () => void;
   readonly onOpenAuditLogs?: () => void;
-  readonly onSeeAll?: () => void;
 }
 
 function buildCardListLabels(labels: StatusTrackingLabels): CardListLabels {
@@ -39,12 +40,12 @@ function buildCardListLabels(labels: StatusTrackingLabels): CardListLabels {
     verifyDocuments: labels.verifyDocuments,
     sessionLocked: labels.sessionLocked,
     sessionEnded: labels.sessionEnded,
-    seeAll: labels.seeAll,
     todaysSchedule: labels.todaysSchedule,
     regular: labels.regular,
     suspendedPending: labels.suspendedPending,
     onLeave: labels.onLeave,
     pendingVerification: labels.pendingVerification,
+    noEntries: labels.noEntries,
   };
 }
 
@@ -62,17 +63,22 @@ function buildAnalyticsLabels(labels: StatusTrackingLabels): SuspensionAnalytics
 }
 
 export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingViewModelProps>): StatusTrackingViewModel {
-  const { onActivate, onReschedule, onVerify, onNewReport, onOpenAuditLogs, onSeeAll } = props;
+  const { onActivate, onReschedule, onVerify, onNewReport, onOpenAuditLogs } = props;
   const router = useRouter();
   const setRescheduleSession = useRescheduleStore(state => state.setSession);
   const hasPermission = useUserStore(state => state.hasPermission);
+  const selectedDate = useStatusTrackingStore(state => state.selectedDate);
+  const setSelectedDate = useStatusTrackingStore(state => state.setSelectedDate);
   const labels = useStatusTrackingLabels();
   const notifications = useNotifications();
 
-  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const viewerTimezone = useMemo(
+    () => toGraphqlIanaTimezone(resolveBrowserIanaTimezoneId()),
+    []
+  );
 
   const { data } = useQuery(statusTrackingScheduleQueryDocument, {
-    variables: { date: today, search: null, viewerTimezone: null },
+    variables: { date: selectedDate, search: null, viewerTimezone },
     fetchPolicy: "cache-and-network",
   });
 
@@ -134,10 +140,6 @@ export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingView
     notifications.show(labels.errorAuditLogsComingSoon, { severity: "info", autoHideDuration: 4000 });
   }, [notifications, labels]);
 
-  const handleSeeAll = useCallback(() => {
-    router.push("/schedule");
-  }, [router]);
-
   const cardListLabels = useMemo(() => buildCardListLabels(labels), [labels]);
   const analyticsLabels = useMemo(() => buildAnalyticsLabels(labels), [labels]);
 
@@ -147,12 +149,13 @@ export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingView
     totalSessions: rows.length,
     suspendedCount,
     labels,
+    dateValue: selectedDate,
+    onDateChange: setSelectedDate,
     onActivate: onActivate ?? handleActivate,
     onReschedule: onReschedule ?? handleReschedule,
     onVerify: onVerify ?? handleVerify,
     onNewReport: onNewReport ?? handleNewReport,
     onOpenAuditLogs: onOpenAuditLogs ?? handleOpenAuditLogs,
-    onSeeAll: onSeeAll ?? handleSeeAll,
     cardListLabels,
     analyticsLabels,
   };

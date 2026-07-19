@@ -148,6 +148,7 @@ export function RegisteredStudentsSection({
         columns={columns}
         getRowId={row => row.id ?? ""}
         autoHeight
+        paginationOptions={{ mode: "client" }}
         ariaLabel="registered-students-table"
         emptyMessage={labels.noEntries}
         rowHeight={80}

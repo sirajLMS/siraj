@@ -146,6 +146,7 @@ export function DesktopPaymentMethodList({
           getRowId={row => row.id}
           loading={loading}
           autoHeight
+          paginationOptions={{ mode: "client" }}
           emptyMessage={emptyMessage ?? tList.empty}
         />
       </Box>

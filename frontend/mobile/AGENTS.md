@@ -20,7 +20,7 @@ Mobile primitives split into **three** behavioral categories (NOT all null-retur
 | Primitive | Group | Category | Behavior |
 |---|---|---|---|
 | `MobileFab` | `button/` | **viewport-gated null-return** | `useViewport()`; `if (!isMobile) return null` |
-| `MobileMetricCardGrid` | `card/` | **hybrid responsive** | `useViewport()`; 2-col grid on mobile, delegates to `MetricCardGrid` on desktop — does NOT null-return |
+| `MobileMetricCardGrid` | `card/` | **pure presentational** | always horizontal scroll row of internal `MobileMetricCard` — no `useViewport`, no Grid |
 | `MobileCardListItem` | `card/` | **pure presentational** | no `useViewport`, no null-return |
 | `MobileCardList` | `container/` | pure presentational | no `useViewport`, no null-return |
 | `MobileContentStack` | `container/` | pure presentational | no `useViewport`, no null-return |
@@ -36,17 +36,21 @@ Mobile primitives split into **three** behavioral categories (NOT all null-retur
 - Each `.mobile.tsx` file moved from `frontend/views/**/mobile/` → `frontend/mobile/views/**/`
 - Import paths rewritten: `@/frontend/views/**/mobile/...` → `@/frontend/mobile/views/**/...`
 - Switchers in `frontend/common/views/...` dynamically import from `@/frontend/mobile/views/...`
+- **Metric cards:** Views must never import or render `MobileMetricCard`, common `MetricCard`, or common `MetricCardGrid`. Use only `MobileMetricCardGrid` (including when there is a single metric). `MobileMetricCard` is internal to the grid (+ Storybook).
 
 ### 3. Import Conventions
 ```typescript
 // ✅ CORRECT - Mobile views import mobile primitives
-import { MobileCardList, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobilePageHeader, MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 
 // ✅ CORRECT - Desktop views import common primitives
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 
 // ❌ WRONG - Mobile views importing from common (Mobile* removed from common)
 import { MobileCardList } from "@/frontend/common/components/ui";
+
+// ❌ WRONG - Views must not import the metric card primitive
+import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MobileMetricCard";
 ```
 
 ### 4. Switcher Pattern (ResponsiveViewSwitch)

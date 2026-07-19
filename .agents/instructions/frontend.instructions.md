@@ -136,12 +136,11 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 ### Dashboard UI Patterns
 
 - `PageContainer` inside views - never add outer `p: 2/3` (double-padding with `DashboardLayout.pageMargin`)
-- `AppDataGrid` (`@mui/x-data-grid`) via feature `*DataGrid` wrappers - mobile uses `*CardList` components
-- `MetricCard` shared from `@/frontend/components/ui` - no per-feature metric card components
+- `AppDataGrid` / `DesktopAppDataGrid` / `MobileCardList` with required `paginationOptions` — list primitives own pager UI; never MUI `Table`/`Pagination` or raw `DataGrid`
+- `MetricCard` / `MobileMetricCard` / `DesktopMetricCard` — views must never import these; use only `MobileMetricCardGrid` (mobile) or `DesktopMetricCardGrid` (desktop), including single-metric cases
 - `StatusBadge` with `category` prop - no inline status chips
 - `PageHeader` + `SectionPanel` - no ad-hoc flex title blocks
 - `PrimaryPageAction`, `FilterButton`, `ExportButton` presets for actions
-- Embedded tables (e.g., `RegisteredStudentsSection`) may use MUI `Table` styled to `palette.table.header` tokens
 
 ### i18n
 

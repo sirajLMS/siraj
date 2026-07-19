@@ -11,7 +11,6 @@ import type { UserOverridesDataGridProps } from "@/frontend/common/views/dashboa
 import { getUserGroupsForUser } from "@/frontend/common/views/dashboard/permissions/utils";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
-import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 import { useAppTranslation } from "@/shared/locale";
 
 interface UserGroupsCellProps {
@@ -185,7 +184,7 @@ export function UserOverridesDataGridDesktop({
         emptyMessage={t.noPermissionsFound}
         loading={loading}
         autoHeight
-        slots={{ pagination: DesktopGridPagination }}
+        paginationOptions={{ mode: "client" }}
       />
     </Box>
   );

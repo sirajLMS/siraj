@@ -1,7 +1,7 @@
 "use client";
 
-import type { GridPaginationModel } from "@mui/x-data-grid";
-import { AppDataGrid, GridPagination } from "@/frontend/common/components/ui";
+import { AppDataGrid } from "@/frontend/common/components/ui";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -50,35 +50,27 @@ export function ScheduleOverviewDataGrid({
 
   const columns = useScheduleColumns({ headers, statusLabels, detailsLabel, showTimezones });
 
-  const paginationModel: GridPaginationModel = {
-    page,
-    pageSize,
-  };
-
   return (
     <AppDataGrid<DailyScheduleRow>
       rows={rows}
       columns={columns}
       getRowId={row => row.id ?? ""}
       loading={loading}
-      {...(totalCount !== undefined
-        ? {
-            paginationMode: "server" as const,
-            rowCount: totalCount,
-          }
-        : {})}
-      paginationModel={paginationModel}
-      onPaginationModelChange={model => {
-        onPageChange(model.page);
-      }}
-      pageSizeOptions={[pageSize]}
+      paginationOptions={
+        totalCount !== undefined
+          ? buildServerPaginationOptions({
+              page,
+              pageSize,
+              totalCount,
+              onPageChange,
+              pageSizeOptions: [pageSize],
+            })
+          : { mode: "client", pageSize, pageSizeOptions: [pageSize] }
+      }
       autoHeight
       rowHeight={60}
       ariaLabel="schedule-overview-table"
       emptyMessage={emptyMessage}
-      slots={{
-        pagination: GridPagination,
-      }}
       columnVisibilityModel={{
         teacher: true,
         yourTime: true,

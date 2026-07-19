@@ -122,23 +122,25 @@ These non-versioned components are used BY mobile views, not by both tiers:
 
 - `MobilePageHeader` — wraps `PageHeader` with `titleVariant="headlineMd"`, edge-to-edge padding
 - `MobileContentStack` — flex column container with configurable gap/paddingBottom
-- `MobileCardList<T>` — generic list container (loading, empty, pagination, row mapping via `renderItem`)
+- `MobileCardList<T>` — generic list container (loading, empty, required `paginationOptions`, row mapping via `renderItem`)
 - `MobileCardListItem` — generic card shell (`edge-to-edge` | `rounded`, dimmed, accentBorder, interactive)
-- `MobileMetricCardGrid` — 2-col grid or horizontal scroll of `MetricCard`
+- `MobileMetricCardGrid` — always horizontal scroll row of internal `MobileMetricCard` (views must never import the card primitive)
 - `MobileFab` — fixed FAB with theme colors
 - `MobileEmptyState` — centered title + subtitle box
 - `ResponsiveViewSwitch` — ONLY shared component that imports `useViewport()`
 
 ### Desktop Shared Components (unchanged)
 
-- `PageHeader` (default `headlineLg`), `Grid`, `SectionPanel`, `AppDataGrid`, `MetricCardGrid`, `PaginationControls`
+- `PageHeader` (default `headlineLg`), `Grid`, `SectionPanel`, `AppDataGrid`, `PaginationControls`
+- Metric rows: `DesktopMetricCardGrid` only (never import `DesktopMetricCard` / common `MetricCard` / common `MetricCardGrid` from views)
 - Used directly by `.desktop.tsx` views
 
 ### Truly Shared (viewport-agnostic)
 
-- `StatusBadge`, `MetricCard`, `BaseCard`, `ActionIconLink`, `PersonProfileLink`, `PaginationControls`
+- `StatusBadge`, `BaseCard`, `ActionIconLink`, `PersonProfileLink`, `PaginationControls`
+- Common `MetricCard` / `MetricCardGrid` are grid/internal primitives — **views must not import the card**; tier views use `MobileMetricCardGrid` / `DesktopMetricCardGrid`
 - NO `useMediaQuery`, NO `useViewport`, NO viewport logic
-- Both `.mobile.tsx` and `.desktop.tsx` import these
+- Both `.mobile.tsx` and `.desktop.tsx` import shared non-metric primitives
 
 ### ESLint Rules (`eslint.config.mjs`)
 

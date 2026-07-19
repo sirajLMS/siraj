@@ -19,7 +19,9 @@ export { PersonProfileLinkCell } from "@/frontend/common/components/ui/display/p
 export { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
 export * from "@/frontend/common/components/ui/filter";
 export { DateNavigator } from "@/frontend/common/components/ui/filter/DateNavigator";
-export { GridPagination, PaginationControls } from "@/frontend/common/components/ui/filter/PaginationControls";
+export type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+export { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+export { PaginationControls } from "@/frontend/common/components/ui/filter/PaginationControls";
 export * from "@/frontend/common/components/ui/form";
 export { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 export { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";

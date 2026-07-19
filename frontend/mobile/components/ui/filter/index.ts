@@ -1,5 +1,3 @@
 export { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter/dateNavigator.mobile";
-export {
-  MobileGridPagination,
-  MobilePaginationControls,
-} from "@/frontend/mobile/components/ui/filter/paginationControls.mobile";
+export { MobileListPagination } from "@/frontend/mobile/components/ui/filter/MobileListPagination";
+export { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter/paginationControls.mobile";

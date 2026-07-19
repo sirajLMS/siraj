@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useEffect, useMemo } from "react";
 import { studentCreditBalanceQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/credit-lms.documents";
-import { pendingLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
+import { studentRecentLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useStudentDashboardStore } from "@/frontend/common/stores/studentDashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -123,10 +123,8 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
     fetchPolicy: "cache-and-network",
   });
 
-  const { data: reportsData, loading: reportsLoading } = useQuery(pendingLessonReportsQueryDocument, {
+  const { data: reportsData, loading: reportsLoading } = useQuery(studentRecentLessonReportsQueryDocument, {
     variables: {
-      studentId: studentId ?? null,
-      teacherId: null,
       paginationArgs,
     },
     skip: !studentId,
@@ -156,11 +154,11 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
   );
 
   const recentLessonReports: readonly RecentLessonReportRow[] = useMemo(
-    () => mapRecentLessonReports(reportsData?.pendingLessonReports?.rows),
+    () => mapRecentLessonReports(reportsData?.studentRecentLessonReports?.rows),
     [reportsData]
   );
 
-  const totalCount = reportsData?.pendingLessonReports?.totalCount ?? 0;
+  const totalCount = reportsData?.studentRecentLessonReports?.totalCount ?? 0;
 
   useEffect(() => {
     if (totalCount !== useStudentDashboardStore.getState().reportsTotalCount) {

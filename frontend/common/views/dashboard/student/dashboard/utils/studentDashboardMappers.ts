@@ -45,11 +45,13 @@ export function mapUpcomingLessons(
   return classes.map(mapUpcomingLesson);
 }
 
-type PendingReportItem = NonNullable<
-  NonNullable<NonNullable<Operations.PendingLessonReportsQuery["pendingLessonReports"]>["rows"]>[number]
+type RecentReportItem = NonNullable<
+  NonNullable<
+    NonNullable<Operations.StudentRecentLessonReportsQuery["studentRecentLessonReports"]>["rows"]
+  >[number]
 >;
 
-export function mapRecentLessonReport(raw: PendingReportItem): RecentLessonReportRow {
+export function mapRecentLessonReport(raw: RecentReportItem): RecentLessonReportRow {
   return {
     id: raw.id ?? "",
     classInstanceId: raw.classInstanceId ?? null,
@@ -65,7 +67,7 @@ export function mapRecentLessonReport(raw: PendingReportItem): RecentLessonRepor
 }
 
 export function mapRecentLessonReports(
-  reports: NonNullable<Operations.PendingLessonReportsQuery["pendingLessonReports"]>["rows"] | undefined
+  reports: NonNullable<Operations.StudentRecentLessonReportsQuery["studentRecentLessonReports"]>["rows"] | undefined
 ): RecentLessonReportRow[] {
   if (!reports) return [];
   return reports.map(mapRecentLessonReport);

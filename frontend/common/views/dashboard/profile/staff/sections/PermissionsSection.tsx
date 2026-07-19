@@ -60,7 +60,7 @@ function PermissionsOverridesGrid({ overrides }: Readonly<PermissionsOverridesGr
       rows={overrides as StaffPermissionOverride[]}
       columns={columns}
       getRowId={row => row.id ?? ""}
-      hideFooter
+      paginationOptions={false}
       autoHeight
     />
   );

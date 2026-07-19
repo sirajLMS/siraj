@@ -18,6 +18,7 @@ import {
 } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
+import { MobileEmptyState } from "@/frontend/mobile/components/ui/state";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale } from "@/shared/locale";
 
@@ -63,15 +64,15 @@ const StyledSectionTitle = styled(Typography)(({ theme }) => ({
   fontSize: theme.typography.titleLg.fontSize,
   fontWeight: 700,
   color: theme.palette.primary.main,
+  whiteSpace: "nowrap",
 }));
 
-const StyledSeeAllButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  fontFamily: theme.typography.labelUppercase.fontFamily,
-  fontSize: theme.typography.labelUppercase.fontSize,
-  fontWeight: 700,
-  letterSpacing: "0.1em",
-  textTransform: "uppercase",
+const StyledSessionCount = styled(Box)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontWeight: 400,
+  fontSize: theme.typography.bodyMd.fontSize,
+  whiteSpace: "nowrap",
+  flexShrink: 0,
 }));
 
 const StyledStatusAvatar = styled(Box, {
@@ -197,7 +198,7 @@ function StatusTrackingCard({
     <Card
       elevation={0}
       sx={theme => ({
-        borderRadius: 3,
+        borderRadius: 0,
         border: `1px solid ${theme.palette.border.light}`,
         transition: "transform 0.15s ease",
         "&:active": { transform: "scale(0.98)" },
@@ -258,41 +259,30 @@ export function StatusTrackingCardList({
   onActivate,
   onReschedule,
   onVerify,
-  onSeeAll,
 }: StatusTrackingCardListProps) {
   return (
     <Box>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-        <StyledSectionTitle>
-          {labels.todaysSchedule}{" "}
-          <Box
-            component="span"
-            sx={theme => ({
-              color: theme.palette.text.secondary,
-              fontWeight: 400,
-              typography: "bodyMd",
-            })}
-          >
-            ({totalSessions})
-          </Box>
-        </StyledSectionTitle>
-        <StyledSeeAllButton id="status-see-all-btn" size="small" onClick={onSeeAll}>
-          {labels.seeAll}
-        </StyledSeeAllButton>
+      <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 2, minWidth: 0 }}>
+        <StyledSectionTitle>{labels.todaysSchedule}</StyledSectionTitle>
+        <StyledSessionCount>({totalSessions})</StyledSessionCount>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {rows.map(row => (
-          <StatusTrackingCard
-            key={row.id ?? ""}
-            row={row}
-            labels={labels}
-            onActivate={onActivate}
-            onReschedule={onReschedule}
-            onVerify={onVerify}
-          />
-        ))}
-      </Box>
+      {rows.length === 0 ? (
+        <MobileEmptyState title={labels.noEntries} />
+      ) : (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {rows.map(row => (
+            <StatusTrackingCard
+              key={row.id ?? ""}
+              row={row}
+              labels={labels}
+              onActivate={onActivate}
+              onReschedule={onReschedule}
+              onVerify={onVerify}
+            />
+          ))}
+        </Box>
+      )}
     </Box>
   );
 }

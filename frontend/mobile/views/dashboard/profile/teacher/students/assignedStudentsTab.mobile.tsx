@@ -1,8 +1,10 @@
 "use client";
 
 import { Alert, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { AssignedStudentsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsTabTypes";
-import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter";
+import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
+import { MobileListPagination } from "@/frontend/mobile/components/ui/filter";
 import { AssignedStudentsCardList } from "@/frontend/mobile/views/dashboard/profile/teacher/students/assignedStudentsCardList.mobile";
 
 function LoadingState() {
@@ -59,7 +61,6 @@ export function AssignedStudentsTabMobileView({
 
   const { page, pageSize, totalCount, onPageChange } = pagination;
   const pagedRows = rows.slice(page * pageSize, (page + 1) * pageSize);
-  const pageCount = pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
 
   return (
     <Stack spacing={2}>
@@ -70,7 +71,7 @@ export function AssignedStudentsTabMobileView({
         </Typography>
       </Stack>
 
-      <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
+      <MobileHorizontalScrollRow>
         {classFilter.options.map(className => {
           const isActive =
             (className === classFilter.allClassesLabel && classFilter.selected === "all") ||
@@ -84,20 +85,21 @@ export function AssignedStudentsTabMobileView({
               onClick={() => {
                 classFilter.onSelect(className);
               }}
+              sx={{ flexShrink: 0 }}
             />
           );
         })}
-      </Stack>
+      </MobileHorizontalScrollRow>
 
       <AssignedStudentsCardList rows={pagedRows} />
 
-      <MobilePaginationControls
-        embedded
-        page={page}
-        pageCount={pageCount}
-        rowCount={totalCount}
-        pageSize={pageSize}
-        onPageChange={onPageChange}
+      <MobileListPagination
+        paginationOptions={buildServerPaginationOptions({
+          page,
+          pageSize,
+          totalCount,
+          onPageChange,
+        })}
       />
     </Stack>
   );

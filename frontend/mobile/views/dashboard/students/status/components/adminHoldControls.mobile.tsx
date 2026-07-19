@@ -5,7 +5,7 @@ import { Controller, useFormContext } from "react-hook-form";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StatusUpdateFormData } from "@/frontend/common/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { AdminHoldControlsProps } from "@/frontend/common/views/dashboard/students/status/types";
-import { MobileAdminControlPanel, MobileFilterButton, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
+import { MobileAdminControlPanel, MobileFilterButton, MobileHorizontalScrollRow, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 function StatusSelectionField() {
@@ -112,18 +112,21 @@ function ReasonEntryField() {
           />
         )}
       />
-      <Box sx={{ mt: 1.5, display: "flex", flexWrap: "wrap", gap: 0.75 }}>
-        {quickReasons.map(reason => (
-          <MobileFilterButton
-            key={reason.label}
-            size="small"
-            onClick={() => {
-              setValue("reason", reason.text, { shouldValidate: true });
-            }}
-          >
-            {reason.label}
-          </MobileFilterButton>
-        ))}
+      <Box sx={{ mt: 1.5 }}>
+        <MobileHorizontalScrollRow sx={{ paddingInlineStart: 0, paddingInlineEnd: 0 }}>
+          {quickReasons.map(reason => (
+            <MobileFilterButton
+              key={reason.label}
+              size="small"
+              onClick={() => {
+                setValue("reason", reason.text, { shouldValidate: true });
+              }}
+              sx={{ flexShrink: 0 }}
+            >
+              {reason.label}
+            </MobileFilterButton>
+          ))}
+        </MobileHorizontalScrollRow>
       </Box>
     </Box>
   );

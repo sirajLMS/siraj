@@ -1,9 +1,10 @@
 "use client";
 
 import { ArrowBackOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, Grid, Stack } from "@mui/material";
+import { Box, Button, Chip, Stack } from "@mui/material";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
-import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { StudentCreditsDataGrid } from "@/frontend/desktop/views/dashboard/student/credits/components/studentCreditsDataGrid.desktop";
@@ -29,19 +30,30 @@ export function StudentCreditsDesktopView({
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <DesktopMetricCard
-            icon={PaymentsOutlined}
-            label={labels.hoursRemaining}
-            value={balance.classesRemaining}
-            subLabel={`${balance.classesTotal} ${labels.hoursTotal.toLowerCase()}`}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <DesktopMetricCard icon={SchoolOutlined} label={labels.hoursTotal} value={balance.classesTotal} />
-        </Grid>
-      </Grid>
+      <Box sx={{ mb: 3 }}>
+        <DesktopMetricCardGrid
+          metrics={
+            [
+              {
+                key: "hours-remaining",
+                count: balance.classesRemaining,
+                labelKey: "hours-remaining",
+                label: labels.hoursRemaining,
+                icon: PaymentsOutlined,
+                subLabel: `${balance.classesTotal} ${labels.hoursTotal.toLowerCase()}`,
+              },
+              {
+                key: "hours-total",
+                count: balance.classesTotal,
+                labelKey: "hours-total",
+                label: labels.hoursTotal,
+                icon: SchoolOutlined,
+              },
+            ] satisfies MetricItem[]
+          }
+          size={{ xs: 12, md: 6 }}
+        />
+      </Box>
 
       <DesktopSectionPanel
         title={labels.transactionHistory}

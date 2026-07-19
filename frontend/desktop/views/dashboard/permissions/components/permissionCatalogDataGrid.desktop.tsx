@@ -142,6 +142,7 @@ export function PermissionCatalogDataGridDesktop({
         emptyMessage={t.noPermissionsFound}
         loading={loading}
         autoHeight
+        paginationOptions={{ mode: "client" }}
       />
     </Box>
   );

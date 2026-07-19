@@ -148,6 +148,23 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
       });
     });
 
+    test("includes class on date A and excludes it on date B", async () => {
+      await runInRollback(async tx => {
+        const { instance } = await setupStatusTrackingTest(tx, "STRDateAB");
+        const dateB = new Date("2031-06-16T10:00:00.000Z");
+
+        const rowsOnA = await SchedulingRepository.getStatusTrackingRows(
+          FUTURE_DATE,
+          { viewerTimezone: IanaTimezone.UTC },
+          tx
+        );
+        expect(rowsOnA.some(r => r.id === instance.id)).toBe(true);
+
+        const rowsOnB = await SchedulingRepository.getStatusTrackingRows(dateB, { viewerTimezone: IanaTimezone.UTC }, tx);
+        expect(rowsOnB.some(r => r.id === instance.id)).toBe(false);
+      });
+    });
+
     test("orders results by scheduledStartAt ascending", async () => {
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "STROrd", { skipInstance: true });

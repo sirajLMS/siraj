@@ -20,10 +20,10 @@ import {
 } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 import {
   DesktopAppDataGrid,
-  DesktopGridPagination,
   DesktopPersonProfileLinkCell,
   DesktopStatusBadge,
 } from "@/frontend/desktop/components/ui";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 
 export interface AdminInvoicesDataGridLabels {
   readonly invoiceId: string;
@@ -318,18 +318,17 @@ export function AdminInvoicesDataGridDesktop({
       getRowId={row => row.id}
       loading={loading}
       emptyMessage={labels.noEntries}
-      {...(isServerPagination
-        ? {
-            paginationMode: "server" as const,
-            rowCount: totalCount,
-            paginationModel: { page, pageSize },
-            onPaginationModelChange: model => {
-              onPageChange(model.page);
-            },
-            pageSizeOptions: [pageSize],
-            slots: { pagination: DesktopGridPagination },
-          }
-        : {})}
+      paginationOptions={
+        isServerPagination
+          ? buildServerPaginationOptions({
+              page,
+              pageSize,
+              totalCount,
+              onPageChange,
+              pageSizeOptions: [pageSize],
+            })
+          : { mode: "client" }
+      }
     />
   );
 }

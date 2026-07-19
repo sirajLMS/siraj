@@ -13,6 +13,7 @@ import {
   StudentStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
+import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
 import { StatusTrackingView } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusTrackingView";
 import type {
   CardListLabels,
@@ -206,12 +207,12 @@ function buildCardListLabels(labels: StatusTrackingLabels): CardListLabels {
     verifyDocuments: labels.verifyDocuments,
     sessionLocked: labels.sessionLocked,
     sessionEnded: labels.sessionEnded,
-    seeAll: labels.seeAll,
     todaysSchedule: labels.todaysSchedule,
     regular: labels.regular,
     suspendedPending: labels.suspendedPending,
     onLeave: labels.onLeave,
     pendingVerification: labels.pendingVerification,
+    noEntries: labels.noEntries,
   };
 }
 
@@ -263,8 +264,6 @@ function StoryStatusTrackingContainer() {
 
   const handleOpenAuditLogs = () => {};
 
-  const handleSeeAll = () => {};
-
   return (
     <StatusTrackingView
       metrics={metrics}
@@ -272,12 +271,13 @@ function StoryStatusTrackingContainer() {
       totalSessions={totalSessions}
       suspendedCount={suspendedCount}
       labels={labels}
+      dateValue={getTodayScheduleFilterDate()}
+      onDateChange={() => {}}
       onActivate={activateSession}
       onReschedule={handleReschedule}
       onVerify={verifySession}
       onNewReport={handleNewReport}
       onOpenAuditLogs={handleOpenAuditLogs}
-      onSeeAll={handleSeeAll}
       cardListLabels={cardListLabels}
       analyticsLabels={analyticsLabels}
     />

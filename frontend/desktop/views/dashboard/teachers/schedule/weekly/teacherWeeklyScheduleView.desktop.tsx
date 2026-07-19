@@ -13,11 +13,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import WeeklyScheduleGrid from "@/frontend/desktop/views/dashboard/teachers/schedule/weekly/components/weeklyScheduleGrid.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -78,14 +79,20 @@ export function TeacherWeeklyScheduleViewDesktop({
       />
 
       {hasScheduleViewWorkload ? (
-        <Box sx={{ display: "grid", gridTemplateColumns: { md: "repeat(4, 1fr)" }, gap: 2 }}>
-          <MetricCard
-            icon={TimerOutlined}
-            label={t.metrics.weeklyHoursWorked(schedule.weeklyHoursWorked)}
-            value={schedule.weeklyHoursWorked}
-            variant="default"
-          />
-        </Box>
+        <DesktopMetricCardGrid
+          metrics={
+            [
+              {
+                key: "weekly-hours-worked",
+                count: schedule.weeklyHoursWorked,
+                labelKey: "weekly-hours-worked",
+                label: t.metrics.weeklyHoursWorked(schedule.weeklyHoursWorked),
+                icon: TimerOutlined,
+              },
+            ] satisfies MetricItem[]
+          }
+          size={{ xs: 12, md: 3 }}
+        />
       ) : null}
 
       <SectionPanel>

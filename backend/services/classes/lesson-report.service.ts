@@ -451,6 +451,34 @@ export namespace LessonReportService {
     return rows.map(toReturnType);
   }
 
+  /**
+   * Student portal dashboard: paginated lesson reports for the logged-in student.
+   * Requires STUDENT_VIEW_OWN_DASHBOARD; student id is resolved from the actor.
+   */
+  export async function getStudentRecentLessonReports(
+    actorUserId: string,
+    paginationArgs: PaginationArgs,
+    locale?: string
+  ): Promise<{ rows: LessonReportReturnType[]; totalCount: number }> {
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_OWN_DASHBOARD);
+    if (!hasPermission) {
+      throw new Error(tErrors.insufficientPermissions);
+    }
+
+    const studentId = await StudentRepository.getStudentIdByUserId(actorUserId);
+    if (!studentId) {
+      throw new Error(tErrors.unauthorizedAction);
+    }
+
+    const [rows, totalCount] = await Promise.all([
+      LessonReportRepository.findForStudent(studentId, paginationArgs),
+      LessonReportRepository.countForStudent(studentId),
+    ]);
+    return { rows: rows.map(toReturnType), totalCount };
+  }
+
   export async function getReportByClassId(
     actorUserId: string,
     classInstanceId: string,

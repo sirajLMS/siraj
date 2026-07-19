@@ -50,6 +50,7 @@ export function ReportsDataGridMobile({
         loading={loading}
         emptyMessage={labels.noEntries}
         gap={2}
+        paginationOptions={{ mode: "client" }}
         renderItem={row => {
           const href = reportNameHrefForRow(row, reportType);
           return (

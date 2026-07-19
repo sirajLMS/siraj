@@ -143,6 +143,7 @@ export function TeacherDuesMobileView(props: Readonly<TeacherDuesViewModel>) {
             gap={2}
             layout="edge-to-edge"
             getKey={row => row.id}
+            paginationOptions={{ mode: "client" }}
             renderItem={renderItem}
           />
         </MobileSectionPanel>

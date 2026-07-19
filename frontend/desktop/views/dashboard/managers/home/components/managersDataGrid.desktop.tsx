@@ -8,7 +8,8 @@ import { useMemo } from "react";
 import { profileHrefForStaff } from "@/frontend/common/utils/profileHref";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
 import type { BaseManagersListProps, Manager } from "@/frontend/common/views/dashboard/managers/home/types";
-import { DesktopAppDataGrid, DesktopGridPagination } from "@/frontend/desktop/components/ui";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopPersonProfileLinkCell, DesktopPhoneDisplay } from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
@@ -138,18 +139,17 @@ export function ManagersDataGridDesktop({
         loading={loading}
         autoHeight
         rowHeight={80}
-        {...(isServerPagination
-          ? {
-              paginationMode: "server" as const,
-              rowCount: totalCount,
-              paginationModel: { page, pageSize },
-              onPaginationModelChange: model => {
-                onPageChange(model.page);
-              },
-              pageSizeOptions: [pageSize],
-              slots: { pagination: DesktopGridPagination },
-            }
-          : {})}
+        paginationOptions={
+          isServerPagination
+            ? buildServerPaginationOptions({
+                page,
+                pageSize,
+                totalCount,
+                onPageChange,
+                pageSizeOptions: [pageSize],
+              })
+            : { mode: "client" }
+        }
       />
     </StyledDataGridWrapper>
   );

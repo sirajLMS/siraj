@@ -15,7 +15,8 @@ import {
   DesktopPageHeader,
   DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
-import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   AcademicScheduleDataGridDesktop,
   type AcademicScheduleDataGridDesktopLabels,
@@ -52,21 +53,23 @@ function DesktopMetricsSection({
   readonly labels: ScheduleAlertsLabels;
   readonly onDownloadReport: () => void;
 }) {
+  const metricItems: MetricItem[] = metrics.map(metric => {
+    const metricLabel = metricLabels[metric.key];
+    return {
+      key: metric.key,
+      count: metric.value,
+      labelKey: metric.labelKey,
+      label: metricLabel.label,
+      icon: metric.icon,
+      subLabel: metricLabel.subLabel,
+    };
+  });
+
   return (
     <Grid container spacing={2}>
-      {metrics.map(metric => {
-        const metricLabel = metricLabels[metric.key];
-        return (
-          <Grid key={metric.key} size={{ xs: 6, md: 3 }}>
-            <DesktopMetricCard
-              icon={metric.icon}
-              label={metricLabel.label}
-              value={metric.value}
-              subLabel={metricLabel.subLabel}
-            />
-          </Grid>
-        );
-      })}
+      <Grid size={12}>
+        <DesktopMetricCardGrid metrics={metricItems} size={{ xs: 6, md: 3 }} />
+      </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <InstitutionalReportCardDesktop
           title={labels.reportTitle}

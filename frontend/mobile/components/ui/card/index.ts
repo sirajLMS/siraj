@@ -2,7 +2,6 @@ export type { BaseCardProps as MobileBaseCardProps } from "@/frontend/mobile/com
 export { MobileBaseCard } from "@/frontend/mobile/components/ui/card/MobileBaseCard";
 export type { MobileCardListItemProps } from "@/frontend/mobile/components/ui/card/MobileCardListItem";
 export { MobileCardListItem } from "@/frontend/mobile/components/ui/card/MobileCardListItem";
-export type { MobileMetricCardProps } from "@/frontend/mobile/components/ui/card/MobileMetricCard";
-export { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MobileMetricCard";
+/** Metric card primitive is internal — views must use MobileMetricCardGrid only. */
 export type { MobileMetricCardGridProps } from "@/frontend/mobile/components/ui/card/MobileMetricCardGrid";
 export { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card/MobileMetricCardGrid";

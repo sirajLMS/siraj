@@ -1,12 +1,12 @@
 import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
-import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
+import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import {
   DesktopAppDataGrid,
-  DesktopGridPagination,
   DesktopPersonProfileLinkCell,
 } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
@@ -138,11 +138,6 @@ export function TeacherDataGrid({
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
 
-  const paginationModel: GridPaginationModel = {
-    page,
-    pageSize,
-  };
-
   return (
     <DesktopAppDataGrid<TeacherDirectoryRow>
       rows={rows}
@@ -150,18 +145,17 @@ export function TeacherDataGrid({
       rowHeight={72}
       disableRowSelectionOnClick
       getRowId={row => row.id ?? ""}
-      {...(isServerPagination
-        ? {
-            paginationMode: "server" as const,
-            rowCount: totalCount,
-            paginationModel,
-            onPaginationModelChange: model => {
-              onPageChange(model.page);
-            },
-            pageSizeOptions: [pageSize],
-            slots: { pagination: DesktopGridPagination },
-          }
-        : {})}
+      paginationOptions={
+        isServerPagination
+          ? buildServerPaginationOptions({
+              page,
+              pageSize,
+              totalCount,
+              onPageChange,
+              pageSizeOptions: [pageSize],
+            })
+          : { mode: "client" }
+      }
     />
   );
 }

@@ -123,6 +123,7 @@ export function TeacherDuesDesktopView({
           autoHeight
           rowHeight={64}
           checkboxSelection={canMarkPaid}
+          paginationOptions={{ mode: "client" }}
           onRowSelectionModelChange={model => {
             const selectedIds = "ids" in model ? Array.from(model.ids).map(String) : [];
             onSelectDues(selectedIds);

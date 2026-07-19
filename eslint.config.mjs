@@ -237,12 +237,41 @@ const eslintConfig = defineConfig([
   },
 
   // Frontend code must not depend on the backend layer (use GraphQL or shared/ instead).
+  // Also ban raw MUI DataGrid / Table / Pagination outside owned list wrappers.
   {
     files: ["frontend/**/*.{ts,tsx}"],
+    ignores: [
+      "frontend/common/components/ui/dataGrid/AppDataGrid.tsx",
+      "frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid.tsx",
+      "frontend/mobile/components/ui/dataGrid/MobileAppDataGrid.tsx",
+    ],
     rules: {
       "no-restricted-imports": [
         "error",
         {
+          paths: [
+            {
+              name: "@mui/x-data-grid",
+              importNames: ["DataGrid"],
+              message:
+                "Do not import DataGrid directly — use AppDataGrid / DesktopAppDataGrid / MobileAppDataGrid with paginationOptions",
+            },
+            {
+              name: "@mui/material",
+              importNames: [
+                "Pagination",
+                "TablePagination",
+                "Table",
+                "TableBody",
+                "TableCell",
+                "TableContainer",
+                "TableHead",
+                "TableRow",
+              ],
+              message:
+                "Do not use MUI Table/Pagination — use *AppDataGrid / MobileCardList with paginationOptions, or *PaginationControls for intentional non-list footers",
+            },
+          ],
           patterns: [
             {
               group: ["@/backend/**"],

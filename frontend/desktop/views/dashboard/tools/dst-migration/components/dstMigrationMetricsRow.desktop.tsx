@@ -1,9 +1,10 @@
 "use client";
 
 import { AnalyticsOutlined, ErrorOutlined, HistoryOutlined, VerifiedOutlined } from "@mui/icons-material";
-import { Grid } from "@mui/material";
-import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
+import { Box } from "@mui/material";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { DstMigrationMetrics } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
@@ -13,32 +14,42 @@ interface Props {
 export function DstMigrationMetricsRowDesktop({ metrics }: Readonly<Props>) {
   const t = useAppTranslation().dashboardTranslations.dstMigration.metrics;
 
+  const metricItems: MetricItem[] = [
+    {
+      key: "total-audited",
+      count: metrics.totalAudited,
+      labelKey: "total-audited",
+      label: t.totalAudited,
+      icon: AnalyticsOutlined,
+    },
+    {
+      key: "successful",
+      count: metrics.successful,
+      labelKey: "successful",
+      label: t.successful,
+      icon: VerifiedOutlined,
+      variant: "highlight",
+    },
+    {
+      key: "conflicts",
+      count: metrics.conflicts,
+      labelKey: "conflicts",
+      label: t.conflicts,
+      icon: ErrorOutlined,
+      variant: "error",
+    },
+    {
+      key: "unchanged",
+      count: metrics.unchanged,
+      labelKey: "unchanged",
+      label: t.unchanged,
+      icon: HistoryOutlined,
+    },
+  ];
+
   return (
-    <Grid container spacing={2} sx={{ mt: 4 }}>
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <MetricCard label={t.totalAudited} value={metrics.totalAudited} icon={AnalyticsOutlined} />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <MetricCard
-          label={t.successful}
-          value={metrics.successful}
-          icon={VerifiedOutlined}
-          variant="highlight"
-          animationIndex={1}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <MetricCard
-          label={t.conflicts}
-          value={metrics.conflicts}
-          icon={ErrorOutlined}
-          variant="error"
-          animationIndex={2}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <MetricCard label={t.unchanged} value={metrics.unchanged} icon={HistoryOutlined} animationIndex={3} />
-      </Grid>
-    </Grid>
+    <Box sx={{ mt: 4 }}>
+      <DesktopMetricCardGrid metrics={metricItems} size={{ xs: 12, sm: 6, md: 3 }} />
+    </Box>
   );
 }

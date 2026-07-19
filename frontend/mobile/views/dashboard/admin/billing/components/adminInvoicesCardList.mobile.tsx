@@ -3,6 +3,7 @@
 import { VisibilityOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, CircularProgress, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   AdminInvoiceRow,
@@ -15,7 +16,7 @@ import {
   isPayableUnpaidStatus,
   shouldShowViewRejection,
 } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
-import { MobilePaginationControls, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileListPagination, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 
 interface AdminInvoicesCardListLabels {
   readonly markAsPaid: string;
@@ -37,15 +38,12 @@ interface AdminInvoicesCardListProps {
   readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly onDeleteInvoice?: (invoiceId: string) => void;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
+  readonly paginationOptions: ListPaginationOptions;
 }
 
 const StyledInvoiceCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
-  borderRadius: theme.layout.radius.card,
+  borderRadius: 0,
   border: `1px solid ${theme.palette.outlineVariant}`,
   backgroundColor: theme.palette.surfaceContainerLowest,
 }));
@@ -198,7 +196,7 @@ function LoadingOverlay({ loading }: Readonly<LoadingOverlayProps>) {
         alignItems: "center",
         justifyContent: "center",
         bgcolor: "action.hover",
-        borderRadius: 1,
+        borderRadius: 0,
         zIndex: 1,
       }}
     >
@@ -217,13 +215,8 @@ export function AdminInvoicesCardListMobile({
   onMarkAsPaid,
   onViewPaymentDetails,
   onDeleteInvoice,
-  page = 0,
-  pageSize = 10,
-  totalCount,
-  onPageChange,
+  paginationOptions,
 }: Readonly<AdminInvoicesCardListProps>) {
-  const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
-
   return (
     <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 1.5 }}>
       <LoadingOverlay loading={loading} />
@@ -240,15 +233,7 @@ export function AdminInvoicesCardListMobile({
           onDeleteInvoice={onDeleteInvoice}
         />
       ))}
-      {onPageChange && totalCount !== undefined ? (
-        <MobilePaginationControls
-          page={page}
-          pageCount={pageCount}
-          rowCount={totalCount}
-          pageSize={pageSize}
-          onPageChange={onPageChange}
-        />
-      ) : null}
+      <MobileListPagination paginationOptions={paginationOptions} />
     </Box>
   );
 }

@@ -1,9 +1,10 @@
 "use client";
 
 import { AnalyticsOutlined, ErrorOutlined, HistoryOutlined, VerifiedOutlined } from "@mui/icons-material";
-import { Box, Stack } from "@mui/material";
+import { useMemo } from "react";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { DstMigrationMetrics } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MetricCard";
+import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
@@ -13,26 +14,41 @@ interface Props {
 export function DstMigrationMetricsRowMobile({ metrics }: Readonly<Props>) {
   const t = useAppTranslation().dashboardTranslations.dstMigration.metrics;
 
-  return (
-    <Stack spacing={1.5} sx={{ width: "100%" }}>
-      <MobileMetricCard label={t.totalAudited} value={metrics.totalAudited} icon={AnalyticsOutlined} />
-      <MobileMetricCard
-        label={t.successful}
-        value={metrics.successful}
-        icon={VerifiedOutlined}
-        variant="highlight"
-        animationIndex={1}
-      />
-      <MobileMetricCard
-        label={t.conflicts}
-        value={metrics.conflicts}
-        icon={ErrorOutlined}
-        variant="error"
-        animationIndex={2}
-      />
-      <Box>
-        <MobileMetricCard label={t.unchanged} value={metrics.unchanged} icon={HistoryOutlined} animationIndex={3} />
-      </Box>
-    </Stack>
+  const metricItems: readonly MetricItem[] = useMemo(
+    () => [
+      {
+        key: "totalAudited",
+        label: t.totalAudited,
+        count: metrics.totalAudited,
+        icon: AnalyticsOutlined,
+        labelKey: "totalAudited",
+      },
+      {
+        key: "successful",
+        label: t.successful,
+        count: metrics.successful,
+        icon: VerifiedOutlined,
+        labelKey: "successful",
+        variant: "highlight",
+      },
+      {
+        key: "conflicts",
+        label: t.conflicts,
+        count: metrics.conflicts,
+        icon: ErrorOutlined,
+        labelKey: "conflicts",
+        variant: "error",
+      },
+      {
+        key: "unchanged",
+        label: t.unchanged,
+        count: metrics.unchanged,
+        icon: HistoryOutlined,
+        labelKey: "unchanged",
+      },
+    ],
+    [metrics, t]
   );
+
+  return <MobileMetricCardGrid metrics={metricItems} sx={{ width: "100%" }} />;
 }

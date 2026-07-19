@@ -3,6 +3,7 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
 import type { PermissionCatalogToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
+import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
 import { useAppTranslation } from "@/shared/locale";
 
 interface CategoryChipProps {
@@ -72,17 +73,7 @@ export function PermissionCatalogToolbarMobile({
         sx={{ minWidth: "100%" }}
       />
 
-      <Box
-        sx={{
-          display: "flex",
-          gap: 1,
-          overflowX: "auto",
-          pb: 1,
-          "&::-webkit-scrollbar": { display: "none" },
-          msOverflowStyle: "none",
-          scrollbarWidth: "none",
-        }}
-      >
+      <MobileHorizontalScrollRow sx={{ paddingInlineStart: 0, paddingInlineEnd: 0, pb: 1 }}>
         <CategoryChip
           label={t.allCategories}
           active={selectedCategory === "all"}
@@ -91,7 +82,7 @@ export function PermissionCatalogToolbarMobile({
         {categories.map(cat => (
           <CategoryChip key={cat} label={cat} active={selectedCategory === cat} onClick={() => onCategoryChange(cat)} />
         ))}
-      </Box>
+      </MobileHorizontalScrollRow>
     </Box>
   );
 }

@@ -1,14 +1,13 @@
 "use client";
 
 import { Typography } from "@mui/material";
-import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
+import type { GridColDef } from "@mui/x-data-grid";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
 import { formatStatusLabel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsStatusFormatters";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
-import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter";
 import { useAppTranslation } from "@/shared/locale";
 
 type AssignedStudentsDataGridProps = {
@@ -16,15 +15,15 @@ type AssignedStudentsDataGridProps = {
   readonly loading: boolean;
   readonly page: number;
   readonly pageSize: number;
-  readonly onPaginationModelChange: (model: GridPaginationModel) => void;
+  readonly onPaginationModelChange: (model: { page: number; pageSize: number }) => void;
 };
 
 export function AssignedStudentsDataGrid({
   rows,
   loading,
-  page,
+  page: _page,
   pageSize,
-  onPaginationModelChange,
+  onPaginationModelChange: _onPaginationModelChange,
 }: Readonly<AssignedStudentsDataGridProps>) {
   const t = useAppTranslation().profileTranslations.base.students;
 
@@ -109,10 +108,7 @@ export function AssignedStudentsDataGrid({
       columns={columns}
       loading={loading}
       emptyMessage={t.noRows}
-      paginationModel={{ page, pageSize }}
-      onPaginationModelChange={onPaginationModelChange}
-      pageSizeOptions={[5, 10, 25]}
-      slots={{ pagination: DesktopGridPagination }}
+      paginationOptions={{ mode: "client", pageSize, pageSizeOptions: [5, 10, 25] }}
       sx={{ border: "none" }}
     />
   );

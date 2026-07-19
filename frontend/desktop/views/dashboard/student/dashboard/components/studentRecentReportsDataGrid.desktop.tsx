@@ -10,7 +10,8 @@ import type {
   ReportsPagination,
   StudentDashboardViewModel,
 } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
-import { DesktopAppDataGrid, DesktopGridPagination, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import type { AppLocale } from "@/shared/locale";
 
 interface StudentRecentReportsDataGridProps {
@@ -114,14 +115,13 @@ export function StudentRecentReportsDataGrid({
         emptyMessage={labels.noLessonReports}
         autoHeight
         ariaLabel={labels.recentLessonReports}
-        paginationMode="server"
-        rowCount={pagination.totalCount}
-        paginationModel={{ page: pagination.page, pageSize: pagination.pageSize }}
-        onPaginationModelChange={model => {
-          pagination.onPageChange(model.page);
-        }}
-        pageSizeOptions={[pagination.pageSize]}
-        slots={{ pagination: DesktopGridPagination }}
+        paginationOptions={buildServerPaginationOptions({
+          page: pagination.page,
+          pageSize: pagination.pageSize,
+          totalCount: pagination.totalCount,
+          onPageChange: pagination.onPageChange,
+          pageSizeOptions: [pagination.pageSize],
+        })}
       />
     </Box>
   );

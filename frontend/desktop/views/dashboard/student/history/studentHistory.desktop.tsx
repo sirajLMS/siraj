@@ -11,14 +11,15 @@ import {
   VerifiedUserOutlined,
   VisibilityOutlined,
 } from "@mui/icons-material";
-import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
-import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
@@ -176,24 +177,43 @@ export function StudentHistoryDesktopView({
         </Button>
       </Box>
 
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <DesktopMetricCard icon={SchoolOutlined} label={labels.totalClasses} value={metrics.totalClasses} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <DesktopMetricCard
-            icon={VerifiedUserOutlined}
-            label={labels.attendanceRate}
-            value={`${metrics.attendanceRate}%`}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <DesktopMetricCard icon={TimerOutlined} label={labels.hoursStudied} value={`${metrics.hoursStudied}h`} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <DesktopMetricCard icon={TrendingUpOutlined} label={labels.performance} value={`${metrics.performance}%`} />
-        </Grid>
-      </Grid>
+      <Box sx={{ mb: 3 }}>
+        <DesktopMetricCardGrid
+          metrics={
+            [
+              {
+                key: "total-classes",
+                count: metrics.totalClasses,
+                labelKey: "total-classes",
+                label: labels.totalClasses,
+                icon: SchoolOutlined,
+              },
+              {
+                key: "attendance-rate",
+                count: `${metrics.attendanceRate}%`,
+                labelKey: "attendance-rate",
+                label: labels.attendanceRate,
+                icon: VerifiedUserOutlined,
+              },
+              {
+                key: "hours-studied",
+                count: `${metrics.hoursStudied}h`,
+                labelKey: "hours-studied",
+                label: labels.hoursStudied,
+                icon: TimerOutlined,
+              },
+              {
+                key: "performance",
+                count: `${metrics.performance}%`,
+                labelKey: "performance",
+                label: labels.performance,
+                icon: TrendingUpOutlined,
+              },
+            ] satisfies MetricItem[]
+          }
+          size={{ xs: 12, sm: 6, md: 3 }}
+        />
+      </Box>
 
       <DesktopSectionPanel title={labels.lessonHistory} sx={{ mb: 3 }}>
         <StudentPortalHistoryCalendar
@@ -252,6 +272,7 @@ export function StudentHistoryDesktopView({
           getRowId={row => row.id}
           autoHeight
           ariaLabel={labels.lessonHistory}
+          paginationOptions={{ mode: "client" }}
         />
       </DesktopSectionPanel>
 

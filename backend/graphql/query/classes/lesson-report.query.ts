@@ -92,6 +92,37 @@ gqlSchemaBuilder.queryField("recentApprovedLessonReports", t =>
   })
 );
 
+gqlSchemaBuilder.queryField("studentRecentLessonReports", t =>
+  t.field({
+    type: PendingLessonReportsPayloadPothosObject,
+    description: "Paginated lesson reports for the logged-in student (student portal dashboard)",
+    authScopes: { loggedIn: true },
+    args: {
+      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+
+      let pagination: PaginationArgs;
+      if (args.paginationArgs) {
+        pagination = new PaginationArgs({
+          first: args.paginationArgs.first ?? null,
+          skip: args.paginationArgs.skip ?? null,
+          after: args.paginationArgs.after ?? null,
+          before: args.paginationArgs.before ?? null,
+          last: args.paginationArgs.last ?? null,
+          page: args.paginationArgs.page ?? null,
+          maxCount: args.paginationArgs.maxCount ?? null,
+        });
+      } else {
+        pagination = new PaginationArgs();
+      }
+
+      return LessonReportService.getStudentRecentLessonReports(actorUserId, pagination, ctx.locale);
+    },
+  })
+);
+
 gqlSchemaBuilder.queryField("lessonReportCount", t =>
   t.field({
     type: PendingReviewCountPothosObject,

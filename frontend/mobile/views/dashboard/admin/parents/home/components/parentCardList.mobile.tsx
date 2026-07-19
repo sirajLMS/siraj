@@ -8,7 +8,8 @@ import type {
   ParentCardListLabels,
   ParentDirectoryRow,
 } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
-import { MobilePaginationControls, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { MobileListPagination, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card/MobileBaseCard";
 
 export type { ParentCardListLabels };
@@ -102,43 +103,21 @@ interface ParentCardListMobileProps {
   readonly rows: readonly ParentDirectoryRow[];
   readonly labels: ParentCardListLabels;
   readonly onOpenSettings: (id: string) => void;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
+  readonly paginationOptions: ListPaginationOptions;
 }
 
 export function ParentCardListMobile({
   rows,
   labels,
   onOpenSettings,
-  page,
-  pageSize,
-  totalCount,
-  onPageChange,
+  paginationOptions,
 }: Readonly<ParentCardListMobileProps>) {
-  const hasPagination =
-    totalCount !== undefined && page !== undefined && pageSize !== undefined && onPageChange !== undefined;
-  const pageCount = (pageSize ?? 0) > 0 ? Math.ceil((totalCount ?? 0) / (pageSize ?? 1)) : 0;
-
   return (
     <Stack spacing={2}>
       {rows.map(row => (
         <ParentCard key={row.id} row={row} labels={labels} onOpenSettings={onOpenSettings} />
       ))}
-      {hasPagination &&
-        page !== undefined &&
-        pageSize !== undefined &&
-        totalCount !== undefined &&
-        onPageChange !== undefined && (
-          <MobilePaginationControls
-            page={page}
-            pageCount={pageCount}
-            rowCount={totalCount}
-            pageSize={pageSize}
-            onPageChange={onPageChange}
-          />
-        )}
+      <MobileListPagination paginationOptions={paginationOptions} />
     </Stack>
   );
 }

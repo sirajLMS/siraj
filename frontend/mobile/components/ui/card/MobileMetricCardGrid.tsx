@@ -31,9 +31,10 @@ export function MobileMetricCardGrid({ metrics, onMetricClick, selectedKey, sx }
             }}
           >
             <MobileMetricCard
-              {...metric}
+              icon={metric.icon}
               label={label}
               value={metric.count}
+              subLabel={metric.subLabel}
               variant={selectedKey === metric.key ? "highlight" : (metric.variant ?? "default")}
               animationIndex={index}
               onClick={onMetricClick ? () => onMetricClick(metric.key) : undefined}

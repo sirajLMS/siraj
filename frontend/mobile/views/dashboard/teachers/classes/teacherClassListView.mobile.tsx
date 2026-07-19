@@ -118,6 +118,7 @@ export function TeacherClassListMobileView({
             <ClassCard row={row} labels={labels} locale={locale} handleViewClassAudit={handleViewClassAudit} />
           )}
           emptyMessage={labels.noClasses}
+          paginationOptions={{ mode: "client" }}
         />
       ) : null}
     </MobilePageContainer>

@@ -1,41 +1,39 @@
 "use client";
 
-import type { GridPaginationModel } from "@mui/x-data-grid";
-import { GridPagination } from "@/frontend/common/components/ui/filter/PaginationControls";
+import {
+  buildServerPaginationOptions,
+  type ListPaginationOptions,
+  type ServerListPaginationOptions,
+} from "@/frontend/common/components/ui/filter/listPaginationOptions";
 
+export type { ListPaginationOptions, ServerListPaginationOptions };
+export { buildServerPaginationOptions };
+
+/** @deprecated Prefer `buildServerPaginationOptions` — returns list config, not MUI props. */
 export interface ServerPaginationConfig {
   readonly page: number;
   readonly pageSize: number;
 }
 
-export interface ServerPaginationProps {
-  readonly paginationMode: "server";
-  readonly rowCount: number;
-  readonly paginationModel: ServerPaginationConfig;
-  readonly onPaginationModelChange: (model: GridPaginationModel) => void;
-  readonly pageSizeOptions: number[];
-  readonly slots: { pagination: typeof GridPagination };
-}
-
-export function getServerPaginationProps(
+/**
+ * Builds server `ListPaginationOptions` when totalCount + onPageChange are present.
+ * Returns `false` when server pagination is not active (caller may use client mode instead).
+ */
+export function getServerPaginationOptions(
   config: ServerPaginationConfig,
   totalCount: number | undefined,
   onPageChange: ((page: number) => void) | undefined
-): Partial<ServerPaginationProps> {
+): ServerListPaginationOptions | false {
   if (totalCount === undefined || onPageChange === undefined) {
-    return {};
+    return false;
   }
 
-  return {
-    paginationMode: "server",
-    rowCount: totalCount,
-    paginationModel: { page: config.page, pageSize: config.pageSize },
-    onPaginationModelChange: model => {
-      onPageChange(model.page);
-    },
-    pageSizeOptions: [config.pageSize],
-    slots: { pagination: GridPagination },
-  };
+  return buildServerPaginationOptions({
+    page: config.page,
+    pageSize: config.pageSize,
+    totalCount,
+    onPageChange,
+  });
 }
 
 export function isServerPagination(
@@ -44,3 +42,6 @@ export function isServerPagination(
 ): boolean {
   return totalCount !== undefined && onPageChange !== undefined;
 }
+
+/** @deprecated Use `getServerPaginationOptions` */
+export const getServerPaginationProps = getServerPaginationOptions;

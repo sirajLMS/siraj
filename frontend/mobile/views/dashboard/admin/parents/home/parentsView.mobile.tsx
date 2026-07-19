@@ -2,6 +2,7 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { InputAdornment, Stack, TextField } from "@mui/material";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
 import type { BaseParentsViewProps } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
@@ -125,10 +126,16 @@ export function ParentsViewMobile({
               accountStatusLabels: labels.accountStatusLabels,
             }}
             onOpenSettings={onOpenSettings}
-            page={page}
-            pageSize={pageSize}
-            totalCount={totalCount}
-            onPageChange={onPageChange}
+            paginationOptions={
+              totalCount !== undefined && onPageChange !== undefined
+                ? buildServerPaginationOptions({
+                    page: page ?? 0,
+                    pageSize: pageSize ?? 10,
+                    totalCount,
+                    onPageChange,
+                  })
+                : false
+            }
           />
         </MobileSectionPanel>
       </MobileContentStack>

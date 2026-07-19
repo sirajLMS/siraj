@@ -5,14 +5,10 @@ import { Box, InputAdornment, Stack, TextField, Typography, useTheme } from "@mu
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
-import {
-  MobileCardList,
-  MobileCardListItem,
-  MobilePaginationControls,
-  MobileStatusBadge,
-} from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { ScheduleOverviewMobileCard } from "@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.mobile";
 
 const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
@@ -67,7 +63,6 @@ export function ScheduleOverviewMobileView({
   onTeacherChange,
   onSubmit,
   loading,
-  pageCount,
   showTimezones,
   locale,
   // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
@@ -154,16 +149,14 @@ export function ScheduleOverviewMobileView({
           layout="edge-to-edge"
           getKey={row => row.id ?? ""}
           renderItem={renderItem}
+          paginationOptions={buildServerPaginationOptions({
+            page,
+            pageSize,
+            totalCount: totalCount ?? 0,
+            onPageChange,
+          })}
         />
       </Box>
-
-      <MobilePaginationControls
-        page={page}
-        pageCount={pageCount}
-        rowCount={totalCount ?? 0}
-        pageSize={pageSize}
-        onPageChange={onPageChange}
-      />
     </Stack>
   );
 }

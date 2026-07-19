@@ -2,6 +2,8 @@
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Autocomplete, Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { useMemo } from "react";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type {
   DirectoryPersonOption,
   MonthlyReportsViewModel,
@@ -9,12 +11,12 @@ import type {
 import {
   MobileContentStack,
   MobileFilterButton,
+  MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
   MobilePrimaryPageAction,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
-import { MobileMetricCard } from "@/frontend/mobile/components/ui/card";
 
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
@@ -40,6 +42,18 @@ export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel
 
   const selectedTeacher = teacherOptions.find(o => o.id === teacherId) ?? null;
   const selectedStudent = studentOptions.find(o => o.id === studentId) ?? null;
+
+  const metricItems: readonly MetricItem[] = useMemo(
+    () =>
+      metrics.map(metric => ({
+        key: metric.label,
+        label: metric.label,
+        count: metric.value,
+        icon: metric.icon,
+        labelKey: metric.label,
+      })),
+    [metrics]
+  );
 
   return (
     <MobilePageContainer>
@@ -146,15 +160,7 @@ export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel
           </Typography>
         ) : null}
 
-        {metrics.length > 0 ? (
-          <Grid container spacing={2}>
-            {metrics.map(metric => (
-              <Grid key={metric.label} size={6}>
-                <MobileMetricCard icon={metric.icon} label={metric.label} value={metric.value} />
-              </Grid>
-            ))}
-          </Grid>
-        ) : null}
+        {metrics.length > 0 ? <MobileMetricCardGrid metrics={metricItems} /> : null}
       </MobileContentStack>
     </MobilePageContainer>
   );

@@ -94,6 +94,7 @@ export function ExchangeRateHistorySectionDesktop({ labels, historyViewModel }: 
         emptyMessage={labels.history.empty}
         autoHeight
         disableColumnMenu
+        paginationOptions={{ mode: "client" }}
       />
     </Box>
   );

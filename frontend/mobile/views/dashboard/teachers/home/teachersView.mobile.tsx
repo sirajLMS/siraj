@@ -1,6 +1,7 @@
 "use client";
 
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type {
   TeacherDirectoryMetrics,
   TeacherDirectoryRow,
@@ -83,10 +84,16 @@ export function TeachersMobileView({
           rows={rows}
           searchQuery={searchQuery}
           onSearchChange={onSearchChange}
-          page={page}
-          pageSize={pageSize}
-          totalCount={totalCount}
-          onPageChange={onPageChange}
+          paginationOptions={
+            totalCount !== undefined
+              ? buildServerPaginationOptions({
+                  page,
+                  pageSize,
+                  totalCount,
+                  onPageChange,
+                })
+              : false
+          }
           onNavigateToSchedule={onNavigateToSchedule}
           onNavigateToProfile={onNavigateToProfile}
         />

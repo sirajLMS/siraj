@@ -2,22 +2,24 @@
 
 import { Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   BaseParentInvoicesListProps,
   ParentInvoicesCardListMobileLabels,
 } from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
-import { MobilePaginationControls, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileListPagination, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { ParentInvoiceRowActionsMobile } from "@/frontend/mobile/views/dashboard/billing/components/parentInvoiceRowActions.mobile";
 
 // VARIANT JUSTIFICATION: extra field labels — card list tier carries card-shaped labels (withPaymentproofHint + statusLabels); desktop data-grid uses a different labels shape
-interface ParentInvoicesCardListMobileProps extends BaseParentInvoicesListProps {
+interface ParentInvoicesCardListMobileProps extends Omit<BaseParentInvoicesListProps, "page" | "pageSize" | "totalCount" | "onPageChange"> {
   readonly labels: ParentInvoicesCardListMobileLabels;
+  readonly paginationOptions: ListPaginationOptions;
 }
 
 const StyledInvoiceCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
-  borderRadius: theme.layout.radius.card,
+  borderRadius: 0,
   border: `1px solid ${theme.palette.outlineVariant}`,
   backgroundColor: theme.palette.surfaceContainerLowest,
 }));
@@ -42,14 +44,8 @@ export function ParentInvoicesCardListMobile({
   onMarkAsPaid,
   onViewPaymentDetails,
   onDownloadPdf,
-  page = 0,
-  pageSize = 10,
-  totalCount,
-  onPageChange,
+  paginationOptions,
 }: Readonly<ParentInvoicesCardListMobileProps>) {
-  const showPagination = totalCount !== undefined && onPageChange !== undefined && totalCount > 0;
-  const pageCount = pageSize > 0 ? Math.ceil((totalCount ?? 0) / pageSize) : 0;
-
   return (
     <Box sx={{ position: "relative" }}>
       {loading ? (
@@ -62,7 +58,7 @@ export function ParentInvoicesCardListMobile({
             justifyContent: "center",
             bgcolor: "rgba(var(--mui-palette-background-defaultChannel) / 0.6)",
             zIndex: 1,
-            borderRadius: 1,
+            borderRadius: 0,
           }}
         >
           <CircularProgress size={28} />
@@ -116,15 +112,7 @@ export function ParentInvoicesCardListMobile({
             />
           </StyledInvoiceCard>
         ))}
-        {showPagination ? (
-          <MobilePaginationControls
-            page={page + 1}
-            pageCount={pageCount}
-            rowCount={totalCount}
-            pageSize={pageSize}
-            onPageChange={onPageChange}
-          />
-        ) : null}
+        <MobileListPagination paginationOptions={paginationOptions} />
       </Box>
     </Box>
   );

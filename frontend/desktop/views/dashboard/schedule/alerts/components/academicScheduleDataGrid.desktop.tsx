@@ -6,10 +6,10 @@ import { useMemo } from "react";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/common/views/dashboard/schedule/alerts/types";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import {
   DesktopAppDataGrid,
   DesktopClassProfileLinkCell,
-  DesktopGridPagination,
   DesktopPersonProfileLinkCell,
 } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
@@ -181,18 +181,17 @@ export function AcademicScheduleDataGridDesktop({
       rowHeight={100}
       ariaLabel="academic-schedule-table"
       emptyMessage={labels.noEntries}
-      {...(isServerPagination
-        ? {
-            paginationMode: "server" as const,
-            rowCount: totalClasses,
-            paginationModel: { page, pageSize },
-            onPaginationModelChange: model => {
-              onPageChange(model.page);
-            },
-            pageSizeOptions: [pageSize],
-            slots: { pagination: DesktopGridPagination },
-          }
-        : {})}
+      paginationOptions={
+        isServerPagination
+          ? buildServerPaginationOptions({
+              page,
+              pageSize,
+              totalCount: totalClasses,
+              onPageChange,
+              pageSizeOptions: [pageSize],
+            })
+          : { mode: "client" }
+      }
     />
   );
 }

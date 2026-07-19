@@ -9,7 +9,7 @@ import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 
 const StyledCreditCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
-  borderRadius: theme.layout.radius.card,
+  borderRadius: 0,
   border: `1px solid ${theme.palette.outlineVariant}`,
   backgroundColor: theme.palette.surfaceContainerLowest,
 }));

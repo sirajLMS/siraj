@@ -1,17 +1,17 @@
 "use client";
 
-import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
+import { AddOutlined } from "@mui/icons-material";
 import { Box, Fab } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { DesktopLayoutProps } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import {
-  DesktopFilterButton,
   DesktopMetricCardGrid,
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
   DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
+import { DateNavigatorDesktop } from "@/frontend/desktop/components/ui/filter";
 import { SuspensionAnalytics } from "@/frontend/desktop/views/dashboard/classes/status/tracking/components/suspensionAnalytics.desktop";
 import { StatusTrackingDataGridDesktop } from "@/frontend/desktop/views/dashboard/classes/status/tracking/statusTrackingDataGrid.desktop";
 
@@ -54,6 +54,8 @@ export function StatusTrackingDesktopView({
   suspendedCount,
   labels,
   analyticsLabels,
+  dateValue,
+  onDateChange,
   onActivate,
   onReschedule,
   onVerify,
@@ -66,16 +68,22 @@ export function StatusTrackingDesktopView({
         title={labels.pageTitle}
         subtitle={labels.pageSubtitle}
         actions={
-          <>
-            <DesktopFilterButton id="status-filters-btn" startIcon={<FilterListOutlined />}>
-              {labels.filters}
-            </DesktopFilterButton>
-            <DesktopPrimaryPageAction id="status-new-report-btn" startIcon={<AddOutlined />} onClick={onNewReport}>
-              {labels.newReport}
-            </DesktopPrimaryPageAction>
-          </>
+          <DesktopPrimaryPageAction id="status-new-report-btn" startIcon={<AddOutlined />} onClick={onNewReport}>
+            {labels.newReport}
+          </DesktopPrimaryPageAction>
         }
       />
+
+      <Box sx={{ mb: 3 }}>
+        <DateNavigatorDesktop
+          dateValue={dateValue}
+          todayLabel={labels.dateFilter.today}
+          previousDayLabel={labels.dateFilter.previousDay}
+          nextDayLabel={labels.dateFilter.nextDay}
+          dateLabel={labels.dateFilter.dateLabel}
+          onDateChange={onDateChange}
+        />
+      </Box>
 
       <DesktopMetricCardGrid metrics={metrics} size={{ md: 6, lg: "grow" }} />
 

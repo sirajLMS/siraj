@@ -10,7 +10,8 @@ import type {
   BaseParentInvoicesListProps,
   ParentInvoicesDataGridDesktopLabels,
 } from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
-import { DesktopAppDataGrid, DesktopGridPagination, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
+import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { ParentInvoiceRowActionsDesktop } from "@/frontend/desktop/views/dashboard/billing/components/parentInvoiceRowActions.desktop";
 
 // VARIANT JUSTIFICATION: extra field labels — data-grid tier carries grid-shaped labels (column headers + statusLabels + empty-title/subtitle); mobile card list uses a different labels shape
@@ -162,18 +163,17 @@ export function ParentInvoicesDataGridDesktop({
       loading={loading}
       getRowId={row => row.id}
       emptyMessage={emptyMessage}
-      {...(isServerPagination
-        ? {
-            paginationMode: "server" as const,
-            rowCount: totalCount,
-            paginationModel: { page, pageSize },
-            onPaginationModelChange: model => {
-              onPageChange(model.page);
-            },
-            pageSizeOptions: [pageSize],
-            slots: { pagination: DesktopGridPagination },
-          }
-        : {})}
+      paginationOptions={
+        isServerPagination
+          ? buildServerPaginationOptions({
+              page,
+              pageSize,
+              totalCount,
+              onPageChange,
+              pageSizeOptions: [pageSize],
+            })
+          : { mode: "client" }
+      }
     />
   );
 }

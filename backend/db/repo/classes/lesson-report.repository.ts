@@ -111,6 +111,39 @@ export namespace LessonReportRepository {
     return rows.map(mapReportWithNames);
   }
 
+  /** Student portal: lesson reports for a single student (newest lesson first). */
+  export async function findForStudent(
+    studentId: string,
+    paginationArgs: PaginationArgs,
+    tx?: DBTransaction
+  ): Promise<LessonReportWithNames[]> {
+    const queryDb = tx ?? db;
+    const rows = await queryDb
+      .select({
+        report: lessonReports,
+        teacherName: users.name,
+        studentName: students.name,
+      })
+      .from(lessonReports)
+      .innerJoin(students, eq(lessonReports.studentId, students.id))
+      .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .where(eq(lessonReports.studentId, studentId))
+      .orderBy(desc(lessonReports.lessonDate))
+      .limit(paginationArgs.perPage)
+      .offset(paginationArgs.offset);
+    return rows.map(mapReportWithNames);
+  }
+
+  export async function countForStudent(studentId: string, tx?: DBTransaction): Promise<number> {
+    const queryDb = tx ?? db;
+    const [result] = await queryDb
+      .select({ value: count() })
+      .from(lessonReports)
+      .where(eq(lessonReports.studentId, studentId));
+    return Number(result?.value ?? 0);
+  }
+
   export async function create(input: LessonReportInsertType, tx?: DBTransaction): Promise<LessonReportSelectType> {
     const queryDb = tx ?? db;
     const [row] = await queryDb.insert(lessonReports).values(input).returning();
