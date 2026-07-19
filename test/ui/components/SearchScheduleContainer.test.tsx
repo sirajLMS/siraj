@@ -40,7 +40,7 @@ mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import { addDays, format } from "date-fns";
 
 expect.extend(matchers);
@@ -171,14 +171,14 @@ describe("SearchScheduleContainer", () => {
     expect(screen.queryByText("Search Schedule Availability")).toBeNull();
   });
 
-  test("renders page title and search form when permission granted", () => {
+  test("renders page title and search form when permission granted", async () => {
     renderWithWrapper(<SearchScheduleContainer />, {
       locale: "en",
       permissions: [AppPermission.ScheduleSearchAvailability],
       mocks: createSearchMock(),
     });
 
-    expect(screen.getByText("Search Schedule Availability")).toBeVisible();
+    expect(await screen.findByText("Search Schedule Availability")).toBeVisible();
     expect(screen.getByRole("button", { name: /search/i })).toBeVisible();
   });
 
@@ -189,7 +189,9 @@ describe("SearchScheduleContainer", () => {
       mocks: createSearchMock(),
     });
 
-    expect(document.querySelectorAll(".MuiSkeleton-root").length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(document.querySelectorAll(".MuiSkeleton-root").length).toBeGreaterThan(0);
+    });
   });
 
   test("shows results after initial load with matching data", async () => {

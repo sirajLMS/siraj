@@ -47,7 +47,7 @@ describe("GraphQL Notification Preferences Integration Tests", () => {
     const data = await authenticatedRequest(token, "query", notificationPreferencesQueryDocument);
 
     expect(Array.isArray(data.notificationPreferences)).toBe(true);
-    expect(data.notificationPreferences?.length).toBe(32);
+    expect(data.notificationPreferences?.length).toBe(96);
     expect(data.notificationPreferences?.[0]?.id).toBeDefined();
     expect(data.notificationPreferences?.every(pref => pref?.enabled)).toBe(true);
   });

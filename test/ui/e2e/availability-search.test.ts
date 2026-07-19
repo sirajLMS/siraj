@@ -55,7 +55,7 @@ describe("Availability Search E2E", () => {
     setupPageTimeouts(page);
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
-    await page.goto("/ar/search-schedule");
+    await page.goto("/search-schedule");
     await page.waitForURL("**/search-schedule**");
 
     const dateRange = page.getByLabel("نطاق التاريخ");
@@ -75,7 +75,7 @@ describe("Availability Search E2E", () => {
     setupPageTimeouts(page);
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
-    await page.goto("/ar/search-schedule");
+    await page.goto("/search-schedule");
     await page.waitForURL("**/search-schedule**");
 
     const searchButton = page.getByRole("button", { name: "بحث" });
@@ -114,7 +114,7 @@ describe("Availability Search E2E", () => {
     setupPageTimeouts(page);
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
-    await page.goto("/ar/search-schedule");
+    await page.goto("/search-schedule");
     await page.waitForURL("**/search-schedule**");
 
     const heading = page.getByText("البحث عن توفر الجدول");

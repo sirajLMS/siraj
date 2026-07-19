@@ -27,7 +27,7 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/ar/dashboard**");
+    await page.waitForURL("**/dashboard**");
     await page.waitForLoadState("networkidle");
 
     // Hero: Next Class label, or empty-state copy when no upcoming lesson
@@ -61,7 +61,7 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/ar/dashboard**");
+    await page.waitForURL("**/dashboard**");
     await page.waitForLoadState("networkidle");
 
     await expectVisible(page.getByText(/Classes Remaining|الحصص المتبقية/i));
@@ -73,7 +73,7 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/ar/dashboard**");
+    await page.waitForURL("**/dashboard**");
     await page.waitForLoadState("networkidle");
 
     await expectVisible(page.getByText(/Recent Lesson Reports|تقارير الحصص الأخيرة/i));
@@ -85,11 +85,11 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/ar/dashboard**");
+    await page.waitForURL("**/dashboard**");
     await page.waitForLoadState("networkidle");
 
     await page.getByRole("link", { name: /My Credits|رصيدي/i }).click();
-    await page.waitForURL("**/ar/students/me/credits**");
+    await page.waitForURL("**/students/me/credits**");
     await page.waitForLoadState("networkidle");
 
     await expectVisible(page.getByRole("heading", { name: /My Credits|رصيدي/i }));
@@ -100,8 +100,8 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.goto("/ar/students/me/credits");
-    await page.waitForURL("**/ar/students/me/credits**");
+    await page.goto("/students/me/credits");
+    await page.waitForURL("**/students/me/credits**");
     await page.waitForLoadState("networkidle");
 
     await expectVisible(page.getByRole("heading", { name: /Transaction History|سجل المعاملات/i }));
@@ -116,7 +116,7 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/ar/dashboard**");
+    await page.waitForURL("**/dashboard**");
     await page.waitForLoadState("networkidle");
 
     const hero = page
@@ -130,7 +130,7 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/ar/dashboard**");
+    await page.waitForURL("**/dashboard**");
     await page.waitForLoadState("networkidle");
 
     await expectVisible(page.getByRole("link", { name: /Today's Classes|حصص اليوم/i }));

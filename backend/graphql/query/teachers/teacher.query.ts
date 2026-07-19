@@ -28,9 +28,10 @@ gqlSchemaBuilder.queryField("teacherDirectory", t =>
       search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
-    authScopes: {
-      $any: [{ permission: AppPermission.TEACHERS_LIST }, { permission: AppPermission.STAFF_VIEW_DIRECTORY }],
-    },
+    authScopes: (_parent, _args, ctx) =>
+      ctx.isSuperAdmin ||
+      ctx.permissions.includes(AppPermission.TEACHERS_LIST) ||
+      ctx.permissions.includes(AppPermission.STAFF_VIEW_DIRECTORY),
     resolve: async (_parent, args, ctx) => {
       let pagination: PaginationArgs | null = null;
       if (args.paginationArgs) {

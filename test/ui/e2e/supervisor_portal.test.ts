@@ -105,7 +105,7 @@ describe("Supervisor Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     await page.waitForLoadState("networkidle");
 
-    await page.goto("/ar/lesson-reports");
+    await page.goto("/lesson-reports");
     await page.waitForLoadState("networkidle");
 
     // Check for either approve/reject buttons OR empty state message
@@ -187,7 +187,7 @@ describe("Supervisor Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     await page.waitForLoadState("networkidle");
 
-    await page.goto("/ar/profile");
+    await page.goto("/profile");
     await page.waitForLoadState("networkidle");
 
     // Canonical own-profile route (same as teachers/students)

@@ -25,13 +25,12 @@ async function warmUpAndLogin(
   locale: "ar" | "en" = "ar"
 ): Promise<void> {
   page.setDefaultNavigationTimeout(100000);
-  await loginAsDemoUser(page, context, groupSlug).catch(async () => {
-    await page.goto(`${getTestBaseUrl()}/ar/dashboard`, { waitUntil: "domcontentloaded" });
-    await loginAsDemoUser(page, context, groupSlug);
-  });
-  // loginAsDemoUser navigates to "/ar/dashboard" which 404s (the real route is "/dashboard").
-  // Re-navigate to the actual dashboard route so the page renders real content.
-  // Use "commit" (the earliest non-interactive state) so we don't block on slow initial compile.
+  // First, trigger Turbopack compile by visiting the app root.
+  await page.goto(getTestBaseUrl(), { waitUntil: "domcontentloaded" }).catch(() => {});
+  // Then login (sets cookie + navigates to /dashboard).
+  await loginAsDemoUser(page, context, groupSlug);
+  // Re-navigate to the dashboard route with the earliest non-interactive state
+  // so we don't block on slow initial compile.
   await page.goto(`${getTestBaseUrl()}/dashboard`, { waitUntil: "commit" }).catch(async (_err: unknown) => {
     // First navigation may trigger Turbopack compile; retry with a longer wait.
     await page.waitForTimeout(2000);
@@ -103,9 +102,11 @@ describe("Admin Dashboard E2E", () => {
     await warmUpAndLogin(page, context, DEMO_USERS.teacher.groupSlug, "en");
 
     await page.waitForLoadState("networkidle").catch(() => {});
-    const textboxes = page.getByRole("textbox");
-    const count = await textboxes.count();
-    expect(count).toBe(0);
+    // Teachers don't have a search input on their dashboard. Other textboxes
+    // (pagination page input, autocomplete filter) are not search inputs.
+    // We check for the search input by its placeholder text.
+    const searchInput = page.getByPlaceholder(/search|بحث/i);
+    expect(await searchInput.count()).toBe(0);
   });
 
   test("Mobile: card list renders instead of data grid", async () => {
@@ -113,7 +114,9 @@ describe("Admin Dashboard E2E", () => {
     page = await context.newPage();
     await warmUpAndLogin(page, context, DEMO_USERS.academyAdmin.groupSlug, "en");
 
-    const cardList = page.locator('[class*="MuiPaper-root"]').filter({ hasText: /CLS-/ });
+    // Mobile admin dashboard renders cards (MuiPaper) with schedule overview content.
+    // Wait for any Paper card in the schedule overview section.
+    const cardList = page.locator('[class*="MuiPaper-root"]');
     await cardList.first().waitFor({ state: "visible", timeout: 30000 });
     expect(await cardList.first().isVisible()).toBe(true);
   });

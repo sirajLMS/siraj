@@ -77,8 +77,8 @@ export async function loginAsDemoUser(page: Page, context: BrowserContext, group
     },
   ]);
 
-  await page.goto("/ar/dashboard");
-  await page.waitForURL("**/dashboard**");
+  await page.goto("/dashboard", { waitUntil: "commit" });
+  await page.waitForURL("**/dashboard**", { timeout: 100000 });
 }
 
 export async function assertElementVisible(page: Page, selector: string): Promise<void> {

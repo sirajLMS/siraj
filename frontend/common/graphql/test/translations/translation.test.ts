@@ -78,7 +78,7 @@ describe("GraphQL Translation Integration Tests", () => {
       query: translatedMessageQueryDocument,
       variables: {
         key: "title",
-        namespace: "common",
+        namespace: "commonTranslations",
       },
       context: {
         headers: {
@@ -96,7 +96,7 @@ describe("GraphQL Translation Integration Tests", () => {
       query: translatedMessageQueryDocument,
       variables: {
         key: "title",
-        namespace: "common",
+        namespace: "commonTranslations",
       },
       context: {
         headers: {

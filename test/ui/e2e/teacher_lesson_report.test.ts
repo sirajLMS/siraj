@@ -116,7 +116,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
     } else {
       // Clear cookies to logout
       await context.clearCookies();
-      await page.goto("/ar/login");
+      await page.goto("/login");
       await page.waitForURL("**/login**");
     }
 
@@ -130,8 +130,8 @@ describe("Teacher Lesson Report E2E Flow", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     await page.waitForLoadState("networkidle");
 
-    // 10. Navigate to pending reviews page (/ar/lesson-reports)
-    await page.goto("/ar/lesson-reports");
+    // 10. Navigate to pending reviews page (/lesson-reports)
+    await page.goto("/lesson-reports");
     await page.waitForLoadState("networkidle");
     await page.waitForURL("**/lesson-reports**");
     expect(page.url()).toContain("/lesson-reports");
@@ -218,7 +218,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     await page.waitForLoadState("networkidle");
 
-    await page.goto("/ar/lesson-reports");
+    await page.goto("/lesson-reports");
     await page.waitForLoadState("networkidle");
     await page.waitForURL("**/lesson-reports**");
     expect(page.url()).toContain("/lesson-reports");

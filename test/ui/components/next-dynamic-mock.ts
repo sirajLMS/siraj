@@ -24,20 +24,24 @@ function cacheComponent<TProps>(key: string, component: React.ComponentType<TPro
 async function preloadViews() {
   try {
     // Import mobile views
-    const [mobileScheduleOverview, mobilePendingReviews] = await Promise.all([
+    const [mobileScheduleOverview, mobilePendingReviews, mobileSearchSchedule] = await Promise.all([
       import("@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/scheduleOverview.mobile"),
       import("@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/pendingReviews.mobile"),
+      import("@/frontend/mobile/views/dashboard/search-schedule/searchSchedule.mobile"),
     ]);
     cacheComponent("mobile-scheduleOverview", mobileScheduleOverview.ScheduleOverviewMobileView);
     cacheComponent("mobile-pendingReviews", mobilePendingReviews.PendingReviewsMobileView);
+    cacheComponent("mobile-searchSchedule", mobileSearchSchedule.SearchScheduleMobileView);
 
     // Import desktop views
-    const [desktopScheduleOverview, desktopPendingReviews] = await Promise.all([
+    const [desktopScheduleOverview, desktopPendingReviews, desktopSearchSchedule] = await Promise.all([
       import("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/scheduleOverview.desktop"),
       import("@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/pendingReviews.desktop"),
+      import("@/frontend/desktop/views/dashboard/search-schedule/searchSchedule.desktop"),
     ]);
     cacheComponent("desktop-scheduleOverview", desktopScheduleOverview.ScheduleOverviewDesktopView);
     cacheComponent("desktop-pendingReviews", desktopPendingReviews.PendingReviewsDesktopView);
+    cacheComponent("desktop-searchSchedule", desktopSearchSchedule.SearchScheduleDesktopView);
   } catch (err) {
     globalThis.console.error("Failed to preload views:", err);
   }
@@ -63,6 +67,10 @@ mock.module("next/dynamic", () => {
       cacheKey = "mobile-pendingReviews";
     } else if (importerStr.includes("pendingReviews.desktop")) {
       cacheKey = "desktop-pendingReviews";
+    } else if (importerStr.includes("searchSchedule.mobile")) {
+      cacheKey = "mobile-searchSchedule";
+    } else if (importerStr.includes("searchSchedule.desktop")) {
+      cacheKey = "desktop-searchSchedule";
     } else {
       // For any other dynamic imports, use the function string as key
       cacheKey = importerStr;
