@@ -33,3 +33,14 @@ export function setAuthCookies(
     });
   }
 }
+
+const AUTH_COOKIE_NAMES = ["session_id", "refresh_token", "access_token"] as const;
+
+/** Clear auth cookies with path `/` so deletion matches {@link setAuthCookies}. */
+export function clearAuthCookies(cookies: ResponseCookies | undefined): void {
+  if (!cookies) return;
+
+  for (const name of AUTH_COOKIE_NAMES) {
+    cookies.delete({ name, path: "/" });
+  }
+}

@@ -1,12 +1,22 @@
 import { SessionRepository } from "@/backend/db/repo";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
+import { verifyToken } from "@/backend/lib/auth/jwt";
 import { computeSessionHashes, verifyAndMigrateSessionHash } from "@/backend/lib/auth/session-hash";
 import { logger } from "@/backend/lib/logger";
+import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 import type { CurrentUserProfile, SessionEntity } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
+import { getServerTranslations } from "@/shared/locale";
+
+export type LogoutUserInput = {
+  sessionId?: string | null;
+  accessToken?: string | null;
+  ipAddress?: string | null;
+  locale?: string;
+};
 
 export namespace SessionService {
   /**
@@ -72,5 +82,46 @@ export namespace SessionService {
       teacherId: teacherId ?? null,
       parentId: parentId ?? null,
     };
+  }
+
+  /**
+   * End impersonation (best-effort), delete all sessions for the session owner,
+   * and return whether a logged-in session was found and cleared.
+   * Callers are responsible for clearing auth cookies on the response.
+   *
+   * `session_id` is required. `accessToken` improves impersonation cleanup when present;
+   * expired/missing tokens still clear sessions owned by the validated session row.
+   */
+  export async function logoutUser(input: LogoutUserInput): Promise<boolean> {
+    const { sessionId, accessToken, ipAddress, locale = "ar" } = input;
+    if (!sessionId) {
+      return false;
+    }
+
+    const session = await validateSession(sessionId);
+    if (!session?.userId) {
+      return false;
+    }
+
+    // Session row is always owned by the real actor (admin when impersonating).
+    const sessionOwnerId = session.userId;
+
+    if (accessToken) {
+      const payload = await verifyToken(accessToken);
+      if (payload?.type === "access") {
+        const identity = await ImpersonationService.resolveAuthIdentityFromToken(payload, sessionId);
+        if (identity?.isImpersonating) {
+          try {
+            const tErrors = getServerTranslations(locale).errorsTranslations;
+            await ImpersonationService.endImpersonation(sessionOwnerId, sessionId, tErrors, ipAddress);
+          } catch (error) {
+            logger.warn("Failed to end impersonation during logout", { error });
+          }
+        }
+      }
+    }
+
+    await SessionRepository.deleteByUserId(sessionOwnerId);
+    return true;
   }
 }

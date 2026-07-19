@@ -11,7 +11,7 @@ import * as Document from "@/frontend/common/graphql/sharedDocuments";
 import { useAuthToken } from "@/frontend/common/hooks/useAuthToken";
 import { dedupedRefreshToken } from "@/frontend/common/lib/dedupedRefreshToken";
 import logger from "@/frontend/common/lib/logger";
-import { buildLoginHrefFromWindow, isSafeRedirect } from "@/frontend/common/lib/safeRedirect";
+import { isSafeRedirect } from "@/frontend/common/lib/safeRedirect";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
 import { type AuthLoginLabels, useAppTranslation } from "@/shared/locale";
 
@@ -70,7 +70,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { updateAuthToken, clearAuthData } = useAuthToken();
   const client = useApolloClient();
   const [loginMutation] = useMutation(Document.loginMutationDocument);
-  const [logoutMutation] = useMutation(Document.logoutMutationDocument);
 
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -120,22 +119,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [client, updateAuthToken, clearAuthData]);
 
-  const logout = useCallback(async () => {
-    try {
-      await logoutMutation();
-    } finally {
-      clearAuthData();
-      await client.clearStore();
-      const targetUrl = buildLoginHrefFromWindow();
-      logger.info({ caller: "AuthProvider.logout" }, "[AuthRedirect] Redirecting to login after logout", {
-        reason: "user initiated logout",
-        from: `${globalThis.location.pathname}${globalThis.location.search}`,
-        to: targetUrl,
-      });
-      // Perform a hard redirect to ensure all state is cleared.
-      globalThis.location.href = targetUrl;
-    }
-  }, [logoutMutation, clearAuthData, client]);
+  const logout = useCallback(() => {
+    logger.info({ caller: "AuthProvider.logout" }, "[AuthRedirect] Redirecting to /logout", {
+      reason: "user initiated logout",
+      from: `${globalThis.location.pathname}${globalThis.location.search}`,
+      to: "/logout",
+    });
+    // Hard navigate to the server logout route — clears httpOnly cookies +
+    // DB sessions, then redirects to /login (in-memory auth drops on unload).
+    globalThis.location.href = "/logout";
+  }, []);
 
   const login = useCallback(
     async (credentials: MutationLoginArgs, redirectUrl: string | null = null): Promise<boolean> => {

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { GraphQLError } from "graphql";
+import { cookies, headers } from "next/headers";
 import { RateLimitRepository, SessionRepository } from "@/backend/db/repo";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AccountStatus } from "@/backend/enum";
@@ -11,8 +12,8 @@ import {
   LoginResponsePothosObject,
   RefreshTokenResponsePothosObject,
 } from "@/backend/graphql/pothos";
-import { generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
-import { setAuthCookies as applyAuthCookies } from "@/backend/lib/auth/cookies";
+import { extractTokenFromHeader, generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
+import { setAuthCookies as applyAuthCookies, clearAuthCookies } from "@/backend/lib/auth/cookies";
 import { comparePassword } from "@/backend/lib/auth/password";
 import { getBooleanEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
@@ -335,31 +336,20 @@ gqlSchemaBuilder.mutationFields(t => ({
       loggedIn: true,
     },
     resolve: async (_parent, _args, ctx) => {
-      const sessionOwnerId = ctx.actorUserId ?? ctx.user?.id;
-      if (!sessionOwnerId) {
-        return false;
-      }
+      const cookieStore = await cookies();
+      const headersList = await headers();
+      const accessToken =
+        extractTokenFromHeader(headersList.get("authorization")) ?? cookieStore.get("access_token")?.value ?? null;
 
-      if (ctx.isImpersonating && ctx.sessionId) {
-        try {
-          const tErrors = ctx.t().errorsTranslations;
-          await ImpersonationService.endImpersonation(sessionOwnerId, ctx.sessionId, tErrors, ctx.ipAddress);
-        } catch (error) {
-          logger.warn("Failed to end impersonation during logout", { error });
-        }
-      }
+      const loggedOut = await SessionService.logoutUser({
+        sessionId: ctx.sessionId ?? null,
+        accessToken,
+        ipAddress: ctx.ipAddress,
+        locale: ctx.locale,
+      });
 
-      // Delete all sessions for the session owner (admin), not the impersonated user
-      await SessionRepository.deleteByUserId(sessionOwnerId);
-
-      // Clear authentication cookies
-      if (ctx.cookies) {
-        ctx.cookies.delete("session_id");
-        ctx.cookies.delete("refresh_token");
-        ctx.cookies.delete("access_token");
-      }
-
-      return true;
+      clearAuthCookies(ctx.cookies);
+      return loggedOut;
     },
   }),
 }));
