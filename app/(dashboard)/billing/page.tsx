@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
+import { AppPermission } from "@/backend/enum";
+import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
+import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { AdminBillingContainer } from "@/frontend/common/views/dashboard/admin/billing/AdminBillingContainer";
 import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
 export async function generateMetadata({
   params,
@@ -12,6 +17,13 @@ export async function generateMetadata({
   return { title: t.adminPageTitle };
 }
 
-export default function BillingPage() {
+export default async function BillingPage() {
+  const locale = await getLocale();
+  const { userId, context } = await getServerUserContext();
+  if (!userId) {
+    await redirectToLogin();
+    return;
+  }
+  await requirePermissionForPage(userId, [AppPermission.BILLING_VIEW_HISTORY], locale, context);
   return <AdminBillingContainer />;
 }

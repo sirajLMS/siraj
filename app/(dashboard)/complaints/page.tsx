@@ -30,7 +30,7 @@ export default async function ComplaintsPage({ params }: { readonly params: Prom
     await getCachedParentIdForComplaints(userId, locale);
   } catch (error) {
     logger.warn("Failed to retrieve parent ID for complaints page. Redirecting to home dashboard.", { error });
-    redirect({ href: "/", locale });
+    redirect({ href: "/dashboard", locale });
   }
 
   return <ParentComplaintsContainer />;

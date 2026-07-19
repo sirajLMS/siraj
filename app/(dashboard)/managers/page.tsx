@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
+import { AppPermission } from "@/backend/enum";
+import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
+import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { ManagersContainer } from "@/frontend/common/views/dashboard/managers/home/ManagersContainer";
 import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -18,6 +23,14 @@ export async function generateMetadata({
 
 export default async function ManagersPage({ params }: Readonly<Props>) {
   await params;
+
+  const locale = await getLocale();
+  const { userId, context } = await getServerUserContext();
+  if (!userId) {
+    await redirectToLogin();
+    return;
+  }
+  await requirePermissionForPage(userId, [AppPermission.STAFF_VIEW_DIRECTORY], locale, context);
 
   return <ManagersContainer />;
 }

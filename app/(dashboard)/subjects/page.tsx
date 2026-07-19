@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { AppPermission } from "@/backend/enum";
+import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { SubjectsContainer } from "@/frontend/common/views/dashboard/subjects/home/SubjectsContainer";
@@ -12,12 +14,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SubjectsPage() {
-  const { userId } = await getServerUserContext();
-
+  const locale = await getLocale();
+  const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
     return;
   }
+  await requirePermissionForPage(userId, [AppPermission.SUBJECTS_LIST], locale, context);
 
   return <SubjectsContainer />;
 }

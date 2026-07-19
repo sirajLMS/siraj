@@ -4,5 +4,6 @@ export * from "./cached-user";
 export * from "./jwt";
 export * from "./password";
 export * from "./permissions";
+export * from "./require-permission";
 export * from "./server-auth";
 export * from "./session-hash";

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cache } from "react";
 import { AppPermission } from "@/backend/enum";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
+import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import type { UserPermissionContext } from "@/backend/services/auth/permissions.service";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
@@ -9,6 +10,7 @@ import { StudentsContainer } from "@/frontend/common/views/dashboard/admin/paren
 import { ParentStudentsContainer } from "@/frontend/common/views/dashboard/parent/students/ParentStudentsContainer";
 import { TeacherStudentsContainer } from "@/frontend/common/views/dashboard/teachers/students/TeacherStudentsContainer";
 import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
 export async function generateMetadata({
   params,
@@ -51,7 +53,15 @@ export default async function StudentsPage() {
     return;
   }
 
+  const locale = await getLocale();
   const audience = await resolveStudentsAudience(userId, context);
+
+  await requirePermissionForPage(
+    userId,
+    [AppPermission.PARENT_VIEW_STUDENTS, AppPermission.TEACHER_VIEW_STUDENTS, AppPermission.STUDENTS_LIST],
+    locale,
+    context
+  );
 
   switch (audience) {
     case "parent":

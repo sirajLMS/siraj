@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { AppPermission } from "@/backend/enum";
+import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { BookService } from "@/backend/services/resource/book.service";
 import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -6,6 +8,7 @@ import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import type { BooksAndBagsPageProps } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
 import { BooksAndBagsView } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBagsView";
 import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
 function mapAvailabilityStatus(status: string): AvailabilityStatus {
   if (status === "OUT_OF_STOCK") {
@@ -26,13 +29,13 @@ export async function generateMetadata({
 
 export default async function BooksAndBagsPage({ params }: BooksAndBagsPageProps) {
   const { locale } = await params;
-
-  const { userId } = await getServerUserContext();
-
+  const permissionLocale = await getLocale();
+  const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
     return;
   }
+  await requirePermissionForPage(userId, [AppPermission.RESOURCES_LIST], permissionLocale, context);
 
   const books = await BookService.listBooks(userId, locale);
 

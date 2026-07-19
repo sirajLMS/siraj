@@ -1,8 +1,13 @@
 import { Box, CircularProgress } from "@mui/material";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { AppPermission } from "@/backend/enum";
+import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
+import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { StudentCreditsContainer } from "@/frontend/common/views/dashboard/student/credits/StudentCreditsContainer";
 import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
 export async function generateMetadata({
   params,
@@ -14,7 +19,14 @@ export async function generateMetadata({
   return { title: t.pageTitle };
 }
 
-export default function StudentCreditsPage() {
+export default async function StudentCreditsPage() {
+  const locale = await getLocale();
+  const { userId, context } = await getServerUserContext();
+  if (!userId) {
+    await redirectToLogin();
+    return;
+  }
+  await requirePermissionForPage(userId, [AppPermission.STUDENT_VIEW_OWN_DASHBOARD], locale, context);
   return (
     <Suspense
       fallback={
