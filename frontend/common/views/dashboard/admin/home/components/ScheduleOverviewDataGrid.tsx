@@ -15,6 +15,7 @@ interface ScheduleOverviewDataGridProps {
   readonly totalCount?: number;
   readonly onPageChange: (page: number) => void;
   readonly headers: {
+    readonly className: string;
     readonly student: string;
     readonly teacher: string;
     readonly time: string;

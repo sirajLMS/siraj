@@ -7,6 +7,7 @@ export const useAdminDashboardLabels = () => {
   const t = useAppTranslation().dashboardTranslations.admin;
 
   const headers = {
+    className: t.className,
     student: t.student,
     teacher: t.teacher,
     time: t.time,

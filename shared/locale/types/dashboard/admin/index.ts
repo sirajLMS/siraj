@@ -23,6 +23,7 @@ export interface AdminDashboardLabels {
   readonly selectTeacher: string;
   readonly submit: string;
   readonly classId: string;
+  readonly className: string;
   readonly student: string;
   readonly time: string;
   readonly yourTime: string;
@@ -52,6 +53,13 @@ export interface AdminDashboardLabels {
   readonly loadingFailedDesc: string;
   readonly retryBtn: string;
   readonly loginBtn: string;
+  /** Labels for the teacher/student timezone offset cell tooltip. */
+  readonly timezoneOffsetDetail: {
+    readonly time: string;
+    readonly timezone: string;
+    readonly utcOffset: string;
+    readonly yourOffset: string;
+  };
 
   // ─── Interpolated → typed functions ────────────────────────────────
 

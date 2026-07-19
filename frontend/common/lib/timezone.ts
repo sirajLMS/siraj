@@ -59,12 +59,30 @@ export function getTimezoneEmoji(ianaTimezone: string): string {
   return getCountryByCode(territoryCode)?.emoji ?? GLOBE_EMOJI;
 }
 
-function formatOffsetFromMinutes(offsetMinutes: number): string {
+export function formatOffsetFromMinutes(offsetMinutes: number): string {
   const sign = offsetMinutes >= 0 ? "+" : "-";
   const absoluteMinutes = Math.abs(offsetMinutes);
   const hours = Math.floor(absoluteMinutes / 60);
   const minutes = absoluteMinutes % 60;
   return `${sign}${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+/**
+ * UTC offset of `targetTimezone` relative to `viewerTimezone`
+ * (target − viewer). Example: Cairo (+03) vs New York (−04) → `+07:00`.
+ */
+export function formatRelativeTimezoneOffset(
+  targetTimezone: string | null | undefined,
+  viewerTimezone: string,
+  date = new Date()
+): string {
+  if (!targetTimezone) {
+    return "—";
+  }
+
+  const targetMinutes = getTimezoneOffsetMinutes(targetTimezone, date);
+  const viewerMinutes = getTimezoneOffsetMinutes(viewerTimezone, date);
+  return formatOffsetFromMinutes(targetMinutes - viewerMinutes);
 }
 
 export function getTimezoneOffsetLabel(ianaTimezone: string, _locale?: string, date = new Date()): string {

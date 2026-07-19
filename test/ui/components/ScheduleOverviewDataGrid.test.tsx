@@ -55,6 +55,7 @@ const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
 };
 
 const headers = {
+  className: "Class",
   student: "Student",
   teacher: "Teacher",
   time: "Time",

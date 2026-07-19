@@ -17,7 +17,7 @@ const StyledDateControls = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "flex-end",
   gap: theme.spacing(1),
-  minWidth: 0,
+  flexShrink: 0,
   width: "auto",
 }));
 

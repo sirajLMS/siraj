@@ -13,6 +13,7 @@ export const dashboardAdminEn: AdminDashboardLabels = {
   selectTeacher: "Select Teacher",
   submit: "Submit",
   classId: "Class ID",
+  className: "Class",
   student: "Student",
   time: "Time",
   yourTime: "Your Time",
@@ -42,6 +43,13 @@ export const dashboardAdminEn: AdminDashboardLabels = {
   loadingFailedDesc: "An unexpected error occurred while loading the schedule.",
   retryBtn: "Retry Loading",
   loginBtn: "Go to Login",
+
+  timezoneOffsetDetail: {
+    time: "Time",
+    timezone: "Timezone",
+    utcOffset: "UTC offset",
+    yourOffset: "Your offset",
+  },
 
   // ─── Interpolated → typed functions ────────────────────────────────
 

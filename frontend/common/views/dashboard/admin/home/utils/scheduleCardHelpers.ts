@@ -1,6 +1,5 @@
 // NEW FOR PLAN v5: schedule card pure-data helpers (getPersonAccentColor, getNameInitials, buildScheduleMetaItems) lifted out of the mobile tier view so tier modules contain rendering only.
 import type { Theme } from "@mui/material/styles";
-import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 
 export type PersonAccentTone = "teacher" | "student" | "default";
 
@@ -30,7 +29,6 @@ export interface MetaStatItem {
   readonly label: string;
   readonly value: import("react").ReactNode;
   readonly tone?: PersonAccentTone;
-  readonly timezone?: string | null;
 }
 
 export function buildScheduleMetaItems(
@@ -39,9 +37,8 @@ export function buildScheduleMetaItems(
     readonly studentTime: string;
     readonly duration: string;
   },
-  row: DailyScheduleRow,
-  teacherTime: string,
-  studentTime: string,
+  teacherTimeCell: import("react").ReactNode,
+  studentTimeCell: import("react").ReactNode,
   duration: string,
   showTimezones: boolean
 ): MetaStatItem[] {
@@ -49,15 +46,13 @@ export function buildScheduleMetaItems(
   if (showTimezones) {
     items.push({
       label: headers.teacherTime,
-      value: teacherTime,
+      value: teacherTimeCell,
       tone: "teacher",
-      timezone: row.teacherTimezone,
     });
     items.push({
       label: headers.studentTime,
-      value: studentTime,
+      value: studentTimeCell,
       tone: "student",
-      timezone: row.studentTimezone,
     });
   }
   items.push({ label: headers.duration, value: duration, tone: "default" });

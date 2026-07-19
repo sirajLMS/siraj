@@ -51,6 +51,7 @@ export interface ScheduleOverviewData {
   readonly teachers: readonly TeacherFilterItem[];
   readonly rows: readonly DailyScheduleRow[];
   readonly headers: {
+    readonly className: string;
     readonly student: string;
     readonly teacher: string;
     readonly time: string;

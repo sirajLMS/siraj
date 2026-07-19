@@ -125,6 +125,7 @@ const createMockProps = (overrides: Partial<UseScheduleOverviewViewModelProps> =
     searchValue: "",
     rows: [],
     headers: {
+      className: "Class",
       student: "Student",
       teacher: "Teacher",
       time: "Time",

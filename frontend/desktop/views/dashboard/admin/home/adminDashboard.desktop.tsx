@@ -43,11 +43,7 @@ export function AdminDashboardDesktopView({
         subtitle={lastUpdated}
         actions={
           <>
-            <DesktopMetricCardGrid
-              metrics={metrics}
-              onMetricClick={onMetricClick}
-              selectedKey={selectedMetricKey}
-            />
+            <DesktopMetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
             {canDashboardSearch ? (
               <TextField
                 placeholder={t.searchPlaceholder}
@@ -72,10 +68,9 @@ export function AdminDashboardDesktopView({
         }
       />
 
-      <DesktopSectionPanel
-        title={t.scheduleOverview}
-        actions={
-          canScheduleFilterAdvanced ? (
+      <DesktopSectionPanel title={t.scheduleOverview}>
+        {canScheduleFilterAdvanced ? (
+          <Box sx={{ mb: 2.5 }}>
             <ScheduleFilters
               dateLabel={t.listOfClassesOn}
               dateValue={dateValue}
@@ -91,9 +86,8 @@ export function AdminDashboardDesktopView({
                 />
               }
             />
-          ) : null
-        }
-      >
+          </Box>
+        ) : null}
         {selectedMetricLabel ? (
           <Box sx={{ mb: 1 }}>
             <StatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />

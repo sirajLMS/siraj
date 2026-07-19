@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { formatOffsetFromMinutes, formatRelativeTimezoneOffset } from "@/frontend/common/lib/timezone";
 import {
+  buildScheduleTimezoneOffsetDetail,
   formatDurationMinutes,
   formatScheduleTimeOnly,
   formatScheduleYourTime,
@@ -41,5 +43,40 @@ describe("formatDurationMinutes", () => {
 
   test("returns empty string for missing values", () => {
     expect(formatDurationMinutes(null)).toBe("");
+  });
+});
+
+describe("formatRelativeTimezoneOffset", () => {
+  test("returns zero relative offset when timezones match", () => {
+    expect(formatRelativeTimezoneOffset("Africa/Cairo", "Africa/Cairo", new Date("2026-07-19T12:00:00Z"))).toBe(
+      "+00:00"
+    );
+  });
+
+  test("returns dash when target timezone is missing", () => {
+    expect(formatRelativeTimezoneOffset(null, "Africa/Cairo")).toBe("—");
+  });
+
+  test("formats absolute offset minutes with sign", () => {
+    expect(formatOffsetFromMinutes(180)).toBe("+03:00");
+    expect(formatOffsetFromMinutes(-240)).toBe("-04:00");
+  });
+});
+
+describe("buildScheduleTimezoneOffsetDetail", () => {
+  test("includes time, timezone name, absolute offsets, and relative offset", () => {
+    const detail = buildScheduleTimezoneOffsetDetail({
+      timeValue: "11:00 AM",
+      timezone: "Africa/Cairo",
+      viewerTimezone: "Africa/Cairo",
+      locale: "en",
+      at: "2026-07-19T08:00:00.000Z",
+    });
+
+    expect(detail.relativeOffset).toBe("+00:00");
+    expect(detail.time).toBe("11:00 AM");
+    expect(detail.timezoneName.length).toBeGreaterThan(0);
+    expect(detail.timezoneUtcOffset).toMatch(/^[+-]\d{2}:\d{2}$/);
+    expect(detail.yourUtcOffset).toMatch(/^[+-]\d{2}:\d{2}$/);
   });
 });

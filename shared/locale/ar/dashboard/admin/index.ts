@@ -13,6 +13,7 @@ export const dashboardAdminAr: AdminDashboardLabels = {
   selectTeacher: "اختر المعلم",
   submit: "إرسال",
   classId: "رقم الحصة",
+  className: "الحصة",
   student: "الطالب",
   time: "الوقت",
   yourTime: "وقتك",
@@ -42,6 +43,13 @@ export const dashboardAdminAr: AdminDashboardLabels = {
   loadingFailedDesc: "حدث خطأ غير متوقع أثناء تحميل المخطط.",
   retryBtn: "إعادة محاولة التحميل",
   loginBtn: "الذهاب لتسجيل الدخول",
+
+  timezoneOffsetDetail: {
+    time: "الوقت",
+    timezone: "المنطقة الزمنية",
+    utcOffset: "إزاحة التوقيت العالمي",
+    yourOffset: "إزاحتك",
+  },
 
   // ─── Interpolated → typed functions ────────────────────────────────
 

@@ -1,6 +1,47 @@
+import {
+  formatRelativeTimezoneOffset,
+  fromGraphqlIanaTimezone,
+  getTimezoneOffsetLabel,
+  getTimezonePathLabel,
+} from "@/frontend/common/lib/timezone";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 const localeTag = getLatnLocaleTag;
+
+export interface ScheduleTimezoneOffsetDetail {
+  readonly relativeOffset: string;
+  readonly time: string;
+  readonly timezoneName: string;
+  readonly timezoneUtcOffset: string;
+  readonly yourUtcOffset: string;
+}
+
+export function resolveScheduleInstant(value: string | null | undefined): Date {
+  const parsed = parseScheduleDate(value);
+  return parsed ?? new Date();
+}
+
+export function buildScheduleTimezoneOffsetDetail(params: {
+  readonly timeValue: string | null | undefined;
+  readonly timezone: string | null | undefined;
+  readonly viewerTimezone: string;
+  readonly locale: string;
+  readonly at?: string | null;
+}): ScheduleTimezoneOffsetDetail {
+  const at = resolveScheduleInstant(params.at);
+  let normalizedTimezone: string | null = null;
+  if (params.timezone) {
+    normalizedTimezone = params.timezone.includes("/") ? params.timezone : fromGraphqlIanaTimezone(params.timezone);
+  }
+
+  return {
+    relativeOffset: formatRelativeTimezoneOffset(normalizedTimezone, params.viewerTimezone, at),
+    time: formatScheduleTimeOnly(params.timeValue, params.locale),
+    timezoneName: normalizedTimezone ? getTimezonePathLabel(normalizedTimezone, params.locale) : "",
+    timezoneUtcOffset: normalizedTimezone ? getTimezoneOffsetLabel(normalizedTimezone, params.locale, at) : "",
+    yourUtcOffset: getTimezoneOffsetLabel(params.viewerTimezone, params.locale, at),
+  };
+}
 
 function parseScheduleDate(value: string | null | undefined): Date | null {
   if (!value) {

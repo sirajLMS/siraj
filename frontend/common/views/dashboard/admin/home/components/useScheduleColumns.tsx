@@ -1,12 +1,11 @@
 "use client";
 
 import { HistoryOutlined } from "@mui/icons-material";
-import { Box, Stack, Tooltip } from "@mui/material";
+import { Box, Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { PersonProfileLinkCell, ActionIconLink as StyledHistoryIconLink } from "@/frontend/common/components/ui";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
@@ -15,10 +14,10 @@ import {
   StyledGridDetailsLink,
   StyledMonospaceLabel,
 } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
+import { ScheduleTimezoneOffsetCell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleTimezoneOffsetCell";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import {
   formatDurationMinutes,
-  formatScheduleTimeOnly,
   formatScheduleYourTime,
 } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
@@ -26,6 +25,7 @@ import { useAppLocale } from "@/shared/locale";
 
 interface UseScheduleColumnsParams {
   readonly headers: {
+    readonly className: string;
     readonly student: string;
     readonly teacher: string;
     readonly time: string;
@@ -70,31 +70,29 @@ function buildTimeColumns(
     {
       field: "teacherTime",
       headerName: headers.teacherTime,
-      width: 130,
-      flex: 1,
-      minWidth: 110,
+      width: 110,
+      flex: 0.6,
+      minWidth: 96,
       renderCell: ({ row }) => (
-        <Stack spacing={0.25}>
-          <StyledMonospaceLabel variant="labelMd">
-            {formatScheduleTimeOnly(row.teacherTime, locale)}
-          </StyledMonospaceLabel>
-          {row.teacherTimezone ? <TimezoneDisplay timezone={row.teacherTimezone} typographyVariant="labelMd" /> : null}
-        </Stack>
+        <ScheduleTimezoneOffsetCell
+          timeValue={row.teacherTime}
+          timezone={row.teacherTimezone}
+          at={row.scheduledStartAt}
+        />
       ),
     },
     {
       field: "studentTime",
       headerName: headers.studentTime,
-      width: 130,
-      flex: 1,
-      minWidth: 110,
+      width: 110,
+      flex: 0.6,
+      minWidth: 96,
       renderCell: ({ row }) => (
-        <Stack spacing={0.25}>
-          <StyledMonospaceLabel variant="labelMd">
-            {formatScheduleTimeOnly(row.studentTime, locale)}
-          </StyledMonospaceLabel>
-          {row.studentTimezone ? <TimezoneDisplay timezone={row.studentTimezone} typographyVariant="labelMd" /> : null}
-        </Stack>
+        <ScheduleTimezoneOffsetCell
+          timeValue={row.studentTime}
+          timezone={row.studentTimezone}
+          at={row.scheduledStartAt}
+        />
       ),
     },
   ];

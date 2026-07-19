@@ -3,6 +3,7 @@
 import { ClassDetailsAdminView } from "@/frontend/common/views/dashboard/classes/details/admin/ClassDetailsAdminView";
 import { ActionFeedbackAlert } from "@/frontend/common/views/dashboard/classes/details/components/ActionFeedbackAlert";
 import { DeleteConfirmationDialog } from "@/frontend/common/views/dashboard/classes/details/components/DeleteConfirmationDialog";
+import { useLocalizedClassInstance } from "@/frontend/common/views/dashboard/classes/details/hooks/useLocalizedClassInstance";
 import { ClassDetailsTeacherView } from "@/frontend/common/views/dashboard/classes/details/teacher/ClassDetailsTeacherView";
 import type {
   AdminViewProps,
@@ -17,12 +18,14 @@ import { ClassDetailsHeaderDesktop } from "@/frontend/desktop/views/dashboard/cl
 
 const AdminView = (props: AdminViewProps) => {
   const labels = useAdminViewLabels(props.instance.studentTimezone ?? "");
-  return <ClassDetailsAdminView {...props} labels={labels} />;
+  const instance = useLocalizedClassInstance(props.instance);
+  return <ClassDetailsAdminView {...props} instance={instance} labels={labels} />;
 };
 
 const TeacherView = (props: TeacherViewProps) => {
   const labels = useTeacherViewLabels(props.instance.studentTimezone ?? "");
-  return <ClassDetailsTeacherView {...props} labels={labels} />;
+  const instance = useLocalizedClassInstance(props.instance);
+  return <ClassDetailsTeacherView {...props} instance={instance} labels={labels} />;
 };
 
 export function ClassDetailsContentDesktop(props: Readonly<ClassDetailsContentProps>) {

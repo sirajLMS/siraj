@@ -14,7 +14,26 @@ const StyledFiltersContainer = styled(Box)(({ theme }) => ({
   [theme.breakpoints.up("md")]: {
     flexDirection: "row",
     alignItems: "flex-end",
+    flexWrap: "wrap",
+  },
+}));
+
+const StyledDateNavigatorSlot = styled(Box)(({ theme }) => ({
+  width: "100%",
+  minWidth: 0,
+  [theme.breakpoints.up("md")]: {
     width: "auto",
+    flexShrink: 0,
+  },
+}));
+
+const StyledTeacherSelectSlot = styled(Box)(({ theme }) => ({
+  width: "100%",
+  minWidth: 0,
+  [theme.breakpoints.up("md")]: {
+    flex: "1 1 200px",
+    minWidth: 200,
+    maxWidth: 360,
   },
 }));
 
@@ -39,7 +58,7 @@ export function ScheduleFilters({
 }: Readonly<ScheduleFiltersProps>) {
   return (
     <StyledFiltersContainer>
-      <Box sx={{ width: "100%", minWidth: 0 }}>
+      <StyledDateNavigatorSlot>
         <DateNavigator
           dateValue={dateValue}
           todayLabel={todayLabel}
@@ -48,9 +67,9 @@ export function ScheduleFilters({
           dateLabel={dateLabel}
           onDateChange={onDateChange}
         />
-      </Box>
+      </StyledDateNavigatorSlot>
 
-      <Box sx={{ width: "100%", minWidth: { xs: 0, md: 200 } }}>{teacherSelect}</Box>
+      <StyledTeacherSelectSlot>{teacherSelect}</StyledTeacherSelectSlot>
     </StyledFiltersContainer>
   );
 }

@@ -9,14 +9,14 @@ import { type ClassExecutionState, ClassOutcome } from "@/frontend/common/graphq
 import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import { StyledScheduleNameLink } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
+import { ScheduleTimezoneOffsetCell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleTimezoneOffsetCell";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import {
   formatDurationMinutes,
-  formatScheduleTimeOnly,
   formatScheduleYourTime,
 } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
-import { MobileActionIconLink, MobileTimezoneDisplay } from "@/frontend/mobile/components/ui";
+import { MobileActionIconLink } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig/MeetingJoinAction.mobile";
 import { Link } from "@/shared/i18n/routing";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
@@ -229,7 +229,6 @@ interface MetaStatItem {
   readonly label: string;
   readonly value: React.ReactNode;
   readonly tone?: PersonAccentTone;
-  readonly timezone?: string | null;
 }
 
 function ScheduleMetaStatBar({ items }: { readonly items: readonly MetaStatItem[] }) {
@@ -247,7 +246,6 @@ function ScheduleMetaStatBar({ items }: { readonly items: readonly MetaStatItem[
           <StyledMetaValue variant="bodyMd" tone={item.tone}>
             {item.value}
           </StyledMetaValue>
-          {item.timezone ? <MobileTimezoneDisplay timezone={item.timezone} displayType="iconOnly" /> : null}
         </StyledMetaTile>
       ))}
     </StyledMetaPanel>
@@ -259,16 +257,19 @@ interface PersonCellProps {
   readonly label: string;
   readonly tone: PersonAccentTone;
   readonly href?: string;
+  readonly avatarUrl?: string | null;
 }
 
-function PersonCell({ name, label, tone, href }: PersonCellProps) {
+function PersonCell({ name, label, tone, href, avatarUrl }: PersonCellProps) {
   return (
     <StyledPersonCell>
       <StyledPersonLabel variant="labelMd" title={label}>
         {label}
       </StyledPersonLabel>
       <StyledPersonContentRow>
-        <StyledPersonAvatar aria-hidden>{getNameInitials(name)}</StyledPersonAvatar>
+        <StyledPersonAvatar src={avatarUrl ?? undefined} alt={name} aria-hidden={!avatarUrl}>
+          {getNameInitials(name)}
+        </StyledPersonAvatar>
         <StyledPersonText>
           <StyledPersonName
             variant="bodyMd"
@@ -295,8 +296,6 @@ function PersonCell({ name, label, tone, href }: PersonCellProps) {
 function buildScheduleMetaItems(
   headers: ScheduleOverviewViewModel["headers"],
   row: DailyScheduleRow,
-  teacherTime: string,
-  studentTime: string,
   duration: string,
   showTimezones: boolean
 ): MetaStatItem[] {
@@ -304,15 +303,25 @@ function buildScheduleMetaItems(
   if (showTimezones) {
     items.push({
       label: headers.teacherTime,
-      value: teacherTime,
+      value: (
+        <ScheduleTimezoneOffsetCell
+          timeValue={row.teacherTime}
+          timezone={row.teacherTimezone}
+          at={row.scheduledStartAt}
+        />
+      ),
       tone: "teacher",
-      timezone: row.teacherTimezone,
     });
     items.push({
       label: headers.studentTime,
-      value: studentTime,
+      value: (
+        <ScheduleTimezoneOffsetCell
+          timeValue={row.studentTime}
+          timezone={row.studentTimezone}
+          at={row.scheduledStartAt}
+        />
+      ),
       tone: "student",
-      timezone: row.studentTimezone,
     });
   }
   items.push({ label: headers.duration, value: duration, tone: "default" });
@@ -381,8 +390,6 @@ export function ScheduleOverviewMobileCard({
   const teacherId = row.teacher?.id;
   const classId = row.id ?? "";
   const yourTime = formatScheduleYourTime(row.yourTime, row.studentTime ?? row.teacherTime, locale);
-  const teacherTime = formatScheduleTimeOnly(row.teacherTime, locale);
-  const studentTime = formatScheduleTimeOnly(row.studentTime, locale);
   const duration = formatDurationMinutes(row.duration);
 
   return (
@@ -441,9 +448,7 @@ export function ScheduleOverviewMobileCard({
         </StyledTimeHighlightContent>
       </StyledTimeHighlight>
 
-      <ScheduleMetaStatBar
-        items={buildScheduleMetaItems(headers, row, teacherTime, studentTime, duration, showTimezones)}
-      />
+      <ScheduleMetaStatBar items={buildScheduleMetaItems(headers, row, duration, showTimezones)} />
 
       <StyledPeopleRow>
         <PersonCell
@@ -451,12 +456,14 @@ export function ScheduleOverviewMobileCard({
           name={teacherName}
           tone="teacher"
           href={teacherId ? profileHrefForTeacher({ teacherId }) : undefined}
+          avatarUrl={row.teacher?.avatarUrl}
         />
         <PersonCell
           label={headers.student}
           name={studentName}
           tone="student"
           href={studentId ? studentHref(studentId) : undefined}
+          avatarUrl={row.student?.avatarUrl}
         />
       </StyledPeopleRow>
     </Box>
