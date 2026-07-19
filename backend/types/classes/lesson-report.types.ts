@@ -11,6 +11,10 @@ export type LessonReportReturnType = Omit<LessonReportSelectType, "status" | "at
   studentName?: string | null;
   subjectName?: string | null;
   classAvatarUrl?: string | null;
+  teacherAvatarUrl?: string | null;
+  studentAvatarUrl?: string | null;
+  teacherUserId?: string | null;
+  studentUserId?: string | null;
 };
 
 export interface LessonReportSubmitInput {

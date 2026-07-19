@@ -71,6 +71,7 @@ function ReviewCard({
             <MobilePersonProfileLink
               href={row.studentId ? studentHref(row.studentId) : undefined}
               name={row.studentName || row.studentId}
+              avatarUrl={row.studentAvatarUrl}
               label={labels.studentColumn}
             />
           </Box>
@@ -78,6 +79,7 @@ function ReviewCard({
             <MobilePersonProfileLink
               href={profileHrefForTeacher({ teacherId: row.teacherId })}
               name={row.teacherName || row.teacherId}
+              avatarUrl={row.teacherAvatarUrl}
               label={labels.teacherColumn}
             />
           </Box>

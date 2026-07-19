@@ -79,6 +79,7 @@ export function LessonReportDetailPanelMobile({ report, labels }: Readonly<Lesso
           <MobilePersonProfileLink
             href={report.studentId ? studentHref(report.studentId) : undefined}
             name={report.studentName || report.studentId}
+            avatarUrl={report.studentAvatarUrl}
           />
         </Stack>
         <Stack sx={{ gap: 0.25 }}>
@@ -88,6 +89,7 @@ export function LessonReportDetailPanelMobile({ report, labels }: Readonly<Lesso
           <MobilePersonProfileLink
             href={profileHrefForTeacher({ teacherId: report.teacherId })}
             name={report.teacherName || report.teacherId}
+            avatarUrl={report.teacherAvatarUrl}
           />
         </Stack>
         <DetailField label={labels.completionColumn} value={String(report.completionPercentage)} />

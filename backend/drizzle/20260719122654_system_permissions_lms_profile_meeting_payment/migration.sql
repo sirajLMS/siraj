@@ -239,7 +239,9 @@ WHERE
     'students.list',
     'complaints.list',
     'complaints.respond',
-    'notification.view_alerts'
+    'notification.view_alerts',
+    'user.view_profile',
+    'teacher.view_profile'
   )
 ON CONFLICT DO NOTHING;
 --> statement-breakpoint
@@ -1507,7 +1509,28 @@ WHERE
   AND p.key IN (
     'profile.core_identity.view_own',
     'profile.core_contact.view_own',
-    'profile.staff_role.view_own'
+    'profile.staff_role.view_own',
+    'profile.core_identity.view_other',
+    'profile.core_contact.view_other',
+    'profile.teacher_professional.view_other',
+    'profile.teacher_identity.view_other',
+    'profile.parent_social.view_other',
+    'profile.parent_identity.view_other',
+    'profile.parent_billing.view_other',
+    'profile.parent_account.view_other',
+    'profile.parent_students.view_other',
+    'profile.teacher_students.view_other',
+    'profile.staff_role.view_other',
+    'profile.staff_permissions.view_other',
+    'profile.payment_methods.view_other',
+    'profile.meeting_configs.view_other',
+    'student.student_identity.view_other',
+    'student.student_academic.view_other',
+    'student.student_teacher.view_other',
+    'student.student_parent.view_other',
+    'student.student_schedule.view_other',
+    'student.student_history.view_other',
+    'student.student_quota_edit.view_other'
   )
 ON CONFLICT DO NOTHING;
 --> statement-breakpoint

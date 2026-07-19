@@ -25,6 +25,10 @@ type LessonReportWithNames = LessonReportSelectType & {
   studentName: string | null;
   subjectName: string | null;
   classAvatarUrl: string | null;
+  teacherAvatarUrl: string | null;
+  studentAvatarUrl: string | null;
+  teacherUserId: string | null;
+  studentUserId: string | null;
 };
 
 type ReportJoinRow = {
@@ -34,6 +38,10 @@ type ReportJoinRow = {
   subjectName: string | null;
   subjectAvatarUrl: string | null;
   recurringAvatarUrl: string | null;
+  teacherAvatarUrl: string | null;
+  studentAvatarUrl: string | null;
+  teacherUserId: string | null;
+  studentUserId: string | null;
 };
 
 const reportSelectFields = {
@@ -43,6 +51,10 @@ const reportSelectFields = {
   subjectName: classSubjects.name,
   subjectAvatarUrl: classSubjects.avatarUrl,
   recurringAvatarUrl: recurringSchedules.avatarUrl,
+  teacherAvatarUrl: users.avatarUrl,
+  studentAvatarUrl: students.avatarUrl,
+  teacherUserId: users.id,
+  studentUserId: students.userId,
 } as const;
 
 function mapReportWithNames(row: ReportJoinRow): LessonReportWithNames {
@@ -52,6 +64,10 @@ function mapReportWithNames(row: ReportJoinRow): LessonReportWithNames {
     studentName: row.studentName,
     subjectName: row.subjectName,
     classAvatarUrl: resolveClassAvatarUrl(row.recurringAvatarUrl, row.subjectAvatarUrl),
+    teacherAvatarUrl: row.teacherAvatarUrl,
+    studentAvatarUrl: row.studentAvatarUrl,
+    teacherUserId: row.teacherUserId,
+    studentUserId: row.studentUserId,
   };
 }
 

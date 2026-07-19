@@ -77,7 +77,11 @@ export namespace StaffProfileService {
     teacherId: string,
     locale?: string
   ): Promise<TeacherProfileReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_EDIT_PROFILE);
+    const hasPermission = await PermissionsService.hasAnyPermission(actorUserId, [
+      AppPermission.STAFF_EDIT_PROFILE,
+      AppPermission.TEACHER_VIEW_PROFILE,
+      AppPermission.USER_VIEW_PROFILE,
+    ]);
     if (!hasPermission) {
       const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
       throw new Error(tFunc.insufficientPermissions);

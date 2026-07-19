@@ -2133,15 +2133,19 @@ type LessonReport {
   reviewedAt: DateTime
   reviewedByUserId: String
   status: LessonReportStatus
+  studentAvatarUrl: String
   studentId: String
   studentName: String
   studentNotes: String
+  studentUserId: String
   subjectName: String
   submittedAt: DateTime
   submittedByUserId: String
+  teacherAvatarUrl: String
   teacherId: String
   teacherName: String
   teacherNotes: String
+  teacherUserId: String
   updatedAt: DateTime
 }
 

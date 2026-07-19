@@ -11,6 +11,10 @@ export interface PendingReviewRow {
   readonly teacherName: string;
   readonly subjectName: string;
   readonly classAvatarUrl: string | null;
+  readonly teacherAvatarUrl: string | null;
+  readonly studentAvatarUrl: string | null;
+  readonly teacherUserId: string | null;
+  readonly studentUserId: string | null;
   readonly lessonDate: string;
   readonly durationMinutes: number;
   readonly attendanceEvaluation: AttendanceEvaluation | null;

@@ -221,7 +221,9 @@ WHERE
     'students.list',
     'complaints.list',
     'complaints.respond',
-    'notification.view_alerts'
+    'notification.view_alerts',
+    'user.view_profile',
+    'teacher.view_profile'
   )
 ON CONFLICT DO NOTHING;
 

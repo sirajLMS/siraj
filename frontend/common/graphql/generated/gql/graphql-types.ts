@@ -2205,15 +2205,19 @@ export type LessonReport = {
   reviewedAt: Maybe<Scalars['DateTime']['output']>;
   reviewedByUserId: Maybe<Scalars['String']['output']>;
   status: Maybe<LessonReportStatus>;
+  studentAvatarUrl: Maybe<Scalars['String']['output']>;
   studentId: Maybe<Scalars['String']['output']>;
   studentName: Maybe<Scalars['String']['output']>;
   studentNotes: Maybe<Scalars['String']['output']>;
+  studentUserId: Maybe<Scalars['String']['output']>;
   subjectName: Maybe<Scalars['String']['output']>;
   submittedAt: Maybe<Scalars['DateTime']['output']>;
   submittedByUserId: Maybe<Scalars['String']['output']>;
+  teacherAvatarUrl: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
   teacherNotes: Maybe<Scalars['String']['output']>;
+  teacherUserId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
 

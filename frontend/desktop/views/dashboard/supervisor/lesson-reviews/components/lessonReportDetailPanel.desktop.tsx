@@ -82,6 +82,7 @@ export function LessonReportDetailPanelDesktop({ report, labels }: Readonly<Less
             <DesktopPersonProfileLink
               href={report.studentId ? studentHref(report.studentId) : undefined}
               name={report.studentName || report.studentId}
+              avatarUrl={report.studentAvatarUrl}
             />
           </Stack>
         </Grid>
@@ -93,6 +94,7 @@ export function LessonReportDetailPanelDesktop({ report, labels }: Readonly<Less
             <DesktopPersonProfileLink
               href={profileHrefForTeacher({ teacherId: report.teacherId })}
               name={report.teacherName || report.teacherId}
+              avatarUrl={report.teacherAvatarUrl}
             />
           </Stack>
         </Grid>

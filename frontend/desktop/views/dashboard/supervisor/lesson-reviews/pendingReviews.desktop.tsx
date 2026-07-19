@@ -83,6 +83,7 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
           <DesktopPersonProfileLinkCell
             href={params.row.studentId ? studentHref(params.row.studentId) : undefined}
             name={params.row.studentName || params.row.studentId}
+            avatarUrl={params.row.studentAvatarUrl}
           />
         ),
       },
@@ -95,6 +96,7 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
           <DesktopPersonProfileLinkCell
             href={profileHrefForTeacher({ teacherId: params.row.teacherId })}
             name={params.row.teacherName || params.row.teacherId}
+            avatarUrl={params.row.teacherAvatarUrl}
           />
         ),
       },
