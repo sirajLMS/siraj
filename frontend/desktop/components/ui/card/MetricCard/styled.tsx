@@ -14,24 +14,22 @@ import {
 } from "@/frontend/desktop/components/ui/card/MetricCard/utils";
 
 export interface StyledCardProps {
-  readonly isCompactSize: boolean;
   readonly isHighlight: boolean;
   readonly isError: boolean;
   readonly isInteractive: boolean;
 }
 
+/** Desktop layout: horizontal row chrome. */
 export const StyledCard = styled(DesktopBaseCard, {
-  shouldForwardProp: prop =>
-    prop !== "isCompactSize" && prop !== "isHighlight" && prop !== "isError" && prop !== "isInteractive",
-})<StyledCardProps>(({ theme, isCompactSize, isHighlight, isError, isInteractive }) => ({
-  padding: isCompactSize ? theme.spacing(1.5) : theme.spacing(2.5),
+  shouldForwardProp: prop => prop !== "isHighlight" && prop !== "isError" && prop !== "isInteractive",
+})<StyledCardProps>(({ theme, isHighlight, isError, isInteractive }) => ({
+  padding: theme.spacing(2.5),
   display: "flex",
-  flexDirection: isCompactSize ? "column" : "row",
-  alignItems: isCompactSize ? "stretch" : "center",
-  justifyContent: isCompactSize ? "flex-start" : "space-between",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
   gap: theme.spacing(1),
   height: "100%",
-  minHeight: isCompactSize ? 92 : undefined,
   overflow: "hidden",
   cursor: isInteractive ? "pointer" : "default",
   transition: "border-color 0.15s ease, box-shadow 0.15s ease",
@@ -54,15 +52,14 @@ export const StyledCard = styled(DesktopBaseCard, {
 export const MotionStyledCard = motion.create(StyledCard);
 
 export interface StyledLabelProps {
-  readonly isCompactSize: boolean;
   readonly isError: boolean;
 }
 
 export const StyledLabel = styled(Typography, {
-  shouldForwardProp: prop => prop !== "isCompactSize" && prop !== "isError",
-})<StyledLabelProps>(({ theme, isCompactSize, isError }) => ({
+  shouldForwardProp: prop => prop !== "isError",
+})<StyledLabelProps>(({ theme, isError }) => ({
   color: isError ? theme.palette.error.main : theme.palette.primary.main,
-  marginBottom: isCompactSize ? 0 : theme.spacing(0.5),
+  marginBottom: theme.spacing(0.5),
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
@@ -119,38 +116,9 @@ export const StyledIcon = styled(
   transition: "color 0.2s ease",
 }));
 
-export const StyledCompactContentRoot = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-between",
-  gap: theme.spacing(1.25),
-  height: "100%",
-  minWidth: 0,
-}));
-
-export const StyledCompactMiddleRow = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: theme.spacing(1),
-  minWidth: 0,
-}));
-
-export const StyledValueContainer = styled(Box)({
-  minWidth: 0,
-});
-
-export interface StyledSubLabelProps {
-  readonly isCompactSize: boolean;
-}
-
-export const StyledSubLabel = styled(Typography, {
-  shouldForwardProp: prop => prop !== "isCompactSize",
-})<StyledSubLabelProps>(({ theme, isCompactSize }) => ({
+export const StyledSubLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.dark,
-  ...(!isCompactSize && {
-    marginTop: theme.spacing(0.5),
-  }),
+  marginTop: theme.spacing(0.5),
 }));
 
 export const StyledDefaultContentRoot = styled(Box)(({ theme }) => ({

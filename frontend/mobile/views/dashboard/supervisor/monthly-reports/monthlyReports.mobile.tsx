@@ -150,7 +150,7 @@ export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel
           <Grid container spacing={2}>
             {metrics.map(metric => (
               <Grid key={metric.label} size={6}>
-                <MobileMetricCard icon={metric.icon} label={metric.label} value={metric.value} variant="compact" />
+                <MobileMetricCard icon={metric.icon} label={metric.label} value={metric.value} />
               </Grid>
             ))}
           </Grid>

@@ -16,6 +16,7 @@ interface DashboardMetricsSectionMobileProps {
   readonly onMetricClick?: (key: string) => void;
   readonly selectedMetricKey?: string;
   readonly withSectionMargin?: boolean;
+  /** Desktop-only Grid span; ignored on mobile (always horizontal scroll). */
   readonly gridSize?: ResponsiveStyleValue<GridSize>;
 }
 
@@ -26,7 +27,6 @@ export function DashboardMetricsSectionMobile({
   onMetricClick,
   selectedMetricKey,
   withSectionMargin = false,
-  gridSize,
 }: Readonly<DashboardMetricsSectionMobileProps>) {
   const section = (
     <MobileSectionPanel
@@ -51,7 +51,6 @@ export function DashboardMetricsSectionMobile({
           metrics={metrics}
           onMetricClick={onMetricClick}
           selectedKey={selectedMetricKey}
-          size={gridSize}
         />
       </Box>
     </MobileSectionPanel>

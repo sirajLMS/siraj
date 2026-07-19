@@ -17,19 +17,16 @@ export function SuggestionsMetricsRowMobile({
           label={labels.metrics.pending}
           value={summary.pending}
           icon={VisibilityOutlined}
-          variant="compact"
         />
         <MobileMetricCard
           label={labels.metrics.reviewed}
           value={summary.reviewed}
           icon={CheckCircleOutlined}
-          variant="compact"
         />
         <MobileMetricCard
           label={labels.metrics.duplicate}
           value={summary.duplicateCount}
           icon={ContentCopyOutlined}
-          variant="compact"
         />
       </Box>
       <AdminQueueEfficiencyBanner

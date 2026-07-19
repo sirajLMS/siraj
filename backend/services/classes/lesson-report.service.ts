@@ -240,6 +240,18 @@ export namespace LessonReportService {
   }): Promise<LessonReportReturnType | null> {
     const existing = await LessonReportRepository.findByClassInstanceId(input.classInstanceId);
     if (existing) {
+      if (
+        input.reviewedByUserId &&
+        existing.reviewedByUserId &&
+        existing.reviewedByUserId !== input.reviewedByUserId
+      ) {
+        const updated = await LessonReportRepository.updateReviewedBy(
+          existing.id,
+          input.reviewedByUserId,
+          input.reviewedAt ?? existing.reviewedAt
+        );
+        return toReturnType(updated);
+      }
       return toReturnType(existing);
     }
 

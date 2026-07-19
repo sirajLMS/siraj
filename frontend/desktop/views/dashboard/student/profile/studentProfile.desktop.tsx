@@ -245,7 +245,6 @@ export function StudentProfileDesktopView({
                   icon={SchoolOutlined}
                   label={labels.teacher}
                   value={profile.teacherName ?? "—"}
-                  variant="compact"
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
@@ -253,7 +252,6 @@ export function StudentProfileDesktopView({
                   icon={CalendarTodayOutlined}
                   label={labels.hoursPerWeek}
                   value={profile.hoursPerWeek ?? 0}
-                  variant="compact"
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
@@ -261,7 +259,6 @@ export function StudentProfileDesktopView({
                   icon={PersonOutlined}
                   label={labels.classesRemaining}
                   value={profile.classesRemaining ?? 0}
-                  variant="compact"
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
@@ -269,7 +266,6 @@ export function StudentProfileDesktopView({
                   icon={AssignmentOutlined}
                   label={labels.classesTotal}
                   value={profile.classesTotal ?? 0}
-                  variant="compact"
                 />
               </Grid>
             </Grid>

@@ -1,7 +1,6 @@
 import type { Theme } from "@mui/material";
 
-export type MetricCardVariant = "default" | "error" | "highlight" | "danger" | "compact";
-export type MetricCardSize = "default" | "compact";
+export type MetricCardVariant = "default" | "error" | "highlight" | "danger";
 
 export function formatValue(value: number | string): string {
   if (typeof value === "number") {
@@ -19,8 +18,6 @@ export function valueColor({ variant, theme }: { variant: MetricCardVariant; the
     case "danger":
       return theme.palette.error.main;
     case "default":
-      return theme.palette.primary.main;
-    case "compact":
       return theme.palette.primary.main;
   }
 }

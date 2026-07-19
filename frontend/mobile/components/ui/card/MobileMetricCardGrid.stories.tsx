@@ -83,13 +83,6 @@ export const WithSelection: Story = {
   },
 };
 
-export const ScrollLayout: Story = {
-  args: {
-    layout: "scroll",
-    onMetricClick: () => undefined,
-  },
-};
-
 export const Arabic: Story = {
   globals: { locale: "ar" },
   args: {

@@ -4,10 +4,27 @@ import {
   cycleAtIndex,
   loadSeedConfig,
   type SeedConfig,
+  STUDENT_USER_EMAIL,
+  SUPERVISOR_USER_EMAIL,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import { NotificationPreferencesService } from "@/backend/services/notification/notification-preferences.service";
 import type { UserSelectType } from "@/backend/types";
+import {
+  type NotificationEventTypeKey,
+  STUDENT_NOTIFICATION_EVENTS,
+  SUPERVISOR_NOTIFICATION_EVENTS,
+} from "@/shared/constants/notification-event-allowlists";
+
+function eventTypesForUser(email: string): readonly NotificationEventTypeKey[] {
+  if (email === STUDENT_USER_EMAIL || /^student-\d+@seed\.siraj\.local$/.test(email)) {
+    return STUDENT_NOTIFICATION_EVENTS;
+  }
+  if (email === SUPERVISOR_USER_EMAIL) {
+    return SUPERVISOR_NOTIFICATION_EVENTS;
+  }
+  return ALL_NOTIFICATION_EVENT_TYPES as readonly NotificationEventTypeKey[];
+}
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding user notification preferences...");
@@ -27,7 +44,8 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
   for (let userIndex = 0; userIndex < targetUsers.length; userIndex++) {
     const user = targetUsers[userIndex];
     const channel = cycleAtIndex(ALL_NOTIFICATION_CHANNELS, userIndex);
-    const eventType = cycleAtIndex(ALL_NOTIFICATION_EVENT_TYPES, userIndex);
+    const allowlist = eventTypesForUser(user.email);
+    const eventType = cycleAtIndex(allowlist, userIndex);
 
     const inserted = await NotificationPreferencesService.upsertManyPreferences(user.id, [
       {

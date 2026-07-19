@@ -1,5 +1,5 @@
 import type { SeedConfig } from "@/backend/db/seeds/lib";
-import { findAdminUserOrFallback } from "@/backend/db/seeds/lib";
+import { findAdminUserOrFallback, findSupervisorUserOrFallback } from "@/backend/db/seeds/lib";
 import { AttendanceEvaluation, ClassExecutionState, LessonReportStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
@@ -107,6 +107,7 @@ export async function seedOrGet(
   const teacherById = new Map(teachersList.map(t => [t.id, t]));
   const teacherUserIdById = new Map(teachersList.map(t => [t.id, t.userId]));
   const adminUser = findAdminUserOrFallback(users);
+  const supervisorUser = findSupervisorUserOrFallback(users);
 
   const specs = buildReportSpecs(completedInstances, studentById, teacherById);
 
@@ -120,7 +121,7 @@ export async function seedOrGet(
     }
 
     const isReviewed = spec.status === LessonReportStatus.APPROVED || spec.status === LessonReportStatus.REJECTED;
-    const reviewedByUserId = isReviewed ? (adminUser?.id ?? submittedByUserId) : null;
+    const reviewedByUserId = isReviewed ? (supervisorUser?.id ?? submittedByUserId) : null;
     const reviewedAt = isReviewed ? (spec.classInstance.actualEndAt ?? spec.classInstance.scheduledEndAt) : null;
 
     const report = await LessonReportService.seedLessonReportIfMissing({

@@ -76,14 +76,12 @@ function renderMetricCard({
   index,
   selectedKey,
   onMetricClick,
-  isScroll,
   translations,
 }: {
   metric: MetricItem;
   index: number;
   selectedKey?: string;
   onMetricClick?: (key: string) => void;
-  isScroll: boolean;
   translations: ReturnType<typeof useAppTranslation>;
 }) {
   const label = metric.label || resolveMetricLabel(metric.labelKey, translations);
@@ -94,7 +92,6 @@ function renderMetricCard({
       value={metric.count}
       subLabel={metric.subLabel}
       variant={selectedKey === metric.key ? "highlight" : metric.variant}
-      size={isScroll ? "compact" : "default"}
       animationIndex={index}
       onClick={
         onMetricClick
@@ -115,9 +112,8 @@ export function DesktopMetricCardGrid({
   layout = "grid",
 }: DesktopMetricCardGridProps) {
   const translations = useAppTranslation();
-  const isScroll = layout === "scroll";
 
-  if (isScroll) {
+  if (layout === "scroll") {
     return (
       <DesktopHorizontalScrollRow>
         {metrics.map((metric, index) => (
@@ -130,7 +126,7 @@ export function DesktopMetricCardGrid({
               borderRadius: 0,
             }}
           >
-            {renderMetricCard({ metric, index, selectedKey, onMetricClick, isScroll, translations })}
+            {renderMetricCard({ metric, index, selectedKey, onMetricClick, translations })}
           </Box>
         ))}
       </DesktopHorizontalScrollRow>
@@ -141,7 +137,7 @@ export function DesktopMetricCardGrid({
     <Grid container spacing={2}>
       {metrics.map((metric, index) => (
         <Grid key={metric.key} size={size ?? defaultSize} sx={{ minWidth: 0 }}>
-          {renderMetricCard({ metric, index, selectedKey, onMetricClick, isScroll, translations })}
+          {renderMetricCard({ metric, index, selectedKey, onMetricClick, translations })}
         </Grid>
       ))}
     </Grid>

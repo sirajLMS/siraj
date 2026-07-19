@@ -93,7 +93,6 @@ export function StudentCreditsMobileView({
               icon={PaymentsOutlined}
               label={labels.hoursRemaining}
               value={balance.classesRemaining}
-              variant="compact"
             />
           </Box>
           <Box sx={{ flex: 1 }}>
@@ -101,7 +100,6 @@ export function StudentCreditsMobileView({
               icon={SchoolOutlined}
               label={labels.hoursTotal}
               value={balance.classesTotal}
-              variant="compact"
             />
           </Box>
         </Stack>

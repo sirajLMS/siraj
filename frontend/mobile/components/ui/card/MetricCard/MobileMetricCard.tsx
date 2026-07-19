@@ -7,7 +7,6 @@ import {
   StyledCard,
   StyledCompactContentRoot,
   StyledCompactMiddleRow,
-  StyledDefaultContentRoot,
   StyledIcon,
   StyledIconWrap,
   StyledLabel,
@@ -15,18 +14,13 @@ import {
   StyledValue,
   StyledValueContainer,
 } from "@/frontend/mobile/components/ui/card/MetricCard/styled";
-import {
-  formatValue,
-  type MetricCardSize,
-  type MetricCardVariant,
-} from "@/frontend/mobile/components/ui/card/MetricCard/utils";
+import { formatValue, type MetricCardVariant } from "@/frontend/mobile/components/ui/card/MetricCard/utils";
 
 export interface MobileMetricCardProps {
   readonly icon: SvgIconComponent;
   readonly label: string;
   readonly value: number | string;
   readonly variant?: MetricCardVariant;
-  readonly size?: MetricCardSize;
   readonly subLabel?: string;
   readonly animated?: boolean;
   readonly animationIndex?: number;
@@ -39,7 +33,6 @@ export function MobileMetricCard({
   label,
   value,
   variant = "default",
-  size = "compact",
   subLabel,
   animated = true,
   animationIndex = 0,
@@ -48,22 +41,17 @@ export function MobileMetricCard({
 }: MobileMetricCardProps) {
   const isError = variant === "error" || variant === "danger";
   const isHighlight = variant === "highlight";
-  const isCompactVariant = variant === "compact";
-  const isCompactSize = size === "compact" || isCompactVariant;
-  const iconSize = isCompactSize ? 28 : 40;
-  const iconFontSize = isCompactSize ? 18 : 22;
+  const iconSize = 28;
+  const iconFontSize = 18;
 
   const labelTypography = (
-    <StyledLabel variant="labelUppercase" title={label} isCompactSize={isCompactSize} isError={isError}>
+    <StyledLabel variant="labelUppercase" title={label} isError={isError}>
       {label}
     </StyledLabel>
   );
 
   const valueTypography = (
-    <StyledValue
-      variant={isCompactSize ? "headlineMd" : "headlineLg"}
-      metricVariant={variant === "compact" ? "default" : variant}
-    >
+    <StyledValue variant="headlineMd" metricVariant={variant}>
       {formatValue(value)}
     </StyledValue>
   );
@@ -74,32 +62,15 @@ export function MobileMetricCard({
     </StyledIconWrap>
   );
 
-  const cardContent = isCompactSize ? (
+  const cardContent = (
     <StyledCompactContentRoot>
       {labelTypography}
       <StyledCompactMiddleRow>
         <StyledValueContainer>{valueTypography}</StyledValueContainer>
         {iconWrap}
       </StyledCompactMiddleRow>
-      {subLabel ? (
-        <StyledSubLabel variant="labelMd" isCompactSize={isCompactSize}>
-          {subLabel}
-        </StyledSubLabel>
-      ) : null}
+      {subLabel ? <StyledSubLabel variant="labelMd">{subLabel}</StyledSubLabel> : null}
     </StyledCompactContentRoot>
-  ) : (
-    <>
-      <StyledDefaultContentRoot>
-        {labelTypography}
-        {valueTypography}
-        {subLabel ? (
-          <StyledSubLabel variant="labelMd" isCompactSize={isCompactSize}>
-            {subLabel}
-          </StyledSubLabel>
-        ) : null}
-      </StyledDefaultContentRoot>
-      {iconWrap}
-    </>
   );
 
   if (animated) {
@@ -107,7 +78,6 @@ export function MobileMetricCard({
       <MotionStyledCard
         interactive={false}
         onClick={onClick}
-        isCompactSize={isCompactSize}
         isHighlight={isHighlight}
         isError={isError}
         isInteractive={Boolean(onClick)}
@@ -129,7 +99,6 @@ export function MobileMetricCard({
     <StyledCard
       interactive={false}
       onClick={onClick}
-      isCompactSize={isCompactSize}
       isHighlight={isHighlight}
       isError={isError}
       isInteractive={Boolean(onClick)}

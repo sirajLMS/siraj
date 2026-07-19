@@ -36,7 +36,7 @@ export function AdminComplaintsMobileView({
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={3} paddingBottom={4}>
-        <ComplaintsMetricsRowMobile summary={summary} labels={labels} compact />
+        <ComplaintsMetricsRowMobile summary={summary} labels={labels} />
 
         <ComplaintsSearchBarMobile
           value={searchQuery}

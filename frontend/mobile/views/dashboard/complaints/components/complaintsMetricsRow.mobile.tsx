@@ -18,14 +18,9 @@ const StyledMetricsContainer = styled(Box)(({ theme }) => ({
 interface ComplaintsMetricsRowMobileProps {
   readonly summary: AdminComplaintsSummary;
   readonly labels: ComplaintsAdminLabels;
-  readonly compact?: boolean;
 }
 
-export function ComplaintsMetricsRowMobile({
-  summary,
-  labels,
-  compact = false,
-}: Readonly<ComplaintsMetricsRowMobileProps>) {
+export function ComplaintsMetricsRowMobile({ summary, labels }: Readonly<ComplaintsMetricsRowMobileProps>) {
   const metrics: readonly MetricItem[] = [
     {
       key: "unanswered",
@@ -33,7 +28,6 @@ export function ComplaintsMetricsRowMobile({
       count: summary.unanswered,
       icon: VisibilityOutlined,
       labelKey: "unanswered",
-      variant: compact ? "compact" : "default",
     },
     {
       key: "answered",
@@ -41,13 +35,12 @@ export function ComplaintsMetricsRowMobile({
       count: summary.answered,
       icon: CheckCircleOutlined,
       labelKey: "answered",
-      variant: compact ? "compact" : "default",
     },
   ];
 
   return (
     <StyledMetricsContainer>
-      <MobileMetricCardGrid metrics={metrics} layout="grid" />
+      <MobileMetricCardGrid metrics={metrics} />
       <AdminQueueEfficiencyBanner
         avgLabel={labels.metrics.avgResolution}
         avgValue={summary.avgResolutionHours}

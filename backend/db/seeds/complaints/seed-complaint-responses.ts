@@ -1,4 +1,9 @@
-import { findAdminUser, getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
+import {
+  findSupervisorUserOrFallback,
+  getFakerForIndex,
+  loadSeedConfig,
+  type SeedConfig,
+} from "@/backend/db/seeds/lib";
 import { ComplaintStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { ComplaintService } from "@/backend/services/communication/complaint.service";
@@ -17,7 +22,7 @@ export async function seedOrGet(complaintsList: ComplaintRow[], usersList: UserS
     return [];
   }
 
-  const adminUser = findAdminUser(usersList);
+  const responderUser = findSupervisorUserOrFallback(usersList);
   const results = [];
 
   for (let i = 0; i < complaintsList.length; i++) {
@@ -27,7 +32,7 @@ export async function seedOrGet(complaintsList: ComplaintRow[], usersList: UserS
     const faker = getFakerForIndex(seedConfig.fakerSeed, 12000 + i);
     const inserted = await ComplaintService.ensureComplaintResponse({
       complaintId: complaint.id,
-      responderUserId: adminUser?.id ?? null,
+      responderUserId: responderUser?.id ?? null,
       body: faker.lorem.paragraph(),
       emailSent: true,
     });

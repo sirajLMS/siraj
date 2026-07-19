@@ -2,6 +2,10 @@ export {
   ADMIN_USER_EMAIL,
   findAdminUser,
   findAdminUserOrFallback,
+  findSupervisorUser,
+  findSupervisorUserOrFallback,
+  STUDENT_USER_EMAIL,
+  SUPERVISOR_USER_EMAIL,
 } from "./admin-user";
 export { SEED_ASSET_MANIFEST, type SeedAssetEntry } from "./asset-manifest";
 export {

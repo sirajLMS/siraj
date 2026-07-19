@@ -139,6 +139,26 @@ export namespace LessonReportRepository {
     return row;
   }
 
+  /** Seed/bootstrap helper: re-attribute reviewer without changing status. */
+  export async function updateReviewedBy(
+    reportId: string,
+    reviewedByUserId: string,
+    reviewedAt: Date | null,
+    tx?: DBTransaction
+  ): Promise<LessonReportSelectType> {
+    const queryDb = tx ?? db;
+    const [row] = await queryDb
+      .update(lessonReports)
+      .set({
+        reviewedByUserId,
+        reviewedAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(lessonReports.id, reportId))
+      .returning();
+    return row;
+  }
+
   export async function countPendingReviews(filters?: PendingReviewFilters, tx?: DBTransaction): Promise<number> {
     const queryDb = tx ?? db;
     const conditions = [eq(lessonReports.status, LessonReportStatus.PENDING_REVIEW)];

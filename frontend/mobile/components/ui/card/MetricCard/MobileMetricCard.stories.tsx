@@ -15,11 +15,7 @@ const meta: Meta<typeof MobileMetricCard> = {
   argTypes: {
     variant: {
       control: "select",
-      options: ["default", "error", "highlight", "danger", "compact"],
-    },
-    size: {
-      control: "select",
-      options: ["default", "compact"],
+      options: ["default", "error", "highlight", "danger"],
     },
     onClick: { action: "clicked" },
   },

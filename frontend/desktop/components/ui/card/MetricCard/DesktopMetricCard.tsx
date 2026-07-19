@@ -5,28 +5,20 @@ import type { SxProps } from "@mui/material";
 import {
   MotionStyledCard,
   StyledCard,
-  StyledCompactContentRoot,
-  StyledCompactMiddleRow,
   StyledDefaultContentRoot,
   StyledIcon,
   StyledIconWrap,
   StyledLabel,
   StyledSubLabel,
   StyledValue,
-  StyledValueContainer,
 } from "@/frontend/desktop/components/ui/card/MetricCard/styled";
-import {
-  formatValue,
-  type MetricCardSize,
-  type MetricCardVariant,
-} from "@/frontend/desktop/components/ui/card/MetricCard/utils";
+import { formatValue, type MetricCardVariant } from "@/frontend/desktop/components/ui/card/MetricCard/utils";
 
 export interface DesktopMetricCardProps {
   readonly icon: SvgIconComponent;
   readonly label: string;
   readonly value: number | string;
   readonly variant?: MetricCardVariant;
-  readonly size?: MetricCardSize;
   readonly subLabel?: string;
   readonly animated?: boolean;
   readonly animationIndex?: number;
@@ -39,7 +31,6 @@ export function DesktopMetricCard({
   label,
   value,
   variant = "default",
-  size = "default",
   subLabel,
   animated = true,
   animationIndex = 0,
@@ -48,22 +39,17 @@ export function DesktopMetricCard({
 }: DesktopMetricCardProps) {
   const isError = variant === "error" || variant === "danger";
   const isHighlight = variant === "highlight";
-  const isCompactVariant = variant === "compact";
-  const isCompactSize = size === "compact" || isCompactVariant;
-  const iconSize = isCompactSize ? 32 : 44;
-  const iconFontSize = isCompactSize ? 18 : 22;
+  const iconSize = 44;
+  const iconFontSize = 22;
 
   const labelTypography = (
-    <StyledLabel variant="labelUppercase" title={label} isCompactSize={isCompactSize} isError={isError}>
+    <StyledLabel variant="labelUppercase" title={label} isError={isError}>
       {label}
     </StyledLabel>
   );
 
   const valueTypography = (
-    <StyledValue
-      variant={isCompactSize ? "headlineMd" : "headlineLg"}
-      metricVariant={variant === "compact" ? "default" : variant}
-    >
+    <StyledValue variant="headlineLg" metricVariant={variant}>
       {formatValue(value)}
     </StyledValue>
   );
@@ -74,29 +60,12 @@ export function DesktopMetricCard({
     </StyledIconWrap>
   );
 
-  const cardContent = isCompactSize ? (
-    <StyledCompactContentRoot>
-      {labelTypography}
-      <StyledCompactMiddleRow>
-        <StyledValueContainer>{valueTypography}</StyledValueContainer>
-        {iconWrap}
-      </StyledCompactMiddleRow>
-      {subLabel ? (
-        <StyledSubLabel variant="labelMd" isCompactSize={isCompactSize}>
-          {subLabel}
-        </StyledSubLabel>
-      ) : null}
-    </StyledCompactContentRoot>
-  ) : (
+  const cardContent = (
     <>
       <StyledDefaultContentRoot>
         {labelTypography}
         {valueTypography}
-        {subLabel ? (
-          <StyledSubLabel variant="labelMd" isCompactSize={isCompactSize}>
-            {subLabel}
-          </StyledSubLabel>
-        ) : null}
+        {subLabel ? <StyledSubLabel variant="labelMd">{subLabel}</StyledSubLabel> : null}
       </StyledDefaultContentRoot>
       {iconWrap}
     </>
@@ -107,7 +76,6 @@ export function DesktopMetricCard({
       <MotionStyledCard
         interactive={false}
         onClick={onClick}
-        isCompactSize={isCompactSize}
         isHighlight={isHighlight}
         isError={isError}
         isInteractive={Boolean(onClick)}
@@ -129,7 +97,6 @@ export function DesktopMetricCard({
     <StyledCard
       interactive={false}
       onClick={onClick}
-      isCompactSize={isCompactSize}
       isHighlight={isHighlight}
       isError={isError}
       isInteractive={Boolean(onClick)}

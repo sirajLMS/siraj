@@ -397,7 +397,12 @@ export namespace ComplaintService {
     emailSent: boolean;
   }) {
     const existing = await ComplaintResponseRepository.findByComplaintId(input.complaintId);
-    if (existing) return existing;
+    if (existing) {
+      if (input.responderUserId && existing.responderUserId !== input.responderUserId) {
+        return ComplaintResponseRepository.updateResponderUserId(existing.id, input.responderUserId);
+      }
+      return existing;
+    }
     return ComplaintResponseRepository.insertResponse(input);
   }
 }

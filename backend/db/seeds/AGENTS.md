@@ -39,6 +39,18 @@ Each domain sub-directory contains its own `index.ts` barrel that re-exports eac
 
 When creating or updating a seeder in this directory, you must adhere to the following rules:
 
+### FORBIDDEN: System permissions (CRITICAL)
+
+**Do not seed system permissions from this directory.** Rows in `permissions`, `permission_groups`, and `group_permissions` are owned exclusively by SQL under `backend/db/migration/` and applied via drizzle migrations under `backend/drizzle/`.
+
+- **Never** insert/upsert into `permissions`, `permission_groups`, or `group_permissions` from a seeder
+- **Never** call `PermissionManagementService.upsertSystemPermissions`, `ensureSystemPermissionGroup`, `ensureGroupPermissionsForGroups`, or `revokeGroupPermissions` from seeders
+- New permission keys, system groups (`student_default`, `supervisor_default`, etc.), or group grants → add SQL under `backend/db/migration/` **and** a new drizzle migration folder under `backend/drizzle/`
+- Seeders **may** assign users to existing groups (`user_permission_groups`) and seed `user_permission_overrides` (per-user overrides only)
+- Demo student / supervisor logins come from `shared/demo-users.ts` → `seed-users.ts`; student domain rows from `students/seed-students.ts`. Groups must already exist from migrations before `seed-users` runs.
+
+### Standard seeder rules
+
 - **"seed or get" Pattern**: Every seeder MUST export a function named `seedOrGet`.
 - **One Seeder per Table**: Every table must have its own dedicated seeder file (e.g. `seed-classes.ts`, `seed-class-instances.ts`). Do not combine distinct domains.
 - **Idempotency**: The `seedOrGet` function must be safely runnable multiple times. Use look-before-create in the seeder (`orchestrateSeedMany` or explicit checks), then service bootstrap methods that handle duplicates (`onConflictDoUpdate`, `onConflictDoNothing`, or race recovery).
@@ -92,8 +104,6 @@ Use these service bootstrap entry points from seeders. Domain seed data (constan
 
 | Seeder domain | Service | Bootstrap method(s) |
 |---------------|---------|---------------------|
-| `auth/seed-meeting-permissions` | `PermissionManagementService` | `upsertSystemPermissions`, `ensureGroupPermissionsForGroups` |
-| `auth/seed-payment-method-permissions` | `PermissionManagementService` | `upsertSystemPermissions`, `ensureGroupPermissionsForGroups` |
 | `auth/seed-user-permission-overrides` | `PermissionManagementService` | `ensureUserPermissionOverride` |
 | `audit/seed-audit-logs` | `AuditService` | `countAuditLogs`, `listAuditLogs`, `createManyAuditLogs` |
 | `audit/seed-admin-audit-logs` | `AuditService` | `countAdminAuditLogs`, `listAdminAuditLogs`, `createManyAdminAuditLogs` |

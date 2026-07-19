@@ -200,7 +200,6 @@ export function StudentProfileMobileView({
                 icon={SchoolOutlined}
                 label={labels.teacher}
                 value={profile.teacherName ?? "—"}
-                variant="compact"
               />
             </Box>
             <Box sx={{ flex: "1 1 140px" }}>
@@ -208,7 +207,6 @@ export function StudentProfileMobileView({
                 icon={CalendarTodayOutlined}
                 label={labels.hoursPerWeek}
                 value={profile.hoursPerWeek ?? 0}
-                variant="compact"
               />
             </Box>
             <Box sx={{ flex: "1 1 140px" }}>
@@ -216,7 +214,6 @@ export function StudentProfileMobileView({
                 icon={PersonOutlined}
                 label={labels.classesRemaining}
                 value={profile.classesRemaining ?? 0}
-                variant="compact"
               />
             </Box>
             <Box sx={{ flex: "1 1 140px" }}>
@@ -224,7 +221,6 @@ export function StudentProfileMobileView({
                 icon={AssignmentOutlined}
                 label={labels.classesTotal}
                 value={profile.classesTotal ?? 0}
-                variant="compact"
               />
             </Box>
           </Stack>

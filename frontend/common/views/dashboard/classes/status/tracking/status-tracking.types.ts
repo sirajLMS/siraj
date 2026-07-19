@@ -129,7 +129,7 @@ export interface RawMetric {
   readonly count: number;
   readonly labelKey: string;
   readonly icon: SvgIconComponent;
-  readonly variant?: "default" | "error" | "highlight" | "danger" | "compact";
+  readonly variant?: "default" | "error" | "highlight" | "danger";
   readonly subLabel?: string;
 }
 

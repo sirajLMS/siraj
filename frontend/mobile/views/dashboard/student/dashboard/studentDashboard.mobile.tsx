@@ -116,7 +116,6 @@ export function StudentDashboardMobileView({
               icon={PaymentsOutlined}
               label={labels.classesRemaining}
               value={creditBalance.classesRemaining}
-              variant="compact"
               onClick={onViewCredits}
             />
           </Box>
@@ -125,7 +124,6 @@ export function StudentDashboardMobileView({
               icon={SchoolOutlined}
               label={labels.classesTotal}
               value={creditBalance.classesTotal}
-              variant="compact"
             />
           </Box>
         </Stack>
@@ -134,7 +132,6 @@ export function StudentDashboardMobileView({
           icon={HistoryOutlined}
           label={labels.upcomingToday}
           value={upcomingTodayCount}
-          variant="compact"
         />
 
         <MobileSectionPanel title={labels.recentLessonReports}>

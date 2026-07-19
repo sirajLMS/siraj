@@ -1,9 +1,5 @@
 import { seedOrGet as seedOrGetAdminAuditLogs } from "@/backend/db/seeds/audit/seed-admin-audit-logs";
 import { seedOrGet as seedOrGetAuditLogs } from "@/backend/db/seeds/audit/seed-audit-logs";
-import { seedOrGet as seedOrGetLmsPermissions } from "@/backend/db/seeds/auth/seed-lms-permissions";
-import { seedOrGet as seedOrGetMeetingPermissions } from "@/backend/db/seeds/auth/seed-meeting-permissions";
-import { seedOrGet as seedOrGetPaymentMethodPermissions } from "@/backend/db/seeds/auth/seed-payment-method-permissions";
-import { seedOrGet as seedOrGetProfileFieldPermissions } from "@/backend/db/seeds/auth/seed-profile-field-permissions";
 import { seedOrGet as seedOrGetUserPermissionOverrides } from "@/backend/db/seeds/auth/seed-user-permission-overrides";
 import { seedOrGet as seedOrGetSupportedCurrencies } from "@/backend/db/seeds/billing/seed-currencies";
 import { seedOrGet as seedOrGetCurrencyExchangeAuditLogs } from "@/backend/db/seeds/billing/seed-currency-exchange-audit-logs";
@@ -125,7 +121,6 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
 
   await seedSystemSettings(context, step);
   await seedTimezones(context, step);
-  await seedPermissions(context, step);
   await seedReferenceData(context, step);
   await seedBooksAndCategories(context, step);
   await seedPermissionGroups(context, step);
@@ -181,13 +176,6 @@ async function seedTimezones(context: SeedContext, step: RunStep): Promise<void>
     const timezones = await step("timezones", () => seedOrGetTimezones());
     if (timezones) context.timezones = timezones;
   }
-}
-
-async function seedPermissions(_context: SeedContext, step: RunStep): Promise<void> {
-  await step("payment-method-permissions", () => seedOrGetPaymentMethodPermissions());
-  await step("profile-field-permissions", () => seedOrGetProfileFieldPermissions());
-  await step("meeting-permissions", () => seedOrGetMeetingPermissions());
-  await step("lms-permissions", () => seedOrGetLmsPermissions());
 }
 
 async function seedReferenceData(_context: SeedContext, step: RunStep): Promise<void> {

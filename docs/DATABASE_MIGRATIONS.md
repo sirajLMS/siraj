@@ -128,9 +128,10 @@ Files in `backend/db/migration/` are combined using `localeCompare` (alphabetica
 
 1. **Never use `CREATE INDEX CONCURRENTLY`** in `backend/db/migration/` — Drizzle’s migrator is always transactional.
 2. **Prefer schema for structure** — tables, columns, and indexes belong in `backend/db/schema/`; custom SQL should hold seeds, triggers, RLS, and functions Drizzle cannot express.
-3. **Use `bun db migrate` / `bun db reset`**, not `bun db push`, when you rely on the migration journal.
-4. **After changing custom SQL**, run `bun db cleanGenerate` (or regenerate the `combined_custom_logic` folder) so `backend/drizzle/` stays in sync.
-5. **Adding enum values** — add to `shared/lib/enum.ts` first, then `bun db cleanGenerate`; avoid duplicate `ALTER TYPE ... ADD VALUE` files unless upgrading legacy databases only.
+3. **System permissions belong in migrations only** — never seed `permissions`, `permission_groups`, or `group_permissions` from `backend/db/seeds/**`. Author SQL under `backend/db/migration/` (e.g. `6-lms-permissions-and-groups.sql`) and apply via a new folder under `backend/drizzle/` (`bun db migrate`). See `backend/db/seeds/AGENTS.md`.
+4. **Use `bun db migrate`**, not only `bun db push`, when you rely on the migration journal for permission/group data.
+5. **After changing custom SQL on an already-migrated DB**, add a **new** drizzle custom migration folder (do not rely on editing `combined_custom_logic`, which will not re-run). `db reset` / `db cleanGenerate` are permanently disabled by repo policy.
+6. **Adding enum values** — add to `AppPermission` / schema enum first, then `bun db push` (and include `ALTER TYPE ... ADD VALUE IF NOT EXISTS` in incremental permission SQL when needed for migrate-before-push ordering).
 
 ## Drizzle migrator reference (installed: `drizzle-orm@1.0.0-rc.3`)
 

@@ -17,7 +17,6 @@ export function ParentDashboardMetricsRowMobile({ metrics, labels }: Readonly<Pa
           icon={ChildCareOutlined}
           label={labels.totalStudents}
           value={formatCount(metrics.totalStudents)}
-          variant="compact"
         />
       </Grid>
       <Grid size={6}>
@@ -25,7 +24,6 @@ export function ParentDashboardMetricsRowMobile({ metrics, labels }: Readonly<Pa
           icon={EventOutlined}
           label={labels.todaysClasses}
           value={formatCount(metrics.todaysClasses)}
-          variant="compact"
         />
       </Grid>
       <Grid size={6}>
@@ -41,7 +39,6 @@ export function ParentDashboardMetricsRowMobile({ metrics, labels }: Readonly<Pa
           icon={TrendingUpOutlined}
           label={labels.performanceAvg}
           value={`${metrics.performanceAvgMobile}%`}
-          variant="compact"
         />
       </Grid>
     </Grid>

@@ -55,7 +55,7 @@ export interface MetricItem {
   readonly label?: string;
   readonly icon: SvgIconComponent;
   readonly subLabel?: string;
-  readonly variant?: "default" | "error" | "highlight" | "danger" | "compact";
+  readonly variant?: "default" | "error" | "highlight" | "danger";
 }
 
 export interface TeacherFilterItem {

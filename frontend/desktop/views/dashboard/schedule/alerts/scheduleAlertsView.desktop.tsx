@@ -63,7 +63,6 @@ function DesktopMetricsSection({
               label={metricLabel.label}
               value={metric.value}
               subLabel={metricLabel.subLabel}
-              variant="compact"
             />
           </Grid>
         );

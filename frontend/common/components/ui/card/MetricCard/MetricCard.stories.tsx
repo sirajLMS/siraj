@@ -11,7 +11,7 @@ const meta: Meta<typeof MetricCard> = {
   argTypes: {
     variant: {
       control: "select",
-      options: ["default", "error", "highlight", "danger", "compact"],
+      options: ["default", "error", "highlight", "danger"],
     },
     onClick: { action: "clicked" },
   },

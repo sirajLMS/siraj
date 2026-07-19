@@ -40,6 +40,21 @@ export namespace ComplaintResponseRepository {
     return created;
   };
 
+  /** Seed/bootstrap helper: re-attribute responder on an existing response. */
+  export const updateResponderUserId = async (
+    responseId: string,
+    responderUserId: string | null,
+    tx?: DBTransaction
+  ) => {
+    const queryDb = tx ?? db;
+    const [row] = await queryDb
+      .update(complaintResponses)
+      .set({ responderUserId })
+      .where(eq(complaintResponses.id, responseId))
+      .returning();
+    return row;
+  };
+
   export const createResponse = async (input: CreateComplaintResponseInput, tx?: DBTransaction, _locale?: string) => {
     const runner = async (t: DBTransaction) => {
       const now = new Date();

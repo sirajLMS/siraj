@@ -14,24 +14,23 @@ import {
 } from "@/frontend/mobile/components/ui/card/MetricCard/utils";
 
 export interface StyledCardProps {
-  readonly isCompactSize: boolean;
   readonly isHighlight: boolean;
   readonly isError: boolean;
   readonly isInteractive: boolean;
 }
 
+/** Mobile layout: always compact column chrome. */
 export const StyledCard = styled(MobileBaseCard, {
-  shouldForwardProp: prop =>
-    prop !== "isCompactSize" && prop !== "isHighlight" && prop !== "isError" && prop !== "isInteractive",
-})<StyledCardProps>(({ theme, isCompactSize, isHighlight, isError, isInteractive }) => ({
-  padding: isCompactSize ? theme.spacing(1) : theme.spacing(2),
+  shouldForwardProp: prop => prop !== "isHighlight" && prop !== "isError" && prop !== "isInteractive",
+})<StyledCardProps>(({ theme, isHighlight, isError, isInteractive }) => ({
+  padding: theme.spacing(1),
   display: "flex",
-  flexDirection: isCompactSize ? "column" : "row",
-  alignItems: isCompactSize ? "stretch" : "center",
-  justifyContent: isCompactSize ? "flex-start" : "space-between",
+  flexDirection: "column",
+  alignItems: "stretch",
+  justifyContent: "flex-start",
   gap: theme.spacing(1),
   height: "100%",
-  minHeight: isCompactSize ? 88 : undefined,
+  minHeight: 88,
   overflow: "hidden",
   cursor: isInteractive ? "pointer" : "default",
   transition: "border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
@@ -59,15 +58,14 @@ export const StyledCard = styled(MobileBaseCard, {
 export const MotionStyledCard = motion.create(StyledCard);
 
 export interface StyledLabelProps {
-  readonly isCompactSize: boolean;
   readonly isError: boolean;
 }
 
 export const StyledLabel = styled(Typography, {
-  shouldForwardProp: prop => prop !== "isCompactSize" && prop !== "isError",
-})<StyledLabelProps>(({ theme, isCompactSize, isError }) => ({
+  shouldForwardProp: prop => prop !== "isError",
+})<StyledLabelProps>(({ theme, isError }) => ({
   color: isError ? theme.palette.error.main : theme.palette.primary.main,
-  marginBottom: isCompactSize ? 0 : theme.spacing(0.5),
+  marginBottom: 0,
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
@@ -145,25 +143,6 @@ export const StyledValueContainer = styled(Box)({
   minWidth: 0,
 });
 
-export interface StyledSubLabelProps {
-  readonly isCompactSize: boolean;
-}
-
-export const StyledSubLabel = styled(Typography, {
-  shouldForwardProp: prop => prop !== "isCompactSize",
-})<StyledSubLabelProps>(({ theme, isCompactSize }) => ({
+export const StyledSubLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.dark,
-  ...(!isCompactSize && {
-    marginTop: theme.spacing(0.5),
-  }),
-}));
-
-export const StyledDefaultContentRoot = styled(Box)(({ theme }) => ({
-  marginLeft: theme.spacing(0.5),
-  flex: 1,
-  minWidth: 0,
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-around",
-  height: "100%",
 }));
