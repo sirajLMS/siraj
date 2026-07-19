@@ -61,12 +61,23 @@ const StyledUnavailableText = styled(Typography)(({ theme }) => ({
 function MetadataRow({ icon, label, value }: MetadataRowProps) {
   return (
     <>
-      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", py: 1.5 }}>
-        <StyledLabelRow direction="row">
-          <Box sx={{ fontSize: 18, display: "flex" }}>{icon}</Box>
-          <Typography variant="body2">{label}</Typography>
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          py: 1.5,
+          gap: 1.5,
+          minWidth: 0,
+        }}
+      >
+        <StyledLabelRow direction="row" sx={{ minWidth: 0, flex: "1 1 auto" }}>
+          <Box sx={{ fontSize: 18, display: "flex", flexShrink: 0 }}>{icon}</Box>
+          <Typography variant="body2" sx={{ minWidth: 0 }}>
+            {label}
+          </Typography>
         </StyledLabelRow>
-        {value}
+        <Box sx={{ flex: "0 1 auto", minWidth: 0, textAlign: "end" }}>{value}</Box>
       </Stack>
       <StyledRowDivider sx={theme => ({ borderColor: theme.palette.outlineVariant })} />
     </>

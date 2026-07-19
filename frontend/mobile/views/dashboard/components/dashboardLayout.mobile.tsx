@@ -10,6 +10,7 @@ import {
   LanguageSwitcher,
   NavbarChrome,
   NotificationButton,
+  ThemeSwitcher,
   UserMenuButton,
 } from "@/frontend/common/views/dashboard/components/navbar";
 import { useNavLabels } from "@/frontend/common/views/dashboard/components/useNavLabels";
@@ -85,6 +86,7 @@ export function DashboardLayoutMobile({
         leftSlot={<MobileMenuButton />}
         rightSlot={
           <>
+            <ThemeSwitcher />
             <LanguageSwitcher />
             <NotificationButton notificationCount={notificationCount} />
             <UserMenuButton userName={userName} userEmail={userEmail} avatarUrl={avatarUrl} />

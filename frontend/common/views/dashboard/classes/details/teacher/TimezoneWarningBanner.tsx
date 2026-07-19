@@ -20,19 +20,19 @@ interface TimezoneWarningBannerProps {
   };
 }
 
-// Error-container-tinted alert with pulsing animation and canceled-border accent
+// Warning-container-tinted alert with pulsing animation
 const StyledTimezoneWarningAlert = styled(Alert)(({ theme }) => ({
   borderLeft: 4,
-  borderColor: theme.palette.status.cancelled,
-  backgroundColor: theme.palette.errorContainer,
-  color: theme.palette.onErrorContainer,
+  borderColor: theme.palette.onWarningContainer,
+  backgroundColor: theme.palette.warningContainer,
+  color: theme.palette.onWarningContainer,
   animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
   "@keyframes pulse": {
     "0%, 100%": { opacity: 1 },
     "50%": { opacity: 0.85 },
   },
   "& .MuiAlert-icon": {
-    color: theme.palette.error.main,
+    color: theme.palette.onWarningContainer,
   },
 }));
 
@@ -54,7 +54,7 @@ export function TimezoneWarningBanner({
   return (
     <StyledTimezoneWarningAlert
       icon={<WarningAmberIcon />}
-      severity="error"
+      severity="warning"
       sx={mergeSx({ mb: { xs: 0, lg: 3 } }, edgeToEdgeSx, classDetailsContentPaddingSx)}
       action={
         <IconButton

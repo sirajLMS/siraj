@@ -5,6 +5,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import MenuBookOutlined from "@mui/icons-material/MenuBookOutlined";
 import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import type { ReactNode } from "react";
 import { BaseCard, UserAvatar } from "@/frontend/common/components/ui";
 import type {
   ClassInstanceStudentInfo,
@@ -77,21 +78,82 @@ function LinkedAvatar({
   href,
   name,
   avatarUrl,
+  size = 64,
 }: {
   readonly href?: string;
   readonly name: string;
   readonly avatarUrl?: string;
+  readonly size?: number;
 }) {
-  const avatar = <UserAvatar src={avatarUrl} label={name} size={64} />;
+  const avatar = <UserAvatar src={avatarUrl} label={name} size={size} />;
 
   if (!href) {
     return avatar;
   }
 
   return (
-    <Box component={Link} href={href} sx={{ display: "inline-flex", textDecoration: "none" }}>
+    <Box component={Link} href={href} sx={{ display: "inline-flex", textDecoration: "none", flexShrink: 0 }}>
       {avatar}
     </Box>
+  );
+}
+
+function PersonBlock({
+  href,
+  name,
+  avatarUrl,
+  roleLabel,
+  nameNode,
+  detail,
+}: {
+  readonly href?: string;
+  readonly name: string;
+  readonly avatarUrl?: string;
+  readonly roleLabel: string;
+  readonly nameNode: ReactNode;
+  readonly detail?: ReactNode;
+}) {
+  return (
+    <Stack
+      direction="row"
+      sx={{
+        alignItems: "center",
+        gap: { xs: 1.5, sm: 2 },
+        flex: 1,
+        minWidth: 0,
+        width: "100%",
+      }}
+    >
+      <Box
+        sx={{
+          flexShrink: 0,
+          width: { xs: 48, sm: 64 },
+          height: { xs: 48, sm: 64 },
+          "& .MuiAvatar-root": { width: "100%", height: "100%" },
+        }}
+      >
+        <LinkedAvatar href={href} name={name} avatarUrl={avatarUrl} size={64} />
+      </Box>
+      <Box sx={{ minWidth: 0, overflow: "hidden" }}>
+        <StyledPersonRoleCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
+          {roleLabel}
+        </StyledPersonRoleCaption>
+        <Box
+          sx={{
+            minWidth: 0,
+            "& a, & .MuiTypography-root": {
+              display: "block",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            },
+          }}
+        >
+          {nameNode}
+        </Box>
+        {detail}
+      </Box>
+    </Stack>
   );
 }
 
@@ -113,11 +175,39 @@ export function ClassInfoCard({
     <BaseCard edgeToEdge sx={{ position: "relative", overflow: "hidden", height: "100%" }}>
       <Stack
         direction="row"
-        sx={theme => ({ justifyContent: "space-between", alignItems: "flex-start", mb: theme.spacing(4) })}
+        sx={theme => ({
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          mb: theme.spacing(4),
+          gap: theme.spacing(1),
+          flexWrap: "wrap",
+        })}
       >
-        <Stack direction="row" sx={theme => ({ alignItems: "flex-start", gap: theme.spacing(2), flex: 1, minWidth: 0 })}>
+        <Stack
+          direction="row"
+          sx={theme => ({
+            alignItems: "flex-start",
+            gap: theme.spacing(2),
+            flex: 1,
+            minWidth: 0,
+          })}
+        >
           {subjectId || subjectName ? (
-            <LinkedAvatar href={subjectHref} name={subjectName || courseName} avatarUrl={subjectAvatarUrl ?? undefined} />
+            <Box
+              sx={{
+                flexShrink: 0,
+                width: { xs: 48, sm: 64 },
+                height: { xs: 48, sm: 64 },
+                "& .MuiAvatar-root": { width: "100%", height: "100%" },
+              }}
+            >
+              <LinkedAvatar
+                href={subjectHref}
+                name={subjectName || courseName}
+                avatarUrl={subjectAvatarUrl ?? undefined}
+                size={64}
+              />
+            </Box>
           ) : null}
           <Box sx={{ minWidth: 0 }}>
             <StyledLiveInstanceChip
@@ -134,7 +224,13 @@ export function ClassInfoCard({
             />
             <StyledCourseNameHeading
               variant="h3"
-              sx={theme => ({ mb: theme.spacing(0.5), color: theme.palette.primary.main })}
+              sx={theme => ({
+                mb: theme.spacing(0.5),
+                color: theme.palette.primary.main,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              })}
             >
               {courseName}
             </StyledCourseNameHeading>
@@ -161,7 +257,14 @@ export function ClassInfoCard({
           </Box>
         </Stack>
         {isActive && (
-          <Stack direction="row" sx={theme => ({ alignItems: "center", gap: theme.spacing(1) })}>
+          <Stack
+            direction="row"
+            sx={theme => ({
+              alignItems: "center",
+              gap: theme.spacing(1),
+              flexShrink: 0,
+            })}
+          >
             <StyledActiveStatusDot sx={theme => ({ color: theme.palette.status.active })} />
             <StyledActiveConnectionCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
               {labels.activeConnection}
@@ -170,51 +273,54 @@ export function ClassInfoCard({
         )}
       </Stack>
 
-      <Stack direction="row" sx={theme => ({ gap: theme.spacing(4), mt: theme.spacing(2), alignItems: "center" })}>
-        <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
-          <LinkedAvatar
-            href={studentProfileHref}
-            name={student.name ?? ""}
-            avatarUrl={student.avatarUrl ?? undefined}
-          />
-          <Box>
-            <StyledPersonRoleCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {labels.student}
-            </StyledPersonRoleCaption>
-            {student.id ? (
-              <StudentEntityLink studentId={student.id} name={student.name ?? ""} />
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        sx={theme => ({
+          gap: { xs: theme.spacing(2), sm: theme.spacing(4) },
+          mt: theme.spacing(2),
+          alignItems: { xs: "stretch", sm: "center" },
+          minWidth: 0,
+        })}
+      >
+        <PersonBlock
+          href={studentProfileHref}
+          name={student.name ?? ""}
+          avatarUrl={student.avatarUrl ?? undefined}
+          roleLabel={labels.student}
+          nameNode={
+            student.id ? (
+              <StudentEntityLink studentId={student.id} name={student.name ?? ""} variant="bodyLg" />
             ) : (
-              <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
+              <Typography variant="bodyLg" sx={{ fontWeight: 700 }}>
                 {student.name ?? ""}
               </Typography>
-            )}
-          </Box>
-        </Stack>
+            )
+          }
+        />
 
-        <Divider orientation="vertical" flexItem />
+        <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
+        <Divider sx={{ display: { xs: "block", sm: "none" } }} />
 
-        <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
-          <LinkedAvatar
-            href={teacherProfileHref}
-            name={teacher.name ?? ""}
-            avatarUrl={teacher.avatarUrl ?? undefined}
-          />
-          <Box>
-            <StyledPersonRoleCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {labels.moduleInstructor}
-            </StyledPersonRoleCaption>
-            {teacher.id ? (
-              <TeacherEntityLink teacherId={teacher.id} name={teacher.name ?? ""} />
+        <PersonBlock
+          href={teacherProfileHref}
+          name={teacher.name ?? ""}
+          avatarUrl={teacher.avatarUrl ?? undefined}
+          roleLabel={labels.moduleInstructor}
+          nameNode={
+            teacher.id ? (
+              <TeacherEntityLink teacherId={teacher.id} name={teacher.name ?? ""} variant="bodyLg" />
             ) : (
-              <Typography variant="titleLg">{teacher.name ?? ""}</Typography>
-            )}
-            {teacher.title ? (
+              <Typography variant="bodyLg">{teacher.name ?? ""}</Typography>
+            )
+          }
+          detail={
+            teacher.title ? (
               <StyledPersonDetailCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
                 {teacher.title}
               </StyledPersonDetailCaption>
-            ) : null}
-          </Box>
-        </Stack>
+            ) : null
+          }
+        />
       </Stack>
 
       <StyledDecorativeIconWrapper sx={theme => ({ color: theme.palette.primary.main })}>

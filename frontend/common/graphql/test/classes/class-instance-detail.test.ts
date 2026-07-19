@@ -67,6 +67,7 @@ describe("GraphQL Class Instance Detail Query", () => {
     expect(instance?.courseName).toBeTruthy();
     expect(instance?.subjectId).toBeTruthy();
     expect(instance?.subjectName).toBeTruthy();
+    expect(instance).toHaveProperty("subjectAvatarUrl");
     expect(instance?.student?.id).toBe(studentId);
     expect(instance?.teacher?.id).toBe(teacherId);
   });

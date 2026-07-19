@@ -28,10 +28,16 @@ interface Bar {
 const StyledHeatmapHeader = styled(Stack)(({ theme }) => ({
   justifyContent: "space-between",
   alignItems: "center",
+  flexWrap: "wrap",
+  gap: theme.spacing(1.5),
   paddingBlock: theme.spacing(2.5),
   borderBottom: 1,
   borderColor: theme.palette.border.light,
   backgroundColor: theme.palette.background.paper,
+  [theme.breakpoints.down("sm")]: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+  },
 }));
 
 const StyledSectionTitle = styled(Typography)(({ theme }) => ({
@@ -75,10 +81,10 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
   return (
     <BaseCard edgeToEdge edgeToEdgePadding={false} sx={{ py: 0, overflow: "hidden" }}>
       <StyledHeatmapHeader direction="row" sx={classDetailsCardInnerPaddingSx}>
-        <StyledSectionTitle variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
+        <StyledSectionTitle variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, minWidth: 0 })}>
           {labels.activityHeatmap}
         </StyledSectionTitle>
-        <Stack direction="row" sx={{ gap: 3 }}>
+        <Stack direction="row" sx={{ gap: { xs: 2, sm: 3 }, flexWrap: "wrap", minWidth: 0 }}>
           <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
             <StyledStudentInputSwatch sx={theme => ({ backgroundColor: theme.palette.primary.main })} />
             <StyledLegendCaption variant="caption">{labels.studentInput}</StyledLegendCaption>
