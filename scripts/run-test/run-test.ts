@@ -140,7 +140,7 @@ async function runTest(testPath: string): Promise<number> {
 
   logInfo(`Running: bun test ${testPath}`);
 
-  const proc = Bun.spawn([BUN_BIN, "test", testPath, "--timeout=60000"], {
+  const proc = Bun.spawn([BUN_BIN, "--env-file=.env.test", "test", testPath, "--timeout=60000"], {
     stdout: "pipe",
     stderr: "pipe",
     env: { ...process.env, FORCE_COLOR: "0", NODE_ENV: "test" },

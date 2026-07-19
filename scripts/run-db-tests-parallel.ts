@@ -133,7 +133,7 @@ async function runSingleTestFile(file: string): Promise<void> {
   const start = performance.now();
 
   try {
-    const proc = Bun.spawn(["bun", "test", file, "--timeout=60000"], {
+    const proc = Bun.spawn(["bun", "--env-file=.env.test", "test", file, "--timeout=60000"], {
       stdout: "pipe",
       stderr: "pipe",
       env: { ...process.env, FORCE_COLOR: "1", NODE_ENV: "test" },
