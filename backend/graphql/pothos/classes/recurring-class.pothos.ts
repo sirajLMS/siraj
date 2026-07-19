@@ -22,6 +22,7 @@ export const CreateRecurringClassInputPothosObject = gqlSchemaBuilder
     fields: t => ({
       studentId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       teacherId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      subjectId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       durationMinutes: t.int({ required: true }),
       defaultStartTime: t.string({ required: true, directives: { constraint: { maxLength: 10 } } }),
       timezone: t.field({ type: IanaTimezonePothosObject, required: true }),

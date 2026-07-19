@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { StudentHistoryRepository } from "@/backend/db/repo";
 import { classInstancePerformance, classInstances } from "@/backend/db/schema";
-import { setupTestEntities } from "@/backend/db/test/entity-setup";
+import { setupTestEntities, ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 
 describe("StudentHistoryRepository", () => {
@@ -15,6 +15,7 @@ describe("StudentHistoryRepository", () => {
         .values({
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           scheduledStartAt: new Date("2026-06-15T14:30:00Z"),
           scheduledEndAt: new Date("2026-06-15T15:30:00Z"),
           durationMinutes: 60,
@@ -36,6 +37,7 @@ describe("StudentHistoryRepository", () => {
       await tx.insert(classInstances).values({
         studentId: student.id,
         teacherId: teacher.id,
+        subjectId: await ensureTestSubjectId(tx),
         scheduledStartAt: new Date("2026-05-15T14:30:00Z"),
         scheduledEndAt: new Date("2026-05-15T15:30:00Z"),
         durationMinutes: 60,
@@ -72,6 +74,7 @@ describe("StudentHistoryRepository", () => {
         .values({
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           scheduledStartAt: new Date("2026-06-16T14:30:00Z"),
           scheduledEndAt: new Date("2026-06-16T15:30:00Z"),
           durationMinutes: 60,
@@ -106,6 +109,7 @@ describe("StudentHistoryRepository", () => {
       await tx.insert(classInstances).values({
         studentId: student.id,
         teacherId: teacher.id,
+        subjectId: await ensureTestSubjectId(tx),
         scheduledStartAt: new Date("2026-06-10T10:00:00Z"),
         scheduledEndAt: new Date("2026-06-10T11:00:00Z"),
         durationMinutes: 60,
@@ -123,6 +127,7 @@ describe("StudentHistoryRepository", () => {
       await tx.insert(classInstances).values({
         studentId: student.id,
         teacherId: teacher.id,
+        subjectId: await ensureTestSubjectId(tx),
         scheduledStartAt: new Date("2026-06-12T10:00:00Z"),
         scheduledEndAt: new Date("2026-06-12T11:00:00Z"),
         durationMinutes: 30,
@@ -138,6 +143,7 @@ describe("StudentHistoryRepository", () => {
       await tx.insert(classInstances).values({
         studentId: student.id,
         teacherId: teacher.id,
+        subjectId: await ensureTestSubjectId(tx),
         scheduledStartAt: new Date("2026-06-14T10:00:00Z"),
         scheduledEndAt: new Date("2026-06-14T11:00:00Z"),
         durationMinutes: 60,
@@ -166,6 +172,7 @@ describe("StudentHistoryRepository", () => {
         .values({
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           scheduledStartAt: new Date("2026-06-10T10:00:00Z"),
           scheduledEndAt: new Date("2026-06-10T11:00:00Z"),
           durationMinutes: 60,
@@ -184,6 +191,7 @@ describe("StudentHistoryRepository", () => {
         .values({
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           scheduledStartAt: new Date("2026-06-12T10:00:00Z"),
           scheduledEndAt: new Date("2026-06-12T11:00:00Z"),
           durationMinutes: 60,
@@ -238,6 +246,7 @@ describe("StudentHistoryRepository", () => {
         .values({
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           scheduledStartAt: new Date(),
           scheduledEndAt: new Date(),
           durationMinutes: 60,

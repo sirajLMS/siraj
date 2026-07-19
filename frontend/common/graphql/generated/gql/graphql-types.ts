@@ -562,6 +562,8 @@ export type ClassInstanceDetail = {
   status: Maybe<ClassExecutionState>;
   student: Maybe<ClassInstanceStudentInfo>;
   studentTimezone: Maybe<IanaTimezone>;
+  subjectId: Maybe<Scalars['String']['output']>;
+  subjectName: Maybe<Scalars['String']['output']>;
   teacher: Maybe<ClassInstanceTeacherInfo>;
   teacherTimezone: Maybe<IanaTimezone>;
 };
@@ -1062,6 +1064,7 @@ export type CreateManualClassEntryInput = {
   scheduledEndAt: Scalars['String']['input'];
   scheduledStartAt: Scalars['String']['input'];
   studentId: Scalars['ID']['input'];
+  subjectId: Scalars['ID']['input'];
   teacherId: Scalars['ID']['input'];
 };
 
@@ -1080,6 +1083,7 @@ export type CreateRecurringClassInput = {
   effectiveUntil: InputMaybe<Scalars['String']['input']>;
   generateInstancesForWeeks: InputMaybe<Scalars['Int']['input']>;
   studentId: Scalars['String']['input'];
+  subjectId: Scalars['String']['input'];
   teacherId: Scalars['String']['input'];
   timezone: IanaTimezone;
 };

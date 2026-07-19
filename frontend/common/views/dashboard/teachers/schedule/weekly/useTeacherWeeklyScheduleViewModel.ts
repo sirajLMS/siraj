@@ -214,6 +214,7 @@ export function useTeacherWeeklyScheduleViewModel(
         const input = buildCreateRecurringClassInput(
           formState.studentId,
           teacherId,
+          formState.subjectId,
           formState.duration,
           formState.defaultStartTime,
           formState.timezone,
@@ -237,6 +238,7 @@ export function useTeacherWeeklyScheduleViewModel(
     [
       validateBeforeSubmit,
       formState.studentId,
+      formState.subjectId,
       formState.duration,
       formState.defaultStartTime,
       formState.timezone,

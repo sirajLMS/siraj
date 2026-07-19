@@ -21,6 +21,7 @@ import {
   cleanupTestSuperAdmin,
   fetchFirstClassInstanceId,
   loginAndProvision,
+  mutateCreateRecurringClass,
   provisionTestEntities,
   provisionTestSuperAdmin,
   verifyWeeklyScheduleGrid,
@@ -29,6 +30,8 @@ import {
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
+import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 async function assertDstBulkUpdateFails(token: string) {
   const result = await testClient.mutate({
@@ -279,6 +282,22 @@ describe("GraphQL Schedule Integration Tests", () => {
   test("createRecurringClass denied for invalid input (no days)", async () => {
     await assertRecurringClassDenied(superAdminToken, []);
     expect(superAdminToken).not.toBe("");
+  });
+
+  test("createRecurringClass rejected when subjectId is omitted", async () => {
+    const result = await mutateCreateRecurringClass(superAdminToken, {
+      studentId,
+      teacherId,
+      durationMinutes: 60,
+      defaultStartTime: "10:00:00",
+      timezone: IanaTimezone.Utc,
+      days: [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }],
+      classType: "REGULAR",
+      generateInstancesForWeeks: 1,
+      effectiveFrom: null,
+      effectiveUntil: null,
+    } as unknown as CreateRecurringClassInput);
+    expect(result.error).toBeDefined();
   });
 
   // DST Migration tests

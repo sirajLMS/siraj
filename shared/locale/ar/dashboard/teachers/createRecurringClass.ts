@@ -7,6 +7,8 @@ export const dashboardTeacherCreateRecurringClassAr: TeacherCreateRecurringClass
     studentPlaceholder: "ابحث واختر طالباً...",
     teacher: "المعلم",
     teacherPlaceholder: "ابحث واختر معلماً...",
+    subject: "المادة",
+    subjectPlaceholder: "اختر مادة",
     time: "الوقت",
     duration: "المدة",
     durationMinutes: minutes => `${minutes} دقائق`,
@@ -45,6 +47,7 @@ export const dashboardTeacherCreateRecurringClassAr: TeacherCreateRecurringClass
   errors: {
     noDaysSelected: "يرجى اختيار يوم واحد على الأقل للجدول المتكرر.",
     noStudentSelected: "يرجى اختيار طالب.",
+    noSubjectSelected: "يرجى اختيار مادة.",
     creationFailed: "فشل إنشاء الحصة المتكررة. يرجى المحاولة مرة أخرى.",
     durationMustBePositive: "يجب أن تكون المدة أكبر من 0",
   },

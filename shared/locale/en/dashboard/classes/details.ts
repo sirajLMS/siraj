@@ -37,6 +37,7 @@ export const dashboardClassDetailsEn: ClassDetailsLabels = {
     activeConnection: "Active Connection",
     student: "Student",
     moduleInstructor: "Module Instructor",
+    viewSubject: "View subject",
   },
   metadata: {
     metadata: "Metadata",
@@ -76,6 +77,7 @@ export const dashboardClassDetailsEn: ClassDetailsLabels = {
     endTime: "End Time",
     duration: "Duration",
     status: "Status",
+    viewSubject: "View subject",
   },
   remarks: {
     remarksTitle: "Remarks / Special Instructions",

@@ -13,6 +13,7 @@ const dayScheduleSchema = z.object({
 export const createRecurringClassSchema = (messages: {
   studentRequired: string;
   teacherRequired: string;
+  subjectRequired: string;
   startTimeRequired: string;
   durationRequired: string;
   daysRequired: string;
@@ -24,6 +25,7 @@ export const createRecurringClassSchema = (messages: {
     .object({
       studentId: z.string().min(1, messages.studentRequired),
       teacherId: z.string().min(1, messages.teacherRequired),
+      subjectId: z.string().min(1, messages.subjectRequired),
       defaultStartTime: z.string().min(1, messages.startTimeRequired),
       durationHours: z
         .number({ error: messages.durationRequired })

@@ -35,6 +35,7 @@ export interface ClassDetailsLabels {
     readonly activeConnection: string;
     readonly student: string;
     readonly moduleInstructor: string;
+    readonly viewSubject: string;
   };
   readonly metadata: {
     readonly metadata: string;
@@ -74,6 +75,7 @@ export interface ClassDetailsLabels {
     readonly endTime: string;
     readonly duration: string;
     readonly status: string;
+    readonly viewSubject: string;
   };
   readonly remarks: {
     readonly remarksTitle: string;

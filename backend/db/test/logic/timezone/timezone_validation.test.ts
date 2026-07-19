@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { recurringSchedules, users } from "@/backend/db/schema";
-import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
+import { ensureTestSubjectId, setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { RecurringScheduleEntity } from "@/backend/types";
@@ -69,6 +69,7 @@ describe("Timezone Validation Constraints", () => {
         .values({
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           durationMinutes: 60,
           defaultStartTime: "09:00:00",
           timezone: IanaTimezone.Europe_London,
@@ -89,12 +90,14 @@ describe("Timezone Validation Constraints", () => {
       const { student } = await setupStudent(tx, { name: "Schedule Parent User" }, {}, { name: "Schedule Student" });
       const { teacher } = await setupTeacher(tx, { name: "Schedule Teacher User" });
 
+      const subjectId = await ensureTestSubjectId(tx);
       const error = await expectConstraintError(() =>
         tx
           .insert(recurringSchedules)
           .values({
             studentId: student.id,
             teacherId: teacher.id,
+            subjectId,
             durationMinutes: 60,
             defaultStartTime: "09:00:00",
             timezone: "NotATimezone",

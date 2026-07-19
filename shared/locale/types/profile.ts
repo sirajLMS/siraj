@@ -335,6 +335,7 @@ export interface ProfileLabels {
   readonly shell: ProfileShellLabels;
   readonly pageTitle: string;
   readonly editTitle: string;
+  readonly editAvatarTitle: string;
   readonly notSet: string;
   readonly adminEditHint: string;
   readonly role: ProfileRoleLabels;

@@ -1,10 +1,11 @@
 "use client";
-import { InfoOutlined } from "@mui/icons-material";
-import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
+import { InfoOutlined, MenuBookOutlined } from "@mui/icons-material";
+import { Box, Button, Chip, Grid, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/common/components/ui";
 import { StudentEntityLink } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
 import type { ClassInstanceStatus } from "@/frontend/common/views/dashboard/types/dashboard";
+import { Link } from "@/shared/i18n/routing";
 
 const STATUS_COLOR_MAP: Record<ClassInstanceStatus, "active" | "confirmed" | "pending" | "completed" | "cancelled"> = {
   active: "active",
@@ -19,6 +20,8 @@ interface ClassInstanceDetailsCardProps {
   readonly studentId: string;
   readonly studentName: string;
   readonly courseModule: string;
+  readonly subjectId: string;
+  readonly subjectName: string;
   readonly startTime: string;
   readonly endTime: string;
   readonly durationMinutes: number;
@@ -31,6 +34,7 @@ interface ClassInstanceDetailsCardProps {
     readonly endTime: string;
     readonly duration: string;
     readonly status: string;
+    readonly viewSubject: string;
     readonly minutes: string;
     readonly statusLabels: Record<ClassInstanceStatus, string>;
   };
@@ -77,6 +81,8 @@ export function ClassInstanceDetailsCard({
   studentId,
   studentName,
   courseModule,
+  subjectId,
+  subjectName,
   startTime,
   endTime,
   durationMinutes,
@@ -122,7 +128,26 @@ export function ClassInstanceDetailsCard({
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <DetailField label={labels.courseModule} value={<Typography variant="bodyLg">{courseModule}</Typography>} />
+          <DetailField
+            label={labels.courseModule}
+            value={
+              <Stack sx={{ gap: 1 }}>
+                <Typography variant="bodyLg">{subjectName || courseModule}</Typography>
+                {subjectId ? (
+                  <Button
+                    component={Link}
+                    href={`/subjects/${subjectId}`}
+                    variant="outlined"
+                    size="small"
+                    startIcon={<MenuBookOutlined />}
+                    sx={{ alignSelf: "flex-start" }}
+                  >
+                    {labels.viewSubject}
+                  </Button>
+                ) : null}
+              </Stack>
+            }
+          />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <DetailField label={labels.startTime} value={<Typography variant="bodyLg">{startTime}</Typography>} />

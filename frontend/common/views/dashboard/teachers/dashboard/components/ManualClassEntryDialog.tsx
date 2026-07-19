@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { logger } from "@/frontend/common/utils/logger";
+import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import type { TeacherDashboardLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -40,6 +41,7 @@ interface ManualClassEntryDialogProps {
   readonly onClose: () => void;
   readonly onSubmit: (data: {
     studentId: string;
+    subjectId: string;
     scheduledStartAt: string;
     scheduledEndAt: string;
     durationMinutes: number;
@@ -58,6 +60,7 @@ export function ManualClassEntryDialog({
 }: Readonly<ManualClassEntryDialogProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherDashboard;
   const [studentId, setStudentId] = useState("");
+  const [subjectId, setSubjectId] = useState("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [duration, setDuration] = useState(60);
@@ -69,6 +72,7 @@ export function ManualClassEntryDialog({
     if (open) {
       setError(null);
       setStudentId("");
+      setSubjectId("");
       const now = new Date();
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, "0");
@@ -95,6 +99,10 @@ export function ManualClassEntryDialog({
       setError(t.manualClassEntry.selectStudent);
       return;
     }
+    if (!subjectId) {
+      setError(t.manualClassEntry.selectSubject);
+      return;
+    }
     if (!date) {
       setError(t.manualClassEntry.selectDate);
       return;
@@ -113,6 +121,7 @@ export function ManualClassEntryDialog({
 
       await onSubmit({
         studentId,
+        subjectId,
         scheduledStartAt: startDateTime.toISOString(),
         scheduledEndAt: endDateTime.toISOString(),
         durationMinutes: duration,
@@ -140,6 +149,8 @@ export function ManualClassEntryDialog({
             <ManualClassEntryFormFields
               error={error}
               studentSelect={studentSelect}
+              subjectId={subjectId}
+              setSubjectId={setSubjectId}
               date={date}
               setDate={setDate}
               startTime={startTime}
@@ -148,6 +159,7 @@ export function ManualClassEntryDialog({
               setDuration={setDuration}
               classType={classType}
               setClassType={setClassType}
+              submitting={submitting}
               t={t}
             />
           </ManualClassEntryStudentFieldContext.Provider>
@@ -168,6 +180,8 @@ export function ManualClassEntryDialog({
 interface ManualClassEntryFormFieldsProps {
   readonly error: string | null;
   readonly studentSelect: ReactNode;
+  readonly subjectId: string;
+  readonly setSubjectId: (value: string) => void;
   readonly date: string;
   readonly setDate: (value: string) => void;
   readonly startTime: string;
@@ -176,12 +190,15 @@ interface ManualClassEntryFormFieldsProps {
   readonly setDuration: (value: number) => void;
   readonly classType: string;
   readonly setClassType: (value: string) => void;
+  readonly submitting: boolean;
   readonly t: TeacherDashboardLabels;
 }
 
 function ManualClassEntryFormFields({
   error,
   studentSelect,
+  subjectId,
+  setSubjectId,
   date,
   setDate,
   startTime,
@@ -190,6 +207,7 @@ function ManualClassEntryFormFields({
   setDuration,
   classType,
   setClassType,
+  submitting,
   t,
 }: Readonly<ManualClassEntryFormFieldsProps>) {
   return (
@@ -197,6 +215,14 @@ function ManualClassEntryFormFields({
       {error && <Alert severity="error">{error}</Alert>}
 
       {studentSelect}
+
+      <SubjectSelect
+        value={subjectId}
+        onChange={setSubjectId}
+        label={t.manualClassEntry.subjectLabel}
+        placeholder={t.manualClassEntry.subjectPlaceholder}
+        disabled={submitting}
+      />
 
       <TextField
         label={t.manualClassEntry.scheduledDate}

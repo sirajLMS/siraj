@@ -24,6 +24,7 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
         {
           studentId: args.input.studentId,
           teacherId: args.input.teacherId,
+          subjectId: args.input.subjectId,
           durationMinutes: args.input.durationMinutes,
           defaultStartTime: args.input.defaultStartTime,
           timezone: args.input.timezone,

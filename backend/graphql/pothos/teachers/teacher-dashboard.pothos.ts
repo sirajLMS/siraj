@@ -105,6 +105,7 @@ export const CreateManualClassEntryInputPothosObject = gqlSchemaBuilder
     fields: t => ({
       studentId: t.id({ required: true }),
       teacherId: t.id({ required: true }),
+      subjectId: t.id({ required: true }),
       scheduledStartAt: t.string({ required: true }),
       scheduledEndAt: t.string({ required: true }),
       durationMinutes: t.int({ required: true }),

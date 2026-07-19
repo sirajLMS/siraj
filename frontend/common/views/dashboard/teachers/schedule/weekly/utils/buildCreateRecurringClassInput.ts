@@ -20,6 +20,7 @@ import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classe
 export function buildCreateRecurringClassInput(
   studentId: string,
   teacherId: string,
+  subjectId: string,
   duration: number,
   defaultStartTime: string,
   timezone: string,
@@ -30,6 +31,7 @@ export function buildCreateRecurringClassInput(
   return {
     studentId,
     teacherId,
+    subjectId,
     durationMinutes: Number(duration),
     defaultStartTime,
     timezone: toGraphqlIanaTimezone(timezone),

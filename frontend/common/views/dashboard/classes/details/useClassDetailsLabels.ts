@@ -16,6 +16,7 @@ export interface TeacherViewLabels {
     readonly endTime: string;
     readonly duration: string;
     readonly status: string;
+    readonly viewSubject: string;
     readonly minutes: string;
     readonly statusLabels: Record<ClassInstanceStatus, string>;
   };
@@ -82,6 +83,7 @@ export const useAdminViewLabels = (_timezone: string): AdminViewLabels => {
         activeConnection: t.classInfo.activeConnection,
         student: t.classInfo.student,
         moduleInstructor: t.classInfo.moduleInstructor,
+        viewSubject: t.classInfo.viewSubject,
       },
       metadata: {
         metadata: t.metadata.metadata,
@@ -139,6 +141,7 @@ export const useTeacherViewLabels = (_timezone: string): TeacherViewLabels => {
         endTime: t.instanceDetails.endTime,
         duration: t.instanceDetails.duration,
         status: t.instanceDetails.status,
+        viewSubject: t.instanceDetails.viewSubject,
         minutes: t.metadata.minutes,
         statusLabels,
       },

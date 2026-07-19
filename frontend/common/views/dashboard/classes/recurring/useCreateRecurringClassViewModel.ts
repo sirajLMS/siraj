@@ -214,6 +214,7 @@ export function useCreateRecurringClassViewModel(
     defaultValues: {
       studentId: "",
       teacherId: "",
+      subjectId: "",
       defaultStartTime: "09:00",
       durationHours: 0,
       durationMinutes: 45,

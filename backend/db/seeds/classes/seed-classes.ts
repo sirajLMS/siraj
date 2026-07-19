@@ -10,6 +10,7 @@ import {
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
+import { ClassCatalogService } from "@/backend/services/classes/class-catalog.service";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
 import type { StudentEntity, TeacherEntity } from "@/backend/types";
 
@@ -22,9 +23,15 @@ export async function seedOrGet(teachersList: TeacherEntity[], studentsList: Stu
     throw new Error("Missing teachers or students for recurring schedule seeding.");
   }
 
+  const subjects = await ClassCatalogService.findSubjectsBySlugs(["tajweed", "hifz", "arabic-reading", "seerah"]);
+  if (!subjects.length) {
+    throw new Error("Missing class subjects for recurring schedule seeding. Seed subjects first.");
+  }
+
   const inputs = studentsList.map((student, i) => ({
     teacherId: teachersList[i % teachersList.length].id,
     studentId: student.id,
+    subjectId: subjects[i % subjects.length].id,
     durationMinutes: pickScheduleDurationMinutes(i),
     defaultStartTime: pickScheduleDefaultStartTime(i),
     timezone: student.timezoneOverride ?? pickTimezoneForIndex(i),

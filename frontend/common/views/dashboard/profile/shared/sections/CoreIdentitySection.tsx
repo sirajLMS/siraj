@@ -7,7 +7,6 @@ import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel, UserAvatar } from "@/frontend/common/components/ui";
 import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay";
-import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
@@ -45,10 +44,8 @@ type CoreIdentityEditProps = {
   readonly nameLabel: string;
   readonly emailLabel: string;
   readonly currencyLabel: string;
-  readonly avatarLabel: string;
   readonly register: UseFormRegister<CoreIdentityFormFields>;
   readonly control: Control<CoreIdentityFormFields>;
-  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 };
 
 type CoreIdentitySectionProps = CoreIdentityViewProps | CoreIdentityEditProps;
@@ -65,12 +62,6 @@ export function CoreIdentitySection(props: CoreIdentitySectionProps) {
     return (
       <SectionPanel title={props.sectionTitle}>
         <Stack spacing={2}>
-          <AvatarImageField
-            control={props.control}
-            name="avatarUrl"
-            label={props.avatarLabel}
-            onUploadAvatar={props.onUploadAvatar}
-          />
           <TextField label={props.nameLabel} fullWidth size="small" {...props.register("name")} />
           <TextField label={props.emailLabel} fullWidth size="small" type="email" {...props.register("email")} />
           <Controller

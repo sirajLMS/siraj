@@ -34,6 +34,7 @@ import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/Met
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopAppDatePicker } from "@/frontend/desktop/components/ui/form/date/DesktopAppDatePicker";
+import { useAppTranslation } from "@/shared/locale";
 
 function ProfileField({ label, value }: Readonly<{ label: string; value: string }>): React.ReactNode {
   return (
@@ -69,6 +70,8 @@ export function StudentProfileDesktopView({
   onSnackbarClose,
   onUploadAvatar,
 }: Readonly<StudentProfileViewModel>) {
+  const editAvatarTitle = useAppTranslation().profileTranslations.base.editAvatarTitle;
+
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
   }
@@ -109,6 +112,19 @@ export function StudentProfileDesktopView({
         }
       />
 
+      {isEditing ? (
+        <Box sx={{ mb: 3 }}>
+          <AvatarImageField
+            label={labels.avatar}
+            title={editAvatarTitle}
+            value={draft.avatarUrl}
+            onChange={url => onDraftChange({ avatarUrl: url })}
+            onUploadAvatar={onUploadAvatar}
+            disabled={saving}
+          />
+        </Box>
+      ) : null}
+
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 4 }}>
           <DesktopSectionPanel title={labels.personalInfo} sx={{ height: "100%" }}>
@@ -127,13 +143,6 @@ export function StudentProfileDesktopView({
               <Divider />
               {isEditing ? (
                 <Stack spacing={2}>
-                  <AvatarImageField
-                    label={labels.avatar}
-                    value={draft.avatarUrl}
-                    onChange={url => onDraftChange({ avatarUrl: url })}
-                    onUploadAvatar={onUploadAvatar}
-                    disabled={saving}
-                  />
                   <TextField
                     label={labels.phone}
                     value={draft.phone}

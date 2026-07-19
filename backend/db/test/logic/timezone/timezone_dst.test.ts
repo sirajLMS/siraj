@@ -1,5 +1,6 @@
 // cspell:ignore: proname prosecdef pronamespace nspname
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { randomUUID } from "node:crypto";
 import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
@@ -201,6 +202,7 @@ describe("Timezone Handling & DST Adjustment", () => {
     const classInstance = await SchedulingRepository.createClassInstance({
       studentId: testStudent.id,
       teacherId: testTeacher.id,
+      subjectId: await ensureTestSubjectId(db),
       scheduledStartAt: startTime,
       scheduledEndAt: endTime,
       durationMinutes: 60,
@@ -225,6 +227,7 @@ describe("Timezone Handling & DST Adjustment", () => {
       .values({
         studentId: testStudent.id,
         teacherId: testTeacher.id,
+        subjectId: await ensureTestSubjectId(db),
         scheduledStartAt: startTime,
         scheduledEndAt: endTime,
         durationMinutes: 60,

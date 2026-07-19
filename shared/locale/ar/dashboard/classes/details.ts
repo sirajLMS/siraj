@@ -37,6 +37,7 @@ export const dashboardClassDetailsAr: ClassDetailsLabels = {
     activeConnection: "اتصال نشط",
     student: "الطالب",
     moduleInstructor: "مدرس الوحدة",
+    viewSubject: "عرض المادة",
   },
   metadata: {
     metadata: "البيانات الوصفية",
@@ -76,6 +77,7 @@ export const dashboardClassDetailsAr: ClassDetailsLabels = {
     endTime: "وقت النهاية",
     duration: "المدة",
     status: "الحالة",
+    viewSubject: "عرض المادة",
   },
   remarks: {
     remarksTitle: "الملاحظات / التعليمات الخاصة",

@@ -35,6 +35,7 @@ export const dashboardAdminViewAr: AdminViewLabels = {
     activeConnection: "اتصال نشط",
     student: "الطالب",
     moduleInstructor: "مدرس الوحدة",
+    viewSubject: "عرض المادة",
   },
   metadata: {
     metadata: "البيانات الوصفية",

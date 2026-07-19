@@ -20,6 +20,7 @@ export interface ScheduleContext {
   scheduleId: string;
   studentId: string;
   teacherId: string;
+  subjectId: string;
   durationMinutes: number;
   days: ScheduleDaySpec[];
   isDemoSchedule: boolean;
@@ -132,6 +133,7 @@ export function buildShowcaseInstancesForToday(
       recurringScheduleId: schedule.scheduleId,
       teacherId: schedule.teacherId,
       studentId: schedule.studentId,
+      subjectId: schedule.subjectId,
       scheduledStartAt: start,
       scheduledEndAt: end,
       durationMinutes: schedule.durationMinutes,
@@ -251,6 +253,7 @@ export function generateClassInstancesForSchedule(
       recurringScheduleId: schedule.scheduleId,
       teacherId: schedule.teacherId,
       studentId: schedule.studentId,
+      subjectId: schedule.subjectId,
       scheduledStartAt,
       scheduledEndAt,
       durationMinutes: schedule.durationMinutes,

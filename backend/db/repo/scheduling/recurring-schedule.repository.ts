@@ -93,6 +93,7 @@ export namespace RecurringScheduleRepository {
             .update(recurringSchedules)
             .set({
               teacherId: input.teacherId,
+              subjectId: input.subjectId,
               durationMinutes: input.durationMinutes,
               defaultStartTime: input.defaultStartTime,
               timezone: input.timezone,

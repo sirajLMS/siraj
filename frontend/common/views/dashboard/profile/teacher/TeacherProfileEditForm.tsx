@@ -5,6 +5,7 @@ import { Box, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
@@ -31,7 +32,7 @@ export function TeacherProfileEditForm({
   readonly onSubmit: (values: TeacherOwnEditFormData) => Promise<void>;
 }) {
   const t = useAppTranslation().profileTranslations.teacher;
-  const baseActions = useAppTranslation().profileTranslations.base.actions;
+  const base = useAppTranslation().profileTranslations.base;
   const scope = ProfileScope.Own;
   const { canEdit } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
@@ -70,10 +71,21 @@ export function TeacherProfileEditForm({
   return (
     <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
       <Stack spacing={3}>
+        {canEdit("core_identity") ? (
+          <AvatarImageField
+            control={form.control}
+            name="avatarUrl"
+            label={t.fields.avatar}
+            title={base.editAvatarTitle}
+            onUploadAvatar={onUploadAvatar}
+          />
+        ) : null}
         <Box
           sx={{
             display: "grid",
             gap: 3,
+            minWidth: 0,
+            width: "100%",
             gridTemplateColumns: {
               xs: "minmax(0, 1fr)",
               lg: "repeat(2, minmax(0, 1fr))",
@@ -87,7 +99,6 @@ export function TeacherProfileEditForm({
               teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
               register={form.register}
               control={form.control}
-              onUploadAvatar={onUploadAvatar}
             />
           ) : null}
           {canEdit("core_contact") || canEdit("teacher_identity") ? (
@@ -104,8 +115,8 @@ export function TeacherProfileEditForm({
           {isSaving ? t.shell.loading : t.actions.save}
         </PrimaryPageAction>
       </Stack>
-      <FormSuccessSnackbar open={successOpen} message={baseActions.saveSuccess} onClose={() => setSuccessOpen(false)} />
-      <FormErrorSnackbar open={errorOpen} message={baseActions.saveError} onClose={() => setErrorOpen(false)} />
+      <FormSuccessSnackbar open={successOpen} message={base.actions.saveSuccess} onClose={() => setSuccessOpen(false)} />
+      <FormErrorSnackbar open={errorOpen} message={base.actions.saveError} onClose={() => setErrorOpen(false)} />
     </Box>
   );
 }

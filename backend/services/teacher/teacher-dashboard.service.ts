@@ -66,6 +66,7 @@ export namespace TeacherDashboardService {
   export interface ManualEntryInput {
     studentId: string;
     teacherId: string;
+    subjectId: string;
     scheduledStartAt: string;
     scheduledEndAt: string;
     durationMinutes: number;
@@ -74,6 +75,10 @@ export namespace TeacherDashboardService {
 
   export async function createManualEntry(userId: string, input: ManualEntryInput, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, tErrors);
+
+    if (!input.subjectId) {
+      throw new Error(tErrors.invalidInput);
+    }
 
     const balance = await CreditRepository.getBalance(db, input.studentId);
     if (balance.classesRemaining <= 0) {
@@ -89,6 +94,7 @@ export namespace TeacherDashboardService {
     const entry: Omit<ClassInstanceInsertInput, "createdAt" | "updatedAt"> = {
       studentId: input.studentId,
       teacherId: input.teacherId,
+      subjectId: input.subjectId,
       scheduledStartAt: new Date(input.scheduledStartAt),
       scheduledEndAt: new Date(input.scheduledEndAt),
       durationMinutes: input.durationMinutes,

@@ -98,6 +98,8 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
           <ClassInfoCard
             courseName={instance.courseName ?? ""}
             instanceId={instance.instanceId ?? instance.id ?? ""}
+            subjectId={instance.subjectId ?? ""}
+            subjectName={instance.subjectName ?? ""}
             student={
               student ?? {
                 id: null,

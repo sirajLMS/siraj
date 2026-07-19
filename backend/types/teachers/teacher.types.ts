@@ -190,6 +190,7 @@ export type TeacherAssignedClassesResult = {
 export type CreateManualClassEntryInput = {
   studentId: string;
   teacherId: string;
+  subjectId: string;
   scheduledStartAt: string;
   scheduledEndAt: string;
   durationMinutes: number;

@@ -19,6 +19,11 @@ import {
   createTestEntitiesMutationDocument,
   createTestSuperAdminMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/shared/test-helper.documents";
+import {
+  classSubjectsQueryDocument,
+  createClassSubjectMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
+import { createClassCategoryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-category.documents";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/manager-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
@@ -26,6 +31,53 @@ import { testClient } from "@/frontend/common/graphql/test/testClient";
 /** Shared test password — all provisioned test users use this value. */
 // eslint-disable-next-line sonarjs/no-hardcoded-passwords
 const TEST_USER_PASSWORD = "Test_Pass1!";
+
+/**
+ * Returns an existing class subject id, or creates a category + subject when the catalog is empty.
+ */
+export async function ensureTestSubjectId(token: string): Promise<string> {
+  const listResult = await testClient.query({
+    query: classSubjectsQueryDocument,
+    variables: { categoryId: null },
+    context: { headers: { Authorization: `Bearer ${token}` } },
+  });
+  const existing = listResult.data?.classSubjects?.find(s => s?.id && s.isActive !== false)?.id;
+  if (existing) {
+    return existing;
+  }
+
+  const slugSuffix = Date.now().toString(36);
+  const categoryResult = await authenticatedRequest(token, "mutate", createClassCategoryMutationDocument, {
+    input: {
+      name: `Test Category ${slugSuffix}`,
+      slug: `test-cat-${slugSuffix}`,
+      description: null,
+      isActive: true,
+      sortOrder: 0,
+    },
+  });
+  const categoryId = categoryResult.createClassCategory?.id;
+  if (!categoryId) {
+    throw new Error("Failed to create test class category for subjectId");
+  }
+
+  const subjectResult = await authenticatedRequest(token, "mutate", createClassSubjectMutationDocument, {
+    input: {
+      categoryId,
+      name: `Test Subject ${slugSuffix}`,
+      slug: `test-subj-${slugSuffix}`,
+      description: null,
+      avatarUrl: null,
+      isActive: true,
+      sortOrder: 0,
+    },
+  });
+  const subjectId = subjectResult.createClassSubject?.id;
+  if (!subjectId) {
+    throw new Error("Failed to create test class subject");
+  }
+  return subjectId;
+}
 
 async function executeLogin<TData, TVars>(
   mutation: TypedDocumentNode<TData, TVars>,
@@ -229,6 +281,7 @@ export async function authenticatedRequest<TData, TVariables extends OperationVa
 
 export async function fetchFirstClassInstanceId(token: string, date: string): Promise<string> {
   const entities = await provisionTestEntities(token, "sched-del", 5);
+  const subjectId = await ensureTestSubjectId(token);
 
   const d = new Date(date);
   const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
@@ -237,6 +290,7 @@ export async function fetchFirstClassInstanceId(token: string, date: string): Pr
   await mutateCreateRecurringClass(token, {
     studentId: entities.studentId,
     teacherId: entities.teacherId,
+    subjectId,
     durationMinutes: 60,
     defaultStartTime: "10:00:00",
     timezone: IanaTimezone.Utc,
@@ -321,14 +375,17 @@ export async function createManualClassEntry(
   studentId: string,
   teacherId: string,
   startAt: string,
-  endAt: string
+  endAt: string,
+  subjectId?: string
 ) {
+  const resolvedSubjectId = subjectId ?? (await ensureTestSubjectId(token));
   return testClient.mutate({
     mutation: createTeacherManualClassEntryMutationDocument,
     variables: {
       input: {
         studentId,
         teacherId,
+        subjectId: resolvedSubjectId,
         scheduledStartAt: startAt,
         scheduledEndAt: endAt,
         durationMinutes: 60,
@@ -483,9 +540,11 @@ export async function assertRecurringClassDenied(
   token: string,
   days: { dayOfWeek: string; startTime: string; isActive: boolean }[]
 ): Promise<void> {
+  const subjectId = await ensureTestSubjectId(token).catch(() => "00000000-0000-0000-0000-000000000000");
   const result = await mutateCreateRecurringClass(token, {
     studentId: "fake-student-id",
     teacherId: "fake-teacher-id",
+    subjectId,
     durationMinutes: 60,
     defaultStartTime: "10:00:00",
     timezone: IanaTimezone.Utc,

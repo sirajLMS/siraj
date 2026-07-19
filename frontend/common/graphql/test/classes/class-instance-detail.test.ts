@@ -7,6 +7,7 @@ import {
   authenticatedRequest,
   loginAndProvision,
   loginUser,
+  ensureTestSubjectId,
 } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 
@@ -28,6 +29,7 @@ describe("GraphQL Class Instance Detail Query", () => {
     teacherId = r.teacherId;
 
     if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
+    const subjectId = await ensureTestSubjectId(adminToken!);
     if (!r.parentUserEmail) throw new Error("Parent email not returned");
     parentToken = await loginUser(r.parentUserEmail, "Test_Pass1!");
 
@@ -39,6 +41,7 @@ describe("GraphQL Class Instance Detail Query", () => {
         input: {
           studentId,
           teacherId,
+          subjectId,
           scheduledStartAt: new Date().toISOString(),
           scheduledEndAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
           durationMinutes: 60,
@@ -62,6 +65,8 @@ describe("GraphQL Class Instance Detail Query", () => {
     expect(instance?.id).toBe(classInstanceId);
     expect(instance?.classType).toBe(ClassType.Regular);
     expect(instance?.courseName).toBeTruthy();
+    expect(instance?.subjectId).toBeTruthy();
+    expect(instance?.subjectName).toBeTruthy();
     expect(instance?.student?.id).toBe(studentId);
     expect(instance?.teacher?.id).toBe(teacherId);
   });

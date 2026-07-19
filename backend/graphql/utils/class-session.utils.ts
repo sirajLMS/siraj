@@ -127,6 +127,8 @@ export async function buildClassInstanceDetail(
     teacherTimezone,
     meetingJoinUrl: effectiveMeeting.joinUrl,
     effectiveMeeting,
+    subjectId: instance.subjectId,
+    subjectName: instance.subject?.name ?? unknownName,
     student: buildStudentParticipant(instance, unknownName),
     teacher: buildTeacherParticipant(instance, unknownName),
     performance: buildPerformanceBlock(perf),

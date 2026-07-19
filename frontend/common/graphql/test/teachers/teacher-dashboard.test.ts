@@ -9,7 +9,10 @@ import {
   teacherDashboardQueryDocument,
   teacherFutureScheduleQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { authenticatedRequest, loginAndProvision } from "@/frontend/common/graphql/test/helpers";
+import {
+  authenticatedRequest, loginAndProvision,
+  ensureTestSubjectId,
+} from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 
@@ -150,6 +153,8 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   test("createTeacherManualClassEntry creates a manual class instance successfully", async () => {
     if (!teacherToken || !superAdminToken || !studentId || !teacherId) throw new Error("Missing test context");
 
+    const subjectId = await ensureTestSubjectId(superAdminToken);
+
     const randomYear = 2030 + (Date.now() % 10);
     const dateStr = `${randomYear}-06-25`;
     const startAt = `${dateStr}T10:00:00Z`;
@@ -164,6 +169,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
         input: {
           studentId,
           teacherId,
+          subjectId,
           scheduledStartAt: startAt,
           scheduledEndAt: endAt,
           durationMinutes: 60,

@@ -23,6 +23,7 @@ import {
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { MobileFormErrorSnackbar, MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar";
+import { useAppTranslation } from "@/shared/locale";
 
 function ProfileField({ label, value }: Readonly<{ label: string; value: string }>): React.ReactNode {
   return (
@@ -58,6 +59,8 @@ export function StudentProfileMobileView({
   onSnackbarClose,
   onUploadAvatar,
 }: Readonly<StudentProfileViewModel>) {
+  const editAvatarTitle = useAppTranslation().profileTranslations.base.editAvatarTitle;
+
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
   }
@@ -122,6 +125,17 @@ export function StudentProfileMobileView({
           }
         />
 
+        {isEditing ? (
+          <AvatarImageField
+            label={labels.avatar}
+            title={editAvatarTitle}
+            value={draft.avatarUrl}
+            onChange={url => onDraftChange({ avatarUrl: url })}
+            onUploadAvatar={onUploadAvatar}
+            disabled={saving}
+          />
+        ) : null}
+
         <MobileSectionPanel title={labels.personalInfo}>
           <Stack spacing={2}>
             <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
@@ -138,13 +152,6 @@ export function StudentProfileMobileView({
 
             {isEditing ? (
               <>
-                <AvatarImageField
-                  label={labels.avatar}
-                  value={draft.avatarUrl}
-                  onChange={url => onDraftChange({ avatarUrl: url })}
-                  onUploadAvatar={onUploadAvatar}
-                  disabled={saving}
-                />
                 <TextField
                   label={labels.phone}
                   value={draft.phone}

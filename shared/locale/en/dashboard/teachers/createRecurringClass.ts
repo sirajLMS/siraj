@@ -7,6 +7,8 @@ export const dashboardTeacherCreateRecurringClassEn: TeacherCreateRecurringClass
     studentPlaceholder: "Select student",
     teacher: "Teacher",
     teacherPlaceholder: "Select teacher",
+    subject: "Subject",
+    subjectPlaceholder: "Select subject",
     time: "Time",
     duration: "Duration",
     durationMinutes: minutes => `${minutes} minutes`,
@@ -45,6 +47,7 @@ export const dashboardTeacherCreateRecurringClassEn: TeacherCreateRecurringClass
   errors: {
     noDaysSelected: "At least one day must be selected.",
     noStudentSelected: "A student must be selected.",
+    noSubjectSelected: "A subject must be selected.",
     creationFailed: "Failed to create recurring classes.",
     durationMustBePositive: "Duration must be greater than 0.",
   },

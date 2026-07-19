@@ -35,6 +35,7 @@ export const dashboardAdminViewEn: AdminViewLabels = {
     activeConnection: "Active Connection",
     student: "Student",
     moduleInstructor: "Module Instructor",
+    viewSubject: "View subject",
   },
   metadata: {
     metadata: "Metadata",

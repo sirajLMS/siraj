@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
+import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode, Gender } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
@@ -57,6 +58,7 @@ async function createTestClass(
   teacherId: string,
   overrides: Partial<Parameters<typeof SchedulingRepository.createClassInstance>[0]> = {}
 ) {
+  const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
   return SchedulingRepository.createClassInstance(
     {
       studentId,
@@ -67,6 +69,7 @@ async function createTestClass(
       classType: "REGULAR",
       idempotencyKey: randomUUID(),
       ...overrides,
+      subjectId,
     },
     tx
   );
@@ -87,6 +90,7 @@ async function rescheduleTestClass(
   teacherId: string,
   overrides: Partial<Parameters<typeof SchedulingRepository.rescheduleClassInstance>[1]> = {}
 ) {
+  const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
   return SchedulingRepository.rescheduleClassInstance(
     originalId,
     {
@@ -98,6 +102,7 @@ async function rescheduleTestClass(
       classType: "REGULAR",
       idempotencyKey: randomUUID(),
       ...overrides,
+      subjectId,
     },
     tx
   );
@@ -116,6 +121,7 @@ async function insertClassInstance(tx: DBTransaction, values: Partial<typeof cla
       updatedAt: now,
       idempotencyKey: randomUUID(),
       ...values,
+      subjectId: values.subjectId ?? (await ensureTestSubjectId(tx)),
     } as typeof classInstances.$inferInsert)
     .returning();
   return instance;

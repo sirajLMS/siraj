@@ -16,6 +16,8 @@ export const dashboardCreateRecurringClassAr: CreateRecurringClassLabels = {
   studentsPlaceholder: "اختر طالباً",
   teacher: "المعلم",
   teacherPlaceholder: "اختر معلماً",
+  subject: "المادة",
+  subjectPlaceholder: "اختر مادة",
   defaultStartTime: "وقت البدء الافتراضي",
   duration: "المدة",
   durationHours: "المدة (ساعات)",
@@ -42,6 +44,7 @@ export const dashboardCreateRecurringClassAr: CreateRecurringClassLabels = {
   validation: {
     studentRequired: "يرجى اختيار طالب",
     teacherRequired: "يرجى اختيار معلم",
+    subjectRequired: "يرجى اختيار مادة",
     startTimeRequired: "وقت البدء الافتراضي مطلوب",
     durationRequired: "يجب أن تكون المدة أكبر من صفر",
     daysRequired: "اختر يوماً واحداً على الأقل",

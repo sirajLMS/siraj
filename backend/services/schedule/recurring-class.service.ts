@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository } from "@/backend/db/repo";
+import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 import { classLifecycleAffectedUserIds, SchedulingRepository } from "@/backend/db/repo/scheduling";
 import {
   type RecurringScheduleDayUpsertInput,
@@ -21,6 +22,7 @@ import type { ErrorsLabels } from "@/shared/locale";
 export interface CreateRecurringClassInput {
   studentId: string;
   teacherId: string;
+  subjectId: string;
   durationMinutes: number;
   defaultStartTime: string;
   timezone: IanaTimezone;
@@ -122,6 +124,20 @@ export namespace RecurringClassService {
         throw new Error(tErrors.invalidInput);
       }
 
+      if (!input.subjectId) {
+        throw new Error(tErrors.invalidInput);
+      }
+
+      let subject: Awaited<ReturnType<typeof ClassSubjectRepository.getSubjectById>>;
+      try {
+        subject = await ClassSubjectRepository.getSubjectById(input.subjectId);
+      } catch {
+        throw new Error(tErrors.invalidInput);
+      }
+      if (!subject.isActive) {
+        throw new Error(tErrors.invalidInput);
+      }
+
       const activeDays = input.days.filter(d => d.isActive);
       if (activeDays.length === 0) {
         throw new Error(tErrors.invalidInput);
@@ -142,6 +158,7 @@ export namespace RecurringClassService {
           {
             studentId: input.studentId,
             teacherId: input.teacherId,
+            subjectId: input.subjectId,
             durationMinutes: input.durationMinutes,
             defaultStartTime: input.defaultStartTime,
             timezone: input.timezone,

@@ -59,6 +59,8 @@ export type ClassInstanceDetailReturnType = Omit<
   executionState: ClassExecutionState | null;
   outcome: ClassOutcome | null;
   avatarUrl?: string | null;
+  subjectId: string;
+  subjectName: string;
   student: ClassInstanceStudentReturnType;
   teacher: ClassInstanceTeacherReturnType;
   performance: ClassInstancePerformanceReturnType | null;

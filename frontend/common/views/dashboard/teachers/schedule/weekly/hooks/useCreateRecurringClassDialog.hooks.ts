@@ -38,6 +38,8 @@ import type {
 export interface CreateRecurringClassDialogFormState {
   readonly studentId: string;
   readonly setStudentId: Dispatch<SetStateAction<string>>;
+  readonly subjectId: string;
+  readonly setSubjectId: Dispatch<SetStateAction<string>>;
   readonly duration: number;
   readonly setDuration: Dispatch<SetStateAction<number>>;
   readonly defaultStartTime: string;
@@ -60,6 +62,7 @@ export interface CreateRecurringClassDialogFormState {
 // `useState` or `useEffect` (per specs.md §3 N7 + N6).
 export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void): CreateRecurringClassDialogFormState {
   const [studentId, setStudentId] = useState("");
+  const [subjectId, setSubjectId] = useState("");
   const [duration, setDuration] = useState(60);
   const [defaultStartTime, setDefaultStartTime] = useState("09:00");
   const [timezone, setTimezone] = useState("Africa/Cairo");
@@ -71,6 +74,7 @@ export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void)
   useEffect(() => {
     if (isDialogOpen) {
       setStudentId("");
+      setSubjectId("");
       setDuration(60);
       setDefaultStartTime("09:00");
       setTimezone("Africa/Cairo");
@@ -85,6 +89,8 @@ export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void)
   return {
     studentId,
     setStudentId,
+    subjectId,
+    setSubjectId,
     duration,
     setDuration,
     defaultStartTime,
@@ -120,6 +126,11 @@ export function useValidation(
       return false;
     }
 
+    if (!state.subjectId) {
+      notifications.show(t.errors.noSubjectSelected, { severity: "error" });
+      return false;
+    }
+
     const activeDays = days.filter(d => d.enabled);
     if (activeDays.length === 0) {
       notifications.show(t.errors.noDaysSelected, { severity: "error" });
@@ -142,5 +153,15 @@ export function useValidation(
     }
 
     return true;
-  }, [state.studentId, state.duration, state.meetingConfig, days, notifications, t, tClassScope, tMeeting]);
+  }, [
+    state.studentId,
+    state.subjectId,
+    state.duration,
+    state.meetingConfig,
+    days,
+    notifications,
+    t,
+    tClassScope,
+    tMeeting,
+  ]);
 }

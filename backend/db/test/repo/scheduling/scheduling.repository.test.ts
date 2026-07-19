@@ -14,10 +14,12 @@ import {
   createMockClassInstance,
   createTestMeetingConfig,
   createTestMeetingProvider,
+  ensureTestSubjectId,
   setupTestEntities,
 } from "@/backend/db/test/entity-setup";
 import { testRepoError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 interface ClassStatusEventState {
@@ -28,22 +30,27 @@ interface ClassStatusEventState {
 
 describe("Scheduling Repository — CRUD & Queries", () => {
   describe("createClassInstance", () => {
-    const getCreatePayload = (
+    const getCreatePayload = async (
+      tx: DBTransaction,
       studentId: string,
       teacherId: string,
       start: Date,
       end: Date,
       overrides: Partial<typeof classInstances.$inferInsert> = {}
-    ) => ({
-      studentId,
-      teacherId,
-      scheduledStartAt: start,
-      scheduledEndAt: end,
-      durationMinutes: 60,
-      classType: "REGULAR" as const,
-      idempotencyKey: randomUUID(),
-      ...overrides,
-    });
+    ) => {
+      const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
+      return {
+        studentId,
+        teacherId,
+        scheduledStartAt: start,
+        scheduledEndAt: end,
+        durationMinutes: 60,
+        classType: "REGULAR" as const,
+        idempotencyKey: randomUUID(),
+        ...overrides,
+        subjectId,
+      };
+    };
 
     test("creates successfully with valid data and handles quota deduction", async () => {
       await runInRollback(async tx => {
@@ -54,7 +61,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         const end = new Date(start.getTime() + 3600000);
 
         const created = await SchedulingRepository.createClassInstance(
-          getCreatePayload(student.id, teacher.id, start, end, { quotaDeducted: true }),
+          await getCreatePayload(tx, student.id, teacher.id, start, end, { quotaDeducted: true }),
           tx
         );
         expect(created.quotaDeducted).toBe(true);
@@ -68,7 +75,8 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       const { student, now } = await setupTestEntities(tx, "Create2");
       const { teacher } = await setupTestEntities(tx, "CreateUnassigned");
       await SchedulingRepository.createClassInstance(
-        getCreatePayload(
+        await getCreatePayload(
+          tx,
           student.id,
           teacher.id,
           new Date(now.getTime() + 86400000),
@@ -85,7 +93,10 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       await createMockClassInstance(tx, student.id, teacher.id, { scheduledStartAt: start, scheduledEndAt: end });
       const { student: student2 } = await setupTestEntities(tx, "Create4");
       await tx.insert(teacherAssignments).values({ studentId: student2.id, teacherId: teacher.id, assignedAt: now });
-      await SchedulingRepository.createClassInstance(getCreatePayload(student2.id, teacher.id, start, end), tx);
+      await SchedulingRepository.createClassInstance(
+        await getCreatePayload(tx, student2.id, teacher.id, start, end),
+        tx
+      );
     });
 
     testRepoError("throws on student overlap", async tx => {
@@ -95,7 +106,10 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       await createMockClassInstance(tx, student.id, teacher.id, { scheduledStartAt: start, scheduledEndAt: end });
       const { teacher: teacher2 } = await setupTestEntities(tx, "CreateStudentOver2");
       await tx.insert(teacherAssignments).values({ studentId: student.id, teacherId: teacher2.id, assignedAt: now });
-      await SchedulingRepository.createClassInstance(getCreatePayload(student.id, teacher2.id, start, end), tx);
+      await SchedulingRepository.createClassInstance(
+        await getCreatePayload(tx, student.id, teacher2.id, start, end),
+        tx
+      );
     });
 
     testRepoError("throws on zoomUrl overlap", async tx => {
@@ -123,7 +137,10 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         isDefault: true,
       });
       await SchedulingRepository.createClassInstance(
-        getCreatePayload(s2.id, t2.id, start, end, { userMeetingConfigId: config2.id, meetingJoinUrl: zoomUrl }),
+        await getCreatePayload(tx, s2.id, t2.id, start, end, {
+          userMeetingConfigId: config2.id,
+          meetingJoinUrl: zoomUrl,
+        }),
         tx
       );
     });
@@ -202,26 +219,31 @@ describe("Scheduling Repository — CRUD & Queries", () => {
   });
 
   describe("rescheduleClassInstance", () => {
-    const getReschedulePayload = (
+    const getReschedulePayload = async (
+      tx: DBTransaction,
       studentId: string,
       teacherId: string,
       overrides: Partial<typeof classInstances.$inferInsert> = {}
-    ) => ({
-      studentId,
-      teacherId,
-      scheduledStartAt: new Date(),
-      scheduledEndAt: new Date(),
-      durationMinutes: 60,
-      classType: "REGULAR" as const,
-      idempotencyKey: randomUUID(),
-      ...overrides,
-    });
+    ) => {
+      const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
+      return {
+        studentId,
+        teacherId,
+        scheduledStartAt: new Date(),
+        scheduledEndAt: new Date(),
+        durationMinutes: 60,
+        classType: "REGULAR" as const,
+        idempotencyKey: randomUUID(),
+        ...overrides,
+        subjectId,
+      };
+    };
 
     testRepoError("throws if original class not found", async tx => {
       const { student, teacher } = await setupTestEntities(tx, "Resched1");
       await SchedulingRepository.rescheduleClassInstance(
         randomUUID(),
-        getReschedulePayload(student.id, teacher.id),
+        await getReschedulePayload(tx, student.id, teacher.id),
         tx
       );
     });
@@ -231,7 +253,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       const instance = await createMockClassInstance(tx, student.id, teacher.id);
       await SchedulingRepository.rescheduleClassInstance(
         instance.id,
-        getReschedulePayload(student.id, teacher.id, { id: instance.id }),
+        await getReschedulePayload(tx, student.id, teacher.id, { id: instance.id }),
         tx
       );
     });
@@ -244,13 +266,13 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         actualStartAt: now,
         actualEndAt: new Date(now.getTime() + 3600000),
       });
-      await SchedulingRepository.rescheduleClassInstance(instance.id, getReschedulePayload(student.id, teacher.id), tx);
+      await SchedulingRepository.rescheduleClassInstance(instance.id, await getReschedulePayload(tx, student.id, teacher.id), tx);
     });
 
     testRepoError("throws if already rescheduled", async tx => {
       const { student, teacher } = await setupTestEntities(tx, "Resched4");
       const instance = await createMockClassInstance(tx, student.id, teacher.id, { isRescheduled: true });
-      await SchedulingRepository.rescheduleClassInstance(instance.id, getReschedulePayload(student.id, teacher.id), tx);
+      await SchedulingRepository.rescheduleClassInstance(instance.id, await getReschedulePayload(tx, student.id, teacher.id), tx);
     });
 
     test("creates new instance, marks old as rescheduled, and refunds quota", async () => {
@@ -265,7 +287,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
 
         const newInstance = await SchedulingRepository.rescheduleClassInstance(
           original.id,
-          getReschedulePayload(student.id, teacher.id, { scheduledStartAt: start, scheduledEndAt: end }),
+          await getReschedulePayload(tx, student.id, teacher.id, { scheduledStartAt: start, scheduledEndAt: end }),
           tx
         );
         expect(newInstance.originalClassId).toBe(original.id);

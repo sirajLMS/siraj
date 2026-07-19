@@ -80,6 +80,8 @@ export function ClassDetailsTeacherView(props: Readonly<ClassDetailsTeacherViewP
             studentId={student.id ?? ""}
             studentName={student.name ?? ""}
             courseModule={instance.courseName ?? ""}
+            subjectId={instance.subjectId ?? ""}
+            subjectName={instance.subjectName ?? ""}
             startTime={formattedStartTime}
             endTime={formattedEndTime}
             durationMinutes={instance.durationMinutes ?? 0}

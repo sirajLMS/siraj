@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { students, teacherAssignments, teachers, users } from "@/backend/db/schema";
-import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
+import { createTestParent, createTestUser, ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import type { StudentEntity, TeacherEntity } from "@/backend/types";
@@ -114,6 +114,7 @@ async function testTeacherOverlaps(tx: DBTransaction, student1Id: string, studen
     {
       studentId: student1Id,
       teacherId: teacher1Id,
+      subjectId: await ensureTestSubjectId(tx),
       scheduledStartAt: new Date("2026-06-20T10:00:00Z"),
       scheduledEndAt: new Date("2026-06-20T11:00:00Z"),
       durationMinutes: 60,
@@ -127,6 +128,7 @@ async function testTeacherOverlaps(tx: DBTransaction, student1Id: string, studen
     {
       studentId: student2Id,
       teacherId: teacher1Id,
+      subjectId: await ensureTestSubjectId(tx),
       scheduledStartAt: new Date("2026-06-20T11:00:00Z"),
       scheduledEndAt: new Date("2026-06-20T12:00:00Z"),
       durationMinutes: 60,
@@ -137,11 +139,12 @@ async function testTeacherOverlaps(tx: DBTransaction, student1Id: string, studen
   );
 
   // 2. Attempt Overlapping Teacher
-  const teacherError = await expectOverlapError(() =>
+  const teacherError = await expectOverlapError(async () =>
     SchedulingRepository.createClassInstance(
       {
         studentId: student2Id,
         teacherId: teacher1Id,
+        subjectId: await ensureTestSubjectId(tx),
         scheduledStartAt: new Date("2026-06-20T10:30:00Z"),
         scheduledEndAt: new Date("2026-06-20T11:30:00Z"),
         durationMinutes: 60,
@@ -157,11 +160,12 @@ async function testTeacherOverlaps(tx: DBTransaction, student1Id: string, studen
 
 async function testStudentOverlap(tx: DBTransaction, student1Id: string, teacher2Id: string) {
   // 3. Attempt Overlapping Student
-  const studentError = await expectOverlapError(() =>
+  const studentError = await expectOverlapError(async () =>
     SchedulingRepository.createClassInstance(
       {
         studentId: student1Id,
         teacherId: teacher2Id,
+        subjectId: await ensureTestSubjectId(tx),
         scheduledStartAt: new Date("2026-06-20T10:30:00Z"),
         scheduledEndAt: new Date("2026-06-20T11:30:00Z"),
         durationMinutes: 60,
@@ -189,6 +193,7 @@ async function testZoomUrlOverlap(args: {
     {
       studentId: student1Id,
       teacherId: teacher1Id,
+      subjectId: await ensureTestSubjectId(tx),
       scheduledStartAt: new Date("2026-06-21T10:00:00Z"),
       scheduledEndAt: new Date("2026-06-21T11:00:00Z"),
       durationMinutes: 60,
@@ -199,11 +204,12 @@ async function testZoomUrlOverlap(args: {
     tx
   );
 
-  const zoomError = await expectOverlapError(() =>
+  const zoomError = await expectOverlapError(async () =>
     SchedulingRepository.createClassInstance(
       {
         studentId: student2Id,
         teacherId: teacher2Id,
+        subjectId: await ensureTestSubjectId(tx),
         scheduledStartAt: new Date("2026-06-21T10:30:00Z"),
         scheduledEndAt: new Date("2026-06-21T11:30:00Z"),
         durationMinutes: 60,

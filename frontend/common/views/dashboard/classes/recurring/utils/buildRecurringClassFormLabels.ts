@@ -10,6 +10,8 @@ export type RecurringClassFormLabels = {
   readonly studentsPlaceholder: string;
   readonly teacher: string;
   readonly teacherPlaceholder: string;
+  readonly subject: string;
+  readonly subjectPlaceholder: string;
   readonly defaultStartTime: string;
   readonly duration: string;
   readonly durationHours: string;
@@ -36,6 +38,8 @@ export function buildRecurringClassFormLabels(labels: CreateRecurringClassLabels
     studentsPlaceholder: labels.studentsPlaceholder,
     teacher: labels.teacher,
     teacherPlaceholder: labels.teacherPlaceholder,
+    subject: labels.subject,
+    subjectPlaceholder: labels.subjectPlaceholder,
     defaultStartTime: labels.defaultStartTime,
     duration: labels.duration,
     durationHours: labels.durationHours,

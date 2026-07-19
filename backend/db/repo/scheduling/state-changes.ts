@@ -593,6 +593,7 @@ export function buildRescheduledClassInput(
 ): Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt"> {
   return {
     ...input,
+    subjectId: input.subjectId ?? original.subjectId,
     originalClassId,
     isRescheduled: false,
     quotaDeducted: false,

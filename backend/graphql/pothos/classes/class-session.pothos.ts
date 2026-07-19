@@ -118,6 +118,8 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
+    subjectId: t.exposeString("subjectId"),
+    subjectName: t.exposeString("subjectName"),
     student: t.expose("student", { type: ClassInstanceStudentPothosObject }),
     teacher: t.expose("teacher", { type: ClassInstanceTeacherPothosObject }),
     performance: t.expose("performance", {

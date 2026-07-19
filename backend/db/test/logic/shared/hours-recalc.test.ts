@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo";
 import { parents, recurringScheduleDays, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
+import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
@@ -148,6 +149,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       .values({
         studentId: testStudent.id,
         teacherId: testTeacher.id,
+        subjectId: await ensureTestSubjectId(db),
         durationMinutes: 60,
         defaultStartTime: "10:00:00",
         timezone: IanaTimezone.UTC,

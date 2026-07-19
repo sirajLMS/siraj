@@ -181,6 +181,8 @@ export async function createRescheduledSuccessor(
   const successorInput = {
     studentId: existing.studentId,
     teacherId: existing.teacherId,
+    subjectId: existing.subjectId,
+    recurringScheduleId: existing.recurringScheduleId,
     originalClassId: existing.id,
     scheduledStartAt: newScheduledStartAt,
     scheduledEndAt: newScheduledEndAt,

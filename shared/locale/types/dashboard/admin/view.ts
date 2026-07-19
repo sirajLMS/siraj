@@ -43,6 +43,7 @@ export interface AdminViewLabels {
     readonly activeConnection: string;
     readonly student: string;
     readonly moduleInstructor: string;
+    readonly viewSubject: string;
   };
   readonly metadata: {
     readonly metadata: string;

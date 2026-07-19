@@ -57,7 +57,9 @@ export const recurringSchedules = pgTable(
     teacherId: uuid("teacher_id")
       .notNull()
       .references(() => teachers.id, { onDelete: "restrict" }),
-    subjectId: uuid("subject_id").references(() => classSubjects.id, { onDelete: "restrict" }),
+    subjectId: uuid("subject_id")
+      .notNull()
+      .references(() => classSubjects.id, { onDelete: "restrict" }),
     avatarUrl: varchar("avatar_url", { length: 1024 }),
     durationMinutes: integer("duration_minutes").notNull(),
     defaultStartTime: time("default_start_time").notNull(),
@@ -125,7 +127,9 @@ export const classInstances = pgTable(
     teacherId: uuid("teacher_id")
       .notNull()
       .references(() => teachers.id, { onDelete: "restrict" }),
-    subjectId: uuid("subject_id").references(() => classSubjects.id, { onDelete: "restrict" }),
+    subjectId: uuid("subject_id")
+      .notNull()
+      .references(() => classSubjects.id, { onDelete: "restrict" }),
     recurringScheduleId: uuid("recurring_schedule_id").references(() => recurringSchedules.id, {
       onDelete: "set null",
     }),

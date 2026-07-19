@@ -6,6 +6,7 @@ import { classInstances, leaveQuotaUsage, students, teacherAssignments } from "@
 import {
   createMockClassInstance,
   createTestUser,
+  ensureTestSubjectId,
   setupStudent,
   setupTeacher,
   setupTestEntities,
@@ -167,11 +168,12 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
           classesRemaining: 0,
         });
 
-        const createError = await expectRepositoryError(() =>
+        const createError = await expectRepositoryError(async () =>
           SchedulingRepository.createClassInstance(
             {
               studentId: student.id,
               teacherId: teacher.id,
+              subjectId: await ensureTestSubjectId(tx),
               scheduledStartAt: new Date(Date.now() + 86400000),
               scheduledEndAt: new Date(Date.now() + 90000000),
               durationMinutes: 60,

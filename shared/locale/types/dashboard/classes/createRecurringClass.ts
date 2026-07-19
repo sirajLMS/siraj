@@ -14,6 +14,8 @@ export interface CreateRecurringClassLabels {
   readonly studentsPlaceholder: string;
   readonly teacher: string;
   readonly teacherPlaceholder: string;
+  readonly subject: string;
+  readonly subjectPlaceholder: string;
   readonly defaultStartTime: string;
   readonly duration: string;
   readonly durationHours: string;
@@ -40,6 +42,7 @@ export interface CreateRecurringClassLabels {
   readonly validation: {
     readonly studentRequired: string;
     readonly teacherRequired: string;
+    readonly subjectRequired: string;
     readonly startTimeRequired: string;
     readonly durationRequired: string;
     readonly daysRequired: string;

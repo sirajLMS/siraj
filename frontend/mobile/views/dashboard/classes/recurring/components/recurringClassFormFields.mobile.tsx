@@ -8,6 +8,7 @@ import type { PersonOption } from "@/frontend/common/components/ui/input/userSel
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
+import { SubjectSelectField } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import {
   CLASS_TYPE_OPTIONS,
@@ -127,6 +128,15 @@ export function RecurringClassFormFieldsMobile({
           />
         </Box>
       </Box>
+
+      <SubjectSelectField
+        name="subjectId"
+        control={control}
+        label={labels.subject}
+        placeholder={labels.subjectPlaceholder}
+        error={errors.subjectId?.message}
+        disabled={isSubmitting}
+      />
 
       {teacherId ? (
         <RecurringMeetingConfigSection

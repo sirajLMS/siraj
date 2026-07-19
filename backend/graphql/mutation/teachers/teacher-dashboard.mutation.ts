@@ -31,6 +31,7 @@ gqlSchemaBuilder.mutationField("createTeacherManualClassEntry", t =>
         {
           studentId: args.input.studentId,
           teacherId: args.input.teacherId,
+          subjectId: args.input.subjectId,
           scheduledStartAt: args.input.scheduledStartAt,
           scheduledEndAt: args.input.scheduledEndAt,
           durationMinutes: args.input.durationMinutes,

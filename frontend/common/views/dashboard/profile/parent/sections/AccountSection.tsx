@@ -45,7 +45,6 @@ type AccountSectionProps =
       readonly parentData: AccountParentData;
       readonly register: UseFormRegister<ParentAccountFormFields>;
       readonly control: Control<ParentAccountFormFields>;
-      readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
     };
 
 export function AccountSection(props: AccountSectionProps) {
@@ -62,10 +61,8 @@ export function AccountSection(props: AccountSectionProps) {
         nameLabel={t.fields.fullName}
         emailLabel={t.fields.primaryEmail}
         currencyLabel={t.fields.displayCurrency}
-        avatarLabel={t.fields.avatar}
         register={props.register}
         control={props.control}
-        onUploadAvatar={props.onUploadAvatar}
       />
     );
   }

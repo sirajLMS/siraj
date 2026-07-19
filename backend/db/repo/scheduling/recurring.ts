@@ -17,6 +17,7 @@ import { getServerTranslations } from "@/shared/locale";
 export interface CreateRecurringScheduleInput {
   studentId: string;
   teacherId: string;
+  subjectId: string;
   durationMinutes: number;
   defaultStartTime: string;
   timezone: string;
@@ -169,6 +170,7 @@ async function createSingleRecurringInstance(params: {
     .values({
       studentId: input.studentId,
       teacherId: input.teacherId,
+      subjectId: input.subjectId,
       recurringScheduleId,
       scheduledStartAt,
       scheduledEndAt,
@@ -320,6 +322,7 @@ export const createRecurringScheduleWithInstances = async (
       .values({
         studentId: input.studentId,
         teacherId: input.teacherId,
+        subjectId: input.subjectId,
         durationMinutes: input.durationMinutes,
         defaultStartTime: input.defaultStartTime,
         timezone: input.timezone,

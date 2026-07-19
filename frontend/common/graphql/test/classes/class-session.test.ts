@@ -20,6 +20,7 @@ import {
   createManualClassEntry,
   createManualClassEntryWithAssertions,
   loginAndProvision,
+  ensureTestSubjectId,
 } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
@@ -63,6 +64,8 @@ async function clearClassesOnDate(token: string, dateVal: string) {
 
 describe("GraphQL Class Session Integration Tests", () => {
   setupTestServerLifecycle();
+
+  let sharedSubjectId: string | null = null;
 
   let adminToken: string | null = null;
   let teacherToken: string | null = null;
@@ -114,6 +117,7 @@ describe("GraphQL Class Session Integration Tests", () => {
     expect(r.teacherId).toBeTruthy();
     adminToken = r.adminToken;
     teacherToken = r.teacherToken;
+    sharedSubjectId = await ensureTestSubjectId(adminToken ?? r.adminToken);
     studentId = r.studentId;
     teacherId = r.teacherId;
     studentUserId = r.studentUserId;
@@ -260,6 +264,7 @@ describe("GraphQL Class Session Integration Tests", () => {
         input: {
           studentId,
           teacherId,
+          subjectId: sharedSubjectId!,
           scheduledStartAt: startAbsent.toISOString(),
           scheduledEndAt: endAbsent.toISOString(),
           durationMinutes: 60,

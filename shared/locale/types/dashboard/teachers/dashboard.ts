@@ -127,6 +127,8 @@ export interface TeacherDashboardLabels {
     readonly studentLabel: string;
     readonly studentLoading: string;
     readonly noStudentsAssigned: string;
+    readonly subjectLabel: string;
+    readonly subjectPlaceholder: string;
     readonly scheduledDate: string;
     readonly startTime: string;
     readonly durationMinutes: string;
@@ -135,6 +137,7 @@ export interface TeacherDashboardLabels {
     readonly classTypeTrial: string;
     readonly classTypePromotion: string;
     readonly selectStudent: string;
+    readonly selectSubject: string;
     readonly selectDate: string;
     readonly selectTime: string;
     readonly createFailed: string;

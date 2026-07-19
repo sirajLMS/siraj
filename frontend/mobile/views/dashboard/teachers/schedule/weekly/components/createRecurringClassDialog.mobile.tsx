@@ -22,6 +22,7 @@ import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
 import { CLASS_TYPE_OPTIONS, type DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import {
@@ -350,6 +351,13 @@ function DialogFormContent({
           isDialogOpen={isDialogOpen}
           mutationLoading={mutationLoading}
           t={t}
+        />
+        <SubjectSelect
+          value={state.subjectId}
+          onChange={state.setSubjectId}
+          label={t.fields.subject}
+          placeholder={t.fields.subjectPlaceholder}
+          disabled={mutationLoading}
         />
         <DurationTimeFields
           duration={state.duration}

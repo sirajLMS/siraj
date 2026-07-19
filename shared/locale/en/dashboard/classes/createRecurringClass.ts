@@ -16,6 +16,8 @@ export const dashboardCreateRecurringClassEn: CreateRecurringClassLabels = {
   studentsPlaceholder: "Select a student",
   teacher: "Teacher",
   teacherPlaceholder: "Select a teacher",
+  subject: "Subject",
+  subjectPlaceholder: "Select a subject",
   defaultStartTime: "Default Start Time",
   duration: "Duration",
   durationHours: "Duration (hours)",
@@ -42,6 +44,7 @@ export const dashboardCreateRecurringClassEn: CreateRecurringClassLabels = {
   validation: {
     studentRequired: "Please select a student",
     teacherRequired: "Please select a teacher",
+    subjectRequired: "Please select a subject",
     startTimeRequired: "Default start time is required",
     durationRequired: "Duration must be greater than zero",
     daysRequired: "Select at least one day",

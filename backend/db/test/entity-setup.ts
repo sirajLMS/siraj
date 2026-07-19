@@ -1,8 +1,11 @@
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
+import type { db } from "@/backend/db/drizzleDb";
 import {
+  classCategories,
   classInstances,
   classMeetingConfigs,
+  classSubjects,
   creditTransactions,
   lessonReports,
   meetingProviders,
@@ -44,6 +47,47 @@ import type {
 /** LocalizedString helper for permission/group JSONB columns in tests. */
 export function loc(en: string, ar?: string): { ar: string; en: string } {
   return { ar: ar ?? en, en };
+}
+
+/** DB client or transaction — both support the query methods used by test helpers. */
+export type TestDb = DBTransaction | typeof db;
+
+export async function ensureTestSubjectId(tx: TestDb): Promise<string> {
+  const [existing] = await tx.select({ id: classSubjects.id }).from(classSubjects).limit(1);
+  if (existing) {
+    return existing.id;
+  }
+
+  const [category] = await tx
+    .insert(classCategories)
+    .values({
+      name: "Test Category",
+      slug: `test-cat-${randomUUID().slice(0, 8)}`,
+      isActive: true,
+      sortOrder: 0,
+    })
+    .returning({ id: classCategories.id });
+
+  if (!category) {
+    throw new Error("Failed to create test class category");
+  }
+
+  const [subject] = await tx
+    .insert(classSubjects)
+    .values({
+      categoryId: category.id,
+      name: "Test Subject",
+      slug: `test-subj-${randomUUID().slice(0, 8)}`,
+      isActive: true,
+      sortOrder: 0,
+    })
+    .returning({ id: classSubjects.id });
+
+  if (!subject) {
+    throw new Error("Failed to create test class subject");
+  }
+
+  return subject.id;
 }
 
 export async function createTestUser(
@@ -194,6 +238,7 @@ export async function createMockClassInstance(
   overrides: Partial<typeof classInstances.$inferInsert> = {}
 ): Promise<ClassInstanceEntity> {
   const now = new Date();
+  const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
   const [instance] = await tx
     .insert(classInstances)
     .values({
@@ -207,6 +252,7 @@ export async function createMockClassInstance(
       createdAt: now,
       updatedAt: now,
       ...overrides,
+      subjectId,
     })
     .returning();
 

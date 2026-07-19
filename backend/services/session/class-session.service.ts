@@ -369,6 +369,8 @@ export namespace ClassSessionService {
         {
           studentId: existing.studentId,
           teacherId: existing.teacherId,
+          subjectId: existing.subjectId,
+          recurringScheduleId: existing.recurringScheduleId,
           scheduledStartAt: input.scheduledStartAt,
           scheduledEndAt: input.scheduledEndAt,
           durationMinutes: input.durationMinutes,

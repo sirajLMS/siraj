@@ -2,7 +2,8 @@
 
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LanguageIcon from "@mui/icons-material/Language";
-import { Box, Chip, Divider, Stack, Typography } from "@mui/material";
+import MenuBookOutlined from "@mui/icons-material/MenuBookOutlined";
+import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard, UserAvatar } from "@/frontend/common/components/ui";
 import type {
@@ -19,6 +20,8 @@ import { Link } from "@/shared/i18n/routing";
 interface ClassInfoCardProps {
   readonly courseName: string;
   readonly instanceId: string;
+  readonly subjectId: string;
+  readonly subjectName: string;
   readonly student: ClassInstanceStudentInfo;
   readonly teacher: ClassInstanceTeacherInfo;
   readonly isActive: boolean;
@@ -27,6 +30,7 @@ interface ClassInfoCardProps {
     readonly activeConnection: string;
     readonly student: string;
     readonly moduleInstructor: string;
+    readonly viewSubject: string;
   };
 }
 
@@ -95,7 +99,16 @@ function LinkedAvatar({
   );
 }
 
-export function ClassInfoCard({ courseName, instanceId, student, teacher, isActive, labels }: ClassInfoCardProps) {
+export function ClassInfoCard({
+  courseName,
+  instanceId,
+  subjectId,
+  subjectName,
+  student,
+  teacher,
+  isActive,
+  labels,
+}: ClassInfoCardProps) {
   const studentProfileHref = student.id ? studentHref(student.id) : undefined;
   const teacherProfileHref = profileHrefForTeacher({ teacherId: teacher.id });
 
@@ -124,6 +137,11 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
           >
             {courseName}
           </StyledCourseNameHeading>
+          {subjectName ? (
+            <Typography variant="bodyMd" sx={theme => ({ mb: theme.spacing(0.5), color: theme.palette.text.secondary })}>
+              {subjectName}
+            </Typography>
+          ) : null}
           <StyledInstanceIdLabel variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
             Instance ID:{" "}
             <Box
@@ -137,6 +155,18 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
               {instanceId}
             </Box>
           </StyledInstanceIdLabel>
+          {subjectId ? (
+            <Button
+              component={Link}
+              href={`/subjects/${subjectId}`}
+              variant="outlined"
+              size="small"
+              startIcon={<MenuBookOutlined />}
+              sx={theme => ({ mt: theme.spacing(1.5) })}
+            >
+              {labels.viewSubject}
+            </Button>
+          ) : null}
         </Box>
         {isActive && (
           <Stack direction="row" sx={theme => ({ alignItems: "center", gap: theme.spacing(1) })}>

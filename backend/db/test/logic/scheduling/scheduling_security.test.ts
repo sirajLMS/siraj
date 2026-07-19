@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
-import { setupTestEntities } from "@/backend/db/test/entity-setup";
+import { setupTestEntities, ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
@@ -37,6 +37,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
         .values({
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           classType: "REGULAR",
           scheduledStartAt: new Date(),
           scheduledEndAt: new Date(Date.now() + 3600000),
@@ -65,6 +66,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
         .values({
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           classType: "REGULAR",
           scheduledStartAt: new Date(),
           scheduledEndAt: new Date(Date.now() + 3600000),
@@ -93,6 +95,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
         .values({
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           classType: "REGULAR",
           scheduledStartAt: new Date(),
           scheduledEndAt: new Date(Date.now() + 3600000),
@@ -123,6 +126,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
         .values({
           teacherId: teacher.id,
           studentId: student.id,
+          subjectId: await ensureTestSubjectId(tx),
           durationMinutes: 60,
           defaultStartTime: "10:00:00",
           timezone: IanaTimezone.UTC,
@@ -136,6 +140,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
         .values({
           teacherId: teacher.id,
           studentId: student.id,
+          subjectId: await ensureTestSubjectId(tx),
           durationMinutes: 60,
           defaultStartTime: "14:00:00",
           timezone: IanaTimezone.UTC,

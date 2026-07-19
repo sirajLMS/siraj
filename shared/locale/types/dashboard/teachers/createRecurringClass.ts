@@ -5,6 +5,8 @@ export interface TeacherCreateRecurringClassLabels {
     readonly studentPlaceholder: string;
     readonly teacher: string;
     readonly teacherPlaceholder: string;
+    readonly subject: string;
+    readonly subjectPlaceholder: string;
     readonly time: string;
     readonly duration: string;
     readonly durationMinutes: (minutes: number) => string;
@@ -43,6 +45,7 @@ export interface TeacherCreateRecurringClassLabels {
   readonly errors: {
     readonly noDaysSelected: string;
     readonly noStudentSelected: string;
+    readonly noSubjectSelected: string;
     readonly creationFailed: string;
     readonly durationMustBePositive: string;
   };

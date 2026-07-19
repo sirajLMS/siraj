@@ -22,6 +22,7 @@ export function mapFormDataToInput(data: RecurringClassFormData): CreateRecurrin
   return {
     studentId: data.studentId,
     teacherId: data.teacherId,
+    subjectId: data.subjectId,
     durationMinutes: calculateDurationMinutes(data),
     defaultStartTime: data.defaultStartTime,
     timezone: toGraphqlIanaTimezone(data.timezone),
@@ -39,6 +40,7 @@ export function mapFormDataToServiceInput(data: RecurringClassFormData) {
   return {
     studentId: data.studentId,
     teacherId: data.teacherId,
+    subjectId: data.subjectId,
     durationMinutes: calculateDurationMinutes(data),
     defaultStartTime: data.defaultStartTime,
     timezone: data.timezone,

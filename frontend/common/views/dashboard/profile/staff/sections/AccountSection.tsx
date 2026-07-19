@@ -29,7 +29,6 @@ type AccountSectionProps =
       readonly isAdminScope: boolean;
       readonly register: UseFormRegister<StaffAdminEditFormData>;
       readonly control: Control<StaffAdminEditFormData>;
-      readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
     };
 
 function StaffRoleStatusView({
@@ -66,10 +65,8 @@ export function AccountSection(props: AccountSectionProps) {
           nameLabel={t.fields.fullName}
           emailLabel={t.fields.primaryEmail}
           currencyLabel={t.fields.displayCurrency}
-          avatarLabel={t.fields.avatar}
           register={props.register}
           control={props.control}
-          onUploadAvatar={props.onUploadAvatar}
         />
         {props.isAdminScope && canEdit("staff_role") ? (
           <SectionPanel title={t.sections.role}>

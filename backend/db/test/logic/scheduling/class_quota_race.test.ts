@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
@@ -148,6 +149,7 @@ describe("Class Quota System Constraints & Triggers", () => {
         {
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
           scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
           durationMinutes: 60,
@@ -166,6 +168,7 @@ describe("Class Quota System Constraints & Triggers", () => {
         {
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           scheduledStartAt: new Date("2026-06-16T10:00:00Z"),
           scheduledEndAt: new Date("2026-06-16T11:00:00Z"),
           durationMinutes: 60,
@@ -210,6 +213,7 @@ describe("Class Quota System Constraints & Triggers", () => {
           {
             studentId: student.id,
             teacherId: teacher.id,
+            subjectId: await ensureTestSubjectId(tx),
             scheduledStartAt: new Date("2026-06-15T12:00:00Z"),
             scheduledEndAt: new Date("2026-06-15T13:00:00Z"),
             durationMinutes: 60,
@@ -245,11 +249,13 @@ describe("Class Quota System Constraints & Triggers", () => {
     });
 
     try {
+      const subjectId = await ensureTestSubjectId(db);
       // Execute two concurrent insertions targeting the same student
       const resultPromises = Promise.allSettled([
         SchedulingRepository.createClassInstance({
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId,
           scheduledStartAt: new Date("2026-06-15T15:00:00Z"),
           scheduledEndAt: new Date("2026-06-15T16:00:00Z"),
           durationMinutes: 60,
@@ -260,6 +266,7 @@ describe("Class Quota System Constraints & Triggers", () => {
         SchedulingRepository.createClassInstance({
           studentId: student.id,
           teacherId: teacher.id,
+          subjectId,
           scheduledStartAt: new Date("2026-06-15T16:00:00Z"),
           scheduledEndAt: new Date("2026-06-15T17:00:00Z"),
           durationMinutes: 60,

@@ -124,6 +124,7 @@ export type RecurringClassDayInput = {
 export type CreateRecurringClassInput = {
   studentId: string;
   teacherId: string;
+  subjectId: string;
   durationMinutes: number;
   defaultStartTime: string;
   timezone: IanaTimezone;

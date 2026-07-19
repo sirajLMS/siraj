@@ -5,6 +5,7 @@ import { Box, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { ParentStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
@@ -38,6 +39,7 @@ export function ParentProfileEditForm({
   readonly onSubmit: (values: ParentAdminEditFormData) => Promise<void>;
 }) {
   const t = useAppTranslation().profileTranslations.base;
+  const pt = useAppTranslation().profileTranslations.parent;
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canEdit } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
@@ -97,10 +99,21 @@ export function ParentProfileEditForm({
   return (
     <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
       <Stack spacing={3}>
+        {canEdit("core_identity") ? (
+          <AvatarImageField
+            control={form.control}
+            name="avatarUrl"
+            label={pt.fields.avatar}
+            title={t.editAvatarTitle}
+            onUploadAvatar={onUploadAvatar}
+          />
+        ) : null}
         <Box
           sx={{
             display: "grid",
             gap: 3,
+            minWidth: 0,
+            width: "100%",
             gridTemplateColumns: {
               xs: "minmax(0, 1fr)",
               lg: "repeat(2, minmax(0, 1fr))",
@@ -114,7 +127,6 @@ export function ParentProfileEditForm({
               parentData={{ name: parentData.name ?? null, email: parentData.email ?? null }}
               register={form.register}
               control={form.control}
-              onUploadAvatar={onUploadAvatar}
             />
           ) : null}
           {canEdit("core_contact") ? <ContactSection mode="edit" scope={scope} control={form.control} /> : null}

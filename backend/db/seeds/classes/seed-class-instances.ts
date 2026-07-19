@@ -45,6 +45,7 @@ function buildAllClassInstances(
       scheduleId: schedule.id,
       studentId: student.id,
       teacherId: teacher.id,
+      subjectId: schedule.subjectId,
       durationMinutes: schedule.durationMinutes,
       days,
       isDemoSchedule,

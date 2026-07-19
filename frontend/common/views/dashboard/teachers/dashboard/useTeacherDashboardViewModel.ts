@@ -50,6 +50,7 @@ export interface TeacherDashboardViewModel {
   readonly onManualEntryClose: () => void;
   readonly onManualEntrySubmit: (data: {
     readonly studentId: string;
+    readonly subjectId: string;
     readonly scheduledStartAt: string;
     readonly scheduledEndAt: string;
     readonly durationMinutes: number;

@@ -17,6 +17,7 @@ export const profileAr: ProfileLabels = {
   },
   pageTitle: "الملف الشخصي",
   editTitle: "تعديل الملف الشخصي",
+  editAvatarTitle: "تعديل صورة الملف الشخصي",
   notSet: "غير محدد",
   adminEditHint: "Use the staff profile tools for full administrative editing.",
   role: {

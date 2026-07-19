@@ -301,6 +301,7 @@ export function TeacherDashboardContainer() {
 
   const handleManualEntrySubmit = async (data: {
     studentId: string;
+    subjectId: string;
     scheduledStartAt: string;
     scheduledEndAt: string;
     durationMinutes: number;
@@ -314,6 +315,7 @@ export function TeacherDashboardContainer() {
         input: {
           studentId: data.studentId,
           teacherId,
+          subjectId: data.subjectId,
           scheduledStartAt: data.scheduledStartAt,
           scheduledEndAt: data.scheduledEndAt,
           durationMinutes: data.durationMinutes,

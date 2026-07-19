@@ -11,6 +11,7 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
+import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEntity } from "@/backend/types";
@@ -77,6 +78,7 @@ async function setupTestEnvironment(tx: DBTransaction, now: Date) {
     .values({
       studentId: student.id,
       teacherId: teacher.id,
+      subjectId: await ensureTestSubjectId(tx),
       scheduledStartAt: now,
       scheduledEndAt: now,
       durationMinutes: 60,

@@ -4,7 +4,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
-import { createMockClassInstance, setupStudent, setupTeacher, setupTestEntities } from "@/backend/db/test/entity-setup";
+import { createMockClassInstance, ensureTestSubjectId, setupStudent, setupTeacher, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
@@ -119,7 +119,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
   });
 
   describe("createRecurringScheduleWithInstances", () => {
-    const getRecurringPayload = (
+    const getRecurringPayload = async (
+      tx: DBTransaction,
       studentId: string,
       teacherId: string,
       days: {
@@ -131,6 +132,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
     ) => ({
       studentId,
       teacherId,
+      subjectId: await ensureTestSubjectId(tx),
       durationMinutes: 60,
       defaultStartTime: "10:00:00",
       timezone: IanaTimezone.UTC,
@@ -151,6 +153,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           {
             studentId: student.id,
             teacherId: teacher.id,
+            subjectId: await ensureTestSubjectId(tx),
             durationMinutes: 60,
             defaultStartTime: "10:00:00",
             timezone: IanaTimezone.UTC,
@@ -203,6 +206,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           {
             studentId: student.id,
             teacherId: teacher.id,
+            subjectId: await ensureTestSubjectId(tx),
             durationMinutes: 60,
             defaultStartTime: "10:00:00",
             timezone: IanaTimezone.UTC,
@@ -225,6 +229,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             {
               studentId: student2.id,
               teacherId: teacher.id,
+              subjectId: await ensureTestSubjectId(tx),
               durationMinutes: 60,
               defaultStartTime: "10:00:00",
               timezone: IanaTimezone.UTC,
@@ -251,7 +256,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
         await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
 
         const result = await SchedulingRepository.createRecurringScheduleWithInstances(
-          getRecurringPayload(student.id, teacher.id, [
+          await getRecurringPayload(tx, student.id, teacher.id, [
             { dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true },
             { dayOfWeek: "TUESDAY", startTime: "11:00:00", isActive: false },
             { dayOfWeek: "WEDNESDAY", startTime: "12:00:00", isActive: true },
@@ -269,7 +274,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
         await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
 
         const result = await SchedulingRepository.createRecurringScheduleWithInstances(
-          getRecurringPayload(student.id, teacher.id, [
+          await getRecurringPayload(tx, student.id, teacher.id, [
             { dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true },
             { dayOfWeek: "WEDNESDAY", startTime: "14:00:00", isActive: true },
             { dayOfWeek: "FRIDAY", startTime: "09:00:00", isActive: false },
@@ -296,7 +301,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
         await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
 
         const result = await SchedulingRepository.createRecurringScheduleWithInstances(
-          getRecurringPayload(student.id, teacher.id, [
+          await getRecurringPayload(tx, student.id, teacher.id, [
             { dayOfWeek: "MONDAY", startTime: "08:00:00", isActive: true },
             { dayOfWeek: "WEDNESDAY", startTime: "16:00:00", isActive: true },
           ]),
@@ -333,6 +338,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
         {
           studentId: unassignedStudent.id,
           teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
           durationMinutes: 60,
           defaultStartTime: "10:00:00",
           timezone: IanaTimezone.UTC,
@@ -390,6 +396,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           {
             studentId: student.id,
             teacherId: teacher.id,
+            subjectId: await ensureTestSubjectId(tx),
             durationMinutes: 60,
             defaultStartTime: "10:00:00",
             timezone: IanaTimezone.UTC,
@@ -407,6 +414,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           {
             studentId: student2.id,
             teacherId: teacher.id,
+            subjectId: await ensureTestSubjectId(tx),
             durationMinutes: 60,
             defaultStartTime: "14:00:00",
             timezone: IanaTimezone.UTC,
@@ -540,6 +548,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           {
             studentId: student.id,
             teacherId: teacher.id,
+            subjectId: await ensureTestSubjectId(tx),
             durationMinutes: 45,
             defaultStartTime: "09:00:00",
             timezone: IanaTimezone.UTC,

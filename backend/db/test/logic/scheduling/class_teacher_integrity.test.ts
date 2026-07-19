@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
+import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import type { ParentEntity } from "@/backend/types/parents/parent.types";
@@ -65,10 +66,11 @@ async function createTestStudent(tx: DBTransaction, parentId: string, name: stri
   return student;
 }
 
-function getClassParams(studentId: string, teacherId: string) {
+async function getClassParams(tx: DBTransaction, studentId: string, teacherId: string) {
   return {
     studentId,
     teacherId,
+    subjectId: await ensureTestSubjectId(tx),
     scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
     scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
     durationMinutes: 60,
@@ -80,7 +82,7 @@ function getClassParams(studentId: string, teacherId: string) {
 async function expectClassCreationToFail(tx: DBTransaction, studentId: string, teacherId: string) {
   let errorCaught: unknown = null;
   try {
-    await SchedulingRepository.createClassInstance(getClassParams(studentId, teacherId), tx);
+    await SchedulingRepository.createClassInstance(await getClassParams(tx, studentId, teacherId), tx);
   } catch (error) {
     errorCaught = error;
   }
@@ -103,7 +105,7 @@ describe("Class Teacher Assignment Integrity", () => {
         assignedAt: now,
       });
 
-      await SchedulingRepository.createClassInstance(getClassParams(student.id, teacher.id), tx);
+      await SchedulingRepository.createClassInstance(await getClassParams(tx, student.id, teacher.id), tx);
 
       const [insertedClass] = await tx.select().from(classInstances).where(eq(classInstances.studentId, student.id));
       expect(insertedClass).toBeDefined();
@@ -143,7 +145,7 @@ describe("Class Teacher Assignment Integrity", () => {
         assignedAt: now,
       });
 
-      const classInst = await SchedulingRepository.createClassInstance(getClassParams(student.id, teacher1.id), tx);
+      const classInst = await SchedulingRepository.createClassInstance(await getClassParams(tx, student.id, teacher1.id), tx);
 
       let errorCaught: unknown = null;
       try {

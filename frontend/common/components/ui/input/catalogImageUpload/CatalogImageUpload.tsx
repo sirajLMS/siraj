@@ -20,6 +20,8 @@ export type CatalogImageUploadProps = {
   readonly helperText?: string;
   readonly error?: boolean;
   readonly errorMessage?: string;
+  /** `"circle"` for avatars; default square for catalog logos. */
+  readonly previewShape?: "square" | "circle";
 };
 
 type PreviewBoxProps = {
@@ -28,6 +30,7 @@ type PreviewBoxProps = {
   readonly showError: boolean;
   readonly isUploading: boolean;
   readonly previewAlt: string;
+  readonly previewShape: "square" | "circle";
 };
 
 type UploadButtonsProps = {
@@ -39,6 +42,7 @@ type UploadButtonsProps = {
   readonly uploadLabel: string;
   readonly uploadingLabel: string;
   readonly removeLabel: string;
+  readonly horizontal?: boolean;
 };
 
 type ErrorDisplayProps = {
@@ -55,20 +59,23 @@ type UrlFallbackFieldProps = {
   readonly optionalLabel: string | undefined;
 };
 
+const PREVIEW_SIZE = 96;
+
 const PreviewBox: React.FC<PreviewBoxProps> = ({
   previewUrl,
   label,
   showError,
   isUploading,
   previewAlt,
+  previewShape,
 }): React.ReactNode => (
   <Box
     sx={theme => ({
       position: "relative",
-      width: 128,
-      height: 128,
+      width: PREVIEW_SIZE,
+      height: PREVIEW_SIZE,
       flexShrink: 0,
-      borderRadius: theme.layout.radius.card,
+      borderRadius: previewShape === "circle" ? "50%" : theme.layout.radius.card,
       overflow: "hidden",
       border: `1px solid ${showError ? theme.palette.error.main : theme.palette.outlineVariant}`,
       backgroundColor: theme.palette.surfaceContainerLow,
@@ -78,9 +85,15 @@ const PreviewBox: React.FC<PreviewBoxProps> = ({
     })}
   >
     {previewUrl ? (
-      <Image src={previewUrl} alt={label ?? previewAlt} fill unoptimized style={{ objectFit: "contain" }} />
+      <Image
+        src={previewUrl}
+        alt={label ?? previewAlt}
+        fill
+        unoptimized
+        style={{ objectFit: previewShape === "circle" ? "cover" : "contain" }}
+      />
     ) : (
-      <CloudUploadOutlined sx={theme => ({ fontSize: 40, color: theme.palette.text.secondary })} />
+      <CloudUploadOutlined sx={theme => ({ fontSize: 36, color: theme.palette.text.secondary })} />
     )}
     {isUploading ? (
       <Box
@@ -93,7 +106,7 @@ const PreviewBox: React.FC<PreviewBoxProps> = ({
           backgroundColor: "rgba(0,0,0,0.5)",
         }}
       >
-        <CircularProgress size={32} />
+        <CircularProgress size={28} />
       </Box>
     ) : null}
   </Box>
@@ -108,25 +121,42 @@ const UploadButtons: React.FC<UploadButtonsProps> = ({
   uploadLabel,
   uploadingLabel,
   removeLabel,
+  horizontal = false,
 }): React.ReactNode => (
-  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: horizontal ? "row" : "column",
+      flexWrap: "wrap",
+      gap: 1,
+      alignItems: horizontal ? "center" : "stretch",
+    }}
+  >
     <Button
       variant="contained"
+      size="small"
       startIcon={<CloudUploadOutlined />}
       onClick={onUploadClick}
       disabled={disabled || isUploading}
       aria-label={uploadLabel}
-      sx={theme => ({ borderRadius: theme.layout.radius.button, flexShrink: 0 })}
+      sx={theme => ({
+        borderRadius: theme.layout.radius.button,
+        ...(horizontal ? {} : { justifyContent: "flex-start" }),
+      })}
     >
       {isUploading ? uploadingLabel : uploadLabel}
     </Button>
     <Button
       variant="outlined"
+      size="small"
       startIcon={<DeleteOutlined />}
       onClick={onRemoveClick}
       disabled={disabled || isUploading || !hasPreview}
       aria-label={removeLabel}
-      sx={theme => ({ borderRadius: theme.layout.radius.button, flexShrink: 0 })}
+      sx={theme => ({
+        borderRadius: theme.layout.radius.button,
+        ...(horizontal ? {} : { justifyContent: "flex-start" }),
+      })}
     >
       {removeLabel}
     </Button>
@@ -191,6 +221,7 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
   helperText,
   error = false,
   errorMessage,
+  previewShape = "square",
 }): React.ReactNode => {
   const t = useAppTranslation().uiTranslations.catalogImageUpload;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -211,20 +242,30 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
   const resolvedHelperText = helperText ?? t.helperText(maxSizeMb);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 0 }}>
       {label ? (
         <Typography variant="labelMd" component="span" sx={theme => ({ color: theme.palette.text.secondary })}>
           {label}
         </Typography>
       ) : null}
       <Box
-        sx={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: 2,
-          flexWrap: "wrap",
-          minWidth: 0,
-        }}
+        sx={
+          previewShape === "circle"
+            ? {
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: 1.5,
+                minWidth: 0,
+              }
+            : {
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 2,
+                minWidth: 0,
+              }
+        }
       >
         <PreviewBox
           previewUrl={resolvedPreview}
@@ -232,8 +273,9 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
           showError={showError}
           isUploading={upload.isUploading}
           previewAlt={t.previewAlt}
+          previewShape={previewShape}
         />
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1, flex: "1 1 12rem", minWidth: 0 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 0, width: previewShape === "circle" ? "100%" : "auto" }}>
           <UploadButtons
             onUploadClick={triggerFileInput}
             onRemoveClick={upload.handleRemove}
@@ -243,8 +285,14 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
             uploadLabel={t.upload}
             uploadingLabel={t.uploading}
             removeLabel={t.remove}
+            horizontal={previewShape === "circle"}
           />
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+          <Typography
+            sx={theme => ({
+              typography: "bodySm",
+              color: theme.palette.text.secondary,
+            })}
+          >
             {resolvedHelperText}
           </Typography>
           {showError && resolvedError ? <ErrorDisplay errorMessage={resolvedError} /> : null}

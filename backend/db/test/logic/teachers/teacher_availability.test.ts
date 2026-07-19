@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository, TeacherAvailabilityRepository } from "@/backend/db/repo";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
+import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
@@ -104,6 +105,7 @@ async function createTestClassInstance(args: {
     {
       studentId,
       teacherId,
+      subjectId: await ensureTestSubjectId(tx),
       scheduledStartAt: typeof start === "string" ? new Date(start) : start,
       scheduledEndAt: typeof end === "string" ? new Date(end) : end,
       durationMinutes: 60,
