@@ -16,14 +16,14 @@ import {
   SUPERVISOR_NOTIFICATION_EVENTS,
 } from "@/shared/constants/notification-event-allowlists";
 
-function eventTypesForUser(email: string): readonly NotificationEventTypeKey[] {
+function eventTypesForUser(email: string): readonly (NotificationEventTypeKey | (typeof ALL_NOTIFICATION_EVENT_TYPES)[number])[] {
   if (email === STUDENT_USER_EMAIL || /^student-\d+@seed\.siraj\.local$/.test(email)) {
     return STUDENT_NOTIFICATION_EVENTS;
   }
   if (email === SUPERVISOR_USER_EMAIL) {
     return SUPERVISOR_NOTIFICATION_EVENTS;
   }
-  return ALL_NOTIFICATION_EVENT_TYPES as readonly NotificationEventTypeKey[];
+  return ALL_NOTIFICATION_EVENT_TYPES;
 }
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
