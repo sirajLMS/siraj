@@ -1,13 +1,21 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/material";
+import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink/PersonProfileLink.mobile";
 import type { PendingReviewsLabels } from "@/shared/locale";
 
 interface LessonReportDetailPanelMobileProps {
   readonly report: PendingReviewRow | null;
   readonly labels: PendingReviewsLabels;
+}
+
+function statusLabel(status: PendingReviewRow["status"], labels: PendingReviewsLabels): string {
+  if (!status) return labels.statusLabels.PENDING_REVIEW;
+  return labels.statusLabels[status] ?? labels.statusLabels.PENDING_REVIEW;
 }
 
 export function LessonReportDetailPanelMobile({ report, labels }: Readonly<LessonReportDetailPanelMobileProps>) {
@@ -49,13 +57,39 @@ export function LessonReportDetailPanelMobile({ report, labels }: Readonly<Lesso
         <MobileStatusBadge
           category="classStatus"
           status={report.status ? report.status.toLowerCase() : "pending"}
-          label={report.status ?? "PENDING"}
+          label={statusLabel(report.status, labels)}
         />
       </Stack>
 
       <Stack sx={{ gap: 1 }}>
-        <DetailField label={labels.studentColumn} value={report.studentName ?? ""} />
-        <DetailField label={labels.teacherColumn} value={report.teacherName ?? ""} />
+        <Stack sx={{ gap: 0.25 }}>
+          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+            {labels.classColumn}
+          </Typography>
+          <MobileClassProfileLink
+            href={report.classInstanceId ? classHref(report.classInstanceId) : undefined}
+            name={report.subjectName?.trim() || "—"}
+            avatarUrl={report.classAvatarUrl}
+          />
+        </Stack>
+        <Stack sx={{ gap: 0.25 }}>
+          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+            {labels.studentColumn}
+          </Typography>
+          <MobilePersonProfileLink
+            href={report.studentId ? studentHref(report.studentId) : undefined}
+            name={report.studentName || report.studentId}
+          />
+        </Stack>
+        <Stack sx={{ gap: 0.25 }}>
+          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+            {labels.teacherColumn}
+          </Typography>
+          <MobilePersonProfileLink
+            href={profileHrefForTeacher({ teacherId: report.teacherId })}
+            name={report.teacherName || report.teacherId}
+          />
+        </Stack>
         <DetailField label={labels.completionColumn} value={String(report.completionPercentage)} />
         <DetailField label={labels.attendanceColumn} value={report.attendanceEvaluation ?? ""} />
         <DetailField label={labels.submittedAtColumn} value={report.submittedAt} />

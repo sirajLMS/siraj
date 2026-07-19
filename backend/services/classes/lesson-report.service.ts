@@ -34,7 +34,12 @@ import { getServerTranslations } from "@/shared/locale";
  */
 export namespace LessonReportService {
   function toReturnType(
-    row: LessonReportSelectType & { teacherName?: string | null; studentName?: string | null }
+    row: LessonReportSelectType & {
+      teacherName?: string | null;
+      studentName?: string | null;
+      subjectName?: string | null;
+      classAvatarUrl?: string | null;
+    }
   ): LessonReportReturnType {
     return {
       ...row,
@@ -42,6 +47,8 @@ export namespace LessonReportService {
       attendanceEvaluation: row.attendanceEvaluation as AttendanceEvaluation,
       teacherName: row.teacherName ?? null,
       studentName: row.studentName ?? null,
+      subjectName: row.subjectName ?? null,
+      classAvatarUrl: row.classAvatarUrl ?? null,
     };
   }
 
@@ -240,11 +247,7 @@ export namespace LessonReportService {
   }): Promise<LessonReportReturnType | null> {
     const existing = await LessonReportRepository.findByClassInstanceId(input.classInstanceId);
     if (existing) {
-      if (
-        input.reviewedByUserId &&
-        existing.reviewedByUserId &&
-        existing.reviewedByUserId !== input.reviewedByUserId
-      ) {
+      if (input.reviewedByUserId && existing.reviewedByUserId && existing.reviewedByUserId !== input.reviewedByUserId) {
         const updated = await LessonReportRepository.updateReviewedBy(
           existing.id,
           input.reviewedByUserId,

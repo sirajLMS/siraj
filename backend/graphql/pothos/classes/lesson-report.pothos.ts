@@ -17,6 +17,8 @@ export const LessonReportPothosObject = LessonReportRef.implement({
     teacherId: t.exposeString("teacherId"),
     teacherName: t.exposeString("teacherName", { nullable: true }),
     studentName: t.exposeString("studentName", { nullable: true }),
+    subjectName: t.exposeString("subjectName", { nullable: true }),
+    classAvatarUrl: t.exposeString("classAvatarUrl", { nullable: true }),
     lessonDate: t.expose("lessonDate", { type: "DateTime" }),
     durationMinutes: t.exposeInt("durationMinutes"),
     attendanceEvaluation: t.expose("attendanceEvaluation", { type: AttendanceEvaluationPothosEnum }),

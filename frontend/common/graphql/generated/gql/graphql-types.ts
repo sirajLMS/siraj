@@ -2193,6 +2193,7 @@ export enum LeaveRequestStatus {
 export type LessonReport = {
   __typename?: 'LessonReport';
   attendanceEvaluation: Maybe<AttendanceEvaluation>;
+  classAvatarUrl: Maybe<Scalars['String']['output']>;
   classInstanceId: Maybe<Scalars['String']['output']>;
   completionPercentage: Maybe<Scalars['Int']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
@@ -2207,6 +2208,7 @@ export type LessonReport = {
   studentId: Maybe<Scalars['String']['output']>;
   studentName: Maybe<Scalars['String']['output']>;
   studentNotes: Maybe<Scalars['String']['output']>;
+  subjectName: Maybe<Scalars['String']['output']>;
   submittedAt: Maybe<Scalars['DateTime']['output']>;
   submittedByUserId: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;

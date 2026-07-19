@@ -5,6 +5,7 @@ export interface PendingReviewsLabels {
   readonly allTeachers: string;
   readonly allStudents: string;
   readonly lessonDateColumn: string;
+  readonly classColumn: string;
   readonly studentColumn: string;
   readonly teacherColumn: string;
   readonly attendanceColumn: string;
@@ -28,4 +29,10 @@ export interface PendingReviewsLabels {
   readonly rejectError: string;
   readonly teacherSearchPlaceholder: string;
   readonly studentSearchPlaceholder: string;
+  readonly statusLabels: {
+    readonly DRAFT: string;
+    readonly PENDING_REVIEW: string;
+    readonly APPROVED: string;
+    readonly REJECTED: string;
+  };
 }

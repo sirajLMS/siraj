@@ -1,5 +1,5 @@
-import type { AttendanceEvaluation, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
+import type { AttendanceEvaluation, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PendingReviewsLabels } from "@/shared/locale";
 
 export interface PendingReviewRow {
@@ -9,6 +9,8 @@ export interface PendingReviewRow {
   readonly studentName: string;
   readonly teacherId: string;
   readonly teacherName: string;
+  readonly subjectName: string;
+  readonly classAvatarUrl: string | null;
   readonly lessonDate: string;
   readonly durationMinutes: number;
   readonly attendanceEvaluation: AttendanceEvaluation | null;

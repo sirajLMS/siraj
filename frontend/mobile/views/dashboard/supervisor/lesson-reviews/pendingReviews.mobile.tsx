@@ -1,8 +1,9 @@
 "use client";
 
-import { ChevronRightOutlined } from "@mui/icons-material";
-import { Box, Stack, Typography } from "@mui/material";
+import { CancelOutlined, CheckCircleOutlined, RateReviewOutlined } from "@mui/icons-material";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   PendingReviewRow,
   PendingReviewsViewModel,
@@ -11,19 +12,21 @@ import {
   MobileCardList,
   MobileContentInset,
   MobileContentStack,
-  MobileFilterButton,
   MobilePageContainer,
   MobilePageHeader,
-  MobilePrimaryPageAction,
   MobileSectionPanel,
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
-import {
-  StudentAutocompleteMobile,
-  TeacherAutocompleteMobile,
-} from "@/frontend/mobile/components/ui/input/userSelect";
+import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink/PersonProfileLink.mobile";
+import { StudentAutocompleteMobile, TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { LessonReportDetailPanelMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/lessonReportDetailPanel.mobile";
 import { RejectReportDialogMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/rejectReportDialog.mobile";
+
+function statusLabel(status: PendingReviewRow["status"], labels: PendingReviewsViewModel["labels"]): string {
+  if (!status) return labels.statusLabels.PENDING_REVIEW;
+  return labels.statusLabels[status] ?? labels.statusLabels.PENDING_REVIEW;
+}
 
 function ReviewCard({
   row,
@@ -62,17 +65,33 @@ function ReviewCard({
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface, fontWeight: 500 })}>
             {row.lessonDate}
           </Typography>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.studentColumn}: {row.studentName || row.studentId}
-          </Typography>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.teacherColumn}: {row.teacherName || row.teacherId}
-          </Typography>
+          <Box sx={{ mt: 0.75 }}>
+            <MobileClassProfileLink
+              href={row.classInstanceId ? classHref(row.classInstanceId) : undefined}
+              name={row.subjectName?.trim() || "—"}
+              avatarUrl={row.classAvatarUrl}
+              label={labels.classColumn}
+            />
+          </Box>
+          <Box sx={{ mt: 0.75 }}>
+            <MobilePersonProfileLink
+              href={row.studentId ? studentHref(row.studentId) : undefined}
+              name={row.studentName || row.studentId}
+              label={labels.studentColumn}
+            />
+          </Box>
+          <Box sx={{ mt: 0.75 }}>
+            <MobilePersonProfileLink
+              href={profileHrefForTeacher({ teacherId: row.teacherId })}
+              name={row.teacherName || row.teacherId}
+              label={labels.teacherColumn}
+            />
+          </Box>
         </Box>
         <MobileStatusBadge
           category="classStatus"
           status={row.status ? row.status.toLowerCase() : "pending"}
-          label={row.status ?? "PENDING"}
+          label={statusLabel(row.status, labels)}
         />
       </Stack>
 
@@ -92,23 +111,33 @@ function ReviewCard({
         </Typography>
       </Stack>
 
-      <Stack sx={{ flexDirection: "row", gap: 1, flexWrap: "wrap" }}>
-        <MobileFilterButton size="small" onClick={() => onSelect(row)} startIcon={<ChevronRightOutlined />}>
-          {labels.reviewButton}
-        </MobileFilterButton>
-        <MobilePrimaryPageAction size="small" onClick={() => onApprove(row.id)} disabled={approving}>
-          {labels.approveButton}
-        </MobilePrimaryPageAction>
-        <MobileFilterButton
-          size="small"
-          onClick={() => onReject(row)}
-          sx={theme => ({
-            borderColor: theme.palette.error.main,
-            color: theme.palette.error.main,
-          })}
-        >
-          {labels.rejectButton}
-        </MobileFilterButton>
+      <Stack sx={{ flexDirection: "row", gap: 0.5, justifyContent: "flex-end" }}>
+        <Tooltip title={labels.reviewButton}>
+          <IconButton size="small" aria-label={labels.reviewButton} onClick={() => onSelect(row)}>
+            <RateReviewOutlined fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={labels.approveButton}>
+          <IconButton
+            size="small"
+            aria-label={labels.approveButton}
+            onClick={() => onApprove(row.id)}
+            disabled={approving}
+            sx={theme => ({ color: theme.palette.primary.main })}
+          >
+            <CheckCircleOutlined fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={labels.rejectButton}>
+          <IconButton
+            size="small"
+            aria-label={labels.rejectButton}
+            onClick={() => onReject(row)}
+            sx={theme => ({ color: theme.palette.error.main })}
+          >
+            <CancelOutlined fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </Stack>
     </Box>
   );

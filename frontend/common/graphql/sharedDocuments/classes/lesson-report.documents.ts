@@ -12,6 +12,8 @@ export const lessonReportQueryDocument: TypedDocumentNode<Operations.LessonRepor
       teacherId
       teacherName
       studentName
+      subjectName
+      classAvatarUrl
       lessonDate
       durationMinutes
       attendanceEvaluation
@@ -43,6 +45,8 @@ export const lessonReportByIdQueryDocument: TypedDocumentNode<
       teacherId
       teacherName
       studentName
+      subjectName
+      classAvatarUrl
       lessonDate
       durationMinutes
       attendanceEvaluation
@@ -76,6 +80,8 @@ export const pendingLessonReportsQueryDocument: TypedDocumentNode<
         teacherId
         teacherName
         studentName
+        subjectName
+        classAvatarUrl
         lessonDate
         durationMinutes
         attendanceEvaluation
@@ -108,6 +114,8 @@ export const recentApprovedLessonReportsQueryDocument: TypedDocumentNode<
       teacherId
       teacherName
       studentName
+      subjectName
+      classAvatarUrl
       lessonDate
       durationMinutes
       attendanceEvaluation
@@ -141,6 +149,8 @@ export const studentRecentLessonReportsQueryDocument: TypedDocumentNode<
         teacherId
         teacherName
         studentName
+        subjectName
+        classAvatarUrl
         lessonDate
         durationMinutes
         attendanceEvaluation
@@ -184,6 +194,8 @@ export const submitLessonReportMutationDocument: TypedDocumentNode<
       teacherId
       teacherName
       studentName
+      subjectName
+      classAvatarUrl
       lessonDate
       durationMinutes
       attendanceEvaluation
@@ -215,6 +227,8 @@ export const approveLessonReportMutationDocument: TypedDocumentNode<
       teacherId
       teacherName
       studentName
+      subjectName
+      classAvatarUrl
       lessonDate
       durationMinutes
       attendanceEvaluation
@@ -246,6 +260,8 @@ export const rejectLessonReportMutationDocument: TypedDocumentNode<
       teacherId
       teacherName
       studentName
+      subjectName
+      classAvatarUrl
       lessonDate
       durationMinutes
       attendanceEvaluation
@@ -277,6 +293,8 @@ export const submitStudentReflectionMutationDocument: TypedDocumentNode<
       teacherId
       teacherName
       studentName
+      subjectName
+      classAvatarUrl
       lessonDate
       durationMinutes
       attendanceEvaluation

@@ -7,6 +7,7 @@ export const dashboardSupervisorPortalPendingReviewsAr: PendingReviewsLabels = {
   allTeachers: "كل المعلمين",
   allStudents: "كل الطلاب",
   lessonDateColumn: "تاريخ الحصة",
+  classColumn: "الحصة",
   studentColumn: "الطالب",
   teacherColumn: "المعلم",
   attendanceColumn: "الحضور",
@@ -30,4 +31,10 @@ export const dashboardSupervisorPortalPendingReviewsAr: PendingReviewsLabels = {
   rejectError: "فشل رفض التقرير",
   teacherSearchPlaceholder: "ابحث عن معلمين…",
   studentSearchPlaceholder: "ابحث عن طلاب…",
+  statusLabels: {
+    DRAFT: "مسودة",
+    PENDING_REVIEW: "معلق",
+    APPROVED: "مقبول",
+    REJECTED: "مرفوض",
+  },
 };

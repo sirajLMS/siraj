@@ -7,6 +7,7 @@ export const dashboardSupervisorPortalPendingReviewsEn: PendingReviewsLabels = {
   allTeachers: "All Teachers",
   allStudents: "All Students",
   lessonDateColumn: "Lesson Date",
+  classColumn: "Class",
   studentColumn: "Student",
   teacherColumn: "Teacher",
   attendanceColumn: "Attendance",
@@ -30,4 +31,10 @@ export const dashboardSupervisorPortalPendingReviewsEn: PendingReviewsLabels = {
   rejectError: "Failed to reject report",
   teacherSearchPlaceholder: "Search teachers…",
   studentSearchPlaceholder: "Search students…",
+  statusLabels: {
+    DRAFT: "Draft",
+    PENDING_REVIEW: "Pending",
+    APPROVED: "Approved",
+    REJECTED: "Rejected",
+  },
 };

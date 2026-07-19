@@ -2121,6 +2121,7 @@ A teacher-submitted lesson report for a completed class instance, with review wo
 """
 type LessonReport {
   attendanceEvaluation: AttendanceEvaluation
+  classAvatarUrl: String
   classInstanceId: String
   completionPercentage: Int
   createdAt: DateTime
@@ -2135,6 +2136,7 @@ type LessonReport {
   studentId: String
   studentName: String
   studentNotes: String
+  subjectName: String
   submittedAt: DateTime
   submittedByUserId: String
   teacherId: String

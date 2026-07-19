@@ -76,6 +76,8 @@ export function usePendingReviewsViewModel(
       studentName: r?.studentName ?? "",
       teacherId: r?.teacherId ?? "",
       teacherName: r?.teacherName ?? "",
+      subjectName: r?.subjectName ?? "",
+      classAvatarUrl: r?.classAvatarUrl ?? null,
       lessonDate: r?.lessonDate ?? "",
       durationMinutes: r?.durationMinutes ?? 0,
       attendanceEvaluation: r?.attendanceEvaluation ?? null,

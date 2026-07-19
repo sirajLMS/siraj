@@ -1,8 +1,17 @@
 import { and, count, desc, eq, inArray } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { lessonReports, students, teachers, users } from "@/backend/db/schema";
+import {
+  classInstances,
+  classSubjects,
+  lessonReports,
+  recurringSchedules,
+  students,
+  teachers,
+  users,
+} from "@/backend/db/schema";
 import { LessonReportStatus } from "@/backend/enum";
+import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { LessonReportInsertType, LessonReportSelectType } from "@/backend/types";
 import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
 
@@ -14,17 +23,35 @@ export interface PendingReviewFilters {
 type LessonReportWithNames = LessonReportSelectType & {
   teacherName: string | null;
   studentName: string | null;
+  subjectName: string | null;
+  classAvatarUrl: string | null;
 };
 
-function mapReportWithNames(row: {
+type ReportJoinRow = {
   report: LessonReportSelectType;
   teacherName: string | null;
   studentName: string | null;
-}): LessonReportWithNames {
+  subjectName: string | null;
+  subjectAvatarUrl: string | null;
+  recurringAvatarUrl: string | null;
+};
+
+const reportSelectFields = {
+  report: lessonReports,
+  teacherName: users.name,
+  studentName: students.name,
+  subjectName: classSubjects.name,
+  subjectAvatarUrl: classSubjects.avatarUrl,
+  recurringAvatarUrl: recurringSchedules.avatarUrl,
+} as const;
+
+function mapReportWithNames(row: ReportJoinRow): LessonReportWithNames {
   return {
     ...row.report,
     teacherName: row.teacherName,
     studentName: row.studentName,
+    subjectName: row.subjectName,
+    classAvatarUrl: resolveClassAvatarUrl(row.recurringAvatarUrl, row.subjectAvatarUrl),
   };
 }
 
@@ -35,15 +62,14 @@ export namespace LessonReportRepository {
   ): Promise<LessonReportWithNames | null> {
     const queryDb = tx ?? db;
     const [row] = await queryDb
-      .select({
-        report: lessonReports,
-        teacherName: users.name,
-        studentName: students.name,
-      })
+      .select(reportSelectFields)
       .from(lessonReports)
       .innerJoin(students, eq(lessonReports.studentId, students.id))
       .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
       .innerJoin(users, eq(teachers.userId, users.id))
+      .innerJoin(classInstances, eq(lessonReports.classInstanceId, classInstances.id))
+      .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
+      .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
       .where(eq(lessonReports.classInstanceId, classInstanceId))
       .limit(1);
     return row ? mapReportWithNames(row) : null;
@@ -52,15 +78,14 @@ export namespace LessonReportRepository {
   export async function findById(reportId: string, tx?: DBTransaction): Promise<LessonReportWithNames | null> {
     const queryDb = tx ?? db;
     const [row] = await queryDb
-      .select({
-        report: lessonReports,
-        teacherName: users.name,
-        studentName: students.name,
-      })
+      .select(reportSelectFields)
       .from(lessonReports)
       .innerJoin(students, eq(lessonReports.studentId, students.id))
       .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
       .innerJoin(users, eq(teachers.userId, users.id))
+      .innerJoin(classInstances, eq(lessonReports.classInstanceId, classInstances.id))
+      .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
+      .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
       .where(eq(lessonReports.id, reportId))
       .limit(1);
     return row ? mapReportWithNames(row) : null;
@@ -77,15 +102,14 @@ export namespace LessonReportRepository {
     if (filters.studentId) conditions.push(eq(lessonReports.studentId, filters.studentId));
 
     const rows = await queryDb
-      .select({
-        report: lessonReports,
-        teacherName: users.name,
-        studentName: students.name,
-      })
+      .select(reportSelectFields)
       .from(lessonReports)
       .innerJoin(students, eq(lessonReports.studentId, students.id))
       .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
       .innerJoin(users, eq(teachers.userId, users.id))
+      .innerJoin(classInstances, eq(lessonReports.classInstanceId, classInstances.id))
+      .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
+      .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
       .where(and(...conditions))
       .orderBy(lessonReports.submittedAt)
       .limit(paginationArgs.perPage)
@@ -96,15 +120,14 @@ export namespace LessonReportRepository {
   export async function findRecentApproved(limit: number, tx?: DBTransaction): Promise<LessonReportWithNames[]> {
     const queryDb = tx ?? db;
     const rows = await queryDb
-      .select({
-        report: lessonReports,
-        teacherName: users.name,
-        studentName: students.name,
-      })
+      .select(reportSelectFields)
       .from(lessonReports)
       .innerJoin(students, eq(lessonReports.studentId, students.id))
       .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
       .innerJoin(users, eq(teachers.userId, users.id))
+      .innerJoin(classInstances, eq(lessonReports.classInstanceId, classInstances.id))
+      .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
+      .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
       .where(eq(lessonReports.status, LessonReportStatus.APPROVED))
       .orderBy(desc(lessonReports.reviewedAt))
       .limit(limit);
@@ -119,15 +142,14 @@ export namespace LessonReportRepository {
   ): Promise<LessonReportWithNames[]> {
     const queryDb = tx ?? db;
     const rows = await queryDb
-      .select({
-        report: lessonReports,
-        teacherName: users.name,
-        studentName: students.name,
-      })
+      .select(reportSelectFields)
       .from(lessonReports)
       .innerJoin(students, eq(lessonReports.studentId, students.id))
       .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
       .innerJoin(users, eq(teachers.userId, users.id))
+      .innerJoin(classInstances, eq(lessonReports.classInstanceId, classInstances.id))
+      .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
+      .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
       .where(eq(lessonReports.studentId, studentId))
       .orderBy(desc(lessonReports.lessonDate))
       .limit(paginationArgs.perPage)

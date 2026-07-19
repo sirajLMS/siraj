@@ -2,12 +2,20 @@
 
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
+import { DesktopClassProfileLink } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLink.desktop";
+import { DesktopPersonProfileLink } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLink.desktop";
 import type { PendingReviewsLabels } from "@/shared/locale";
 
 interface LessonReportDetailPanelDesktopProps {
   readonly report: PendingReviewRow | null;
   readonly labels: PendingReviewsLabels;
+}
+
+function statusLabel(status: PendingReviewRow["status"], labels: PendingReviewsLabels): string {
+  if (!status) return labels.statusLabels.PENDING_REVIEW;
+  return labels.statusLabels[status] ?? labels.statusLabels.PENDING_REVIEW;
 }
 
 export function LessonReportDetailPanelDesktop({ report, labels }: Readonly<LessonReportDetailPanelDesktopProps>) {
@@ -49,16 +57,44 @@ export function LessonReportDetailPanelDesktop({ report, labels }: Readonly<Less
         <StatusBadge
           category="classStatus"
           status={report.status ? report.status.toLowerCase() : "pending"}
-          label={report.status ?? "PENDING"}
+          label={statusLabel(report.status, labels)}
         />
       </Stack>
 
       <Grid container spacing={2}>
-        <Grid size={{ xs: 6, md: 12, lg: 6 }}>
-          <DetailField label={labels.studentColumn} value={report.studentName ?? ""} />
+        <Grid size={{ xs: 12 }}>
+          <Stack sx={{ gap: 0.25 }}>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {labels.classColumn}
+            </Typography>
+            <DesktopClassProfileLink
+              href={report.classInstanceId ? classHref(report.classInstanceId) : undefined}
+              name={report.subjectName?.trim() || "—"}
+              avatarUrl={report.classAvatarUrl}
+            />
+          </Stack>
         </Grid>
         <Grid size={{ xs: 6, md: 12, lg: 6 }}>
-          <DetailField label={labels.teacherColumn} value={report.teacherName ?? ""} />
+          <Stack sx={{ gap: 0.25 }}>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {labels.studentColumn}
+            </Typography>
+            <DesktopPersonProfileLink
+              href={report.studentId ? studentHref(report.studentId) : undefined}
+              name={report.studentName || report.studentId}
+            />
+          </Stack>
+        </Grid>
+        <Grid size={{ xs: 6, md: 12, lg: 6 }}>
+          <Stack sx={{ gap: 0.25 }}>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {labels.teacherColumn}
+            </Typography>
+            <DesktopPersonProfileLink
+              href={profileHrefForTeacher({ teacherId: report.teacherId })}
+              name={report.teacherName || report.teacherId}
+            />
+          </Stack>
         </Grid>
         <Grid size={{ xs: 6, md: 12, lg: 6 }}>
           <DetailField label={labels.completionColumn} value={String(report.completionPercentage)} />

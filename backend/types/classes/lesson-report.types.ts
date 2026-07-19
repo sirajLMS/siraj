@@ -9,6 +9,8 @@ export type LessonReportReturnType = Omit<LessonReportSelectType, "status" | "at
   attendanceEvaluation: AttendanceEvaluation;
   teacherName?: string | null;
   studentName?: string | null;
+  subjectName?: string | null;
+  classAvatarUrl?: string | null;
 };
 
 export interface LessonReportSubmitInput {
