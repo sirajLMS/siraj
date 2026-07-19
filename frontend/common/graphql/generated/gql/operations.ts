@@ -3619,7 +3619,7 @@ export type CreateParentMutationVariables = Exact<{
 
 export type CreateParentMutation = CreateParentMutation_Mutation;
 
-export type ParentAssignedStudentsQuery_parentAssignedStudents_ParentAssignedStudentsResult_rows_ParentAssignedStudent = { id: string | null, name: string | null, status: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null };
+export type ParentAssignedStudentsQuery_parentAssignedStudents_ParentAssignedStudentsResult_rows_ParentAssignedStudent = { id: string | null, name: string | null, studentAvatarUrl: string | null, status: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null };
 
 export type ParentAssignedStudentsQuery_parentAssignedStudents_ParentAssignedStudentsResult = { id: string | null, totalCount: number | null, rows: Array<ParentAssignedStudentsQuery_parentAssignedStudents_ParentAssignedStudentsResult_rows_ParentAssignedStudent> | null };
 
@@ -3665,7 +3665,7 @@ export type ParentProfileQueryVariables = Exact<{
 
 export type ParentProfileQuery = ParentProfileQuery_Query;
 
-export type ParentAssociatedStudentsQuery_parentAssociatedStudents_AssociatedStudent = { id: string | null, name: string | null, status: Types.StudentStatus | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, updatedAt: string | null };
+export type ParentAssociatedStudentsQuery_parentAssociatedStudents_AssociatedStudent = { id: string | null, name: string | null, avatarUrl: string | null, status: Types.StudentStatus | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, updatedAt: string | null };
 
 export type ParentAssociatedStudentsQuery_Query = { parentAssociatedStudents: Array<ParentAssociatedStudentsQuery_parentAssociatedStudents_AssociatedStudent> | null };
 
@@ -4691,7 +4691,7 @@ export type StudentUpcomingClassesQueryVariables = Exact<{
 
 export type StudentUpcomingClassesQuery = StudentUpcomingClassesQuery_Query;
 
-export type StudentsQuery_students_StudentsWithFiltersResponse_data_Student = { id: string, name: string };
+export type StudentsQuery_students_StudentsWithFiltersResponse_data_Student = { id: string, name: string, avatarUrl: string | null };
 
 export type StudentsQuery_students_StudentsWithFiltersResponse_pageInfo_PageInfo = { total: number };
 
@@ -4709,7 +4709,7 @@ export type StudentsQueryVariables = Exact<{
 
 export type StudentsQuery = StudentsQuery_Query;
 
-export type StudentByIdQuery_studentById_AssociatedStudent = { id: string | null, name: string | null, status: Types.StudentStatus | null, primaryTeacherId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, version: number | null, updatedAt: string | null };
+export type StudentByIdQuery_studentById_AssociatedStudent = { id: string | null, name: string | null, avatarUrl: string | null, status: Types.StudentStatus | null, primaryTeacherId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, version: number | null, updatedAt: string | null };
 
 export type StudentByIdQuery_Query = { studentById: StudentByIdQuery_studentById_AssociatedStudent | null };
 
@@ -5166,7 +5166,7 @@ export type TeacherAssignedClassesQueryVariables = Exact<{ [key: string]: never;
 
 export type TeacherAssignedClassesQuery = TeacherAssignedClassesQuery_Query;
 
-export type TeachersQuery_teachers_TeacherSimple = { id: string | null, name: string | null };
+export type TeachersQuery_teachers_TeacherSimple = { id: string | null, name: string | null, avatarUrl: string | null };
 
 export type TeachersQuery_Query = { teachers: Array<TeachersQuery_teachers_TeacherSimple> | null };
 

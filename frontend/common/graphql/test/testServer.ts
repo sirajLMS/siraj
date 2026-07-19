@@ -122,11 +122,13 @@ async function spawnServerOnPort(port: number): Promise<ReturnType<typeof spawn>
 
   await releaseTcpPortReservation();
 
-  const proc = spawn(["bun", "run", "next", "dev", "-p", String(port)], {
+  const proc = spawn(["bun", "--env-file=.env.test", "run", "next", "dev", "-p", String(port)], {
     stdout: "pipe",
     stderr: "pipe",
     env: {
       ...process.env,
+      NODE_ENV: process.env.NODE_ENV ?? "test",
+      DATABASE_URL: process.env.DATABASE_URL,
       NEXT_DIST_DIR: getTestDistDir(port),
       IS_DEMO: "true",
     },

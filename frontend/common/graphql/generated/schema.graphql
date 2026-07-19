@@ -294,6 +294,7 @@ input AssignPermissionGroupToUserInput {
 }
 
 type AssociatedStudent {
+  avatarUrl: String
   classesRemaining: Int
   classesTotal: Int
   gender: String
@@ -4479,6 +4480,7 @@ type TeacherProgressFeedItem {
 }
 
 type TeacherSimple {
+  avatarUrl: String
   id: String
   name: String
 }

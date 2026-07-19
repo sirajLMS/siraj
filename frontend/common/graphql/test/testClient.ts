@@ -1,8 +1,3 @@
-import path from "node:path";
-import { config } from "dotenv";
-
-config({ path: path.resolve(process.cwd(), ".env.test") });
-
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { getTestGraphqlUrl } from "@/frontend/common/graphql/test/testPort";
 

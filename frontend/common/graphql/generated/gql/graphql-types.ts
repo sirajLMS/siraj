@@ -323,6 +323,7 @@ export type AssignPermissionGroupToUserInput = {
 
 export type AssociatedStudent = {
   __typename?: 'AssociatedStudent';
+  avatarUrl: Maybe<Scalars['String']['output']>;
   classesRemaining: Maybe<Scalars['Int']['output']>;
   classesTotal: Maybe<Scalars['Int']['output']>;
   gender: Maybe<Scalars['String']['output']>;
@@ -5767,6 +5768,7 @@ export type TeacherProgressFeedItem = {
 
 export type TeacherSimple = {
   __typename?: 'TeacherSimple';
+  avatarUrl: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
 };

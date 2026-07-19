@@ -93,6 +93,7 @@ export namespace TeacherRepository {
       .select({
         id: teachers.id,
         name: users.name,
+        avatarUrl: users.avatarUrl,
       })
       .from(teachers)
       .innerJoin(users, eq(teachers.userId, users.id))

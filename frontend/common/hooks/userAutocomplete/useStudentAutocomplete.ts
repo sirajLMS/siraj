@@ -107,11 +107,13 @@ export function useStudentAutocomplete(args?: {
         case "teacherFiltered": {
           const typed = data as {
             students?: {
-              data?: readonly {
-                id?: string | null;
-                name?: string | null;
-                avatarUrl?: string | null;
-              }[] | null;
+              data?:
+                | readonly {
+                    id?: string | null;
+                    name?: string | null;
+                    avatarUrl?: string | null;
+                  }[]
+                | null;
             } | null;
           } | null;
           return typed?.students?.data ?? [];

@@ -55,11 +55,38 @@ async function requireStudent(
   return student;
 }
 
-function toStudentResult(student: { status: string }): AssociatedStudentResult {
+function toStudentResult(student: {
+  id: string;
+  name: string;
+  studentAvatarUrl: string | null;
+  status: string;
+  primaryTeacherId: string | null;
+  teacherUserId: string | null;
+  teacherName: string | null;
+  hoursPerWeek: string;
+  classesRemaining: number;
+  classesTotal: number;
+  language: string | null;
+  gender: string | null;
+  version: number;
+  updatedAt: Date;
+}): AssociatedStudentResult {
   return {
-    ...student,
+    id: student.id,
+    name: student.name,
+    avatarUrl: student.studentAvatarUrl,
     status: parseStudentStatus(student.status) ?? StudentStatus.REGULAR,
-  } as AssociatedStudentResult;
+    primaryTeacherId: student.primaryTeacherId,
+    teacherUserId: student.teacherUserId,
+    teacherName: student.teacherName,
+    hoursPerWeek: student.hoursPerWeek,
+    classesRemaining: student.classesRemaining,
+    classesTotal: student.classesTotal,
+    language: student.language,
+    gender: student.gender,
+    version: student.version,
+    updatedAt: student.updatedAt,
+  };
 }
 
 export namespace ParentProfileService {

@@ -30,6 +30,7 @@ export const studentByIdQueryDocument: TypedDocumentNode<Operations.StudentByIdQ
     studentById(studentId: $studentId) {
       id
       name
+      avatarUrl
       status
       primaryTeacherId
       teacherName

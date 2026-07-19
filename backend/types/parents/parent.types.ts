@@ -153,6 +153,7 @@ export type ParentDashboardMetricsReturnType = {
 export interface AssociatedStudentResult {
   readonly id: string;
   readonly name: string;
+  readonly avatarUrl: string | null;
   readonly status: StudentStatus;
   readonly primaryTeacherId: string | null;
   readonly teacherUserId: string | null;

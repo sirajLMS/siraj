@@ -60,6 +60,7 @@ export const AssociatedStudentPothosObject = AssociatedStudentRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
     name: t.exposeString("name"),
+    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     status: t.expose("status", { type: StudentStatusPothosObject }),
     primaryTeacherId: t.exposeString("primaryTeacherId", { nullable: true }),
     teacherUserId: t.exposeString("teacherUserId", { nullable: true }),

@@ -208,4 +208,5 @@ export type TeacherHandbookUrl = {
 export type TeacherSimple = {
   id: string;
   name: string;
+  avatarUrl: string | null;
 };
