@@ -158,8 +158,8 @@ export function RecurringClassFormFieldsDesktop({
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", gap: 3, flexDirection: "row" }}>
-        <Box sx={{ flex: 1 }}>
+      <Box sx={{ display: "flex", gap: 3, flexDirection: "row", alignItems: "flex-start" }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           <DurationInputDesktop
             register={register}
             errors={errors}
@@ -173,7 +173,7 @@ export function RecurringClassFormFieldsDesktop({
             }}
           />
         </Box>
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           <OptionSelectDesktop
             labelId="class-type-select-label"
             value={classType}

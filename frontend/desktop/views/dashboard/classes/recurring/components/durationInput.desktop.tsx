@@ -1,87 +1,49 @@
 "use client";
 
-import { Box, FormControl, FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { durationBoxSx } from "@/frontend/common/components/ui/form";
-import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
+import { Box, FormHelperText, TextField } from "@mui/material";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { DurationInputProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 
-const StyledDurationUnitLabel = styled(Typography)(({ theme }) => ({
-  ...theme.typography.labelMd,
-  color: theme.palette.onSurfaceVariant,
-  textTransform: "uppercase",
-}));
-
 export function DurationInputDesktop({ register, errors, isSubmitting, labels }: DurationInputProps) {
-  const mainLabel = labels.duration;
   const hasError = !!(errors.durationHours ?? errors.durationMinutes);
 
   return (
-    <FormControl component="fieldset" fullWidth error={hasError}>
-      <FormLabel component="legend">{mainLabel}</FormLabel>
-      <Box sx={{ display: "flex", gap: 2, flexDirection: "row", mt: 1 }}>
-        <DurationField
-          register={register}
-          fieldName="durationHours"
-          label={labels.durationHours}
-          unit={labels.hours}
-          max={12}
-          isSubmitting={isSubmitting}
+    <Box>
+      <Box sx={{ display: "flex", flexDirection: "row", gap: 2, width: "100%" }}>
+        <TextField
+          {...register("durationHours", { valueAsNumber: true })}
+          type="number"
+          label={labels.hours}
+          disabled={isSubmitting}
           error={!!errors.durationHours}
+          fullWidth
+          variant="outlined"
+          sx={outlinedInputSx}
+          slotProps={{
+            htmlInput: { min: 0, max: 12, "aria-label": labels.durationHours, inputMode: "numeric" },
+            inputLabel: { shrink: true },
+          }}
         />
-        <DurationField
-          register={register}
-          fieldName="durationMinutes"
-          label={labels.durationMinutes}
-          unit={labels.minutes}
-          max={59}
-          isSubmitting={isSubmitting}
+        <TextField
+          {...register("durationMinutes", { valueAsNumber: true })}
+          type="number"
+          label={labels.minutes}
+          disabled={isSubmitting}
           error={!!errors.durationMinutes}
+          fullWidth
+          variant="outlined"
+          sx={outlinedInputSx}
+          slotProps={{
+            htmlInput: { min: 0, max: 59, "aria-label": labels.durationMinutes, inputMode: "numeric" },
+            inputLabel: { shrink: true },
+          }}
         />
       </Box>
       {hasError && (
-        <FormHelperText error sx={{ mt: 1 }}>
+        <FormHelperText error>
           {errors.durationHours?.message ?? errors.durationMinutes?.message}
         </FormHelperText>
       )}
-    </FormControl>
-  );
-}
-
-interface DurationFieldProps {
-  readonly register: import("react-hook-form").UseFormRegister<RecurringClassFormData>;
-  readonly fieldName: "durationHours" | "durationMinutes";
-  readonly label: string;
-  readonly unit: string;
-  readonly max: number;
-  readonly isSubmitting: boolean;
-  readonly error: boolean;
-}
-
-function DurationField({ register, fieldName, label, unit, max, isSubmitting, error }: DurationFieldProps) {
-  return (
-    <FormControl fullWidth error={error} sx={{ flex: 1 }}>
-      <FormLabel>{label}</FormLabel>
-      <Box sx={durationBoxSx(false)}>
-        <TextField
-          {...register(fieldName, { valueAsNumber: true })}
-          type="number"
-          disabled={isSubmitting}
-          error={error}
-          slotProps={{
-            htmlInput: { min: 0, max },
-            input: {
-              sx: {
-                textAlign: "center",
-                p: 1,
-                backgroundColor: "transparent",
-                "& fieldset": { border: "none" },
-              },
-            },
-          }}
-        />
-        <StyledDurationUnitLabel>{unit}</StyledDurationUnitLabel>
-      </Box>
-    </FormControl>
+    </Box>
   );
 }

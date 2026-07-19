@@ -1,6 +1,6 @@
 "use client";
 
-import { AddOutlined, CheckCircleOutlined } from "@mui/icons-material";
+import { CheckCircleOutlined } from "@mui/icons-material";
 import { Alert, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { BaseRecurringClassFormProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
@@ -23,15 +23,17 @@ const StyledScrollableFormBody = styled(Box)(({ theme }) => ({
 const StyledFormActions = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  alignItems: "flex-start",
+  alignItems: "flex-end",
   gap: theme.spacing(2),
 }));
 
 const StyledSubmitRow = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
+  justifyContent: "flex-end",
   gap: theme.spacing(2),
   flexWrap: "wrap",
+  width: "100%",
 }));
 
 const StyledSubmitButton = styled(Button)(({ theme }) => ({
@@ -133,8 +135,8 @@ export function RecurringClassFormDesktop({
             </Alert>
           ) : null}
           <StyledSubmitRow>
-            <StyledSubmitButton type="submit" variant="contained" disabled={isSubmitting} startIcon={<AddOutlined />}>
-              {formLabels.add}
+            <StyledSubmitButton type="submit" variant="contained" disabled={isSubmitting}>
+              {formLabels.addClass}
             </StyledSubmitButton>
 
             {showSuccess && (

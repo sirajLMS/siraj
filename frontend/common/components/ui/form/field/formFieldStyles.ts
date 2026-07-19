@@ -28,22 +28,3 @@ export const timeInputStandardSx: SxProps<Theme> = theme => ({
 export const timeInputOutlinedSx: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": { borderRadius: 3 },
 };
-
-export const durationBoxSx =
-  (isMobile: boolean): SxProps<Theme> =>
-  theme => ({
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 1,
-    px: isMobile ? 1.5 : 1.5,
-    py: isMobile ? 0.5 : 0,
-    borderRadius: 1,
-    border: 1,
-    borderStyle: "solid",
-    borderColor: theme.palette.outlineVariant,
-    backgroundColor: isMobile ? theme.palette.background.paper : theme.palette.surfaceContainerLow,
-    "&:focus-within": {
-      borderColor: theme.palette.primary.main,
-    },
-  });

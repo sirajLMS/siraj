@@ -1,6 +1,5 @@
 "use client";
 
-import { AddOutlined } from "@mui/icons-material";
 import { Alert, Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { BaseRecurringClassFormProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
@@ -117,13 +116,7 @@ export function RecurringClassFormMobile({
               {meetingConfigWarningMessage}
             </Alert>
           ) : null}
-          <StyledSubmitButton
-            type="submit"
-            variant="contained"
-            disabled={isSubmitting}
-            endIcon={<AddOutlined />}
-            fullWidth
-          >
+          <StyledSubmitButton type="submit" variant="contained" disabled={isSubmitting} fullWidth>
             {formLabels.addClass}
           </StyledSubmitButton>
         </StyledFormActions>
