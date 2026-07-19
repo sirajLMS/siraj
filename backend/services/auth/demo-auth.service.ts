@@ -10,6 +10,9 @@ import type { SafeUser, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 import type { ErrorsLabels } from "@/shared/locale";
 
+/** Internal machine roles — never exposed as demo quick-login options. */
+const EXCLUDED_DEMO_LOGIN_GROUP_SLUGS = new Set<string>(["system_automated"]);
+
 export namespace DemoAuthService {
   /**
    * Retrieves all available permission groups from the database for demo login purposes.
@@ -24,14 +27,16 @@ export namespace DemoAuthService {
           description: true,
         },
       });
-      return groups.map(group => {
-        const description = resolveLocalized(group.description, locale);
-        return {
-          slug: group.slug,
-          name: resolveLocalized(group.name, locale),
-          description: description === "" ? null : description,
-        };
-      });
+      return groups
+        .filter(group => !EXCLUDED_DEMO_LOGIN_GROUP_SLUGS.has(group.slug))
+        .map(group => {
+          const description = resolveLocalized(group.description, locale);
+          return {
+            slug: group.slug,
+            name: resolveLocalized(group.name, locale),
+            description: description === "" ? null : description,
+          };
+        });
     } catch (error) {
       logger.error("Failed to fetch demo groups", { error });
       return [];
@@ -59,6 +64,10 @@ export namespace DemoAuthService {
     sessionId: string;
   }> {
     const t = tErrors;
+
+    if (EXCLUDED_DEMO_LOGIN_GROUP_SLUGS.has(groupSlug)) {
+      throw new Error(t.auth.demoGroupNotFound(groupSlug));
+    }
 
     const [group] = await db.select().from(permissionGroups).where(eq(permissionGroups.slug, groupSlug)).limit(1);
 

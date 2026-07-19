@@ -131,8 +131,21 @@ export namespace ScheduleService {
 
       const mappedRows = await Promise.all(rows.map(row => mapDailyScheduleListItem(row, tErrors)));
 
+      // Include metricFilter + pagination in the cache id so Apollo does not collide
+      // distinct query results (e.g. page/filter changes that return empty rows).
+      const page = input.paginationArgs?.page ?? 1;
+      const first = input.paginationArgs?.first ?? "default";
+      const resultKey = [
+        input.date,
+        teacherId || "all",
+        search || "",
+        metricFilter || "all",
+        `p${page}`,
+        `f${first}`,
+      ].join("-");
+
       return {
-        id: `admin-dashboard-${input.date}-${teacherId || "all"}-${search || ""}`,
+        id: `admin-dashboard-${resultKey}`,
         metrics: {
           id: `metrics-${targetDate.toISOString()}-${teacherId || "all"}-${search || ""}`,
           ...metrics,

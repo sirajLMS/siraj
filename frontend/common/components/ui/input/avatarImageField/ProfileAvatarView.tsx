@@ -71,7 +71,14 @@ export function ProfileAvatarView({
             })}
           >
             {imageUrl ? (
-              <Image src={imageUrl} alt={label} fill unoptimized style={{ objectFit: "cover" }} />
+              <Image
+                src={imageUrl}
+                alt={label}
+                fill
+                priority
+                unoptimized
+                style={{ objectFit: "cover" }}
+              />
             ) : (
               <PersonOutlined sx={theme => ({ fontSize: 40, color: theme.palette.text.secondary })} />
             )}

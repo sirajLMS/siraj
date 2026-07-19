@@ -2,7 +2,7 @@ import { expect } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import { getTestBaseUrl } from "@/frontend/common/graphql/test/testPort";
-import { academyAdmins, parents, students, supervisors, teachers } from "@/shared/demo-users";
+import { academyAdmins, parents, staff, students, supervisors, teachers } from "@/shared/demo-users";
 
 const PWD = "12345678";
 
@@ -26,6 +26,11 @@ export const DEMO_USERS = {
     email: supervisors[0].email,
     password: PWD,
     groupSlug: SystemPermissionGroupSlug.SUPERVISOR_DEFAULT,
+  },
+  staff: {
+    email: staff[0].email,
+    password: PWD,
+    groupSlug: SystemPermissionGroupSlug.STAFF_DEFAULT,
   },
   student: {
     email: students[0].email,

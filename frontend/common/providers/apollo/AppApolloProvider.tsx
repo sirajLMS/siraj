@@ -1,6 +1,6 @@
 "use client";
 
-import { ApolloClient, ApolloLink, HttpLink, InMemoryCache } from "@apollo/client";
+import { ApolloClient, ApolloLink, HttpLink } from "@apollo/client";
 import { PersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { ApolloProvider } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
@@ -8,6 +8,7 @@ import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NetworkConnectivityContext } from "@/frontend/common/context/NetworkConnectivityContext";
 import { useApolloConnectivity } from "@/frontend/common/hooks/useApolloConnectivity";
+import { createApolloCache } from "@/frontend/common/providers/apollo/apolloCache";
 import { InitializingUI } from "@/frontend/common/providers/apollo/AppApolloProviderHelpers";
 import {
   createAuthLink,
@@ -94,7 +95,7 @@ export function AppApolloProvider({ children }: { readonly children: React.React
       setApolloClient(
         new ApolloClient({
           link: ApolloLink.from([errorLink, connectivityCheckLink, authLink, persistedQueryLink, httpLink]),
-          cache: new InMemoryCache(),
+          cache: createApolloCache(),
           defaultOptions: {
             watchQuery: {
               errorPolicy: "none",
