@@ -264,7 +264,11 @@ const getMuiDataGrid = (): Components<Omit<Theme, "components">>["MuiDataGrid"] 
         textTransform: "uppercase",
         color: theme.palette.onSurfaceVariant,
       },
+      // Cells default to display:block; without flex, plain text sticks to the top
+      // while taller renderCell content (avatars, icon buttons) sits mid-row.
       "& .MuiDataGrid-cell": {
+        display: "flex",
+        alignItems: "center",
         borderBottom: `1px solid`,
         borderColor: theme.palette.border.light,
       },
