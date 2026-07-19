@@ -4,6 +4,7 @@ import { Alert, Box } from "@mui/material";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
 import { ParentSupportFab } from "@/frontend/common/views/dashboard/parent/dashboard/components/ParentSupportFab";
+import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import {
   teacherDashboardContentPaddingSx,
@@ -13,6 +14,7 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 import { ActivationPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/activationPolicyPanel.desktop";
 import { MissedClassAlertBannerDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.desktop";
 import { StudentProgressFeedDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/studentProgressFeed.desktop";
+import { ManualClassEntryStudentSelectDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/manualClassEntryStudentSelect.desktop";
 import { TeacherDailyScheduleSectionDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherDailyScheduleSection.desktop";
 
 export function TeacherDashboardDesktopView({
@@ -39,6 +41,11 @@ export function TeacherDashboardDesktopView({
   pageSize = 10,
   totalCount,
   onPageChange,
+  manualEntryOpen,
+  manualEntryDefaultActive,
+  teacherId,
+  onManualEntryClose,
+  onManualEntrySubmit,
 }: Readonly<TeacherDashboardViewModel>) {
   return (
     <>
@@ -101,6 +108,16 @@ export function TeacherDashboardDesktopView({
 
         <ParentSupportFab label={labels.support.liveSupport} onClick={onSupport} />
       </DesktopPageContainer>
+
+      <ManualClassEntryDialog
+        open={manualEntryOpen}
+        onClose={onManualEntryClose}
+        onSubmit={onManualEntrySubmit}
+        defaultActive={manualEntryDefaultActive}
+        studentSelect={
+          <ManualClassEntryStudentSelectDesktop teacherId={teacherId} open={manualEntryOpen} />
+        }
+      />
     </>
   );
 }

@@ -87,10 +87,6 @@ export function RecurringClassFormDesktop({
   onSubmit,
   meetingConfig,
   onMeetingConfigChangeAction,
-  students,
-  teachers,
-  studentsLoading,
-  teachersLoading,
 }: RecurringClassFormDesktopProps) {
   return (
     <Box
@@ -112,10 +108,6 @@ export function RecurringClassFormDesktop({
           labels={formLabels}
           meetingConfig={meetingConfig}
           onMeetingConfigChangeAction={onMeetingConfigChangeAction}
-          students={students}
-          teachers={teachers}
-          studentsLoading={studentsLoading}
-          teachersLoading={teachersLoading}
         />
 
         <StyledFormActions>

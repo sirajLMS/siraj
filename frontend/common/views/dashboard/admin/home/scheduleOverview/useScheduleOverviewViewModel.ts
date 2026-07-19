@@ -5,7 +5,7 @@ import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphq
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import type { TeacherFilterItem } from "@/frontend/common/types/shared.types";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 
 export interface ScheduleOverviewViewModel {
@@ -15,9 +15,7 @@ export interface ScheduleOverviewViewModel {
   readonly dateLabel: string;
   readonly dateValue: string;
   readonly teacherPlaceholder: string;
-  readonly teacherValue: string;
-  readonly submitLabel: string;
-  readonly teachers: readonly TeacherFilterItem[];
+  readonly selectedTeacher: PersonOption | null;
   readonly rows: readonly DailyScheduleRow[];
   readonly headers: {
     readonly student: string;
@@ -46,7 +44,7 @@ export interface ScheduleOverviewViewModel {
   readonly onPageChange: (page: number) => void;
   readonly onSearchChange: (value: string) => void;
   readonly onDateChange: (date: string) => void;
-  readonly onTeacherChange: (teacher: string) => void;
+  readonly onTeacherChange: (teacher: PersonOption | null) => void;
   readonly onSubmit: () => void;
   readonly pageCount: number;
   readonly showTimezones: boolean;

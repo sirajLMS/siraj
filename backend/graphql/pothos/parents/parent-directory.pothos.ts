@@ -1,7 +1,12 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { AccountStatusPothosObject, ParentStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
-import type { ParentDirectoryMetrics, ParentDirectoryResult, ParentDirectoryRow } from "@/backend/types";
+import type {
+  ParentDirectoryAutocompleteRow,
+  ParentDirectoryMetrics,
+  ParentDirectoryResult,
+  ParentDirectoryRow,
+} from "@/backend/types";
 
 const ParentDirectoryMetricsRef = gqlSchemaBuilder.objectRef<ParentDirectoryMetrics>("ParentDirectoryMetrics");
 
@@ -42,5 +47,18 @@ export const ParentDirectoryPothosObject = ParentDirectoryRef.implement({
     rows: t.expose("rows", { type: [ParentDirectoryRowPothosObject] }),
     totalCount: t.exposeInt("totalCount"),
     pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
+  }),
+});
+
+const ParentDirectoryAutocompleteRowRef = gqlSchemaBuilder.objectRef<ParentDirectoryAutocompleteRow>(
+  "ParentDirectoryAutocompleteRow"
+);
+
+export const ParentDirectoryAutocompleteRowPothosObject = ParentDirectoryAutocompleteRowRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    name: t.exposeString("name"),
+    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
+    email: t.exposeString("email"),
   }),
 });

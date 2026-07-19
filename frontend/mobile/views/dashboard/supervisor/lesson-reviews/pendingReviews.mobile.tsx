@@ -1,10 +1,9 @@
 "use client";
 
 import { ChevronRightOutlined } from "@mui/icons-material";
-import { Autocomplete, Box, Stack, TextField, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import type {
-  DirectoryPersonOption,
   PendingReviewRow,
   PendingReviewsViewModel,
 } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
@@ -18,6 +17,10 @@ import {
   MobileSectionPanel,
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
+import {
+  StudentAutocompleteMobile,
+  TeacherAutocompleteMobile,
+} from "@/frontend/mobile/components/ui/input/userSelect";
 import { LessonReportDetailPanelMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/lessonReportDetailPanel.mobile";
 import { RejectReportDialogMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/rejectReportDialog.mobile";
 
@@ -114,15 +117,13 @@ export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel
   const {
     rows,
     selectedReport,
-    teacherFilter,
+    selectedTeacher,
     studentFilter,
-    teacherOptions,
-    studentOptions,
     loading,
     approving,
     rejecting,
     labels,
-    onTeacherFilterChange,
+    onSelectedTeacherChange,
     onStudentFilterChange,
     onSelectReport,
     onApprove,
@@ -133,9 +134,6 @@ export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel
     rejectDialogOpen,
     rejectReason,
   } = props;
-
-  const selectedTeacher = teacherOptions.find(o => o.id === teacherFilter) ?? null;
-  const selectedStudent = studentOptions.find(o => o.id === studentFilter) ?? null;
 
   const renderItem = (row: PendingReviewRow): ReactNode => (
     <ReviewCard
@@ -161,35 +159,17 @@ export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel
 
         <MobileSectionPanel>
           <Stack sx={{ gap: 1.5, mb: 2 }}>
-            <Autocomplete<DirectoryPersonOption>
-              options={[...teacherOptions]}
+            <TeacherAutocompleteMobile
               value={selectedTeacher}
-              onChange={(_, option) => onTeacherFilterChange(option?.id ?? "")}
-              getOptionLabel={option => option.name}
-              isOptionEqualToValue={(a, b) => a.id === b.id}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  label={labels.filterByTeacher}
-                  placeholder={labels.teacherSearchPlaceholder}
-                  size="small"
-                />
-              )}
+              onChange={onSelectedTeacherChange}
+              label={labels.filterByTeacher}
+              placeholder={labels.teacherSearchPlaceholder}
             />
-            <Autocomplete<DirectoryPersonOption>
-              options={[...studentOptions]}
-              value={selectedStudent}
-              onChange={(_, option) => onStudentFilterChange(option?.id ?? "")}
-              getOptionLabel={option => option.name}
-              isOptionEqualToValue={(a, b) => a.id === b.id}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  label={labels.filterByStudent}
-                  placeholder={labels.studentSearchPlaceholder}
-                  size="small"
-                />
-              )}
+            <StudentAutocompleteMobile
+              value={studentFilter}
+              onChange={onStudentFilterChange}
+              label={labels.filterByStudent}
+              placeholder={labels.studentSearchPlaceholder}
             />
           </Stack>
 

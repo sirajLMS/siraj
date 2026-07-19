@@ -14,52 +14,43 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useState } from "react";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
+import { resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect/userSelect.utils";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/common/utils/student-status-transitions";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { ManagementControlsCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { useAppTranslation } from "@/shared/locale";
 
 function TeacherSelection({
-  teachers,
   selectedTeacherId,
   onTeacherChange,
 }: Readonly<{
-  teachers: readonly { readonly id: string; readonly name: string }[];
   selectedTeacherId: string;
   onTeacherChange: (id: string) => void;
 }>) {
   const t = useAppTranslation().dashboardTranslations.teacherReassignment.controls;
+  const [selectedTeacher, setSelectedTeacher] = useState<PersonOption | null>(null);
+  const value =
+    selectedTeacher ?? resolvePersonOption(selectedTeacherId, [], selectedTeacher);
+
   return (
     <Box>
-      <FormControl fullWidth size="small" sx={outlinedInputSx}>
-        <InputLabel id="teacher-reassignment-teacher-label-mobile" shrink>
-          {t.assignTeacher}
-        </InputLabel>
-        <Select
-          displayEmpty
-          value={selectedTeacherId}
-          labelId="teacher-reassignment-teacher-label-mobile"
-          label={t.assignTeacher}
-          onChange={e => {
-            const val = e.target.value;
-            if (typeof val === "string") onTeacherChange(val);
-          }}
-        >
-          <MenuItem value="" disabled>
-            {t.assignTeacherPlaceholder}
-          </MenuItem>
-          {teachers.map(teacher => (
-            <MenuItem key={teacher.id} value={teacher.id}>
-              {teacher.name}
-            </MenuItem>
-          ))}
-        </Select>
-        <FormHelperText sx={{ fontStyle: "italic" }}>{t.teacherAvailabilityNotice}</FormHelperText>
-      </FormControl>
+      <TeacherAutocompleteMobile
+        value={value}
+        onChange={(next: PersonOption | null) => {
+          setSelectedTeacher(next);
+          onTeacherChange(next?.id ?? "");
+        }}
+        label={t.assignTeacher}
+        placeholder={t.assignTeacherPlaceholder}
+      />
+      <FormHelperText sx={{ fontStyle: "italic", mt: 1 }}>{t.teacherAvailabilityNotice}</FormHelperText>
     </Box>
   );
 }
@@ -203,7 +194,6 @@ function ActionButtons({
 }
 
 export function ManagementControlsCardMobile({
-  teachers,
   currentStatus,
   studentId: _studentId,
   version: _version,
@@ -233,7 +223,6 @@ export function ManagementControlsCardMobile({
 
       <Stack component="form" spacing={3} onSubmit={onSubmitForm}>
         <TeacherSelection
-          teachers={teachers}
           selectedTeacherId={selectedTeacherId}
           onTeacherChange={onSelectedTeacherIdChange}
         />

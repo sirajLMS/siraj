@@ -3573,6 +3573,14 @@ export type ParentDirectory = {
   totalCount: Maybe<Scalars['Int']['output']>;
 };
 
+export type ParentDirectoryAutocompleteRow = {
+  __typename?: 'ParentDirectoryAutocompleteRow';
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+};
+
 export type ParentDirectoryMetrics = {
   __typename?: 'ParentDirectoryMetrics';
   id: Maybe<Scalars['String']['output']>;
@@ -3961,6 +3969,8 @@ export type Query = {
   parentProfile: Maybe<ParentProfile>;
   /** Returns the authenticated parent's suggestion history with review status. */
   parentSuggestions: Maybe<Array<Suggestion>>;
+  /** Lightweight parent list for autocomplete (id, name, avatarUrl). */
+  parentsDirectory: Array<ParentDirectoryAutocompleteRow>;
   /** Get pending lesson reports awaiting review with optional teacher/student filters and pagination */
   pendingLessonReports: Maybe<PendingLessonReportsPayload>;
   /** Fetch a single permission group by ID. */
@@ -3982,6 +3992,8 @@ export type Query = {
   searchSuggestions: Maybe<Array<SuggestionSearchResult>>;
   searchTeacherAvailability: Maybe<AvailabilitySearchResult>;
   simulatablePermissionGroups: Maybe<Array<SimulatablePermissionGroup>>;
+  /** Lightweight staff list for autocomplete (id, name, avatarUrl, email). */
+  staffDirectory: Array<StaffDirectoryAutocompleteRow>;
   statusTrackingSchedule: Maybe<Array<StatusTrackingScheduleRow>>;
   storageStats: Maybe<StorageStats>;
   student: Maybe<Student>;
@@ -4264,6 +4276,12 @@ export type QueryParentSuggestionsArgs = {
 };
 
 
+export type QueryParentsDirectoryArgs = {
+  limit: InputMaybe<Scalars['Int']['input']>;
+  search: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryPendingLessonReportsArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
   studentId: InputMaybe<Scalars['ID']['input']>;
@@ -4319,6 +4337,13 @@ export type QuerySearchSuggestionsArgs = {
 
 export type QuerySearchTeacherAvailabilityArgs = {
   input: AvailabilitySearchInput;
+};
+
+
+export type QueryStaffDirectoryArgs = {
+  limit: InputMaybe<Scalars['Int']['input']>;
+  permissionGroupFilter: InputMaybe<Scalars['String']['input']>;
+  search: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -4537,6 +4562,7 @@ export type QueryUserPermissionGroupsArgs = {
 export type QueryUsersArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+  search: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ReactivateParentResult = {
@@ -4700,6 +4726,14 @@ export type SimulatablePermissionGroup = {
 export type StaffAdminProfileUpdateInput = {
   phone: InputMaybe<Scalars['String']['input']>;
   status: InputMaybe<Scalars['String']['input']>;
+};
+
+export type StaffDirectoryAutocompleteRow = {
+  __typename?: 'StaffDirectoryAutocompleteRow';
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
 };
 
 export type StaffOwnProfileUpdateInput = {

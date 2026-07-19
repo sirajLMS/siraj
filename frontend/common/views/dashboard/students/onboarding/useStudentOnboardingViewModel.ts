@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useSearchParams } from "next/navigation";
@@ -13,8 +12,6 @@ import {
   useForm,
 } from "react-hook-form";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { parentDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-directory.documents";
-import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher.documents";
 import { useCreateStudentOnboarding } from "@/frontend/common/hooks/useCreateStudentOnboarding";
 import { logger } from "@/frontend/common/utils/logger";
 import { studentHref } from "@/frontend/common/utils/profileHref";
@@ -24,16 +21,6 @@ import {
 } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
-
-export interface ParentOption {
-  readonly id: string;
-  readonly label: string;
-}
-
-export interface TeacherOption {
-  readonly id: string;
-  readonly name: string;
-}
 
 export interface StudentOnboardingLabels {
   readonly pageTitle: string;
@@ -84,8 +71,6 @@ export interface StudentOnboardingViewModel {
   readonly errors: FieldErrors<StudentOnboardingFormData>;
   readonly handleSubmit: UseFormHandleSubmit<StudentOnboardingFormData>;
   readonly isSubmitting: boolean;
-  readonly parentOptions: readonly ParentOption[];
-  readonly teacherOptions: readonly TeacherOption[];
   readonly parentLocked: boolean;
   readonly labels: StudentOnboardingLabels;
   readonly onSubmit: (data: StudentOnboardingFormData) => void | Promise<void>;
@@ -110,40 +95,6 @@ function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
 
   const { execute, loading } = useCreateStudentOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
-
-  const { data: parentData } = useQuery(parentDirectoryQueryDocument, {
-    variables: { search: null, paginationArgs: null, lifecycleStatusFilter: null },
-    fetchPolicy: "cache-first",
-  });
-
-  const { data: teacherData } = useQuery(teachersQueryDocument, {
-    variables: { search: "", limit: 100 },
-    fetchPolicy: "cache-first",
-  });
-
-  const parentOptions: ParentOption[] = useMemo(
-    () =>
-      (parentData?.parentDirectory?.rows ?? [])
-        .filter((row): row is typeof row & { id: string; name: string } => Boolean(row.id && row.name))
-        .map(row => ({
-          id: row.id,
-          label: row.name,
-        })),
-    [parentData]
-  );
-
-  const teacherOptions: TeacherOption[] = useMemo(
-    () =>
-      (teacherData?.teachers ?? [])
-        .filter((teacher): teacher is typeof teacher & { id: string; name: string } =>
-          Boolean(teacher.id && teacher.name)
-        )
-        .map(teacher => ({
-          id: teacher.id,
-          name: teacher.name,
-        })),
-    [teacherData]
-  );
 
   const {
     register,
@@ -246,8 +197,6 @@ function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
     errors,
     handleSubmit,
     isSubmitting: loading,
-    parentOptions,
-    teacherOptions,
     parentLocked: Boolean(initialParentId),
     labels,
     onSubmit,

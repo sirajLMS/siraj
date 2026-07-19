@@ -70,7 +70,6 @@ interface PersistedSearchScheduleFilters {
 
 interface PersistedSearchScheduleState {
   readonly draftFilters: PersistedSearchScheduleFilters;
-  readonly teacherSearchInput: string;
   readonly selectedTeacher: SearchScheduleTeacherOption | null;
   readonly pageSize: number;
   // NEW FOR PLAN v5: persisted lifted UI state. sortMenuAnchorEl is intentionally absent
@@ -120,11 +119,8 @@ function mergeDraftWithPersistedFilters(
   };
 }
 
-function resolveTeacherNameSearch(
-  selectedTeacher: SearchScheduleTeacherOption | null,
-  teacherSearchInput: string
-): string | null {
-  const name = selectedTeacher?.name ?? teacherSearchInput.trim();
+function resolveTeacherNameSearch(selectedTeacher: SearchScheduleTeacherOption | null): string | null {
+  const name = selectedTeacher?.name?.trim() ?? "";
   return name.length > 0 ? name : null;
 }
 
@@ -163,8 +159,6 @@ interface SearchScheduleState {
   readonly hasSearched: boolean;
   readonly page: number;
   readonly pageSize: number;
-  readonly teacherSearchInput: string;
-  readonly debouncedTeacherSearch: string;
   readonly selectedTeacher: SearchScheduleTeacherOption | null;
   readonly _hasHydrated: boolean;
   // NEW FOR PLAN v5: form-filter drawer open state (lifted from searchScheduleForm.{mobile,desktop}.tsx).
@@ -181,8 +175,6 @@ interface SearchScheduleState {
   // NEW FOR PLAN v5: teacher selected for the month drawer (lifted from teacherAvailabilityMonthDrawer.{mobile,desktop}.tsx).
   readonly monthDrawerTeacher: SearchScheduleMonthDrawerTeacher | null;
   setDraft: (draft: Partial<SearchScheduleDraftFilters>) => void;
-  setTeacherSearchInput: (input: string) => void;
-  setDebouncedTeacherSearch: (query: string) => void;
   setSelectedTeacher: (teacher: SearchScheduleTeacherOption | null) => void;
   setHasHydrated: (hasHydrated: boolean) => void;
   commitSearch: () => void;
@@ -205,8 +197,6 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
       hasSearched: false,
       page: 0,
       pageSize: DEFAULT_PAGE_SIZE,
-      teacherSearchInput: "",
-      debouncedTeacherSearch: "",
       selectedTeacher: null,
       _hasHydrated: false,
       // NEW FOR PLAN v5 (newly created for the migration wave): default values for the lifted
@@ -223,13 +213,7 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
         set(state => ({
           draft: { ...state.draft, ...draft },
         })),
-      setTeacherSearchInput: teacherSearchInput => set({ teacherSearchInput }),
-      setDebouncedTeacherSearch: debouncedTeacherSearch => set({ debouncedTeacherSearch }),
-      setSelectedTeacher: selectedTeacher =>
-        set({
-          selectedTeacher,
-          teacherSearchInput: selectedTeacher?.name ?? "",
-        }),
+      setSelectedTeacher: selectedTeacher => set({ selectedTeacher }),
       setHasHydrated: hasHydrated => set({ _hasHydrated: hasHydrated }),
       // NEW FOR PLAN v5: form-filter drawer setter — toggles the mobile/desktop filter drawer.
       setFormFilterDrawerOpen: formFilterDrawerOpen => set({ formFilterDrawerOpen }),
@@ -249,8 +233,8 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
       // NEW FOR PLAN v5: setMonthDrawerCurrentMonth — advances the drawer's navigated month.
       setMonthDrawerCurrentMonth: monthDrawerCurrentMonth => set({ monthDrawerCurrentMonth }),
       commitSearch: () => {
-        const { draft, pageSize, selectedTeacher, teacherSearchInput } = get();
-        const teacherNameSearch = resolveTeacherNameSearch(selectedTeacher, teacherSearchInput);
+        const { draft, pageSize, selectedTeacher } = get();
+        const teacherNameSearch = resolveTeacherNameSearch(selectedTeacher);
         set({
           activeInput: draftToActiveInput(draft, 0, pageSize, teacherNameSearch),
           hasSearched: true,
@@ -258,8 +242,8 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
         });
       },
       setPage: page => {
-        const { draft, pageSize, selectedTeacher, teacherSearchInput } = get();
-        const teacherNameSearch = resolveTeacherNameSearch(selectedTeacher, teacherSearchInput);
+        const { draft, pageSize, selectedTeacher } = get();
+        const teacherNameSearch = resolveTeacherNameSearch(selectedTeacher);
         set({
           page,
           activeInput: draftToActiveInput(draft, page, pageSize, teacherNameSearch),
@@ -271,8 +255,6 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
           activeInput: null,
           hasSearched: false,
           page: 0,
-          teacherSearchInput: "",
-          debouncedTeacherSearch: "",
           selectedTeacher: null,
           // NEW FOR PLAN v5: also reset all lifted UI state on clearFilters.
           formFilterDrawerOpen: false,
@@ -283,11 +265,11 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
           monthDrawerTeacher: null,
         }),
       buildActiveInput: () => {
-        const { draft, page, pageSize, activeInput, selectedTeacher, teacherSearchInput } = get();
+        const { draft, page, pageSize, activeInput, selectedTeacher } = get();
         if (!activeInput) {
           return null;
         }
-        const teacherNameSearch = resolveTeacherNameSearch(selectedTeacher, teacherSearchInput);
+        const teacherNameSearch = resolveTeacherNameSearch(selectedTeacher);
         return draftToActiveInput(draft, page, pageSize, teacherNameSearch);
       },
     }),
@@ -295,7 +277,6 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
       name: STORAGE_KEY,
       partialize: (state): PersistedSearchScheduleState => ({
         draftFilters: extractPersistedDraftFilters(state.draft),
-        teacherSearchInput: state.teacherSearchInput,
         selectedTeacher: state.selectedTeacher,
         pageSize: state.pageSize,
         // NEW FOR PLAN v5: include the lifted UI state. sortMenuAnchorEl is excluded because it
@@ -308,14 +289,11 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
       }),
       merge: (persistedState, currentState) => {
         const persisted = persistedState as PersistedSearchScheduleState | undefined;
-        const teacherSearchInput = persisted?.teacherSearchInput ?? "";
 
         return {
           ...currentState,
           draft: mergeDraftWithPersistedFilters(persisted?.draftFilters),
-          teacherSearchInput,
           selectedTeacher: persisted?.selectedTeacher ?? null,
-          debouncedTeacherSearch: teacherSearchInput.trim(),
           pageSize: persisted?.pageSize ?? currentState.pageSize,
           // NEW FOR PLAN v5: restore lifted UI state from persistence. sortMenuAnchorEl stays
           // null (non-serializable DOM element — menu starts closed after refresh).

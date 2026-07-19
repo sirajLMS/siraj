@@ -57,7 +57,7 @@ const searchMocks = [
   {
     request: {
       query: teachersQueryDocument,
-      variables: { search: "", limit: 10 },
+      variables: { search: "", limit: 20 },
     },
     result: { data: { teachers: [] } },
   },
@@ -106,8 +106,6 @@ const meta: Meta<typeof SearchScheduleContainer> = {
         activeInput: null,
         hasSearched: false,
         page: 0,
-        teacherSearchInput: "",
-        debouncedTeacherSearch: "",
         selectedTeacher: null,
         _hasHydrated: true,
         // NEW FOR PLAN v5: reset lifted UI state in the storybook decorator.

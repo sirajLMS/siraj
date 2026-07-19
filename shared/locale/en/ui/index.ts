@@ -10,6 +10,7 @@ import { uiPaymentMethodEn as paymentMethod } from "./payment-method";
 import { uiPhoneInputEn as phoneInput } from "./phone-input";
 import { uiTagInputEn as tagInput } from "./tag-input";
 import { uiTimezoneSelectEn as timezoneSelect } from "./timezone-select";
+import { uiUserSelectEn as userSelect } from "./user-select";
 
 export const uiEn: UiLabels = {
   catalogImageUpload,
@@ -23,4 +24,5 @@ export const uiEn: UiLabels = {
   timezoneSelect,
   meetingConfig,
   paymentMethod,
+  userSelect,
 };

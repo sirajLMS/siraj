@@ -21,7 +21,6 @@ export function ReportsMobileView({
   toDate,
   teacherId,
   reportType,
-  teachers,
   rows,
   summary,
   canGenerate,
@@ -49,7 +48,6 @@ export function ReportsMobileView({
           toDate={toDate}
           teacherId={teacherId}
           reportType={reportType}
-          teachers={teachers}
           labels={labels.filtersLabels}
           canGenerate={canGenerate}
           expanded={filtersExpanded}

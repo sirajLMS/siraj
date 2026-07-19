@@ -14,14 +14,12 @@ import {
   changeStudentStatusMutationDocument,
   reassignStudentTeacherMutationDocument,
   studentByIdQueryDocument,
-  teachersQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type {
   ReassignmentStudentData,
   ReassignmentSubmitInput,
-  ReassignmentTeacherOption,
   StatusChangeInput,
   TeacherReassignmentViewProps,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
@@ -50,7 +48,6 @@ const EMPTY_STUDENT: ReassignmentStudentData = {
 };
 
 type StudentQueryData = Operations.StudentByIdQuery;
-type TeachersQueryData = Operations.TeachersQuery;
 
 function mapStudentData(studentData: StudentQueryData | undefined): ReassignmentStudentData | null {
   const s = studentData?.studentById;
@@ -67,19 +64,6 @@ function mapStudentData(studentData: StudentQueryData | undefined): Reassignment
     version: s.version ?? null,
     updatedAt: s.updatedAt ?? null,
   };
-}
-
-function mapTeacherOptions(teachersData: TeachersQueryData | undefined): readonly ReassignmentTeacherOption[] {
-  return (teachersData?.teachers ?? [])
-    .filter(
-      (t): t is { readonly id: string; readonly name: string } => typeof t.id === "string" && typeof t.name === "string"
-    )
-    .map(t => ({
-      id: t.id,
-      name: t.name,
-      avatarUrl: "",
-      status: "active" as const,
-    }));
 }
 
 function ReassignmentLoadingState() {
@@ -130,14 +114,6 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
     skip: !studentId,
   });
 
-  const {
-    data: teachersData,
-    loading: teachersLoading,
-    error: teachersError,
-  } = useQuery(teachersQueryDocument, {
-    variables: { search: "", limit: 100 },
-  });
-
   const [reassignTeacher, { loading: isReassigning }] = useMutation(reassignStudentTeacherMutationDocument, {
     onCompleted: () => {
       notifications.show(t.actions.reassignSuccess, { severity: "success", autoHideDuration: 4000 });
@@ -161,8 +137,6 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
   });
 
   const student: ReassignmentStudentData | null = useMemo(() => mapStudentData(studentData), [studentData]);
-
-  const teachers: readonly ReassignmentTeacherOption[] = useMemo(() => mapTeacherOptions(teachersData), [teachersData]);
 
   const versionRef = useRef(student?.version ?? null);
   useEffect(() => {
@@ -207,7 +181,6 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
   const viewModelProps: Readonly<TeacherReassignmentViewProps> = {
     student: student ?? EMPTY_STUDENT,
     currentTeacherName: student?.teacherName ?? "Unset",
-    teachers,
     isSubmitting: isReassigning || isChangingStatus,
     onReassign: handleReassign,
     onStatusChange: handleStatusChange,
@@ -220,12 +193,12 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
     return <ReassignmentErrorState message={t.errors.invalidId} />;
   }
 
-  if (studentLoading || teachersLoading) {
+  if (studentLoading) {
     return <ReassignmentLoadingState />;
   }
 
-  if (studentError || teachersError) {
-    logger.error("Error loading teacher reassignment data:", { studentError, teachersError });
+  if (studentError) {
+    logger.error("Error loading teacher reassignment data:", { studentError });
     return <ReassignmentErrorState message={tc.loadFailed} />;
   }
 

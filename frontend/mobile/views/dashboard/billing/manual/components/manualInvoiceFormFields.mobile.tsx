@@ -1,17 +1,18 @@
 "use client";
 
-import { Autocomplete, Box, Skeleton, TextField } from "@mui/material";
+import { Box } from "@mui/material";
 import type { Control } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 import type { ManualInvoiceFormData } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
 import type { ManualInvoiceFormFieldsMobileProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceFormFields.types";
-import type { StudentOption } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
 import { ManualInvoiceDateFieldMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceDateField.mobile";
 import { ManualInvoiceFeeFieldMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceFeeField.mobile";
 import { MobileFieldCard } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceFormLayout.mobile";
 import { ManualInvoiceParentFieldMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceParentField.mobile";
+import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import type { BillingManualLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -48,43 +49,29 @@ function CurrencyField({
 
 function StudentSelectorField({
   control,
-  studentOptions,
+  selectedParentId,
   labels,
 }: {
   readonly control: Control<ManualInvoiceFormData>;
-  readonly studentOptions: readonly StudentOption[];
+  readonly selectedParentId: string | null;
   readonly labels: BillingManualLabels;
 }) {
   return (
     <Controller
       control={control}
       name="studentId"
-      render={({ field }) => (
-        <Autocomplete
-          options={studentOptions}
-          getOptionLabel={option => option.name}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          value={studentOptions.find(s => s.id === field.value) ?? null}
-          onChange={(_e, newValue) => {
-            field.onChange(newValue?.id ?? "");
+      render={({ field, fieldState }) => (
+        <StudentAutocompleteMobile
+          value={field.value ? ({ id: field.value, name: "" } satisfies PersonOption) : null}
+          onChange={option => {
+            field.onChange(option?.id ?? "");
           }}
-          renderInput={params => (
-            <TextField
-              {...params}
-              slotProps={{
-                ...params.slotProps,
-                htmlInput: {
-                  ...params.slotProps.htmlInput,
-                  autoComplete: "off",
-                },
-              }}
-              label={labels.studentSelection}
-              variant="outlined"
-              size="small"
-              fullWidth
-            />
-          )}
-          size="small"
+          scope={{ parentId: selectedParentId ?? undefined }}
+          skip={!selectedParentId}
+          label={labels.studentSelection}
+          error={Boolean(fieldState.error)}
+          helperText={fieldState.error?.message}
+          disabled={!selectedParentId}
         />
       )}
     />
@@ -95,35 +82,25 @@ export function ManualInvoiceFormFieldsMobile({
   control,
   errors,
   labels,
-  parentOptions,
-  studentOptions,
+  selectedParentId,
   draftCurrency,
-  parentsLoading = false,
-  studentsLoading = false,
 }: Readonly<ManualInvoiceFormFieldsMobileProps>) {
   const tProfile = useAppTranslation().profileTranslations.parent;
   const currencyLabel = tProfile.fields.currency;
+  const watchedParentId = useWatch({ control, name: "parentId" });
+  const parentIdForStudents = watchedParentId || selectedParentId;
 
   const parentField = (
-    <ManualInvoiceParentFieldMobile control={control} errors={errors} labels={labels} parentOptions={parentOptions} />
+    <ManualInvoiceParentFieldMobile control={control} errors={errors} labels={labels} />
   );
-  const studentField = <StudentSelectorField control={control} studentOptions={studentOptions} labels={labels} />;
-
-  const parentFieldNode = parentsLoading ? (
-    <Skeleton variant="rounded" height={56} sx={{ borderRadius: 1 }} />
-  ) : (
-    parentField
-  );
-  const studentFieldNode = studentsLoading ? (
-    <Skeleton variant="rounded" height={56} sx={{ borderRadius: 1 }} />
-  ) : (
-    studentField
+  const studentField = (
+    <StudentSelectorField control={control} selectedParentId={parentIdForStudents} labels={labels} />
   );
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <MobileFieldCard>{parentFieldNode}</MobileFieldCard>
-      <MobileFieldCard>{studentFieldNode}</MobileFieldCard>
+      <MobileFieldCard>{parentField}</MobileFieldCard>
+      <MobileFieldCard>{studentField}</MobileFieldCard>
       <MobileFieldCard>
         <ManualInvoiceFeeFieldMobile control={control} errors={errors} labels={labels} draftCurrency={draftCurrency} />
       </MobileFieldCard>

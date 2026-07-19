@@ -12,7 +12,6 @@ import {
   teacherWorkloadMetricsQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { createRecurringClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-class.documents";
-import { studentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { useCreateRecurringClassStore } from "@/frontend/common/stores/createRecurringClassStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -92,28 +91,6 @@ export function useTeacherWeeklyScheduleViewModel(
   const [deleteRecurringClass] = useMutation(deleteRecurringClassMutationDocument);
   const [clearWeeklySchedule] = useMutation(clearWeeklyScheduleMutationDocument);
 
-  // NEW FOR PLAN v5: `useQuery` for students lifted out of the tier dialog
-  // (specs N1 — no `useQuery` in tier files). The ViewModel owns the document
-  //_subscription + `skip`-gating on `isDialogOpen`.
-  const { data: studentsData, loading: loadingStudents } = useQuery(studentsQueryDocument, {
-    variables: {
-      filterArgs: null,
-      paginationArgs: {
-        first: 100,
-        skip: 0,
-        after: null,
-        before: null,
-        last: null,
-        maxCount: null,
-        page: null,
-      },
-      orderBy: null,
-    },
-    skip: !isDialogOpen,
-  });
-
-  // NEW FOR PLAN v5: `useMutation` for create-class lifted out of the tier
-  // dialog (specs N1 — no `useMutation` in tier files).
   const [createClassMutation, { loading: mutationLoading }] = useMutation(createRecurringClassMutationDocument);
 
   const schedule = scheduleData?.teacherWeeklyScheduleGrid;
@@ -132,8 +109,6 @@ export function useTeacherWeeklyScheduleViewModel(
   // NEW FOR PLAN v5: `useValidation` (which calls `useNotifications`) is now
   // called by the ViewModel (specs N17 — `useNotifications` only in VM).
   const validateBeforeSubmit = useValidation(formState, days, notifications, dialogLabels, tClassScope, tMeeting);
-
-  const students = studentsData?.students?.data || [];
 
   // NEW FOR PLAN v5: `hasSessionCreateClass` aliases the same
   // `ScheduleCreateClass` permission computed above so the dialog
@@ -290,8 +265,6 @@ export function useTeacherWeeklyScheduleViewModel(
     toggleDay,
     toggleTimeOverride,
     setTimeOverride,
-    students,
-    loadingStudents,
     mutationLoading,
     meetingConfigWarning: formState.meetingConfigWarning,
     completedClassInstanceId: formState.createdClassInstanceId,

@@ -1,11 +1,10 @@
 "use client";
 
-import { Autocomplete, Grid, TextField } from "@mui/material";
+import { Grid } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { getServerPaginationOptions } from "@/frontend/common/components/ui/filter/serverPaginationProps";
 import type {
-  DirectoryPersonOption,
   PendingReviewRow,
   PendingReviewsViewModel,
 } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
@@ -17,6 +16,10 @@ import {
 } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import {
+  StudentAutocompleteDesktop,
+  TeacherAutocompleteDesktop,
+} from "@/frontend/desktop/components/ui/input/userSelect";
 import { LessonReportDetailPanelDesktop } from "@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/components/lessonReportDetailPanel.desktop";
 import { RejectReportDialogDesktop } from "@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/components/rejectReportDialog.desktop";
 
@@ -27,15 +30,13 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
     page,
     pageSize,
     selectedReport,
-    teacherFilter,
+    selectedTeacher,
     studentFilter,
-    teacherOptions,
-    studentOptions,
     loading,
     approving,
     rejecting,
     labels,
-    onTeacherFilterChange,
+    onSelectedTeacherChange,
     onStudentFilterChange,
     onPageChange,
     onSelectReport,
@@ -47,9 +48,6 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
     rejectDialogOpen,
     rejectReason,
   } = props;
-
-  const selectedTeacher = teacherOptions.find(o => o.id === teacherFilter) ?? null;
-  const selectedStudent = studentOptions.find(o => o.id === studentFilter) ?? null;
 
   const columns = useMemo<GridColDef<PendingReviewRow>[]>(
     () => [
@@ -153,37 +151,19 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
         actions={
           <Grid container spacing={1} sx={{ minWidth: { md: 480 } }}>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Autocomplete<DirectoryPersonOption>
-                options={[...teacherOptions]}
+              <TeacherAutocompleteDesktop
                 value={selectedTeacher}
-                onChange={(_, option) => onTeacherFilterChange(option?.id ?? "")}
-                getOptionLabel={option => option.name}
-                isOptionEqualToValue={(a, b) => a.id === b.id}
-                renderInput={params => (
-                  <TextField
-                    {...params}
-                    label={labels.filterByTeacher}
-                    placeholder={labels.teacherSearchPlaceholder}
-                    size="small"
-                  />
-                )}
+                onChange={onSelectedTeacherChange}
+                label={labels.filterByTeacher}
+                placeholder={labels.teacherSearchPlaceholder}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Autocomplete<DirectoryPersonOption>
-                options={[...studentOptions]}
-                value={selectedStudent}
-                onChange={(_, option) => onStudentFilterChange(option?.id ?? "")}
-                getOptionLabel={option => option.name}
-                isOptionEqualToValue={(a, b) => a.id === b.id}
-                renderInput={params => (
-                  <TextField
-                    {...params}
-                    label={labels.filterByStudent}
-                    placeholder={labels.studentSearchPlaceholder}
-                    size="small"
-                  />
-                )}
+              <StudentAutocompleteDesktop
+                value={studentFilter}
+                onChange={onStudentFilterChange}
+                label={labels.filterByStudent}
+                placeholder={labels.studentSearchPlaceholder}
               />
             </Grid>
           </Grid>

@@ -8,7 +8,6 @@ import { ManageOverridesDialogMobile } from "@/frontend/mobile/views/dashboard/p
 import { PermissionGroupFormMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionGroupForm.mobile";
 
 export function PermissionManagementDialogsMobile({
-  users,
   isLoading,
   activeGroup,
   selectedGroupId,
@@ -93,7 +92,6 @@ export function PermissionManagementDialogsMobile({
       <AssignGroupDialogMobile
         open={isAssignDialogOpen}
         group={activeGroup}
-        users={users}
         isLoading={isLoading}
         onClose={closeAssignDialog}
         onAssign={async userId => {

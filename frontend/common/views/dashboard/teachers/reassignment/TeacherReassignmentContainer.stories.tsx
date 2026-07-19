@@ -31,7 +31,7 @@ const reassignmentMocks = [
   {
     request: {
       query: teachersQueryDocument,
-      variables: { search: "", limit: 100 },
+      variables: { search: "", limit: 20 },
     },
     result: {
       data: {

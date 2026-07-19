@@ -7,6 +7,7 @@ import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/co
 import { ScheduleOverviewDataGrid } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import { DesktopSectionPanel, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
+import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 
 const StyledDesktopPanel = styled(Paper)(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 2,
@@ -68,12 +69,9 @@ export function ScheduleOverviewDesktopView({
   previousDayLabel,
   nextDayLabel,
   teacherPlaceholder,
-  teacherValue,
-  submitLabel,
-  teachers,
+  selectedTeacher,
   onDateChange,
   onTeacherChange,
-  onSubmit,
   loading,
   // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
   // instead of the previous `RequirePermission` wrappers.
@@ -120,13 +118,14 @@ export function ScheduleOverviewDesktopView({
               todayLabel={todayLabel}
               previousDayLabel={previousDayLabel}
               nextDayLabel={nextDayLabel}
-              teacherPlaceholder={teacherPlaceholder}
-              teacherValue={teacherValue}
-              submitLabel={submitLabel}
-              teachers={teachers}
               onDateChange={onDateChange}
-              onTeacherChange={onTeacherChange}
-              onSubmit={onSubmit}
+              teacherSelect={
+                <TeacherAutocompleteDesktop
+                  value={selectedTeacher}
+                  onChange={onTeacherChange}
+                  label={teacherPlaceholder}
+                />
+              }
             />
           </StyledFilterContainer>
         ) : null}

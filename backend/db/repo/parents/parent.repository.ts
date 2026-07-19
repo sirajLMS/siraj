@@ -37,6 +37,7 @@ import type {
   ParentCreateResult,
   ParentDashboardMetricsType,
   ParentDashboardScheduleRow,
+  ParentDirectoryAutocompleteRow,
   ParentDirectoryRawMetrics,
   ParentDirectoryRawRow,
   ParentEntity,
@@ -227,6 +228,27 @@ export namespace ParentRepository {
       totalCount: total,
       pageInfo,
     };
+  };
+
+  export const findParentsDirectoryLite = async (
+    options: { search?: string | null; limit: number },
+    tx?: DBTransaction
+  ): Promise<ParentDirectoryAutocompleteRow[]> => {
+    const queryDb = tx ?? db;
+    const conditions = buildDirectoryConditions({ search: options.search });
+
+    return await queryDb
+      .select({
+        id: parents.id,
+        name: users.name,
+        avatarUrl: users.avatarUrl,
+        email: users.email,
+      })
+      .from(parents)
+      .innerJoin(users, eq(parents.userId, users.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(parents.updatedAt))
+      .limit(options.limit);
   };
 
   export const getStudentsForParent = async (parentId: string, tx?: DBTransaction): Promise<{ name: string }[]> => {

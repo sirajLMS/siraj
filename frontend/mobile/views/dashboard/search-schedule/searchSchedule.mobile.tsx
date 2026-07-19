@@ -95,12 +95,7 @@ export function SearchScheduleMobileView({
   onDraftChange,
   onSearch,
   onPageChange,
-  teacherSearchInput,
   selectedTeacher,
-  teacherOptions,
-  teacherSearchLoading,
-  shouldSearchTeachers,
-  onTeacherSearchInputChange,
   onSelectTeacher,
   formFilterDrawerOpen,
   onOpenFormFilterDrawer,
@@ -155,12 +150,7 @@ export function SearchScheduleMobileView({
           onSortMenuOpen={onSortMenuOpen}
           onSortMenuClose={onSortMenuClose}
           onSortChange={onSortChange}
-          teacherSearchInput={teacherSearchInput}
           selectedTeacher={selectedTeacher}
-          teacherOptions={teacherOptions}
-          teacherSearchLoading={teacherSearchLoading}
-          shouldSearchTeachers={shouldSearchTeachers}
-          onTeacherSearchInputChange={onTeacherSearchInputChange}
           onSelectTeacher={onSelectTeacher}
         />
 

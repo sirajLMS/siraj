@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { count, eq, inArray, type SQL } from "drizzle-orm";
+import { and, count, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
@@ -126,8 +126,24 @@ export namespace UserRepository {
     }));
   };
 
-  export const findUsers = async (opts: { limit: number; offset: number }): Promise<UserReturnType[]> => {
-    const results = await db.select().from(users).orderBy(users.createdAt).limit(opts.limit).offset(opts.offset);
+  export const findUsers = async (opts: {
+    limit: number;
+    offset: number;
+    search?: string | null;
+  }): Promise<UserReturnType[]> => {
+    const conditions: (SQL | undefined)[] = [];
+    const trimmedSearch = opts.search?.trim();
+    if (trimmedSearch) {
+      conditions.push(or(ilike(users.name, `%${trimmedSearch}%`), ilike(users.email, `%${trimmedSearch}%`)));
+    }
+
+    const results = await db
+      .select()
+      .from(users)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(users.createdAt)
+      .limit(opts.limit)
+      .offset(opts.offset);
     return results.map(user => AuthUtils.toUserReturnType(user));
   };
 

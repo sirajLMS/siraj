@@ -3,7 +3,7 @@
 import { ExpandMoreOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Collapse, IconButton, Typography } from "@mui/material";
 import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
-import type { ReportTeacherOption, ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import type { ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import type { ReportFiltersCollapsibleProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import {
   ReportFiltersFormMobile,
@@ -23,7 +23,6 @@ export function ReportFiltersCollapsibleMobile({
   toDate,
   teacherId,
   reportType,
-  teachers,
   labels,
   canGenerate,
   expanded,
@@ -90,7 +89,6 @@ export function ReportFiltersCollapsibleMobile({
             toDate={toDate}
             teacherId={teacherId}
             reportType={reportType}
-            teachers={teachers}
             labels={labels}
             canGenerate={canGenerate}
             onFromDateChange={onFromDateChange}
@@ -107,4 +105,3 @@ export function ReportFiltersCollapsibleMobile({
 
 export type _CollapsibleLabelsUnused = ReportFiltersFormMobileLabels;
 export type _CollapsibleReportTypeUnused = ReportType;
-export type _CollapsibleTeacherOptionUnused = ReportTeacherOption;

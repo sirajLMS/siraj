@@ -44,6 +44,17 @@ export interface TeacherDashboardViewModel {
   readonly onPrintSchedule: () => void;
   readonly onManualEntry: () => void;
   readonly onNewSession: () => void;
+  readonly manualEntryOpen: boolean;
+  readonly manualEntryDefaultActive: boolean;
+  readonly teacherId: string;
+  readonly onManualEntryClose: () => void;
+  readonly onManualEntrySubmit: (data: {
+    readonly studentId: string;
+    readonly scheduledStartAt: string;
+    readonly scheduledEndAt: string;
+    readonly durationMinutes: number;
+    readonly classType: string;
+  }) => Promise<void>;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;

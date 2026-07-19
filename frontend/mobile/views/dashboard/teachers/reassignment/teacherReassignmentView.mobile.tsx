@@ -13,7 +13,6 @@ import { useAppTranslation } from "@/shared/locale";
 export function TeacherReassignmentViewMobile({
   student,
   currentTeacherName,
-  teachers,
   isSubmitting,
   onReassign,
   onStatusChange,
@@ -54,7 +53,6 @@ export function TeacherReassignmentViewMobile({
           </Alert>
 
           <ManagementControlsCardMobile
-            teachers={teachers}
             currentStatus={student.status}
             studentId={student.id}
             version={student.version}

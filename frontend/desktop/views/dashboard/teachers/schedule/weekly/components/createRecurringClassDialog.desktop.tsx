@@ -30,10 +30,10 @@ import type { CreateRecurringClassDialogFormState } from "@/frontend/common/view
 import type {
   ClassTypeEnum,
   CreateRecurringClassDialogProps,
-  CreateRecurringClassDialogStudent,
   CreateRecurringClassDialogViewModel,
   DayOfWeek,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import { StudentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import type {
   MeetingConfigManagerLabels,
   MeetingConfigRecurringScheduleLabels,
@@ -76,38 +76,29 @@ function MeetingConfigWarningAlert({
 function StudentSelectField({
   studentId,
   setStudentId,
-  students,
-  loadingStudents,
+  teacherId,
+  isDialogOpen,
   mutationLoading,
   t,
 }: {
   readonly studentId: string;
   readonly setStudentId: (value: string) => void;
-  readonly students: readonly CreateRecurringClassDialogStudent[];
-  readonly loadingStudents: boolean;
+  readonly teacherId: string;
+  readonly isDialogOpen: boolean;
   readonly mutationLoading: boolean;
   readonly t: TeacherCreateRecurringClassLabels;
 }) {
   return (
-    <FormControl fullWidth>
-      <InputLabel id="student-select-label" shrink>
-        {t.fields.student}
-      </InputLabel>
-      <Select
-        labelId="student-select-label"
-        id="student-select"
-        value={studentId}
-        label={t.fields.student}
-        onChange={e => setStudentId(e.target.value)}
-        disabled={loadingStudents || mutationLoading}
-      >
-        {students.map(s => (
-          <MenuItem key={s.id} value={s.id || ""}>
-            {s.name || "Unknown student"}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <StudentAutocompleteDesktop
+      value={studentId ? { id: studentId, name: "" } : null}
+      onChange={option => {
+        setStudentId(option?.id ?? "");
+      }}
+      scope={{ primaryTeacherId: teacherId }}
+      skip={!isDialogOpen || !teacherId}
+      disabled={mutationLoading}
+      label={t.fields.student}
+    />
   );
 }
 
@@ -315,8 +306,7 @@ function DialogFormContent({
   toggleDay,
   toggleTimeOverride,
   setTimeOverride,
-  students,
-  loadingStudents,
+  isDialogOpen,
   mutationLoading,
   meetingConfigWarning,
   createdClassInstanceId,
@@ -331,8 +321,7 @@ function DialogFormContent({
   readonly toggleDay: (day: DayOfWeek) => void;
   readonly toggleTimeOverride: (day: DayOfWeek) => void;
   readonly setTimeOverride: (day: DayOfWeek, time: string) => void;
-  readonly students: readonly CreateRecurringClassDialogStudent[];
-  readonly loadingStudents: boolean;
+  readonly isDialogOpen: boolean;
   readonly mutationLoading: boolean;
   readonly meetingConfigWarning: boolean;
   readonly createdClassInstanceId: string | null;
@@ -355,8 +344,8 @@ function DialogFormContent({
         <StudentSelectField
           studentId={state.studentId}
           setStudentId={state.setStudentId}
-          students={students}
-          loadingStudents={loadingStudents}
+          teacherId={teacherId}
+          isDialogOpen={isDialogOpen}
           mutationLoading={mutationLoading}
           t={t}
         />
@@ -408,12 +397,10 @@ function CreateRecurringClassDialogDesktopBody({
     toggleDay,
     toggleTimeOverride,
     setTimeOverride,
-    students,
-    loadingStudents,
+    isDialogOpen,
     mutationLoading,
     meetingConfigWarning,
     completedClassInstanceId,
-    isDialogOpen,
     closeDialog,
     handleSubmit,
     hasSessionCreateClass,
@@ -434,8 +421,7 @@ function CreateRecurringClassDialogDesktopBody({
           toggleDay={toggleDay}
           toggleTimeOverride={toggleTimeOverride}
           setTimeOverride={setTimeOverride}
-          students={students}
-          loadingStudents={loadingStudents}
+          isDialogOpen={isDialogOpen}
           mutationLoading={mutationLoading}
           meetingConfigWarning={meetingConfigWarning}
           createdClassInstanceId={completedClassInstanceId}

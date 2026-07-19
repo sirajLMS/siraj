@@ -1,6 +1,6 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
 import type { Control, FieldErrors, UseFormHandleSubmit } from "react-hook-form";
-import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { AssignGroupFormData } from "@/frontend/common/views/dashboard/permissions/schemas/assignGroup.schema";
 
 export interface AssignGroupFormBindings {
@@ -15,7 +15,6 @@ export interface AssignGroupFormBindings {
 export interface AssignGroupDialogProps extends AssignGroupFormBindings {
   readonly open: boolean;
   readonly group: PermissionGroup | null;
-  readonly users: readonly User[];
   readonly isLoading: boolean;
   readonly onClose: () => void;
   readonly onAssign: (userId: string) => void;

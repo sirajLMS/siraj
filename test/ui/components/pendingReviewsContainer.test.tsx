@@ -228,8 +228,8 @@ function createMocks(): MockLink.MockedResponse[] {
 afterEach(() => {
   cleanup();
   usePendingLessonReviewsStore.setState({
-    teacherFilter: "",
-    studentFilter: "",
+    selectedTeacher: null,
+    studentFilter: null,
     selectedReportId: null,
     rejectDialogOpen: false,
     rejectReason: "",

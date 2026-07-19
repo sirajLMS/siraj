@@ -1,13 +1,11 @@
 "use client";
 
-import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
+import { useApolloClient, useMutation } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { type Resolver, useForm } from "react-hook-form";
 import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createRecurringClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-class.documents";
-import { studentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student.documents";
-import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher.documents";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { useCreateRecurringClassStore } from "@/frontend/common/stores/createRecurringClassStore";
 import { logger } from "@/frontend/common/utils/logger";
@@ -15,7 +13,7 @@ import {
   createRecurringClassSchema,
   type RecurringClassFormData,
 } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
-import { DEFAULT_DAY_SCHEDULE, type SimpleEntity } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import { DEFAULT_DAY_SCHEDULE } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import {
   buildRecurringClassFormLabels,
   type RecurringClassFormLabels,
@@ -58,10 +56,6 @@ export interface CreateRecurringClassViewModel {
   readonly onSubmit: (data: RecurringClassFormData, meetingConfig: RecurringMeetingConfigFormState) => void;
   readonly onDismissSuccess: () => void;
   readonly onDismissError: () => void;
-  readonly students: readonly SimpleEntity[];
-  readonly teachers: readonly SimpleEntity[];
-  readonly studentsLoading: boolean;
-  readonly teachersLoading: boolean;
   readonly meetingConfig: RecurringMeetingConfigFormState;
   readonly onMeetingConfigChange: (next: RecurringMeetingConfigFormState) => void;
   readonly register: RecurringClassFormInstance["register"];
@@ -210,29 +204,6 @@ export function useCreateRecurringClassViewModel(
 
   const [createClassMutation] = useMutation(createRecurringClassMutationDocument);
 
-  // NEW FOR PLAN v5: GraphQL useQuery for students/teachers lifted out of tier
-  // (specs N1 — no `useQuery` in tier files).
-  const { data: studentsData, loading: studentsLoading } = useQuery(studentsQueryDocument, {
-    variables: {
-      filterArgs: null,
-      paginationArgs: { first: 100, skip: 0, after: null, before: null, last: null, maxCount: null, page: null },
-      orderBy: null,
-    },
-  });
-  const { data: teachersData, loading: teachersLoading } = useQuery(teachersQueryDocument, {
-    variables: { search: "", limit: 50 },
-  });
-
-  // NEW FOR PLAN v5: `useMemo` data derivations lifted out of tier (specs N11).
-  const students = useMemo<readonly SimpleEntity[]>(
-    () => studentsData?.students?.data?.map(s => ({ id: s.id ?? "", name: s.name ?? "" })) ?? [],
-    [studentsData?.students?.data]
-  );
-  const teachers = useMemo<readonly SimpleEntity[]>(
-    () => teachersData?.teachers?.map(t => ({ id: t.id ?? "", name: t.name ?? "" })) ?? [],
-    [teachersData?.teachers]
-  );
-
   const formLabels = useMemo(() => buildRecurringClassFormLabels(labels), [labels]);
   const schema = useMemo(() => createRecurringClassSchema(labels.validation), [labels.validation]);
 
@@ -331,10 +302,6 @@ export function useCreateRecurringClassViewModel(
     onSubmit,
     onDismissSuccess: resetSuccess,
     onDismissError: clearError,
-    students,
-    teachers,
-    studentsLoading,
-    teachersLoading,
     meetingConfig,
     onMeetingConfigChange: handleMeetingConfigChange,
     register,

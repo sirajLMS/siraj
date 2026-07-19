@@ -8,6 +8,7 @@ import { ScheduleOverviewDataGrid } from "@/frontend/common/views/dashboard/admi
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
+import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 
 export function AdminDashboardDesktopView({
   t,
@@ -19,8 +20,7 @@ export function AdminDashboardDesktopView({
   selectedMetricLabel,
   searchValue,
   dateValue,
-  teacherValue,
-  teachers,
+  selectedTeacher,
   rows,
   headers,
   statusLabels,
@@ -30,7 +30,6 @@ export function AdminDashboardDesktopView({
   onSearchChange,
   onDateChange,
   onTeacherChange,
-  onSubmit,
   pageSize,
   // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
   // instead of the previous `RequirePermission` wrappers.
@@ -83,13 +82,14 @@ export function AdminDashboardDesktopView({
               todayLabel={t.today}
               previousDayLabel={t.previousDay}
               nextDayLabel={t.nextDay}
-              teacherPlaceholder={t.selectTeacher}
-              teacherValue={teacherValue}
-              submitLabel={t.submit}
-              teachers={teachers}
               onDateChange={onDateChange}
-              onTeacherChange={onTeacherChange}
-              onSubmit={onSubmit}
+              teacherSelect={
+                <TeacherAutocompleteDesktop
+                  value={selectedTeacher}
+                  onChange={onTeacherChange}
+                  label={t.selectTeacher}
+                />
+              }
             />
           ) : null
         }

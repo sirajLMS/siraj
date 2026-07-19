@@ -1,17 +1,16 @@
 "use client";
 
-import { FamilyRestroomOutlined } from "@mui/icons-material";
-import { Autocomplete, Box, InputAdornment, TextField } from "@mui/material";
+import { Box } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
+import { type PersonOption, resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
-import type { ParentOption } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
+import { ParentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 
 interface ParentAssignmentSectionProps {
   readonly control: Control<StudentOnboardingFormData>;
   readonly errors: FieldErrors<StudentOnboardingFormData>;
-  readonly parentOptions: readonly ParentOption[];
   readonly parentLocked: boolean;
   readonly sectionTitle: string;
   readonly labels: {
@@ -24,7 +23,6 @@ interface ParentAssignmentSectionProps {
 export function ParentAssignmentSection({
   control,
   errors,
-  parentOptions,
   parentLocked,
   sectionTitle,
   labels,
@@ -36,45 +34,21 @@ export function ParentAssignmentSection({
           control={control}
           name="parentId"
           render={({ field }) => {
-            const selectedParent = parentOptions.find(option => option.id === field.value) ?? null;
+            const selectedParent: PersonOption | null = field.value
+              ? resolvePersonOption(field.value, [], { id: field.value, name: "" })
+              : null;
 
             return (
-              <Autocomplete
-                options={parentOptions}
+              <ParentAutocompleteDesktop
                 value={selectedParent}
                 disabled={parentLocked}
-                getOptionLabel={option => option.label}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                onChange={(_event, value) => {
-                  field.onChange(value?.id ?? "");
+                label={labels.parent}
+                placeholder={labels.parentPlaceholder}
+                error={Boolean(errors.parentId)}
+                helperText={errors.parentId ? labels.parentRequired : undefined}
+                onChange={person => {
+                  field.onChange(person?.id ?? "");
                 }}
-                renderInput={params => (
-                  <TextField
-                    {...params}
-                    label={labels.parent}
-                    placeholder={labels.parentPlaceholder}
-                    error={Boolean(errors.parentId)}
-                    helperText={errors.parentId ? labels.parentRequired : undefined}
-                    slotProps={{
-                      input: {
-                        ...params.slotProps.input,
-                        startAdornment: (
-                          <>
-                            <InputAdornment position="start">
-                              <FamilyRestroomOutlined />
-                            </InputAdornment>
-                            {params.slotProps.input?.startAdornment}
-                          </>
-                        ),
-                      },
-                      inputLabel: params.slotProps.inputLabel,
-                      htmlInput: {
-                        ...params.slotProps.htmlInput,
-                        autoComplete: "off",
-                      },
-                    }}
-                  />
-                )}
               />
             );
           }}

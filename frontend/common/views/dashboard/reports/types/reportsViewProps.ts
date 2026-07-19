@@ -17,7 +17,6 @@ import type {
   ReportLedgerRow,
   ReportPaidAmount,
   ReportsSummary,
-  ReportTeacherOption,
   ReportType,
 } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 
@@ -26,7 +25,6 @@ export interface ReportFiltersFormProps {
   readonly toDate: string;
   readonly teacherId: string;
   readonly reportType: ReportType;
-  readonly teachers: readonly ReportTeacherOption[];
   readonly labels: ReportFiltersFormLabels;
   readonly canGenerate: boolean;
   readonly onFromDateChange: (date: string) => void;

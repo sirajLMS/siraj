@@ -23,7 +23,6 @@ import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashbo
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { StudentProgressFeedItem, TeacherProgressFeedEventKind } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
-import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import {
   type TeacherDashboardViewModel,
   type UseTeacherDashboardViewModelProps,
@@ -387,6 +386,11 @@ export function TeacherDashboardContainer() {
       setManualEntryDefaultActive(true);
       setManualEntryOpen(true);
     },
+    manualEntryOpen,
+    manualEntryDefaultActive,
+    teacherId,
+    onManualEntryClose: () => setManualEntryOpen(false),
+    onManualEntrySubmit: handleManualEntrySubmit,
     onActivate: handleActivate,
     onStartSession: async (id: string) => {
       try {
@@ -460,13 +464,6 @@ export function TeacherDashboardContainer() {
   return (
     <RequirePermission permissions={[AppPermission.TeacherViewDashboard]}>
       <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-      <ManualClassEntryDialog
-        open={manualEntryOpen}
-        onClose={() => setManualEntryOpen(false)}
-        teacherId={teacherId}
-        onSubmit={handleFormSubmit => handleManualEntrySubmit(handleFormSubmit)}
-        defaultActive={manualEntryDefaultActive}
-      />
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}

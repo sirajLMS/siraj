@@ -10,7 +10,6 @@ import {
   type ComplaintStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
-  parentAssignedStudentsQueryDocument,
   parentComplaintsQueryDocument,
   submitComplaintMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
@@ -58,8 +57,6 @@ export function ParentComplaintsContainer() {
     fetchPolicy: "cache-and-network",
   });
 
-  const { data: studentsData } = useQuery(parentAssignedStudentsQueryDocument);
-
   const [submitComplaint] = useMutation(submitComplaintMutationDocument, {
     onCompleted: () => {
       setSubmitting(false);
@@ -70,12 +67,6 @@ export function ParentComplaintsContainer() {
       setSubmitting(false);
     },
   });
-
-  const studentOptions =
-    studentsData?.parentAssignedStudents?.rows?.map(student => ({
-      id: student.id ?? "",
-      label: student.name ?? "",
-    })) ?? [];
 
   const records =
     data?.parentComplaints?.complaints?.map(record => ({
@@ -115,7 +106,6 @@ export function ParentComplaintsContainer() {
 
   const viewModel = useParentComplaintsViewModel({
     labels: labels.parent,
-    studentOptions,
     records,
     hasOlderRecords: data?.parentComplaints?.pageInfo?.hasMorePages ?? false,
     isSubmitting,

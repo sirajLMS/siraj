@@ -10,6 +10,7 @@ import { uiPaymentMethodAr as paymentMethod } from "./payment-method";
 import { uiPhoneInputAr as phoneInput } from "./phone-input";
 import { uiTagInputAr as tagInput } from "./tag-input";
 import { uiTimezoneSelectAr as timezoneSelect } from "./timezone-select";
+import { uiUserSelectAr as userSelect } from "./user-select";
 
 export const uiAr: UiLabels = {
   catalogImageUpload,
@@ -23,4 +24,5 @@ export const uiAr: UiLabels = {
   timezoneSelect,
   meetingConfig,
   paymentMethod,
+  userSelect,
 };

@@ -1,16 +1,16 @@
 "use client";
 
-import { SchoolOutlined } from "@mui/icons-material";
-import { Autocomplete, InputAdornment, TextField } from "@mui/material";
 import type { Control } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import { useState } from "react";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
+import { resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect/userSelect.utils";
+import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
-import type { TeacherOption } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
-import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
+import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 
 interface TeacherAssignmentSectionProps {
   readonly control: Control<StudentOnboardingFormData>;
-  readonly teacherOptions: readonly TeacherOption[];
   readonly labels: {
     readonly sectionTitle: string;
     readonly primaryTeacher: string;
@@ -18,53 +18,30 @@ interface TeacherAssignmentSectionProps {
   };
 }
 
-export function TeacherAssignmentSection({ control, teacherOptions, labels }: Readonly<TeacherAssignmentSectionProps>) {
+export function TeacherAssignmentSection({ control, labels }: Readonly<TeacherAssignmentSectionProps>) {
+  const [selectedTeacher, setSelectedTeacher] = useState<PersonOption | null>(null);
+
   return (
-    <MobileSectionPanel title={labels.sectionTitle}>
+    <SectionPanel title={labels.sectionTitle}>
       <Controller
         control={control}
         name="primaryTeacherId"
         render={({ field }) => {
-          const selectedTeacher = teacherOptions.find(option => option.id === field.value) ?? null;
+          const value = selectedTeacher ?? resolvePersonOption(field.value, [], selectedTeacher);
 
           return (
-            <Autocomplete
-              options={teacherOptions}
-              value={selectedTeacher}
-              getOptionLabel={option => option.name}
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              onChange={(_event, value) => {
-                field.onChange(value?.id ?? "");
+            <TeacherAutocompleteMobile
+              value={value}
+              onChange={(next: PersonOption | null) => {
+                setSelectedTeacher(next);
+                field.onChange(next?.id ?? "");
               }}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  label={labels.primaryTeacher}
-                  placeholder={labels.primaryTeacherPlaceholder}
-                  slotProps={{
-                    input: {
-                      ...params.slotProps.input,
-                      startAdornment: (
-                        <>
-                          <InputAdornment position="start">
-                            <SchoolOutlined />
-                          </InputAdornment>
-                          {params.slotProps.input?.startAdornment}
-                        </>
-                      ),
-                    },
-                    inputLabel: params.slotProps.inputLabel,
-                    htmlInput: {
-                      ...params.slotProps.htmlInput,
-                      autoComplete: "off",
-                    },
-                  }}
-                />
-              )}
+              label={labels.primaryTeacher}
+              placeholder={labels.primaryTeacherPlaceholder}
             />
           );
         }}
       />
-    </MobileSectionPanel>
+    </SectionPanel>
   );
 }

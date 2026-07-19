@@ -125,10 +125,6 @@ export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurri
     errors,
     meetingConfig,
     onMeetingConfigChange,
-    students,
-    teachers,
-    studentsLoading,
-    teachersLoading,
   } = viewModel;
 
   return (
@@ -163,10 +159,6 @@ export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurri
           formLabels={formLabels}
           meetingConfig={meetingConfig}
           onMeetingConfigChangeAction={onMeetingConfigChange}
-          students={students}
-          teachers={teachers}
-          studentsLoading={studentsLoading}
-          teachersLoading={teachersLoading}
           onSubmit={data => onSubmit(data, meetingConfig)}
         />
       </MobileSectionPanel>

@@ -6,13 +6,10 @@ import {
   approveLessonReportMutationDocument,
   pendingLessonReportsQueryDocument,
   rejectLessonReportMutationDocument,
-  studentsDirectoryQueryDocument,
-  teacherDirectoryQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { usePendingLessonReviewsStore } from "@/frontend/common/stores/pendingLessonReviewsStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
-  DirectoryPersonOption,
   PendingReviewRow,
   PendingReviewsSnackbarState,
   PendingReviewsViewModel,
@@ -35,14 +32,14 @@ export function usePendingReviewsViewModel(
 
   const [snackbar, setSnackbar] = useState<PendingReviewsSnackbarState>(EMPTY_SNACKBAR);
 
-  const teacherFilter = usePendingLessonReviewsStore(s => s.teacherFilter);
+  const selectedTeacher = usePendingLessonReviewsStore(s => s.selectedTeacher);
   const studentFilter = usePendingLessonReviewsStore(s => s.studentFilter);
   const selectedReportId = usePendingLessonReviewsStore(s => s.selectedReportId);
   const rejectDialogOpen = usePendingLessonReviewsStore(s => s.rejectDialogOpen);
   const rejectReason = usePendingLessonReviewsStore(s => s.rejectReason);
   const page = usePendingLessonReviewsStore(s => s.page);
   const pageSize = usePendingLessonReviewsStore(s => s.pageSize);
-  const setTeacherFilter = usePendingLessonReviewsStore(s => s.setTeacherFilter);
+  const setSelectedTeacher = usePendingLessonReviewsStore(s => s.setSelectedTeacher);
   const setStudentFilter = usePendingLessonReviewsStore(s => s.setStudentFilter);
   const setSelectedReportId = usePendingLessonReviewsStore(s => s.setSelectedReportId);
   const setRejectReason = usePendingLessonReviewsStore(s => s.setRejectReason);
@@ -52,8 +49,8 @@ export function usePendingReviewsViewModel(
 
   const { data, loading, refetch } = useQuery(pendingLessonReportsQueryDocument, {
     variables: {
-      teacherId: teacherFilter || null,
-      studentId: studentFilter || null,
+      teacherId: selectedTeacher?.id || null,
+      studentId: studentFilter?.id || null,
       paginationArgs: {
         first: pageSize,
         page: page + 1,
@@ -64,27 +61,6 @@ export function usePendingReviewsViewModel(
         skip: null,
       },
     },
-    fetchPolicy: "cache-and-network",
-  });
-
-  const { data: teacherDirectoryData } = useQuery(teacherDirectoryQueryDocument, {
-    variables: {
-      search: null,
-      paginationArgs: {
-        first: 100,
-        page: 1,
-        after: null,
-        before: null,
-        last: null,
-        maxCount: null,
-        skip: null,
-      },
-    },
-    fetchPolicy: "cache-and-network",
-  });
-
-  const { data: studentsDirectoryData } = useQuery(studentsDirectoryQueryDocument, {
-    variables: { search: null, limit: 100 },
     fetchPolicy: "cache-and-network",
   });
 
@@ -114,20 +90,6 @@ export function usePendingReviewsViewModel(
   }, [data]);
 
   const totalCount = data?.pendingLessonReports?.totalCount ?? 0;
-
-  const teacherOptions: DirectoryPersonOption[] = useMemo(() => {
-    const directoryRows = teacherDirectoryData?.teacherDirectory?.rows ?? [];
-    return directoryRows
-      .filter((r): r is NonNullable<typeof r> => Boolean(r?.id))
-      .map(r => ({ id: r.id ?? "", name: r.name ?? r.id ?? "" }));
-  }, [teacherDirectoryData]);
-
-  const studentOptions: DirectoryPersonOption[] = useMemo(() => {
-    const directoryRows = studentsDirectoryData?.studentsDirectory ?? [];
-    return directoryRows
-      .filter((r): r is NonNullable<typeof r> => Boolean(r?.id))
-      .map(r => ({ id: r.id ?? "", name: r.name ?? r.id ?? "" }));
-  }, [studentsDirectoryData]);
 
   const selectedReport = useMemo(() => rows.find(r => r.id === selectedReportId) ?? null, [rows, selectedReportId]);
 
@@ -170,16 +132,14 @@ export function usePendingReviewsViewModel(
     selectedReport,
     rejectDialogOpen,
     rejectReason,
-    teacherFilter,
+    selectedTeacher,
     studentFilter,
-    teacherOptions,
-    studentOptions,
     loading,
     approving,
     rejecting,
     snackbar,
     labels: t,
-    onTeacherFilterChange: setTeacherFilter,
+    onSelectedTeacherChange: setSelectedTeacher,
     onStudentFilterChange: setStudentFilter,
     onPageChange: setPage,
     onSelectReport: (report: PendingReviewRow | null) => setSelectedReportId(report?.id ?? null),

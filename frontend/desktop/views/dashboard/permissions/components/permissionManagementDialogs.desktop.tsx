@@ -8,7 +8,6 @@ import { ManageOverridesDialogDesktop } from "@/frontend/desktop/views/dashboard
 import { PermissionGroupFormDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionGroupForm.desktop";
 
 export function PermissionManagementDialogsDesktop({
-  users,
   isLoading,
   activeGroup,
   selectedGroupId,
@@ -93,7 +92,6 @@ export function PermissionManagementDialogsDesktop({
       <AssignGroupDialogDesktop
         open={isAssignDialogOpen}
         group={activeGroup}
-        users={users}
         isLoading={isLoading}
         onClose={closeAssignDialog}
         onAssign={async userId => {

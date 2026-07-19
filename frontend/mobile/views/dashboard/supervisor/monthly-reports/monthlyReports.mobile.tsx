@@ -1,13 +1,10 @@
 "use client";
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
-import { Autocomplete, Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useMemo } from "react";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
-import type {
-  DirectoryPersonOption,
-  MonthlyReportsViewModel,
-} from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
+import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
 import {
   MobileContentStack,
   MobileFilterButton,
@@ -17,6 +14,10 @@ import {
   MobilePrimaryPageAction,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
+import {
+  StudentAutocompleteMobile,
+  TeacherAutocompleteMobile,
+} from "@/frontend/mobile/components/ui/input/userSelect";
 
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
@@ -25,23 +26,18 @@ export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel
     reportType,
     year,
     month,
-    teacherId,
-    studentId,
-    teacherOptions,
-    studentOptions,
+    selectedTeacher,
+    studentSelection,
     metrics,
     loading,
     labels,
     onReportTypeChange,
     onYearChange,
     onMonthChange,
-    onTeacherIdChange,
-    onStudentIdChange,
+    onSelectedTeacherChange,
+    onStudentSelectionChange,
     onGenerate,
   } = props;
-
-  const selectedTeacher = teacherOptions.find(o => o.id === teacherId) ?? null;
-  const selectedStudent = studentOptions.find(o => o.id === studentId) ?? null;
 
   const metricItems: readonly MetricItem[] = useMemo(
     () =>
@@ -119,26 +115,18 @@ export function MonthlyReportsMobileView(props: Readonly<MonthlyReportsViewModel
             </Grid>
 
             {reportType === "teacher" ? (
-              <Autocomplete<DirectoryPersonOption>
-                options={[...teacherOptions]}
+              <TeacherAutocompleteMobile
                 value={selectedTeacher}
-                onChange={(_, option) => onTeacherIdChange(option?.id ?? "")}
-                getOptionLabel={option => option.name}
-                isOptionEqualToValue={(a, b) => a.id === b.id}
-                renderInput={params => (
-                  <TextField {...params} label={labels.selectTeacher} placeholder={labels.teacherSearchPlaceholder} />
-                )}
+                onChange={onSelectedTeacherChange}
+                label={labels.selectTeacher}
+                placeholder={labels.teacherSearchPlaceholder}
               />
             ) : (
-              <Autocomplete<DirectoryPersonOption>
-                options={[...studentOptions]}
-                value={selectedStudent}
-                onChange={(_, option) => onStudentIdChange(option?.id ?? "")}
-                getOptionLabel={option => option.name}
-                isOptionEqualToValue={(a, b) => a.id === b.id}
-                renderInput={params => (
-                  <TextField {...params} label={labels.selectStudent} placeholder={labels.studentSearchPlaceholder} />
-                )}
+              <StudentAutocompleteMobile
+                value={studentSelection}
+                onChange={onStudentSelectionChange}
+                label={labels.selectStudent}
+                placeholder={labels.studentSearchPlaceholder}
               />
             )}
 

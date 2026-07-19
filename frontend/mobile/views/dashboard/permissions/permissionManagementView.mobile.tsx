@@ -112,7 +112,6 @@ export function PermissionManagementMobileView({
       )}
 
       <PermissionManagementDialogsMobile
-        users={users}
         isLoading={isLoading}
         activeGroup={activeGroup}
         selectedGroupId={selectedGroupId}

@@ -7,6 +7,7 @@ import { buildServerPaginationOptions } from "@/frontend/common/components/ui/fi
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
+import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import {
   teacherDashboardContentPaddingSx,
@@ -23,6 +24,7 @@ import { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter";
 import { ActivationPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/activationPolicyPanel.mobile";
 import { MissedClassAlertBannerMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.mobile";
 import { StudentProgressFeedMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/studentProgressFeed.mobile";
+import { ManualClassEntryStudentSelectMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/manualClassEntryStudentSelect.mobile";
 import { TeacherScheduleCardMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherScheduleCard.mobile";
 
 interface MobileWelcomeHeaderProps {
@@ -199,6 +201,11 @@ export function TeacherDashboardMobileView({
   totalCount,
   onPageChange,
   welcomeMobileSummary,
+  manualEntryOpen,
+  manualEntryDefaultActive,
+  teacherId,
+  onManualEntryClose,
+  onManualEntrySubmit,
 }: Readonly<TeacherDashboardViewModel>) {
   return (
     <>
@@ -255,6 +262,16 @@ export function TeacherDashboardMobileView({
           />
         </MobileContentStack>
       </MobilePageContainer>
+
+      <ManualClassEntryDialog
+        open={manualEntryOpen}
+        onClose={onManualEntryClose}
+        onSubmit={onManualEntrySubmit}
+        defaultActive={manualEntryDefaultActive}
+        studentSelect={
+          <ManualClassEntryStudentSelectMobile teacherId={teacherId} open={manualEntryOpen} />
+        }
+      />
     </>
   );
 }

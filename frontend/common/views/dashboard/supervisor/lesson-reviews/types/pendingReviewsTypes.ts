@@ -1,10 +1,6 @@
 import type { AttendanceEvaluation, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import type { PendingReviewsLabels } from "@/shared/locale";
-
-export interface DirectoryPersonOption {
-  readonly id: string;
-  readonly name: string;
-}
 
 export interface PendingReviewRow {
   readonly id: string;
@@ -39,17 +35,15 @@ export interface PendingReviewsViewModel {
   readonly selectedReport: PendingReviewRow | null;
   readonly rejectDialogOpen: boolean;
   readonly rejectReason: string;
-  readonly teacherFilter: string;
-  readonly studentFilter: string;
-  readonly teacherOptions: readonly DirectoryPersonOption[];
-  readonly studentOptions: readonly DirectoryPersonOption[];
+  readonly selectedTeacher: PersonOption | null;
+  readonly studentFilter: PersonOption | null;
   readonly loading: boolean;
   readonly approving: boolean;
   readonly rejecting: boolean;
   readonly snackbar: PendingReviewsSnackbarState;
   readonly labels: PendingReviewsLabels;
-  readonly onTeacherFilterChange: (value: string) => void;
-  readonly onStudentFilterChange: (value: string) => void;
+  readonly onSelectedTeacherChange: (value: PersonOption | null) => void;
+  readonly onStudentFilterChange: (value: PersonOption | null) => void;
   readonly onPageChange: (page: number) => void;
   readonly onSelectReport: (report: PendingReviewRow | null) => void;
   readonly onApprove: (reportId: string) => void;

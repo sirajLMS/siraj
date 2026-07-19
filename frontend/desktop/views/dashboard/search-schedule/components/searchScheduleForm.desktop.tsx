@@ -7,7 +7,7 @@ import { AppDateRangePicker, AppTimeRangePicker } from "@/frontend/common/compon
 import { countActiveDrawerFilters } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
 import type { SearchScheduleFormProps } from "@/frontend/common/views/dashboard/search-schedule/types";
 import { SearchScheduleSortMenuDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/searchScheduleSortMenu.desktop";
-import { SearchScheduleTeacherAutocompleteDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/searchScheduleTeacherAutocomplete.desktop";
+import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { SearchScheduleFilterDrawerDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/searchScheduleFilterDrawer.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -23,12 +23,7 @@ export function SearchScheduleFormDesktop({
   onSortMenuOpen,
   onSortMenuClose,
   onSortChange,
-  teacherSearchInput,
   selectedTeacher,
-  teacherOptions,
-  teacherSearchLoading,
-  shouldSearchTeachers,
-  onTeacherSearchInputChange,
   onSelectTeacher,
 }: Readonly<SearchScheduleFormProps>) {
   const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
@@ -87,15 +82,11 @@ export function SearchScheduleFormDesktop({
         </Box>
 
         <Box sx={{ flex: "1 1 200px", minWidth: { xs: "100%", sm: 180 } }}>
-          <SearchScheduleTeacherAutocompleteDesktop
-            size="small"
-            teacherSearchInput={teacherSearchInput}
-            selectedTeacher={selectedTeacher}
-            teacherOptions={teacherOptions}
-            teacherSearchLoading={teacherSearchLoading}
-            shouldSearchTeachers={shouldSearchTeachers}
-            onTeacherSearchInputChange={onTeacherSearchInputChange}
-            onSelectTeacher={onSelectTeacher}
+          <TeacherAutocompleteDesktop
+            value={selectedTeacher}
+            onChange={onSelectTeacher}
+            label={t.teacherName}
+            placeholder={t.teacherNamePlaceholder}
           />
         </Box>
 

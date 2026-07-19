@@ -13,6 +13,12 @@
   - `operations.ts` is only for operation-specific result/variable types (e.g., `DeleteBookMutationMutation`)
   - Zustand stores and other type consumers: always prefer `graphql-types.ts` for entity types
 
+## Person Autocomplete options cache
+
+- `userAutocompleteStore` caches **fetched options only** (by audience + search + scope), not selection.
+- Page/domain stores (or RHF) hold the **selected** `PersonOption` / id.
+- In-memory LRU (no `persist`) — survives SPA navigation and tier switch; refresh refetches.
+
 ## Serialization
 
 - **Non-serializable values**: Never store `File`, `Blob`, `FormData`, `Promise`, or other non-JSON-serializable values in `persist`-enabled Zustand stores. `JSON.stringify(new File(...))` produces `{}`, destroying the value on rehydration.

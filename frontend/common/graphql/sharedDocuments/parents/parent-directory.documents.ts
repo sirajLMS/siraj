@@ -2,6 +2,15 @@ import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
+export const parentDirectoryAutocompleteRowFragment = gql`
+  fragment ParentDirectoryAutocompleteRowFragment on ParentDirectoryAutocompleteRow {
+    id
+    name
+    avatarUrl
+    email
+  }
+`;
+
 export const parentDirectoryQueryDocument: TypedDocumentNode<
   Operations.ParentDirectoryQuery,
   Types.QueryParentDirectoryArgs
@@ -48,6 +57,18 @@ export const parentDirectoryQueryDocument: TypedDocumentNode<
         perPage
         total
       }
+    }
+  }
+`;
+
+export const parentsDirectoryQueryDocument: TypedDocumentNode<
+  Operations.ParentsDirectoryQuery,
+  Types.QueryParentsDirectoryArgs
+> = gql`
+  ${parentDirectoryAutocompleteRowFragment}
+  query parentsDirectory($search: String, $limit: Int) {
+    parentsDirectory(search: $search, limit: $limit) {
+      ...ParentDirectoryAutocompleteRowFragment
     }
   }
 `;

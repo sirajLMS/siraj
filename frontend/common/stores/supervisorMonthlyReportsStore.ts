@@ -1,3 +1,4 @@
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { create } from "zustand";
 
 export type MonthlyReportType = "teacher" | "student";
@@ -6,13 +7,13 @@ interface SupervisorMonthlyReportsState {
   readonly reportType: MonthlyReportType;
   readonly year: number;
   readonly month: number;
-  readonly teacherId: string;
-  readonly studentId: string;
+  readonly selectedTeacher: PersonOption | null;
+  readonly studentSelection: PersonOption | null;
   readonly setReportType: (type: MonthlyReportType) => void;
   readonly setYear: (year: number) => void;
   readonly setMonth: (month: number) => void;
-  readonly setTeacherId: (id: string) => void;
-  readonly setStudentId: (id: string) => void;
+  readonly setSelectedTeacher: (teacher: PersonOption | null) => void;
+  readonly setStudentSelection: (selection: PersonOption | null) => void;
 }
 
 function defaultYearMonth(): { year: number; month: number } {
@@ -26,11 +27,11 @@ export const useSupervisorMonthlyReportsStore = create<SupervisorMonthlyReportsS
   reportType: "teacher",
   year: initial.year,
   month: initial.month,
-  teacherId: "",
-  studentId: "",
+  selectedTeacher: null,
+  studentSelection: null,
   setReportType: type => set({ reportType: type }),
   setYear: year => set({ year }),
   setMonth: month => set({ month }),
-  setTeacherId: id => set({ teacherId: id }),
-  setStudentId: id => set({ studentId: id }),
+  setSelectedTeacher: teacher => set({ selectedTeacher: teacher }),
+  setStudentSelection: selection => set({ studentSelection: selection }),
 }));

@@ -118,7 +118,6 @@ export function PermissionManagementDesktopView({
       )}
 
       <PermissionManagementDialogsDesktop
-        users={users}
         isLoading={isLoading}
         activeGroup={activeGroup}
         selectedGroupId={selectedGroupId}

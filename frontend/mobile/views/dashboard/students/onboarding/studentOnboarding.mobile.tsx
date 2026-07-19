@@ -20,8 +20,6 @@ export function StudentOnboardingMobileView({
   errors,
   handleSubmit,
   isSubmitting,
-  parentOptions,
-  teacherOptions,
   parentLocked,
   labels,
   onSubmit,
@@ -60,7 +58,6 @@ export function StudentOnboardingMobileView({
           <ParentAssignmentSection
             control={control}
             errors={errors}
-            parentOptions={parentOptions}
             parentLocked={parentLocked}
             sectionTitle={labels.sections.parentAssignment}
             labels={{
@@ -94,7 +91,6 @@ export function StudentOnboardingMobileView({
 
           <TeacherAssignmentSection
             control={control}
-            teacherOptions={teacherOptions}
             labels={{
               sectionTitle: labels.sections.teacherAssignment,
               primaryTeacher: labels.fields.primaryTeacher,

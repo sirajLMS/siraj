@@ -2,7 +2,12 @@ import { ParentRepository } from "@/backend/db/repo";
 import { AppPermission, ParentStatus } from "@/backend/enum";
 import { parseAccountStatus, parseParentStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { PaginationArgs, ParentDirectoryResult, ParentDirectoryRow } from "@/backend/types";
+import type {
+  PaginationArgs,
+  ParentDirectoryAutocompleteRow,
+  ParentDirectoryResult,
+  ParentDirectoryRow,
+} from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 export type {
@@ -10,6 +15,8 @@ export type {
   ParentDirectoryResult,
   ParentDirectoryRow,
 } from "@/backend/types";
+
+const PARENTS_DIRECTORY_MAX_LIMIT = 100;
 
 export namespace ParentDirectoryService {
   /**
@@ -70,5 +77,30 @@ export namespace ParentDirectoryService {
       totalCount,
       pageInfo,
     };
+  }
+
+  /**
+   * Lightweight parent list for autocomplete.
+   * Requires: parent.view_directory permission.
+   */
+  export async function getParentsDirectory(
+    actorUserId: string,
+    search: string | null,
+    limit: number,
+    locale?: string
+  ): Promise<ParentDirectoryAutocompleteRow[]> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_VIEW_DIRECTORY);
+    if (!hasPermission) {
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
+    }
+
+    const cappedLimit = Math.min(Math.max(limit, 1), PARENTS_DIRECTORY_MAX_LIMIT);
+    const trimmedSearch = search?.trim() || null;
+
+    return await ParentRepository.findParentsDirectoryLite({
+      search: trimmedSearch,
+      limit: cappedLimit,
+    });
   }
 }

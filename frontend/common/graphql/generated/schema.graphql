@@ -2766,6 +2766,13 @@ type ParentDirectory {
   totalCount: Int
 }
 
+type ParentDirectoryAutocompleteRow {
+  avatarUrl: String
+  email: String
+  id: String
+  name: String
+}
+
 type ParentDirectoryMetrics {
   id: String
   onLeave: Int
@@ -3165,6 +3172,9 @@ type Query {
   """
   parentSuggestions(options: ParentSuggestionOptions!): [Suggestion!]
 
+  """Lightweight parent list for autocomplete (id, name, avatarUrl)."""
+  parentsDirectory(limit: Int, search: String): [ParentDirectoryAutocompleteRow!]!
+
   """
   Get pending lesson reports awaiting review with optional teacher/student filters and pagination
   """
@@ -3209,6 +3219,9 @@ type Query {
   searchSuggestions(excludeId: String!, query: String!): [SuggestionSearchResult!]
   searchTeacherAvailability(input: AvailabilitySearchInput!): AvailabilitySearchResult
   simulatablePermissionGroups: [SimulatablePermissionGroup!]
+
+  """Lightweight staff list for autocomplete (id, name, avatarUrl, email)."""
+  staffDirectory(limit: Int, permissionGroupFilter: String, search: String): [StaffDirectoryAutocompleteRow!]!
   statusTrackingSchedule(date: String!, search: String, viewerTimezone: IanaTimezone): [StatusTrackingScheduleRow!]
   storageStats(
     """
@@ -3299,6 +3312,7 @@ type Query {
     """Max results (max 200)"""
     limit: Int = 50
     offset: Int = 0
+    search: String
   ): [User!]
   welcomeMessage: String
 }
@@ -3453,6 +3467,13 @@ type SimulatablePermissionGroup {
 input StaffAdminProfileUpdateInput {
   phone: String
   status: String
+}
+
+type StaffDirectoryAutocompleteRow {
+  avatarUrl: String
+  email: String
+  id: String
+  name: String
 }
 
 input StaffOwnProfileUpdateInput {

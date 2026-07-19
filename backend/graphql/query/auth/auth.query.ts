@@ -38,13 +38,15 @@ gqlSchemaBuilder.queryFields(t => ({
     authScopes: { permission: AppPermission.STAFF_LIST },
     type: [UserPothosObject],
     args: {
+      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       limit: t.arg.int({ required: false, defaultValue: 50, description: "Max results (max 200)" }),
       offset: t.arg.int({ required: false, defaultValue: 0 }),
     },
     resolve: async (_parent, args) => {
       const limit = Math.min(args.limit ?? 50, 200);
       const offset = args.offset ?? 0;
-      return await UserRepository.findUsers({ limit, offset });
+      const search = args.search?.trim() ?? null;
+      return await UserRepository.findUsers({ limit, offset, search });
     },
   }),
 }));

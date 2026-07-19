@@ -25,7 +25,6 @@ import type {
   ReportLedgerRow,
   ReportPaidAmount,
   ReportsSummary,
-  ReportTeacherOption,
   ReportType,
 } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import {
@@ -70,7 +69,6 @@ export interface UseReportsViewModelProps {
   // props). The VM supplies no-op/empty defaults when callers omit data; a
   // future caller may still pass real labels/rows/handlers to override them.
   readonly labels?: ReportsViewLabels;
-  readonly teachers?: readonly ReportTeacherOption[];
   readonly rows?: readonly ReportLedgerRow[];
   readonly summary?: ReportsSummary;
   readonly canGenerate?: boolean;
@@ -94,7 +92,6 @@ export interface ReportsViewModel {
   readonly toDate: string;
   readonly teacherId: string;
   readonly reportType: ReportType;
-  readonly teachers: readonly ReportTeacherOption[];
   readonly rows: readonly ReportLedgerRow[];
   readonly summary: ReportsSummary;
   readonly canGenerate: boolean;
@@ -145,14 +142,13 @@ export function useReportsViewModel(
   const tProfile = useAppTranslation().profileTranslations.base;
   const tErrors = useAppTranslation().errorsTranslations;
 
-  const { labels, teachers, rows, summary, canGenerate, loading, onSubmit, onExportCsv, onPrintReport, onRowClick } =
+  const { labels, rows, summary, canGenerate, loading, onSubmit, onExportCsv, onPrintReport, onRowClick } =
     props;
   // NEW FOR PLAN v5: empty/no-op defaults so the Container can invoke this
   // ViewModel with no arguments (specs.md §6.1) — the page passes `<ReportsContainer />`
   // and the VM supplies safe defaults for callers that omit input data/handlers.
   // Wrapped in `useMemo` so the `useMemo` further down has stable deps.
   const safeLabels = useMemo(() => labels ?? ({} as ReportsViewLabels), [labels]);
-  const safeTeachers = useMemo(() => teachers ?? [], [teachers]);
   const safeRows = useMemo(() => rows ?? [], [rows]);
   const safeSummary = useMemo(() => summary ?? ({} as ReportsSummary), [summary]);
   const safeCanGenerate = canGenerate ?? false;
@@ -202,7 +198,6 @@ export function useReportsViewModel(
     toDate,
     teacherId,
     reportType,
-    teachers: safeTeachers,
     rows: safeRows,
     summary: safeSummary,
     canGenerate: safeCanGenerate,

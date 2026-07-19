@@ -45,6 +45,14 @@ export interface ManagerDirectoryFilters {
   readonly statusFilter?: string | null;
 }
 
+/** Lightweight row for staff autocomplete (`staffDirectory` query). */
+export interface StaffDirectoryAutocompleteRow {
+  readonly id: string;
+  readonly name: string;
+  readonly avatarUrl: string | null;
+  readonly email: string;
+}
+
 export interface OnboardingMetricsResult {
   readonly id: string;
   readonly activeStaff: number;

@@ -110,6 +110,7 @@ import { uiPaymentMethodTypeSelectorEn } from "@/shared/locale/en/ui/paymentMeth
 import { uiPhoneInputEn } from "@/shared/locale/en/ui/phone-input";
 import { uiTagInputEn } from "@/shared/locale/en/ui/tag-input";
 import { uiTimezoneSelectEn } from "@/shared/locale/en/ui/timezone-select";
+import { uiUserSelectEn } from "@/shared/locale/en/ui/user-select";
 import type { Translations } from "@/shared/locale/types/message";
 
 export const enMessages: Translations = {
@@ -149,6 +150,7 @@ export const enMessages: Translations = {
     phoneInput: uiPhoneInputEn,
     tagInput: uiTagInputEn,
     timezoneSelect: uiTimezoneSelectEn,
+    userSelect: uiUserSelectEn,
   },
   dashboardTranslations: {
     admin: dashboardAdminEn,

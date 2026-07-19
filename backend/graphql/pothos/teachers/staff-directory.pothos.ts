@@ -12,6 +12,7 @@ import type {
   ManagerDirectoryResult,
   ManagerDirectoryRow,
   OnboardingMetricsResult,
+  StaffDirectoryAutocompleteRow,
   TeacherDirectoryMetrics,
   TeacherDirectoryReturnType,
   TeacherDirectoryRow,
@@ -126,6 +127,19 @@ export const OnboardingMetricsPothosObject = OnboardingMetricsRef.implement({
     activeStaff: t.exposeInt("activeStaff"),
     pendingApproval: t.exposeInt("pendingApproval"),
     avgOnboardingDays: t.exposeFloat("avgOnboardingDays"),
+  }),
+});
+
+const StaffDirectoryAutocompleteRowRef = gqlSchemaBuilder.objectRef<StaffDirectoryAutocompleteRow>(
+  "StaffDirectoryAutocompleteRow"
+);
+
+export const StaffDirectoryAutocompleteRowPothosObject = StaffDirectoryAutocompleteRowRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    name: t.exposeString("name"),
+    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
+    email: t.exposeString("email"),
   }),
 });
 

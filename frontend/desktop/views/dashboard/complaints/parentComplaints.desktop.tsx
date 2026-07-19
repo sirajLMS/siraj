@@ -11,7 +11,6 @@ import { ComplaintRecordCardListDesktop } from "@/frontend/desktop/views/dashboa
 
 export function ParentComplaintsDesktopView({
   labels,
-  studentOptions,
   records,
   hasOlderRecords,
   control,
@@ -36,12 +35,7 @@ export function ParentComplaintsDesktopView({
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, lg: 5 }}>
           <DesktopBaseCard>
-            <ComplaintFormFieldsDesktop
-              control={control}
-              errors={errors}
-              labels={labels}
-              studentOptions={studentOptions}
-            />
+            <ComplaintFormFieldsDesktop control={control} errors={errors} labels={labels} />
             <DesktopPrimaryPageAction
               fullWidth
               disabled={!canSubmit || isSubmitting}

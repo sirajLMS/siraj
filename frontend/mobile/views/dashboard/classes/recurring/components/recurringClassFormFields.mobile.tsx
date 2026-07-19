@@ -4,6 +4,7 @@ import { ExpandMoreOutlined } from "@mui/icons-material";
 import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
@@ -14,8 +15,11 @@ import {
 } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { DaysScheduleSectionMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/daysScheduleSection.mobile";
 import { DurationInputMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/durationInput.mobile";
-import { EntitySelectMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/entitySelect.mobile";
 import { TimeInputMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/timeInput.mobile";
+import {
+  StudentAutocompleteMobile,
+  TeacherAutocompleteMobile,
+} from "@/frontend/mobile/components/ui/input/userSelect";
 
 function OptionSelectMobile({
   labelId,
@@ -77,12 +81,7 @@ export function RecurringClassFormFieldsMobile({
   labels,
   meetingConfig,
   onMeetingConfigChangeAction,
-  students,
-  teachers,
-  studentsLoading,
-  teachersLoading,
 }: RecurringClassFormFieldsProps) {
-  const studentId = watch("studentId");
   const teacherId = watch("teacherId");
   const classType = watch("classType") || "";
 
@@ -90,29 +89,41 @@ export function RecurringClassFormFieldsMobile({
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box sx={{ display: "flex", gap: 2, flexDirection: "column" }}>
         <Box sx={{ flex: 1 }}>
-          <EntitySelectMobile
-            value={studentId}
-            entities={students}
-            isSubmitting={isSubmitting || studentsLoading}
-            label={labels.students}
-            placeholder={labels.studentsPlaceholder}
-            error={errors.studentId?.message}
-            onChange={val => {
-              setValue("studentId", val, { shouldValidate: true });
-            }}
+          <Controller
+            name="studentId"
+            control={control}
+            render={({ field, fieldState }) => (
+              <StudentAutocompleteMobile
+                value={field.value ? ({ id: field.value, name: "" } satisfies PersonOption) : null}
+                onChange={option => {
+                  field.onChange(option?.id ?? "");
+                }}
+                label={labels.students}
+                placeholder={labels.studentsPlaceholder}
+                error={Boolean(fieldState.error ?? errors.studentId)}
+                helperText={fieldState.error?.message ?? errors.studentId?.message}
+                disabled={isSubmitting}
+              />
+            )}
           />
         </Box>
         <Box sx={{ flex: 1 }}>
-          <EntitySelectMobile
-            value={teacherId}
-            entities={teachers}
-            isSubmitting={isSubmitting || teachersLoading}
-            label={labels.teacher}
-            placeholder={labels.teacherPlaceholder}
-            error={errors.teacherId?.message}
-            onChange={val => {
-              setValue("teacherId", val, { shouldValidate: true });
-            }}
+          <Controller
+            name="teacherId"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TeacherAutocompleteMobile
+                value={field.value ? ({ id: field.value, name: "" } satisfies PersonOption) : null}
+                onChange={option => {
+                  field.onChange(option?.id ?? "");
+                }}
+                label={labels.teacher}
+                placeholder={labels.teacherPlaceholder}
+                error={Boolean(fieldState.error ?? errors.teacherId)}
+                helperText={fieldState.error?.message ?? errors.teacherId?.message}
+                disabled={isSubmitting}
+              />
+            )}
           />
         </Box>
       </Box>

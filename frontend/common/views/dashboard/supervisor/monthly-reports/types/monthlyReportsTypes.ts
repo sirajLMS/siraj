@@ -1,10 +1,6 @@
 import type { SvgIconComponent } from "@mui/icons-material";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import type { SupervisorMonthlyReportsLabels } from "@/shared/locale";
-
-export interface DirectoryPersonOption {
-  readonly id: string;
-  readonly name: string;
-}
 
 export interface TeacherMonthlyReportData {
   readonly teacherId: string;
@@ -49,10 +45,8 @@ export interface MonthlyReportsViewModel {
   readonly reportType: "teacher" | "student";
   readonly year: number;
   readonly month: number;
-  readonly teacherId: string;
-  readonly studentId: string;
-  readonly teacherOptions: readonly DirectoryPersonOption[];
-  readonly studentOptions: readonly DirectoryPersonOption[];
+  readonly selectedTeacher: PersonOption | null;
+  readonly studentSelection: PersonOption | null;
   readonly teacherReport: TeacherMonthlyReportData | null;
   readonly studentReport: StudentMonthlyReportData | null;
   readonly metrics: MonthlyReportMetric[];
@@ -61,8 +55,8 @@ export interface MonthlyReportsViewModel {
   readonly onReportTypeChange: (type: "teacher" | "student") => void;
   readonly onYearChange: (year: number) => void;
   readonly onMonthChange: (month: number) => void;
-  readonly onTeacherIdChange: (id: string) => void;
-  readonly onStudentIdChange: (id: string) => void;
+  readonly onSelectedTeacherChange: (teacher: PersonOption | null) => void;
+  readonly onStudentSelectionChange: (selection: PersonOption | null) => void;
   readonly onGenerate: () => void;
 }
 

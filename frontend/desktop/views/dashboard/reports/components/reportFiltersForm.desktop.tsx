@@ -3,6 +3,9 @@
 import { QueryStatsOutlined } from "@mui/icons-material";
 import type { SelectChangeEvent } from "@mui/material";
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { useState } from "react";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
+import { resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect/userSelect.utils";
 import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import type { ReportFiltersFormProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
@@ -12,6 +15,7 @@ import {
 } from "@/frontend/common/views/dashboard/reports/utils/reportFiltersDate.utils";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopAppDatePicker } from "@/frontend/desktop/components/ui/form/date";
+import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 
 export type ReportFiltersFormDesktopLabels = ReportFiltersFormLabels;
 
@@ -20,7 +24,6 @@ export function ReportFiltersFormDesktop({
   toDate,
   teacherId,
   reportType,
-  teachers,
   labels,
   canGenerate,
   onFromDateChange,
@@ -31,10 +34,9 @@ export function ReportFiltersFormDesktop({
 }: Readonly<ReportFiltersFormProps>) {
   const selectedFromDate = parseReportFilterDate(fromDate);
   const selectedToDate = parseReportFilterDate(toDate);
-
-  const handleTeacherSelect = (event: SelectChangeEvent) => {
-    onTeacherChange(event.target.value);
-  };
+  const [selectedTeacher, setSelectedTeacher] = useState<PersonOption | null>(null);
+  const teacherValue =
+    selectedTeacher ?? resolvePersonOption(teacherId, [], selectedTeacher);
 
   const handleReportTypeSelect = (event: SelectChangeEvent) => {
     onReportTypeChange(event.target.value as ReportType);
@@ -79,21 +81,15 @@ export function ReportFiltersFormDesktop({
         }}
       />
 
-      <FormControl size="small" fullWidth>
-        <InputLabel id="reports-teacher-label" shrink>
-          {labels.teacher}
-        </InputLabel>
-        <Select labelId="reports-teacher-label" value={teacherId} label={labels.teacher} onChange={handleTeacherSelect}>
-          <MenuItem value="">
-            <em>{labels.allTeachers}</em>
-          </MenuItem>
-          {teachers.map(teacher => (
-            <MenuItem key={teacher.id} value={teacher.id}>
-              {teacher.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <TeacherAutocompleteDesktop
+        value={teacherValue}
+        onChange={(next: PersonOption | null) => {
+          setSelectedTeacher(next);
+          onTeacherChange(next?.id ?? "");
+        }}
+        label={labels.teacher}
+        placeholder={labels.allTeachers}
+      />
 
       <FormControl size="small" fullWidth>
         <InputLabel id="reports-type-label" shrink>

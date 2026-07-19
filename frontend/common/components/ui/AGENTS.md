@@ -31,6 +31,14 @@ frontend/common/components/ui/<component-name>/
 - **NEVER** use default exports for components
 - **NEVER** re-export `Mobile*` or `Desktop*`-prefixed primitives from this layer — they belong in `frontend/mobile/components/ui` / `frontend/desktop/components/ui`
 
+### Person / audience Autocomplete (`input/userSelect/`)
+
+- Common owns the Autocomplete **engine** + audience facades + hooks; types/utils live only here.
+- Desktop/mobile **compose** the common facade with locked platform styles — they must **not** re-export common under a new name.
+- Views must import tier components (`TeacherAutocompleteDesktop` / `TeacherAutocompleteMobile`, etc.), never common facades.
+- Speak in **audience** / **permission** terms — never “role” for these pickers.
+- Options cache: `frontend/common/stores/userAutocompleteStore.ts` (no selected value).
+
 ### Mobile vs Desktop Isolation Rules
 
 **ESLint Enforcement:** `eslint.config.mjs` enforces `no-restricted-imports` for:

@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import {
   AccessTimeOutlined,
   AccountBalanceOutlined,
@@ -17,13 +16,11 @@ import {
 import { useMemo } from "react";
 import {
   studentMonthlyReportQueryDocument,
-  studentsDirectoryQueryDocument,
-  teacherDirectoryQueryDocument,
   teacherMonthlyReportQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import { useQuery } from "@apollo/client/react";
 import { useSupervisorMonthlyReportsStore } from "@/frontend/common/stores/supervisorMonthlyReportsStore";
 import type {
-  DirectoryPersonOption,
   MonthlyReportMetric,
   MonthlyReportsViewModel,
   StudentMonthlyReportData,
@@ -42,14 +39,16 @@ export function useMonthlyReportsViewModel(
   const reportType = useSupervisorMonthlyReportsStore(s => s.reportType);
   const year = useSupervisorMonthlyReportsStore(s => s.year);
   const month = useSupervisorMonthlyReportsStore(s => s.month);
-  const teacherId = useSupervisorMonthlyReportsStore(s => s.teacherId);
-  const studentId = useSupervisorMonthlyReportsStore(s => s.studentId);
+  const selectedTeacher = useSupervisorMonthlyReportsStore(s => s.selectedTeacher);
+  const studentSelection = useSupervisorMonthlyReportsStore(s => s.studentSelection);
   const setReportType = useSupervisorMonthlyReportsStore(s => s.setReportType);
   const setYear = useSupervisorMonthlyReportsStore(s => s.setYear);
   const setMonth = useSupervisorMonthlyReportsStore(s => s.setMonth);
-  const setTeacherId = useSupervisorMonthlyReportsStore(s => s.setTeacherId);
-  const setStudentId = useSupervisorMonthlyReportsStore(s => s.setStudentId);
+  const setSelectedTeacher = useSupervisorMonthlyReportsStore(s => s.setSelectedTeacher);
+  const setStudentSelection = useSupervisorMonthlyReportsStore(s => s.setStudentSelection);
 
+  const teacherId = selectedTeacher?.id ?? "";
+  const studentId = studentSelection?.id ?? "";
   const skipTeacher = reportType !== "teacher" || teacherId.trim().length === 0;
   const skipStudent = reportType !== "student" || studentId.trim().length === 0;
 
@@ -72,41 +71,6 @@ export function useMonthlyReportsViewModel(
     fetchPolicy: "cache-and-network",
     skip: skipStudent,
   });
-
-  const { data: teacherDirectoryData } = useQuery(teacherDirectoryQueryDocument, {
-    variables: {
-      search: null,
-      paginationArgs: {
-        first: 100,
-        page: 1,
-        after: null,
-        before: null,
-        last: null,
-        maxCount: null,
-        skip: null,
-      },
-    },
-    fetchPolicy: "cache-and-network",
-  });
-
-  const { data: studentsDirectoryData } = useQuery(studentsDirectoryQueryDocument, {
-    variables: { search: null, limit: 100 },
-    fetchPolicy: "cache-and-network",
-  });
-
-  const teacherOptions: DirectoryPersonOption[] = useMemo(() => {
-    const directoryRows = teacherDirectoryData?.teacherDirectory?.rows ?? [];
-    return directoryRows
-      .filter((r): r is NonNullable<typeof r> => Boolean(r?.id))
-      .map(r => ({ id: r.id ?? "", name: r.name ?? r.id ?? "" }));
-  }, [teacherDirectoryData]);
-
-  const studentOptions: DirectoryPersonOption[] = useMemo(() => {
-    const directoryRows = studentsDirectoryData?.studentsDirectory ?? [];
-    return directoryRows
-      .filter((r): r is NonNullable<typeof r> => Boolean(r?.id))
-      .map(r => ({ id: r.id ?? "", name: r.name ?? r.id ?? "" }));
-  }, [studentsDirectoryData]);
 
   const teacherReport: TeacherMonthlyReportData | null = useMemo(() => {
     if (reportType !== "teacher") return null;
@@ -204,10 +168,8 @@ export function useMonthlyReportsViewModel(
     reportType,
     year,
     month,
-    teacherId,
-    studentId,
-    teacherOptions,
-    studentOptions,
+    selectedTeacher,
+    studentSelection,
     teacherReport,
     studentReport,
     metrics,
@@ -216,8 +178,8 @@ export function useMonthlyReportsViewModel(
     onReportTypeChange: setReportType,
     onYearChange: setYear,
     onMonthChange: setMonth,
-    onTeacherIdChange: setTeacherId,
-    onStudentIdChange: setStudentId,
+    onSelectedTeacherChange: setSelectedTeacher,
+    onStudentSelectionChange: setStudentSelection,
     onGenerate: handleGenerate,
   };
 }

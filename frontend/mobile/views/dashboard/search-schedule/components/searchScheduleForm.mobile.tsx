@@ -7,7 +7,7 @@ import { AppDateRangePicker, AppTimeRangePicker } from "@/frontend/common/compon
 import { countActiveDrawerFilters } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
 import type { SearchScheduleFormProps } from "@/frontend/common/views/dashboard/search-schedule/types";
 import { SearchScheduleSortMenuMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleSortMenu.mobile";
-import { SearchScheduleTeacherAutocompleteMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleTeacherAutocomplete.mobile";
+import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { SearchScheduleFilterDrawerMobile } from "@/frontend/mobile/views/dashboard/search-schedule/searchScheduleFilterDrawer.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -23,12 +23,7 @@ export function SearchScheduleFormMobile({
   onSortMenuOpen,
   onSortMenuClose,
   onSortChange,
-  teacherSearchInput,
   selectedTeacher,
-  teacherOptions,
-  teacherSearchLoading,
-  shouldSearchTeachers,
-  onTeacherSearchInputChange,
   onSelectTeacher,
 }: Readonly<SearchScheduleFormProps>) {
   const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
@@ -87,15 +82,11 @@ export function SearchScheduleFormMobile({
         </Box>
 
         <Box sx={{ flex: "1 1 100%" }}>
-          <SearchScheduleTeacherAutocompleteMobile
-            size="small"
-            teacherSearchInput={teacherSearchInput}
-            selectedTeacher={selectedTeacher}
-            teacherOptions={teacherOptions}
-            teacherSearchLoading={teacherSearchLoading}
-            shouldSearchTeachers={shouldSearchTeachers}
-            onTeacherSearchInputChange={onTeacherSearchInputChange}
-            onSelectTeacher={onSelectTeacher}
+          <TeacherAutocompleteMobile
+            value={selectedTeacher}
+            onChange={onSelectTeacher}
+            label={t.teacherName}
+            placeholder={t.teacherNamePlaceholder}
           />
         </Box>
 

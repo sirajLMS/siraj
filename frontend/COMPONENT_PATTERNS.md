@@ -311,6 +311,26 @@ When building or refactoring a dashboard page:
 - [ ] Status cells → shared `StatusBadge`
 - [ ] Pass i18n `noEntries` / `noClasses` to DataGrid `emptyMessage`
 - [ ] Wire real pagination (no decorative prev/next buttons)
+- [ ] Person pickers → tier `userSelect` Autocomplete (`TeacherAutocompleteDesktop` / `StudentAutocompleteMobile` / …) — never inline MUI Autocomplete + directory `useQuery` in views
+
+### Person / audience Autocomplete (userSelect)
+
+Siraj is **permission-based**. Person pickers are keyed by **audience** (`teacher` | `student` | `parent` | `staff` | `user`), not RBAC roles.
+
+| Layer | Responsibility |
+|-------|----------------|
+| Common | `AudienceAutocomplete` engine, audience facades, hooks, `userAutocompleteStore` (options cache only), types/utils |
+| Desktop / mobile | Compose common facade + **locked** platform styles — **no re-exports**, **no viewport branching** |
+| Page store / RHF | **Selection only** (`PersonOption \| null` or id) |
+
+**Rules:**
+
+- Desktop views import from `@/frontend/desktop/components/ui/input/userSelect`
+- Mobile views import from `@/frontend/mobile/components/ui/input/userSelect`
+- Never import `TeacherAutocomplete` / peers from common in views
+- Never call `teachersQueryDocument` / `studentsDirectoryQueryDocument` / `parentsDirectoryQueryDocument` / `staffDirectoryQueryDocument` from views for pickers — hooks own that
+- Shared common UI that needs a picker (e.g. `ScheduleFilters`) takes a **slot** `ReactNode` from the tier parent
+- Empty search returns up to 20 results; debounce 300ms; options cached in `userAutocompleteStore` (LRU, in-memory)
 
 ### Migrated pages (2026-06-13)
 

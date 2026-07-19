@@ -13,7 +13,6 @@ import { ComplaintRecordCardListMobile } from "@/frontend/mobile/views/dashboard
 
 export function ParentComplaintsMobileView({
   labels,
-  studentOptions,
   records,
   hasOlderRecords,
   control,
@@ -42,12 +41,7 @@ export function ParentComplaintsMobileView({
 
         <MobileContentStack gap={3} paddingBottom={4}>
           <MobileBaseCard>
-            <ComplaintFormFieldsMobile
-              control={control}
-              errors={errors}
-              labels={labels}
-              studentOptions={studentOptions}
-            />
+            <ComplaintFormFieldsMobile control={control} errors={errors} labels={labels} />
             <MobilePrimaryPageAction
               fullWidth
               disabled={!canSubmit || isSubmitting}

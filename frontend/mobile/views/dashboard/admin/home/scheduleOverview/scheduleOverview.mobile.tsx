@@ -9,6 +9,7 @@ import { buildServerPaginationOptions } from "@/frontend/common/components/ui/fi
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { ScheduleOverviewMobileCard } from "@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.mobile";
 
 const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
@@ -56,12 +57,9 @@ export function ScheduleOverviewMobileView({
   previousDayLabel,
   nextDayLabel,
   teacherPlaceholder,
-  teacherValue,
-  submitLabel,
-  teachers,
+  selectedTeacher,
   onDateChange,
   onTeacherChange,
-  onSubmit,
   loading,
   showTimezones,
   locale,
@@ -103,13 +101,14 @@ export function ScheduleOverviewMobileView({
               todayLabel={todayLabel}
               previousDayLabel={previousDayLabel}
               nextDayLabel={nextDayLabel}
-              teacherPlaceholder={teacherPlaceholder}
-              teacherValue={teacherValue}
-              submitLabel={submitLabel}
-              teachers={teachers}
               onDateChange={onDateChange}
-              onTeacherChange={onTeacherChange}
-              onSubmit={onSubmit}
+              teacherSelect={
+                <TeacherAutocompleteMobile
+                  value={selectedTeacher}
+                  onChange={onTeacherChange}
+                  label={teacherPlaceholder}
+                />
+              }
             />
           ) : null}
 

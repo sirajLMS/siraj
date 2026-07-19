@@ -69,10 +69,6 @@ export function RecurringClassFormMobile({
   onSubmit,
   meetingConfig,
   onMeetingConfigChangeAction,
-  students,
-  teachers,
-  studentsLoading,
-  teachersLoading,
 }: RecurringClassFormMobileProps) {
   return (
     <Box
@@ -94,10 +90,6 @@ export function RecurringClassFormMobile({
           labels={formLabels}
           meetingConfig={meetingConfig}
           onMeetingConfigChangeAction={onMeetingConfigChangeAction}
-          students={students}
-          teachers={teachers}
-          studentsLoading={studentsLoading}
-          teachersLoading={teachersLoading}
         />
 
         <StyledFormActions>

@@ -110,6 +110,7 @@ import { uiPaymentMethodTypeSelectorAr } from "@/shared/locale/ar/ui/paymentMeth
 import { uiPhoneInputAr } from "@/shared/locale/ar/ui/phone-input";
 import { uiTagInputAr } from "@/shared/locale/ar/ui/tag-input";
 import { uiTimezoneSelectAr } from "@/shared/locale/ar/ui/timezone-select";
+import { uiUserSelectAr } from "@/shared/locale/ar/ui/user-select";
 import type { Translations } from "@/shared/locale/types/message";
 
 export const arMessages: Translations = {
@@ -149,6 +150,7 @@ export const arMessages: Translations = {
     phoneInput: uiPhoneInputAr,
     tagInput: uiTagInputAr,
     timezoneSelect: uiTimezoneSelectAr,
+    userSelect: uiUserSelectAr,
   },
   dashboardTranslations: {
     admin: dashboardAdminAr,

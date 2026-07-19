@@ -1,16 +1,17 @@
 "use client";
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
-import { Autocomplete, Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import type {
-  DirectoryPersonOption,
-  MonthlyReportsViewModel,
-} from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
+import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
 import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import {
+  StudentAutocompleteDesktop,
+  TeacherAutocompleteDesktop,
+} from "@/frontend/desktop/components/ui/input/userSelect";
 
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
@@ -19,23 +20,18 @@ export function MonthlyReportsDesktopView(props: Readonly<MonthlyReportsViewMode
     reportType,
     year,
     month,
-    teacherId,
-    studentId,
-    teacherOptions,
-    studentOptions,
+    selectedTeacher,
+    studentSelection,
     metrics,
     loading,
     labels,
     onReportTypeChange,
     onYearChange,
     onMonthChange,
-    onTeacherIdChange,
-    onStudentIdChange,
+    onSelectedTeacherChange,
+    onStudentSelectionChange,
     onGenerate,
   } = props;
-
-  const selectedTeacher = teacherOptions.find(o => o.id === teacherId) ?? null;
-  const selectedStudent = studentOptions.find(o => o.id === studentId) ?? null;
 
   return (
     <DesktopPageContainer>
@@ -99,28 +95,20 @@ export function MonthlyReportsDesktopView(props: Readonly<MonthlyReportsViewMode
 
           {reportType === "teacher" ? (
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Autocomplete<DirectoryPersonOption>
-                options={[...teacherOptions]}
+              <TeacherAutocompleteDesktop
                 value={selectedTeacher}
-                onChange={(_, option) => onTeacherIdChange(option?.id ?? "")}
-                getOptionLabel={option => option.name}
-                isOptionEqualToValue={(a, b) => a.id === b.id}
-                renderInput={params => (
-                  <TextField {...params} label={labels.selectTeacher} placeholder={labels.teacherSearchPlaceholder} />
-                )}
+                onChange={onSelectedTeacherChange}
+                label={labels.selectTeacher}
+                placeholder={labels.teacherSearchPlaceholder}
               />
             </Grid>
           ) : (
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Autocomplete<DirectoryPersonOption>
-                options={[...studentOptions]}
-                value={selectedStudent}
-                onChange={(_, option) => onStudentIdChange(option?.id ?? "")}
-                getOptionLabel={option => option.name}
-                isOptionEqualToValue={(a, b) => a.id === b.id}
-                renderInput={params => (
-                  <TextField {...params} label={labels.selectStudent} placeholder={labels.studentSearchPlaceholder} />
-                )}
+              <StudentAutocompleteDesktop
+                value={studentSelection}
+                onChange={onStudentSelectionChange}
+                label={labels.selectStudent}
+                placeholder={labels.studentSearchPlaceholder}
               />
             </Grid>
           )}

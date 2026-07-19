@@ -324,6 +324,17 @@ export interface TimezoneSelectLabels {
   readonly required: string;
 }
 
+export interface UserSelectLabels {
+  readonly teacherLabel: string;
+  readonly studentLabel: string;
+  readonly parentLabel: string;
+  readonly userLabel: string;
+  readonly staffLabel: string;
+  readonly searchPlaceholder: string;
+  readonly noResults: string;
+  readonly required: string;
+}
+
 export interface UiLabels {
   readonly catalogImageUpload: CatalogImageUploadLabels;
   readonly genderSelector: GenderSelectorLabels;
@@ -336,4 +347,5 @@ export interface UiLabels {
   readonly timezoneSelect: TimezoneSelectLabels;
   readonly meetingConfig: MeetingConfigLabels;
   readonly paymentMethod: PaymentMethodLabels;
+  readonly userSelect: UserSelectLabels;
 }

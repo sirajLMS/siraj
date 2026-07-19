@@ -4,7 +4,6 @@ import type { StudentAccountStatus } from "@/frontend/common/views/dashboard/adm
 export interface TeacherReassignmentViewProps {
   readonly student: ReassignmentStudentData;
   readonly currentTeacherName: string;
-  readonly teachers: readonly ReassignmentTeacherOption[];
   readonly isSubmitting: boolean;
   readonly onReassign: (input: ReassignmentSubmitInput) => Promise<void>;
   readonly onStatusChange: (input: StatusChangeInput) => Promise<void>;
@@ -43,7 +42,6 @@ export interface StatusChangeInput {
 }
 
 export interface ManagementControlsCardProps {
-  readonly teachers: readonly ReassignmentTeacherOption[];
   readonly currentStatus: StudentStatus;
   readonly studentId: string;
   readonly version: number | null;

@@ -14,7 +14,6 @@ import type { ComplaintFormData } from "@/frontend/common/views/dashboard/compla
 import { complaintFormSchema } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
 import type {
   ParentComplaintRecord,
-  ParentStudentOption,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { ParentComplaintsDesktopView } from "@/frontend/desktop/views/dashboard/complaints/parentComplaints.desktop";
@@ -49,10 +48,6 @@ const MOCK_PARENT_COMPLAINTS: readonly ParentComplaintRecord[] = [
   },
 ];
 
-const MOCK_STUDENT_OPTIONS: readonly ParentStudentOption[] = [
-  { id: "stu-zaid", label: "Zaid Ahmad (Grade 4-B)" },
-  { id: "stu-ayesha", label: "Ayesha Ahmad (Grade 1-A)" },
-];
 
 const PARENT_PERMISSIONS = [AppPermission.SupportSubmitComplaint, AppPermission.SupportViewHistory];
 
@@ -70,7 +65,6 @@ const mockActions = {
 
 interface ParentComplaintsDesktopStoryProps {
   readonly records: readonly ParentComplaintRecord[];
-  readonly studentOptions: readonly ParentStudentOption[];
   readonly hasOlderRecords: boolean;
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
@@ -79,7 +73,6 @@ interface ParentComplaintsDesktopStoryProps {
 
 function ParentComplaintsDesktopStoryRenderer({
   records,
-  studentOptions,
   hasOlderRecords,
   isSubmitting,
   showSuccess,
@@ -104,7 +97,6 @@ function ParentComplaintsDesktopStoryRenderer({
     <ParentComplaintsDesktopView
       labels={labels}
       records={records}
-      studentOptions={studentOptions}
       hasOlderRecords={hasOlderRecords}
       control={control}
       errors={errors}
@@ -155,7 +147,6 @@ type Story = StoryObj<typeof ParentComplaintsDesktopStoryRenderer>;
 export const Default: Story = {
   args: {
     records: MOCK_PARENT_COMPLAINTS,
-    studentOptions: MOCK_STUDENT_OPTIONS,
     hasOlderRecords: true,
     isSubmitting: false,
     showSuccess: false,

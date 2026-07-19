@@ -30,8 +30,7 @@ const StyledFormFieldset = styled("fieldset")(({ theme }) => ({
 
 export function ManualInvoiceDesktopView({
   labels,
-  parentOptions,
-  studentOptions,
+  selectedParentId,
   control,
   errors,
   totalFormatted,
@@ -39,8 +38,6 @@ export function ManualInvoiceDesktopView({
   canCreate,
   canSendEmail,
   isSubmitting,
-  parentsLoading,
-  studentsLoading,
   onBack,
   onSubmitClick,
   onSubmitAndSendEmailClick,
@@ -71,10 +68,7 @@ export function ManualInvoiceDesktopView({
                 control={control}
                 errors={errors}
                 labels={labels}
-                parentOptions={parentOptions}
-                studentOptions={studentOptions}
-                parentsLoading={parentsLoading}
-                studentsLoading={studentsLoading}
+                selectedParentId={selectedParentId}
               />
               <BillingMonthSelectorDesktop control={control} errors={errors} labels={labels} />
               <InvoiceDraftSummaryCardDesktop

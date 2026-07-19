@@ -10,13 +10,11 @@ import {
 } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
 import type {
   ParentComplaintRecord,
-  ParentStudentOption,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsParentLabels } from "@/shared/locale/types/dashboard/complaints";
 
 export interface ParentComplaintsViewModel {
   readonly labels: ComplaintsParentLabels;
-  readonly studentOptions: readonly ParentStudentOption[];
   readonly records: readonly ParentComplaintRecord[];
   readonly hasOlderRecords: boolean;
   readonly control: Control<ComplaintFormData>;
@@ -35,7 +33,6 @@ export interface ParentComplaintsViewModel {
 
 export interface UseParentComplaintsViewModelProps {
   readonly labels: ComplaintsParentLabels;
-  readonly studentOptions: readonly ParentStudentOption[];
   readonly records: readonly ParentComplaintRecord[];
   readonly hasOlderRecords: boolean;
   readonly isSubmitting: boolean;
@@ -91,7 +88,6 @@ export function useParentComplaintsViewModel(
 ): ParentComplaintsViewModel {
   const {
     labels,
-    studentOptions,
     records,
     hasOlderRecords,
     isSubmitting,
@@ -123,7 +119,6 @@ export function useParentComplaintsViewModel(
 
   return {
     labels,
-    studentOptions,
     records,
     hasOlderRecords,
     control,

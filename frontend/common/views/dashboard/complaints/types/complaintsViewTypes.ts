@@ -4,7 +4,6 @@ import type {
   AdminComplaintsSummary,
   ComplaintTab,
   ParentComplaintRecord,
-  ParentStudentOption,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsLabels } from "@/shared/locale/types/dashboard/complaints";
 
@@ -12,7 +11,6 @@ export type { ComplaintsLabels };
 
 export interface ParentComplaintsViewProps {
   readonly labels: ComplaintsLabels["parent"];
-  readonly studentOptions: readonly ParentStudentOption[];
   readonly records: readonly ParentComplaintRecord[];
   readonly hasOlderRecords: boolean;
   readonly isSubmitting: boolean;

@@ -18,8 +18,9 @@ import { Controller } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { ComplaintCategory } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ComplaintFormData } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
-import type { ParentStudentOption } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsParentLabels } from "@/shared/locale";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
+import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 
 const StyledFormContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -49,7 +50,6 @@ interface ComplaintFormFieldsMobileProps {
   readonly control: Control<ComplaintFormData>;
   readonly errors: FieldErrors<ComplaintFormData>;
   readonly labels: ComplaintsParentLabels;
-  readonly studentOptions: readonly ParentStudentOption[];
 }
 
 function FormHeader({ title }: { readonly title: string }) {
@@ -179,7 +179,6 @@ export function ComplaintFormFieldsMobile({
   control,
   errors,
   labels,
-  studentOptions,
 }: Readonly<ComplaintFormFieldsMobileProps>) {
   return (
     <StyledFormContainer>
@@ -193,16 +192,22 @@ export function ComplaintFormFieldsMobile({
         ))}
       </SelectFieldGroup>
 
-      <SelectFieldGroup label={labels.student} control={control} name="studentId" error={errors.studentId}>
-        <MenuItem value="" disabled>
-          {labels.student}
-        </MenuItem>
-        {studentOptions.map(option => (
-          <MenuItem key={option.id} value={option.id}>
-            {option.label}
-          </MenuItem>
-        ))}
-      </SelectFieldGroup>
+      <Controller
+        name="studentId"
+        control={control}
+        render={({ field, fieldState }) => (
+          <StudentAutocompleteMobile
+            value={field.value ? ({ id: field.value, name: "" } satisfies PersonOption) : null}
+            onChange={option => {
+              field.onChange(option?.id ?? "");
+            }}
+            scope={{ viewerAssigned: true }}
+            label={labels.student}
+            error={Boolean(fieldState.error ?? errors.studentId)}
+            helperText={fieldState.error?.message ?? errors.studentId?.message}
+          />
+        )}
+      />
 
       <ContactEmailField control={control} error={errors.contactEmail} labels={labels} />
 

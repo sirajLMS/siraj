@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import {
   Alert,
   Button,
@@ -15,17 +14,30 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import type { PaginationArgs, StudentFilterArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { studentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { logger } from "@/frontend/common/utils/logger";
 import type { TeacherDashboardLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
+export interface ManualClassEntryStudentFieldContextValue {
+  readonly studentId: string;
+  readonly setStudentId: (value: string) => void;
+  readonly disabled: boolean;
+}
+
+const ManualClassEntryStudentFieldContext = createContext<ManualClassEntryStudentFieldContextValue | null>(null);
+
+export function useManualClassEntryStudentField(): ManualClassEntryStudentFieldContextValue {
+  const context = useContext(ManualClassEntryStudentFieldContext);
+  if (!context) {
+    throw new Error("useManualClassEntryStudentField must be used within ManualClassEntryDialog");
+  }
+  return context;
+}
+
 interface ManualClassEntryDialogProps {
   readonly open: boolean;
   readonly onClose: () => void;
-  readonly teacherId: string;
   readonly onSubmit: (data: {
     studentId: string;
     scheduledStartAt: string;
@@ -34,14 +46,15 @@ interface ManualClassEntryDialogProps {
     classType: string;
   }) => Promise<void>;
   readonly defaultActive?: boolean;
+  readonly studentSelect: ReactNode;
 }
 
 export function ManualClassEntryDialog({
   open,
   onClose,
-  teacherId,
   onSubmit,
   defaultActive = false,
+  studentSelect,
 }: Readonly<ManualClassEntryDialogProps>) {
   const t = useAppTranslation().dashboardTranslations.teacherDashboard;
   const [studentId, setStudentId] = useState("");
@@ -52,34 +65,21 @@ export function ManualClassEntryDialog({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { data, loading } = useQuery(studentsQueryDocument, {
-    variables: {
-      filterArgs: (teacherId ? { primaryTeacherId: teacherId } : null) as StudentFilterArgs | null,
-      paginationArgs: { page: 0 } as PaginationArgs | null,
-      orderBy: null,
-    },
-    skip: !open || !teacherId,
-  });
-
-  // Set default active values when opened
   useEffect(() => {
     if (open) {
       setError(null);
       setStudentId("");
       const now = new Date();
-      // Format YYYY-MM-DD
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, "0");
       const dd = String(now.getDate()).padStart(2, "0");
       setDate(`${yyyy}-${mm}-${dd}`);
 
       if (defaultActive) {
-        // Active mode default is "now"
         const hh = String(now.getHours()).padStart(2, "0");
         const min = String(now.getMinutes()).padStart(2, "0");
         setStartTime(`${hh}:${min}`);
       } else {
-        // Standard default is next hour
         const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
         const hh = String(nextHour.getHours()).padStart(2, "0");
         setStartTime(`${hh}:00`);
@@ -88,8 +88,6 @@ export function ManualClassEntryDialog({
       setClassType("REGULAR");
     }
   }, [open, defaultActive]);
-
-  const studentsList = data?.students?.data ?? [];
 
   const handleFormSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -136,28 +134,29 @@ export function ManualClassEntryDialog({
           {defaultActive ? t.manualClassEntry.titleCreateActive : t.manualClassEntry.titleCreate}
         </DialogTitle>
         <DialogContent dividers>
-          <ManualClassEntryFormFields
-            error={error}
-            studentId={studentId}
-            setStudentId={setStudentId}
-            loading={loading}
-            studentsList={studentsList}
-            date={date}
-            setDate={setDate}
-            startTime={startTime}
-            setStartTime={setStartTime}
-            duration={duration}
-            setDuration={setDuration}
-            classType={classType}
-            setClassType={setClassType}
-            t={t}
-          />
+          <ManualClassEntryStudentFieldContext.Provider
+            value={{ studentId, setStudentId, disabled: submitting }}
+          >
+            <ManualClassEntryFormFields
+              error={error}
+              studentSelect={studentSelect}
+              date={date}
+              setDate={setDate}
+              startTime={startTime}
+              setStartTime={setStartTime}
+              duration={duration}
+              setDuration={setDuration}
+              classType={classType}
+              setClassType={setClassType}
+              t={t}
+            />
+          </ManualClassEntryStudentFieldContext.Provider>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={onClose} disabled={submitting}>
             {t.manualClassEntry.cancel}
           </Button>
-          <Button type="submit" variant="contained" disabled={submitting || loading}>
+          <Button type="submit" variant="contained" disabled={submitting}>
             {submitting ? t.manualClassEntry.creating : t.manualClassEntry.create}
           </Button>
         </DialogActions>
@@ -166,38 +165,9 @@ export function ManualClassEntryDialog({
   );
 }
 
-function renderStudentMenuItems(
-  loading: boolean,
-  studentsList: ReadonlyArray<{ readonly id?: string | null; readonly name?: string | null }>,
-  t: TeacherDashboardLabels
-) {
-  if (loading) {
-    return (
-      <MenuItem value="" disabled>
-        {t.manualClassEntry.studentLoading}
-      </MenuItem>
-    );
-  }
-  if (studentsList.length === 0) {
-    return (
-      <MenuItem value="" disabled>
-        {t.manualClassEntry.noStudentsAssigned}
-      </MenuItem>
-    );
-  }
-  return studentsList.map(s => (
-    <MenuItem key={s.id} value={s.id ?? ""}>
-      {s.name}
-    </MenuItem>
-  ));
-}
-
 interface ManualClassEntryFormFieldsProps {
   readonly error: string | null;
-  readonly studentId: string;
-  readonly setStudentId: (value: string) => void;
-  readonly loading: boolean;
-  readonly studentsList: ReadonlyArray<{ readonly id?: string | null; readonly name?: string | null }>;
+  readonly studentSelect: ReactNode;
   readonly date: string;
   readonly setDate: (value: string) => void;
   readonly startTime: string;
@@ -211,10 +181,7 @@ interface ManualClassEntryFormFieldsProps {
 
 function ManualClassEntryFormFields({
   error,
-  studentId,
-  setStudentId,
-  loading,
-  studentsList,
+  studentSelect,
   date,
   setDate,
   startTime,
@@ -229,20 +196,7 @@ function ManualClassEntryFormFields({
     <Stack spacing={3} sx={{ mt: 1 }}>
       {error && <Alert severity="error">{error}</Alert>}
 
-      <FormControl fullWidth required>
-        <InputLabel id="student-select-label" shrink>
-          {t.manualClassEntry.studentLabel}
-        </InputLabel>
-        <Select
-          labelId="student-select-label"
-          value={studentId}
-          label={t.manualClassEntry.studentLabel}
-          onChange={e => setStudentId(e.target.value)}
-          disabled={loading}
-        >
-          {renderStudentMenuItems(loading, studentsList, t)}
-        </Select>
-      </FormControl>
+      {studentSelect}
 
       <TextField
         label={t.manualClassEntry.scheduledDate}

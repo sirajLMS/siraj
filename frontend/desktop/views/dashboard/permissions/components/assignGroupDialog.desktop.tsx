@@ -1,29 +1,17 @@
 "use client";
 
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
-} from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import { useMemo } from "react";
 import { Controller } from "react-hook-form";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
-import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type PersonOption, resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { AssignGroupDialogProps } from "@/frontend/common/views/dashboard/permissions/types";
+import { UserAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { useAppTranslation } from "@/shared/locale";
 
 export function AssignGroupDialogDesktop({
   open,
   group,
-  users,
   isLoading,
   onClose,
   onAssign,
@@ -33,12 +21,12 @@ export function AssignGroupDialogDesktop({
 }: Readonly<AssignGroupDialogProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
-  if (!group) return null;
-
-  const assignedUserIds = new Set(group.assignedUsers?.map(au => au.id) ?? []);
-  const assignableUsers = users.filter(
-    (user): user is User & { id: string } => !!user.id && !assignedUserIds.has(user.id)
+  const assignedUserIds = useMemo(
+    () => group?.assignedUsers?.map(user => user.id).filter((id): id is string => Boolean(id)) ?? [],
+    [group]
   );
+
+  if (!group) return null;
 
   const onSubmit = (data: { userId: string }) => {
     onAssign(data.userId);
@@ -65,24 +53,30 @@ export function AssignGroupDialogDesktop({
           <Controller
             name="userId"
             control={control}
-            render={({ field }) => (
-              <FormControl fullWidth required error={!!errors.userId} disabled={isLoading} sx={outlinedInputSx}>
-                <InputLabel id="assign-group-user-label-desktop" shrink>
-                  {t.selectUserLabel}
-                </InputLabel>
-                <Select {...field} labelId="assign-group-user-label-desktop" label={t.selectUserLabel} displayEmpty>
-                  <MenuItem value="" disabled>
-                    {t.selectUserPlaceholder}
-                  </MenuItem>
-                  {assignableUsers.map(user => (
-                    <MenuItem key={user.id} value={user.id}>
-                      {user.name} ({user.email})
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.userId ? <FormHelperText>{t.selectUserPlaceholder}</FormHelperText> : null}
-              </FormControl>
-            )}
+            render={({ field }) => {
+              const selectedUser: PersonOption | null = field.value
+                ? resolvePersonOption(field.value, [], { id: field.value, name: "" })
+                : null;
+
+              return (
+                <UserAutocompleteDesktop
+                  value={selectedUser}
+                  disabled={isLoading}
+                  required
+                  label={t.selectUserLabel}
+                  placeholder={t.selectUserPlaceholder}
+                  error={Boolean(errors.userId)}
+                  helperText={errors.userId ? t.selectUserPlaceholder : undefined}
+                  excludeIds={assignedUserIds}
+                  onChange={person => {
+                    if (person && assignedUserIds.includes(person.id)) {
+                      return;
+                    }
+                    field.onChange(person?.id ?? "");
+                  }}
+                />
+              );
+            }}
           />
         </Box>
       </DialogContent>

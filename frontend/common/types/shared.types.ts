@@ -7,6 +7,7 @@
  */
 
 import type { SvgIconComponent } from "@mui/icons-material";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import type {
   ClassExecutionState,
   ClassOutcome,
@@ -66,6 +67,7 @@ export interface TeacherFilterItem {
 export interface DashboardFilters {
   readonly date: string;
   readonly teacherId: string;
+  readonly selectedTeacher: PersonOption | null;
   readonly searchQuery: string;
   readonly debouncedSearchQuery: string;
   readonly selectedStatus: AdminMetricKey | null;

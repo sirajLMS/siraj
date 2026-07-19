@@ -405,6 +405,53 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+
+  // Person pickers: views must use tier userSelect Autocompletes + shared hooks — not directory queries / common facades.
+  {
+    files: [
+      "frontend/**/views/**/*.{ts,tsx}",
+      "frontend/desktop/views/**/*.{ts,tsx}",
+      "frontend/mobile/views/**/*.{ts,tsx}",
+    ],
+    ignores: [
+      "frontend/common/hooks/userAutocomplete/**",
+      "frontend/**/views/**/*.stories.tsx",
+      "frontend/**/students/quota/**",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@/frontend/common/graphql/sharedDocuments",
+              importNames: [
+                "teachersQueryDocument",
+                "studentsDirectoryQueryDocument",
+                "parentsDirectoryQueryDocument",
+                "staffDirectoryQueryDocument",
+              ],
+              message:
+                "Person pickers must use userSelect Autocomplete (tier components + hooks). Do not query lightweight directories from views.",
+            },
+            {
+              name: "@/frontend/common/components/ui/input/userSelect",
+              importNames: [
+                "TeacherAutocomplete",
+                "StudentAutocomplete",
+                "ParentAutocomplete",
+                "UserAutocomplete",
+                "StaffAutocomplete",
+                "AudienceAutocomplete",
+              ],
+              message:
+                "Import TeacherAutocompleteDesktop/Mobile (or peer) from the tier UI kit — never common Autocomplete facades in views. Types/utils (PersonOption, resolvePersonOption) are allowed.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

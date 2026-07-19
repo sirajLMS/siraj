@@ -1,11 +1,10 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
-import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { AssignGroupFormBindings } from "@/frontend/common/views/dashboard/permissions/components/useAssignGroupForm";
 import type { ManageOverridesState } from "@/frontend/common/views/dashboard/permissions/components/useManageOverridesState";
 import type { PermissionGroupFormState } from "@/frontend/common/views/dashboard/permissions/components/usePermissionGroupForm";
 
 export interface PermissionManagementDialogsProps {
-  readonly users: readonly User[];
   readonly isLoading: boolean;
   readonly activeGroup: PermissionGroup | null;
   readonly selectedGroupId: string | null;

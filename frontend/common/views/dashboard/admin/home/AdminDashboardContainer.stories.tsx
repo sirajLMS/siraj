@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useMemo, useState } from "react";
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
-import { renderAdminDashboardView } from "@/frontend/common/views/dashboard/admin/__shared__/adminDashboardView";
+import { AdminDashboardDesktopView } from "@/frontend/desktop/views/dashboard/admin/home/adminDashboard.desktop";
 import { useAdminDashboardLabels } from "@/frontend/common/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import {
@@ -20,7 +20,6 @@ export function MockAdminDashboardContainer() {
   const lastUpdatedKey = useDashboardStore(state => state.lastUpdated);
   const filters = useDashboardStore(state => state.filters);
   const scheduleRows = useDashboardStore(state => state.scheduleRows);
-  const teachers = useDashboardStore(state => state.teachers);
   const setDateFilter = useDashboardStore(state => state.setDateFilter);
   const setTeacherFilter = useDashboardStore(state => state.setTeacherFilter);
   const setSearchQuery = useDashboardStore(state => state.setSearchQuery);
@@ -87,30 +86,37 @@ export function MockAdminDashboardContainer() {
     }
   };
 
-  return renderAdminDashboardView({
-    t,
-    loading: false,
-    lastUpdated: translatedLastUpdated,
-    metrics,
-    onMetricClick: handleMetricClick,
-    selectedMetricKey: filters.selectedStatus ?? undefined,
-    selectedMetricLabel,
-    searchValue: filters.searchQuery,
-    dateValue: filters.date,
-    teacherValue: filters.teacherId,
-    teachers,
-    rows: paginatedRows as readonly (typeof paginatedRows)[number][],
-    headers,
-    statusLabels,
-    page,
-    totalCount: filteredRows.length,
-    onPageChange: setPage,
-    onSearchChange: setSearchQuery,
-    onDateChange: setDateFilter,
-    onTeacherChange: setTeacherFilter,
-    onSubmit: handleSubmit,
-    pageSize,
-  });
+  const pageCount = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+
+  return (
+    <AdminDashboardDesktopView
+      t={t}
+      loading={false}
+      lastUpdated={translatedLastUpdated}
+      metrics={metrics}
+      onMetricClick={handleMetricClick}
+      selectedMetricKey={filters.selectedStatus ?? undefined}
+      selectedMetricLabel={selectedMetricLabel}
+      searchValue={filters.searchQuery}
+      dateValue={filters.date}
+      selectedTeacher={filters.selectedTeacher}
+      rows={paginatedRows as readonly (typeof paginatedRows)[number][]}
+      headers={headers}
+      statusLabels={statusLabels}
+      page={page}
+      totalCount={filteredRows.length}
+      onPageChange={setPage}
+      onSearchChange={setSearchQuery}
+      onDateChange={setDateFilter}
+      onTeacherChange={setTeacherFilter}
+      onSubmit={handleSubmit}
+      pageSize={pageSize}
+      pageCount={pageCount}
+      canDashboardSearch
+      canScheduleFilterAdvanced
+      canScheduleViewTimezones
+    />
+  );
 }
 
 const meta: Meta<typeof MockAdminDashboardContainer> = {

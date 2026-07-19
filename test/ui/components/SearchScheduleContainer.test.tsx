@@ -85,8 +85,6 @@ afterEach(() => {
     activeInput: null,
     hasSearched: false,
     page: 0,
-    teacherSearchInput: "",
-    debouncedTeacherSearch: "",
     selectedTeacher: null,
   });
 });

@@ -4,6 +4,7 @@ import { ExpandMoreOutlined } from "@mui/icons-material";
 import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
@@ -14,8 +15,11 @@ import {
 } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { DaysScheduleSectionDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/daysScheduleSection.desktop";
 import { DurationInputDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/durationInput.desktop";
-import { EntitySelectDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/entitySelect.desktop";
 import { TimeInputDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/timeInput.desktop";
+import {
+  StudentAutocompleteDesktop,
+  TeacherAutocompleteDesktop,
+} from "@/frontend/desktop/components/ui/input/userSelect";
 
 function OptionSelectDesktop({
   labelId,
@@ -77,12 +81,7 @@ export function RecurringClassFormFieldsDesktop({
   labels,
   meetingConfig,
   onMeetingConfigChangeAction,
-  students,
-  teachers,
-  studentsLoading,
-  teachersLoading,
 }: RecurringClassFormFieldsProps) {
-  const studentId = watch("studentId");
   const teacherId = watch("teacherId");
   const classType = watch("classType") || "";
 
@@ -90,29 +89,41 @@ export function RecurringClassFormFieldsDesktop({
     <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
       <Box sx={{ display: "flex", gap: 3, flexDirection: "row" }}>
         <Box sx={{ flex: 1 }}>
-          <EntitySelectDesktop
-            value={studentId}
-            entities={students}
-            isSubmitting={isSubmitting || studentsLoading}
-            label={labels.students}
-            placeholder={labels.studentsPlaceholder}
-            error={errors.studentId?.message}
-            onChange={val => {
-              setValue("studentId", val, { shouldValidate: true });
-            }}
+          <Controller
+            name="studentId"
+            control={control}
+            render={({ field, fieldState }) => (
+              <StudentAutocompleteDesktop
+                value={field.value ? ({ id: field.value, name: "" } satisfies PersonOption) : null}
+                onChange={option => {
+                  field.onChange(option?.id ?? "");
+                }}
+                label={labels.students}
+                placeholder={labels.studentsPlaceholder}
+                error={Boolean(fieldState.error ?? errors.studentId)}
+                helperText={fieldState.error?.message ?? errors.studentId?.message}
+                disabled={isSubmitting}
+              />
+            )}
           />
         </Box>
         <Box sx={{ flex: 1 }}>
-          <EntitySelectDesktop
-            value={teacherId}
-            entities={teachers}
-            isSubmitting={isSubmitting || teachersLoading}
-            label={labels.teacher}
-            placeholder={labels.teacherPlaceholder}
-            error={errors.teacherId?.message}
-            onChange={val => {
-              setValue("teacherId", val, { shouldValidate: true });
-            }}
+          <Controller
+            name="teacherId"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TeacherAutocompleteDesktop
+                value={field.value ? ({ id: field.value, name: "" } satisfies PersonOption) : null}
+                onChange={option => {
+                  field.onChange(option?.id ?? "");
+                }}
+                label={labels.teacher}
+                placeholder={labels.teacherPlaceholder}
+                error={Boolean(fieldState.error ?? errors.teacherId)}
+                helperText={fieldState.error?.message ?? errors.teacherId?.message}
+                disabled={isSubmitting}
+              />
+            )}
           />
         </Box>
       </Box>

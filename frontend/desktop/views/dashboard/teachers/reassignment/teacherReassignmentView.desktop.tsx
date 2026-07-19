@@ -13,7 +13,6 @@ import { useAppTranslation } from "@/shared/locale";
 export function TeacherReassignmentViewDesktop({
   student,
   currentTeacherName,
-  teachers,
   isSubmitting,
   onReassign,
   onStatusChange,
@@ -63,7 +62,6 @@ export function TeacherReassignmentViewDesktop({
             </Alert>
 
             <ManagementControlsCardDesktop
-              teachers={teachers}
               currentStatus={student.status}
               studentId={student.id}
               version={student.version}

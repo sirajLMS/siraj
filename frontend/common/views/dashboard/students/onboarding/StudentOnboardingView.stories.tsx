@@ -71,8 +71,6 @@ function StudentOnboardingStory() {
     errors: formState.errors as FieldErrors<StudentOnboardingFormData>,
     handleSubmit: handleSubmit as UseFormHandleSubmit<StudentOnboardingFormData>,
     isSubmitting: false,
-    parentOptions: [{ id: "parent-1", label: "Ahmed Parent" }],
-    teacherOptions: [{ id: "teacher-1", name: "Sara Teacher" }],
     parentLocked: true,
     labels,
     onSubmit: () => undefined,

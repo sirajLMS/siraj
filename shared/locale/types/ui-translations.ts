@@ -30,6 +30,7 @@ import type {
   PhoneInputLabels,
   TagInputLabels,
   TimezoneSelectLabels,
+  UserSelectLabels,
 } from "@/shared/locale/types/ui";
 
 export interface UiTranslations {
@@ -62,4 +63,5 @@ export interface UiTranslations {
   phoneInput: PhoneInputLabels;
   tagInput: TagInputLabels;
   timezoneSelect: TimezoneSelectLabels;
+  userSelect: UserSelectLabels;
 }

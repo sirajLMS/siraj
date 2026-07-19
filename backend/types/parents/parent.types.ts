@@ -79,6 +79,14 @@ export type ParentDirectoryResult = {
   pageInfo: PageInfo | null;
 };
 
+/** Lightweight row for parent autocomplete (`parentsDirectory` query). */
+export type ParentDirectoryAutocompleteRow = {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  email: string;
+};
+
 export type ParentDashboardScheduleRow = {
   id: string;
   studentId: string;

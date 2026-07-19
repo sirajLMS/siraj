@@ -32,10 +32,6 @@ export function CreateRecurringClassViewDesktop(viewModel: Readonly<CreateRecurr
     errors,
     meetingConfig,
     onMeetingConfigChange,
-    students,
-    teachers,
-    studentsLoading,
-    teachersLoading,
   } = viewModel;
 
   const breadcrumbs = [
@@ -80,10 +76,6 @@ export function CreateRecurringClassViewDesktop(viewModel: Readonly<CreateRecurr
             formLabels={formLabels}
             meetingConfig={meetingConfig}
             onMeetingConfigChangeAction={onMeetingConfigChange}
-            students={students}
-            teachers={teachers}
-            studentsLoading={studentsLoading}
-            teachersLoading={teachersLoading}
             onSubmit={data => onSubmit(data, meetingConfig)}
           />
         </DesktopSectionPanel>

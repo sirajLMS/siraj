@@ -1903,7 +1903,11 @@ export type UsersQuery_users_User = { createdAt: string | null, displayCurrency:
 export type UsersQuery_Query = { users: Array<UsersQuery_users_User> | null };
 
 
-export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
+export type UsersQueryVariables = Exact<{
+  search: string | null | undefined;
+  limit: number | null | undefined;
+  offset: number | null | undefined;
+}>;
 
 
 export type UsersQuery = UsersQuery_Query;
@@ -3529,6 +3533,8 @@ export type ParentDashboardMetricsQueryVariables = Exact<{ [key: string]: never;
 
 export type ParentDashboardMetricsQuery = ParentDashboardMetricsQuery_Query;
 
+export type ParentDirectoryAutocompleteRowFragmentFragment = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
+
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics = { id: string | null, regular: number | null, onLeave: number | null, onTrial: number | null, suspended: number | null };
 
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow = { id: string | null, userId: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, lifecycleStatus: Types.ParentStatus | null, accountStatus: Types.AccountStatus | null, unpaidInvoices: number | null };
@@ -3548,6 +3554,19 @@ export type ParentDirectoryQueryVariables = Exact<{
 
 
 export type ParentDirectoryQuery = ParentDirectoryQuery_Query;
+
+export type ParentsDirectoryQuery_parentsDirectory_ParentDirectoryAutocompleteRow = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
+
+export type ParentsDirectoryQuery_Query = { parentsDirectory: Array<ParentsDirectoryQuery_parentsDirectory_ParentDirectoryAutocompleteRow> };
+
+
+export type ParentsDirectoryQueryVariables = Exact<{
+  search: string | null | undefined;
+  limit: number | null | undefined;
+}>;
+
+
+export type ParentsDirectoryQuery = ParentsDirectoryQuery_Query;
 
 export type ParentDocumentsQuery_parentDocuments_ParentDocument = { id: string | null, fileId: string | null, filePath: string | null, isProtected: boolean | null, usageType: string | null, createdAt: string | null };
 
@@ -4892,6 +4911,22 @@ export type OnboardingMetricsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type OnboardingMetricsQuery = OnboardingMetricsQuery_Query;
+
+export type StaffDirectoryAutocompleteRowFragmentFragment = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
+
+export type StaffDirectoryQuery_staffDirectory_StaffDirectoryAutocompleteRow = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
+
+export type StaffDirectoryQuery_Query = { staffDirectory: Array<StaffDirectoryQuery_staffDirectory_StaffDirectoryAutocompleteRow> };
+
+
+export type StaffDirectoryQueryVariables = Exact<{
+  search: string | null | undefined;
+  limit: number | null | undefined;
+  permissionGroupFilter: string | null | undefined;
+}>;
+
+
+export type StaffDirectoryQuery = StaffDirectoryQuery_Query;
 
 export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 

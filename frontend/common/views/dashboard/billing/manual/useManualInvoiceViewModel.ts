@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useMutation } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect } from "react";
 import {
@@ -12,11 +12,7 @@ import {
   useWatch,
 } from "react-hook-form";
 import { AppPermission, CurrencyCode, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import {
-  createManualInvoiceMutationDocument,
-  parentAssociatedStudentsQueryDocument,
-  parentDirectoryQueryDocument,
-} from "@/frontend/common/graphql/sharedDocuments";
+import { createManualInvoiceMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useManualInvoiceUiStore } from "@/frontend/common/stores/manualInvoiceUiStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
@@ -24,28 +20,17 @@ import {
   type ManualInvoiceFormData,
   manualInvoiceSchema,
 } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
-import type {
-  ManualInvoiceLabels,
-  ParentInvoiceOption,
-  StudentOption,
-} from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
+import type { ManualInvoiceLabels } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
 import { buildManualInvoiceLabels } from "@/frontend/common/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
 import { formatDraftTotal } from "@/frontend/common/views/dashboard/billing/manual/utils/manualInvoiceFormatters";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
-// NEW FOR PLAN v5 (manual-invoice wave): ViewModel now owns ALL state for the
-// §6.1 + §6.2 contract — Server Component page renders the Container with no
-// props (mirrors useAdminBillingViewModel). The Container renders the View
-// which invokes this hook with `Record<string, never>` (per §6.2).
 export type UseManualInvoiceViewModelProps = Record<string, never>;
 
-// NEW FOR PLAN v5 (manual-invoice wave): Preserve the ManualInvoiceViewModel
-// interface name so tier views keep their existing prop signature.
 export interface ManualInvoiceViewModel {
   readonly labels: ManualInvoiceLabels;
-  readonly parentOptions: readonly ParentInvoiceOption[];
-  readonly studentOptions: readonly StudentOption[];
+  readonly selectedParentId: string | null;
   readonly control: Control<ManualInvoiceFormData>;
   readonly errors: FieldErrors<ManualInvoiceFormData>;
   readonly totalFormatted: string;
@@ -53,8 +38,6 @@ export interface ManualInvoiceViewModel {
   readonly canCreate: boolean;
   readonly canSendEmail: boolean;
   readonly isSubmitting: boolean;
-  readonly parentsLoading: boolean;
-  readonly studentsLoading: boolean;
   readonly showSuccess: boolean;
   readonly onBack: () => void;
   readonly onSubmitClick: () => void;
@@ -119,10 +102,6 @@ export function useManualInvoiceViewModel(_props: Readonly<UseManualInvoiceViewM
   const router = useRouter();
   const hasPermission = useUserStore(state => state.hasPermission);
   const canCreate = hasPermission(AppPermission.BillingCreateInvoice);
-  // NEW FOR PLAN v5: capability flag for the "submit & email" action. The
-  // SYSTEM_DISPATCH_EMAIL permission gates ad-hoc email sends on the server;
-  // we surface it so the tier view can disable the email variant when the
-  // current actor is not authorized.
   const canSendEmail = hasPermission(AppPermission.SystemDispatchEmail);
 
   const selectedParentId = useManualInvoiceUiStore(state => state.selectedParentId);
@@ -132,39 +111,6 @@ export function useManualInvoiceViewModel(_props: Readonly<UseManualInvoiceViewM
   const showSuccess = useManualInvoiceUiStore(state => state.showSuccess);
   const setShowSuccess = useManualInvoiceUiStore(state => state.setShowSuccess);
   const dismissSuccess = useManualInvoiceUiStore(state => state.dismissSuccess);
-
-  const { data: parentsData, loading: parentsLoading } = useQuery(parentDirectoryQueryDocument, {
-    variables: { paginationArgs: null, search: null, lifecycleStatusFilter: null },
-    fetchPolicy: "cache-and-network",
-  });
-
-  // CROSS-FILE DEPENDENCY: a dedicated `studentsForParentQueryDocument` keyed by
-  // parentId does not currently exist. We reuse `parentAssociatedStudentsQueryDocument`
-  // which accepts a non-null `parentId` (the parent's profile id, matching the
-  // id column returned by `parentDirectoryQueryDocument` rows). When new
-  // dedicated documents land, this block should be swapped.
-  const { data: studentsData, loading: studentsLoading } = useQuery(parentAssociatedStudentsQueryDocument, {
-    variables: { parentId: selectedParentId ?? "" },
-    skip: !selectedParentId,
-    fetchPolicy: "cache-and-network",
-  });
-
-  const parentOptions: readonly ParentInvoiceOption[] = parentsData?.parentDirectory?.rows
-    ? parentsData.parentDirectory.rows
-        .filter((row): row is NonNullable<typeof row> => row != null)
-        .map(row => ({
-          id: row.id ?? "",
-          userId: row.userId ?? null,
-          name: row.name ?? "",
-          label: row.name ?? "",
-        }))
-    : [];
-
-  const studentOptions: readonly StudentOption[] = studentsData?.parentAssociatedStudents
-    ? studentsData.parentAssociatedStudents
-        .filter((stu): stu is NonNullable<typeof stu> => stu != null)
-        .map(stu => ({ id: stu.id ?? "", name: stu.name ?? "" }))
-    : [];
 
   const schema = manualInvoiceSchema(labels.validation);
   const {
@@ -194,8 +140,6 @@ export function useManualInvoiceViewModel(_props: Readonly<UseManualInvoiceViewM
   useResetStudentOnParentChange(currentParentId ?? "", setValue);
   useAutoDismissOnSuccess(showSuccess, dismissSuccess);
 
-  // Sync store's selectedParentId whenever the form's parentId changes — if the
-  // user clears the autocomplete we have nothing to fetch students for.
   useEffect(() => {
     if ((currentParentId ?? "") !== selectedParentId) {
       onParentChange((currentParentId ?? "") || null);
@@ -244,8 +188,7 @@ export function useManualInvoiceViewModel(_props: Readonly<UseManualInvoiceViewM
 
   return {
     labels,
-    parentOptions,
-    studentOptions,
+    selectedParentId,
     control,
     errors,
     totalFormatted,
@@ -253,8 +196,6 @@ export function useManualInvoiceViewModel(_props: Readonly<UseManualInvoiceViewM
     canCreate,
     canSendEmail,
     isSubmitting,
-    parentsLoading,
-    studentsLoading,
     showSuccess,
     onBack,
     onSubmitClick,

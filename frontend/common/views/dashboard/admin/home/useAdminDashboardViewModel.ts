@@ -1,4 +1,5 @@
 "use client";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import {
@@ -6,7 +7,6 @@ import {
   useAdminDashboardHandlers,
   useAdminScheduleQuery,
   useLastUpdatedLabel,
-  useTeachers,
 } from "@/frontend/common/views/dashboard/admin/__shared__/useAdminDashboard";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { useAdminDashboardLabels } from "@/frontend/common/views/dashboard/admin/home/utils";
@@ -28,8 +28,7 @@ export interface AdminDashboardViewModel {
   readonly selectedMetricLabel: string | null;
   readonly searchValue: string;
   readonly dateValue: string;
-  readonly teacherValue: string;
-  readonly teachers: readonly import("@/frontend/common/views/dashboard/types/dashboard").TeacherFilterItem[];
+  readonly selectedTeacher: PersonOption | null;
   readonly rows: readonly DailyScheduleRow[];
   readonly headers: import("@/frontend/common/views/dashboard/types/dashboard").ScheduleOverviewData["headers"];
   readonly statusLabels: import("@/frontend/common/views/dashboard/types/dashboard").ScheduleOverviewData["statusLabels"];
@@ -38,7 +37,7 @@ export interface AdminDashboardViewModel {
   readonly onPageChange: (page: number) => void;
   readonly onSearchChange: (value: string) => void;
   readonly onDateChange: (date: string) => void;
-  readonly onTeacherChange: (teacher: string) => void;
+  readonly onTeacherChange: (teacher: PersonOption | null) => void;
   readonly onSubmit: () => void;
   readonly pageSize: number;
   readonly loadingLabel?: string;
@@ -71,7 +70,6 @@ export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardVie
   const canScheduleViewTimezones = hasPermission(AppPermission.ScheduleViewTimezones);
 
   const { dashboardData, loading, refetch, page, setPage } = useAdminScheduleQuery();
-  const teachers = useTeachers();
   const lastUpdated = useLastUpdatedLabel(dashboardData);
 
   const { filters, handleDateChange, handleTeacherChange, handleSearchChange, handleMetricClick } =
@@ -104,8 +102,7 @@ export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardVie
     selectedMetricLabel,
     searchValue: filters.searchQuery,
     dateValue: filters.date,
-    teacherValue: filters.teacherId,
-    teachers,
+    selectedTeacher: filters.selectedTeacher,
     rows,
     headers,
     statusLabels,

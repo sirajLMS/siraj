@@ -2,8 +2,9 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useEffect, useState } from "react";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { adminDashboardScheduleQueryDocument, teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { adminDashboardScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
@@ -79,19 +80,6 @@ export function useAdminScheduleQuery() {
   return { dashboardData, loading, refetch, page, setPage };
 }
 
-/** Fetches the teacher list for the filter dropdown. */
-export function useTeachers() {
-  const [teacherSearchQuery] = useState("");
-  const { data: teachersData } = useQuery(teachersQueryDocument, {
-    variables: { search: teacherSearchQuery, limit: 10 },
-  });
-
-  return (teachersData?.teachers ?? []).map(teacher => ({
-    id: teacher?.id ?? "",
-    name: teacher?.name ?? "",
-  }));
-}
-
 /** Groups the filter-change handlers so they stay cohesive and the container stays small. */
 export function useAdminDashboardHandlers(setPage: (p: number) => void) {
   const { hasPermission } = useUserStore();
@@ -102,8 +90,8 @@ export function useAdminDashboardHandlers(setPage: (p: number) => void) {
     setPage(0);
   };
 
-  const handleTeacherChange = (teacherId: string) => {
-    setTeacherFilter(teacherId);
+  const handleTeacherChange = (teacher: PersonOption | null) => {
+    setTeacherFilter(teacher);
     setPage(0);
   };
 

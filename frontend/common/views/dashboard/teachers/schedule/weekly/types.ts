@@ -63,15 +63,6 @@ export interface TeacherWeeklyScheduleContainerProps {
   readonly teacherId: string;
 }
 
-// NEW FOR PLAN v5: CreateRecurringClassDialogStudent — minimal student-shape
-// the dialog renders. Lifted out of the per-tier inline `{ id, name }`
-// literals so both tier `StudentSelectField` props reference one shared
-// contract (per specs.md §4 — ONE-PER-CONTRACT rule).
-export interface CreateRecurringClassDialogStudent {
-  readonly id: string;
-  readonly name: string;
-}
-
 // NEW FOR PLAN v5: CreateRecurringClassDialogViewModel — the ViewModel-owned
 // bag of state/actions the `CreateRecurringClassDialog` tier views consume
 // as plain props. Per specs.md §6.2 the ViewModel is the SOLE owner of
@@ -88,9 +79,6 @@ export interface CreateRecurringClassDialogViewModel {
   readonly toggleDay: (day: DayOfWeek) => void;
   readonly toggleTimeOverride: (day: DayOfWeek) => void;
   readonly setTimeOverride: (day: DayOfWeek, time: string) => void;
-  // STUDENTS (useQuery owned by the ViewModel — specs N1)
-  readonly students: readonly CreateRecurringClassDialogStudent[];
-  readonly loadingStudents: boolean;
   // MUTATION (useMutation owned by the ViewModel — specs N1)
   readonly mutationLoading: boolean;
   // MEETING CONFIG side-effect (postCreateRecurringMeetingConfig owned by

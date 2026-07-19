@@ -17,7 +17,6 @@ export function ReportsDesktopView({
   toDate,
   teacherId,
   reportType,
-  teachers,
   rows,
   summary,
   canGenerate,
@@ -57,7 +56,6 @@ export function ReportsDesktopView({
           toDate={toDate}
           teacherId={teacherId}
           reportType={reportType}
-          teachers={teachers}
           labels={labels.filtersLabels}
           canGenerate={canGenerate}
           onFromDateChange={onFromDateChange}

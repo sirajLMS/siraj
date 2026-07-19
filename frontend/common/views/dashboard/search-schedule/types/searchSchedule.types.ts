@@ -29,12 +29,7 @@ export interface SearchScheduleFormProps {
   readonly onSortMenuOpen: (event: { currentTarget: HTMLElement }) => void;
   readonly onSortMenuClose: () => void;
   readonly onSortChange: (sortBy: SearchScheduleDraftFilters["sortBy"]) => void;
-  readonly teacherSearchInput: string;
   readonly selectedTeacher: SearchScheduleTeacherOption | null;
-  readonly teacherOptions: readonly SearchScheduleTeacherOption[];
-  readonly teacherSearchLoading: boolean;
-  readonly shouldSearchTeachers: boolean;
-  readonly onTeacherSearchInputChange: (input: string) => void;
   readonly onSelectTeacher: (teacher: SearchScheduleTeacherOption | null) => void;
 }
 
@@ -45,18 +40,6 @@ export interface SearchScheduleSortMenuProps {
   readonly onSortMenuOpen: (event: { currentTarget: HTMLElement }) => void;
   readonly onSortMenuClose: () => void;
   readonly onSortChange: (sortBy: AvailabilitySearchSortBy) => void;
-}
-
-// Class-B unified: byte-identical mobile/desktop interfaces — per specs.md §4.1.
-export interface SearchScheduleTeacherAutocompleteProps {
-  readonly size?: "small" | "medium";
-  readonly teacherSearchInput: string;
-  readonly selectedTeacher: SearchScheduleTeacherOption | null;
-  readonly teacherOptions: readonly SearchScheduleTeacherOption[];
-  readonly teacherSearchLoading: boolean;
-  readonly shouldSearchTeachers: boolean;
-  readonly onTeacherSearchInputChange: (input: string) => void;
-  readonly onSelectTeacher: (teacher: SearchScheduleTeacherOption | null) => void;
 }
 
 // Class-B unified: byte-identical mobile/desktop interfaces — per specs.md §4.1.

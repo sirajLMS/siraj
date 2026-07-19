@@ -46,9 +46,9 @@ export const userQueryDocument: TypedDocumentNode<Operations.UserQuery, Types.Qu
   }
 `;
 
-export const usersQueryDocument: TypedDocumentNode<Operations.UsersQuery> = gql`
-  query users {
-    users {
+export const usersQueryDocument: TypedDocumentNode<Operations.UsersQuery, Types.QueryUsersArgs> = gql`
+  query users($search: String, $limit: Int, $offset: Int) {
+    users(search: $search, limit: $limit, offset: $offset) {
       createdAt
       displayCurrency
       email

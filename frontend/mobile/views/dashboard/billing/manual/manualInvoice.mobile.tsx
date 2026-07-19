@@ -27,8 +27,7 @@ const StyledFormFieldset = styled("fieldset")(({ theme }) => ({
 
 export function ManualInvoiceMobileView({
   labels,
-  parentOptions,
-  studentOptions,
+  selectedParentId,
   control,
   errors,
   totalFormatted,
@@ -36,8 +35,6 @@ export function ManualInvoiceMobileView({
   canCreate,
   canSendEmail,
   isSubmitting,
-  parentsLoading,
-  studentsLoading,
   onSubmitClick,
   onSubmitAndSendEmailClick,
 }: Readonly<ManualInvoiceViewModel>) {
@@ -56,11 +53,8 @@ export function ManualInvoiceMobileView({
             control={control}
             errors={errors}
             labels={labels}
-            parentOptions={parentOptions}
-            studentOptions={studentOptions}
+            selectedParentId={selectedParentId}
             draftCurrency={draftCurrency}
-            parentsLoading={parentsLoading}
-            studentsLoading={studentsLoading}
           />
 
           <MobileBaseCard>

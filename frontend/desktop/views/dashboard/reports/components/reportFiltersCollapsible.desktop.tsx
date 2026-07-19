@@ -14,7 +14,6 @@ export function ReportFiltersCollapsibleDesktop({
   toDate,
   teacherId,
   reportType,
-  teachers,
   labels,
   canGenerate,
   onFromDateChange,
@@ -30,7 +29,6 @@ export function ReportFiltersCollapsibleDesktop({
         toDate={toDate}
         teacherId={teacherId}
         reportType={reportType}
-        teachers={teachers}
         labels={labels}
         canGenerate={canGenerate}
         onFromDateChange={onFromDateChange}

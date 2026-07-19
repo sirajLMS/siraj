@@ -14,3 +14,4 @@ export * from "@/frontend/mobile/components/ui/input/phoneInput";
 export * from "@/frontend/mobile/components/ui/input/tagInput";
 export * from "@/frontend/mobile/components/ui/input/timezoneSelect";
 export * from "@/frontend/mobile/components/ui/input/userPaymentMethodSelect";
+export * from "@/frontend/mobile/components/ui/input/userSelect";

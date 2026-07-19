@@ -1,0 +1,3 @@
+export const USER_SELECT_LIMIT = 20;
+export const USER_SELECT_DEBOUNCE_MS = 300;
+export const USER_SELECT_CACHE_MAX_KEYS_PER_AUDIENCE = 20;

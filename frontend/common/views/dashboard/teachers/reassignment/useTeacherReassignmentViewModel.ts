@@ -7,7 +7,6 @@ import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   ReassignmentStudentData,
   ReassignmentSubmitInput,
-  ReassignmentTeacherOption,
   StatusChangeInput,
   TeacherReassignmentViewProps,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
@@ -19,7 +18,6 @@ export type UseTeacherReassignmentViewModelProps = TeacherReassignmentViewProps;
 export interface TeacherReassignmentViewModel {
   readonly student: ReassignmentStudentData;
   readonly currentTeacherName: string;
-  readonly teachers: readonly ReassignmentTeacherOption[];
   readonly isSubmitting: boolean;
   readonly onReassign: (input: ReassignmentSubmitInput) => Promise<void>;
   readonly onStatusChange: (input: StatusChangeInput) => Promise<void>;
@@ -43,7 +41,7 @@ export interface TeacherReassignmentViewModel {
 export function useTeacherReassignmentViewModel(
   props: Readonly<UseTeacherReassignmentViewModelProps>
 ): TeacherReassignmentViewModel {
-  const { student, currentTeacherName, teachers, isSubmitting, onReassign, onStatusChange, onCancel } = props;
+  const { student, currentTeacherName, isSubmitting, onReassign, onStatusChange, onCancel } = props;
 
   const t = useAppTranslation().dashboardTranslations.teacherReassignment;
   const notifications = useNotifications();
@@ -114,7 +112,6 @@ export function useTeacherReassignmentViewModel(
   return {
     student,
     currentTeacherName,
-    teachers,
     isSubmitting,
     onReassign,
     onStatusChange,

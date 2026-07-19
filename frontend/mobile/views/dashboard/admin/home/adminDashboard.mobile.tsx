@@ -10,6 +10,7 @@ import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/h
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { ScheduleOverviewMobileCard } from "@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.mobile";
 
 const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
@@ -42,8 +43,7 @@ export function AdminDashboardMobileView({
   selectedMetricLabel,
   searchValue,
   dateValue,
-  teacherValue,
-  teachers,
+  selectedTeacher,
   rows,
   headers,
   statusLabels,
@@ -53,7 +53,6 @@ export function AdminDashboardMobileView({
   onSearchChange,
   onDateChange,
   onTeacherChange,
-  onSubmit,
   pageSize,
   // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
   // instead of the previous `RequirePermission` wrappers + `useUserStore()`.
@@ -96,13 +95,14 @@ export function AdminDashboardMobileView({
               todayLabel={t.today}
               previousDayLabel={t.previousDay}
               nextDayLabel={t.nextDay}
-              teacherPlaceholder={t.selectTeacher}
-              teacherValue={teacherValue}
-              submitLabel={t.submit}
-              teachers={teachers}
               onDateChange={onDateChange}
-              onTeacherChange={onTeacherChange}
-              onSubmit={onSubmit}
+              teacherSelect={
+                <TeacherAutocompleteMobile
+                  value={selectedTeacher}
+                  onChange={onTeacherChange}
+                  label={t.selectTeacher}
+                />
+              }
             />
           ) : null}
 

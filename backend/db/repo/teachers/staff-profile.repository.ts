@@ -22,6 +22,7 @@ import type {
   ManagerDirectoryRow,
   OnboardingMetricsResult,
   PaginationArgs,
+  StaffDirectoryAutocompleteRow,
   StaffPermissionGroupReturnType,
   StaffPermissionOverrideReturnType,
   StaffProfileCreateResult,
@@ -241,6 +242,42 @@ export namespace StaffProfileRepository {
         total: totalCount,
       },
     };
+  }
+
+  export async function getStaffDirectoryLite(
+    options: { search?: string | null; limit: number; permissionGroupFilter?: string | null },
+    tx?: DBTransaction
+  ): Promise<StaffDirectoryAutocompleteRow[]> {
+    const queryDb = tx ?? db;
+    const filters: ManagerDirectoryFilters = {
+      roleFilter: options.permissionGroupFilter ?? null,
+    };
+    const roleWhere = buildManagerDirectoryWhere(filters);
+
+    const searchConditions: ReturnType<typeof or>[] = [];
+    const trimmedSearch = options.search?.trim();
+    if (trimmedSearch) {
+      searchConditions.push(or(ilike(users.name, `%${trimmedSearch}%`), ilike(users.email, `%${trimmedSearch}%`)));
+    }
+
+    const whereClause =
+      searchConditions.length > 0 ? and(roleWhere, searchConditions[0]) : roleWhere;
+
+    return await queryDb
+      .select({
+        id: users.id,
+        name: users.name,
+        avatarUrl: users.avatarUrl,
+        email: users.email,
+      })
+      .from(staffProfiles)
+      .innerJoin(users, eq(staffProfiles.userId, users.id))
+      .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
+      .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
+      .where(whereClause)
+      .groupBy(users.id, users.name, users.avatarUrl, users.email)
+      .orderBy(users.name)
+      .limit(options.limit);
   }
 
   async function getManagerDirectoryMetrics(queryDb: typeof db | DBTransaction): Promise<ManagerDirectoryMetrics> {

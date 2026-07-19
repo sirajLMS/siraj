@@ -20,6 +20,8 @@ import { usePermissionManagementStore } from "@/frontend/common/stores/permissio
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { logger } from "@/frontend/common/utils/logger";
 
+const USERS_QUERY_VARIABLES = { search: null, limit: 50, offset: 0 };
+
 // Hook for handling queries
 const usePermissionQueries = () => {
   const {
@@ -28,7 +30,9 @@ const usePermissionQueries = () => {
     error: permissionsError,
   } = useQuery(permissionsQueryDocument);
   const { data: groupsData, loading: groupsLoading, error: groupsError } = useQuery(permissionGroupsQueryDocument);
-  const { data: usersData, loading: usersLoading, error: usersError } = useQuery(usersQueryDocument);
+  const { data: usersData, loading: usersLoading, error: usersError } = useQuery(usersQueryDocument, {
+    variables: USERS_QUERY_VARIABLES,
+  });
 
   const setPermissions = usePermissionManagementStore(s => s.setPermissions);
   const setGroups = usePermissionManagementStore(s => s.setGroups);
@@ -72,7 +76,10 @@ const usePermissionMutations = () => {
   const mutationOptions = (label: string, refetch = true) => ({
     ...(refetch
       ? {
-          refetchQueries: [{ query: permissionGroupsQueryDocument }, { query: usersQueryDocument }],
+          refetchQueries: [
+            { query: permissionGroupsQueryDocument },
+            { query: usersQueryDocument, variables: USERS_QUERY_VARIABLES },
+          ],
         }
       : {}),
     onError: (err: Error) => {

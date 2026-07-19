@@ -9,10 +9,7 @@ import {
   type AvailabilitySearchInput,
   AvailabilitySearchSortBy,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import {
-  searchTeacherAvailabilityQueryDocument,
-  teachersQueryDocument,
-} from "@/frontend/common/graphql/sharedDocuments";
+import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import {
   type SearchScheduleDraftFilters,
   type SearchScheduleMonthDrawerTeacher,
@@ -88,13 +85,7 @@ export interface SearchScheduleViewModel {
   readonly onPageChange: (page: number) => void;
   readonly requiredPermission: AppPermission;
 
-  // NEW FOR PLAN v5: teacher autocomplete (lifted from searchScheduleTeacherAutocomplete tier).
-  readonly teacherSearchInput: string;
   readonly selectedTeacher: SearchScheduleTeacherOption | null;
-  readonly teacherOptions: readonly SearchScheduleTeacherOption[];
-  readonly teacherSearchLoading: boolean;
-  readonly shouldSearchTeachers: boolean;
-  readonly onTeacherSearchInputChange: (input: string) => void;
   readonly onSelectTeacher: (teacher: SearchScheduleTeacherOption | null) => void;
 
   // NEW FOR PLAN v5: form-filter drawer (lifted from searchScheduleForm tier).
@@ -119,10 +110,6 @@ export interface SearchScheduleViewModel {
   readonly onCloseMonthDrawer: () => void;
   readonly onMonthDrawerChangeMonth: (next: Date) => void;
 }
-
-const TEACHER_SEARCH_DEBOUNCE_MS = 300;
-const TEACHER_SEARCH_MIN_LENGTH = 2;
-const TEACHER_SEARCH_LIMIT = 10;
 
 const EMPTY_INPUT: AvailabilitySearchInput = {
   fromDate: "",
@@ -158,12 +145,7 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
   const hasSearched = useSearchScheduleStore(state => state.hasSearched);
   const hasHydrated = useSearchScheduleStore(state => state._hasHydrated);
 
-  // NEW FOR PLAN v5: subscribe to lifted teacher autocomplete state.
-  const teacherSearchInput = useSearchScheduleStore(state => state.teacherSearchInput);
-  const debouncedTeacherSearch = useSearchScheduleStore(state => state.debouncedTeacherSearch);
   const selectedTeacher = useSearchScheduleStore(state => state.selectedTeacher);
-  const setTeacherSearchInput = useSearchScheduleStore(state => state.setTeacherSearchInput);
-  const setDebouncedTeacherSearch = useSearchScheduleStore(state => state.setDebouncedTeacherSearch);
   const setSelectedTeacher = useSearchScheduleStore(state => state.setSelectedTeacher);
 
   // NEW FOR PLAN v5: subscribe to lifted form-filter drawer + sort menu state.
@@ -188,50 +170,6 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
 
     commitSearch();
   }, [commitSearch, hasHydrated, hasSearched]);
-
-  // NEW FOR PLAN v5: debounce teacher search input → debouncedTeacherSearch. Tier files no longer
-  // own the setTimeout/effector — the ViewModel is the SOLE owner (specs.md §6.2 + N18 closure).
-  useEffect(() => {
-    const trimmed = teacherSearchInput.trim();
-    const timer = window.setTimeout(() => {
-      setDebouncedTeacherSearch(trimmed);
-    }, TEACHER_SEARCH_DEBOUNCE_MS);
-
-    return () => window.clearTimeout(timer);
-  }, [teacherSearchInput, setDebouncedTeacherSearch]);
-
-  const shouldSearchTeachers = debouncedTeacherSearch.length >= TEACHER_SEARCH_MIN_LENGTH;
-
-  // NEW FOR PLAN v5: teacher autocomplete query lives in the ViewModel (F1/N1 closure).
-  const { data: teacherSearchData, loading: teacherSearchLoading } = useQuery(teachersQueryDocument, {
-    variables: {
-      search: debouncedTeacherSearch,
-      limit: TEACHER_SEARCH_LIMIT,
-    },
-    skip: !shouldSearchTeachers,
-    fetchPolicy: "cache-and-network",
-  });
-
-  const teacherOptions = useMemo((): readonly SearchScheduleTeacherOption[] => {
-    const teachers =
-      teacherSearchData?.teachers?.map(teacher => ({
-        id: teacher.id ?? "",
-        name: teacher.name ?? "",
-      })) ?? [];
-
-    if (selectedTeacher && !teachers.some(teacher => teacher.id === selectedTeacher.id)) {
-      return [selectedTeacher, ...teachers];
-    }
-
-    return teachers;
-  }, [teacherSearchData?.teachers, selectedTeacher]);
-
-  const onTeacherSearchInputChange = (input: string) => {
-    setTeacherSearchInput(input);
-    if (selectedTeacher && input !== selectedTeacher.name) {
-      setSelectedTeacher(null);
-    }
-  };
 
   const onSelectTeacher = (teacher: SearchScheduleTeacherOption | null) => {
     setSelectedTeacher(teacher);
@@ -362,24 +300,15 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
     onSearch: commitSearch,
     onPageChange: setPage,
     requiredPermission,
-    // NEW FOR PLAN v5: teacher autocomplete.
-    teacherSearchInput,
     selectedTeacher,
-    teacherOptions,
-    teacherSearchLoading,
-    shouldSearchTeachers,
-    onTeacherSearchInputChange,
     onSelectTeacher,
-    // NEW FOR PLAN v5: form-filter drawer.
     formFilterDrawerOpen,
     onOpenFormFilterDrawer,
     onCloseFormFilterDrawer,
-    // NEW FOR PLAN v5: sort menu.
     sortMenuAnchorEl,
     onSortMenuOpen,
     onSortMenuClose,
     onSortChange,
-    // NEW FOR PLAN v5: month drawer.
     monthDrawerOpen,
     monthDrawerTeacher: monthDrawerResultItem,
     monthDrawerCurrentMonth: monthDrawerCurrentDate,

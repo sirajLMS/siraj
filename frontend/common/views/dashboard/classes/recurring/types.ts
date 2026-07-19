@@ -18,11 +18,6 @@ export const DEFAULT_DAY_SCHEDULE: readonly DayScheduleConfig[] = [
   { day: DayOfWeek.Sunday, enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: false },
 ];
 
-export interface SimpleEntity {
-  readonly id: string;
-  readonly name: string;
-}
-
 export const CLASS_TYPE_OPTIONS = ["REGULAR", "TRIAL", "ADVANCE"] as const;
 export type ClassType = (typeof CLASS_TYPE_OPTIONS)[number];
 
@@ -31,16 +26,6 @@ export const TIMEZONE_OPTIONS = [
   { value: IanaTimezone.AsiaRiyadh, label: "Asia/Riyadh (Riyadh)" },
   { value: "UTC", label: "UTC" },
 ] as const;
-
-export interface EntitySelectProps {
-  readonly label: string;
-  readonly placeholder: string;
-  readonly value: string;
-  readonly entities: readonly SimpleEntity[];
-  readonly isSubmitting: boolean;
-  readonly error?: string;
-  readonly onChange: (value: string) => void;
-}
 
 export interface TimeInputProps {
   readonly label: string;
@@ -91,10 +76,6 @@ export interface RecurringClassFormFieldsProps {
   readonly labels: RecurringClassFormLabels;
   readonly meetingConfig: RecurringMeetingConfigFormState;
   readonly onMeetingConfigChangeAction: (next: RecurringMeetingConfigFormState) => void;
-  readonly students: readonly SimpleEntity[];
-  readonly teachers: readonly SimpleEntity[];
-  readonly studentsLoading: boolean;
-  readonly teachersLoading: boolean;
 }
 
 export interface BaseRecurringClassFormProps {
@@ -113,8 +94,4 @@ export interface BaseRecurringClassFormProps {
   readonly meetingConfigWarningMessage?: string;
   readonly goToClassLabel?: string;
   readonly onGoToCreatedClass?: () => void;
-  readonly students: readonly SimpleEntity[];
-  readonly teachers: readonly SimpleEntity[];
-  readonly studentsLoading: boolean;
-  readonly teachersLoading: boolean;
 }
