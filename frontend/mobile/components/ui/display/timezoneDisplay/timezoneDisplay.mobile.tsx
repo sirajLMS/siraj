@@ -58,7 +58,7 @@ export const MobileTimezoneDisplay: React.FC<MobileTimezoneDisplayProps> = ({
     : getTimezonePathLabel(normalizedTimezone, locale);
 
   return (
-    <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap", ...sx }}>
+    <Typography component="span" variant={typographyVariant} sx={{ whiteSpace: "nowrap", ...sx }}>
       {display}
     </Typography>
   );

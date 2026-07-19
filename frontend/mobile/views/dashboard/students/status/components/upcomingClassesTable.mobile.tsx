@@ -89,7 +89,7 @@ export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<Upco
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0, flex: 1 }}>
                 <MobileClassProfileLink
                   href={classHref(cls.id)}
-                  name={cls.subjectName?.trim() || t.table.subject}
+                  name={cls.subjectName?.trim() || "—"}
                   avatarUrl={cls.avatarUrl}
                   avatarSize={40}
                   typographyVariant="bodyLg"

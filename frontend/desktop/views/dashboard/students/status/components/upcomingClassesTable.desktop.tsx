@@ -107,7 +107,7 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
       renderCell: params => (
         <DesktopClassProfileLinkCell
           href={classHref(params.row.id)}
-          name={params.row.subjectName?.trim() || t.table.subject}
+          name={params.row.subjectName?.trim() || "—"}
           avatarUrl={params.row.avatarUrl}
           avatarSize={40}
           typographyVariant="bodyMd"
