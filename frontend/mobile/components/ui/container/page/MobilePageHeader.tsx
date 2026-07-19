@@ -17,15 +17,19 @@ export interface MobilePageHeaderProps {
   readonly titleVariant?: TypographyProps["variant"];
   readonly breadcrumbs?: readonly MobilePageHeaderBreadcrumb[];
   readonly actions?: ReactNode;
+  /**
+   * Full-width chrome (header spans the viewport). Does not remove content
+   * gutter — titles always keep horizontal inset on the edge-to-edge shell.
+   */
   readonly edgeToEdge?: boolean;
   readonly sticky?: boolean;
   readonly sx?: SxProps<Theme>;
 }
 
 /**
- * Mobile page header. Wraps the standard header JSX inside an edge-to-edge /
- * sticky `Box sx={headerSx}` wrapper. Defaults to `headlineMd` title variant
- * (mobile-specific, differs from desktop's `headlineLg`).
+ * Mobile page header. Always applies the content gutter so titles never sit
+ * flush against the edge-to-edge page shell. `edgeToEdge` controls full-width
+ * chrome only (sticky bar / background bleed) — it does NOT remove text inset.
  */
 export function MobilePageHeader({
   title,
@@ -38,10 +42,11 @@ export function MobilePageHeader({
   sx,
 }: MobilePageHeaderProps) {
   const headerSx: SxProps<Theme> = {
+    px: { xs: 2, md: 3 },
+    py: { xs: 1, md: 2 },
     ...(edgeToEdge
       ? {
-          px: { xs: 2, md: 3 },
-          py: { xs: 1, md: 2 },
+          width: "100%",
         }
       : {}),
     ...(sticky

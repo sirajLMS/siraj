@@ -12,8 +12,9 @@ export interface MobilePageContainerProps {
 /**
  * Mobile page wrapper. Navbar offset is handled by DashboardLayoutMobile
  * (pt: navbarHeight for the fixed AppBar) — do not re-add it here.
- * Outer edge-to-edge layout is handled by DashboardLayoutMobile page padding.
- * Structurally simpler than DesktopPageContainer — no LinearProgress overlay.
+ * The shell is edge-to-edge (`DashboardLayoutMobile` uses `px: 0`); horizontal
+ * inset is owned by content primitives (`MobilePageHeader`, `MobileContentInset`,
+ * scroll rows, section panels) — not by this container.
  */
 export function MobilePageContainer({ sx, children }: MobilePageContainerProps) {
   return (
