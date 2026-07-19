@@ -56,13 +56,14 @@ export function AudienceAutocomplete({
       filterOptions={passThroughFilter}
       isOptionEqualToValue={(option, selected) => option.id === selected.id}
       getOptionLabel={option => option.name}
+      getOptionKey={option => option.id}
       noOptionsText={noOptionsText}
       sx={sx}
       slotProps={slotProps}
       renderOption={(props, option) => {
-        const { key, ...rest } = props;
+        const { key: _muiKey, ...rest } = props;
         return (
-          <li key={key} {...rest}>
+          <li key={option.id} {...rest}>
             <UserSelectOptionRow option={option} showEmail={Boolean(option.email)} />
           </li>
         );
