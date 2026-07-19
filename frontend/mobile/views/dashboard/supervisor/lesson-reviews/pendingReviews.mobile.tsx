@@ -9,6 +9,7 @@ import type {
 } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import {
   MobileCardList,
+  MobileContentInset,
   MobileContentStack,
   MobileFilterButton,
   MobilePageContainer,

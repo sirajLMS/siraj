@@ -98,7 +98,7 @@ export function TeacherWeeklyScheduleViewMobile({
 
       {hasScheduleViewWorkload ? <MobileMetricCardGrid metrics={workloadMetrics} /> : null}
 
-      <MobileSectionPanel>
+      <MobileSectionPanel contentInset={false}>
         <MobileScheduleList
           classes={schedule.classes}
           onRemoveClass={onRemoveClass}

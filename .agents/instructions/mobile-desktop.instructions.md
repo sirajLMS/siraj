@@ -120,8 +120,10 @@ export function XxView(props: Readonly<UseXxViewModelProps>) {
 
 These non-versioned components are used BY mobile views, not by both tiers:
 
-- `MobilePageHeader` — wraps `PageHeader` with `titleVariant="headlineMd"`, edge-to-edge padding
-- `MobileContentStack` — flex column container with configurable gap/paddingBottom
+- `MobilePageHeader` — always applies content gutter; `edgeToEdge` is full-width chrome only (does not strip text inset)
+- `MobileContentStack` — flex column with gap/paddingBottom only (no horizontal px — shell is edge-to-edge)
+- `MobileContentInset` / `MobileSectionTitleRow` — apply shared `mobileContentGutterSx` for toolbars, buttons, ad-hoc titles
+- `MobileSectionPanel` — title bar always guttered; body defaults to `contentInset`; set `contentInset={false}` for `MobileCardList` / scroll rows / metric grids
 - `MobileCardList<T>` — generic list container (loading, empty, required `paginationOptions`, row mapping via `renderItem`)
 - `MobileCardListItem` — generic card shell (`edge-to-edge` | `rounded`, dimmed, accentBorder, interactive)
 - `MobileMetricCardGrid` — always horizontal scroll row of internal `MobileMetricCard` (views must never import the card primitive)

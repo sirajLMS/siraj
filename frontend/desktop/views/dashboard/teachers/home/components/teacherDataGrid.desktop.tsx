@@ -57,17 +57,23 @@ export function TeacherDataGrid({
     {
       field: "index",
       headerName: t.table.hash,
-      width: 80,
-      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {params.value}
-        </Typography>
-      ),
+      width: 72,
+      sortable: false,
+      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => {
+        const relativeIndex = params.api.getRowIndexRelativeToVisibleRows(params.id);
+        const displayIndex = relativeIndex >= 0 ? page * pageSize + relativeIndex + 1 : "—";
+        return (
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {displayIndex}
+          </Typography>
+        );
+      },
     },
     {
       field: "name",
       headerName: t.table.name,
       flex: 1.5,
+      minWidth: 200,
       renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
         <DesktopPersonProfileLinkCell
           href={profileHrefForTeacher({ userId: params.row.userId, teacherId: params.row.id })}
@@ -83,8 +89,17 @@ export function TeacherDataGrid({
       field: "email",
       headerName: t.table.email,
       flex: 1.5,
+      minWidth: 200,
       renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+        <Typography
+          variant="bodyMd"
+          sx={theme => ({
+            color: theme.palette.text.secondary,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          })}
+        >
           {params.value as string}
         </Typography>
       ),
@@ -95,16 +110,19 @@ export function TeacherDataGrid({
       width: 120,
       align: "center",
       headerAlign: "center",
+      sortable: false,
       renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
-        <TeacherActionButton
-          icon={<CalendarMonthOutlined />}
-          variant="error"
-          onClick={() => {
-            if (params.row.id) {
-              onNavigateToSchedule(params.row.id);
-            }
-          }}
-        />
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+          <TeacherActionButton
+            icon={<CalendarMonthOutlined />}
+            variant="error"
+            onClick={() => {
+              if (params.row.id) {
+                onNavigateToSchedule(params.row.id);
+              }
+            }}
+          />
+        </Box>
       ),
     },
     {
@@ -115,7 +133,7 @@ export function TeacherDataGrid({
       headerAlign: "center",
       sortable: false,
       renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, height: "100%" }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, width: "100%" }}>
           {params.row.userId ? (
             <ViewAsUserButton
               variant="link"

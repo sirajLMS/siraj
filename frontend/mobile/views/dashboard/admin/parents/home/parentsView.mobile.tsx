@@ -7,6 +7,7 @@ import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/paren
 import type { BaseParentsViewProps } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
 import {
+  MobileContentInset,
   MobileContentStack,
   MobileExportButton,
   MobileFilterButton,
@@ -94,9 +95,13 @@ export function ParentsViewMobile({
       />
 
       <MobileContentStack gap={2} paddingBottom={4}>
-        <ParentMobileSearchField placeholder={labels.searchPlaceholder} onSearch={onSearch} />
+        <MobileContentInset>
+          <ParentMobileSearchField placeholder={labels.searchPlaceholder} onSearch={onSearch} />
+        </MobileContentInset>
 
-        <ParentsMetricGrid metrics={metrics} />
+        <MobileContentInset>
+          <ParentsMetricGrid metrics={metrics} />
+        </MobileContentInset>
 
         <MobileSectionPanel
           title={labels.records}
@@ -110,15 +115,17 @@ export function ParentsViewMobile({
             </Stack>
           }
         >
-          <ParentFilterPanel
-            open={filterPanelOpen}
-            lifecycleStatusFilter={lifecycleStatusFilter}
-            filterLabel={labels.filterLabel}
-            clearFiltersLabel={labels.clearFilters}
-            statusLabels={labels.statusLabels}
-            onLifecycleStatusFilterChange={onLifecycleStatusFilterChange}
-            onResetFilters={onResetFilters}
-          />
+          <MobileContentInset>
+            <ParentFilterPanel
+              open={filterPanelOpen}
+              lifecycleStatusFilter={lifecycleStatusFilter}
+              filterLabel={labels.filterLabel}
+              clearFiltersLabel={labels.clearFilters}
+              statusLabels={labels.statusLabels}
+              onLifecycleStatusFilterChange={onLifecycleStatusFilterChange}
+              onResetFilters={onResetFilters}
+            />
+          </MobileContentInset>
           <ParentCardListMobile
             rows={rows}
             labels={{

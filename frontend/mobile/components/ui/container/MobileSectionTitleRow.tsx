@@ -2,8 +2,8 @@
 
 import { Box, type SxProps, type Theme } from "@mui/material";
 import type { ReactNode } from "react";
-import { mobileContentGutterSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { mobileContentGutterSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
 
 export interface MobileSectionTitleRowProps {
   readonly title: ReactNode;

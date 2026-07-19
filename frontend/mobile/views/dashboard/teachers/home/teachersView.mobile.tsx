@@ -70,7 +70,7 @@ export function TeachersMobileView({
                 </MobilePrimaryPageAction>
               </Link>
             ) : null}
-            <MobilePrimaryPageAction startIcon={<EditCalendarOutlined />}>
+            <MobilePrimaryPageAction variant="outlined" startIcon={<EditCalendarOutlined />}>
               {t.actions.updateSchedules}
             </MobilePrimaryPageAction>
           </>

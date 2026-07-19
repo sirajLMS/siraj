@@ -2,7 +2,12 @@
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import type { AdminComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useAdminComplaintsViewModel";
-import { MobileContentInset, MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileContentInset,
+  MobileContentStack,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 import { ComplaintQueueCardListMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintQueueCardList.mobile";
 import { ComplaintsMetricsRowMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintsMetricsRow.mobile";
 import { ComplaintsSearchBarMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintsSearchBar.mobile";

@@ -2,7 +2,13 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import type { MobileLayoutProps } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
-import { MobileContentStack, MobileFab, MobileMetricCardGrid, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileContentStack,
+  MobileFab,
+  MobileMetricCardGrid,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 import { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter";
 import { StatusTrackingCardList } from "@/frontend/mobile/views/dashboard/classes/status/tracking/components/statusTrackingCardList.mobile";
 import { SuspensionAnalyticsMobile } from "@/frontend/mobile/views/dashboard/classes/status/tracking/components/suspensionAnalytics.mobile";

@@ -3,8 +3,8 @@
 import { alpha, Box, Paper, type SxProps, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { mobileContentGutterSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { mobileContentGutterSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
 
 export interface MobileSectionPanelProps {
   readonly id?: string;

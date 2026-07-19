@@ -46,6 +46,12 @@ export function DesktopAppDataGrid<R extends GridValidRowModel>({
   const defaultGridSx = {
     border: "none",
     borderRadius: 0,
+    // MUI DataGrid cells default to display:block; text then sticks to the top
+    // while taller renderCell content (avatars, icon buttons) looks mid-row.
+    "& .MuiDataGrid-cell": {
+      display: "flex",
+      alignItems: "center",
+    },
     "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
       outline: "none",
     },

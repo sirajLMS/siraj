@@ -27,6 +27,7 @@ const StyledCreditFooterBox = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "center",
   borderTop: `1px solid ${theme.palette.outlineVariant}`,
+  paddingInline: theme.spacing(2),
 }));
 
 function ExchangeRatesLink({ labels }: { readonly labels: AdminBillingViewModel["labels"] }) {

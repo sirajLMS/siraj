@@ -18,6 +18,7 @@ This document defines the shared UI layer for Siraj dashboard pages. All new das
 ## Architecture
 
 ```
+Desktop:
 DashboardLayout (pageMargin only)
   └── PageContainer (section gap — NO extra p: 2/3)
         ├── PageHeader (title, subtitle, breadcrumbs?, actions?)
@@ -25,9 +26,18 @@ DashboardLayout (pageMargin only)
         └── SectionPanel (title bar + actions)
               ├── AppDataGrid (desktop, ≥ md)
               └── *CardList (mobile, < md)
+
+Mobile:
+DashboardLayoutMobile (px: 0 — edge-to-edge)
+  └── MobilePageContainer / MobileContentStack (gap only — NO horizontal px)
+        ├── MobilePageHeader (always content gutter)
+        ├── MobileMetricCardGrid / MobileHorizontalScrollRow (own peek-scroll padding)
+        ├── MobileSectionPanel (title gutter; body inset unless contentInset={false})
+        ├── MobileContentInset / MobileSectionTitleRow (ad-hoc text & controls)
+        └── full-bleed heroes (internal padding only)
 ```
 
-**Import from:** `@/frontend/common/components/ui`
+**Import from:** `@/frontend/common/components/ui` (desktop) / `@/frontend/mobile/components/ui` (mobile)
 
 ---
 
@@ -35,7 +45,8 @@ DashboardLayout (pageMargin only)
 
 ### PageContainer
 
-- **Purpose:** Single content wrapper inside `DashboardLayout`. Fixes double-padding.
+- **Purpose (desktop):** Single content wrapper inside `DashboardLayout`. Fixes double-padding with `pageMargin`.
+- **Mobile:** Use `MobilePageContainer` — gap only; horizontal inset is owned by content primitives (see Architecture diagram above and `frontend/mobile/AGENTS.md`).
 - **Rule:** Views must **not** add outer `p: 2`, `p: 3`, or `p: { xs: 2, md: 3 }`.
 - **Spacing:** Uses `theme.layout.sectionGap` between child sections.
 
@@ -301,8 +312,9 @@ DataGrid overrides: `MuiDataGrid` in theme `components`.
 
 When building or refactoring a dashboard page:
 
-- [ ] Wrap content in `PageContainer` (no extra outer padding)
-- [ ] Add `PageHeader` with title + subtitle + actions
+- [ ] Desktop: wrap content in `PageContainer` (no extra outer padding — avoids double-padding with `pageMargin`)
+- [ ] Mobile: `MobilePageContainer` / `MobileContentStack` without horizontal px; use gutter primitives for content
+- [ ] Add `PageHeader` / `MobilePageHeader` with title + subtitle + actions
 - [ ] Use `MetricCard` for stat rows
 - [ ] Use `SectionPanel` for table/list sections
 - [ ] Desktop table → feature `*DataGrid` wrapping `AppDataGrid` / `DesktopAppDataGrid` with `paginationOptions`

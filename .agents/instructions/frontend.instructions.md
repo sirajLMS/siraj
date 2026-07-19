@@ -135,7 +135,8 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 
 ### Dashboard UI Patterns
 
-- `PageContainer` inside views - never add outer `p: 2/3` (double-padding with `DashboardLayout.pageMargin`)
+- `PageContainer` inside **desktop** views - never add outer `p: 2/3` (double-padding with `DashboardLayout.pageMargin`)
+- **Mobile** shell is edge-to-edge (`DashboardLayoutMobile` `px: 0`); content owns horizontal inset via `mobileContentGutterSx` / `MobileContentInset` / padding primitives — do not pad `MobilePageContainer` / `MobileContentStack`
 - `AppDataGrid` / `DesktopAppDataGrid` / `MobileCardList` with required `paginationOptions` — list primitives own pager UI; never MUI `Table`/`Pagination` or raw `DataGrid`
 - `MetricCard` / `MobileMetricCard` / `DesktopMetricCard` — views must never import these; use only `MobileMetricCardGrid` (mobile) or `DesktopMetricCardGrid` (desktop), including single-metric cases
 - `StatusBadge` with `category` prop - no inline status chips

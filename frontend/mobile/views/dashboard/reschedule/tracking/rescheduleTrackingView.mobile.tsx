@@ -75,6 +75,7 @@ export function RescheduleTrackingViewMobile({
 
       <MobileSectionPanel
         title={labels.sectionTitle}
+        contentInset={false}
         actions={<Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>{filterSelect}</Box>}
       >
         <Box sx={{ p: 2 }}>

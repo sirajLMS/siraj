@@ -66,9 +66,8 @@ export function MobilePageHeader({
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          flexWrap: "wrap",
+          flexDirection: "column",
+          alignItems: "stretch",
           gap: 2,
         }}
       >
@@ -132,7 +131,21 @@ export function MobilePageHeader({
             </Typography>
           ) : null}
         </Box>
-        {actions ? <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>{actions}</Box> : null}
+        {actions ? (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1.5,
+              width: "100%",
+              // Stretch Link/wrappers so MobilePrimaryPageAction's width:100%
+              // resolves against the full content column, not shrink-wrapped text.
+              "& > *": { width: "100%", minWidth: 0 },
+            }}
+          >
+            {actions}
+          </Box>
+        ) : null}
       </Box>
     </Box>
   );

@@ -185,7 +185,8 @@ bun quality-gate
 **Read [COMPONENT_PATTERNS.md](COMPONENT_PATTERNS.md) before building or refactoring dashboard pages.**
 **Use [.github/CODE_REVIEW_CHECKLIST.md](.github/CODE_REVIEW_CHECKLIST.md) when reviewing code.**
 
-- **Layout:** Use `PageContainer` inside views — never add outer `p: 2/3` (double-padding with `DashboardLayout.pageMargin`).
+- **Layout (desktop):** Use `PageContainer` inside views — never add outer `p: 2/3` (double-padding with `DashboardLayout.pageMargin`).
+- **Layout (mobile):** `DashboardLayoutMobile` is edge-to-edge (`px: 0`). Do **not** put horizontal padding on `MobilePageContainer` / `MobileContentStack`. Content owns inset via `mobileContentGutterSx`, `MobileContentInset`, `MobilePageHeader`, scroll rows, and section panels — see `frontend/mobile/AGENTS.md`.
 - **Lists / tables:** Desktop → `AppDataGrid` / `DesktopAppDataGrid` with required `paginationOptions`. Mobile → `MobileCardList` (or feature card lists) with required `paginationOptions`. List primitives own pager UI — never pass `slots.pagination` or sibling `MobilePaginationControls` next to a list. Desktop ad-hoc card lists may use sibling `DesktopPaginationControls` when intentional. Do not use MUI `Table` / `Pagination`.
 - **Metrics:** Views must never import or render `MetricCard` / `MobileMetricCard` / `DesktopMetricCard`. Use only `MobileMetricCardGrid` (mobile) or `DesktopMetricCardGrid` (desktop), including when there is a single metric. Cards are internal to the grid (+ Storybook).
 - **Status:** Use shared `StatusBadge` with the correct `category` prop — no inline status chips.

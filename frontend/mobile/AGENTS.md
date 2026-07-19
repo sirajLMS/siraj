@@ -23,13 +23,30 @@ Mobile primitives split into **three** behavioral categories (NOT all null-retur
 | `MobileMetricCardGrid` | `card/` | **pure presentational** | always horizontal scroll row of internal `MobileMetricCard` — no `useViewport`, no Grid |
 | `MobileCardListItem` | `card/` | **pure presentational** | no `useViewport`, no null-return |
 | `MobileCardList` | `container/` | pure presentational | no `useViewport`, no null-return |
-| `MobileContentStack` | `container/` | pure presentational | no `useViewport`, no null-return |
-| `MobilePageHeader` | `container/page/` | pure presentational | no `useViewport`, no null-return (wraps `PageHeader`) |
-| `MobileEmptyState` | `state/` | pure presentational | no `useViewport`, no null-return |
+| `MobileContentStack` | `container/` | pure presentational | no `useViewport`, no null-return; gap/pb only — no horizontal px |
+| `MobileContentInset` | `container/` | pure presentational | shared content gutter wrapper for toolbars / buttons / ad-hoc blocks |
+| `MobileSectionTitleRow` | `container/` | pure presentational | title + actions row with content gutter |
+| `MobilePageHeader` | `container/page/` | pure presentational | no `useViewport`; always content gutter; `edgeToEdge` = chrome only |
+| `MobileEmptyState` | `state/` | pure presentational | no `useViewport`; includes content gutter |
 | `dateNavigator.mobile.tsx` | `filter/` | tier-paired variant | paired with `DateNavigator.tsx` parent in `common` |
 | `localeAdornmentSwitch.mobile.tsx`, `localizedStringDrawer.mobile.tsx` | `input/localizedString/` | tier-paired variant | paired with parents in `common` |
 
 > **Do NOT "fix" pure-presentational primitives** by adding `useViewport()` null-return — they are intentionally presentational-only.
+
+### 1b. Mobile padding ownership (edge-to-edge shell)
+
+`DashboardLayoutMobile` uses `px: 0`. Horizontal inset is **not** on `MobilePageContainer` / `MobileContentStack`.
+
+| Owns gutter | Notes |
+|---|---|
+| `mobileContentGutterSx` / `MobileContentInset` | Shared `paddingInline: theme.spacing(2)` for ad-hoc content |
+| `MobilePageHeader` | Always pads; `edgeToEdge` does not remove inset |
+| `MobileSectionTitleRow` | Title + SEE ALL / actions rows |
+| `MobileSectionPanel` | Title bar padded; body padded unless `contentInset={false}` |
+| `MobileHorizontalScrollRow` / `MobileMetricCardGrid` | Own peek-scroll padding — do not wrap in `MobileContentInset` |
+| `MobileEmptyState` | Includes content gutter |
+
+**Full-bleed containers** (heroes, edge-to-edge panels with `contentInset={false}`) must pad their own children via the helpers above or list primitives (`MobileCardList` edge-to-edge layout).
 
 ### 2. Mobile Views (`views/dashboard/**/`)
 - Mirror the `frontend/common/views/dashboard/` structure exactly (minus the `mobile/` segment)

@@ -30,6 +30,7 @@ import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileCardList,
+  MobileContentInset,
   MobileContentStack,
   MobileMetricCardGrid,
   MobilePageContainer,
@@ -263,65 +264,69 @@ export function StudentHistoryMobileView({
         />
 
         <MobileSectionPanel title={labels.lessonHistory} contentInset={false}>
-          <Stack spacing={2}>
-            <FormControl fullWidth size="small">
-              <InputLabel id="mobile-history-subject-filter" shrink>
-                {labels.filterBySubject}
-              </InputLabel>
-              <Select
-                labelId="mobile-history-subject-filter"
-                label={labels.filterBySubject}
-                value={subjectFilter}
-                onChange={e => onSubjectFilterChange(e.target.value)}
-              >
-                <MenuItem value="">{labels.allSubjects}</MenuItem>
-                {subjectOptions.map(subject => (
-                  <MenuItem key={subject} value={subject}>
-                    {subject}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth size="small">
-              <InputLabel id="mobile-history-status-filter" shrink>
-                {labels.filterByStatus}
-              </InputLabel>
-              <Select
-                labelId="mobile-history-status-filter"
-                label={labels.filterByStatus}
-                value={statusFilter}
-                onChange={e => onStatusFilterChange(e.target.value)}
-              >
-                <MenuItem value="">{labels.allStatuses}</MenuItem>
-                {statusOptions.map(status => (
-                  <MenuItem key={status} value={status}>
-                    {status}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          <MobileContentInset>
+            <Stack spacing={2} sx={{ mb: 2 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="mobile-history-subject-filter" shrink>
+                  {labels.filterBySubject}
+                </InputLabel>
+                <Select
+                  labelId="mobile-history-subject-filter"
+                  label={labels.filterBySubject}
+                  value={subjectFilter}
+                  onChange={e => onSubjectFilterChange(e.target.value)}
+                >
+                  <MenuItem value="">{labels.allSubjects}</MenuItem>
+                  {subjectOptions.map(subject => (
+                    <MenuItem key={subject} value={subject}>
+                      {subject}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth size="small">
+                <InputLabel id="mobile-history-status-filter" shrink>
+                  {labels.filterByStatus}
+                </InputLabel>
+                <Select
+                  labelId="mobile-history-status-filter"
+                  label={labels.filterByStatus}
+                  value={statusFilter}
+                  onChange={e => onStatusFilterChange(e.target.value)}
+                >
+                  <MenuItem value="">{labels.allStatuses}</MenuItem>
+                  {statusOptions.map(status => (
+                    <MenuItem key={status} value={status}>
+                      {status}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Stack>
+          </MobileContentInset>
 
-            <MobileCardList<StudentHistorySessionRow>
-              rows={listRows}
-              emptyMessage={labels.noHistory}
-              getKey={row => row.id}
-              paginationOptions={{ mode: "client" }}
-              renderItem={row => (
-                <MobileSessionItem row={row} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
-              )}
-            />
-          </Stack>
+          <MobileCardList<StudentHistorySessionRow>
+            rows={listRows}
+            emptyMessage={labels.noHistory}
+            getKey={row => row.id}
+            paginationOptions={{ mode: "client" }}
+            renderItem={row => (
+              <MobileSessionItem row={row} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
+            )}
+          />
         </MobileSectionPanel>
 
-        <Button
-          variant="outlined"
-          fullWidth
-          startIcon={<ArrowBackOutlined />}
-          sx={theme => ({ color: theme.palette.primary.main, borderColor: theme.palette.primary.main })}
-          onClick={onBackToDashboard}
-        >
-          {labels.backToDashboard}
-        </Button>
+        <MobileContentInset>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<ArrowBackOutlined />}
+            sx={theme => ({ color: theme.palette.primary.main, borderColor: theme.palette.primary.main })}
+            onClick={onBackToDashboard}
+          >
+            {labels.backToDashboard}
+          </Button>
+        </MobileContentInset>
       </MobileContentStack>
     </MobilePageContainer>
   );
