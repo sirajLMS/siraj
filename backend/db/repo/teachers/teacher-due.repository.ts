@@ -181,7 +181,10 @@ export namespace TeacherDueRepository {
         createdAt: teacherDues.createdAt,
         updatedAt: teacherDues.updatedAt,
         teacherName: users.name,
+        teacherUserId: users.id,
+        teacherAvatarUrl: users.avatarUrl,
         studentName: students.name,
+        studentAvatarUrl: students.avatarUrl,
         classDate: classInstances.scheduledStartAt,
       })
       .from(teacherDues)

@@ -32,8 +32,9 @@ export function TeacherDuesDesktopView({
         minWidth: 150,
         renderCell: params => (
           <DesktopPersonProfileLinkCell
-            href={profileHrefForTeacher({ teacherId: params.row.teacherId })}
+            href={profileHrefForTeacher({ userId: params.row.teacherUserId, teacherId: params.row.teacherId })}
             name={params.row.teacherName || params.row.teacherId}
+            avatarUrl={params.row.teacherAvatarUrl}
           />
         ),
       },
@@ -53,6 +54,7 @@ export function TeacherDuesDesktopView({
           <DesktopPersonProfileLinkCell
             href={params.row.studentId ? studentHref(params.row.studentId) : undefined}
             name={params.row.studentName || params.row.studentId}
+            avatarUrl={params.row.studentAvatarUrl}
           />
         ),
       },

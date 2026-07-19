@@ -43,12 +43,14 @@ function DueCard({
           {canMarkPaid ? <Checkbox checked={selected} onChange={() => onToggle(row.id)} size="small" /> : null}
           <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.75 }}>
             <MobilePersonProfileLink
-              href={profileHrefForTeacher({ teacherId: row.teacherId })}
+              href={profileHrefForTeacher({ userId: row.teacherUserId, teacherId: row.teacherId })}
               name={row.teacherName || row.teacherId}
+              avatarUrl={row.teacherAvatarUrl}
             />
             <MobilePersonProfileLink
               href={row.studentId ? studentHref(row.studentId) : undefined}
               name={row.studentName || row.studentId}
+              avatarUrl={row.studentAvatarUrl}
               label={labels.studentColumn}
             />
             <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>

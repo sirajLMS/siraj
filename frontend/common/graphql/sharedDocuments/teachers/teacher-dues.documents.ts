@@ -11,9 +11,12 @@ export const teacherPendingDuesQueryDocument: TypedDocumentNode<
       id
       teacherId
       teacherName
+      teacherUserId
+      teacherAvatarUrl
       classInstanceId
       studentId
       studentName
+      studentAvatarUrl
       classDate
       hours
       amount
@@ -68,9 +71,12 @@ export const markTeacherDuesPaidMutationDocument: TypedDocumentNode<
       id
       teacherId
       teacherName
+      teacherUserId
+      teacherAvatarUrl
       classInstanceId
       studentId
       studentName
+      studentAvatarUrl
       classDate
       hours
       amount

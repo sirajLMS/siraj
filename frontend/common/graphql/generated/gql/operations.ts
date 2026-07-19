@@ -5039,7 +5039,7 @@ export type TeacherHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TeacherHandbookUrlQuery = TeacherHandbookUrlQuery_Query;
 
-export type TeacherPendingDuesQuery_teacherPendingDues_TeacherDue = { id: string | null, teacherId: string | null, teacherName: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
+export type TeacherPendingDuesQuery_teacherPendingDues_TeacherDue = { id: string | null, teacherId: string | null, teacherName: string | null, teacherUserId: string | null, teacherAvatarUrl: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, studentAvatarUrl: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type TeacherPendingDuesQuery_Query = { teacherPendingDues: Array<TeacherPendingDuesQuery_teacherPendingDues_TeacherDue> | null };
 
@@ -5075,7 +5075,7 @@ export type TeacherMonthlyReportQueryVariables = Exact<{
 
 export type TeacherMonthlyReportQuery = TeacherMonthlyReportQuery_Query;
 
-export type MarkTeacherDuesPaidMutation_markTeacherDuesPaid_TeacherDue = { id: string | null, teacherId: string | null, teacherName: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
+export type MarkTeacherDuesPaidMutation_markTeacherDuesPaid_TeacherDue = { id: string | null, teacherId: string | null, teacherName: string | null, teacherUserId: string | null, teacherAvatarUrl: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, studentAvatarUrl: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type MarkTeacherDuesPaidMutation_Mutation = { markTeacherDuesPaid: Array<MarkTeacherDuesPaidMutation_markTeacherDuesPaid_TeacherDue> | null };
 

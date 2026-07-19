@@ -4281,11 +4281,14 @@ type TeacherDue {
   hours: String
   id: String
   status: TeacherDueStatus
+  studentAvatarUrl: String
   studentId: String
   studentName: String
+  teacherAvatarUrl: String
   teacherId: String
   teacherName: String
   teacherPaymentId: String
+  teacherUserId: String
   updatedAt: DateTime
 }
 

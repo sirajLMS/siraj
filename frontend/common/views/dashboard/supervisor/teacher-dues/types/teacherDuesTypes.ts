@@ -7,8 +7,11 @@ export interface TeacherDueRow {
   readonly teacherName: string;
   readonly classInstanceId: string;
   readonly classDate: string;
+  readonly teacherUserId: string;
+  readonly teacherAvatarUrl: string;
   readonly studentId: string;
   readonly studentName: string;
+  readonly studentAvatarUrl: string;
   readonly hours: string;
   readonly amount: string;
   readonly currency: CurrencyCode | null;

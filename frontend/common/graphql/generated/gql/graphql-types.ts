@@ -5577,11 +5577,14 @@ export type TeacherDue = {
   hours: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   status: Maybe<TeacherDueStatus>;
+  studentAvatarUrl: Maybe<Scalars['String']['output']>;
   studentId: Maybe<Scalars['String']['output']>;
   studentName: Maybe<Scalars['String']['output']>;
+  teacherAvatarUrl: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
   teacherPaymentId: Maybe<Scalars['String']['output']>;
+  teacherUserId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
 

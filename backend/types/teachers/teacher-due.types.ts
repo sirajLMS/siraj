@@ -8,7 +8,10 @@ export type TeacherDueReturnType = Omit<TeacherDueSelectType, "status" | "curren
   status: TeacherDueStatus;
   currency: CurrencyCode;
   teacherName?: string | null;
+  teacherUserId?: string | null;
+  teacherAvatarUrl?: string | null;
   studentName?: string | null;
+  studentAvatarUrl?: string | null;
   classDate?: Date | null;
 };
 
