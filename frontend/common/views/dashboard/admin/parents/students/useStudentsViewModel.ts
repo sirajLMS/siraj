@@ -15,7 +15,6 @@ import type {
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import {
   buildLabels,
-  buildMobileMetrics,
   buildStatusCounts,
   buildStudentRows,
   buildViewMetrics,
@@ -73,7 +72,6 @@ const DEFAULT_PAGINATION_ARGS = {
 export interface StudentsViewModel {
   readonly labels: StudentsViewLabels;
   readonly metrics: readonly MetricItem[];
-  readonly mobileMetrics: readonly MetricItem[];
   readonly rows: readonly StudentDirectoryRowExtended[];
   readonly totalStudents: number | undefined;
   readonly searchQuery: string;
@@ -126,9 +124,8 @@ function useDerivedStudentData(data: StudentDirectoryQuery | undefined, t: Stude
   const totalStudents = data ? (data.studentDirectory?.totalCount ?? 0) : undefined;
   const counts = useMemo(() => buildStatusCounts(rows), [rows]);
   const viewMetrics = useMemo(() => buildViewMetrics(counts, t), [counts, t]);
-  const mobileMetrics = useMemo(() => buildMobileMetrics(counts, t), [counts, t]);
   const labels = useMemo(() => buildLabels(t), [t]);
-  return { rows, totalStudents, viewMetrics, mobileMetrics, labels };
+  return { rows, totalStudents, viewMetrics, labels };
 }
 
 function createStudentHandlers(
@@ -187,7 +184,7 @@ export function useStudentsViewModel(): StudentsViewModel {
     }
   }, [error, notifications, t]);
 
-  const { rows, totalStudents, viewMetrics, mobileMetrics, labels } = useDerivedStudentData(data, t);
+  const { rows, totalStudents, viewMetrics, labels } = useDerivedStudentData(data, t);
   const { handleViewProfile, handleViewHistory, handleAddStudent, handleFilterClick } = createStudentHandlers(
     router,
     setFilterPanelOpen,
@@ -197,7 +194,6 @@ export function useStudentsViewModel(): StudentsViewModel {
   return {
     labels,
     metrics: viewMetrics,
-    mobileMetrics,
     rows,
     totalStudents,
     searchQuery,

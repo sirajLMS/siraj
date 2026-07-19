@@ -80,12 +80,17 @@ export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardVie
   };
 
   const scheduleResult = dashboardData?.adminDashboardSchedule;
-  const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null);
+  const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null).map(metric => ({
+    ...metric,
+    label: t.metrics[metric.key as keyof AdminDashboardLabels["metrics"]] ?? metric.labelKey,
+  }));
   const rows = (scheduleResult?.rows ?? []) as unknown as readonly DailyScheduleRow[];
   const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
 
   const selectedMetricLabel =
-    filters.selectedStatus && isAdminMetricKey(filters.selectedStatus) ? t.metrics[filters.selectedStatus] : null;
+    filters.selectedStatus && isAdminMetricKey(filters.selectedStatus)
+      ? t.metrics[filters.selectedStatus as keyof AdminDashboardLabels["metrics"]]
+      : null;
 
   const pageCount =
     totalCount !== undefined && ADMIN_DASHBOARD_PAGE_SIZE > 0

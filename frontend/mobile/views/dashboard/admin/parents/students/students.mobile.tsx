@@ -9,15 +9,15 @@ import {
   MobileCardList,
   MobileContentStack,
   MobileFab,
+  MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
 import { StudentDirectoryMobileCard } from "@/frontend/mobile/views/dashboard/admin/parents/students/components/studentDirectoryCard.mobile";
-import { StudentMobileMetricsScroll } from "@/frontend/mobile/views/dashboard/admin/parents/students/components/studentMobileMetricsScroll.mobile";
 
 export function StudentsMobileView({
   labels,
-  mobileMetrics,
+  metrics,
   rows,
   totalStudents,
   searchQuery,
@@ -51,7 +51,7 @@ export function StudentsMobileView({
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={3} paddingBottom={10}>
-        <StudentMobileMetricsScroll metrics={mobileMetrics} />
+        <MobileMetricCardGrid metrics={metrics} />
 
         <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
           <TextField

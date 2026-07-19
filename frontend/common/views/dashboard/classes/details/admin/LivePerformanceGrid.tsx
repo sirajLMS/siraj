@@ -81,7 +81,7 @@ export function LivePerformanceGrid({ metrics, hasData, labels }: LivePerformanc
       </Stack>
 
       {hasData ? (
-        <MetricCardGrid metrics={metricItems} size={{ md: 3, lg: "grow" }} />
+        <MetricCardGrid metrics={metricItems} layout="scroll" />
       ) : (
         <Typography
           variant="body2"

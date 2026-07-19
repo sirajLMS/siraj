@@ -6,9 +6,13 @@ import { Avatar, Box, Tooltip, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import type * as React from "react";
 import { type ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
+import {
+  classHref,
+  profileHrefForTeacher,
+  studentHref,
+  studentProfileTabHref,
+} from "@/frontend/common/utils/profileHref";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
-import { StyledScheduleNameLink } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
 import { ScheduleTimezoneOffsetCell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleTimezoneOffsetCell";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
@@ -17,6 +21,7 @@ import {
   formatScheduleYourTime,
 } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
 import { MobileActionIconLink } from "@/frontend/mobile/components/ui";
+import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig/MeetingJoinAction.mobile";
 import { Link } from "@/shared/i18n/routing";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
@@ -61,14 +66,6 @@ const StyledCardHeaderMain = styled(Box)(({ theme }) => ({
   minWidth: 0,
   flex: 1,
 }));
-
-const StyledStudentTitle = styled(Typography)({
-  minWidth: 0,
-  maxWidth: "100%",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-});
 
 const StyledCardActions = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -389,6 +386,7 @@ export function ScheduleOverviewMobileCard({
   const teacherName = row.teacher?.name ?? "Unknown Teacher";
   const teacherId = row.teacher?.id;
   const classId = row.id ?? "";
+  const courseName = row.courseName?.trim() || "—";
   const yourTime = formatScheduleYourTime(row.yourTime, row.studentTime ?? row.teacherTime, locale);
   const duration = formatDurationMinutes(row.duration);
 
@@ -404,19 +402,14 @@ export function ScheduleOverviewMobileCard({
     >
       <StyledCardHeader>
         <StyledCardHeaderMain>
-          {studentId ? (
-            <StyledScheduleNameLink
-              href={studentHref(studentId)}
-              title={studentName}
-              sx={{ minWidth: 0, maxWidth: "100%", display: "block", overflow: "hidden", alignSelf: "stretch" }}
-            >
-              <StyledStudentTitle variant="titleLg">{studentName}</StyledStudentTitle>
-            </StyledScheduleNameLink>
-          ) : (
-            <StyledStudentTitle variant="titleLg" title={studentName}>
-              {studentName}
-            </StyledStudentTitle>
-          )}
+          <MobileClassProfileLink
+            href={classId ? classHref(classId) : undefined}
+            name={courseName}
+            avatarUrl={row.avatarUrl}
+            avatarSize={40}
+            typographyVariant="titleLg"
+            fontWeight={700}
+          />
 
           <ScheduleInstanceStatusBadge
             outcome={row.outcome}

@@ -4,12 +4,17 @@ import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, Stack, TextField, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
-import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileCardListItem,
+  MobileMetricCardGrid,
+  MobileStatusBadge,
+} from "@/frontend/mobile/components/ui";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { ScheduleOverviewMobileCard } from "@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.mobile";
 
@@ -40,6 +45,9 @@ const StyledMobileSectionBody = styled(Stack)(({ theme }) => ({
 export function AdminDashboardMobileView({
   t,
   loading,
+  metrics,
+  onMetricClick,
+  selectedMetricKey,
   selectedMetricLabel,
   searchValue,
   dateValue,
@@ -87,6 +95,8 @@ export function AdminDashboardMobileView({
           ) : null}
         </StyledSectionTitleRow>
 
+        <MobileMetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
+
         <StyledMobileSectionBody>
           {canScheduleFilterAdvanced ? (
             <ScheduleFilters
@@ -97,11 +107,7 @@ export function AdminDashboardMobileView({
               nextDayLabel={t.nextDay}
               onDateChange={onDateChange}
               teacherSelect={
-                <TeacherAutocompleteMobile
-                  value={selectedTeacher}
-                  onChange={onTeacherChange}
-                  label={t.selectTeacher}
-                />
+                <TeacherAutocompleteMobile value={selectedTeacher} onChange={onTeacherChange} label={t.selectTeacher} />
               }
             />
           ) : null}

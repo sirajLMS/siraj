@@ -64,6 +64,7 @@ export interface BuildAdminDashboardViewPropsParams {
 }
 
 export type AdminDashboardLabelHeaders = {
+  readonly className: string;
   readonly student: string;
   readonly teacher: string;
   readonly time: string;

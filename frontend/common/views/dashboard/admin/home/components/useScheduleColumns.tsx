@@ -5,9 +5,15 @@ import { Box, Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { PersonProfileLinkCell, ActionIconLink as StyledHistoryIconLink } from "@/frontend/common/components/ui";
+import { ClassProfileLinkCell } from "@/frontend/common/components/ui/display/classProfileLink/ClassProfileLinkCell";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
+import {
+  classHref,
+  profileHrefForTeacher,
+  studentHref,
+  studentProfileTabHref,
+} from "@/frontend/common/utils/profileHref";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import {
   StyledActionsCellBox,
@@ -98,6 +104,22 @@ function buildTimeColumns(
   ];
 }
 
+function renderClassCell(row: DailyScheduleRow) {
+  const classId = row.id ?? "";
+  const courseName = row.courseName?.trim() || "—";
+
+  return (
+    <ClassProfileLinkCell
+      href={classId ? classHref(classId) : undefined}
+      name={courseName}
+      avatarUrl={row.avatarUrl}
+      avatarSize={40}
+      typographyVariant="bodyMd"
+      fontWeight={700}
+    />
+  );
+}
+
 function renderStudentCell(row: DailyScheduleRow) {
   const studentName = row.student?.name ?? "Unknown Student";
   const studentId = row.student?.id;
@@ -174,6 +196,13 @@ export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTi
 
   return useMemo<GridColDef<DailyScheduleRow>[]>(() => {
     return [
+      {
+        field: "courseName",
+        headerName: headers.className,
+        flex: 1.2,
+        minWidth: 180,
+        renderCell: ({ row }) => renderClassCell(row),
+      },
       ...buildTimeColumns(showTimezones, headers, locale),
       {
         field: "duration",

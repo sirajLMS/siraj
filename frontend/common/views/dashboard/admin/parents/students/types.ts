@@ -16,14 +16,6 @@ export const STUDENT_STATUS_TO_ACCOUNT_STATUS: Record<StudentStatus, StudentAcco
 
 export type StudentAccountStatus = "deactivated" | "regular" | "on_leave" | "suspended" | "on_trial";
 
-export const MOBILE_METRIC_KEYS = ["regular", "on_leave", "suspended"] as const;
-
-export const MOBILE_METRIC_ICON_KEYS = {
-  regular: "PersonOutlined",
-  on_leave: "EventBusyOutlined",
-  suspended: "BlockOutlined",
-} as const;
-
 export type StudentDirectoryRowExtended = Readonly<Omit<StudentDirectoryRow, "parentName">> & {
   readonly index: number;
   readonly accountStatus: StudentAccountStatus;

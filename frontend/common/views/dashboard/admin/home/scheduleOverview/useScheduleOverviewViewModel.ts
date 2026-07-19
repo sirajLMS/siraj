@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 
 export interface ScheduleOverviewViewModel {

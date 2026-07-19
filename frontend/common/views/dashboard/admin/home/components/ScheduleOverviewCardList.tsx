@@ -5,6 +5,7 @@ import { Avatar, Box, CircularProgress, Paper, Stack, type Theme, Tooltip, Typog
 import { alpha, styled } from "@mui/material/styles";
 import type * as React from "react";
 import { ActionIconLink } from "@/frontend/common/components/ui";
+import { ClassProfileLink } from "@/frontend/common/components/ui/display/classProfileLink/ClassProfileLink";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import {
   AppPermission,
@@ -12,9 +13,13 @@ import {
   ClassOutcome,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
+import {
+  classHref,
+  profileHrefForTeacher,
+  studentHref,
+  studentProfileTabHref,
+} from "@/frontend/common/utils/profileHref";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
-import { StyledScheduleNameLink } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
 import { ScheduleTimezoneOffsetCell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleTimezoneOffsetCell";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import {
@@ -110,14 +115,6 @@ const StyledCardHeaderMain = styled(Box)(({ theme }) => ({
   minWidth: 0,
   flex: 1,
 }));
-
-const StyledStudentTitle = styled(Typography)({
-  minWidth: 0,
-  maxWidth: "100%",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-});
 
 const StyledCardActions = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -438,6 +435,7 @@ function ScheduleOverviewMobileCard({
   const teacherName = row.teacher?.name ?? "Unknown Teacher";
   const teacherId = row.teacher?.id;
   const classId = row.id ?? "";
+  const courseName = row.courseName?.trim() || "—";
   const yourTime = formatScheduleYourTime(row.yourTime, row.studentTime ?? row.teacherTime, locale);
   const duration = formatDurationMinutes(row.duration);
 
@@ -445,19 +443,14 @@ function ScheduleOverviewMobileCard({
     <StyledScheduleCard elevation={0} isAbsent={isAbsent}>
       <StyledCardHeader>
         <StyledCardHeaderMain>
-          {studentId ? (
-            <StyledScheduleNameLink
-              href={studentHref(studentId)}
-              title={studentName}
-              sx={{ minWidth: 0, maxWidth: "100%", display: "block", overflow: "hidden", alignSelf: "stretch" }}
-            >
-              <StyledStudentTitle variant="titleLg">{studentName}</StyledStudentTitle>
-            </StyledScheduleNameLink>
-          ) : (
-            <StyledStudentTitle variant="titleLg" title={studentName}>
-              {studentName}
-            </StyledStudentTitle>
-          )}
+          <ClassProfileLink
+            href={classId ? classHref(classId) : undefined}
+            name={courseName}
+            avatarUrl={row.avatarUrl}
+            avatarSize={40}
+            typographyVariant="titleLg"
+            fontWeight={700}
+          />
 
           <ScheduleInstanceStatusBadge
             outcome={row.outcome}

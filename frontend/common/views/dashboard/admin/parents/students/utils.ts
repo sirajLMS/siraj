@@ -1,9 +1,7 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import {
-  BlockOutlined,
   CancelOutlined,
   EventBusyOutlined,
-  PersonOutlined,
   TimerOutlined,
   VerifiedUserOutlined,
   WarningAmberOutlined,
@@ -18,17 +16,10 @@ import type {
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import {
   StudentEnrollmentStatus as EnrollmentEnum,
-  MOBILE_METRIC_KEYS,
   STUDENT_STATUS_TO_ACCOUNT_STATUS,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { StudentDirectoryLabels } from "@/shared/locale";
-
-const MOBILE_METRIC_ICONS = {
-  regular: PersonOutlined,
-  on_leave: EventBusyOutlined,
-  suspended: BlockOutlined,
-} as const;
 
 const METRIC_DEFINITIONS = [
   { key: "deactivated" as const, icon: CancelOutlined },
@@ -116,13 +107,6 @@ export function buildViewMetrics(
   t: StudentDirectoryLabels
 ): MetricItem[] {
   return METRIC_DEFINITIONS.map(({ key, icon }) => toMetricItem(key, counts[key], icon, t));
-}
-
-export function buildMobileMetrics(
-  counts: Record<StudentAccountStatus, number>,
-  t: StudentDirectoryLabels
-): MetricItem[] {
-  return MOBILE_METRIC_KEYS.map(key => toMetricItem(key, counts[key], MOBILE_METRIC_ICONS[key], t));
 }
 
 export function buildLabels(t: StudentDirectoryLabels): StudentsViewLabels {
