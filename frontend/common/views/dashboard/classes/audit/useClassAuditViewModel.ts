@@ -10,7 +10,7 @@ import {
 import { logger } from "@/frontend/common/utils/logger";
 import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type { ClassAuditViewProps } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface ClassAuditViewModel extends ClassAuditViewProps {

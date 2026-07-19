@@ -20,7 +20,7 @@ import {
   type StudentOnboardingFormData,
   studentOnboardingSchema,
 } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface StudentOnboardingLabels {

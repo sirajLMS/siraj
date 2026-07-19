@@ -21,7 +21,7 @@ import {
   mapRecentLessonReports,
   mapUpcomingLessons,
 } from "@/frontend/common/views/dashboard/student/dashboard/utils/studentDashboardMappers";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { type AppLocale, type StudentPortalDashboardLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 function useStudentDashboardLabels(t: StudentPortalDashboardLabels): StudentDashboardLabels {

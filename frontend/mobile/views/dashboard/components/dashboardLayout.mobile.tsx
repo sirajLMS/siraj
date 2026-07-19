@@ -18,7 +18,7 @@ import { getActiveNavKey } from "@/frontend/common/views/dashboard/lib/getDashbo
 import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { BottomNavbarMobile } from "@/frontend/mobile/views/dashboard/components/bottomNavbar.mobile";
 import { MobileMenuButton } from "@/frontend/mobile/views/dashboard/components/mobileMenuButton.mobile";
-import { usePathname } from "@/shared/i18n/routing";
+import { usePathname } from "@/shared/i18n/navigation";
 import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/core/nav";
 
 function MobileMainScrollArea({ children }: { readonly children: ReactNode }) {

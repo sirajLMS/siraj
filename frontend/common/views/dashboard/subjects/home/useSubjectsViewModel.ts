@@ -27,7 +27,7 @@ import type {
   SubjectItem,
   SubjectsDialogLabels,
 } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface SubjectsViewModel {

@@ -17,7 +17,7 @@ import {
   type StudentProfileTab,
 } from "@/frontend/common/views/dashboard/students/profile/studentProfileTabs";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { type StudentStatusLabels, useAppTranslation } from "@/shared/locale";
 
 const STATUS_BADGE_KEY: Record<StudentStatus, string> = {

@@ -13,7 +13,7 @@ import type {
   ClassSessionStatus,
   ScheduleAlert,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 import { useAppTranslation } from "@/shared/locale";
 

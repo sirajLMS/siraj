@@ -11,7 +11,7 @@ import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppTranslation } from "@/shared/locale";

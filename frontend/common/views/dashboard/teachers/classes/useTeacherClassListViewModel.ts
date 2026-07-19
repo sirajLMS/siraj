@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import type { TeacherAssignedClassesQuery_teacherAssignedClasses_TeacherAssignedClassesResult_rows_TeacherAssignedClass } from "@/frontend/common/graphql/generated/gql/operations";
 import { teacherAssignedClassesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppTranslation } from "@/shared/locale";
 

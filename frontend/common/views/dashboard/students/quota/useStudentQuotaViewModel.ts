@@ -20,7 +20,7 @@ import {
   type StudentQuotaFormInput,
 } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import type { StudentProfileData } from "@/frontend/common/views/dashboard/students/quota/types";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { type CommonLabels, useAppTranslation } from "@/shared/locale";
 
 function resolveGenderLabel(raw: string | null | undefined): "MALE" | "FEMALE" | null {

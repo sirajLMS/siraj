@@ -28,7 +28,7 @@ import {
   getRecurringMeetingConfigErrorKey,
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import type {
   CreateRecurringClassLabels,
   MeetingConfigClassScopeLabels,

@@ -1,7 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { redirect as nextRedirect, usePathname as useNextPathname, useRouter as useNextRouter } from "next/navigation";
+import { redirect as nextRedirect } from "next/navigation";
 import type { ComponentProps } from "react";
 import { type AppLocale, defaultLocale, locales } from "@/shared/locale/AppLocale";
 
@@ -21,23 +19,6 @@ export const routing: RoutingConfig = {
 
 export type LinkProps = ComponentProps<typeof Link>;
 export { Link };
-
-export function usePathname(): string {
-  return useNextPathname();
-}
-
-export interface AppRouter {
-  push(href: string, options?: { scroll?: boolean }): void;
-  replace(href: string, options?: { scroll?: boolean }): void;
-  back(): void;
-  forward(): void;
-  refresh(): void;
-  prefetch(href: string): void;
-}
-
-export function useRouter(): AppRouter {
-  return useNextRouter() as AppRouter;
-}
 
 export interface RedirectOptions {
   href: string;

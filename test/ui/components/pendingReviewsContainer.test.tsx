@@ -13,6 +13,12 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
+mock.module("@/shared/i18n/navigation", () => ({
+  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}), replace: mock(() => {}), prefetch: mock(() => {}) }),
+  usePathname: () => "/dashboard",
+}));
+
+
 import { afterEach, describe, expect, mock, test } from "bun:test";
 
 // Bypass ResponsiveViewSwitch / next/dynamic preload races (same pattern as studentDashboard).

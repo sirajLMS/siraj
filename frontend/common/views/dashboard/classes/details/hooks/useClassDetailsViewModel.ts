@@ -12,7 +12,7 @@ import { useClassDetailsData } from "@/frontend/common/views/dashboard/classes/d
 import { useClassMutations } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassMutations";
 import { useEventLogDownload } from "@/frontend/common/views/dashboard/classes/details/hooks/useEventLogDownload";
 import { formatClassDetailDate } from "@/frontend/common/views/dashboard/classes/details/types";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { type ClassDetailsLabels, useAppTranslation } from "@/shared/locale";
 
 const noopAsync = () => Promise.resolve();

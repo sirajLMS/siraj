@@ -15,7 +15,7 @@ import {
   MobilePrimaryPageAction,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 
 export function ParentOnboardingMobileView({
   form,

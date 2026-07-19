@@ -11,7 +11,7 @@ import { teacherDirectoryQueryDocument } from "@/frontend/common/graphql/sharedD
 import { useTeacherDirectoryStore } from "@/frontend/common/stores/teacherDirectoryStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 
 export interface TeachersViewModel {
   readonly metrics: TeacherDirectoryMetrics | null | undefined;

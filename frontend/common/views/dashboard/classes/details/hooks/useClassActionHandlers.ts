@@ -1,7 +1,7 @@
 "use client";
 import type { useClassMutations } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassMutations";
 import type { ActionFeedbackState, ClassActionHandlers } from "@/frontend/common/views/dashboard/classes/details/types";
-import type { useRouter } from "@/shared/i18n/routing";
+import type { useRouter } from "@/shared/i18n/navigation";
 import type { ClassDetailsLabels } from "@/shared/locale";
 
 export function useClassActionHandlers(

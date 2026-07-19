@@ -12,7 +12,7 @@ import type {
   StudentCreditBalanceInfo,
   StudentCreditTransactionRow,
 } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { type AppLocale, type StudentPortalCreditsLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 export type CreditReasonFilter = "ALL" | CreditReason;

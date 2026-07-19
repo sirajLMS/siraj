@@ -23,7 +23,7 @@ import {
   mapStudentHistoryMetrics,
   mapStudentHistorySessions,
 } from "@/frontend/common/views/dashboard/student/history/utils/studentHistoryMappers";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { type StudentPortalHistoryLabels, useAppTranslation } from "@/shared/locale";
 
 function useStudentHistoryLabels(t: StudentPortalHistoryLabels): StudentHistoryLabels {

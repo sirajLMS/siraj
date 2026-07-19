@@ -78,11 +78,17 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
     status: t.expose("status", { type: AccountStatusPothosObject }),
     roleSlug: t.exposeString("roleSlug", { nullable: true }),
     roleName: t.exposeString("roleName", { nullable: true }),
-    hourlyRate: t.exposeString("hourlyRate", { nullable: true, authScopes: { superAdmin: true } }),
+    hourlyRate: t.exposeString("hourlyRate", {
+      nullable: true,
+      authScopes: { superAdmin: true },
+      // Shared profile queries select these fields; non-admins get null instead of FORBIDDEN.
+      unauthorizedResolver: () => null,
+    }),
     rateCurrency: t.expose("rateCurrency", {
       type: CurrencyCodePothosObject,
       nullable: true,
       authScopes: { superAdmin: true },
+      unauthorizedResolver: () => null,
     }),
     displayAmount: t.field({
       type: DisplayAmountPothosObject,

@@ -31,7 +31,7 @@ import {
 import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
 import { buildTeacherActiveMetricItems } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardMetrics";
 import { useTeacherDashboardLastUpdated } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/useTeacherDashboardLastUpdated";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 type SupportRequestType = "COORDINATOR" | "SUPPORT";

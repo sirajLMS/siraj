@@ -38,6 +38,12 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
+mock.module("@/shared/i18n/navigation", () => ({
+  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}), replace: mock(() => {}), prefetch: mock(() => {}) }),
+  usePathname: () => "/users/test-user-id/billing-profile",
+}));
+
+
 mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));

@@ -21,7 +21,7 @@ import {
 } from "@/frontend/common/stores/studentPortalProfileStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { type StudentPortalProfileLabels, useAppTranslation } from "@/shared/locale";
 
 function toDateInputValue(value: string | null | undefined): string {

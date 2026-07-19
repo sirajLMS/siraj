@@ -25,7 +25,7 @@ import type {
   NotificationMetadata,
   NotificationsDrawerViewModel,
 } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale/client";
 
 const REFETCH_QUERIES = [{ query: notificationAlertsQueryDocument }, { query: meQueryDocument }] as const;

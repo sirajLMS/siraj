@@ -20,7 +20,7 @@ import type {
   StudentProgressItem,
   WorkshopPromo,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import type { ParentDashboardLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 

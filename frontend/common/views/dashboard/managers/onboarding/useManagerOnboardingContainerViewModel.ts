@@ -13,7 +13,7 @@ import {
 import { ManagerAccountType } from "@/frontend/common/views/dashboard/managers/onboarding/types";
 import type { OnboardingMetricsViewModel } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
 import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 
 const defaultValues: ManagerOnboardingFormData = {
   name: "",

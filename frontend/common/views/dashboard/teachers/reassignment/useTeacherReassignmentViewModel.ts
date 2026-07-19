@@ -10,7 +10,7 @@ import type {
   StatusChangeInput,
   TeacherReassignmentViewProps,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 export type UseTeacherReassignmentViewModelProps = TeacherReassignmentViewProps;

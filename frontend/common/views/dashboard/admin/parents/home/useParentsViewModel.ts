@@ -21,7 +21,7 @@ import {
   toParentLifecycleStatus,
 } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents";
 

@@ -1,6 +1,5 @@
 export {
   type AppLocale,
-  type AppRouter,
   defaultLocale,
   Link,
   type LinkProps,
@@ -9,6 +8,4 @@ export {
   type RoutingConfig,
   redirect,
   routing,
-  usePathname,
-  useRouter,
 } from "./routing";

@@ -5,7 +5,8 @@ import { Alert, Button } from "@mui/material";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { Link, usePathname } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/routing";
+import { usePathname } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function FxStaleBanner(): React.ReactNode {

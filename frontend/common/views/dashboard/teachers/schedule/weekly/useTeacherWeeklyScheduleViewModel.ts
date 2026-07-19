@@ -24,7 +24,7 @@ import type {
   TeacherWeeklyScheduleViewProps,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { buildCreateRecurringClassInput } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/utils";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface TeacherWeeklyScheduleViewModel extends TeacherWeeklyScheduleViewProps {

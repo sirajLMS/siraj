@@ -12,7 +12,7 @@ import type {
   SupervisorDashboardViewModel,
   UseSupervisorDashboardViewModelProps,
 } from "@/frontend/common/views/dashboard/supervisor/dashboard/types/supervisorDashboardTypes";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 export type { SupervisorDashboardViewModel, UseSupervisorDashboardViewModelProps };

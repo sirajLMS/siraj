@@ -39,7 +39,7 @@ import type {
 } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import { formatBillingDate } from "@/frontend/common/views/dashboard/billing/utils/formatBillingDate";
 import { deriveAdminInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 function formatDate(dateStr: string | null, locale: string): string {

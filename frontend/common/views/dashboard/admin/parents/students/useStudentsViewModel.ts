@@ -20,7 +20,7 @@ import {
   buildViewMetrics,
 } from "@/frontend/common/views/dashboard/admin/parents/students/utils";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { type StudentDirectoryLabels, useAppTranslation } from "@/shared/locale";
 
 const EMPTY_FILTER_ARGS: StudentFilterArgs = {

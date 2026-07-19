@@ -8,7 +8,7 @@ import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/student
 import type { StudentStatusHeaderProps } from "@/frontend/common/views/dashboard/students/status/types";
 import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 const STATUS_DOT_COLOR_MAP: Record<string, string> = {

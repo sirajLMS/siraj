@@ -20,7 +20,7 @@ import type {
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { useStatusTrackingLabels } from "@/frontend/common/views/dashboard/classes/status/tracking/useStatusTrackingLabels";
 import { useStatusTrackingMetrics } from "@/frontend/common/views/dashboard/classes/status/tracking/useStatusTrackingMetrics";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 
 export interface StatusTrackingViewModel extends MobileLayoutProps, DesktopLayoutProps {}
 

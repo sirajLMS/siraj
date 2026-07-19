@@ -8,7 +8,7 @@ import { FxStaleBanner } from "@/frontend/common/views/dashboard/components/FxSt
 import { getActiveNavKey } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
 import { SidebarDesktop } from "@/frontend/desktop/views/dashboard/components/sidebar.desktop";
 import { TopNavbarDesktop } from "@/frontend/desktop/views/dashboard/components/topNavbar.desktop";
-import { usePathname } from "@/shared/i18n/routing";
+import { usePathname } from "@/shared/i18n/navigation";
 
 function DesktopMainScrollArea({ children }: { readonly children: ReactNode }) {
   const mainRef = useRef<HTMLElement>(null);

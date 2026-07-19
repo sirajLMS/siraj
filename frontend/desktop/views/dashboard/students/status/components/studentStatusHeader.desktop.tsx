@@ -9,7 +9,7 @@ import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/student
 import type { StudentStatusHeaderProps } from "@/frontend/common/views/dashboard/students/status/types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/display";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 const STATUS_BADGE_MAP: Record<string, string> = {

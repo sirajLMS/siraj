@@ -14,7 +14,7 @@ import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermissionGroupSimulation";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ownProfileHref } from "@/frontend/common/utils/profileHref";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale/client";
 import type { AuthImpersonationLabels } from "@/shared/locale/types/auth";
 import type { CommonLabels } from "@/shared/locale/types/common";

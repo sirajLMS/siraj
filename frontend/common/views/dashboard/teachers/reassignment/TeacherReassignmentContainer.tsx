@@ -28,7 +28,7 @@ import {
   type UseTeacherReassignmentViewModelProps,
   useTeacherReassignmentViewModel,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 // NEW FOR PLAN v5: Container invokes the ViewModel unconditionally (Rules of

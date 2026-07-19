@@ -44,6 +44,12 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
+mock.module("@/shared/i18n/navigation", () => ({
+  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}), replace: mock(() => {}), prefetch: mock(() => {}) }),
+  usePathname: () => "/students/me/dashboard",
+}));
+
+
 // Eliminates dependency on the router-backed language switch hook so this file is
 // immune to any router mock configuration registered by earlier test files.
 mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({

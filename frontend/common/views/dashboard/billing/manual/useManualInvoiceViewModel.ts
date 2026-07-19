@@ -23,7 +23,7 @@ import {
 import type { ManualInvoiceLabels } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
 import { buildManualInvoiceLabels } from "@/frontend/common/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
 import { formatDraftTotal } from "@/frontend/common/views/dashboard/billing/manual/utils/manualInvoiceFormatters";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 export type UseManualInvoiceViewModelProps = Record<string, never>;

@@ -17,7 +17,7 @@ import {
   useRescheduleViewModel,
 } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
 import { combineDateTime } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 const lazyViews = createLazyView<RescheduleViewModel>(

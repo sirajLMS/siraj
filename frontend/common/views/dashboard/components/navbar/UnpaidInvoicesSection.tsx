@@ -12,7 +12,7 @@ import {
   mapBillingCurrencyBuckets,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function UnpaidInvoicesSection() {
