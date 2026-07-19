@@ -1,38 +1,27 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState } from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { AppLocale } from "@/shared/i18n/routing";
 
 export function useLanguageSwitch() {
   const currentLocale = useAppLocale() as AppLocale;
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
   const switchLanguage = (newLocale: AppLocale) => {
-    if (currentLocale === newLocale) return;
+    if (currentLocale === newLocale || isPending) return;
 
-    startTransition(async () => {
-      try {
-        // Use server-side API to set locale cookie
-        // This works across all hostnames (localhost, LAN IP, etc.)
-        const response = await fetch("/api/set-locale", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ locale: newLocale }),
-        });
+    setIsPending(true);
 
-        if (!response.ok) {
-          throw new Error("Failed to set locale");
-        }
-      } catch {
-        // Cookie may already be set, or Accept-Language will be used as fallback.
-      }
-
-      // Full reload so SSR locale, Apollo cache, and in-memory stores all reset.
-      globalThis.location.reload();
+    // Full document navigation: set cookie on the redirect response, then land
+    // on the same URL. Avoids fetch + location.reload() races where the reload
+    // can miss the newly set cookie.
+    const redirect = `${globalThis.location.pathname}${globalThis.location.search}`;
+    const params = new URLSearchParams({
+      locale: newLocale,
+      redirect,
     });
+    globalThis.location.assign(`/api/set-locale?${params.toString()}`);
   };
 
   return {
