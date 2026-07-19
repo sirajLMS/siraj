@@ -4,7 +4,7 @@ import { Box, Checkbox, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { AddPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { AddPermissionBulkBarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/addPermissionBulkBar.mobile";
 import { AddPermissionFilterBarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/addPermissionFilterBar.mobile";
@@ -25,9 +25,9 @@ interface PermissionCardProps {
 function AddPermissionCardMobile({ permission, checked, onToggle }: Readonly<PermissionCardProps>) {
   const id = permission.id ?? "";
   return (
-    <MobileBaseCard
+    <MobileCardListItem
+      variant="edge-to-edge"
       sx={theme => ({
-        p: 2,
         backgroundColor: checked ? theme.palette.primaryContainer : undefined,
         borderColor: checked ? theme.palette.primary.main : undefined,
       })}
@@ -62,7 +62,7 @@ function AddPermissionCardMobile({ permission, checked, onToggle }: Readonly<Per
           )}
         </Box>
       </Box>
-    </MobileBaseCard>
+    </MobileCardListItem>
   );
 }
 
@@ -100,28 +100,25 @@ export function AddPermissionsTabMobile({
       )}
 
       <MobileSectionPanel title={t.addPermissions}>
-        {filteredAvailablePermissions.length === 0 && !loading ? (
-          <Box sx={{ p: 4, textAlign: "center" }}>
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {t.noPermissionsFound}
-            </Typography>
-          </Box>
-        ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-            {filteredAvailablePermissions.map(permission => {
-              const id = permission.id ?? "";
-              const checked = selectedAddPermissionIds.includes(id);
-              return (
-                <AddPermissionCardMobile
-                  key={id}
-                  permission={permission}
-                  checked={checked}
-                  onToggle={onPermissionToggle}
-                />
-              );
-            })}
-          </Box>
-        )}
+        <MobileCardList
+          rows={filteredAvailablePermissions}
+          loading={loading}
+          emptyMessage={t.noPermissionsFound}
+          getKey={permission => permission.id ?? ""}
+          paginationOptions={{ mode: "client" }}
+          layout="edge-to-edge"
+          renderItem={permission => {
+            const id = permission.id ?? "";
+            const checked = selectedAddPermissionIds.includes(id);
+            return (
+              <AddPermissionCardMobile
+                permission={permission}
+                checked={checked}
+                onToggle={onPermissionToggle}
+              />
+            );
+          }}
+        />
       </MobileSectionPanel>
     </StyledTabContainer>
   );

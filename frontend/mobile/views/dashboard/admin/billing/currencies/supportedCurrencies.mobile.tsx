@@ -6,21 +6,20 @@ import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { SupportedCurrenciesViewModel } from "@/frontend/common/views/dashboard/admin/billing/currencies/SupportedCurrenciesView";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 
 function SupportedCurrencyCard({
   row,
   locale,
 }: Readonly<{ readonly row: CurrencyOption & { readonly id: string }; readonly locale: string }>) {
   return (
+    <MobileCardListItem variant="edge-to-edge">
     <Box
       sx={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         gap: 2,
-        py: 1.5,
-        borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -39,6 +38,7 @@ function SupportedCurrencyCard({
         </Box>
       </Box>
     </Box>
+    </MobileCardListItem>
   );
 }
 
@@ -55,17 +55,14 @@ export function SupportedCurrenciesMobileView({
     <MobilePageContainer>
       <MobilePageHeader title={pageTitle} subtitle={pageSubtitle} edgeToEdge={false} />
       <Box sx={{ px: { xs: 2, md: 0 }, pb: 2 }}>
-        {rows.length === 0 ? (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            {emptyMessage}
-          </Alert>
-        ) : (
-          <Box>
-            {rows.map(row => (
-              <SupportedCurrencyCard key={row.id} row={row} locale={locale} />
-            ))}
-          </Box>
-        )}
+        <MobileCardList
+          rows={rows}
+          emptyMessage={emptyMessage}
+          getKey={row => row.id}
+          paginationOptions={{ mode: "client" }}
+          layout="edge-to-edge"
+          renderItem={row => <SupportedCurrencyCard row={row} locale={locale} />}
+        />
         <Alert severity="info" sx={{ mt: 2 }}>
           {footerNote}
         </Alert>

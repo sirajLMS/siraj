@@ -11,6 +11,7 @@ import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboar
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileCardList,
+  MobileCardListItem,
   MobileContentInset,
   MobileContentStack,
   MobileMetricCardGrid,
@@ -36,14 +37,7 @@ function statusSessionKey(status: LessonReportStatus | null): string {
 
 function MobileReportItem({ report, labels, locale, onAddReflection }: MobileReportItemProps): ReactNode {
   return (
-    <Box
-      sx={theme => ({
-        p: 2,
-        borderRadius: 2,
-        backgroundColor: theme.palette.surfaceContainer,
-        border: `1px solid ${theme.palette.outlineVariant}`,
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge">
       <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}>
         <Box sx={{ minWidth: 0 }}>
           <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
@@ -78,7 +72,7 @@ function MobileReportItem({ report, labels, locale, onAddReflection }: MobileRep
       >
         {labels.addReflection}
       </Button>
-    </Box>
+    </MobileCardListItem>
   );
 }
 

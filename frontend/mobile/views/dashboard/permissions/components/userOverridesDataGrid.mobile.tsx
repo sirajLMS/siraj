@@ -9,7 +9,7 @@ import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { OverridesCell } from "@/frontend/common/views/dashboard/permissions/components/OverridesCell";
 import type { UserOverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { getUserGroupsForUser } from "@/frontend/common/views/dashboard/permissions/utils";
-import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -45,7 +45,7 @@ function UserOverridesCardMobile({ user, groups, onManageOverrides }: Readonly<U
   const userGroups = getUserGroupsForUser(userId, groups);
 
   return (
-    <MobileBaseCard sx={{ p: 2 }}>
+    <MobileCardListItem variant="edge-to-edge">
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <StyledUserAvatar>
@@ -137,7 +137,7 @@ function UserOverridesCardMobile({ user, groups, onManageOverrides }: Readonly<U
           {t.editOverrides}
         </Button>
       </Box>
-    </MobileBaseCard>
+    </MobileCardListItem>
   );
 }
 
@@ -149,26 +149,21 @@ export function UserOverridesDataGridMobile({
 }: Readonly<UserOverridesDataGridProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
-  if (users.length === 0 && !loading) {
-    return (
-      <Box sx={{ p: 4, textAlign: "center" }}>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t.noPermissionsFound}
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      {users.map(user => (
+    <MobileCardList
+      rows={users}
+      loading={loading}
+      emptyMessage={t.noPermissionsFound}
+      getKey={user => user.id ?? user.email ?? ""}
+      paginationOptions={{ mode: "client" }}
+      layout="edge-to-edge"
+      renderItem={user => (
         <UserOverridesCardMobile
-          key={user.id ?? user.email ?? ""}
           user={user}
           groups={groups}
           onManageOverrides={onManageOverrides}
         />
-      ))}
-    </Box>
+      )}
+    />
   );
 }

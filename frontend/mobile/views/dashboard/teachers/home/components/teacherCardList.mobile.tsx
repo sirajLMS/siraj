@@ -158,7 +158,7 @@ export function TeacherCardList({
 
       <MobileCardList
         rows={rows}
-        getKey={row => row.id}
+        getKey={row => row.id ?? ""}
         paginationOptions={paginationOptions}
         layout="edge-to-edge"
         renderItem={row => (

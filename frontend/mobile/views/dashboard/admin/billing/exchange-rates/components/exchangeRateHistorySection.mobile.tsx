@@ -5,6 +5,7 @@ import { CurrencyDisplay, CurrencyDisplayPart } from "@/frontend/common/componen
 import { parseCurrencyCode } from "@/frontend/common/lib/currency";
 import { formatExchangeRateTimestamp } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 import type { ExchangeRateHistoryProps } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/types";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 
 export function ExchangeRateHistorySectionMobile({ labels, historyViewModel }: Readonly<ExchangeRateHistoryProps>) {
   const { fromCurrency, toCurrency, maxDays, rows, loading, fromOptions, toOptions, dayOptions } = historyViewModel;
@@ -82,23 +83,16 @@ export function ExchangeRateHistorySectionMobile({ labels, historyViewModel }: R
         </FormControl>
       </Box>
 
-      <Box>
-        {loading ? (
-          <Typography sx={theme => ({ color: theme.palette.text.secondary, py: 1 })}>{labels.history.empty}</Typography>
-        ) : rows.length === 0 ? (
-          <Typography sx={theme => ({ color: theme.palette.text.secondary, py: 1 })}>{labels.history.empty}</Typography>
-        ) : (
-          rows.map(row => (
-            <Box
-              key={row.id}
-              sx={{
-                py: 1.5,
-                borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
-                display: "flex",
-                flexDirection: "column",
-                gap: 0.25,
-              }}
-            >
+      <MobileCardList
+        rows={rows}
+        loading={loading}
+        emptyMessage={labels.history.empty}
+        getKey={row => row.id}
+        paginationOptions={{ mode: "client" }}
+        layout="edge-to-edge"
+        renderItem={row => (
+          <MobileCardListItem variant="edge-to-edge">
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography sx={{ fontWeight: 700 }}>
                   {row.fromCurrency} → {row.toCurrency}
@@ -112,9 +106,9 @@ export function ExchangeRateHistorySectionMobile({ labels, historyViewModel }: R
                 {formatExchangeRateTimestamp(row.effectiveDate)}
               </Typography>
             </Box>
-          ))
+          </MobileCardListItem>
         )}
-      </Box>
+      />
     </Box>
   );
 }

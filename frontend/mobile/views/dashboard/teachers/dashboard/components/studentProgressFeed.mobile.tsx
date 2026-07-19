@@ -1,34 +1,30 @@
 "use client";
 
 import { InfoOutlined } from "@mui/icons-material";
-import { Box, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Stack, Tooltip, Typography } from "@mui/material";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import type { StudentProgressFeedProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 import { resolveStudentProgressFeedIcon } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/resolveStudentProgressFeedIcon";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 
 /**
  * Mobile variant of the student progress feed.
- * Compact vertical list with avatar + summary + event icon, mirroring the
- * historical mobile layout (separating per-row dividers, edge-to-edge card shell).
- *
- * Plan v5: per specs.md §3 N15 + §4.1 Class B, the byte-identical inline
- * `StudentProgressFeedMobileProps` interface was deleted; both tiers now
- * import the shared `StudentProgressFeedProps` declared once in
- * `frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps.ts`.
- * Per specs.md §3 N9 + §5 the inline pure-data `resolveFeedIcon` helper was
- * lifted to `frontend/common/views/dashboard/teachers/dashboard/utils/resolveStudentProgressFeedIcon.ts`.
  */
 export function StudentProgressFeedMobile({ items, title, labels }: Readonly<StudentProgressFeedProps>) {
   return (
     <Stack sx={{ gap: 2 }}>
       <Typography sx={{ typography: "titleLg", color: theme => theme.palette.primary.main }}>{title}</Typography>
-      <Paper variant="outlined" sx={{ overflow: "hidden", borderColor: theme => theme.palette.border.light }}>
-        <Stack divider={<Box sx={{ borderBottom: theme => `1px solid ${theme.palette.border.light}` }} />}>
-          {items.map(item => {
-            const EventIcon = resolveStudentProgressFeedIcon(item.eventKind);
-            return (
-              <Box key={item.id} sx={{ p: 2, display: "flex", alignItems: "flex-start", gap: 2 }}>
+      <MobileCardList
+        rows={items}
+        getKey={item => item.id}
+        paginationOptions={false}
+        layout="edge-to-edge"
+        renderItem={item => {
+          const EventIcon = resolveStudentProgressFeedIcon(item.eventKind);
+          return (
+            <MobileCardListItem variant="edge-to-edge">
+              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, alignItems: "flex-start" }}>
                     <MobilePersonProfileLink
@@ -73,10 +69,10 @@ export function StudentProgressFeedMobile({ items, title, labels }: Readonly<Stu
                   ) : null}
                 </Box>
               </Box>
-            );
-          })}
-        </Stack>
-      </Paper>
+            </MobileCardListItem>
+          );
+        }}
+      />
     </Stack>
   );
 }

@@ -1,12 +1,12 @@
 "use client";
 
 import { BlockOutlined, EventBusyOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
-import { alpha, Box, Button, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Stack, Tooltip, Typography } from "@mui/material";
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classHref } from "@/frontend/common/utils/profileHref";
 import type { FutureClassCardProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
-import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";
@@ -186,13 +186,7 @@ export function FutureClassCardMobile({ item, onRequestLeave }: Readonly<FutureC
   const isRescheduled = item.isRescheduled === true;
 
   return (
-    <MobileBaseCard
-      sx={theme => ({
-        p: 2,
-        "&:hover": { border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` },
-        transition: "all 0.2s",
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge">
       <Stack direction="column" spacing={2} sx={{ justifyContent: "space-between" }}>
         <Stack direction="row" spacing={2} sx={{ flex: 1 }}>
           <DateSquare date={item.scheduledDate ?? ""} isRescheduled={isRescheduled} />
@@ -200,6 +194,6 @@ export function FutureClassCardMobile({ item, onRequestLeave }: Readonly<FutureC
         </Stack>
         <ActionButtons item={item} onRequestLeave={onRequestLeave} />
       </Stack>
-    </MobileBaseCard>
+    </MobileCardListItem>
   );
 }

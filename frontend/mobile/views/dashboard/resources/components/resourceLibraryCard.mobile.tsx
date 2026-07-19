@@ -1,8 +1,9 @@
 "use client";
 
 import { AttachFileOutlined, DeleteOutlined } from "@mui/icons-material";
-import { Box, IconButton, Paper, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import type { ResourceLibraryCardProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
+import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { ResourceFileTypeIconMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceFileTypeIcon.mobile";
 
 export function ResourceLibraryCardMobile({
@@ -12,65 +13,42 @@ export function ResourceLibraryCardMobile({
   onDeleteRequest,
   onCardClick,
 }: Readonly<Omit<ResourceLibraryCardProps, "variant">>) {
-  // NEW FOR PLAN v5: the inline `<RequirePermission permissions={AppPermission.ResourcesDelete}>`
-  // wrapper that previously lived here was lifted to the page-level ViewModel
-  // per specs.md §3 N3 + §6.1. The card now consumes the `canManage` prop
-  // (Threaded from `useResourcesViewModel.canResourcesDelete` via the grid)
-  // and renders the delete IconButton conditionally — no permission hook is
-  // called inside the tier module.
   return (
-    <Paper
-      elevation={0}
-      onClick={() => {
-        onCardClick(resource.id);
-      }}
-      sx={theme => ({
-        p: 2,
-        borderRadius: theme.layout.radius.card,
-        border: `1px solid ${theme.palette.outlineVariant}`,
-        backgroundColor: theme.palette.surfaceContainerLowest,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "flex-start",
-        gap: 2,
-        position: "relative",
-        justifyContent: "space-between",
-        transition: "border-color 0.15s ease",
-        cursor: "pointer",
-        "&:hover": { borderColor: theme.palette.primary.main },
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge" interactive sx={{ position: "relative" }}>
       <Box
+        onClick={() => {
+          onCardClick(resource.id);
+        }}
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          flexDirection: "row",
           alignItems: "flex-start",
-          width: "auto",
+          gap: 2,
+          cursor: "pointer",
         }}
       >
         <ResourceFileTypeIconMobile fileType={resource.fileType} />
-      </Box>
-
-      <Box sx={{ flex: 1, pr: canManage ? 4 : 0 }}>
-        <Typography variant="bodyLg" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-          {resource.title}
-        </Typography>
-        <Typography
-          variant="labelMd"
-          sx={theme => ({
-            color: theme.palette.text.secondary,
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            mt: 0.5,
-          })}
-        >
-          <AttachFileOutlined sx={{ fontSize: 14 }} />
-          {resource.fileName}
-        </Typography>
-        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mt: 0.5 })}>
-          {labels.library.uploaded} {resource.uploadedAt}
-        </Typography>
+        <Box sx={{ flex: 1, pr: canManage ? 4 : 0 }}>
+          <Typography variant="bodyLg" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
+            {resource.title}
+          </Typography>
+          <Typography
+            variant="labelMd"
+            sx={theme => ({
+              color: theme.palette.text.secondary,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              mt: 0.5,
+            })}
+          >
+            <AttachFileOutlined sx={{ fontSize: 14 }} />
+            {resource.fileName}
+          </Typography>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mt: 0.5 })}>
+            {labels.library.uploaded} {resource.uploadedAt}
+          </Typography>
+        </Box>
       </Box>
 
       {canManage ? (
@@ -85,6 +63,6 @@ export function ResourceLibraryCardMobile({
           <DeleteOutlined />
         </IconButton>
       ) : null}
-    </Paper>
+    </MobileCardListItem>
   );
 }

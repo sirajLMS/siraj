@@ -4,7 +4,7 @@ import { RemoveCircleOutlined, SecurityOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { CurrentPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledRevokeButton = styled(Button)(({ theme }) => ({
@@ -103,38 +103,40 @@ export function CurrentPermissionsTabMobile({
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      {groupPermissions.map(permission => {
-        const key = permission.id ?? permission.key ?? "";
-        return (
-          <MobileBaseCard key={key} sx={{ p: 2 }}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
-                <StyledPermissionKeyChip>{permission.key}</StyledPermissionKeyChip>
-                {permission.category && (
-                  <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                    {permission.category}
-                  </Typography>
-                )}
-              </Box>
-              {permission.description && (
-                <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                  {permission.description}
+    <MobileCardList
+      rows={groupPermissions}
+      loading={loading}
+      getKey={permission => permission.id ?? permission.key ?? ""}
+      paginationOptions={{ mode: "client" }}
+      layout="edge-to-edge"
+      renderItem={permission => (
+        <MobileCardListItem variant="edge-to-edge">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
+              <StyledPermissionKeyChip>{permission.key}</StyledPermissionKeyChip>
+              {permission.category ? (
+                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+                  {permission.category}
                 </Typography>
-              )}
-              {!group.isSystem && permission.id && (
-                <StyledRevokeButton
-                  size="small"
-                  startIcon={<RemoveCircleOutlined fontSize="small" />}
-                  onClick={() => permission.id && onRevokePermission(permission.id)}
-                >
-                  {t.revoke}
-                </StyledRevokeButton>
-              )}
+              ) : null}
             </Box>
-          </MobileBaseCard>
-        );
-      })}
-    </Box>
+            {permission.description ? (
+              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+                {permission.description}
+              </Typography>
+            ) : null}
+            {!group.isSystem && permission.id ? (
+              <StyledRevokeButton
+                size="small"
+                startIcon={<RemoveCircleOutlined fontSize="small" />}
+                onClick={() => permission.id && onRevokePermission(permission.id)}
+              >
+                {t.revoke}
+              </StyledRevokeButton>
+            ) : null}
+          </Box>
+        </MobileCardListItem>
+      )}
+    />
   );
 }

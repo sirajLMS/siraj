@@ -1,14 +1,14 @@
 "use client";
 
 import { AlternateEmailOutlined, CheckCircleOutlined, DeleteOutlineOutlined, SendOutlined } from "@mui/icons-material";
-import { Avatar, Box, Paper, TextField, Typography } from "@mui/material";
+import { Avatar, Box, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import {
   type AdminComplaintRow,
   type ComplaintPriority,
   ComplaintStatus,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import { MobileFilterButton, MobilePrimaryPageAction, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileCardListItem, MobileFilterButton, MobilePrimaryPageAction, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
 
 const StyledAnsweredResponseBox = styled(Box)(({ theme }) => ({
@@ -59,16 +59,6 @@ const StyledEmailActionButton = styled(MobileFilterButton)(({ theme }) => ({
   color: theme.palette.onPrimary,
   borderColor: theme.palette.primary.main,
   "&:hover": { backgroundColor: theme.palette.primary.dark },
-}));
-
-const StyledQueueCardPaper = styled(Paper, {
-  shouldForwardProp: prop => prop !== "isUnanswered",
-})<{ isUnanswered: boolean }>(({ theme, isUnanswered }) => ({
-  padding: theme.spacing(2.5),
-  borderRadius: theme.layout.radius.card,
-  border: `1px solid ${theme.palette.outlineVariant}`,
-  backgroundColor: isUnanswered ? theme.palette.surface : theme.palette.surfaceContainerLow,
-  transition: "background-color 0.15s ease",
 }));
 
 const StyledQueueCardHeader = styled(Box)(({ theme }) => ({
@@ -258,7 +248,10 @@ export function ComplaintQueueCardMobile({
   const isUnanswered = row.status === ComplaintStatus.Unanswered;
 
   return (
-    <StyledQueueCardPaper elevation={0} isUnanswered={isUnanswered}>
+    <MobileCardListItem
+      variant="rounded"
+      accentBorder={isUnanswered ? { color: "warning", side: "inline-start" } : undefined}
+    >
       <StyledQueueCardHeader>
         <StyledSubmitterInfoBox>
           <StyledSubmitterAvatar src={row.avatarUrl || undefined}>
@@ -295,6 +288,6 @@ export function ComplaintQueueCardMobile({
         onAnswer={onAnswer}
         onDelete={onDelete}
       />
-    </StyledQueueCardPaper>
+    </MobileCardListItem>
   );
 }

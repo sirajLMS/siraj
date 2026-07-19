@@ -1,7 +1,7 @@
 "use client";
 
 import { AccessTimeOutlined, AcUnitOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { alpha, Box, Button, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { alpha, Box, Button, Paper, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
@@ -33,11 +33,6 @@ const StyledScheduleCard = styled(Paper, {
   width: "100%",
   opacity: 1,
   borderInlineStart: isLive ? `4px solid ${theme.palette.primary.main}` : undefined,
-}));
-
-const StyledCardList = styled(Stack)(({ theme }) => ({
-  gap: theme.spacing(2),
-  backgroundColor: theme.palette.surfaceContainerHighest,
 }));
 
 const StyledTimeHighlight = styled(Box)(({ theme }) => ({
@@ -436,52 +431,3 @@ export function TeacherScheduleMobileCardItem({
  * Mobile view is the only legitimate consumer of this implementation.
  */
 export const TeacherScheduleMobileCard = TeacherScheduleMobileCardItem;
-
-export interface TeacherScheduleMobileCardListProps {
-  readonly rows: readonly TeacherScheduleRow[];
-  readonly labels: TeacherDashboardViewLabels;
-  readonly canActivate: boolean;
-  readonly emptyMessage: string;
-  readonly onActivate?: (id: string) => void;
-  readonly onStartSession?: (id: string) => void;
-  readonly onMarkAbsent?: (id: string) => void;
-  readonly onRequestLeave?: (id: string) => void;
-}
-
-export function TeacherScheduleMobileCardList({
-  rows,
-  labels,
-  canActivate,
-  emptyMessage,
-  onActivate,
-  onStartSession,
-  onMarkAbsent,
-  onRequestLeave,
-}: Readonly<TeacherScheduleMobileCardListProps>) {
-  if (rows.length === 0) {
-    return (
-      <Box sx={{ py: 4, px: 2, textAlign: "center" }}>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {emptyMessage}
-        </Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <StyledCardList>
-      {rows.map(row => (
-        <TeacherScheduleMobileCard
-          key={row.id}
-          row={row}
-          labels={labels}
-          canActivate={canActivate}
-          onActivate={onActivate}
-          onStartSession={onStartSession}
-          onMarkAbsent={onMarkAbsent}
-          onRequestLeave={onRequestLeave}
-        />
-      ))}
-    </StyledCardList>
-  );
-}

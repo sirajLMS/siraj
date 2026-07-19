@@ -6,6 +6,7 @@ import { alpha } from "@mui/material/styles";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ClassSession, ClassSessionListProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { isJoinableClassSession } from "@/frontend/common/views/dashboard/students/history/types";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
@@ -75,19 +76,14 @@ function ClassSessionCard({
   const showJoin = isJoinableClassSession(session.executionState, session.outcome, { isFrozen: session.isFrozen });
 
   return (
-    <Box
-      sx={theme => ({
-        backgroundColor: theme.palette.surfaceContainerLowest,
-        borderRadius: "xl",
-        boxShadow: theme.palette.shadow.card,
-        border: `1px solid ${theme.palette.border.light}`,
-        p: theme.spacing(2),
-        display: "flex",
-        alignItems: "center",
-        gap: 2,
-        transition: "transform 0.2s",
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge">
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
       <Box
         component={Link}
         href={`/classes/${session.id}`}
@@ -162,7 +158,8 @@ function ClassSessionCard({
           label={t.joinSession}
         />
       ) : null}
-    </Box>
+      </Box>
+    </MobileCardListItem>
   );
 }
 
@@ -173,23 +170,20 @@ export function ClassSessionListMobile({ dateStr, sessions }: Readonly<ClassSess
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <SessionListHeader title={t.title} dateStr={dateStr} />
 
-      {sessions.length === 0 ? (
-        <Typography
-          variant="bodyMd"
-          sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center", py: 4 })}
-        >
-          {t.noSessions}
-        </Typography>
-      ) : (
-        sessions.map(session => (
+      <MobileCardList
+        rows={sessions}
+        emptyMessage={t.noSessions}
+        getKey={session => session.id}
+        paginationOptions={false}
+        layout="edge-to-edge"
+        renderItem={session => (
           <ClassSessionCard
-            key={session.id}
             session={session}
             statusLabel={t.status[session.status as keyof typeof t.status] ?? session.status}
             durationLabel={formatDuration(session.duration)}
           />
-        ))
-      )}
+        )}
+      />
     </Box>
   );
 }

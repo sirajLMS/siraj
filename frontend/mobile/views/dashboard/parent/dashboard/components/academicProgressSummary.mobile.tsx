@@ -1,9 +1,10 @@
 "use client";
 
 import { AnalyticsOutlined, DownloadOutlined } from "@mui/icons-material";
-import { Box, Button, LinearProgress, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, LinearProgress, Paper, Typography } from "@mui/material";
 import type { AcademicProgressSummaryProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardComponents.types";
 import type { StudentProgressItem } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 
 function ProgressRowMobile({
   student,
@@ -13,7 +14,7 @@ function ProgressRowMobile({
   readonly completionLabel: string;
 }) {
   return (
-    <Box>
+    <MobileCardListItem variant="edge-to-edge">
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.75 }}>
         <Typography variant="labelMd" sx={{ fontWeight: 700 }}>
           {student.name}
@@ -35,7 +36,7 @@ function ProgressRowMobile({
           },
         })}
       />
-    </Box>
+    </MobileCardListItem>
   );
 }
 
@@ -68,15 +69,17 @@ export function AcademicProgressSummaryMobile({
         <AnalyticsOutlined sx={theme => ({ fontSize: 24, color: theme.palette.header })} />
       </Box>
 
-      <Stack spacing={2} sx={{ mb: 2 }}>
-        {studentProgress.map(student => (
-          <ProgressRowMobile
-            key={student.id}
-            student={student}
-            completionLabel={labels.completion(student.completionPercent)}
-          />
-        ))}
-      </Stack>
+      <Box sx={{ mb: 2 }}>
+        <MobileCardList
+          rows={studentProgress}
+          getKey={student => student.id}
+          paginationOptions={false}
+          layout="edge-to-edge"
+          renderItem={student => (
+            <ProgressRowMobile student={student} completionLabel={labels.completion(student.completionPercent)} />
+          )}
+        />
+      </Box>
 
       <Button
         variant="outlined"

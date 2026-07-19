@@ -8,7 +8,7 @@ import type {
   PaymentCatalogRow,
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
 import { resolvePaymentDirectionLabel } from "@/frontend/common/views/dashboard/admin/payment-catalogs/utils/paymentCatalogLabels.utils";
-import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 // VARIANT JUSTIFICATION: extra field none — desktop has no paired data-grid
@@ -24,39 +24,33 @@ export function PaymentCatalogCardMobile({ row, onEdit, onDelete }: Readonly<Pay
   const dirLabel = resolvePaymentDirectionLabel(row.supportedDirections, t);
 
   return (
-    <Box
-      sx={{
-        py: 2,
-        borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
-        display: "flex",
-        flexDirection: "column",
-        gap: 0.5,
-      }}
-    >
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1 }}>
-        <Box>
-          <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
-            {row.slug}
-          </Typography>
-          <LocalizedStringDisplay value={row.name} />
+    <MobileCardListItem variant="edge-to-edge">
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1 }}>
+          <Box>
+            <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
+              {row.slug}
+            </Typography>
+            <LocalizedStringDisplay value={row.name} />
+          </Box>
+          <MobileStatusBadge
+            category="paymentMethod"
+            status={row.isActive ? "active" : "inactive"}
+            label={row.isActive ? t.active : t.inactive}
+          />
         </Box>
-        <MobileStatusBadge
-          category="paymentMethod"
-          status={row.isActive ? "active" : "inactive"}
-          label={row.isActive ? t.active : t.inactive}
-        />
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+          <Chip size="small" label={dirLabel} />
+        </Box>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
+          <IconButton size="small" aria-label={t.edit} onClick={() => onEdit(row)}>
+            <EditOutlined fontSize="small" />
+          </IconButton>
+          <IconButton size="small" aria-label={t.delete} onClick={() => onDelete(row)}>
+            <DeleteOutlined fontSize="small" />
+          </IconButton>
+        </Box>
       </Box>
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-        <Chip size="small" label={dirLabel} />
-      </Box>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
-        <IconButton size="small" aria-label={t.edit} onClick={() => onEdit(row)}>
-          <EditOutlined fontSize="small" />
-        </IconButton>
-        <IconButton size="small" aria-label={t.delete} onClick={() => onDelete(row)}>
-          <DeleteOutlined fontSize="small" />
-        </IconButton>
-      </Box>
-    </Box>
+    </MobileCardListItem>
   );
 }

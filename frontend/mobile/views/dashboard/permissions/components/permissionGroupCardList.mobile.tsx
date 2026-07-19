@@ -5,8 +5,8 @@ import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { RowMenuAnchor } from "@/frontend/common/views/dashboard/permissions/components/useRowMenuAnchor";
 import type { BasePermissionGroupListProps } from "@/frontend/common/views/dashboard/permissions/types";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
-import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -41,12 +41,7 @@ function GroupCardMobile({
   const permissionsCount = group.permissionIds?.length ?? 0;
 
   return (
-    <MobileBaseCard
-      sx={theme => ({
-        p: 2,
-        boxShadow: theme.palette.shadow.card,
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge">
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
@@ -134,7 +129,7 @@ function GroupCardMobile({
           </Typography>
         </Box>
       </Box>
-    </MobileBaseCard>
+    </MobileCardListItem>
   );
 }
 
@@ -148,21 +143,15 @@ export function PermissionGroupCardListMobile({
 }: Readonly<BasePermissionGroupListProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
-  if (groups.length === 0) {
-    return (
-      <Box sx={{ p: 4, textAlign: "center" }}>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t.noPermissionsFound}
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      {groups.map(group => (
+    <MobileCardList
+      rows={groups}
+      emptyMessage={t.noPermissionsFound}
+      getKey={group => group.id ?? group.slug ?? ""}
+      paginationOptions={{ mode: "client" }}
+      layout="edge-to-edge"
+      renderItem={group => (
         <GroupCardMobile
-          key={group.id ?? group.slug ?? ""}
           group={group}
           onViewGroup={onViewGroup}
           onEditGroup={onEditGroup}
@@ -170,7 +159,7 @@ export function PermissionGroupCardListMobile({
           onAssignGroup={onAssignGroup}
           rowMenuAnchor={groupRowMenuAnchor}
         />
-      ))}
-    </Box>
+      )}
+    />
   );
 }

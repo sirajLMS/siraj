@@ -3,7 +3,7 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Tab, Tabs } from "@mui/material";
 import type { PaymentCatalogAdminViewModel } from "@/frontend/common/views/dashboard/admin/payment-catalogs/usePaymentCatalogAdminViewModel";
-import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { PaymentCatalogCardMobile } from "@/frontend/mobile/views/dashboard/admin/payment-catalogs/components/paymentCatalogCard.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -20,6 +20,10 @@ export function PaymentCatalogAdminMobileView({
 }: Readonly<PaymentCatalogAdminViewModel>) {
   const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
 
+  const catalogRows =
+    activeTab === "mobileWallet" ? mobileWallets : activeTab === "paymentLink" ? paymentLinks : onlineAccounts;
+  const rows = catalogRows.filter((row): row is NonNullable<typeof row> & { id: string } => Boolean(row?.id));
+
   return (
     <MobilePageContainer>
       <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} edgeToEdge={false} actions={null} />
@@ -33,27 +37,14 @@ export function PaymentCatalogAdminMobileView({
           <Tab value="onlineAccount" label={t.tabs.onlineAccounts} />
         </Tabs>
 
-        {activeTab === "mobileWallet" && !loading ? (
-          <Box>
-            {mobileWallets.map(row =>
-              row?.id ? <PaymentCatalogCardMobile key={row.id} row={row} onEdit={onEdit} onDelete={onDelete} /> : null
-            )}
-          </Box>
-        ) : null}
-        {activeTab === "paymentLink" && !loading ? (
-          <Box>
-            {paymentLinks.map(row =>
-              row?.id ? <PaymentCatalogCardMobile key={row.id} row={row} onEdit={onEdit} onDelete={onDelete} /> : null
-            )}
-          </Box>
-        ) : null}
-        {activeTab === "onlineAccount" && !loading ? (
-          <Box>
-            {onlineAccounts.map(row =>
-              row?.id ? <PaymentCatalogCardMobile key={row.id} row={row} onEdit={onEdit} onDelete={onDelete} /> : null
-            )}
-          </Box>
-        ) : null}
+        <MobileCardList
+          rows={rows}
+          loading={loading}
+          getKey={row => row.id}
+          paginationOptions={{ mode: "client" }}
+          layout="edge-to-edge"
+          renderItem={row => <PaymentCatalogCardMobile row={row} onEdit={onEdit} onDelete={onDelete} />}
+        />
       </MobileContentStack>
     </MobilePageContainer>
   );

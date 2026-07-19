@@ -3,8 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { BasePermissionCatalogListProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { MobileCardList } from "@/frontend/mobile/components/ui";
-import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -24,7 +23,7 @@ export function PermissionCatalogCardListMobile({ permissions, groups }: Readonl
         });
 
         return (
-          <MobileBaseCard sx={{ p: 2 }}>
+          <MobileCardListItem variant="edge-to-edge">
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
                 <Box
@@ -109,7 +108,7 @@ export function PermissionCatalogCardListMobile({ permissions, groups }: Readonl
                 </Box>
               )}
             </Box>
-          </MobileBaseCard>
+          </MobileCardListItem>
         );
       }}
     />

@@ -9,6 +9,7 @@ import type {
 } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
 import {
   MobileCardList,
+  MobileCardListItem,
   MobileContentStack,
   MobilePageContainer,
   MobilePageHeader,
@@ -36,16 +37,8 @@ function DueCard({
   readonly onMarkPaid: (ids: string[]) => void;
 }>) {
   return (
-    <Box
-      sx={theme => ({
-        p: 2,
-        backgroundColor: theme.palette.surfaceContainer,
-        borderRadius: theme.layout.radius.section,
-        display: "flex",
-        flexDirection: "column",
-        gap: 1.5,
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge">
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
         {canMarkPaid ? <Checkbox checked={selected} onChange={() => onToggle(row.id)} size="small" /> : null}
         <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.75 }}>
@@ -103,6 +96,7 @@ function DueCard({
         </MobilePrimaryPageAction>
       ) : null}
     </Box>
+    </MobileCardListItem>
   );
 }
 

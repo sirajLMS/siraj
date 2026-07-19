@@ -5,6 +5,8 @@ import { Box, Stack, Typography } from "@mui/material";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashboard/supervisor/dashboard/useSupervisorDashboardViewModel";
 import {
+  MobileCardList,
+  MobileCardListItem,
   MobileContentStack,
   MobilePageContainer,
   MobilePageHeader,
@@ -71,15 +73,16 @@ export function SupervisorDashboardMobileView({
         </MobileSectionPanel>
 
         <MobileSectionPanel title={labels.recentApprovals}>
-          {recentApprovals.length === 0 ? (
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {labels.noRecentApprovals}
-            </Typography>
-          ) : (
-            <Stack sx={{ gap: 1.5 }}>
-              {recentApprovals.map(item => (
+          <MobileCardList
+            rows={recentApprovals}
+            loading={loading}
+            emptyMessage={labels.noRecentApprovals}
+            getKey={item => item.id}
+            paginationOptions={false}
+            layout="edge-to-edge"
+            renderItem={item => (
+              <MobileCardListItem variant="edge-to-edge">
                 <Box
-                  key={item.id}
                   sx={{
                     display: "flex",
                     alignItems: "center",
@@ -121,9 +124,9 @@ export function SupervisorDashboardMobileView({
                     {item.lessonDate}
                   </Typography>
                 </Box>
-              ))}
-            </Stack>
-          )}
+              </MobileCardListItem>
+            )}
+          />
         </MobileSectionPanel>
       </MobileContentStack>
     </MobilePageContainer>

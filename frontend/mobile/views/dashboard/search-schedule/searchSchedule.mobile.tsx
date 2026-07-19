@@ -1,5 +1,7 @@
 import { Box, Typography } from "@mui/material";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type {
+  SearchSchedulePageInfo,
   SearchScheduleResultItem,
   SearchScheduleResultSummary,
   SearchScheduleViewModel,
@@ -9,9 +11,8 @@ import {
   getColumnCount,
   groupGapsByDate,
 } from "@/frontend/common/views/dashboard/search-schedule/utils";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { SearchScheduleFormMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleForm.mobile";
-import { SearchSchedulePaginationFooterMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchSchedulePaginationFooter.mobile";
 import { SearchScheduleResultsSkeletonMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleResultsSkeleton.mobile";
 import { TeacherAvailabilityGridMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityGrid.mobile";
 import { TeacherAvailabilityMonthDrawerMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.mobile";
@@ -23,6 +24,10 @@ interface SearchScheduleMobileResultsProps {
   readonly toDate: string;
   readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreSearchSchedule"];
   readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
+  readonly pageInfo: SearchSchedulePageInfo | null | undefined;
+  readonly teacherCount: number;
+  readonly onPageChange: (page: number) => void;
+  readonly showPagination: boolean;
 }
 
 function SearchScheduleMobileResults({
@@ -31,6 +36,10 @@ function SearchScheduleMobileResults({
   toDate,
   t,
   onOpenMonthDrawer,
+  pageInfo,
+  teacherCount,
+  onPageChange,
+  showPagination,
 }: Readonly<SearchScheduleMobileResultsProps>) {
   if (!searchResult) {
     return null;
@@ -42,17 +51,15 @@ function SearchScheduleMobileResults({
     return teacher !== null && teacher !== undefined;
   });
 
-  if (activeTeachers.length === 0) {
-    return (
-      <Box sx={{ textAlign: "center", py: 6, px: 2 }}>
-        <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t.noResults}
-        </Typography>
-      </Box>
-    );
-  }
-
   const dateColumns = buildDateColumns(fromDate, toDate);
+  const paginationOptions = showPagination && pageInfo
+    ? buildServerPaginationOptions({
+        page: (pageInfo.currentPage ?? 1) - 1,
+        pageSize: pageInfo.perPage ?? teacherCount ?? 10,
+        totalCount: pageInfo.total ?? 0,
+        onPageChange,
+      })
+    : false;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -66,18 +73,22 @@ function SearchScheduleMobileResults({
         {t.resultsCount(searchResult.totalCount ?? activeTeachers.length, totalGaps)}
       </Typography>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {activeTeachers.map(teacher => (
+      <MobileCardList
+        rows={activeTeachers}
+        emptyMessage={t.noResults}
+        getKey={teacher => teacher.id ?? ""}
+        paginationOptions={paginationOptions}
+        layout="edge-to-edge"
+        renderItem={teacher => (
           <TeacherAvailabilityGridMobile
-            key={teacher.id ?? ""}
             teacher={teacher}
             fromDate={fromDate}
             dateColumns={dateColumns}
             gapsByDate={groupGapsByDate(teacher.gaps)}
             onOpenMonthDrawer={onOpenMonthDrawer}
           />
-        ))}
-      </Box>
+        )}
+      />
     </Box>
   );
 }
@@ -169,14 +180,10 @@ export function SearchScheduleMobileView({
             toDate={toDate}
             t={t}
             onOpenMonthDrawer={onOpenMonthDrawer}
-          />
-        ) : null}
-
-        {showPaginationFooter && pageInfo ? (
-          <SearchSchedulePaginationFooterMobile
             pageInfo={pageInfo}
             teacherCount={teacherCount}
             onPageChange={onPageChange}
+            showPagination={showPaginationFooter}
           />
         ) : null}
       </Box>

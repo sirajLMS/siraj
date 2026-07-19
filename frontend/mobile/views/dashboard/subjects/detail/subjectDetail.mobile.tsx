@@ -6,16 +6,11 @@ import {
   Chip,
   CircularProgress,
   IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   Typography,
 } from "@mui/material";
 import type { SubjectResourceItem } from "@/frontend/common/views/dashboard/subjects/detail/types";
 import type { SubjectDetailViewModel } from "@/frontend/common/views/dashboard/subjects/detail/useSubjectDetailViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 
 function ResourceItemMobile({
@@ -28,26 +23,36 @@ function ResourceItemMobile({
   onDownload: (resource: SubjectResourceItem) => void;
 }>) {
   return (
-    <ListItem
-      disablePadding
-      secondaryAction={
-        resource.filePath ? (
-          <IconButton edge="end" onClick={() => onDownload(resource)} aria-label={labels.download}>
+    <MobileCardListItem variant="edge-to-edge" interactive>
+      <Box
+        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+        onClick={() => {
+          if (resource.filePath) onDownload(resource);
+        }}
+      >
+        <FolderOutlined />
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="bodyMd">{resource.displayName ?? labels.untitledResource}</Typography>
+          {resource.resourceType ? (
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {resource.resourceType}
+            </Typography>
+          ) : null}
+        </Box>
+        {resource.filePath ? (
+          <IconButton
+            edge="end"
+            onClick={e => {
+              e.stopPropagation();
+              onDownload(resource);
+            }}
+            aria-label={labels.download}
+          >
             <DownloadOutlined />
           </IconButton>
-        ) : undefined
-      }
-    >
-      <ListItemButton onClick={() => onDownload(resource)} disabled={!resource.filePath}>
-        <ListItemIcon sx={{ minWidth: 40 }}>
-          <FolderOutlined />
-        </ListItemIcon>
-        <ListItemText
-          primary={resource.displayName ?? labels.untitledResource}
-          secondary={resource.resourceType ?? undefined}
-        />
-      </ListItemButton>
-    </ListItem>
+        ) : null}
+      </Box>
+    </MobileCardListItem>
   );
 }
 
@@ -102,24 +107,16 @@ export function SubjectDetailMobileView({
       )}
 
       <MobileSectionPanel title={labels.resourcesTitle} subTitle={labels.resourcesSubtitle(resources.length)}>
-        {resources.length === 0 ? (
-          <Box sx={{ py: 4, textAlign: "center" }}>
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {labels.noResources}
-            </Typography>
-          </Box>
-        ) : (
-          <List disablePadding>
-            {resources.map(resource => (
-              <ResourceItemMobile
-                key={resource.id ?? ""}
-                resource={resource}
-                labels={labels}
-                onDownload={onDownloadResource}
-              />
-            ))}
-          </List>
-        )}
+        <MobileCardList
+          rows={resources}
+          emptyMessage={labels.noResources}
+          getKey={resource => resource.id ?? ""}
+          paginationOptions={{ mode: "client" }}
+          layout="edge-to-edge"
+          renderItem={resource => (
+            <ResourceItemMobile resource={resource} labels={labels} onDownload={onDownloadResource} />
+          )}
+        />
       </MobileSectionPanel>
     </MobilePageContainer>
   );

@@ -1,7 +1,8 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
 import type { ResourceLibraryListProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
+import { Box, Typography } from "@mui/material";
+import { MobileCardList } from "@/frontend/mobile/components/ui";
 import { ResourceLibraryCardMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceLibraryCard.mobile";
 import { ResourceLibraryHeaderMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceLibraryHeader.mobile";
 
@@ -32,27 +33,22 @@ export function ResourceLibraryListMobile({
         />
       </Box>
 
-      {resources.length === 0 ? (
-        <Typography
-          variant="bodyMd"
-          sx={theme => ({ color: theme.palette.text.secondary, py: 4, textAlign: "center" })}
-        >
-          {labels.library.noEntries}
-        </Typography>
-      ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-          {resources.map(resource => (
-            <ResourceLibraryCardMobile
-              key={resource.id}
-              resource={resource}
-              labels={labels}
-              canManage={canManage}
-              onDeleteRequest={onDeleteRequest}
-              onCardClick={onCardClick}
-            />
-          ))}
-        </Box>
-      )}
+      <MobileCardList
+        rows={resources}
+        emptyMessage={labels.library.noEntries}
+        getKey={resource => resource.id}
+        paginationOptions={{ mode: "client" }}
+        layout="edge-to-edge"
+        renderItem={resource => (
+          <ResourceLibraryCardMobile
+            resource={resource}
+            labels={labels}
+            canManage={canManage}
+            onDeleteRequest={onDeleteRequest}
+            onCardClick={onCardClick}
+          />
+        )}
+      />
     </Box>
   );
 }

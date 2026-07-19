@@ -2,7 +2,7 @@
 
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { FutureClassCardMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/futureClassCard.mobile";
 import { ImportantNotesMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/importantNotes.mobile";
 import { JumpToDateHeaderMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.mobile";
@@ -77,15 +77,20 @@ export function FutureScheduleViewMobile({
               </Stack>
             </Box>
 
-            {classes.map(item => (
-              <FutureClassCardMobile
-                key={item.id ?? ""}
-                item={item}
-                onRequestLeave={() => {
-                  if (item.id) onRequestLeave(item.id);
-                }}
-              />
-            ))}
+            <MobileCardList
+              rows={classes}
+              getKey={item => item.id ?? ""}
+              paginationOptions={{ mode: "client" }}
+              layout="edge-to-edge"
+              renderItem={item => (
+                <FutureClassCardMobile
+                  item={item}
+                  onRequestLeave={() => {
+                    if (item.id) onRequestLeave(item.id);
+                  }}
+                />
+              )}
+            />
           </Stack>
         </Grid>
 

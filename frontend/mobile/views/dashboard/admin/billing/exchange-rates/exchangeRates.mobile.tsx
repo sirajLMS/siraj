@@ -11,6 +11,8 @@ import type {
 } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/useExchangeRatesViewModel";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
 import {
+  MobileCardList,
+  MobileCardListItem,
   MobileContentStack,
   MobilePageContainer,
   MobilePageHeader,
@@ -224,34 +226,33 @@ export function ExchangeRatesMobileView({
           </Box>
           {ratesLoading && rates.length === 0 ? (
             <Typography sx={theme => ({ color: theme.palette.text.secondary, py: 2 })}>{labels.noRates}</Typography>
-          ) : rates.length === 0 ? (
-            <Typography sx={theme => ({ color: theme.palette.text.secondary, py: 2 })}>{labels.noRates}</Typography>
           ) : (
-            rates.map(row => (
-              <Box
-                key={row.id}
-                sx={{
-                  py: 1.5,
-                  borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 0.25,
-                }}
-              >
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Typography sx={{ fontWeight: 700 }}>
-                    {row.fromCurrency} → {row.toCurrency}
-                  </Typography>
-                  <Typography sx={{ fontWeight: 700 }}>{row.rate}</Typography>
-                </Box>
-                <Typography variant="bodyMd" color="textSecondary">
-                  {row.source ?? "—"}
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  {formatExchangeRateTimestamp(row.effectiveDate)}
-                </Typography>
-              </Box>
-            ))
+            <MobileCardList
+              rows={rates}
+              loading={ratesLoading}
+              emptyMessage={labels.noRates}
+              getKey={row => row.id}
+              paginationOptions={{ mode: "client" }}
+              layout="edge-to-edge"
+              renderItem={row => (
+                <MobileCardListItem variant="edge-to-edge">
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                      <Typography sx={{ fontWeight: 700 }}>
+                        {row.fromCurrency} → {row.toCurrency}
+                      </Typography>
+                      <Typography sx={{ fontWeight: 700 }}>{row.rate}</Typography>
+                    </Box>
+                    <Typography variant="bodyMd" color="textSecondary">
+                      {row.source ?? "—"}
+                    </Typography>
+                    <Typography variant="caption" color="textSecondary">
+                      {formatExchangeRateTimestamp(row.effectiveDate)}
+                    </Typography>
+                  </Box>
+                </MobileCardListItem>
+              )}
+            />
           )}
         </MobileSectionPanel>
 

@@ -79,7 +79,7 @@ DashboardLayoutMobile (px: 0 — edge-to-edge)
 | Tier | Primitive | Pagination |
 |------|-----------|------------|
 | Desktop / shared | `AppDataGrid` / `DesktopAppDataGrid` | Required `paginationOptions` — wrapper owns footer UI |
-| Mobile | `MobileCardList` (preferred) | Required `paginationOptions` — list owns pager UI |
+| Mobile | `MobileCardList` + `MobileCardListItem` | Required `paginationOptions` — list owns pager UI (always shown when enabled) |
 | Mobile (rare) | `MobileAppDataGrid` | Same `paginationOptions` API |
 
 ### `paginationOptions` (required)
@@ -100,12 +100,10 @@ type ListPaginationOptions =
 ```
 
 - **Client:** parent passes full `rows`; primitive slices / pages internally.
-- **Server:** parent owns page in Zustand; pass one page of rows + `totalCount` + `onPageChange`. Prefer `buildServerPaginationOptions(...)`.
+- **Server:** parent owns page in Zustand; pass one page of rows + `totalCount` + `onPageChange`. Prefer `buildServerPaginationOptions(...)`. If the ViewModel already has server paging, mobile **must** use `mode: "server"` — never fake `client` on a server-sliced page.
 - **Do not** pass `slots.pagination`, `hideFooter`, `paginationMode`, or flat MUI pagination props.
-- **Mobile:** do not render sibling `MobilePaginationControls` next to a list — fold into `paginationOptions`. Feature card lists use `MobileListPagination` + `paginationOptions`.
+- **Mobile:** do not render sibling `MobilePaginationControls` next to a list — fold into `paginationOptions`. Every row shell uses `MobileCardListItem`. Pager remains visible when `paginationOptions !== false` (even one page / few rows).
 - **Desktop ad-hoc card lists** (e.g. complaints) may keep sibling `DesktopPaginationControls` when intentional.
-- **Non-list footers** (e.g. search-schedule sticky bar) may use standalone `PaginationControls`.
-
 ### Wrapper features
 
 - Themed headers (`palette.table.header`)
@@ -117,7 +115,7 @@ type ListPaginationOptions =
 ### Mobile strategy
 
 - **Desktop:** `*AppDataGrid` inside `SectionPanel`
-- **Mobile:** `MobileCardList` / feature `*CardList` — do not force DataGrid on small screens
+- **Mobile:** `MobileCardList` + `MobileCardListItem` — do not force DataGrid on small screens; do not hand-roll `rows.map` for entity collections
 
 ---
 
@@ -318,8 +316,7 @@ When building or refactoring a dashboard page:
 - [ ] Use `MetricCard` for stat rows
 - [ ] Use `SectionPanel` for table/list sections
 - [ ] Desktop table → feature `*DataGrid` wrapping `AppDataGrid` / `DesktopAppDataGrid` with `paginationOptions`
-- [ ] Mobile list → `MobileCardList` (or feature card list) with `paginationOptions` — no sibling mobile pagers
-- [ ] Mobile → existing or new `*CardList`
+- [ ] Mobile list → `MobileCardList` + `MobileCardListItem` with `paginationOptions` — no sibling mobile pagers; server ViewModels use `buildServerPaginationOptions`
 - [ ] Status cells → shared `StatusBadge`
 - [ ] Pass i18n `noEntries` / `noClasses` to DataGrid `emptyMessage`
 - [ ] Wire real pagination (no decorative prev/next buttons)

@@ -1,27 +1,10 @@
 "use client";
 
 import { WarningAmberOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import type { StudentCreditCardListMobileProps } from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
 import { formatClassesLeft } from "@/frontend/common/views/dashboard/billing/utils/parentInvoiceFormatters";
-import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
-
-const StyledCreditCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderRadius: 0,
-  border: `1px solid ${theme.palette.outlineVariant}`,
-  backgroundColor: theme.palette.surfaceContainerLowest,
-}));
-
-const StyledStudentNameTypography = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  color: theme.palette.primary.main,
-}));
-
-const StyledPlanTypography = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-}));
+import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 
 export function StudentCreditCardListMobile({
   rows,
@@ -32,30 +15,29 @@ export function StudentCreditCardListMobile({
   loading = false,
   sendingReminderId = null,
 }: Readonly<StudentCreditCardListMobileProps>) {
-  if (loading && rows.length === 0) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-        <CircularProgress size={28} />
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-      {rows.map(row => {
+    <MobileCardList
+      rows={rows}
+      loading={loading}
+      getKey={row => row.id}
+      paginationOptions={{ mode: "client" }}
+      layout="edge-to-edge"
+      renderItem={row => {
         const isNegative = row.status === "negative_balance";
-
         return (
-          <StyledCreditCard key={row.id} elevation={0}>
-            <StyledStudentNameTypography variant="titleLg" sx={{ mb: 0.5 }}>
+          <MobileCardListItem variant="edge-to-edge">
+            <Typography
+              variant="titleLg"
+              sx={theme => ({ mb: 0.5, fontWeight: 700, color: theme.palette.primary.main })}
+            >
               {row.studentName}
-            </StyledStudentNameTypography>
+            </Typography>
             <Typography variant="bodyMd" sx={{ mb: 1 }}>
               {row.parentEmail}
             </Typography>
-            <StyledPlanTypography variant="labelMd" sx={{ mb: 1.5 }}>
+            <Typography variant="labelMd" sx={theme => ({ mb: 1.5, color: theme.palette.text.secondary })}>
               {row.planType}
-            </StyledPlanTypography>
+            </Typography>
             <Box
               sx={{
                 display: "flex",
@@ -70,9 +52,9 @@ export function StudentCreditCardListMobile({
                   status={isNegative ? "OVERDUE" : "PAID"}
                   label={formatClassesLeft(row)}
                 />
-                {isNegative && (
+                {isNegative ? (
                   <WarningAmberOutlined sx={theme => ({ fontSize: 16, color: theme.palette.error.main })} />
-                )}
+                ) : null}
               </Box>
               <Typography
                 variant="bodyMd"
@@ -84,7 +66,7 @@ export function StudentCreditCardListMobile({
                 {labels.creditStatusLabels[row.status]}
               </Typography>
             </Box>
-            {isNegative && canManage && !billingActionsDisabled && (
+            {isNegative && canManage && !billingActionsDisabled ? (
               <Button
                 fullWidth
                 variant="contained"
@@ -95,10 +77,10 @@ export function StudentCreditCardListMobile({
               >
                 {sendingReminderId === row.id ? <CircularProgress size={18} color="inherit" /> : labels.sendReminder}
               </Button>
-            )}
-          </StyledCreditCard>
+            ) : null}
+          </MobileCardListItem>
         );
-      })}
-    </Box>
+      }}
+    />
   );
 }

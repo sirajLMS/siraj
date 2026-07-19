@@ -1,9 +1,9 @@
 "use client";
 
-import { Paper, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profileHref";
 import type { BaseAssociatedStudentsListProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentScheduleComponents.types";
-import { MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 function formatStatusLabel(status: string): string {
@@ -16,9 +16,14 @@ export function AssociatedStudentsCardListMobile({ rows }: Readonly<BaseAssociat
   const tProfile = useAppTranslation().profileTranslations.base;
 
   return (
-    <Stack spacing={1.5} aria-label={t.students.mobileListLabel}>
-      {rows.map(row => (
-        <Paper key={row.id} variant="outlined" sx={{ p: 2 }}>
+    <MobileCardList
+      rows={rows}
+      getKey={row => row.id ?? ""}
+      paginationOptions={false}
+      layout="edge-to-edge"
+      emptyMessage={t.students.mobileListLabel}
+      renderItem={row => (
+        <MobileCardListItem variant="edge-to-edge">
           <Stack spacing={1.5}>
             <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", gap: 1 }}>
               <MobilePersonProfileLink
@@ -44,8 +49,8 @@ export function AssociatedStudentsCardListMobile({ rows }: Readonly<BaseAssociat
               {t.students.columns.hoursPerWeek}: {row.hoursPerWeek}
             </Typography>
           </Stack>
-        </Paper>
-      ))}
-    </Stack>
+        </MobileCardListItem>
+      )}
+    />
   );
 }

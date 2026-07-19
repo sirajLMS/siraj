@@ -1,7 +1,8 @@
 "use client";
 
 import { DeleteOutlined } from "@mui/icons-material";
-import { Box, Card, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
+import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   BookItemCardProps,
@@ -32,21 +33,7 @@ export function BookItemCardMobile({ book, labels, onDelete }: Readonly<BookItem
   const statusLabel = labels[statusLabelMap[book.availabilityStatus]];
 
   return (
-    <Card
-      elevation={0}
-      sx={theme => ({
-        p: 2,
-        borderRadius: theme.layout.radius.card,
-        border: `1px solid ${theme.palette.outlineVariant}`,
-        backgroundColor: theme.palette.surfaceContainerLowest,
-        display: "flex",
-        flexDirection: "column",
-        gap: 1.5,
-        position: "relative",
-        transition: "border-color 0.15s ease",
-        "&:active": { borderColor: theme.palette.primary.main },
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge" interactive sx={{ position: "relative" }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 1 }}>
         <Typography variant="bodyLg" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
           {book.name}
@@ -82,6 +69,6 @@ export function BookItemCardMobile({ book, labels, onDelete }: Readonly<BookItem
           {statusLabel}
         </Typography>
       </Box>
-    </Card>
+    </MobileCardListItem>
   );
 }

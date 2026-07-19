@@ -1,11 +1,16 @@
 "use client";
 
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import type {
   ParentStudentRow,
   ParentStudentsViewModel,
 } from "@/frontend/common/views/dashboard/parent/students/useParentStudentsViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileCardListItem,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 
 function ParentStudentMobileCard({
   row,
@@ -15,14 +20,7 @@ function ParentStudentMobileCard({
   readonly labels: ParentStudentsViewModel["labels"];
 }) {
   return (
-    <Box
-      sx={theme => ({
-        p: 1.5,
-        borderRadius: 1,
-        border: `1px solid ${theme.palette.outlineVariant}`,
-        backgroundColor: theme.palette.surfaceContainerLowest,
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge">
       <Typography sx={{ typography: "titleMd", fontWeight: 600 }}>{row.name}</Typography>
       <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
         {labels.statusLabel(row.status ?? "")}
@@ -38,7 +36,7 @@ function ParentStudentMobileCard({
       <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
         {labels.hoursLabel(Number(row.hoursPerWeek ?? 0))}
       </Typography>
-    </Box>
+    </MobileCardListItem>
   );
 }
 
@@ -46,21 +44,20 @@ export function ParentStudentsMobileView({ labels, loading, error, rows }: Reado
   return (
     <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
-      {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress />
-        </Box>
-      ) : null}
       {error ? (
         <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.errors.failedToLoad}</Typography>
       ) : null}
-      {!loading && !error ? (
+      {!error ? (
         <Stack spacing={1}>
-          {rows.length === 0 ? (
-            <Typography sx={{ color: theme => theme.palette.text.secondary }}>{labels.noStudents}</Typography>
-          ) : (
-            rows.map(row => <ParentStudentMobileCard key={row.id} row={row} labels={labels} />)
-          )}
+          <MobileCardList
+            rows={rows}
+            loading={loading}
+            emptyMessage={labels.noStudents}
+            getKey={row => row.id}
+            paginationOptions={{ mode: "client" }}
+            layout="edge-to-edge"
+            renderItem={row => <ParentStudentMobileCard row={row} labels={labels} />}
+          />
         </Stack>
       ) : null}
     </MobilePageContainer>

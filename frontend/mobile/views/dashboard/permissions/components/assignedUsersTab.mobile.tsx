@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -134,102 +134,95 @@ export function AssignedUsersTabMobile({
         </StyledBulkActionBar>
       )}
 
-      {filteredAssignedUsers.length === 0 ? (
-        <Box sx={{ p: 4, textAlign: "center" }}>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t.noAssignedUsers}
-          </Typography>
-        </Box>
-      ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {filteredAssignedUsers.map(user => {
-            const id = user.id ?? "";
-            const checked = selectedAssignedUserIds.includes(id);
-            const profileHref = id ? profileHrefForUser(id) : undefined;
-
-            return (
-              <MobileBaseCard
-                key={(id || user.email) ?? ""}
-                sx={theme => ({
-                  p: 2,
-                  backgroundColor: checked ? theme.palette.primaryContainer : undefined,
-                })}
-              >
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                    <StyledUserAvatar>
-                      {user.name
-                        ?.split(" ")
-                        .map((w: string) => w[0])
-                        .join("")
-                        .slice(0, 2)
-                        .toUpperCase()}
-                    </StyledUserAvatar>
-                    <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
-                      {profileHref ? (
-                        <Link href={profileHref} style={{ textDecoration: "none", color: "inherit" }}>
-                          <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-                            {user.name}
-                          </Typography>
-                        </Link>
-                      ) : (
+      <MobileCardList
+        rows={filteredAssignedUsers}
+        emptyMessage={t.noAssignedUsers}
+        getKey={user => (user.id || user.email) ?? ""}
+        paginationOptions={{ mode: "client" }}
+        layout="edge-to-edge"
+        renderItem={user => {
+          const id = user.id ?? "";
+          const checked = selectedAssignedUserIds.includes(id);
+          const profileHref = id ? profileHrefForUser(id) : undefined;
+          return (
+            <MobileCardListItem
+              variant="edge-to-edge"
+              sx={theme => ({
+                backgroundColor: checked ? theme.palette.primaryContainer : undefined,
+              })}
+            >
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <StyledUserAvatar>
+                    {user.name
+                      ?.split(" ")
+                      .map((w: string) => w[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </StyledUserAvatar>
+                  <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
+                    {profileHref ? (
+                      <Link href={profileHref} style={{ textDecoration: "none", color: "inherit" }}>
                         <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
                           {user.name}
                         </Typography>
-                      )}
-                      <Typography
-                        variant="labelMd"
-                        sx={theme => ({
-                          color: theme.palette.text.secondary,
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        })}
-                      >
-                        {user.email}
+                      </Link>
+                    ) : (
+                      <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
+                        {user.name}
                       </Typography>
-                    </Box>
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={e => onUserToggle(id, e.target.checked)}
-                      style={{ width: 20, height: 20 }}
-                    />
-                  </Box>
-
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                    <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                      {t.assignedDate}:{" "}
-                      {group.createdAt
-                        ? new Date(group.createdAt).toLocaleDateString()
-                        : new Date().toLocaleDateString()}
+                    )}
+                    <Typography
+                      variant="labelMd"
+                      sx={theme => ({
+                        color: theme.palette.text.secondary,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      })}
+                    >
+                      {user.email}
                     </Typography>
                   </Box>
-
-                  <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
-                    {id && (
-                      <ViewAsUserButton
-                        variant="link"
-                        targetUserId={id}
-                        targetUserName={user.name ?? user.email ?? ""}
-                        targetIsSuperAdmin={group.slug === "super_admin"}
-                      />
-                    )}
-                    <StyledRemoveButton
-                      size="small"
-                      color="error"
-                      startIcon={<PersonRemoveOutlined fontSize="small" />}
-                      onClick={() => id && onRevokeUser(id)}
-                    >
-                      {t.removeUser}
-                    </StyledRemoveButton>
-                  </Box>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={e => onUserToggle(id, e.target.checked)}
+                    style={{ width: 20, height: 20 }}
+                  />
                 </Box>
-              </MobileBaseCard>
-            );
-          })}
-        </Box>
-      )}
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                  <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+                    {t.assignedDate}:{" "}
+                    {group.createdAt
+                      ? new Date(group.createdAt).toLocaleDateString()
+                      : new Date().toLocaleDateString()}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
+                  {id ? (
+                    <ViewAsUserButton
+                      variant="link"
+                      targetUserId={id}
+                      targetUserName={user.name ?? user.email ?? ""}
+                      targetIsSuperAdmin={group.slug === "super_admin"}
+                    />
+                  ) : null}
+                  <StyledRemoveButton
+                    size="small"
+                    color="error"
+                    startIcon={<PersonRemoveOutlined fontSize="small" />}
+                    onClick={() => id && onRevokeUser(id)}
+                  >
+                    {t.removeUser}
+                  </StyledRemoveButton>
+                </Box>
+              </Box>
+            </MobileCardListItem>
+          );
+        }}
+      />
     </StyledTabContainer>
   );
 }

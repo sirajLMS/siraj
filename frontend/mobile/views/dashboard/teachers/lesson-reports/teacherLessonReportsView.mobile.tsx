@@ -54,7 +54,7 @@ export function TeacherLessonReportsMobileView({
             rows={rows}
             loading={loading}
             emptyMessage={noReportsMessage}
-            getKey={(row, index) => row.id ?? row.classInstanceId ?? `row-${index}`}
+            getKey={row => row.id ?? row.classInstanceId ?? `${row.lessonDate}-${row.submittedAt}`}
             paginationOptions={{ mode: "client" }}
             layout="edge-to-edge"
             renderItem={row => (

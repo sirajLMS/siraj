@@ -30,6 +30,7 @@ import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileCardList,
+  MobileCardListItem,
   MobileContentInset,
   MobileContentStack,
   MobileMetricCardGrid,
@@ -97,14 +98,7 @@ function MobileSessionItem({
   }
 
   return (
-    <Box
-      sx={theme => ({
-        p: 2,
-        borderRadius: 2,
-        backgroundColor: theme.palette.surfaceContainer,
-        border: `1px solid ${theme.palette.outlineVariant}`,
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge">
       <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", justifyContent: "space-between" }}>
         <Box sx={{ flex: 1 }}>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface, fontWeight: 700 })}>
@@ -139,7 +133,7 @@ function MobileSessionItem({
           </Button>
         </Box>
       ) : null}
-    </Box>
+    </MobileCardListItem>
   );
 }
 

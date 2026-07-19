@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 import type { OverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { OverrideEditControlsMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEditControls.mobile";
 import { OverrideEffectiveDisplayMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEffectiveDisplay.mobile";
 import { useAppTranslation } from "@/shared/locale";
@@ -37,20 +37,15 @@ export function OverridesDataGridMobile({
 }: Readonly<OverridesDataGridProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
 
-  if (filteredPermissions.length === 0) {
-    return (
-      <Box sx={{ p: 4, textAlign: "center" }}>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t.noPermissionsFound}
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2 }}>
-      {filteredPermissions.map(permission => {
-        const key = permission.id ?? permission.key ?? "";
+    <Box sx={{ p: 2 }}>
+    <MobileCardList
+      rows={filteredPermissions}
+      emptyMessage={t.noPermissionsFound}
+      getKey={permission => permission.id ?? permission.key ?? ""}
+      paginationOptions={{ mode: "client" }}
+      layout="edge-to-edge"
+      renderItem={permission => {
         const baselineGroups = userGroups.filter(
           g =>
             (permission.id && g.permissionIds?.includes(permission.id)) ||
@@ -74,7 +69,7 @@ export function OverridesDataGridMobile({
         }
 
         return (
-          <MobileBaseCard key={key} sx={{ p: 2 }}>
+          <MobileCardListItem variant="edge-to-edge">
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Box>
                 <StyledPermissionKeyText variant="bodyMd">{permission.key}</StyledPermissionKeyText>
@@ -110,9 +105,10 @@ export function OverridesDataGridMobile({
                 ) : null}
               </Box>
             </Box>
-          </MobileBaseCard>
+          </MobileCardListItem>
         );
-      })}
+      }}
+    />
     </Box>
   );
 }

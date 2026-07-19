@@ -1,19 +1,10 @@
 "use client";
 
-import { Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { AdminComplaintRow } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { MobileCardList } from "@/frontend/mobile/components/ui";
 import { ComplaintQueueCardMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintQueueCard.mobile";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
-
-const StyledEmptyStateMessage = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  paddingTop: theme.spacing(4),
-  paddingBottom: theme.spacing(4),
-  textAlign: "center",
-}));
 
 interface ComplaintQueueCardListMobileProps {
   readonly rows: readonly AdminComplaintRow[];
@@ -44,13 +35,10 @@ export function ComplaintQueueCardListMobile({
   onDelete,
   onPageChange,
 }: Readonly<ComplaintQueueCardListMobileProps>) {
-  if (rows.length === 0) {
-    return <StyledEmptyStateMessage variant="bodyMd">{labels.queue.noEntries}</StyledEmptyStateMessage>;
-  }
-
   return (
     <MobileCardList
       rows={rows}
+      emptyMessage={labels.queue.noEntries}
       getKey={row => row.id}
       layout="rounded"
       gap={2}

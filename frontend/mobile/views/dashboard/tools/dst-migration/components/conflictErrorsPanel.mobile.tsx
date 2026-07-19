@@ -3,45 +3,38 @@
 import { CancelOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Stack, Typography } from "@mui/material";
 import type { ConflictGroup } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly conflictGroups: readonly ConflictGroup[];
 }
 
-function ConflictCard({
-  studentName,
-  message,
-}: Readonly<{
-  studentName: string;
-  message: string;
-}>) {
-  return (
-    <Box
-      sx={theme => ({
-        p: 1.5,
-        borderRadius: 2,
-        borderLeft: 4,
-        borderColor: theme.palette.error.main,
-        backgroundColor: alpha(theme.palette.error.main, 0.06),
-      })}
-    >
-      <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main, mb: 0.5 })}>
-        {studentName}
-      </Typography>
-      <Stack direction="row" spacing={0.5} sx={{ alignItems: "flex-start" }}>
-        <WarningAmberOutlined sx={theme => ({ fontSize: 16, color: theme.palette.error.main, mt: 0.25 })} />
-        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.error.main })}>
-          {message}
-        </Typography>
-      </Stack>
-    </Box>
+type ConflictRow = {
+  readonly id: string;
+  readonly groupId: string;
+  readonly teacherName: string;
+  readonly studentName: string;
+  readonly message: string;
+  readonly isFirstInGroup: boolean;
+};
+
+function flattenConflicts(groups: readonly ConflictGroup[]): ConflictRow[] {
+  return groups.flatMap(group =>
+    group.conflicts.map((conflict, index) => ({
+      id: conflict.id,
+      groupId: group.id,
+      teacherName: group.teacherName,
+      studentName: conflict.studentName,
+      message: conflict.message,
+      isFirstInGroup: index === 0,
+    }))
   );
 }
 
 export function ConflictErrorsPanelMobile({ conflictGroups }: Readonly<Props>) {
   const t = useAppTranslation().dashboardTranslations.dstMigration;
+  const rows = flattenConflicts(conflictGroups);
 
   return (
     <Box
@@ -81,19 +74,39 @@ export function ConflictErrorsPanelMobile({ conflictGroups }: Readonly<Props>) {
           {t.sections.errors}
         </Typography>
       </Box>
-      <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-        {conflictGroups.map(group => (
-          <Box key={group.id} sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <MobileStatusBadge
-              category="session"
-              status="pending"
-              label={t.conflicts.teacherLabel(group.teacherName)}
-            />
-            {group.conflicts.map(conflict => (
-              <ConflictCard key={conflict.id} studentName={conflict.studentName} message={conflict.message} />
-            ))}
-          </Box>
-        ))}
+      <Box sx={{ p: 2 }}>
+        <MobileCardList
+          rows={rows}
+          getKey={row => row.id}
+          paginationOptions={false}
+          layout="edge-to-edge"
+          renderItem={row => (
+            <MobileCardListItem
+              variant="edge-to-edge"
+              accentBorder={{ color: "error", side: "inline-start" }}
+              sx={theme => ({ backgroundColor: alpha(theme.palette.error.main, 0.06) })}
+            >
+              {row.isFirstInGroup ? (
+                <Box sx={{ mb: 1 }}>
+                  <MobileStatusBadge
+                    category="session"
+                    status="pending"
+                    label={t.conflicts.teacherLabel(row.teacherName)}
+                  />
+                </Box>
+              ) : null}
+              <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main, mb: 0.5 })}>
+                {row.studentName}
+              </Typography>
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: "flex-start" }}>
+                <WarningAmberOutlined sx={theme => ({ fontSize: 16, color: theme.palette.error.main, mt: 0.25 })} />
+                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.error.main })}>
+                  {row.message}
+                </Typography>
+              </Stack>
+            </MobileCardListItem>
+          )}
+        />
       </Box>
     </Box>
   );
