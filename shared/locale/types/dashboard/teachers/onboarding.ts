@@ -61,7 +61,5 @@ export interface TeacherOnboardingLabels {
     readonly currencyRequired: string;
     readonly urlInvalid: string;
   };
-  readonly bannerJoinFaculty: string;
-  readonly bannerRegistrationForm: string;
   readonly optionalHint: string;
 }

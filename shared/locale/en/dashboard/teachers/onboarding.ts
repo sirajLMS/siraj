@@ -2,7 +2,7 @@ import type { TeacherOnboardingLabels } from "@/shared/locale/types/dashboard/te
 
 export const dashboardTeacherOnboardingEn: TeacherOnboardingLabels = {
   pageTitle: "Teacher Onboarding",
-  pageSubtitle: "Registration Form",
+  pageSubtitle: "Complete the form below to register a new teacher.",
   mandatoryFields: "* Mandatory fields",
   sections: {
     teacherInfo: "Teacher Information",
@@ -45,7 +45,7 @@ export const dashboardTeacherOnboardingEn: TeacherOnboardingLabels = {
     meetingLabel: "Enter label for meeting link",
   },
   actions: {
-    signup: "Sign Up",
+    signup: "Create",
     cancel: "Cancel",
     proceeding: "Proceeding...",
     successMessage: "Registration successful!",
@@ -63,7 +63,5 @@ export const dashboardTeacherOnboardingEn: TeacherOnboardingLabels = {
     currencyRequired: "Currency is required",
     urlInvalid: "Invalid URL format",
   },
-  bannerJoinFaculty: "Join Our Faculty Today",
-  bannerRegistrationForm: "Complete the form below to register as a teacher.",
   optionalHint: "Optional",
 };

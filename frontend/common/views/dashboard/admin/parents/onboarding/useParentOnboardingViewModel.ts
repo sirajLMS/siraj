@@ -1,25 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback, useEffect, useState } from "react";
+import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
+import { CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useCreateParentOnboarding } from "@/frontend/common/hooks/useCreateParentOnboarding";
 import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
 import { logger } from "@/frontend/common/utils/logger";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
-import type { ParentOnboardingViewProps } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
+import {
+  type ParentOnboardingFormData,
+  parentOnboardingSchema,
+} from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
+import { InvoiceType, PaymentMethodType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 import { useAppTranslation } from "@/shared/locale";
 
+const defaultValues: ParentOnboardingFormData = {
+  name: "",
+  email: "",
+  phone: "",
+  nationality: "",
+  address: "",
+  whatsapp: "",
+  facebook: "",
+  twitter: "",
+  invoiceType: InvoiceType.Monthly,
+  feeAmount: "",
+  payinMethod: {
+    type: PaymentMethodType.BankTransfer,
+    label: "",
+    details: {},
+  },
+  currency: CurrencyCode.Usd,
+  timezone: IanaTimezone.AfricaCairo,
+  meetingProvider: null,
+  meetingUrl: "",
+  meetingLabel: "",
+};
+
 export interface ParentOnboardingViewModel {
-  readonly register: ParentOnboardingViewProps["register"];
-  readonly control: ParentOnboardingViewProps["control"];
-  readonly errors: ParentOnboardingViewProps["errors"];
-  readonly handleSubmit: ParentOnboardingViewProps["handleSubmit"];
-  readonly isSubmitting: ParentOnboardingViewProps["isSubmitting"];
-  readonly onSubmit: ParentOnboardingViewProps["onSubmit"];
+  readonly form: UseFormReturn<ParentOnboardingFormData>;
+  readonly register: UseFormRegister<ParentOnboardingFormData>;
+  readonly control: Control<ParentOnboardingFormData>;
+  readonly errors: FieldErrors<ParentOnboardingFormData>;
+  readonly handleSubmit: UseFormHandleSubmit<ParentOnboardingFormData>;
+  readonly isSubmitting: boolean;
+  readonly onSubmit: (data: ParentOnboardingFormData) => Promise<void>;
   readonly meetingConfigWarning: boolean;
   readonly clearMeetingConfigWarning: () => void;
   readonly meetingSetupHref: string | undefined;
   readonly showSuccess: boolean;
-  readonly setShowSuccess: (value: boolean) => void;
+  readonly onDismissSuccess: () => void;
   readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["parentOnboarding"];
   readonly tMeeting: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfig"]["manager"];
   readonly tJoin: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfig"]["join"];
@@ -39,33 +71,57 @@ export function useParentOnboardingViewModel(): ParentOnboardingViewModel {
     ? `${profileHrefForParent({ userId: createdParent.userId, parentId: createdParent.parentId })}?tab=meeting`
     : undefined;
 
-  const onSubmit = async (
-    formData: ParentOnboardingViewProps["onSubmit"] extends (data: infer T) => void ? T : never
-  ) => {
+  const form = useForm<ParentOnboardingFormData>({
+    resolver: zodResolver(parentOnboardingSchema),
+    defaultValues,
+  });
+
+  const { register, control, handleSubmit, formState, reset } = form;
+  const errors = formState.errors;
+
+  const onSubmit = async (formData: ParentOnboardingFormData) => {
     try {
       logger.info("Submitting parent onboarding form", { formData });
       await execute(formData);
       logger.info("Parent onboarding form submitted successfully");
       setShowSuccess(true);
+      reset(defaultValues);
     } catch (error) {
       logger.error("Failed to submit parent onboarding form", { error });
     }
   };
 
+  const onDismissSuccess = useCallback(() => {
+    setShowSuccess(false);
+  }, []);
+
+  useEffect(() => {
+    if (!showSuccess) return undefined;
+    const timer = setTimeout(() => {
+      onDismissSuccess();
+    }, 3000);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [showSuccess, onDismissSuccess]);
+
   return {
-    register: undefined as unknown as ParentOnboardingViewProps["register"],
-    control: undefined as unknown as ParentOnboardingViewProps["control"],
-    errors: undefined as unknown as ParentOnboardingViewProps["errors"],
-    handleSubmit: undefined as unknown as ParentOnboardingViewProps["handleSubmit"],
+    form,
+    register,
+    control,
+    errors,
+    handleSubmit,
     isSubmitting: loading,
     onSubmit,
     meetingConfigWarning,
     clearMeetingConfigWarning,
     meetingSetupHref,
     showSuccess,
-    setShowSuccess,
+    onDismissSuccess,
     t,
     tMeeting,
     tJoin,
   };
 }
+
+export { FormProvider };

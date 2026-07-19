@@ -12,39 +12,6 @@ import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/compone
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar";
-import { useAppTranslation } from "@/shared/locale";
-
-function OnboardingBanner() {
-  const t = useAppTranslation().dashboardTranslations.teacherOnboarding;
-
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        height: 128,
-        borderRadius: 3,
-        overflow: "hidden",
-        position: "relative",
-        mb: 2,
-      }}
-    >
-      <Box component="img" src="/demo/avatars/03.png" sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
-      <Box
-        sx={theme => ({
-          position: "absolute",
-          inset: 0,
-          background: `linear-gradient(to top, ${theme.palette.scrim} 0%, transparent 100%)`,
-        })}
-      />
-      <Box sx={theme => ({ position: "absolute", bottom: 16, left: 16, color: theme.palette.onSurface })}>
-        <Typography variant="labelUppercase" sx={{ opacity: 0.9 }}>
-          {t.bannerJoinFaculty}
-        </Typography>
-        <Typography variant="headlineMd">{t.bannerRegistrationForm}</Typography>
-      </Box>
-    </Box>
-  );
-}
 
 function FormActions({
   isSubmitting,
@@ -115,7 +82,6 @@ export function TeacherOnboardingMobileView({
           }}
           sx={{ display: "flex", flexDirection: "column", gap: 4, pb: 12 }}
         >
-          <OnboardingBanner />
           <MobileSectionPanel title={labels.sections.teacherInfo}>
             <TeacherInfoSection register={register} control={control} errors={errors} labels={labels} />
           </MobileSectionPanel>

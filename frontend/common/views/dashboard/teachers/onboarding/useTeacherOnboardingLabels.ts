@@ -66,8 +66,6 @@ export function useTeacherOnboardingLabels(): TeacherOnboardingLabels {
       currencyRequired: t.validation.currencyRequired,
       urlInvalid: t.validation.urlInvalid,
     },
-    bannerJoinFaculty: t.bannerJoinFaculty,
-    bannerRegistrationForm: t.bannerRegistrationForm,
     optionalHint: t.optionalHint,
   };
 }

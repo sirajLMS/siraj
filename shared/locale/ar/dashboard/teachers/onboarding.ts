@@ -2,7 +2,7 @@ import type { TeacherOnboardingLabels } from "@/shared/locale/types/dashboard/te
 
 export const dashboardTeacherOnboardingAr: TeacherOnboardingLabels = {
   pageTitle: "انضمام المعلم",
-  pageSubtitle: "نموذج التسجيل",
+  pageSubtitle: "أكمل النموذج أدناه لتسجيل معلم جديد.",
   mandatoryFields: "* الحقول الإلزامية",
   sections: {
     teacherInfo: "معلومات المعلم",
@@ -45,7 +45,7 @@ export const dashboardTeacherOnboardingAr: TeacherOnboardingLabels = {
     meetingLabel: "أدخل تسمية رابط الاجتماع",
   },
   actions: {
-    signup: "تسجيل",
+    signup: "إنشاء",
     cancel: "إلغاء",
     proceeding: "جاري المعالجة...",
     successMessage: "تم التسجيل بنجاح!",
@@ -63,7 +63,5 @@ export const dashboardTeacherOnboardingAr: TeacherOnboardingLabels = {
     currencyRequired: "العملة مطلوبة",
     urlInvalid: "رابط غير صالح",
   },
-  bannerJoinFaculty: "انضم إلى هيئتنا التدريسية اليوم",
-  bannerRegistrationForm: "أكمل النموذج أدناه للتسجيل كمعلم.",
   optionalHint: "اختياري",
 };
