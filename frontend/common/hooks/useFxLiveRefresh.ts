@@ -80,7 +80,7 @@ export function useFxLiveRefresh(): void {
 
       client
         .refetchQueries({
-          include: [{ query: profileByUserIdQueryDocument }, { query: userQueryDocument }, { query: meQueryDocument }],
+          include: [profileByUserIdQueryDocument, userQueryDocument, meQueryDocument],
         })
         .catch(error => {
           logger.warn("FX live refresh refetchQueries failed", { error: error.message });

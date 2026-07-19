@@ -7,23 +7,21 @@ import {
   STUDENT_USER_EMAIL,
   SUPERVISOR_USER_EMAIL,
 } from "@/backend/db/seeds/lib";
+import { NotificationEventType } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { NotificationPreferencesService } from "@/backend/services/notification/notification-preferences.service";
 import type { UserSelectType } from "@/backend/types";
 import {
-  type NotificationEventTypeKey,
   STUDENT_NOTIFICATION_EVENTS,
   SUPERVISOR_NOTIFICATION_EVENTS,
 } from "@/shared/constants/notification-event-allowlists";
 
-function eventTypesForUser(
-  email: string
-): readonly (NotificationEventTypeKey | (typeof ALL_NOTIFICATION_EVENT_TYPES)[number])[] {
+function eventTypesForUser(email: string): readonly NotificationEventType[] {
   if (email === STUDENT_USER_EMAIL || /^student-\d+@seed\.siraj\.local$/.test(email)) {
-    return STUDENT_NOTIFICATION_EVENTS;
+    return STUDENT_NOTIFICATION_EVENTS.map(key => NotificationEventType[key as keyof typeof NotificationEventType]);
   }
   if (email === SUPERVISOR_USER_EMAIL) {
-    return SUPERVISOR_NOTIFICATION_EVENTS;
+    return SUPERVISOR_NOTIFICATION_EVENTS.map(key => NotificationEventType[key as keyof typeof NotificationEventType]);
   }
   return ALL_NOTIFICATION_EVENT_TYPES;
 }

@@ -28,8 +28,8 @@ describe("GraphQL Class Instance Detail Query", () => {
     studentId = r.studentId;
     teacherId = r.teacherId;
 
-    if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
-    const subjectId = await ensureTestSubjectId(adminToken!);
+    if (!adminToken || !teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
+    const subjectId = await ensureTestSubjectId(adminToken);
     if (!r.parentUserEmail) throw new Error("Parent email not returned");
     parentToken = await loginUser(r.parentUserEmail, "Test_Pass1!");
 

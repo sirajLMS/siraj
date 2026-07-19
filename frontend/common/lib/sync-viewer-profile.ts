@@ -38,7 +38,7 @@ export function syncViewerFromProfile(
   // Same-tab refetch for reactive consumers (e.g., FxStaleBanner, DisplayCurrencyHint)
   client
     .refetchQueries({
-      include: [{ query: meQueryDocument }, { query: fxSyncHealthQueryDocument }],
+      include: [meQueryDocument, fxSyncHealthQueryDocument],
     })
     .catch(() => {
       // refetch failures are non-fatal for cache sync

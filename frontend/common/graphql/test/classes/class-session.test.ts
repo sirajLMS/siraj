@@ -246,7 +246,8 @@ describe("GraphQL Class Session Integration Tests", () => {
   });
 
   test("teacher marks a class past waiting period as absent", async () => {
-    if (!teacherToken || !adminToken || !studentId || !teacherId) throw new Error("Missing test context");
+    if (!teacherToken || !adminToken || !studentId || !teacherId || !sharedSubjectId)
+      throw new Error("Missing test context");
 
     // Clear today's classes to avoid any overlaps with previously run tests
     await clearClassesOnDate(adminToken, testDate);
@@ -264,7 +265,7 @@ describe("GraphQL Class Session Integration Tests", () => {
         input: {
           studentId,
           teacherId,
-          subjectId: sharedSubjectId!,
+          subjectId: sharedSubjectId,
           scheduledStartAt: startAbsent.toISOString(),
           scheduledEndAt: endAbsent.toISOString(),
           durationMinutes: 60,
