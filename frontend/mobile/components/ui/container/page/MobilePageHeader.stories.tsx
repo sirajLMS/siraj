@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui/container/page/MobilePageHeader";
 
 const meta: Meta<typeof MobilePageHeader> = {
-  title: "UI/MobilePageHeader",
+  title: "UI/PageHeader/Mobile",
   component: MobilePageHeader,
   tags: ["ai-generated"],
   args: {

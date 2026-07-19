@@ -21,4 +21,8 @@ export const dashboardStudentPortalDashboardEn: StudentPortalDashboardLabels = {
   upcomingThisWeek: "This Week",
   noLessonReports: "No lesson reports yet",
   loadingMessage: "Loading...",
+  columnDate: "Date",
+  columnDuration: "Duration",
+  columnStatus: "Status",
+  columnActions: "Actions",
 };

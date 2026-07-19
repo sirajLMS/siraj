@@ -85,6 +85,7 @@ export function StudentDashboardMobileView({
   upcomingTodayCount,
   creditBalance,
   recentLessonReports,
+  reportsPagination: _reportsPagination,
   labels,
   loading,
   onJoinLesson,

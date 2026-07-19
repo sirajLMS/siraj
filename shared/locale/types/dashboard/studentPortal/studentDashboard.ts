@@ -19,4 +19,8 @@ export interface StudentPortalDashboardLabels {
   readonly upcomingThisWeek: string;
   readonly noLessonReports: string;
   readonly loadingMessage: string;
+  readonly columnDate: string;
+  readonly columnDuration: string;
+  readonly columnStatus: string;
+  readonly columnActions: string;
 }

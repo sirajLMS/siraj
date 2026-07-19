@@ -247,12 +247,12 @@ function createMocks(): MockLink.MockedResponse[] {
           studentId: "student-1",
           teacherId: null,
           paginationArgs: {
+            page: 1,
             first: 5,
             skip: null,
             after: null,
             before: null,
             last: null,
-            page: null,
             maxCount: null,
           },
         },
@@ -265,7 +265,13 @@ function createMocks(): MockLink.MockedResponse[] {
 afterEach(() => {
   cleanup();
   useUserStore.setState({ name: "", permissions: [] }, false);
-  useStudentDashboardStore.setState({ selectedReportId: null, reflectionDialogOpen: false });
+  useStudentDashboardStore.setState({
+    selectedReportId: null,
+    reflectionDialogOpen: false,
+    page: 0,
+    pageSize: 5,
+    reportsTotalCount: 0,
+  });
 });
 
 describe("StudentDashboardContainer", () => {

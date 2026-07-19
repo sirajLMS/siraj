@@ -1,0 +1,104 @@
+import { Box } from "@mui/material";
+import type { Meta, StoryObj } from "@storybook/react";
+import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
+import type { MobileMeetingConfigDisplayData } from "@/frontend/mobile/components/ui/display/meetingConfig";
+import { MobileMeetingConfigDisplay } from "@/frontend/mobile/components/ui/display/meetingConfig/MeetingConfigDisplay.mobile";
+
+const sampleConfig: MobileMeetingConfigDisplayData = {
+  id: "cfg-1",
+  label: "Personal Zoom",
+  isDefault: true,
+  providerSlug: "zoom",
+  providerName: { en: "Zoom", ar: "زووم" },
+  meetingId: "123-456-789",
+  source: EffectiveMeetingSource.Teacher,
+  details: {
+    meetingUrl: "https://zoom.us/j/123456789",
+    username: "teacher@example.com",
+    tenantId: "tenant-abc",
+  },
+  hasSecret: true,
+  masked: false,
+};
+
+const meta: Meta<typeof MobileMeetingConfigDisplay> = {
+  title: "UI/MeetingConfigDisplay/Mobile",
+  component: MobileMeetingConfigDisplay,
+  tags: ["ai-generated"],
+  parameters: {
+    viewport: {
+      defaultViewport: "mobile1",
+      viewports: {
+        mobile1: {
+          name: "Mobile (375px)",
+          styles: { width: "375px", height: "667px" },
+        },
+        mobile2: {
+          name: "Mobile Large (414px)",
+          styles: { width: "414px", height: "896px" },
+        },
+        tablet: {
+          name: "Tablet (768px)",
+          styles: { width: "768px", height: "1024px" },
+        },
+        desktop: {
+          name: "Desktop (1280px)",
+          styles: { width: "1280px", height: "800px" },
+        },
+      },
+    },
+  },
+  decorators: [
+    Story => (
+      <Box sx={{ p: 2, maxWidth: 375 }}>
+        <Story />
+      </Box>
+    ),
+  ],
+  args: {
+    config: sampleConfig,
+    showSource: false,
+    compact: false,
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof MobileMeetingConfigDisplay>;
+
+export const Default: Story = {};
+
+export const WithSource: Story = {
+  args: {
+    showSource: true,
+  },
+};
+
+export const MaskedCompact: Story = {
+  args: {
+    compact: true,
+    config: {
+      ...sampleConfig,
+      masked: true,
+      isDefault: false,
+    },
+  },
+};
+
+export const Empty: Story = {
+  args: {
+    config: {
+      id: "cfg-empty",
+      details: null,
+      providerName: null,
+      providerSlug: null,
+      label: null,
+    },
+  },
+};
+
+export const RTL: Story = {
+  globals: { locale: "ar" },
+  args: {
+    showSource: true,
+  },
+};

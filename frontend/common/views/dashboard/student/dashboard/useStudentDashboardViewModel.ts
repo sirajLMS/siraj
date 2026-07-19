@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { studentCreditBalanceQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/credit-lms.documents";
 import { pendingLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
@@ -47,9 +47,20 @@ function useStudentDashboardLabels(t: StudentPortalDashboardLabels): StudentDash
       upcomingThisWeek: t.upcomingThisWeek,
       noLessonReports: t.noLessonReports,
       loadingMessage: t.loadingMessage,
+      columnDate: t.columnDate,
+      columnDuration: t.columnDuration,
+      columnStatus: t.columnStatus,
+      columnActions: t.columnActions,
     }),
     [t]
   );
+}
+
+export interface ReportsPagination {
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+  readonly onPageChange: (page: number) => void;
 }
 
 export interface StudentDashboardViewModel {
@@ -59,6 +70,7 @@ export interface StudentDashboardViewModel {
   readonly upcomingTodayCount: number;
   readonly creditBalance: StudentCreditBalanceRow;
   readonly recentLessonReports: readonly RecentLessonReportRow[];
+  readonly reportsPagination: ReportsPagination;
   readonly labels: StudentDashboardLabels;
   readonly loading: boolean;
   readonly onJoinLesson: (id: string) => void;
@@ -78,8 +90,25 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
   const userName = useUserStore(state => state.name);
   const setSelectedReportId = useStudentDashboardStore(state => state.setSelectedReportId);
   const setReflectionDialogOpen = useStudentDashboardStore(state => state.setReflectionDialogOpen);
+  const page = useStudentDashboardStore(state => state.page);
+  const pageSize = useStudentDashboardStore(state => state.pageSize);
+  const setPage = useStudentDashboardStore(state => state.setPage);
+  const setReportsTotalCount = useStudentDashboardStore(state => state.setReportsTotalCount);
 
   const labels = useStudentDashboardLabels(t);
+
+  const paginationArgs = useMemo(
+    () => ({
+      page: page + 1,
+      first: pageSize,
+      skip: null,
+      after: null,
+      before: null,
+      last: null,
+      maxCount: null,
+    }),
+    [page, pageSize]
+  );
 
   const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
     variables: { studentId: null, year: null, month: null },
@@ -98,15 +127,7 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
     variables: {
       studentId: studentId ?? null,
       teacherId: null,
-      paginationArgs: {
-        first: 5,
-        skip: null,
-        after: null,
-        before: null,
-        last: null,
-        page: null,
-        maxCount: null,
-      },
+      paginationArgs,
     },
     skip: !studentId,
     fetchPolicy: "cache-and-network",
@@ -139,6 +160,14 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
     [reportsData]
   );
 
+  const totalCount = reportsData?.pendingLessonReports?.totalCount ?? 0;
+
+  useEffect(() => {
+    if (totalCount !== useStudentDashboardStore.getState().reportsTotalCount) {
+      setReportsTotalCount(totalCount);
+    }
+  }, [totalCount, setReportsTotalCount]);
+
   const loading = profileLoading || balanceLoading || reportsLoading;
 
   const handlers = useMemo(
@@ -165,8 +194,21 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
       handleEditProfile: () => {
         router.push("/profile");
       },
+      handleReportsPageChange: (newPage: number) => {
+        setPage(newPage);
+      },
     }),
-    [upcomingLessons, router, setSelectedReportId, setReflectionDialogOpen]
+    [upcomingLessons, router, setSelectedReportId, setReflectionDialogOpen, setPage]
+  );
+
+  const reportsPagination = useMemo<ReportsPagination>(
+    () => ({
+      page,
+      pageSize,
+      totalCount,
+      onPageChange: handlers.handleReportsPageChange,
+    }),
+    [page, pageSize, totalCount, handlers.handleReportsPageChange]
   );
 
   return {
@@ -176,6 +218,7 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
     upcomingTodayCount,
     creditBalance,
     recentLessonReports,
+    reportsPagination,
     labels,
     loading,
     onJoinLesson: handlers.handleJoinLesson,

@@ -8,7 +8,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card/MobileCardListItem";
 
 const meta: Meta<typeof MobileCardListItem> = {
-  title: "UI/Card/MobileCardListItem",
+  title: "UI/CardListItem/Mobile",
   component: MobileCardListItem,
   tags: ["ai-generated"],
   parameters: {

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { MobileContentStack } from "@/frontend/mobile/components/ui/container/MobileContentStack";
 
 const meta: Meta<typeof MobileContentStack> = {
-  title: "UI/Container/MobileContentStack",
+  title: "UI/ContentStack/Mobile",
   component: MobileContentStack,
   tags: ["autodocs"],
   decorators: [

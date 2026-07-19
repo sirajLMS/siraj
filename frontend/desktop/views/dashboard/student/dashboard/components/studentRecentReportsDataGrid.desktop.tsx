@@ -6,8 +6,11 @@ import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { RecentLessonReportRow } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
-import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
-import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
+import type {
+  ReportsPagination,
+  StudentDashboardViewModel,
+} from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
+import { DesktopAppDataGrid, DesktopGridPagination, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import type { AppLocale } from "@/shared/locale";
 
 interface StudentRecentReportsDataGridProps {
@@ -15,6 +18,7 @@ interface StudentRecentReportsDataGridProps {
   readonly labels: StudentDashboardViewModel["labels"];
   readonly locale: AppLocale;
   readonly loading: boolean;
+  readonly pagination: ReportsPagination;
   readonly onAddReflection: (classInstanceId: string) => void;
 }
 
@@ -29,13 +33,14 @@ export function StudentRecentReportsDataGrid({
   labels,
   locale,
   loading,
+  pagination,
   onAddReflection,
 }: Readonly<StudentRecentReportsDataGridProps>) {
   const columns = useMemo<GridColDef<RecentLessonReportRow>[]>(
     () => [
       {
         field: "lessonDate",
-        headerName: "",
+        headerName: labels.columnDate,
         flex: 1.4,
         minWidth: 180,
         renderCell: ({ row }) => (
@@ -53,7 +58,7 @@ export function StudentRecentReportsDataGrid({
       },
       {
         field: "durationMinutes",
-        headerName: "",
+        headerName: labels.columnDuration,
         width: 160,
         renderCell: ({ row }) => (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
@@ -64,7 +69,7 @@ export function StudentRecentReportsDataGrid({
       },
       {
         field: "status",
-        headerName: "",
+        headerName: labels.columnStatus,
         width: 140,
         renderCell: ({ row }) =>
           row.status ? (
@@ -78,7 +83,7 @@ export function StudentRecentReportsDataGrid({
       },
       {
         field: "actions",
-        headerName: "",
+        headerName: labels.columnActions,
         width: 150,
         sortable: false,
         renderCell: ({ row }) => (
@@ -107,9 +112,16 @@ export function StudentRecentReportsDataGrid({
         getRowId={row => row.id}
         loading={loading}
         emptyMessage={labels.noLessonReports}
-        hideFooter
         autoHeight
         ariaLabel={labels.recentLessonReports}
+        paginationMode="server"
+        rowCount={pagination.totalCount}
+        paginationModel={{ page: pagination.page, pageSize: pagination.pageSize }}
+        onPaginationModelChange={model => {
+          pagination.onPageChange(model.page);
+        }}
+        pageSizeOptions={[pagination.pageSize]}
+        slots={{ pagination: DesktopGridPagination }}
       />
     </Box>
   );

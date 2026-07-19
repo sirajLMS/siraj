@@ -16,6 +16,7 @@ export function StudentDashboardDesktopView({
   upcomingTodayCount,
   creditBalance,
   recentLessonReports,
+  reportsPagination,
   labels,
   loading,
   onJoinLesson,
@@ -73,6 +74,7 @@ export function StudentDashboardDesktopView({
           labels={labels}
           locale={locale}
           loading={loading}
+          pagination={reportsPagination}
           onAddReflection={onAddReflection}
         />
       </DesktopSectionPanel>

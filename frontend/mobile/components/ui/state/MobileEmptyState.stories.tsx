@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { MobileEmptyState } from "@/frontend/mobile/components/ui/state/MobileEmptyState";
 
 const meta: Meta<typeof MobileEmptyState> = {
-  title: "UI/State/MobileEmptyState",
+  title: "UI/EmptyState/Mobile",
   component: MobileEmptyState,
   tags: ["autodocs"],
   argTypes: {

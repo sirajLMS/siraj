@@ -21,4 +21,8 @@ export const dashboardStudentPortalDashboardAr: StudentPortalDashboardLabels = {
   upcomingThisWeek: "هذا الأسبوع",
   noLessonReports: "لا توجد تقارير حصص بعد",
   loadingMessage: "جارٍ التحميل...",
+  columnDate: "التاريخ",
+  columnDuration: "المدة",
+  columnStatus: "الحالة",
+  columnActions: "الإجراءات",
 };
