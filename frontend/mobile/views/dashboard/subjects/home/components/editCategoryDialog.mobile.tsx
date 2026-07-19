@@ -12,10 +12,10 @@ import {
   Typography,
 } from "@mui/material";
 import { type Control, Controller, type FieldErrors } from "react-hook-form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { ClassCategoryUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { EditCategoryFormValues } from "@/frontend/common/views/dashboard/subjects/home/schemas/category.schema";
 import type { EditCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { MobileFieldWrapper, standardInputSx } from "@/frontend/mobile/components/ui/form/field";
 
 function TextFieldController({
   name,
@@ -41,18 +41,18 @@ function TextFieldController({
       name={name}
       control={control}
       render={({ field }) => (
-        <MobileFieldWrapper label={label} required={required} error={error}>
-          <TextField
-            {...field}
-            fullWidth
-            variant="standard"
-            error={!!error}
-            multiline={multiline}
-            rows={rows}
-            disabled={disabled}
-            sx={standardInputSx}
-          />
-        </MobileFieldWrapper>
+        <TextField
+          {...field}
+          fullWidth
+          label={label}
+          required={required}
+          error={!!error}
+          helperText={error}
+          multiline={multiline}
+          rows={rows}
+          disabled={disabled}
+          sx={outlinedInputSx}
+        />
       )}
     />
   );

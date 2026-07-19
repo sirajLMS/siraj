@@ -25,9 +25,9 @@ import {
 } from "@mui/material";
 import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileCardList,
   MobileContentStack,
@@ -265,7 +265,9 @@ export function StudentHistoryMobileView({
         <MobileSectionPanel title={labels.lessonHistory}>
           <Stack spacing={2}>
             <FormControl fullWidth size="small">
-              <InputLabel id="mobile-history-subject-filter">{labels.filterBySubject}</InputLabel>
+              <InputLabel id="mobile-history-subject-filter" shrink>
+                {labels.filterBySubject}
+              </InputLabel>
               <Select
                 labelId="mobile-history-subject-filter"
                 label={labels.filterBySubject}
@@ -281,7 +283,9 @@ export function StudentHistoryMobileView({
               </Select>
             </FormControl>
             <FormControl fullWidth size="small">
-              <InputLabel id="mobile-history-status-filter">{labels.filterByStatus}</InputLabel>
+              <InputLabel id="mobile-history-status-filter" shrink>
+                {labels.filterByStatus}
+              </InputLabel>
               <Select
                 labelId="mobile-history-status-filter"
                 label={labels.filterByStatus}

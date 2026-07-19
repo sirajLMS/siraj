@@ -9,7 +9,7 @@ export function overrideTimePickerTextFieldSx(theme: Theme) {
   return {
     width: 150,
     "& .MuiOutlinedInput-root": {
-      borderColor: theme.palette.sidebar,
+      borderColor: theme.palette.primary.main,
       borderWidth: 2,
     },
   };
@@ -18,6 +18,6 @@ export function overrideTimePickerTextFieldSx(theme: Theme) {
 export function overrideTimePickerInputSx(theme: Theme) {
   return {
     fontWeight: 700,
-    color: theme.palette.sidebar,
+    color: theme.palette.primary.main,
   };
 }

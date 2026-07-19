@@ -1,14 +1,13 @@
 "use client";
 
-import { Grid, Input, MenuItem, Select } from "@mui/material";
+import { FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getLanguageByCode } from "@/frontend/common/lib/locale";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
-import { MobileFieldWrapper } from "@/frontend/mobile/components/ui/form/field";
 import { GenderSelectorMobile } from "@/frontend/mobile/components/ui/input/genderSelector";
 import { LanguageSelectorMobile } from "@/frontend/mobile/components/ui/input/languageSelector";
 
@@ -34,31 +33,36 @@ interface StudentInfoSectionProps {
   };
 }
 
+const statusLabelId = "student-onboarding-status-label-mobile";
+
 export function StudentInfoSection({ register, errors, control, labels }: Readonly<StudentInfoSectionProps>) {
   return (
     <MobileSectionPanel title={labels.sectionTitle}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <MobileFieldWrapper label={labels.name} required error={errors.name ? labels.nameMinLength : undefined}>
-            <Input
-              {...register("name")}
-              placeholder={labels.namePlaceholder}
-              error={Boolean(errors.name)}
-              fullWidth
-              sx={standardInputSx}
-            />
-          </MobileFieldWrapper>
+          <TextField
+            {...register("name")}
+            label={labels.name}
+            placeholder={labels.namePlaceholder}
+            required
+            error={Boolean(errors.name)}
+            helperText={errors.name ? labels.nameMinLength : undefined}
+            fullWidth
+            sx={outlinedInputSx}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <MobileFieldWrapper label={labels.dateOfBirth}>
-            <Input
-              {...register("dateOfBirth")}
-              type="date"
-              placeholder={labels.dateOfBirthPlaceholder}
-              fullWidth
-              sx={standardInputSx}
-            />
-          </MobileFieldWrapper>
+          <TextField
+            {...register("dateOfBirth")}
+            label={labels.dateOfBirth}
+            type="date"
+            placeholder={labels.dateOfBirthPlaceholder}
+            fullWidth
+            sx={outlinedInputSx}
+            slotProps={{
+              inputLabel: { shrink: true },
+            }}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <Controller
@@ -98,18 +102,19 @@ export function StudentInfoSection({ register, errors, control, labels }: Readon
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <MobileFieldWrapper label={labels.status}>
-            <Controller
-              control={control}
-              name="status"
-              render={({ field }) => (
-                <Select value={field.value} fullWidth onChange={field.onChange} sx={standardInputSx}>
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <FormControl fullWidth sx={outlinedInputSx}>
+                <InputLabel id={statusLabelId}>{labels.status}</InputLabel>
+                <Select {...field} labelId={statusLabelId} label={labels.status} fullWidth>
                   <MenuItem value={StudentStatus.OnTrial}>{labels.statusOnTrial}</MenuItem>
                   <MenuItem value={StudentStatus.Regular}>{labels.statusRegular}</MenuItem>
                 </Select>
-              )}
-            />
-          </MobileFieldWrapper>
+              </FormControl>
+            )}
+          />
         </Grid>
       </Grid>
     </MobileSectionPanel>

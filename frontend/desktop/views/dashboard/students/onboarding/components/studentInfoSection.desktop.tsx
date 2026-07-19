@@ -1,10 +1,10 @@
 "use client";
 
-import { Grid, Input, MenuItem, Select } from "@mui/material";
+import { FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
-import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { LanguageSelector } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -33,31 +33,36 @@ interface StudentInfoSectionProps {
   };
 }
 
+const statusLabelId = "student-onboarding-status-label";
+
 export function StudentInfoSection({ register, errors, control, labels }: Readonly<StudentInfoSectionProps>) {
   return (
     <SectionPanel title={labels.sectionTitle}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper label={labels.name} required error={errors.name ? labels.nameMinLength : undefined}>
-            <Input
-              {...register("name")}
-              placeholder={labels.namePlaceholder}
-              error={Boolean(errors.name)}
-              fullWidth
-              sx={standardInputSx}
-            />
-          </FieldWrapper>
+          <TextField
+            {...register("name")}
+            label={labels.name}
+            placeholder={labels.namePlaceholder}
+            required
+            error={Boolean(errors.name)}
+            helperText={errors.name ? labels.nameMinLength : undefined}
+            fullWidth
+            sx={outlinedInputSx}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper label={labels.dateOfBirth}>
-            <Input
-              {...register("dateOfBirth")}
-              type="date"
-              placeholder={labels.dateOfBirthPlaceholder}
-              fullWidth
-              sx={standardInputSx}
-            />
-          </FieldWrapper>
+          <TextField
+            {...register("dateOfBirth")}
+            label={labels.dateOfBirth}
+            type="date"
+            placeholder={labels.dateOfBirthPlaceholder}
+            fullWidth
+            sx={outlinedInputSx}
+            slotProps={{
+              inputLabel: { shrink: true },
+            }}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <Controller
@@ -97,18 +102,19 @@ export function StudentInfoSection({ register, errors, control, labels }: Readon
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper label={labels.status}>
-            <Controller
-              control={control}
-              name="status"
-              render={({ field }) => (
-                <Select value={field.value} fullWidth onChange={field.onChange} sx={standardInputSx}>
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <FormControl fullWidth sx={outlinedInputSx}>
+                <InputLabel id={statusLabelId}>{labels.status}</InputLabel>
+                <Select {...field} labelId={statusLabelId} label={labels.status} fullWidth>
                   <MenuItem value={StudentStatus.OnTrial}>{labels.statusOnTrial}</MenuItem>
                   <MenuItem value={StudentStatus.Regular}>{labels.statusRegular}</MenuItem>
                 </Select>
-              )}
-            />
-          </FieldWrapper>
+              </FormControl>
+            )}
+          />
         </Grid>
       </Grid>
     </SectionPanel>

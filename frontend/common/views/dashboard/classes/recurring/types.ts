@@ -14,8 +14,8 @@ export const DEFAULT_DAY_SCHEDULE: readonly DayScheduleConfig[] = [
   { day: DayOfWeek.Wednesday, enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: false },
   { day: DayOfWeek.Thursday, enabled: true, timeOverride: "13:30", showOverride: true, isWeekend: false },
   { day: DayOfWeek.Friday, enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: false },
-  { day: DayOfWeek.Saturday, enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: true },
-  { day: DayOfWeek.Sunday, enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: true },
+  { day: DayOfWeek.Saturday, enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: false },
+  { day: DayOfWeek.Sunday, enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: false },
 ];
 
 export interface SimpleEntity {
@@ -65,17 +65,6 @@ export interface DurationInputProps {
 }
 
 export interface DayScheduleRowProps {
-  readonly day: DayScheduleConfig;
-  readonly dayLabel: string;
-  readonly weekendOffLabel: string;
-  readonly timeOverrideLabel: string;
-  readonly index: number;
-  readonly onToggleDay: (index: number, enabled: boolean) => void;
-  readonly onToggleOverride: (index: number) => void;
-  readonly onTimeOverrideChange: (index: number, time: string) => void;
-}
-
-export interface MobileDayOverrideRowProps {
   readonly day: DayScheduleConfig;
   readonly dayLabel: string;
   readonly timeOverrideLabel: string;

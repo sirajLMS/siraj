@@ -2,14 +2,25 @@
 "use client";
 
 import { CheckCircleOutlined, InfoOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Typography,
+} from "@mui/material";
 import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/common/utils/student-status-transitions";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { ManagementControlsCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
-import { labelSx, outlinedInputSx } from "@/frontend/desktop/components/ui/form/field/formFieldStyles.desktop";
+import { outlinedInputSx } from "@/frontend/desktop/components/ui/form/field/formFieldStyles.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
 function TeacherSelection({
@@ -24,15 +35,15 @@ function TeacherSelection({
   const t = useAppTranslation().dashboardTranslations.teacherReassignment.controls;
   return (
     <Box>
-      <Box component="label" sx={labelSx}>
-        {t.assignTeacher}
-      </Box>
-      <FormControl fullWidth sx={{ mt: 1.5 }}>
+      <FormControl fullWidth sx={outlinedInputSx}>
+        <InputLabel id="teacher-reassignment-teacher-label-desktop" shrink>
+          {t.assignTeacher}
+        </InputLabel>
         <Select
           displayEmpty
           value={selectedTeacherId}
-          inputProps={{ "aria-label": "Without label" }}
-          sx={outlinedInputSx}
+          labelId="teacher-reassignment-teacher-label-desktop"
+          label={t.assignTeacher}
           onChange={e => {
             const val = e.target.value;
             if (typeof val === "string") onTeacherChange(val);
@@ -47,13 +58,8 @@ function TeacherSelection({
             </MenuItem>
           ))}
         </Select>
+        <FormHelperText sx={{ fontStyle: "italic" }}>{t.teacherAvailabilityNotice}</FormHelperText>
       </FormControl>
-      <Typography
-        variant="labelSm"
-        sx={theme => ({ mt: 1, color: theme.palette.onSurfaceVariant, fontStyle: "italic", display: "block" })}
-      >
-        {t.teacherAvailabilityNotice}
-      </Typography>
     </Box>
   );
 }
@@ -75,13 +81,14 @@ function StatusUpdate({
 
   return (
     <Box>
-      <Box component="label" sx={labelSx}>
-        {t.statusUpdate}
-      </Box>
-      <FormControl fullWidth sx={{ mt: 1.5 }}>
+      <FormControl fullWidth sx={outlinedInputSx}>
+        <InputLabel id="teacher-reassignment-status-label-desktop" shrink>
+          {t.statusUpdate}
+        </InputLabel>
         <Select
           value={selectedStatus}
-          sx={outlinedInputSx}
+          labelId="teacher-reassignment-status-label-desktop"
+          label={t.statusUpdate}
           onChange={e => {
             const val = e.target.value;
             if (typeof val === "string") onStatusChange(val);

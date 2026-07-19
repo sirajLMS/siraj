@@ -6,6 +6,10 @@ import {
   FormControl,
   FormControlLabel,
   FormHelperText,
+  FormLabel,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
   Radio,
   RadioGroup,
   TextField,
@@ -13,14 +17,15 @@ import {
 } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
 import { Controller, useFormContext } from "react-hook-form";
-import { LanguageDisplay } from "@/frontend/common/components/ui/display";
+import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
 import { AppDatePicker } from "@/frontend/common/components/ui/form";
+import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/components/quotaFieldStyles";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import { GENDER_OPTIONS } from "@/frontend/common/views/dashboard/students/quota/types";
-import { QuotaFormFieldDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/quotaFormField.desktop";
 import { SectionHeaderDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/sectionHeader.desktop";
 import { type StudentQuotaLabels, useAppTranslation } from "@/shared/locale";
 
@@ -39,24 +44,23 @@ function StudentNameField() {
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
   return (
-    <QuotaFormFieldDesktop label={t.fields.studentName}>
-      <Controller
-        name="studentName"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            placeholder={t.fields.studentNamePlaceholder}
-            variant="outlined"
-            fullWidth
-            disabled
-            error={Boolean(errors.studentName)}
-            helperText={errors.studentName?.message}
-            sx={quotaInputSx}
-          />
-        )}
-      />
-    </QuotaFormFieldDesktop>
+    <Controller
+      name="studentName"
+      control={control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label={t.fields.studentName}
+          placeholder={t.fields.studentNamePlaceholder}
+          variant="outlined"
+          fullWidth
+          disabled
+          error={Boolean(errors.studentName)}
+          helperText={errors.studentName?.message}
+          sx={quotaInputSx}
+        />
+      )}
+    />
   );
 }
 
@@ -67,52 +71,63 @@ function DateOfBirthField() {
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
   return (
-    <QuotaFormFieldDesktop label={t.fields.dateOfBirth}>
-      <Controller
-        name="dateOfBirth"
-        control={control}
-        render={({ field }) => (
-          <AppDatePicker
-            value={parseDateValue(field.value)}
-            onChange={(date: Date | null) => {
-              field.onChange(date && isValid(date) ? format(date, DATE_FORMAT) : "");
-            }}
-            slotProps={{
-              textField: {
-                variant: "outlined",
-                fullWidth: true,
-                disabled: true,
-                error: Boolean(errors.dateOfBirth),
-                helperText: errors.dateOfBirth?.message,
-                sx: quotaInputSx,
-                slotProps: { htmlInput: { autoComplete: "off" } },
-              },
-            }}
-          />
-        )}
-      />
-    </QuotaFormFieldDesktop>
+    <Controller
+      name="dateOfBirth"
+      control={control}
+      render={({ field }) => (
+        <AppDatePicker
+          value={parseDateValue(field.value)}
+          onChange={(date: Date | null) => {
+            field.onChange(date && isValid(date) ? format(date, DATE_FORMAT) : "");
+          }}
+          slotProps={{
+            textField: {
+              label: t.fields.dateOfBirth,
+              variant: "outlined",
+              fullWidth: true,
+              disabled: true,
+              error: Boolean(errors.dateOfBirth),
+              helperText: errors.dateOfBirth?.message,
+              sx: quotaInputSx,
+              slotProps: { htmlInput: { autoComplete: "off" } },
+            },
+          }}
+        />
+      )}
+    />
   );
 }
 
 function LanguageField() {
   const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const locale = useAppLocale();
   const {
     control,
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
   return (
-    <QuotaFormFieldDesktop label={t.fields.language} helperText={errors.language?.message}>
-      <Controller
-        name="language"
-        control={control}
-        render={({ field }) => (
-          <Box sx={quotaInputSx}>
-            <LanguageDisplay code={field.value} />
-          </Box>
-        )}
-      />
-    </QuotaFormFieldDesktop>
+    <Controller
+      name="language"
+      control={control}
+      render={({ field }) => (
+        <FormControl fullWidth variant="outlined" error={Boolean(errors.language)} sx={quotaInputSx}>
+          <InputLabel shrink>{t.fields.language}</InputLabel>
+          <OutlinedInput
+            label={t.fields.language}
+            readOnly
+            value={field.value ? getLanguageDisplayName(field.value, locale) : ""}
+            startAdornment={
+              field.value ? (
+                <InputAdornment position="start">
+                  <LocaleEmoji emoji={getLanguageEmoji(field.value)} />
+                </InputAdornment>
+              ) : undefined
+            }
+          />
+          {errors.language?.message ? <FormHelperText>{errors.language.message}</FormHelperText> : null}
+        </FormControl>
+      )}
+    />
   );
 }
 
@@ -130,40 +145,39 @@ function GenderField() {
         const hasGender = field.value === "MALE" || field.value === "FEMALE";
 
         return (
-          <QuotaFormFieldDesktop label={t.fields.gender}>
+          <FormControl error={Boolean(errors.gender)} component="fieldset" sx={{ px: 0 }}>
+            <FormLabel component="legend">{t.fields.gender}</FormLabel>
             {hasGender ? (
-              <FormControl error={Boolean(errors.gender)} sx={{ height: "48px", justifyContent: "center", px: 0 }}>
-                <RadioGroup {...field} row>
-                  {GENDER_OPTIONS.map(option => (
-                    <FormControlLabel
-                      key={option.value}
-                      value={option.value}
-                      disabled
-                      control={
-                        <Radio
-                          sx={theme => ({
-                            color: theme.palette.border.main,
-                            "&.Mui-checked": { color: theme.palette.primary.main },
-                          })}
-                        />
-                      }
-                      label={
-                        <Typography variant="bodyMd">
-                          {t.fields[option.labelKey as keyof StudentQuotaLabels["fields"]]}
-                        </Typography>
-                      }
-                      sx={option.value === GENDER_OPTIONS[0].value ? { mr: 4 } : undefined}
-                    />
-                  ))}
-                </RadioGroup>
-                {errors.gender ? <FormHelperText>{errors.gender.message}</FormHelperText> : null}
-              </FormControl>
+              <RadioGroup {...field} row sx={{ height: "48px", justifyContent: "center" }}>
+                {GENDER_OPTIONS.map(option => (
+                  <FormControlLabel
+                    key={option.value}
+                    value={option.value}
+                    disabled
+                    control={
+                      <Radio
+                        sx={theme => ({
+                          color: theme.palette.border.main,
+                          "&.Mui-checked": { color: theme.palette.primary.main },
+                        })}
+                      />
+                    }
+                    label={
+                      <Typography variant="bodyMd">
+                        {t.fields[option.labelKey as keyof StudentQuotaLabels["fields"]]}
+                      </Typography>
+                    }
+                    sx={option.value === GENDER_OPTIONS[0].value ? { mr: 4 } : undefined}
+                  />
+                ))}
+              </RadioGroup>
             ) : (
               <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, py: 1.5 })}>
                 {t.common.notSet}
               </Typography>
             )}
-          </QuotaFormFieldDesktop>
+            {errors.gender ? <FormHelperText>{errors.gender.message}</FormHelperText> : null}
+          </FormControl>
         );
       }}
     />

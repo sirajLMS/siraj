@@ -80,7 +80,9 @@ export function ReportFiltersFormDesktop({
       />
 
       <FormControl size="small" fullWidth>
-        <InputLabel id="reports-teacher-label">{labels.teacher}</InputLabel>
+        <InputLabel id="reports-teacher-label" shrink>
+          {labels.teacher}
+        </InputLabel>
         <Select labelId="reports-teacher-label" value={teacherId} label={labels.teacher} onChange={handleTeacherSelect}>
           <MenuItem value="">
             <em>{labels.allTeachers}</em>
@@ -94,7 +96,9 @@ export function ReportFiltersFormDesktop({
       </FormControl>
 
       <FormControl size="small" fullWidth>
-        <InputLabel id="reports-type-label">{labels.reportType}</InputLabel>
+        <InputLabel id="reports-type-label" shrink>
+          {labels.reportType}
+        </InputLabel>
         <Select
           labelId="reports-type-label"
           value={reportType}

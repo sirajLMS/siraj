@@ -66,9 +66,7 @@ export function ComplaintRecordCardListMobile({
   paginationOptions,
 }: Readonly<ComplaintRecordCardListMobileProps>) {
   const totalLabel = labels.totalRecords(
-    paginationOptions !== false && paginationOptions.mode === "server"
-      ? paginationOptions.totalCount
-      : records.length,
+    paginationOptions !== false && paginationOptions.mode === "server" ? paginationOptions.totalCount : records.length
   );
   const showPagination = paginationOptions !== false && paginationOptions.mode === "server";
 

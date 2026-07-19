@@ -1,24 +1,10 @@
 "use client";
 
 import { DescriptionOutlined, PersonOutlined } from "@mui/icons-material";
-import { Box, InputAdornment, TextField, Typography } from "@mui/material";
+import { Box, InputAdornment, TextField } from "@mui/material";
 import { Controller } from "react-hook-form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { SuggestionFormFieldsProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
-
-function FieldLabel({ children }: Readonly<{ children: string }>) {
-  return (
-    <Typography
-      variant={children.length > 20 ? "titleLg" : "labelMd"}
-      sx={theme => ({
-        color: theme.palette.onSurfaceVariant,
-        textTransform: children.length > 20 ? "none" : "uppercase",
-        fontWeight: children.length > 20 ? 600 : 500,
-      })}
-    >
-      {children}
-    </Typography>
-  );
-}
 
 export function SuggestionFormFieldsDesktop({
   control,
@@ -27,61 +13,61 @@ export function SuggestionFormFieldsDesktop({
 }: Readonly<Omit<SuggestionFormFieldsProps, "variant">>) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <FieldLabel>{labels.fullName}</FieldLabel>
-        <Controller
-          name="fullName"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              placeholder={labels.fullNamePlaceholder}
-              fullWidth
-              error={Boolean(errors.fullName)}
-              helperText={errors.fullName?.message}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonOutlined sx={theme => ({ color: theme.palette.primary.main })} />
-                    </InputAdornment>
-                  ),
-                },
-                htmlInput: { autoComplete: "name" },
-              }}
-            />
-          )}
-        />
-      </Box>
+      <Controller
+        name="fullName"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label={labels.fullName}
+            placeholder={labels.fullNamePlaceholder}
+            variant="outlined"
+            fullWidth
+            error={Boolean(errors.fullName)}
+            helperText={errors.fullName?.message}
+            sx={outlinedInputSx}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonOutlined sx={theme => ({ color: theme.palette.primary.main })} />
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: { autoComplete: "name" },
+            }}
+          />
+        )}
+      />
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <FieldLabel>{labels.suggestion}</FieldLabel>
-        <Controller
-          name="suggestion"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              placeholder={labels.suggestionPlaceholder}
-              fullWidth
-              multiline
-              minRows={6}
-              error={Boolean(errors.suggestion)}
-              helperText={errors.suggestion?.message}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start" sx={{ alignSelf: "flex-start", mt: 1 }}>
-                      <DescriptionOutlined sx={theme => ({ color: theme.palette.primary.main })} />
-                    </InputAdornment>
-                  ),
-                },
-                htmlInput: { autoComplete: "off" },
-              }}
-            />
-          )}
-        />
-      </Box>
+      <Controller
+        name="suggestion"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label={labels.suggestion}
+            placeholder={labels.suggestionPlaceholder}
+            variant="outlined"
+            fullWidth
+            multiline
+            minRows={6}
+            error={Boolean(errors.suggestion)}
+            helperText={errors.suggestion?.message}
+            sx={outlinedInputSx}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start" sx={{ alignSelf: "flex-start", mt: 1 }}>
+                    <DescriptionOutlined sx={theme => ({ color: theme.palette.primary.main })} />
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: { autoComplete: "off" },
+            }}
+          />
+        )}
+      />
     </Box>
   );
 }

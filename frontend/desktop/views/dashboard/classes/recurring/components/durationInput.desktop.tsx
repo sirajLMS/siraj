@@ -1,8 +1,8 @@
 "use client";
 
-import { Box, FormHelperText, TextField, Typography } from "@mui/material";
+import { Box, FormControl, FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { durationBoxSx, labelSx } from "@/frontend/common/components/ui/form";
+import { durationBoxSx } from "@/frontend/common/components/ui/form";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import type { DurationInputProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 
@@ -14,13 +14,12 @@ const StyledDurationUnitLabel = styled(Typography)(({ theme }) => ({
 
 export function DurationInputDesktop({ register, errors, isSubmitting, labels }: DurationInputProps) {
   const mainLabel = labels.duration;
+  const hasError = !!(errors.durationHours ?? errors.durationMinutes);
 
   return (
-    <Box>
-      <Box component="label" sx={labelSx}>
-        {mainLabel}
-      </Box>
-      <Box sx={{ display: "flex", gap: 2, flexDirection: "row" }}>
+    <FormControl component="fieldset" fullWidth error={hasError}>
+      <FormLabel component="legend">{mainLabel}</FormLabel>
+      <Box sx={{ display: "flex", gap: 2, flexDirection: "row", mt: 1 }}>
         <DurationField
           register={register}
           fieldName="durationHours"
@@ -40,12 +39,12 @@ export function DurationInputDesktop({ register, errors, isSubmitting, labels }:
           error={!!errors.durationMinutes}
         />
       </Box>
-      {(errors.durationHours ?? errors.durationMinutes) && (
+      {hasError && (
         <FormHelperText error sx={{ mt: 1 }}>
           {errors.durationHours?.message ?? errors.durationMinutes?.message}
         </FormHelperText>
       )}
-    </Box>
+    </FormControl>
   );
 }
 
@@ -59,9 +58,10 @@ interface DurationFieldProps {
   readonly error: boolean;
 }
 
-function DurationField({ register, fieldName, unit, max, isSubmitting, error }: DurationFieldProps) {
+function DurationField({ register, fieldName, label, unit, max, isSubmitting, error }: DurationFieldProps) {
   return (
-    <Box sx={{ flex: 1 }}>
+    <FormControl fullWidth error={error} sx={{ flex: 1 }}>
+      <FormLabel>{label}</FormLabel>
       <Box sx={durationBoxSx(false)}>
         <TextField
           {...register(fieldName, { valueAsNumber: true })}
@@ -82,6 +82,6 @@ function DurationField({ register, fieldName, unit, max, isSubmitting, error }: 
         />
         <StyledDurationUnitLabel>{unit}</StyledDurationUnitLabel>
       </Box>
-    </Box>
+    </FormControl>
   );
 }

@@ -1,11 +1,23 @@
 "use client";
 
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Select } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
 import { Controller } from "react-hook-form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { AssignGroupDialogProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { MobileFieldWrapper, standardInputSx } from "@/frontend/mobile/components/ui/form/field";
 import { useAppTranslation } from "@/shared/locale";
 
 export function AssignGroupDialogMobile({
@@ -53,20 +65,11 @@ export function AssignGroupDialogMobile({
             name="userId"
             control={control}
             render={({ field }) => (
-              <MobileFieldWrapper
-                label={t.selectUserLabel}
-                required
-                error={errors.userId ? t.selectUserPlaceholder : undefined}
-              >
-                <Select
-                  {...field}
-                  error={!!errors.userId}
-                  fullWidth
-                  variant="standard"
-                  displayEmpty
-                  sx={standardInputSx}
-                  disabled={isLoading}
-                >
+              <FormControl fullWidth required error={!!errors.userId} disabled={isLoading} sx={outlinedInputSx}>
+                <InputLabel id="assign-group-user-label-mobile" shrink>
+                  {t.selectUserLabel}
+                </InputLabel>
+                <Select {...field} labelId="assign-group-user-label-mobile" label={t.selectUserLabel} displayEmpty>
                   <MenuItem value="" disabled>
                     {t.selectUserPlaceholder}
                   </MenuItem>
@@ -76,7 +79,8 @@ export function AssignGroupDialogMobile({
                     </MenuItem>
                   ))}
                 </Select>
-              </MobileFieldWrapper>
+                {errors.userId ? <FormHelperText>{t.selectUserPlaceholder}</FormHelperText> : null}
+              </FormControl>
             )}
           />
         </Box>

@@ -79,6 +79,7 @@ function StudentSelectorField({
                 },
               }}
               label={labels.studentSelection}
+              variant="outlined"
               size="small"
               fullWidth
             />
@@ -121,20 +122,20 @@ export function ManualInvoiceFormFieldsMobile({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <MobileFieldCard label={labels.parentSelection}>{parentFieldNode}</MobileFieldCard>
-      <MobileFieldCard label={labels.studentSelection}>{studentFieldNode}</MobileFieldCard>
-      <MobileFieldCard label={labels.feeAmount}>
+      <MobileFieldCard>{parentFieldNode}</MobileFieldCard>
+      <MobileFieldCard>{studentFieldNode}</MobileFieldCard>
+      <MobileFieldCard>
         <ManualInvoiceFeeFieldMobile control={control} errors={errors} labels={labels} draftCurrency={draftCurrency} />
       </MobileFieldCard>
-      <MobileFieldCard label={currencyLabel}>
+      <MobileFieldCard>
         <CurrencyField control={control} label={currencyLabel} />
       </MobileFieldCard>
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-        <MobileFieldCard label={labels.issueDate}>
-          <ManualInvoiceDateFieldMobile control={control} errors={errors} name="issueDate" />
+        <MobileFieldCard>
+          <ManualInvoiceDateFieldMobile control={control} errors={errors} labels={labels} name="issueDate" />
         </MobileFieldCard>
-        <MobileFieldCard label={labels.dueDate}>
-          <ManualInvoiceDateFieldMobile control={control} errors={errors} name="dueDate" />
+        <MobileFieldCard>
+          <ManualInvoiceDateFieldMobile control={control} errors={errors} labels={labels} name="dueDate" />
         </MobileFieldCard>
       </Box>
     </Box>

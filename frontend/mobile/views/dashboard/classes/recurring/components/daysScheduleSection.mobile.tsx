@@ -17,7 +17,7 @@ export function DaysScheduleSectionMobile({ watch, setValue, errors, labels }: D
 
   const handleToggleOverride = (index: number) => {
     const current = days[index];
-    if (!current.enabled || current.isWeekend) return;
+    if (!current.enabled) return;
     setValue(`days.${index}.showOverride`, !current.showOverride, { shouldValidate: true });
   };
 
@@ -41,7 +41,6 @@ export function DaysScheduleSectionMobile({ watch, setValue, errors, labels }: D
               day={day}
               index={index}
               dayLabel={dayLabel}
-              weekendOffLabel={labels.weekendOff}
               timeOverrideLabel={labels.timeOverride}
               onToggleDay={handleToggleDay}
               onToggleOverride={handleToggleOverride}

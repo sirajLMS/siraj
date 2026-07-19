@@ -1,10 +1,10 @@
 "use client";
 
 import { AlternateEmailOutlined, GroupsOutlined } from "@mui/icons-material";
-import { Grid, Input, InputAdornment } from "@mui/material";
+import { Grid, InputAdornment, TextField } from "@mui/material";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
-import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { useAppTranslation } from "@/shared/locale";
@@ -29,34 +29,40 @@ export function SocialCommsSection({ register, control }: Props) {
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <FieldWrapper label={t.fields.facebook}>
-            <Input
-              {...register("facebook")}
-              placeholder={t.placeholders.facebook}
-              fullWidth
-              sx={standardInputSx}
-              startAdornment={
-                <InputAdornment position="start">
-                  <GroupsOutlined sx={theme => ({ color: theme.palette.primary.main, opacity: 0.4 })} />
-                </InputAdornment>
-              }
-            />
-          </FieldWrapper>
+          <TextField
+            {...register("facebook")}
+            label={t.fields.facebook}
+            placeholder={t.placeholders.facebook}
+            fullWidth
+            sx={outlinedInputSx}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <GroupsOutlined sx={theme => ({ color: theme.palette.primary.main, opacity: 0.4 })} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <FieldWrapper label={t.fields.twitter}>
-            <Input
-              {...register("twitter")}
-              placeholder={t.placeholders.twitter}
-              fullWidth
-              sx={standardInputSx}
-              startAdornment={
-                <InputAdornment position="start">
-                  <AlternateEmailOutlined sx={theme => ({ color: theme.palette.primary.main, opacity: 0.4 })} />
-                </InputAdornment>
-              }
-            />
-          </FieldWrapper>
+          <TextField
+            {...register("twitter")}
+            label={t.fields.twitter}
+            placeholder={t.placeholders.twitter}
+            fullWidth
+            sx={outlinedInputSx}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <AlternateEmailOutlined sx={theme => ({ color: theme.palette.primary.main, opacity: 0.4 })} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
         </Grid>
       </Grid>
     </SectionPanel>

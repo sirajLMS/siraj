@@ -94,7 +94,9 @@ function StudentSelectField({
 }) {
   return (
     <FormControl fullWidth>
-      <InputLabel id="student-select-label">{t.fields.student}</InputLabel>
+      <InputLabel id="student-select-label" shrink>
+        {t.fields.student}
+      </InputLabel>
       <Select
         labelId="student-select-label"
         id="student-select"
@@ -183,7 +185,9 @@ function TimezoneClassTypeFields({
         disabled={mutationLoading}
       />
       <FormControl fullWidth>
-        <InputLabel id="class-type-select-label">{t.fields.classType}</InputLabel>
+        <InputLabel id="class-type-select-label" shrink>
+          {t.fields.classType}
+        </InputLabel>
         <Select
           labelId="class-type-select-label"
           id="class-type-select"

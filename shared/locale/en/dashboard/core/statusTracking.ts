@@ -1,10 +1,10 @@
 import type { StatusTrackingLabels } from "@/shared/locale/types/dashboard/core";
 
 export const dashboardCoreStatusTrackingEn: StatusTrackingLabels = {
-  pageTitle: "Status Overview",
-  pageSubtitle: "Real-time tracking of institutional activities and admin remarks.",
+  pageTitle: "Class Session Status",
+  pageSubtitle: "Monitor class sessions by student status — regular, pending, suspended, and on leave.",
   filters: "Filters",
-  newReport: "New Report",
+  newReport: "New Class",
   todaysClassSchedule: "Today's Class Schedule",
   totalSessions: total => `Total: ${total} classes`,
   previous: "Previous",

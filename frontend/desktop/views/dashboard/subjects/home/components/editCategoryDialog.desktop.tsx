@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { type Control, Controller, type FieldErrors } from "react-hook-form";
-import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { ClassCategoryUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { EditCategoryFormValues } from "@/frontend/common/views/dashboard/subjects/home/schemas/category.schema";
 import type { EditCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
@@ -41,18 +41,18 @@ function TextFieldController({
       name={name}
       control={control}
       render={({ field }) => (
-        <FieldWrapper label={label} required={required} error={error}>
-          <TextField
-            {...field}
-            fullWidth
-            variant="standard"
-            error={!!error}
-            multiline={multiline}
-            rows={rows}
-            disabled={disabled}
-            sx={standardInputSx}
-          />
-        </FieldWrapper>
+        <TextField
+          {...field}
+          fullWidth
+          label={label}
+          required={required}
+          error={!!error}
+          helperText={error}
+          multiline={multiline}
+          rows={rows}
+          disabled={disabled}
+          sx={outlinedInputSx}
+        />
       )}
     />
   );

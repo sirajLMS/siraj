@@ -2,13 +2,9 @@
 "use client";
 
 import { SearchOutlined } from "@mui/icons-material";
-import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
-import {
-  labelSx,
-  outlinedInputSx,
-  timeInputOutlinedSx,
-} from "@/frontend/common/components/ui/form/field/formFieldStyles";
+import { outlinedInputSx, timeInputOutlinedSx } from "@/frontend/common/components/ui/form";
 import { AppTimePicker } from "@/frontend/common/components/ui/form/time/AppTimePicker";
 import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
@@ -21,29 +17,25 @@ import { useAppTranslation } from "@/shared/locale";
 function TimeField({ label, name }: Readonly<TimeFieldProps>) {
   const { control } = useFormContext<AvailabilitySearchFormData>();
   return (
-    <Box>
-      <Typography variant="labelMd" sx={labelSx}>
-        {label}
-      </Typography>
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => (
-          <AppTimePicker
-            value={field.value}
-            onChange={field.onChange}
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                size: "medium",
-                variant: "outlined",
-                sx: timeInputOutlinedSx,
-              },
-            }}
-          />
-        )}
-      />
-    </Box>
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => (
+        <AppTimePicker
+          value={field.value}
+          onChange={field.onChange}
+          slotProps={{
+            textField: {
+              label,
+              fullWidth: true,
+              size: "medium",
+              variant: "outlined",
+              sx: timeInputOutlinedSx,
+            },
+          }}
+        />
+      )}
+    />
   );
 }
 
@@ -72,22 +64,22 @@ export function AvailabilitySearchFormDesktop({ onSearch }: Readonly<Availabilit
       <TimeField label={t.from} name="fromTime" />
       <TimeField label={t.to} name="toTime" />
 
-      <Box>
-        <Typography variant="labelMd" sx={labelSx}>
+      <FormControl fullWidth sx={outlinedInputSx}>
+        <InputLabel id="availability-gender-label-desktop" shrink>
           {t.gender}
-        </Typography>
+        </InputLabel>
         <Controller
           name="gender"
           control={control}
           render={({ field }) => (
-            <Select {...field} fullWidth sx={outlinedInputSx}>
+            <Select {...field} labelId="availability-gender-label-desktop" label={t.gender}>
               <MenuItem value="">{t.any}</MenuItem>
               <MenuItem value={Gender.Male}>{t.male}</MenuItem>
               <MenuItem value={Gender.Female}>{t.female}</MenuItem>
             </Select>
           )}
         />
-      </Box>
+      </FormControl>
 
       <Button
         type="submit"

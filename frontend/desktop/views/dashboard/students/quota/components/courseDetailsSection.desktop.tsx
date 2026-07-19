@@ -7,6 +7,7 @@ import {
   CircularProgress,
   FormControl,
   FormHelperText,
+  InputLabel,
   MenuItem,
   Select,
   TextField,
@@ -18,9 +19,10 @@ import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/prof
 import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/components/quotaFieldStyles";
 import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/quotaFormAccessContext";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
-import { QuotaFormFieldDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/quotaFormField.desktop";
 import { SectionHeaderDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/sectionHeader.desktop";
 import { useAppTranslation } from "@/shared/locale";
+
+const teacherLabelId = "student-quota-teacher-label";
 
 function TeacherField() {
   const t = useAppTranslation().dashboardTranslations.studentQuota;
@@ -42,41 +44,42 @@ function TeacherField() {
   const teachers = data?.teachers ?? [];
 
   return (
-    <QuotaFormFieldDesktop label={t.fields.teacher}>
-      <Controller
-        name="teacher"
-        control={control}
-        render={({ field }) => {
-          const currentValue = field.value ?? "";
-          const isInOptions = teachers.some(teacher => teacher?.name === currentValue);
-          const showCurrentAsExtra = !loading && currentValue !== "" && !isInOptions;
+    <Controller
+      name="teacher"
+      control={control}
+      render={({ field }) => {
+        const currentValue = field.value ?? "";
+        const isInOptions = teachers.some(teacher => teacher?.name === currentValue);
+        const showCurrentAsExtra = !loading && currentValue !== "" && !isInOptions;
 
-          return (
-            <FormControl fullWidth error={Boolean(errors.teacher)}>
-              <Select {...field} displayEmpty disabled sx={quotaInputSx}>
-                {loading && (
-                  <MenuItem disabled value="">
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <CircularProgress size={16} />
-                      <Typography variant="bodyMd">{t.fields.loadingTeachers}</Typography>
-                    </Box>
+        return (
+          <FormControl fullWidth variant="outlined" error={Boolean(errors.teacher)} sx={quotaInputSx}>
+            <InputLabel id={teacherLabelId} shrink>
+              {t.fields.teacher}
+            </InputLabel>
+            <Select {...field} labelId={teacherLabelId} label={t.fields.teacher} displayEmpty disabled>
+              {loading && (
+                <MenuItem disabled value="">
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <CircularProgress size={16} />
+                    <Typography variant="bodyMd">{t.fields.loadingTeachers}</Typography>
+                  </Box>
+                </MenuItem>
+              )}
+              {showCurrentAsExtra && <MenuItem value={currentValue}>{currentValue}</MenuItem>}
+              {teachers.map(teacher =>
+                teacher?.name ? (
+                  <MenuItem key={teacher.id ?? ""} value={teacher.name}>
+                    {teacher.name}
                   </MenuItem>
-                )}
-                {showCurrentAsExtra && <MenuItem value={currentValue}>{currentValue}</MenuItem>}
-                {teachers.map(teacher =>
-                  teacher?.name ? (
-                    <MenuItem key={teacher.id ?? ""} value={teacher.name}>
-                      {teacher.name}
-                    </MenuItem>
-                  ) : null
-                )}
-              </Select>
-              {errors.teacher && <FormHelperText>{errors.teacher.message}</FormHelperText>}
-            </FormControl>
-          );
-        }}
-      />
-    </QuotaFormFieldDesktop>
+                ) : null
+              )}
+            </Select>
+            {errors.teacher ? <FormHelperText>{errors.teacher.message}</FormHelperText> : null}
+          </FormControl>
+        );
+      }}
+    />
   );
 }
 
@@ -93,24 +96,23 @@ function TotalClassesField() {
   }
 
   return (
-    <QuotaFormFieldDesktop label={t.fields.totalClasses}>
-      <Controller
-        name="totalClasses"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            type="number"
-            variant="outlined"
-            fullWidth
-            disabled
-            error={Boolean(errors.totalClasses)}
-            helperText={errors.totalClasses?.message}
-            sx={quotaInputSx}
-          />
-        )}
-      />
-    </QuotaFormFieldDesktop>
+    <Controller
+      name="totalClasses"
+      control={control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label={t.fields.totalClasses}
+          type="number"
+          variant="outlined"
+          fullWidth
+          disabled
+          error={Boolean(errors.totalClasses)}
+          helperText={errors.totalClasses?.message}
+          sx={quotaInputSx}
+        />
+      )}
+    />
   );
 }
 
@@ -128,32 +130,14 @@ function ClassesLeftField() {
   }
 
   return (
-    <QuotaFormFieldDesktop
-      label={t.fields.classesLeft}
-      helperText={
-        fieldDisabled ? null : (
-          <Typography
-            variant="bodyMd"
-            sx={theme => ({
-              color: theme.palette.onSurfaceVariant,
-              fontStyle: "italic",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 0.5,
-              mt: 0,
-            })}
-          >
-            {t.fields.overrideNotice}
-          </Typography>
-        )
-      }
-    >
+    <Box>
       <Controller
         name="classesLeft"
         control={control}
         render={({ field }) => (
           <TextField
             {...field}
+            label={t.fields.classesLeft}
             type="number"
             variant="outlined"
             fullWidth
@@ -195,7 +179,22 @@ function ClassesLeftField() {
           />
         )}
       />
-    </QuotaFormFieldDesktop>
+      {!fieldDisabled ? (
+        <Typography
+          variant="bodyMd"
+          sx={theme => ({
+            color: theme.palette.onSurfaceVariant,
+            fontStyle: "italic",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 0.5,
+            mt: 0.5,
+          })}
+        >
+          {t.fields.overrideNotice}
+        </Typography>
+      ) : null}
+    </Box>
   );
 }
 

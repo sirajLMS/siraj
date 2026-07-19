@@ -1,7 +1,7 @@
 "use client";
 
 import { AddOutlined, CheckCircleOutlined } from "@mui/icons-material";
-import { Alert, alpha, Box, Button, Typography } from "@mui/material";
+import { Alert, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { BaseRecurringClassFormProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { RecurringClassFormFieldsDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/recurringClassFormFields.desktop";
@@ -9,7 +9,10 @@ import { RecurringClassFormFieldsDesktop } from "@/frontend/desktop/views/dashbo
 const StyledScrollableFormBody = styled(Box)(({ theme }) => ({
   flex: 1,
   overflowY: "auto",
-  p: 3,
+  padding: theme.spacing(3),
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(4),
   "&::-webkit-scrollbar": { width: 4 },
   "&::-webkit-scrollbar-thumb": {
     backgroundColor: theme.palette.divider,
@@ -17,26 +20,30 @@ const StyledScrollableFormBody = styled(Box)(({ theme }) => ({
   },
 }));
 
-const StyledFormFooter = styled(Box)(({ theme }) => ({
-  p: 3,
+const StyledFormActions = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
+  gap: theme.spacing(2),
+}));
+
+const StyledSubmitRow = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  justifyContent: "space-between",
-  borderTop: 1,
-  borderColor: theme.palette.divider,
-  backgroundColor: alpha(theme.palette.background.default, 0.5),
+  gap: theme.spacing(2),
+  flexWrap: "wrap",
 }));
 
 const StyledSubmitButton = styled(Button)(({ theme }) => ({
-  backgroundColor: theme.palette.sidebar,
-  color: theme.palette.onSidebar,
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
   borderRadius: 10,
   px: 5,
   py: 1.5,
   typography: "labelUppercase",
   boxShadow: theme.palette.shadow.button,
   "&:hover": {
-    backgroundColor: theme.palette.sidebar,
+    backgroundColor: theme.palette.primary.main,
     filter: "brightness(1.1)",
   },
 }));
@@ -49,7 +56,7 @@ const StyledSuccessBadge = styled(Box)(({ theme }) => ({
   py: 1,
   borderRadius: 2,
   backgroundColor: theme.palette.status.activeContainer,
-  color: theme.palette.sidebar,
+  color: theme.palette.status.active,
   border: 1,
   borderColor: theme.palette.status.active,
 }));
@@ -108,37 +115,39 @@ export function RecurringClassFormDesktop({
           studentsLoading={studentsLoading}
           teachersLoading={teachersLoading}
         />
+
+        <StyledFormActions>
+          {meetingConfigWarning && meetingConfigWarningMessage ? (
+            <Alert
+              severity="warning"
+              sx={{ width: "100%" }}
+              action={
+                onGoToCreatedClass && goToClassLabel ? (
+                  <Button color="inherit" size="small" onClick={onGoToCreatedClass}>
+                    {goToClassLabel}
+                  </Button>
+                ) : undefined
+              }
+            >
+              {meetingConfigWarningMessage}
+            </Alert>
+          ) : null}
+          <StyledSubmitRow>
+            <StyledSubmitButton type="submit" variant="contained" disabled={isSubmitting} startIcon={<AddOutlined />}>
+              {formLabels.add}
+            </StyledSubmitButton>
+
+            {showSuccess && (
+              <StyledSuccessBadge>
+                <CheckCircleOutlined sx={{ fontSize: 20 }} />
+                <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
+                  {formLabels.addedSuccessfully}
+                </Typography>
+              </StyledSuccessBadge>
+            )}
+          </StyledSubmitRow>
+        </StyledFormActions>
       </StyledScrollableFormBody>
-
-      <StyledFormFooter>
-        {meetingConfigWarning && meetingConfigWarningMessage ? (
-          <Alert
-            severity="warning"
-            sx={{ mb: 2, width: "100%" }}
-            action={
-              onGoToCreatedClass && goToClassLabel ? (
-                <Button color="inherit" size="small" onClick={onGoToCreatedClass}>
-                  {goToClassLabel}
-                </Button>
-              ) : undefined
-            }
-          >
-            {meetingConfigWarningMessage}
-          </Alert>
-        ) : null}
-        <StyledSubmitButton type="submit" variant="contained" disabled={isSubmitting} startIcon={<AddOutlined />}>
-          {formLabels.add}
-        </StyledSubmitButton>
-
-        {showSuccess && (
-          <StyledSuccessBadge>
-            <CheckCircleOutlined sx={{ fontSize: 20 }} />
-            <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-              {formLabels.addedSuccessfully}
-            </Typography>
-          </StyledSuccessBadge>
-        )}
-      </StyledFormFooter>
     </Box>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { MenuItem, Select } from "@mui/material";
+import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
-import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { CategoryItem } from "@/frontend/common/views/dashboard/subjects/home/types";
 
 interface CategorySelectFieldProps<T extends FieldValues> {
@@ -16,11 +16,8 @@ interface CategorySelectFieldProps<T extends FieldValues> {
 }
 
 /**
- * Renders the `categoryId` selector (a standard-variant `Select` listing the
- * available categories) wrapped in a `FieldWrapper`.
- *
- * Extracted from CreateSubjectDialog and EditSubjectDialog which previously
- * duplicated the entire Controller/Select/MenuItem mapping block.
+ * Renders the `categoryId` selector (outlined `Select` with MUI `InputLabel`)
+ * listing available categories.
  */
 export function CategorySelectField<T extends FieldValues>({
   name,
@@ -31,21 +28,18 @@ export function CategorySelectField<T extends FieldValues>({
   disabled,
   categories,
 }: Readonly<CategorySelectFieldProps<T>>) {
+  const labelId = `${String(name)}-label`;
+
   return (
     <Controller
       name={name}
       control={control}
       render={({ field }) => (
-        <FieldWrapper label={label} required error={error}>
-          <Select
-            {...field}
-            fullWidth
-            variant="standard"
-            error={!!error}
-            disabled={disabled}
-            displayEmpty
-            sx={standardInputSx}
-          >
+        <FormControl fullWidth required error={!!error} disabled={disabled} sx={outlinedInputSx}>
+          <InputLabel id={labelId} shrink>
+            {label}
+          </InputLabel>
+          <Select {...field} labelId={labelId} label={label} displayEmpty>
             <MenuItem value="" disabled>
               {placeholder}
             </MenuItem>
@@ -55,7 +49,8 @@ export function CategorySelectField<T extends FieldValues>({
               </MenuItem>
             ))}
           </Select>
-        </FieldWrapper>
+          {error ? <FormHelperText>{error}</FormHelperText> : null}
+        </FormControl>
       )}
     />
   );

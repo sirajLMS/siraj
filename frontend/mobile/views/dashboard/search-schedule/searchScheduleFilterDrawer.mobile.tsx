@@ -30,7 +30,9 @@ function DaysOfWeekSelect({
 
   return (
     <FormControl size="small" fullWidth>
-      <InputLabel id="search-schedule-days-label">{t.daysOfWeek}</InputLabel>
+      <InputLabel id="search-schedule-days-label" shrink>
+        {t.daysOfWeek}
+      </InputLabel>
       <Select
         labelId="search-schedule-days-label"
         label={t.daysOfWeek}

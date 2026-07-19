@@ -1,20 +1,25 @@
 "use client";
 
 import { DescriptionOutlined, EmailOutlined, RateReviewOutlined } from "@mui/icons-material";
-import { Box, FormControl, InputAdornment, MenuItem, Select, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  FormHelperText,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { ComplaintCategory } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ComplaintFormData } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
 import type { ParentStudentOption } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsParentLabels } from "@/shared/locale";
-
-const StyledFieldLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onSurfaceVariant,
-  textTransform: "uppercase",
-  fontWeight: 500,
-}));
 
 const StyledFormContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -26,11 +31,6 @@ const StyledFormHeaderBox = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: theme.spacing(1),
-}));
-
-const StyledFieldErrorMessage = styled(Typography)(({ theme }) => ({
-  color: theme.palette.error.main,
-  marginTop: theme.spacing(0.5),
 }));
 
 const StyledFormHeaderIcon = styled(RateReviewOutlined)(({ theme }) => ({
@@ -45,21 +45,11 @@ const StyledDescriptionIcon = styled(DescriptionOutlined)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-const StyledFormFieldGroup = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(1),
-}));
-
 interface ComplaintFormFieldsMobileProps {
   readonly control: Control<ComplaintFormData>;
   readonly errors: FieldErrors<ComplaintFormData>;
   readonly labels: ComplaintsParentLabels;
   readonly studentOptions: readonly ParentStudentOption[];
-}
-
-function FieldLabel({ children }: Readonly<{ children: string }>) {
-  return <StyledFieldLabel variant="labelMd">{children}</StyledFieldLabel>;
 }
 
 function FormHeader({ title }: { readonly title: string }) {
@@ -84,24 +74,24 @@ function SelectFieldGroup({
   readonly error: FieldErrors<ComplaintFormData>["category"] | FieldErrors<ComplaintFormData>["studentId"];
   readonly children: React.ReactNode;
 }) {
+  const labelId = `${name}-label`;
+
   return (
-    <StyledFormFieldGroup>
-      <FieldLabel>{label}</FieldLabel>
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => (
-          <FormControl fullWidth error={Boolean(error)}>
-            <Select {...field} displayEmpty value={field.value}>
-              {children}
-            </Select>
-            {error?.message ? (
-              <StyledFieldErrorMessage variant="bodyMd">{error.message}</StyledFieldErrorMessage>
-            ) : null}
-          </FormControl>
-        )}
-      />
-    </StyledFormFieldGroup>
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => (
+        <FormControl fullWidth error={Boolean(error)} sx={outlinedInputSx}>
+          <InputLabel id={labelId} shrink>
+            {label}
+          </InputLabel>
+          <Select {...field} labelId={labelId} label={label} displayEmpty value={field.value}>
+            {children}
+          </Select>
+          {error?.message ? <FormHelperText>{error.message}</FormHelperText> : null}
+        </FormControl>
+      )}
+    />
   );
 }
 
@@ -115,32 +105,32 @@ function ContactEmailField({
   readonly labels: ComplaintsParentLabels;
 }) {
   return (
-    <StyledFormFieldGroup>
-      <FieldLabel>{labels.contactEmail}</FieldLabel>
-      <Controller
-        name="contactEmail"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            placeholder={labels.contactEmailPlaceholder}
-            fullWidth
-            error={Boolean(error)}
-            helperText={error?.message}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <StyledEmailIcon />
-                  </InputAdornment>
-                ),
-              },
-              htmlInput: { autoComplete: "email" },
-            }}
-          />
-        )}
-      />
-    </StyledFormFieldGroup>
+    <Controller
+      name="contactEmail"
+      control={control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label={labels.contactEmail}
+          placeholder={labels.contactEmailPlaceholder}
+          variant="outlined"
+          fullWidth
+          error={Boolean(error)}
+          helperText={error?.message}
+          sx={outlinedInputSx}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <StyledEmailIcon />
+                </InputAdornment>
+              ),
+            },
+            htmlInput: { autoComplete: "email" },
+          }}
+        />
+      )}
+    />
   );
 }
 
@@ -154,34 +144,34 @@ function ComplaintDetailsField({
   readonly labels: ComplaintsParentLabels;
 }) {
   return (
-    <StyledFormFieldGroup>
-      <FieldLabel>{labels.complaintDetails}</FieldLabel>
-      <Controller
-        name="complaintDetails"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            placeholder={labels.complaintDetailsPlaceholder}
-            fullWidth
-            multiline
-            minRows={4}
-            error={Boolean(error)}
-            helperText={error?.message}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start" sx={{ alignSelf: "flex-start", mt: 1 }}>
-                    <StyledDescriptionIcon />
-                  </InputAdornment>
-                ),
-              },
-              htmlInput: { autoComplete: "off" },
-            }}
-          />
-        )}
-      />
-    </StyledFormFieldGroup>
+    <Controller
+      name="complaintDetails"
+      control={control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label={labels.complaintDetails}
+          placeholder={labels.complaintDetailsPlaceholder}
+          variant="outlined"
+          fullWidth
+          multiline
+          minRows={4}
+          error={Boolean(error)}
+          helperText={error?.message}
+          sx={outlinedInputSx}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start" sx={{ alignSelf: "flex-start", mt: 1 }}>
+                  <StyledDescriptionIcon />
+                </InputAdornment>
+              ),
+            },
+            htmlInput: { autoComplete: "off" },
+          }}
+        />
+      )}
+    />
   );
 }
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { Box, Grid, Input, InputAdornment, Typography } from "@mui/material";
+import { Grid, InputAdornment, TextField, Typography } from "@mui/material";
 import { type Control, Controller, type FieldErrors, type UseFormRegister, useWatch } from "react-hook-form";
-import { labelSx, standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
@@ -36,38 +36,34 @@ export function SalaryDetailsSection({ register, control, errors, labels }: Read
       })}
     >
       <Grid size={{ xs: 12, md: 8 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.salaryAmount}{" "}
-          <Box component="span" sx={theme => ({ color: theme.palette.error.main })}>
-            *
-          </Box>
-        </Box>
-        <Input
+        <TextField
           {...register("hourlyRate")}
+          label={labels.fields.salaryAmount}
           placeholder={labels.placeholders.salaryAmount}
           type="number"
+          required
           error={!!errors.hourlyRate}
+          helperText={errors.hourlyRate?.message}
           fullWidth
-          sx={standardInputSx}
-          startAdornment={
-            <InputAdornment position="start">
-              <Typography
-                variant="bodyMd"
-                sx={theme => ({
-                  fontWeight: 700,
-                  color: theme.palette.onSurfaceVariant,
-                })}
-              >
-                {currencySymbol}
-              </Typography>
-            </InputAdornment>
-          }
+          sx={outlinedInputSx}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Typography
+                    variant="bodyMd"
+                    sx={theme => ({
+                      fontWeight: 700,
+                      color: theme.palette.onSurfaceVariant,
+                    })}
+                  >
+                    {currencySymbol}
+                  </Typography>
+                </InputAdornment>
+              ),
+            },
+          }}
         />
-        {errors.hourlyRate ? (
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.error.main, mt: 0.5, display: "block" })}>
-            {errors.hourlyRate.message}
-          </Typography>
-        ) : null}
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
         <Controller

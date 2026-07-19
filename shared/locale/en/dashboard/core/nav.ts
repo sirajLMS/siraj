@@ -4,7 +4,7 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   home: "Home",
   scheduleSearch: "Schedule Search",
   scheduleTracking: "Reschedule Tracking",
-  statusTracking: "Status Tracking",
+  statusTracking: "Class Session Status",
   scheduleAlerts: "Schedule Alerts",
   teachers: "Teachers",
   parents: "Parents",

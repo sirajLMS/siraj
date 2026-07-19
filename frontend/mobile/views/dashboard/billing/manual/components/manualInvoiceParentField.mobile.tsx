@@ -34,10 +34,9 @@ export function ManualInvoiceParentFieldMobile({
             }}
             renderInput={params => (
               <TextField
-                id={params.id}
-                disabled={params.disabled}
-                fullWidth={params.fullWidth}
-                size={params.size}
+                {...params}
+                label={labels.parentSelection}
+                variant="outlined"
                 placeholder={labels.parentPlaceholder}
                 error={Boolean(errors.parentId)}
                 helperText={errors.parentId?.message}

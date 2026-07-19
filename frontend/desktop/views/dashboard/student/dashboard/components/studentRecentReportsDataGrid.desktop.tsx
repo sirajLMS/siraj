@@ -4,13 +4,13 @@ import { Box, Button, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { RecentLessonReportRow } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import type {
   ReportsPagination,
   StudentDashboardViewModel,
 } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import type { AppLocale } from "@/shared/locale";
 

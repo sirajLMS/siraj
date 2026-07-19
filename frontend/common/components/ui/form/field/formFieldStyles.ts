@@ -1,5 +1,6 @@
 import type { SxProps, Theme } from "@mui/material";
 
+/** Non-input section/stat chrome only — never use as a form field label. Prefer MUI `label` / `InputLabel`. */
 export const labelSx: SxProps<Theme> = theme => ({
   ...theme.typography.labelMd,
   color: theme.palette.onSurfaceVariant,
@@ -32,10 +33,11 @@ export const durationBoxSx =
   (isMobile: boolean): SxProps<Theme> =>
   theme => ({
     display: "flex",
+    flexDirection: "row",
     alignItems: "center",
     gap: 1,
-    px: isMobile ? 2 : 1.5,
-    py: isMobile ? 1.5 : 0,
+    px: isMobile ? 1.5 : 1.5,
+    py: isMobile ? 0.5 : 0,
     borderRadius: 1,
     border: 1,
     borderStyle: "solid",

@@ -16,8 +16,8 @@ import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/prof
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryViewModel";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { CalendarGridDesktop } from "@/frontend/desktop/views/dashboard/students/history/components/calendarGrid.desktop";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { useAppTranslation } from "@/shared/locale";

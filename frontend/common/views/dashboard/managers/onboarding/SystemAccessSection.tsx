@@ -1,11 +1,11 @@
 "use client";
 
-import { Box, Button, Grid, Input, Typography } from "@mui/material";
+import { Box, Button, FormControl, FormLabel, Grid, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
-import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { ManagerOnboardingFormData } from "@/frontend/common/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
 import { ManagerAccountType } from "@/frontend/common/views/dashboard/managers/onboarding/types";
 import { useAppTranslation } from "@/shared/locale";
@@ -95,24 +95,28 @@ export function SystemAccessSection({ register, control, errors }: Props) {
     <SectionPanel title={t.sections.systemAccess}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper label={t.fields.accountType}>
+          <FormControl fullWidth>
+            <FormLabel sx={theme => ({ mb: 1, color: theme.palette.onSurfaceVariant })}>
+              {t.fields.accountType}
+            </FormLabel>
             <AccountTypeToggle control={control} />
             <Typography variant="bodyMd" sx={theme => ({ mt: 1.5, color: theme.palette.text.secondary })}>
               {getDescription()}
             </Typography>
-          </FieldWrapper>
+          </FormControl>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper label={t.fields.password} required error={getPasswordError()}>
-            <Input
-              {...register("password")}
-              type="password"
-              placeholder={t.placeholders.password}
-              error={!!errors.password}
-              fullWidth
-              sx={standardInputSx}
-            />
-          </FieldWrapper>
+          <TextField
+            {...register("password")}
+            label={t.fields.password}
+            placeholder={t.placeholders.password}
+            type="password"
+            required
+            error={!!errors.password}
+            helperText={getPasswordError()}
+            fullWidth
+            sx={outlinedInputSx}
+          />
         </Grid>
       </Grid>
     </SectionPanel>

@@ -5,7 +5,12 @@ import { Controller, useFormContext } from "react-hook-form";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StatusUpdateFormData } from "@/frontend/common/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { AdminHoldControlsProps } from "@/frontend/common/views/dashboard/students/status/types";
-import { MobileAdminControlPanel, MobileFilterButton, MobileHorizontalScrollRow, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
+import {
+  MobileAdminControlPanel,
+  MobileFilterButton,
+  MobileHorizontalScrollRow,
+  MobilePrimaryPageAction,
+} from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 function StatusSelectionField() {

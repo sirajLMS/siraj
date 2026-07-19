@@ -2,7 +2,7 @@
 
 import { Controller } from "react-hook-form";
 import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
-import type { ManualInvoiceDateFieldDesktopProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceDateField.types";
+import type { BaseManualInvoiceDateFieldProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceDateField.types";
 import {
   formatFormDate,
   parseFormDate,
@@ -13,7 +13,7 @@ export function ManualInvoiceDateFieldDesktop({
   errors,
   labels,
   name,
-}: Readonly<ManualInvoiceDateFieldDesktopProps>) {
+}: Readonly<BaseManualInvoiceDateFieldProps>) {
   const label = name === "issueDate" ? labels.issueDate : labels.dueDate;
   const fieldError = errors[name];
 

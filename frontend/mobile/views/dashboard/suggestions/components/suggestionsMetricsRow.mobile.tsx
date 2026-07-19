@@ -3,9 +3,9 @@
 import { CheckCircleOutlined, ContentCopyOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { useMemo } from "react";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { AdminQueueEfficiencyBanner } from "@/frontend/common/views/dashboard/shared/AdminQueueEfficiencyBanner";
 import type { SuggestionsMetricsRowProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 
 export function SuggestionsMetricsRowMobile({

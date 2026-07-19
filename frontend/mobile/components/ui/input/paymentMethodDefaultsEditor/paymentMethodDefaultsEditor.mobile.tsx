@@ -1,14 +1,14 @@
 "use client";
 
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import { Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, InputAdornment, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useCallback } from "react";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
 import { filterMethodsForDirection } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/utils";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge/MobileStatusBadge";
-import { MobileFieldWrapper } from "@/frontend/mobile/components/ui/form/field/MobileFieldWrapper";
 import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar/MobileFormSuccessSnackbar";
 import { CurrencySelectMobile } from "@/frontend/mobile/components/ui/input/currencySelect";
 import { LocalizedStringDrawerMobile } from "@/frontend/mobile/components/ui/input/localizedString";
@@ -56,62 +56,76 @@ export function PaymentMethodDefaultsEditorMobile({
 
   return (
     <Stack sx={{ gap: 2 }}>
-      <MobileFieldWrapper label={tDefaults.payinDefault}>
-        <TextField
-          select
-          fullWidth
-          size="small"
-          disabled={disabled}
-          value={payinDefaultId ?? ""}
-          onChange={event => onPayinDefaultChangeAction(event.target.value || null)}
-        >
-          <MenuItem value="" sx={{ minHeight: 40 }}>
-            {tDefaults.none}
+      <TextField
+        select
+        label={tDefaults.payinDefault}
+        fullWidth
+        size="small"
+        disabled={disabled}
+        value={payinDefaultId ?? ""}
+        onChange={event => onPayinDefaultChangeAction(event.target.value || null)}
+        sx={outlinedInputSx}
+        slotProps={{ inputLabel: { shrink: true } }}
+      >
+        <MenuItem value="" sx={{ minHeight: 40 }}>
+          {tDefaults.none}
+        </MenuItem>
+        {payinMethods.map(method => (
+          <MenuItem key={method.id} value={method.id} sx={{ minHeight: 40 }}>
+            {formatMethodLabel(method)}
           </MenuItem>
-          {payinMethods.map(method => (
-            <MenuItem key={method.id} value={method.id} sx={{ minHeight: 40 }}>
-              {formatMethodLabel(method)}
-            </MenuItem>
-          ))}
-        </TextField>
-      </MobileFieldWrapper>
+        ))}
+      </TextField>
 
-      <MobileFieldWrapper label={tDefaults.payoutDefault}>
-        <TextField
-          select
-          fullWidth
-          size="small"
-          disabled={disabled}
-          value={payoutDefaultId ?? ""}
-          onChange={event => onPayoutDefaultChangeAction(event.target.value || null)}
-        >
-          <MenuItem value="" sx={{ minHeight: 40 }}>
-            {tDefaults.none}
+      <TextField
+        select
+        label={tDefaults.payoutDefault}
+        fullWidth
+        size="small"
+        disabled={disabled}
+        value={payoutDefaultId ?? ""}
+        onChange={event => onPayoutDefaultChangeAction(event.target.value || null)}
+        sx={outlinedInputSx}
+        slotProps={{ inputLabel: { shrink: true } }}
+      >
+        <MenuItem value="" sx={{ minHeight: 40 }}>
+          {tDefaults.none}
+        </MenuItem>
+        {payoutMethods.map(method => (
+          <MenuItem key={method.id} value={method.id} sx={{ minHeight: 40 }}>
+            {formatMethodLabel(method)}
           </MenuItem>
-          {payoutMethods.map(method => (
-            <MenuItem key={method.id} value={method.id} sx={{ minHeight: 40 }}>
-              {formatMethodLabel(method)}
-            </MenuItem>
-          ))}
-        </TextField>
-      </MobileFieldWrapper>
+        ))}
+      </TextField>
 
       {onInstructionsSaveAction ? (
-        <MobileFieldWrapper label={tDefaults.instructions}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography sx={{ flex: 1, typography: "bodyMd", color: "text.secondary" }}>
-              {Object.values(instructions).find(value => value.trim() !== "") ?? tDefaults.none}
-            </Typography>
-            <Button
-              variant="outlined"
-              size="medium"
-              disabled={disabled}
-              startIcon={<EditOutlinedIcon />}
-              onClick={() => setInstructionsOpen(true)}
-            >
-              {tDefaults.editInstructions}
-            </Button>
-          </Box>
+        <>
+          <TextField
+            label={tDefaults.instructions}
+            fullWidth
+            size="small"
+            disabled={disabled}
+            value={Object.values(instructions).find(value => value.trim() !== "") ?? tDefaults.none}
+            sx={outlinedInputSx}
+            slotProps={{
+              input: {
+                readOnly: true,
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Button
+                      variant="outlined"
+                      size="medium"
+                      disabled={disabled}
+                      startIcon={<EditOutlinedIcon />}
+                      onClick={() => setInstructionsOpen(true)}
+                    >
+                      {tDefaults.editInstructions}
+                    </Button>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
           <LocalizedStringDrawerMobile
             open={instructionsOpen}
             value={instructions}
@@ -123,19 +137,18 @@ export function PaymentMethodDefaultsEditorMobile({
             }}
             onCancelAction={() => setInstructionsOpen(false)}
           />
-        </MobileFieldWrapper>
+        </>
       ) : null}
 
       {onDisplayCurrencyChangeAction ? (
-        <MobileFieldWrapper label={tDefaults.displayCurrency}>
-          <CurrencySelectMobile
-            currency={displayCurrency ?? null}
-            setCurrencyAction={onDisplayCurrencyChangeAction}
-            allowedCodes={allowedCurrencyCodes}
-            disabled={disabled}
-            fullWidth
-          />
-        </MobileFieldWrapper>
+        <CurrencySelectMobile
+          label={tDefaults.displayCurrency}
+          currency={displayCurrency ?? null}
+          setCurrencyAction={onDisplayCurrencyChangeAction}
+          allowedCodes={allowedCurrencyCodes}
+          disabled={disabled}
+          fullWidth
+        />
       ) : null}
 
       {methods.length > 0 ? (

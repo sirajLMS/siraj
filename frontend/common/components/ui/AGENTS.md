@@ -6,6 +6,13 @@ For tier-specific primitives, see:
 - [`frontend/mobile/AGENTS.md`](../../mobile/AGENTS.md) — `Mobile*`-prefixed primitives (3 behavioral categories)
 - [`frontend/desktop/AGENTS.md`](../../desktop/AGENTS.md) — tier-paired `.desktop.*` variants only
 
+### Form field labels
+
+- **ALWAYS** use MUI Material labels on form inputs: `label` on `TextField` / Autocomplete / date-time `slotProps.textField`, or `FormControl` + `InputLabel` + `Select`.
+- **NEVER** render a separate label above an input (`Box component="label"`, `Typography` field label, or retired `FieldWrapper`-style wrappers).
+- Prefer outlined controls so the label notches into the border (see `TimezoneSelect`).
+- `labelSx` is only for non-input section/stat chrome — not for form fields. See `frontend/COMPONENT_PATTERNS.md` Forms section.
+
 ### Component Directory Structure
 
 ```

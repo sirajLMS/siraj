@@ -1,8 +1,8 @@
 "use client";
 
 import { ExpandMoreOutlined } from "@mui/icons-material";
-import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
-import { labelSx } from "@/frontend/common/components/ui/form";
+import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { EntitySelectProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 
 export function EntitySelectMobile({
@@ -14,37 +14,35 @@ export function EntitySelectMobile({
   error,
   onChange,
 }: EntitySelectProps) {
+  const labelId = `select-label-${label}`;
+
   return (
-    <>
-      <Box component="label" sx={labelSx}>
+    <FormControl fullWidth error={!!error} sx={outlinedInputSx}>
+      <InputLabel id={labelId} shrink>
         {label}
-      </Box>
-      <FormControl fullWidth error={!!error} variant="outlined">
-        <InputLabel id={`select-label-${label}`}>{placeholder}</InputLabel>
-        <Select
-          labelId={`select-label-${label}`}
-          value={value}
-          label={placeholder}
-          displayEmpty
-          disabled={isSubmitting}
-          onChange={e => {
-            onChange(e.target.value);
-          }}
-          IconComponent={ExpandMoreOutlined}
-          variant="outlined"
-          sx={{ borderRadius: 3 }}
-        >
-          <MenuItem value="">
-            <em>{placeholder}</em>
+      </InputLabel>
+      <Select
+        labelId={labelId}
+        label={label}
+        value={value}
+        displayEmpty
+        disabled={isSubmitting}
+        onChange={e => {
+          onChange(e.target.value);
+        }}
+        IconComponent={ExpandMoreOutlined}
+        variant="outlined"
+      >
+        <MenuItem value="" disabled>
+          {placeholder}
+        </MenuItem>
+        {entities.map(entity => (
+          <MenuItem key={entity.id} value={entity.id}>
+            {entity.name}
           </MenuItem>
-          {entities.map(entity => (
-            <MenuItem key={entity.id} value={entity.id}>
-              {entity.name}
-            </MenuItem>
-          ))}
-        </Select>
-        {error && <FormHelperText>{error}</FormHelperText>}
-      </FormControl>
-    </>
+        ))}
+      </Select>
+      {error && <FormHelperText>{error}</FormHelperText>}
+    </FormControl>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
-import { Box, Grid, Input, Typography } from "@mui/material";
+import { FormControl, FormHelperText, Grid, TextField } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { labelSx, standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
@@ -48,44 +48,28 @@ export function BasicInfoFields({ register, control, errors, labels }: Readonly<
   return (
     <>
       <Grid size={{ xs: 12, md: 4 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.fullName}{" "}
-          <Box component="span" sx={theme => ({ color: theme.palette.error.main })}>
-            *
-          </Box>
-        </Box>
-        <Input
+        <TextField
           {...register("name")}
+          label={labels.fields.fullName}
           placeholder={labels.placeholders.fullName}
+          required
           error={!!errors.name}
+          helperText={errors.name?.message}
           fullWidth
-          sx={standardInputSx}
+          sx={outlinedInputSx}
         />
-        {errors.name ? (
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.name.message}
-          </Typography>
-        ) : null}
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.email}{" "}
-          <Box component="span" sx={theme => ({ color: theme.palette.error.main })}>
-            *
-          </Box>
-        </Box>
-        <Input
+        <TextField
           {...register("email")}
+          label={labels.fields.email}
           placeholder={labels.placeholders.email}
+          required
           error={!!errors.email}
+          helperText={errors.email?.message}
           fullWidth
-          sx={standardInputSx}
+          sx={outlinedInputSx}
         />
-        {errors.email ? (
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.email.message}
-          </Typography>
-        ) : null}
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
         <Controller
@@ -116,36 +100,22 @@ export function IdentityFields({ register, control, errors, labels }: Readonly<S
   return (
     <>
       <Grid size={{ xs: 12, md: 4 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.nationalId}{" "}
-          <Box component="span" sx={theme => ({ color: theme.palette.error.main })}>
-            *
-          </Box>
-        </Box>
-        <Input
+        <TextField
           {...register("nationalId")}
+          label={labels.fields.nationalId}
           placeholder={labels.placeholders.nationalId}
+          required
           error={!!errors.nationalId}
+          helperText={errors.nationalId?.message}
           fullWidth
-          sx={standardInputSx}
+          sx={outlinedInputSx}
         />
-        {errors.nationalId ? (
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.nationalId.message}
-          </Typography>
-        ) : null}
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.phone}{" "}
-          <Box component="span" sx={theme => ({ color: theme.palette.error.main })}>
-            *
-          </Box>
-        </Box>
         <PhoneFormField
           name="phone"
           control={control}
-          hideLabel
+          label={labels.fields.phone}
           required
           placeholder={labels.placeholders.phone}
           error={!!errors.phone}
@@ -156,41 +126,37 @@ export function IdentityFields({ register, control, errors, labels }: Readonly<S
       <Grid size={{ xs: 12, md: 4 }}>
         <Grid container spacing={2}>
           <Grid size={{ xs: 6 }}>
-            <Box component="label" sx={labelSx}>
-              {labels.fields.age}
-            </Box>
-            <Input
+            <TextField
               {...register("dateOfBirth")}
+              label={labels.fields.age}
               placeholder={labels.placeholders.age}
               type="number"
               fullWidth
-              sx={standardInputSx}
+              sx={outlinedInputSx}
             />
           </Grid>
           <Grid size={{ xs: 6 }}>
-            <Controller
-              control={control}
-              name="gender"
-              render={({ field }) => (
-                <GenderSelector
-                  gender={field.value ?? null}
-                  setGenderAction={field.onChange}
-                  required
-                  error={!!errors.gender}
-                  fullWidth
-                  labels={{
-                    title: labels.fields.gender,
-                    male: labels.fields.male,
-                    female: labels.fields.female,
-                  }}
-                />
-              )}
-            />
-            {errors.gender ? (
-              <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-                {errors.gender.message}
-              </Typography>
-            ) : null}
+            <FormControl fullWidth error={!!errors.gender}>
+              <Controller
+                control={control}
+                name="gender"
+                render={({ field }) => (
+                  <GenderSelector
+                    gender={field.value ?? null}
+                    setGenderAction={field.onChange}
+                    required
+                    error={!!errors.gender}
+                    fullWidth
+                    labels={{
+                      title: labels.fields.gender,
+                      male: labels.fields.male,
+                      female: labels.fields.female,
+                    }}
+                  />
+                )}
+              />
+              {errors.gender ? <FormHelperText>{errors.gender.message}</FormHelperText> : null}
+            </FormControl>
           </Grid>
         </Grid>
       </Grid>
@@ -202,20 +168,21 @@ export function AddressFields({ register, labels }: Readonly<BaseSectionProps>) 
   return (
     <>
       <Grid size={{ xs: 12, md: 8 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.address}
-        </Box>
-        <Input {...register("address")} placeholder={labels.placeholders.address} fullWidth sx={standardInputSx} />
+        <TextField
+          {...register("address")}
+          label={labels.fields.address}
+          placeholder={labels.placeholders.address}
+          fullWidth
+          sx={outlinedInputSx}
+        />
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.qualifications}
-        </Box>
-        <Input
+        <TextField
           {...register("qualifications")}
+          label={labels.fields.qualifications}
           placeholder={labels.placeholders.qualifications}
           fullWidth
-          sx={standardInputSx}
+          sx={outlinedInputSx}
         />
       </Grid>
     </>

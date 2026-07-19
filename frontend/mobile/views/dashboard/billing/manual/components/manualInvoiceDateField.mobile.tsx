@@ -8,7 +8,13 @@ import {
   parseFormDate,
 } from "@/frontend/common/views/dashboard/billing/manual/utils/manualInvoiceFormatters";
 
-export function ManualInvoiceDateFieldMobile({ control, errors, name }: Readonly<BaseManualInvoiceDateFieldProps>) {
+export function ManualInvoiceDateFieldMobile({
+  control,
+  errors,
+  labels,
+  name,
+}: Readonly<BaseManualInvoiceDateFieldProps>) {
+  const label = name === "issueDate" ? labels.issueDate : labels.dueDate;
   const fieldError = errors[name];
 
   return (
@@ -17,7 +23,7 @@ export function ManualInvoiceDateFieldMobile({ control, errors, name }: Readonly
       control={control}
       render={({ field }) => (
         <AppDatePicker
-          label={undefined}
+          label={label}
           value={parseFormDate(field.value)}
           onChange={(date: Date | null) => {
             field.onChange(formatFormDate(date));

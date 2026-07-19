@@ -11,8 +11,8 @@ import {
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { AppLanguage, Gender, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileContentStack,
   MobileMetricCardGrid,
@@ -166,7 +166,9 @@ export function StudentProfileMobileView({
                   slotProps={{ inputLabel: { shrink: true } }}
                 />
                 <FormControl fullWidth size="small">
-                  <InputLabel id="mobile-profile-gender-label">{labels.gender}</InputLabel>
+                  <InputLabel id="mobile-profile-gender-label" shrink>
+                    {labels.gender}
+                  </InputLabel>
                   <Select
                     labelId="mobile-profile-gender-label"
                     label={labels.gender}
@@ -179,7 +181,9 @@ export function StudentProfileMobileView({
                   </Select>
                 </FormControl>
                 <FormControl fullWidth size="small">
-                  <InputLabel id="mobile-profile-language-label">{labels.language}</InputLabel>
+                  <InputLabel id="mobile-profile-language-label" shrink>
+                    {labels.language}
+                  </InputLabel>
                   <Select
                     labelId="mobile-profile-language-label"
                     label={labels.language}

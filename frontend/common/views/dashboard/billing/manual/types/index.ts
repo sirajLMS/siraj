@@ -3,7 +3,6 @@ export type { InvoiceDraftSummaryCardProps } from "./invoiceDraftSummaryCard.typ
 export type { ManualInvoiceActionsProps } from "./manualInvoiceActions.types";
 export type {
   BaseManualInvoiceDateFieldProps,
-  ManualInvoiceDateFieldDesktopProps,
 } from "./manualInvoiceDateField.types";
 export type {
   BaseManualInvoiceFeeFieldProps,

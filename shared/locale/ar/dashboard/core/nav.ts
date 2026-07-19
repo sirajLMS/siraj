@@ -4,7 +4,7 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   home: "الرئيسية",
   scheduleSearch: "بحث الجدول",
   scheduleTracking: "متابعة إعادة الجدولة",
-  statusTracking: "متابعة الحالة",
+  statusTracking: "حالة حصص الجلسات",
   scheduleAlerts: "التنبيهات والحصص",
   teachers: "المعلمون",
   parents: "أولياء الأمور",

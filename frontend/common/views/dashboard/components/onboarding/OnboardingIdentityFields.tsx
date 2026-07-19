@@ -1,8 +1,8 @@
 "use client";
 
-import { Grid, Input } from "@mui/material";
+import { Grid, TextField } from "@mui/material";
 import type { Control, FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook-form";
-import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 
 interface IdentityFieldShape {
@@ -57,48 +57,40 @@ export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldVal
   return (
     <>
       <Grid size={{ xs: 12, md: 6 }}>
-        <FieldWrapper
+        <TextField
+          {...register(nameField)}
           label={translate.fields.fullName}
+          placeholder={translate.placeholders.fullName}
           required
-          error={validationMessage(translate, nameError?.message as string | undefined)}
-        >
-          <Input
-            {...register(nameField)}
-            placeholder={translate.placeholders.fullName}
-            error={!!nameError}
-            fullWidth
-            sx={standardInputSx}
-          />
-        </FieldWrapper>
+          error={!!nameError}
+          helperText={validationMessage(translate, nameError?.message as string | undefined)}
+          fullWidth
+          sx={outlinedInputSx}
+        />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <FieldWrapper
+        <TextField
+          {...register(emailField)}
           label={translate.fields.email}
+          placeholder={translate.placeholders.email}
           required
-          error={validationMessage(translate, errors.email?.message as string | undefined)}
-        >
-          <Input
-            {...register(emailField)}
-            placeholder={translate.placeholders.email}
-            error={!!errors.email}
-            fullWidth
-            type="email"
-            sx={standardInputSx}
-          />
-        </FieldWrapper>
+          error={!!errors.email}
+          helperText={validationMessage(translate, errors.email?.message as string | undefined)}
+          fullWidth
+          type="email"
+          sx={outlinedInputSx}
+        />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <FieldWrapper label={translate.fields.phone} required={phoneRequired}>
-          <PhoneFormField
-            name={phoneField}
-            control={control}
-            hideLabel
-            required={phoneRequired}
-            placeholder={translate.placeholders.phone}
-            error={!!errors.phone}
-            helperText={validationMessage(translate, errors.phone?.message as string | undefined)}
-          />
-        </FieldWrapper>
+        <PhoneFormField
+          name={phoneField}
+          control={control}
+          label={translate.fields.phone}
+          required={phoneRequired}
+          placeholder={translate.placeholders.phone}
+          error={!!errors.phone}
+          helperText={validationMessage(translate, errors.phone?.message as string | undefined)}
+        />
       </Grid>
     </>
   );

@@ -27,10 +27,16 @@ export function ManualInvoiceFeeFieldMobile({
         <TextField
           {...field}
           type="number"
+          label={labels.feeAmount}
           placeholder={labels.feeAmountPlaceholder}
+          variant="outlined"
           fullWidth
           error={Boolean(errors.feeAmount)}
           helperText={errors.feeAmount?.message}
+          sx={theme => ({
+            borderRadius: 3,
+            "& input": { fontSize: theme.typography.headlineLg.fontSize, fontWeight: 700 },
+          })}
           slotProps={{
             input: {
               startAdornment: (
@@ -42,7 +48,6 @@ export function ManualInvoiceFeeFieldMobile({
             },
             htmlInput: { autoComplete: "off" },
           }}
-          sx={{ "& input": { fontSize: theme => theme.typography.headlineLg.fontSize, fontWeight: 700 } }}
         />
       )}
     />

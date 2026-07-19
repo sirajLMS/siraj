@@ -1,4 +1,4 @@
-import type { ElementType, ReactNode } from "react";
+import type { ElementType } from "react";
 import { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 
@@ -13,13 +13,6 @@ export interface SectionHeaderProps {
   readonly title: string;
   readonly desktopIcon: ElementType;
   readonly mobileIcon: ElementType;
-}
-
-export interface QuotaFormFieldProps {
-  readonly label: string;
-  readonly children: ReactNode;
-  readonly extraLabel?: ReactNode;
-  readonly helperText?: ReactNode;
 }
 
 export interface MobileProfileHeaderProps {

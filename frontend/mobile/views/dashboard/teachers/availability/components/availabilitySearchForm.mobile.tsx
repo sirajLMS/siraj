@@ -2,41 +2,40 @@
 "use client";
 
 import { SearchOutlined } from "@mui/icons-material";
-import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
+import { outlinedInputSx, timeInputOutlinedSx } from "@/frontend/common/components/ui/form";
 import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   AvailabilitySearchFormData,
   AvailabilitySearchFormProps,
   TimeFieldProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
-import { MobileFieldWrapper, standardInputSx } from "@/frontend/mobile/components/ui/form/field";
 import { MobileAppTimePicker } from "@/frontend/mobile/components/ui/form/time";
 import { useAppTranslation } from "@/shared/locale";
 
 function TimeField({ label, name }: Readonly<TimeFieldProps>) {
   const { control } = useFormContext<AvailabilitySearchFormData>();
   return (
-    <MobileFieldWrapper label={label}>
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => (
-          <MobileAppTimePicker
-            value={field.value}
-            onChange={field.onChange}
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                size: "small",
-                variant: "outlined",
-                sx: standardInputSx,
-              },
-            }}
-          />
-        )}
-      />
-    </MobileFieldWrapper>
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => (
+        <MobileAppTimePicker
+          value={field.value}
+          onChange={field.onChange}
+          slotProps={{
+            textField: {
+              label,
+              fullWidth: true,
+              size: "small",
+              variant: "outlined",
+              sx: timeInputOutlinedSx,
+            },
+          }}
+        />
+      )}
+    />
   );
 }
 
@@ -64,22 +63,22 @@ export function AvailabilitySearchFormMobile({ onSearch }: Readonly<Availability
       <TimeField label={t.from} name="fromTime" />
       <TimeField label={t.to} name="toTime" />
 
-      <Box>
-        <Typography variant="labelSm" sx={standardInputSx}>
+      <FormControl fullWidth size="small" sx={outlinedInputSx}>
+        <InputLabel id="availability-gender-label-mobile" shrink>
           {t.gender}
-        </Typography>
+        </InputLabel>
         <Controller
           name="gender"
           control={control}
           render={({ field }) => (
-            <Select {...field} fullWidth size="small" sx={standardInputSx}>
+            <Select {...field} labelId="availability-gender-label-mobile" label={t.gender}>
               <MenuItem value="">{t.any}</MenuItem>
               <MenuItem value={Gender.Male}>{t.male}</MenuItem>
               <MenuItem value={Gender.Female}>{t.female}</MenuItem>
             </Select>
           )}
         />
-      </Box>
+      </FormControl>
 
       <Button
         type="submit"

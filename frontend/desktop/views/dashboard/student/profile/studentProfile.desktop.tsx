@@ -157,7 +157,9 @@ export function StudentProfileDesktopView({
                     slotProps={{ textField: { size: "small", fullWidth: true } }}
                   />
                   <FormControl fullWidth size="small">
-                    <InputLabel id="profile-gender-label">{labels.gender}</InputLabel>
+                    <InputLabel id="profile-gender-label" shrink>
+                      {labels.gender}
+                    </InputLabel>
                     <Select
                       labelId="profile-gender-label"
                       label={labels.gender}
@@ -170,7 +172,9 @@ export function StudentProfileDesktopView({
                     </Select>
                   </FormControl>
                   <FormControl fullWidth size="small">
-                    <InputLabel id="profile-language-label">{labels.language}</InputLabel>
+                    <InputLabel id="profile-language-label" shrink>
+                      {labels.language}
+                    </InputLabel>
                     <Select
                       labelId="profile-language-label"
                       label={labels.language}

@@ -2,7 +2,7 @@
 
 import { TextField } from "@mui/material";
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
-import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 
 /**
  * Props for the shared labeled text field controller.
@@ -23,12 +23,8 @@ interface LabeledTextFieldProps<T extends FieldValues> {
 }
 
 /**
- * Renders a `Controller`-bound standard-variant `TextField` wrapped in a
- * `FieldWrapper` (label + required marker + error message).
- *
- * Extracted from the create/edit category and subject dialogs which all
- * previously duplicated the same ~15 line Controller/FieldWrapper/TextField
- * block for name, slug, and description.
+ * Renders a `Controller`-bound outlined `TextField` with MUI floating label,
+ * required marker, and helper-text error message.
  */
 export function LabeledTextField<T extends Record<string, unknown>>({
   name,
@@ -45,18 +41,18 @@ export function LabeledTextField<T extends Record<string, unknown>>({
       name={name}
       control={control}
       render={({ field }) => (
-        <FieldWrapper label={label} required={required} error={error}>
-          <TextField
-            {...field}
-            fullWidth
-            variant="standard"
-            error={!!error}
-            multiline={multiline}
-            rows={rows}
-            disabled={disabled}
-            sx={standardInputSx}
-          />
-        </FieldWrapper>
+        <TextField
+          {...field}
+          fullWidth
+          label={label}
+          required={required}
+          error={!!error}
+          helperText={error}
+          multiline={multiline}
+          rows={rows}
+          disabled={disabled}
+          sx={outlinedInputSx}
+        />
       )}
     />
   );

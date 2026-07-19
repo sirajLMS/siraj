@@ -1,11 +1,11 @@
 "use client";
 
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import { Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, InputAdornment, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
-import { FieldWrapper } from "@/frontend/common/components/ui/form/field/FieldWrapper";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { LocalizedStringDrawer } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringDrawer";
@@ -64,58 +64,72 @@ export function PaymentMethodDefaultsEditor({
 
   return (
     <Stack spacing={2}>
-      <FieldWrapper label={tDefaults.payinDefault}>
-        <TextField
-          select
-          fullWidth
-          size="small"
-          disabled={disabled}
-          value={payinDefaultId ?? ""}
-          onChange={event => onPayinDefaultChangeAction(event.target.value || null)}
-        >
-          <MenuItem value="">{tDefaults.none}</MenuItem>
-          {payinMethods.map(method => (
-            <MenuItem key={method.id} value={method.id}>
-              {formatMethodLabel(method)}
-            </MenuItem>
-          ))}
-        </TextField>
-      </FieldWrapper>
+      <TextField
+        select
+        label={tDefaults.payinDefault}
+        fullWidth
+        size="small"
+        disabled={disabled}
+        value={payinDefaultId ?? ""}
+        onChange={event => onPayinDefaultChangeAction(event.target.value || null)}
+        sx={outlinedInputSx}
+        slotProps={{ inputLabel: { shrink: true } }}
+      >
+        <MenuItem value="">{tDefaults.none}</MenuItem>
+        {payinMethods.map(method => (
+          <MenuItem key={method.id} value={method.id}>
+            {formatMethodLabel(method)}
+          </MenuItem>
+        ))}
+      </TextField>
 
-      <FieldWrapper label={tDefaults.payoutDefault}>
-        <TextField
-          select
-          fullWidth
-          size="small"
-          disabled={disabled}
-          value={payoutDefaultId ?? ""}
-          onChange={event => onPayoutDefaultChangeAction(event.target.value || null)}
-        >
-          <MenuItem value="">{tDefaults.none}</MenuItem>
-          {payoutMethods.map(method => (
-            <MenuItem key={method.id} value={method.id}>
-              {formatMethodLabel(method)}
-            </MenuItem>
-          ))}
-        </TextField>
-      </FieldWrapper>
+      <TextField
+        select
+        label={tDefaults.payoutDefault}
+        fullWidth
+        size="small"
+        disabled={disabled}
+        value={payoutDefaultId ?? ""}
+        onChange={event => onPayoutDefaultChangeAction(event.target.value || null)}
+        sx={outlinedInputSx}
+        slotProps={{ inputLabel: { shrink: true } }}
+      >
+        <MenuItem value="">{tDefaults.none}</MenuItem>
+        {payoutMethods.map(method => (
+          <MenuItem key={method.id} value={method.id}>
+            {formatMethodLabel(method)}
+          </MenuItem>
+        ))}
+      </TextField>
 
       {onInstructionsSaveAction ? (
-        <FieldWrapper label={tDefaults.instructions}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography sx={{ flex: 1, typography: "bodyMd", color: "text.secondary" }}>
-              {Object.values(instructions).find(value => value.trim() !== "") ?? tDefaults.none}
-            </Typography>
-            <Button
-              variant="outlined"
-              size="small"
-              disabled={disabled}
-              startIcon={<EditOutlinedIcon />}
-              onClick={() => setInstructionsOpen(true)}
-            >
-              {tDefaults.editInstructions}
-            </Button>
-          </Box>
+        <>
+          <TextField
+            label={tDefaults.instructions}
+            fullWidth
+            size="small"
+            disabled={disabled}
+            value={Object.values(instructions).find(value => value.trim() !== "") ?? tDefaults.none}
+            sx={outlinedInputSx}
+            slotProps={{
+              input: {
+                readOnly: true,
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled={disabled}
+                      startIcon={<EditOutlinedIcon />}
+                      onClick={() => setInstructionsOpen(true)}
+                    >
+                      {tDefaults.editInstructions}
+                    </Button>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
           <LocalizedStringDrawer
             open={instructionsOpen}
             value={instructions}
@@ -127,19 +141,18 @@ export function PaymentMethodDefaultsEditor({
             }}
             onCancelAction={() => setInstructionsOpen(false)}
           />
-        </FieldWrapper>
+        </>
       ) : null}
 
       {onDisplayCurrencyChangeAction ? (
-        <FieldWrapper label={tDefaults.displayCurrency}>
-          <CurrencySelect
-            currency={displayCurrency ?? null}
-            setCurrencyAction={onDisplayCurrencyChangeAction}
-            allowedCodes={allowedCurrencyCodes}
-            disabled={disabled}
-            fullWidth
-          />
-        </FieldWrapper>
+        <CurrencySelect
+          label={tDefaults.displayCurrency}
+          currency={displayCurrency ?? null}
+          setCurrencyAction={onDisplayCurrencyChangeAction}
+          allowedCodes={allowedCurrencyCodes}
+          disabled={disabled}
+          fullWidth
+        />
       ) : null}
 
       {methods.length > 0 ? (

@@ -143,35 +143,33 @@ export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurri
         }
       />
 
-      <Box sx={{ pb: 12 }}>
-        <MobileSectionPanel
-          sx={theme => ({
-            backgroundColor: alpha(theme.palette.surfaceContainer, 0.2),
-          })}
-        >
-          <RecurringClassFormMobile
-            register={register}
-            errors={errors}
-            watch={watch}
-            setValue={setValue}
-            control={control}
-            handleSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-            meetingConfigWarning={meetingConfigWarning}
-            meetingConfigWarningMessage={meetingConfigWarningMessage}
-            goToClassLabel={goToClassLabel}
-            onGoToCreatedClass={onGoToCreatedClass}
-            formLabels={formLabels}
-            meetingConfig={meetingConfig}
-            onMeetingConfigChangeAction={onMeetingConfigChange}
-            students={students}
-            teachers={teachers}
-            studentsLoading={studentsLoading}
-            teachersLoading={teachersLoading}
-            onSubmit={data => onSubmit(data, meetingConfig)}
-          />
-        </MobileSectionPanel>
-      </Box>
+      <MobileSectionPanel
+        sx={theme => ({
+          backgroundColor: alpha(theme.palette.surfaceContainer, 0.2),
+        })}
+      >
+        <RecurringClassFormMobile
+          register={register}
+          errors={errors}
+          watch={watch}
+          setValue={setValue}
+          control={control}
+          handleSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          meetingConfigWarning={meetingConfigWarning}
+          meetingConfigWarningMessage={meetingConfigWarningMessage}
+          goToClassLabel={goToClassLabel}
+          onGoToCreatedClass={onGoToCreatedClass}
+          formLabels={formLabels}
+          meetingConfig={meetingConfig}
+          onMeetingConfigChangeAction={onMeetingConfigChange}
+          students={students}
+          teachers={teachers}
+          studentsLoading={studentsLoading}
+          teachersLoading={teachersLoading}
+          onSubmit={data => onSubmit(data, meetingConfig)}
+        />
+      </MobileSectionPanel>
 
       <SuccessSnackbar open={showSuccess} onClose={onDismissSuccess} labels={labels.addedSuccessfully} />
       <ErrorSnackbar open={!!errorMessage} onClose={onDismissError} message={errorMessage ?? ""} />

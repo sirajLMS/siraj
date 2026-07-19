@@ -6,8 +6,8 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileCardList,
   MobileContentStack,

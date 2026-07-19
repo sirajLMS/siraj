@@ -1,7 +1,7 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Alert, alpha, Box, Button } from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { BaseRecurringClassFormProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { RecurringClassFormFieldsMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/recurringClassFormFields.mobile";
@@ -9,7 +9,10 @@ import { RecurringClassFormFieldsMobile } from "@/frontend/mobile/views/dashboar
 const StyledScrollableFormBody = styled(Box)(({ theme }) => ({
   flex: 1,
   overflowY: "auto",
-  p: 2,
+  padding: theme.spacing(2),
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(4),
   "&::-webkit-scrollbar": { width: 4 },
   "&::-webkit-scrollbar-thumb": {
     backgroundColor: theme.palette.divider,
@@ -17,35 +20,28 @@ const StyledScrollableFormBody = styled(Box)(({ theme }) => ({
   },
 }));
 
-const StyledFormFooter = styled(Box)(({ theme }) => ({
-  p: 2,
+const StyledFormActions = styled(Box)(({ theme }) => ({
   display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  borderTop: 1,
-  borderColor: theme.palette.divider,
-  backgroundColor: alpha(theme.palette.background.default, 0.5),
-  position: "fixed",
-  bottom: 0,
-  left: 0,
-  right: 0,
-  zIndex: theme.zIndex.drawer + 2,
-  pb: "calc(16px + env(safe-area-inset-bottom))",
+  flexDirection: "column",
+  alignItems: "stretch",
+  gap: theme.spacing(2),
 }));
 
 const StyledSubmitButton = styled(Button)(({ theme }) => ({
-  backgroundColor: theme.palette.sidebar,
-  color: theme.palette.onSidebar,
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
   borderRadius: 10,
   px: 4,
   py: 1.75,
   typography: "labelUppercase",
   boxShadow: theme.palette.shadow.button,
   "&:hover": {
-    backgroundColor: theme.palette.sidebar,
+    backgroundColor: theme.palette.primary.main,
     filter: "brightness(1.1)",
   },
   maxWidth: 480,
+  alignSelf: "center",
+  width: "100%",
 }));
 
 // VARIANT JUSTIFICATION: Mobile tier does not render the success badge inline
@@ -104,34 +100,34 @@ export function RecurringClassFormMobile({
           studentsLoading={studentsLoading}
           teachersLoading={teachersLoading}
         />
-      </StyledScrollableFormBody>
 
-      <StyledFormFooter>
-        {meetingConfigWarning && meetingConfigWarningMessage ? (
-          <Alert
-            severity="warning"
-            sx={{ mb: 2, width: "100%" }}
-            action={
-              onGoToCreatedClass && goToClassLabel ? (
-                <Button color="inherit" size="small" onClick={onGoToCreatedClass}>
-                  {goToClassLabel}
-                </Button>
-              ) : undefined
-            }
+        <StyledFormActions>
+          {meetingConfigWarning && meetingConfigWarningMessage ? (
+            <Alert
+              severity="warning"
+              sx={{ width: "100%" }}
+              action={
+                onGoToCreatedClass && goToClassLabel ? (
+                  <Button color="inherit" size="small" onClick={onGoToCreatedClass}>
+                    {goToClassLabel}
+                  </Button>
+                ) : undefined
+              }
+            >
+              {meetingConfigWarningMessage}
+            </Alert>
+          ) : null}
+          <StyledSubmitButton
+            type="submit"
+            variant="contained"
+            disabled={isSubmitting}
+            endIcon={<AddOutlined />}
+            fullWidth
           >
-            {meetingConfigWarningMessage}
-          </Alert>
-        ) : null}
-        <StyledSubmitButton
-          type="submit"
-          variant="contained"
-          disabled={isSubmitting}
-          endIcon={<AddOutlined />}
-          fullWidth
-        >
-          {formLabels.addClass}
-        </StyledSubmitButton>
-      </StyledFormFooter>
+            {formLabels.addClass}
+          </StyledSubmitButton>
+        </StyledFormActions>
+      </StyledScrollableFormBody>
     </Box>
   );
 }

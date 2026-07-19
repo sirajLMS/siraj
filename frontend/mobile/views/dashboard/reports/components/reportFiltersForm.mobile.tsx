@@ -79,7 +79,9 @@ export function ReportFiltersFormMobile({
       />
 
       <FormControl size="small" fullWidth>
-        <InputLabel id="reports-mobile-teacher-label">{labels.teacher}</InputLabel>
+        <InputLabel id="reports-mobile-teacher-label" shrink>
+          {labels.teacher}
+        </InputLabel>
         <Select
           labelId="reports-mobile-teacher-label"
           value={teacherId}
@@ -98,7 +100,9 @@ export function ReportFiltersFormMobile({
       </FormControl>
 
       <FormControl size="small" fullWidth>
-        <InputLabel id="reports-mobile-type-label">{labels.reportType}</InputLabel>
+        <InputLabel id="reports-mobile-type-label" shrink>
+          {labels.reportType}
+        </InputLabel>
         <Select
           labelId="reports-mobile-type-label"
           value={reportType}

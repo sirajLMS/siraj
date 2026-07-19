@@ -217,31 +217,49 @@ Wire the `DateNavigator` to a Zustand store `filterDate` field so a single value
 
 ## Forms
 
-Use shared form field styles from `@/frontend/common/components/ui/form`:
+Form inputs **must** use MUI Material floating/notched labels (`label` on `TextField` / Autocomplete, or `InputLabel` + `Select`). Never render a separate label above the control.
 
 ```tsx
-import { labelSx, standardInputSx, outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { TextField, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { outlinedInputSx, timeInputOutlinedSx, AppTimePicker } from "@/frontend/common/components/ui/form";
 
-<Box component="label" sx={labelSx}>
-  {label}
-</Box>
-<Input sx={standardInputSx} />
+<TextField label="Full name" required error={!!error} helperText={error} sx={outlinedInputSx} />
+
+{/* displayEmpty + empty-value placeholder REQUIRES InputLabel shrink, or label overlaps the placeholder */}
+<FormControl fullWidth required sx={outlinedInputSx}>
+  <InputLabel id="class-type-label" shrink>
+    Class type
+  </InputLabel>
+  <Select labelId="class-type-label" label="Class type" value={value} displayEmpty onChange={onChange}>
+    <MenuItem value="" disabled>
+      Select class type
+    </MenuItem>
+    <MenuItem value="group">Group</MenuItem>
+  </Select>
+</FormControl>
+
+<AppTimePicker
+  label="Default start time"
+  slotProps={{ textField: { fullWidth: true, sx: timeInputOutlinedSx } }}
+/>
 ```
+
+Reference implementations: `TimezoneSelect`, `CountrySelect`, `CurrencySelect`, `PhoneInput`.
 
 ### Available styles
 
-| Export                    | Use case                                |
-| ------------------------- | --------------------------------------- |
-| `labelSx`                 | Uppercase form field labels             |
-| `standardInputSx`         | MUI Input variant with themed underline |
-| `outlinedInputSx`         | Outlined inputs with `borderRadius: 3`  |
-| `timeInputStandardSx`     | TimePicker standard variant             |
-| `timeInputOutlinedSx`     | TimePicker outlined variant             |
-| `durationBoxSx(isMobile)` | Custom duration input container         |
-| `AppDatePicker`           | MUI DatePicker with Arabic localization |
-| `AppTimePicker`           | MUI TimePicker with Arabic localization |
+| Export                    | Use case                                          |
+| ------------------------- | ------------------------------------------------- |
+| `outlinedInputSx`         | Outlined inputs with `borderRadius: 3` (preferred)|
+| `timeInputOutlinedSx`     | TimePicker outlined variant (preferred)           |
+| `standardInputSx`         | Legacy underline inputs (avoid for new fields)    |
+| `timeInputStandardSx`     | Legacy TimePicker standard variant                |
+| `durationBoxSx(isMobile)` | Custom duration input container                   |
+| `labelSx`                 | Non-input section/stat labels only — **not** form fields |
+| `AppDatePicker`           | MUI DatePicker with Arabic localization           |
+| `AppTimePicker`           | MUI TimePicker with Arabic localization           |
 
-**Note on Date & Time Pickers**: Always use `AppDatePicker` or `AppTimePicker` from `@/frontend/common/components/ui/form` rather than manually configuring MUI pickers and `LocalizationProvider`. They automatically handle the Arabic localization mappings and provider wrapping.
+**Note on Date & Time Pickers**: Always use `AppDatePicker` or `AppTimePicker` from `@/frontend/common/components/ui/form` rather than manually configuring MUI pickers and `LocalizationProvider`. Pass `label` (or `slotProps.textField.label`) so the picker shows a Material floating label.
 
 ---
 

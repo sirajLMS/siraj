@@ -1,9 +1,9 @@
 "use client";
 
 import { ExpandMoreOutlined } from "@mui/icons-material";
-import { Box, FormControl, FormHelperText, MenuItem, Select } from "@mui/material";
+import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { Controller } from "react-hook-form";
-import { labelSx, standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
@@ -37,35 +37,33 @@ function OptionSelectDesktop({
   readonly options: readonly { readonly value: string; readonly label: string }[];
 }) {
   return (
-    <>
-      <Box component="label" sx={labelSx}>
+    <FormControl fullWidth error={!!error} sx={outlinedInputSx}>
+      <InputLabel id={labelId} shrink>
         {label}
-      </Box>
-      <FormControl fullWidth error={!!error} variant="standard">
-        <Select
-          labelId={labelId}
-          value={value}
-          displayEmpty
-          disabled={isSubmitting}
-          onChange={e => {
-            onChange(e.target.value);
-          }}
-          IconComponent={ExpandMoreOutlined}
-          variant="standard"
-          sx={standardInputSx}
-        >
-          <MenuItem value="">
-            <em>{placeholder}</em>
+      </InputLabel>
+      <Select
+        labelId={labelId}
+        label={label}
+        value={value}
+        displayEmpty
+        disabled={isSubmitting}
+        onChange={e => {
+          onChange(e.target.value);
+        }}
+        IconComponent={ExpandMoreOutlined}
+        variant="outlined"
+      >
+        <MenuItem value="" disabled>
+          {placeholder}
+        </MenuItem>
+        {options.map(opt => (
+          <MenuItem key={opt.value} value={opt.value}>
+            {opt.label}
           </MenuItem>
-          {options.map(opt => (
-            <MenuItem key={opt.value} value={opt.value}>
-              {opt.label}
-            </MenuItem>
-          ))}
-        </Select>
-        {error && <FormHelperText>{error}</FormHelperText>}
-      </FormControl>
-    </>
+        ))}
+      </Select>
+      {error && <FormHelperText>{error}</FormHelperText>}
+    </FormControl>
   );
 }
 
@@ -197,7 +195,6 @@ export function RecurringClassFormFieldsDesktop({
         labels={{
           daysSelection: labels.daysSelection,
           classSchedule: labels.classSchedule,
-          weekendOff: labels.weekendOff,
           timeOverride: labels.timeOverride,
           days: labels.days,
         }}

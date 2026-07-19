@@ -1,19 +1,9 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box } from "@mui/material";
 import type { ReactNode } from "react";
 
-const StyledFieldLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onSurfaceVariant,
-  textTransform: "uppercase",
-}));
-
-export function FieldLabelMobile({ children }: Readonly<{ children: string }>) {
-  return <StyledFieldLabel variant="labelMd">{children}</StyledFieldLabel>;
-}
-
-export function MobileFieldCard({ label, children }: Readonly<{ label: string; children: ReactNode }>) {
+export function MobileFieldCard({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <Box
       sx={theme => ({
@@ -23,8 +13,7 @@ export function MobileFieldCard({ label, children }: Readonly<{ label: string; c
         boxShadow: theme.palette.shadow.card,
       })}
     >
-      <FieldLabelMobile>{label}</FieldLabelMobile>
-      <Box sx={{ mt: 1 }}>{children}</Box>
+      {children}
     </Box>
   );
 }

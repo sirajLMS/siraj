@@ -4,6 +4,7 @@ import { PaymentsOutlined } from "@mui/icons-material";
 import { InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Controller } from "react-hook-form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { BaseManualInvoiceFeeFieldProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceFeeField.types";
 
 const StyledPaymentsIcon = styled(PaymentsOutlined)(({ theme }) => ({
@@ -19,10 +20,13 @@ export function ManualInvoiceFeeFieldDesktop({ control, errors, labels }: Readon
         <TextField
           {...field}
           type="number"
+          label={labels.feeAmount}
           placeholder={labels.feeAmountPlaceholder}
+          variant="outlined"
           fullWidth
           error={Boolean(errors.feeAmount)}
           helperText={errors.feeAmount?.message}
+          sx={outlinedInputSx}
           slotProps={{
             input: {
               startAdornment: (

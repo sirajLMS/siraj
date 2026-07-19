@@ -230,7 +230,9 @@ export function StudentHistoryDesktopView({
         actions={
           <Stack direction="row" spacing={2}>
             <FormControl size="small" sx={{ minWidth: 160 }}>
-              <InputLabel id="history-subject-filter">{labels.filterBySubject}</InputLabel>
+              <InputLabel id="history-subject-filter" shrink>
+                {labels.filterBySubject}
+              </InputLabel>
               <Select
                 labelId="history-subject-filter"
                 label={labels.filterBySubject}
@@ -246,7 +248,9 @@ export function StudentHistoryDesktopView({
               </Select>
             </FormControl>
             <FormControl size="small" sx={{ minWidth: 160 }}>
-              <InputLabel id="history-status-filter">{labels.filterByStatus}</InputLabel>
+              <InputLabel id="history-status-filter" shrink>
+                {labels.filterByStatus}
+              </InputLabel>
               <Select
                 labelId="history-status-filter"
                 label={labels.filterByStatus}

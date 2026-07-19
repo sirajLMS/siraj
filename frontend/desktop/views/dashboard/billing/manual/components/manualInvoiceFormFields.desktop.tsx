@@ -10,7 +10,6 @@ import type { BaseManualInvoiceFormFieldsProps } from "@/frontend/common/views/d
 import type { StudentOption } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
 import { ManualInvoiceDateFieldDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceDateField.desktop";
 import { ManualInvoiceFeeFieldDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceFeeField.desktop";
-import { FieldLabelDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceFormLayout.desktop";
 import { ManualInvoiceParentFieldDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceParentField.desktop";
 import type { BillingManualLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
@@ -79,6 +78,7 @@ function StudentSelectorField({
                 },
               }}
               label={labels.studentSelection}
+              variant="outlined"
               size="small"
               fullWidth
             />
@@ -126,29 +126,12 @@ export function ManualInvoiceFormFieldsDesktop({
         gap: 3,
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <FieldLabelDesktop>{labels.parentSelection}</FieldLabelDesktop>
-        {parentFieldNode}
-      </Box>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <FieldLabelDesktop>{labels.studentSelection}</FieldLabelDesktop>
-        {studentFieldNode}
-      </Box>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <FieldLabelDesktop>{labels.feeAmount}</FieldLabelDesktop>
-        <ManualInvoiceFeeFieldDesktop control={control} errors={errors} labels={labels} />
-      </Box>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <CurrencyField control={control} label={currencyLabel} />
-      </Box>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <FieldLabelDesktop>{labels.issueDate}</FieldLabelDesktop>
-        <ManualInvoiceDateFieldDesktop control={control} errors={errors} labels={labels} name="issueDate" />
-      </Box>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <FieldLabelDesktop>{labels.dueDate}</FieldLabelDesktop>
-        <ManualInvoiceDateFieldDesktop control={control} errors={errors} labels={labels} name="dueDate" />
-      </Box>
+      {parentFieldNode}
+      {studentFieldNode}
+      <ManualInvoiceFeeFieldDesktop control={control} errors={errors} labels={labels} />
+      <CurrencyField control={control} label={currencyLabel} />
+      <ManualInvoiceDateFieldDesktop control={control} errors={errors} labels={labels} name="issueDate" />
+      <ManualInvoiceDateFieldDesktop control={control} errors={errors} labels={labels} name="dueDate" />
     </Box>
   );
 }

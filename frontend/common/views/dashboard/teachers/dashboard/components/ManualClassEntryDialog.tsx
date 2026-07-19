@@ -230,7 +230,9 @@ function ManualClassEntryFormFields({
       {error && <Alert severity="error">{error}</Alert>}
 
       <FormControl fullWidth required>
-        <InputLabel id="student-select-label">{t.manualClassEntry.studentLabel}</InputLabel>
+        <InputLabel id="student-select-label" shrink>
+          {t.manualClassEntry.studentLabel}
+        </InputLabel>
         <Select
           labelId="student-select-label"
           value={studentId}
@@ -279,7 +281,9 @@ function ManualClassEntryFormFields({
       />
 
       <FormControl fullWidth required>
-        <InputLabel id="class-type-select-label">{t.manualClassEntry.classType}</InputLabel>
+        <InputLabel id="class-type-select-label" shrink>
+          {t.manualClassEntry.classType}
+        </InputLabel>
         <Select
           labelId="class-type-select-label"
           value={classType}

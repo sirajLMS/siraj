@@ -2,14 +2,25 @@
 "use client";
 
 import { CheckCircleOutlined, InfoOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/common/utils/student-status-transitions";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { ManagementControlsCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
-import { MobileFieldWrapper, standardInputSx } from "@/frontend/mobile/components/ui/form/field";
 import { useAppTranslation } from "@/shared/locale";
 
 function TeacherSelection({
@@ -23,14 +34,16 @@ function TeacherSelection({
 }>) {
   const t = useAppTranslation().dashboardTranslations.teacherReassignment.controls;
   return (
-    <MobileFieldWrapper label={t.assignTeacher}>
-      <FormControl fullWidth>
+    <Box>
+      <FormControl fullWidth size="small" sx={outlinedInputSx}>
+        <InputLabel id="teacher-reassignment-teacher-label-mobile" shrink>
+          {t.assignTeacher}
+        </InputLabel>
         <Select
           displayEmpty
           value={selectedTeacherId}
-          size="small"
-          inputProps={{ "aria-label": "Without label" }}
-          sx={standardInputSx}
+          labelId="teacher-reassignment-teacher-label-mobile"
+          label={t.assignTeacher}
           onChange={e => {
             const val = e.target.value;
             if (typeof val === "string") onTeacherChange(val);
@@ -45,14 +58,9 @@ function TeacherSelection({
             </MenuItem>
           ))}
         </Select>
+        <FormHelperText sx={{ fontStyle: "italic" }}>{t.teacherAvailabilityNotice}</FormHelperText>
       </FormControl>
-      <Typography
-        variant="labelSm"
-        sx={theme => ({ mt: 0.5, color: theme.palette.onSurfaceVariant, fontStyle: "italic", display: "block" })}
-      >
-        {t.teacherAvailabilityNotice}
-      </Typography>
-    </MobileFieldWrapper>
+    </Box>
   );
 }
 
@@ -72,12 +80,15 @@ function StatusUpdate({
   const allowedTargets = ALLOWED_TARGET_STATUSES[currentStatus] ?? [];
 
   return (
-    <MobileFieldWrapper label={t.statusUpdate}>
-      <FormControl fullWidth>
+    <Box>
+      <FormControl fullWidth size="small" sx={outlinedInputSx}>
+        <InputLabel id="teacher-reassignment-status-label-mobile" shrink>
+          {t.statusUpdate}
+        </InputLabel>
         <Select
           value={selectedStatus}
-          size="small"
-          sx={standardInputSx}
+          labelId="teacher-reassignment-status-label-mobile"
+          label={t.statusUpdate}
           onChange={e => {
             const val = e.target.value;
             if (typeof val === "string") onStatusChange(val);
@@ -96,7 +107,7 @@ function StatusUpdate({
         </Typography>
         <MobileStatusBadge category="studentAccount" status={statusKey} label={currentStatus} />
       </Box>
-    </MobileFieldWrapper>
+    </Box>
   );
 }
 

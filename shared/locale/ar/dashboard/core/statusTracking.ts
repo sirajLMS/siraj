@@ -1,10 +1,10 @@
 import type { StatusTrackingLabels } from "@/shared/locale/types/dashboard/core";
 
 export const dashboardCoreStatusTrackingAr: StatusTrackingLabels = {
-  pageTitle: "نظرة عامة على الحالة",
-  pageSubtitle: "متابعة لحظية للأنشطة المؤسسية والتعليقات الإدارية.",
+  pageTitle: "حالة حصص الجلسات",
+  pageSubtitle: "راقب حصص الجلسات حسب حالة الطالب — عادي، معلّق، موقوف، وفي إجازة.",
   filters: "الفلاتر",
-  newReport: "تقرير جديد",
+  newReport: "حصة جديدة",
   todaysClassSchedule: "جدول حصص اليوم",
   totalSessions: total => `الإجمالي: ${total} حصة`,
   previous: "السابق",

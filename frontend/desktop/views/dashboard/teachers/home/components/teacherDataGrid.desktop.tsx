@@ -5,10 +5,7 @@ import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserBu
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
-import {
-  DesktopAppDataGrid,
-  DesktopPersonProfileLinkCell,
-} from "@/frontend/desktop/components/ui";
+import { DesktopAppDataGrid, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 interface TeacherDataGridProps {

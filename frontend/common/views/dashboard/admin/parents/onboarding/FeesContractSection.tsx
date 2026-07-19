@@ -1,11 +1,21 @@
 "use client";
 
-import { Box, Grid, Input, MenuItem, Select } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  FormHelperText,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 import { useState } from "react";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
-import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { PaymentMethodTypeFields } from "@/frontend/common/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
@@ -39,56 +49,62 @@ function InvoiceFields({ register, control, errors }: InvoiceFieldsProps) {
   const t = useAppTranslation().dashboardTranslations.parentOnboarding;
   const currency = useWatch({ control, name: "currency" });
   const currencySymbol = getCurrencySymbol(currency ?? CurrencyCode.Usd);
+  const invoiceTypeLabelId = "parent-onboarding-invoice-type-label";
+
   return (
     <>
       <Grid size={{ xs: 12, md: 6 }}>
-        <FieldWrapper
-          label={t.fields.invoiceType}
-          required
-          error={errors.invoiceType ? t.validation[errors.invoiceType.message as keyof typeof t.validation] : undefined}
-        >
+        <FormControl fullWidth required error={!!errors.invoiceType} sx={outlinedInputSx}>
+          <InputLabel id={invoiceTypeLabelId} shrink>
+            {t.fields.invoiceType}
+          </InputLabel>
           <Select
             {...register("invoiceType")}
-            error={!!errors.invoiceType}
-            fullWidth
-            variant="standard"
-            sx={standardInputSx}
+            labelId={invoiceTypeLabelId}
+            label={t.fields.invoiceType}
             defaultValue=""
           >
             <MenuItem value="">{t.placeholders.invoiceType}</MenuItem>
             <MenuItem value={InvoiceType.PerClasses}>{t.options.invoiceType.perClass}</MenuItem>
             <MenuItem value={InvoiceType.Monthly}>{t.options.invoiceType.monthly}</MenuItem>
           </Select>
-        </FieldWrapper>
+          {errors.invoiceType ? (
+            <FormHelperText>{t.validation[errors.invoiceType.message as keyof typeof t.validation]}</FormHelperText>
+          ) : null}
+        </FormControl>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <FieldWrapper
+        <TextField
+          {...register("feeAmount")}
           label={t.fields.feeAmount}
+          placeholder={t.placeholders.feeAmount}
           required
-          error={errors.feeAmount ? t.validation[errors.feeAmount.message as keyof typeof t.validation] : undefined}
-        >
-          <Input
-            {...register("feeAmount")}
-            placeholder={t.placeholders.feeAmount}
-            error={!!errors.feeAmount}
-            fullWidth
-            type="number"
-            sx={standardInputSx}
-            startAdornment={
-              <Box
-                component="span"
-                sx={theme => ({
-                  mr: 1,
-                  fontWeight: "bold",
-                  color: theme.palette.primary.main,
-                  opacity: 0.6,
-                })}
-              >
-                {currencySymbol}
-              </Box>
-            }
-          />
-        </FieldWrapper>
+          error={!!errors.feeAmount}
+          helperText={
+            errors.feeAmount ? t.validation[errors.feeAmount.message as keyof typeof t.validation] : undefined
+          }
+          fullWidth
+          type="number"
+          sx={outlinedInputSx}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Box
+                    component="span"
+                    sx={theme => ({
+                      fontWeight: "bold",
+                      color: theme.palette.primary.main,
+                      opacity: 0.6,
+                    })}
+                  >
+                    {currencySymbol}
+                  </Box>
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
       </Grid>
     </>
   );
