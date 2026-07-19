@@ -12,6 +12,7 @@ export interface ManagerOnboardingLabels {
     readonly accountType: string;
     readonly department: string;
     readonly password: string;
+    readonly avatar: string;
   };
   readonly placeholders: {
     readonly fullName: string;

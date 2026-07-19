@@ -1,11 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import type { Control } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { useState } from "react";
+import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect/userSelect.utils";
-import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 

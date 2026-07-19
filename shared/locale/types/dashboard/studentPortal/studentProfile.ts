@@ -7,6 +7,7 @@ export interface StudentPortalProfileLabels {
   readonly dateOfBirth: string;
   readonly gender: string;
   readonly language: string;
+  readonly avatar: string;
   readonly parentInfo: string;
   readonly parentName: string;
   readonly parentEmail: string;

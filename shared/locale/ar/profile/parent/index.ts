@@ -31,6 +31,7 @@ export const profileParentAr: ProfileParentLabels = {
     timezone: "المنطقة الزمنية",
     lifecycleStatus: "حالة دورة الحياة",
     accountStatus: "حالة الحساب",
+    avatar: "الصورة الشخصية",
   },
   status: {
     regular: "عادي",

@@ -35,6 +35,11 @@ export const StudentOnboardingInputPothosObject = gqlSchemaBuilder
         type: IanaTimezonePothosObject,
         description: "Student timezone (applied to the created user record)",
       }),
+      avatarUrl: t.string({
+        required: false,
+        description: "Student avatar URL",
+        directives: { constraint: { maxLength: 1024 } },
+      }),
     }),
   });
 

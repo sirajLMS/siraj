@@ -14,6 +14,7 @@ export const dashboardManagerOnboardingAr: ManagerOnboardingLabels = {
     accountType: "نوع الحساب",
     department: "القسم الرئيسي",
     password: "كلمة المرور",
+    avatar: "الصورة الشخصية",
   },
   placeholders: {
     fullName: "مثال: د. سلمان الفارسي",

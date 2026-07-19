@@ -28,6 +28,7 @@ export function useCreateTeacherOnboarding() {
       name: formData.name,
       email: formData.email,
       password: "",
+      avatarUrl: formData.avatarUrl ?? null,
       nationality: formData.nationality || null,
       nationalId: formData.nationalId,
       phone: formData.phone,

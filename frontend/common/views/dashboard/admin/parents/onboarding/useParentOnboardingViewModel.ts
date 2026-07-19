@@ -1,10 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
 import { CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateParentOnboarding } from "@/frontend/common/hooks/useCreateParentOnboarding";
 import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
 import { logger } from "@/frontend/common/utils/logger";
@@ -19,6 +20,7 @@ import { useAppTranslation } from "@/shared/locale";
 const defaultValues: ParentOnboardingFormData = {
   name: "",
   email: "",
+  avatarUrl: undefined,
   phone: "",
   nationality: "",
   address: "",
@@ -55,6 +57,7 @@ export interface ParentOnboardingViewModel {
   readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["parentOnboarding"];
   readonly tMeeting: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfig"]["manager"];
   readonly tJoin: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfig"]["join"];
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
 export type UseParentOnboardingViewModelProps = Record<string, never>;
@@ -66,6 +69,8 @@ export function useParentOnboardingViewModel(): ParentOnboardingViewModel {
   const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateParentOnboarding();
   const createdParent = useParentOnboardingStore(state => state.result);
   const [showSuccess, setShowSuccess] = useState(false);
+  const pendingAvatarKey = useRef(`pending-${crypto.randomUUID()}`);
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey.current });
 
   const meetingSetupHref = createdParent
     ? `${profileHrefForParent({ userId: createdParent.userId, parentId: createdParent.parentId })}?tab=meeting`
@@ -121,6 +126,7 @@ export function useParentOnboardingViewModel(): ParentOnboardingViewModel {
     t,
     tMeeting,
     tJoin,
+    onUploadAvatar,
   };
 }
 

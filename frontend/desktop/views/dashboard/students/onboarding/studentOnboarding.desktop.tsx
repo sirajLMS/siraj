@@ -11,6 +11,7 @@ import { TeacherAssignmentSection } from "@/frontend/desktop/views/dashboard/stu
 
 export function StudentOnboardingDesktopView({
   register,
+  onUploadAvatar,
   control,
   errors,
   handleSubmit,
@@ -70,6 +71,7 @@ export function StudentOnboardingDesktopView({
           register={register}
           errors={errors}
           control={control}
+          onUploadAvatar={onUploadAvatar}
           labels={{
             sectionTitle: labels.sections.studentInfo,
             name: labels.fields.name,
@@ -85,6 +87,7 @@ export function StudentOnboardingDesktopView({
             status: labels.fields.status,
             statusOnTrial: labels.options.status.onTrial,
             statusRegular: labels.options.status.regular,
+            avatar: labels.fields.avatar,
           }}
         />
 

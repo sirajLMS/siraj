@@ -2,10 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
+import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
@@ -20,23 +21,28 @@ export type { TeacherEditData, TeacherOwnEditFormData };
 
 export function TeacherProfileEditForm({
   teacherData,
-  avatarUrl,
+  targetUserId,
   isSaving,
   onSubmit,
 }: {
   readonly teacherData: TeacherEditData;
-  readonly avatarUrl?: string | null;
+  readonly targetUserId: string;
   readonly isSaving: boolean;
   readonly onSubmit: (values: TeacherOwnEditFormData) => Promise<void>;
 }) {
   const t = useAppTranslation().profileTranslations.teacher;
+  const baseActions = useAppTranslation().profileTranslations.base.actions;
   const scope = ProfileScope.Own;
   const { canEdit } = useProfileFieldAccess({ scope });
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
   const form = useForm<TeacherOwnEditFormData>({
     resolver: zodResolver(teacherOwnEditSchema),
     defaultValues: {
       name: "",
       email: "",
+      avatarUrl: null,
       phone: "",
       displayCurrency: null,
     },
@@ -46,13 +52,19 @@ export function TeacherProfileEditForm({
     form.reset({
       name: teacherData.name ?? "",
       email: teacherData.email ?? "",
+      avatarUrl: teacherData.avatarUrl ?? null,
       phone: teacherData.phone ?? "",
       displayCurrency: teacherData.displayCurrency ?? null,
     });
   }, [form, teacherData]);
 
   const onValidSubmit = async (values: TeacherOwnEditFormData) => {
-    await onSubmit(values);
+    try {
+      await onSubmit(values);
+      setSuccessOpen(true);
+    } catch {
+      setErrorOpen(true);
+    }
   };
 
   return (
@@ -64,7 +76,7 @@ export function TeacherProfileEditForm({
             gap: 3,
             gridTemplateColumns: {
               xs: "minmax(0, 1fr)",
-              md: "repeat(2, minmax(0, 1fr))",
+              lg: "repeat(2, minmax(0, 1fr))",
             },
           }}
         >
@@ -73,9 +85,9 @@ export function TeacherProfileEditForm({
               mode="edit"
               scope={scope}
               teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
-              avatarUrl={avatarUrl}
               register={form.register}
               control={form.control}
+              onUploadAvatar={onUploadAvatar}
             />
           ) : null}
           {canEdit("core_contact") || canEdit("teacher_identity") ? (
@@ -92,6 +104,8 @@ export function TeacherProfileEditForm({
           {isSaving ? t.shell.loading : t.actions.save}
         </PrimaryPageAction>
       </Stack>
+      <FormSuccessSnackbar open={successOpen} message={baseActions.saveSuccess} onClose={() => setSuccessOpen(false)} />
+      <FormErrorSnackbar open={errorOpen} message={baseActions.saveError} onClose={() => setErrorOpen(false)} />
     </Box>
   );
 }

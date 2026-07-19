@@ -31,6 +31,7 @@ export const profileParentEn: ProfileParentLabels = {
     timezone: "Timezone",
     lifecycleStatus: "Lifecycle Status",
     accountStatus: "Account Status",
+    avatar: "Avatar",
   },
   status: {
     regular: "Regular",

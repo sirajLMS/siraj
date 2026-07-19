@@ -38,6 +38,11 @@ export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
         description: "Teacher password",
         directives: { constraint: { maxLength: 128 } },
       }),
+      avatarUrl: t.string({
+        required: false,
+        description: "Teacher avatar URL",
+        directives: { constraint: { maxLength: 1024 } },
+      }),
       nationality: t.string({
         description: "Teacher nationality (country code)",
         directives: { constraint: { maxLength: 512 } },

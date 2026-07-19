@@ -250,7 +250,10 @@ async function applyStudentProfileEdit(
   locale?: string
 ): Promise<void> {
   const hasIdentityUpdate =
-    input.dateOfBirth !== undefined || input.gender !== undefined || input.language !== undefined;
+    input.dateOfBirth !== undefined ||
+    input.gender !== undefined ||
+    input.language !== undefined ||
+    input.avatarUrl !== undefined;
   if (hasIdentityUpdate) {
     await StudentRepository.partiallyUpdate(
       {
@@ -258,6 +261,7 @@ async function applyStudentProfileEdit(
         ...(input.dateOfBirth !== undefined ? { dateOfBirth: input.dateOfBirth } : {}),
         ...(input.gender !== undefined ? { gender: input.gender } : {}),
         ...(input.language !== undefined ? { language: input.language } : {}),
+        ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
       },
       tErrors,
       locale
@@ -284,7 +288,8 @@ function collectStudentProfileEditGroups(input: StudentProfileEditInput): string
     input.phone !== undefined ||
     input.dateOfBirth !== undefined ||
     input.gender !== undefined ||
-    input.language !== undefined
+    input.language !== undefined ||
+    input.avatarUrl !== undefined
   ) {
     groups.push("student_identity");
   }

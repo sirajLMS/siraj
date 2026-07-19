@@ -29,6 +29,7 @@ export const dashboardParentOnboardingEn: ParentOnboardingLabels = {
     meetingProvider: "Meeting Provider",
     meetingUrl: "Meeting URL",
     meetingLabel: "Meeting Label",
+    avatar: "Avatar",
   },
   placeholders: {
     fullName: "Enter full name",

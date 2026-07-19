@@ -1,10 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
 import { CurrencyCode, IanaTimezone, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateTeacherOnboarding } from "@/frontend/common/hooks/useCreateTeacherOnboarding";
 import { useTeacherOnboardingStore } from "@/frontend/common/stores/teacherOnboardingStore";
 import { logger } from "@/frontend/common/utils/logger";
@@ -44,6 +45,7 @@ export interface TeacherOnboardingViewModel {
   readonly meetingSetupHref: string | undefined;
   readonly tMeeting: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigManager"];
   readonly tJoin: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigJoin"];
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
 export type UseTeacherOnboardingViewModelProps = Record<string, never>;
@@ -55,6 +57,8 @@ export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
   const labels = useAppTranslation().dashboardTranslations.teacherOnboarding;
   const tMeeting = useAppTranslation().uiTranslations.meetingConfigManager;
   const tJoin = useAppTranslation().uiTranslations.meetingConfigJoin;
+  const pendingAvatarKey = useRef(`pending-${crypto.randomUUID()}`);
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey.current });
 
   const meetingSetupHref = createdTeacher
     ? `${profileHrefForTeacher({ userId: createdTeacher.userId, teacherId: createdTeacher.id })}?tab=meeting`
@@ -69,6 +73,7 @@ export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
       countryCode: CountryCode.Eg,
       timezone: IanaTimezone.AfricaCairo,
       rateCurrency: CurrencyCode.Usd,
+      avatarUrl: undefined,
       payoutMethod: {
         type: PaymentMethodType.BankTransfer,
         label: "",
@@ -120,6 +125,7 @@ export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
     meetingSetupHref,
     tMeeting,
     tJoin,
+    onUploadAvatar,
   };
 }
 

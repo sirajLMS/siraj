@@ -40,6 +40,7 @@ export type StudentProfileEditInput = {
   readonly dateOfBirth?: Date | null;
   readonly gender?: Gender | null;
   readonly language?: AppLanguage | null;
+  readonly avatarUrl?: string | null;
   /** Updates linked parent user phone when the student has a parent link. */
   readonly parentPhone?: string | null;
 };

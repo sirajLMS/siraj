@@ -17,6 +17,7 @@ export interface StudentOnboardingLabels {
     readonly primaryTeacher: string;
     readonly male: string;
     readonly female: string;
+    readonly avatar: string;
   };
   readonly placeholders: {
     readonly parent: string;

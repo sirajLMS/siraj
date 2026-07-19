@@ -9,6 +9,7 @@ export const dashboardStudentPortalProfileAr: StudentPortalProfileLabels = {
   dateOfBirth: "تاريخ الميلاد",
   gender: "الجنس",
   language: "اللغة",
+  avatar: "الصورة الشخصية",
   parentInfo: "معلومات ولي الأمر",
   parentName: "اسم ولي الأمر",
   parentEmail: "بريد ولي الأمر",

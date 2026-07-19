@@ -5,6 +5,7 @@ import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
+import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
@@ -26,6 +27,7 @@ interface BaseSectionProps {
       readonly female: string;
       readonly address: string;
       readonly qualifications: string;
+      readonly avatar: string;
     };
     readonly placeholders: {
       readonly fullName: string;
@@ -44,9 +46,27 @@ interface SectionProps extends BaseSectionProps {
   readonly control: Control<TeacherOnboardingFormData>;
 }
 
-export function BasicInfoFields({ register, control, errors, labels }: Readonly<SectionProps>) {
+interface TeacherInfoSectionProps extends SectionProps {
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
+}
+
+export function BasicInfoFields({
+  register,
+  control,
+  errors,
+  labels,
+  onUploadAvatar,
+}: Readonly<TeacherInfoSectionProps>) {
   return (
     <>
+      <Grid size={{ xs: 12 }}>
+        <AvatarImageField
+          control={control}
+          name="avatarUrl"
+          label={labels.fields.avatar}
+          onUploadAvatar={onUploadAvatar}
+        />
+      </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
         <TextField
           {...register("name")}
@@ -189,10 +209,22 @@ export function AddressFields({ register, labels }: Readonly<BaseSectionProps>) 
   );
 }
 
-export function TeacherInfoSection({ register, control, errors, labels }: Readonly<SectionProps>) {
+export function TeacherInfoSection({
+  register,
+  control,
+  errors,
+  labels,
+  onUploadAvatar,
+}: Readonly<TeacherInfoSectionProps>) {
   return (
     <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
-      <BasicInfoFields register={register} control={control} errors={errors} labels={labels} />
+      <BasicInfoFields
+        register={register}
+        control={control}
+        errors={errors}
+        labels={labels}
+        onUploadAvatar={onUploadAvatar}
+      />
       <IdentityFields register={register} control={control} errors={errors} labels={labels} />
       <AddressFields register={register} errors={errors} labels={labels} />
     </Grid>

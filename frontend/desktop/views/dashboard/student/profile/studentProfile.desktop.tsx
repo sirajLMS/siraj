@@ -24,7 +24,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
+import { FormErrorSnackbar, FormSuccessSnackbar, UserAvatar } from "@/frontend/common/components/ui";
+import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AppLanguage, Gender, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
@@ -66,6 +67,7 @@ export function StudentProfileDesktopView({
   onDraftChange,
   onSave,
   onSnackbarClose,
+  onUploadAvatar,
 }: Readonly<StudentProfileViewModel>) {
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
@@ -112,21 +114,7 @@ export function StudentProfileDesktopView({
           <DesktopSectionPanel title={labels.personalInfo} sx={{ height: "100%" }}>
             <Stack spacing={3}>
               <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-                <Box
-                  sx={theme => ({
-                    width: 80,
-                    height: 80,
-                    borderRadius: "50%",
-                    backgroundColor: theme.palette.primary.main,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  })}
-                >
-                  <Typography variant="headlineLg" sx={theme => ({ color: theme.palette.onPrimary })}>
-                    {profile.name.charAt(0).toUpperCase()}
-                  </Typography>
-                </Box>
+                {isEditing ? null : <UserAvatar src={profile.avatarUrl} label={profile.name} size={80} />}
                 <Stack>
                   <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
                     {profile.name}
@@ -139,6 +127,13 @@ export function StudentProfileDesktopView({
               <Divider />
               {isEditing ? (
                 <Stack spacing={2}>
+                  <AvatarImageField
+                    label={labels.avatar}
+                    value={draft.avatarUrl}
+                    onChange={url => onDraftChange({ avatarUrl: url })}
+                    onUploadAvatar={onUploadAvatar}
+                    disabled={saving}
+                  />
                   <TextField
                     label={labels.phone}
                     value={draft.phone}

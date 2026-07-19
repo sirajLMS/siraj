@@ -53,6 +53,7 @@ function FormActions({
 export function TeacherOnboardingDesktopView({
   form,
   register,
+  onUploadAvatar,
   control,
   errors,
   handleSubmit,
@@ -85,7 +86,13 @@ export function TeacherOnboardingDesktopView({
           sx={{ display: "flex", flexDirection: "column", gap: 4, pb: 12 }}
         >
           <DesktopSectionPanel title={labels.sections.teacherInfo}>
-            <TeacherInfoSection register={register} control={control} errors={errors} labels={labels} />
+            <TeacherInfoSection
+              register={register}
+              control={control}
+              errors={errors}
+              labels={labels}
+              onUploadAvatar={onUploadAvatar}
+            />
           </DesktopSectionPanel>
           <DesktopSectionPanel title={labels.sections.officialDetails}>
             <OfficialDetailsSection register={register} control={control} errors={errors} labels={labels} />

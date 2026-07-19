@@ -41,6 +41,7 @@ export const ManagerOnboardingInputPothosObject = gqlSchemaBuilder
       name: t.string({ required: true, directives: { constraint: { maxLength: 512 } } }),
       email: t.string({ required: true }),
       password: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
+      avatarUrl: t.string({ required: false, directives: { constraint: { maxLength: 1024 } } }),
       phone: t.string({ directives: { constraint: { maxLength: 512 } } }),
       accountType: t.field({ type: ManagerAccountTypePothosEnum, required: true }),
     }),

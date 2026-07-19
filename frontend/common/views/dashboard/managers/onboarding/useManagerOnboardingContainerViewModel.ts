@@ -1,8 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateManagerOnboarding } from "@/frontend/common/hooks/useCreateManagerOnboarding";
 import { logger } from "@/frontend/common/utils/logger";
 import {
@@ -17,6 +18,7 @@ import { useRouter } from "@/shared/i18n/routing";
 const defaultValues: ManagerOnboardingFormData = {
   name: "",
   email: "",
+  avatarUrl: undefined,
   phone: "",
   accountType: ManagerAccountType.Manager,
   password: "",
@@ -34,6 +36,7 @@ export interface ManagerOnboardingContainerViewModel {
   readonly onDismissSuccess: () => void;
   // NEW FOR PLAN v5: metricsModel exposed by the Container VM so the tier views no longer call `useOnboardingMetrics` directly (was a GraphQL-in-tier violation per specs §3 N1 / §6.2).
   readonly metricsModel: OnboardingMetricsViewModel;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
 export type UseManagerOnboardingContainerViewModelProps = Record<string, never>;
@@ -45,6 +48,8 @@ export function useManagerOnboardingContainerViewModel(
   const { execute, loading } = useCreateManagerOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
   const metricsModel = useOnboardingMetrics();
+  const pendingAvatarKey = useRef(`pending-${crypto.randomUUID()}`);
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey.current });
 
   const {
     register,
@@ -95,5 +100,6 @@ export function useManagerOnboardingContainerViewModel(
     onCancel,
     onDismissSuccess: () => setShowSuccess(false),
     metricsModel,
+    onUploadAvatar,
   };
 }

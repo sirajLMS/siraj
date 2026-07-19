@@ -4,12 +4,14 @@ import { Grid, TextField } from "@mui/material";
 import type { Control, FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
+import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 
 interface IdentityFieldShape {
   readonly fullName?: string;
   readonly name?: string;
   readonly email: string;
   readonly phone?: string;
+  readonly avatarUrl?: string | null;
 }
 
 interface TranslationObject {
@@ -17,6 +19,7 @@ interface TranslationObject {
     readonly fullName: string;
     readonly email: string;
     readonly phone: string;
+    readonly avatar: string;
     [key: string]: string;
   };
   readonly placeholders: {
@@ -34,6 +37,7 @@ interface Props<T extends IdentityFieldShape & FieldValues> {
   readonly errors: FieldErrors<T>;
   readonly translate: TranslationObject;
   readonly phoneRequired?: boolean;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
 function validationMessage(translate: TranslationObject, message: string | undefined): string | undefined {
@@ -47,15 +51,25 @@ export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldVal
   errors,
   translate,
   phoneRequired = false,
+  onUploadAvatar,
 }: Props<T>) {
   const nameField = ("name" in errors || !("fullName" in errors) ? "name" : "fullName") as Path<T>;
   const emailField = "email" as Path<T>;
   const phoneField = "phone" as Path<T>;
+  const avatarField = "avatarUrl" as Path<T>;
 
   const nameError = nameField === "name" ? errors.name : errors.fullName;
 
   return (
     <>
+      <Grid size={{ xs: 12 }}>
+        <AvatarImageField
+          control={control}
+          name={avatarField}
+          label={translate.fields.avatar}
+          onUploadAvatar={onUploadAvatar}
+        />
+      </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <TextField
           {...register(nameField)}

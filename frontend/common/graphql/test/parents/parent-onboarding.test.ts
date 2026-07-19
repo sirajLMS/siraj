@@ -25,6 +25,7 @@ const createMinimalParentInput = (
 ) => ({
   name: overrides?.name ?? "Test Parent",
   email: overrides?.email ?? `test_parent_${Date.now()}@test.com`,
+  avatarUrl: null,
   password: `Pwd_${randomUUID()}`,
   phone: null,
   invoiceType: null,
@@ -59,6 +60,7 @@ const createFullParentInput = (
 ) => ({
   name: overrides?.name ?? "Test Parent",
   email: overrides?.email ?? `test_parent_${Date.now()}@test.com`,
+  avatarUrl: null,
   password: `Pwd_${randomUUID()}`,
   phone: overrides?.phone ?? "+1234567890",
   invoiceType: overrides?.invoiceType ?? InvoiceType.Monthly,

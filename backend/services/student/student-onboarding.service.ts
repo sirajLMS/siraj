@@ -58,7 +58,16 @@ export namespace StudentOnboardingService {
 
     const run = async (txObj: DBTransaction): Promise<StudentOnboardingResult> => {
       // Step 1: Create the student login account (users row).
-      const user = await UserRepository.create({ name: input.name, email: { value: email }, password }, locale, txObj);
+      const user = await UserRepository.create(
+        {
+          name: input.name,
+          email: { value: email },
+          password,
+          ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
+        },
+        locale,
+        txObj
+      );
 
       if (input.timezone) {
         await UserRepository.updateTimezone(user.id, input.timezone, txObj, locale);
@@ -86,6 +95,7 @@ export namespace StudentOnboardingService {
           classesTotal: input.classesTotal ?? 0,
           classesRemaining: input.classesRemaining ?? 0,
           idempotencyKey: randomUUID(),
+          ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
         },
         tErrors,
         txObj

@@ -16,6 +16,7 @@ import { TeacherAssignmentSection } from "@/frontend/mobile/views/dashboard/stud
 
 export function StudentOnboardingMobileView({
   register,
+  onUploadAvatar,
   control,
   errors,
   handleSubmit,
@@ -71,6 +72,7 @@ export function StudentOnboardingMobileView({
             register={register}
             errors={errors}
             control={control}
+            onUploadAvatar={onUploadAvatar}
             labels={{
               sectionTitle: labels.sections.studentInfo,
               name: labels.fields.name,
@@ -86,6 +88,7 @@ export function StudentOnboardingMobileView({
               status: labels.fields.status,
               statusOnTrial: labels.options.status.onTrial,
               statusRegular: labels.options.status.regular,
+              avatar: labels.fields.avatar,
             }}
           />
 

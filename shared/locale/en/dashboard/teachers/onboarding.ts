@@ -30,6 +30,7 @@ export const dashboardTeacherOnboardingEn: TeacherOnboardingLabels = {
     meetingProvider: "Meeting Provider",
     meetingUrl: "Meeting URL",
     meetingLabel: "Meeting Link Label",
+    avatar: "Avatar",
   },
   placeholders: {
     fullName: "Enter full name",

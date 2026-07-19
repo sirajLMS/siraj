@@ -37,6 +37,7 @@ export const profileTeacherAr: ProfileTeacherLabels = {
     paymentMethod: "طريقة الدفع",
     status: "حالة الحساب",
     displayCurrency: "عملة العرض",
+    avatar: "الصورة الشخصية",
   },
   gender: {
     male: "ذكر",
@@ -65,6 +66,8 @@ export const profileTeacherAr: ProfileTeacherLabels = {
     save: "حفظ التغييرات",
     cancel: "إلغاء",
     retry: "إعادة المحاولة",
+    saveSuccess: "تم حفظ الملف الشخصي بنجاح.",
+    saveError: "فشل حفظ الملف الشخصي.",
   },
   errors: {
     failedToLoad: "Failed to load profile.",

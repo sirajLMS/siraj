@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type Control,
   type FieldErrors,
@@ -12,6 +12,7 @@ import {
   useForm,
 } from "react-hook-form";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateStudentOnboarding } from "@/frontend/common/hooks/useCreateStudentOnboarding";
 import { logger } from "@/frontend/common/utils/logger";
 import { studentHref } from "@/frontend/common/utils/profileHref";
@@ -43,6 +44,7 @@ export interface StudentOnboardingLabels {
     readonly language: string;
     readonly status: string;
     readonly primaryTeacher: string;
+    readonly avatar: string;
   };
   readonly placeholders: {
     readonly parent: string;
@@ -77,6 +79,7 @@ export interface StudentOnboardingViewModel {
   readonly successOpen: boolean;
   readonly onCloseSuccess: () => void;
   readonly successMessage: string;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
 export function useStudentOnboardingViewModel(
@@ -95,6 +98,8 @@ function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
 
   const { execute, loading } = useCreateStudentOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
+  const pendingAvatarKey = useRef(`pending-${crypto.randomUUID()}`);
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey.current });
 
   const {
     register,
@@ -108,6 +113,7 @@ function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
     defaultValues: {
       parentId: initialParentId,
       name: "",
+      avatarUrl: undefined,
       dateOfBirth: "",
       gender: null,
       language: null,
@@ -130,6 +136,7 @@ function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
       reset({
         parentId: initialParentId || formData.parentId,
         name: "",
+        avatarUrl: undefined,
         dateOfBirth: "",
         gender: null,
         language: null,
@@ -167,6 +174,7 @@ function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
         language: t.fields.language,
         status: t.fields.status,
         primaryTeacher: t.fields.primaryTeacher,
+        avatar: t.fields.avatar,
       },
       placeholders: {
         parent: t.placeholders.parent,
@@ -203,5 +211,6 @@ function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
     successOpen: showSuccess,
     onCloseSuccess,
     successMessage: t.actions.successMessage,
+    onUploadAvatar,
   };
 }

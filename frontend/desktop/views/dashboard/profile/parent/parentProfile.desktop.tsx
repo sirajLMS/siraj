@@ -32,7 +32,6 @@ export function ParentProfileDesktopView({
   onRetry,
   parentData,
   editData,
-  avatarUrl,
   parentId: _parentId,
   meetingTabHref: _meetingTabHref,
   associatedStudents: _associatedStudents,
@@ -255,9 +254,8 @@ export function ParentProfileDesktopView({
   return (
     <ParentProfileEditForm
       parentData={editData}
-      avatarUrl={avatarUrl}
+      targetUserId={targetUserId}
       isAdminScope={isAdminScope}
-      targetUserId={isAdminScope ? targetUserId : undefined}
       isSaving={isSaving}
       onSubmit={onSubmit}
     />

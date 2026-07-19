@@ -33,6 +33,7 @@ export function useTeacherOnboardingLabels(): TeacherOnboardingLabels {
       meetingProvider: t.fields.meetingProvider,
       meetingUrl: t.fields.meetingUrl,
       meetingLabel: t.fields.meetingLabel,
+      avatar: t.fields.avatar,
     },
     placeholders: {
       fullName: t.placeholders.fullName,

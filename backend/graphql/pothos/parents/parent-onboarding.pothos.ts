@@ -32,6 +32,7 @@ export const ParentOnboardingInputPothosObject = gqlSchemaBuilder
       name: t.string({ required: true, directives: { constraint: { maxLength: 512 } } }),
       email: t.field({ type: "Email", required: true }),
       password: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
+      avatarUrl: t.string({ required: false, directives: { constraint: { maxLength: 1024 } } }),
       phone: t.string({ directives: { constraint: { maxLength: 512 } } }),
       nationality: t.string({ directives: { constraint: { maxLength: 512 } } }),
       address: t.string({ directives: { constraint: { maxLength: 2000 } } }),

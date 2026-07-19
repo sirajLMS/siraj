@@ -2,10 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
+import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/sections/AccountSection";
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/staff/sections/CompensationSection";
@@ -20,13 +21,17 @@ import { useAppTranslation } from "@/shared/locale";
 
 export function StaffProfileEditForm({
   staffData,
+  avatarUrl,
   displayCurrency,
+  targetUserId,
   isAdminScope,
   isSaving,
   onSubmit,
 }: {
   readonly staffData: StaffProfileData;
+  readonly avatarUrl?: string | null;
   readonly displayCurrency: StaffAdminEditFormData["displayCurrency"];
+  readonly targetUserId: string;
   readonly isAdminScope: boolean;
   readonly isSaving: boolean;
   readonly onSubmit: (values: StaffAdminEditFormData) => Promise<void>;
@@ -34,11 +39,15 @@ export function StaffProfileEditForm({
   const tc = useAppTranslation().profileTranslations.base;
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canView, canEdit } = useProfileFieldAccess({ scope });
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
   const form = useForm<StaffAdminEditFormData>({
     resolver: zodResolver(isAdminScope ? staffAdminEditSchema : staffOwnEditSchema),
     defaultValues: {
       name: "",
       email: "",
+      avatarUrl: null,
       phone: "",
       status: AccountStatus.Activated,
       displayCurrency: null,
@@ -51,16 +60,22 @@ export function StaffProfileEditForm({
     form.reset({
       name: staffData.name ?? "",
       email: staffData.email ?? "",
+      avatarUrl: avatarUrl ?? staffData.avatarUrl ?? null,
       phone: staffData.phone ?? "",
       status: staffData.status ?? AccountStatus.Activated,
       displayCurrency: displayCurrency ?? null,
       hourlyRate: staffData.hourlyRate ?? "",
       rateCurrency: staffData.rateCurrency ?? null,
     });
-  }, [displayCurrency, form, staffData]);
+  }, [avatarUrl, displayCurrency, form, staffData]);
 
   const onValidSubmit = async (values: StaffAdminEditFormData) => {
-    await onSubmit(values);
+    try {
+      await onSubmit(values);
+      setSuccessOpen(true);
+    } catch {
+      setErrorOpen(true);
+    }
   };
 
   const showAccountSection = canEdit("core_identity") || (isAdminScope && canEdit("staff_role"));
@@ -77,7 +92,7 @@ export function StaffProfileEditForm({
             gap: 3,
             gridTemplateColumns: {
               xs: "minmax(0, 1fr)",
-              md: "repeat(2, minmax(0, 1fr))",
+              lg: "repeat(2, minmax(0, 1fr))",
             },
           }}
         >
@@ -89,6 +104,7 @@ export function StaffProfileEditForm({
               isAdminScope={isAdminScope}
               register={form.register}
               control={form.control}
+              onUploadAvatar={onUploadAvatar}
             />
           ) : null}
           {canEdit("core_contact") ? <ContactSection mode="edit" scope={scope} control={form.control} /> : null}
@@ -102,6 +118,8 @@ export function StaffProfileEditForm({
           {tc.actions.save}
         </PrimaryPageAction>
       </Stack>
+      <FormSuccessSnackbar open={successOpen} message={tc.actions.saveSuccess} onClose={() => setSuccessOpen(false)} />
+      <FormErrorSnackbar open={errorOpen} message={tc.actions.saveError} onClose={() => setErrorOpen(false)} />
     </Box>
   );
 }

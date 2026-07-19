@@ -37,6 +37,7 @@ export const profileTeacherEn: ProfileTeacherLabels = {
     paymentMethod: "Payment Method",
     status: "Account Status",
     displayCurrency: "Display Currency",
+    avatar: "Avatar",
   },
   gender: {
     male: "Male",
@@ -65,6 +66,8 @@ export const profileTeacherEn: ProfileTeacherLabels = {
     save: "Save Changes",
     cancel: "Cancel",
     retry: "Retry",
+    saveSuccess: "Profile saved successfully.",
+    saveError: "Failed to save profile.",
   },
   errors: {
     failedToLoad: "Failed to load profile.",

@@ -123,6 +123,7 @@ afterEach(() => {
       gender: "",
       language: "",
       parentPhone: "",
+      avatarUrl: null,
     },
     snackbar: { open: false, message: "", severity: "success" },
   });

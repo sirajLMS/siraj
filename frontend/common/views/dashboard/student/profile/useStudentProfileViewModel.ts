@@ -13,6 +13,7 @@ import {
   recordStudentProfileEditMutationDocument,
   studentProfileQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
+import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import {
   type StudentPortalProfileEditDraft,
@@ -37,6 +38,7 @@ function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDra
     gender: (profile.gender as Gender | null) ?? "",
     language: (profile.language as AppLanguage | null) ?? "",
     parentPhone: profile.parentPhone ?? "",
+    avatarUrl: profile.avatarUrl ?? null,
   };
 }
 
@@ -51,6 +53,7 @@ function useStudentProfileLabels(t: StudentPortalProfileLabels): StudentPortalPr
       dateOfBirth: t.dateOfBirth,
       gender: t.gender,
       language: t.language,
+      avatar: t.avatar,
       parentInfo: t.parentInfo,
       parentName: t.parentName,
       parentEmail: t.parentEmail,
@@ -87,6 +90,7 @@ export interface StudentProfileViewModel {
   readonly mode: ProfileMode;
   readonly targetUserId: string;
   readonly activeTab: string;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
   readonly onBackToDashboard: () => void;
   readonly onStartEdit: () => void;
   readonly onCancelEdit: () => void;
@@ -165,6 +169,9 @@ export function useStudentProfileViewModel({
     };
   }, [profileData]);
 
+  const storageOwnerKey = profile?.id || _targetUserId;
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey });
+
   const formattedDateOfBirth = useMemo(() => {
     if (!profile?.dateOfBirth) return "—";
     try {
@@ -194,6 +201,7 @@ export function useStudentProfileViewModel({
             gender: draft.gender || null,
             language: draft.language || null,
             parentPhone: draft.parentPhone.trim() || null,
+            avatarUrl: draft.avatarUrl,
           },
         },
       });
@@ -221,6 +229,7 @@ export function useStudentProfileViewModel({
     mode,
     targetUserId: _targetUserId,
     activeTab,
+    onUploadAvatar,
     onBackToDashboard: () => router.push("/students/me"),
     onStartEdit,
     onCancelEdit,

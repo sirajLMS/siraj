@@ -30,6 +30,8 @@ export const profileAr: ProfileLabels = {
     save: "حفظ التغييرات",
     cancel: "إلغاء",
     retry: "إعادة المحاولة",
+    saveSuccess: "تم حفظ الملف الشخصي بنجاح.",
+    saveError: "فشل حفظ الملف الشخصي.",
   },
   errors: {
     failedToLoad: "Failed to load profile.",
@@ -79,6 +81,7 @@ export const profileAr: ProfileLabels = {
       paymentMethod: "طريقة الدفع",
       status: "حالة الحساب",
       displayCurrency: "عملة العرض",
+      avatar: "الصورة الشخصية",
     },
     gender: {
       male: "ذكر",
@@ -107,6 +110,8 @@ export const profileAr: ProfileLabels = {
       save: "حفظ التغييرات",
       cancel: "إلغاء",
       retry: "إعادة المحاولة",
+      saveSuccess: "تم حفظ الملف الشخصي بنجاح.",
+      saveError: "فشل حفظ الملف الشخصي.",
     },
     errors: {
       failedToLoad: "Failed to load profile.",
@@ -144,6 +149,7 @@ export const profileAr: ProfileLabels = {
       timezone: "المنطقة الزمنية",
       lifecycleStatus: "حالة دورة الحياة",
       accountStatus: "حالة الحساب",
+      avatar: "الصورة الشخصية",
     },
     status: {
       regular: "عادي",
@@ -223,6 +229,7 @@ export const profileAr: ProfileLabels = {
       displayCurrency: "عملة العرض",
       hourlyRate: "الأجر بالساعة",
       currency: "العملة",
+      avatar: "الصورة الشخصية",
     },
     permissions: {
       inheritedGroups: "مجموعات الصلاحيات",

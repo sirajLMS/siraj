@@ -5,6 +5,7 @@ import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { LanguageSelector } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -15,6 +16,7 @@ interface StudentInfoSectionProps {
   readonly register: UseFormRegister<StudentOnboardingFormData>;
   readonly errors: FieldErrors<StudentOnboardingFormData>;
   readonly control: Control<StudentOnboardingFormData>;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
   readonly labels: {
     readonly sectionTitle: string;
     readonly name: string;
@@ -30,15 +32,25 @@ interface StudentInfoSectionProps {
     readonly status: string;
     readonly statusOnTrial: string;
     readonly statusRegular: string;
+    readonly avatar: string;
   };
 }
 
 const statusLabelId = "student-onboarding-status-label";
 
-export function StudentInfoSection({ register, errors, control, labels }: Readonly<StudentInfoSectionProps>) {
+export function StudentInfoSection({
+  register,
+  errors,
+  control,
+  labels,
+  onUploadAvatar,
+}: Readonly<StudentInfoSectionProps>) {
   return (
     <SectionPanel title={labels.sectionTitle}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
+        <Grid size={{ xs: 12 }}>
+          <AvatarImageField control={control} name="avatarUrl" label={labels.avatar} onUploadAvatar={onUploadAvatar} />
+        </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
             {...register("name")}

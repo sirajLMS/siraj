@@ -19,6 +19,7 @@ export const dashboardStudentOnboardingAr: StudentOnboardingLabels = {
     primaryTeacher: "المعلم الأساسي",
     male: "ذكر",
     female: "أنثى",
+    avatar: "الصورة الشخصية",
   },
   placeholders: {
     parent: "اختر ولي الأمر",

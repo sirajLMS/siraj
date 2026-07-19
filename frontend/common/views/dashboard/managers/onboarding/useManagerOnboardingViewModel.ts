@@ -13,6 +13,7 @@ export interface ManagerOnboardingViewModel {
   readonly onCancel: ManagerOnboardingViewProps["onCancel"];
   readonly onDismissSuccess: ManagerOnboardingViewProps["onDismissSuccess"];
   readonly metricsModel: ManagerOnboardingViewProps["metricsModel"];
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
 export type UseManagerOnboardingViewModelProps = ManagerOnboardingViewModel;

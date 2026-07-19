@@ -2,10 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
+import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
@@ -21,25 +22,28 @@ import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherAdminEditForm({
   teacherData,
-  avatarUrl,
   targetUserId,
   isSaving,
   onSubmit,
 }: {
   readonly teacherData: TeacherEditData;
-  readonly avatarUrl?: string | null;
-  readonly targetUserId?: string;
+  readonly targetUserId: string;
   readonly isSaving: boolean;
   readonly onSubmit: (values: TeacherAdminEditFormData) => Promise<void>;
 }) {
   const t = useAppTranslation().profileTranslations.teacher;
+  const baseActions = useAppTranslation().profileTranslations.base.actions;
   const scope = ProfileScope.Other;
   const { canEdit } = useProfileFieldAccess({ scope });
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
   const form = useForm<TeacherAdminEditFormData>({
     resolver: zodResolver(teacherAdminEditSchema),
     defaultValues: {
       name: "",
       email: "",
+      avatarUrl: null,
       phone: "",
       nationalId: "",
       dateOfBirth: "",
@@ -58,6 +62,7 @@ export function TeacherAdminEditForm({
     form.reset({
       name: teacherData.name ?? "",
       email: teacherData.email ?? "",
+      avatarUrl: teacherData.avatarUrl ?? null,
       phone: teacherData.phone ?? "",
       nationalId: teacherData.nationalId ?? "",
       dateOfBirth: teacherData.dateOfBirth ?? "",
@@ -73,7 +78,12 @@ export function TeacherAdminEditForm({
   }, [form, teacherData]);
 
   const onValidSubmit = async (values: TeacherAdminEditFormData) => {
-    await onSubmit(values);
+    try {
+      await onSubmit(values);
+      setSuccessOpen(true);
+    } catch {
+      setErrorOpen(true);
+    }
   };
 
   return (
@@ -85,7 +95,7 @@ export function TeacherAdminEditForm({
             gap: 3,
             gridTemplateColumns: {
               xs: "minmax(0, 1fr)",
-              md: "repeat(2, minmax(0, 1fr))",
+              lg: "repeat(2, minmax(0, 1fr))",
             },
           }}
         >
@@ -94,15 +104,15 @@ export function TeacherAdminEditForm({
               mode="edit"
               scope={scope}
               teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
-              avatarUrl={avatarUrl}
               register={form.register}
               control={form.control}
+              onUploadAvatar={onUploadAvatar}
             />
           ) : null}
           {canEdit("core_contact") || canEdit("teacher_identity") ? (
             <ContactSection mode="edit" scope={scope} isAdminScope register={form.register} control={form.control} />
           ) : null}
-          {targetUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} /> : null}
+          <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} />
           {canEdit("teacher_professional") ? (
             <CompensationSection mode="edit" register={form.register} control={form.control} />
           ) : null}
@@ -114,6 +124,8 @@ export function TeacherAdminEditForm({
           {isSaving ? t.shell.loading : t.actions.save}
         </PrimaryPageAction>
       </Stack>
+      <FormSuccessSnackbar open={successOpen} message={baseActions.saveSuccess} onClose={() => setSuccessOpen(false)} />
+      <FormErrorSnackbar open={errorOpen} message={baseActions.saveError} onClose={() => setErrorOpen(false)} />
     </Box>
   );
 }

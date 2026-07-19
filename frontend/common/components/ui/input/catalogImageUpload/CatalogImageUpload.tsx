@@ -109,14 +109,14 @@ const UploadButtons: React.FC<UploadButtonsProps> = ({
   uploadingLabel,
   removeLabel,
 }): React.ReactNode => (
-  <Box sx={{ display: "flex", gap: 1 }}>
+  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
     <Button
       variant="contained"
       startIcon={<CloudUploadOutlined />}
       onClick={onUploadClick}
       disabled={disabled || isUploading}
       aria-label={uploadLabel}
-      sx={theme => ({ borderRadius: theme.layout.radius.button })}
+      sx={theme => ({ borderRadius: theme.layout.radius.button, flexShrink: 0 })}
     >
       {isUploading ? uploadingLabel : uploadLabel}
     </Button>
@@ -126,7 +126,7 @@ const UploadButtons: React.FC<UploadButtonsProps> = ({
       onClick={onRemoveClick}
       disabled={disabled || isUploading || !hasPreview}
       aria-label={removeLabel}
-      sx={theme => ({ borderRadius: theme.layout.radius.button })}
+      sx={theme => ({ borderRadius: theme.layout.radius.button, flexShrink: 0 })}
     >
       {removeLabel}
     </Button>
@@ -217,7 +217,15 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
           {label}
         </Typography>
       ) : null}
-      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 2,
+          flexWrap: "wrap",
+          minWidth: 0,
+        }}
+      >
         <PreviewBox
           previewUrl={resolvedPreview}
           label={label}
@@ -225,7 +233,7 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
           isUploading={upload.isUploading}
           previewAlt={t.previewAlt}
         />
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1, flex: "1 1 12rem", minWidth: 0 }}>
           <UploadButtons
             onUploadClick={triggerFileInput}
             onRemoveClick={upload.handleRemove}

@@ -14,6 +14,7 @@ import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecyc
 const createMinimalParentInput = (overrides?: Partial<{ name: string; email: string }>) => ({
   name: overrides?.name ?? "Student Onboard Parent",
   email: overrides?.email ?? `student_parent_${Date.now()}@test.com`,
+  avatarUrl: null,
   password: `Pwd_${randomUUID()}`,
   phone: null,
   invoiceType: null,
@@ -34,6 +35,7 @@ const createMinimalStudentInput = (
 ) => ({
   parentId,
   name: overrides?.name ?? "GraphQL Test Student",
+  avatarUrl: null,
   dateOfBirth: null,
   gender: null,
   language: null,

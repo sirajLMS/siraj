@@ -11,9 +11,10 @@ interface Props {
   readonly register: UseFormRegister<ManagerOnboardingFormData>;
   readonly control: Control<ManagerOnboardingFormData>;
   readonly errors: FieldErrors<ManagerOnboardingFormData>;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
-export function StaffInfoSection({ register, control, errors }: Readonly<Props>) {
+export function StaffInfoSection({ register, control, errors, onUploadAvatar }: Readonly<Props>) {
   const t = useAppTranslation().dashboardTranslations.managerOnboarding;
 
   const translate = {
@@ -21,6 +22,7 @@ export function StaffInfoSection({ register, control, errors }: Readonly<Props>)
       fullName: t.fields.fullName,
       email: t.fields.email,
       phone: t.fields.phone,
+      avatar: t.fields.avatar,
     },
     placeholders: {
       fullName: t.placeholders.fullName,
@@ -33,7 +35,13 @@ export function StaffInfoSection({ register, control, errors }: Readonly<Props>)
   return (
     <SectionPanel title={t.sections.staffInfo}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
-        <OnboardingIdentityFields register={register} control={control} errors={errors} translate={translate} />
+        <OnboardingIdentityFields
+          register={register}
+          control={control}
+          errors={errors}
+          translate={translate}
+          onUploadAvatar={onUploadAvatar}
+        />
       </Grid>
     </SectionPanel>
   );

@@ -1,13 +1,22 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { useState } from "react";
 import {
+  type AccountStatus,
   type CurrencyCode,
+  type Gender,
+  type IanaTimezone,
   type ProfileMode,
   ProfileScope,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
-import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import {
+  profileByUserIdQueryDocument,
+  updateOwnProfileMutationDocument,
+  updateUserProfileMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
+import { logger } from "@/frontend/common/utils/logger";
 import type {
   TeacherAdminData,
   TeacherOwnData,
@@ -20,6 +29,31 @@ function buildEditSource(scope: ProfileScope, profile: ProfileData): TeacherOwnD
   return scope === ProfileScope.Own ? profile.teacherOwnProfile : profile.teacherAdminProfile;
 }
 
+export type TeacherOwnSubmitData = {
+  name: string;
+  email: string;
+  phone: string;
+  avatarUrl?: string | null;
+  displayCurrency: CurrencyCode | null;
+};
+
+export type TeacherAdminSubmitData = {
+  name: string;
+  email: string;
+  phone: string;
+  avatarUrl?: string | null;
+  nationalId: string;
+  dateOfBirth: string;
+  gender: string | null;
+  address: string;
+  qualifications: string;
+  timezone: string;
+  hourlyRate: string;
+  rateCurrency: CurrencyCode | undefined;
+  status: string;
+  displayCurrency: CurrencyCode | null;
+};
+
 export interface TeacherProfileViewModel {
   readonly teacherData: TeacherViewData;
   readonly avatarUrl: string | null | undefined;
@@ -30,27 +64,8 @@ export interface TeacherProfileViewModel {
   readonly mode: ProfileMode;
   readonly scope: ProfileScope;
   readonly isSaving: boolean;
-  readonly onSubmitOwn: (formData: {
-    name: string;
-    email: string;
-    phone: string;
-    displayCurrency: CurrencyCode | null;
-  }) => Promise<void>;
-  readonly onSubmitAdmin: (formData: {
-    name: string;
-    email: string;
-    phone: string;
-    nationalId: string;
-    dateOfBirth: string;
-    gender: string | null;
-    address: string;
-    qualifications: string;
-    timezone: string;
-    hourlyRate: string;
-    rateCurrency: CurrencyCode | undefined;
-    status: string;
-    displayCurrency: CurrencyCode | null;
-  }) => Promise<void>;
+  readonly onSubmitOwn: (formData: TeacherOwnSubmitData) => Promise<void>;
+  readonly onSubmitAdmin: (formData: TeacherAdminSubmitData) => Promise<void>;
   readonly loading: boolean;
   readonly error: Error | undefined;
   readonly refetch: () => void;
@@ -69,46 +84,87 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
   const { scope, mode, targetUserId, activeTab: _activeTab = "profile" } = props;
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
+  const [isSaving, setIsSaving] = useState(false);
 
   const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
     fetchPolicy: "cache-and-network",
   });
 
+  const [updateOwnProfile] = useMutation(updateOwnProfileMutationDocument);
+  const [updateUserProfile] = useMutation(updateUserProfileMutationDocument);
+
   const profile = data?.profileByUserId;
   const teacherData = buildEditSource(scope, profile ?? ({} as ProfileData));
   const avatarUrl = profile?.avatarUrl;
   const displayCurrency = profile?.displayCurrency;
 
-  const onSubmitOwn = async (_formData: {
-    name: string;
-    email: string;
-    phone: string;
-    displayCurrency: CurrencyCode | null;
-  }) => {
-    // Implementation in container
+  const onSubmitOwn = async (formData: TeacherOwnSubmitData) => {
+    setIsSaving(true);
+    try {
+      await updateOwnProfile({
+        variables: {
+          input: {
+            core: {
+              name: formData.name,
+              email: formData.email,
+              avatarUrl: formData.avatarUrl,
+              displayCurrency: formData.displayCurrency,
+            },
+            teacher: {
+              phone: formData.phone || null,
+            },
+          },
+        },
+      });
+      await refetch();
+    } catch (submitError) {
+      logger.error("Failed to update own teacher profile", { error: submitError });
+      throw submitError;
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const onSubmitAdmin = async (_formData: {
-    name: string;
-    email: string;
-    phone: string;
-    nationalId: string;
-    dateOfBirth: string;
-    gender: string | null;
-    address: string;
-    qualifications: string;
-    timezone: string;
-    hourlyRate: string;
-    rateCurrency: CurrencyCode | undefined;
-    status: string;
-    displayCurrency: CurrencyCode | null;
-  }) => {
-    // Implementation in container
+  const onSubmitAdmin = async (formData: TeacherAdminSubmitData) => {
+    setIsSaving(true);
+    try {
+      await updateUserProfile({
+        variables: {
+          userId: targetUserId,
+          input: {
+            core: {
+              name: formData.name,
+              email: formData.email,
+              avatarUrl: formData.avatarUrl,
+              displayCurrency: formData.displayCurrency,
+            },
+            teacher: {
+              phone: formData.phone || null,
+              nationalId: formData.nationalId || null,
+              dateOfBirth: formData.dateOfBirth || null,
+              gender: (formData.gender as Gender | null) ?? null,
+              address: formData.address || null,
+              qualifications: formData.qualifications || null,
+              timezone: (formData.timezone || null) as IanaTimezone | null,
+              hourlyRate: formData.hourlyRate || null,
+              rateCurrency: formData.rateCurrency ?? null,
+              status: (formData.status || null) as AccountStatus | null,
+            },
+          },
+        },
+      });
+      await refetch();
+    } catch (submitError) {
+      logger.error("Failed to update teacher profile", { error: submitError });
+      throw submitError;
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const onTabChange = (_tab: string) => {
-    // Implementation in container
+    // Tab routing is owned by the profile shell / URL.
   };
 
   return {
@@ -120,7 +176,7 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
     meetingTabHref: "?tab=meeting",
     mode,
     scope,
-    isSaving: false,
+    isSaving,
     onSubmitOwn,
     onSubmitAdmin,
     loading,

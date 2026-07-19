@@ -2231,6 +2231,7 @@ type ManagerOnboarding {
 """Input for creating a new manager/staff account with RBAC assignment"""
 input ManagerOnboardingInput {
   accountType: ManagerAccountType!
+  avatarUrl: String
   email: String!
   name: String!
   password: String!
@@ -2838,6 +2839,7 @@ type ParentInvoiceRow {
 """Input for creating a new parent account with billing configuration"""
 input ParentOnboardingInput {
   address: String
+  avatarUrl: String
   currency: CurrencyCode
   email: Email!
   facebook: String
@@ -3737,6 +3739,8 @@ type StudentMonthlyReport {
 
 """Input for creating a new student profile under a parent"""
 input StudentOnboardingInput {
+  """Student avatar URL"""
+  avatarUrl: String
   classesRemaining: Int
   classesTotal: Int
   dateOfBirth: DateTime
@@ -3796,6 +3800,7 @@ type StudentProfile {
 }
 
 input StudentProfileEditInput {
+  avatarUrl: String
   dateOfBirth: DateTime
   gender: Gender
   language: AppLanguage
@@ -4351,6 +4356,9 @@ type TeacherOnboarding {
 input TeacherOnboardingInput {
   """Teacher address"""
   address: String
+
+  """Teacher avatar URL"""
+  avatarUrl: String
 
   """Teacher country code"""
   countryCode: CountryCode

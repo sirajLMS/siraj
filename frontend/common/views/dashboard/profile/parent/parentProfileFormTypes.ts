@@ -5,6 +5,7 @@ import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 const coreSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
+  avatarUrl: z.string().nullable().optional(),
   displayCurrency: z.enum(CurrencyCode).nullable().optional(),
 });
 
@@ -37,6 +38,7 @@ export type ParentAdminEditFormData = z.infer<typeof parentAdminEditSchema>;
 export type ParentEditData = {
   readonly name?: string | null;
   readonly email?: string | null;
+  readonly avatarUrl?: string | null;
   readonly displayCurrency?: CurrencyCode | null;
   readonly phone?: string | null;
   readonly facebook?: string | null;

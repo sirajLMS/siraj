@@ -43,6 +43,7 @@ export const OwnEdit: Story = {
   render: () => (
     <ParentProfileEditForm
       parentData={ownParentData}
+      targetUserId="user-parent-1"
       isAdminScope={false}
       isSaving={false}
       onSubmit={async () => {
@@ -56,6 +57,7 @@ export const AdminEdit: Story = {
   render: () => (
     <ParentProfileEditForm
       parentData={adminParentData}
+      targetUserId="user-parent-1"
       isAdminScope={true}
       isSaving={false}
       onSubmit={async () => {

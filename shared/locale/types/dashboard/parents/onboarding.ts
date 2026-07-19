@@ -27,6 +27,7 @@ export interface ParentOnboardingLabels {
     readonly meetingProvider: string;
     readonly meetingUrl: string;
     readonly meetingLabel: string;
+    readonly avatar: string;
   };
   readonly placeholders: {
     readonly fullName: string;

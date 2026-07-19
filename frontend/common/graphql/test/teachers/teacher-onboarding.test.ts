@@ -26,6 +26,7 @@ const createMinimalTeacherInput = (
 ) => ({
   name: overrides?.name ?? "Test Teacher",
   email: overrides?.email ?? `test_teacher_${Date.now()}@test.com`,
+  avatarUrl: null,
   password: `Pwd_${randomUUID()}`,
   timezone: IanaTimezone.Utc,
   nationality: CountryCode.Us,

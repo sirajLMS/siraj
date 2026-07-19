@@ -29,6 +29,7 @@ const StyledFormActions = styled(Box)(({ theme }) => ({
 
 export function ManagerOnboardingMobileView({
   register,
+  onUploadAvatar,
   control,
   errors,
   handleSubmit,
@@ -53,7 +54,7 @@ export function ManagerOnboardingMobileView({
         sx={{ display: "flex", flexDirection: "column", gap: 2, px: { xs: 2, md: 3 }, pb: 4 }}
       >
         <StyledFormWrapper>
-          <StaffInfoSection register={register} control={control} errors={errors} />
+          <StaffInfoSection register={register} control={control} errors={errors} onUploadAvatar={onUploadAvatar} />
           <SystemAccessSection register={register} control={control} errors={errors} />
 
           <StyledFormActions>

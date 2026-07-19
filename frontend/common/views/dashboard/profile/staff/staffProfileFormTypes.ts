@@ -4,6 +4,7 @@ import { AccountStatus, CurrencyCode } from "@/frontend/common/graphql/generated
 const coreSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
+  avatarUrl: z.string().nullable().optional(),
   displayCurrency: z.enum(CurrencyCode).nullable().optional(),
   phone: z.string().optional(),
 });

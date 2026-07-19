@@ -30,6 +30,7 @@ export const dashboardTeacherOnboardingAr: TeacherOnboardingLabels = {
     meetingProvider: "مقدم الاجتماع",
     meetingUrl: "رابط الاجتماع",
     meetingLabel: "تسمية رابط الاجتماع",
+    avatar: "الصورة الشخصية",
   },
   placeholders: {
     fullName: "أدخل الاسم الكامل",

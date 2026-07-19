@@ -13,6 +13,7 @@ export function useCreateStudentOnboarding() {
     const input: StudentOnboardingInput = {
       parentId: formData.parentId,
       name: formData.name,
+      avatarUrl: formData.avatarUrl ?? null,
       dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth : null,
       gender: formData.gender ?? null,
       language: formData.language ?? null,

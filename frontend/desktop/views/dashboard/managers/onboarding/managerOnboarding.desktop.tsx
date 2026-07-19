@@ -29,6 +29,7 @@ const StyledFormActions = styled(Box)(({ theme }) => ({
 
 export function ManagerOnboardingDesktopView({
   register,
+  onUploadAvatar,
   control,
   errors,
   handleSubmit,
@@ -52,7 +53,7 @@ export function ManagerOnboardingDesktopView({
         }}
       >
         <StyledFormWrapper>
-          <StaffInfoSection register={register} control={control} errors={errors} />
+          <StaffInfoSection register={register} control={control} errors={errors} onUploadAvatar={onUploadAvatar} />
           <SystemAccessSection register={register} control={control} errors={errors} />
 
           <StyledFormActions>

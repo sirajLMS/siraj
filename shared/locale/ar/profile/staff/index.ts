@@ -24,6 +24,7 @@ export const profileStaffAr: ProfileStaffLabels = {
     displayCurrency: "عملة العرض",
     hourlyRate: "الأجر بالساعة",
     currency: "العملة",
+    avatar: "الصورة الشخصية",
   },
   permissions: {
     inheritedGroups: "مجموعات الصلاحيات",

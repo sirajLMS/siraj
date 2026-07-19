@@ -15,15 +15,23 @@ interface Props {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
   readonly control: Control<ParentOnboardingFormData>;
   readonly errors: FieldErrors<ParentOnboardingFormData>;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
-export function ParentInfoSection({ register, control, errors }: Props) {
+export function ParentInfoSection({ register, control, errors, onUploadAvatar }: Props) {
   const t = useAppTranslation().dashboardTranslations.parentOnboarding;
 
   return (
     <SectionPanel title={t.sections.parentInfo}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
-        <OnboardingIdentityFields register={register} control={control} errors={errors} translate={t} phoneRequired />
+        <OnboardingIdentityFields
+          register={register}
+          control={control}
+          errors={errors}
+          translate={t}
+          phoneRequired
+          onUploadAvatar={onUploadAvatar}
+        />
         <Grid size={{ xs: 12, md: 6 }}>
           <Controller
             name="nationality"

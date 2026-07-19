@@ -1,14 +1,19 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { useMemo } from "react";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { useMemo, useState } from "react";
 import {
   type CurrencyCode,
   type ProfileMode,
   ProfileScope,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
-import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import {
+  profileByUserIdQueryDocument,
+  updateOwnProfileMutationDocument,
+  updateUserProfileMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
+import { logger } from "@/frontend/common/utils/logger";
 import type { StaffProfileData } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type {
   StaffAdminEditFormData,
@@ -54,27 +59,80 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
   const { scope, mode, targetUserId, activeTab: _activeTab = "profile" } = props;
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
+  const [isSaving, setIsSaving] = useState(false);
 
   const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
     fetchPolicy: "cache-and-network",
   });
 
+  const [updateOwnProfile] = useMutation(updateOwnProfileMutationDocument);
+  const [updateUserProfile] = useMutation(updateUserProfileMutationDocument);
+
   const profile = data?.profileByUserId;
   const staffData = buildEditSource(scope, profile ?? ({} as ProfileData));
-  const avatarUrl = profile?.avatarUrl;
+  const avatarUrl = profile?.avatarUrl ?? staffData?.avatarUrl;
   const displayCurrency = profile?.displayCurrency;
 
-  const onSubmitOwn = async (_formData: StaffOwnEditFormData) => {
-    // Implementation in container
+  const onSubmitOwn = async (formData: StaffOwnEditFormData) => {
+    setIsSaving(true);
+    try {
+      await updateOwnProfile({
+        variables: {
+          input: {
+            core: {
+              name: formData.name,
+              email: formData.email,
+              avatarUrl: formData.avatarUrl,
+              displayCurrency: formData.displayCurrency,
+            },
+            staff: {
+              phone: formData.phone || null,
+            },
+          },
+        },
+      });
+      await refetch();
+    } catch (submitError) {
+      logger.error("Failed to update own staff profile", { error: submitError });
+      throw submitError;
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const onSubmitAdmin = async (_formData: StaffAdminEditFormData) => {
-    // Implementation in container
+  const onSubmitAdmin = async (formData: StaffAdminEditFormData) => {
+    setIsSaving(true);
+    try {
+      await updateUserProfile({
+        variables: {
+          userId: targetUserId,
+          input: {
+            core: {
+              name: formData.name,
+              email: formData.email,
+              avatarUrl: formData.avatarUrl,
+              displayCurrency: formData.displayCurrency,
+            },
+            staff: {
+              status: formData.status ?? null,
+              hourlyRate: formData.hourlyRate || null,
+              rateCurrency: formData.rateCurrency ?? null,
+            },
+          },
+        },
+      });
+      await refetch();
+    } catch (submitError) {
+      logger.error("Failed to update staff profile", { error: submitError });
+      throw submitError;
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const onTabChange = (_tab: string) => {
-    // Implementation in container
+    // Tab routing is owned by the profile shell / URL.
   };
 
   const canView = useMemo(() => (_field: string) => true, []);
@@ -88,7 +146,7 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
     meetingTabHref: "?tab=meeting",
     mode,
     scope,
-    isSaving: false,
+    isSaving,
     onSubmitOwn,
     onSubmitAdmin,
     loading,

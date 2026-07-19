@@ -27,6 +27,7 @@ export function useCreateParentOnboarding() {
       const input: ParentOnboardingInput = {
         name: formData.name,
         email: formData.email,
+        avatarUrl: formData.avatarUrl ?? null,
         phone: formData.phone,
         nationality: formData.nationality || null,
         address: formData.address,

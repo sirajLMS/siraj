@@ -32,6 +32,7 @@ const labels = {
     language: "Language",
     status: "Status",
     primaryTeacher: "Primary Teacher",
+    avatar: "Avatar",
   },
   placeholders: {
     parent: "Select parent",
@@ -73,6 +74,7 @@ function StudentOnboardingStory() {
     isSubmitting: false,
     parentLocked: true,
     labels,
+    onUploadAvatar: async () => ({ url: "https://example.com/avatar.png" }),
     onSubmit: () => undefined,
     successOpen: false,
     onCloseSuccess: () => undefined,

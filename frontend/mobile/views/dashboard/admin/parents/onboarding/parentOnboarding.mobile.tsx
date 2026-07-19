@@ -25,6 +25,7 @@ export function ParentOnboardingMobileView({
   handleSubmit,
   isSubmitting,
   onSubmit,
+  onUploadAvatar,
   meetingConfigWarning,
   clearMeetingConfigWarning,
   meetingSetupHref,
@@ -87,7 +88,7 @@ export function ParentOnboardingMobileView({
           }}
           sx={{ display: "flex", flexDirection: "column", gap: 2, px: { xs: 2, md: 3 }, pb: 4 }}
         >
-          <ParentInfoSection register={register} control={control} errors={errors} />
+          <ParentInfoSection register={register} control={control} errors={errors} onUploadAvatar={onUploadAvatar} />
           <SocialCommsSection register={register} control={control} />
           <FeesContractSection register={register} control={control} errors={errors} />
           <MobileSectionPanel title={t.sections.meetingConfig}>

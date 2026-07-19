@@ -19,6 +19,7 @@ export const dashboardStudentOnboardingEn: StudentOnboardingLabels = {
     primaryTeacher: "Primary Teacher",
     male: "Male",
     female: "Female",
+    avatar: "Avatar",
   },
   placeholders: {
     parent: "Select parent",

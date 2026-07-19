@@ -29,6 +29,8 @@ export interface ProfileActionsLabels {
   readonly save: string;
   readonly cancel: string;
   readonly retry: string;
+  readonly saveSuccess: string;
+  readonly saveError: string;
 }
 
 export interface ProfileErrorsLabels {
@@ -82,6 +84,7 @@ export interface ProfileTeacherLabels {
     readonly paymentMethod: string;
     readonly status: string;
     readonly displayCurrency: string;
+    readonly avatar: string;
   };
   readonly gender: {
     readonly male: string;
@@ -131,6 +134,7 @@ export interface ProfileParentLabels {
     readonly timezone: string;
     readonly lifecycleStatus: string;
     readonly accountStatus: string;
+    readonly avatar: string;
   };
   readonly status: {
     readonly regular: string;
@@ -209,6 +213,7 @@ export interface ProfileStaffLabels {
     readonly displayCurrency: string;
     readonly hourlyRate: string;
     readonly currency: string;
+    readonly avatar: string;
   };
   readonly permissions: {
     readonly inheritedGroups: string;

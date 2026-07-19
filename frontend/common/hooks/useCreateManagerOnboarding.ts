@@ -20,6 +20,7 @@ export function useCreateManagerOnboarding() {
       const input: ManagerOnboardingInput = {
         name: formData.name,
         email: formData.email,
+        avatarUrl: formData.avatarUrl ?? null,
         phone: formData.phone || null,
         accountType: formData.accountType,
         password: formData.password,

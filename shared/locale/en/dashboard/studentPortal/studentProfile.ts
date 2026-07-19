@@ -9,6 +9,7 @@ export const dashboardStudentPortalProfileEn: StudentPortalProfileLabels = {
   dateOfBirth: "Date of Birth",
   gender: "Gender",
   language: "Language",
+  avatar: "Avatar",
   parentInfo: "Parent Information",
   parentName: "Parent Name",
   parentEmail: "Parent Email",

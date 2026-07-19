@@ -13,6 +13,7 @@ const StudentProfileEditInputPothosObject = gqlSchemaBuilder
       dateOfBirth: t.field({ type: "DateTime", required: false }),
       gender: t.field({ type: GenderPothosObject, required: false }),
       language: t.field({ type: AppLanguagePothosObject, required: false }),
+      avatarUrl: t.string({ required: false }),
       parentPhone: t.string({ required: false }),
     }),
   });

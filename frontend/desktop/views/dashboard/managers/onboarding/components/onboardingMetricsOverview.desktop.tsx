@@ -2,10 +2,10 @@
 
 import { GroupsOutlined, PendingActionsOutlined, SpeedOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { OnboardingMetricsOverviewProps } from "@/frontend/common/views/dashboard/managers/onboarding/types";
 import type { OnboardingMetricKey } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
 import { resolveMetricValue } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { useAppTranslation } from "@/shared/locale";
 

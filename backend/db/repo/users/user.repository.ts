@@ -6,13 +6,13 @@ import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repos
 import { users } from "@/backend/db/schema";
 import type { AccountStatus } from "@/backend/enum";
 import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
-import { PaginationArgsDefault } from "@/backend/types/shared/pagination.types";
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { parseAccountStatus } from "@/backend/lib/enum";
 import logger from "@/backend/lib/logger";
 import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
 import type { PaginatedUsersResponseSelectType } from "@/backend/types/auth/auth.types";
 import type { PaginationInput } from "@/backend/types/shared/pagination.types";
+import { PaginationArgsDefault } from "@/backend/types/shared/pagination.types";
 import type { UserCreateInput, UserReturnType, UserSelectType } from "@/backend/types/users/user.types";
 import { AuthUtils } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
@@ -220,6 +220,7 @@ export namespace UserRepository {
           emailVerifiedAt: now,
           createdAt: now,
           updatedAt: now,
+          ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
         })
         .returning();
       return AuthUtils.toUserReturnType(result);

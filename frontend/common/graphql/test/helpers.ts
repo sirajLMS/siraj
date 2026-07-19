@@ -404,6 +404,7 @@ export async function provisionTestManager(
       input: {
         name: `${prefix}-manager`,
         email: `${prefix}-manager@test.com`,
+        avatarUrl: null,
         password: TEST_USER_PASSWORD,
         accountType,
         phone: null,

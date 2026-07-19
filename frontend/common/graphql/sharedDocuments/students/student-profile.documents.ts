@@ -119,6 +119,7 @@ interface RecordStudentProfileEditMutationArgs {
     gender?: string | null;
     language?: string | null;
     parentPhone?: string | null;
+    avatarUrl?: string | null;
   };
 }
 

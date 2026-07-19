@@ -10,6 +10,7 @@ export interface ManagerOnboardingInput {
   readonly name: string;
   readonly email: string;
   readonly password: string;
+  readonly avatarUrl?: string | null;
   readonly phone?: string | null;
   readonly accountType: "admin" | "manager" | "supervisor";
 }
@@ -62,7 +63,12 @@ export namespace ManagerOnboardingService {
     const run = async (txObj: DBTransaction) => {
       // Step 1: Create user record
       const user = await UserRepository.create(
-        { name: input.name, email: { value: input.email }, password: input.password },
+        {
+          name: input.name,
+          email: { value: input.email },
+          password: input.password,
+          ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
+        },
         locale,
         txObj
       );

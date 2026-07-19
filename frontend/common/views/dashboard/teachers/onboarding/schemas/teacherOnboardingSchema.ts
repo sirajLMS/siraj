@@ -24,6 +24,7 @@ export const teacherOnboardingSchema = (validationLabels: {
     .object({
       name: z.string().min(1, validationLabels.fullNameRequired),
       email: z.email({ message: validationLabels.emailInvalid }),
+      avatarUrl: z.string().optional(),
       nationality: z.string().optional(),
       nationalId: z.string().min(1, validationLabels.nationalIdRequired),
       phone: z.string().min(1, validationLabels.phoneRequired),

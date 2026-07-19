@@ -19,6 +19,7 @@ import { type ProfileParentLabels, useAppTranslation } from "@/shared/locale";
 type ParentAccountFormFields = {
   name: string;
   email: string;
+  avatarUrl?: string | null;
   displayCurrency?: CurrencyCode | null;
 };
 
@@ -42,9 +43,9 @@ type AccountSectionProps =
       readonly mode: "edit";
       readonly scope?: ProfileScope;
       readonly parentData: AccountParentData;
-      readonly avatarUrl?: string | null;
       readonly register: UseFormRegister<ParentAccountFormFields>;
       readonly control: Control<ParentAccountFormFields>;
+      readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
     };
 
 export function AccountSection(props: AccountSectionProps) {
@@ -57,13 +58,14 @@ export function AccountSection(props: AccountSectionProps) {
         mode="edit"
         scope={props.scope}
         name={props.parentData.name}
-        avatarUrl={props.avatarUrl}
         sectionTitle={t.sections.account}
         nameLabel={t.fields.fullName}
         emailLabel={t.fields.primaryEmail}
         currencyLabel={t.fields.displayCurrency}
+        avatarLabel={t.fields.avatar}
         register={props.register}
         control={props.control}
+        onUploadAvatar={props.onUploadAvatar}
       />
     );
   }

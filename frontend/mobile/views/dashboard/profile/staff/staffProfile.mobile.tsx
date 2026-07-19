@@ -96,7 +96,9 @@ export function StaffProfileMobileView({
   onSubmitOwn,
   onSubmitAdmin,
   staffData,
+  avatarUrl,
   displayCurrency,
+  targetUserId,
   permissionGroups,
   permissionOverrides,
   activeTab,
@@ -105,20 +107,19 @@ export function StaffProfileMobileView({
   const translations = useAppTranslation().profileTranslations;
   const st = translations.staff;
 
-  const guard = (
-    <StaffProfileMobileGuard
-      activeTab={activeTab}
-      scope={scope}
-      isAdminScope={isAdminScope}
-      loading={loading}
-      error={error}
-      staffData={staffData}
-      permissionGroups={permissionGroups}
-      permissionOverrides={permissionOverrides}
-      canView={canView}
-      translations={translations}
-    />
-  );
+  // Call as a function (not JSX) so the success path can return null and continue to the form.
+  const guard = StaffProfileMobileGuard({
+    activeTab,
+    scope,
+    isAdminScope,
+    loading,
+    error,
+    staffData,
+    permissionGroups,
+    permissionOverrides,
+    canView,
+    translations,
+  });
   if (guard !== null) {
     return guard;
   }
@@ -196,7 +197,9 @@ export function StaffProfileMobileView({
     return (
       <StaffProfileEditForm
         staffData={staffData}
+        avatarUrl={avatarUrl}
         displayCurrency={displayCurrency}
+        targetUserId={targetUserId}
         isAdminScope={isAdminScope}
         isSaving={isSaving}
         onSubmit={values => onSubmitOwn(values)}
@@ -207,7 +210,9 @@ export function StaffProfileMobileView({
   return (
     <StaffProfileEditForm
       staffData={staffData}
+      avatarUrl={avatarUrl}
       displayCurrency={displayCurrency}
+      targetUserId={targetUserId}
       isAdminScope={isAdminScope}
       isSaving={isSaving}
       onSubmit={values => onSubmitAdmin(values)}

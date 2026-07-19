@@ -30,6 +30,8 @@ export const profileEn: ProfileLabels = {
     save: "Save Changes",
     cancel: "Cancel",
     retry: "Retry",
+    saveSuccess: "Profile saved successfully.",
+    saveError: "Failed to save profile.",
   },
   errors: {
     failedToLoad: "Failed to load profile.",
@@ -79,6 +81,7 @@ export const profileEn: ProfileLabels = {
       paymentMethod: "Payment Method",
       status: "Account Status",
       displayCurrency: "Display Currency",
+      avatar: "Avatar",
     },
     gender: {
       male: "Male",
@@ -107,6 +110,8 @@ export const profileEn: ProfileLabels = {
       save: "Save Changes",
       cancel: "Cancel",
       retry: "Retry",
+      saveSuccess: "Profile saved successfully.",
+      saveError: "Failed to save profile.",
     },
     errors: {
       failedToLoad: "Failed to load profile.",
@@ -144,6 +149,7 @@ export const profileEn: ProfileLabels = {
       timezone: "Timezone",
       lifecycleStatus: "Lifecycle Status",
       accountStatus: "Account Status",
+      avatar: "Avatar",
     },
     status: {
       regular: "Regular",
@@ -221,6 +227,7 @@ export const profileEn: ProfileLabels = {
       statusActive: "Active",
       statusInactive: "Inactive",
       displayCurrency: "Display Currency",
+      avatar: "Avatar",
       hourlyRate: "Hourly Rate",
       currency: "Currency",
     },

@@ -44,6 +44,7 @@ export const OwnEdit: Story = {
   render: () => (
     <TeacherProfileEditForm
       teacherData={ownTeacherData}
+      targetUserId="user-teacher-1"
       isSaving={false}
       onSubmit={async () => {
         await Promise.resolve();
@@ -56,6 +57,7 @@ export const AdminEdit: Story = {
   render: () => (
     <TeacherAdminEditForm
       teacherData={adminTeacherData}
+      targetUserId="user-teacher-1"
       isSaving={false}
       onSubmit={async () => {
         await Promise.resolve();

@@ -51,4 +51,5 @@ export type UserCreateInput = {
   name: string;
   email: { value: string };
   password: string;
+  avatarUrl?: string | null;
 };

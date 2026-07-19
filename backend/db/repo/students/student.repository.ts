@@ -118,6 +118,7 @@ export namespace StudentRepository {
       classesTotal: input.classesTotal ?? 0,
       classesRemaining: input.classesRemaining ?? 0,
       idempotencyKey: input.idempotencyKey,
+      avatarUrl: input.avatarUrl ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -242,6 +243,7 @@ export namespace StudentRepository {
       status: input.status ?? existingStudent.status,
       classesTotal: input.classesTotal ?? existingStudent.classesTotal,
       classesRemaining: input.classesRemaining ?? existingStudent.classesRemaining,
+      avatarUrl: input.avatarUrl === null ? null : (input.avatarUrl ?? existingStudent.avatarUrl),
       idempotencyKey: existingStudent.idempotencyKey,
       createdAt: existingStudent.createdAt,
       updatedAt: new Date(),

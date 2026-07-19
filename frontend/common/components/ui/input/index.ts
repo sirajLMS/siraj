@@ -1,3 +1,4 @@
+export * from "@/frontend/common/components/ui/input/avatarImageField";
 export * from "@/frontend/common/components/ui/input/catalogImageUpload/CatalogImageUpload";
 export * from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 export * from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";

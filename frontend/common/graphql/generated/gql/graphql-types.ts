@@ -2303,6 +2303,7 @@ export type ManagerOnboarding = {
 /** Input for creating a new manager/staff account with RBAC assignment */
 export type ManagerOnboardingInput = {
   accountType: ManagerAccountType;
+  avatarUrl: InputMaybe<Scalars['String']['input']>;
   email: Scalars['String']['input'];
   name: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -3652,6 +3653,7 @@ export type ParentInvoiceRow = {
 /** Input for creating a new parent account with billing configuration */
 export type ParentOnboardingInput = {
   address: InputMaybe<Scalars['String']['input']>;
+  avatarUrl: InputMaybe<Scalars['String']['input']>;
   currency: InputMaybe<CurrencyCode>;
   email: Scalars['Email']['input'];
   facebook: InputMaybe<Scalars['String']['input']>;
@@ -5005,6 +5007,8 @@ export type StudentMonthlyReport = {
 
 /** Input for creating a new student profile under a parent */
 export type StudentOnboardingInput = {
+  /** Student avatar URL */
+  avatarUrl: InputMaybe<Scalars['String']['input']>;
   classesRemaining: InputMaybe<Scalars['Int']['input']>;
   classesTotal: InputMaybe<Scalars['Int']['input']>;
   dateOfBirth: InputMaybe<Scalars['DateTime']['input']>;
@@ -5063,6 +5067,7 @@ export type StudentProfile = {
 };
 
 export type StudentProfileEditInput = {
+  avatarUrl: InputMaybe<Scalars['String']['input']>;
   dateOfBirth: InputMaybe<Scalars['DateTime']['input']>;
   gender: InputMaybe<Gender>;
   language: InputMaybe<AppLanguage>;
@@ -5646,6 +5651,8 @@ export type TeacherOnboarding = {
 export type TeacherOnboardingInput = {
   /** Teacher address */
   address: InputMaybe<Scalars['String']['input']>;
+  /** Teacher avatar URL */
+  avatarUrl: InputMaybe<Scalars['String']['input']>;
   /** Teacher country code */
   countryCode: InputMaybe<CountryCode>;
   /** Teacher date of birth (ISO date string) */

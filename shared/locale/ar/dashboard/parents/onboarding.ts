@@ -29,6 +29,7 @@ export const dashboardParentOnboardingAr: ParentOnboardingLabels = {
     meetingProvider: "مزود الاجتماع",
     meetingUrl: "رابط الاجتماع",
     meetingLabel: "تسمية الإعداد",
+    avatar: "الصورة الشخصية",
   },
   placeholders: {
     fullName: "مثال: أحمد الفارس",

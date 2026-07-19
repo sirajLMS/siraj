@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Skeleton, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import {
   type ProfileAudience,
@@ -36,9 +36,16 @@ function renderBody(
   t: ReturnType<typeof useAppTranslation>["profileTranslations"]["base"]
 ): ReactNode {
   const showTabs = mode === ProfileMode.View && currentTab && onTabChange;
+  const isEditMode = mode === ProfileMode.Edit;
 
   if (loading) {
-    return <ProfileSkeleton />;
+    return isEditMode ? (
+      <Box sx={{ width: "100%", py: 2 }}>
+        <Skeleton variant="rectangular" height={240} sx={{ borderRadius: 1 }} />
+      </Box>
+    ) : (
+      <ProfileSkeleton />
+    );
   }
 
   if (error) {
@@ -69,13 +76,19 @@ function renderBody(
         },
       })}
     >
-      <ProfileHeader
-        name={name ?? ""}
-        email={email ?? ""}
-        roleLabel={roleLabel}
-        avatarUrl={avatarUrl}
-        actions={actions}
-      />
+      {isEditMode ? (
+        actions ? (
+          <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>{actions}</Box>
+        ) : null
+      ) : (
+        <ProfileHeader
+          name={name ?? ""}
+          email={email ?? ""}
+          roleLabel={roleLabel}
+          avatarUrl={avatarUrl}
+          actions={actions}
+        />
+      )}
       {showTabs ? (
         <ProfileTabNav
           audience={audience as ProfileAudience}

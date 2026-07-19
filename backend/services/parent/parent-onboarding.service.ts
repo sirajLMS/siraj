@@ -13,6 +13,7 @@ export interface ParentOnboardingInput {
   readonly name: string;
   readonly email: string;
   readonly password: string;
+  readonly avatarUrl?: string | null;
   readonly phone?: string | null;
   readonly nationality?: string | null;
   readonly address?: string | null;
@@ -59,7 +60,12 @@ export namespace ParentOnboardingService {
     const run = async (txObj: DBTransaction) => {
       // Step 1: Create user record
       const user = await UserRepository.create(
-        { name: input.name, email: { value: input.email }, password: input.password },
+        {
+          name: input.name,
+          email: { value: input.email },
+          password: input.password,
+          ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
+        },
         undefined,
         txObj
       );

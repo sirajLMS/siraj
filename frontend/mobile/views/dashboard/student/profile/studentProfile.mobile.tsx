@@ -8,7 +8,9 @@ import {
   PersonOutlined,
   SchoolOutlined,
 } from "@mui/icons-material";
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { UserAvatar } from "@/frontend/common/components/ui";
+import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AppLanguage, Gender, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
@@ -54,6 +56,7 @@ export function StudentProfileMobileView({
   onDraftChange,
   onSave,
   onSnackbarClose,
+  onUploadAvatar,
 }: Readonly<StudentProfileViewModel>) {
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
@@ -122,21 +125,7 @@ export function StudentProfileMobileView({
         <MobileSectionPanel title={labels.personalInfo}>
           <Stack spacing={2}>
             <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-              <Box
-                sx={theme => ({
-                  width: 48,
-                  height: 48,
-                  borderRadius: "50%",
-                  backgroundColor: theme.palette.primary.main,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                })}
-              >
-                <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.onPrimary })}>
-                  {profile.name.charAt(0).toUpperCase()}
-                </Typography>
-              </Box>
+              {isEditing ? null : <UserAvatar src={profile.avatarUrl} label={profile.name} size={48} />}
               <Stack>
                 <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
                   {profile.name}
@@ -149,6 +138,13 @@ export function StudentProfileMobileView({
 
             {isEditing ? (
               <>
+                <AvatarImageField
+                  label={labels.avatar}
+                  value={draft.avatarUrl}
+                  onChange={url => onDraftChange({ avatarUrl: url })}
+                  onUploadAvatar={onUploadAvatar}
+                  disabled={saving}
+                />
                 <TextField
                   label={labels.phone}
                   value={draft.phone}

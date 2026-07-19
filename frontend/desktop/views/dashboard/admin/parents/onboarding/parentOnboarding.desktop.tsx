@@ -20,6 +20,7 @@ import { useRouter } from "@/shared/i18n/routing";
 export function ParentOnboardingDesktopView({
   form,
   register,
+  onUploadAvatar,
   control,
   errors,
   handleSubmit,
@@ -86,7 +87,7 @@ export function ParentOnboardingDesktopView({
           }}
           sx={{ display: "flex", flexDirection: "column", gap: 3 }}
         >
-          <ParentInfoSection register={register} control={control} errors={errors} />
+          <ParentInfoSection register={register} control={control} errors={errors} onUploadAvatar={onUploadAvatar} />
           <SocialCommsSection register={register} control={control} />
           <FeesContractSection register={register} control={control} errors={errors} />
           <DesktopSectionPanel title={t.sections.meetingConfig}>

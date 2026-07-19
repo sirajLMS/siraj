@@ -7,6 +7,7 @@ export interface StudentPortalProfileEditDraft {
   readonly gender: Gender | "";
   readonly language: AppLanguage | "";
   readonly parentPhone: string;
+  readonly avatarUrl: string | null;
 }
 
 export interface StudentPortalProfileSnackbar {
@@ -33,6 +34,7 @@ const EMPTY_DRAFT: StudentPortalProfileEditDraft = {
   gender: "",
   language: "",
   parentPhone: "",
+  avatarUrl: null,
 };
 
 export const useStudentPortalProfileStore = create<StudentPortalProfileState>(set => ({

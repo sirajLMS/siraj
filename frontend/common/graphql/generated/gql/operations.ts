@@ -1296,6 +1296,7 @@ export type ManagerAccountType =
 /** Input for creating a new manager/staff account with RBAC assignment */
 export type ManagerOnboardingInput = {
   accountType: ManagerAccountType;
+  avatarUrl: string | null | undefined;
   email: string;
   name: string;
   password: string;
@@ -1417,6 +1418,7 @@ export type ParentAdminProfileUpdateInput = {
 /** Input for creating a new parent account with billing configuration */
 export type ParentOnboardingInput = {
   address: string | null | undefined;
+  avatarUrl: string | null | undefined;
   currency: CurrencyCode | null | undefined;
   email: string;
   facebook: string | null | undefined;
@@ -1576,6 +1578,8 @@ export type StudentFilterArgs = {
 
 /** Input for creating a new student profile under a parent */
 export type StudentOnboardingInput = {
+  /** Student avatar URL */
+  avatarUrl: string | null | undefined;
   classesRemaining: number | null | undefined;
   classesTotal: number | null | undefined;
   dateOfBirth: string | null | undefined;
@@ -1594,6 +1598,7 @@ export type StudentOnboardingInput = {
 };
 
 export type StudentProfileEditInput = {
+  avatarUrl: string | null | undefined;
   dateOfBirth: string | null | undefined;
   gender: Gender | null | undefined;
   language: AppLanguage | null | undefined;
@@ -1727,6 +1732,8 @@ export type TeacherDueStatus =
 export type TeacherOnboardingInput = {
   /** Teacher address */
   address: string | null | undefined;
+  /** Teacher avatar URL */
+  avatarUrl: string | null | undefined;
   /** Teacher country code */
   countryCode: CountryCode | null | undefined;
   /** Teacher date of birth (ISO date string) */

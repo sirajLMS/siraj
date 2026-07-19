@@ -11,6 +11,7 @@ export const parentOnboardingSchema = z
   .object({
     name: z.string().min(1, "fullNameRequired"),
     email: z.email({ message: "emailInvalid" }),
+    avatarUrl: z.string().optional(),
     phone: z.string().min(1, "phoneRequired"),
     nationality: z.string().optional(),
     address: z.string().min(1, "addressRequired"),

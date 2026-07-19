@@ -12,12 +12,14 @@ import type { TeacherProfileViewModel } from "@/frontend/common/views/dashboard/
 
 function toTeacherEditData(
   teacherData: TeacherViewData,
+  avatarUrl: string | null | undefined,
   displayCurrency: CurrencyCode | null | undefined
 ): TeacherEditData {
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
   return {
     name: teacherData.name,
     email: teacherData.email,
+    avatarUrl,
     phone: teacherData.phone,
     displayCurrency,
     nationalId: adminData?.nationalId ?? null,
@@ -51,19 +53,20 @@ export function TeacherProfileEditBody({
   onSubmitOwn: TeacherProfileViewModel["onSubmitOwn"];
   onSubmitAdmin: TeacherProfileViewModel["onSubmitAdmin"];
 }>) {
-  const editData = toTeacherEditData(teacherData, displayCurrency);
+  const editData = toTeacherEditData(teacherData, avatarUrl, displayCurrency);
 
   if (scope === ProfileScope.Own) {
     return (
       <TeacherProfileEditForm
         teacherData={editData}
-        avatarUrl={avatarUrl}
+        targetUserId={targetUserId}
         isSaving={isSaving}
         onSubmit={async values => {
           await onSubmitOwn({
             name: values.name,
             email: values.email,
             phone: values.phone ?? "",
+            avatarUrl: values.avatarUrl,
             displayCurrency: values.displayCurrency ?? null,
           });
         }}
@@ -74,7 +77,6 @@ export function TeacherProfileEditBody({
   return (
     <TeacherAdminEditForm
       teacherData={editData}
-      avatarUrl={avatarUrl}
       targetUserId={targetUserId}
       isSaving={isSaving}
       onSubmit={async values => {
@@ -82,6 +84,7 @@ export function TeacherProfileEditBody({
           name: values.name,
           email: values.email,
           phone: values.phone ?? "",
+          avatarUrl: values.avatarUrl,
           nationalId: values.nationalId ?? "",
           dateOfBirth: values.dateOfBirth ?? "",
           gender: values.gender ?? null,

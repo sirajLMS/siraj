@@ -4,6 +4,7 @@ import { AppLanguage, Gender, StudentStatus } from "@/frontend/common/graphql/ge
 export const studentOnboardingSchema = z.object({
   parentId: z.string().min(1, "parentRequired"),
   name: z.string().min(3, "nameMinLength"),
+  avatarUrl: z.string().optional(),
   dateOfBirth: z.string().optional(),
   gender: z.enum(Gender).optional().nullable(),
   language: z.enum(AppLanguage).optional().nullable(),

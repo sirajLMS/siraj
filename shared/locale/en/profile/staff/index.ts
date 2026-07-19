@@ -24,6 +24,7 @@ export const profileStaffEn: ProfileStaffLabels = {
     displayCurrency: "Display Currency",
     hourlyRate: "Hourly Rate",
     currency: "Currency",
+    avatar: "Avatar",
   },
   permissions: {
     inheritedGroups: "Permission Groups",

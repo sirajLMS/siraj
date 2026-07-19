@@ -4,6 +4,7 @@ import { FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@mui
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getLanguageByCode } from "@/frontend/common/lib/locale";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
@@ -15,6 +16,7 @@ interface StudentInfoSectionProps {
   readonly register: UseFormRegister<StudentOnboardingFormData>;
   readonly errors: FieldErrors<StudentOnboardingFormData>;
   readonly control: Control<StudentOnboardingFormData>;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
   readonly labels: {
     readonly sectionTitle: string;
     readonly name: string;
@@ -30,15 +32,25 @@ interface StudentInfoSectionProps {
     readonly status: string;
     readonly statusOnTrial: string;
     readonly statusRegular: string;
+    readonly avatar: string;
   };
 }
 
 const statusLabelId = "student-onboarding-status-label-mobile";
 
-export function StudentInfoSection({ register, errors, control, labels }: Readonly<StudentInfoSectionProps>) {
+export function StudentInfoSection({
+  register,
+  errors,
+  control,
+  labels,
+  onUploadAvatar,
+}: Readonly<StudentInfoSectionProps>) {
   return (
     <MobileSectionPanel title={labels.sectionTitle} contentInset={false}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
+        <Grid size={{ xs: 12 }}>
+          <AvatarImageField control={control} name="avatarUrl" label={labels.avatar} onUploadAvatar={onUploadAvatar} />
+        </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
             {...register("name")}
