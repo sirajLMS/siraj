@@ -12,10 +12,12 @@ import type {
   ScheduleAlertsLabels,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import {
+  MobileContentInset,
   MobileContentStack,
   MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
+  MobileSectionTitleRow,
 } from "@/frontend/mobile/components/ui";
 import {
   AcademicScheduleCardListMobile,
@@ -72,12 +74,14 @@ function MobileMetricsSection({
   return (
     <Stack spacing={2}>
       <MobileMetricCardGrid metrics={metricItems} />
-      <InstitutionalReportCardMobile
-        title={labels.reportTitle}
-        description={labels.reportDescriptionMobile}
-        downloadLabel={labels.downloadPdf}
-        onDownload={onDownloadReport}
-      />
+      <MobileContentInset>
+        <InstitutionalReportCardMobile
+          title={labels.reportTitle}
+          description={labels.reportDescriptionMobile}
+          downloadLabel={labels.downloadPdf}
+          onDownload={onDownloadReport}
+        />
+      </MobileContentInset>
     </Stack>
   );
 }
@@ -126,41 +130,45 @@ function MobileAlertsBody({
   }
   return (
     <Box>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
-          {labels.sectionTitle}
-        </Typography>
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton
-            id="schedule-alerts-filter-mobile"
-            onClick={onFilter}
-            sx={theme => ({
-              width: 40,
-              height: 40,
-              backgroundColor: theme.palette.background.paper,
-              border: `1px solid ${theme.palette.border.light}`,
-              color: theme.palette.primary.main,
-            })}
-            aria-label={labels.filter}
-          >
-            <FilterListOutlined />
-          </IconButton>
-          <IconButton
-            id="schedule-alerts-export-mobile"
-            onClick={onExport}
-            sx={theme => ({
-              width: 40,
-              height: 40,
-              backgroundColor: theme.palette.background.paper,
-              border: `1px solid ${theme.palette.border.light}`,
-              color: theme.palette.primary.main,
-            })}
-            aria-label={labels.export}
-          >
-            <IosShareOutlined />
-          </IconButton>
-        </Box>
-      </Box>
+      <MobileSectionTitleRow
+        title={
+          <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
+            {labels.sectionTitle}
+          </Typography>
+        }
+        actions={
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <IconButton
+              id="schedule-alerts-filter-mobile"
+              onClick={onFilter}
+              sx={theme => ({
+                width: 40,
+                height: 40,
+                backgroundColor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.border.light}`,
+                color: theme.palette.primary.main,
+              })}
+              aria-label={labels.filter}
+            >
+              <FilterListOutlined />
+            </IconButton>
+            <IconButton
+              id="schedule-alerts-export-mobile"
+              onClick={onExport}
+              sx={theme => ({
+                width: 40,
+                height: 40,
+                backgroundColor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.border.light}`,
+                color: theme.palette.primary.main,
+              })}
+              aria-label={labels.export}
+            >
+              <IosShareOutlined />
+            </IconButton>
+          </Box>
+        }
+      />
       <AcademicScheduleCardListMobile
         rows={classes}
         labels={cardListLabels}
@@ -209,7 +217,7 @@ export function ScheduleAlertsViewMobile({
 
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
+      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
       <MobileContentStack gap={2} paddingBottom={4}>
         <ScheduleAlertBannersMobile alerts={alerts} labels={labels.alertMessages} />

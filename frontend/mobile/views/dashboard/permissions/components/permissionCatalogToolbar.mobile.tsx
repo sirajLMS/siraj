@@ -3,7 +3,7 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
 import type { PermissionCatalogToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
+import { MobileContentInset, MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
 import { useAppTranslation } from "@/shared/locale";
 
 interface CategoryChipProps {
@@ -55,25 +55,27 @@ export function PermissionCatalogToolbarMobile({
         gap: 2,
       }}
     >
-      <TextField
-        size="small"
-        value={searchQuery}
-        onChange={e => onSearchChange(e.target.value)}
-        placeholder={t.searchPlaceholder}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlined fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-          htmlInput: { autoComplete: "off" },
-        }}
-        sx={{ minWidth: "100%" }}
-      />
+      <MobileContentInset>
+        <TextField
+          size="small"
+          value={searchQuery}
+          onChange={e => onSearchChange(e.target.value)}
+          placeholder={t.searchPlaceholder}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchOutlined fontSize="small" />
+                </InputAdornment>
+              ),
+            },
+            htmlInput: { autoComplete: "off" },
+          }}
+          sx={{ minWidth: "100%" }}
+        />
+      </MobileContentInset>
 
-      <MobileHorizontalScrollRow sx={{ paddingInlineStart: 0, paddingInlineEnd: 0, pb: 1 }}>
+      <MobileHorizontalScrollRow sx={{ pb: 1 }}>
         <CategoryChip
           label={t.allCategories}
           active={selectedCategory === "all"}

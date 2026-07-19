@@ -32,7 +32,7 @@ export function StatusTrackingMobileView({
 }: Readonly<MobileLayoutProps>) {
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
+      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
       <MobileContentStack gap={3} paddingBottom={12}>
         <DateNavigatorMobile

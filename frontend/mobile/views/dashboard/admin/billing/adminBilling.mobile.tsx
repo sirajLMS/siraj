@@ -99,14 +99,14 @@ function InvoicesSection({
 
   if (invoices.length === 0 && !invoicesLoading) {
     return (
-      <MobileSectionPanel title={labels.sections.recentInvoices}>
-        <MobileEmptyState title={labels.parentTable.emptyTitle} subtitle={labels.adminTable.noEntries} />
-      </MobileSectionPanel>
+    <MobileSectionPanel title={labels.sections.recentInvoices} contentInset={false}>
+      <MobileEmptyState title={labels.parentTable.emptyTitle} subtitle={labels.adminTable.noEntries} />
+    </MobileSectionPanel>
     );
   }
 
   return (
-    <MobileSectionPanel title={labels.sections.recentInvoices}>
+    <MobileSectionPanel title={labels.sections.recentInvoices} contentInset={false}>
       <MobileCardList<(typeof invoices)[number]>
         rows={invoicesList}
         renderItem={renderItem}
@@ -157,6 +157,7 @@ function StudentCreditSection({
       id="student-credit-section"
       title={labels.sections.studentCreditStatus}
       subTitle={creditFilter === "negative_balance" ? labels.creditTable.showingNegativeBalanceOnly : undefined}
+      contentInset={false}
       actions={
         creditFilter === "negative_balance" ? (
           <Chip label={labels.creditTable.negativeBalance} size="small" color="error" />

@@ -31,6 +31,7 @@ function MobileScheduleSection({
   return (
     <MobileSectionPanel
       title={labels.schedule.titleMobile}
+      contentInset={false}
       actions={
         <MobilePrimaryPageAction variant="text" onClick={onViewAll} sx={{ minWidth: "auto", px: 0 }}>
           {labels.schedule.viewAll}

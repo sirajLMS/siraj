@@ -37,7 +37,7 @@ const statusLabelId = "student-onboarding-status-label-mobile";
 
 export function StudentInfoSection({ register, errors, control, labels }: Readonly<StudentInfoSectionProps>) {
   return (
-    <MobileSectionPanel title={labels.sectionTitle}>
+    <MobileSectionPanel title={labels.sectionTitle} contentInset={false}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField

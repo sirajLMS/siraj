@@ -17,6 +17,7 @@ import {
   getStatusIcon,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileContentInset, MobileSectionTitleRow } from "@/frontend/mobile/components/ui/container";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { MobileEmptyState } from "@/frontend/mobile/components/ui/state";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
@@ -68,11 +69,11 @@ const StyledSectionTitle = styled(Typography)(({ theme }) => ({
 }));
 
 const StyledSessionCount = styled(Box)(({ theme }) => ({
+  display: "inline",
   color: theme.palette.text.secondary,
   fontWeight: 400,
   fontSize: theme.typography.bodyMd.fontSize,
   whiteSpace: "nowrap",
-  flexShrink: 0,
 }));
 
 const StyledStatusAvatar = styled(Box, {
@@ -262,26 +263,32 @@ export function StatusTrackingCardList({
 }: StatusTrackingCardListProps) {
   return (
     <Box>
-      <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 2, minWidth: 0 }}>
-        <StyledSectionTitle>{labels.todaysSchedule}</StyledSectionTitle>
-        <StyledSessionCount>({totalSessions})</StyledSessionCount>
-      </Box>
+      <MobileSectionTitleRow
+        title={
+          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, minWidth: 0 }}>
+            <StyledSectionTitle>{labels.todaysSchedule}</StyledSectionTitle>
+            <StyledSessionCount>({totalSessions})</StyledSessionCount>
+          </Box>
+        }
+      />
 
       {rows.length === 0 ? (
         <MobileEmptyState title={labels.noEntries} />
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {rows.map(row => (
-            <StatusTrackingCard
-              key={row.id ?? ""}
-              row={row}
-              labels={labels}
-              onActivate={onActivate}
-              onReschedule={onReschedule}
-              onVerify={onVerify}
-            />
-          ))}
-        </Box>
+        <MobileContentInset>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {rows.map(row => (
+              <StatusTrackingCard
+                key={row.id ?? ""}
+                row={row}
+                labels={labels}
+                onActivate={onActivate}
+                onReschedule={onReschedule}
+                onVerify={onVerify}
+              />
+            ))}
+          </Box>
+        </MobileContentInset>
       )}
     </Box>
   );

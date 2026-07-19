@@ -11,6 +11,7 @@ import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileCardList,
+  MobileContentInset,
   MobileContentStack,
   MobileHorizontalScrollRow,
   MobileMetricCardGrid,
@@ -131,11 +132,13 @@ export function StudentCreditsMobileView({
           })}
         </MobileHorizontalScrollRow>
 
-        <MobileSectionPanel title={labels.transactionHistory}>
+        <MobileSectionPanel title={labels.transactionHistory} contentInset={false}>
           {loading && transactions.length === 0 ? (
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {labels.pageTitle}
-            </Typography>
+            <MobileContentInset>
+              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+                {labels.pageTitle}
+              </Typography>
+            </MobileContentInset>
           ) : (
             <MobileCardList<StudentCreditTransactionRow>
               rows={transactions}
@@ -152,15 +155,17 @@ export function StudentCreditsMobileView({
           )}
         </MobileSectionPanel>
 
-        <Button
-          variant="outlined"
-          fullWidth
-          startIcon={<ArrowBackOutlined />}
-          sx={theme => ({ color: theme.palette.primary.main, borderColor: theme.palette.primary.main })}
-          onClick={onBackToDashboard}
-        >
-          {labels.backToDashboard}
-        </Button>
+        <MobileContentInset>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<ArrowBackOutlined />}
+            sx={theme => ({ color: theme.palette.primary.main, borderColor: theme.palette.primary.main })}
+            onClick={onBackToDashboard}
+          >
+            {labels.backToDashboard}
+          </Button>
+        </MobileContentInset>
       </MobileContentStack>
     </MobilePageContainer>
   );

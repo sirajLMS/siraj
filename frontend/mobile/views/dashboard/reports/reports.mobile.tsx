@@ -73,7 +73,7 @@ export function ReportsMobileView({
           subtitle={labels.summaryLabels.financialSubtitle}
         />
 
-        <MobileSectionPanel title={labels.ledgerTitle}>
+        <MobileSectionPanel title={labels.ledgerTitle} contentInset={false}>
           <ReportsTotalsSectionMobile
             summary={summary}
             rows={rows}

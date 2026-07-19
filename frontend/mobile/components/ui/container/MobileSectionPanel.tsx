@@ -3,6 +3,7 @@
 import { alpha, Box, Paper, type SxProps, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
+import { mobileContentGutterSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export interface MobileSectionPanelProps {
@@ -13,15 +14,20 @@ export interface MobileSectionPanelProps {
   readonly children?: ReactNode;
   /** Mobile default: edge-to-edge (square corners, no inline borders). */
   readonly edgeToEdge?: boolean;
+  /**
+   * When true (default), body children get the shared content gutter.
+   * Set false for full-bleed children that own their own inset
+   * (`MobileCardList`, `MobileHorizontalScrollRow`, `MobileMetricCardGrid`).
+   */
+  readonly contentInset?: boolean;
   readonly sx?: SxProps<Theme>;
 }
 
 /**
  * Mobile section shell: bordered Paper with optional title bar + actions.
  * Defaults to edge-to-edge (square corners, no inline borders) so panels
- * cover the full mobile viewport width. Title bar uses stacked actions
- * (actions drop below the title when the row would wrap) and tighter
- * padding tuned for mobile spacing.
+ * cover the full mobile viewport width. Title bar and body (unless
+ * `contentInset={false}`) use the shared content gutter.
  */
 export function MobileSectionPanel({
   id,
@@ -30,6 +36,7 @@ export function MobileSectionPanel({
   actions,
   children,
   edgeToEdge = true,
+  contentInset = true,
   sx,
 }: MobileSectionPanelProps) {
   return (
@@ -55,14 +62,13 @@ export function MobileSectionPanel({
     >
       {(title || actions) && (
         <Box
-          sx={{
-            px: 2,
+          sx={mergeSx(mobileContentGutterSx, {
             py: 2,
             display: "flex",
             flexDirection: "column",
             gap: 1.5,
             borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
-          }}
+          })}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
             <Box
@@ -109,15 +115,14 @@ export function MobileSectionPanel({
     if (!children) {
       return null;
     }
-    if (edgeToEdge) {
+    if (!contentInset) {
       return children;
     }
     return (
       <Box
-        sx={{
-          px: 2,
+        sx={mergeSx(mobileContentGutterSx, {
           py: 2,
-        }}
+        })}
       >
         {children}
       </Box>

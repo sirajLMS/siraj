@@ -136,7 +136,7 @@ export function TeacherDuesMobileView(props: Readonly<TeacherDuesViewModel>) {
           </Typography>
         ) : null}
 
-        <MobileSectionPanel>
+        <MobileSectionPanel contentInset={false}>
           <MobileCardList<TeacherDueRow>
             rows={rows}
             emptyMessage={labels.noPendingDues}

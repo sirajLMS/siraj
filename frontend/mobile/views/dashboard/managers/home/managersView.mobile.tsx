@@ -6,7 +6,7 @@ import { ManagersMetrics } from "@/frontend/common/views/dashboard/managers/home
 import type { ManagersViewProps } from "@/frontend/common/views/dashboard/managers/home/types";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
-import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
+import { MobileContentInset, MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { ManagersCardListMobile } from "@/frontend/mobile/views/dashboard/managers/home/components/managersCardList.mobile";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
@@ -24,15 +24,19 @@ export function ManagersViewMobile(props: Readonly<ManagersViewProps>) {
     <MobilePageContainer>
       <MobilePageHeader title={t.mobileTitle} subtitle={t.pageSubtitle} actions={actions} />
 
-      <ManagersMetrics metrics={props.metrics} />
+      <MobileContentInset>
+        <ManagersMetrics metrics={props.metrics} />
+      </MobileContentInset>
 
-      <MobileSectionPanel>
-        <ManagersFilterBar
-          roleFilter={props.roleFilter}
-          statusFilter={props.statusFilter}
-          onRoleFilterChange={props.onRoleFilterChange}
-          onStatusFilterChange={props.onStatusFilterChange}
-        />
+      <MobileSectionPanel contentInset={false}>
+        <MobileContentInset>
+          <ManagersFilterBar
+            roleFilter={props.roleFilter}
+            statusFilter={props.statusFilter}
+            onRoleFilterChange={props.onRoleFilterChange}
+            onStatusFilterChange={props.onStatusFilterChange}
+          />
+        </MobileContentInset>
 
         <ManagersCardListMobile
           managers={[...props.managers]}

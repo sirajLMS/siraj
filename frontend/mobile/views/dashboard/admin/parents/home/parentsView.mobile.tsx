@@ -100,6 +100,7 @@ export function ParentsViewMobile({
 
         <MobileSectionPanel
           title={labels.records}
+          contentInset={false}
           actions={
             <Stack direction="row" spacing={1} sx={{ display: "flex", alignItems: "center" }}>
               <MobileFilterButton size="small" onClick={onFilter}>

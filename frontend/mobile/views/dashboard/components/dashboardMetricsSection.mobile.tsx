@@ -32,6 +32,7 @@ export function DashboardMetricsSectionMobile({
     <MobileSectionPanel
       title={title}
       edgeToEdge
+      contentInset={false}
       actions={
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
           <AccessTimeOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />

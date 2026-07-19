@@ -28,7 +28,7 @@ export function ParentAssignmentSection({
   labels,
 }: Readonly<ParentAssignmentSectionProps>) {
   return (
-    <MobileSectionPanel title={sectionTitle}>
+    <MobileSectionPanel title={sectionTitle} contentInset={false}>
       <Box sx={theme => ({ p: theme.layout.cardPadding })}>
         <Controller
           control={control}

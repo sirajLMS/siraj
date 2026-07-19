@@ -24,6 +24,7 @@ export function CategoriesSectionMobile({
   return (
     <MobileSectionPanel
       title={t.categoriesTitle}
+      contentInset={false}
       actions={
         canManage ? (
           <IconButton onClick={onCreateCategory} size="small" aria-label={t.createCategory}>

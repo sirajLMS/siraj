@@ -120,7 +120,7 @@ function MobileScheduleSection({
         />
       </Box>
 
-      <MobileSectionPanel title={labels.schedule.titleToday} edgeToEdge actions={schedulePanelActions}>
+      <MobileSectionPanel title={labels.schedule.titleToday} edgeToEdge contentInset={false} actions={schedulePanelActions}>
         <MobileCardList<TeacherScheduleRow>
           rows={scheduleRows}
           loading={loading}

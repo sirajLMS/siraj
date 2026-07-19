@@ -157,21 +157,23 @@ export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel
           </Typography>
         ) : null}
 
-        <MobileSectionPanel>
-          <Stack sx={{ gap: 1.5, mb: 2 }}>
-            <TeacherAutocompleteMobile
-              value={selectedTeacher}
-              onChange={onSelectedTeacherChange}
-              label={labels.filterByTeacher}
-              placeholder={labels.teacherSearchPlaceholder}
-            />
-            <StudentAutocompleteMobile
-              value={studentFilter}
-              onChange={onStudentFilterChange}
-              label={labels.filterByStudent}
-              placeholder={labels.studentSearchPlaceholder}
-            />
-          </Stack>
+        <MobileSectionPanel contentInset={false}>
+          <MobileContentInset>
+            <Stack sx={{ gap: 1.5, mb: 2 }}>
+              <TeacherAutocompleteMobile
+                value={selectedTeacher}
+                onChange={onSelectedTeacherChange}
+                label={labels.filterByTeacher}
+                placeholder={labels.teacherSearchPlaceholder}
+              />
+              <StudentAutocompleteMobile
+                value={studentFilter}
+                onChange={onStudentFilterChange}
+                label={labels.filterByStudent}
+                placeholder={labels.studentSearchPlaceholder}
+              />
+            </Stack>
+          </MobileContentInset>
 
           <MobileCardList<PendingReviewRow>
             rows={rows}

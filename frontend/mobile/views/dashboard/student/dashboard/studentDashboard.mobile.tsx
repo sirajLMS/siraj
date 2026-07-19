@@ -10,6 +10,7 @@ import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboar
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileCardList,
+  MobileContentInset,
   MobileContentStack,
   MobileMetricCardGrid,
   MobilePageContainer,
@@ -146,7 +147,7 @@ export function StudentDashboardMobileView({
           }}
         />
 
-        <MobileSectionPanel title={labels.recentLessonReports}>
+        <MobileSectionPanel title={labels.recentLessonReports} contentInset={false}>
           <MobileCardList<StudentDashboardViewModel["recentLessonReports"][number]>
             rows={recentLessonReports}
             emptyMessage={labels.noLessonReports}
@@ -158,18 +159,27 @@ export function StudentDashboardMobileView({
           />
         </MobileSectionPanel>
 
-        <Button
-          variant="outlined"
-          fullWidth
-          startIcon={<HistoryOutlined />}
-          sx={theme => ({ color: theme.palette.primary.main, borderColor: theme.palette.primary.main })}
-          onClick={onViewHistory}
-        >
-          {labels.viewAllHistory}
-        </Button>
-        <Button variant="text" fullWidth sx={theme => ({ color: theme.palette.primary.main })} onClick={onViewCredits}>
-          {labels.viewCredits}
-        </Button>
+        <MobileContentInset>
+          <Stack sx={{ gap: 1 }}>
+            <Button
+              variant="outlined"
+              fullWidth
+              startIcon={<HistoryOutlined />}
+              sx={theme => ({ color: theme.palette.primary.main, borderColor: theme.palette.primary.main })}
+              onClick={onViewHistory}
+            >
+              {labels.viewAllHistory}
+            </Button>
+            <Button
+              variant="text"
+              fullWidth
+              sx={theme => ({ color: theme.palette.primary.main })}
+              onClick={onViewCredits}
+            >
+              {labels.viewCredits}
+            </Button>
+          </Stack>
+        </MobileContentInset>
       </MobileContentStack>
     </MobilePageContainer>
   );

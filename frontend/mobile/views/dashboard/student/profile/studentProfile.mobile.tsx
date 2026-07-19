@@ -229,7 +229,7 @@ export function StudentProfileMobileView({
           </MobileSectionPanel>
         )}
 
-        <MobileSectionPanel title={labels.academicInfo}>
+        <MobileSectionPanel title={labels.academicInfo} contentInset={false}>
           <MobileMetricCardGrid metrics={academicMetrics} />
         </MobileSectionPanel>
 

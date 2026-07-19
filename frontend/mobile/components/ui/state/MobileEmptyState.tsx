@@ -2,6 +2,8 @@
 
 import { Box, type SxProps, type Theme, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { mobileContentGutterSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export interface MobileEmptyStateProps {
   readonly title: string;
@@ -12,7 +14,7 @@ export interface MobileEmptyStateProps {
 
 export function MobileEmptyState({ title, subtitle, icon, sx }: MobileEmptyStateProps) {
   return (
-    <Box sx={{ py: 6, textAlign: "center", ...sx }}>
+    <Box sx={mergeSx(mobileContentGutterSx, { py: 6, textAlign: "center" }, sx)}>
       {icon && <Box sx={{ mb: 2, display: "flex", justifyContent: "center" }}>{icon}</Box>}
       <Typography variant="headlineMd" sx={{ mb: 1, color: theme => theme.palette.text.primary }}>
         {title}

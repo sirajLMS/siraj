@@ -262,7 +262,7 @@ export function StudentHistoryMobileView({
           onSelectDay={onSelectDay}
         />
 
-        <MobileSectionPanel title={labels.lessonHistory}>
+        <MobileSectionPanel title={labels.lessonHistory} contentInset={false}>
           <Stack spacing={2}>
             <FormControl fullWidth size="small">
               <InputLabel id="mobile-history-subject-filter" shrink>
