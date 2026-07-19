@@ -1,8 +1,8 @@
 import { VideocamOffOutlined } from "@mui/icons-material";
 import { Box, Paper, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
+import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type {
   UpcomingClassDisplay,
   UpcomingClassesTableProps,

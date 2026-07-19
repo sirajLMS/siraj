@@ -113,8 +113,8 @@ export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<Upco
                 >
                   <CalendarTodayOutlined sx={{ fontSize: 18 }} />
                   <Typography variant="bodyMd">
-                    {formatDateTime(locale, cls.scheduledStartAt)} ·{" "}
-                    {formatTime(locale, cls.scheduledStartAt)} - {formatTime(locale, cls.scheduledEndAt)}
+                    {formatDateTime(locale, cls.scheduledStartAt)} · {formatTime(locale, cls.scheduledStartAt)} -{" "}
+                    {formatTime(locale, cls.scheduledEndAt)}
                   </Typography>
                 </Box>
                 <Box
