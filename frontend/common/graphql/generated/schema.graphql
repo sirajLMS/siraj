@@ -524,6 +524,7 @@ type ClassInstanceDetail {
   status: ClassExecutionState
   student: ClassInstanceStudentInfo
   studentTimezone: IanaTimezone
+  subjectAvatarUrl: String
   subjectId: String
   subjectName: String
   teacher: ClassInstanceTeacherInfo

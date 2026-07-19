@@ -23,7 +23,6 @@ export function ParentLifecycleMobileView({
     <MobilePageContainer>
       <MobilePageHeader
         title={t.pageTitle}
-        subtitle={t.parentId(parent.id)}
         edgeToEdge={false}
         breadcrumbs={[
           { label: t.breadcrumbs.parents, href: "/parents" },

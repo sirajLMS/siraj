@@ -9,7 +9,6 @@ export const dashboardTeacherReassignmentAr: TeacherReassignmentLabels = {
     teacherReassignment: "إعادة تعيين المعلم",
   },
   studentContext: {
-    studentId: id => `معرف الطالب: #${id}`,
     grade: grade => `الصف: ${grade}`,
     enrollment: "التسجيل",
     active: "نشط",

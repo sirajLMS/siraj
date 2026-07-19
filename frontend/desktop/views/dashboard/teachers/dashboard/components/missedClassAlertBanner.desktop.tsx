@@ -16,7 +16,7 @@ import type { MissedClassAlertBannerProps } from "@/frontend/common/views/dashbo
  * `frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps.ts`.
  */
 export function MissedClassAlertBannerDesktop({ alert, labels, fixed = false }: Readonly<MissedClassAlertBannerProps>) {
-  const description = labels.description(alert.classId, alert.scheduledTime);
+  const description = labels.description(alert.scheduledTime);
 
   return (
     <Alert

@@ -1,6 +1,5 @@
 export interface StudentStatusLabels {
   readonly pageTitle: string;
-  readonly studentId: (id: string) => string;
   readonly breadcrumbs: {
     readonly students: string;
     readonly statusHold: string;
@@ -48,7 +47,7 @@ export interface StudentStatusLabels {
     readonly status: string;
     readonly join: string;
     readonly pendingHolds: (count: number) => string;
-    readonly footerInfo: (id: string) => string;
+    readonly footerInfo: string;
     readonly noUpcomingClasses: string;
     readonly frozen: string;
     readonly active: string;

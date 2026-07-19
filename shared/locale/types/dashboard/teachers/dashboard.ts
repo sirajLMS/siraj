@@ -96,7 +96,7 @@ export interface TeacherDashboardLabels {
   };
   readonly alert: {
     readonly title: string;
-    readonly description: (classId: string, time: string) => string;
+    readonly description: (time: string) => string;
   };
   readonly policy: {
     readonly title: string;

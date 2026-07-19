@@ -54,8 +54,8 @@ export function LessonReportDetailPanelMobile({ report, labels }: Readonly<Lesso
       </Stack>
 
       <Stack sx={{ gap: 1 }}>
-        <DetailField label={labels.studentColumn} value={report.studentName || report.studentId} />
-        <DetailField label={labels.teacherColumn} value={report.teacherName || report.teacherId} />
+        <DetailField label={labels.studentColumn} value={report.studentName ?? ""} />
+        <DetailField label={labels.teacherColumn} value={report.teacherName ?? ""} />
         <DetailField label={labels.completionColumn} value={String(report.completionPercentage)} />
         <DetailField label={labels.attendanceColumn} value={report.attendanceEvaluation ?? ""} />
         <DetailField label={labels.submittedAtColumn} value={report.submittedAt} />

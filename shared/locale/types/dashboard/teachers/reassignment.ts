@@ -7,7 +7,6 @@ export interface TeacherReassignmentLabels {
     readonly teacherReassignment: string;
   };
   readonly studentContext: {
-    readonly studentId: (id: string) => string;
     readonly grade: (grade: string) => string;
     readonly enrollment: string;
     readonly active: string;

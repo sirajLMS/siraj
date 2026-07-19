@@ -99,7 +99,7 @@ export const dashboardTeacherDashboardEn: TeacherDashboardLabels = {
   },
   alert: {
     title: "Missed Class Time",
-    description: (classId, time) => `Class ${classId} was scheduled for ${time}. Please contact admin to reschedule.`,
+    description: time => `A class was scheduled for ${time}. Please contact admin to reschedule.`,
   },
   policy: {
     title: "Activation Policy",

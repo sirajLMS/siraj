@@ -55,10 +55,10 @@ export function LessonReportDetailPanelDesktop({ report, labels }: Readonly<Less
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 6, md: 12, lg: 6 }}>
-          <DetailField label={labels.studentColumn} value={report.studentName || report.studentId} />
+          <DetailField label={labels.studentColumn} value={report.studentName ?? ""} />
         </Grid>
         <Grid size={{ xs: 6, md: 12, lg: 6 }}>
-          <DetailField label={labels.teacherColumn} value={report.teacherName || report.teacherId} />
+          <DetailField label={labels.teacherColumn} value={report.teacherName ?? ""} />
         </Grid>
         <Grid size={{ xs: 6, md: 12, lg: 6 }}>
           <DetailField label={labels.completionColumn} value={String(report.completionPercentage)} />

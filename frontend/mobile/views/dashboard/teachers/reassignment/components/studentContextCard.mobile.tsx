@@ -28,9 +28,6 @@ export function StudentContextCardMobile({ student }: Readonly<StudentContextCar
           <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
             {student.name}
           </Typography>
-          <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {t.studentId(student.id.replace("stu-", "SIR-"))}
-          </Typography>
         </Box>
 
         <Box

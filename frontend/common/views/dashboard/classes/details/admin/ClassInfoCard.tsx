@@ -19,9 +19,9 @@ import { Link } from "@/shared/i18n/routing";
 
 interface ClassInfoCardProps {
   readonly courseName: string;
-  readonly instanceId: string;
   readonly subjectId: string;
   readonly subjectName: string;
+  readonly subjectAvatarUrl?: string | null;
   readonly student: ClassInstanceStudentInfo;
   readonly teacher: ClassInstanceTeacherInfo;
   readonly isActive: boolean;
@@ -41,10 +41,6 @@ const StyledLiveInstanceChip = styled(Chip)(() => ({
 
 const StyledCourseNameHeading = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
-}));
-
-const StyledInstanceIdLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
 }));
 
 const StyledActiveStatusDot = styled(FiberManualRecordIcon)(({ theme }) => ({
@@ -101,9 +97,9 @@ function LinkedAvatar({
 
 export function ClassInfoCard({
   courseName,
-  instanceId,
   subjectId,
   subjectName,
+  subjectAvatarUrl,
   student,
   teacher,
   isActive,
@@ -111,6 +107,7 @@ export function ClassInfoCard({
 }: ClassInfoCardProps) {
   const studentProfileHref = student.id ? studentHref(student.id) : undefined;
   const teacherProfileHref = profileHrefForTeacher({ teacherId: teacher.id });
+  const subjectHref = subjectId ? `/subjects/${subjectId}` : undefined;
 
   return (
     <BaseCard edgeToEdge sx={{ position: "relative", overflow: "hidden", height: "100%" }}>
@@ -118,56 +115,51 @@ export function ClassInfoCard({
         direction="row"
         sx={theme => ({ justifyContent: "space-between", alignItems: "flex-start", mb: theme.spacing(4) })}
       >
-        <Box>
-          <StyledLiveInstanceChip
-            label={labels.liveInstance}
-            size="small"
-            sx={theme => ({
-              mb: theme.spacing(1.5),
-              backgroundColor: theme.palette.primary.main,
-              color: theme.palette.onPrimary,
-              "& .MuiChip-label": {
-                paddingInline: theme.spacing(1.5),
-              },
-            })}
-          />
-          <StyledCourseNameHeading
-            variant="h3"
-            sx={theme => ({ mb: theme.spacing(0.5), color: theme.palette.primary.main })}
-          >
-            {courseName}
-          </StyledCourseNameHeading>
-          {subjectName ? (
-            <Typography variant="bodyMd" sx={theme => ({ mb: theme.spacing(0.5), color: theme.palette.text.secondary })}>
-              {subjectName}
-            </Typography>
+        <Stack direction="row" sx={theme => ({ alignItems: "flex-start", gap: theme.spacing(2), flex: 1, minWidth: 0 })}>
+          {subjectId || subjectName ? (
+            <LinkedAvatar href={subjectHref} name={subjectName || courseName} avatarUrl={subjectAvatarUrl ?? undefined} />
           ) : null}
-          <StyledInstanceIdLabel variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
-            Instance ID:{" "}
-            <Box
-              component="span"
-              sx={theme => ({
-                fontFamily: "monospace",
-                fontWeight: theme.typography.fontWeightBold,
-                color: theme.palette.primary.main,
-              })}
-            >
-              {instanceId}
-            </Box>
-          </StyledInstanceIdLabel>
-          {subjectId ? (
-            <Button
-              component={Link}
-              href={`/subjects/${subjectId}`}
-              variant="outlined"
+          <Box sx={{ minWidth: 0 }}>
+            <StyledLiveInstanceChip
+              label={labels.liveInstance}
               size="small"
-              startIcon={<MenuBookOutlined />}
-              sx={theme => ({ mt: theme.spacing(1.5) })}
+              sx={theme => ({
+                mb: theme.spacing(1.5),
+                backgroundColor: theme.palette.primary.main,
+                color: theme.palette.onPrimary,
+                "& .MuiChip-label": {
+                  paddingInline: theme.spacing(1.5),
+                },
+              })}
+            />
+            <StyledCourseNameHeading
+              variant="h3"
+              sx={theme => ({ mb: theme.spacing(0.5), color: theme.palette.primary.main })}
             >
-              {labels.viewSubject}
-            </Button>
-          ) : null}
-        </Box>
+              {courseName}
+            </StyledCourseNameHeading>
+            {subjectName ? (
+              <Typography
+                variant="bodyMd"
+                sx={theme => ({ mb: theme.spacing(0.5), color: theme.palette.text.secondary })}
+              >
+                {subjectName}
+              </Typography>
+            ) : null}
+            {subjectId ? (
+              <Button
+                component={Link}
+                href={`/subjects/${subjectId}`}
+                variant="outlined"
+                size="small"
+                startIcon={<MenuBookOutlined />}
+                sx={theme => ({ mt: theme.spacing(1.5) })}
+              >
+                {labels.viewSubject}
+              </Button>
+            ) : null}
+          </Box>
+        </Stack>
         {isActive && (
           <Stack direction="row" sx={theme => ({ alignItems: "center", gap: theme.spacing(1) })}>
             <StyledActiveStatusDot sx={theme => ({ color: theme.palette.status.active })} />
@@ -196,11 +188,6 @@ export function ClassInfoCard({
                 {student.name ?? ""}
               </Typography>
             )}
-            {student.id ? (
-              <StyledPersonDetailCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-                ID: {student.id}
-              </StyledPersonDetailCaption>
-            ) : null}
           </Box>
         </Stack>
 

@@ -2,7 +2,6 @@ import type { ParentLifecycleLabels } from "@/shared/locale/types/dashboard/pare
 
 export const dashboardParentLifecycleEn: ParentLifecycleLabels = {
   pageTitle: "Parent Lifecycle",
-  parentId: id => `Parent ID: ${id}`,
   breadcrumbs: {
     parents: "Parents",
     lifecycle: "Lifecycle",

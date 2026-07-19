@@ -2,7 +2,6 @@ import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/student
 
 export const dashboardStudentQuotaAr: StudentQuotaLabels = {
   pageTitle: "تعديل الملف الشخصي للطالب",
-  studentId: id => `معرف الطالب: #${id}`,
   common: {
     system: "النظام",
     notSet: "غير محدد",

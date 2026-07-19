@@ -193,7 +193,7 @@ const mockLabels: BillingLabels = {
   showingResults: (shown: number, total: number) => `Showing ${shown} of ${total} results`,
   invalidUserId: "Invalid User ID",
   billingProfileTitle: "User Billing Profile",
-  profileForUser: (userId: string) => `Billing profile details for user ${userId}`,
+  profileForUser: "Billing profile details",
   reminderSent: "Payment reminder sent",
   reminderFailed: "Failed to send payment reminder",
   adminMetrics: {

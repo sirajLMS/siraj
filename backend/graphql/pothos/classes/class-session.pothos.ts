@@ -120,6 +120,7 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     subjectId: t.exposeString("subjectId"),
     subjectName: t.exposeString("subjectName"),
+    subjectAvatarUrl: t.exposeString("subjectAvatarUrl", { nullable: true }),
     student: t.expose("student", { type: ClassInstanceStudentPothosObject }),
     teacher: t.expose("teacher", { type: ClassInstanceTeacherPothosObject }),
     performance: t.expose("performance", {

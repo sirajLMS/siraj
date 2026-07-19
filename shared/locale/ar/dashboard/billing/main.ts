@@ -19,7 +19,7 @@ export const dashboardBillingAr: BillingLabels = {
   showingResults: (shown: number, total: number) => `عرض ${shown} من ${total} نتائج`,
   invalidUserId: "معرف المستخدم غير صالح",
   billingProfileTitle: "الملف المالي للمستخدم",
-  profileForUser: (userId: string) => `تفاصيل الملف المالي للمستخدم ${userId}`,
+  profileForUser: "تفاصيل الملف المالي",
   reminderSent: "تم إرسال تذكير الدفع",
   reminderFailed: "فشل إرسال تذكير الدفع",
   adminMetrics: {

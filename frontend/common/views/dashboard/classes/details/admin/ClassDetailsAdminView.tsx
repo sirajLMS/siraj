@@ -101,9 +101,9 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
         <Grid size={{ xs: 12, lg: 7 }}>
           <ClassInfoCard
             courseName={instance.courseName ?? ""}
-            instanceId={instance.instanceId ?? instance.id ?? ""}
             subjectId={instance.subjectId ?? ""}
             subjectName={instance.subjectName ?? ""}
+            subjectAvatarUrl={instance.subjectAvatarUrl}
             student={
               student ?? {
                 id: null,

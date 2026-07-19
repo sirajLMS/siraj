@@ -2,7 +2,6 @@ import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/studen
 
 export const dashboardStudentStatusEn: StudentStatusLabels = {
   pageTitle: "Student Status & Schedule Hold",
-  studentId: id => `ID: #${id}`,
   breadcrumbs: {
     students: "Students",
     statusHold: "Status & Hold",
@@ -50,7 +49,7 @@ export const dashboardStudentStatusEn: StudentStatusLabels = {
     status: "Status",
     join: "Join",
     pendingHolds: count => `${count} pending holds`,
-    footerInfo: id => `End of upcoming classes for ${id}`,
+    footerInfo: "End of upcoming classes",
     noUpcomingClasses: "No upcoming classes",
     frozen: "Frozen",
     active: "Active",

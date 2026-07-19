@@ -2,7 +2,6 @@ import type { ParentLifecycleLabels } from "@/shared/locale/types/dashboard/pare
 
 export const dashboardParentLifecycleAr: ParentLifecycleLabels = {
   pageTitle: "دورة حياة ولي الأمر",
-  parentId: id => `معرف ولي الأمر: ${id}`,
   breadcrumbs: {
     parents: "أولياء الأمور",
     lifecycle: "دورة الحياة",

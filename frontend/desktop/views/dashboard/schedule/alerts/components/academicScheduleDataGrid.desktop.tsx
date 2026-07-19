@@ -91,7 +91,6 @@ export function AcademicScheduleDataGridDesktop({
             href={classHref(row.id)}
             name={row.className}
             avatarSize={40}
-            label={`ID: ${row.classId}`}
             typographyVariant="bodyMd"
             fontWeight={700}
           />

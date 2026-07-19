@@ -61,6 +61,7 @@ export type ClassInstanceDetailReturnType = Omit<
   avatarUrl?: string | null;
   subjectId: string;
   subjectName: string;
+  subjectAvatarUrl: string | null;
   student: ClassInstanceStudentReturnType;
   teacher: ClassInstanceTeacherReturnType;
   performance: ClassInstancePerformanceReturnType | null;

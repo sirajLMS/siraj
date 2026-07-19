@@ -2,15 +2,23 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { TimezoneDisplay } from "@/frontend/common/components/ui/display";
+import { fromGraphqlIanaTimezone, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly timezone: string;
 }
 
+function formatTimezoneLabel(timezone: string, locale: string): string {
+  const normalized = timezone.includes("/") ? timezone : fromGraphqlIanaTimezone(timezone);
+  return getTimezoneSelectLabel(normalized, locale);
+}
+
 export function TimezoneWarningBannerMobile({ timezone }: Readonly<Props>) {
   const t = useAppTranslation().dashboardTranslations.rescheduleForm;
+  const locale = useAppLocale();
+  const timezoneLabel = formatTimezoneLabel(timezone, locale);
 
   return (
     <Box
@@ -27,9 +35,7 @@ export function TimezoneWarningBannerMobile({ timezone }: Readonly<Props>) {
     >
       <InfoOutlined sx={theme => ({ color: theme.palette.onWarningContainer })} />
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onWarningContainer })}>
-        {t.warning.prefix}
-        <TimezoneDisplay timezone={timezone} sx={theme => ({ color: theme.palette.onWarningContainer })} />
-        {t.warning.suffix}
+        {t.warning.message(timezoneLabel)}
       </Typography>
     </Box>
   );

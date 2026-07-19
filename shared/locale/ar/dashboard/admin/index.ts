@@ -7,7 +7,7 @@ export const dashboardAdminAr: AdminDashboardLabels = {
   todayClasses: "حصص اليوم",
   updatedJustNow: "تم التحديث الآن",
   scheduleOverview: "نظرة عامة على الجدول",
-  searchPlaceholder: "البحث بالطالب أو رقم الحصة...",
+  searchPlaceholder: "البحث بالطالب أو اسم الحصة...",
   listOfClassesOn: "قائمة الحصص في",
   teacher: "المعلم",
   selectTeacher: "اختر المعلم",

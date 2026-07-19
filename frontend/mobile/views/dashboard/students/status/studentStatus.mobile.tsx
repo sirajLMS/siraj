@@ -93,7 +93,6 @@ export function StudentStatusMobileView({
       {embedded ? null : (
         <MobilePageHeader
           title={t.pageTitle}
-          subtitle={t.studentId(student.id)}
           breadcrumbs={[
             { label: t.breadcrumbs.students, href: "/students" },
             { label: t.breadcrumbs.statusHold, current: true },

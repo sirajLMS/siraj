@@ -23,7 +23,6 @@ export function ParentLifecycleDesktopView({
     <DesktopPageContainer>
       <DesktopPageHeader
         title={t.pageTitle}
-        subtitle={t.parentId(parent.id)}
         breadcrumbs={[
           { label: t.breadcrumbs.parents, href: "/parents" },
           { label: t.breadcrumbs.lifecycle, current: true },

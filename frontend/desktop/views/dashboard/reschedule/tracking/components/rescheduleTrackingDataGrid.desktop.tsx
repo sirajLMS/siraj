@@ -41,28 +41,14 @@ export function RescheduleTrackingDataGridDesktop({
         flex: 1.2,
         minWidth: 200,
         renderCell: ({ row }) => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, alignSelf: "center", height: "100%" }}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                gap: 0.5,
-              }}
-            >
-              <DesktopPersonProfileLinkCell
-                href={profileHrefForTeacher({ teacherId: row.teacherId })}
-                name={row.teacherName ?? ""}
-                avatarUrl={row.teacherAvatarUrl}
-                avatarSize={36}
-                typographyVariant="bodyMd"
-                fontWeight={700}
-              />
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                ID: {row.teacherId ?? ""}
-              </Typography>
-            </Box>
-          </Box>
+          <DesktopPersonProfileLinkCell
+            href={profileHrefForTeacher({ teacherId: row.teacherId })}
+            name={row.teacherName ?? ""}
+            avatarUrl={row.teacherAvatarUrl}
+            avatarSize={36}
+            typographyVariant="bodyMd"
+            fontWeight={700}
+          />
         ),
       },
       {

@@ -1,7 +1,6 @@
 import { VideocamOffOutlined } from "@mui/icons-material";
 import { Box, Paper, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
 import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type {
   UpcomingClassDisplay,
@@ -34,7 +33,7 @@ function formatTime(locale: string, dateStr: string): string {
   }
 }
 
-function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string; pendingCount: number }>) {
+function DesktopHeader({ pendingCount }: Readonly<{ pendingCount: number }>) {
   const t = useAppTranslation().dashboardTranslations.studentStatus;
   return (
     <Box
@@ -53,7 +52,7 @@ function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string
           {t.sections.upcomingClasses}
         </Typography>
         <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t.table.footerInfo(formatStudentDisplayId(studentId))}
+          {t.table.footerInfo}
         </Typography>
       </Box>
       {pendingCount > 0 ? (
@@ -75,7 +74,7 @@ function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string
   );
 }
 
-function DesktopFooter({ studentId }: Readonly<{ studentId: string }>) {
+function DesktopFooter() {
   const t = useAppTranslation().dashboardTranslations.studentStatus;
   return (
     <Box
@@ -88,13 +87,13 @@ function DesktopFooter({ studentId }: Readonly<{ studentId: string }>) {
       })}
     >
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, fontStyle: "italic" })}>
-        {t.table.footerInfo(formatStudentDisplayId(studentId))}
+        {t.table.footerInfo}
       </Typography>
     </Box>
   );
 }
 
-export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
+export function UpcomingClassesTableDesktop({ classes }: Readonly<UpcomingClassesTableProps>) {
   const t = useAppTranslation().dashboardTranslations.studentStatus;
   const locale = useAppLocale();
 
@@ -231,7 +230,7 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
         width: "100%",
       })}
     >
-      <DesktopHeader studentId={studentId} pendingCount={classes.filter(c => c.isFrozen).length} />
+      <DesktopHeader pendingCount={classes.filter(c => c.isFrozen).length} />
       <DesktopAppDataGrid
         rows={classes}
         columns={columns}
@@ -252,7 +251,7 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
           },
         })}
       />
-      <DesktopFooter studentId={studentId} />
+      <DesktopFooter />
     </Paper>
   );
 }

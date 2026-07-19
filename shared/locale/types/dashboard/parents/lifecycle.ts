@@ -1,6 +1,5 @@
 export interface ParentLifecycleLabels {
   readonly pageTitle: string;
-  readonly parentId: (id: string) => string;
   readonly breadcrumbs: {
     readonly parents: string;
     readonly lifecycle: string;

@@ -19,7 +19,7 @@ export const dashboardBillingEn: BillingLabels = {
   showingResults: (shown: number, total: number) => `Showing ${shown} of ${total} results`,
   invalidUserId: "Invalid user ID",
   billingProfileTitle: "User Billing Profile",
-  profileForUser: (userId: string) => `Billing profile details for user ${userId}`,
+  profileForUser: "Billing profile details",
   adminMetrics: {
     totalOutstanding: "Total Outstanding",
     pendingInvoices: "Pending Invoices",

@@ -7,7 +7,7 @@ export const dashboardAdminEn: AdminDashboardLabels = {
   todayClasses: "Today's Classes",
   updatedJustNow: "Updated just now",
   scheduleOverview: "Schedule Overview",
-  searchPlaceholder: "Search by student or class ID...",
+  searchPlaceholder: "Search by student or class name...",
   listOfClassesOn: "List of Classes on",
   teacher: "Teacher",
   selectTeacher: "Select Teacher",

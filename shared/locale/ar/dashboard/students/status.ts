@@ -2,7 +2,6 @@ import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/studen
 
 export const dashboardStudentStatusAr: StudentStatusLabels = {
   pageTitle: "حالة الطالب وتجميد الجدول",
-  studentId: id => `المعرف: #${id}`,
   breadcrumbs: {
     students: "الطلاب",
     statusHold: "الحالة والتجميد",
@@ -50,7 +49,7 @@ export const dashboardStudentStatusAr: StudentStatusLabels = {
     status: "الحالة",
     join: "الانضمام",
     pendingHolds: count => `${count} تجميدات معلقة`,
-    footerInfo: id => `نهاية قائمة الحصص القادمة لـ ${id}`,
+    footerInfo: "نهاية قائمة الحصص القادمة",
     noUpcomingClasses: "لا توجد حصص قادمة",
     frozen: "مجمّد",
     active: "نشط",

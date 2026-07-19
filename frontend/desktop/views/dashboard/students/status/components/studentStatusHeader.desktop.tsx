@@ -1,10 +1,9 @@
 "use client";
 
-import { Fingerprint, HistoryOutlined, MailOutlineOutlined } from "@mui/icons-material";
+import { HistoryOutlined, MailOutlineOutlined } from "@mui/icons-material";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useCallback } from "react";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
 import { profileHrefForUser, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import type { StudentStatusHeaderProps } from "@/frontend/common/views/dashboard/students/status/types";
@@ -77,22 +76,6 @@ function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["
         ) : null}
       </Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, mt: 1 }}>
-        {showIdentity ? (
-          <Box
-            sx={theme => ({
-              display: "flex",
-              alignItems: "center",
-              justifyContent: { xs: "center", md: "flex-start" },
-              gap: 1,
-              color: theme.palette.onSurfaceVariant,
-            })}
-          >
-            <Fingerprint sx={{ fontSize: 16 }} />
-            <Typography variant="labelMd" sx={{ letterSpacing: "0.05em" }}>
-              {t.studentId(formatStudentDisplayId(student.id))}
-            </Typography>
-          </Box>
-        ) : null}
         {showTeacher ? (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
             {student.teacherName}

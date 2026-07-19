@@ -18,7 +18,7 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly showingResults: (shown: number, total: number) => string;
   readonly invalidUserId: string;
   readonly billingProfileTitle: string;
-  readonly profileForUser: (userId: string) => string;
+  readonly profileForUser: string;
   readonly reminderSent: string;
   readonly reminderFailed: string;
   readonly adminMetrics: {

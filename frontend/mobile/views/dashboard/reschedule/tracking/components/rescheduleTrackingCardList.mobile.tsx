@@ -37,16 +37,6 @@ function TrackingCardHeader({ row, onView }: { row: TrackingRow; onView: (id: st
         >
           {row.teacherName ?? ""}
         </Typography>
-        <Typography
-          variant="labelMd"
-          sx={theme => ({
-            fontFamily: '"Inter", sans-serif',
-            color: theme.palette.text.secondary,
-            fontWeight: 500,
-          })}
-        >
-          ID: {row.teacherId ?? ""}
-        </Typography>
       </Box>
       <IconButton
         id={`view-card-${rowId}`}

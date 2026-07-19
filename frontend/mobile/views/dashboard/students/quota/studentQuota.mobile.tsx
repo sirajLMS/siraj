@@ -20,7 +20,6 @@ import { StudentInformationSectionMobile } from "@/frontend/mobile/views/dashboa
 import { useAppTranslation } from "@/shared/locale";
 
 function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Readonly<MobileProfileHeaderProps>) {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
   return (
     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", py: 4 }}>
       <Box sx={{ position: "relative", width: 96, height: 96, mb: 2 }}>
@@ -52,7 +51,7 @@ function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Read
         ) : null}
       </Box>
       <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-        {t.studentId(studentData.id)}
+        {studentData.studentName}
       </Typography>
     </Box>
   );

@@ -26,9 +26,6 @@ export function StudentContextCardDesktop({ student }: Readonly<StudentContextCa
           <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
             {student.name}
           </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {t.studentId(student.id.replace("stu-", "SIR-"))}
-          </Typography>
         </Box>
 
         <Box

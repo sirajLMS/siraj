@@ -13,8 +13,8 @@ export const dashboardRescheduleFormEn: RescheduleFormLabels = {
     newTime: "Select New Time",
   },
   warning: {
-    prefix: "Warning: Class time is calculated based on teacher's timezone (",
-    suffix: "). Please verify local timezone conversions.",
+    message: teacherTimezone =>
+      `Warning: Class time is calculated based on teacher's timezone (${teacherTimezone}). Please verify local timezone conversions.`,
   },
   quickAdjust: {
     label: "Quick Adjust",

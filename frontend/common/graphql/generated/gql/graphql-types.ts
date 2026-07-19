@@ -562,6 +562,7 @@ export type ClassInstanceDetail = {
   status: Maybe<ClassExecutionState>;
   student: Maybe<ClassInstanceStudentInfo>;
   studentTimezone: Maybe<IanaTimezone>;
+  subjectAvatarUrl: Maybe<Scalars['String']['output']>;
   subjectId: Maybe<Scalars['String']['output']>;
   subjectName: Maybe<Scalars['String']['output']>;
   teacher: Maybe<ClassInstanceTeacherInfo>;

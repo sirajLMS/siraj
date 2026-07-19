@@ -1,8 +1,8 @@
 "use client";
 import { InfoOutlined, MenuBookOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, Grid, Stack, Typography } from "@mui/material";
+import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
+import { BaseCard, UserAvatar } from "@/frontend/common/components/ui";
 import { StudentEntityLink } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
 import type { ClassInstanceStatus } from "@/frontend/common/views/dashboard/types/dashboard";
 import { Link } from "@/shared/i18n/routing";
@@ -16,12 +16,12 @@ const STATUS_COLOR_MAP: Record<ClassInstanceStatus, "active" | "confirmed" | "pe
 };
 
 interface ClassInstanceDetailsCardProps {
-  readonly instanceId: string;
   readonly studentId: string;
   readonly studentName: string;
   readonly courseModule: string;
   readonly subjectId: string;
   readonly subjectName: string;
+  readonly subjectAvatarUrl?: string | null;
   readonly startTime: string;
   readonly endTime: string;
   readonly durationMinutes: number;
@@ -54,10 +54,6 @@ const StyledCardHeading = styled(Typography)(() => ({
 
 const StyledHeadingInfoIcon = styled(InfoOutlined)(() => ({}));
 
-const StyledInstanceIdChip = styled(Chip)(() => ({
-  typography: "labelUppercase",
-}));
-
 // Small status dot; bg color is set per-call via sx based on status key
 const StyledStatusDot = styled(Box)({
   width: 10,
@@ -77,12 +73,12 @@ function DetailField({ label, value }: DetailFieldProps) {
 }
 
 export function ClassInstanceDetailsCard({
-  instanceId,
   studentId,
   studentName,
   courseModule,
   subjectId,
   subjectName,
+  subjectAvatarUrl,
   startTime,
   endTime,
   durationMinutes,
@@ -91,6 +87,7 @@ export function ClassInstanceDetailsCard({
 }: ClassInstanceDetailsCardProps) {
   const statusKey = STATUS_COLOR_MAP[status];
   const statusLabel = labels.statusLabels[status];
+  const displaySubjectName = subjectName || courseModule;
 
   return (
     <BaseCard edgeToEdge>
@@ -102,14 +99,6 @@ export function ClassInstanceDetailsCard({
           <StyledHeadingInfoIcon sx={theme => ({ color: theme.palette.header })} />
           {labels.classInstanceDetails}
         </StyledCardHeading>
-        <StyledInstanceIdChip
-          label={`ID: #${instanceId}`}
-          size="small"
-          sx={theme => ({
-            backgroundColor: theme.palette.secondaryContainer,
-            color: theme.palette.onSecondaryContainer,
-          })}
-        />
       </Stack>
 
       <Grid container spacing={3} sx={theme => ({ pb: 4, borderBottom: 1, borderColor: theme.palette.border.light })}>
@@ -132,7 +121,10 @@ export function ClassInstanceDetailsCard({
             label={labels.courseModule}
             value={
               <Stack sx={{ gap: 1 }}>
-                <Typography variant="bodyLg">{subjectName || courseModule}</Typography>
+                <Stack direction="row" sx={{ alignItems: "center", gap: 1.5 }}>
+                  <UserAvatar src={subjectAvatarUrl ?? undefined} label={displaySubjectName} size={40} />
+                  <Typography variant="bodyLg">{displaySubjectName}</Typography>
+                </Stack>
                 {subjectId ? (
                   <Button
                     component={Link}

@@ -2,7 +2,6 @@ import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/student
 
 export const dashboardStudentQuotaEn: StudentQuotaLabels = {
   pageTitle: "Student Quota",
-  studentId: id => `Student ID: ${id}`,
   common: {
     system: "System",
     notSet: "Not set",

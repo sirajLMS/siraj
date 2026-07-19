@@ -37,6 +37,7 @@ export const classInstanceQueryDocument: TypedDocumentNode<
       avatarUrl
       subjectId
       subjectName
+      subjectAvatarUrl
       student {
         id
         name

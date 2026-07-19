@@ -101,8 +101,7 @@ export const dashboardTeacherDashboardAr: TeacherDashboardLabels = {
   },
   alert: {
     title: "فاتك وقت الحصة",
-    description: (classId, time) =>
-      `كانت الحصة ${classId} مجدولة الساعة ${time}. يرجى التواصل مع الإدارة لإعادة الجدولة.`,
+    description: time => `كانت هناك حصة مجدولة الساعة ${time}. يرجى التواصل مع الإدارة لإعادة الجدولة.`,
   },
   policy: {
     title: "سياسة التفعيل",

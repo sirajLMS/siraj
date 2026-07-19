@@ -80,12 +80,12 @@ export function ClassDetailsTeacherView(props: Readonly<ClassDetailsTeacherViewP
       <Grid container spacing={{ xs: 2, lg: 3 }}>
         <Grid size={{ xs: 12, lg: 8 }}>
           <ClassInstanceDetailsCard
-            instanceId={instance.instanceId ?? instance.id ?? ""}
             studentId={student.id ?? ""}
             studentName={student.name ?? ""}
             courseModule={instance.courseName ?? ""}
             subjectId={instance.subjectId ?? ""}
             subjectName={instance.subjectName ?? ""}
+            subjectAvatarUrl={instance.subjectAvatarUrl}
             startTime={formattedStartTime}
             endTime={formattedEndTime}
             durationMinutes={instance.durationMinutes ?? 0}

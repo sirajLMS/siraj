@@ -1,6 +1,5 @@
 export interface StudentQuotaLabels {
   readonly pageTitle: string;
-  readonly studentId: (id: string) => string;
   readonly common: {
     readonly system: string;
     readonly notSet: string;
