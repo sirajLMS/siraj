@@ -3,6 +3,7 @@
 import { LinearProgress } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   TeacherDueRow,
   TeacherDuesViewModel,
@@ -10,6 +11,7 @@ import type {
 import { DesktopAppDataGrid, DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
 
 export function TeacherDuesDesktopView({
   rows,
@@ -28,7 +30,12 @@ export function TeacherDuesDesktopView({
         headerName: labels.teacherNameColumn,
         flex: 1,
         minWidth: 150,
-        valueGetter: (_, row) => row.teacherName || row.teacherId,
+        renderCell: params => (
+          <DesktopPersonProfileLinkCell
+            href={profileHrefForTeacher({ teacherId: params.row.teacherId })}
+            name={params.row.teacherName || params.row.teacherId}
+          />
+        ),
       },
       {
         field: "classDate",
@@ -42,7 +49,12 @@ export function TeacherDuesDesktopView({
         headerName: labels.studentColumn,
         flex: 1,
         minWidth: 150,
-        valueGetter: (_, row) => row.studentName || row.studentId,
+        renderCell: params => (
+          <DesktopPersonProfileLinkCell
+            href={params.row.studentId ? studentHref(params.row.studentId) : undefined}
+            name={params.row.studentName || params.row.studentId}
+          />
+        ),
       },
       {
         field: "hours",

@@ -2,9 +2,11 @@
 
 import { CalendarMonthOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
+import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashboard/supervisor/dashboard/useSupervisorDashboardViewModel";
 import { DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import { DesktopPersonProfileLink } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLink.desktop";
 import { DuesSummaryCardDesktop } from "@/frontend/desktop/views/dashboard/supervisor/dashboard/components/duesSummaryCard.desktop";
 import { PendingReviewsHeroCardDesktop } from "@/frontend/desktop/views/dashboard/supervisor/dashboard/components/pendingReviewsHeroCard.desktop";
 
@@ -64,27 +66,43 @@ export function SupervisorDashboardDesktopView({
             {recentApprovals.map(item => (
               <Box
                 key={item.id}
-                component="button"
-                type="button"
-                onClick={() => onViewRecentApproval(item.id)}
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   gap: 1.5,
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                  textAlign: "start",
-                  fontFamily: "inherit",
-                  color: "inherit",
-                  "&:hover": { opacity: 0.85 },
                 }}
               >
-                <CheckCircleOutlined fontSize="small" sx={theme => ({ color: theme.palette.status.activeContainer })} />
-                <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
-                  {[item.studentName, item.teacherName].filter(Boolean).join(" · ") || "—"}
-                </Typography>
+                <Box
+                  component="button"
+                  type="button"
+                  onClick={() => onViewRecentApproval(item.id)}
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    color: "inherit",
+                    "&:hover": { opacity: 0.85 },
+                  }}
+                  aria-label={labels.recentApprovals}
+                >
+                  <CheckCircleOutlined
+                    fontSize="small"
+                    sx={theme => ({ color: theme.palette.status.activeContainer })}
+                  />
+                </Box>
+                <DesktopPersonProfileLink
+                  href={item.studentId ? studentHref(item.studentId) : undefined}
+                  name={item.studentName || item.studentId || "—"}
+                  showAvatar={false}
+                />
+                <DesktopPersonProfileLink
+                  href={profileHrefForTeacher({ teacherId: item.teacherId })}
+                  name={item.teacherName || item.teacherId || "—"}
+                  showAvatar={false}
+                />
                 <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, ml: "auto" })}>
                   {item.lessonDate}
                 </Typography>

@@ -22,6 +22,7 @@ export interface AcademicClassRow {
   readonly id: string;
   readonly className: string;
   readonly classId: string;
+  readonly classAvatarUrl?: string | null;
   readonly instructor: string;
   readonly instructorId?: string;
   readonly time: string;

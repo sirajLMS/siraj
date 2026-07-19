@@ -3,9 +3,11 @@
 import { BlockOutlined, EventBusyOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Stack, Tooltip, Typography } from "@mui/material";
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { classHref } from "@/frontend/common/utils/profileHref";
 import type { FutureClassCardProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
+import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppTranslation } from "@/shared/locale";
@@ -60,9 +62,13 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
   return (
     <Box sx={{ flex: 1 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-          {item.courseName}
-        </Typography>
+        <MobileClassProfileLink
+          href={item.id ? classHref(item.id) : undefined}
+          name={item.courseName?.trim() || item.subjectName?.trim() || "—"}
+          avatarUrl={item.avatarUrl}
+          typographyVariant="titleLg"
+          fontWeight={700}
+        />
         {isRescheduled && <MobileStatusBadge category="trackingStatus" status="rescheduled" label={t.reScheduled} />}
       </Box>
 

@@ -11,6 +11,7 @@ import { Box, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import {
   getTrackingStatusIcon,
   getTrackingStatusLabel,
@@ -21,22 +22,19 @@ import type {
 } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { MobileCardList, MobileCardListItem, MobileEmptyState } from "@/frontend/mobile/components/ui";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 
 function TrackingCardHeader({ row, onView }: { row: TrackingRow; onView: (id: string) => void }) {
   const rowId = row.id ?? "";
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
       <Box>
-        <Typography
-          variant="bodyLg"
-          sx={theme => ({
-            fontFamily: '"Hanken Grotesk", sans-serif',
-            fontWeight: 700,
-            color: theme.palette.text.primary,
-          })}
-        >
-          {row.teacherName ?? ""}
-        </Typography>
+        <MobilePersonProfileLink
+          href={profileHrefForTeacher({ teacherId: row.teacherId })}
+          name={row.teacherName ?? ""}
+          typographyVariant="bodyLg"
+          fontWeight={700}
+        />
       </Box>
       <IconButton
         id={`view-card-${rowId}`}
@@ -66,15 +64,12 @@ function TrackingCardBody({ row }: { row: TrackingRow }) {
     <Box sx={{ mb: 2 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}>
         <SchoolOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />
-        <Typography
-          variant="bodyMd"
-          sx={theme => ({
-            fontFamily: '"Hanken Grotesk", sans-serif',
-            color: theme.palette.text.secondary,
-          })}
-        >
-          {row.studentName ?? ""}
-        </Typography>
+        <MobilePersonProfileLink
+          href={row.studentId ? studentHref(row.studentId) : undefined}
+          name={row.studentName ?? ""}
+          showAvatar={false}
+          typographyVariant="bodyMd"
+        />
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <ScheduleOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />

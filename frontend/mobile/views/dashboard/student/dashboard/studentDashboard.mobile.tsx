@@ -5,6 +5,7 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
@@ -88,7 +89,7 @@ export function StudentDashboardMobileView({
   upcomingTodayCount,
   creditBalance,
   recentLessonReports,
-  reportsPagination: _reportsPagination,
+  reportsPagination,
   labels,
   loading,
   onJoinLesson,
@@ -152,7 +153,12 @@ export function StudentDashboardMobileView({
             rows={recentLessonReports}
             emptyMessage={labels.noLessonReports}
             getKey={row => row.id}
-            paginationOptions={{ mode: "client" }}
+            paginationOptions={buildServerPaginationOptions({
+              page: reportsPagination.page,
+              pageSize: reportsPagination.pageSize,
+              totalCount: reportsPagination.totalCount,
+              onPageChange: reportsPagination.onPageChange,
+            })}
             renderItem={row => (
               <MobileReportItem report={row} labels={labels} locale={locale} onAddReflection={onAddReflection} />
             )}

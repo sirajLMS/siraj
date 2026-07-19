@@ -10,7 +10,7 @@ import {
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
+import { profileHrefForTeacher, classHref } from "@/frontend/common/utils/profileHref";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import {
   MobileMeetingJoinAction,
@@ -18,6 +18,7 @@ import {
   MobilePersonProfileLink,
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
+import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { ClassSessionActionButtonMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/components/classSessionActionButton.mobile";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
@@ -72,17 +73,13 @@ function ClassCardHeader({ row, labels }: Readonly<{ row: AcademicClassRow; labe
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
       <Box>
-        <Typography
-          variant="titleLg"
-          sx={theme => ({
-            fontFamily: '"Hanken Grotesk", sans-serif',
-            fontWeight: 600,
-            color: theme.palette.primary.main,
-            lineHeight: 1.2,
-          })}
-        >
-          {row.className}
-        </Typography>
+        <MobileClassProfileLink
+          href={row.id ? classHref(row.id) : undefined}
+          name={row.className}
+          avatarUrl={row.classAvatarUrl}
+          typographyVariant="titleLg"
+          fontWeight={600}
+        />
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}>
           <PersonOutlined sx={theme => ({ fontSize: 14, color: theme.palette.text.secondary })} />
           <MobilePersonProfileLink

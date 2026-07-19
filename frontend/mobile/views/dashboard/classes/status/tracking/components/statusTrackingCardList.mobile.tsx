@@ -16,9 +16,12 @@ import {
   getStatusAvatarSx,
   getStatusIcon,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
+import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileContentInset, MobileSectionTitleRow } from "@/frontend/mobile/components/ui/container";
+import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 import { MobileEmptyState } from "@/frontend/mobile/components/ui/state";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale } from "@/shared/locale";
@@ -213,9 +216,25 @@ function StatusTrackingCard({
 
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1 }}>
-              <Box sx={{ minWidth: 0 }}>
-                <StyledStudentNameText>{row.studentName ?? ""}</StyledStudentNameText>
-                <StyledClassNameText>{row.teacherName ?? ""}</StyledClassNameText>
+              <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
+                <MobilePersonProfileLink
+                  href={row.studentId ? studentHref(row.studentId) : undefined}
+                  name={row.studentName ?? ""}
+                  avatarUrl={row.studentAvatarUrl}
+                  showAvatar={false}
+                  typographyVariant="bodyMd"
+                  fontWeight={700}
+                />
+                {row.courseName ? (
+                  <MobileClassProfileLink
+                    href={row.id ? classHref(row.id) : undefined}
+                    name={row.courseName}
+                    avatarUrl={row.avatarUrl}
+                    showAvatar={false}
+                    typographyVariant="labelMd"
+                    fontWeight={500}
+                  />
+                ) : null}
               </Box>
               <MobileStatusBadge
                 category="sessionTracking"
@@ -228,7 +247,13 @@ function StatusTrackingCard({
             <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 0.75 }}>
               <StyledMetaInfoRow>
                 <PersonOutlined sx={{ fontSize: 16 }} />
-                <Typography sx={{ typography: "bodyMd" }}>{row.teacherName ?? ""}</Typography>
+                <MobilePersonProfileLink
+                  href={profileHrefForTeacher({ teacherId: row.teacherId })}
+                  name={row.teacherName ?? ""}
+                  avatarUrl={row.teacherAvatarUrl}
+                  showAvatar={false}
+                  typographyVariant="bodyMd"
+                />
               </StyledMetaInfoRow>
               <StyledMetaInfoRow>
                 <ScheduleOutlined sx={{ fontSize: 16 }} />

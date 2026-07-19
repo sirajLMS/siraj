@@ -2,6 +2,7 @@
 
 import { Box, Checkbox, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   TeacherDueRow,
   TeacherDuesViewModel,
@@ -15,6 +16,7 @@ import {
   MobileSectionPanel,
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 
 function DueCard({
   row,
@@ -46,13 +48,16 @@ function DueCard({
     >
       <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
         {canMarkPaid ? <Checkbox checked={selected} onChange={() => onToggle(row.id)} size="small" /> : null}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface, fontWeight: 500 })}>
-            {row.teacherName || row.teacherId}
-          </Typography>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.studentColumn}: {row.studentName || row.studentId}
-          </Typography>
+        <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.75 }}>
+          <MobilePersonProfileLink
+            href={profileHrefForTeacher({ teacherId: row.teacherId })}
+            name={row.teacherName || row.teacherId}
+          />
+          <MobilePersonProfileLink
+            href={row.studentId ? studentHref(row.studentId) : undefined}
+            name={row.studentName || row.studentId}
+            label={labels.studentColumn}
+          />
           <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
             {labels.classDateColumn}: {row.classDate || "-"}
           </Typography>

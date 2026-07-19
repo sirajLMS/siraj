@@ -2,6 +2,7 @@
 
 import { CalendarMonthOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
+import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashboard/supervisor/dashboard/useSupervisorDashboardViewModel";
 import {
   MobileContentStack,
@@ -9,6 +10,7 @@ import {
   MobilePageHeader,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 import { DuesSummaryCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/duesSummaryCard.mobile";
 import { PendingReviewsHeroCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/pendingReviewsHeroCard.mobile";
 
@@ -78,29 +80,43 @@ export function SupervisorDashboardMobileView({
               {recentApprovals.map(item => (
                 <Box
                   key={item.id}
-                  component="button"
-                  type="button"
-                  onClick={() => onViewRecentApproval(item.id)}
                   sx={{
                     display: "flex",
                     alignItems: "center",
                     gap: 1,
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    cursor: "pointer",
-                    textAlign: "start",
-                    fontFamily: "inherit",
-                    color: "inherit",
+                    flexWrap: "wrap",
                   }}
                 >
-                  <CheckCircleOutlined
-                    fontSize="small"
-                    sx={theme => ({ color: theme.palette.status.activeContainer })}
+                  <Box
+                    component="button"
+                    type="button"
+                    onClick={() => onViewRecentApproval(item.id)}
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      cursor: "pointer",
+                      color: "inherit",
+                    }}
+                    aria-label={labels.recentApprovals}
+                  >
+                    <CheckCircleOutlined
+                      fontSize="small"
+                      sx={theme => ({ color: theme.palette.status.activeContainer })}
+                    />
+                  </Box>
+                  <MobilePersonProfileLink
+                    href={item.studentId ? studentHref(item.studentId) : undefined}
+                    name={item.studentName || item.studentId || "—"}
+                    showAvatar={false}
                   />
-                  <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
-                    {[item.studentName, item.teacherName].filter(Boolean).join(" · ") || "—"}
-                  </Typography>
+                  <MobilePersonProfileLink
+                    href={profileHrefForTeacher({ teacherId: item.teacherId })}
+                    name={item.teacherName || item.teacherId || "—"}
+                    showAvatar={false}
+                  />
                   <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                     {item.lessonDate}
                   </Typography>

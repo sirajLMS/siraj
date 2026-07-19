@@ -6,7 +6,9 @@ import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { classHref } from "@/frontend/common/utils/profileHref";
 import type { FutureClassCardProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
+import { DesktopClassProfileLink } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLink.desktop";
 import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -60,9 +62,13 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
   return (
     <Box sx={{ flex: 1 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-          {item.courseName}
-        </Typography>
+        <DesktopClassProfileLink
+          href={item.id ? classHref(item.id) : undefined}
+          name={item.courseName?.trim() || item.subjectName?.trim() || "—"}
+          avatarUrl={item.avatarUrl}
+          typographyVariant="titleLg"
+          fontWeight={700}
+        />
         {isRescheduled && <StatusBadge category="trackingStatus" status="rescheduled" label={t.reScheduled} />}
       </Box>
 

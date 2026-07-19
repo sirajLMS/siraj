@@ -90,6 +90,7 @@ export function AcademicScheduleDataGridDesktop({
           <DesktopClassProfileLinkCell
             href={classHref(row.id)}
             name={row.className}
+            avatarUrl={row.classAvatarUrl}
             avatarSize={40}
             typographyVariant="bodyMd"
             fontWeight={700}
