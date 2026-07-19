@@ -7,17 +7,17 @@ import {
   PersonOutlined,
   ScheduleOutlined,
 } from "@mui/icons-material";
-import { Box, Card, CardContent, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { Box, Typography } from "@mui/material";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { profileHrefForTeacher, classHref } from "@/frontend/common/utils/profileHref";
+import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import {
+  MobileCardListItem,
   MobileMeetingJoinAction,
-  MobileListPagination,
   MobilePersonProfileLink,
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
+import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
 import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { ClassSessionActionButtonMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/components/classSessionActionButton.mobile";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
@@ -208,26 +208,11 @@ const AcademicClassCard = ({
   const isMissed = row.sessionStatus === "missed";
 
   return (
-    <Card
-      elevation={0}
-      sx={theme => ({
-        borderRadius: 0,
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: theme.palette.shadow.card,
-        opacity: isMissed ? 0.8 : 1,
-        border: "1px solid transparent",
-        transition: "border-color 0.15s ease",
-        "&:hover": {
-          borderColor: alpha(theme.palette.header, 0.2),
-        },
-      })}
-    >
-      <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
-        <ClassCardHeader row={row} labels={labels} />
-        <ClassCardMetadata row={row} />
-        <ClassCardActions row={row} labels={labels} onLeave={onLeave} onViewClassAudit={onViewClassAudit} />
-      </CardContent>
-    </Card>
+    <MobileCardListItem variant="edge-to-edge" dimmed={isMissed}>
+      <ClassCardHeader row={row} labels={labels} />
+      <ClassCardMetadata row={row} />
+      <ClassCardActions row={row} labels={labels} onLeave={onLeave} onViewClassAudit={onViewClassAudit} />
+    </MobileCardListItem>
   );
 };
 
@@ -266,17 +251,16 @@ export function AcademicScheduleCardListMobile({
 }: AcademicScheduleCardListMobileProps) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      {rows.map(row => (
-        <AcademicClassCard
-          key={row.id}
-          row={row}
-          labels={labels}
-          onLeave={onLeave}
-          onViewClassAudit={onViewClassAudit}
-        />
-      ))}
+      <MobileCardList
+        rows={rows}
+        getKey={row => row.id}
+        paginationOptions={paginationOptions}
+        layout="edge-to-edge"
+        renderItem={row => (
+          <AcademicClassCard row={row} labels={labels} onLeave={onLeave} onViewClassAudit={onViewClassAudit} />
+        )}
+      />
       <EndOfSchedule label={labels.endOfSchedule} />
-      <MobileListPagination paginationOptions={paginationOptions} />
     </Box>
   );
 }

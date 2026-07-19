@@ -1,8 +1,9 @@
 "use client";
 
 import { EventRepeatOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
-import { Box, Button, Card, CardContent, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import { STATUS_LABEL_KEYS } from "@/frontend/common/views/dashboard/classes/status/tracking/constants/statusLabelKeys.constants";
 import {
   type CardListLabels,
@@ -16,13 +17,12 @@ import {
   getStatusAvatarSx,
   getStatusIcon,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
-import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
-import { MobileContentInset, MobileSectionTitleRow } from "@/frontend/mobile/components/ui/container";
+import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
+import { MobileCardList, MobileContentInset, MobileSectionTitleRow } from "@/frontend/mobile/components/ui/container";
 import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
-import { MobileEmptyState } from "@/frontend/mobile/components/ui/state";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale } from "@/shared/locale";
 
@@ -42,18 +42,6 @@ const StyledActivateActionButton = styled(StyledCardActionButtonBase)(({ theme }
   color: theme.palette.primary.main,
   borderColor: theme.palette.primary.main,
   "&:hover": { borderWidth: 2 },
-}));
-
-const StyledStudentNameText = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  fontSize: theme.typography.bodyLg.fontSize,
-  color: theme.palette.text.primary,
-}));
-
-const StyledClassNameText = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.labelMd.fontSize,
-  color: theme.palette.primary.main,
-  fontWeight: 500,
 }));
 
 const StyledMetaInfoRow = styled(Box)(({ theme }) => ({
@@ -199,82 +187,72 @@ function StatusTrackingCard({
   const locale = useAppLocale();
   const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
   return (
-    <Card
-      elevation={0}
-      sx={theme => ({
-        borderRadius: 0,
-        border: `1px solid ${theme.palette.border.light}`,
-        transition: "transform 0.15s ease",
-        "&:active": { transform: "scale(0.98)" },
-      })}
-    >
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <StyledStatusAvatar avatarSx={getStatusAvatarSx(sessionStatus)}>
-            {row.studentInitials ?? ""}
-          </StyledStatusAvatar>
+    <MobileCardListItem variant="edge-to-edge" interactive>
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <StyledStatusAvatar avatarSx={getStatusAvatarSx(sessionStatus)}>
+          {row.studentInitials ?? ""}
+        </StyledStatusAvatar>
 
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1 }}>
-              <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
-                <MobilePersonProfileLink
-                  href={row.studentId ? studentHref(row.studentId) : undefined}
-                  name={row.studentName ?? ""}
-                  avatarUrl={row.studentAvatarUrl}
-                  showAvatar={false}
-                  typographyVariant="bodyMd"
-                  fontWeight={700}
-                />
-                {row.courseName ? (
-                  <MobileClassProfileLink
-                    href={row.id ? classHref(row.id) : undefined}
-                    name={row.courseName}
-                    avatarUrl={row.avatarUrl}
-                    showAvatar={false}
-                    typographyVariant="labelMd"
-                    fontWeight={500}
-                  />
-                ) : null}
-              </Box>
-              <MobileStatusBadge
-                category="sessionTracking"
-                status={sessionStatus}
-                label={labels[STATUS_LABEL_KEYS[sessionStatus]]}
-                icon={getStatusIcon(sessionStatus)}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1 }}>
+            <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
+              <MobilePersonProfileLink
+                href={row.studentId ? studentHref(row.studentId) : undefined}
+                name={row.studentName ?? ""}
+                avatarUrl={row.studentAvatarUrl}
+                showAvatar={false}
+                typographyVariant="bodyMd"
+                fontWeight={700}
               />
-            </Box>
-
-            <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 0.75 }}>
-              <StyledMetaInfoRow>
-                <PersonOutlined sx={{ fontSize: 16 }} />
-                <MobilePersonProfileLink
-                  href={profileHrefForTeacher({ teacherId: row.teacherId })}
-                  name={row.teacherName ?? ""}
-                  avatarUrl={row.teacherAvatarUrl}
+              {row.courseName ? (
+                <MobileClassProfileLink
+                  href={row.id ? classHref(row.id) : undefined}
+                  name={row.courseName}
+                  avatarUrl={row.avatarUrl}
                   showAvatar={false}
-                  typographyVariant="bodyMd"
+                  typographyVariant="labelMd"
+                  fontWeight={500}
                 />
-              </StyledMetaInfoRow>
-              <StyledMetaInfoRow>
-                <ScheduleOutlined sx={{ fontSize: 16 }} />
-                <Typography sx={{ typography: "bodyMd" }}>
-                  {formatScheduleRange(row.scheduledStartAt, row.scheduledEndAt, locale)}
-                </Typography>
-              </StyledMetaInfoRow>
+              ) : null}
             </Box>
+            <MobileStatusBadge
+              category="sessionTracking"
+              status={sessionStatus}
+              label={labels[STATUS_LABEL_KEYS[sessionStatus]]}
+              icon={getStatusIcon(sessionStatus)}
+            />
+          </Box>
+
+          <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 0.75 }}>
+            <StyledMetaInfoRow>
+              <PersonOutlined sx={{ fontSize: 16 }} />
+              <MobilePersonProfileLink
+                href={profileHrefForTeacher({ teacherId: row.teacherId })}
+                name={row.teacherName ?? ""}
+                avatarUrl={row.teacherAvatarUrl}
+                showAvatar={false}
+                typographyVariant="bodyMd"
+              />
+            </StyledMetaInfoRow>
+            <StyledMetaInfoRow>
+              <ScheduleOutlined sx={{ fontSize: 16 }} />
+              <Typography sx={{ typography: "bodyMd" }}>
+                {formatScheduleRange(row.scheduledStartAt, row.scheduledEndAt, locale)}
+              </Typography>
+            </StyledMetaInfoRow>
           </Box>
         </Box>
+      </Box>
 
-        <CardActionButton
-          row={row}
-          sessionStatus={sessionStatus}
-          labels={labels}
-          onActivate={onActivate}
-          onReschedule={onReschedule}
-          onVerify={onVerify}
-        />
-      </CardContent>
-    </Card>
+      <CardActionButton
+        row={row}
+        sessionStatus={sessionStatus}
+        labels={labels}
+        onActivate={onActivate}
+        onReschedule={onReschedule}
+        onVerify={onVerify}
+      />
+    </MobileCardListItem>
   );
 }
 
@@ -297,24 +275,24 @@ export function StatusTrackingCardList({
         }
       />
 
-      {rows.length === 0 ? (
-        <MobileEmptyState title={labels.noEntries} />
-      ) : (
-        <MobileContentInset>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {rows.map(row => (
-              <StatusTrackingCard
-                key={row.id ?? ""}
-                row={row}
-                labels={labels}
-                onActivate={onActivate}
-                onReschedule={onReschedule}
-                onVerify={onVerify}
-              />
-            ))}
-          </Box>
-        </MobileContentInset>
-      )}
+      <MobileContentInset>
+        <MobileCardList
+          rows={rows}
+          getKey={row => row.id ?? ""}
+          emptyMessage={labels.noEntries}
+          paginationOptions={{ mode: "client" }}
+          layout="edge-to-edge"
+          renderItem={row => (
+            <StatusTrackingCard
+              row={row}
+              labels={labels}
+              onActivate={onActivate}
+              onReschedule={onReschedule}
+              onVerify={onVerify}
+            />
+          )}
+        />
+      </MobileContentInset>
     </Box>
   );
 }

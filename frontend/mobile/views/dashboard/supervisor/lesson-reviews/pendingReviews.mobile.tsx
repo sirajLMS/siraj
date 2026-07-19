@@ -3,6 +3,7 @@
 import { CancelOutlined, CheckCircleOutlined, RateReviewOutlined } from "@mui/icons-material";
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   PendingReviewRow,
@@ -10,6 +11,7 @@ import type {
 } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import {
   MobileCardList,
+  MobileCardListItem,
   MobileContentInset,
   MobileContentStack,
   MobilePageContainer,
@@ -44,21 +46,13 @@ function ReviewCard({
   readonly onSelect: (row: PendingReviewRow) => void;
 }>) {
   return (
-    <Box
-      sx={theme => ({
-        p: 2,
-        backgroundColor: theme.palette.surfaceContainer,
-        borderRadius: theme.layout.radius.section,
-        display: "flex",
-        flexDirection: "column",
-        gap: 1.5,
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge">
       <Stack
         sx={{
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "flex-start",
+          gap: 1.5,
         }}
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -101,6 +95,7 @@ function ReviewCard({
           justifyContent: "space-between",
           alignItems: "center",
           gap: 1,
+          mt: 1.5,
         }}
       >
         <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
@@ -111,7 +106,7 @@ function ReviewCard({
         </Typography>
       </Stack>
 
-      <Stack sx={{ flexDirection: "row", gap: 0.5, justifyContent: "flex-end" }}>
+      <Stack sx={{ flexDirection: "row", gap: 0.5, justifyContent: "flex-end", mt: 1.5 }}>
         <Tooltip title={labels.reviewButton}>
           <IconButton size="small" aria-label={labels.reviewButton} onClick={() => onSelect(row)}>
             <RateReviewOutlined fontSize="small" />
@@ -139,13 +134,16 @@ function ReviewCard({
           </IconButton>
         </Tooltip>
       </Stack>
-    </Box>
+    </MobileCardListItem>
   );
 }
 
 export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel>) {
   const {
     rows,
+    totalCount,
+    page,
+    pageSize,
     selectedReport,
     selectedTeacher,
     studentFilter,
@@ -155,6 +153,7 @@ export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel
     labels,
     onSelectedTeacherChange,
     onStudentFilterChange,
+    onPageChange,
     onSelectReport,
     onApprove,
     onOpenRejectDialog,
@@ -181,12 +180,6 @@ export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel
       <MobileContentStack>
         <MobilePageHeader title={labels.pageTitle} />
 
-        {loading ? (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {labels.loadingMessage}
-          </Typography>
-        ) : null}
-
         <MobileSectionPanel contentInset={false}>
           <MobileContentInset>
             <Stack sx={{ gap: 1.5, mb: 2 }}>
@@ -207,11 +200,17 @@ export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel
 
           <MobileCardList<PendingReviewRow>
             rows={rows}
+            loading={loading}
             emptyMessage={labels.noPendingReviews}
             gap={2}
             layout="edge-to-edge"
             getKey={row => row.id}
-            paginationOptions={{ mode: "client" }}
+            paginationOptions={buildServerPaginationOptions({
+              page,
+              pageSize,
+              totalCount,
+              onPageChange,
+            })}
             renderItem={renderItem}
           />
         </MobileSectionPanel>

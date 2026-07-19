@@ -19,6 +19,44 @@ export interface MobileCardListProps<T> {
   readonly sx?: SxProps<Theme>;
 }
 
+function buildPaginationControls(
+  paginationOptions: ListPaginationOptions,
+  rowsLength: number,
+  clientPage: number,
+  clientPageSize: number,
+  setClientPage: (page: number) => void
+) {
+  if (paginationOptions === false) {
+    return null;
+  }
+
+  if (paginationOptions.mode === "server") {
+    const pageCount = Math.max(1, Math.ceil(paginationOptions.totalCount / paginationOptions.pageSize) || 1);
+    return (
+      <MobilePaginationControls
+        embedded
+        page={paginationOptions.page}
+        pageCount={pageCount}
+        rowCount={paginationOptions.totalCount}
+        pageSize={paginationOptions.pageSize}
+        onPageChange={paginationOptions.onPageChange}
+      />
+    );
+  }
+
+  const pageCount = Math.max(1, Math.ceil(rowsLength / clientPageSize) || 1);
+  return (
+    <MobilePaginationControls
+      embedded
+      page={clientPage}
+      pageCount={pageCount}
+      rowCount={rowsLength}
+      pageSize={clientPageSize}
+      onPageChange={setClientPage}
+    />
+  );
+}
+
 export function MobileCardList<T>({
   rows,
   renderItem,
@@ -42,7 +80,7 @@ export function MobileCardList<T>({
     if (paginationOptions === false || paginationOptions.mode !== "client") {
       return;
     }
-    const pageCount = Math.max(1, Math.ceil(rows.length / clientPageSize));
+    const pageCount = Math.max(1, Math.ceil(rows.length / clientPageSize) || 1);
     if (clientPage >= pageCount) {
       setClientPage(Math.max(0, pageCount - 1));
     }
@@ -56,59 +94,37 @@ export function MobileCardList<T>({
     return rows.slice(start, start + clientPageSize);
   }, [clientPage, clientPageSize, paginationOptions, rows]);
 
+  const paginationControls = buildPaginationControls(
+    paginationOptions,
+    rows.length,
+    clientPage,
+    clientPageSize,
+    setClientPage
+  );
+
   if (loading && rows.length === 0) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
-        <CircularProgress />
+      <Box sx={{ display: "flex", flexDirection: "column", gap, ...(isEdgeToEdge ? { px: { xs: 2 } } : {}), ...sx }}>
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
+          <CircularProgress />
+        </Box>
+        {paginationControls}
       </Box>
     );
   }
 
   if (rows.length === 0) {
     return (
-      <Box sx={{ py: 4, px: 2, textAlign: "center" }}>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {emptyMessage}
-        </Typography>
+      <Box sx={{ display: "flex", flexDirection: "column", gap, ...(isEdgeToEdge ? { px: { xs: 2 } } : {}), ...sx }}>
+        <Box sx={{ py: 4, px: 2, textAlign: "center" }}>
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {emptyMessage}
+          </Typography>
+        </Box>
+        {paginationControls}
       </Box>
     );
   }
-
-  const paginationControls = (() => {
-    if (paginationOptions === false) {
-      return null;
-    }
-    if (paginationOptions.mode === "server") {
-      const pageCount = Math.max(1, Math.ceil(paginationOptions.totalCount / paginationOptions.pageSize));
-      if (paginationOptions.totalCount <= 0 || pageCount <= 1) {
-        return null;
-      }
-      return (
-        <MobilePaginationControls
-          embedded
-          page={paginationOptions.page}
-          pageCount={pageCount}
-          rowCount={paginationOptions.totalCount}
-          pageSize={paginationOptions.pageSize}
-          onPageChange={paginationOptions.onPageChange}
-        />
-      );
-    }
-    const pageCount = Math.max(1, Math.ceil(rows.length / clientPageSize));
-    if (rows.length <= 0 || pageCount <= 1) {
-      return null;
-    }
-    return (
-      <MobilePaginationControls
-        embedded
-        page={clientPage}
-        pageCount={pageCount}
-        rowCount={rows.length}
-        pageSize={clientPageSize}
-        onPageChange={setClientPage}
-      />
-    );
-  })();
 
   return (
     <Box

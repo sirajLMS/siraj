@@ -3,14 +3,14 @@
 import { PriorityHighOutlined as AlertIcon, SettingsOutlined as SettingsIcon } from "@mui/icons-material";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type {
   ParentCardListLabels,
   ParentDirectoryRow,
 } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
-import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { MobileListPagination, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
-import { MobileBaseCard } from "@/frontend/mobile/components/ui/card/MobileBaseCard";
+import { MobileCardListItem, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
 
 export type { ParentCardListLabels };
 
@@ -24,16 +24,13 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
   const hasUnpaid = row.unpaidInvoices > 0;
 
   return (
-    <MobileBaseCard
+    <Box
       onClick={() => {
         onOpenSettings(row.id);
       }}
-      sx={{
-        cursor: "pointer",
-        transition: "transform 0.15s ease",
-        "&:active": { transform: "scale(0.98)" },
-      }}
+      sx={{ cursor: "pointer" }}
     >
+    <MobileCardListItem variant="edge-to-edge" interactive>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
         <Box sx={{ display: "flex", gap: 1.5 }}>
           <Stack>
@@ -94,7 +91,8 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
           )}
         </Box>
       </Box>
-    </MobileBaseCard>
+    </MobileCardListItem>
+    </Box>
   );
 }
 
@@ -113,11 +111,12 @@ export function ParentCardListMobile({
   paginationOptions,
 }: Readonly<ParentCardListMobileProps>) {
   return (
-    <Stack spacing={2}>
-      {rows.map(row => (
-        <ParentCard key={row.id} row={row} labels={labels} onOpenSettings={onOpenSettings} />
-      ))}
-      <MobileListPagination paginationOptions={paginationOptions} />
-    </Stack>
+    <MobileCardList
+      rows={rows}
+      getKey={row => row.id}
+      paginationOptions={paginationOptions}
+      layout="edge-to-edge"
+      renderItem={row => <ParentCard row={row} labels={labels} onOpenSettings={onOpenSettings} />}
+    />
   );
 }

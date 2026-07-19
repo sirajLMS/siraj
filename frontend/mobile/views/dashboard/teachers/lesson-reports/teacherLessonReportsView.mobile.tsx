@@ -1,11 +1,17 @@
 "use client";
 
-import { Box, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { LessonReportCardProps } from "@/frontend/common/views/dashboard/teachers/lesson-reports/types";
 import type { TeacherLessonReportsViewModel } from "@/frontend/common/views/dashboard/teachers/lesson-reports/useTeacherLessonReportsViewModel";
-import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileCardListItem,
+  MobileContentStack,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 
 export function TeacherLessonReportsMobileView({
   title,
@@ -41,30 +47,25 @@ export function TeacherLessonReportsMobileView({
           </Select>
         </FormControl>
 
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-            <CircularProgress />
-          </Box>
-        ) : null}
-
         {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{noReportsMessage}</Typography> : null}
 
-        {!loading && !error && rows.length === 0 ? (
-          <Typography sx={{ color: theme => theme.palette.text.secondary }}>{noReportsMessage}</Typography>
-        ) : null}
-
-        {!loading && !error && rows.length > 0 ? (
-          <Stack spacing={1}>
-            {rows.map((row, index) => (
+        {!error ? (
+          <MobileCardList
+            rows={rows}
+            loading={loading}
+            emptyMessage={noReportsMessage}
+            getKey={(row, index) => row.id ?? row.classInstanceId ?? `row-${index}`}
+            paginationOptions={{ mode: "client" }}
+            layout="edge-to-edge"
+            renderItem={row => (
               <LessonReportCardMobile
-                key={row.id ?? row.classInstanceId ?? `row-${index}`}
                 row={row}
                 labels={labels}
                 locale={locale}
                 resolveStatusLabel={resolveStatusLabel}
               />
-            ))}
-          </Stack>
+            )}
+          />
         ) : null}
       </MobileContentStack>
     </MobilePageContainer>
@@ -73,16 +74,7 @@ export function TeacherLessonReportsMobileView({
 
 function LessonReportCardMobile({ row, labels, locale, resolveStatusLabel }: Readonly<LessonReportCardProps>) {
   return (
-    <Box
-      sx={theme => ({
-        p: 2,
-        borderRadius: 1,
-        border: `1px solid ${theme.palette.border.light}`,
-        display: "flex",
-        flexDirection: "column",
-        gap: 1,
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge">
       <Box
         sx={{
           display: "flex",
@@ -105,7 +97,7 @@ function LessonReportCardMobile({ row, labels, locale, resolveStatusLabel }: Rea
           <StatusBadge category="classInstance" status={row.status} label={resolveStatusLabel(row.status)} />
         ) : null}
       </Box>
-      <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", gap: 1 }}>
+      <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", gap: 1, mt: 1 }}>
         {row.durationMinutes != null ? (
           <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
             {labels.durationMinutes}: {row.durationMinutes}
@@ -123,15 +115,15 @@ function LessonReportCardMobile({ row, labels, locale, resolveStatusLabel }: Rea
         ) : null}
       </Stack>
       {row.teacherNotes ? (
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, mt: 1 }}>
           {labels.teacherNotes}: {row.teacherNotes}
         </Typography>
       ) : null}
       {row.status === LessonReportStatus.Rejected && row.rejectionReason ? (
-        <Typography sx={{ typography: "bodySm", color: theme => theme.palette.error.main }}>
+        <Typography sx={{ typography: "bodySm", color: theme => theme.palette.error.main, mt: 1 }}>
           {labels.rejectionReason}: {row.rejectionReason}
         </Typography>
       ) : null}
-    </Box>
+    </MobileCardListItem>
   );
 }

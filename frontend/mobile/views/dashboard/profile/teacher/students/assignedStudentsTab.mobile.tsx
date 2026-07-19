@@ -4,7 +4,6 @@ import { Alert, Button, Chip, Skeleton, Stack, Typography } from "@mui/material"
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { AssignedStudentsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsTabTypes";
 import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
-import { MobileListPagination } from "@/frontend/mobile/components/ui/filter";
 import { AssignedStudentsCardList } from "@/frontend/mobile/views/dashboard/profile/teacher/students/assignedStudentsCardList.mobile";
 
 function LoadingState() {
@@ -91,9 +90,8 @@ export function AssignedStudentsTabMobileView({
         })}
       </MobileHorizontalScrollRow>
 
-      <AssignedStudentsCardList rows={pagedRows} />
-
-      <MobileListPagination
+      <AssignedStudentsCardList
+        rows={pagedRows}
         paginationOptions={buildServerPaginationOptions({
           page,
           pageSize,

@@ -6,8 +6,9 @@ import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gq
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
+import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
-import { MobileListPagination } from "@/frontend/mobile/components/ui/filter";
 import type { TeachersDirectoryLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -69,16 +70,7 @@ function TeacherCard({
   readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }) {
   return (
-    <Box
-      sx={theme => ({
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: 0,
-        p: 2,
-        boxShadow: theme.palette.shadow.card,
-        border: `1px solid ${theme.palette.border.main}`,
-        opacity: row.status === AccountStatus.Deactivated ? 0.75 : 1,
-      })}
-    >
+    <MobileCardListItem variant="edge-to-edge" dimmed={row.status === AccountStatus.Deactivated}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         <Box sx={{ flex: 1 }}>
           <MobilePersonProfileLink
@@ -142,7 +134,7 @@ function TeacherCard({
           </IconButton>
         </Box>
       </Box>
-    </Box>
+    </MobileCardListItem>
   );
 }
 
@@ -164,19 +156,20 @@ export function TeacherCardList({
         placeholder="placeholders.searchTeachers"
       />
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {rows.map(row => (
+      <MobileCardList
+        rows={rows}
+        getKey={row => row.id}
+        paginationOptions={paginationOptions}
+        layout="edge-to-edge"
+        renderItem={row => (
           <TeacherCard
-            key={row.id}
             row={row}
             t={t}
             onNavigateToSchedule={onNavigateToSchedule}
             onNavigateToProfile={onNavigateToProfile}
           />
-        ))}
-      </Box>
-
-      <MobileListPagination paginationOptions={paginationOptions} />
+        )}
+      />
     </Box>
   );
 }

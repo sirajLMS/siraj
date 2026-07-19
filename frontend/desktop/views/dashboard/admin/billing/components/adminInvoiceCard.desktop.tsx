@@ -1,9 +1,10 @@
 "use client";
 
 import { VisibilityOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
+import { Box, Button, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
 import type {
   AdminInvoiceRow,
@@ -16,13 +17,7 @@ import {
   shouldShowViewRejection,
 } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui";
-
-const StyledStudentAvatar = styled(Avatar)(({ theme }) => ({
-  width: 40,
-  height: 40,
-  backgroundColor: theme.palette.secondaryContainer,
-  fontSize: 12,
-}));
+import { DesktopPersonProfileLink } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLink.desktop";
 
 const StyledInvoiceIdLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -67,11 +62,14 @@ export function AdminInvoiceDesktopCard({
     <Box sx={{ py: 2 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <StyledStudentAvatar>{row.studentInitials}</StyledStudentAvatar>
           <Box>
-            <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
-              {row.studentName}
-            </Typography>
+            <DesktopPersonProfileLink
+              href={row.studentId ? studentHref(row.studentId) : undefined}
+              name={row.studentName}
+              avatarSize={40}
+              typographyVariant="titleLg"
+              fontWeight={700}
+            />
             <StyledInvoiceIdLabel variant="labelMd">{invoiceNumber}</StyledInvoiceIdLabel>
           </Box>
         </Box>

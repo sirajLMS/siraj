@@ -89,6 +89,8 @@ const StyledPendingStatusBox = styled(Box)(({ theme }) => ({
 interface ComplaintRecordCardMobileProps {
   readonly record: ParentComplaintRecord;
   readonly labels: ComplaintsParentLabels;
+  /** When true, omit outer Paper chrome (parent provides MobileCardListItem). */
+  readonly bare?: boolean;
 }
 
 function mapStatusForBadge(status: ComplaintStatus): string {
@@ -99,43 +101,51 @@ function mapStatusForBadge(status: ComplaintStatus): string {
   return "pending";
 }
 
-export function ComplaintRecordCardMobile({ record, labels }: Readonly<ComplaintRecordCardMobileProps>) {
+export function ComplaintRecordCardMobile({ record, labels, bare = false }: Readonly<ComplaintRecordCardMobileProps>) {
   const isResolved = record.status === ComplaintStatus.Answered;
   const labelKey = record.status === ComplaintStatus.Answered ? "resolved" : "pending";
 
+  const content = (
+    <>
+      <StyledRecordCardHeader>
+        <Box>
+          <StyledRecordRegardingLabel variant="labelMd">{record.regarding}</StyledRecordRegardingLabel>
+          <StyledRecordSummaryText variant="bodyLg">{record.summary}</StyledRecordSummaryText>
+        </Box>
+        <MobileStatusBadge
+          category="classStatus"
+          status={mapStatusForBadge(record.status)}
+          label={labels.statusLabels[labelKey]}
+        />
+      </StyledRecordCardHeader>
+
+      {isResolved && record.adminResponse ? (
+        <StyledAdminResponseBox>
+          <StyledAdminResponseHeader>
+            <StyledVerifiedIcon />
+            <StyledAdminResponseLabel variant="labelMd">{labels.adminResponse}</StyledAdminResponseLabel>
+            <StyledAdminResponseTime variant="labelMd">{record.adminResponse.answeredAt}</StyledAdminResponseTime>
+          </StyledAdminResponseHeader>
+          <StyledAdminResponseText variant="bodyMd">
+            &ldquo;{record.adminResponse.text}&rdquo;
+          </StyledAdminResponseText>
+        </StyledAdminResponseBox>
+      ) : (
+        <StyledPendingStatusBox>
+          <HourglassEmptyOutlined sx={{ fontSize: 20 }} />
+          <Typography variant="labelMd">{labels.waitingMessage}</Typography>
+        </StyledPendingStatusBox>
+      )}
+    </>
+  );
+
+  if (bare) {
+    return content;
+  }
+
   return (
     <StyledRecordCardPaper elevation={0}>
-      <StyledRecordCardContent>
-        <StyledRecordCardHeader>
-          <Box>
-            <StyledRecordRegardingLabel variant="labelMd">{record.regarding}</StyledRecordRegardingLabel>
-            <StyledRecordSummaryText variant="bodyLg">{record.summary}</StyledRecordSummaryText>
-          </Box>
-          <MobileStatusBadge
-            category="classStatus"
-            status={mapStatusForBadge(record.status)}
-            label={labels.statusLabels[labelKey]}
-          />
-        </StyledRecordCardHeader>
-
-        {isResolved && record.adminResponse ? (
-          <StyledAdminResponseBox>
-            <StyledAdminResponseHeader>
-              <StyledVerifiedIcon />
-              <StyledAdminResponseLabel variant="labelMd">{labels.adminResponse}</StyledAdminResponseLabel>
-              <StyledAdminResponseTime variant="labelMd">{record.adminResponse.answeredAt}</StyledAdminResponseTime>
-            </StyledAdminResponseHeader>
-            <StyledAdminResponseText variant="bodyMd">
-              &ldquo;{record.adminResponse.text}&rdquo;
-            </StyledAdminResponseText>
-          </StyledAdminResponseBox>
-        ) : (
-          <StyledPendingStatusBox>
-            <HourglassEmptyOutlined sx={{ fontSize: 20 }} />
-            <Typography variant="labelMd">{labels.waitingMessage}</Typography>
-          </StyledPendingStatusBox>
-        )}
-      </StyledRecordCardContent>
+      <StyledRecordCardContent>{content}</StyledRecordCardContent>
     </StyledRecordCardPaper>
   );
 }

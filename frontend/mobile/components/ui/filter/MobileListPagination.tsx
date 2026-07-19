@@ -5,8 +5,8 @@ import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter
 
 /**
  * Renders owned mobile list pagination from `ListPaginationOptions`.
- * Client-mode paging for feature lists that do not slice rows themselves
- * should use `MobileCardList` instead.
+ * Always visible when `paginationOptions !== false` (even single page).
+ * Prefer `MobileCardList` for new lists — this helper is for transitional feature lists.
  */
 export function MobileListPagination({
   paginationOptions,
@@ -19,10 +19,7 @@ export function MobileListPagination({
     return null;
   }
 
-  const pageCount = Math.max(1, Math.ceil(paginationOptions.totalCount / paginationOptions.pageSize));
-  if (paginationOptions.totalCount <= 0 || pageCount <= 1) {
-    return null;
-  }
+  const pageCount = Math.max(1, Math.ceil(paginationOptions.totalCount / paginationOptions.pageSize) || 1);
 
   return (
     <MobilePaginationControls

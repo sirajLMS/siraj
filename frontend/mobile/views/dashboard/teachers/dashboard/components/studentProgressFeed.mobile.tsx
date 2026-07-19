@@ -2,9 +2,10 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 import type { StudentProgressFeedProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 import { resolveStudentProgressFeedIcon } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/resolveStudentProgressFeedIcon";
-import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 
 /**
  * Mobile variant of the student progress feed.
@@ -28,12 +29,15 @@ export function StudentProgressFeedMobile({ items, title, labels }: Readonly<Stu
             const EventIcon = resolveStudentProgressFeedIcon(item.eventKind);
             return (
               <Box key={item.id} sx={{ p: 2, display: "flex", alignItems: "flex-start", gap: 2 }}>
-                <MobileUserAvatar label={item.studentName} size={40}>
-                  {item.studentInitials}
-                </MobileUserAvatar>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, alignItems: "flex-start" }}>
-                    <Typography sx={{ typography: "bodyLg", fontWeight: 600 }}>{item.studentName}</Typography>
+                    <MobilePersonProfileLink
+                      href={item.studentId ? studentHref(item.studentId) : undefined}
+                      name={item.studentName}
+                      avatarSize={40}
+                      typographyVariant="bodyLg"
+                      fontWeight={600}
+                    />
                     <Typography
                       sx={{
                         typography: "labelMd",

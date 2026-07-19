@@ -5,7 +5,8 @@ import { Box, Button, Chip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { ParentComplaintRecord } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import { MobileListPagination } from "@/frontend/mobile/components/ui/filter";
+import { MobileCardListItem } from "@/frontend/mobile/components/ui";
+import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
 import { ComplaintRecordCardMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintRecordCard.mobile";
 import type { ComplaintsParentLabels } from "@/shared/locale";
 
@@ -29,12 +30,6 @@ const StyledCardListTitleGroup = styled(Box)(({ theme }) => ({
 
 const StyledTotalCountChip = styled(Chip)(({ theme }) => ({
   backgroundColor: theme.palette.surfaceContainerHigh,
-}));
-
-const StyledCardListContainer = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(2),
 }));
 
 const StyledLoadMoreContainer = styled(Box)(({ theme }) => ({
@@ -68,7 +63,7 @@ export function ComplaintRecordCardListMobile({
   const totalLabel = labels.totalRecords(
     paginationOptions !== false && paginationOptions.mode === "server" ? paginationOptions.totalCount : records.length
   );
-  const showPagination = paginationOptions !== false && paginationOptions.mode === "server";
+  const showLoadMore = paginationOptions === false && hasOlderRecords;
 
   return (
     <Box>
@@ -80,23 +75,25 @@ export function ComplaintRecordCardListMobile({
         <StyledTotalCountChip label={totalLabel} size="small" />
       </StyledCardListHeader>
 
-      <StyledCardListContainer>
-        {records.map(record => (
-          <ComplaintRecordCardMobile key={record.id} record={record} labels={labels} />
-        ))}
-      </StyledCardListContainer>
+      <MobileCardList
+        rows={records}
+        getKey={record => record.id}
+        paginationOptions={paginationOptions}
+        layout="edge-to-edge"
+        renderItem={record => (
+          <MobileCardListItem variant="edge-to-edge">
+            <ComplaintRecordCardMobile record={record} labels={labels} bare />
+          </MobileCardListItem>
+        )}
+      />
 
-      {showPagination ? (
-        <MobileListPagination paginationOptions={paginationOptions} />
-      ) : (
-        hasOlderRecords && (
-          <StyledLoadMoreContainer>
-            <StyledLoadMoreButton onClick={onLoadOlderRecords} endIcon={<ExpandMoreOutlined />}>
-              {labels.loadOlder}
-            </StyledLoadMoreButton>
-          </StyledLoadMoreContainer>
-        )
-      )}
+      {showLoadMore ? (
+        <StyledLoadMoreContainer>
+          <StyledLoadMoreButton onClick={onLoadOlderRecords} endIcon={<ExpandMoreOutlined />}>
+            {labels.loadOlder}
+          </StyledLoadMoreButton>
+        </StyledLoadMoreContainer>
+      ) : null}
     </Box>
   );
 }
