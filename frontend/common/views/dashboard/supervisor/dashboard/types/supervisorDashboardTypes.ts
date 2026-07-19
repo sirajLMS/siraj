@@ -17,8 +17,12 @@ export interface RecentApproval {
   readonly lessonDate: string;
   readonly studentId: string;
   readonly studentName: string;
+  readonly studentAvatarUrl: string | null;
+  readonly studentUserId: string | null;
   readonly teacherId: string;
   readonly teacherName: string;
+  readonly teacherAvatarUrl: string | null;
+  readonly teacherUserId: string | null;
   readonly reviewedAt: string;
 }
 

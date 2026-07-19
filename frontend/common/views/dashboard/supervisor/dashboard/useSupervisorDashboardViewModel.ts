@@ -62,8 +62,12 @@ export function useSupervisorDashboardViewModel(
       lessonDate: r?.lessonDate ? formatDate(r.lessonDate, locale) : "",
       studentId: r?.studentId ?? "",
       studentName: r?.studentName?.trim() || "",
+      studentAvatarUrl: r?.studentAvatarUrl ?? null,
+      studentUserId: r?.studentUserId ?? null,
       teacherId: r?.teacherId ?? "",
       teacherName: r?.teacherName?.trim() || "",
+      teacherAvatarUrl: r?.teacherAvatarUrl ?? null,
+      teacherUserId: r?.teacherUserId ?? null,
       reviewedAt: r?.reviewedAt ? formatDateTime(r.reviewedAt, locale) : "",
     }));
   }, [dashboard?.recentApprovals, locale]);

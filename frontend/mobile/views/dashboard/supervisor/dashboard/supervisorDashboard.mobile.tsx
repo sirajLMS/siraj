@@ -113,12 +113,12 @@ export function SupervisorDashboardMobileView({
                   <MobilePersonProfileLink
                     href={item.studentId ? studentHref(item.studentId) : undefined}
                     name={item.studentName || item.studentId || "—"}
-                    showAvatar={false}
+                    avatarUrl={item.studentAvatarUrl}
                   />
                   <MobilePersonProfileLink
-                    href={profileHrefForTeacher({ teacherId: item.teacherId })}
+                    href={profileHrefForTeacher({ userId: item.teacherUserId, teacherId: item.teacherId })}
                     name={item.teacherName || item.teacherId || "—"}
-                    showAvatar={false}
+                    avatarUrl={item.teacherAvatarUrl}
                   />
                   <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                     {item.lessonDate}

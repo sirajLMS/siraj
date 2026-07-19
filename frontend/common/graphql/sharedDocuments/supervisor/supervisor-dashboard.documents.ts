@@ -18,6 +18,10 @@ export const supervisorDashboardQueryDocument: TypedDocumentNode<Operations.Supe
         studentName
         teacherId
         teacherName
+        studentAvatarUrl
+        teacherAvatarUrl
+        studentUserId
+        teacherUserId
         lessonDate
         durationMinutes
         attendanceEvaluation
