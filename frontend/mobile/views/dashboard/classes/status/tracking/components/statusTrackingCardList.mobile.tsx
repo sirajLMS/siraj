@@ -189,9 +189,7 @@ function StatusTrackingCard({
   return (
     <MobileCardListItem variant="edge-to-edge" interactive>
       <Box sx={{ display: "flex", gap: 2 }}>
-        <StyledStatusAvatar avatarSx={getStatusAvatarSx(sessionStatus)}>
-          {row.studentInitials ?? ""}
-        </StyledStatusAvatar>
+        <StyledStatusAvatar avatarSx={getStatusAvatarSx(sessionStatus)}>{row.studentInitials ?? ""}</StyledStatusAvatar>
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1 }}>

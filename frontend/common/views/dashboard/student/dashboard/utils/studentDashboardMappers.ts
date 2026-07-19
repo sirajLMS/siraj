@@ -46,9 +46,7 @@ export function mapUpcomingLessons(
 }
 
 type RecentReportItem = NonNullable<
-  NonNullable<
-    NonNullable<Operations.StudentRecentLessonReportsQuery["studentRecentLessonReports"]>["rows"]
-  >[number]
+  NonNullable<NonNullable<Operations.StudentRecentLessonReportsQuery["studentRecentLessonReports"]>["rows"]>[number]
 >;
 
 export function mapRecentLessonReport(raw: RecentReportItem): RecentLessonReportRow {

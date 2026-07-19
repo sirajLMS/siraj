@@ -30,68 +30,70 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
       }}
       sx={{ cursor: "pointer" }}
     >
-    <MobileCardListItem variant="edge-to-edge" interactive>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
-        <Box sx={{ display: "flex", gap: 1.5 }}>
-          <Stack>
-            <MobilePersonProfileLink
-              href={profileHrefForParent({ userId: row.userId, parentId: row.id })}
-              name={row.name}
-              avatarUrl={row.avatarUrl}
-              avatarSize={48}
-              typographyVariant="titleLg"
-              fontWeight={600}
-            />
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, pl: 7 })}>
-              {labels.guardianOf(row.guardianOf)}
-            </Typography>
-          </Stack>
-        </Box>
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
-          {row.userId ? <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name} /> : null}
-          <IconButton
-            size="small"
-            onClick={e => {
-              e.stopPropagation();
-              onOpenSettings(row.id);
-            }}
-            sx={theme => ({ color: theme.palette.onSurfaceVariant })}
-          >
-            <SettingsIcon />
-          </IconButton>
-        </Box>
-      </Box>
-
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
-          <MobileStatusBadge
-            category="studentAccount"
-            status={row.lifecycleStatus}
-            label={labels.statusLabels[row.lifecycleStatus]}
-          />
-          <MobileStatusBadge
-            category="staffAccount"
-            status={row.accountStatus}
-            label={labels.accountStatusLabels[row.accountStatus]}
-          />
-          {hasUnpaid ? (
-            <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.error.main })}>
-              <AlertIcon sx={{ fontSize: 16 }} />
-              <Typography variant="labelMd" sx={{ fontWeight: 700 }}>
-                {labels.unpaidCount(row.unpaidInvoices)}
+      <MobileCardListItem variant="edge-to-edge" interactive>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+          <Box sx={{ display: "flex", gap: 1.5 }}>
+            <Stack>
+              <MobilePersonProfileLink
+                href={profileHrefForParent({ userId: row.userId, parentId: row.id })}
+                name={row.name}
+                avatarUrl={row.avatarUrl}
+                avatarSize={48}
+                typographyVariant="titleLg"
+                fontWeight={600}
+              />
+              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, pl: 7 })}>
+                {labels.guardianOf(row.guardianOf)}
               </Typography>
-            </Box>
-          ) : (
-            <Typography
-              variant="labelMd"
-              sx={theme => ({ color: theme.palette.onSurfaceVariant, opacity: 0.6, fontStyle: "italic" })}
+            </Stack>
+          </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+            {row.userId ? (
+              <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name} />
+            ) : null}
+            <IconButton
+              size="small"
+              onClick={e => {
+                e.stopPropagation();
+                onOpenSettings(row.id);
+              }}
+              sx={theme => ({ color: theme.palette.onSurfaceVariant })}
             >
-              {labels.invoicesCleared}
-            </Typography>
-          )}
+              <SettingsIcon />
+            </IconButton>
+          </Box>
         </Box>
-      </Box>
-    </MobileCardListItem>
+
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
+            <MobileStatusBadge
+              category="studentAccount"
+              status={row.lifecycleStatus}
+              label={labels.statusLabels[row.lifecycleStatus]}
+            />
+            <MobileStatusBadge
+              category="staffAccount"
+              status={row.accountStatus}
+              label={labels.accountStatusLabels[row.accountStatus]}
+            />
+            {hasUnpaid ? (
+              <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.error.main })}>
+                <AlertIcon sx={{ fontSize: 16 }} />
+                <Typography variant="labelMd" sx={{ fontWeight: 700 }}>
+                  {labels.unpaidCount(row.unpaidInvoices)}
+                </Typography>
+              </Box>
+            ) : (
+              <Typography
+                variant="labelMd"
+                sx={theme => ({ color: theme.palette.onSurfaceVariant, opacity: 0.6, fontStyle: "italic" })}
+              >
+                {labels.invoicesCleared}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      </MobileCardListItem>
     </Box>
   );
 }

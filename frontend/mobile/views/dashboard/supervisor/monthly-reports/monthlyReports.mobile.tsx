@@ -3,8 +3,8 @@
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useMemo } from "react";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileContentStack,
   MobileFilterButton,
@@ -14,10 +14,7 @@ import {
   MobilePrimaryPageAction,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
-import {
-  StudentAutocompleteMobile,
-  TeacherAutocompleteMobile,
-} from "@/frontend/mobile/components/ui/input/userSelect";
+import { StudentAutocompleteMobile, TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 

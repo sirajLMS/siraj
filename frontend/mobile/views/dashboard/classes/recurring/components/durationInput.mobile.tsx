@@ -40,9 +40,7 @@ export function DurationInputMobile({ register, errors, isSubmitting, labels }: 
         />
       </Box>
       {hasError && (
-        <FormHelperText error>
-          {errors.durationHours?.message ?? errors.durationMinutes?.message}
-        </FormHelperText>
+        <FormHelperText error>{errors.durationHours?.message ?? errors.durationMinutes?.message}</FormHelperText>
       )}
     </Box>
   );

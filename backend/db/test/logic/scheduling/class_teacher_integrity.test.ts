@@ -145,7 +145,10 @@ describe("Class Teacher Assignment Integrity", () => {
         assignedAt: now,
       });
 
-      const classInst = await SchedulingRepository.createClassInstance(await getClassParams(tx, student.id, teacher1.id), tx);
+      const classInst = await SchedulingRepository.createClassInstance(
+        await getClassParams(tx, student.id, teacher1.id),
+        tx
+      );
 
       let errorCaught: unknown = null;
       try {

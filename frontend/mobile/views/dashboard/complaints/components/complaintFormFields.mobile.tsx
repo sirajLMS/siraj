@@ -16,11 +16,11 @@ import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { ComplaintCategory } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ComplaintFormData } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
-import type { ComplaintsParentLabels } from "@/shared/locale";
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
+import type { ComplaintsParentLabels } from "@/shared/locale";
 
 const StyledFormContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -175,11 +175,7 @@ function ComplaintDetailsField({
   );
 }
 
-export function ComplaintFormFieldsMobile({
-  control,
-  errors,
-  labels,
-}: Readonly<ComplaintFormFieldsMobileProps>) {
+export function ComplaintFormFieldsMobile({ control, errors, labels }: Readonly<ComplaintFormFieldsMobileProps>) {
   return (
     <StyledFormContainer>
       <FormHeader title={labels.formTitle} />

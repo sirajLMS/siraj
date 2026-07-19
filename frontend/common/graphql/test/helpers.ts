@@ -10,6 +10,11 @@ import {
   demoLoginMutationDocument,
   loginMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
+import { createClassCategoryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-category.documents";
+import {
+  classSubjectsQueryDocument,
+  createClassSubjectMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
 import { createRecurringClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-class.documents";
 import { teacherWeeklyScheduleGridQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/weekly-schedule.documents";
 import {
@@ -19,11 +24,6 @@ import {
   createTestEntitiesMutationDocument,
   createTestSuperAdminMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/shared/test-helper.documents";
-import {
-  classSubjectsQueryDocument,
-  createClassSubjectMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
-import { createClassCategoryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-category.documents";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/manager-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { testClient } from "@/frontend/common/graphql/test/testClient";

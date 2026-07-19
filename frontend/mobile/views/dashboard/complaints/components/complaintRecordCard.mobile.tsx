@@ -126,9 +126,7 @@ export function ComplaintRecordCardMobile({ record, labels, bare = false }: Read
             <StyledAdminResponseLabel variant="labelMd">{labels.adminResponse}</StyledAdminResponseLabel>
             <StyledAdminResponseTime variant="labelMd">{record.adminResponse.answeredAt}</StyledAdminResponseTime>
           </StyledAdminResponseHeader>
-          <StyledAdminResponseText variant="bodyMd">
-            &ldquo;{record.adminResponse.text}&rdquo;
-          </StyledAdminResponseText>
+          <StyledAdminResponseText variant="bodyMd">&ldquo;{record.adminResponse.text}&rdquo;</StyledAdminResponseText>
         </StyledAdminResponseBox>
       ) : (
         <StyledPendingStatusBox>

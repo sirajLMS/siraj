@@ -9,10 +9,7 @@ import {
   teacherDashboardQueryDocument,
   teacherFutureScheduleQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import {
-  authenticatedRequest, loginAndProvision,
-  ensureTestSubjectId,
-} from "@/frontend/common/graphql/test/helpers";
+import { authenticatedRequest, ensureTestSubjectId, loginAndProvision } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 

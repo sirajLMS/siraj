@@ -70,12 +70,7 @@ function MeetingConfigSelectStory({
 
   return (
     <Box sx={{ width: "100%", maxWidth: 375, p: 2 }}>
-      <MeetingConfigSelectMobile
-        options={mockOptions}
-        value={value}
-        onChangeAction={setValue}
-        {...props}
-      />
+      <MeetingConfigSelectMobile options={mockOptions} value={value} onChangeAction={setValue} {...props} />
     </Box>
   );
 }

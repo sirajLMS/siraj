@@ -4,23 +4,23 @@ import { ExpandMoreOutlined } from "@mui/icons-material";
 import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
-import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
 import { SubjectSelectField } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
+import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import {
   CLASS_TYPE_OPTIONS,
   type RecurringClassFormFieldsProps,
 } from "@/frontend/common/views/dashboard/classes/recurring/types";
-import { DaysScheduleSectionDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/daysScheduleSection.desktop";
-import { DurationInputDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/durationInput.desktop";
-import { TimeInputDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/timeInput.desktop";
 import {
   StudentAutocompleteDesktop,
   TeacherAutocompleteDesktop,
 } from "@/frontend/desktop/components/ui/input/userSelect";
+import { DaysScheduleSectionDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/daysScheduleSection.desktop";
+import { DurationInputDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/durationInput.desktop";
+import { TimeInputDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/timeInput.desktop";
 
 function OptionSelectDesktop({
   labelId,

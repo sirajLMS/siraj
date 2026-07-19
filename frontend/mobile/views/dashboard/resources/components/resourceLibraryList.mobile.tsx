@@ -1,7 +1,7 @@
 "use client";
 
-import type { ResourceLibraryListProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
 import { Box, Typography } from "@mui/material";
+import type { ResourceLibraryListProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
 import { MobileCardList } from "@/frontend/mobile/components/ui";
 import { ResourceLibraryCardMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceLibraryCard.mobile";
 import { ResourceLibraryHeaderMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceLibraryHeader.mobile";

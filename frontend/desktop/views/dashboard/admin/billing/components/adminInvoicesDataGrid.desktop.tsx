@@ -5,6 +5,7 @@ import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { type ReactNode, useMemo } from "react";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import type {
@@ -18,12 +19,7 @@ import {
   isPayableUnpaidStatus,
   shouldShowViewRejection,
 } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
-import {
-  DesktopAppDataGrid,
-  DesktopPersonProfileLinkCell,
-  DesktopStatusBadge,
-} from "@/frontend/desktop/components/ui";
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 
 export interface AdminInvoicesDataGridLabels {
   readonly invoiceId: string;

@@ -15,16 +15,16 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect/userSelect.utils";
+import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/common/utils/student-status-transitions";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { ManagementControlsCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
-import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { outlinedInputSx } from "@/frontend/desktop/components/ui/form/field/formFieldStyles.desktop";
+import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { useAppTranslation } from "@/shared/locale";
 
 function TeacherSelection({
@@ -36,8 +36,7 @@ function TeacherSelection({
 }>) {
   const t = useAppTranslation().dashboardTranslations.teacherReassignment.controls;
   const [selectedTeacher, setSelectedTeacher] = useState<PersonOption | null>(null);
-  const value =
-    selectedTeacher ?? resolvePersonOption(selectedTeacherId, [], selectedTeacher);
+  const value = selectedTeacher ?? resolvePersonOption(selectedTeacherId, [], selectedTeacher);
 
   return (
     <Box>
@@ -222,10 +221,7 @@ export function ManagementControlsCardDesktop({
       </Box>
 
       <Stack component="form" spacing={4} onSubmit={onSubmitForm}>
-        <TeacherSelection
-          selectedTeacherId={selectedTeacherId}
-          onTeacherChange={onSelectedTeacherIdChange}
-        />
+        <TeacherSelection selectedTeacherId={selectedTeacherId} onTeacherChange={onSelectedTeacherIdChange} />
         <StatusUpdate
           currentStatus={currentStatus}
           selectedStatus={selectedNewStatus}

@@ -48,7 +48,9 @@ const meta: Meta<typeof MobileCardList<SampleRow>> = {
     renderItem: (row: SampleRow) => (
       <MobileCardListItem variant="edge-to-edge">
         <Typography sx={{ typography: "titleLg", fontWeight: 600 }}>{row.title}</Typography>
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>{row.subtitle}</Typography>
+        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+          {row.subtitle}
+        </Typography>
       </MobileCardListItem>
     ),
     layout: "edge-to-edge",
@@ -94,7 +96,9 @@ export const RoundedLayout: Story = {
     renderItem: (row: SampleRow) => (
       <MobileCardListItem variant="rounded">
         <Typography sx={{ typography: "titleLg", fontWeight: 600 }}>{row.title}</Typography>
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>{row.subtitle}</Typography>
+        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+          {row.subtitle}
+        </Typography>
       </MobileCardListItem>
     ),
   },

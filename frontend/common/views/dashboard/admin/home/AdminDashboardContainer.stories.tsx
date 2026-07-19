@@ -2,13 +2,13 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useMemo, useState } from "react";
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
-import { AdminDashboardDesktopView } from "@/frontend/desktop/views/dashboard/admin/home/adminDashboard.desktop";
 import { useAdminDashboardLabels } from "@/frontend/common/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import {
   matchesDailyScheduleMetricFilter,
   resolveDailyScheduleMetricFilter,
 } from "@/frontend/common/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
+import { AdminDashboardDesktopView } from "@/frontend/desktop/views/dashboard/admin/home/adminDashboard.desktop";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 import { useAppTranslation } from "@/shared/locale";
 import { MOCK_SCHEDULE, MOCK_TEACHERS } from "@/test/ui/components/fixtures/adminDashboardFixtures";

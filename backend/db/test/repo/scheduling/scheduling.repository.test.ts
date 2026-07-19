@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import {
   classInstances,
@@ -19,7 +20,6 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { testRepoError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 interface ClassStatusEventState {
@@ -266,13 +266,21 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         actualStartAt: now,
         actualEndAt: new Date(now.getTime() + 3600000),
       });
-      await SchedulingRepository.rescheduleClassInstance(instance.id, await getReschedulePayload(tx, student.id, teacher.id), tx);
+      await SchedulingRepository.rescheduleClassInstance(
+        instance.id,
+        await getReschedulePayload(tx, student.id, teacher.id),
+        tx
+      );
     });
 
     testRepoError("throws if already rescheduled", async tx => {
       const { student, teacher } = await setupTestEntities(tx, "Resched4");
       const instance = await createMockClassInstance(tx, student.id, teacher.id, { isRescheduled: true });
-      await SchedulingRepository.rescheduleClassInstance(instance.id, await getReschedulePayload(tx, student.id, teacher.id), tx);
+      await SchedulingRepository.rescheduleClassInstance(
+        instance.id,
+        await getReschedulePayload(tx, student.id, teacher.id),
+        tx
+      );
     });
 
     test("creates new instance, marks old as rescheduled, and refunds quota", async () => {

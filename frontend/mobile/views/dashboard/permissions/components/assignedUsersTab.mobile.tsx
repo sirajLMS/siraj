@@ -195,9 +195,7 @@ export function AssignedUsersTabMobile({
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
                   <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
                     {t.assignedDate}:{" "}
-                    {group.createdAt
-                      ? new Date(group.createdAt).toLocaleDateString()
-                      : new Date().toLocaleDateString()}
+                    {group.createdAt ? new Date(group.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>

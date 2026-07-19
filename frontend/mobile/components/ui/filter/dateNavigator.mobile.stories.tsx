@@ -3,9 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter/dateNavigator.mobile";
 
-function DateNavigatorMobileStory({
-  initialValue = "2024-01-15",
-}: Readonly<{ initialValue?: string }>) {
+function DateNavigatorMobileStory({ initialValue = "2024-01-15" }: Readonly<{ initialValue?: string }>) {
   const [date, setDate] = useState(initialValue);
 
   return (

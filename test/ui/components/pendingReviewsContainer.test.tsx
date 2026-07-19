@@ -14,10 +14,16 @@ mock.module("@/shared/i18n/routing", () => ({
 }));
 
 mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}), replace: mock(() => {}), prefetch: mock(() => {}) }),
+  useRouter: () => ({
+    push: mock(() => {}),
+    back: mock(() => {}),
+    forward: mock(() => {}),
+    refresh: mock(() => {}),
+    replace: mock(() => {}),
+    prefetch: mock(() => {}),
+  }),
   usePathname: () => "/dashboard",
 }));
-
 
 import { afterEach, describe, expect, mock, test } from "bun:test";
 

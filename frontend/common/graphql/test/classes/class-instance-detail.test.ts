@@ -5,9 +5,9 @@ import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common
 import {
   assertOperationDenied,
   authenticatedRequest,
+  ensureTestSubjectId,
   loginAndProvision,
   loginUser,
-  ensureTestSubjectId,
 } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 

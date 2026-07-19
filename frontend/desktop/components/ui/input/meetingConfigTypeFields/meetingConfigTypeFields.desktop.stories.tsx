@@ -2,8 +2,8 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import {
-  MeetingConfigTypeFieldsDesktop,
   type MeetingConfigDetailsFormValue,
+  MeetingConfigTypeFieldsDesktop,
   type MeetingConfigTypeFieldsProps,
   type MeetingProviderFieldsFragment,
 } from "@/frontend/desktop/components/ui/input/meetingConfigTypeFields/meetingConfigTypeFields.desktop";
@@ -58,18 +58,11 @@ function MeetingConfigTypeFieldsStory({
     provider?: MeetingProviderFieldsFragment;
   }
 >) {
-  const [value, setValue] = useState<MeetingConfigDetailsFormValue>(
-    initialValue ?? { meetingUrl: "" }
-  );
+  const [value, setValue] = useState<MeetingConfigDetailsFormValue>(initialValue ?? { meetingUrl: "" });
 
   return (
     <Box sx={{ width: 480, p: 2 }}>
-      <MeetingConfigTypeFieldsDesktop
-        provider={provider}
-        value={value}
-        onChangeAction={setValue}
-        {...props}
-      />
+      <MeetingConfigTypeFieldsDesktop provider={provider} value={value} onChangeAction={setValue} {...props} />
     </Box>
   );
 }

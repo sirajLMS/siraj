@@ -3,16 +3,16 @@
 import { Box } from "@mui/material";
 import type { Control } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 import type { ManualInvoiceFormData } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
 import type { ManualInvoiceFormFieldsMobileProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceFormFields.types";
+import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { ManualInvoiceDateFieldMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceDateField.mobile";
 import { ManualInvoiceFeeFieldMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceFeeField.mobile";
 import { MobileFieldCard } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceFormLayout.mobile";
 import { ManualInvoiceParentFieldMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceParentField.mobile";
-import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import type { BillingManualLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -90,9 +90,7 @@ export function ManualInvoiceFormFieldsMobile({
   const watchedParentId = useWatch({ control, name: "parentId" });
   const parentIdForStudents = watchedParentId || selectedParentId;
 
-  const parentField = (
-    <ManualInvoiceParentFieldMobile control={control} errors={errors} labels={labels} />
-  );
+  const parentField = <ManualInvoiceParentFieldMobile control={control} errors={errors} labels={labels} />;
   const studentField = (
     <StudentSelectorField control={control} selectedParentId={parentIdForStudents} labels={labels} />
   );

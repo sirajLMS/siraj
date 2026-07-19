@@ -1,16 +1,15 @@
 "use client";
 
 import { DownloadOutlined, FolderOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Chip,
-  CircularProgress,
-  IconButton,
-  Typography,
-} from "@mui/material";
+import { Box, Chip, CircularProgress, IconButton, Typography } from "@mui/material";
 import type { SubjectResourceItem } from "@/frontend/common/views/dashboard/subjects/detail/types";
 import type { SubjectDetailViewModel } from "@/frontend/common/views/dashboard/subjects/detail/useSubjectDetailViewModel";
-import { MobileCardList, MobileCardListItem, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileCardListItem,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 
 function ResourceItemMobile({

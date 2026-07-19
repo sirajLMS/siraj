@@ -6,8 +6,8 @@ import { useMemo } from "react";
 import { AppDataGridLoadingOverlay } from "@/frontend/common/components/ui/dataGrid/AppDataGridLoadingOverlay";
 import { AppDataGridNoRowsOverlay } from "@/frontend/common/components/ui/dataGrid/AppDataGridNoRowsOverlay";
 import { mapPaginationOptionsToDataGridProps } from "@/frontend/common/components/ui/dataGrid/mapPaginationOptionsToDataGridProps";
-import { GridPagination } from "@/frontend/common/components/ui/filter/PaginationControls";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { GridPagination } from "@/frontend/common/components/ui/filter/PaginationControls";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 type OmittedDataGridProps =

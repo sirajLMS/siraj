@@ -3,7 +3,12 @@
 import { Stack, Typography } from "@mui/material";
 import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profileHref";
 import type { BaseAssociatedStudentsListProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentScheduleComponents.types";
-import { MobileCardList, MobileCardListItem, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileCardListItem,
+  MobilePersonProfileLink,
+  MobileStatusBadge,
+} from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 
 function formatStatusLabel(status: string): string {

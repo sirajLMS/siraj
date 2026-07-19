@@ -1,8 +1,8 @@
 "use client";
 
 import { Grid, Skeleton } from "@mui/material";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { BillingMetricsRowProps } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 
 export type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";

@@ -100,9 +100,9 @@ function InvoicesSection({
 
   if (invoices.length === 0 && !invoicesLoading) {
     return (
-    <MobileSectionPanel title={labels.sections.recentInvoices} contentInset={false}>
-      <MobileEmptyState title={labels.parentTable.emptyTitle} subtitle={labels.adminTable.noEntries} />
-    </MobileSectionPanel>
+      <MobileSectionPanel title={labels.sections.recentInvoices} contentInset={false}>
+        <MobileEmptyState title={labels.parentTable.emptyTitle} subtitle={labels.adminTable.noEntries} />
+      </MobileSectionPanel>
     );
   }
 

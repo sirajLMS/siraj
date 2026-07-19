@@ -135,14 +135,7 @@ function AvatarEditorBody({
               })}
             >
               {previewUrl ? (
-                <Image
-                  src={previewUrl}
-                  alt={label}
-                  fill
-                  priority
-                  unoptimized
-                  style={{ objectFit: "cover" }}
-                />
+                <Image src={previewUrl} alt={label} fill priority unoptimized style={{ objectFit: "cover" }} />
               ) : (
                 <CloudUploadOutlined sx={theme => ({ fontSize: 40, color: theme.palette.text.secondary })} />
               )}

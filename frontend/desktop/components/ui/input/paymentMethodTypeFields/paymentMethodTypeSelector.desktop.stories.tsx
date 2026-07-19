@@ -19,13 +19,7 @@ function PaymentMethodTypeSelectorStory({
 
   return (
     <Box sx={{ width: 640, p: 2 }}>
-      <PaymentMethodTypeSelectorDesktop
-        type={type}
-        setTypeAction={setType}
-        error={initialError}
-        fullWidth
-        {...props}
-      />
+      <PaymentMethodTypeSelectorDesktop type={type} setTypeAction={setType} error={initialError} fullWidth {...props} />
     </Box>
   );
 }

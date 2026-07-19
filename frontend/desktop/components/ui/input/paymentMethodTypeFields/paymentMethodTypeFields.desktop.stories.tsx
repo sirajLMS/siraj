@@ -93,9 +93,7 @@ function PaymentMethodTypeFieldsStory({
 >) {
   const { control } = useForm<StoryFormValues>({ defaultValues });
   const [selectedWallet, setSelectedWallet] = useState<PaymentMethodCatalogOption | null>(initialWallet);
-  const [selectedPaymentLink, setSelectedPaymentLink] = useState<PaymentMethodCatalogOption | null>(
-    initialPaymentLink,
-  );
+  const [selectedPaymentLink, setSelectedPaymentLink] = useState<PaymentMethodCatalogOption | null>(initialPaymentLink);
 
   return (
     <Box sx={{ width: 480, p: 2 }}>

@@ -39,76 +39,78 @@ export function OverridesDataGridMobile({
 
   return (
     <Box sx={{ p: 2 }}>
-    <MobileCardList
-      rows={filteredPermissions}
-      emptyMessage={t.noPermissionsFound}
-      getKey={permission => permission.id ?? permission.key ?? ""}
-      paginationOptions={{ mode: "client" }}
-      layout="edge-to-edge"
-      renderItem={permission => {
-        const baselineGroups = userGroups.filter(
-          g =>
-            (permission.id && g.permissionIds?.includes(permission.id)) ||
-            (permission.key && g.permissionIds?.includes(permission.key))
-        );
-        const isAllowedByGroup = baselineGroups.length > 0;
-        const baselineText = isAllowedByGroup
-          ? t.allowedViaGroups(baselineGroups.map(g => g.name).join(", "))
-          : t.notSet;
-        const overrideState: OverrideState = (permission.id && localOverrides[permission.id]) || "INHERIT";
+      <MobileCardList
+        rows={filteredPermissions}
+        emptyMessage={t.noPermissionsFound}
+        getKey={permission => permission.id ?? permission.key ?? ""}
+        paginationOptions={{ mode: "client" }}
+        layout="edge-to-edge"
+        renderItem={permission => {
+          const baselineGroups = userGroups.filter(
+            g =>
+              (permission.id && g.permissionIds?.includes(permission.id)) ||
+              (permission.key && g.permissionIds?.includes(permission.key))
+          );
+          const isAllowedByGroup = baselineGroups.length > 0;
+          const baselineText = isAllowedByGroup
+            ? t.allowedViaGroups(baselineGroups.map(g => g.name).join(", "))
+            : t.notSet;
+          const overrideState: OverrideState = (permission.id && localOverrides[permission.id]) || "INHERIT";
 
-        let effectiveState: "allowed" | "denied" | "not_set";
-        if (overrideState === "GRANTED") {
-          effectiveState = "allowed";
-        } else if (overrideState === "DENIED") {
-          effectiveState = "denied";
-        } else if (isAllowedByGroup) {
-          effectiveState = "allowed";
-        } else {
-          effectiveState = "not_set";
-        }
+          let effectiveState: "allowed" | "denied" | "not_set";
+          if (overrideState === "GRANTED") {
+            effectiveState = "allowed";
+          } else if (overrideState === "DENIED") {
+            effectiveState = "denied";
+          } else if (isAllowedByGroup) {
+            effectiveState = "allowed";
+          } else {
+            effectiveState = "not_set";
+          }
 
-        return (
-          <MobileCardListItem variant="edge-to-edge">
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Box>
-                <StyledPermissionKeyText variant="bodyMd">{permission.key}</StyledPermissionKeyText>
-                {permission.description && (
-                  <StyledPermissionDescription variant="caption">{permission.description}</StyledPermissionDescription>
-                )}
+          return (
+            <MobileCardListItem variant="edge-to-edge">
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box>
+                  <StyledPermissionKeyText variant="bodyMd">{permission.key}</StyledPermissionKeyText>
+                  {permission.description && (
+                    <StyledPermissionDescription variant="caption">
+                      {permission.description}
+                    </StyledPermissionDescription>
+                  )}
+                </Box>
+
+                <Box>
+                  <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary, mb: 0.5 })}>
+                    {t.columnGroupBaseline}
+                  </Typography>
+                  <StyledBaselineText variant="bodyMd" isAllowed={isAllowedByGroup}>
+                    {baselineText}
+                  </StyledBaselineText>
+                </Box>
+
+                <Box>
+                  <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary, mb: 0.5 })}>
+                    {t.columnOverrideControl}
+                  </Typography>
+                  {permission.id ? (
+                    mode === "effective" ? (
+                      <OverrideEffectiveDisplayMobile effectiveState={effectiveState} overrideState={overrideState} />
+                    ) : (
+                      <OverrideEditControlsMobile
+                        permissionId={permission.id}
+                        overrideState={overrideState}
+                        isDialogLoading={isDialogLoading}
+                        handleOverrideChange={handleOverrideChange}
+                      />
+                    )
+                  ) : null}
+                </Box>
               </Box>
-
-              <Box>
-                <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary, mb: 0.5 })}>
-                  {t.columnGroupBaseline}
-                </Typography>
-                <StyledBaselineText variant="bodyMd" isAllowed={isAllowedByGroup}>
-                  {baselineText}
-                </StyledBaselineText>
-              </Box>
-
-              <Box>
-                <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary, mb: 0.5 })}>
-                  {t.columnOverrideControl}
-                </Typography>
-                {permission.id ? (
-                  mode === "effective" ? (
-                    <OverrideEffectiveDisplayMobile effectiveState={effectiveState} overrideState={overrideState} />
-                  ) : (
-                    <OverrideEditControlsMobile
-                      permissionId={permission.id}
-                      overrideState={overrideState}
-                      isDialogLoading={isDialogLoading}
-                      handleOverrideChange={handleOverrideChange}
-                    />
-                  )
-                ) : null}
-              </Box>
-            </Box>
-          </MobileCardListItem>
-        );
-      }}
-    />
+            </MobileCardListItem>
+          );
+        }}
+      />
     </Box>
   );
 }

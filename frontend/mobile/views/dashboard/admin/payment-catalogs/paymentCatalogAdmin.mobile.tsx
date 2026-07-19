@@ -3,7 +3,12 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Tab, Tabs } from "@mui/material";
 import type { PaymentCatalogAdminViewModel } from "@/frontend/common/views/dashboard/admin/payment-catalogs/usePaymentCatalogAdminViewModel";
-import { MobileCardList, MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileContentStack,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 import { PaymentCatalogCardMobile } from "@/frontend/mobile/views/dashboard/admin/payment-catalogs/components/paymentCatalogCard.mobile";
 import { useAppTranslation } from "@/shared/locale";
 

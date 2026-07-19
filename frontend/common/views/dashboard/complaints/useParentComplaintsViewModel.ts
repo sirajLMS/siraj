@@ -8,9 +8,7 @@ import {
   type ComplaintFormData,
   complaintFormSchema,
 } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
-import type {
-  ParentComplaintRecord,
-} from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
+import type { ParentComplaintRecord } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsParentLabels } from "@/shared/locale/types/dashboard/complaints";
 
 export interface ParentComplaintsViewModel {

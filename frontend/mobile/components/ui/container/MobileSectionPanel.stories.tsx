@@ -34,8 +34,8 @@ const meta: Meta<typeof MobileSectionPanel> = {
     subTitle: "Personal details and academic records.",
     children: (
       <Typography variant="bodyMd">
-        Content of the section panel goes here. It is wrapped in a mobile-tuned Paper shell with optional
-        edge-to-edge layout.
+        Content of the section panel goes here. It is wrapped in a mobile-tuned Paper shell with optional edge-to-edge
+        layout.
       </Typography>
     ),
   },

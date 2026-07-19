@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
-import { setupTestEntities, ensureTestSubjectId } from "@/backend/db/test/entity-setup";
+import { ensureTestSubjectId, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";

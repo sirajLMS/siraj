@@ -22,9 +22,9 @@ import {
 } from "@/frontend/mobile/components/ui";
 import { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter";
 import { ActivationPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/activationPolicyPanel.mobile";
+import { ManualClassEntryStudentSelectMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/manualClassEntryStudentSelect.mobile";
 import { MissedClassAlertBannerMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.mobile";
 import { StudentProgressFeedMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/studentProgressFeed.mobile";
-import { ManualClassEntryStudentSelectMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/manualClassEntryStudentSelect.mobile";
 import { TeacherScheduleCardMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherScheduleCard.mobile";
 
 interface MobileWelcomeHeaderProps {
@@ -120,7 +120,12 @@ function MobileScheduleSection({
         />
       </Box>
 
-      <MobileSectionPanel title={labels.schedule.titleToday} edgeToEdge contentInset={false} actions={schedulePanelActions}>
+      <MobileSectionPanel
+        title={labels.schedule.titleToday}
+        edgeToEdge
+        contentInset={false}
+        actions={schedulePanelActions}
+      >
         <MobileCardList<TeacherScheduleRow>
           rows={scheduleRows}
           loading={loading}
@@ -268,9 +273,7 @@ export function TeacherDashboardMobileView({
         onClose={onManualEntryClose}
         onSubmit={onManualEntrySubmit}
         defaultActive={manualEntryDefaultActive}
-        studentSelect={
-          <ManualClassEntryStudentSelectMobile teacherId={teacherId} open={manualEntryOpen} />
-        }
+        studentSelect={<ManualClassEntryStudentSelectMobile teacherId={teacherId} open={manualEntryOpen} />}
       />
     </>
   );

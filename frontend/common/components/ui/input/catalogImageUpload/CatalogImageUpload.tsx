@@ -275,7 +275,15 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
           previewAlt={t.previewAlt}
           previewShape={previewShape}
         />
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 0, width: previewShape === "circle" ? "100%" : "auto" }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            minWidth: 0,
+            width: previewShape === "circle" ? "100%" : "auto",
+          }}
+        >
           <UploadButtons
             onUploadClick={triggerFileInput}
             onRemoveClick={upload.handleRemove}

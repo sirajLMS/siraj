@@ -6,7 +6,12 @@ import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { SupportedCurrenciesViewModel } from "@/frontend/common/views/dashboard/admin/billing/currencies/SupportedCurrenciesView";
-import { MobileCardList, MobileCardListItem, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileCardListItem,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 
 function SupportedCurrencyCard({
   row,
@@ -14,30 +19,30 @@ function SupportedCurrencyCard({
 }: Readonly<{ readonly row: CurrencyOption & { readonly id: string }; readonly locale: string }>) {
   return (
     <MobileCardListItem variant="edge-to-edge">
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 2,
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Box component="span" sx={{ fontSize: 24 }} aria-hidden>
-          {row.flagEmoji}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box component="span" sx={{ fontSize: 24 }} aria-hidden>
+            {row.flagEmoji}
+          </Box>
+          <Box>
+            <Box sx={{ fontWeight: 700 }}>{row.code}</Box>
+            <Box sx={theme => ({ color: theme.palette.text.secondary })}>{row.symbol}</Box>
+          </Box>
         </Box>
-        <Box>
-          <Box sx={{ fontWeight: 700 }}>{row.code}</Box>
-          <Box sx={theme => ({ color: theme.palette.text.secondary })}>{row.symbol}</Box>
+        <Box sx={{ textAlign: "right" }}>
+          <Box>{getCurrencyDisplayName(row.code, locale)}</Box>
+          <Box sx={theme => ({ color: theme.palette.text.secondary })}>
+            {getCountryDisplayName(row.countryCode, locale)}
+          </Box>
         </Box>
       </Box>
-      <Box sx={{ textAlign: "right" }}>
-        <Box>{getCurrencyDisplayName(row.code, locale)}</Box>
-        <Box sx={theme => ({ color: theme.palette.text.secondary })}>
-          {getCountryDisplayName(row.countryCode, locale)}
-        </Box>
-      </Box>
-    </Box>
     </MobileCardListItem>
   );
 }

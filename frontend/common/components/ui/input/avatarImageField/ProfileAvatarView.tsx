@@ -16,11 +16,7 @@ export type ProfileAvatarViewProps = {
  * Read-only avatar panel matching the mobile edit avatar card
  * (frosted surface, centered title, conic ring).
  */
-export function ProfileAvatarView({
-  imageUrl,
-  label,
-  title,
-}: Readonly<ProfileAvatarViewProps>): React.ReactNode {
+export function ProfileAvatarView({ imageUrl, label, title }: Readonly<ProfileAvatarViewProps>): React.ReactNode {
   const heading = title ?? label;
 
   return (
@@ -71,14 +67,7 @@ export function ProfileAvatarView({
             })}
           >
             {imageUrl ? (
-              <Image
-                src={imageUrl}
-                alt={label}
-                fill
-                priority
-                unoptimized
-                style={{ objectFit: "cover" }}
-              />
+              <Image src={imageUrl} alt={label} fill priority unoptimized style={{ objectFit: "cover" }} />
             ) : (
               <PersonOutlined sx={theme => ({ fontSize: 40, color: theme.palette.text.secondary })} />
             )}

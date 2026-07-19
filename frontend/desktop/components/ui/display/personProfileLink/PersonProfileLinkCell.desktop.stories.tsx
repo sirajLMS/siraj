@@ -16,7 +16,7 @@ const meta: Meta<typeof DesktopPersonProfileLinkCell> = {
     typographyVariant: "bodyMd",
   },
   decorators: [
-    (Story) => (
+    Story => (
       <Stack sx={{ width: 240, maxWidth: "100%", p: 1 }}>
         <Story />
       </Stack>

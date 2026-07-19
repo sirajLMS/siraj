@@ -115,7 +115,11 @@ export function TeacherProfileEditForm({
           {isSaving ? t.shell.loading : t.actions.save}
         </PrimaryPageAction>
       </Stack>
-      <FormSuccessSnackbar open={successOpen} message={base.actions.saveSuccess} onClose={() => setSuccessOpen(false)} />
+      <FormSuccessSnackbar
+        open={successOpen}
+        message={base.actions.saveSuccess}
+        onClose={() => setSuccessOpen(false)}
+      />
       <FormErrorSnackbar open={errorOpen} message={base.actions.saveError} onClose={() => setErrorOpen(false)} />
     </Box>
   );

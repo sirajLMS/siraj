@@ -41,11 +41,7 @@ export const CustomIcon: Story = {
   args: {
     title: "System Settings",
     icon: SettingsOutlined,
-    children: (
-      <Typography variant="bodyMd">
-        Configure platform-wide defaults and operational preferences.
-      </Typography>
-    ),
+    children: <Typography variant="bodyMd">Configure platform-wide defaults and operational preferences.</Typography>,
   },
 };
 
@@ -54,9 +50,7 @@ export const Arabic: Story = {
   args: {
     title: "لوحة التحكم الإدارية",
     children: (
-      <Typography variant="bodyMd">
-        إدارة الإعدادات المؤسسية والصلاحيات وضوابط دورة الحياة من هذه اللوحة.
-      </Typography>
+      <Typography variant="bodyMd">إدارة الإعدادات المؤسسية والصلاحيات وضوابط دورة الحياة من هذه اللوحة.</Typography>
     ),
   },
 };

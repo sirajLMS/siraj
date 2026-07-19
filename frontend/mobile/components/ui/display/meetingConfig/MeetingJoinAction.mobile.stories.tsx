@@ -70,11 +70,7 @@ export const ButtonVariant: Story = {
 export const IconVariant: Story = {
   render: () => (
     <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
-      <MobileMeetingJoinAction
-        joinUrl="https://meet.example.com/abc-123"
-        meeting={mockMeeting}
-        variant="icon"
-      />
+      <MobileMeetingJoinAction joinUrl="https://meet.example.com/abc-123" meeting={mockMeeting} variant="icon" />
     </Box>
   ),
 };

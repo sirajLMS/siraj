@@ -36,8 +36,8 @@ import type {
   CreateRecurringClassDialogViewModel,
   DayOfWeek,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
-import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { TimezoneSelectMobile } from "@/frontend/mobile/components/ui/input/timezoneSelect";
+import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import type {
   MeetingConfigManagerLabels,
   MeetingConfigRecurringScheduleLabels,

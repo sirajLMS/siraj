@@ -2,8 +2,8 @@
 
 import { ChildCareOutlined, EventOutlined, PaymentsOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { useMemo } from "react";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { ParentDashboardMetricsRowProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardComponents.types";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 
 function formatCount(value: number): string {

@@ -2,8 +2,8 @@
 
 import { Box, Skeleton } from "@mui/material";
 import { useMemo } from "react";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { BillingMetricsRowProps } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { MobileHorizontalScrollRow, MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 
 export type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";

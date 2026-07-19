@@ -30,11 +30,7 @@ function getBellButton(p: Page): Locator {
   // The NotificationButton wraps NotificationsOutlined icon in NavbarIcon
   // (IconButton with aria-label="Notifications" / "الإشعارات").
   // In dev mode MUI icons get data-testid="${displayName}Icon".
-  return p
-    .locator(
-      'button[aria-label="Notifications"], button[aria-label="الإشعارات"]'
-    )
-    .first();
+  return p.locator('button[aria-label="Notifications"], button[aria-label="الإشعارات"]').first();
 }
 
 describe("Notifications & Billing E2E", () => {
@@ -77,9 +73,7 @@ describe("Notifications & Billing E2E", () => {
 
   test("Teacher does NOT see notification bell icon", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.teacher.groupSlug);
-    const bellIcon = p.locator(
-      'button[aria-label="Notifications"], button[aria-label="الإشعارات"]'
-    );
+    const bellIcon = p.locator('button[aria-label="Notifications"], button[aria-label="الإشعارات"]');
     expect(await bellIcon.count()).toBe(0);
   });
 

@@ -26,13 +26,7 @@ gqlSchemaBuilder.queryField("staffDirectory", t =>
       const search = args.search?.trim() ?? null;
       const permissionGroupFilter = args.permissionGroupFilter ?? null;
 
-      return ManagerDirectoryService.getStaffDirectory(
-        userId,
-        search,
-        limit,
-        permissionGroupFilter,
-        ctx.locale
-      );
+      return ManagerDirectoryService.getStaffDirectory(userId, search, limit, permissionGroupFilter, ctx.locale);
     },
     description: "Lightweight staff list for autocomplete (id, name, avatarUrl, email).",
   })

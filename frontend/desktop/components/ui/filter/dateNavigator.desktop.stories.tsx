@@ -3,9 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { DateNavigatorDesktop } from "@/frontend/desktop/components/ui/filter/dateNavigator.desktop";
 
-function DateNavigatorDesktopStory({
-  initialValue = "2024-01-15",
-}: Readonly<{ initialValue?: string }>) {
+function DateNavigatorDesktopStory({ initialValue = "2024-01-15" }: Readonly<{ initialValue?: string }>) {
   const [date, setDate] = useState(initialValue);
 
   return (

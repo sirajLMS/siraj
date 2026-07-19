@@ -5,17 +5,14 @@ import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import { ClassesLeftProgress } from "@/frontend/common/views/dashboard/admin/parents/students/components/ClassesLeftProgress";
 import type {
   StudentDirectoryDataGridLabels,
   StudentDirectoryRowExtended,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import {
-  DesktopAppDataGrid,
-  DesktopPersonProfileLinkCell,
-} from "@/frontend/desktop/components/ui";
+import { DesktopAppDataGrid, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 
 interface StudentDirectoryDataGridProps {

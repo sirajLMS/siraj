@@ -35,8 +35,7 @@ export function ReportFiltersFormMobile({
   const selectedFromDate = parseReportFilterDate(fromDate);
   const selectedToDate = parseReportFilterDate(toDate);
   const [selectedTeacher, setSelectedTeacher] = useState<PersonOption | null>(null);
-  const teacherValue =
-    selectedTeacher ?? resolvePersonOption(teacherId, [], selectedTeacher);
+  const teacherValue = selectedTeacher ?? resolvePersonOption(teacherId, [], selectedTeacher);
 
   const handleReportTypeSelect = (event: SelectChangeEvent) => {
     onReportTypeChange(event.target.value as ReportType);

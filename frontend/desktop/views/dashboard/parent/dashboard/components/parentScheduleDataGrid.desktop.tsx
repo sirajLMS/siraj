@@ -4,18 +4,14 @@ import { AcUnitOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   ParentBookingStatus,
   ParentScheduleRow,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import type { ParentScheduleDataGridDesktopProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentScheduleComponents.types";
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import {
-  DesktopAppDataGrid,
-  DesktopPersonProfileLinkCell,
-  DesktopStatusBadge,
-} from "@/frontend/desktop/components/ui";
+import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { ParentClassStatusIndicatorDesktop } from "@/frontend/desktop/views/dashboard/parent/dashboard/components/parentClassStatusIndicator.desktop";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";

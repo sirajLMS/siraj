@@ -1,6 +1,5 @@
 // cspell:ignore: proname prosecdef pronamespace nspname
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { randomUUID } from "node:crypto";
 import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
@@ -17,6 +16,7 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
+import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

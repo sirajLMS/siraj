@@ -104,7 +104,13 @@ export function MobileWalletCatalogGridDesktop({
 
   return (
     <Box sx={{ width: "100%", minHeight: 400, height: { xs: 480, md: 560 } }}>
-      <DesktopAppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} paginationOptions={{ mode: "client" }} />
+      <DesktopAppDataGrid
+        rows={rows}
+        columns={columns}
+        loading={loading}
+        getRowId={row => row.id ?? ""}
+        paginationOptions={{ mode: "client" }}
+      />
     </Box>
   );
 }

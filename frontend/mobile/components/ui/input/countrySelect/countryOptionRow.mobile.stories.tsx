@@ -1,7 +1,7 @@
 import { Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { CountryOptionRowMobile } from "@/frontend/mobile/components/ui/input/countrySelect/countryOptionRow.mobile";
 import { countries } from "@/frontend/common/lib/locale";
+import { CountryOptionRowMobile } from "@/frontend/mobile/components/ui/input/countrySelect/countryOptionRow.mobile";
 
 const sampleCountries = ["SA", "EG", "AE", "US"].flatMap(code => {
   const country = countries.find(entry => entry.code === code);

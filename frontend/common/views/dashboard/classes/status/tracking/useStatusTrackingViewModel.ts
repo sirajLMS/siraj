@@ -72,10 +72,7 @@ export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingView
   const labels = useStatusTrackingLabels();
   const notifications = useNotifications();
 
-  const viewerTimezone = useMemo(
-    () => toGraphqlIanaTimezone(resolveBrowserIanaTimezoneId()),
-    []
-  );
+  const viewerTimezone = useMemo(() => toGraphqlIanaTimezone(resolveBrowserIanaTimezoneId()), []);
 
   const { data } = useQuery(statusTrackingScheduleQueryDocument, {
     variables: { date: selectedDate, search: null, viewerTimezone },

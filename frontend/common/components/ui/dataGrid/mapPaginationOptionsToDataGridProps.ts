@@ -19,9 +19,7 @@ type DataGridPaginationProps = Pick<
  * Maps `ListPaginationOptions` to MUI X DataGrid pagination props.
  * Pagination UI slot is forced by the AppDataGrid wrappers separately.
  */
-export function mapPaginationOptionsToDataGridProps(
-  paginationOptions: ListPaginationOptions
-): DataGridPaginationProps {
+export function mapPaginationOptionsToDataGridProps(paginationOptions: ListPaginationOptions): DataGridPaginationProps {
   if (paginationOptions === false) {
     return { hideFooter: true };
   }

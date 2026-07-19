@@ -260,8 +260,7 @@ export namespace StaffProfileRepository {
       searchConditions.push(or(ilike(users.name, `%${trimmedSearch}%`), ilike(users.email, `%${trimmedSearch}%`)));
     }
 
-    const whereClause =
-      searchConditions.length > 0 ? and(roleWhere, searchConditions[0]) : roleWhere;
+    const whereClause = searchConditions.length > 0 ? and(roleWhere, searchConditions[0]) : roleWhere;
 
     return await queryDb
       .select({

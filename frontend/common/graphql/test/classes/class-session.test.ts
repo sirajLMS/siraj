@@ -19,8 +19,8 @@ import {
   authenticatedRequest,
   createManualClassEntry,
   createManualClassEntryWithAssertions,
-  loginAndProvision,
   ensureTestSubjectId,
+  loginAndProvision,
 } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { testClient } from "@/frontend/common/graphql/test/testClient";

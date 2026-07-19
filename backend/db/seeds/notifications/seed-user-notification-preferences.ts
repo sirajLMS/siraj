@@ -16,7 +16,9 @@ import {
   SUPERVISOR_NOTIFICATION_EVENTS,
 } from "@/shared/constants/notification-event-allowlists";
 
-function eventTypesForUser(email: string): readonly (NotificationEventTypeKey | (typeof ALL_NOTIFICATION_EVENT_TYPES)[number])[] {
+function eventTypesForUser(
+  email: string
+): readonly (NotificationEventTypeKey | (typeof ALL_NOTIFICATION_EVENT_TYPES)[number])[] {
   if (email === STUDENT_USER_EMAIL || /^student-\d+@seed\.siraj\.local$/.test(email)) {
     return STUDENT_NOTIFICATION_EVENTS;
   }

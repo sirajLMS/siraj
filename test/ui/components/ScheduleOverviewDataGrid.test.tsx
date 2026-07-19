@@ -14,10 +14,16 @@ mock.module("@/shared/i18n/routing", () => ({
 }));
 
 mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}), replace: mock(() => {}), prefetch: mock(() => {}) }),
+  useRouter: () => ({
+    push: mock(() => {}),
+    back: mock(() => {}),
+    forward: mock(() => {}),
+    refresh: mock(() => {}),
+    replace: mock(() => {}),
+    prefetch: mock(() => {}),
+  }),
   usePathname: () => "/dashboard",
 }));
-
 
 mock.module("next/link", () => ({
   default: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (

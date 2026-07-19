@@ -38,64 +38,64 @@ function DueCard({
 }>) {
   return (
     <MobileCardListItem variant="edge-to-edge">
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-      <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
-        {canMarkPaid ? <Checkbox checked={selected} onChange={() => onToggle(row.id)} size="small" /> : null}
-        <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.75 }}>
-          <MobilePersonProfileLink
-            href={profileHrefForTeacher({ teacherId: row.teacherId })}
-            name={row.teacherName || row.teacherId}
-          />
-          <MobilePersonProfileLink
-            href={row.studentId ? studentHref(row.studentId) : undefined}
-            name={row.studentName || row.studentId}
-            label={labels.studentColumn}
-          />
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.classDateColumn}: {row.classDate || "-"}
-          </Typography>
-        </Box>
-        <MobileStatusBadge category="invoice" status={row.status ?? "PENDING"} label={row.status ?? "PENDING"} />
-      </Stack>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+        <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
+          {canMarkPaid ? <Checkbox checked={selected} onChange={() => onToggle(row.id)} size="small" /> : null}
+          <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.75 }}>
+            <MobilePersonProfileLink
+              href={profileHrefForTeacher({ teacherId: row.teacherId })}
+              name={row.teacherName || row.teacherId}
+            />
+            <MobilePersonProfileLink
+              href={row.studentId ? studentHref(row.studentId) : undefined}
+              name={row.studentName || row.studentId}
+              label={labels.studentColumn}
+            />
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {labels.classDateColumn}: {row.classDate || "-"}
+            </Typography>
+          </Box>
+          <MobileStatusBadge category="invoice" status={row.status ?? "PENDING"} label={row.status ?? "PENDING"} />
+        </Stack>
 
-      <Stack sx={{ flexDirection: "row", justifyContent: "space-between", gap: 1 }}>
-        <Box>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.hoursColumn}
-          </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
-            {row.hours}
-          </Typography>
-        </Box>
-        <Box>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.amountColumn}
-          </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
-            {row.currency} {row.amount}
-          </Typography>
-        </Box>
-        <Box>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.approvedDateColumn}
-          </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
-            {row.approvedAt || "-"}
-          </Typography>
-        </Box>
-      </Stack>
+        <Stack sx={{ flexDirection: "row", justifyContent: "space-between", gap: 1 }}>
+          <Box>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {labels.hoursColumn}
+            </Typography>
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
+              {row.hours}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {labels.amountColumn}
+            </Typography>
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
+              {row.currency} {row.amount}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {labels.approvedDateColumn}
+            </Typography>
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
+              {row.approvedAt || "-"}
+            </Typography>
+          </Box>
+        </Stack>
 
-      {canMarkPaid ? (
-        <MobilePrimaryPageAction
-          size="small"
-          onClick={() => onMarkPaid([row.id])}
-          disabled={markingPaid}
-          sx={{ alignSelf: "flex-start" }}
-        >
-          {labels.markAsPaidButton}
-        </MobilePrimaryPageAction>
-      ) : null}
-    </Box>
+        {canMarkPaid ? (
+          <MobilePrimaryPageAction
+            size="small"
+            onClick={() => onMarkPaid([row.id])}
+            disabled={markingPaid}
+            sx={{ alignSelf: "flex-start" }}
+          >
+            {labels.markAsPaidButton}
+          </MobilePrimaryPageAction>
+        ) : null}
+      </Box>
     </MobileCardListItem>
   );
 }

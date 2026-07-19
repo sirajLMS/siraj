@@ -8,8 +8,8 @@ import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NetworkConnectivityContext } from "@/frontend/common/context/NetworkConnectivityContext";
 import { useApolloConnectivity } from "@/frontend/common/hooks/useApolloConnectivity";
-import { createApolloCache } from "@/frontend/common/providers/apollo/apolloCache";
 import { InitializingUI } from "@/frontend/common/providers/apollo/AppApolloProviderHelpers";
+import { createApolloCache } from "@/frontend/common/providers/apollo/apolloCache";
 import {
   createAuthLink,
   createConnectivityLink,

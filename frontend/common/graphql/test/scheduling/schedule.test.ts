@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassOutcome, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { executeDstBulkUpdateMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/dst-migration.documents";
 import {
   adminDashboardScheduleQueryDocument,
@@ -30,8 +31,6 @@ import {
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 async function assertDstBulkUpdateFails(token: string) {
   const result = await testClient.mutate({

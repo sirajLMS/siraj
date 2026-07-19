@@ -3,9 +3,9 @@
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import type { MonthlyReportsViewModel } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import {

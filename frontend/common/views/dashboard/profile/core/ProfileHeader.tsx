@@ -13,14 +13,7 @@ export type ProfileHeaderProps = {
   readonly actions?: ReactNode;
 };
 
-export function ProfileHeader({
-  name,
-  email,
-  roleLabel,
-  avatarUrl,
-  showAvatar = true,
-  actions,
-}: ProfileHeaderProps) {
+export function ProfileHeader({ name, email, roleLabel, avatarUrl, showAvatar = true, actions }: ProfileHeaderProps) {
   return (
     <Stack
       direction={{ xs: "column", sm: "row" }}

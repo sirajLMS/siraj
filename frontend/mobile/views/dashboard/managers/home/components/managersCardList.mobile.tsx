@@ -58,10 +58,7 @@ export interface ManagersCardListMobileProps {
   readonly paginationOptions: ListPaginationOptions;
 }
 
-export function ManagersCardListMobile({
-  managers,
-  paginationOptions,
-}: Readonly<ManagersCardListMobileProps>) {
+export function ManagersCardListMobile({ managers, paginationOptions }: Readonly<ManagersCardListMobileProps>) {
   const t = useAppTranslation().dashboardTranslations.managersDirectory;
 
   return (

@@ -48,11 +48,7 @@ export function DashboardMetricsSectionMobile({
           py: { xs: 2, md: 2.5 },
         }}
       >
-        <MobileMetricCardGrid
-          metrics={metrics}
-          onMetricClick={onMetricClick}
-          selectedKey={selectedMetricKey}
-        />
+        <MobileMetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
       </Box>
     </MobileSectionPanel>
   );

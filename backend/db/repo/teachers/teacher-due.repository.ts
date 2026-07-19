@@ -1,11 +1,12 @@
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { classInstances, teacherDues, teachers, users } from "@/backend/db/schema";
+import { classInstances, students, teacherDues, teachers, users } from "@/backend/db/schema";
 import { ClassExecutionState, ClassOutcome, CurrencyCode, TeacherDueStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
   TeacherDueInsertType,
+  TeacherDueReturnType,
   TeacherDueSelectType,
   TeacherMonthlyReportReturnType,
   TeacherPendingDuesSummaryReturnType,
@@ -158,17 +159,44 @@ export namespace TeacherDueRepository {
   export async function getPendingDues(
     teacherId: string | undefined,
     tx?: DBTransaction
-  ): Promise<TeacherDueSelectType[]> {
+  ): Promise<TeacherDueReturnType[]> {
     const executor = tx ?? db;
     const conditions = [eq(teacherDues.status, TeacherDueStatus.PENDING)];
     if (teacherId) {
       conditions.push(eq(teacherDues.teacherId, teacherId));
     }
-    return executor
-      .select()
+    const rows = await executor
+      .select({
+        id: teacherDues.id,
+        teacherId: teacherDues.teacherId,
+        classInstanceId: teacherDues.classInstanceId,
+        studentId: teacherDues.studentId,
+        hours: teacherDues.hours,
+        amount: teacherDues.amount,
+        currency: teacherDues.currency,
+        status: teacherDues.status,
+        approvedByUserId: teacherDues.approvedByUserId,
+        approvedAt: teacherDues.approvedAt,
+        teacherPaymentId: teacherDues.teacherPaymentId,
+        createdAt: teacherDues.createdAt,
+        updatedAt: teacherDues.updatedAt,
+        teacherName: users.name,
+        studentName: students.name,
+        classDate: classInstances.scheduledStartAt,
+      })
       .from(teacherDues)
+      .innerJoin(teachers, eq(teacherDues.teacherId, teachers.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .innerJoin(students, eq(teacherDues.studentId, students.id))
+      .innerJoin(classInstances, eq(teacherDues.classInstanceId, classInstances.id))
       .where(and(...conditions))
       .orderBy(teacherDues.approvedAt);
+
+    return rows.map(row => ({
+      ...row,
+      status: row.status as TeacherDueStatus,
+      currency: row.currency as CurrencyCode,
+    }));
   }
 
   export async function getPendingDuesSummary(tx?: DBTransaction): Promise<TeacherPendingDuesSummaryReturnType> {

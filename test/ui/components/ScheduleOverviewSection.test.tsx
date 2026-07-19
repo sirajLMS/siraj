@@ -27,10 +27,16 @@ mock.module("@/shared/i18n/routing", () => ({
 }));
 
 mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}), replace: mock(() => {}), prefetch: mock(() => {}) }),
+  useRouter: () => ({
+    push: mock(() => {}),
+    back: mock(() => {}),
+    forward: mock(() => {}),
+    refresh: mock(() => {}),
+    replace: mock(() => {}),
+    prefetch: mock(() => {}),
+  }),
   usePathname: () => "/dashboard",
 }));
-
 
 // Mock RequirePermission to check permissions from useUserStore
 // Note: mock.module registrations are process-global in Bun, so this mock

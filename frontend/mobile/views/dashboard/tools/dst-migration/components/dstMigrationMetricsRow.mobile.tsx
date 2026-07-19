@@ -2,8 +2,8 @@
 
 import { AnalyticsOutlined, ErrorOutlined, HistoryOutlined, VerifiedOutlined } from "@mui/icons-material";
 import { useMemo } from "react";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { DstMigrationMetrics } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 

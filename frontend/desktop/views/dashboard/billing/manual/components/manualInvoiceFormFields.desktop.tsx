@@ -3,15 +3,15 @@
 import { Box } from "@mui/material";
 import type { Control } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 import type { ManualInvoiceFormData } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
 import type { BaseManualInvoiceFormFieldsProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceFormFields.types";
+import { StudentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { ManualInvoiceDateFieldDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceDateField.desktop";
 import { ManualInvoiceFeeFieldDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceFeeField.desktop";
 import { ManualInvoiceParentFieldDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceParentField.desktop";
-import { StudentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import type { BillingManualLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -88,9 +88,7 @@ export function ManualInvoiceFormFieldsDesktop({
   const watchedParentId = useWatch({ control, name: "parentId" });
   const parentIdForStudents = watchedParentId || selectedParentId;
 
-  const parentField = (
-    <ManualInvoiceParentFieldDesktop control={control} errors={errors} labels={labels} />
-  );
+  const parentField = <ManualInvoiceParentFieldDesktop control={control} errors={errors} labels={labels} />;
   const studentField = (
     <StudentSelectorField control={control} selectedParentId={parentIdForStudents} labels={labels} />
   );

@@ -2,8 +2,8 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import {
-  MeetingConfigTypeFieldsMobile,
   type MeetingConfigDetailsFormValue,
+  MeetingConfigTypeFieldsMobile,
   type MeetingConfigTypeFieldsProps,
   type MeetingProviderFieldsFragment,
 } from "@/frontend/mobile/components/ui/input/meetingConfigTypeFields/meetingConfigTypeFields.mobile";
@@ -58,18 +58,11 @@ function MeetingConfigTypeFieldsStory({
     provider?: MeetingProviderFieldsFragment;
   }
 >) {
-  const [value, setValue] = useState<MeetingConfigDetailsFormValue>(
-    initialValue ?? { meetingUrl: "" }
-  );
+  const [value, setValue] = useState<MeetingConfigDetailsFormValue>(initialValue ?? { meetingUrl: "" });
 
   return (
     <Box sx={{ width: 375, p: 2 }}>
-      <MeetingConfigTypeFieldsMobile
-        provider={provider}
-        value={value}
-        onChangeAction={setValue}
-        {...props}
-      />
+      <MeetingConfigTypeFieldsMobile provider={provider} value={value} onChangeAction={setValue} {...props} />
     </Box>
   );
 }

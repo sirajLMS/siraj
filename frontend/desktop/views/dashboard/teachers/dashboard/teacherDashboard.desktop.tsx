@@ -12,9 +12,9 @@ import {
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { ActivationPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/activationPolicyPanel.desktop";
+import { ManualClassEntryStudentSelectDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/manualClassEntryStudentSelect.desktop";
 import { MissedClassAlertBannerDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.desktop";
 import { StudentProgressFeedDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/studentProgressFeed.desktop";
-import { ManualClassEntryStudentSelectDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/manualClassEntryStudentSelect.desktop";
 import { TeacherDailyScheduleSectionDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherDailyScheduleSection.desktop";
 
 export function TeacherDashboardDesktopView({
@@ -114,9 +114,7 @@ export function TeacherDashboardDesktopView({
         onClose={onManualEntryClose}
         onSubmit={onManualEntrySubmit}
         defaultActive={manualEntryDefaultActive}
-        studentSelect={
-          <ManualClassEntryStudentSelectDesktop teacherId={teacherId} open={manualEntryOpen} />
-        }
+        studentSelect={<ManualClassEntryStudentSelectDesktop teacherId={teacherId} open={manualEntryOpen} />}
       />
     </>
   );

@@ -1,9 +1,6 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import {
-  TagInputMobile,
-  type TagInputProps,
-} from "@/frontend/mobile/components/ui/input/tagInput/tagInput.mobile";
+import { TagInputMobile, type TagInputProps } from "@/frontend/mobile/components/ui/input/tagInput/tagInput.mobile";
 
 function TagInputStory(props: Readonly<Partial<TagInputProps>>) {
   return (

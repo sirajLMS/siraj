@@ -8,6 +8,7 @@ import type {
   ScheduleAlert,
   ScheduleAlertsLabels,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   DesktopExportButton,
   DesktopFilterButton,
@@ -16,7 +17,6 @@ import {
   DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   AcademicScheduleDataGridDesktop,
   type AcademicScheduleDataGridDesktopLabels,

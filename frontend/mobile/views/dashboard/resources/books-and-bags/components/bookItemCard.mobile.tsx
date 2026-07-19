@@ -2,12 +2,12 @@
 
 import { DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
-import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   BookItemCardProps,
   BooksAndBagsLabels,
 } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
+import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 
 const statusLabelMap: Record<AvailabilityStatus, keyof BooksAndBagsLabels> = {
   [AvailabilityStatus.Available]: "statusAvailable",

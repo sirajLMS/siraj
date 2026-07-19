@@ -160,7 +160,11 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
         );
         expect(rowsOnA.some(r => r.id === instance.id)).toBe(true);
 
-        const rowsOnB = await SchedulingRepository.getStatusTrackingRows(dateB, { viewerTimezone: IanaTimezone.UTC }, tx);
+        const rowsOnB = await SchedulingRepository.getStatusTrackingRows(
+          dateB,
+          { viewerTimezone: IanaTimezone.UTC },
+          tx
+        );
         expect(rowsOnB.some(r => r.id === instance.id)).toBe(false);
       });
     });

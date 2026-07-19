@@ -8,7 +8,12 @@ import type {
   HedgeRow,
 } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/CurrencyHedgesView";
 import { formatHedgeTimestamp } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/utils";
-import { MobileCardList, MobileCardListItem, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileCardListItem,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 import { useAppLocale } from "@/shared/locale";
 
 export function CurrencyHedgesMobileView({
@@ -70,7 +75,9 @@ export function CurrencyHedgesMobileView({
                   <Typography>{row.amount}</Typography>
                 </Box>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Typography sx={theme => ({ color: theme.palette.text.secondary })}>{hedgeTypeColumnLabel}</Typography>
+                  <Typography sx={theme => ({ color: theme.palette.text.secondary })}>
+                    {hedgeTypeColumnLabel}
+                  </Typography>
                   <Typography>{row.hedgeType}</Typography>
                 </Box>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -78,7 +85,9 @@ export function CurrencyHedgesMobileView({
                   <Typography>{row.notes ?? ""}</Typography>
                 </Box>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Typography sx={theme => ({ color: theme.palette.text.secondary })}>{updatedAtColumnLabel}</Typography>
+                  <Typography sx={theme => ({ color: theme.palette.text.secondary })}>
+                    {updatedAtColumnLabel}
+                  </Typography>
                   <Typography>{formatHedgeTimestamp(row.updatedAt, locale)}</Typography>
                 </Box>
               </Box>

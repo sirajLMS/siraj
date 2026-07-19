@@ -30,7 +30,11 @@ const usePermissionQueries = () => {
     error: permissionsError,
   } = useQuery(permissionsQueryDocument);
   const { data: groupsData, loading: groupsLoading, error: groupsError } = useQuery(permissionGroupsQueryDocument);
-  const { data: usersData, loading: usersLoading, error: usersError } = useQuery(usersQueryDocument, {
+  const {
+    data: usersData,
+    loading: usersLoading,
+    error: usersError,
+  } = useQuery(usersQueryDocument, {
     variables: USERS_QUERY_VARIABLES,
   });
 

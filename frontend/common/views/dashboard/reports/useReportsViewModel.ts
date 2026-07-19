@@ -142,8 +142,7 @@ export function useReportsViewModel(
   const tProfile = useAppTranslation().profileTranslations.base;
   const tErrors = useAppTranslation().errorsTranslations;
 
-  const { labels, rows, summary, canGenerate, loading, onSubmit, onExportCsv, onPrintReport, onRowClick } =
-    props;
+  const { labels, rows, summary, canGenerate, loading, onSubmit, onExportCsv, onPrintReport, onRowClick } = props;
   // NEW FOR PLAN v5: empty/no-op defaults so the Container can invoke this
   // ViewModel with no arguments (specs.md §6.1) — the page passes `<ReportsContainer />`
   // and the VM supplies safe defaults for callers that omit input data/handlers.

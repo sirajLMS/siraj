@@ -65,10 +65,7 @@ export function ClassDetailsTeacherView(props: Readonly<ClassDetailsTeacherViewP
 
   return (
     <Stack sx={{ gap: { xs: 2, lg: 3 } }}>
-      {!isWarningDismissed &&
-      instance.hasTimezoneMismatch &&
-      instance.studentTimezone &&
-      instance.teacherTimezone ? (
+      {!isWarningDismissed && instance.hasTimezoneMismatch && instance.studentTimezone && instance.teacherTimezone ? (
         <TimezoneWarningBanner
           studentTimezone={instance.studentTimezone}
           teacherTimezone={instance.teacherTimezone}

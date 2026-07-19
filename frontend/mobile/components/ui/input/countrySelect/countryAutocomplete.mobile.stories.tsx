@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
+import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import type { CountryAutocompleteProps } from "@/frontend/mobile/components/ui/input/countrySelect";
 import { CountryAutocompleteMobile } from "@/frontend/mobile/components/ui/input/countrySelect/countryAutocomplete.mobile";
-import { type CountryType, countries } from "@/frontend/common/lib/locale";
 
 function CountryAutocompleteStory({
   initialCountryCode,

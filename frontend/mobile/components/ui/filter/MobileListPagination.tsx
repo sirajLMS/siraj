@@ -8,9 +8,7 @@ import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter
  * Always visible when `paginationOptions !== false` (even single page).
  * Prefer `MobileCardList` for new lists — this helper is for transitional feature lists.
  */
-export function MobileListPagination({
-  paginationOptions,
-}: Readonly<{ paginationOptions: ListPaginationOptions }>) {
+export function MobileListPagination({ paginationOptions }: Readonly<{ paginationOptions: ListPaginationOptions }>) {
   if (paginationOptions === false) {
     return null;
   }

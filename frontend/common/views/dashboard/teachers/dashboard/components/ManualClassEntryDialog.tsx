@@ -14,7 +14,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { logger } from "@/frontend/common/utils/logger";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import type { TeacherDashboardLabels } from "@/shared/locale";
@@ -143,9 +143,7 @@ export function ManualClassEntryDialog({
           {defaultActive ? t.manualClassEntry.titleCreateActive : t.manualClassEntry.titleCreate}
         </DialogTitle>
         <DialogContent dividers>
-          <ManualClassEntryStudentFieldContext.Provider
-            value={{ studentId, setStudentId, disabled: submitting }}
-          >
+          <ManualClassEntryStudentFieldContext.Provider value={{ studentId, setStudentId, disabled: submitting }}>
             <ManualClassEntryFormFields
               error={error}
               studentSelect={studentSelect}

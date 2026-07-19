@@ -4,6 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
 import type {
@@ -11,7 +12,6 @@ import type {
   ParentInvoicesDataGridDesktopLabels,
 } from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
 import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { ParentInvoiceRowActionsDesktop } from "@/frontend/desktop/views/dashboard/billing/components/parentInvoiceRowActions.desktop";
 
 // VARIANT JUSTIFICATION: extra field labels — data-grid tier carries grid-shaped labels (column headers + statusLabels + empty-title/subtitle); mobile card list uses a different labels shape

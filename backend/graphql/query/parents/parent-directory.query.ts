@@ -1,3 +1,4 @@
+import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ParentDirectoryAutocompleteRowPothosObject,
@@ -7,7 +8,6 @@ import { ParentStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pot
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ParentDirectoryService } from "@/backend/services/parent/parent-directory.service";
-import { AppPermission } from "@/backend/enum";
 import { PaginationArgs } from "@/backend/types";
 
 const PARENTS_DIRECTORY_DEFAULT_LIMIT = 20;

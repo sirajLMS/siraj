@@ -157,13 +157,7 @@ export function UserOverridesDataGridMobile({
       getKey={user => user.id ?? user.email ?? ""}
       paginationOptions={{ mode: "client" }}
       layout="edge-to-edge"
-      renderItem={user => (
-        <UserOverridesCardMobile
-          user={user}
-          groups={groups}
-          onManageOverrides={onManageOverrides}
-        />
-      )}
+      renderItem={user => <UserOverridesCardMobile user={user} groups={groups} onManageOverrides={onManageOverrides} />}
     />
   );
 }

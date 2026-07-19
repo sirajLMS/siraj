@@ -45,11 +45,7 @@ export function UserBillingProfileMobileView({
   return (
     <>
       <MobilePageContainer>
-        <MobilePageHeader
-          title={labels.billingProfileTitle}
-          subtitle={labels.profileForUser}
-          edgeToEdge={false}
-        />
+        <MobilePageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser} edgeToEdge={false} />
 
         <MobileContentStack gap={3} paddingBottom={4}>
           <BillingMetricsRowMobile metrics={metrics} compact loading={summaryLoading} />

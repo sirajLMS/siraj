@@ -8,7 +8,12 @@ import {
   type ComplaintPriority,
   ComplaintStatus,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import { MobileCardListItem, MobileFilterButton, MobilePrimaryPageAction, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardListItem,
+  MobileFilterButton,
+  MobilePrimaryPageAction,
+  MobileStatusBadge,
+} from "@/frontend/mobile/components/ui";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
 
 const StyledAnsweredResponseBox = styled(Box)(({ theme }) => ({

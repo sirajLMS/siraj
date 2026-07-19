@@ -1,6 +1,5 @@
 "use client";
 
-import { Fragment } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
@@ -26,10 +25,8 @@ export function StudentDashboardContainer() {
   const viewModel = useStudentDashboardViewModel({});
   return (
     <RequirePermission permissions={[AppPermission.StudentViewOwnDashboard]} fallback={null}>
-      <Fragment>
-        <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-        <ReflectionDialog />
-      </Fragment>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
+      <ReflectionDialog />
     </RequirePermission>
   );
 }

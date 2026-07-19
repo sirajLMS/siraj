@@ -95,7 +95,10 @@ export function ConflictErrorsPanelMobile({ conflictGroups }: Readonly<Props>) {
                   />
                 </Box>
               ) : null}
-              <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main, mb: 0.5 })}>
+              <Typography
+                variant="bodyMd"
+                sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main, mb: 0.5 })}
+              >
                 {row.studentName}
               </Typography>
               <Stack direction="row" spacing={0.5} sx={{ alignItems: "flex-start" }}>

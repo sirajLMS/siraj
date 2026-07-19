@@ -4,7 +4,13 @@ import { and, eq, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
-import { createMockClassInstance, ensureTestSubjectId, setupStudent, setupTeacher, setupTestEntities } from "@/backend/db/test/entity-setup";
+import {
+  createMockClassInstance,
+  ensureTestSubjectId,
+  setupStudent,
+  setupTeacher,
+  setupTestEntities,
+} from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 

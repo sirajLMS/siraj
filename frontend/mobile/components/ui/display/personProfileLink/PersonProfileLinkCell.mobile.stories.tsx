@@ -39,7 +39,7 @@ const meta: Meta<typeof MobilePersonProfileLinkCell> = {
     typographyVariant: "bodySm",
   },
   decorators: [
-    (Story) => (
+    Story => (
       <Stack sx={{ width: 220, maxWidth: "100%", p: 1 }}>
         <Story />
       </Stack>

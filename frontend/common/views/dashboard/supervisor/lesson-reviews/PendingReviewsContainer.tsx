@@ -29,19 +29,17 @@ export function PendingReviewsContainer() {
       permissions={[AppPermission.LessonReportsReview, AppPermission.LessonReportsApprove]}
       fallback={null}
     >
-      <>
-        <Snackbar
-          open={viewModel.snackbar.open}
-          autoHideDuration={4000}
-          onClose={viewModel.onCloseSnackbar}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert severity={viewModel.snackbar.severity} onClose={viewModel.onCloseSnackbar} sx={{ width: "100%" }}>
-            {viewModel.snackbar.message}
-          </Alert>
-        </Snackbar>
-        <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-      </>
+      <Snackbar
+        open={viewModel.snackbar.open}
+        autoHideDuration={4000}
+        onClose={viewModel.onCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={viewModel.snackbar.severity} onClose={viewModel.onCloseSnackbar} sx={{ width: "100%" }}>
+          {viewModel.snackbar.message}
+        </Alert>
+      </Snackbar>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
     </RequirePermission>
   );
 }

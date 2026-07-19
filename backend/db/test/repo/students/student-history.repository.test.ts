@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { StudentHistoryRepository } from "@/backend/db/repo";
 import { classInstancePerformance, classInstances } from "@/backend/db/schema";
-import { setupTestEntities, ensureTestSubjectId } from "@/backend/db/test/entity-setup";
+import { ensureTestSubjectId, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 
 describe("StudentHistoryRepository", () => {

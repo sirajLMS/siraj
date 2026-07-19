@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
 import {
   AccessTimeOutlined,
   AccountBalanceOutlined,
@@ -18,7 +19,6 @@ import {
   studentMonthlyReportQueryDocument,
   teacherMonthlyReportQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { useQuery } from "@apollo/client/react";
 import { useSupervisorMonthlyReportsStore } from "@/frontend/common/stores/supervisorMonthlyReportsStore";
 import type {
   MonthlyReportMetric,

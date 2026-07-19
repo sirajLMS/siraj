@@ -6,11 +6,7 @@ import type { ParentScheduleListMobileProps } from "@/frontend/common/views/dash
 import { MobileCardList } from "@/frontend/mobile/components/ui";
 import { ParentScheduleCardMobile } from "@/frontend/mobile/views/dashboard/parent/dashboard/components/parentScheduleCard.mobile";
 
-export function ParentScheduleListMobile({
-  rows,
-  labels,
-  pagination,
-}: Readonly<ParentScheduleListMobileProps>) {
+export function ParentScheduleListMobile({ rows, labels, pagination }: Readonly<ParentScheduleListMobileProps>) {
   return (
     <MobileCardList<ParentScheduleRow>
       rows={rows}

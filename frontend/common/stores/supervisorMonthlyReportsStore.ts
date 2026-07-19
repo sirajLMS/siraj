@@ -1,5 +1,5 @@
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { create } from "zustand";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 
 export type MonthlyReportType = "teacher" | "student";
 

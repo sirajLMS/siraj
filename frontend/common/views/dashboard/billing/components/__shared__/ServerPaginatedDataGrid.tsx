@@ -37,9 +37,7 @@ export function ServerPaginatedDataGrid<R extends GridValidRowModel>({
       getRowId={getRowId}
       emptyMessage={emptyMessage}
       ariaLabel={ariaLabel}
-      paginationOptions={
-        getServerPaginationOptions({ page, pageSize }, totalCount, onPageChange) || { mode: "client" }
-      }
+      paginationOptions={getServerPaginationOptions({ page, pageSize }, totalCount, onPageChange) || { mode: "client" }}
     />
   );
 }

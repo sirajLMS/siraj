@@ -11,12 +11,12 @@ import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type {
   ParentDirectoryRow,
   ParentsDataGridLabels,
 } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";

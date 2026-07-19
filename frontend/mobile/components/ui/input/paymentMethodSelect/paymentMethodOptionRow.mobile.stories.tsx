@@ -62,11 +62,7 @@ export const Default: Story = {
     <Box sx={{ width: "100%", maxWidth: 375, p: 2 }}>
       <Stack spacing={1}>
         {MOCK_OPTIONS.map(option => (
-          <PaymentMethodOptionRowMobile
-            key={option.id}
-            option={option}
-            type={PaymentMethodType.MobileWallet}
-          />
+          <PaymentMethodOptionRowMobile key={option.id} option={option} type={PaymentMethodType.MobileWallet} />
         ))}
       </Stack>
     </Box>

@@ -6,8 +6,8 @@ import type { SyntheticEvent } from "react";
 import { AppDateRangePicker, AppTimeRangePicker } from "@/frontend/common/components/ui/form";
 import { countActiveDrawerFilters } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
 import type { SearchScheduleFormProps } from "@/frontend/common/views/dashboard/search-schedule/types";
-import { SearchScheduleSortMenuMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleSortMenu.mobile";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
+import { SearchScheduleSortMenuMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleSortMenu.mobile";
 import { SearchScheduleFilterDrawerMobile } from "@/frontend/mobile/views/dashboard/search-schedule/searchScheduleFilterDrawer.mobile";
 import { useAppTranslation } from "@/shared/locale";
 

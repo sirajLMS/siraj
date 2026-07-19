@@ -52,14 +52,15 @@ function SearchScheduleMobileResults({
   });
 
   const dateColumns = buildDateColumns(fromDate, toDate);
-  const paginationOptions = showPagination && pageInfo
-    ? buildServerPaginationOptions({
-        page: (pageInfo.currentPage ?? 1) - 1,
-        pageSize: pageInfo.perPage ?? teacherCount ?? 10,
-        totalCount: pageInfo.total ?? 0,
-        onPageChange,
-      })
-    : false;
+  const paginationOptions =
+    showPagination && pageInfo
+      ? buildServerPaginationOptions({
+          page: (pageInfo.currentPage ?? 1) - 1,
+          pageSize: pageInfo.perPage ?? teacherCount ?? 10,
+          totalCount: pageInfo.total ?? 0,
+          onPageChange,
+        })
+      : false;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

@@ -1,10 +1,7 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
-import {
-  PhoneInput,
-  type PhoneInputProps,
-} from "@/frontend/mobile/components/ui/input/phoneInput/PhoneInput";
+import { PhoneInput, type PhoneInputProps } from "@/frontend/mobile/components/ui/input/phoneInput/PhoneInput";
 
 function PhoneInputStory({
   initialValue = null,

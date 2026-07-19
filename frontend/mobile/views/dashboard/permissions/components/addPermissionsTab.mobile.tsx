@@ -110,13 +110,7 @@ export function AddPermissionsTabMobile({
           renderItem={permission => {
             const id = permission.id ?? "";
             const checked = selectedAddPermissionIds.includes(id);
-            return (
-              <AddPermissionCardMobile
-                permission={permission}
-                checked={checked}
-                onToggle={onPermissionToggle}
-              />
-            );
+            return <AddPermissionCardMobile permission={permission} checked={checked} onToggle={onPermissionToggle} />;
           }}
         />
       </MobileSectionPanel>
