@@ -1,8 +1,8 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "c6127f16-8267-4cfb-97da-28a75ee69ca5",
-  "prevIds": ["aa93b61e-9262-4a75-80fe-e1350f7d23c5"],
+  "id": "e2c0d554-8cf8-47fe-b040-47bd85b04c42",
+  "prevIds": ["fef7e61b-3928-4846-9664-f1a306750d18"],
   "ddl": [
     {
       "values": ["pending", "approved", "rejected"],
@@ -705,7 +705,9 @@
         "CLASS_RESET",
         "STUDENT_TEACHER_REASSIGNED",
         "STUDENT_STATUS_CHANGED",
-        "STUDENT_QUOTA_OVERRIDDEN"
+        "STUDENT_QUOTA_OVERRIDDEN",
+        "LESSON_REPORT_SUBMITTED",
+        "LESSON_REPORT_REVIEWED"
       ],
       "name": "notification_event_type",
       "entityType": "enums",
@@ -4899,7 +4901,7 @@
     {
       "type": "uuid",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
@@ -5887,7 +5889,7 @@
     {
       "type": "uuid",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
