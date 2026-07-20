@@ -77,25 +77,66 @@ export interface UseStudentProfilePageViewModelProps {
   readonly studentId: string;
 }
 
-export function useStudentProfilePageViewModel(
-  props: Readonly<UseStudentProfilePageViewModelProps>
-): StudentProfilePageViewModel {
-  const { studentId } = props;
+interface StudentProfileTabState {
+  readonly activeTab: StudentProfileTab | null;
+  readonly visibleTabs: readonly StudentProfileTab[];
+  readonly onTabChange: (event: React.SyntheticEvent, nextTab: StudentProfileTab) => void;
+  readonly activeTabForQuery: StudentProfileTab | null;
+}
 
-  const t = useAppTranslation().dashboardTranslations.studentProfile;
-  const tStatus = useAppTranslation().dashboardTranslations.studentStatus;
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const { currentMonth } = useStudentHistoryStore();
-  const { canView, showField } = useStudentFieldAccess();
+interface StudentProfileQueryState {
+  readonly profile: StudentProfileQueryData | undefined;
+  readonly loading: boolean;
+  readonly loadingState: StudentProfileLoadingState;
+  readonly refetch: (variables?: { readonly year?: number | null; readonly month?: number | null }) => Promise<unknown>;
+}
 
+interface StudentProfilePresentationState {
+  readonly header: StudentProfileHeaderValues;
+  readonly statusBadge: StudentProfileStatusBadge | undefined;
+}
+
+type StudentFieldAccess = ReturnType<typeof useStudentFieldAccess>;
+type StudentProfileTranslations = ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentProfile"];
+
+function useStudentProfileTabState(
+  studentId: string,
+  access: StudentFieldAccess,
+  tabParam: string | null,
+  router: ReturnType<typeof useRouter>
+): StudentProfileTabState {
+  const { canView } = access;
   const visibleTabs = useMemo(() => getVisibleStudentProfileTabs(canView), [canView]);
-  const tabParam = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState<StudentProfileTab | null>(() =>
     resolveStudentProfileTab(tabParam, canView)
   );
 
+  useEffect(() => {
+    const nextResolved = resolveStudentProfileTab(tabParam, canView);
+    setActiveTab(nextResolved);
+    if (nextResolved && tabParam !== nextResolved) {
+      router.replace(`/students/${studentId}/profile?tab=${nextResolved}`);
+    }
+  }, [tabParam, canView, studentId, router]);
+
+  const handleTabChange = useCallback(
+    (_event: React.SyntheticEvent, nextTab: StudentProfileTab) => {
+      setActiveTab(nextTab);
+      router.replace(`/students/${studentId}/profile?tab=${nextTab}`);
+    },
+    [router, studentId]
+  );
+
   const activeTabForQuery = activeTab ?? resolveStudentProfileTab(tabParam, canView);
+
+  return { activeTab, visibleTabs, onTabChange: handleTabChange, activeTabForQuery };
+}
+
+function useStudentProfileQueryState(
+  studentId: string,
+  activeTabForQuery: StudentProfileTab | null,
+  currentMonth: Date
+): StudentProfileQueryState {
   const year = activeTabForQuery === "history" ? currentMonth.getFullYear() : undefined;
   const month = activeTabForQuery === "history" ? currentMonth.getMonth() + 1 : undefined;
 
@@ -106,39 +147,24 @@ export function useStudentProfilePageViewModel(
   });
 
   const profile = (data?.studentProfile ?? undefined) as StudentProfileQueryData | undefined;
-
-  useDocumentTitle(profile?.name, "dashboard.studentProfile", "title");
-
-  const contextValue = useMemo<StudentProfileContextValue>(
-    () => ({
-      studentId,
-      profile: profile ?? null,
-      loading,
-      refetch: async (variables?: { readonly year?: number | null; readonly month?: number | null }) =>
-        refetch(variables ?? {}),
-    }),
-    [studentId, profile, loading, refetch]
-  );
-
-  useEffect(() => {
-    const nextResolved = resolveStudentProfileTab(searchParams.get("tab"), canView);
-    setActiveTab(nextResolved);
-    const currentParam = searchParams.get("tab");
-    if (nextResolved && currentParam !== nextResolved) {
-      router.replace(`/students/${studentId}/profile?tab=${nextResolved}`);
-    }
-  }, [searchParams, canView, studentId, router]);
-
-  const handleTabChange = useCallback(
-    (_event: React.SyntheticEvent, nextTab: StudentProfileTab) => {
-      setActiveTab(nextTab);
-      router.replace(`/students/${studentId}/profile?tab=${nextTab}`);
-    },
-    [router, studentId]
-  );
-
   const loadingState: StudentProfileLoadingState = loading && !profile ? "loading" : !profile ? "notFound" : "ready";
 
+  return {
+    profile,
+    loading,
+    loadingState,
+    refetch: async (variables?: { readonly year?: number | null; readonly month?: number | null }) =>
+      refetch(variables ?? {}),
+  };
+}
+
+function useStudentProfilePresentation(
+  profile: StudentProfileQueryData | undefined,
+  access: StudentFieldAccess,
+  tStatus: StudentStatusLabels,
+  t: StudentProfileTranslations
+): StudentProfilePresentationState {
+  const { canView, showField } = access;
   const studentStatusLabel = useMemo(() => buildStudentStatusLabel(tStatus), [tStatus]);
 
   const header = useMemo<StudentProfileHeaderValues>(() => {
@@ -164,6 +190,49 @@ export function useStudentProfilePageViewModel(
     };
   }, [canView, profile, studentStatusLabel]);
 
+  return { header, statusBadge };
+}
+
+export function useStudentProfilePageViewModel(
+  props: Readonly<UseStudentProfilePageViewModelProps>
+): StudentProfilePageViewModel {
+  const { studentId } = props;
+
+  const t = useAppTranslation().dashboardTranslations.studentProfile;
+  const tStatus = useAppTranslation().dashboardTranslations.studentStatus;
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { currentMonth } = useStudentHistoryStore();
+  const access = useStudentFieldAccess();
+
+  const tabParam = searchParams.get("tab");
+  const { activeTab, visibleTabs, onTabChange, activeTabForQuery } = useStudentProfileTabState(
+    studentId,
+    access,
+    tabParam,
+    router
+  );
+
+  const { profile, loading, loadingState, refetch } = useStudentProfileQueryState(
+    studentId,
+    activeTabForQuery,
+    currentMonth
+  );
+
+  useDocumentTitle(profile?.name, "dashboard.studentProfile", "title");
+
+  const contextValue = useMemo<StudentProfileContextValue>(
+    () => ({
+      studentId,
+      profile: profile ?? null,
+      loading,
+      refetch,
+    }),
+    [studentId, profile, loading, refetch]
+  );
+
+  const { header, statusBadge } = useStudentProfilePresentation(profile, access, tStatus, t);
+
   return {
     studentId,
     loadingState,
@@ -178,7 +247,7 @@ export function useStudentProfilePageViewModel(
     notFoundTitle: t.notFoundTitle,
     notFoundDescription: t.notFoundDescription,
     tabLabels: t.tabs,
-    onTabChange: handleTabChange,
+    onTabChange,
   };
 }
 

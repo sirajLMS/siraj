@@ -3,10 +3,12 @@
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
 import {
+  BookingStatus,
   ClassExecutionState,
   ClassOutcome,
   type EffectiveMeeting,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   parentDashboardMetricsQueryDocument,
   parentDashboardScheduleQueryDocument,
@@ -70,35 +72,9 @@ function resolveMeetingJoinUrl(
   return fromEffective || fromLegacy || null;
 }
 
-function useScheduleRows(
-  data:
-    | {
-        readonly parentDashboardSchedule?: {
-          readonly rows?:
-            | readonly {
-                readonly id?: string | null;
-                readonly classTimeFormatted?: string | null;
-                readonly durationMinutes?: number | null;
-                readonly studentId?: string | null;
-                readonly studentName?: string | null;
-                readonly studentInitials?: string | null;
-                readonly studentAvatarUrl?: string | null;
-                readonly teacherId?: string | null;
-                readonly teacherName?: string | null;
-                readonly teacherAvatarUrl?: string | null;
-                readonly bookingStatus?: string | null;
-                readonly executionState?: ClassExecutionState | null;
-                readonly outcome?: ClassOutcome | null;
-                readonly isFrozen?: boolean | null;
-                readonly meetingJoinUrl?: string | null;
-                readonly effectiveMeeting?: EffectiveMeeting | null;
-              }[]
-            | null;
-          readonly totalCount?: number | null;
-        } | null;
-      }
-    | undefined
-): readonly ParentScheduleRow[] {
+type ScheduleQueryData = Operations.ParentDashboardScheduleQuery;
+
+function useScheduleRows(data: ScheduleQueryData | undefined): readonly ParentScheduleRow[] {
   return useMemo(() => {
     const rows = data?.parentDashboardSchedule?.rows;
     if (!rows) return [];
@@ -118,7 +94,7 @@ function useScheduleRows(
         teacherId: r.teacherId ?? undefined,
         teacherName: r.teacherName ?? "",
         teacherAvatarUrl: r.teacherAvatarUrl ?? undefined,
-        bookingStatus: r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed",
+        bookingStatus: r.bookingStatus === BookingStatus.Rescheduled ? "rescheduled" : "confirmed",
         liveClassStatus: mapExecutionStateToLiveClassStatus(executionState, outcome),
         executionState,
         outcome,
@@ -170,43 +146,13 @@ function useDashboardLabels(t: ParentDashboardLabels, _userName: string) {
   );
 }
 
-export function useParentDashboardViewModel(_props: UseParentDashboardViewModelProps): ParentDashboardViewModel {
-  const t = useAppTranslation().dashboardTranslations.coreParentDashboard;
-  const router = useRouter();
-  const userName = useUserStore(state => state.name);
-  const page = useParentDashboardStore(state => state.page);
-  const pageSize = useParentDashboardStore(state => state.pageSize);
-  const setPage = useParentDashboardStore(state => state.setPage);
-  const setScheduleTotalCount = useParentDashboardStore(state => state.setScheduleTotalCount);
+type MetricsResult = Operations.ParentDashboardMetricsQuery_parentDashboardMetrics_ParentDashboardMetricsResult;
 
-  const paginationArgs = useMemo(
-    () => ({
-      page: page + 1,
-      first: pageSize,
-      skip: null,
-      after: null,
-      before: null,
-      last: null,
-      maxCount: null,
-    }),
-    [page, pageSize]
-  );
-
-  const today = useMemo(() => {
-    const d = new Date();
-    return d.toISOString().split("T")[0];
-  }, []);
-
-  const { data: scheduleData } = useQuery(parentDashboardScheduleQueryDocument, {
-    variables: { date: today, search: null, paginationArgs },
-    fetchPolicy: "cache-and-network",
-  });
-
-  const { data: metricsData } = useQuery(parentDashboardMetricsQueryDocument, {
-    fetchPolicy: "cache-and-network",
-  });
-
-  const metricsResult = metricsData?.parentDashboardMetrics;
+function useParentDashboardMetrics(metricsResult: MetricsResult | null | undefined): {
+  readonly metrics: ParentDashboardMetrics;
+  readonly studentProgress: readonly StudentProgressItem[];
+  readonly workshopPromo: WorkshopPromo | null;
+} {
   const metrics: ParentDashboardMetrics = useMemo(
     () => ({
       totalStudents: metricsResult?.metrics?.totalStudents ?? 0,
@@ -236,11 +182,15 @@ export function useParentDashboardViewModel(_props: UseParentDashboardViewModelP
     return { title: wp.title ?? "", description: wp.description ?? "", imageUrl: wp.imageUrl ?? "" };
   }, [metricsResult]);
 
-  const scheduleRows = useScheduleRows(scheduleData);
-  const totalCount = scheduleData?.parentDashboardSchedule?.totalCount ?? 0;
-  const labels = useDashboardLabels(t, userName);
+  return { metrics, studentProgress, workshopPromo };
+}
 
-  const handlers = useMemo(
+function useParentDashboardHandlers(
+  router: ReturnType<typeof useRouter>,
+  workshopPromo: WorkshopPromo | null,
+  setPage: (page: number) => void
+) {
+  return useMemo(
     () => ({
       handleFilter: () => {
         router.push("/schedule");
@@ -271,22 +221,83 @@ export function useParentDashboardViewModel(_props: UseParentDashboardViewModelP
     }),
     [router, workshopPromo, setPage]
   );
+}
 
+function useScheduleTotalCountSync(totalCount: number, setScheduleTotalCount: (count: number) => void) {
   useMemo(() => {
     if (totalCount !== useParentDashboardStore.getState().scheduleTotalCount) {
       setScheduleTotalCount(totalCount);
     }
   }, [totalCount, setScheduleTotalCount]);
+}
 
-  const schedulePagination = useMemo<SchedulePagination>(
+function useSchedulePagination(
+  page: number,
+  pageSize: number,
+  totalCount: number,
+  handlePageChange: (page: number) => void
+): SchedulePagination {
+  return useMemo<SchedulePagination>(
     () => ({
       page,
       pageSize,
       totalCount,
-      onPageChange: handlers.handlePageChange,
+      onPageChange: handlePageChange,
     }),
-    [page, pageSize, totalCount, handlers.handlePageChange]
+    [page, pageSize, totalCount, handlePageChange]
   );
+}
+
+function useTodayIso(): string {
+  return useMemo(() => new Date().toISOString().split("T")[0], []);
+}
+
+function usePaginationArgs(page: number, pageSize: number) {
+  return useMemo(
+    () => ({
+      page: page + 1,
+      first: pageSize,
+      skip: null,
+      after: null,
+      before: null,
+      last: null,
+      maxCount: null,
+    }),
+    [page, pageSize]
+  );
+}
+
+export function useParentDashboardViewModel(_props: UseParentDashboardViewModelProps): ParentDashboardViewModel {
+  const t = useAppTranslation().dashboardTranslations.coreParentDashboard;
+  const router = useRouter();
+  const userName = useUserStore(state => state.name);
+  const page = useParentDashboardStore(state => state.page);
+  const pageSize = useParentDashboardStore(state => state.pageSize);
+  const setPage = useParentDashboardStore(state => state.setPage);
+  const setScheduleTotalCount = useParentDashboardStore(state => state.setScheduleTotalCount);
+
+  const paginationArgs = usePaginationArgs(page, pageSize);
+  const today = useTodayIso();
+
+  const { data: scheduleData } = useQuery(parentDashboardScheduleQueryDocument, {
+    variables: { date: today, search: null, paginationArgs },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const { data: metricsData } = useQuery(parentDashboardMetricsQueryDocument, {
+    fetchPolicy: "cache-and-network",
+  });
+
+  const { metrics, studentProgress, workshopPromo } = useParentDashboardMetrics(metricsData?.parentDashboardMetrics);
+
+  const scheduleRows = useScheduleRows(scheduleData);
+  const totalCount = scheduleData?.parentDashboardSchedule?.totalCount ?? 0;
+  const labels = useDashboardLabels(t, userName);
+  const handlers = useParentDashboardHandlers(router, workshopPromo, setPage);
+
+  useScheduleTotalCountSync(totalCount, setScheduleTotalCount);
+
+  const schedulePagination = useSchedulePagination(page, pageSize, totalCount, handlers.handlePageChange);
 
   const pageCount =
     schedulePagination !== undefined && schedulePagination.pageSize > 0

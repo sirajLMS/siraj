@@ -88,30 +88,10 @@ export function useStudentOnboardingViewModel(
   return useStudentOnboardingViewModelImpl();
 }
 
-function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
-  const t = useAppTranslation().dashboardTranslations.studentOnboarding;
-  const tc = useAppTranslation().commonTranslations;
-  const router = useRouter();
-  const notifications = useNotifications();
-  const searchParams = useSearchParams();
-  const initialParentId = searchParams.get("parentId") ?? "";
+type StudentOnboardingFormHook = ReturnType<typeof useForm<StudentOnboardingFormData>>;
 
-  const { execute, loading } = useCreateStudentOnboarding();
-  const [showSuccess, setShowSuccess] = useState(false);
-  // Lazy initializer: generate the pending-avatar storage key once per hook
-  // instance. Using useState with a lazy initializer (instead of useRef) avoids
-  // reading ref.current during render (which trips `react-hooks/refs`).
-  const [pendingAvatarKey] = useState(() => `pending-${crypto.randomUUID()}`);
-  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey });
-
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    setValue,
-  } = useForm<StudentOnboardingFormData>({
+function useStudentOnboardingForm(initialParentId: string): StudentOnboardingFormHook {
+  return useForm<StudentOnboardingFormData>({
     resolver: zodResolver(studentOnboardingSchema),
     defaultValues: {
       parentId: initialParentId,
@@ -124,6 +104,92 @@ function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
       primaryTeacherId: "",
     },
   });
+}
+
+function buildResetPayload(initialParentId: string, formData: StudentOnboardingFormData) {
+  return {
+    parentId: initialParentId || formData.parentId,
+    name: "",
+    avatarUrl: undefined,
+    dateOfBirth: "",
+    gender: null,
+    language: null,
+    status: StudentStatus.OnTrial,
+    primaryTeacherId: "",
+  } as StudentOnboardingFormData;
+}
+
+function buildLabels(
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentOnboarding"]
+): StudentOnboardingLabels {
+  return {
+    pageTitle: t.pageTitle,
+    pageSubtitle: t.pageSubtitle,
+    statusBanner: t.statusBanner,
+    create: t.actions.create,
+    processing: t.actions.processing,
+    sections: {
+      parentAssignment: t.sections.parentAssignment,
+      studentInfo: t.sections.studentInfo,
+      teacherAssignment: t.sections.teacherAssignment,
+    },
+    fields: {
+      parent: t.fields.parent,
+      name: t.fields.name,
+      dateOfBirth: t.fields.dateOfBirth,
+      gender: t.fields.gender,
+      male: t.fields.male,
+      female: t.fields.female,
+      language: t.fields.language,
+      status: t.fields.status,
+      primaryTeacher: t.fields.primaryTeacher,
+      avatar: t.fields.avatar,
+    },
+    placeholders: {
+      parent: t.placeholders.parent,
+      name: t.placeholders.name,
+      dateOfBirth: t.placeholders.dateOfBirth,
+      language: t.placeholders.language,
+      primaryTeacher: t.placeholders.primaryTeacher,
+    },
+    options: {
+      status: {
+        onTrial: t.options.status.onTrial,
+        regular: t.options.status.regular,
+      },
+    },
+    validation: {
+      parentRequired: t.validation.parentRequired,
+      nameMinLength: t.validation.nameMinLength,
+    },
+  };
+}
+
+function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
+  const translations = useAppTranslation();
+  const t = translations.dashboardTranslations.studentOnboarding;
+  const tc = translations.commonTranslations;
+  const router = useRouter();
+  const notifications = useNotifications();
+  const searchParams = useSearchParams();
+  const initialParentId = searchParams.get("parentId") ?? "";
+
+  const { execute, loading } = useCreateStudentOnboarding();
+  const [showSuccess, setShowSuccess] = useState(false);
+  // Lazy initializer: Generate the pending-avatar storage key once per hook
+  // instance. Using useState with a lazy initializer (instead of useRef) avoids
+  // reading ref.current during render (which trips `react-hooks/refs`).
+  const [pendingAvatarKey] = useState(() => `pending-${crypto.randomUUID()}`);
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey });
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue,
+  } = useStudentOnboardingForm(initialParentId);
 
   useEffect(() => {
     if (initialParentId) {
@@ -131,74 +197,25 @@ function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
     }
   }, [initialParentId, setValue]);
 
-  const onSubmit = async (formData: StudentOnboardingFormData) => {
-    try {
-      logger.info("Submitting student onboarding form", { formData });
-      const result = await execute(formData);
-      setShowSuccess(true);
-      reset({
-        parentId: initialParentId || formData.parentId,
-        name: "",
-        avatarUrl: undefined,
-        dateOfBirth: "",
-        gender: null,
-        language: null,
-        status: StudentStatus.OnTrial,
-        primaryTeacherId: "",
-      });
-      if (result.studentId) {
-        router.push(studentHref(result.studentId));
+  const onSubmit = useCallback(
+    async (formData: StudentOnboardingFormData) => {
+      try {
+        logger.info("Submitting student onboarding form", { formData });
+        const result = await execute(formData);
+        setShowSuccess(true);
+        reset(buildResetPayload(initialParentId, formData));
+        if (result.studentId) {
+          router.push(studentHref(result.studentId));
+        }
+      } catch (error) {
+        logger.error("Failed to submit student onboarding form", { error });
+        notifications.show(tc.operationFailed, { severity: "error", autoHideDuration: 5000 });
       }
-    } catch (error) {
-      logger.error("Failed to submit student onboarding form", { error });
-      notifications.show(tc.operationFailed, { severity: "error", autoHideDuration: 5000 });
-    }
-  };
-
-  const labels: StudentOnboardingLabels = useMemo(
-    () => ({
-      pageTitle: t.pageTitle,
-      pageSubtitle: t.pageSubtitle,
-      statusBanner: t.statusBanner,
-      create: t.actions.create,
-      processing: t.actions.processing,
-      sections: {
-        parentAssignment: t.sections.parentAssignment,
-        studentInfo: t.sections.studentInfo,
-        teacherAssignment: t.sections.teacherAssignment,
-      },
-      fields: {
-        parent: t.fields.parent,
-        name: t.fields.name,
-        dateOfBirth: t.fields.dateOfBirth,
-        gender: t.fields.gender,
-        male: t.fields.male,
-        female: t.fields.female,
-        language: t.fields.language,
-        status: t.fields.status,
-        primaryTeacher: t.fields.primaryTeacher,
-        avatar: t.fields.avatar,
-      },
-      placeholders: {
-        parent: t.placeholders.parent,
-        name: t.placeholders.name,
-        dateOfBirth: t.placeholders.dateOfBirth,
-        language: t.placeholders.language,
-        primaryTeacher: t.placeholders.primaryTeacher,
-      },
-      options: {
-        status: {
-          onTrial: t.options.status.onTrial,
-          regular: t.options.status.regular,
-        },
-      },
-      validation: {
-        parentRequired: t.validation.parentRequired,
-        nameMinLength: t.validation.nameMinLength,
-      },
-    }),
-    [t]
+    },
+    [execute, initialParentId, notifications, reset, router, tc.operationFailed]
   );
+
+  const labels = useMemo(() => buildLabels(t), [t]);
 
   const onCloseSuccess = useCallback(() => setShowSuccess(false), []);
 

@@ -3,7 +3,12 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback } from "react";
+import type { CreateRecurringClassInput, DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass,
+  TeacherWorkloadMetricsQuery_teacherWorkloadMetrics_WeeklyWorkloadMetrics,
+} from "@/frontend/common/graphql/generated/gql/operations";
 import {
   clearWeeklyScheduleMutationDocument,
   deleteRecurringClassMutationDocument,
@@ -17,8 +22,13 @@ import { useCreateRecurringClassStore } from "@/frontend/common/stores/createRec
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import { logger } from "@/frontend/common/utils/logger";
+import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { postCreateRecurringMeetingConfig } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import { useDialogFormState, useValidation } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
+import {
+  type CreateRecurringClassDialogFormState,
+  useDialogFormState,
+  useValidation,
+} from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
 import type {
   CreateRecurringClassDialogViewModel,
   TeacherWeeklyScheduleViewProps,
@@ -36,133 +46,202 @@ export type UseTeacherWeeklyScheduleViewModelProps = {
   readonly teacherId: string;
 };
 
-export function useTeacherWeeklyScheduleViewModel(
-  props: Readonly<UseTeacherWeeklyScheduleViewModelProps>
-): TeacherWeeklyScheduleViewModel {
-  const { teacherId } = props;
+type CreateRecurringClassResult = {
+  readonly id?: string | null;
+  readonly recurringScheduleId?: string | null;
+  readonly classInstanceIds?: ReadonlyArray<string> | null;
+  readonly classInstanceCount?: number | null;
+};
 
-  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
-  // NEW FOR PLAN v5: dialog labels lifted out of the tier views (specs §6.3 —
-  // labels travel with the ViewModel, the tier views no longer call
-  // `useAppTranslation` themselves for THIS dialog).
-  const dialogLabels = useAppTranslation().dashboardTranslations.teacherCreateRecurringClass;
-  const tMeeting = useAppTranslation().uiTranslations.meetingConfigManager;
-  const tRecurringSchedule = useAppTranslation().uiTranslations.meetingConfigRecurringSchedule;
-  const tClassScope = useAppTranslation().uiTranslations.meetingConfigClassScope;
-  const notifications = useNotifications();
-  const client = useApolloClient();
-  const router = useRouter();
-  const { selectedWeekDate } = useWeeklyScheduleStore();
-  // NEW FOR PLAN v5: the ViewModel subscribes to the dialog store directly so
-  // the tier dialog files don't (specs §6.2 + N2 — ViewModel owns state).
-  const { openDialog, isDialogOpen, closeDialog, days, toggleDay, setTimeOverride, toggleTimeOverride, resetDays } =
-    useCreateRecurringClassStore();
-  const { name: loggedInUserName, hasPermission } = useUserStore();
+type SchedulePermissions = {
+  readonly isAdmin: boolean;
+  readonly hasScheduleCreateClass: boolean;
+  readonly hasScheduleClearWeekly: boolean;
+  readonly hasScheduleViewWorkload: boolean;
+  readonly hasScheduleDeleteClass: boolean;
+};
 
-  const {
-    data: scheduleData,
-    loading: scheduleLoading,
-    refetch: refetchSchedule,
-  } = useQuery(teacherWeeklyScheduleGridQueryDocument, {
-    variables: { teacherId, weekDate: selectedWeekDate },
-  });
+type BaseViewModelFields = Pick<
+  TeacherWeeklyScheduleViewModel,
+  | "onRemoveClass"
+  | "onClearSchedule"
+  | "onAddClass"
+  | "hasScheduleCreateClass"
+  | "hasScheduleClearWeekly"
+  | "hasScheduleViewWorkload"
+  | "hasScheduleDeleteClass"
+  | "createRecurringClassDialog"
+  | "handleRefetch"
+>;
 
-  const { data: workloadData, refetch: refetchWorkload } = useQuery(teacherWorkloadMetricsQueryDocument, {
-    variables: { teacherId, weekDate: selectedWeekDate },
-  });
+type DeleteClassFn = (opts: { variables: { classInstanceId: string } }) => Promise<unknown>;
+type ClearWeeklyFn = (opts: { variables: { teacherId: string } }) => Promise<unknown>;
+type CreateClassFn = (opts: { variables: { input: CreateRecurringClassInput } }) => Promise<{
+  data?: { createRecurringClass?: CreateRecurringClassResult | null };
+}>;
 
-  const isAdmin = hasPermission(AppPermission.StaffViewDirectory);
+type Translations = ReturnType<typeof useScheduleTranslations>;
 
+type ScheduleClass =
+  TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass;
+
+type ScheduleGrid = { teacherId: string | null; weekEnd: string | null; classes: ReadonlyArray<ScheduleClass> | null };
+
+type Workload = TeacherWorkloadMetricsQuery_teacherWorkloadMetrics_WeeklyWorkloadMetrics | null | undefined;
+
+function useScheduleTranslations(): {
+  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["teacherWeeklySchedule"];
+  readonly dialogLabels: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["teacherCreateRecurringClass"];
+  readonly tMeeting: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigManager"];
+  readonly tRecurringSchedule: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigRecurringSchedule"];
+  readonly tClassScope: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigClassScope"];
+} {
+  return {
+    t: useAppTranslation().dashboardTranslations.teacherWeeklySchedule,
+    // NEW FOR PLAN v5: dialog labels lifted out of the tier views (specs §6.3 —
+    // labels travel with the ViewModel, the tier views no longer call
+    // `useAppTranslation` themselves for THIS dialog).
+    dialogLabels: useAppTranslation().dashboardTranslations.teacherCreateRecurringClass,
+    tMeeting: useAppTranslation().uiTranslations.meetingConfigManager,
+    tRecurringSchedule: useAppTranslation().uiTranslations.meetingConfigRecurringSchedule,
+    tClassScope: useAppTranslation().uiTranslations.meetingConfigClassScope,
+  };
+}
+
+function useSchedulePermissions(hasPermission: (perm: AppPermission) => boolean): SchedulePermissions {
   // NEW FOR PLAN v5: per-button/tier-section permission booleans lifted out
   // of the tier views per specs.md §6.1 + §3 N3. The tier weekly-schedule
   // views previously rendered inline `<RequirePermission>` wrappers for
   // ScheduleCreateClass / ScheduleClearWeekly / ScheduleViewWorkload /
   // ScheduleDeleteClass — they now gate on these booleans instead.
-  const hasScheduleCreateClass = hasPermission(AppPermission.ScheduleCreateClass);
-  const hasScheduleClearWeekly = hasPermission(AppPermission.ScheduleClearWeekly);
-  const hasScheduleViewWorkload = hasPermission(AppPermission.ScheduleViewWorkload);
-  const hasScheduleDeleteClass = hasPermission(AppPermission.ScheduleDeleteClass);
+  return {
+    isAdmin: hasPermission(AppPermission.StaffViewDirectory),
+    hasScheduleCreateClass: hasPermission(AppPermission.ScheduleCreateClass),
+    hasScheduleClearWeekly: hasPermission(AppPermission.ScheduleClearWeekly),
+    hasScheduleViewWorkload: hasPermission(AppPermission.ScheduleViewWorkload),
+    hasScheduleDeleteClass: hasPermission(AppPermission.ScheduleDeleteClass),
+  };
+}
+
+function useScheduleQueries(teacherId: string, weekDate: string, isAdmin: boolean) {
+  const {
+    data: scheduleData,
+    loading: scheduleLoading,
+    refetch: refetchSchedule,
+  } = useQuery(teacherWeeklyScheduleGridQueryDocument, {
+    variables: { teacherId, weekDate },
+  });
+
+  const { data: workloadData, refetch: refetchWorkload } = useQuery(teacherWorkloadMetricsQueryDocument, {
+    variables: { teacherId, weekDate },
+  });
 
   const { data: directoryData } = useQuery(teacherDirectoryQueryDocument, {
     variables: { search: null, paginationArgs: null },
     skip: !isAdmin,
   });
 
+  return { scheduleData, scheduleLoading, refetchSchedule, workloadData, refetchWorkload, directoryData };
+}
+
+function useScheduleMutations() {
   const [deleteRecurringClass] = useMutation(deleteRecurringClassMutationDocument);
   const [clearWeeklySchedule] = useMutation(clearWeeklyScheduleMutationDocument);
-
   const [createClassMutation, { loading: mutationLoading }] = useMutation(createRecurringClassMutationDocument);
+  return { deleteRecurringClass, clearWeeklySchedule, createClassMutation, mutationLoading };
+}
 
-  const schedule = scheduleData?.teacherWeeklyScheduleGrid;
-  const workload = workloadData?.teacherWorkloadMetrics;
-
-  const teacherName =
-    directoryData?.teacherDirectory?.rows?.find(r => r?.id === teacherId)?.name || loggedInUserName || "";
-
-  useDocumentTitle(teacherName, "dashboard.teacherWeeklySchedule", "pageTitle");
-
-  // NEW FOR PLAN v5: `useDialogFormState` (8 `useState` + 1 `useEffect`) is
-  // now called by the ViewModel instead of by the tier views (specs §6.2 + N7
-  // + N6 — the ViewModel owns form state + side-effect resets).
-  const formState = useDialogFormState(isDialogOpen, resetDays);
-
-  // NEW FOR PLAN v5: `useValidation` (which calls `useNotifications`) is now
-  // called by the ViewModel (specs N17 — `useNotifications` only in VM).
-  const validateBeforeSubmit = useValidation(formState, days, notifications, dialogLabels, tClassScope, tMeeting);
-
-  // NEW FOR PLAN v5: `hasSessionCreateClass` aliases the same
-  // `ScheduleCreateClass` permission computed above so the dialog
-  // `CreateRecurringClassDialogViewModel` bubble can offer the boolean
-  // without an extra `hasPermission` call (specs §6.1 + §3 N3).
-  const hasSessionCreateClass = hasScheduleCreateClass;
-
-  const handleRemoveClass = useCallback(
-    async (classInstanceId: string) => {
-      try {
-        await deleteRecurringClass({
-          variables: { classInstanceId },
-        });
-        await refetchSchedule();
-        await refetchWorkload();
-        notifications.show(t.notifications.classDeleted, { severity: "success" });
-      } catch (error) {
-        logger.error("Failed to delete class instance", { error });
-        notifications.show(t.notifications.classDeleteFailed, { severity: "error" });
-      }
-    },
-    [deleteRecurringClass, refetchSchedule, refetchWorkload, notifications, t]
-  );
-
-  const handleClearSchedule = useCallback(async () => {
-    try {
-      await clearWeeklySchedule({
-        variables: { teacherId },
-      });
-      await refetchSchedule();
-      await refetchWorkload();
-      notifications.show(t.notifications.scheduleCleared, { severity: "success" });
-    } catch (error) {
-      logger.error("Failed to clear weekly schedule", { error });
-      notifications.show(t.notifications.scheduleClearFailed, { severity: "error" });
-    }
-  }, [clearWeeklySchedule, teacherId, refetchSchedule, refetchWorkload, notifications, t]);
-
-  const handleRefetch = useCallback(async () => {
+function useScheduleRefetcher(refetchSchedule: () => Promise<unknown>, refetchWorkload: () => Promise<unknown>) {
+  return useCallback(async () => {
     await refetchSchedule();
     await refetchWorkload();
   }, [refetchSchedule, refetchWorkload]);
+}
 
+type ScheduleMutationRunner = (args: {
+  readonly action: () => Promise<unknown>;
+  readonly onSuccessLabel: string;
+  readonly onErrorLabel: string;
+  readonly errorLogMsg: string;
+}) => Promise<void>;
+
+function useScheduleMutationRunner(args: {
+  readonly refetchSchedule: () => Promise<unknown>;
+  readonly refetchWorkload: () => Promise<unknown>;
+  readonly notifications: ReturnType<typeof useNotifications>;
+}) {
+  const { refetchSchedule, refetchWorkload, notifications } = args;
+  return useCallback<ScheduleMutationRunner>(
+    async ({ action, onSuccessLabel, onErrorLabel, errorLogMsg }) => {
+      try {
+        await action();
+        await refetchSchedule();
+        await refetchWorkload();
+        notifications.show(onSuccessLabel, { severity: "success" });
+      } catch (error) {
+        logger.error(errorLogMsg, { error });
+        notifications.show(onErrorLabel, { severity: "error" });
+      }
+    },
+    [refetchSchedule, refetchWorkload, notifications]
+  );
+}
+
+function useGridClassRemoval(args: {
+  readonly deleteRecurringClass: DeleteClassFn;
+  readonly runMutation: ScheduleMutationRunner;
+  readonly onSuccessLabel: string;
+  readonly onErrorLabel: string;
+  readonly errorLogMsg: string;
+}) {
+  const { deleteRecurringClass, runMutation, onSuccessLabel, onErrorLabel, errorLogMsg } = args;
+  return useCallback(
+    async (classInstanceId: string) => {
+      await runMutation({
+        action: () => deleteRecurringClass({ variables: { classInstanceId } }),
+        onSuccessLabel,
+        onErrorLabel,
+        errorLogMsg,
+      });
+    },
+    [deleteRecurringClass, runMutation, onSuccessLabel, onErrorLabel, errorLogMsg]
+  );
+}
+
+function useScheduleClear(args: {
+  readonly clearWeeklySchedule: ClearWeeklyFn;
+  readonly teacherId: string;
+  readonly runMutation: ScheduleMutationRunner;
+  readonly onSuccessLabel: string;
+  readonly onErrorLabel: string;
+  readonly errorLogMsg: string;
+}) {
+  const { clearWeeklySchedule, teacherId, runMutation, onSuccessLabel, onErrorLabel, errorLogMsg } = args;
+  return useCallback(async () => {
+    await runMutation({
+      action: () => clearWeeklySchedule({ variables: { teacherId } }),
+      onSuccessLabel,
+      onErrorLabel,
+      errorLogMsg,
+    });
+  }, [clearWeeklySchedule, teacherId, runMutation, onSuccessLabel, onErrorLabel, errorLogMsg]);
+}
+
+function useCompleteSuccessfulCreate(args: {
+  readonly client: ReturnType<typeof useApolloClient>;
+  readonly formState: CreateRecurringClassDialogFormState;
+  readonly notifications: ReturnType<typeof useNotifications>;
+  readonly dialogLabels: Translations["dialogLabels"];
+  readonly handleRefetch: () => Promise<void>;
+  readonly closeDialog: () => void;
+}) {
+  const { client, formState, notifications, dialogLabels, handleRefetch, closeDialog } = args;
   // NEW FOR PLAN v5: completeSuccessfulCreate — lifts the previously inline
   // `useCallback` out of BOTH tier dialog files. The ViewModel owns the
   // `postCreateRecurringMeetingConfig` side-effect + `useNotifications`
   // success toast + `logger.info` (specs §6.2 + N17).
-  const completeSuccessfulCreate = useCallback(
-    async (result: {
-      readonly id?: string | null;
-      readonly recurringScheduleId?: string | null;
-      readonly classInstanceIds?: ReadonlyArray<string> | null;
-      readonly classInstanceCount?: number | null;
-    }) => {
+  return useCallback(
+    async (result: CreateRecurringClassResult) => {
       if (!result) {
         return;
       }
@@ -197,12 +276,33 @@ export function useTeacherWeeklyScheduleViewModel(
     },
     [client, formState, notifications, dialogLabels, handleRefetch, closeDialog]
   );
+}
 
+function useHandleSubmit(args: {
+  readonly teacherId: string;
+  readonly formState: CreateRecurringClassDialogFormState;
+  readonly days: readonly DayScheduleConfig[];
+  readonly validateBeforeSubmit: () => boolean;
+  readonly createClassMutation: CreateClassFn;
+  readonly completeSuccessfulCreate: (result: CreateRecurringClassResult) => Promise<void>;
+  readonly notifications: ReturnType<typeof useNotifications>;
+  readonly creationFailedLabel: Translations["dialogLabels"]["errors"]["creationFailed"];
+}) {
+  const {
+    teacherId,
+    formState,
+    days,
+    validateBeforeSubmit,
+    createClassMutation,
+    completeSuccessfulCreate,
+    notifications,
+    creationFailedLabel,
+  } = args;
   // NEW FOR PLAN v5: handleSubmit — the previously inline submit handler
   // (with `buildCreateRecurringClassInput` + `createClassMutation` +
   // `logger.error` + `useNotifications` error toast) lifted out of BOTH
   // tier dialog files (specs §6.2 + N1 + N17).
-  const handleSubmit = useCallback(
+  return useCallback(
     async (e: React.SyntheticEvent<HTMLFormElement>) => {
       e.preventDefault();
 
@@ -222,9 +322,7 @@ export function useTeacherWeeklyScheduleViewModel(
           days
         );
 
-        const { data } = await createClassMutation({
-          variables: { input },
-        });
+        const { data } = await createClassMutation({ variables: { input } });
 
         if (data?.createRecurringClass) {
           await completeSuccessfulCreate(data.createRecurringClass);
@@ -232,7 +330,7 @@ export function useTeacherWeeklyScheduleViewModel(
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         logger.error("Failed to create recurring class", { err: error });
-        notifications.show(dialogLabels.errors.creationFailed, { severity: "error" });
+        notifications.show(creationFailedLabel, { severity: "error" });
       }
     },
     [
@@ -248,20 +346,46 @@ export function useTeacherWeeklyScheduleViewModel(
       createClassMutation,
       completeSuccessfulCreate,
       notifications,
-      dialogLabels.errors.creationFailed,
+      creationFailedLabel,
     ]
   );
+}
 
-  // NEW FOR PLAN v5: onGoToCreatedClass — the previously inline
-  // `() => router.push(`/classes/${createdClassInstanceId}`)` handler lifted
-  // out of BOTH tier dialog files (specs §6.2 + N8 — `useRouter` only in VM).
-  const onGoToCreatedClass = useCallback(() => {
-    if (formState.createdClassInstanceId) {
-      router.push(`/classes/${formState.createdClassInstanceId}`);
-    }
-  }, [formState.createdClassInstanceId, router]);
-
-  const createRecurringClassDialog: CreateRecurringClassDialogViewModel = {
+function buildCreateRecurringClassDialog(args: {
+  readonly formState: CreateRecurringClassDialogFormState;
+  readonly days: readonly DayScheduleConfig[];
+  readonly toggleDay: (day: DayOfWeek) => void;
+  readonly toggleTimeOverride: (day: DayOfWeek) => void;
+  readonly setTimeOverride: (day: DayOfWeek, time: string) => void;
+  readonly mutationLoading: boolean;
+  readonly isDialogOpen: boolean;
+  readonly closeDialog: () => void;
+  readonly validateBeforeSubmit: () => boolean;
+  readonly handleSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => Promise<void>;
+  readonly hasSessionCreateClass: boolean;
+  readonly dialogLabels: Translations["dialogLabels"];
+  readonly tMeeting: Translations["tMeeting"];
+  readonly tRecurringSchedule: Translations["tRecurringSchedule"];
+  readonly onGoToCreatedClass: () => void;
+}): CreateRecurringClassDialogViewModel {
+  const {
+    formState,
+    days,
+    toggleDay,
+    toggleTimeOverride,
+    setTimeOverride,
+    mutationLoading,
+    isDialogOpen,
+    closeDialog,
+    validateBeforeSubmit,
+    handleSubmit,
+    hasSessionCreateClass,
+    dialogLabels,
+    tMeeting,
+    tRecurringSchedule,
+    onGoToCreatedClass,
+  } = args;
+  return {
     formState,
     days,
     toggleDay,
@@ -280,53 +404,159 @@ export function useTeacherWeeklyScheduleViewModel(
     recurringScheduleLabels: tRecurringSchedule,
     onGoToCreatedClass,
   };
+}
 
-  // Handle loading state - return null-like shape when loading
-  if (scheduleLoading || !schedule) {
-    return {
-      schedule: null,
-      onRemoveClass: handleRemoveClass,
-      onClearSchedule: handleClearSchedule,
-      onAddClass: openDialog,
-      hasScheduleCreateClass,
-      hasScheduleClearWeekly,
-      hasScheduleViewWorkload,
-      hasScheduleDeleteClass,
-      createRecurringClassDialog,
-      handleRefetch,
-    };
-  }
-
+function buildScheduleViewModel(schedule: ScheduleGrid, workload: Workload, teacherName: string) {
   return {
-    schedule: {
-      teacherId: schedule.teacherId || "",
-      teacherName,
-      weeklyHoursWorked: workload?.weeklyHoursWorked ? Number(workload.weeklyHoursWorked) : 0,
-      classes: (schedule.classes || []).map(c => ({
-        id: c.id || "",
-        studentName: c.studentName || "",
-        studentId: c.studentId || "",
-        duration: c.duration || 0,
-        startTime: c.startTime || "",
-        day: c.day || "",
-        executionState: c.executionState,
-        outcome: c.outcome,
-        subjectName: c.subjectName ?? null,
-        classType: c.classType ?? null,
-        meetingJoinUrl: c.meetingJoinUrl,
-        effectiveMeeting: c.effectiveMeeting,
-        isFrozen: c.isFrozen ?? false,
-      })),
-      lastUpdated: schedule.weekEnd || new Date().toLocaleTimeString(),
-    },
+    teacherId: schedule?.teacherId || "",
+    teacherName,
+    weeklyHoursWorked: workload?.weeklyHoursWorked ? Number(workload.weeklyHoursWorked) : 0,
+    classes: (schedule?.classes || []).map(c => ({
+      id: c.id || "",
+      studentName: c.studentName || "",
+      studentId: c.studentId || "",
+      duration: c.duration || 0,
+      startTime: c.startTime || "",
+      day: c.day || "",
+      executionState: c.executionState,
+      outcome: c.outcome,
+      subjectName: c.subjectName ?? null,
+      classType: c.classType ?? null,
+      meetingJoinUrl: c.meetingJoinUrl,
+      effectiveMeeting: c.effectiveMeeting,
+      isFrozen: c.isFrozen ?? false,
+    })),
+    lastUpdated: schedule?.weekEnd || new Date().toLocaleTimeString(),
+  };
+}
+
+export function useTeacherWeeklyScheduleViewModel(
+  props: Readonly<UseTeacherWeeklyScheduleViewModelProps>
+): TeacherWeeklyScheduleViewModel {
+  const { teacherId } = props;
+
+  const { t, dialogLabels, tMeeting, tRecurringSchedule, tClassScope } = useScheduleTranslations();
+  const notifications = useNotifications();
+  const client = useApolloClient();
+  const router = useRouter();
+  const { selectedWeekDate } = useWeeklyScheduleStore();
+  // NEW FOR PLAN v5: the ViewModel subscribes to the dialog store directly so
+  // the tier dialog files don't (specs §6.2 + N2 — ViewModel owns state).
+  const { openDialog, isDialogOpen, closeDialog, days, toggleDay, setTimeOverride, toggleTimeOverride, resetDays } =
+    useCreateRecurringClassStore();
+  const { name: loggedInUserName, hasPermission } = useUserStore();
+
+  const permissions = useSchedulePermissions(hasPermission);
+  const { scheduleData, scheduleLoading, refetchSchedule, workloadData, refetchWorkload, directoryData } =
+    useScheduleQueries(teacherId, selectedWeekDate, permissions.isAdmin);
+  const { deleteRecurringClass, clearWeeklySchedule, createClassMutation, mutationLoading } = useScheduleMutations();
+
+  const schedule = scheduleData?.teacherWeeklyScheduleGrid;
+  const workload = workloadData?.teacherWorkloadMetrics;
+  const teacherName =
+    directoryData?.teacherDirectory?.rows?.find(r => r?.id === teacherId)?.name || loggedInUserName || "";
+
+  useDocumentTitle(teacherName, "dashboard.teacherWeeklySchedule", "pageTitle");
+
+  // NEW FOR PLAN v5: `useDialogFormState` (8 `useState` + 1 `useEffect`) is
+  // now called by the ViewModel instead of by the tier views (specs §6.2 + N7
+  // + N6 — the ViewModel owns form state + side-effect resets).
+  const formState = useDialogFormState(isDialogOpen, resetDays);
+  // NEW FOR PLAN v5: `useValidation` (which calls `useNotifications`) is now
+  // called by the ViewModel (specs N17 — `useNotifications` only in VM).
+  const validateBeforeSubmit = useValidation(formState, days, notifications, dialogLabels, tClassScope, tMeeting);
+  // NEW FOR PLAN v5: `hasSessionCreateClass` aliases the same
+  // `ScheduleCreateClass` permission computed above so the dialog
+  // `CreateRecurringClassDialogViewModel` bubble can offer the boolean
+  // without an extra `hasPermission` call (specs §6.1 + §3 N3).
+  const hasSessionCreateClass = permissions.hasScheduleCreateClass;
+
+  const handleRefetch = useScheduleRefetcher(refetchSchedule, refetchWorkload);
+  const runScheduleMutation = useScheduleMutationRunner({
+    refetchSchedule,
+    refetchWorkload,
+    notifications,
+  });
+  const handleRemoveClass = useGridClassRemoval({
+    deleteRecurringClass,
+    runMutation: runScheduleMutation,
+    onSuccessLabel: t.notifications.classDeleted,
+    onErrorLabel: t.notifications.classDeleteFailed,
+    errorLogMsg: "Failed to delete class instance",
+  });
+  const handleClearSchedule = useScheduleClear({
+    clearWeeklySchedule,
+    teacherId,
+    runMutation: runScheduleMutation,
+    onSuccessLabel: t.notifications.scheduleCleared,
+    onErrorLabel: t.notifications.scheduleClearFailed,
+    errorLogMsg: "Failed to clear weekly schedule",
+  });
+  const completeSuccessfulCreate = useCompleteSuccessfulCreate({
+    client,
+    formState,
+    notifications,
+    dialogLabels,
+    handleRefetch,
+    closeDialog,
+  });
+  const handleSubmit = useHandleSubmit({
+    teacherId,
+    formState,
+    days,
+    validateBeforeSubmit,
+    createClassMutation,
+    completeSuccessfulCreate,
+    notifications,
+    creationFailedLabel: dialogLabels.errors.creationFailed,
+  });
+
+  // NEW FOR PLAN v5: onGoToCreatedClass — the previously inline
+  // `() => router.push(`/classes/${createdClassInstanceId}`)` handler lifted
+  // out of BOTH tier dialog files (specs §6.2 + N8 — `useRouter` only in VM).
+  const onGoToCreatedClass = useCallback(() => {
+    if (formState.createdClassInstanceId) {
+      router.push(`/classes/${formState.createdClassInstanceId}`);
+    }
+  }, [formState.createdClassInstanceId, router]);
+
+  const createRecurringClassDialog = buildCreateRecurringClassDialog({
+    formState,
+    days,
+    toggleDay,
+    toggleTimeOverride,
+    setTimeOverride,
+    mutationLoading,
+    isDialogOpen,
+    closeDialog,
+    validateBeforeSubmit,
+    handleSubmit,
+    hasSessionCreateClass,
+    dialogLabels,
+    tMeeting,
+    tRecurringSchedule,
+    onGoToCreatedClass,
+  });
+
+  const baseFields: BaseViewModelFields = {
     onRemoveClass: handleRemoveClass,
     onClearSchedule: handleClearSchedule,
     onAddClass: openDialog,
-    hasScheduleCreateClass,
-    hasScheduleClearWeekly,
-    hasScheduleViewWorkload,
-    hasScheduleDeleteClass,
+    hasScheduleCreateClass: permissions.hasScheduleCreateClass,
+    hasScheduleClearWeekly: permissions.hasScheduleClearWeekly,
+    hasScheduleViewWorkload: permissions.hasScheduleViewWorkload,
+    hasScheduleDeleteClass: permissions.hasScheduleDeleteClass,
     createRecurringClassDialog,
     handleRefetch,
+  };
+
+  // Handle loading state - return null-like shape when loading
+  if (scheduleLoading || !schedule) {
+    return { schedule: null, ...baseFields };
+  }
+
+  return {
+    schedule: buildScheduleViewModel(schedule, workload, teacherName),
+    ...baseFields,
   };
 }

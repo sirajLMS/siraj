@@ -133,9 +133,41 @@ const EMPTY_INPUT: AvailabilitySearchInput = {
   },
 };
 
-export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleViewModelProps>): SearchScheduleViewModel {
-  const requiredPermission = props?.requiredPermission ?? AppPermission.ScheduleSearchAvailability;
+function adaptResultItemToStoreTeacher(teacher: SearchScheduleResultItem): SearchScheduleMonthDrawerTeacher {
+  return {
+    id: teacher.id ?? null,
+    name: teacher.name ?? null,
+    gender: teacher.gender ?? null,
+    timezone: teacher.timezone ?? null,
+    availableDaysCount: teacher.availableDaysCount ?? null,
+    gaps: (teacher.gaps ?? null) as SearchScheduleMonthDrawerTeacher["gaps"],
+  };
+}
 
+interface SearchScheduleStoreSlice {
+  readonly draft: SearchScheduleDraftFilters;
+  readonly setDraft: (draft: Partial<SearchScheduleDraftFilters>) => void;
+  readonly activeInput: AvailabilitySearchInput | null;
+  readonly commitSearch: () => void;
+  readonly setPage: (page: number) => void;
+  readonly hasSearched: boolean;
+  readonly hasHydrated: boolean;
+  readonly selectedTeacher: SearchScheduleTeacherOption | null;
+  readonly setSelectedTeacher: (teacher: SearchScheduleTeacherOption | null) => void;
+  readonly formFilterDrawerOpen: boolean;
+  readonly setFormFilterDrawerOpen: (open: boolean) => void;
+  readonly sortMenuAnchorEl: HTMLElement | null;
+  readonly setSortMenuAnchorEl: (anchor: HTMLElement | null) => void;
+  readonly monthDrawerOpen: boolean;
+  readonly monthDrawerAnchorFromDate: string;
+  readonly monthDrawerCurrentMonthIso: string;
+  readonly monthDrawerTeacher: SearchScheduleMonthDrawerTeacher | null;
+  readonly openMonthDrawer: (teacher: SearchScheduleMonthDrawerTeacher, anchorFromDate: string) => void;
+  readonly closeMonthDrawer: () => void;
+  readonly setMonthDrawerCurrentMonth: (isoMonth: string) => void;
+}
+
+function useSearchScheduleStoreSlice(): SearchScheduleStoreSlice {
   // Existing search-result state subscription.
   const draft = useSearchScheduleStore(state => state.draft);
   const setDraft = useSearchScheduleStore(state => state.setDraft);
@@ -163,14 +195,45 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
   const closeMonthDrawer = useSearchScheduleStore(state => state.closeMonthDrawer);
   const setMonthDrawerCurrentMonth = useSearchScheduleStore(state => state.setMonthDrawerCurrentMonth);
 
-  useEffect(() => {
-    if (!hasHydrated || hasSearched) {
-      return;
-    }
+  return {
+    draft,
+    setDraft,
+    activeInput,
+    commitSearch,
+    setPage,
+    hasSearched,
+    hasHydrated,
+    selectedTeacher,
+    setSelectedTeacher,
+    formFilterDrawerOpen,
+    setFormFilterDrawerOpen,
+    sortMenuAnchorEl,
+    setSortMenuAnchorEl,
+    monthDrawerOpen,
+    monthDrawerAnchorFromDate,
+    monthDrawerCurrentMonthIso,
+    monthDrawerTeacher,
+    openMonthDrawer,
+    closeMonthDrawer,
+    setMonthDrawerCurrentMonth,
+  };
+}
 
-    commitSearch();
-  }, [commitSearch, hasHydrated, hasSearched]);
+interface SearchScheduleHandlers {
+  readonly onSelectTeacher: (teacher: SearchScheduleTeacherOption | null) => void;
+  readonly onOpenFormFilterDrawer: () => void;
+  readonly onCloseFormFilterDrawer: () => void;
+  readonly onSortMenuOpen: (event: { readonly currentTarget: HTMLElement }) => void;
+  readonly onSortMenuClose: () => void;
+  readonly onSortChange: (sortBy: AvailabilitySearchSortBy) => void;
+}
 
+function _useSearchScheduleHandlers(
+  setDraft: (draft: Partial<SearchScheduleDraftFilters>) => void,
+  setSelectedTeacher: (teacher: SearchScheduleTeacherOption | null) => void,
+  setFormFilterDrawerOpen: (open: boolean) => void,
+  setSortMenuAnchorEl: (anchor: HTMLElement | null) => void
+): SearchScheduleHandlers {
   const onSelectTeacher = (teacher: SearchScheduleTeacherOption | null) => {
     setSelectedTeacher(teacher);
   };
@@ -190,7 +253,17 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
     setSortMenuAnchorEl(null);
   };
 
-  // Main search query (existing behavior — kept unchanged).
+  return {
+    onSelectTeacher,
+    onOpenFormFilterDrawer,
+    onCloseFormFilterDrawer,
+    onSortMenuOpen,
+    onSortMenuClose,
+    onSortChange,
+  };
+}
+
+function useSearchScheduleMainQuery(activeInput: AvailabilitySearchInput | null) {
   const { data, loading, error, networkStatus, previousData } = useQuery(searchTeacherAvailabilityQueryDocument, {
     variables: activeInput ? { input: activeInput } : { input: {} as AvailabilitySearchInput },
     skip: activeInput === null,
@@ -205,19 +278,34 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
     !!displayData &&
     (networkStatus === NetworkStatus.refetch || networkStatus === NetworkStatus.setVariables);
 
-  const activeFromDate = useMemo(
-    () => activeInput?.fromDate ?? draft.fromDate,
-    [activeInput?.fromDate, draft.fromDate]
-  );
-  const activeToDate = useMemo(() => activeInput?.toDate ?? draft.toDate, [activeInput?.toDate, draft.toDate]);
-
   const searchResult = displayData?.searchTeacherAvailability;
   const pageInfo = searchResult?.pageInfo;
   const teacherCount = searchResult?.teachers?.length ?? 0;
   const showPaginationFooter = Boolean(pageInfo && (pageInfo.total ?? 0) > 0);
 
-  // NEW FOR PLAN v5: month drawer query — uses the same draft + a teacher-specific month window.
-  // This was previously an inline custom hook `useMonthDrawerQuery` in the tier files (N25 violation).
+  return {
+    data,
+    error,
+    isInitialLoading,
+    isRefetching,
+    searchResult,
+    pageInfo,
+    teacherCount,
+    showPaginationFooter,
+  };
+}
+
+function useSearchScheduleMonthDrawer(
+  draft: SearchScheduleDraftFilters,
+  activeFromDate: string,
+  monthDrawerOpen: boolean,
+  monthDrawerTeacher: SearchScheduleMonthDrawerTeacher | null,
+  monthDrawerCurrentMonthIso: string,
+  monthDrawerAnchorFromDate: string,
+  openMonthDrawer: (teacher: SearchScheduleMonthDrawerTeacher, anchorFromDate: string) => void,
+  closeMonthDrawer: () => void,
+  setMonthDrawerCurrentMonth: (isoMonth: string) => void
+) {
   const monthDrawerCurrentDate = useMemo(() => {
     if (!monthDrawerCurrentMonthIso) {
       // Fall back to the anchor date or today when no month has been navigated yet.
@@ -266,15 +354,7 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
 
   const onOpenMonthDrawer = (teacher: SearchScheduleResultItem, anchorFromDate: string) => {
     // Adapt SearchScheduleResultItem → the minimal persisted store shape.
-    const storeTeacher: SearchScheduleMonthDrawerTeacher = {
-      id: teacher.id ?? null,
-      name: teacher.name ?? null,
-      gender: teacher.gender ?? null,
-      timezone: teacher.timezone ?? null,
-      availableDaysCount: teacher.availableDaysCount ?? null,
-      gaps: (teacher.gaps ?? null) as SearchScheduleMonthDrawerTeacher["gaps"],
-    };
-    openMonthDrawer(storeTeacher, anchorFromDate);
+    openMonthDrawer(adaptResultItemToStoreTeacher(teacher), anchorFromDate);
   };
 
   const onCloseMonthDrawer = () => closeMonthDrawer();
@@ -284,39 +364,127 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
   };
 
   return {
-    searchResult,
-    fromDate: activeFromDate,
-    toDate: activeToDate,
-    isInitialLoading,
-    isRefetching,
-    hasSearched,
-    error,
-    pageInfo,
-    teacherCount,
-    showPaginationFooter,
-    draft,
-    hasHydrated,
-    onDraftChange: setDraft,
-    onSearch: commitSearch,
-    onPageChange: setPage,
-    requiredPermission,
-    selectedTeacher,
-    onSelectTeacher,
-    formFilterDrawerOpen,
-    onOpenFormFilterDrawer,
-    onCloseFormFilterDrawer,
-    sortMenuAnchorEl,
-    onSortMenuOpen,
-    onSortMenuClose,
-    onSortChange,
-    monthDrawerOpen,
-    monthDrawerTeacher: monthDrawerResultItem,
-    monthDrawerCurrentMonth: monthDrawerCurrentDate,
+    monthDrawerCurrentDate,
+    monthDrawerResultItem,
     monthDrawerLoading,
     monthDrawerError,
     monthDrawerDaysByDate,
     onOpenMonthDrawer,
     onCloseMonthDrawer,
     onMonthDrawerChangeMonth,
+  };
+}
+
+export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleViewModelProps>): SearchScheduleViewModel {
+  const requiredPermission = props?.requiredPermission ?? AppPermission.ScheduleSearchAvailability;
+
+  const store = useSearchScheduleStoreSlice();
+
+  useEffect(() => {
+    if (!store.hasHydrated || store.hasSearched) {
+      return;
+    }
+
+    store.commitSearch();
+  }, [store.commitSearch, store.hasHydrated, store.hasSearched]);
+
+  const handlers = _useSearchScheduleHandlers(
+    store.setDraft,
+    store.setSelectedTeacher,
+    store.setFormFilterDrawerOpen,
+    store.setSortMenuAnchorEl
+  );
+
+  // Main search query (existing behavior — kept unchanged).
+  const mainQuery = useSearchScheduleMainQuery(store.activeInput);
+
+  const activeFromDate = useMemo(
+    () => store.activeInput?.fromDate ?? store.draft.fromDate,
+    [store.activeInput?.fromDate, store.draft.fromDate]
+  );
+  const activeToDate = useMemo(
+    () => store.activeInput?.toDate ?? store.draft.toDate,
+    [store.activeInput?.toDate, store.draft.toDate]
+  );
+
+  // NEW FOR PLAN v5: month drawer query — uses the same draft + a teacher-specific month window.
+  // This was previously an inline custom hook `useMonthDrawerQuery` in the tier files (N25 violation).
+  const monthDrawer = useSearchScheduleMonthDrawer(
+    store.draft,
+    activeFromDate,
+    store.monthDrawerOpen,
+    store.monthDrawerTeacher,
+    store.monthDrawerCurrentMonthIso,
+    store.monthDrawerAnchorFromDate,
+    store.openMonthDrawer,
+    store.closeMonthDrawer,
+    store.setMonthDrawerCurrentMonth
+  );
+
+  return buildSearchScheduleViewModel({
+    requiredPermission,
+    store,
+    handlers,
+    mainQuery,
+    activeFromDate,
+    activeToDate,
+    monthDrawer,
+  });
+}
+
+interface SearchScheduleViewModelParts {
+  readonly requiredPermission: AppPermission;
+  readonly store: SearchScheduleStoreSlice;
+  readonly handlers: SearchScheduleHandlers;
+  readonly mainQuery: ReturnType<typeof useSearchScheduleMainQuery>;
+  readonly activeFromDate: string;
+  readonly activeToDate: string;
+  readonly monthDrawer: ReturnType<typeof useSearchScheduleMonthDrawer>;
+}
+
+function buildSearchScheduleViewModel({
+  requiredPermission,
+  store,
+  handlers,
+  mainQuery,
+  activeFromDate,
+  activeToDate,
+  monthDrawer,
+}: SearchScheduleViewModelParts): SearchScheduleViewModel {
+  return {
+    searchResult: mainQuery.searchResult,
+    fromDate: activeFromDate,
+    toDate: activeToDate,
+    isInitialLoading: mainQuery.isInitialLoading,
+    isRefetching: mainQuery.isRefetching,
+    hasSearched: store.hasSearched,
+    error: mainQuery.error,
+    pageInfo: mainQuery.pageInfo,
+    teacherCount: mainQuery.teacherCount,
+    showPaginationFooter: mainQuery.showPaginationFooter,
+    draft: store.draft,
+    hasHydrated: store.hasHydrated,
+    onDraftChange: store.setDraft,
+    onSearch: store.commitSearch,
+    onPageChange: store.setPage,
+    requiredPermission,
+    selectedTeacher: store.selectedTeacher,
+    onSelectTeacher: handlers.onSelectTeacher,
+    formFilterDrawerOpen: store.formFilterDrawerOpen,
+    onOpenFormFilterDrawer: handlers.onOpenFormFilterDrawer,
+    onCloseFormFilterDrawer: handlers.onCloseFormFilterDrawer,
+    sortMenuAnchorEl: store.sortMenuAnchorEl,
+    onSortMenuOpen: handlers.onSortMenuOpen,
+    onSortMenuClose: handlers.onSortMenuClose,
+    onSortChange: handlers.onSortChange,
+    monthDrawerOpen: store.monthDrawerOpen,
+    monthDrawerTeacher: monthDrawer.monthDrawerResultItem,
+    monthDrawerCurrentMonth: monthDrawer.monthDrawerCurrentDate,
+    monthDrawerLoading: monthDrawer.monthDrawerLoading,
+    monthDrawerError: monthDrawer.monthDrawerError,
+    monthDrawerDaysByDate: monthDrawer.monthDrawerDaysByDate,
+    onOpenMonthDrawer: monthDrawer.onOpenMonthDrawer,
+    onCloseMonthDrawer: monthDrawer.onCloseMonthDrawer,
+    onMonthDrawerChangeMonth: monthDrawer.onMonthDrawerChangeMonth,
   };
 }

@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { type MutableRefObject, useCallback, useEffect, useMemo, useRef } from "react";
 import { type UseFormReturn, useForm } from "react-hook-form";
 import {
   ClassExecutionState as GqlClassExecutionState,
@@ -69,8 +69,8 @@ function mapUpcomingClasses(classes: readonly UpcomingClassInput[] | null | unde
   }));
 }
 
-type StudentById = NonNullable<GqlOperations.StudentByIdQuery["studentById"]>;
-type StudentUpcoming = GqlOperations.StudentUpcomingClassesQuery["studentUpcomingClasses"] | undefined;
+type StudentByIdType = NonNullable<GqlOperations.StudentByIdQuery["studentById"]>;
+type StudentUpcomingType = GqlOperations.StudentUpcomingClassesQuery["studentUpcomingClasses"] | undefined;
 
 function buildStudentFromProfile(profile: NonNullable<StudentProfileQueryData>): StudentStatusPageData | null {
   if (!profile.id || !profile.name) return null;
@@ -90,7 +90,7 @@ function buildStudentFromProfile(profile: NonNullable<StudentProfileQueryData>):
   };
 }
 
-function buildStudentFromQuery(student: StudentById, upcoming: StudentUpcoming): StudentStatusPageData | null {
+function buildStudentFromQuery(student: StudentByIdType, upcoming: StudentUpcomingType): StudentStatusPageData | null {
   if (!student.id || !student.name) return null;
   return {
     id: student.id,
@@ -131,20 +131,17 @@ export interface StudentStatusViewModel {
   readonly handleSubmit: (data: StatusUpdateFormData) => Promise<void>;
 }
 
-export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewModelProps>): StudentStatusViewModel {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
-  const tc = useAppTranslation().commonTranslations;
-  const params = useParams();
-  const profileContext = useStudentProfileContext();
-  const notifications = useNotifications();
-  const studentId = props.studentId ?? profileContext?.studentId ?? (typeof params?.id === "string" ? params.id : "");
-  const useUnifiedProfile = profileContext != null;
-  const { canView, canEdit } = useStudentFieldAccess();
-  const canEditStatus = canEdit("student_academic");
-  const canViewStatus = canView("student_academic");
-  const canViewSchedule = canView("student_schedule");
-  const hasTabAccess = canViewStudentProfileTab("status", canView);
+type QueryResult = {
+  readonly studentData: GqlOperations.StudentByIdQuery | undefined;
+  readonly studentLoading: boolean;
+  readonly studentError: unknown;
+  readonly upcomingData: GqlOperations.StudentUpcomingClassesQuery | undefined;
+  readonly upcomingLoading: boolean;
+  readonly upcomingError: unknown;
+  readonly refetchUpcoming: (() => Promise<unknown> | undefined) | undefined;
+};
 
+function useStudentStatusQueries(studentId: string, useUnifiedProfile: boolean): QueryResult {
   const {
     data: studentData,
     loading: studentLoading,
@@ -164,6 +161,71 @@ export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewMo
     skip: !studentId || useUnifiedProfile,
   });
 
+  return { studentData, studentLoading, studentError, upcomingData, upcomingLoading, upcomingError, refetchUpcoming };
+}
+
+type PermissionsResult = {
+  readonly canEditStatus: boolean;
+  readonly canViewStatus: boolean;
+  readonly canViewSchedule: boolean;
+  readonly hasTabAccess: boolean;
+};
+
+function useStudentStatusPermissions(): PermissionsResult {
+  const { canView, canEdit } = useStudentFieldAccess();
+  return {
+    canEditStatus: canEdit("student_academic"),
+    canViewStatus: canView("student_academic"),
+    canViewSchedule: canView("student_schedule"),
+    hasTabAccess: canViewStudentProfileTab("status", canView),
+  };
+}
+
+type DataEnv = {
+  readonly studentId: string;
+  readonly useUnifiedProfile: boolean;
+  readonly profileContext: ReturnType<typeof useStudentProfileContext>;
+};
+
+type DataResult = {
+  readonly student: StudentStatusPageData | null;
+  readonly versionRef: MutableRefObject<number | null>;
+  readonly queries: QueryResult;
+};
+
+function useStudentStatusData(env: Readonly<DataEnv>): DataResult {
+  const { studentId, useUnifiedProfile, profileContext } = env;
+  const queries = useStudentStatusQueries(studentId, useUnifiedProfile);
+
+  const student: StudentStatusPageData | null = useMemo(() => {
+    if (useUnifiedProfile) {
+      const profile = profileContext?.profile;
+      return profile ? buildStudentFromProfile(profile) : null;
+    }
+    const s = queries.studentData?.studentById;
+    if (!s?.id || !s.name) return null;
+    return buildStudentFromQuery(s, queries.upcomingData?.studentUpcomingClasses);
+  }, [useUnifiedProfile, profileContext?.profile, queries.studentData, queries.upcomingData]);
+
+  const versionRef = useRef<number | null>(student?.version ?? null);
+  useEffect(() => {
+    versionRef.current = student?.version ?? null;
+  }, [student?.version]);
+
+  return { student, versionRef, queries };
+}
+
+function useChangeStudentStatusMutation(env: {
+  readonly studentId: string;
+  readonly useUnifiedProfile: boolean;
+  readonly refetchUpcoming: QueryResult["refetchUpcoming"];
+  readonly profileContext: ReturnType<typeof useStudentProfileContext>;
+  readonly t: StudentStatusLabels;
+  readonly tc: CommonLabels;
+}) {
+  const { studentId, useUnifiedProfile, refetchUpcoming, profileContext, t, tc } = env;
+  const notifications = useNotifications();
+
   const handleMutationCompleted = useCallback(() => {
     notifications.show(t.successMessage, {
       severity: "success",
@@ -172,7 +234,7 @@ export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewMo
     if (useUnifiedProfile) {
       profileContext?.refetch()?.catch(() => undefined);
     } else {
-      refetchUpcoming()?.catch(() => undefined);
+      refetchUpcoming?.()?.catch(() => undefined);
     }
   }, [notifications, t, useUnifiedProfile, profileContext, refetchUpcoming]);
 
@@ -197,22 +259,17 @@ export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewMo
     refetchQueries,
   });
 
-  const student: StudentStatusPageData | null = useMemo(() => {
-    if (useUnifiedProfile) {
-      const profile = profileContext?.profile;
-      return profile ? buildStudentFromProfile(profile) : null;
-    }
+  return { changeStatus, isUpdating };
+}
 
-    const s = studentData?.studentById;
-    if (!s?.id || !s.name) return null;
-    return buildStudentFromQuery(s, upcomingData?.studentUpcomingClasses);
-  }, [useUnifiedProfile, profileContext?.profile, studentData, upcomingData]);
-
-  const versionRef = useRef(student?.version ?? null);
-  useEffect(() => {
-    versionRef.current = student?.version ?? null;
-  }, [student?.version]);
-
+function useStudentStatusFormState(env: {
+  readonly student: StudentStatusPageData | null;
+  readonly studentId: string;
+  readonly t: StudentStatusLabels;
+  readonly changeStatus: ReturnType<typeof useChangeStudentStatusMutation>["changeStatus"];
+  readonly versionRef: MutableRefObject<number | null>;
+}) {
+  const { student, studentId, t, changeStatus, versionRef } = env;
   const schema = createStatusUpdateSchema(t.validation);
 
   const methods = useForm<StatusUpdateFormData>({
@@ -243,7 +300,32 @@ export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewMo
     methods.reset({ status: data.status, reason: "" });
   };
 
-  const handleUpdateStatus = useCallback(
+  return { methods, selectedStatus, handleSubmit };
+}
+
+function useStudentStatusDerived(env: {
+  readonly studentId: string;
+  readonly useUnifiedProfile: boolean;
+  readonly profileContext: ReturnType<typeof useStudentProfileContext>;
+  readonly queries: QueryResult;
+  readonly tc: CommonLabels;
+}) {
+  const { studentId, useUnifiedProfile, profileContext, queries, tc } = env;
+  const loading = useUnifiedProfile
+    ? Boolean(profileContext?.loading)
+    : queries.studentLoading || queries.upcomingLoading;
+  const error =
+    !studentId || (!useUnifiedProfile && (queries.studentError || queries.upcomingError)) ? tc.loadFailed : null;
+  return { loading, error };
+}
+
+function useUpdateStatusHandler(env: {
+  readonly studentId: string;
+  readonly changeStatus: ReturnType<typeof useChangeStudentStatusMutation>["changeStatus"];
+  readonly versionRef: MutableRefObject<number | null>;
+}) {
+  const { studentId, changeStatus, versionRef } = env;
+  return useCallback(
     async (status: StudentStatus, _reason: string) => {
       if (!studentId) return;
       await changeStatus({
@@ -254,16 +336,66 @@ export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewMo
         },
       });
     },
-    [studentId, changeStatus]
+    [studentId, changeStatus, versionRef.current]
   );
+}
 
-  const unifiedLoading = useUnifiedProfile ? Boolean(profileContext?.loading) : studentLoading || upcomingLoading;
+function useStudentStatusLayout(canEditStatus: boolean, canViewStatus: boolean, canViewSchedule: boolean) {
+  return {
+    hasLeftColumn: canEditStatus || (canViewStatus && !canEditStatus),
+    hasRightColumn: canViewSchedule,
+    hasContent: canEditStatus || (canViewStatus && !canEditStatus),
+  };
+}
 
-  const error = !studentId || (!useUnifiedProfile && (studentError || upcomingError)) ? tc.loadFailed : null;
+export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewModelProps>): StudentStatusViewModel {
+  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const tc = useAppTranslation().commonTranslations;
+  const params = useParams();
+  const profileContext = useStudentProfileContext();
+  const studentId = props.studentId ?? profileContext?.studentId ?? (typeof params?.id === "string" ? params.id : "");
+  const useUnifiedProfile = profileContext != null;
 
-  const hasLeftColumn = canEditStatus || (canViewStatus && !canEditStatus);
-  const hasRightColumn = canViewSchedule;
-  const hasContent = hasLeftColumn;
+  const { canEditStatus, canViewStatus, canViewSchedule, hasTabAccess } = useStudentStatusPermissions();
+
+  const { student, versionRef, queries } = useStudentStatusData({
+    studentId,
+    useUnifiedProfile,
+    profileContext,
+  });
+
+  const { changeStatus, isUpdating } = useChangeStudentStatusMutation({
+    studentId,
+    useUnifiedProfile,
+    refetchUpcoming: queries.refetchUpcoming,
+    profileContext,
+    t,
+    tc,
+  });
+
+  const { methods, selectedStatus, handleSubmit } = useStudentStatusFormState({
+    student,
+    studentId,
+    t,
+    changeStatus,
+    versionRef,
+  });
+
+  const handleUpdateStatus = useUpdateStatusHandler({ studentId, changeStatus, versionRef });
+
+  const { loading, error } = useStudentStatusDerived({
+    studentId,
+    useUnifiedProfile,
+    profileContext,
+    queries,
+    tc,
+  });
+
+  const { hasLeftColumn, hasRightColumn, hasContent } = useStudentStatusLayout(
+    canEditStatus,
+    canViewStatus,
+    canViewSchedule
+  );
 
   return {
     t,
@@ -274,7 +406,7 @@ export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewMo
     canEditStatus,
     canViewSchedule,
     hasTabAccess,
-    loading: unifiedLoading,
+    loading,
     error,
     handleUpdateStatus,
     hasLeftColumn,

@@ -13,134 +13,140 @@ interface LessonReportDetailPanelDesktopProps {
   readonly labels: PendingReviewsLabels;
 }
 
+interface NotesBlockProps {
+  readonly label: string;
+  readonly value: string;
+  readonly isError?: boolean;
+}
+
 function statusLabel(status: PendingReviewRow["status"], labels: PendingReviewsLabels): string {
   if (!status) return labels.statusLabels.PENDING_REVIEW;
   return labels.statusLabels[status] ?? labels.statusLabels.PENDING_REVIEW;
 }
 
-export function LessonReportDetailPanelDesktop({ report, labels }: Readonly<LessonReportDetailPanelDesktopProps>) {
-  if (!report) {
-    return (
-      <Box
-        sx={theme => ({
-          p: 3,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: theme.palette.surfaceContainer,
-          borderRadius: theme.layout.radius.section,
-          minHeight: 200,
-        })}
-      >
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {labels.noPendingReviews}
-        </Typography>
-      </Box>
-    );
-  }
-
+function EmptyReportPanel({ labels }: { readonly labels: PendingReviewsLabels }) {
   return (
     <Box
       sx={theme => ({
         p: 3,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         backgroundColor: theme.palette.surfaceContainer,
         borderRadius: theme.layout.radius.section,
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
+        minHeight: 200,
       })}
     >
-      <Stack sx={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
-          {report.lessonDate}
-        </Typography>
-        <StatusBadge
-          category="classStatus"
-          status={report.status ? report.status.toLowerCase() : "pending"}
-          label={statusLabel(report.status, labels)}
-        />
-      </Stack>
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+        {labels.noPendingReviews}
+      </Typography>
+    </Box>
+  );
+}
 
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12 }}>
-          <Stack sx={{ gap: 0.25 }}>
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {labels.classColumn}
-            </Typography>
-            <DesktopClassProfileLink
-              href={report.classInstanceId ? classHref(report.classInstanceId) : undefined}
-              name={report.subjectName?.trim() || "—"}
-              avatarUrl={report.classAvatarUrl}
-            />
-          </Stack>
-        </Grid>
-        <Grid size={{ xs: 6, md: 12, lg: 6 }}>
-          <Stack sx={{ gap: 0.25 }}>
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {labels.studentColumn}
-            </Typography>
-            <DesktopPersonProfileLink
-              href={report.studentId ? studentHref(report.studentId) : undefined}
-              name={report.studentName || report.studentId}
-              avatarUrl={report.studentAvatarUrl}
-            />
-          </Stack>
-        </Grid>
-        <Grid size={{ xs: 6, md: 12, lg: 6 }}>
-          <Stack sx={{ gap: 0.25 }}>
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {labels.teacherColumn}
-            </Typography>
-            <DesktopPersonProfileLink
-              href={profileHrefForTeacher({ teacherId: report.teacherId })}
-              name={report.teacherName || report.teacherId}
-              avatarUrl={report.teacherAvatarUrl}
-            />
-          </Stack>
-        </Grid>
-        <Grid size={{ xs: 6, md: 12, lg: 6 }}>
-          <DetailField label={labels.completionColumn} value={String(report.completionPercentage)} />
-        </Grid>
-        <Grid size={{ xs: 6, md: 12, lg: 6 }}>
-          <DetailField label={labels.attendanceColumn} value={report.attendanceEvaluation ?? ""} />
-        </Grid>
-        <Grid size={{ xs: 12 }}>
-          <DetailField label={labels.submittedAtColumn} value={report.submittedAt} />
-        </Grid>
+function LessonReportHeaderRow({
+  report,
+  labels,
+}: Readonly<{ report: PendingReviewRow; labels: PendingReviewsLabels }>) {
+  return (
+    <Stack sx={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
+      <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
+        {report.lessonDate}
+      </Typography>
+      <StatusBadge
+        category="classStatus"
+        status={report.status ? report.status.toLowerCase() : "pending"}
+        label={statusLabel(report.status, labels)}
+      />
+    </Stack>
+  );
+}
+
+function LessonReportDetailGrid({
+  report,
+  labels,
+}: Readonly<{ report: PendingReviewRow; labels: PendingReviewsLabels }>) {
+  return (
+    <Grid container spacing={2}>
+      <Grid size={{ xs: 12 }}>
+        <Stack sx={{ gap: 0.25 }}>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+            {labels.classColumn}
+          </Typography>
+          <DesktopClassProfileLink
+            href={report.classInstanceId ? classHref(report.classInstanceId) : undefined}
+            name={report.subjectName?.trim() || "—"}
+            avatarUrl={report.classAvatarUrl}
+          />
+        </Stack>
       </Grid>
-
-      {report.teacherNotes ? (
-        <Box>
-          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant, mb: 0.5 })}>
-            {labels.reviewButton}
-          </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
-            {report.teacherNotes}
-          </Typography>
-        </Box>
-      ) : null}
-
-      {report.studentNotes ? (
-        <Box>
-          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant, mb: 0.5 })}>
+      <Grid size={{ xs: 6, md: 12, lg: 6 }}>
+        <Stack sx={{ gap: 0.25 }}>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
             {labels.studentColumn}
           </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
-            {report.studentNotes}
+          <DesktopPersonProfileLink
+            href={report.studentId ? studentHref(report.studentId) : undefined}
+            name={report.studentName || report.studentId}
+            avatarUrl={report.studentAvatarUrl}
+          />
+        </Stack>
+      </Grid>
+      <Grid size={{ xs: 6, md: 12, lg: 6 }}>
+        <Stack sx={{ gap: 0.25 }}>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+            {labels.teacherColumn}
           </Typography>
-        </Box>
-      ) : null}
+          <DesktopPersonProfileLink
+            href={profileHrefForTeacher({ teacherId: report.teacherId })}
+            name={report.teacherName || report.teacherId}
+            avatarUrl={report.teacherAvatarUrl}
+          />
+        </Stack>
+      </Grid>
+      <Grid size={{ xs: 6, md: 12, lg: 6 }}>
+        <DetailField label={labels.completionColumn} value={String(report.completionPercentage)} />
+      </Grid>
+      <Grid size={{ xs: 6, md: 12, lg: 6 }}>
+        <DetailField label={labels.attendanceColumn} value={report.attendanceEvaluation ?? ""} />
+      </Grid>
+      <Grid size={{ xs: 12 }}>
+        <DetailField label={labels.submittedAtColumn} value={report.submittedAt} />
+      </Grid>
+    </Grid>
+  );
+}
 
+function LessonReportNotesSection({
+  report,
+  labels,
+}: Readonly<{ report: PendingReviewRow; labels: PendingReviewsLabels }>) {
+  return (
+    <>
+      {report.teacherNotes ? <NotesBlock label={labels.reviewButton} value={report.teacherNotes} /> : null}
+      {report.studentNotes ? <NotesBlock label={labels.studentColumn} value={report.studentNotes} /> : null}
       {report.rejectionReason ? (
-        <Box>
-          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.error.main, mb: 0.5 })}>
-            {labels.rejectReasonLabel}
-          </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main })}>
-            {report.rejectionReason}
-          </Typography>
-        </Box>
+        <NotesBlock label={labels.rejectReasonLabel} value={report.rejectionReason} isError />
       ) : null}
+    </>
+  );
+}
+
+function NotesBlock({ label, value, isError }: Readonly<NotesBlockProps>) {
+  return (
+    <Box>
+      <Typography
+        variant="labelUppercase"
+        sx={theme => ({ color: isError ? theme.palette.error.main : theme.palette.onSurfaceVariant, mb: 0.5 })}
+      >
+        {label}
+      </Typography>
+      <Typography
+        variant="bodyMd"
+        sx={theme => ({ color: isError ? theme.palette.error.main : theme.palette.onSurface })}
+      >
+        {value}
+      </Typography>
     </Box>
   );
 }
@@ -155,5 +161,28 @@ function DetailField({ label, value }: { readonly label: string; readonly value:
         {value}
       </Typography>
     </Stack>
+  );
+}
+
+export function LessonReportDetailPanelDesktop({ report, labels }: Readonly<LessonReportDetailPanelDesktopProps>) {
+  if (!report) {
+    return <EmptyReportPanel labels={labels} />;
+  }
+
+  return (
+    <Box
+      sx={theme => ({
+        p: 3,
+        backgroundColor: theme.palette.surfaceContainer,
+        borderRadius: theme.layout.radius.section,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      })}
+    >
+      <LessonReportHeaderRow report={report} labels={labels} />
+      <LessonReportDetailGrid report={report} labels={labels} />
+      <LessonReportNotesSection report={report} labels={labels} />
+    </Box>
   );
 }

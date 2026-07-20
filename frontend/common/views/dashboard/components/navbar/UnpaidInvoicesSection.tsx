@@ -6,14 +6,171 @@ import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from "@
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/billing-alerts.documents";
-import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { buildFxDisplayMessages, type FxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import {
   formatBillingCurrencyTotals,
   mapBillingCurrencyBuckets,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useRouter } from "@/shared/i18n/navigation";
+import type { ErrorsLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { ProfileLabels } from "@/shared/locale/types/profile";
+
+function buildUnpaidInvoicesFxMessages(
+  tProfile: Pick<ProfileLabels, "convertedAmount" | "convertedTotalApprox">,
+  tErrors: ErrorsLabels
+): FxDisplayMessages {
+  return buildFxDisplayMessages(
+    {
+      convertedAmount: tProfile.convertedAmount,
+    },
+    tErrors,
+    {
+      convertedTotalApprox: tProfile.convertedTotalApprox,
+    }
+  );
+}
+
+function LoadingState({ message }: { readonly message: string }) {
+  return (
+    <Box sx={{ px: 2, py: 1.5 }}>
+      <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
+        {message}
+      </Typography>
+    </Box>
+  );
+}
+
+function ErrorState({ message }: { readonly message: string }) {
+  return (
+    <Box sx={{ px: 2, py: 1.5 }}>
+      <Typography variant="body2" sx={theme => ({ color: theme.palette.error.main })}>
+        {message}
+      </Typography>
+    </Box>
+  );
+}
+
+function EmptyState({ message }: { readonly message: string }) {
+  return (
+    <Box sx={{ px: 2, py: 1.5, textAlign: "center" }}>
+      <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
+        {message}
+      </Typography>
+    </Box>
+  );
+}
+
+function SectionHeader({
+  title,
+  count,
+  totalLabel,
+  totalLabelValue,
+}: {
+  readonly title: string;
+  readonly count: number;
+  readonly totalLabel: string;
+  readonly totalLabelValue: string;
+}) {
+  return (
+    <Box sx={{ px: 2, py: 1, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+      <PaymentsOutlined fontSize="small" />
+      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+        {title}
+      </Typography>
+      <Typography
+        variant="caption"
+        sx={theme => ({
+          backgroundColor: theme.palette.error.main,
+          color: theme.palette.onError,
+          px: 0.75,
+          py: 0.25,
+          borderRadius: 1,
+          fontWeight: 600,
+        })}
+      >
+        {count}
+      </Typography>
+      <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, ml: "auto" })}>
+        {totalLabel}: {totalLabelValue}
+      </Typography>
+    </Box>
+  );
+}
+
+function FxNoteSection({
+  hasDisplayCurrency,
+  withDisplayCurrencyNote,
+  withoutDisplayCurrencyNote,
+}: {
+  readonly hasDisplayCurrency: boolean;
+  readonly withDisplayCurrencyNote: string;
+  readonly withoutDisplayCurrencyNote: string;
+}) {
+  if (hasDisplayCurrency) {
+    return (
+      <Typography
+        variant="caption"
+        sx={theme => ({ display: "block", px: 2, pb: 0.5, color: theme.palette.text.secondary })}
+      >
+        {withDisplayCurrencyNote}
+      </Typography>
+    );
+  }
+  return (
+    <Typography
+      variant="caption"
+      sx={theme => ({ display: "block", px: 2, pb: 0.5, color: theme.palette.text.secondary, fontStyle: "italic" })}
+    >
+      ({withoutDisplayCurrencyNote})
+    </Typography>
+  );
+}
+
+interface InvoiceItemRowProps {
+  readonly item: {
+    readonly id: string | null;
+    readonly userId?: string | null;
+    readonly userName?: string | null;
+    readonly overdueCount?: number | null;
+    readonly amountsByCurrency: Parameters<typeof mapBillingCurrencyBuckets>[0];
+  };
+  readonly fxMessages: FxDisplayMessages;
+  readonly onUserClick: (userId: string) => void;
+}
+
+function InvoiceItemRow({ item, fxMessages, onUserClick }: InvoiceItemRowProps) {
+  const amountLabel = formatBillingCurrencyTotals(
+    mapBillingCurrencyBuckets(item.amountsByCurrency),
+    "en",
+    fxMessages
+  ).primary;
+
+  const itemText = (
+    <ListItemText
+      primary={item.userName ?? ""}
+      secondary={`${amountLabel} — ${item.overdueCount ?? 0} overdue`}
+      slotProps={{
+        primary: { variant: "body2", sx: { fontWeight: 500 } },
+        secondary: { variant: "caption" },
+      }}
+    />
+  );
+
+  return (
+    <ListItem key={item.id ?? undefined} disablePadding>
+      <RequirePermission
+        permissions={AppPermission.UserViewProfile}
+        fallback={<Box sx={{ px: 2, py: 0.75, width: "100%" }}>{itemText}</Box>}
+      >
+        <ListItemButton onClick={() => item.userId && onUserClick(item.userId)} sx={{ py: 0.75 }}>
+          {itemText}
+        </ListItemButton>
+      </RequirePermission>
+    </ListItem>
+  );
+}
 
 export function UnpaidInvoicesSection() {
   const t = useAppTranslation().dashboardTranslations.coreNotifications;
@@ -25,51 +182,20 @@ export function UnpaidInvoicesSection() {
   const { data, loading, error } = useQuery(unpaidInvoicesAlertQueryDocument);
 
   if (loading) {
-    return (
-      <Box sx={{ px: 2, py: 1.5 }}>
-        <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t.loadingBilling}
-        </Typography>
-      </Box>
-    );
+    return <LoadingState message={t.loadingBilling} />;
   }
 
   if (error) {
-    return (
-      <Box sx={{ px: 2, py: 1.5 }}>
-        <Typography variant="body2" sx={theme => ({ color: theme.palette.error.main })}>
-          {t.errorLoading}
-        </Typography>
-      </Box>
-    );
+    return <ErrorState message={t.errorLoading} />;
   }
 
   const summary = data?.unpaidInvoicesAlert;
 
   if (!summary || summary.totalOverdueInvoices === 0) {
-    return (
-      <Box sx={{ px: 2, py: 1.5, textAlign: "center" }}>
-        <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t.noUnpaidInvoices}
-        </Typography>
-      </Box>
-    );
+    return <EmptyState message={t.noUnpaidInvoices} />;
   }
 
-  const handleUserClick = (userId: string) => {
-    router.push(`/users/${userId}/billing-profile`);
-  };
-
-  const items = summary.items ?? [];
-  const fxMessages = buildFxDisplayMessages(
-    {
-      convertedAmount: tProfile.convertedAmount,
-    },
-    tErrors,
-    {
-      convertedTotalApprox: tProfile.convertedTotalApprox,
-    }
-  );
+  const fxMessages = buildUnpaidInvoicesFxMessages(tProfile, tErrors);
 
   const globalTotalLabel = formatBillingCurrencyTotals(
     mapBillingCurrencyBuckets(summary.overdueAmountsByCurrency),
@@ -77,78 +203,32 @@ export function UnpaidInvoicesSection() {
     fxMessages
   ).primary;
 
+  const handleUserClick = (userId: string) => {
+    router.push(`/users/${userId}/billing-profile`);
+  };
+
   return (
     <Box>
-      <Box sx={{ px: 2, py: 1, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-        <PaymentsOutlined fontSize="small" />
-        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-          {t.unpaidInvoicesTitle}
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={theme => ({
-            backgroundColor: theme.palette.error.main,
-            color: theme.palette.onError,
-            px: 0.75,
-            py: 0.25,
-            borderRadius: 1,
-            fontWeight: 600,
-          })}
-        >
-          {summary.totalOverdueInvoices}
-        </Typography>
-        <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, ml: "auto" })}>
-          {t.totalOverdueLabel}: {globalTotalLabel}
-        </Typography>
-      </Box>
-      {displayCurrency ? (
-        <Typography
-          variant="caption"
-          sx={theme => ({ display: "block", px: 2, pb: 0.5, color: theme.palette.text.secondary })}
-        >
-          {t.unpaidInvoicesFxNote}
-        </Typography>
-      ) : (
-        <Typography
-          variant="caption"
-          sx={theme => ({ display: "block", px: 2, pb: 0.5, color: theme.palette.text.secondary, fontStyle: "italic" })}
-        >
-          ({t.noDisplayCurrencyNote})
-        </Typography>
-      )}
-
+      <SectionHeader
+        title={t.unpaidInvoicesTitle}
+        count={summary.totalOverdueInvoices ?? 0}
+        totalLabel={t.totalOverdueLabel}
+        totalLabelValue={globalTotalLabel}
+      />
+      <FxNoteSection
+        hasDisplayCurrency={Boolean(displayCurrency)}
+        withDisplayCurrencyNote={t.unpaidInvoicesFxNote}
+        withoutDisplayCurrencyNote={t.noDisplayCurrencyNote}
+      />
       <List disablePadding dense>
-        {items.map(item => {
-          const amountLabel = formatBillingCurrencyTotals(
-            mapBillingCurrencyBuckets(item.amountsByCurrency),
-            "en",
-            fxMessages
-          ).primary;
-
-          const itemText = (
-            <ListItemText
-              primary={item.userName}
-              secondary={`${amountLabel} — ${item.overdueCount} overdue`}
-              slotProps={{
-                primary: { variant: "body2", sx: { fontWeight: 500 } },
-                secondary: { variant: "caption" },
-              }}
-            />
-          );
-
-          return (
-            <ListItem key={item.id} disablePadding>
-              <RequirePermission
-                permissions={AppPermission.UserViewProfile}
-                fallback={<Box sx={{ px: 2, py: 0.75, width: "100%" }}>{itemText}</Box>}
-              >
-                <ListItemButton onClick={() => item.userId && handleUserClick(item.userId)} sx={{ py: 0.75 }}>
-                  {itemText}
-                </ListItemButton>
-              </RequirePermission>
-            </ListItem>
-          );
-        })}
+        {(summary.items ?? []).map(item => (
+          <InvoiceItemRow
+            key={item.id ?? undefined}
+            item={item}
+            fxMessages={fxMessages}
+            onUserClick={handleUserClick}
+          />
+        ))}
       </List>
     </Box>
   );

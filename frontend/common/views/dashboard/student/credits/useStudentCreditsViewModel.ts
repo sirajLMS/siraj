@@ -85,15 +85,14 @@ export interface StudentCreditsViewModel {
 
 export type UseStudentCreditsViewModelProps = Record<string, never>;
 
-export function useStudentCreditsViewModel(): StudentCreditsViewModel {
-  const t = useAppTranslation().dashboardTranslations.studentPortalCredits;
-  const locale = useAppLocale();
-  const router = useRouter();
-  const labels = useStudentCreditsLabels(t);
-  const [reasonFilter, setReasonFilter] = useState<CreditReasonFilter>("ALL");
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+interface UseCreditQueriesState {
+  readonly studentId: string | null;
+  readonly balance: StudentCreditBalanceInfo;
+  readonly allTransactions: readonly StudentCreditTransactionRow[];
+  readonly loading: boolean;
+}
 
+function useStudentCreditQueries(): UseCreditQueriesState {
   const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
     variables: { studentId: null, year: null, month: null },
     fetchPolicy: "cache-first",
@@ -123,7 +122,7 @@ export function useStudentCreditsViewModel(): StudentCreditsViewModel {
     fetchPolicy: "cache-and-network",
   });
 
-  const balance: StudentCreditBalanceInfo = useMemo(
+  const balance = useMemo<StudentCreditBalanceInfo>(
     () => ({
       classesRemaining: balanceData?.studentCreditBalance?.classesRemaining ?? 0,
       classesTotal: balanceData?.studentCreditBalance?.classesTotal ?? 0,
@@ -131,12 +130,59 @@ export function useStudentCreditsViewModel(): StudentCreditsViewModel {
     [balanceData]
   );
 
-  const allTransactions: readonly StudentCreditTransactionRow[] = useMemo(() => {
+  const allTransactions = useMemo<readonly StudentCreditTransactionRow[]>(() => {
     const rows = transactionsData?.studentCreditTransactions;
     if (!rows) return [];
     return rows.map(mapTransaction);
   }, [transactionsData]);
 
+  const loading = profileLoading || balanceLoading || transactionsLoading;
+
+  return { studentId, balance, allTransactions, loading };
+}
+
+interface UseReasonFilterState {
+  readonly reasonFilter: CreditReasonFilter;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly setReasonFilter: (value: CreditReasonFilter) => void;
+  readonly setPage: (page: number) => void;
+  readonly setPageSize: (size: number) => void;
+}
+
+function useStudentCreditsPagination(): UseReasonFilterState {
+  const [reasonFilter, setReasonFilter] = useState<CreditReasonFilter>("ALL");
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+
+  return {
+    reasonFilter,
+    page,
+    pageSize,
+    setReasonFilter: value => {
+      setReasonFilter(value);
+      setPage(0);
+    },
+    setPage,
+    setPageSize: size => {
+      setPageSize(size);
+      setPage(0);
+    },
+  };
+}
+
+interface UseDerivedTransactionsState {
+  readonly filteredTransactions: readonly StudentCreditTransactionRow[];
+  readonly transactions: readonly StudentCreditTransactionRow[];
+  readonly totalCount: number;
+}
+
+function useDerivedTransactions(
+  allTransactions: readonly StudentCreditTransactionRow[],
+  reasonFilter: CreditReasonFilter,
+  page: number,
+  pageSize: number
+): UseDerivedTransactionsState {
   const filteredTransactions = useMemo(() => {
     if (reasonFilter === "ALL") return allTransactions;
     return allTransactions.filter(row => row.reason === reasonFilter);
@@ -149,6 +195,15 @@ export function useStudentCreditsViewModel(): StudentCreditsViewModel {
     return filteredTransactions.slice(start, start + pageSize);
   }, [filteredTransactions, page, pageSize]);
 
+  return { filteredTransactions, transactions, totalCount };
+}
+
+interface UseReasonOptionsState {
+  readonly reasonOptions: readonly CreditReasonFilterOption[];
+  readonly reasonLabel: (reason: CreditReason | null) => string;
+}
+
+function useReasonOptions(labels: StudentPortalCreditsLabels): UseReasonOptionsState {
   const reasonOptions = useMemo<readonly CreditReasonFilterOption[]>(
     () => [
       { value: "ALL", label: labels.filterAll },
@@ -160,23 +215,39 @@ export function useStudentCreditsViewModel(): StudentCreditsViewModel {
     [labels]
   );
 
-  const reasonLabel = (reason: CreditReason | null): string => {
-    if (!reason) return "";
-    switch (reason) {
-      case CreditReason.Purchase:
-        return labels.purchase;
-      case CreditReason.Deduction:
-        return labels.deduction;
-      case CreditReason.Refund:
-        return labels.refund;
-      case CreditReason.Adjustment:
-        return labels.adjustment;
-      default:
-        return reason;
-    }
-  };
+  const reasonLabel = useMemo(
+    () =>
+      (reason: CreditReason | null): string => {
+        if (!reason) return "";
+        switch (reason) {
+          case CreditReason.Purchase:
+            return labels.purchase;
+          case CreditReason.Deduction:
+            return labels.deduction;
+          case CreditReason.Refund:
+            return labels.refund;
+          case CreditReason.Adjustment:
+            return labels.adjustment;
+          default:
+            return reason;
+        }
+      },
+    [labels]
+  );
 
-  const loading = profileLoading || balanceLoading || transactionsLoading;
+  return { reasonOptions, reasonLabel };
+}
+
+export function useStudentCreditsViewModel(): StudentCreditsViewModel {
+  const t = useAppTranslation().dashboardTranslations.studentPortalCredits;
+  const locale = useAppLocale();
+  const router = useRouter();
+  const labels = useStudentCreditsLabels(t);
+
+  const { balance, allTransactions, loading } = useStudentCreditQueries();
+  const { reasonFilter, page, pageSize, setReasonFilter, setPage, setPageSize } = useStudentCreditsPagination();
+  const { transactions, totalCount } = useDerivedTransactions(allTransactions, reasonFilter, page, pageSize);
+  const { reasonOptions, reasonLabel } = useReasonOptions(labels);
 
   return {
     balance,
@@ -189,15 +260,9 @@ export function useStudentCreditsViewModel(): StudentCreditsViewModel {
     locale,
     labels,
     loading,
-    onReasonFilterChange: value => {
-      setReasonFilter(value);
-      setPage(0);
-    },
+    onReasonFilterChange: setReasonFilter,
     onPageChange: setPage,
-    onPageSizeChange: size => {
-      setPageSize(size);
-      setPage(0);
-    },
+    onPageSizeChange: setPageSize,
     onBackToDashboard: () => router.push("/students/me"),
     reasonLabel,
   };

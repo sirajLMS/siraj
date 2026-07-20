@@ -132,6 +132,200 @@ function MobileSnackbar({
   );
 }
 
+type ExchangeRatesRateRow = ExchangeRatesViewModel["rates"][number];
+
+function MobileRateRow({ row }: Readonly<{ readonly row: ExchangeRatesRateRow }>) {
+  return (
+    <MobileCardListItem variant="edge-to-edge">
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography sx={{ fontWeight: 700 }}>
+            {row.fromCurrency} → {row.toCurrency}
+          </Typography>
+          <Typography sx={{ fontWeight: 700 }}>{row.rate}</Typography>
+        </Box>
+        <Typography variant="bodyMd" color="textSecondary">
+          {row.source ?? "—"}
+        </Typography>
+        <Typography variant="caption" color="textSecondary">
+          {formatExchangeRateTimestamp(row.effectiveDate)}
+        </Typography>
+      </Box>
+    </MobileCardListItem>
+  );
+}
+
+function MobileRatesList({
+  labels,
+  rates,
+  ratesLoading,
+}: Readonly<{
+  readonly labels: ExchangeRatesViewModel["labels"];
+  readonly rates: ExchangeRatesViewModel["rates"];
+  readonly ratesLoading: boolean;
+}>) {
+  if (ratesLoading && rates.length === 0) {
+    return <Typography sx={theme => ({ color: theme.palette.text.secondary, py: 2 })}>{labels.noRates}</Typography>;
+  }
+  return (
+    <MobileCardList
+      rows={rates}
+      loading={ratesLoading}
+      emptyMessage={labels.noRates}
+      getKey={row => row.id}
+      paginationOptions={{ mode: "client" }}
+      layout="edge-to-edge"
+      renderItem={row => <MobileRateRow row={row} />}
+    />
+  );
+}
+
+function MobileRateTablePanel({
+  labels,
+  rates,
+  ratesLoading,
+  canOverride,
+  onOpenManualOverride,
+  billingActionsDisabled,
+}: Readonly<{
+  readonly labels: ExchangeRatesViewModel["labels"];
+  readonly rates: ExchangeRatesViewModel["rates"];
+  readonly ratesLoading: boolean;
+  readonly canOverride: boolean;
+  readonly onOpenManualOverride: () => void;
+  readonly billingActionsDisabled: boolean;
+}>) {
+  return (
+    <MobileSectionPanel title={labels.rateTable.title}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+        {canOverride ? (
+          <Button variant="outlined" onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
+            {labels.manualOverride.title}
+          </Button>
+        ) : null}
+      </Box>
+      <MobileRatesList labels={labels} rates={rates} ratesLoading={ratesLoading} />
+    </MobileSectionPanel>
+  );
+}
+
+function MobileLoadFailedAlert({
+  labels,
+  onRetry,
+}: Readonly<{ readonly labels: ExchangeRatesViewModel["labels"]; readonly onRetry: () => void }>) {
+  return (
+    <Alert
+      severity="warning"
+      sx={{ mb: 2 }}
+      action={
+        <Button color="inherit" size="small" onClick={() => void onRetry()}>
+          {labels.errors.retry}
+        </Button>
+      }
+    >
+      {labels.errors.loadFailed}
+    </Alert>
+  );
+}
+
+function MobileExchangeRatesAlerts({
+  labels,
+  showStaleWarning,
+  ratesError,
+  syncError,
+  refetchRates,
+  refetchSync,
+}: Readonly<{
+  readonly labels: ExchangeRatesViewModel["labels"];
+  readonly showStaleWarning: boolean;
+  readonly ratesError: Error | null | undefined;
+  readonly syncError: Error | null | undefined;
+  readonly refetchRates: () => void;
+  readonly refetchSync: () => void;
+}>) {
+  return (
+    <>
+      {ratesError ? <MobileLoadFailedAlert labels={labels} onRetry={refetchRates} /> : null}
+      {syncError ? <MobileLoadFailedAlert labels={labels} onRetry={refetchSync} /> : null}
+      {showStaleWarning ? (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          {labels.staleWarning}
+        </Alert>
+      ) : null}
+    </>
+  );
+}
+
+interface MobileExchangeRatesContentProps {
+  readonly labels: ExchangeRatesViewModel["labels"];
+  readonly rates: ExchangeRatesViewModel["rates"];
+  readonly ratesLoading: boolean;
+  readonly syncRun: ExchangeRatesSyncRun | null;
+  readonly syncLoading: boolean;
+  readonly showStaleWarning: boolean;
+  readonly billingActionsDisabled: boolean;
+  readonly canOverride: boolean;
+  readonly onOpenManualOverride: () => void;
+  readonly ratesError: Error | null | undefined;
+  readonly syncError: Error | null | undefined;
+  readonly refetchRates: () => void;
+  readonly refetchSync: () => void;
+  readonly historyViewModel: ExchangeRatesViewModel["historyViewModel"];
+}
+
+function MobileExchangeRatesContent({
+  labels,
+  rates,
+  ratesLoading,
+  syncRun,
+  syncLoading,
+  showStaleWarning,
+  billingActionsDisabled,
+  canOverride,
+  onOpenManualOverride,
+  ratesError,
+  syncError,
+  refetchRates,
+  refetchSync,
+  historyViewModel,
+}: Readonly<MobileExchangeRatesContentProps>) {
+  return (
+    <>
+      <MobileExchangeRatesAlerts
+        labels={labels}
+        showStaleWarning={showStaleWarning}
+        ratesError={ratesError}
+        syncError={syncError}
+        refetchRates={refetchRates}
+        refetchSync={refetchSync}
+      />
+
+      <MobileSectionPanel title={labels.syncStatus.title}>
+        <MobileSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
+      </MobileSectionPanel>
+
+      <ProviderSettingsSection
+        labels={labels.providerSettings}
+        onFeedback={(_message, _severity) => undefined}
+        actionsDisabled={billingActionsDisabled}
+      />
+
+      <MobileRateTablePanel
+        labels={labels}
+        rates={rates}
+        ratesLoading={ratesLoading}
+        canOverride={canOverride}
+        onOpenManualOverride={onOpenManualOverride}
+        billingActionsDisabled={billingActionsDisabled}
+      />
+
+      <MobileSectionPanel title={labels.history.title}>
+        <ExchangeRateHistorySectionMobile labels={labels} historyViewModel={historyViewModel} />
+      </MobileSectionPanel>
+    </>
+  );
+}
+
 export function ExchangeRatesMobileView({
   labels,
   rates,
@@ -174,91 +368,22 @@ export function ExchangeRatesMobileView({
         }
       />
       <MobileContentStack gap={3} paddingBottom={4}>
-        {ratesError ? (
-          <Alert
-            severity="warning"
-            sx={{ mb: 2 }}
-            action={
-              <Button color="inherit" size="small" onClick={() => void refetchRates()}>
-                {labels.errors.retry}
-              </Button>
-            }
-          >
-            {labels.errors.loadFailed}
-          </Alert>
-        ) : null}
-        {syncError ? (
-          <Alert
-            severity="warning"
-            sx={{ mb: 2 }}
-            action={
-              <Button color="inherit" size="small" onClick={() => void refetchSync()}>
-                {labels.errors.retry}
-              </Button>
-            }
-          >
-            {labels.errors.loadFailed}
-          </Alert>
-        ) : null}
-        {showStaleWarning ? (
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            {labels.staleWarning}
-          </Alert>
-        ) : null}
-
-        <MobileSectionPanel title={labels.syncStatus.title}>
-          <MobileSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
-        </MobileSectionPanel>
-
-        <ProviderSettingsSection
-          labels={labels.providerSettings}
-          onFeedback={(_message, _severity) => onSuccessManualOverride()}
-          actionsDisabled={billingActionsDisabled}
+        <MobileExchangeRatesContent
+          labels={labels}
+          rates={rates}
+          ratesLoading={ratesLoading}
+          syncRun={syncRun}
+          syncLoading={syncLoading}
+          showStaleWarning={showStaleWarning}
+          billingActionsDisabled={billingActionsDisabled}
+          canOverride={canOverride}
+          onOpenManualOverride={onOpenManualOverride}
+          ratesError={ratesError}
+          syncError={syncError}
+          refetchRates={refetchRates}
+          refetchSync={refetchSync}
+          historyViewModel={historyViewModel}
         />
-
-        <MobileSectionPanel title={labels.rateTable.title}>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-            {canOverride ? (
-              <Button variant="outlined" onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
-                {labels.manualOverride.title}
-              </Button>
-            ) : null}
-          </Box>
-          {ratesLoading && rates.length === 0 ? (
-            <Typography sx={theme => ({ color: theme.palette.text.secondary, py: 2 })}>{labels.noRates}</Typography>
-          ) : (
-            <MobileCardList
-              rows={rates}
-              loading={ratesLoading}
-              emptyMessage={labels.noRates}
-              getKey={row => row.id}
-              paginationOptions={{ mode: "client" }}
-              layout="edge-to-edge"
-              renderItem={row => (
-                <MobileCardListItem variant="edge-to-edge">
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
-                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                      <Typography sx={{ fontWeight: 700 }}>
-                        {row.fromCurrency} → {row.toCurrency}
-                      </Typography>
-                      <Typography sx={{ fontWeight: 700 }}>{row.rate}</Typography>
-                    </Box>
-                    <Typography variant="bodyMd" color="textSecondary">
-                      {row.source ?? "—"}
-                    </Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      {formatExchangeRateTimestamp(row.effectiveDate)}
-                    </Typography>
-                  </Box>
-                </MobileCardListItem>
-              )}
-            />
-          )}
-        </MobileSectionPanel>
-
-        <MobileSectionPanel title={labels.history.title}>
-          <ExchangeRateHistorySectionMobile labels={labels} historyViewModel={historyViewModel} />
-        </MobileSectionPanel>
 
         <ManualOverrideDialog
           open={manualOverrideOpen && !billingActionsDisabled}

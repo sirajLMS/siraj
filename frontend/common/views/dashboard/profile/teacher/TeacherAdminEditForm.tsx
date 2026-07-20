@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { type UseFormReturn, useForm } from "react-hook-form";
 import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -21,6 +21,91 @@ import {
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
 import { useAppTranslation } from "@/shared/locale";
 
+type FieldScope = ReturnType<typeof useProfileFieldAccess>["canEdit"];
+
+function buildDefaultFormValues(data?: TeacherEditData | null): TeacherAdminEditFormData {
+  return {
+    name: data?.name ?? "",
+    email: data?.email ?? "",
+    avatarUrl: data?.avatarUrl ?? null,
+    phone: data?.phone ?? "",
+    nationalId: data?.nationalId ?? "",
+    dateOfBirth: data?.dateOfBirth ?? "",
+    gender: data?.gender ?? null,
+    address: data?.address ?? "",
+    qualifications: data?.qualifications ?? "",
+    timezone: data?.timezone ?? "",
+    hourlyRate: data?.hourlyRate ?? "",
+    rateCurrency: data?.rateCurrency ?? undefined,
+    status: data?.status ?? AccountStatus.Activated,
+    displayCurrency: data?.displayCurrency ?? null,
+  };
+}
+
+function useTeacherEditForm(teacherData: TeacherEditData) {
+  const form = useForm<TeacherAdminEditFormData>({
+    resolver: zodResolver(teacherAdminEditSchema),
+    defaultValues: buildDefaultFormValues(),
+  });
+
+  useEffect(() => {
+    form.reset(buildDefaultFormValues(teacherData));
+  }, [form, teacherData]);
+
+  return form;
+}
+
+function useSubmitFeedbackStates() {
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
+  return { successOpen, errorOpen, setSuccessOpen, setErrorOpen };
+}
+
+interface SectionsGridProps {
+  readonly teacherData: TeacherEditData;
+  readonly targetUserId: string;
+  readonly scope: ProfileScope;
+  readonly canEdit: FieldScope;
+  readonly form: UseFormReturn<TeacherAdminEditFormData>;
+}
+
+function TeacherFormSectionsGrid({ teacherData, targetUserId, scope, canEdit, form }: SectionsGridProps) {
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gap: 3,
+        minWidth: 0,
+        width: "100%",
+        gridTemplateColumns: {
+          xs: "minmax(0, 1fr)",
+          lg: "repeat(2, minmax(0, 1fr))",
+        },
+      }}
+    >
+      {canEdit("core_identity") ? (
+        <AccountSection
+          mode="edit"
+          scope={scope}
+          teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
+          register={form.register}
+          control={form.control}
+        />
+      ) : null}
+      {canEdit("core_contact") || canEdit("teacher_identity") ? (
+        <ContactSection mode="edit" scope={scope} isAdminScope register={form.register} control={form.control} />
+      ) : null}
+      <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} />
+      {canEdit("teacher_professional") ? (
+        <CompensationSection mode="edit" register={form.register} control={form.control} />
+      ) : null}
+      {canEdit("teacher_identity") ? (
+        <AdminOnlySection mode="edit" register={form.register} control={form.control} />
+      ) : null}
+    </Box>
+  );
+}
+
 export function TeacherAdminEditForm({
   teacherData,
   targetUserId,
@@ -37,46 +122,8 @@ export function TeacherAdminEditForm({
   const scope = ProfileScope.Other;
   const { canEdit } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
-  const [successOpen, setSuccessOpen] = useState(false);
-  const [errorOpen, setErrorOpen] = useState(false);
-  const form = useForm<TeacherAdminEditFormData>({
-    resolver: zodResolver(teacherAdminEditSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      avatarUrl: null,
-      phone: "",
-      nationalId: "",
-      dateOfBirth: "",
-      gender: null,
-      address: "",
-      qualifications: "",
-      timezone: "",
-      hourlyRate: "",
-      rateCurrency: undefined,
-      status: AccountStatus.Activated,
-      displayCurrency: null,
-    },
-  });
-
-  useEffect(() => {
-    form.reset({
-      name: teacherData.name ?? "",
-      email: teacherData.email ?? "",
-      avatarUrl: teacherData.avatarUrl ?? null,
-      phone: teacherData.phone ?? "",
-      nationalId: teacherData.nationalId ?? "",
-      dateOfBirth: teacherData.dateOfBirth ?? "",
-      gender: teacherData.gender ?? null,
-      address: teacherData.address ?? "",
-      qualifications: teacherData.qualifications ?? "",
-      timezone: teacherData.timezone ?? "",
-      hourlyRate: teacherData.hourlyRate ?? "",
-      rateCurrency: teacherData.rateCurrency ?? undefined,
-      status: teacherData.status ?? AccountStatus.Activated,
-      displayCurrency: teacherData.displayCurrency ?? null,
-    });
-  }, [form, teacherData]);
+  const { successOpen, errorOpen, setSuccessOpen, setErrorOpen } = useSubmitFeedbackStates();
+  const form = useTeacherEditForm(teacherData);
 
   const onValidSubmit = async (values: TeacherAdminEditFormData) => {
     try {
@@ -99,38 +146,13 @@ export function TeacherAdminEditForm({
             onUploadAvatar={onUploadAvatar}
           />
         ) : null}
-        <Box
-          sx={{
-            display: "grid",
-            gap: 3,
-            minWidth: 0,
-            width: "100%",
-            gridTemplateColumns: {
-              xs: "minmax(0, 1fr)",
-              lg: "repeat(2, minmax(0, 1fr))",
-            },
-          }}
-        >
-          {canEdit("core_identity") ? (
-            <AccountSection
-              mode="edit"
-              scope={scope}
-              teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
-              register={form.register}
-              control={form.control}
-            />
-          ) : null}
-          {canEdit("core_contact") || canEdit("teacher_identity") ? (
-            <ContactSection mode="edit" scope={scope} isAdminScope register={form.register} control={form.control} />
-          ) : null}
-          <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} />
-          {canEdit("teacher_professional") ? (
-            <CompensationSection mode="edit" register={form.register} control={form.control} />
-          ) : null}
-          {canEdit("teacher_identity") ? (
-            <AdminOnlySection mode="edit" register={form.register} control={form.control} />
-          ) : null}
-        </Box>
+        <TeacherFormSectionsGrid
+          teacherData={teacherData}
+          targetUserId={targetUserId}
+          scope={scope}
+          canEdit={canEdit}
+          form={form}
+        />
         <PrimaryPageAction type="submit" disabled={isSaving}>
           {isSaving ? t.shell.loading : t.actions.save}
         </PrimaryPageAction>

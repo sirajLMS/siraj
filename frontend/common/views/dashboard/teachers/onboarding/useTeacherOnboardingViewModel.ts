@@ -50,25 +50,31 @@ export interface TeacherOnboardingViewModel {
 
 export type UseTeacherOnboardingViewModelProps = Record<string, never>;
 
-export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
-  const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateTeacherOnboarding();
-  const createdTeacher = useTeacherOnboardingStore(state => state.result);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const labels = useAppTranslation().dashboardTranslations.teacherOnboarding;
-  const tMeeting = useAppTranslation().uiTranslations.meetingConfigManager;
-  const tJoin = useAppTranslation().uiTranslations.meetingConfigJoin;
-  // Lazy initializer: generate the pending-avatar storage key once per hook
-  // instance. Using useState with a lazy initializer (instead of useRef) avoids
-  // reading ref.current during render (which trips `react-hooks/refs`).
-  const [pendingAvatarKey] = useState(() => `pending-${crypto.randomUUID()}`);
-  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey });
+interface OnboardingTranslations {
+  readonly labels: TeacherOnboardingLabels;
+  readonly tMeeting: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigManager"];
+  readonly tJoin: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigJoin"];
+}
 
-  const meetingSetupHref = createdTeacher
-    ? `${profileHrefForTeacher({ userId: createdTeacher.userId, teacherId: createdTeacher.id })}?tab=meeting`
-    : undefined;
+function useOnboardingTranslations(): OnboardingTranslations {
+  const app = useAppTranslation();
+  return {
+    labels: app.dashboardTranslations.teacherOnboarding,
+    tMeeting: app.uiTranslations.meetingConfigManager,
+    tJoin: app.uiTranslations.meetingConfigJoin,
+  };
+}
 
+interface OnboardingForm {
+  readonly form: UseFormReturn<TeacherOnboardingFormData>;
+  readonly register: UseFormRegister<TeacherOnboardingFormData>;
+  readonly control: Control<TeacherOnboardingFormData>;
+  readonly errors: FieldErrors<TeacherOnboardingFormData>;
+  readonly handleSubmit: UseFormHandleSubmit<TeacherOnboardingFormData>;
+}
+
+function useOnboardingForm(labels: TeacherOnboardingLabels): OnboardingForm {
   const schema = teacherOnboardingSchema(labels.validation);
-
   const form = useForm<TeacherOnboardingFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -84,20 +90,38 @@ export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
       },
     },
   });
-
   const { register, control, handleSubmit, formState } = form;
-  const errors = formState.errors;
-
-  const onSubmit = async (data: TeacherOnboardingFormData) => {
-    logger.info("Submitting teacher onboarding data:", data);
-    try {
-      await execute(data);
-      setShowSuccess(true);
-    } catch (error) {
-      logger.error("Failed to submit teacher onboarding form", { error });
-    }
+  return {
+    form,
+    register,
+    control,
+    errors: formState.errors,
+    handleSubmit,
   };
+}
 
+type OnboardingExecutor = (data: TeacherOnboardingFormData) => Promise<unknown>;
+
+interface OnboardingSubmit {
+  readonly showSuccess: boolean;
+  readonly onSubmit: (data: TeacherOnboardingFormData) => Promise<void>;
+  readonly onDismissSuccess: () => void;
+}
+
+function useOnboardingSubmit(execute: OnboardingExecutor): OnboardingSubmit {
+  const [showSuccess, setShowSuccess] = useState(false);
+  const onSubmit = useCallback(
+    async (data: TeacherOnboardingFormData) => {
+      logger.info("Submitting teacher onboarding data:", data);
+      try {
+        await execute(data);
+        setShowSuccess(true);
+      } catch (error) {
+        logger.error("Failed to submit teacher onboarding form", { error });
+      }
+    },
+    [execute]
+  );
   const onDismissSuccess = useCallback(() => {
     setShowSuccess(false);
   }, []);
@@ -111,6 +135,33 @@ export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
       clearTimeout(timer);
     };
   }, [showSuccess, onDismissSuccess]);
+
+  return { showSuccess, onSubmit, onDismissSuccess };
+}
+
+function useOnboardingAvatar() {
+  // Lazy initializer: generate the pending-avatar storage key once per hook
+  // instance. Using useState with a lazy initializer (instead of useRef) avoids
+  // reading ref.current during render (which trips `react-hooks/refs`).
+  const [pendingAvatarKey] = useState(() => `pending-${crypto.randomUUID()}`);
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey });
+  return { onUploadAvatar };
+}
+
+function useMeetingSetupHref(): string | undefined {
+  const createdTeacher = useTeacherOnboardingStore(state => state.result);
+  return createdTeacher
+    ? `${profileHrefForTeacher({ userId: createdTeacher.userId, teacherId: createdTeacher.id })}?tab=meeting`
+    : undefined;
+}
+
+export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
+  const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateTeacherOnboarding();
+  const { labels, tMeeting, tJoin } = useOnboardingTranslations();
+  const { form, register, control, errors, handleSubmit } = useOnboardingForm(labels);
+  const { showSuccess, onSubmit, onDismissSuccess } = useOnboardingSubmit(execute);
+  const { onUploadAvatar } = useOnboardingAvatar();
+  const meetingSetupHref = useMeetingSetupHref();
 
   return {
     form,

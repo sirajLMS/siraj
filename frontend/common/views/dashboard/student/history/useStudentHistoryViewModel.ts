@@ -93,24 +93,27 @@ export interface StudentHistoryViewModel {
 
 export type UseStudentHistoryViewModelProps = Record<string, never>;
 
-export function useStudentHistoryViewModel(_props: UseStudentHistoryViewModelProps): StudentHistoryViewModel {
-  const t = useAppTranslation().dashboardTranslations.studentPortalHistory;
-  const router = useRouter();
-  const locale = useAppLocale();
-  const labels = useStudentHistoryLabels(t);
+interface StudentHistoryNavigation {
+  readonly onBackToDashboard: () => void;
+  readonly onOpenMeetingUrl: (url: string | null | undefined) => void;
+}
 
+function useStudentHistoryNavigation(): StudentHistoryNavigation {
+  const router = useRouter();
+  return useMemo(
+    () => ({
+      onBackToDashboard: () => router.push("/students/me"),
+      onOpenMeetingUrl: (url: string | null | undefined) => safeOpenWindow(url),
+    }),
+    [router]
+  );
+}
+
+function useStudentHistoryDates(locale: string) {
   const year = useStudentPortalHistoryStore(s => s.year);
   const month = useStudentPortalHistoryStore(s => s.month);
-  const selectedDay = useStudentPortalHistoryStore(s => s.selectedDay);
-  const selectedWeek = useStudentPortalHistoryStore(s => s.selectedWeek);
-  const subjectFilter = useStudentPortalHistoryStore(s => s.subjectFilter);
-  const statusFilter = useStudentPortalHistoryStore(s => s.statusFilter);
   const goPrevMonth = useStudentPortalHistoryStore(s => s.goPrevMonth);
   const goNextMonth = useStudentPortalHistoryStore(s => s.goNextMonth);
-  const setSelectedDay = useStudentPortalHistoryStore(s => s.setSelectedDay);
-  const setSelectedWeek = useStudentPortalHistoryStore(s => s.setSelectedWeek);
-  const setSubjectFilter = useStudentPortalHistoryStore(s => s.setSubjectFilter);
-  const setStatusFilter = useStudentPortalHistoryStore(s => s.setStatusFilter);
 
   const currentMonth = useMemo(() => new Date(year, month - 1, 1), [year, month]);
   const monthLabel = formatMonthYear(currentMonth, locale);
@@ -118,13 +121,40 @@ export function useStudentHistoryViewModel(_props: UseStudentHistoryViewModelPro
   const now = new Date();
   const canGoNext = year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1);
 
+  return { year, month, currentMonth, monthLabel, canGoNext, goPrevMonth, goNextMonth };
+}
+
+function useStudentHistoryFilters() {
+  const selectedDay = useStudentPortalHistoryStore(s => s.selectedDay);
+  const selectedWeek = useStudentPortalHistoryStore(s => s.selectedWeek);
+  const subjectFilter = useStudentPortalHistoryStore(s => s.subjectFilter);
+  const statusFilter = useStudentPortalHistoryStore(s => s.statusFilter);
+  const setSelectedDay = useStudentPortalHistoryStore(s => s.setSelectedDay);
+  const setSelectedWeek = useStudentPortalHistoryStore(s => s.setSelectedWeek);
+  const setSubjectFilter = useStudentPortalHistoryStore(s => s.setSubjectFilter);
+  const setStatusFilter = useStudentPortalHistoryStore(s => s.setStatusFilter);
+
+  return {
+    selectedDay,
+    selectedWeek,
+    subjectFilter,
+    statusFilter,
+    setSelectedDay,
+    setSelectedWeek,
+    setSubjectFilter,
+    setStatusFilter,
+  };
+}
+
+function useStudentProfile() {
   const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
     variables: { studentId: null, year: null, month: null },
     fetchPolicy: "cache-and-network",
   });
+  return { studentId: profileData?.studentProfile?.id ?? null, profileLoading };
+}
 
-  const studentId = profileData?.studentProfile?.id ?? null;
-
+function useStudentClassHistory(studentId: string | null, year: number, month: number) {
   const { data: historyData, loading: historyLoading } = useQuery(studentClassHistoryQueryDocument, {
     variables: {
       studentId: studentId ?? "",
@@ -145,43 +175,64 @@ export function useStudentHistoryViewModel(_props: UseStudentHistoryViewModelPro
     [historyData]
   );
 
+  return { historyLoading, metrics, sessions };
+}
+
+function useDerivedSessionData(
+  sessions: readonly StudentHistorySessionRow[],
+  subjectFilter: string,
+  statusFilter: string
+) {
   const filteredSessions = useMemo(
     () => filterHistorySessions(sessions, subjectFilter, statusFilter),
     [sessions, subjectFilter, statusFilter]
   );
-
   const sessionsByDay = useMemo(() => mapSessionsByDay(sessions), [sessions]);
   const subjectOptions = useMemo(() => uniqueSessionSubjects(sessions), [sessions]);
   const statusOptions = useMemo(() => uniqueSessionStatuses(sessions), [sessions]);
+  return { filteredSessions, sessionsByDay, subjectOptions, statusOptions };
+}
+
+export function useStudentHistoryViewModel(_props: UseStudentHistoryViewModelProps): StudentHistoryViewModel {
+  const t = useAppTranslation().dashboardTranslations.studentPortalHistory;
+  const locale = useAppLocale();
+  const labels = useStudentHistoryLabels(t);
+
+  const dates = useStudentHistoryDates(locale);
+  const filters = useStudentHistoryFilters();
+  const navigation = useStudentHistoryNavigation();
+  const { studentId, profileLoading } = useStudentProfile();
+  const { historyLoading, metrics, sessions } = useStudentClassHistory(studentId, dates.year, dates.month);
+  const derived = useDerivedSessionData(sessions, filters.subjectFilter, filters.statusFilter);
 
   const loading = profileLoading || historyLoading;
 
   return {
     metrics,
     sessions,
-    filteredSessions,
-    sessionsByDay,
-    subjectOptions,
-    statusOptions,
-    subjectFilter,
-    statusFilter,
-    year,
-    month,
-    currentMonth,
-    monthLabel,
-    selectedDay,
-    selectedWeek,
-    canGoNext,
+    filteredSessions: derived.filteredSessions,
+    sessionsByDay: derived.sessionsByDay,
+    subjectOptions: derived.subjectOptions,
+    statusOptions: derived.statusOptions,
+    subjectFilter: filters.subjectFilter,
+    statusFilter: filters.statusFilter,
+    year: dates.year,
+    month: dates.month,
+    currentMonth: dates.currentMonth,
+    monthLabel: dates.monthLabel,
+    selectedDay: filters.selectedDay,
+    selectedWeek: filters.selectedWeek,
+    canGoNext: dates.canGoNext,
     labels,
     locale,
     loading,
-    onBackToDashboard: () => router.push("/students/me"),
-    onOpenMeetingUrl: (url: string | null | undefined) => safeOpenWindow(url),
-    onPrevMonth: goPrevMonth,
-    onNextMonth: goNextMonth,
-    onSelectDay: setSelectedDay,
-    onSelectWeek: setSelectedWeek,
-    onSubjectFilterChange: setSubjectFilter,
-    onStatusFilterChange: setStatusFilter,
+    onBackToDashboard: navigation.onBackToDashboard,
+    onOpenMeetingUrl: navigation.onOpenMeetingUrl,
+    onPrevMonth: dates.goPrevMonth,
+    onNextMonth: dates.goNextMonth,
+    onSelectDay: filters.setSelectedDay,
+    onSelectWeek: filters.setSelectedWeek,
+    onSubjectFilterChange: filters.setSubjectFilter,
+    onStatusFilterChange: filters.setStatusFilter,
   };
 }

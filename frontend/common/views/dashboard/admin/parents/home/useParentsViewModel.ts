@@ -131,59 +131,72 @@ function useDirectoryLabels(t: ParentsDirectoryLabels): ParentsViewLabels {
   };
 }
 
-export type UseParentsViewModelProps = Record<string, never>;
+type ParentDirectoryQueryVariables = {
+  readonly search: string | null;
+  readonly lifecycleStatusFilter: ParentStatus | null;
+  readonly paginationArgs: {
+    readonly first: number;
+    readonly page: number;
+    readonly skip: null;
+    readonly after: null;
+    readonly before: null;
+    readonly last: null;
+    readonly maxCount: null;
+  };
+};
 
-export function useParentsViewModel(_props: Readonly<UseParentsViewModelProps>): ParentsViewModel {
-  const t = useAppTranslation().dashboardTranslations.parentsDirectory;
-  const router = useRouter();
+function buildDirectoryQueryVariables(
+  searchQuery: string,
+  pageSize: number,
+  page: number,
+  lifecycleStatusFilter: ParentStatus | null
+): ParentDirectoryQueryVariables {
+  return {
+    search: searchQuery || null,
+    lifecycleStatusFilter: lifecycleStatusFilter || null,
+    paginationArgs: {
+      first: pageSize,
+      page: page + 1,
+      skip: null,
+      after: null,
+      before: null,
+      last: null,
+      maxCount: null,
+    },
+  };
+}
 
+function useParentPermissionGates(): Pick<ParentsViewModel, "canParentsCreate" | "canParentManageStatus"> {
   // NEW FOR PLAN v5: read the user's permissions ONCE in the ViewModel and
   // expose boolean gates. Tier parents views no longer import `RequirePermission`
   // or call `useUserStore()` (specs.md §3 N3).
   const hasPermission = useUserStore(state => state.hasPermission);
   const canParentsCreate = hasPermission(AppPermission.ParentsCreate);
   const canParentManageStatus = hasPermission(AppPermission.ParentManageStatus);
+  return { canParentsCreate, canParentManageStatus };
+}
 
-  const {
-    searchQuery,
-    page,
-    pageSize,
-    lifecycleStatusFilter,
-    filterPanelOpen,
-    setSearchQuery,
-    setPage,
-    setLifecycleStatusFilter,
-    setFilterPanelOpen,
-    resetFilters,
-  } = useParentsStore();
-
-  const { data, loading } = useQuery(parentDirectoryQueryDocument, {
-    variables: {
-      search: searchQuery || null,
-      lifecycleStatusFilter: lifecycleStatusFilter || null,
-      paginationArgs: {
-        first: pageSize,
-        page: page + 1,
-        skip: null,
-        after: null,
-        before: null,
-        last: null,
-        maxCount: null,
-      },
-    },
+function useParentsDirectoryQuery() {
+  const { searchQuery, page, pageSize, lifecycleStatusFilter } = useParentsStore();
+  const variables = buildDirectoryQueryVariables(searchQuery, pageSize, page, lifecycleStatusFilter);
+  return useQuery(parentDirectoryQueryDocument, {
+    variables,
     fetchPolicy: "cache-and-network",
   });
+}
 
-  const directory = data?.parentDirectory;
-  const metrics = useDirectoryMetrics(directory ?? null);
-  const rows = useDirectoryRows(directory ?? null);
-  const labels = useDirectoryLabels(t);
+function useParentHandlers(
+  rows: readonly ParentDirectoryRow[],
+  labels: ParentsViewLabels
+): Pick<ParentsViewModel, "onAddParent" | "onOpenSettings" | "onSearch" | "onPageChange" | "onFilter" | "onExport"> {
+  const router = useRouter();
+  const { setSearchQuery, setPage, setFilterPanelOpen, filterPanelOpen } = useParentsStore();
 
-  const handleAddParent = () => {
+  const onAddParent = () => {
     router.push("/parents/onboarding");
   };
 
-  const handleOpenSettings = (id: string) => {
+  const onOpenSettings = (id: string) => {
     const row = rows.find(r => r.id === id);
     const href = profileHrefForParent({ userId: row?.userId, parentId: id });
     if (href) {
@@ -191,22 +204,22 @@ export function useParentsViewModel(_props: Readonly<UseParentsViewModelProps>):
     }
   };
 
-  const handleSearch = (query: string) => {
+  const onSearch = (query: string) => {
     setSearchQuery(query);
   };
 
-  const handlePageChange = useCallback(
+  const onPageChange = useCallback(
     (newPage: number) => {
       setPage(newPage);
     },
     [setPage]
   );
 
-  const handleFilter = useCallback(() => {
+  const onFilter = useCallback(() => {
     setFilterPanelOpen(!filterPanelOpen);
   }, [filterPanelOpen, setFilterPanelOpen]);
 
-  const handleExport = useCallback(() => {
+  const onExport = useCallback(() => {
     const exportLabels: ParentDirectoryExportLabels = {
       pageTitle: labels.pageTitle,
       table: {
@@ -222,6 +235,27 @@ export function useParentsViewModel(_props: Readonly<UseParentsViewModelProps>):
     void exportParentDirectory({ rows, labels: exportLabels });
   }, [rows, labels]);
 
+  return { onAddParent, onOpenSettings, onSearch, onPageChange, onFilter, onExport };
+}
+
+export type UseParentsViewModelProps = Record<string, never>;
+
+export function useParentsViewModel(_props: Readonly<UseParentsViewModelProps>): ParentsViewModel {
+  const t = useAppTranslation().dashboardTranslations.parentsDirectory;
+
+  const { canParentsCreate, canParentManageStatus } = useParentPermissionGates();
+
+  const { page, pageSize, lifecycleStatusFilter, filterPanelOpen, setLifecycleStatusFilter, resetFilters } =
+    useParentsStore();
+
+  const { data, loading } = useParentsDirectoryQuery();
+  const directory = data?.parentDirectory;
+  const metrics = useDirectoryMetrics(directory ?? null);
+  const rows = useDirectoryRows(directory ?? null);
+  const labels = useDirectoryLabels(t);
+
+  const handlers = useParentHandlers(rows, labels);
+
   return {
     metrics,
     rows,
@@ -232,14 +266,9 @@ export function useParentsViewModel(_props: Readonly<UseParentsViewModelProps>):
     totalCount: directory ? (directory.totalCount ?? 0) : undefined,
     lifecycleStatusFilter,
     filterPanelOpen,
-    onAddParent: handleAddParent,
-    onOpenSettings: handleOpenSettings,
-    onSearch: handleSearch,
-    onPageChange: handlePageChange,
-    onFilter: handleFilter,
-    onExport: handleExport,
     onLifecycleStatusFilterChange: setLifecycleStatusFilter,
     onResetFilters: resetFilters,
+    ...handlers,
     // NEW FOR PLAN v5: lifted permission booleans consumed by the tier views.
     canParentsCreate,
     canParentManageStatus,

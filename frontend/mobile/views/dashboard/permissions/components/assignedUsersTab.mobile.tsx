@@ -89,138 +89,225 @@ export function AssignedUsersTabMobile({
 
   return (
     <StyledTabContainer>
-      <StyledUserToolbar>
-        <Box
-          component="input"
-          type="text"
-          value={searchQuery}
-          onChange={e => onSearchChange(e.target.value)}
-          placeholder={t.searchAssignedUsers}
-          autoComplete="off"
-          sx={theme => ({
-            width: "100%",
-            padding: `${theme.spacing(1)} ${theme.spacing(3.5)} ${theme.spacing(1)} ${theme.spacing(3.5)}`,
-            border: `1px solid ${theme.palette.outlineVariant}`,
-            borderRadius: theme.shape.borderRadius,
-            backgroundColor: theme.palette.surfaceContainer,
-            color: theme.palette.onSurface,
-            outline: "none",
-            typography: "bodyMd",
-          })}
+      <AssignedUsersToolbar
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
+        onAssignGroup={onAssignGroup}
+        groupId={group.id}
+        assignUsersLabel={t.assignUsers}
+        searchPlaceholder={t.searchAssignedUsers}
+        loading={loading}
+      />
+      {selectedAssignedUserIds.length > 0 ? (
+        <BulkActionBar
+          selectedCount={selectedAssignedUserIds.length}
+          onBulkRevokeUsers={onBulkRevokeUsers}
+          usersSelectedLabel={t.usersSelected}
+          removeSelectedLabel={t.removeSelected}
         />
-        <StyledAssignUsersButton
-          variant="contained"
-          startIcon={<PersonAddOutlined />}
-          onClick={() => group.id && onAssignGroup(group.id)}
-          disabled={loading}
-        >
-          {t.assignUsers}
-        </StyledAssignUsersButton>
-      </StyledUserToolbar>
-
-      {selectedAssignedUserIds.length > 0 && (
-        <StyledBulkActionBar>
-          <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-            {t.usersSelected(selectedAssignedUserIds.length)}
-          </Typography>
-          <StyledRemoveSelectedButton
-            variant="contained"
-            color="error"
-            startIcon={<DeleteOutlined />}
-            onClick={onBulkRevokeUsers}
-          >
-            {t.removeSelected}
-          </StyledRemoveSelectedButton>
-        </StyledBulkActionBar>
-      )}
-
+      ) : null}
       <MobileCardList
         rows={filteredAssignedUsers}
         emptyMessage={t.noAssignedUsers}
         getKey={user => (user.id || user.email) ?? ""}
         paginationOptions={{ mode: "client" }}
         layout="edge-to-edge"
-        renderItem={user => {
-          const id = user.id ?? "";
-          const checked = selectedAssignedUserIds.includes(id);
-          const profileHref = id ? profileHrefForUser(id) : undefined;
-          return (
-            <MobileCardListItem
-              variant="edge-to-edge"
-              sx={theme => ({
-                backgroundColor: checked ? theme.palette.primaryContainer : undefined,
-              })}
-            >
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <StyledUserAvatar>
-                    {user.name
-                      ?.split(" ")
-                      .map((w: string) => w[0])
-                      .join("")
-                      .slice(0, 2)
-                      .toUpperCase()}
-                  </StyledUserAvatar>
-                  <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
-                    {profileHref ? (
-                      <Link href={profileHref} style={{ textDecoration: "none", color: "inherit" }}>
-                        <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-                          {user.name}
-                        </Typography>
-                      </Link>
-                    ) : (
-                      <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-                        {user.name}
-                      </Typography>
-                    )}
-                    <Typography
-                      variant="labelMd"
-                      sx={theme => ({
-                        color: theme.palette.text.secondary,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      })}
-                    >
-                      {user.email}
-                    </Typography>
-                  </Box>
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={e => onUserToggle(id, e.target.checked)}
-                    style={{ width: 20, height: 20 }}
-                  />
-                </Box>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                  <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                    {t.assignedDate}:{" "}
-                    {group.createdAt ? new Date(group.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
-                  {id ? (
-                    <ViewAsUserButton
-                      variant="link"
-                      targetUserId={id}
-                      targetUserName={user.name ?? user.email ?? ""}
-                      targetIsSuperAdmin={group.slug === "super_admin"}
-                    />
-                  ) : null}
-                  <StyledRemoveButton
-                    size="small"
-                    color="error"
-                    startIcon={<PersonRemoveOutlined fontSize="small" />}
-                    onClick={() => id && onRevokeUser(id)}
-                  >
-                    {t.removeUser}
-                  </StyledRemoveButton>
-                </Box>
-              </Box>
-            </MobileCardListItem>
-          );
-        }}
+        renderItem={user => (
+          <AssignedUserCard
+            user={user}
+            checked={selectedAssignedUserIds.includes(user.id ?? "")}
+            profileHref={user.id ? profileHrefForUser(user.id) : undefined}
+            assignedDateLabel={t.assignedDate}
+            removeUserLabel={t.removeUser}
+            groupCreatedAt={group.createdAt ?? undefined}
+            groupSlug={group.slug ?? undefined}
+            onUserToggle={onUserToggle}
+            onRevokeUser={onRevokeUser}
+          />
+        )}
       />
     </StyledTabContainer>
+  );
+}
+
+type AssignedUsersToolbarProps = {
+  readonly searchQuery: string;
+  readonly onSearchChange: (value: string) => void;
+  readonly onAssignGroup: (id: string) => void;
+  readonly groupId: string | null | undefined;
+  readonly assignUsersLabel: string;
+  readonly searchPlaceholder: string;
+  readonly loading: boolean;
+};
+
+function AssignedUsersToolbar({
+  searchQuery,
+  onSearchChange,
+  onAssignGroup,
+  groupId,
+  assignUsersLabel,
+  searchPlaceholder,
+  loading,
+}: Readonly<AssignedUsersToolbarProps>) {
+  return (
+    <StyledUserToolbar>
+      <Box
+        component="input"
+        type="text"
+        value={searchQuery}
+        onChange={e => onSearchChange(e.target.value)}
+        placeholder={searchPlaceholder}
+        autoComplete="off"
+        sx={theme => ({
+          width: "100%",
+          padding: `${theme.spacing(1)} ${theme.spacing(3.5)} ${theme.spacing(1)} ${theme.spacing(3.5)}`,
+          border: `1px solid ${theme.palette.outlineVariant}`,
+          borderRadius: theme.shape.borderRadius,
+          backgroundColor: theme.palette.surfaceContainer,
+          color: theme.palette.onSurface,
+          outline: "none",
+          typography: "bodyMd",
+        })}
+      />
+      <StyledAssignUsersButton
+        variant="contained"
+        startIcon={<PersonAddOutlined />}
+        onClick={() => groupId && onAssignGroup(groupId)}
+        disabled={loading}
+      >
+        {assignUsersLabel}
+      </StyledAssignUsersButton>
+    </StyledUserToolbar>
+  );
+}
+
+type BulkActionBarProps = {
+  readonly selectedCount: number;
+  readonly onBulkRevokeUsers: () => void;
+  readonly usersSelectedLabel: (count: number) => string;
+  readonly removeSelectedLabel: string;
+};
+
+function BulkActionBar({
+  selectedCount,
+  onBulkRevokeUsers,
+  usersSelectedLabel,
+  removeSelectedLabel,
+}: Readonly<BulkActionBarProps>) {
+  return (
+    <StyledBulkActionBar>
+      <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
+        {usersSelectedLabel(selectedCount)}
+      </Typography>
+      <StyledRemoveSelectedButton
+        variant="contained"
+        color="error"
+        startIcon={<DeleteOutlined />}
+        onClick={onBulkRevokeUsers}
+      >
+        {removeSelectedLabel}
+      </StyledRemoveSelectedButton>
+    </StyledBulkActionBar>
+  );
+}
+
+type AssignedUserCardProps = {
+  readonly user: AssignedUsersTabProps["filteredAssignedUsers"][number];
+  readonly checked: boolean;
+  readonly profileHref: string | undefined;
+  readonly assignedDateLabel: string;
+  readonly removeUserLabel: string;
+  readonly groupCreatedAt: string | undefined;
+  readonly groupSlug: string | undefined;
+  readonly onUserToggle: (id: string, checked: boolean) => void;
+  readonly onRevokeUser: (userId: string) => void;
+};
+
+function AssignedUserCard({
+  user,
+  checked,
+  profileHref,
+  assignedDateLabel,
+  removeUserLabel,
+  groupCreatedAt,
+  groupSlug,
+  onUserToggle,
+  onRevokeUser,
+}: Readonly<AssignedUserCardProps>) {
+  const id = user.id ?? "";
+  const initials = user.name
+    ?.split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  const assignedOn = groupCreatedAt ? new Date(groupCreatedAt).toLocaleDateString() : new Date().toLocaleDateString();
+
+  return (
+    <MobileCardListItem
+      variant="edge-to-edge"
+      sx={theme => ({
+        backgroundColor: checked ? theme.palette.primaryContainer : undefined,
+      })}
+    >
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <StyledUserAvatar>{initials}</StyledUserAvatar>
+          <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
+            {profileHref ? (
+              <Link href={profileHref} style={{ textDecoration: "none", color: "inherit" }}>
+                <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
+                  {user.name}
+                </Typography>
+              </Link>
+            ) : (
+              <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
+                {user.name}
+              </Typography>
+            )}
+            <Typography
+              variant="labelMd"
+              sx={theme => ({
+                color: theme.palette.text.secondary,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              })}
+            >
+              {user.email}
+            </Typography>
+          </Box>
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={e => onUserToggle(id, e.target.checked)}
+            style={{ width: 20, height: 20 }}
+          />
+        </Box>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {assignedDateLabel}: {assignedOn}
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
+          {id ? (
+            <ViewAsUserButton
+              variant="link"
+              targetUserId={id}
+              targetUserName={user.name ?? user.email ?? ""}
+              targetIsSuperAdmin={groupSlug === "super_admin"}
+            />
+          ) : null}
+          <StyledRemoveButton
+            size="small"
+            color="error"
+            startIcon={<PersonRemoveOutlined fontSize="small" />}
+            onClick={() => id && onRevokeUser(id)}
+          >
+            {removeUserLabel}
+          </StyledRemoveButton>
+        </Box>
+      </Box>
+    </MobileCardListItem>
   );
 }

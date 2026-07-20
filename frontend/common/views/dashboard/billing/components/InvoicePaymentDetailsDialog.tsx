@@ -592,6 +592,192 @@ function useInvoicePaymentReview({
   };
 }
 
+type DialogLabels = {
+  readonly submissionLabels: {
+    readonly pending: string;
+    readonly rejected: string;
+    readonly submittedAt: string;
+    readonly noProof: string;
+    readonly viewProof: string;
+    readonly viewProofFailed: string;
+  };
+  readonly reviewLabels: {
+    readonly reviewActions: string;
+    readonly rejectionReason: string;
+    readonly rejectionReasonPlaceholder: string;
+    readonly close: string;
+    readonly reject: string;
+    readonly rejecting: string;
+    readonly approve: string;
+    readonly approving: string;
+    readonly confirmReject: string;
+    readonly confirmRejectMessage: string;
+  };
+  readonly loadFailed: string;
+  readonly tryAgain: string;
+  readonly amount: string;
+  readonly date: string;
+  readonly submittedAt: string;
+  readonly close: string;
+  readonly empty: string;
+  readonly title: string;
+};
+
+function useDialogLabels(): DialogLabels {
+  const t = useAppTranslation().dashboardTranslations.billing.paymentDetailsDialog;
+  return {
+    submissionLabels: {
+      pending: t.pending,
+      rejected: t.rejected,
+      submittedAt: t.submittedAt,
+      noProof: t.noProof,
+      viewProof: t.viewProof,
+      viewProofFailed: t.viewProofFailed,
+    },
+    reviewLabels: {
+      reviewActions: t.reviewActions,
+      rejectionReason: t.rejectionReason,
+      rejectionReasonPlaceholder: t.rejectionReasonPlaceholder,
+      close: t.close,
+      reject: t.reject,
+      rejecting: t.rejecting,
+      approve: t.approve,
+      approving: t.approving,
+      confirmReject: t.confirmReject,
+      confirmRejectMessage: t.confirmRejectMessage,
+    },
+    loadFailed: t.loadFailed,
+    tryAgain: t.tryAgain,
+    amount: t.amount,
+    date: t.date,
+    submittedAt: t.submittedAt,
+    close: t.close,
+    empty: t.empty,
+    title: t.title,
+  };
+}
+
+type ReviewState = ReturnType<typeof useInvoicePaymentReview>;
+
+type DialogHandlers = {
+  readonly handleDialogClose: () => void;
+  readonly handleDialogCloseFromEvent: (reason: string) => void;
+  readonly onRejectionReasonChange: (value: string) => void;
+  readonly onShowRejectForm: () => void;
+  readonly onCancelReject: () => void;
+  readonly onApprove: () => void;
+  readonly onRequestReject: () => void;
+  readonly onConfirmReject: () => void;
+  readonly onRetryLoad: () => void;
+};
+
+function useDialogHandlers(review: ReviewState, onClose: () => void): DialogHandlers {
+  const handleDialogClose = () => {
+    if (review.reviewBusy) {
+      return;
+    }
+    onClose();
+  };
+
+  const handleDialogCloseFromEvent = (reason: string) => {
+    if (review.reviewBusy && (reason === "backdropClick" || reason === "escapeKeyDown")) {
+      return;
+    }
+    handleDialogClose();
+  };
+
+  const onRejectionReasonChange = (value: string) => {
+    review.setRejectionReason(value);
+    review.setShowRejectConfirm(false);
+  };
+
+  const onShowRejectForm = () => review.setShowRejectForm(true);
+
+  const onCancelReject = () => {
+    review.setShowRejectForm(false);
+    review.setShowRejectConfirm(false);
+    review.setRejectionReason("");
+  };
+
+  const onApprove = () => {
+    review.handleApprove();
+  };
+
+  const onRequestReject = () => review.setShowRejectConfirm(true);
+
+  const onConfirmReject = () => {
+    review.handleReject();
+  };
+
+  return {
+    handleDialogClose,
+    handleDialogCloseFromEvent,
+    onRejectionReasonChange,
+    onShowRejectForm,
+    onCancelReject,
+    onApprove,
+    onRequestReject,
+    onConfirmReject,
+    onRetryLoad: review.handleRetryLoad,
+  };
+}
+
+function DialogContentBody({
+  review,
+  handlers,
+  labels,
+  locale,
+  fxMessages,
+  subjectUserId,
+  displayCurrency,
+}: {
+  readonly review: ReviewState;
+  readonly handlers: DialogHandlers;
+  readonly labels: DialogLabels;
+  readonly locale: string;
+  readonly fxMessages: FormatCurrencyMessages;
+  readonly subjectUserId?: string | null;
+  readonly displayCurrency?: string | null;
+}): React.ReactNode {
+  return (
+    <PaymentDetailsDialogContent
+      loading={review.loading}
+      loadFailed={review.loadFailed}
+      loadFailedLabel={labels.loadFailed}
+      tryAgainLabel={labels.tryAgain}
+      onRetry={handlers.onRetryLoad}
+      showDisplayCurrencyHint={!displayCurrency}
+      subjectUserId={subjectUserId}
+      viewerDisplayCurrency={displayCurrency}
+      submission={review.submission}
+      payments={review.payments}
+      locale={locale}
+      submissionLabels={labels.submissionLabels}
+      showReviewActions={review.showReviewActions}
+      reviewLabels={labels.reviewLabels}
+      actionError={review.actionError}
+      rejectionReason={review.rejectionReason}
+      showRejectForm={review.showRejectForm}
+      showRejectConfirm={review.showRejectConfirm}
+      reviewBusy={review.reviewBusy}
+      rejecting={review.rejecting}
+      approving={review.approving}
+      onRejectionReasonChange={handlers.onRejectionReasonChange}
+      onShowRejectForm={handlers.onShowRejectForm}
+      onCancelReject={handlers.onCancelReject}
+      onApprove={handlers.onApprove}
+      onRequestReject={handlers.onRequestReject}
+      onConfirmReject={handlers.onConfirmReject}
+      amountLabel={labels.amount}
+      dateLabel={labels.date}
+      submittedAtLabel={labels.submittedAt}
+      closeLabel={labels.close}
+      emptyLabel={labels.empty}
+      fxMessages={fxMessages}
+    />
+  );
+}
+
 export function InvoicePaymentDetailsDialog({
   open,
   onClose,
@@ -601,7 +787,6 @@ export function InvoicePaymentDetailsDialog({
   billingActionsDisabled = false,
   onSuccess,
 }: InvoicePaymentDetailsDialogProps): React.ReactNode {
-  const t = useAppTranslation().dashboardTranslations.billing.paymentDetailsDialog;
   const tProfile = useAppTranslation().profileTranslations.base;
   const tErrors = useAppTranslation().errorsTranslations;
   const locale = useAppLocale();
@@ -625,95 +810,31 @@ export function InvoicePaymentDetailsDialog({
     canManage,
   });
 
-  const handleDialogClose = () => {
-    if (review.reviewBusy) {
-      return;
-    }
-    onClose();
-  };
+  const labels = useDialogLabels();
+  const handlers = useDialogHandlers(review, onClose);
 
   return (
     <Dialog
       open={open}
-      onClose={(_event, reason) => {
-        if (review.reviewBusy && (reason === "backdropClick" || reason === "escapeKeyDown")) {
-          return;
-        }
-        handleDialogClose();
-      }}
+      onClose={(_event, reason) => handlers.handleDialogCloseFromEvent(reason)}
       fullWidth
       maxWidth="sm"
     >
-      <DialogTitle>{t.title}</DialogTitle>
+      <DialogTitle>{labels.title}</DialogTitle>
       <DialogContent>
-        <PaymentDetailsDialogContent
-          loading={review.loading}
-          loadFailed={review.loadFailed}
-          loadFailedLabel={t.loadFailed}
-          tryAgainLabel={t.tryAgain}
-          onRetry={review.handleRetryLoad}
-          showDisplayCurrencyHint={!displayCurrency}
-          subjectUserId={subjectUserId}
-          viewerDisplayCurrency={displayCurrency}
-          submission={review.submission}
-          payments={review.payments}
+        <DialogContentBody
+          review={review}
+          handlers={handlers}
+          labels={labels}
           locale={locale}
-          submissionLabels={{
-            pending: t.pending,
-            rejected: t.rejected,
-            submittedAt: t.submittedAt,
-            noProof: t.noProof,
-            viewProof: t.viewProof,
-            viewProofFailed: t.viewProofFailed,
-          }}
-          showReviewActions={review.showReviewActions}
-          reviewLabels={{
-            reviewActions: t.reviewActions,
-            rejectionReason: t.rejectionReason,
-            rejectionReasonPlaceholder: t.rejectionReasonPlaceholder,
-            close: t.close,
-            reject: t.reject,
-            rejecting: t.rejecting,
-            approve: t.approve,
-            approving: t.approving,
-            confirmReject: t.confirmReject,
-            confirmRejectMessage: t.confirmRejectMessage,
-          }}
-          actionError={review.actionError}
-          rejectionReason={review.rejectionReason}
-          showRejectForm={review.showRejectForm}
-          showRejectConfirm={review.showRejectConfirm}
-          reviewBusy={review.reviewBusy}
-          rejecting={review.rejecting}
-          approving={review.approving}
-          onRejectionReasonChange={value => {
-            review.setRejectionReason(value);
-            review.setShowRejectConfirm(false);
-          }}
-          onShowRejectForm={() => review.setShowRejectForm(true)}
-          onCancelReject={() => {
-            review.setShowRejectForm(false);
-            review.setShowRejectConfirm(false);
-            review.setRejectionReason("");
-          }}
-          onApprove={() => {
-            review.handleApprove();
-          }}
-          onRequestReject={() => review.setShowRejectConfirm(true)}
-          onConfirmReject={() => {
-            review.handleReject();
-          }}
-          amountLabel={t.amount}
-          dateLabel={t.date}
-          submittedAtLabel={t.submittedAt}
-          closeLabel={t.close}
-          emptyLabel={t.empty}
           fxMessages={fxMessages}
+          subjectUserId={subjectUserId}
+          displayCurrency={displayCurrency}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleDialogClose} disabled={review.reviewBusy}>
-          {t.close}
+        <Button onClick={handlers.handleDialogClose} disabled={review.reviewBusy}>
+          {labels.close}
         </Button>
       </DialogActions>
     </Dialog>

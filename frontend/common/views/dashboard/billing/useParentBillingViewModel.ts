@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   markInvoicePaidMutationDocument,
   parentBillingSummaryQueryDocument,
@@ -17,7 +18,7 @@ import {
   mapBillingCurrencyBuckets,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
-import { useParentBillingStore } from "@/frontend/common/stores/parentBillingStore";
+import { type ParentBillingState, useParentBillingStore } from "@/frontend/common/stores/parentBillingStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
@@ -48,7 +49,16 @@ export type UseParentBillingViewModelProps = Record<string, never>;
 // ParentBillingViewProps.
 export type ParentBillingViewModel = ParentBillingViewProps;
 
-export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewModelProps>): ParentBillingViewModel {
+interface BillingTranslations {
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["billing"];
+  tErrors: ReturnType<typeof useAppTranslation>["errorsTranslations"];
+  tc: ReturnType<typeof useAppTranslation>["commonTranslations"];
+  locale: ReturnType<typeof useAppLocale>;
+  labels: ReturnType<typeof buildBillingLabels>;
+  fxMessages: ReturnType<typeof buildFxDisplayMessages>;
+}
+
+function useBillingTranslations(): BillingTranslations {
   const t = useAppTranslation().dashboardTranslations.billing;
   const tProfile = useAppTranslation().profileTranslations.teacher;
   const tProfileRoot = useAppTranslation().profileTranslations.base;
@@ -56,37 +66,63 @@ export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewM
   const tc = useAppTranslation().commonTranslations;
   const locale = useAppLocale();
   const labels = buildBillingLabels(t);
-  const { isImpersonating } = useImpersonation();
-  const billingActionsDisabled = isImpersonating;
-  const hasPermission = useUserStore(state => state.hasPermission);
-
-  const canManage = hasPermission(AppPermission.BillingUpdateStatusPaid);
-  const canSubmitProof = hasPermission(AppPermission.BillingSubmitPaymentProof);
-  const canView = hasPermission(AppPermission.BillingViewHistory);
-  const canCreate = hasPermission(AppPermission.BillingCreateInvoice);
-
   const fxMessages = useMemo(
     () => buildFxDisplayMessages(tProfile, tErrors, tProfileRoot),
     [tProfile, tErrors, tProfileRoot]
   );
+  return { t, tErrors, tc, locale, labels, fxMessages };
+}
 
-  const page = useParentBillingStore(state => state.page);
-  const pageSize = useParentBillingStore(state => state.pageSize);
-  const setPage = useParentBillingStore(state => state.setPage);
-  const searchQuery = useParentBillingStore(state => state.searchQuery);
-  const debouncedSearch = useParentBillingStore(state => state.debouncedSearch);
-  const setSearchQuery = useParentBillingStore(state => state.setSearchQuery);
-  const setDebouncedSearch = useParentBillingStore(state => state.setDebouncedSearch);
-  const showFeedback = useParentBillingStore(state => state.showFeedback);
-  const proofTarget = useParentBillingStore(state => state.proofTarget);
-  const setProofTarget = useParentBillingStore(state => state.setProofTarget);
-  const detailsTarget = useParentBillingStore(state => state.detailsTarget);
-  const setDetailsTarget = useParentBillingStore(state => state.setDetailsTarget);
-  const snackbarOpen = useParentBillingStore(state => state.snackbarOpen);
-  const snackbarMessage = useParentBillingStore(state => state.snackbarMessage);
-  const snackbarSeverity = useParentBillingStore(state => state.snackbarSeverity);
-  const closeSnackbar = useParentBillingStore(state => state.closeSnackbar);
+interface BillingPermissions {
+  canManage: boolean;
+  canSubmitProof: boolean;
+  canView: boolean;
+  canCreate: boolean;
+  billingActionsDisabled: boolean;
+}
 
+function useBillingPermissions(): BillingPermissions {
+  const { isImpersonating } = useImpersonation();
+  const hasPermission = useUserStore(state => state.hasPermission);
+  return {
+    canManage: hasPermission(AppPermission.BillingUpdateStatusPaid),
+    canSubmitProof: hasPermission(AppPermission.BillingSubmitPaymentProof),
+    canView: hasPermission(AppPermission.BillingViewHistory),
+    canCreate: hasPermission(AppPermission.BillingCreateInvoice),
+    billingActionsDisabled: isImpersonating,
+  };
+}
+
+type BillingStoreState = ParentBillingState;
+
+function useBillingStoreState(): BillingStoreState {
+  return {
+    page: useParentBillingStore(state => state.page),
+    pageSize: useParentBillingStore(state => state.pageSize),
+    setPage: useParentBillingStore(state => state.setPage),
+    searchQuery: useParentBillingStore(state => state.searchQuery),
+    debouncedSearch: useParentBillingStore(state => state.debouncedSearch),
+    setSearchQuery: useParentBillingStore(state => state.setSearchQuery),
+    setDebouncedSearch: useParentBillingStore(state => state.setDebouncedSearch),
+    showFeedback: useParentBillingStore(state => state.showFeedback),
+    proofTarget: useParentBillingStore(state => state.proofTarget),
+    setProofTarget: useParentBillingStore(state => state.setProofTarget),
+    detailsTarget: useParentBillingStore(state => state.detailsTarget),
+    setDetailsTarget: useParentBillingStore(state => state.setDetailsTarget),
+    snackbarOpen: useParentBillingStore(state => state.snackbarOpen),
+    snackbarMessage: useParentBillingStore(state => state.snackbarMessage),
+    snackbarSeverity: useParentBillingStore(state => state.snackbarSeverity),
+    closeSnackbar: useParentBillingStore(state => state.closeSnackbar),
+  };
+}
+
+interface BillingSearchHandlers {
+  handleSearchChange: (value: string) => void;
+  isSearchPending: boolean;
+}
+
+function useBillingSearchHandlers(store: BillingStoreState): BillingSearchHandlers {
+  const { setSearchQuery, setDebouncedSearch, setPage, searchQuery, debouncedSearch } = store;
   const debouncedApplySearch = useDebouncedCallback((value: string) => {
     setDebouncedSearch(value.trim());
     setPage(0);
@@ -101,6 +137,20 @@ export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewM
   );
 
   const isSearchPending = searchQuery.trim() !== debouncedSearch.trim();
+  return { handleSearchChange, isSearchPending };
+}
+
+interface BillingData {
+  invoicesData: Operations.ParentInvoiceHistoryQuery | undefined;
+  summaryData: Operations.ParentBillingSummaryQuery | undefined;
+  invoicesLoading: boolean;
+  summaryLoading: boolean;
+  refetchInvoices: () => Promise<unknown>;
+  refetchSummary: () => Promise<unknown>;
+}
+
+function useBillingData(store: BillingStoreState): BillingData {
+  const { page, pageSize, debouncedSearch, proofTarget, detailsTarget } = store;
   const dialogsOpen = proofTarget !== null || detailsTarget !== null;
 
   const {
@@ -136,10 +186,30 @@ export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewM
     pollInterval: dialogsOpen ? 0 : 30_000,
   });
 
-  const refreshBillingData = useCallback(() => {
+  return { invoicesData, summaryData, invoicesLoading, summaryLoading, refetchInvoices, refetchSummary };
+}
+
+function useBillingRefresh(data: BillingData): () => void {
+  const { refetchInvoices, refetchSummary } = data;
+  return useCallback(() => {
     refetchInvoices().catch(() => {});
     refetchSummary().catch(() => {});
   }, [refetchInvoices, refetchSummary]);
+}
+
+interface BillingMutations {
+  submittingProof: boolean;
+  markingPaid: boolean;
+  submitPaymentProof: (invoiceId: string, proofFileId: string) => void;
+}
+
+function useBillingMutations(
+  translations: BillingTranslations,
+  store: BillingStoreState,
+  refreshBillingData: () => void
+): BillingMutations {
+  const { labels } = translations;
+  const { setProofTarget, showFeedback } = store;
 
   const [submitPaymentProofMutation, { loading: submittingProof }] = useMutation(submitPaymentProofMutationDocument, {
     onCompleted: () => {
@@ -167,6 +237,24 @@ export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewM
     },
   });
 
+  const submitPaymentProof = useCallback(
+    (invoiceId: string, proofFileId: string) => {
+      submitPaymentProofMutation({
+        variables: { invoiceId, proofFileId, expectedVersion: null },
+      }).catch(() => {});
+    },
+    [submitPaymentProofMutation]
+  );
+
+  return { submittingProof, markingPaid, submitPaymentProof };
+}
+
+function useInvoiceRows(
+  translations: BillingTranslations,
+  data: BillingData
+): { invoices: readonly ParentInvoiceRow[]; totalCount: number } {
+  const { locale, fxMessages } = translations;
+  const { invoicesData } = data;
   const invoices: readonly ParentInvoiceRow[] = useMemo(
     () =>
       (invoicesData?.parentInvoiceHistory?.rows ?? [])
@@ -199,8 +287,13 @@ export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewM
   );
 
   const totalCount = invoicesData?.parentInvoiceHistory?.totalCount ?? 0;
+  return { invoices, totalCount };
+}
 
-  const summary: ParentBillingSummary = useMemo(() => {
+function useBillingSummary(translations: BillingTranslations, data: BillingData): ParentBillingSummary {
+  const { locale, fxMessages } = translations;
+  const { summaryData } = data;
+  return useMemo(() => {
     const outstandingTotals = formatBillingCurrencyTotals(
       mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.outstandingByCurrency),
       locale,
@@ -221,28 +314,29 @@ export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewM
       activeStudents: String(summaryData?.parentBillingSummary?.activeStudents ?? 0),
     };
   }, [summaryData?.parentBillingSummary, locale, fxMessages]);
+}
 
-  const handlePayNow = useCallback(
-    (invoice: MarkPaidInvoiceTarget) => {
-      if (billingActionsDisabled) {
-        showFeedback(tErrors.auth.impersonationNotAllowedDuringSession, "error");
-        return;
-      }
-      setProofTarget(invoice);
-    },
-    [billingActionsDisabled, setProofTarget, showFeedback, tErrors]
-  );
+function useQuickPayHandler(
+  translations: BillingTranslations,
+  permissions: BillingPermissions,
+  store: BillingStoreState,
+  data: BillingData,
+  handlePayNow: (invoice: MarkPaidInvoiceTarget) => void
+): () => void {
+  const { labels, tErrors, locale, fxMessages, tc } = translations;
+  const { billingActionsDisabled } = permissions;
+  const { showFeedback } = store;
 
-  const handleQuickPay = useCallback(() => {
+  return useCallback(() => {
     if (billingActionsDisabled) {
       showFeedback(tErrors.auth.impersonationNotAllowedDuringSession, "error");
       return;
     }
-    if (summaryLoading) {
+    if (data.summaryLoading) {
       showFeedback(tc.loading, "info");
       return;
     }
-    const nextUnpaid = summaryData?.parentBillingSummary?.nextUnpaidInvoice;
+    const nextUnpaid = data.summaryData?.parentBillingSummary?.nextUnpaidInvoice;
     if (nextUnpaid?.id) {
       handlePayNow({
         id: nextUnpaid.id,
@@ -259,7 +353,7 @@ export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewM
       });
       return;
     }
-    const pendingCount = summaryData?.parentBillingSummary?.pendingPaymentCount ?? 0;
+    const pendingCount = data.summaryData?.parentBillingSummary?.pendingPaymentCount ?? 0;
     if (pendingCount > 0) {
       showFeedback(labels.notifications.paymentPendingReview, "info");
       return;
@@ -273,11 +367,42 @@ export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewM
     locale,
     fxMessages,
     showFeedback,
-    summaryData?.parentBillingSummary,
-    summaryLoading,
+    data.summaryData?.parentBillingSummary,
+    data.summaryLoading,
     tErrors,
     tc.loading,
   ]);
+}
+
+interface BillingActionHandlers {
+  handlePayNow: (invoice: MarkPaidInvoiceTarget) => void;
+  handleQuickPay: () => void;
+  handleDownloadPdf: (invoiceId: string) => void;
+  handleMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
+}
+
+function useBillingActionHandlers(
+  translations: BillingTranslations,
+  permissions: BillingPermissions,
+  store: BillingStoreState,
+  data: BillingData
+): BillingActionHandlers {
+  const { labels, tErrors } = translations;
+  const { canManage, billingActionsDisabled } = permissions;
+  const { setProofTarget, showFeedback } = store;
+
+  const handlePayNow = useCallback(
+    (invoice: MarkPaidInvoiceTarget) => {
+      if (billingActionsDisabled) {
+        showFeedback(tErrors.auth.impersonationNotAllowedDuringSession, "error");
+        return;
+      }
+      setProofTarget(invoice);
+    },
+    [billingActionsDisabled, setProofTarget, showFeedback, tErrors]
+  );
+
+  const handleQuickPay = useQuickPayHandler(translations, permissions, store, data, handlePayNow);
 
   const handleDownloadPdf = useCallback(
     (invoiceId: string) => {
@@ -287,15 +412,6 @@ export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewM
       }
     },
     [labels.notifications.popupBlocked, showFeedback]
-  );
-
-  const handleSubmitProof = useCallback(
-    (invoiceId: string, proofFileId: string) => {
-      submitPaymentProofMutation({
-        variables: { invoiceId, proofFileId, expectedVersion: null },
-      }).catch(() => {});
-    },
-    [submitPaymentProofMutation]
   );
 
   const handleMarkAsPaid = useCallback(
@@ -312,40 +428,55 @@ export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewM
     [billingActionsDisabled, canManage, setProofTarget, showFeedback, tErrors]
   );
 
-  const loading = invoicesLoading || isSearchPending || submittingProof || markingPaid;
+  return { handlePayNow, handleQuickPay, handleDownloadPdf, handleMarkAsPaid };
+}
+
+export function useParentBillingViewModel(_props: Readonly<UseParentBillingViewModelProps>): ParentBillingViewModel {
+  const translations = useBillingTranslations();
+  const permissions = useBillingPermissions();
+  const store = useBillingStoreState();
+  const search = useBillingSearchHandlers(store);
+  const data = useBillingData(store);
+  const refreshBillingData = useBillingRefresh(data);
+  const mutations = useBillingMutations(translations, store, refreshBillingData);
+  const { invoices, totalCount } = useInvoiceRows(translations, data);
+  const summary = useBillingSummary(translations, data);
+  const handlers = useBillingActionHandlers(translations, permissions, store, data);
+
+  const loading = data.invoicesLoading || search.isSearchPending || mutations.submittingProof || mutations.markingPaid;
 
   return {
-    labels,
+    labels: translations.labels,
     summary,
-    summaryLoading,
+    summaryLoading: data.summaryLoading,
     invoices,
     loading,
-    isSearchPending,
-    billingActionsDisabled,
-    searchQuery,
-    onSearchChange: handleSearchChange,
-    onPayNow: handlePayNow,
-    onMarkAsPaid: canManage ? handleMarkAsPaid : undefined,
-    onViewPaymentDetails: setDetailsTarget,
-    onDownloadPdf: handleDownloadPdf,
-    onQuickPay: handleQuickPay,
-    page,
-    pageSize,
+    isSearchPending: search.isSearchPending,
+    billingActionsDisabled: permissions.billingActionsDisabled,
+    searchQuery: store.searchQuery,
+    onSearchChange: search.handleSearchChange,
+    onPayNow: handlers.handlePayNow,
+    onMarkAsPaid: permissions.canManage ? handlers.handleMarkAsPaid : undefined,
+    onViewPaymentDetails: store.setDetailsTarget,
+    onDownloadPdf: handlers.handleDownloadPdf,
+    onQuickPay: handlers.handleQuickPay,
+    page: store.page,
+    pageSize: store.pageSize,
     totalCount,
-    onPageChange: setPage,
-    canManage,
-    canSubmitProof,
-    canView,
-    canCreate,
-    proofTarget,
-    detailsTarget,
-    submitProof: handleSubmitProof,
-    snackbarOpen,
-    snackbarMessage,
-    snackbarSeverity,
-    onCloseSnackbar: closeSnackbar,
-    onCloseProofDialog: () => setProofTarget(null),
-    onCloseDetailsDialog: () => setDetailsTarget(null),
+    onPageChange: store.setPage,
+    canManage: permissions.canManage,
+    canSubmitProof: permissions.canSubmitProof,
+    canView: permissions.canView,
+    canCreate: permissions.canCreate,
+    proofTarget: store.proofTarget,
+    detailsTarget: store.detailsTarget,
+    submitProof: mutations.submitPaymentProof,
+    snackbarOpen: store.snackbarOpen,
+    snackbarMessage: store.snackbarMessage,
+    snackbarSeverity: store.snackbarSeverity,
+    onCloseSnackbar: store.closeSnackbar,
+    onCloseProofDialog: () => store.setProofTarget(null),
+    onCloseDetailsDialog: () => store.setDetailsTarget(null),
     refreshBillingData,
   } as ParentBillingViewModel;
 }

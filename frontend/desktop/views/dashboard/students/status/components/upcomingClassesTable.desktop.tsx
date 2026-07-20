@@ -1,6 +1,7 @@
 import { VideocamOffOutlined } from "@mui/icons-material";
 import { Box, Paper, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
+import type { ComponentProps, ComponentType } from "react";
 import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type {
   UpcomingClassDisplay,
@@ -14,6 +15,41 @@ import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/d
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale, useAppTranslation } from "@/shared/locale";
+
+type ProfileLinkCellProps = ComponentProps<typeof DesktopClassProfileLinkCell>;
+type ProfileLinkCellComponent = ComponentType<ProfileLinkCellProps>;
+
+type ProfileLinkColumnConfig = {
+  readonly field: string;
+  readonly headerName: string;
+  readonly flex: number;
+  readonly minWidth: number;
+  readonly avatarSize: number;
+  readonly Cell: ProfileLinkCellComponent;
+  readonly href: (row: UpcomingClassDisplay) => string | null | undefined;
+  readonly name: (row: UpcomingClassDisplay) => string;
+  readonly avatarUrl: (row: UpcomingClassDisplay) => string | null | undefined;
+};
+
+function profileLinkColumn(config: ProfileLinkColumnConfig): GridColDef<UpcomingClassDisplay> {
+  const { Cell, avatarSize, href, name, avatarUrl } = config;
+  return {
+    field: config.field,
+    headerName: config.headerName,
+    flex: config.flex,
+    minWidth: config.minWidth,
+    renderCell: params => (
+      <Cell
+        href={href(params.row)}
+        name={name(params.row)}
+        avatarUrl={avatarUrl(params.row)}
+        avatarSize={avatarSize}
+        typographyVariant="bodyMd"
+        fontWeight={700}
+      />
+    ),
+  };
+}
 
 function formatDateTime(locale: string, dateStr: string): string {
   try {
@@ -98,38 +134,28 @@ export function UpcomingClassesTableDesktop({ classes }: Readonly<UpcomingClasse
   const locale = useAppLocale();
 
   const columns: GridColDef<UpcomingClassDisplay>[] = [
-    {
+    profileLinkColumn({
       field: "subjectName",
       headerName: t.table.subject,
       flex: 1.4,
       minWidth: 180,
-      renderCell: params => (
-        <DesktopClassProfileLinkCell
-          href={classHref(params.row.id)}
-          name={params.row.subjectName?.trim() || "—"}
-          avatarUrl={params.row.avatarUrl}
-          avatarSize={40}
-          typographyVariant="bodyMd"
-          fontWeight={700}
-        />
-      ),
-    },
-    {
+      avatarSize: 40,
+      Cell: DesktopClassProfileLinkCell,
+      href: row => classHref(row.id),
+      name: row => row.subjectName?.trim() || "—",
+      avatarUrl: row => row.avatarUrl,
+    }),
+    profileLinkColumn({
       field: "instructor",
       headerName: t.table.instructor,
       flex: 1.3,
       minWidth: 180,
-      renderCell: params => (
-        <DesktopPersonProfileLinkCell
-          href={profileHrefForTeacher({ teacherId: params.row.teacherId })}
-          name={params.row.instructor}
-          avatarUrl={params.row.teacherAvatarUrl}
-          avatarSize={36}
-          typographyVariant="bodyMd"
-          fontWeight={700}
-        />
-      ),
-    },
+      avatarSize: 36,
+      Cell: DesktopPersonProfileLinkCell,
+      href: row => profileHrefForTeacher({ teacherId: row.teacherId }),
+      name: row => row.instructor,
+      avatarUrl: row => row.teacherAvatarUrl,
+    }),
     {
       field: "scheduledStartAt",
       headerName: t.table.dateTime,
