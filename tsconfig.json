@@ -50,12 +50,22 @@
     ".next-test-*/types/**/*.ts"
   ],
   "exclude": [
+    // Ignore ALL dot-directories anywhere in the tree (e.g. .ai, .git, .cursor,
+    // .vscode, .scannerwork, .husky, .agents, ...). Does NOT affect Next.js's
+    // generated types in .next/ and .next-test*/ — those are pulled in explicitly
+    // via the `include` block above (TS applies `exclude` only to files reached via
+    // ambient/walked discovery, not to explicit `include` entries — so .next types
+    // stay included).
+    "**/.*/**",
+    // Build output / dependency dirs that don't start with a dot.
     "node_modules",
+    "dist",
+    "out",
+    "build",
+    "storybook-static",
+    // Source subtrees deliberately excluded from type-checking.
     "draft",
     "frontend/common/graphql/generated",
-    "**/unRefactored_tests",
-    "**/.ai",
-    ".next-test/**",
-    ".next-test-*/**"
+    "**/unRefactored_tests"
   ]
 }

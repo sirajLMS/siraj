@@ -143,7 +143,10 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
   ensureCacheDir();
 
   const tsConfigIgnores = getTsConfigIgnores();
-  const baseIgnores = ["**/node_modules/**", "**/dist/**", "**/.next/**"];
+  //   **/.*/**  — ignores ALL dot-directories anywhere in the tree (e.g. .next, .ai,
+  //               .scannerwork, .git, ...). One pattern replaces the previous
+  //               hand-maintained list that missed new dot dirs.
+  const baseIgnores = ["**/.*/**", "**/node_modules/**", "**/dist/**"];
   const allIgnores = [...new Set([...baseIgnores, ...tsConfigIgnores])];
 
   logInfo("Finding all TypeScript files...");

@@ -36,9 +36,12 @@ export async function getProjectFingerprint(): Promise<string> {
   }
 
   // Find all relevant files
+  //   **/.*/**  — ignores ALL dot-directories anywhere in the tree (e.g. .next, .git,
+  //               .scannerwork, .ai, ...). One pattern replaces the previous
+  //               hand-maintained list that missed new dot dirs.
   const files = await glob("**/*.{ts,tsx,js,jsx}", {
     cwd: PROJECT_ROOT,
-    ignore: ["**/node_modules/**", "**/dist/**", "**/.next/**", "**/coverage/**", "**/scripts/**", ...exclusions],
+    ignore: ["**/.*/**", "**/node_modules/**", "**/dist/**", "**/coverage/**", "**/scripts/**", ...exclusions],
   });
 
   // Sort files for consistent order
