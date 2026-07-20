@@ -14,6 +14,7 @@ import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
   createManualClassEntryWithAssertions,
+  ensureTestSubjectId,
   loginAndProvision,
   provisionTestSuperAdmin,
 } from "@/frontend/common/graphql/test/helpers";
@@ -37,6 +38,7 @@ describe("GraphQL: Group Class integration tests", () => {
   let parentId: string | null = null;
   let classInstanceId: string | null = null;
   let groupClassId: string | null = null;
+  let sharedSubjectId: string | null = null;
 
   test("provision test entities, class instance, and group class", async () => {
     const r = await loginAndProvision("GroupClassIntTest");
@@ -53,9 +55,18 @@ describe("GraphQL: Group Class integration tests", () => {
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
 
-    if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
+    if (!teacherToken || !studentId || !teacherId || !adminToken) throw new Error("Missing test context");
 
-    classInstanceId = await createManualClassEntryWithAssertions(teacherToken, studentId, teacherId);
+    sharedSubjectId = await ensureTestSubjectId(adminToken);
+
+    classInstanceId = await createManualClassEntryWithAssertions(
+      teacherToken,
+      studentId,
+      teacherId,
+      0,
+      60 * 60 * 1000,
+      sharedSubjectId
+    );
 
     if (!adminToken || !classInstanceId) throw new Error("Missing admin token or classInstanceId");
 

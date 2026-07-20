@@ -6,6 +6,7 @@ import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
   createManualClassEntry,
+  ensureTestSubjectId,
   loginDemoUser,
   provisionTestEntities,
   provisionTestSuperAdmin,
@@ -67,6 +68,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
   let teacherToken = "";
   let superAdminToken = "";
   let superAdminUserId = "";
+  let sharedSubjectId = "";
   const testDate = new Date().toISOString().split("T")[0];
 
   test("login as academy_admin and provision test entities", async () => {
@@ -83,6 +85,9 @@ describe("GraphQL: statusTrackingSchedule query", () => {
     const sa = await provisionTestSuperAdmin(adminToken, "s10statusSa");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
+
+    sharedSubjectId = await ensureTestSubjectId(adminToken);
+    expect(sharedSubjectId).toBeTruthy();
   });
 
   // ─── Authorization Tests ─────────────────────────────────────────────────────
@@ -182,7 +187,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
   });
 
   test("filters by date — class on date A is excluded on date B", async () => {
-    if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
+    if (!teacherToken || !studentId || !teacherId || !sharedSubjectId) throw new Error("Missing test context");
 
     const dateA = "2032-03-15";
     const dateB = "2032-03-16";
@@ -194,7 +199,8 @@ describe("GraphQL: statusTrackingSchedule query", () => {
       studentId,
       teacherId,
       startAt.toISOString(),
-      endAt.toISOString()
+      endAt.toISOString(),
+      sharedSubjectId
     );
     const createdId = createRes.data?.createTeacherManualClassEntry?.id;
     expect(createdId).toBeTruthy();

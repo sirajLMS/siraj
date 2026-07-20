@@ -418,12 +418,20 @@ export async function createManualClassEntryWithAssertions(
   studentId: string,
   teacherId: string,
   startOffsetMs = 0,
-  endOffsetMs = 60 * 60 * 1000
+  endOffsetMs = 60 * 60 * 1000,
+  subjectId?: string
 ): Promise<string> {
   const start = new Date(Date.now() + startOffsetMs);
   const end = new Date(Date.now() + endOffsetMs);
 
-  const createRes = await createManualClassEntry(token, studentId, teacherId, start.toISOString(), end.toISOString());
+  const createRes = await createManualClassEntry(
+    token,
+    studentId,
+    teacherId,
+    start.toISOString(),
+    end.toISOString(),
+    subjectId
+  );
 
   expect(createRes.data).toBeDefined();
   expect(createRes.error).toBeUndefined();

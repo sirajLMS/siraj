@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SessionRepository } from "@/backend/db/repo";
 import { resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
@@ -8,6 +8,7 @@ import { generateAccessToken, generateRefreshToken } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
 import type { SafeUser, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
+import { INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** Internal machine roles — never exposed as demo quick-login options. */
@@ -82,20 +83,45 @@ export namespace DemoAuthService {
       throw new Error(t.auth.demoGroupNotFound(groupSlug));
     }
 
-    const [assignment] = await db
+    const demoUser = await selectDemoUserForGroup(group.id, groupSlug);
+    if (!demoUser) {
+      throw new Error(t.auth.demoGroupNoUser(groupSlug));
+    }
+
+    return proceedWithUser(demoUser);
+  }
+
+  /**
+   * Prefers the canonical demo user for `groupSlug` (from `INTERNAL_DEMO_USERS`),
+   * falling back to the earliest-created group member. Keeps demo login
+   * deterministic so integration tests do not flip-flop between seeded users
+   * with different seeded notification preferences / overrides.
+   */
+  async function selectDemoUserForGroup(groupId: string, groupSlug: string): Promise<UserSelectType | null> {
+    const canonicalEmail = INTERNAL_DEMO_USERS.find(entry => entry.groupSlug === groupSlug)?.email;
+
+    if (canonicalEmail) {
+      const [byEmail] = await db
+        .select({ user: users })
+        .from(userPermissionGroups)
+        .innerJoin(users, eq(users.id, userPermissionGroups.userId))
+        .where(and(eq(userPermissionGroups.groupId, groupId), eq(users.email, canonicalEmail)))
+        .limit(1);
+      if (byEmail?.user) {
+        return byEmail.user;
+      }
+    }
+
+    const [fallback] = await db
       .select({
         user: users,
       })
       .from(userPermissionGroups)
       .innerJoin(users, eq(users.id, userPermissionGroups.userId))
-      .where(eq(userPermissionGroups.groupId, group.id))
+      .where(eq(userPermissionGroups.groupId, groupId))
+      .orderBy(users.createdAt, users.email)
       .limit(1);
-
-    if (!assignment?.user) {
-      throw new Error(t.auth.demoGroupNoUser(groupSlug));
-    }
-
-    return proceedWithUser(assignment.user);
+    return fallback?.user ?? null;
   }
 
   async function proceedWithUser(user: UserSelectType) {

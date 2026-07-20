@@ -138,10 +138,17 @@ describe("GraphQL Class Session Integration Tests", () => {
   });
 
   test("teacher activates class within window successfully", async () => {
-    if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
+    if (!teacherToken || !studentId || !teacherId || !sharedSubjectId) throw new Error("Missing test context");
 
     // 1. Create a new class instance within window (start = now, end = now + 1 hour)
-    const classInstanceId = await createManualClassEntryWithAssertions(teacherToken, studentId, teacherId);
+    const classInstanceId = await createManualClassEntryWithAssertions(
+      teacherToken,
+      studentId,
+      teacherId,
+      0,
+      60 * 60 * 1000,
+      sharedSubjectId
+    );
 
     // 2. Activate as teacher and verify executionState changes to ACTIVATED
     await activateAndVerifyExecutionState(
@@ -154,7 +161,7 @@ describe("GraphQL Class Session Integration Tests", () => {
   });
 
   test("teacher activation outside window fails with YOU MISSED THE CLASS TIME message", async () => {
-    if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
+    if (!teacherToken || !studentId || !teacherId || !sharedSubjectId) throw new Error("Missing test context");
 
     // 1. Create a new class instance outside window (start = now + 2 hours, end = now + 3 hours)
     const now = new Date();
@@ -167,7 +174,8 @@ describe("GraphQL Class Session Integration Tests", () => {
       studentId,
       teacherId,
       startOutside.toISOString(),
-      endOutside.toISOString()
+      endOutside.toISOString(),
+      sharedSubjectId
     );
 
     expect(createRes.data).toBeDefined();
