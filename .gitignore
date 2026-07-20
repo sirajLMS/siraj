@@ -62,7 +62,7 @@ coverage/
 .DS_Store
 
 .next
-.next-prod
+.next-dev
 tsconfig.tsbuildinfo
 .quality-gate-state.json
 

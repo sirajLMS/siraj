@@ -10,6 +10,7 @@ import { getErrorMessage } from "@/shared/utils/error";
 
 describe("StaffProfileService Permission Gating", () => {
   const originalHasPermission = PermissionsService.hasPermission;
+  const originalHasAnyPermission = PermissionsService.hasAnyPermission;
   const mockPermissions = new Map<string, boolean>();
   let testUser: typeof users.$inferSelect;
   let testTeacher: typeof teachers.$inferSelect;
@@ -18,6 +19,9 @@ describe("StaffProfileService Permission Gating", () => {
     PermissionsService.hasPermission = async (userId: string, permissionKey: AppPermission) => {
       const key = `${userId}:${permissionKey}`;
       return mockPermissions.get(key) ?? false;
+    };
+    PermissionsService.hasAnyPermission = async (userId: string, permissionKeys: AppPermission[]) => {
+      return permissionKeys.some(permissionKey => mockPermissions.get(`${userId}:${permissionKey}`) ?? false);
     };
 
     const now = new Date();
@@ -59,6 +63,7 @@ describe("StaffProfileService Permission Gating", () => {
 
   afterAll(async () => {
     PermissionsService.hasPermission = originalHasPermission;
+    PermissionsService.hasAnyPermission = originalHasAnyPermission;
     if (testTeacher) {
       await db.delete(teachers).where(eq(teachers.id, testTeacher.id));
       await db.delete(users).where(eq(users.id, testTeacher.userId));
