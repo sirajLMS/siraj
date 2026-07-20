@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateManagerOnboarding } from "@/frontend/common/hooks/useCreateManagerOnboarding";
@@ -48,8 +48,11 @@ export function useManagerOnboardingContainerViewModel(
   const { execute, loading } = useCreateManagerOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
   const metricsModel = useOnboardingMetrics();
-  const pendingAvatarKey = useRef(`pending-${crypto.randomUUID()}`);
-  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey.current });
+  // Lazy initializer: generate the pending-avatar storage key once per hook
+  // instance. Using useState with a lazy initializer (instead of useRef) avoids
+  // reading ref.current during render (which trips `react-hooks/refs`).
+  const [pendingAvatarKey] = useState(() => `pending-${crypto.randomUUID()}`);
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey });
 
   const {
     register,

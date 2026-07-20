@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type Control,
   type FieldErrors,
@@ -98,8 +98,11 @@ function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
 
   const { execute, loading } = useCreateStudentOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
-  const pendingAvatarKey = useRef(`pending-${crypto.randomUUID()}`);
-  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey.current });
+  // Lazy initializer: generate the pending-avatar storage key once per hook
+  // instance. Using useState with a lazy initializer (instead of useRef) avoids
+  // reading ref.current during render (which trips `react-hooks/refs`).
+  const [pendingAvatarKey] = useState(() => `pending-${crypto.randomUUID()}`);
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey });
 
   const {
     register,

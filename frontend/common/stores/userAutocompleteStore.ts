@@ -13,8 +13,6 @@ interface UserAutocompleteState {
   getResults: (audience: UserSelectAudience, cacheKey: string) => readonly PersonOption[] | null;
 }
 
-const emptyAudienceMap = (): Record<string, CachedAudienceResults> => ({});
-
 function trimToLru(
   map: Readonly<Record<string, CachedAudienceResults>>,
   cacheKey: string,
@@ -22,31 +20,31 @@ function trimToLru(
 ): Record<string, CachedAudienceResults> {
   const next: Record<string, CachedAudienceResults> = { ...map, [cacheKey]: entry };
   const keys = Object.keys(next);
-  if (keys.length <= USER_SELECT_CACHE_MAX_KEYS_PER_AUDIENCE) {
-    return next;
-  }
-  const sorted = keys.sort((a, b) => (next[a]?.updatedAt ?? 0) - (next[b]?.updatedAt ?? 0));
-  const dropCount = keys.length - USER_SELECT_CACHE_MAX_KEYS_PER_AUDIENCE;
-  for (let i = 0; i < dropCount; i += 1) {
-    const key = sorted[i];
-    if (key) {
-      delete next[key];
+  const overflow = keys.length - USER_SELECT_CACHE_MAX_KEYS_PER_AUDIENCE;
+  if (overflow > 0) {
+    const sorted = keys.sort((a, b) => (next[a]?.updatedAt ?? 0) - (next[b]?.updatedAt ?? 0));
+    for (let i = 0; i < overflow; i += 1) {
+      const key = sorted[i];
+      if (key) {
+        delete next[key];
+      }
     }
   }
   return next;
 }
 
 export const useUserAutocompleteStore = create<UserAutocompleteState>((set, get) => ({
+  // Each audience starts with its own fresh empty map (isolated references).
   byAudience: {
-    teacher: emptyAudienceMap(),
-    student: emptyAudienceMap(),
-    parent: emptyAudienceMap(),
-    user: emptyAudienceMap(),
-    staff: emptyAudienceMap(),
+    teacher: {},
+    student: {},
+    parent: {},
+    user: {},
+    staff: {},
   },
   setResults: (audience, cacheKey, options) => {
     set(state => {
-      const audienceMap = state.byAudience[audience] ?? emptyAudienceMap();
+      const audienceMap = state.byAudience[audience] ?? {};
       const trimmed = trimToLru(audienceMap, cacheKey, {
         options,
         updatedAt: Date.now(),

@@ -49,6 +49,8 @@ describe("Notifications & Billing E2E", () => {
   });
 
   test.skip("Billing section appears in popover for Admin", async () => {
+    // SKIP: billing UI is not yet implemented behind the notifications drawer;
+    // re-enable once the "Unpaid Invoices" section ships.
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     await getBellButton(p).click();
     // Section title: "Unpaid Invoices" (en) / "الفواتير غير المدفوعة" (ar)
@@ -58,6 +60,8 @@ describe("Notifications & Billing E2E", () => {
   });
 
   test.skip("Clicking user row in billing section navigates to billing profile", async () => {
+    // SKIP: blocked on the billing-in-notifications feature (see test above);
+    // re-enable once the billing section is reachable from the popover.
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     await getBellButton(p).click();
     const billingTitle = p.getByText(/Unpaid Invoices|الفواتير غير المدفوعة/).first();

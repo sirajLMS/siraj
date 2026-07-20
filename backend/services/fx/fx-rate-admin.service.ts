@@ -35,7 +35,8 @@ export namespace FxRateAdminService {
       actorUserId
     );
 
-    // eslint-disable-next-line sonarjs/no-unused-vars -- intentionally excluded from response
+    // Discard `providerResponse` from the response — uses the `_`-prefix
+    // discard convention honored by `@typescript-eslint/no-unused-vars`.
     const { providerResponse: _providerResponse, ...rest } = rate;
 
     return {

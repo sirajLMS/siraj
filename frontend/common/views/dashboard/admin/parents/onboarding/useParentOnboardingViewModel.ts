@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
 import { CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -69,8 +69,12 @@ export function useParentOnboardingViewModel(): ParentOnboardingViewModel {
   const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateParentOnboarding();
   const createdParent = useParentOnboardingStore(state => state.result);
   const [showSuccess, setShowSuccess] = useState(false);
-  const pendingAvatarKey = useRef(`pending-${crypto.randomUUID()}`);
-  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey.current });
+  // Lazy initializer: generate the pending-avatar storage key once per hook
+  // instance. State with a lazy initializer is the React-blessed pattern for
+  // "compute a stable value once" — using useRef + reading .current during
+  // render trips `react-hooks/refs`.
+  const [pendingAvatarKey] = useState(() => `pending-${crypto.randomUUID()}`);
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey });
 
   const meetingSetupHref = createdParent
     ? `${profileHrefForParent({ userId: createdParent.userId, parentId: createdParent.parentId })}?tab=meeting`

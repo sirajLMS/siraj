@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
 import { CurrencyCode, IanaTimezone, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -57,8 +57,11 @@ export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
   const labels = useAppTranslation().dashboardTranslations.teacherOnboarding;
   const tMeeting = useAppTranslation().uiTranslations.meetingConfigManager;
   const tJoin = useAppTranslation().uiTranslations.meetingConfigJoin;
-  const pendingAvatarKey = useRef(`pending-${crypto.randomUUID()}`);
-  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey.current });
+  // Lazy initializer: generate the pending-avatar storage key once per hook
+  // instance. Using useState with a lazy initializer (instead of useRef) avoids
+  // reading ref.current during render (which trips `react-hooks/refs`).
+  const [pendingAvatarKey] = useState(() => `pending-${crypto.randomUUID()}`);
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey });
 
   const meetingSetupHref = createdTeacher
     ? `${profileHrefForTeacher({ userId: createdTeacher.userId, teacherId: createdTeacher.id })}?tab=meeting`

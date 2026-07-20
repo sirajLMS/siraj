@@ -61,6 +61,11 @@ export function AudienceAutocomplete({
       sx={sx}
       slotProps={slotProps}
       renderOption={(props, option) => {
+        // MUI injects `key` into renderOption props; we discard it via `_` prefix
+        // (per the project's `no-unused-vars` underscore convention) and provide
+        // our own explicit <li> key from the option id. The underscore-prefixed
+        // discard is honored by @typescript-eslint/no-unused-vars but not by
+        // sonarjs/no-unused-vars (which has no ignore options) — see eslint.config.mjs.
         const { key: _muiKey, ...rest } = props;
         return (
           <li key={option.id} {...rest}>

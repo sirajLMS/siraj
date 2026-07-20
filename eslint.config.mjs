@@ -110,6 +110,18 @@ const eslintConfig = defineConfig([
       // SonarJS rules
       "sonarjs/no-nested-conditional": "off",
 
+      // `sonarjs/no-unused-vars` (S1481) is hardcoded with `defaultOptions: []`
+      // and accepts no ignore patterns — it does NOT honor the `^_` underscore
+      // convention that `@typescript-eslint/no-unused-vars` uses via
+      // `varsIgnorePattern`/`argsIgnorePattern`/`destructuredArrayIgnorePattern`.
+      // That makes it a strict subset of the TypeScript rule (which already runs
+      // above with all the underscore exceptions), so it only ever produces
+      // duplicate false positives on intentional `_`-prefixed discards such as
+      // `const { key: _muiKey, ...rest } = props`. Disable it here and rely on
+      // the TypeScript rule for unused-variable detection; SonarQube Server still
+      // surfaces S1481 via the scanner when running `bun sonar-scan`.
+      "sonarjs/no-unused-vars": "off",
+
       "react-hooks/preserve-manual-memoization": "off",
       "@typescript-eslint/restrict-template-expressions": "off",
 
