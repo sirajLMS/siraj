@@ -3,7 +3,6 @@
 import { ApolloLink, CombinedGraphQLErrors, Observable } from "@apollo/client";
 import { ErrorLink } from "@apollo/client/link/error";
 import CryptoJS from "crypto-js";
-import logger from "@/frontend/common/lib/logger";
 import { buildLoginHref } from "@/frontend/common/lib/safeRedirect";
 import { isNetworkError } from "@/frontend/common/utils/errorUtils";
 
@@ -99,50 +98,199 @@ export const createConnectivityLink = (
   });
 };
 
+// ---------------------------------------------------------------------------
+// Auth recovery API — registered by AppApolloProvider so the errorLink can
+// attempt a refreshToken mutation BEFORE hard-redirecting to /login on a
+// UNAUTHENTICATED GraphQL response. This closes the production-only
+// logout-on-navigation bug where the 15-min access_token cookie expires and
+// the next me-query (60s poll / on-mount) bounces the user even though the
+// long-lived refresh_token cookie is still valid.
+// ---------------------------------------------------------------------------
+export type AuthRecoveryApi = {
+  /** Run refreshToken mutation and persist new token to React memory. Returns the fresh token or null. */
+  refresh: () => Promise<string | null>;
+  /** After a successful refresh, re-issue all active observable queries with the new token. */
+  reFetch: () => void;
+};
+
+let authRecovery: AuthRecoveryApi | null = null;
+
+export function registerAuthRecovery(api: AuthRecoveryApi): void {
+  authRecovery = api;
+  logAuthRedirectEvent("authRecovery registered", { hasApi: true });
+}
+
+export function unregisterAuthRecovery(): void {
+  authRecovery = null;
+  logAuthRedirectEvent("authRecovery unregistered", { hasApi: false });
+}
+
+// ---------------------------------------------------------------------------
+// Production-visible diagnostics
+//
+// The project logger (`frontend/common/lib/logger/index.ts`) is disabled in
+// production unless `NEXT_PUBLIC_ENABLE_LOGGING=true` — which is why the
+// previous "[AuthRedirect] GraphQL auth error — redirecting to login" log
+// was invisible on the deployed site. These helpers go straight to
+// `globalThis.console.*` so they show up in the browser DevTools console
+// (and server logs if SSR captures them) without any env flag. The
+// `no-console` ESLint rule bans bare `console.*` member access; going through
+// `globalThis.console.*` is the lint-safe idiom already used by
+// `frontend/common/lib/console.ts`.
+// ---------------------------------------------------------------------------
+
+const AUTH_REDIRECT_TAG = "[AuthRedirect]";
+
+function truncateId(value: string | null | undefined): string | null {
+  if (!value) return null;
+  return value.length <= 8 ? value : value.slice(0, 8);
+}
+
+function logAuthRedirectEvent(message: string, payload: Record<string, unknown> = {}): void {
+  try {
+    globalThis.console.warn(AUTH_REDIRECT_TAG, message, payload);
+  } catch {
+    // defensive: never let a logging failure swallow the redirect logic
+  }
+}
+
 // Prevents multiple concurrent hard-redirects when several queries fail auth at once.
 let isRedirectingToLogin = false;
 
-// Helper to create error link
-function handleAuthError(error: unknown, operationName: string | undefined): boolean {
+// Dedupes concurrent refresh attempts so N simultaneous UNAUTHENTICATED
+// responses share one refreshToken mutation (mirrors dedupedRefreshToken.ts).
+let inFlightRefresh: Promise<string | null> | null = null;
+
+async function getNewAccessToken(): Promise<string | null> {
+  if (inFlightRefresh) {
+    logAuthRedirectEvent("getNewAccessToken: reusing in-flight refresh");
+    return inFlightRefresh;
+  }
+
+  const api = authRecovery;
+  if (!api) {
+    logAuthRedirectEvent("getNewAccessToken: no authRecovery registered");
+    return null;
+  }
+
+  logAuthRedirectEvent("getNewAccessToken: starting refresh", {
+    hadInFlight: false,
+  });
+
+  inFlightRefresh = api
+    .refresh()
+    .then(token => {
+      logAuthRedirectEvent("getNewAccessToken: refresh resolved", {
+        newTokenLength: token ? token.length : 0,
+        newTokenPrefix: token ? truncateId(token) : null,
+      });
+      return token;
+    })
+    .catch(error => {
+      logAuthRedirectEvent("getNewAccessToken: refresh threw", {
+        errorName: error instanceof Error ? error.name : "unknown",
+        errorMessage: error instanceof Error ? error.message : String(error),
+      });
+      return null;
+    })
+    .finally(() => {
+      inFlightRefresh = null;
+    });
+
+  return inFlightRefresh;
+}
+
+async function handleAuthError(error: unknown, operationName: string | undefined): Promise<boolean> {
   if (!CombinedGraphQLErrors.is(error)) return false;
 
-  // Only UNAUTHENTICATED means the session is gone. FORBIDDEN is a permission
-  // denial for an authenticated user — redirecting to login causes a loop
-  // when the auth layout bounces them back to the page that triggered it.
-  const isUnauthenticated = error.errors.some(err => err.extensions?.code === "UNAUTHENTICATED");
+  const errorCodes = error.errors.map(err => err.extensions?.code ?? "unknown");
+  const isUnauthenticated = errorCodes.includes("UNAUTHENTICATED");
+  const isForbidden = errorCodes.includes("FORBIDDEN");
 
-  if (!isUnauthenticated) return false;
-  if (operationName === "login" || operationName === "demoLogin" || operationName === "refreshToken") return false;
+  if (!isUnauthenticated && !isForbidden) return false;
 
-  if (globalThis.window !== undefined) {
-    const pathname = globalThis.window.location.pathname;
-    if (pathname === "/login" || pathname.endsWith("/login")) {
-      return false;
-    }
-    if (isRedirectingToLogin) {
-      return true;
-    }
+  // Make FORBIDDEN visible on prod but DO NOT redirect (existing behavior —
+  // redirecting an authenticated user on a permission denial causes a loop
+  // because the auth layout bounces them straight back).
+  if (isForbidden) {
+    logAuthRedirectEvent("handleAuthError: FORBIDDEN (no redirect)", {
+      operationName,
+      errorCodes,
+    });
+    return false;
+  }
 
-    const search = globalThis.window.location.search;
-    const currentUrl = `${pathname}${search}`;
-    const targetUrl = buildLoginHref(currentUrl);
-    logger.warn(
-      { caller: "ApolloErrorLink.handleAuthError" },
-      "[AuthRedirect] GraphQL auth error — redirecting to login",
-      {
-        reason: "operation returned UNAUTHENTICATED",
-        operationName,
-        errorCodes: error.errors.map(err => err.extensions?.code ?? "unknown"),
-        from: currentUrl,
-        to: targetUrl,
-      }
-    );
-    isRedirectingToLogin = true;
-    globalThis.window.location.href = targetUrl;
+  if (operationName === "login" || operationName === "demoLogin" || operationName === "refreshToken") {
+    return false;
+  }
+
+  if (globalThis.window === undefined) return false;
+
+  const pathname = globalThis.window.location.pathname;
+  if (pathname === "/login" || pathname.endsWith("/login")) {
+    return false;
+  }
+
+  logAuthRedirectEvent("handleAuthError: UNAUTHENTICATED received", {
+    operationName,
+    errorCodes,
+    pathname,
+  });
+
+  if (isRedirectingToLogin) {
+    logAuthRedirectEvent("handleAuthError: redirect already in flight — suppressing duplicate", {
+      operationName,
+    });
     return true;
   }
 
-  return false;
+  return recoverFromUnauthenticated(operationName, pathname);
+}
+
+/**
+ * Refresh-before-redirect path for UNAUTHENTICATED responses. Attempts a
+ * refreshToken via the registered AuthRecoveryApi; on success stays on the
+ * page (re-issuing active observable queries with the fresh token), on
+ * failure hard-redirects to /login as before.
+ */
+async function recoverFromUnauthenticated(operationName: string | undefined, pathname: string): Promise<boolean> {
+  const newToken = await getNewAccessToken();
+  if (newToken) {
+    // Refresh succeeded — re-issue all active observable queries with the
+    // fresh token loaded into React memory by the recovery API, then reset
+    // the redirect flag so we don't get stuck if a future transient
+    // UNAUTHENTICATED arrives.
+    isRedirectingToLogin = false;
+    try {
+      authRecovery?.reFetch();
+      logAuthRedirectEvent("handleAuthError: recovered via refreshToken — staying on page", {
+        operationName,
+        pathname,
+        newTokenLength: newToken.length,
+      });
+    } catch (reFetchError) {
+      logAuthRedirectEvent("handleAuthError: reFetch threw after successful refresh", {
+        operationName,
+        errorName: reFetchError instanceof Error ? reFetchError.name : "unknown",
+        errorMessage: reFetchError instanceof Error ? reFetchError.message : String(reFetchError),
+      });
+    }
+    return true; // suppress the error — recovery handled it
+  }
+
+  // --- refresh failed: genuinely logged out — fall through to hard redirect --
+  const search = globalThis.window.location.search;
+  const currentUrl = `${pathname}${search}`;
+  const targetUrl = buildLoginHref(currentUrl);
+  logAuthRedirectEvent("handleAuthError: refresh failed — redirecting to login", {
+    operationName,
+    errorCodes: ["UNAUTHENTICATED"],
+    from: currentUrl,
+    to: targetUrl,
+  });
+  isRedirectingToLogin = true;
+  globalThis.window.location.href = targetUrl;
+  return true;
 }
 
 // Helper to create error link
@@ -152,17 +300,23 @@ export const createErrorLinkHandler = (
   notifyDisconnected: () => void
 ) => {
   return new ErrorLink(({ error, operation }) => {
-    if (handleAuthError(error, operation.operationName)) {
-      return;
-    }
+    // Fire-and-forget the async recovery; the ErrorLink callback cannot
+    // return a Promise. handleAuthError performs its own redirect + log
+    // side-effects synchronously-after-await; Apollo will treat the
+    // operation as having an error in the meantime, but recovery is
+    // signaled by reFetchObservableQueries rather than by suppressing
+    // the per-operation error.
+    void handleAuthError(error, operation.operationName);
 
     if (error && isNetworkError(error)) {
       const wasConnected = getConnected();
-      logger.warn({ caller: "AppApolloProvider" }, `[Error Link] Network error detected. wasConnected=${wasConnected}`);
+      globalThis.console.warn(AUTH_REDIRECT_TAG, "[Error Link] Network error detected", {
+        wasConnected,
+      });
       setConnected(false);
 
       if (wasConnected) {
-        logger.info({ caller: "AppApolloProvider" }, "[Error Link] Connection lost (was previously connected)");
+        globalThis.console.info(AUTH_REDIRECT_TAG, "[Error Link] Connection lost (was previously connected)");
       }
 
       notifyDisconnected();
