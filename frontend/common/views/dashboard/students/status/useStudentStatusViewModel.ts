@@ -4,8 +4,8 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
-import { type MutableRefObject, useCallback, useEffect, useMemo, useRef } from "react";
-import { type UseFormReturn, useForm } from "react-hook-form";
+import { type RefObject, useCallback, useEffect, useMemo, useRef } from "react";
+import { type UseFormReturn, useForm, useWatch } from "react-hook-form";
 import {
   ClassExecutionState as GqlClassExecutionState,
   StudentStatus,
@@ -189,7 +189,7 @@ type DataEnv = {
 
 type DataResult = {
   readonly student: StudentStatusPageData | null;
-  readonly versionRef: MutableRefObject<number | null>;
+  readonly versionRef: RefObject<number | null>;
   readonly queries: QueryResult;
 };
 
@@ -267,7 +267,7 @@ function useStudentStatusFormState(env: {
   readonly studentId: string;
   readonly t: StudentStatusLabels;
   readonly changeStatus: ReturnType<typeof useChangeStudentStatusMutation>["changeStatus"];
-  readonly versionRef: MutableRefObject<number | null>;
+  readonly versionRef: RefObject<number | null>;
 }) {
   const { student, studentId, t, changeStatus, versionRef } = env;
   const schema = createStatusUpdateSchema(t.validation);
@@ -280,7 +280,7 @@ function useStudentStatusFormState(env: {
     },
   });
 
-  const selectedStatus = methods.watch("status", StudentStatus.Regular);
+  const selectedStatus = useWatch({ control: methods.control, name: "status", defaultValue: StudentStatus.Regular });
 
   useEffect(() => {
     methods.reset({
@@ -322,7 +322,7 @@ function useStudentStatusDerived(env: {
 function useUpdateStatusHandler(env: {
   readonly studentId: string;
   readonly changeStatus: ReturnType<typeof useChangeStudentStatusMutation>["changeStatus"];
-  readonly versionRef: MutableRefObject<number | null>;
+  readonly versionRef: RefObject<number | null>;
 }) {
   const { studentId, changeStatus, versionRef } = env;
   return useCallback(
@@ -336,7 +336,7 @@ function useUpdateStatusHandler(env: {
         },
       });
     },
-    [studentId, changeStatus, versionRef.current]
+    [studentId, changeStatus, versionRef]
   );
 }
 

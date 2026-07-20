@@ -4,8 +4,8 @@ import { Button } from "@mui/material";
 import {
   LifecycleFormBody,
   LifecycleParentSummaryCard,
-  useParentLifecycleProfileHref,
 } from "@/frontend/common/views/dashboard/parents/lifecycle/components/sharedViewContent";
+import { useParentLifecycleProfileHref } from "@/frontend/common/views/dashboard/parents/lifecycle/components/useParentLifecycleForm";
 import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { Link } from "@/shared/i18n/routing";

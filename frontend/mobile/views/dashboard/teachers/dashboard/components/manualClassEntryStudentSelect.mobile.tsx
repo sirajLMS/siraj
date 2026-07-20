@@ -1,10 +1,8 @@
 "use client";
 
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
-import {
-  ManualClassEntryDialog,
-  useManualClassEntryStudentField,
-} from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
+import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
+import { useManualClassEntryStudentField } from "@/frontend/common/views/dashboard/teachers/dashboard/components/manualClassEntryStudentFieldContext";
 import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { useAppTranslation } from "@/shared/locale";
 

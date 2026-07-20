@@ -55,7 +55,7 @@ export function useCategoryFormState(options: Readonly<UseCategoryFormStateOptio
   const handleSubmit = form.handleSubmit;
 
   const nameValue = useWatch({ control, name: "name" });
-  const values = form.watch() as CategoryFormValues;
+  const values = useWatch({ control }) as CategoryFormValues;
 
   useEffect(() => {
     if (open && category) {

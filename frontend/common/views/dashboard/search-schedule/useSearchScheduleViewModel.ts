@@ -380,13 +380,15 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
 
   const store = useSearchScheduleStoreSlice();
 
+  const { commitSearch, hasHydrated, hasSearched } = store;
+
   useEffect(() => {
-    if (!store.hasHydrated || store.hasSearched) {
+    if (!hasHydrated || hasSearched) {
       return;
     }
 
-    store.commitSearch();
-  }, [store.commitSearch, store.hasHydrated, store.hasSearched]);
+    commitSearch();
+  }, [commitSearch, hasHydrated, hasSearched]);
 
   const handlers = _useSearchScheduleHandlers(
     store.setDraft,

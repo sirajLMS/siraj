@@ -62,15 +62,19 @@ export function RescheduleContainer() {
     [storeSession]
   );
 
-  const session = classInstance
-    ? {
-        sessionId: classInstance.id ?? "",
-        teacherName: classInstance.teacher?.name ?? "",
-        studentName: classInstance.student?.name ?? "",
-        teacherTimezone: classInstance.teacherTimezone ?? IanaTimezone.Utc,
-        effectiveMeeting: classInstance.effectiveMeeting ?? null,
-      }
-    : fallbackSession;
+  const session = useMemo<UseRescheduleViewModelProps["session"]>(
+    () =>
+      classInstance
+        ? {
+            sessionId: classInstance.id ?? "",
+            teacherName: classInstance.teacher?.name ?? "",
+            studentName: classInstance.student?.name ?? "",
+            teacherTimezone: classInstance.teacherTimezone ?? IanaTimezone.Utc,
+            effectiveMeeting: classInstance.effectiveMeeting ?? null,
+          }
+        : fallbackSession,
+    [classInstance, fallbackSession]
+  );
 
   const defaultDate = classInstance?.scheduledDate ?? "";
   const defaultTime = classInstance?.startTime ?? "";

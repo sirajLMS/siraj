@@ -270,10 +270,7 @@ function useBillingProfileSummary(
   fxMessages: FxDisplayMessages,
   locale: string
 ): ParentBillingSummary {
-  return useMemo(
-    () => buildSummary(summaryData, locale, fxMessages),
-    [summaryData?.parentBillingSummary, locale, fxMessages, summaryData]
-  );
+  return useMemo(() => buildSummary(summaryData, locale, fxMessages), [locale, fxMessages, summaryData]);
 }
 
 /** Permission gates derived once from the user store. */

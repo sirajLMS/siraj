@@ -17,7 +17,7 @@ import {
   buildActionHandlers,
   CATEGORY_PERMS,
   SUBJECT_PERMS,
-} from "@/frontend/common/views/dashboard/subjects/home/SubjectsContainer";
+} from "@/frontend/common/views/dashboard/subjects/home/subjectsActions";
 import type {
   CategoryItem,
   CreateCategoryDialogProps,

@@ -3,6 +3,7 @@
 import type { Breakpoint } from "@mui/material";
 import { Box } from "@mui/material";
 import Grid, { type GridSize } from "@mui/material/Grid";
+import { resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
@@ -21,55 +22,6 @@ interface MetricCardGridProps {
 }
 
 const defaultSize = { xs: 6, sm: 4, md: 3, lg: 2 };
-
-function resolveDashboardTranslation(
-  path: string,
-  translations: ReturnType<typeof useAppTranslation>
-): string | undefined {
-  const parts = path.split(".");
-  let ns = parts[1];
-  if (ns === "statusTracking") {
-    ns = "coreStatusTracking";
-  }
-  const section = translations.dashboardTranslations[ns as keyof typeof translations.dashboardTranslations];
-  if (!section) {
-    return undefined;
-  }
-  let curr: unknown = section;
-  for (let i = 2; i < parts.length; i++) {
-    if (curr && typeof curr === "object") {
-      curr = (curr as Record<string, unknown>)[parts[i]];
-    } else {
-      return undefined;
-    }
-  }
-  return typeof curr === "string" ? curr : undefined;
-}
-
-export function resolveMetricLabel(path: string, translations: ReturnType<typeof useAppTranslation>): string {
-  if (path.startsWith("dashboard.")) {
-    const val = resolveDashboardTranslation(path, translations);
-    if (val !== undefined) {
-      return val;
-    }
-  } else if (path.startsWith("metrics.")) {
-    const parts = path.split(".");
-    const resolved =
-      translations.dashboardTranslations.coreStatusTracking.metrics[
-        parts[1] as keyof typeof translations.dashboardTranslations.coreStatusTracking.metrics
-      ];
-    if (typeof resolved === "string") {
-      return resolved;
-    }
-  }
-
-  const commonT = translations.commonTranslations as unknown as Record<string, unknown>;
-  if (path in commonT && typeof commonT[path] === "string") {
-    return commonT[path] as string;
-  }
-
-  return path;
-}
 
 function renderMetricCard({
   metric,

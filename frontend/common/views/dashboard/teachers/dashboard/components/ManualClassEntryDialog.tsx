@@ -14,27 +14,12 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { logger } from "@/frontend/common/utils/logger";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
+import { ManualClassEntryStudentFieldContext } from "@/frontend/common/views/dashboard/teachers/dashboard/components/manualClassEntryStudentFieldContext";
 import type { TeacherDashboardLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
-
-export interface ManualClassEntryStudentFieldContextValue {
-  readonly studentId: string;
-  readonly setStudentId: (value: string) => void;
-  readonly disabled: boolean;
-}
-
-const ManualClassEntryStudentFieldContext = createContext<ManualClassEntryStudentFieldContextValue | null>(null);
-
-export function useManualClassEntryStudentField(): ManualClassEntryStudentFieldContextValue {
-  const context = useContext(ManualClassEntryStudentFieldContext);
-  if (!context) {
-    throw new Error("useManualClassEntryStudentField must be used within ManualClassEntryDialog");
-  }
-  return context;
-}
 
 interface ManualClassEntryDialogProps {
   readonly open: boolean;

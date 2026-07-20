@@ -176,7 +176,7 @@ function useStudentProfilePresentation(
       return { title: t.title, subtitle: t.restrictedIdentity(profile.id) };
     }
     return { title: t.title, subtitle: t.restrictedIdentityGeneric };
-  }, [profile, showField, t.title, t.subtitle, t.restrictedIdentity, t.restrictedIdentityGeneric]);
+  }, [profile, showField, t]);
 
   const statusBadge = useMemo<StudentProfileStatusBadge | undefined>(() => {
     const showStatus = canView("student_academic") && profile?.status != null;

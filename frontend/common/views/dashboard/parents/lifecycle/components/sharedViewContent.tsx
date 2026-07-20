@@ -1,18 +1,13 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { PersonOutlined } from "@mui/icons-material";
 import { Box, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { useEffect } from "react";
-import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form";
+import { Controller, FormProvider, useFormContext } from "react-hook-form";
 import { AdminControlPanel, PrimaryPageAction, StatusBadge } from "@/frontend/common/components/ui";
 import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
-import {
-  type LifecycleUpdateFormData,
-  lifecycleUpdateSchema,
-} from "@/frontend/common/views/dashboard/parents/lifecycle/schemas/lifecycleUpdateSchema";
+import { useParentLifecycleForm } from "@/frontend/common/views/dashboard/parents/lifecycle/components/useParentLifecycleForm";
+import type { LifecycleUpdateFormData } from "@/frontend/common/views/dashboard/parents/lifecycle/schemas/lifecycleUpdateSchema";
 import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -153,25 +148,6 @@ export function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean
   );
 }
 
-export function useParentLifecycleForm(parent: ParentLifecycleViewProps["parent"]) {
-  const methods = useForm<LifecycleUpdateFormData>({
-    resolver: zodResolver(lifecycleUpdateSchema),
-    defaultValues: {
-      lifecycleStatus: ParentStatus.Regular,
-      reason: "",
-    },
-  });
-
-  useEffect(() => {
-    methods.reset({
-      lifecycleStatus: parent.lifecycleStatus,
-      reason: "",
-    });
-  }, [parent, methods]);
-
-  return methods;
-}
-
 export function LifecycleFormBody({
   parent,
   isUpdating,
@@ -200,8 +176,4 @@ export function LifecycleFormBody({
       {children}
     </Box>
   );
-}
-
-export function useParentLifecycleProfileHref(parent: ParentLifecycleViewProps["parent"]): string | undefined {
-  return profileHrefForParent({ userId: parent.userId, parentId: parent.id }) || undefined;
 }

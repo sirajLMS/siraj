@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, type SxProps, type Theme } from "@mui/material";
-import { resolveMetricLabel } from "@/frontend/common/components/reports/MetricCardGrid";
+import { resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MobileMetricCard";
 import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container/MobileHorizontalScrollRow";
