@@ -86,7 +86,7 @@ Scan all changed files in scope and check for each of the following violations. 
   - `bun run dev` (dev server with Turbopack)
   - `bun run build` (Next.js production build)
   - `bun run tsgo` (not `tsc` — fast TypeScript checking)
-  - `bun run lint` via lint queue client (NEVER run directly — see AGENTS.md "Lint Queue Server" section)
+  - `bun run lint` (this script IS the lint queue client — safe to run directly — see AGENTS.md "Lint Queue Server" section)
   - `bun run format` / `bun biome:check` (Biome formatter/linter)
   - `bun run generate:gqlSchema` + `bun codegen` (GraphQL codegen)
   - `bun quality-gate` / `bun quality-gate:fresh`

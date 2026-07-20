@@ -40,16 +40,16 @@ across stages — e.g., don't dispatch CODESCENE fix subagents while SONAR fix s
 
 ### Critical Rules
 
-1. **NEVER run `bun lint` or `bun run lint` directly.** Always use the lint queue server/client:
+1. **`bun run lint` IS the lint queue client.** The `package.json` `lint` script is a thin wrapper around `requestFullRepoLint` from `scripts/lint-queue-client.ts`, so running it directly is safe — requests serialize through the lint queue server. Make sure the server is running first:
    ```bash
    curl -s http://localhost:4777/status  # Check server is running
+   ~/.bun/bin/bun run scripts/lint-queue-server.ts &  # Start it if not running
+   ```
+   For file-scoped lint (faster), call the lint queue client directly:
+   ```bash
    curl -s -X POST http://localhost:4777/lint \
      -H "Content-Type: application/json" \
      -d '{"id":"quality-gate","files":["file1.ts","file2.ts"]}'
-   ```
-   If the server is NOT running, start it first:
-   ```bash
-   ~/.bun/bin/bun run scripts/lint-queue-server.ts &
    ```
 
 2. **Subagents NEVER run `bun sonar-scan` or `bun sonar-manager.ts`.**
@@ -439,7 +439,7 @@ Report your results to the orchestrator:
  - Final sub-loop exit status (0 = passed)
 
 ## PROHIBITIONS
- - NEVER run `bun lint` directly — use the lint queue client (the sub-loop script does this)
+ - `bun run lint` IS the lint queue client — safe to run directly (it serializes through the queue server). However, subagents should prefer the per-file `sub-loop.ts` script for file-scoped verification.
  - NEVER run `bun sonar-scan` or `bun scripts/sonar-manager.ts` — those are orchestrator-only
  - NEVER modify files other than <file-path>
 

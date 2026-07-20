@@ -184,7 +184,7 @@ bun tsgo
 # 2. Biome formatting and linting
 bun biome:check <file-path>
 
-# 3. ESLint (via lint queue client — NEVER run `bun lint` directly)
+# 3. ESLint (via lint queue client — or just `bun run lint`, which IS the queue client)
 curl -s -X POST http://localhost:4777/lint \
   -H "Content-Type: application/json" \
   -d '{"id":"refactor","files":["<file-path>"]}'
@@ -359,7 +359,7 @@ Before marking a file as refactored:
 - [ ] Layout props (margins, gaps) kept in `sx` at usage
 - [ ] `bun tsgo` passes
 - [ ] `bun biome:check` passes
-- [ ] lint via queue client passes (NEVER run `bun lint` directly)
+- [ ] lint via queue client passes (or `bun run lint`, which IS the queue client)
 - [ ] All three checks pass in a complete round
 
 ## Reference

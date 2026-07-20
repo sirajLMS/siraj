@@ -34,7 +34,7 @@ Use the agent prompt in `prompt.md` to instruct one or more AI agents to claim a
 ```bash
 cd /workspace/frontend
 bun run tsgo
-# Lint via queue client (NEVER run `bun run lint` directly):
+# Lint via queue client (or just `bun run lint`, which IS the queue client):
 curl -s -X POST http://localhost:4777/lint \
   -H "Content-Type: application/json" \
   -d '{"id":"health-verify","files":["all_files_in_all_errors.txt"]}'

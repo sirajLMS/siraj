@@ -97,7 +97,7 @@ applyTo: "**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx,scripts/run-test
 - Use `bun:test` for test utilities (`describe`, `test`, `it`, `beforeAll`, `afterAll`, `expect`) - NOT Jest or Vitest imports
 - Never use `any` - use `Partial<...>` or specific types
 - Types from `@/backend/types` for consistency with backend architecture
-- Clean up unused imports/variables - run `bun tsgo` and lint via the lint queue client after changes (NEVER run `bun lint` directly)
+- Clean up unused imports/variables - run `bun tsgo` and `bun run lint` (which IS the lint queue client) after changes
 - Use `testLogger` (never `console.log` or `console.*`) - prefer `testLogger` or no logging if not needed
 
 ### Run-Test Script
@@ -169,5 +169,5 @@ When modifying `scripts/run-test/run-test.ts`:
 ### Quality
 
 - Always use `~/.bun/bin/bun` - never npm/yarn/pnpm
-- Run `bun tsgo` and lint via the lint queue client after creating or modifying tests - fix all errors (NEVER run `bun lint` directly)
+- Run `bun tsgo` and `bun run lint` (which IS the lint queue client) after creating or modifying tests - fix all errors
 - Follow Biome/ESLint formatting and linting rules

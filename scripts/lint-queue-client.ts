@@ -8,6 +8,11 @@
  * The lint queue server MUST be running before these functions are called:
  *   `~/.bun/bin/bun run scripts/lint-queue-server.ts`
  *
+ * Note: `package.json`'s `lint` script imports `requestFullRepoLint` from
+ * this file, so `bun run lint` IS the lint queue client — running it directly
+ * is safe and goes through the queue. Use `requestLint(id, [files])` below
+ * for file-scoped lint (faster when a caller only touched a handful of files).
+ *
  * Usage from a sub-agent (PowerShell):
  *   $body = @{ id = "phase8"; files = @("src/foo.ts","src/bar.ts") } | ConvertTo-Json
  *   Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body

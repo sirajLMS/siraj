@@ -20,7 +20,7 @@ You are an AI programming assistant tasked with fixing TypeScript and ESLint err
 
 4. **Verification & Documentation:**
 
-- Run `bun run tsgo` and lint via the lint queue client for your specific file/project to verify the errors are actually fixed. Do not assume your fix is correct without checking. NEVER run `bun run lint` directly.
+- Run `bun run tsgo` and lint via the lint queue client (or `bun run lint`, which IS the lint queue client) for your specific file/project to verify the errors are actually fixed. Do not assume your fix is correct without checking.
 - If you discovered a new way to resolve a breaking change during this process, briefly add it as a short rule to `/workspace/frontend/scripts/health/fixing_patterns.md`.
 
 5. **Completion:**

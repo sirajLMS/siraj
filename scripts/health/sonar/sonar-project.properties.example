@@ -7,7 +7,10 @@ sonar.sources=src
 sonar.sourceEncoding=UTF-8
 
 # Exclusions
-sonar.exclusions=**/node_modules/**,**/.next/**,**/dist/**,**/out/**,**/build/**,**/.storybook/**,**/*.stories.@(js|jsx|ts|tsx),**/*.test.@(js|jsx|ts|tsx),**/__tests__/**,**/*.d.ts,**/public/**,**/coverage/**,**/scripts/**,**/mockData/**,**/decorators/**
+#   **/.*/**  — ignores ALL dot-directories anywhere in the tree (e.g. .next,
+#               .git, .storybook, .scannerwork, ...). One pattern replaces the
+#               previous hand-maintained list that missed new dot dirs.
+sonar.exclusions=**/.*/**,**/node_modules/**,**/dist/**,**/out/**,**/build/**,**/*.stories.@(js|jsx|ts|tsx),**/*.test.@(js|jsx|ts|tsx),**/__tests__/**,**/*.d.ts,**/public/**,**/coverage/**,**/scripts/**,**/mockData/**,**/decorators/**
 
 # TypeScript/JavaScript settings
 sonar.javascript.lcov.reportPaths=coverage/lcov.info

@@ -26,8 +26,9 @@ bun run dev:inspect            # Start dev server with Node inspector enabled (-
 bun run build                  # Next.js production build
 bun run tsgo                   # Fast TypeScript checking (tsgo, not tsc)
 
-# Linting & Formatting (via lint queue client — NEVER run `bun lint` directly)
-bun run lint                   # ESLint with auto-fix (MUST go through lint queue server/client — see "Lint Queue Server" section below)
+# Linting & Formatting (via lint queue — `bun run lint` IS the lint queue client)
+bun run lint                   # Full-repo ESLint; this script now IS the lint queue client (calls requestFullRepoLint). Safe for parallel sub-agents — requests are serialized through the lint queue server.
+bun run lint:server            # Start the lint queue server (background); required before any `bun run lint` / lint queue client call works
 bun run format                 # Biome formatter
 bun run biome:check            # Biome lint + format + unsafe fixes
 
@@ -172,11 +173,13 @@ After making changes:
 
 ## Lint Queue Server (REQUIRED for parallel sub-agents)
 
-`bun run lint` is heavyweight and **MUST NOT be run concurrently** by multiple sub-agents — it causes resource contention and intermittent failures. Instead, use the **lint queue server/client** which serializes all lint requests through a single process. **NEVER run `bun lint` or `bun run lint` directly** — always go through the queue.
+`bun run lint` used to be heavyweight and **MUST NOT have been run concurrently** by multiple sub-agents — it caused resource contention and intermittent failures. That prohibition is now lifted: as of the `package.json` change, `bun run lint` is no longer a raw eslint invocation — it is a thin wrapper that calls `requestFullRepoLint` from `scripts/lint-queue-client.ts`, so every `bun run lint` invocation already goes through the queue. **You can run `bun run lint` (or `bun lint`) directly now** — it serializes behind the queue server like any other caller.
+
+Sub-agents that lint specific files (instead of the whole repo) should still call `requestLint("id", [files])` from `scripts/lint-queue-client.ts` so they don't waste time linting the entire repo. The whole-repo shortcut `requestFullRepoLint` is what `bun run lint` calls under the hood.
 
 ### Starting the server
 
-Before dispatching any sub-agents that will run lint, start the queue server as a background process:
+The queue server MUST be running before any `bun run lint` / lint queue client call works. Start it as a background process:
 
 ```bash
 ~/.bun/bin/bun run scripts/lint-queue-server.ts
@@ -186,7 +189,9 @@ This listens on `http://localhost:4777`.
 
 ### Submitting lint requests (from sub-agents)
 
-Each sub-agent should **NOT** run `bun run lint` directly. Instead, submit a request to the queue:
+For full-repo lint, just run `bun run lint` — it goes through the queue server automatically.
+
+For file-scoped lint (faster, recommended when a sub-agent only touched a handful of files), call the lint queue client directly instead of running the whole-repo script:
 
 **PowerShell (recommended for sub-agents):**
 ```powershell
@@ -218,7 +223,7 @@ Invoke-RestMethod -Uri http://localhost:4777/status
 - `bun tsgo` — Safe to run concurrently (read-only type checker)
 - `bun biome:check` — Safe to run concurrently (lightweight formatter/linter)
 - `bun run test:*` — Safe to run concurrently (isolated test runners)
-- **`bun run lint`** — **ALWAYS use the lint queue server/client instead, NEVER run directly**
+- **`bun run lint`** — Now safe to run directly: as of the `package.json` change, this script just calls `requestFullRepoLint` from `scripts/lint-queue-client.ts`, so it serializes through the queue server like every other caller. For file-scoped lint, call `requestLint` directly.
 
 ## Verification Loop (Per-File Level)
 

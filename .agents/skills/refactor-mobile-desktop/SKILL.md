@@ -107,7 +107,7 @@ Brief: what legacy pattern exists, what breaks
 ## 6. Governing Rules
 - AGENTS.md: frontend/, frontend/views/, frontend/stores/, frontend/components/ui/
 - Instructions: .agents/instructions/mobile-desktop.instructions.md, frontend.instructions.md
-- Lint queue client (NEVER bun lint directly)
+- Lint: `bun run lint` IS the lint queue client (safe to run directly — serializes through the queue server). For file-scoped lint, call `requestLint(id, [files])` from `scripts/lint-queue-client.ts`.
 ```
 
 **`plan.md` template:**
@@ -186,7 +186,7 @@ Brief: what legacy pattern exists, what breaks
 **Spec**: ./spec.md — **Plan**: ./plan.md
 **Tracking**: checkboxes map 1:1 to plan.md phases. Mark `[x]` only after per-file verification (tsgo → biome → lint-queue) passes.
 
-**Lint queue**: ALWAYS go through lint queue server/client — NEVER `bun lint` directly.
+**Lint queue**: `bun run lint` IS the lint queue client — safe to run directly (serializes through the queue server). Make sure the server is running first.
 ```bash
 ~/.bun/bin/bun run scripts/lint-queue-server.ts &
 ```

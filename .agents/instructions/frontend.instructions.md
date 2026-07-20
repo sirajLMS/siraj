@@ -201,7 +201,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - Dev server: `bun run dev` (Turbopack, port 3000) or `bun run dev:safe` (safe mode)
 - Build: `bun run build`
 - Type check: `bun run tsgo` (fast TypeScript, NOT `tsc`)
-- Lint: via lint queue client (NEVER run `bun run lint` directly — see AGENTS.md "Lint Queue Server" section)
+- Lint: `~/.bun/bin/bun run lint` (this script IS the lint queue client — safe to run directly; calls `requestFullRepoLint` from `scripts/lint-queue-client.ts`). For file-scoped lint, call `requestLint(id, [files])` from the client. See AGENTS.md "Lint Queue Server" section.
 - Format: `bun run format` (Biome) / `bun run biome:check` (Biome lint + format + unsafe fixes)
 - Quality: `bun quality-gate` / `bun quality-gate:fresh`
 - GraphQL: `bun run generate:gqlSchema` then `bun codegen`

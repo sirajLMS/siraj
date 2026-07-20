@@ -57,14 +57,14 @@
    gitignore entry. The orchestrator verifies with `git status`
    afterward that no env file appears staged.
 
-5. **No lint, no build, no sonar**: the env files are not TypeScript,
+5. **No lint, no build, no sonar on env files**: the env files are not TypeScript,
    not consumed by the linter, and not covered by sonar. Subagents
-   MUST NOT run `bun run lint`, `bun lint`, `bun biome:check`,
-   `bun sonar-scan`, or `bun run lint` directly on these files. The
-   lint queue rule (F11 in `specs.md`) is irrelevant here but the
-   spirit still binds: no side-effecting quality commands beyond what
-   the orchestrator authorises (which is `bun tsgo` once, at the
-   orchestrator level, purely as a sanity check).
+   MUST NOT invoke any quality command (`bun run lint`, `bun lint`,
+   `bun biome:check`, `bun sonar-scan`) on these files — the lint
+   queue rule (F11 in `specs.md`) covers any raw eslint bypass; `bun run lint`
+   itself is safe elsewhere, just not useful on `.env` files. No
+   side-effecting quality commands beyond what the orchestrator authorises
+   (which is `bun tsgo` once, at the orchestrator level, purely as a sanity check).
 
 If you find yourself about to: hand-edit a PEM, convert `\n` escapes
 to real newlines, write to `.env.example`, run `git add .env`, run

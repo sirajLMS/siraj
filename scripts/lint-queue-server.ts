@@ -1,11 +1,20 @@
 /**
  * Lint Queue Server — Serialized ESLint Execution for Concurrent Sub-Agents
  *
- * When multiple AI sub-agents run in parallel, each calling `bun run lint`
- * simultaneously causes severe resource contention and intermittent failures.
- * This HTTP server serializes lint requests so only one `bun lint` process
- * runs at a time, while all callers wait for their turn and receive results.
+ * When multiple AI sub-agents run in parallel and each invokes eslint at the
+ * same time, they cause severe resource contention and intermittent failures.
+ * This HTTP server serializes lint requests so only one eslint process runs
+ * at a time, while all callers wait for their turn and receive results.
  *
+ * Relationship to `bun run lint`:
+ *   - `package.json` defines `lint` as a thin wrapper that imports
+ *     `requestFullRepoLint` from `scripts/lint-queue-client.ts` and POSTs to
+ *     this server. So `bun run lint` IS the lint queue client — running it
+ *     directly is safe and is the documented way to lint the whole repo.
+ *   - File-scoped lint should call `requestLint(id, [files])` from
+ *     `scripts/lint-queue-client.ts` (or the equivalent HTTP call below) so
+ *     eslint doesn't walk the whole repo.
+    10| *
  * Architecture:
  *   - Single-threaded FIFO queue backed by a `running` flag
  *   - POST /lint  → Enqueue a lint request; blocks until the result is ready
@@ -78,11 +87,13 @@ type LintResult = { success: boolean; output: string; exitCode: number };
  * Executes eslint (report-only, no auto-fix) scoped to the given files via the
  * local eslint binary.
  *
- * NOTE: The `lint` package.json script was removed (per AGENTS.md lint-queue mandate —
- * `bun run lint` must NEVER be invoked directly by sub-agents). This lint-queue server
- * is the SINGLE legitimate caller of eslint in the repo, so it invokes eslint directly.
- * `--fix` is intentionally omitted: this server is for reporting issues only; callers
- * that need auto-fix should run `bun run lint:fix` (which bypasses the queue).
+ * NOTE: `package.json`'s `lint` script is a thin wrapper around
+ * `requestFullRepoLint` from `scripts/lint-queue-client.ts`, so `bun run lint`
+ * is safe to invoke directly — it submits to this queue server. This server is
+ * the SINGLE legitimate direct caller of the eslint binary in the repo, so it
+ * invokes eslint directly. `--fix` is intentionally omitted: this server is
+ * for reporting issues only; callers that need auto-fix should run
+ * `bun run lint:fix` (which bypasses the queue).
  *
  * @param files - List of file paths to lint. When empty, eslint is invoked with
  *                no file args, which makes it lint the whole repo via the

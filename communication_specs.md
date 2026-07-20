@@ -69,19 +69,12 @@
    with `git status --porcelain` afterward that only the 5 expected
    files appear as new/modified (R-self-check, see §5).
 
-5. **No direct `bun run lint`, no sonar-scan, no codescene run by
-   subagents**. The lint rule (AGENTS.md "Lint Queue Server") is
-   binding: subagents MUST NOT run `bun run lint`, `bun lint`, or
-   `bun run lint` directly on their files. The orchestrator submits
-   all 5 files through the lint-queue client
-   (`http://localhost:4777/lint`) in Wave 2. Subagents MAY run
-   `bun tsgo` (read-only type check — safe to run concurrently). The
-   `bun run test:live-comm` real-API run is performed ONCE by the
+5. **Subagents don't bypass the lint queue**. The AGENTS.md "Lint Queue Server" rule is binding: `bun run lint` IS the lint queue client now (it calls `requestFullRepoLint` from `scripts/lint-queue-client.ts` and serializes through the queue), so subagents MAY run `bun run lint` directly. What they MUST NOT do is run raw eslint or otherwise bypass the queue server. For file-scoped lint, submit through the lint-queue client (`http://localhost:4777/lint`) — the orchestrator does this for all 5 files in Wave 2. Subagents MAY run `bun tsgo` (read-only type check — safe to run concurrently). The `bun run test:live-comm` real-API run is performed ONCE by the
    orchestrator in Wave 2; subagents MUST NOT run it (costs money).
 
 If you find yourself about to: edit an adapter source, add a
-`RUN_REAL_PROVIDER_TESTS` flag, use `runInRollback`, run
-`bun run lint` directly, `git add` your new file, `console.log`
+`RUN_REAL_PROVIDER_TESTS` flag, use `runInRollback`, run a raw eslint
+bypassing the lint queue, `git add` your new file, `console.log`
 a real API key, or modify a file outside the §1 matrix — **STOP. You
 are about to violate the rules. Re-read sections 1-7 below.**
 
@@ -655,7 +648,7 @@ The orchestrator:
 - WILL run `bun run test:live-comm` ONCE (real API calls, ~$0.05 USD).
 - WILL run `bun run test:live-comm` TWICE consecutively to detect
   firebase-admin singleton leaks (P-suite `afterEach` validation).
-- WILL NOT run `bun run lint` directly, `bun sonar-scan`,
+- WILL NOT bypass the lint queue with raw eslint. `bun run lint` is fine (it IS the lint queue client). WILL NOT run `bun sonar-scan`,
   `bun codescene`, or `bun scripts/sonar-manager.ts`.
 - WILL NOT auto-commit. User commits when they confirm.
 

@@ -179,7 +179,7 @@ These non-versioned components are used BY mobile views, not by both tiers:
 
 ### Commands
 
-- Verify ESLint rules: `~/.bun/bin/bun run lint` (via lint queue server)
+- Verify ESLint rules: `~/.bun/bin/bun run lint` (this script calls `requestFullRepoLint` from `scripts/lint-queue-client.ts` and serializes through the lint queue server). Ensure `bun run lint:server` is running first.
 - Type check: `~/.bun/bin/bun tsgo`
 - Format: `~/.bun/bin/bun biome:check`
 - Quality gate: `~/.bun/bin/bun quality-gate`

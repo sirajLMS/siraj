@@ -156,7 +156,7 @@ files before reporting completion.
 | **F8** | `import .* from "@/backend/enum"` anywhere in `frontend/` touched files | `rg -n 'from "@/backend/enum' frontend/` → 0 |
 | **F9** | Removing an existing `NotificationSyncService.syncUnpaidNotifications(...)` call without keeping an equivalent tray-summary update | `git diff` review — the call can move but not vanish silently |
 | **F10** | Editing a file outside the ownership matrix | `git diff --name-only` of the subagent's commits must be a subset of its ownership row in §1 |
-| **F11** | `bun run lint` or `bun lint` executed directly (must use the lint queue client on port 4777) | `rg` of agent actions or shell history — orchestrator restarts the subagent |
+| **F11** | Running raw eslint bypassing the lint queue (no longer an issue in practice — `bun run lint` IS the lint queue client now; just don't bypass the queue server) | `rg` of agent actions or shell history — orchestrator restarts the subagent |
 | **F12** | `bun sonar-scan` or `bun scripts/sonar-manager.ts` executed by a non-quality-gate subagent | same as F11 |
 | **F13** | Removing the existing FX cron entry from `vercel.json` | `git diff vercel.json` review — the FX entry MUST still be present |
 | **F14** | Modifying `backend/db/schema/communications/communications.ts` or any DB schema file outside the allowed Drizzle migration generation | this plan does NOT add a new table — it only adds pg-enum values via `bun run db:generate` migration. Hand-editing schema = violation |
@@ -384,9 +384,7 @@ curl -s -X POST http://localhost:4777/lint \
 Response: `{ success: boolean, output: string, exitCode: number }`.
 Blocks until the lint run on those files completes (server serializes).
 
-**NEVER run `bun run lint` or `bun lint` directly.** (F11) Concurrent
-lint runs cause resource contention per AGENTS.md. A subagent that does
-this fails its contract — orchestrator restarts it.
+**Use `bun run lint` or `bun lint` freely** — `bun run lint` IS the lint queue client (it calls `requestFullRepoLint` from `scripts/lint-queue-client.ts` and serializes through the queue server on port 4777). (F11 now covers only raw eslint invocations that bypass the queue.)
 
 ### Per-file verification order (progressive enforcement)
 
@@ -556,7 +554,7 @@ Wave 2 reconciliation subagents:
 > Sixteen forbidden patterns F1-F16 self-check via `rg` before reporting.
 > Hardcoded `"Invoice created"` strings = F3 violation.
 > `CommunicationService.dispatch(` in a domain service = F1 violation.
-> `console.log` anywhere = F4 violation. `bun run lint` directly = F11.
+> `console.log` anywhere = F4 violation. Raw eslint bypassing the queue = F11.
 > Stick to your ownership matrix from §1. Use the lint queue client on
 > port 4777. Per-file verify via
 > `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`.

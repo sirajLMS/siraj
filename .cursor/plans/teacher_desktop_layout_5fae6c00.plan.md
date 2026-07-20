@@ -113,7 +113,7 @@ Also read before implementation: [`frontend/COMPONENT_PATTERNS.md`](frontend/COM
 
 **Skip CodeScene and Sonar** for this task — do not run `bun quality-gate`, `bun run codescene`, `bun sonar-scan`, or `sonar-manager`.
 
-**Per-file loop** before marking a file done (use lint queue server — never `bun run lint` directly):
+**Per-file loop** before marking a file done (`bun run lint` is safe — it IS the lint queue client):
 
 ```bash
 bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint

@@ -227,7 +227,7 @@ touched files before reporting completion.
 | **F5** | `useLazyQuery` or `useSubscription` anywhere touched frontend | `rg -n "useLazyQuery\|useSubscription" <touched>` → 0 |
 | **F6** | `import .* from "@/backend/enum"` anywhere in `frontend/` touched | `rg -n 'from "@/backend/enum' <touched>` → 0 |
 | **F7** | `withSuspenseBindings` anywhere touched | `rg -n "withSuspenseBindings" <touched>` → 0 |
-| **F8** | `bun run lint` or `bun lint` executed directly | inspect shell history → orchestrator restarts the subagent |
+| **F8** | Running raw eslint bypassing the lint queue (no longer an issue — `bun run lint` IS the lint queue client; just don't bypass the queue server) | inspect shell history → orchestrator restarts the subagent |
 | **F9** | `bun sonar-scan` or `sonar-manager` run by a non-orchestrator subagent | inspect shell history |
 | **F10** | Editing a file outside the ownership matrix (§1) | `git diff --name-only` of subagent commits must be ⊆ ownership row |
 | **F11** | `CommunicationService.dispatch(`/`dispatchMulti(` directly from any non-notification service | `rg -n "CommunicationService\.(dispatch\|dispatchMulti)\("` <touched> → 0 |

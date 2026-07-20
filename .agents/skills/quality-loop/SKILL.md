@@ -26,9 +26,9 @@ bun biome:check
 
 Fix formatting and lint issues. `biome:check` is safe to run concurrently.
 
-### Step 3: Lint (via lint queue client — NEVER run `bun lint` directly)
+### Step 3: Lint (via lint queue — `bun run lint` IS the lint queue client)
 
-**NEVER run `bun run lint` directly.** Always use the lint queue server/client.
+`bun run lint` is safe to run directly — the `package.json` `lint` script is a thin wrapper that calls `requestFullRepoLint` from `scripts/lint-queue-client.ts`, so requests serialize through the lint queue server.
 
 First, check if the lint queue server is running:
 
