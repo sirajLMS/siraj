@@ -7,19 +7,15 @@ import { Box, CircularProgress } from "@mui/material";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NetworkConnectivityContext } from "@/frontend/common/context/NetworkConnectivityContext";
-import { refreshTokenMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useApolloConnectivity } from "@/frontend/common/hooks/useApolloConnectivity";
-import { dedupedRefreshToken } from "@/frontend/common/lib/dedupedRefreshToken";
-import logger from "@/frontend/common/lib/logger";
 import { InitializingUI } from "@/frontend/common/providers/apollo/AppApolloProviderHelpers";
 import { createApolloCache } from "@/frontend/common/providers/apollo/apolloCache";
+import { useAuthRecoveryRegistration } from "@/frontend/common/providers/apollo/useAuthRecoveryRegistration";
 import {
   createAuthLink,
   createConnectivityLink,
   createErrorLinkHandler,
-  registerAuthRecovery,
   sha256,
-  unregisterAuthRecovery,
 } from "@/frontend/common/providers/apollo/utils";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -73,60 +69,7 @@ export function AppApolloProvider({ children }: { readonly children: React.React
   // Create Apollo client
   const [apolloClient, setApolloClient] = useState<ApolloClient | null>(null);
 
-  useEffect(() => {
-    if (apolloClient != null) {
-      // Register the recovery API that the errorLink callbacks into when a
-      // GraphQL query returns UNAUTHENTICATED. This lets the errorLink run a
-      // refreshToken mutation BEFORE hard-redirecting to /login, so prod
-      // users whose 15-min access_token cookie has expired (but whose 7-day
-      // refresh_token cookie is still valid) stay logged in on navigation
-      // — closing the production-only logout-on-navigation bug.
-      const refresh = async (): Promise<string | null> => {
-        // Refresh can still rotate the access_token cookie via the httpOnly
-        // refresh_token cookie even when authTokenRef.current is null (e.g.
-        // after a hard F5 reload cleared React memory). No early-return.
-        try {
-          const result = await dedupedRefreshToken(() =>
-            apolloClient.mutate({ mutation: refreshTokenMutationDocument })
-          );
-          const newToken = result.data?.refreshToken?.token ?? null;
-          if (newToken) {
-            updateAuthToken(newToken);
-          }
-          return newToken;
-        } catch {
-          return null;
-        }
-      };
-
-      const reFetch = (): void => {
-        // `false` = do not force a network-only refetch — re-issue the
-        // active observable queries with their existing fetch policies but
-        // with the new Authorization header that authLink will now read
-        // from authTokenRef.current.
-        try {
-          apolloClient.reFetchObservableQueries(false).catch(() => {
-            // Swallow — the redirect/recovery logic must not throw if Apollo
-            // refuses to re-issue (e.g. during teardown).
-          });
-        } catch {
-          // Swallow — same reason as above, for synchronous throws.
-        }
-      };
-
-      registerAuthRecovery({ refresh, reFetch });
-      try {
-        logger.info({ caller: "apollo.AppApolloProvider", force: true }, "[AuthRedirect] authRecovery registered", {
-          hasClient: true,
-        });
-      } catch {
-        // defensive: never let a logging failure swallow the recovery wiring
-      }
-      return () => {
-        unregisterAuthRecovery();
-      };
-    }
-  }, [apolloClient, updateAuthToken]);
+  useAuthRecoveryRegistration(apolloClient, updateAuthToken);
 
   useEffect(() => {
     if (apolloClient == null) {
