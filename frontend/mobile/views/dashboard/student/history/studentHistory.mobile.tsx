@@ -137,37 +137,11 @@ function MobileSessionItem({
   );
 }
 
-export function StudentHistoryMobileView({
-  metrics,
-  filteredSessions,
-  sessionsByDay,
-  subjectOptions,
-  statusOptions,
-  subjectFilter,
-  statusFilter,
-  currentMonth,
-  monthLabel,
-  selectedDay,
-  selectedWeek,
-  canGoNext,
-  labels,
-  locale,
-  loading,
-  onBackToDashboard,
-  onOpenMeetingUrl,
-  onPrevMonth,
-  onNextMonth,
-  onSelectDay,
-  onSelectWeek,
-  onSubjectFilterChange,
-  onStatusFilterChange,
-}: Readonly<StudentHistoryViewModel>) {
-  const listRows = useMemo(() => {
-    if (selectedDay == null) return filteredSessions;
-    return filteredSessions.filter(s => s.dayOfMonth === selectedDay);
-  }, [filteredSessions, selectedDay]);
-
-  const metricItems: readonly MetricItem[] = useMemo(
+function useStudentHistoryMetricItems(
+  metrics: StudentHistoryViewModel["metrics"],
+  labels: StudentHistoryViewModel["labels"]
+): readonly MetricItem[] {
+  return useMemo(
     () => [
       {
         key: "totalClasses",
@@ -200,6 +174,186 @@ export function StudentHistoryMobileView({
     ],
     [labels, metrics]
   );
+}
+
+function MonthNavigator({
+  monthLabel,
+  canGoNext,
+  labels,
+  onPrevMonth,
+  onNextMonth,
+}: Readonly<{
+  monthLabel: string;
+  canGoNext: boolean;
+  labels: StudentHistoryViewModel["labels"];
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+}>): React.ReactNode {
+  const navButtonSx = (theme: Theme) => ({
+    minWidth: 40,
+    transform: theme.direction === "rtl" ? ("scaleX(-1)" as const) : undefined,
+  });
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+      <Button aria-label={labels.previousMonth} onClick={onPrevMonth} sx={navButtonSx}>
+        <ChevronLeft />
+      </Button>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+        <CalendarToday sx={theme => ({ fontSize: 18, color: theme.palette.primary.main })} />
+        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+          {monthLabel}
+        </Typography>
+      </Box>
+      <Button
+        aria-label={labels.nextMonth}
+        onClick={onNextMonth}
+        disabled={!canGoNext}
+        sx={theme => ({ ...navButtonSx(theme), opacity: canGoNext ? 1 : 0.5 })}
+      >
+        <ChevronRight />
+      </Button>
+    </Box>
+  );
+}
+
+function HistoryFilters({
+  subjectFilter,
+  statusFilter,
+  subjectOptions,
+  statusOptions,
+  labels,
+  onSubjectFilterChange,
+  onStatusFilterChange,
+}: Readonly<{
+  subjectFilter: string;
+  statusFilter: string;
+  subjectOptions: readonly string[];
+  statusOptions: readonly string[];
+  labels: StudentHistoryViewModel["labels"];
+  onSubjectFilterChange: StudentHistoryViewModel["onSubjectFilterChange"];
+  onStatusFilterChange: StudentHistoryViewModel["onStatusFilterChange"];
+}>): React.ReactNode {
+  return (
+    <MobileContentInset>
+      <Stack spacing={2} sx={{ mb: 2 }}>
+        <FormControl fullWidth size="small">
+          <InputLabel id="mobile-history-subject-filter" shrink>
+            {labels.filterBySubject}
+          </InputLabel>
+          <Select
+            labelId="mobile-history-subject-filter"
+            label={labels.filterBySubject}
+            value={subjectFilter}
+            onChange={e => onSubjectFilterChange(e.target.value)}
+          >
+            <MenuItem value="">{labels.allSubjects}</MenuItem>
+            {subjectOptions.map(subject => (
+              <MenuItem key={subject} value={subject}>
+                {subject}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl fullWidth size="small">
+          <InputLabel id="mobile-history-status-filter" shrink>
+            {labels.filterByStatus}
+          </InputLabel>
+          <Select
+            labelId="mobile-history-status-filter"
+            label={labels.filterByStatus}
+            value={statusFilter}
+            onChange={e => onStatusFilterChange(e.target.value)}
+          >
+            <MenuItem value="">{labels.allStatuses}</MenuItem>
+            {statusOptions.map(status => (
+              <MenuItem key={status} value={status}>
+                {status}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Stack>
+    </MobileContentInset>
+  );
+}
+
+function HistorySessionList({
+  listRows,
+  labels,
+  locale,
+  onOpenMeetingUrl,
+}: Readonly<{
+  listRows: readonly StudentHistorySessionRow[];
+  labels: StudentHistoryViewModel["labels"];
+  locale: string;
+  onOpenMeetingUrl: StudentHistoryViewModel["onOpenMeetingUrl"];
+}>): React.ReactNode {
+  return (
+    <MobileCardList<StudentHistorySessionRow>
+      rows={listRows}
+      emptyMessage={labels.noHistory}
+      getKey={row => row.id}
+      paginationOptions={{ mode: "client" }}
+      renderItem={row => (
+        <MobileSessionItem row={row} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
+      )}
+    />
+  );
+}
+
+function BackToDashboardButton({
+  labels,
+  onBackToDashboard,
+}: Readonly<{
+  labels: StudentHistoryViewModel["labels"];
+  onBackToDashboard: () => void;
+}>): React.ReactNode {
+  return (
+    <MobileContentInset>
+      <Button
+        variant="outlined"
+        fullWidth
+        startIcon={<ArrowBackOutlined />}
+        sx={theme => ({ color: theme.palette.primary.main, borderColor: theme.palette.primary.main })}
+        onClick={onBackToDashboard}
+      >
+        {labels.backToDashboard}
+      </Button>
+    </MobileContentInset>
+  );
+}
+
+export function StudentHistoryMobileView({
+  metrics,
+  filteredSessions,
+  sessionsByDay,
+  subjectOptions,
+  statusOptions,
+  subjectFilter,
+  statusFilter,
+  currentMonth,
+  monthLabel,
+  selectedDay,
+  selectedWeek,
+  canGoNext,
+  labels,
+  locale,
+  loading,
+  onBackToDashboard,
+  onOpenMeetingUrl,
+  onPrevMonth,
+  onNextMonth,
+  onSelectDay,
+  onSelectWeek,
+  onSubjectFilterChange,
+  onStatusFilterChange,
+}: Readonly<StudentHistoryViewModel>) {
+  const listRows = useMemo(() => {
+    if (selectedDay == null) return filteredSessions;
+    return filteredSessions.filter(s => s.dayOfMonth === selectedDay);
+  }, [filteredSessions, selectedDay]);
+
+  const metricItems = useStudentHistoryMetricItems(metrics, labels);
 
   if (loading && metrics.totalClasses === 0) {
     return (
@@ -216,33 +370,13 @@ export function StudentHistoryMobileView({
       <MobileContentStack>
         <MobilePageHeader title={labels.pageTitle} titleVariant="headlineMd" />
 
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
-          <Button
-            aria-label={labels.previousMonth}
-            onClick={onPrevMonth}
-            sx={theme => ({ minWidth: 40, transform: theme.direction === "rtl" ? "scaleX(-1)" : undefined })}
-          >
-            <ChevronLeft />
-          </Button>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-            <CalendarToday sx={theme => ({ fontSize: 18, color: theme.palette.primary.main })} />
-            <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-              {monthLabel}
-            </Typography>
-          </Box>
-          <Button
-            aria-label={labels.nextMonth}
-            onClick={onNextMonth}
-            disabled={!canGoNext}
-            sx={theme => ({
-              minWidth: 40,
-              transform: theme.direction === "rtl" ? "scaleX(-1)" : undefined,
-              opacity: canGoNext ? 1 : 0.5,
-            })}
-          >
-            <ChevronRight />
-          </Button>
-        </Box>
+        <MonthNavigator
+          monthLabel={monthLabel}
+          canGoNext={canGoNext}
+          labels={labels}
+          onPrevMonth={onPrevMonth}
+          onNextMonth={onNextMonth}
+        />
 
         <MobileMetricCardGrid metrics={metricItems} />
 
@@ -258,69 +392,19 @@ export function StudentHistoryMobileView({
         />
 
         <MobileSectionPanel title={labels.lessonHistory} contentInset={false}>
-          <MobileContentInset>
-            <Stack spacing={2} sx={{ mb: 2 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="mobile-history-subject-filter" shrink>
-                  {labels.filterBySubject}
-                </InputLabel>
-                <Select
-                  labelId="mobile-history-subject-filter"
-                  label={labels.filterBySubject}
-                  value={subjectFilter}
-                  onChange={e => onSubjectFilterChange(e.target.value)}
-                >
-                  <MenuItem value="">{labels.allSubjects}</MenuItem>
-                  {subjectOptions.map(subject => (
-                    <MenuItem key={subject} value={subject}>
-                      {subject}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth size="small">
-                <InputLabel id="mobile-history-status-filter" shrink>
-                  {labels.filterByStatus}
-                </InputLabel>
-                <Select
-                  labelId="mobile-history-status-filter"
-                  label={labels.filterByStatus}
-                  value={statusFilter}
-                  onChange={e => onStatusFilterChange(e.target.value)}
-                >
-                  <MenuItem value="">{labels.allStatuses}</MenuItem>
-                  {statusOptions.map(status => (
-                    <MenuItem key={status} value={status}>
-                      {status}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Stack>
-          </MobileContentInset>
-
-          <MobileCardList<StudentHistorySessionRow>
-            rows={listRows}
-            emptyMessage={labels.noHistory}
-            getKey={row => row.id}
-            paginationOptions={{ mode: "client" }}
-            renderItem={row => (
-              <MobileSessionItem row={row} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
-            )}
+          <HistoryFilters
+            subjectFilter={subjectFilter}
+            statusFilter={statusFilter}
+            subjectOptions={subjectOptions}
+            statusOptions={statusOptions}
+            labels={labels}
+            onSubjectFilterChange={onSubjectFilterChange}
+            onStatusFilterChange={onStatusFilterChange}
           />
+          <HistorySessionList listRows={listRows} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
         </MobileSectionPanel>
 
-        <MobileContentInset>
-          <Button
-            variant="outlined"
-            fullWidth
-            startIcon={<ArrowBackOutlined />}
-            sx={theme => ({ color: theme.palette.primary.main, borderColor: theme.palette.primary.main })}
-            onClick={onBackToDashboard}
-          >
-            {labels.backToDashboard}
-          </Button>
-        </MobileContentInset>
+        <BackToDashboardButton labels={labels} onBackToDashboard={onBackToDashboard} />
       </MobileContentStack>
     </MobilePageContainer>
   );

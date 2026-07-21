@@ -100,6 +100,86 @@ function usePermissionFormFilters(
   return { categories, groupedPermissions };
 }
 
+function buildPermissionGroupInitialValues(group: PermissionGroup | null): PermissionGroupFormData {
+  if (!group) {
+    return { name: {}, description: {}, permissionIds: [] };
+  }
+  return {
+    name: (group.name ?? {}) as PermissionGroupFormData["name"],
+    description: (group.description ?? {}) as PermissionGroupFormData["description"],
+    permissionIds: (group.permissionIds ?? []).filter((id): id is string => !!id),
+  };
+}
+
+function togglePermissionId(selectedIds: readonly string[], permId: string, isSystem: boolean): string[] | null {
+  if (isSystem) return null;
+  if (selectedIds.includes(permId)) {
+    return selectedIds.filter(id => id !== permId);
+  }
+  return [...selectedIds, permId];
+}
+
+function applyCategorySelection(
+  selectedIds: readonly string[],
+  categoryPerms: readonly SelectablePermission[],
+  checked: boolean
+): string[] {
+  const modifiableIds = categoryPerms.filter(p => !p.isSystem).map(p => p.id);
+  if (checked) {
+    return Array.from(new Set([...selectedIds, ...modifiableIds]));
+  }
+  return selectedIds.filter(id => !modifiableIds.includes(id));
+}
+
+function getModifiableInCategory(categoryPerms: readonly SelectablePermission[]): readonly SelectablePermission[] {
+  return categoryPerms.filter(p => !p.isSystem);
+}
+
+function isCategoryFullySelected(
+  selectedIds: readonly string[],
+  categoryPerms: readonly SelectablePermission[]
+): boolean {
+  const modifiable = getModifiableInCategory(categoryPerms);
+  if (modifiable.length === 0) return false;
+  return modifiable.every(p => selectedIds.includes(p.id));
+}
+
+function isCategoryIndeterminate(
+  selectedIds: readonly string[],
+  categoryPerms: readonly SelectablePermission[]
+): boolean {
+  const modifiable = getModifiableInCategory(categoryPerms);
+  if (modifiable.length === 0) return false;
+  const selectedInCategory = modifiable.filter(p => selectedIds.includes(p.id));
+  return selectedInCategory.length > 0 && selectedInCategory.length < modifiable.length;
+}
+
+/**
+ * Owns the `useEffect` that resets the form whenever the dialog opens.
+ * Re-derives values from `group` (edit) or falls back to empty defaults (create)
+ * and clears the cross-tier filter state.
+ */
+function useDialogOpenReset({
+  open,
+  group,
+  reset,
+  setSearchTerm,
+  setSelectedCategory,
+}: {
+  open: boolean;
+  group: PermissionGroup | null;
+  reset: (values: PermissionGroupFormData) => void;
+  setSearchTerm: (term: string) => void;
+  setSelectedCategory: (category: string) => void;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    reset(buildPermissionGroupInitialValues(group));
+    setSearchTerm("");
+    setSelectedCategory("ALL");
+  }, [open, group, reset, setSearchTerm, setSelectedCategory]);
+}
+
 /**
  * Common hook owning the entire Permission Group create/edit form:
  * - `useForm` + `zodResolver(permissionGroupSchema)` (lifted per N4 + N26)
@@ -133,62 +213,26 @@ export function usePermissionGroupForm({
     },
   });
 
-  useEffect(() => {
-    if (open) {
-      if (group) {
-        reset({
-          name: (group.name ?? {}) as PermissionGroupFormData["name"],
-          description: (group.description ?? {}) as PermissionGroupFormData["description"],
-          permissionIds: (group.permissionIds ?? []).filter((id): id is string => !!id),
-        });
-      } else {
-        reset({ name: {}, description: {}, permissionIds: [] });
-      }
-      setSearchTerm("");
-      setSelectedCategory("ALL");
-    }
-  }, [open, group, reset, setSearchTerm, setSelectedCategory]);
+  useDialogOpenReset({ open, group, reset, setSearchTerm, setSelectedCategory });
 
   const selectedPermissionIds = useWatch({ control, name: "permissionIds" }) ?? [];
 
   const handleTogglePermission = (permId: string, isSystem: boolean) => {
-    if (isSystem) return;
-    if (selectedPermissionIds.includes(permId)) {
-      setValue(
-        "permissionIds",
-        selectedPermissionIds.filter(id => id !== permId)
-      );
-    } else {
-      setValue("permissionIds", [...selectedPermissionIds, permId]);
+    const next = togglePermissionId(selectedPermissionIds, permId, isSystem);
+    if (next !== null) {
+      setValue("permissionIds", next);
     }
   };
 
   const handleSelectAllCategory = (categoryPerms: readonly SelectablePermission[], checked: boolean) => {
-    const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
-    const modifiableIds = modifiablePerms.map(p => p.id);
-    if (checked) {
-      const merged = Array.from(new Set([...selectedPermissionIds, ...modifiableIds]));
-      setValue("permissionIds", merged);
-    } else {
-      setValue(
-        "permissionIds",
-        selectedPermissionIds.filter(id => !modifiableIds.includes(id))
-      );
-    }
+    setValue("permissionIds", applyCategorySelection(selectedPermissionIds, categoryPerms, checked));
   };
 
-  const isGroupSelected = (categoryPerms: readonly SelectablePermission[]) => {
-    const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
-    if (modifiablePerms.length === 0) return false;
-    return modifiablePerms.every(p => selectedPermissionIds.includes(p.id));
-  };
+  const isGroupSelected = (categoryPerms: readonly SelectablePermission[]) =>
+    isCategoryFullySelected(selectedPermissionIds, categoryPerms);
 
-  const isGroupIndeterminate = (categoryPerms: readonly SelectablePermission[]) => {
-    const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
-    if (modifiablePerms.length === 0) return false;
-    const selectedInCategory = modifiablePerms.filter(p => selectedPermissionIds.includes(p.id));
-    return selectedInCategory.length > 0 && selectedInCategory.length < modifiablePerms.length;
-  };
+  const isGroupIndeterminate = (categoryPerms: readonly SelectablePermission[]) =>
+    isCategoryIndeterminate(selectedPermissionIds, categoryPerms);
 
   const { categories, groupedPermissions } = usePermissionFormFilters(permissions, searchTerm, selectedCategory);
 

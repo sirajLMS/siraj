@@ -1,3 +1,4 @@
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   normalizePaymentMethodDetailsInput,
@@ -25,6 +26,14 @@ import type {
   UpdateSupportedOnlineAccountInput,
   UpdateSupportedPaymentLinkInput,
 } from "@/backend/types/billing/payment-method.types";
+
+type ErrorsTranslations = ReturnType<BaseContext["t"]>["errorsTranslations"];
+
+async function resolveAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; tErrors: ErrorsTranslations }> {
+  const actorUserId = await requireAuth(ctx);
+  const tErrors = ctx.t().errorsTranslations;
+  return { actorUserId, tErrors };
+}
 
 gqlSchemaBuilder.mutationField("createUserPaymentMethod", t =>
   t.field({
@@ -132,8 +141,7 @@ gqlSchemaBuilder.mutationField("createSupportedMobileWallet", t =>
       input: t.arg({ type: SupportedMobileWalletCreateInputPothos, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.createMobileWallet(
         actorUserId,
         args.input as SupportedMobileWalletSubmitInput,
@@ -152,8 +160,7 @@ gqlSchemaBuilder.mutationField("updateSupportedMobileWallet", t =>
       input: t.arg({ type: SupportedMobileWalletUpdateInputPothos, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.updateMobileWallet(
         actorUserId,
         args.id,
@@ -172,8 +179,7 @@ gqlSchemaBuilder.mutationField("deactivateSupportedMobileWallet", t =>
       id: t.arg.id({ required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.deactivateMobileWallet(actorUserId, args.id, tErrors);
     },
   })
@@ -187,8 +193,7 @@ gqlSchemaBuilder.mutationField("createSupportedPaymentLink", t =>
       input: t.arg({ type: SupportedPaymentLinkCreateInputPothos, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.createPaymentLink(
         actorUserId,
         args.input as SupportedPaymentLinkSubmitInput,
@@ -207,8 +212,7 @@ gqlSchemaBuilder.mutationField("updateSupportedPaymentLink", t =>
       input: t.arg({ type: SupportedPaymentLinkUpdateInputPothos, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.updatePaymentLink(
         actorUserId,
         args.id,
@@ -227,8 +231,7 @@ gqlSchemaBuilder.mutationField("deactivateSupportedPaymentLink", t =>
       id: t.arg.id({ required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.deactivatePaymentLink(actorUserId, args.id, tErrors);
     },
   })
@@ -242,8 +245,7 @@ gqlSchemaBuilder.mutationField("createSupportedOnlineAccount", t =>
       input: t.arg({ type: SupportedOnlineAccountCreateInputPothos, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.createOnlineAccount(
         actorUserId,
         args.input as SupportedOnlineAccountSubmitInput,
@@ -262,8 +264,7 @@ gqlSchemaBuilder.mutationField("updateSupportedOnlineAccount", t =>
       input: t.arg({ type: SupportedOnlineAccountUpdateInputPothos, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.updateOnlineAccount(
         actorUserId,
         args.id,
@@ -282,8 +283,7 @@ gqlSchemaBuilder.mutationField("deactivateSupportedOnlineAccount", t =>
       id: t.arg.id({ required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.deactivateOnlineAccount(actorUserId, args.id, tErrors);
     },
   })

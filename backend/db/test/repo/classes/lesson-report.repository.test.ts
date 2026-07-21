@@ -1,12 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { LessonReportRepository } from "@/backend/db/repo/classes/lesson-report.repository";
 import { lessonReports } from "@/backend/db/schema";
 import { createTestLessonReport, createTestUser, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AttendanceEvaluation, LessonReportStatus } from "@/backend/enum";
-import type { ClassInstanceEntity } from "@/backend/types";
+import type { ClassInstanceEntity, LessonReportSelectType } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
@@ -27,32 +28,110 @@ function requireInstance(instance: ClassInstanceEntity | null): ClassInstanceEnt
   return instance;
 }
 
-async function setupReportChain(tx: Parameters<typeof runInRollback>[0] extends (t: infer T) => unknown ? T : never) {
+type ReportChain = Awaited<ReturnType<typeof setupTestEntities>> & {
+  adminUser: Awaited<ReturnType<typeof createTestUser>>;
+};
+
+async function setupReportChain(tx: DBTransaction): Promise<ReportChain> {
   const entities = await setupTestEntities(tx, "LessonReport", { classesRemaining: 10 });
   const adminUser = await createTestUser(tx, { name: "Reviewing Admin" });
   return { ...entities, adminUser };
 }
 
+/** Sets up the entities, ensures a class instance, and creates a lesson report in one step. */
+async function setupReportCreated(tx: DBTransaction): Promise<{
+  chain: ReportChain;
+  inst: ClassInstanceEntity;
+  report: LessonReportSelectType;
+}> {
+  const chain = await setupReportChain(tx);
+  const inst = requireInstance(chain.instance);
+  const report = await createTestLessonReport(tx, inst.id, chain.student.id, chain.teacher.id, chain.adminUser.id);
+  return { chain, inst, report };
+}
+
+/** Creates a lesson report from an existing chain (no extra setup round-trip). */
+async function createReportFromChain(tx: DBTransaction, chain: ReportChain): Promise<LessonReportSelectType> {
+  const inst = requireInstance(chain.instance);
+  return createTestLessonReport(tx, inst.id, chain.student.id, chain.teacher.id, chain.adminUser.id);
+}
+
+/** Builds a standard lesson report insert payload (used by `create` tests). */
+function buildReportInsert(
+  inst: ClassInstanceEntity,
+  chain: ReportChain,
+  overrides: { idempotencyKey: string; now: Date }
+) {
+  const { student, teacher, adminUser } = chain;
+  const { idempotencyKey, now } = overrides;
+  return {
+    classInstanceId: inst.id,
+    studentId: student.id,
+    teacherId: teacher.id,
+    lessonDate: now,
+    durationMinutes: 45,
+    attendanceEvaluation: AttendanceEvaluation.PRESENT,
+    teacherNotes: "Great work",
+    completionPercentage: 80,
+    status: LessonReportStatus.PENDING_REVIEW,
+    submittedByUserId: adminUser.id,
+    submittedAt: now,
+    reviewedByUserId: null,
+    reviewedAt: null,
+    rejectionReason: null,
+    idempotencyKey,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+/** Creates one pending report for the supplied teacher using a freshly-created class instance. */
+async function seedPendingReportForTeacher(
+  tx: DBTransaction,
+  teacherId: string,
+  adminUserId: string,
+  idempotencyKey: string,
+  prefix: string
+): Promise<void> {
+  const e = await setupTestEntities(tx, prefix, { classesRemaining: 10 });
+  const inst = requireInstance(e.instance);
+  await createTestLessonReport(tx, inst.id, e.student.id, teacherId, adminUserId, { idempotencyKey });
+}
+
+/** Creates one pending report using its own dedicated admin (for the "no filters" global counter tests). */
+async function seedGlobalPendingReport(tx: DBTransaction, prefix: string): Promise<void> {
+  const e = await setupTestEntities(tx, prefix, { classesRemaining: 10 });
+  const inst = requireInstance(e.instance);
+  await createTestLessonReport(tx, inst.id, e.student.id, e.teacher.id, e.parentUser.id, {
+    idempotencyKey: `glob-${randomUUID()}`,
+  });
+}
+
+/** Asserts every report in a list is PENDING_REVIEW and belongs to the supplied teacher. */
+function assertAllPendingForTeacher(rows: LessonReportSelectType[], teacherId: string): void {
+  for (const r of rows) {
+    expect(r.status).toBe(LessonReportStatus.PENDING_REVIEW);
+    expect(r.teacherId).toBe(teacherId);
+  }
+}
+
 describe("LessonReportRepository.findByClassInstanceId", () => {
   test("returns the report linked to a class instance", async () => {
     await runInRollback(async tx => {
-      const { student, teacher, instance, adminUser } = await setupReportChain(tx);
-      const inst = requireInstance(instance);
-
-      const created = await createTestLessonReport(tx, inst.id, student.id, teacher.id, adminUser.id);
+      const { inst, report } = await setupReportCreated(tx);
 
       const found = await LessonReportRepository.findByClassInstanceId(inst.id, tx);
 
       expect(found).not.toBeNull();
-      expect(found?.id).toBe(created.id);
+      expect(found?.id).toBe(report.id);
       expect(found?.classInstanceId).toBe(inst.id);
     });
   });
 
   test("returns null when no report exists for the class instance", async () => {
     await runInRollback(async tx => {
-      const { instance } = await setupReportChain(tx);
-      const inst = requireInstance(instance);
+      const chain = await setupReportChain(tx);
+      const inst = requireInstance(chain.instance);
 
       const found = await LessonReportRepository.findByClassInstanceId(inst.id, tx);
 
@@ -64,14 +143,12 @@ describe("LessonReportRepository.findByClassInstanceId", () => {
 describe("LessonReportRepository.findById", () => {
   test("returns the report by its id", async () => {
     await runInRollback(async tx => {
-      const { student, teacher, instance, adminUser } = await setupReportChain(tx);
-      const inst = requireInstance(instance);
-      const created = await createTestLessonReport(tx, inst.id, student.id, teacher.id, adminUser.id);
+      const { report } = await setupReportCreated(tx);
 
-      const found = await LessonReportRepository.findById(created.id, tx);
+      const found = await LessonReportRepository.findById(report.id, tx);
 
       expect(found).not.toBeNull();
-      expect(found?.id).toBe(created.id);
+      expect(found?.id).toBe(report.id);
     });
   });
 
@@ -86,38 +163,17 @@ describe("LessonReportRepository.findById", () => {
 describe("LessonReportRepository.create", () => {
   test("creates a report with PENDING_REVIEW status", async () => {
     await runInRollback(async tx => {
-      const { student, teacher, instance, adminUser } = await setupReportChain(tx);
-      const inst = requireInstance(instance);
+      const chain = await setupReportChain(tx);
+      const inst = requireInstance(chain.instance);
       const idempotencyKey = randomUUID();
       const now = new Date();
 
-      const created = await LessonReportRepository.create(
-        {
-          classInstanceId: inst.id,
-          studentId: student.id,
-          teacherId: teacher.id,
-          lessonDate: now,
-          durationMinutes: 45,
-          attendanceEvaluation: AttendanceEvaluation.PRESENT,
-          teacherNotes: "Great work",
-          completionPercentage: 80,
-          status: LessonReportStatus.PENDING_REVIEW,
-          submittedByUserId: adminUser.id,
-          submittedAt: now,
-          reviewedByUserId: null,
-          reviewedAt: null,
-          rejectionReason: null,
-          idempotencyKey,
-          createdAt: now,
-          updatedAt: now,
-        },
-        tx
-      );
+      const created = await LessonReportRepository.create(buildReportInsert(inst, chain, { idempotencyKey, now }), tx);
 
       expect(created.id).toBeDefined();
       expect(created.classInstanceId).toBe(inst.id);
-      expect(created.studentId).toBe(student.id);
-      expect(created.teacherId).toBe(teacher.id);
+      expect(created.studentId).toBe(chain.student.id);
+      expect(created.teacherId).toBe(chain.teacher.id);
       expect(created.status).toBe(LessonReportStatus.PENDING_REVIEW);
       expect(created.completionPercentage).toBe(80);
       expect(created.durationMinutes).toBe(45);
@@ -131,8 +187,9 @@ describe("LessonReportRepository.create", () => {
 
   test("rejects a duplicate report for the same class instance (unique index)", async () => {
     await runInRollback(async tx => {
-      const { student, teacher, instance, adminUser } = await setupReportChain(tx);
-      const inst = requireInstance(instance);
+      const chain = await setupReportChain(tx);
+      const inst = requireInstance(chain.instance);
+      const { student, teacher, adminUser } = chain;
       await createTestLessonReport(tx, inst.id, student.id, teacher.id, adminUser.id);
 
       const error = await expectRepoError(() =>
@@ -148,20 +205,19 @@ describe("LessonReportRepository.create", () => {
 describe("LessonReportRepository.updateStatus", () => {
   test("transitions PENDING_REVIEW → APPROVED with reviewedByUserId set", async () => {
     await runInRollback(async tx => {
-      const { student, teacher, instance, adminUser } = await setupReportChain(tx);
-      const inst = requireInstance(instance);
-      const reviewer = await createTestUser(tx, { name: "Approver" });
-      const created = await createTestLessonReport(tx, inst.id, student.id, teacher.id, adminUser.id);
+      const chain = await setupReportChain(tx);
+      const report = await createReportFromChain(tx, chain);
 
+      const reviewer = await createTestUser(tx, { name: "Approver" });
       const updated = await LessonReportRepository.updateStatus(
-        created.id,
+        report.id,
         LessonReportStatus.APPROVED,
         reviewer.id,
         null,
         tx
       );
 
-      expect(updated.id).toBe(created.id);
+      expect(updated.id).toBe(report.id);
       expect(updated.status).toBe(LessonReportStatus.APPROVED);
       expect(updated.reviewedByUserId).toBe(reviewer.id);
       expect(updated.reviewedAt).not.toBeNull();
@@ -171,20 +227,19 @@ describe("LessonReportRepository.updateStatus", () => {
 
   test("transitions PENDING_REVIEW → REJECTED with rejectionReason set", async () => {
     await runInRollback(async tx => {
-      const { student, teacher, instance, adminUser } = await setupReportChain(tx);
-      const inst = requireInstance(instance);
-      const reviewer = await createTestUser(tx, { name: "Rejecter" });
-      const created = await createTestLessonReport(tx, inst.id, student.id, teacher.id, adminUser.id);
+      const chain = await setupReportChain(tx);
+      const report = await createReportFromChain(tx, chain);
 
+      const reviewer = await createTestUser(tx, { name: "Rejecter" });
       const updated = await LessonReportRepository.updateStatus(
-        created.id,
+        report.id,
         LessonReportStatus.REJECTED,
         reviewer.id,
         "Insufficient detail",
         tx
       );
 
-      expect(updated.id).toBe(created.id);
+      expect(updated.id).toBe(report.id);
       expect(updated.status).toBe(LessonReportStatus.REJECTED);
       expect(updated.reviewedByUserId).toBe(reviewer.id);
       expect(updated.reviewedAt).not.toBeNull();
@@ -194,14 +249,13 @@ describe("LessonReportRepository.updateStatus", () => {
 
   test("updating the same report a second time overwrites prior status", async () => {
     await runInRollback(async tx => {
-      const { student, teacher, instance, adminUser } = await setupReportChain(tx);
-      const inst = requireInstance(instance);
-      const reviewer = await createTestUser(tx, { name: "Second Reviewer" });
-      const created = await createTestLessonReport(tx, inst.id, student.id, teacher.id, adminUser.id);
+      const chain = await setupReportChain(tx);
+      const report = await createReportFromChain(tx, chain);
 
-      await LessonReportRepository.updateStatus(created.id, LessonReportStatus.APPROVED, reviewer.id, null, tx);
+      const reviewer = await createTestUser(tx, { name: "Second Reviewer" });
+      await LessonReportRepository.updateStatus(report.id, LessonReportStatus.APPROVED, reviewer.id, null, tx);
       const secondUpdate = await LessonReportRepository.updateStatus(
-        created.id,
+        report.id,
         LessonReportStatus.REJECTED,
         reviewer.id,
         "Reversed",
@@ -217,19 +271,16 @@ describe("LessonReportRepository.updateStatus", () => {
 describe("LessonReportRepository.findPendingReviews", () => {
   test("returns pending reports filtered by teacherId", async () => {
     await runInRollback(async tx => {
-      const { student, teacher, instance, adminUser } = await setupReportChain(tx);
-      const inst = requireInstance(instance);
+      const { chain } = await setupReportCreated(tx);
       const entitiesB = await setupTestEntities(tx, "LessonReportB", { classesRemaining: 5 });
       const instB = requireInstance(entitiesB.instance);
       const adminB = await createTestUser(tx, { name: "Admin B" });
-
-      await createTestLessonReport(tx, inst.id, student.id, teacher.id, adminUser.id);
       await createTestLessonReport(tx, instB.id, entitiesB.student.id, entitiesB.teacher.id, adminB.id);
 
       const pagination = new PaginationArgs({ first: 10, page: 1 });
-      const pending = await LessonReportRepository.findPendingReviews({ teacherId: teacher.id }, pagination, tx);
+      const pending = await LessonReportRepository.findPendingReviews({ teacherId: chain.teacher.id }, pagination, tx);
 
-      const matching = pending.filter(r => r.teacherId === teacher.id);
+      const matching = pending.filter(r => r.teacherId === chain.teacher.id);
       expect(matching.length).toBeGreaterThanOrEqual(1);
       for (const r of matching) {
         expect(r.status).toBe(LessonReportStatus.PENDING_REVIEW);
@@ -242,24 +293,14 @@ describe("LessonReportRepository.findPendingReviews", () => {
       const { teacher, adminUser } = await setupReportChain(tx);
 
       for (let i = 0; i < 3; i++) {
-        // skipInstance defaults to false — each iteration needs a real class
-        // instance to attach the lesson report to (createTestLessonReport's
-        // classInstanceId column has an FK to class_instances.id).
-        const e = await setupTestEntities(tx, `PendPage${i}`, { classesRemaining: 10 });
-        const inst = requireInstance(e.instance);
-        await createTestLessonReport(tx, inst.id, e.student.id, teacher.id, adminUser.id, {
-          idempotencyKey: `pend-${i}-${randomUUID()}`,
-        });
+        await seedPendingReportForTeacher(tx, teacher.id, adminUser.id, `pend-${i}-${randomUUID()}`, `PendPage${i}`);
       }
 
       const pagination = new PaginationArgs({ first: 2, page: 1 });
       const rows = await LessonReportRepository.findPendingReviews({ teacherId: teacher.id }, pagination, tx);
 
       expect(rows.length).toBeLessThanOrEqual(2);
-      for (const r of rows) {
-        expect(r.status).toBe(LessonReportStatus.PENDING_REVIEW);
-        expect(r.teacherId).toBe(teacher.id);
-      }
+      assertAllPendingForTeacher(rows, teacher.id);
     });
   });
 });
@@ -272,14 +313,7 @@ describe("LessonReportRepository.countPendingReviews", () => {
       const initialCount = await LessonReportRepository.countPendingReviews({ teacherId: teacher.id }, tx);
 
       for (let i = 0; i < 2; i++) {
-        // skipInstance defaults to false — each iteration needs a real class
-        // instance to attach the lesson report to (createTestLessonReport's
-        // classInstanceId column has an FK to class_instances.id).
-        const e = await setupTestEntities(tx, `PendCount${i}`, { classesRemaining: 10 });
-        const inst = requireInstance(e.instance);
-        await createTestLessonReport(tx, inst.id, e.student.id, teacher.id, adminUser.id, {
-          idempotencyKey: `count-${i}-${randomUUID()}`,
-        });
+        await seedPendingReportForTeacher(tx, teacher.id, adminUser.id, `count-${i}-${randomUUID()}`, `PendCount${i}`);
       }
 
       const newCount = await LessonReportRepository.countPendingReviews({ teacherId: teacher.id }, tx);
@@ -291,16 +325,8 @@ describe("LessonReportRepository.countPendingReviews", () => {
     await runInRollback(async tx => {
       const globalInitial = await LessonReportRepository.countPendingReviews(undefined, tx);
 
-      const e = await setupTestEntities(tx, "PendGlobalA", { classesRemaining: 10 });
-      const instA = requireInstance(e.instance);
-      await createTestLessonReport(tx, instA.id, e.student.id, e.teacher.id, e.parentUser.id, {
-        idempotencyKey: `glob-${randomUUID()}`,
-      });
-      const e2 = await setupTestEntities(tx, "PendGlobalB", { classesRemaining: 10 });
-      const instB = requireInstance(e2.instance);
-      await createTestLessonReport(tx, instB.id, e2.student.id, e2.teacher.id, e2.parentUser.id, {
-        idempotencyKey: `glob-${randomUUID()}`,
-      });
+      await seedGlobalPendingReport(tx, "PendGlobalA");
+      await seedGlobalPendingReport(tx, "PendGlobalB");
 
       const globalAfter = await LessonReportRepository.countPendingReviews(undefined, tx);
       expect(globalAfter).toBe(globalInitial + 2);
@@ -311,18 +337,25 @@ describe("LessonReportRepository.countPendingReviews", () => {
 describe("LessonReportRepository.findByIdempotencyKeys", () => {
   test("finds existing reports by their idempotency keys", async () => {
     await runInRollback(async tx => {
-      const { student, teacher, instance, adminUser } = await setupReportChain(tx);
-      const inst = requireInstance(instance);
+      const chain = await setupReportChain(tx);
+      const inst = requireInstance(chain.instance);
       const keyA = `lr-${randomUUID()}`;
       const keyB = `lr-${randomUUID()}`;
 
-      const createdA = await createTestLessonReport(tx, inst.id, student.id, teacher.id, adminUser.id, {
-        idempotencyKey: keyA,
-      });
+      const createdA = await createTestLessonReport(
+        tx,
+        inst.id,
+        chain.student.id,
+        chain.teacher.id,
+        chain.adminUser.id,
+        {
+          idempotencyKey: keyA,
+        }
+      );
 
       const e2 = await setupTestEntities(tx, "IdempB", { classesRemaining: 10 });
       const instB = requireInstance(e2.instance);
-      const createdB = await createTestLessonReport(tx, instB.id, e2.student.id, e2.teacher.id, adminUser.id, {
+      const createdB = await createTestLessonReport(tx, instB.id, e2.student.id, e2.teacher.id, chain.adminUser.id, {
         idempotencyKey: keyB,
       });
 
@@ -353,21 +386,21 @@ describe("LessonReportRepository.findByIdempotencyKeys", () => {
 describe("LessonReportRepository — tx propagation", () => {
   test("mutating methods accept and use the supplied transaction", async () => {
     await runInRollback(async tx => {
-      const { student, teacher, instance, adminUser } = await setupReportChain(tx);
-      const inst = requireInstance(instance);
+      const chain = await setupReportChain(tx);
+      const inst = requireInstance(chain.instance);
 
       const created = await LessonReportRepository.create(
         {
           classInstanceId: inst.id,
-          studentId: student.id,
-          teacherId: teacher.id,
+          studentId: chain.student.id,
+          teacherId: chain.teacher.id,
           lessonDate: new Date(),
           durationMinutes: 30,
           attendanceEvaluation: AttendanceEvaluation.LATE,
           teacherNotes: null,
           completionPercentage: 50,
           status: LessonReportStatus.PENDING_REVIEW,
-          submittedByUserId: adminUser.id,
+          submittedByUserId: chain.adminUser.id,
           submittedAt: new Date(),
           reviewedByUserId: null,
           reviewedAt: null,

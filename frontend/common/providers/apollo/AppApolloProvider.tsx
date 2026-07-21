@@ -10,6 +10,7 @@ import { NetworkConnectivityContext } from "@/frontend/common/context/NetworkCon
 import { refreshTokenMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useApolloConnectivity } from "@/frontend/common/hooks/useApolloConnectivity";
 import { dedupedRefreshToken } from "@/frontend/common/lib/dedupedRefreshToken";
+import logger from "@/frontend/common/lib/logger";
 import { InitializingUI } from "@/frontend/common/providers/apollo/AppApolloProviderHelpers";
 import { createApolloCache } from "@/frontend/common/providers/apollo/apolloCache";
 import {
@@ -114,6 +115,13 @@ export function AppApolloProvider({ children }: { readonly children: React.React
       };
 
       registerAuthRecovery({ refresh, reFetch });
+      try {
+        logger.info({ caller: "apollo.AppApolloProvider", force: true }, "[AuthRedirect] authRecovery registered", {
+          hasClient: true,
+        });
+      } catch {
+        // defensive: never let a logging failure swallow the recovery wiring
+      }
       return () => {
         unregisterAuthRecovery();
       };

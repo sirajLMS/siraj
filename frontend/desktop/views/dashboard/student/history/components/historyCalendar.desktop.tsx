@@ -1,6 +1,7 @@
 "use client";
 
 import { ScheduleOutlined } from "@mui/icons-material";
+import type { SxProps, Theme } from "@mui/material";
 import { Box, Typography } from "@mui/material";
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
@@ -23,6 +24,99 @@ function statusBadgeValue(status: string): string {
   return "pending";
 }
 
+const SPILLOVER_CELL_SX: SxProps<Theme> = (theme: Theme) => ({
+  minHeight: 88,
+  p: 1.5,
+  opacity: 0.35,
+  borderRight: `1px solid ${theme.palette.outlineVariant}`,
+  borderBottom: `1px solid ${theme.palette.outlineVariant}`,
+  backgroundColor: theme.palette.surface,
+});
+
+function renderWeekdayHeader(weekdayLabels: readonly string[]) {
+  return (
+    <Box
+      sx={theme => ({
+        display: "grid",
+        gridTemplateColumns: "repeat(7, 1fr)",
+        borderBottom: `1px solid ${theme.palette.outlineVariant}`,
+        backgroundColor: theme.palette.surfaceContainer,
+      })}
+    >
+      {weekdayLabels.map(label => (
+        <Box key={label} sx={{ p: 1, textAlign: "center" }}>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: 700 })}>
+            {label}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+function renderSpilloverDay(day: number, keyPrefix: string) {
+  return (
+    <Box key={`${keyPrefix}-${day}`} sx={SPILLOVER_CELL_SX}>
+      <Typography variant="labelMd">{day}</Typography>
+    </Box>
+  );
+}
+
+function renderDayCell(
+  day: number,
+  session: StudentHistorySessionRow | undefined,
+  isSelected: boolean,
+  onSelectDay: (day: number | null) => void
+) {
+  return (
+    <Box
+      key={`day-${day}`}
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelectDay(isSelected ? null : day)}
+      onKeyDown={e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelectDay(isSelected ? null : day);
+        }
+      }}
+      sx={theme => ({
+        minHeight: 88,
+        p: 1.5,
+        cursor: "pointer",
+        borderRight: `1px solid ${theme.palette.outlineVariant}`,
+        borderBottom: `1px solid ${theme.palette.outlineVariant}`,
+        backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLowest,
+        transition: "background-color 0.15s ease",
+        "&:hover": {
+          boxShadow: `inset 0 0 0 2px ${theme.palette.primary.main}`,
+        },
+      })}
+    >
+      <Typography
+        variant="labelMd"
+        sx={theme => ({
+          color: isSelected ? theme.palette.onPrimaryContainer : theme.palette.onSurfaceVariant,
+          fontWeight: isSelected ? 700 : 500,
+        })}
+      >
+        {day}
+      </Typography>
+      {session ? (
+        <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+          <DesktopStatusBadge category="classStatus" status={statusBadgeValue(session.status)} label={session.title} />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <ScheduleOutlined sx={theme => ({ fontSize: 12, color: theme.palette.onSurfaceVariant })} />
+            <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {session.time || "—"}
+            </Typography>
+          </Box>
+        </Box>
+      ) : null}
+    </Box>
+  );
+}
+
 export function StudentPortalHistoryCalendar({
   currentMonth,
   sessionsByDay,
@@ -41,111 +135,13 @@ export function StudentPortalHistoryCalendar({
         backgroundColor: theme.palette.surfaceContainerLowest,
       })}
     >
-      <Box
-        sx={theme => ({
-          display: "grid",
-          gridTemplateColumns: "repeat(7, 1fr)",
-          borderBottom: `1px solid ${theme.palette.outlineVariant}`,
-          backgroundColor: theme.palette.surfaceContainer,
-        })}
-      >
-        {weekdayLabels.map(label => (
-          <Box key={label} sx={{ p: 1, textAlign: "center" }}>
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: 700 })}>
-              {label}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-
+      {renderWeekdayHeader(weekdayLabels)}
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
-        {emptyStartDays.map(day => (
-          <Box
-            key={`prev-${day}`}
-            sx={theme => ({
-              minHeight: 88,
-              p: 1.5,
-              opacity: 0.35,
-              borderRight: `1px solid ${theme.palette.outlineVariant}`,
-              borderBottom: `1px solid ${theme.palette.outlineVariant}`,
-              backgroundColor: theme.palette.surface,
-            })}
-          >
-            <Typography variant="labelMd">{day}</Typography>
-          </Box>
-        ))}
-
-        {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
-          const session = sessionsByDay[day];
-          const isSelected = selectedDay === day;
-          return (
-            <Box
-              key={`day-${day}`}
-              role="button"
-              tabIndex={0}
-              onClick={() => onSelectDay(isSelected ? null : day)}
-              onKeyDown={e => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onSelectDay(isSelected ? null : day);
-                }
-              }}
-              sx={theme => ({
-                minHeight: 88,
-                p: 1.5,
-                cursor: "pointer",
-                borderRight: `1px solid ${theme.palette.outlineVariant}`,
-                borderBottom: `1px solid ${theme.palette.outlineVariant}`,
-                backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLowest,
-                transition: "background-color 0.15s ease",
-                "&:hover": {
-                  boxShadow: `inset 0 0 0 2px ${theme.palette.primary.main}`,
-                },
-              })}
-            >
-              <Typography
-                variant="labelMd"
-                sx={theme => ({
-                  color: isSelected ? theme.palette.onPrimaryContainer : theme.palette.onSurfaceVariant,
-                  fontWeight: isSelected ? 700 : 500,
-                })}
-              >
-                {day}
-              </Typography>
-              {session ? (
-                <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
-                  <DesktopStatusBadge
-                    category="classStatus"
-                    status={statusBadgeValue(session.status)}
-                    label={session.title}
-                  />
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    <ScheduleOutlined sx={theme => ({ fontSize: 12, color: theme.palette.onSurfaceVariant })} />
-                    <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                      {session.time || "—"}
-                    </Typography>
-                  </Box>
-                </Box>
-              ) : null}
-            </Box>
-          );
-        })}
-
-        {emptyEndDays.map(day => (
-          <Box
-            key={`next-${day}`}
-            sx={theme => ({
-              minHeight: 88,
-              p: 1.5,
-              opacity: 0.35,
-              borderRight: `1px solid ${theme.palette.outlineVariant}`,
-              borderBottom: `1px solid ${theme.palette.outlineVariant}`,
-              backgroundColor: theme.palette.surface,
-            })}
-          >
-            <Typography variant="labelMd">{day}</Typography>
-          </Box>
-        ))}
+        {emptyStartDays.map(day => renderSpilloverDay(day, "prev"))}
+        {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day =>
+          renderDayCell(day, sessionsByDay[day], selectedDay === day, onSelectDay)
+        )}
+        {emptyEndDays.map(day => renderSpilloverDay(day, "next"))}
       </Box>
     </Box>
   );

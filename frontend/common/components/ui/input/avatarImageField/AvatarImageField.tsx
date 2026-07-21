@@ -36,6 +36,259 @@ export type AvatarImageFieldProps<T extends FieldValues = FieldValues> =
 
 const AVATAR_SIZE_PX = 128;
 
+type UploadStatusTexts = {
+  readonly upload: string;
+  readonly uploading: string;
+  readonly remove: string;
+};
+
+function FieldHeading({ label, title }: { readonly label: string; readonly title: string }): React.ReactNode {
+  return (
+    <>
+      <Typography
+        sx={theme => ({
+          typography: "titleMd",
+          color: theme.palette.onSurface,
+          mb: { xs: 2, md: 2.5 },
+          textAlign: { xs: "center", md: "start" },
+          display: { xs: "block", md: "none" },
+        })}
+      >
+        {label}
+      </Typography>
+      <Typography
+        sx={theme => ({
+          typography: "titleMd",
+          color: theme.palette.onSurface,
+          mb: { xs: 2, md: 2.5 },
+          textAlign: { xs: "center", md: "start" },
+          display: { xs: "none", md: "block" },
+        })}
+      >
+        {title}
+      </Typography>
+    </>
+  );
+}
+
+type UploadProgressOverlayProps = {
+  readonly isUploading: boolean;
+};
+
+function UploadProgressOverlay({ isUploading }: Readonly<UploadProgressOverlayProps>): React.ReactNode {
+  if (!isUploading) {
+    return null;
+  }
+  return (
+    <Box
+      sx={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(0,0,0,0.45)",
+      }}
+    >
+      <CircularProgress size={28} />
+    </Box>
+  );
+}
+
+type AvatarRingProps = {
+  readonly previewUrl: string | null;
+  readonly isUploading: boolean;
+  readonly alt: string;
+};
+
+function AvatarRing({ previewUrl, isUploading, alt }: Readonly<AvatarRingProps>): React.ReactNode {
+  return (
+    <Box
+      sx={theme => ({
+        width: { xs: 112, md: AVATAR_SIZE_PX },
+        height: { xs: 112, md: AVATAR_SIZE_PX },
+        borderRadius: "50%",
+        p: "3px",
+        background: `conic-gradient(from 210deg, ${theme.palette.primary.main} 0 62%, transparent 62% 100%)`,
+      })}
+    >
+      <Box
+        sx={theme => ({
+          width: "100%",
+          height: "100%",
+          borderRadius: "50%",
+          overflow: "hidden",
+          backgroundColor: theme.palette.surfaceContainerHighest,
+          border: `2px solid ${theme.palette.surface}`,
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        })}
+      >
+        {previewUrl ? (
+          <Image src={previewUrl} alt={alt} fill priority unoptimized style={{ objectFit: "cover" }} />
+        ) : (
+          <CloudUploadOutlined sx={theme => ({ fontSize: 40, color: theme.palette.text.secondary })} />
+        )}
+        <UploadProgressOverlay isUploading={isUploading} />
+      </Box>
+    </Box>
+  );
+}
+
+type AvatarEditIconButtonProps = {
+  readonly onClick: () => void;
+  readonly disabled: boolean;
+  readonly ariaLabel: string;
+};
+
+function AvatarEditIconButton({ onClick, disabled, ariaLabel }: Readonly<AvatarEditIconButtonProps>): React.ReactNode {
+  return (
+    <IconButton
+      size="small"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      sx={theme => ({
+        position: "absolute",
+        top: 4,
+        right: 4,
+        width: 32,
+        height: 32,
+        backgroundColor: theme.palette.surfaceContainerHighest,
+        color: theme.palette.onSurface,
+        border: `1px solid ${theme.palette.outlineVariant}`,
+        boxShadow: theme.palette.shadow.card,
+        "&:hover": {
+          backgroundColor: theme.palette.surfaceContainerHigh,
+        },
+        display: { xs: "none", md: "inline-flex" },
+      })}
+    >
+      <EditOutlined sx={{ fontSize: 16 }} />
+    </IconButton>
+  );
+}
+
+type AvatarSlotProps = AvatarRingProps & {
+  readonly triggerFileInput: () => void;
+  readonly editDisabled: boolean;
+  readonly uploadAriaLabel: string;
+};
+
+function AvatarSlot({
+  previewUrl,
+  isUploading,
+  alt,
+  triggerFileInput,
+  editDisabled,
+  uploadAriaLabel,
+}: Readonly<AvatarSlotProps>): React.ReactNode {
+  return (
+    <Box sx={{ position: "relative", flexShrink: 0 }}>
+      <AvatarRing previewUrl={previewUrl} isUploading={isUploading} alt={alt} />
+      <AvatarEditIconButton onClick={triggerFileInput} disabled={editDisabled} ariaLabel={uploadAriaLabel} />
+    </Box>
+  );
+}
+
+type AvatarActionsStackProps = {
+  readonly triggerFileInput: () => void;
+  readonly onRemove: () => void;
+  readonly disabled: boolean;
+  readonly isUploading: boolean;
+  readonly previewUrl: string | null;
+  readonly helperText: string;
+  readonly localError: string | null;
+  readonly texts: UploadStatusTexts;
+};
+
+function AvatarActionsStack({
+  triggerFileInput,
+  onRemove,
+  disabled,
+  isUploading,
+  previewUrl,
+  helperText,
+  localError,
+  texts,
+}: Readonly<AvatarActionsStackProps>): React.ReactNode {
+  return (
+    <Box
+      sx={theme => ({
+        flex: 1,
+        width: "100%",
+        minWidth: 0,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.25,
+        alignItems: { xs: "stretch", md: "flex-start" },
+        p: { xs: 1.5, md: 0 },
+        borderRadius: theme.layout.radius.card,
+        backgroundColor: {
+          xs: alpha(theme.palette.surfaceContainerHighest, 0.55),
+          md: "transparent",
+        },
+      })}
+    >
+      <Button
+        variant="contained"
+        startIcon={<CloudUploadOutlined />}
+        onClick={triggerFileInput}
+        disabled={disabled || isUploading}
+        fullWidth
+        sx={theme => ({
+          maxWidth: { md: 240 },
+          borderRadius: theme.layout.radius.button,
+          fontWeight: 700,
+          py: 1.15,
+          color: theme.palette.onPrimary,
+          background: `linear-gradient(135deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
+          "&:hover": {
+            background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+          },
+        })}
+      >
+        {isUploading ? texts.uploading : texts.upload}
+      </Button>
+      <Button
+        variant="outlined"
+        color="primary"
+        startIcon={<DeleteOutlined />}
+        onClick={onRemove}
+        disabled={disabled || isUploading || !previewUrl}
+        fullWidth
+        sx={theme => ({
+          maxWidth: { md: 240 },
+          borderRadius: theme.layout.radius.button,
+          fontWeight: 700,
+          py: 1.15,
+        })}
+      >
+        {texts.remove}
+      </Button>
+      <Typography
+        sx={theme => ({
+          typography: "bodySm",
+          color: theme.palette.text.secondary,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: { xs: "center", md: "flex-start" },
+          gap: 0.75,
+          mt: 0.25,
+        })}
+      >
+        <DescriptionOutlined sx={{ fontSize: 16 }} />
+        {helperText}
+      </Typography>
+      {localError ? (
+        <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.error.main })}>{localError}</Typography>
+      ) : null}
+    </Box>
+  );
+}
+
 type AvatarEditorBodyProps = {
   readonly imageUrl: string | null | undefined;
   readonly onImageUrlChange: (url: string | null) => void;
@@ -66,6 +319,12 @@ function AvatarEditorBody({
 
   const previewUrl = upload.previewUrl ?? imageUrl ?? null;
   const helperText = tUpload.helperText(DEFAULT_MAX_SIZE_MB);
+  const texts: UploadStatusTexts = {
+    upload: tUpload.upload,
+    uploading: tUpload.uploading,
+    remove: tUpload.remove,
+  };
+  const editDisabled = disabled || upload.isUploading;
 
   return (
     <Box
@@ -79,29 +338,7 @@ function AvatarEditorBody({
         py: { xs: 2.5, md: 3 },
       })}
     >
-      <Typography
-        sx={theme => ({
-          typography: "titleMd",
-          color: theme.palette.onSurface,
-          mb: { xs: 2, md: 2.5 },
-          textAlign: { xs: "center", md: "start" },
-          display: { xs: "block", md: "none" },
-        })}
-      >
-        {label}
-      </Typography>
-      <Typography
-        sx={theme => ({
-          typography: "titleMd",
-          color: theme.palette.onSurface,
-          mb: { xs: 2, md: 2.5 },
-          textAlign: { xs: "center", md: "start" },
-          display: { xs: "none", md: "block" },
-        })}
-      >
-        {title}
-      </Typography>
-
+      <FieldHeading label={label} title={title} />
       <Box
         sx={{
           display: "flex",
@@ -110,152 +347,25 @@ function AvatarEditorBody({
           gap: { xs: 2.5, md: 3 },
         }}
       >
-        <Box sx={{ position: "relative", flexShrink: 0 }}>
-          <Box
-            sx={theme => ({
-              width: { xs: 112, md: AVATAR_SIZE_PX },
-              height: { xs: 112, md: AVATAR_SIZE_PX },
-              borderRadius: "50%",
-              p: "3px",
-              background: `conic-gradient(from 210deg, ${theme.palette.primary.main} 0 62%, transparent 62% 100%)`,
-            })}
-          >
-            <Box
-              sx={theme => ({
-                width: "100%",
-                height: "100%",
-                borderRadius: "50%",
-                overflow: "hidden",
-                backgroundColor: theme.palette.surfaceContainerHighest,
-                border: `2px solid ${theme.palette.surface}`,
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              })}
-            >
-              {previewUrl ? (
-                <Image src={previewUrl} alt={label} fill priority unoptimized style={{ objectFit: "cover" }} />
-              ) : (
-                <CloudUploadOutlined sx={theme => ({ fontSize: 40, color: theme.palette.text.secondary })} />
-              )}
-              {upload.isUploading ? (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "rgba(0,0,0,0.45)",
-                  }}
-                >
-                  <CircularProgress size={28} />
-                </Box>
-              ) : null}
-            </Box>
-          </Box>
-
-          <IconButton
-            size="small"
-            onClick={triggerFileInput}
-            disabled={disabled || upload.isUploading}
-            aria-label={tUpload.upload}
-            sx={theme => ({
-              position: "absolute",
-              top: 4,
-              right: 4,
-              width: 32,
-              height: 32,
-              backgroundColor: theme.palette.surfaceContainerHighest,
-              color: theme.palette.onSurface,
-              border: `1px solid ${theme.palette.outlineVariant}`,
-              boxShadow: theme.palette.shadow.card,
-              "&:hover": {
-                backgroundColor: theme.palette.surfaceContainerHigh,
-              },
-              display: { xs: "none", md: "inline-flex" },
-            })}
-          >
-            <EditOutlined sx={{ fontSize: 16 }} />
-          </IconButton>
-        </Box>
-
-        <Box
-          sx={theme => ({
-            flex: 1,
-            width: "100%",
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: 1.25,
-            alignItems: { xs: "stretch", md: "flex-start" },
-            p: { xs: 1.5, md: 0 },
-            borderRadius: theme.layout.radius.card,
-            backgroundColor: {
-              xs: alpha(theme.palette.surfaceContainerHighest, 0.55),
-              md: "transparent",
-            },
-          })}
-        >
-          <Button
-            variant="contained"
-            startIcon={<CloudUploadOutlined />}
-            onClick={triggerFileInput}
-            disabled={disabled || upload.isUploading}
-            fullWidth
-            sx={theme => ({
-              maxWidth: { md: 240 },
-              borderRadius: theme.layout.radius.button,
-              fontWeight: 700,
-              py: 1.15,
-              color: theme.palette.onPrimary,
-              background: `linear-gradient(135deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
-              "&:hover": {
-                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-              },
-            })}
-          >
-            {upload.isUploading ? tUpload.uploading : tUpload.upload}
-          </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<DeleteOutlined />}
-            onClick={upload.handleRemove}
-            disabled={disabled || upload.isUploading || !previewUrl}
-            fullWidth
-            sx={theme => ({
-              maxWidth: { md: 240 },
-              borderRadius: theme.layout.radius.button,
-              fontWeight: 700,
-              py: 1.15,
-            })}
-          >
-            {tUpload.remove}
-          </Button>
-          <Typography
-            sx={theme => ({
-              typography: "bodySm",
-              color: theme.palette.text.secondary,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: { xs: "center", md: "flex-start" },
-              gap: 0.75,
-              mt: 0.25,
-            })}
-          >
-            <DescriptionOutlined sx={{ fontSize: 16 }} />
-            {helperText}
-          </Typography>
-          {upload.localError ? (
-            <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.error.main })}>
-              {upload.localError}
-            </Typography>
-          ) : null}
-        </Box>
+        <AvatarSlot
+          previewUrl={previewUrl}
+          isUploading={upload.isUploading}
+          alt={label}
+          triggerFileInput={triggerFileInput}
+          editDisabled={editDisabled}
+          uploadAriaLabel={tUpload.upload}
+        />
+        <AvatarActionsStack
+          triggerFileInput={triggerFileInput}
+          onRemove={upload.handleRemove}
+          disabled={disabled}
+          isUploading={upload.isUploading}
+          previewUrl={previewUrl}
+          helperText={helperText}
+          localError={upload.localError}
+          texts={texts}
+        />
       </Box>
-
       <input
         ref={fileInputRef}
         type="file"

@@ -18,50 +18,41 @@ import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEnt
 import type { ClassInstanceEntity } from "@/backend/types/scheduling/scheduling.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
-async function setupTestEnvironment(tx: DBTransaction, now: Date) {
-  const [userP] = await tx
+async function insertUser(tx: DBTransaction, now: Date, name: string, prefix: string) {
+  const [user] = await tx
     .insert(users)
     .values({
-      name: "Parent",
-      email: `p-${randomUUID()}@x.com`,
+      name,
+      email: `${prefix}-${randomUUID()}@x.com`,
       password: randomUUID(),
       createdAt: now,
       updatedAt: now,
     })
     .returning();
+  return user;
+}
+
+async function insertParent(tx: DBTransaction, now: Date, userId: string): Promise<ParentEntity> {
   const [parent] = (await tx
     .insert(parents)
-    .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
+    .values({ userId, status: "REGULAR", createdAt: now, updatedAt: now })
     .returning()) as [ParentEntity];
-  const [userT] = await tx
-    .insert(users)
-    .values({
-      name: "Teacher",
-      email: `t-${randomUUID()}@x.com`,
-      password: randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
-  const [teacher] = (await tx
-    .insert(teachers)
-    .values({ userId: userT.id, createdAt: now, updatedAt: now })
-    .returning()) as [TeacherEntity];
-  const [userS] = await tx
-    .insert(users)
-    .values({
-      name: "Student",
-      email: `s-${randomUUID()}@x.com`,
-      password: randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
+  return parent;
+}
+
+async function insertTeacher(tx: DBTransaction, now: Date, userId: string): Promise<TeacherEntity> {
+  const [teacher] = (await tx.insert(teachers).values({ userId, createdAt: now, updatedAt: now }).returning()) as [
+    TeacherEntity,
+  ];
+  return teacher;
+}
+
+async function insertStudent(tx: DBTransaction, now: Date, parentId: string, userId: string): Promise<StudentEntity> {
   const [student] = (await tx
     .insert(students)
     .values({
-      parentId: parent.id,
-      userId: userS.id,
+      parentId,
+      userId,
       name: "Student",
       gender: Gender.MALE,
       status: "REGULAR",
@@ -70,14 +61,20 @@ async function setupTestEnvironment(tx: DBTransaction, now: Date) {
       updatedAt: now,
     })
     .returning()) as [StudentEntity];
+  return student;
+}
 
-  await tx.insert(teacherAssignments).values({ studentId: student.id, teacherId: teacher.id, assignedAt: now });
-
+async function insertClassInstance(
+  tx: DBTransaction,
+  now: Date,
+  studentId: string,
+  teacherId: string
+): Promise<ClassInstanceEntity> {
   const [classInst] = (await tx
     .insert(classInstances)
     .values({
-      studentId: student.id,
-      teacherId: teacher.id,
+      studentId,
+      teacherId,
       subjectId: await ensureTestSubjectId(tx),
       scheduledStartAt: now,
       scheduledEndAt: now,
@@ -88,6 +85,22 @@ async function setupTestEnvironment(tx: DBTransaction, now: Date) {
       updatedAt: now,
     })
     .returning()) as [ClassInstanceEntity];
+  return classInst;
+}
+
+async function setupTestEnvironment(tx: DBTransaction, now: Date) {
+  const userP = await insertUser(tx, now, "Parent", "p");
+  const parent = await insertParent(tx, now, userP.id);
+
+  const userT = await insertUser(tx, now, "Teacher", "t");
+  const teacher = await insertTeacher(tx, now, userT.id);
+
+  const userS = await insertUser(tx, now, "Student", "s");
+  const student = await insertStudent(tx, now, parent.id, userS.id);
+
+  await tx.insert(teacherAssignments).values({ studentId: student.id, teacherId: teacher.id, assignedAt: now });
+
+  const classInst = await insertClassInstance(tx, now, student.id, teacher.id);
 
   return { userP, parent, userT, teacher, student, classInst };
 }

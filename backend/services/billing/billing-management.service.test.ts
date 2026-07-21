@@ -432,6 +432,43 @@ function resetMocks(): void {
   });
 }
 
+// Shared assertion: the status-changed builder ran once for the parent with
+// `action`, and dispatchWithPreferences emitted only INVOICE_STATUS_CHANGED
+// payloads whose metadata.action matches. Used by the B4/B5/B6 tests.
+function expectStatusChangedDispatchToParent(action: string): void {
+  expect(buildInvoiceStatusChangedPayloadsMock).toHaveBeenCalledTimes(1);
+  expect(buildInvoiceStatusChangedCalls[0]?.userId).toBe(PARENT_USER_ID);
+  expect(buildInvoiceStatusChangedCalls[0]?.action).toBe(action);
+
+  expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(1);
+  expect(dispatchCalls[0]?.affectedUserIds).toEqual([PARENT_USER_ID]);
+  const dispatched = dispatchCalls[0]?.payloads as Array<{
+    eventType: NotificationEventType;
+    metadata?: { action?: string };
+  }>;
+  expect(dispatched.every(p => p.eventType === NotificationEventType.INVOICE_STATUS_CHANGED)).toBe(true);
+  expect(dispatched.every(p => p.metadata?.action === action)).toBe(true);
+}
+
+// Shared options literal for `createManualInvoice` invocations across the B1
+// dispatch test, the F9 tray-summary test, and the dispatch-resilience test.
+// Only `sendEmail` varies between them.
+function createManualInvoiceInput(sendEmail: boolean | null) {
+  return {
+    parentId: PARENT_ID,
+    studentId: null,
+    amount: "100.00",
+    currency: "SAR" as never,
+    invoiceType: "MONTHLY" as never,
+    issueDate: "2026-07-01",
+    dueDate: "2026-07-31",
+    exchangeRateSnapshot: null,
+    exchangeRateSource: null,
+    billingMonths: null,
+    sendEmail,
+  };
+}
+
 describe("BillingManagementService notification dispatch", () => {
   beforeEach(() => {
     resetMocks();
@@ -443,19 +480,7 @@ describe("BillingManagementService notification dispatch", () => {
 
       await BillingManagementService.createManualInvoice(
         ACTOR_ID,
-        {
-          parentId: PARENT_ID,
-          studentId: null,
-          amount: "100.00",
-          currency: "SAR" as never,
-          invoiceType: "MONTHLY" as never,
-          issueDate: "2026-07-01",
-          dueDate: "2026-07-31",
-          exchangeRateSnapshot: null,
-          exchangeRateSource: null,
-          billingMonths: null,
-          sendEmail: null,
-        } as never,
+        createManualInvoiceInput(null) as never,
         tErrorsStub as never,
         "en"
       );
@@ -479,19 +504,7 @@ describe("BillingManagementService notification dispatch", () => {
 
       await BillingManagementService.createManualInvoice(
         ACTOR_ID,
-        {
-          parentId: PARENT_ID,
-          studentId: null,
-          amount: "100.00",
-          currency: "SAR" as never,
-          invoiceType: "MONTHLY" as never,
-          issueDate: "2026-07-01",
-          dueDate: "2026-07-31",
-          exchangeRateSnapshot: null,
-          exchangeRateSource: null,
-          billingMonths: null,
-          sendEmail: true,
-        } as never,
+        createManualInvoiceInput(true) as never,
         tErrorsStub as never,
         "en"
       );
@@ -570,18 +583,7 @@ describe("BillingManagementService notification dispatch", () => {
 
       await BillingManagementService.approvePaymentProof(ACTOR_ID, INVOICE_ID, tErrorsStub as never, undefined, "en");
 
-      expect(buildInvoiceStatusChangedPayloadsMock).toHaveBeenCalledTimes(1);
-      expect(buildInvoiceStatusChangedCalls[0]?.userId).toBe(PARENT_USER_ID);
-      expect(buildInvoiceStatusChangedCalls[0]?.action).toBe("proofApproved");
-
-      expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(1);
-      expect(dispatchCalls[0]?.affectedUserIds).toEqual([PARENT_USER_ID]);
-      const dispatched = dispatchCalls[0]?.payloads as Array<{
-        eventType: NotificationEventType;
-        metadata?: { action?: string };
-      }>;
-      expect(dispatched.every(p => p.eventType === NotificationEventType.INVOICE_STATUS_CHANGED)).toBe(true);
-      expect(dispatched.every(p => p.metadata?.action === "proofApproved")).toBe(true);
+      expectStatusChangedDispatchToParent("proofApproved");
     });
   });
 
@@ -599,18 +601,7 @@ describe("BillingManagementService notification dispatch", () => {
         "en"
       );
 
-      expect(buildInvoiceStatusChangedPayloadsMock).toHaveBeenCalledTimes(1);
-      expect(buildInvoiceStatusChangedCalls[0]?.userId).toBe(PARENT_USER_ID);
-      expect(buildInvoiceStatusChangedCalls[0]?.action).toBe("proofRejected");
-
-      expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(1);
-      expect(dispatchCalls[0]?.affectedUserIds).toEqual([PARENT_USER_ID]);
-      const dispatched = dispatchCalls[0]?.payloads as Array<{
-        eventType: NotificationEventType;
-        metadata?: { action?: string };
-      }>;
-      expect(dispatched.every(p => p.eventType === NotificationEventType.INVOICE_STATUS_CHANGED)).toBe(true);
-      expect(dispatched.every(p => p.metadata?.action === "proofRejected")).toBe(true);
+      expectStatusChangedDispatchToParent("proofRejected");
     });
   });
 
@@ -627,18 +618,7 @@ describe("BillingManagementService notification dispatch", () => {
         "en"
       );
 
-      expect(buildInvoiceStatusChangedPayloadsMock).toHaveBeenCalledTimes(1);
-      expect(buildInvoiceStatusChangedCalls[0]?.userId).toBe(PARENT_USER_ID);
-      expect(buildInvoiceStatusChangedCalls[0]?.action).toBe("markedPaid");
-
-      expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(1);
-      expect(dispatchCalls[0]?.affectedUserIds).toEqual([PARENT_USER_ID]);
-      const dispatched = dispatchCalls[0]?.payloads as Array<{
-        eventType: NotificationEventType;
-        metadata?: { action?: string };
-      }>;
-      expect(dispatched.every(p => p.eventType === NotificationEventType.INVOICE_STATUS_CHANGED)).toBe(true);
-      expect(dispatched.every(p => p.metadata?.action === "markedPaid")).toBe(true);
+      expectStatusChangedDispatchToParent("markedPaid");
     });
   });
 
@@ -649,19 +629,7 @@ describe("BillingManagementService notification dispatch", () => {
 
       const result = await BillingManagementService.createManualInvoice(
         ACTOR_ID,
-        {
-          parentId: PARENT_ID,
-          studentId: null,
-          amount: "100.00",
-          currency: "SAR" as never,
-          invoiceType: "MONTHLY" as never,
-          issueDate: "2026-07-01",
-          dueDate: "2026-07-31",
-          exchangeRateSnapshot: null,
-          exchangeRateSource: null,
-          billingMonths: null,
-          sendEmail: null,
-        } as never,
+        createManualInvoiceInput(null) as never,
         tErrorsStub as never,
         "en"
       );

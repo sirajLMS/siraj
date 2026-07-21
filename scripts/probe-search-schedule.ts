@@ -1,9 +1,13 @@
-import { chromium } from "playwright";
+import { type Browser, type BrowserContext, chromium, type Page } from "playwright";
 import { DEMO_USERS, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 
 const logger = console;
 
-async function main() {
+type LinkInventoryItem = { tag: string; text: string; href: string | null };
+type ButtonInventoryItem = { text: string; aria: string | null };
+type HeadingInventoryItem = { tag: string; text: string };
+
+async function createBrowserContext(): Promise<{ browser: Browser; context: BrowserContext; page: Page }> {
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 1280, height: 900 },
@@ -12,15 +16,20 @@ async function main() {
   const page = await context.newPage();
   page.setDefaultNavigationTimeout(90000);
   page.setDefaultTimeout(60000);
+  return { browser, context, page };
+}
 
+async function performLogin(page: Page, context: BrowserContext): Promise<void> {
   try {
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
   } catch (e) {
     const err = e as Error;
     logger.error("login failed:", err.message);
   }
-
   await page.waitForLoadState("networkidle").catch(() => {});
+}
+
+async function auditNav(page: Page): Promise<void> {
   const nav = page.locator('nav, [aria-label*="nav"i], aside');
   const navVisible = await nav.isVisible().catch(() => false);
   const navText = await page
@@ -36,16 +45,27 @@ async function main() {
   const item = page.getByText("بحث الجدول");
   const itemVisible = await item.isVisible().catch(() => false);
   logger.info("'بحث الجدول' visible:", itemVisible);
+}
 
-  const allNavTextareas = await page.evaluate(() => {
+async function collectLinkInventory(page: Page): Promise<LinkInventoryItem[]> {
+  return await page.evaluate(() => {
     const els = Array.from(document.querySelectorAll('a, li, [role="menuitem"], [role="link"]'));
     return els
-      .map(el => ({ tag: el.tagName, text: (el.textContent || "").trim().slice(0, 40), href: el.getAttribute("href") }))
+      .map(el => ({
+        tag: el.tagName,
+        text: (el.textContent || "").trim().slice(0, 40),
+        href: el.getAttribute("href"),
+      }))
       .filter(e => e.text);
   });
-  logger.info("=== all link/menu texts ===");
-  for (const e of allNavTextareas.slice(0, 60)) logger.info(`  <${e.tag}> href=${e.href} text="${e.text}"`);
+}
 
+function logLinkInventory(links: LinkInventoryItem[]): void {
+  logger.info("=== all link/menu texts ===");
+  for (const e of links.slice(0, 60)) logger.info(`  <${e.tag}> href=${e.href} text="${e.text}"`);
+}
+
+async function inspectSearchSchedulePage(page: Page): Promise<void> {
   logger.info("=== navigating to /ar/search-schedule ===");
   await page.goto("/ar/search-schedule");
   await page.waitForLoadState("networkidle").catch(() => {});
@@ -62,31 +82,61 @@ async function main() {
   logger.info("filtersBtn 'الفلاتر' visible:", await fBtn.isVisible().catch(() => false));
   const sBtn = page.getByRole("button", { name: "بحث" });
   logger.info("searchBtn 'بحث' visible:", await sBtn.isVisible().catch(() => false));
+}
 
-  const allBtns = await page.evaluate(() =>
+async function collectButtonInventory(page: Page): Promise<ButtonInventoryItem[]> {
+  return await page.evaluate(() =>
     Array.from(document.querySelectorAll("button"))
       .map(b => ({ text: (b.textContent || "").trim(), aria: b.getAttribute("aria-label") }))
       .filter(b => b.text || b.aria)
   );
+}
+
+function logButtonInventory(buttons: ButtonInventoryItem[]): void {
   logger.info("=== all buttons on search-schedule page ===");
-  for (const b of allBtns.slice(0, 40)) logger.info(`  btn text="${b.text}" aria="${b.aria}"`);
-  const allLabels = await page.evaluate(() =>
+  for (const b of buttons.slice(0, 40)) logger.info(`  btn text="${b.text}" aria="${b.aria}"`);
+}
+
+async function collectLabelInventory(page: Page): Promise<string[]> {
+  return await page.evaluate(() =>
     Array.from(document.querySelectorAll("label"))
       .map(l => (l.textContent || "").trim())
       .filter(Boolean)
   );
+}
+
+function logLabelInventory(labels: string[]): void {
   logger.info("=== all labels ===");
-  for (const l of allLabels.slice(0, 40)) logger.info(`  label="${l}"`);
-  const headings = await page.evaluate(() =>
+  for (const l of labels.slice(0, 40)) logger.info(`  label="${l}"`);
+}
+
+async function collectHeadingInventory(page: Page): Promise<HeadingInventoryItem[]> {
+  return await page.evaluate(() =>
     Array.from(document.querySelectorAll('h1,h2,h3,h4,[role="heading"]')).map(h => ({
       tag: h.tagName,
       text: (h.textContent || "").trim(),
     }))
   );
+}
+
+function logHeadingInventory(headings: HeadingInventoryItem[]): void {
   logger.info("=== all headings ===");
   for (const hh of headings.slice(0, 20)) logger.info(`  <${hh.tag}> "${hh.text}"`);
+}
 
-  await browser.close();
+async function main(): Promise<void> {
+  const { browser, context, page } = await createBrowserContext();
+  try {
+    await performLogin(page, context);
+    await auditNav(page);
+    logLinkInventory(await collectLinkInventory(page));
+    await inspectSearchSchedulePage(page);
+    logButtonInventory(await collectButtonInventory(page));
+    logLabelInventory(await collectLabelInventory(page));
+    logHeadingInventory(await collectHeadingInventory(page));
+  } finally {
+    await browser.close();
+  }
 }
 
 main().catch(e => {

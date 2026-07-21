@@ -3,6 +3,14 @@ import { formatTimestamp } from "@/shared/utils/date-utils";
 
 type LogOptions = {
   caller: string;
+  /**
+   * When true, emit the log to the browser console even in production
+   * (bypasses the dev-only `config.enabled` console gate). Forced logs are
+   * also queued to `/api/logs`, which accepts them when the operator sets
+   * `ENABLE_LOGGING=true` on the server — letting them land in
+   * `logs/client_<sessionId>.log` alongside the existing `server.log`.
+   */
+  force?: boolean;
 };
 
 class ClientLogger {
@@ -114,8 +122,12 @@ class ClientLogger {
       .join(" ");
   }
 
-  private queueLogEntry(options: ApiLogOptions, ...args: unknown[]): void {
-    if (!this.config.enabled) return;
+  private queueLogEntry(options: ApiLogOptions, force: boolean, ...args: unknown[]): void {
+    // Gate the queue on `config.enabled` UNLESS the caller requested `force: true`,
+    // which bypasses the dev-only gate so prod diagnostics are also POSTed to
+    // `/api/logs` (the route accepts them when `ENABLE_LOGGING=true` is set on
+    // the server).
+    if (!force && !this.config.enabled) return;
 
     const message = this.serializeForAPI(...args);
     const logEntry: LogEntry = {
@@ -159,8 +171,11 @@ class ClientLogger {
     }
   }
 
-  private logToConsole(options: ApiLogOptions, ...args: unknown[]): void {
-    if (!this.config.enabled) return;
+  private logToConsole(options: ApiLogOptions, force: boolean, ...args: unknown[]): void {
+    // Gate the log on `enabled` UNLESS the caller requested `force: true`,
+    // which bypasses the dev-only gate so diagnostics can be visible in the
+    // production browser console (e.g. the auth recovery path).
+    if (!force && !this.config.enabled) return;
 
     const timestamp = formatTimestamp();
     const color = this.getColorCode(options.level);
@@ -190,8 +205,8 @@ class ClientLogger {
         break;
     }
 
-    // Queue for batch send
-    this.queueLogEntry(options, ...args);
+    // Queue for batch send — accepts both regular and forced logs.
+    this.queueLogEntry(options, force, ...args);
   }
 
   public log(options: LogOptions, ...args: unknown[]): void {
@@ -200,7 +215,7 @@ class ClientLogger {
       level: "log",
       sequence: ++this.sequenceNumber,
     };
-    this.logToConsole(apiOptions, ...args);
+    this.logToConsole(apiOptions, options.force === true, ...args);
   }
 
   public info(options: LogOptions, ...args: unknown[]): void {
@@ -209,7 +224,7 @@ class ClientLogger {
       level: "info",
       sequence: ++this.sequenceNumber,
     };
-    this.logToConsole(apiOptions, ...args);
+    this.logToConsole(apiOptions, options.force === true, ...args);
   }
 
   public warn(options: LogOptions, ...args: unknown[]): void {
@@ -218,7 +233,7 @@ class ClientLogger {
       level: "warn",
       sequence: ++this.sequenceNumber,
     };
-    this.logToConsole(apiOptions, ...args);
+    this.logToConsole(apiOptions, options.force === true, ...args);
   }
 
   public error(options: LogOptions, ...args: unknown[]): void {
@@ -227,7 +242,7 @@ class ClientLogger {
       level: "error",
       sequence: ++this.sequenceNumber,
     };
-    this.logToConsole(apiOptions, ...args);
+    this.logToConsole(apiOptions, options.force === true, ...args);
   }
 
   public debug(options: LogOptions, ...args: unknown[]): void {
@@ -236,7 +251,7 @@ class ClientLogger {
       level: "debug",
       sequence: ++this.sequenceNumber,
     };
-    this.logToConsole(apiOptions, ...args);
+    this.logToConsole(apiOptions, options.force === true, ...args);
   }
 }
 

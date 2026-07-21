@@ -98,54 +98,38 @@ describeLive("ResendEmailAdapter @live-comm", () => {
     }
   );
 
+  async function sendAndAssertSent(to: string) {
+    const adapter = new ResendEmailAdapter();
+    const result = await adapter.send(basePayload(to));
+
+    expect(result.success).toBe(true);
+    expect(result.providerMessageId).toMatch(RESEND_MESSAGE_ID_RE);
+    expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: NotificationDeliveryStatus.SENT,
+        providerMessageId: result.providerMessageId,
+      })
+    );
+  }
+
   // E3
   // COMMUNICATION-SPEC: Resend simulator addresses are accepted by the send API
   // (success + message id). Bounce/complaint/suppression arrive asynchronously via
   // webhooks — out of scope for adapter send() tests. Assert SENT path instead.
   test("send() to bounced@resend.dev is accepted by Resend API (webhook bounce is async)", async () => {
-    const adapter = new ResendEmailAdapter();
-    const result = await adapter.send(basePayload("bounced@resend.dev"));
-
-    expect(result.success).toBe(true);
-    expect(result.providerMessageId).toMatch(RESEND_MESSAGE_ID_RE);
-    expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        status: NotificationDeliveryStatus.SENT,
-        providerMessageId: result.providerMessageId,
-      })
-    );
+    await sendAndAssertSent("bounced@resend.dev");
   });
 
   // E4
   // COMMUNICATION-SPEC: same as E3 — complained@resend.dev is API-accepted; complaint is webhook-async
   test("send() to complained@resend.dev is accepted by Resend API (webhook complaint is async)", async () => {
-    const adapter = new ResendEmailAdapter();
-    const result = await adapter.send(basePayload("complained@resend.dev"));
-
-    expect(result.success).toBe(true);
-    expect(result.providerMessageId).toMatch(RESEND_MESSAGE_ID_RE);
-    expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        status: NotificationDeliveryStatus.SENT,
-        providerMessageId: result.providerMessageId,
-      })
-    );
+    await sendAndAssertSent("complained@resend.dev");
   });
 
   // E5
   // COMMUNICATION-SPEC: same as E3 — suppressed@resend.dev is API-accepted (or treated as deliverable by send API)
   test("send() to suppressed@resend.dev is accepted by Resend API (webhook suppression is async)", async () => {
-    const adapter = new ResendEmailAdapter();
-    const result = await adapter.send(basePayload("suppressed@resend.dev"));
-
-    expect(result.success).toBe(true);
-    expect(result.providerMessageId).toMatch(RESEND_MESSAGE_ID_RE);
-    expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        status: NotificationDeliveryStatus.SENT,
-        providerMessageId: result.providerMessageId,
-      })
-    );
+    await sendAndAssertSent("suppressed@resend.dev");
   });
 
   // E6 — skip message: "set RESEND_TEST_TO_EMAIL to run"

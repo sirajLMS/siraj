@@ -25,6 +25,65 @@ function mapManagerStatus(status: string | null | undefined): ManagerStatus {
   return status.toLowerCase() === "activated" ? "active" : "offline";
 }
 
+interface ManagerDirectoryRow {
+  id: string | null;
+  staffProfileId: string | null;
+  name: string | null;
+  roleSlug: string | null;
+  status: string | null;
+  email: string | null;
+  phone: string | null;
+  avatarUrl: string | null;
+}
+
+interface ManagerDirectoryMetricsRow {
+  id: string | null;
+  totalAdmin: number | null;
+  systemStaff: number | null;
+  activeNow: number | null;
+  alerts: number | null;
+}
+
+const EMPTY_METRICS: NonNullableManagerDirectoryMetrics = {
+  id: "manager-directory-metrics",
+  totalAdmin: 0,
+  systemStaff: 0,
+  activeNow: 0,
+  alerts: 0,
+};
+
+function buildManagerRows(rawRows: readonly ManagerDirectoryRow[] | null | undefined): Manager[] {
+  if (!rawRows) return [] as Manager[];
+  return rawRows.map(row => ({
+    userId: row.id ?? "",
+    staffProfileId: row.staffProfileId ?? "",
+    name: row.name ?? "",
+    role: mapManagerRole(row.roleSlug),
+    status: mapManagerStatus(row.status),
+    email: row.email ?? "",
+    phone: row.phone ?? "",
+    avatarUrl: row.avatarUrl ?? "",
+    targetIsSuperAdmin: row.roleSlug === "super_admin",
+  })) as Manager[];
+}
+
+function buildManagerMetrics(
+  apiMetrics: ManagerDirectoryMetricsRow | null | undefined
+): NonNullableManagerDirectoryMetrics {
+  if (!apiMetrics) return EMPTY_METRICS;
+  return {
+    id: apiMetrics.id ?? "",
+    totalAdmin: apiMetrics.totalAdmin ?? 0,
+    systemStaff: apiMetrics.systemStaff ?? 0,
+    activeNow: apiMetrics.activeNow ?? 0,
+    alerts: apiMetrics.alerts ?? 0,
+  };
+}
+
+function resolveFilter<T extends string>(filter: T): T | null {
+  return filter !== ("all" as T) ? filter : null;
+}
+
 export interface ManagersContainerViewModel {
   readonly managers: readonly Manager[];
   readonly metrics: NonNullableManagerDirectoryMetrics;
@@ -58,9 +117,6 @@ export function useManagersContainerViewModel(
   const permissions = useUserStore(state => state.permissions);
   const canCreateManager = permissions.includes(AppPermission.StaffCreate);
 
-  const resolvedRoleFilter = roleFilter !== "all" ? roleFilter : null;
-  const resolvedStatusFilter = statusFilter !== "all" ? statusFilter : null;
-
   const { data, loading, error } = useQuery(managerDirectoryQueryDocument, {
     variables: {
       paginationArgs: {
@@ -72,8 +128,8 @@ export function useManagersContainerViewModel(
         last: null,
         maxCount: null,
       },
-      roleFilter: resolvedRoleFilter,
-      statusFilter: resolvedStatusFilter,
+      roleFilter: resolveFilter(roleFilter),
+      statusFilter: resolveFilter(statusFilter),
     },
     fetchPolicy: "cache-and-network",
   });
@@ -82,41 +138,12 @@ export function useManagersContainerViewModel(
     logger.error("Error loading managers directory:", { error });
   }
 
-  const rawRows = data?.managerDirectory?.rows;
-  const apiMetrics = data?.managerDirectory?.metrics;
-
-  const rows = rawRows?.map(row => ({
-    userId: row.id ?? "",
-    staffProfileId: row.staffProfileId ?? "",
-    name: row.name ?? "",
-    role: mapManagerRole(row.roleSlug),
-    status: mapManagerStatus(row.status),
-    email: row.email ?? "",
-    phone: row.phone ?? "",
-    avatarUrl: row.avatarUrl ?? "",
-    targetIsSuperAdmin: row.roleSlug === "super_admin",
-  })) as Manager[];
-
-  const metrics = apiMetrics
-    ? {
-        id: apiMetrics.id ?? "",
-        totalAdmin: apiMetrics.totalAdmin ?? 0,
-        systemStaff: apiMetrics.systemStaff ?? 0,
-        activeNow: apiMetrics.activeNow ?? 0,
-        alerts: apiMetrics.alerts ?? 0,
-      }
-    : {
-        id: "manager-directory-metrics",
-        totalAdmin: 0,
-        systemStaff: 0,
-        activeNow: 0,
-        alerts: 0,
-      };
-
+  const rows = buildManagerRows(data?.managerDirectory?.rows);
+  const metrics = buildManagerMetrics(data?.managerDirectory?.metrics);
   const totalCount = data ? (data.managerDirectory?.totalCount ?? 0) : undefined;
 
   return {
-    managers: rows ?? [],
+    managers: rows,
     metrics,
     totalManagers: totalCount,
     loading,

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, inArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray, type SQL } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -71,39 +71,35 @@ function mapReportWithNames(row: ReportJoinRow): LessonReportWithNames {
   };
 }
 
+type ReportSelectBuilder = ReturnType<typeof db.select<typeof reportSelectFields>>;
+
+function withReportJoins(query: ReportSelectBuilder) {
+  return query
+    .from(lessonReports)
+    .innerJoin(students, eq(lessonReports.studentId, students.id))
+    .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
+    .innerJoin(users, eq(teachers.userId, users.id))
+    .innerJoin(classInstances, eq(lessonReports.classInstanceId, classInstances.id))
+    .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
+    .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id));
+}
+
+function reportsByIdQuery(whereClause: SQL, tx?: DBTransaction) {
+  const queryDb = tx ?? db;
+  return withReportJoins(queryDb.select(reportSelectFields)).where(whereClause);
+}
+
 export namespace LessonReportRepository {
   export async function findByClassInstanceId(
     classInstanceId: string,
     tx?: DBTransaction
   ): Promise<LessonReportWithNames | null> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb
-      .select(reportSelectFields)
-      .from(lessonReports)
-      .innerJoin(students, eq(lessonReports.studentId, students.id))
-      .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
-      .innerJoin(users, eq(teachers.userId, users.id))
-      .innerJoin(classInstances, eq(lessonReports.classInstanceId, classInstances.id))
-      .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
-      .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
-      .where(eq(lessonReports.classInstanceId, classInstanceId))
-      .limit(1);
+    const [row] = await reportsByIdQuery(eq(lessonReports.classInstanceId, classInstanceId), tx).limit(1);
     return row ? mapReportWithNames(row) : null;
   }
 
   export async function findById(reportId: string, tx?: DBTransaction): Promise<LessonReportWithNames | null> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb
-      .select(reportSelectFields)
-      .from(lessonReports)
-      .innerJoin(students, eq(lessonReports.studentId, students.id))
-      .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
-      .innerJoin(users, eq(teachers.userId, users.id))
-      .innerJoin(classInstances, eq(lessonReports.classInstanceId, classInstances.id))
-      .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
-      .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
-      .where(eq(lessonReports.id, reportId))
-      .limit(1);
+    const [row] = await reportsByIdQuery(eq(lessonReports.id, reportId), tx).limit(1);
     return row ? mapReportWithNames(row) : null;
   }
 
@@ -117,15 +113,7 @@ export namespace LessonReportRepository {
     if (filters.teacherId) conditions.push(eq(lessonReports.teacherId, filters.teacherId));
     if (filters.studentId) conditions.push(eq(lessonReports.studentId, filters.studentId));
 
-    const rows = await queryDb
-      .select(reportSelectFields)
-      .from(lessonReports)
-      .innerJoin(students, eq(lessonReports.studentId, students.id))
-      .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
-      .innerJoin(users, eq(teachers.userId, users.id))
-      .innerJoin(classInstances, eq(lessonReports.classInstanceId, classInstances.id))
-      .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
-      .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
+    const rows = await withReportJoins(queryDb.select(reportSelectFields))
       .where(and(...conditions))
       .orderBy(lessonReports.submittedAt)
       .limit(paginationArgs.perPage)
@@ -135,15 +123,7 @@ export namespace LessonReportRepository {
 
   export async function findRecentApproved(limit: number, tx?: DBTransaction): Promise<LessonReportWithNames[]> {
     const queryDb = tx ?? db;
-    const rows = await queryDb
-      .select(reportSelectFields)
-      .from(lessonReports)
-      .innerJoin(students, eq(lessonReports.studentId, students.id))
-      .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
-      .innerJoin(users, eq(teachers.userId, users.id))
-      .innerJoin(classInstances, eq(lessonReports.classInstanceId, classInstances.id))
-      .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
-      .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
+    const rows = await withReportJoins(queryDb.select(reportSelectFields))
       .where(eq(lessonReports.status, LessonReportStatus.APPROVED))
       .orderBy(desc(lessonReports.reviewedAt))
       .limit(limit);
@@ -157,15 +137,7 @@ export namespace LessonReportRepository {
     tx?: DBTransaction
   ): Promise<LessonReportWithNames[]> {
     const queryDb = tx ?? db;
-    const rows = await queryDb
-      .select(reportSelectFields)
-      .from(lessonReports)
-      .innerJoin(students, eq(lessonReports.studentId, students.id))
-      .innerJoin(teachers, eq(lessonReports.teacherId, teachers.id))
-      .innerJoin(users, eq(teachers.userId, users.id))
-      .innerJoin(classInstances, eq(lessonReports.classInstanceId, classInstances.id))
-      .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
-      .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
+    const rows = await withReportJoins(queryDb.select(reportSelectFields))
       .where(eq(lessonReports.studentId, studentId))
       .orderBy(desc(lessonReports.lessonDate))
       .limit(paginationArgs.perPage)
@@ -195,19 +167,17 @@ export namespace LessonReportRepository {
     rejectionReason: string | null,
     tx?: DBTransaction
   ): Promise<LessonReportSelectType> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb
-      .update(lessonReports)
-      .set({
+    return updateReportFields(
+      reportId,
+      {
         status,
         reviewedByUserId,
         reviewedAt: new Date(),
         rejectionReason,
         updatedAt: new Date(),
-      })
-      .where(eq(lessonReports.id, reportId))
-      .returning();
-    return row;
+      },
+      tx
+    );
   }
 
   /** Seed/bootstrap helper: re-attribute reviewer without changing status. */
@@ -217,17 +187,15 @@ export namespace LessonReportRepository {
     reviewedAt: Date | null,
     tx?: DBTransaction
   ): Promise<LessonReportSelectType> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb
-      .update(lessonReports)
-      .set({
+    return updateReportFields(
+      reportId,
+      {
         reviewedByUserId,
         reviewedAt,
         updatedAt: new Date(),
-      })
-      .where(eq(lessonReports.id, reportId))
-      .returning();
-    return row;
+      },
+      tx
+    );
   }
 
   export async function countPendingReviews(filters?: PendingReviewFilters, tx?: DBTransaction): Promise<number> {
@@ -271,4 +239,14 @@ export namespace LessonReportRepository {
       .returning();
     return row ?? null;
   }
+}
+
+async function updateReportFields(
+  reportId: string,
+  fields: Partial<LessonReportInsertType>,
+  tx?: DBTransaction
+): Promise<LessonReportSelectType> {
+  const queryDb = tx ?? db;
+  const [row] = await queryDb.update(lessonReports).set(fields).where(eq(lessonReports.id, reportId)).returning();
+  return row;
 }

@@ -38,15 +38,19 @@ function selectStudentUsers(users: UserSelectType[]): UserSelectType[] {
   return users.filter(u => u.email === DEMO_STUDENT_USER_EMAIL || EXTRA_STUDENT_USER_EMAIL_RE.test(u.email));
 }
 
-export async function seedOrGet(
-  parentsList: ParentEntity[],
-  teachersList: TeacherEntity[],
-  config?: SeedConfig,
-  users: UserSelectType[] = []
-) {
-  logger.info("Seeding system students...");
-  const seedConfig = config ?? loadSeedConfig();
+interface StudentSeedContext {
+  seedConfig: SeedConfig;
+  studentUsers: UserSelectType[];
+  totalStudents: number;
+  avatarUrls: Map<string, string | null>;
+}
 
+async function prepareStudentSeedContext(
+  users: UserSelectType[],
+  seedConfig: SeedConfig,
+  parentsList: ParentEntity[],
+  teachersList: TeacherEntity[]
+): Promise<StudentSeedContext> {
   if (!parentsList?.length) {
     throw new Error("No parents available to link to students.");
   }
@@ -73,47 +77,96 @@ export async function seedOrGet(
       })
     : new Map<string, string | null>();
 
-  const results = [];
+  return { seedConfig, studentUsers, totalStudents, avatarUrls };
+}
+
+interface StudentRowSpec {
+  name: string;
+  idempotencyKey: string;
+  timezoneOverride: string | null;
+  status: StudentStatus;
+  avatarUrl: string | null;
+  parentId: string;
+  primaryTeacherId: string;
+  userId: string;
+}
+
+function buildStudentRowSpec(
+  index: number,
+  ctx: StudentSeedContext,
+  parentsList: ParentEntity[],
+  teachersList: TeacherEntity[]
+): StudentRowSpec {
+  const parent = parentsList[index % parentsList.length];
+  const teacher = teachersList[index % teachersList.length];
+  const avatarUrl = getAvatarUrl(ctx.avatarUrls, index);
+  const studentUser = ctx.studentUsers[index];
+
+  let name: string;
+  let idempotencyKey: string;
+  let timezoneOverride: string | null = null;
+
+  if (index < DEMO_STUDENTS.length) {
+    const demo = DEMO_STUDENTS[index];
+    name = demo.name;
+    idempotencyKey = demo.idempotencyKey;
+    timezoneOverride = demo.timezoneOverride;
+  } else {
+    const extraIndex = index - DEMO_STUDENTS.length + 1;
+    name = buildStudentName(ctx.seedConfig, extraIndex);
+    idempotencyKey = `seed_student_${extraIndex}`;
+  }
+
+  const status = index === 0 ? StudentStatus.REGULAR : cycleAtIndex(ALL_STUDENT_STATUSES, index);
+
+  return {
+    name,
+    idempotencyKey,
+    timezoneOverride,
+    status,
+    avatarUrl,
+    parentId: parent.id,
+    primaryTeacherId: teacher.id,
+    userId: studentUser.id,
+  };
+}
+
+async function upsertStudentRow(spec: StudentRowSpec, assignmentDate: Date): Promise<{ id: string }> {
+  const student = await StudentBootstrapService.upsertByIdempotencyKey({
+    parentId: spec.parentId,
+    userId: spec.userId,
+    primaryTeacherId: spec.primaryTeacherId,
+    name: spec.name,
+    timezoneOverride: spec.timezoneOverride,
+    idempotencyKey: spec.idempotencyKey,
+    avatarUrl: spec.avatarUrl,
+    status: spec.status,
+    classesTotal: 10,
+    classesRemaining: 5,
+  });
+
+  await StudentBootstrapService.ensureTeacherAssignment(student.id, spec.primaryTeacherId, assignmentDate);
+  return student;
+}
+
+export async function seedOrGet(
+  parentsList: ParentEntity[],
+  teachersList: TeacherEntity[],
+  config?: SeedConfig,
+  users: UserSelectType[] = []
+) {
+  logger.info("Seeding system students...");
+  const seedConfig = config ?? loadSeedConfig();
+
+  const ctx = await prepareStudentSeedContext(users, seedConfig, parentsList, teachersList);
+
+  const results: { id: string }[] = [];
   const assignmentDate = new Date("2020-01-01");
 
-  for (let i = 0; i < totalStudents; i++) {
-    const parent = parentsList[i % parentsList.length];
-    const teacher = teachersList[i % teachersList.length];
-    const avatarUrl = getAvatarUrl(avatarUrls, i);
-    const studentUser = studentUsers[i];
-
-    let name: string;
-    let idempotencyKey: string;
-    let timezoneOverride: string | null = null;
-
-    if (i < DEMO_STUDENTS.length) {
-      const demo = DEMO_STUDENTS[i];
-      name = demo.name;
-      idempotencyKey = demo.idempotencyKey;
-      timezoneOverride = demo.timezoneOverride;
-    } else {
-      const extraIndex = i - DEMO_STUDENTS.length + 1;
-      name = buildStudentName(seedConfig, extraIndex);
-      idempotencyKey = `seed_student_${extraIndex}`;
-    }
-
-    const status = i === 0 ? StudentStatus.REGULAR : cycleAtIndex(ALL_STUDENT_STATUSES, i);
-
-    const student = await StudentBootstrapService.upsertByIdempotencyKey({
-      parentId: parent.id,
-      userId: studentUser.id,
-      primaryTeacherId: teacher.id,
-      name,
-      timezoneOverride,
-      idempotencyKey,
-      avatarUrl,
-      status,
-      classesTotal: 10,
-      classesRemaining: 5,
-    });
+  for (let i = 0; i < ctx.totalStudents; i++) {
+    const spec = buildStudentRowSpec(i, ctx, parentsList, teachersList);
+    const student = await upsertStudentRow(spec, assignmentDate);
     results.push(student);
-
-    await StudentBootstrapService.ensureTeacherAssignment(student.id, teacher.id, assignmentDate);
   }
 
   if (shouldSeedExtendedFiles(seedConfig)) {

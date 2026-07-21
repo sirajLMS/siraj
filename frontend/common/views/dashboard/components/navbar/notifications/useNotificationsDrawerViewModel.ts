@@ -67,44 +67,55 @@ function mapAlerts(rawAlerts: RawNotificationAlert[] | null | undefined): readon
   }));
 }
 
-export function useNotificationsDrawerViewModel(): NotificationsDrawerViewModel {
-  const router = useRouter();
-  const notifications = useNotifications();
-  const t = useAppTranslation().dashboardTranslations.coreNotifications;
-  const permissions = useUserStore(state => state.user?.permissions ?? state.permissions);
-  const hasPermission = useUserStore(state => state.hasPermission);
-  const canManageBilling = hasPermission(AppPermission.BillingUpdateStatusPaid);
+type MarkOneReadFn = (deliveryId: string) => Promise<void>;
 
-  const drawerOpen = useNotificationsDrawerStore(state => state.drawerOpen);
-  const openDrawer = useNotificationsDrawerStore(state => state.openDrawer);
-  const closeDrawer = useNotificationsDrawerStore(state => state.closeDrawer);
+interface InvoiceProofHandlerDeps {
+  readonly canManageBilling: boolean;
+  readonly markOneRead: MarkOneReadFn;
+  readonly notifications: ReturnType<typeof useNotifications>;
+  readonly successMessage: string;
+  readonly errorMessage: string;
+}
 
-  const canViewAlerts = hasPermission(AppPermission.NotificationViewAlerts);
+async function _runInvoiceProofAction(
+  action: "approve" | "reject",
+  deliveryId: string,
+  invoiceId: string,
+  mutation: () => Promise<unknown>,
+  deps: Readonly<InvoiceProofHandlerDeps>
+): Promise<void> {
+  if (!deps.canManageBilling) {
+    logger.warn(
+      `useNotificationsDrawerViewModel.handle${action === "approve" ? "Approve" : "Reject"}Invoice denied — missing permission`
+    );
+    deps.notifications.show(deps.errorMessage, { severity: "error" });
+    return;
+  }
 
-  const { data, loading, error } = useQuery(notificationAlertsQueryDocument, {
-    skip: !canViewAlerts,
-  });
+  try {
+    await mutation();
+    await deps.markOneRead(deliveryId);
+    deps.notifications.show(deps.successMessage, { severity: "success" });
+  } catch (mutationError) {
+    logger.warn(`useNotificationsDrawerViewModel.handle${action === "approve" ? "Approve" : "Reject"}Invoice failed`, {
+      deliveryId,
+      invoiceId,
+      error: mutationError instanceof Error ? mutationError.message : String(mutationError),
+    });
+    deps.notifications.show(deps.errorMessage, { severity: "error" });
+  }
+}
 
+function useMarkReadHandlers(): {
+  markOneRead: MarkOneReadFn;
+  markAllRead: () => Promise<void>;
+} {
   const [markOneReadMutation] = useMutation(markNotificationReadMutationDocument, {
     refetchQueries: [...REFETCH_QUERIES],
   });
-
   const [markAllReadMutation] = useMutation(markNotificationsReadMutationDocument, {
     refetchQueries: [...REFETCH_QUERIES],
   });
-
-  const [approvePaymentProof] = useMutation(approvePaymentProofMutationDocument, {
-    refetchQueries: [...REFETCH_QUERIES],
-  });
-
-  const [rejectPaymentProof] = useMutation(rejectPaymentProofMutationDocument, {
-    refetchQueries: [...REFETCH_QUERIES],
-  });
-
-  const alerts = useMemo(() => mapAlerts(data?.notificationAlerts?.alerts), [data?.notificationAlerts?.alerts]);
-
-  const unreadCount = data?.notificationAlerts?.unreadCount ?? 0;
-  const totalCount = data?.notificationAlerts?.totalCount ?? 0;
 
   const markOneRead = useCallback(
     async (deliveryId: string) => {
@@ -130,6 +141,75 @@ export function useNotificationsDrawerViewModel(): NotificationsDrawerViewModel 
     }
   }, [markAllReadMutation]);
 
+  return { markOneRead, markAllRead };
+}
+
+interface InvoiceProofHandlersInput {
+  readonly canManageBilling: boolean;
+  readonly markOneRead: MarkOneReadFn;
+  readonly notifications: ReturnType<typeof useNotifications>;
+  readonly successMessage: string;
+  readonly errorMessage: string;
+}
+
+function useInvoiceProofHandlers(input: Readonly<InvoiceProofHandlersInput>): {
+  handleApproveInvoice: (deliveryId: string, invoiceId: string) => Promise<void>;
+  handleRejectInvoice: (deliveryId: string, invoiceId: string) => Promise<void>;
+} {
+  const [approvePaymentProof] = useMutation(approvePaymentProofMutationDocument, {
+    refetchQueries: [...REFETCH_QUERIES],
+  });
+  const [rejectPaymentProof] = useMutation(rejectPaymentProofMutationDocument, {
+    refetchQueries: [...REFETCH_QUERIES],
+  });
+
+  const deps: InvoiceProofHandlerDeps = useMemo(
+    () => ({
+      canManageBilling: input.canManageBilling,
+      markOneRead: input.markOneRead,
+      notifications: input.notifications,
+      successMessage: input.successMessage,
+      errorMessage: input.errorMessage,
+    }),
+    [input.canManageBilling, input.markOneRead, input.notifications, input.successMessage, input.errorMessage]
+  );
+
+  const handleApproveInvoice = useCallback(
+    async (deliveryId: string, invoiceId: string) => {
+      await _runInvoiceProofAction(
+        "approve",
+        deliveryId,
+        invoiceId,
+        () => approvePaymentProof({ variables: { invoiceId, expectedVersion: null } }),
+        deps
+      );
+    },
+    [approvePaymentProof, deps]
+  );
+
+  const handleRejectInvoice = useCallback(
+    async (deliveryId: string, invoiceId: string) => {
+      await _runInvoiceProofAction(
+        "reject",
+        deliveryId,
+        invoiceId,
+        () => rejectPaymentProof({ variables: { invoiceId, rejectionReason: null, expectedVersion: null } }),
+        deps
+      );
+    },
+    [rejectPaymentProof, deps]
+  );
+
+  return { handleApproveInvoice, handleRejectInvoice };
+}
+
+function useNavigationHandlers(permissions: readonly AppPermission[]): {
+  handleViewEntity: (metadata: NotificationMetadata, eventType?: NotificationEventType | null) => void;
+  handleReschedule: (classInstanceId: string) => void;
+  handleManagePreferences: () => void;
+} {
+  const router = useRouter();
+
   const handleViewEntity = useCallback(
     (metadata: NotificationMetadata, eventType?: NotificationEventType | null) => {
       const href = resolveNotificationDeepLink(metadata, permissions, eventType);
@@ -150,65 +230,44 @@ export function useNotificationsDrawerViewModel(): NotificationsDrawerViewModel 
     [router]
   );
 
-  const handleApproveInvoice = useCallback(
-    async (deliveryId: string, invoiceId: string) => {
-      if (!canManageBilling) {
-        logger.warn("useNotificationsDrawerViewModel.handleApproveInvoice denied — missing permission");
-        notifications.show(t.errorLoading, { severity: "error" });
-        return;
-      }
-
-      try {
-        await approvePaymentProof({
-          variables: { invoiceId, expectedVersion: null },
-        });
-        await markOneRead(deliveryId);
-        notifications.show(t.title, { severity: "success" });
-      } catch (mutationError) {
-        logger.warn("useNotificationsDrawerViewModel.handleApproveInvoice failed", {
-          deliveryId,
-          invoiceId,
-          error: mutationError instanceof Error ? mutationError.message : String(mutationError),
-        });
-        notifications.show(t.errorLoading, { severity: "error" });
-      }
-    },
-    [approvePaymentProof, canManageBilling, markOneRead, notifications, t.errorLoading, t.title]
-  );
-
-  const handleRejectInvoice = useCallback(
-    async (deliveryId: string, invoiceId: string) => {
-      if (!canManageBilling) {
-        logger.warn("useNotificationsDrawerViewModel.handleRejectInvoice denied — missing permission");
-        notifications.show(t.errorLoading, { severity: "error" });
-        return;
-      }
-
-      try {
-        await rejectPaymentProof({
-          variables: {
-            invoiceId,
-            rejectionReason: null,
-            expectedVersion: null,
-          },
-        });
-        await markOneRead(deliveryId);
-        notifications.show(t.title, { severity: "success" });
-      } catch (mutationError) {
-        logger.warn("useNotificationsDrawerViewModel.handleRejectInvoice failed", {
-          deliveryId,
-          invoiceId,
-          error: mutationError instanceof Error ? mutationError.message : String(mutationError),
-        });
-        notifications.show(t.errorLoading, { severity: "error" });
-      }
-    },
-    [canManageBilling, markOneRead, notifications, rejectPaymentProof, t.errorLoading, t.title]
-  );
-
   const handleManagePreferences = useCallback(() => {
     router.push(ownProfileHref());
   }, [router]);
+
+  return { handleViewEntity, handleReschedule, handleManagePreferences };
+}
+
+export function useNotificationsDrawerViewModel(): NotificationsDrawerViewModel {
+  const notifications = useNotifications();
+  const t = useAppTranslation().dashboardTranslations.coreNotifications;
+  const permissions = useUserStore(state => state.user?.permissions ?? state.permissions);
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canManageBilling = hasPermission(AppPermission.BillingUpdateStatusPaid);
+
+  const drawerOpen = useNotificationsDrawerStore(state => state.drawerOpen);
+  const openDrawer = useNotificationsDrawerStore(state => state.openDrawer);
+  const closeDrawer = useNotificationsDrawerStore(state => state.closeDrawer);
+
+  const canViewAlerts = hasPermission(AppPermission.NotificationViewAlerts);
+
+  const { data, loading, error } = useQuery(notificationAlertsQueryDocument, {
+    skip: !canViewAlerts,
+  });
+
+  const alerts = useMemo(() => mapAlerts(data?.notificationAlerts?.alerts), [data?.notificationAlerts?.alerts]);
+
+  const unreadCount = data?.notificationAlerts?.unreadCount ?? 0;
+  const totalCount = data?.notificationAlerts?.totalCount ?? 0;
+
+  const { markOneRead, markAllRead } = useMarkReadHandlers();
+  const { handleViewEntity, handleReschedule, handleManagePreferences } = useNavigationHandlers(permissions);
+  const { handleApproveInvoice, handleRejectInvoice } = useInvoiceProofHandlers({
+    canManageBilling,
+    markOneRead,
+    notifications,
+    successMessage: t.title,
+    errorMessage: t.errorLoading,
+  });
 
   return {
     alerts,

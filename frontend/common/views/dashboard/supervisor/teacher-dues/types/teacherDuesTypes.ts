@@ -41,3 +41,25 @@ export interface TeacherDuesViewModel {
 }
 
 export type UseTeacherDuesViewModelProps = Record<string, never>;
+
+// Desktop tier presentation prop types (sub-components/column-builders defined in
+// `frontend/desktop/views/dashboard/supervisor/teacher-dues/teacherDues.desktop.tsx`).
+export type TeacherDuesColumnLabels = Pick<
+  TeacherDuesViewModel["labels"],
+  | "teacherNameColumn"
+  | "classDateColumn"
+  | "studentColumn"
+  | "hoursColumn"
+  | "amountColumn"
+  | "currencyColumn"
+  | "statusColumn"
+  | "approvedDateColumn"
+  | "markAsPaidButton"
+>;
+
+export interface TeacherDuesColumnParams {
+  readonly labels: TeacherDuesColumnLabels;
+  readonly canMarkPaid: boolean;
+  readonly markingPaid: boolean;
+  readonly onMarkPaid: (dueIds: string[]) => void;
+}

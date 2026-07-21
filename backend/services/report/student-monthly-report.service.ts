@@ -5,7 +5,7 @@ import { classInstances, creditTransactions, lessonReports, students } from "@/b
 import { AppPermission, AttendanceEvaluation, ClassExecutionState, ClassOutcome, CreditReason } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { StudentMonthlyReportReturnType } from "@/backend/types";
+import type { StudentHeader, StudentMonthlyReportReturnType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace StudentMonthlyReportService {
@@ -44,19 +44,7 @@ export namespace StudentMonthlyReportService {
     throw new Error(tErrors.unauthorizedAction);
   }
 
-  export async function getMonthlyReport(
-    actorUserId: string,
-    studentId: string,
-    year: number,
-    month: number,
-    locale?: string
-  ): Promise<StudentMonthlyReportReturnType> {
-    logger.info("StudentMonthlyReportService.getMonthlyReport", { actorUserId, studentId, year, month });
-    await assertCanViewMonthlyReport(actorUserId, studentId, locale);
-
-    const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
-    const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0));
-
+  async function loadStudentHeader(studentId: string, locale?: string): Promise<StudentHeader> {
     const [studentRow] = await db
       .select({
         studentId: students.id,
@@ -72,8 +60,14 @@ export namespace StudentMonthlyReportService {
       throw new Error(tErrors.studentNotFound(studentId));
     }
 
-    const studentName = studentRow.studentName ?? "";
+    return {
+      studentId,
+      studentName: studentRow.studentName ?? "",
+      classesRemaining: studentRow.classesRemaining,
+    };
+  }
 
+  async function aggregateClassInstances(studentId: string, startDate: Date, endDate: Date) {
     const [classAgg] = await db
       .select({
         totalLessons: sql<number>`count(*)`.mapWith(Number),
@@ -97,7 +91,10 @@ export namespace StudentMonthlyReportService {
           isNull(classInstances.deletedAt)
         )
       );
+    return classAgg;
+  }
 
+  async function aggregateLessonReports(studentId: string, startDate: Date, endDate: Date) {
     const [lessonReportAgg] = await db
       .select({
         presentCount:
@@ -123,7 +120,10 @@ export namespace StudentMonthlyReportService {
           isNull(classInstances.deletedAt)
         )
       );
+    return lessonReportAgg;
+  }
 
+  async function aggregateCreditTransactions(studentId: string, startDate: Date, endDate: Date) {
     const [creditAgg] = await db
       .select({
         creditsPurchased:
@@ -147,12 +147,22 @@ export namespace StudentMonthlyReportService {
           sql`${creditTransactions.createdAt} < ${endDate}`
         )
       );
+    return creditAgg;
+  }
 
+  function buildReport(
+    header: StudentHeader,
+    year: number,
+    month: number,
+    classAgg: Awaited<ReturnType<typeof aggregateClassInstances>>,
+    lessonReportAgg: Awaited<ReturnType<typeof aggregateLessonReports>>,
+    creditAgg: Awaited<ReturnType<typeof aggregateCreditTransactions>>
+  ): StudentMonthlyReportReturnType {
     const totalHours = +((classAgg?.totalMinutes ?? 0) / 60).toFixed(2);
 
     return {
-      studentId,
-      studentName,
+      studentId: header.studentId,
+      studentName: header.studentName,
       year,
       month,
       totalLessons: classAgg?.totalLessons ?? 0,
@@ -165,7 +175,28 @@ export namespace StudentMonthlyReportService {
       creditsPurchased: creditAgg?.creditsPurchased ?? 0,
       creditsDeducted: creditAgg?.creditsDeducted ?? 0,
       creditsRefunded: creditAgg?.creditsRefunded ?? 0,
-      creditsBalance: studentRow.classesRemaining,
+      creditsBalance: header.classesRemaining,
     };
+  }
+
+  export async function getMonthlyReport(
+    actorUserId: string,
+    studentId: string,
+    year: number,
+    month: number,
+    locale?: string
+  ): Promise<StudentMonthlyReportReturnType> {
+    logger.info("StudentMonthlyReportService.getMonthlyReport", { actorUserId, studentId, year, month });
+    await assertCanViewMonthlyReport(actorUserId, studentId, locale);
+
+    const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0));
+
+    const header = await loadStudentHeader(studentId, locale);
+    const classAgg = await aggregateClassInstances(studentId, startDate, endDate);
+    const lessonReportAgg = await aggregateLessonReports(studentId, startDate, endDate);
+    const creditAgg = await aggregateCreditTransactions(studentId, startDate, endDate);
+
+    return buildReport(header, year, month, classAgg, lessonReportAgg, creditAgg);
   }
 }

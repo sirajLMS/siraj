@@ -95,3 +95,9 @@ export interface BaseRecurringClassFormProps {
   readonly goToClassLabel?: string;
   readonly onGoToCreatedClass?: () => void;
 }
+
+export type CreatedRecurringClassResult = {
+  readonly recurringScheduleId: string | null;
+  readonly firstClassInstanceId: string | null;
+  readonly meetingConfigSaved: boolean;
+};

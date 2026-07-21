@@ -3,6 +3,7 @@
 import { ApolloLink, CombinedGraphQLErrors, Observable } from "@apollo/client";
 import { ErrorLink } from "@apollo/client/link/error";
 import CryptoJS from "crypto-js";
+import logger from "@/frontend/common/lib/logger";
 import { buildLoginHref } from "@/frontend/common/lib/safeRedirect";
 import { isNetworkError } from "@/frontend/common/utils/errorUtils";
 
@@ -128,18 +129,19 @@ export function unregisterAuthRecovery(): void {
 // ---------------------------------------------------------------------------
 // Production-visible diagnostics
 //
-// The project logger (`frontend/common/lib/logger/index.ts`) is disabled in
-// production unless `NEXT_PUBLIC_ENABLE_LOGGING=true` — which is why the
-// previous "[AuthRedirect] GraphQL auth error — redirecting to login" log
-// was invisible on the deployed site. These helpers go straight to
-// `globalThis.console.*` so they show up in the browser DevTools console
-// (and server logs if SSR captures them) without any env flag. The
-// `no-console` ESLint rule bans bare `console.*` member access; going through
-// `globalThis.console.*` is the lint-safe idiom already used by
-// `frontend/common/lib/console.ts`.
+// The project logger (`frontend/common/lib/logger`) is dev-only by default
+// (gated on `NODE_ENV === "development"` or `NEXT_PUBLIC_ENABLE_LOGGING=true`)
+// — which is why the previous "[AuthRedirect] GraphQL auth error —
+// redirecting to login" log was invisible on the deployed site. We now use
+// the logger directly, but pass `{ force: true }` so the recovery
+// diagnostics bypass the dev-only gate and appear in the production browser
+// DevTools console on the remote deployed site. The logger's existing
+// PII-santizer still scrubs `token`/`refreshToken`/`accessToken` keys
+// before anything is queued, and `/api/logs` is dev-only so forced logs
+// are console-only on prod (no 404 noise).
 // ---------------------------------------------------------------------------
 
-const AUTH_REDIRECT_TAG = "[AuthRedirect]";
+const AUTH_REDIRECT_CALLER = "apollo.utils.errorLink";
 
 function truncateId(value: string | null | undefined): string | null {
   if (!value) return null;
@@ -148,7 +150,7 @@ function truncateId(value: string | null | undefined): string | null {
 
 function logAuthRedirectEvent(message: string, payload: Record<string, unknown> = {}): void {
   try {
-    globalThis.console.warn(AUTH_REDIRECT_TAG, message, payload);
+    logger.warn({ caller: AUTH_REDIRECT_CALLER, force: true }, "[AuthRedirect]", message, payload);
   } catch {
     // defensive: never let a logging failure swallow the redirect logic
   }
@@ -310,13 +312,11 @@ export const createErrorLinkHandler = (
 
     if (error && isNetworkError(error)) {
       const wasConnected = getConnected();
-      globalThis.console.warn(AUTH_REDIRECT_TAG, "[Error Link] Network error detected", {
-        wasConnected,
-      });
+      logAuthRedirectEvent("[Error Link] Network error detected", { wasConnected });
       setConnected(false);
 
       if (wasConnected) {
-        globalThis.console.info(AUTH_REDIRECT_TAG, "[Error Link] Connection lost (was previously connected)");
+        logAuthRedirectEvent("[Error Link] Connection lost (was previously connected)", {});
       }
 
       notifyDisconnected();

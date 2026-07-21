@@ -1,94 +1,80 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import { invoices, parents, students, users } from "@/backend/db/schema";
+import type { DBTransaction } from "@/backend/db/db.types";
+import { invoices, students } from "@/backend/db/schema";
+import { createTestParent, createTestUser, setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode } from "@/backend/enum";
 import type { InvoiceInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
+async function insertInvoice(
+  tx: DBTransaction,
+  parentId: string,
+  studentId: string,
+  uniqueSuffix: string
+): Promise<void> {
+  const now = new Date();
+  const invoiceInput: InvoiceInsertType = {
+    parentId,
+    studentId,
+    issueDate: "2026-06-09",
+    dueDate: "2026-06-16",
+    amount: "100.00",
+    currency: CurrencyCode.USD,
+    status: "UNPAID",
+    invoiceType: "PER_CLASSES",
+    idempotencyKey: `inv-${uniqueSuffix}`,
+    createdAt: now,
+    updatedAt: now,
+  };
+  const [invoiceRecord] = await tx.insert(invoices).values(invoiceInput).returning();
+  expect(invoiceRecord).toBeDefined();
+}
+
+async function expectDeleteBlocked(tx: DBTransaction, studentId: string): Promise<void> {
+  let didThrow = false;
+  try {
+    await tx.delete(students).where(sql`id = ${studentId}`);
+  } catch (error) {
+    didThrow = true;
+    testLogger.info(`Caught expected error: ${error}`);
+  }
+  expect(didThrow).toBe(true);
+}
+
 describe("Invoice Referential Integrity", () => {
   test("Deleting a student with associated invoices is blocked by restrict constraint", async () => {
     testLogger.info("Starting invoice referential constraint test...");
     await runInRollback(async tx => {
-      const now = new Date();
       const uniqueSuffix = randomUUID();
 
-      // 1. Create parent user and parent record
-      const parentEmail = `parent-${uniqueSuffix}@example.com`;
-      const [parentUser] = await tx
-        .insert(users)
-        .values({
-          name: "Invoice Test Parent",
-          email: parentEmail,
-          password: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
+      const parentUser = await createTestUser(tx, {
+        name: "Invoice Test Parent",
+        email: `parent-${uniqueSuffix}@example.com`,
+      });
+      const parentRecord = await createTestParent(tx, parentUser.id, {
+        status: "REGULAR",
+      });
 
-      const [parentRecord] = await tx
-        .insert(parents)
-        .values({
-          userId: parentUser.id,
-          status: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-
-      // 2. Create student user and student record
-      const [studentUser] = await tx
-        .insert(users)
-        .values({
+      const { student } = await setupStudent(
+        tx,
+        {
           name: "Invoice Test Student User",
           email: `student-${uniqueSuffix}@example.com`,
-          password: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-
-      const [studentRecord] = await tx
-        .insert(students)
-        .values({
-          parentId: parentRecord.id,
-          userId: studentUser.id,
+        },
+        {},
+        {
           name: "Invoice Test Student",
           status: "REGULAR",
           idempotencyKey: `stud-${uniqueSuffix}`,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
+        }
+      );
 
-      // 3. Create invoice record referencing both parent and student
-      const invoiceInput: InvoiceInsertType = {
-        parentId: parentRecord.id,
-        studentId: studentRecord.id,
-        issueDate: "2026-06-09",
-        dueDate: "2026-06-16",
-        amount: "100.00",
-        currency: CurrencyCode.USD,
-        status: "UNPAID",
-        invoiceType: "PER_CLASSES",
-        idempotencyKey: `inv-${uniqueSuffix}`,
-        createdAt: now,
-        updatedAt: now,
-      };
-      const [invoiceRecord] = await tx.insert(invoices).values(invoiceInput).returning();
-      expect(invoiceRecord).toBeDefined();
+      await insertInvoice(tx, parentRecord.id, student.id, uniqueSuffix);
 
-      // 4. Attempt to delete student (should fail due to restrict constraint on invoice)
-      let didThrow = false;
-      try {
-        await tx.delete(students).where(sql`id = ${studentRecord.id}`);
-      } catch (error) {
-        didThrow = true;
-        testLogger.info(`Caught expected error: ${error}`);
-        // The delete failed, which is what we expect - the foreign key constraint is working
-      }
-      expect(didThrow).toBe(true);
+      await expectDeleteBlocked(tx, student.id);
 
       testLogger.info("Successfully verified restrict constraint on student deletion.");
     });

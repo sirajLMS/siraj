@@ -32,6 +32,56 @@ async function assertCatalogAdmin(actorUserId: string, tErrors: ErrorsLabels): P
   }
 }
 
+type CatalogRepo<
+  TResult,
+  TCreateInput,
+  TUpdateInput,
+  TListActiveFilter extends { direction?: PaymentDirection } = { direction?: PaymentDirection },
+> = {
+  listAll: (tx?: DBTransaction) => Promise<TResult[]>;
+  listActive: (filters: TListActiveFilter, tx?: DBTransaction) => Promise<TResult[]>;
+  create: (input: TCreateInput, tx?: DBTransaction) => Promise<TResult>;
+  update: (id: string, input: TUpdateInput, tErrors: ErrorsLabels, tx?: DBTransaction) => Promise<TResult>;
+  deactivate: (id: string, tErrors: ErrorsLabels, tx?: DBTransaction) => Promise<TResult>;
+};
+
+type CatalogListFilters<TListActiveFilter> = {
+  readonly activeOnly?: boolean;
+} & TListActiveFilter;
+
+function buildCatalogMethods<
+  TResult,
+  TCreateInput,
+  TUpdateInput,
+  TListActiveFilter extends { direction?: PaymentDirection },
+>(repo: CatalogRepo<TResult, TCreateInput, TUpdateInput, TListActiveFilter>) {
+  return {
+    async list(actorUserId: string, tErrors: ErrorsLabels, filters: CatalogListFilters<TListActiveFilter> | undefined) {
+      await assertCatalogAdmin(actorUserId, tErrors);
+      if (filters?.activeOnly === false) {
+        return repo.listAll(undefined);
+      }
+      return repo.listActive({ direction: filters?.direction } as TListActiveFilter, undefined);
+    },
+    async create(actorUserId: string, input: TCreateInput, tErrors: ErrorsLabels) {
+      await assertCatalogAdmin(actorUserId, tErrors);
+      return repo.create(input, undefined);
+    },
+    async update(actorUserId: string, id: string, input: TUpdateInput, tErrors: ErrorsLabels) {
+      await assertCatalogAdmin(actorUserId, tErrors);
+      return repo.update(id, input, tErrors);
+    },
+    async deactivate(actorUserId: string, id: string, tErrors: ErrorsLabels) {
+      await assertCatalogAdmin(actorUserId, tErrors);
+      return repo.deactivate(id, tErrors);
+    },
+  };
+}
+
+const mobileWalletCatalog = buildCatalogMethods(SupportedMobileWalletRepository);
+const paymentLinkCatalog = buildCatalogMethods(SupportedPaymentLinkRepository);
+const onlineAccountCatalog = buildCatalogMethods(SupportedOnlineAccountRepository);
+
 export namespace PaymentCatalogService {
   // ─── Mobile Wallets ──────────────────────────────────────────────────────
   export async function listMobileWallets(
@@ -54,8 +104,7 @@ export namespace PaymentCatalogService {
     input: SupportedMobileWalletSubmitInput,
     tErrors: ErrorsLabels
   ) {
-    await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedMobileWalletRepository.create(input, undefined);
+    return mobileWalletCatalog.create(actorUserId, input, tErrors);
   }
 
   export async function updateMobileWallet(
@@ -64,13 +113,11 @@ export namespace PaymentCatalogService {
     input: UpdateSupportedMobileWalletInput,
     tErrors: ErrorsLabels
   ) {
-    await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedMobileWalletRepository.update(id, input, tErrors);
+    return mobileWalletCatalog.update(actorUserId, id, input, tErrors);
   }
 
   export async function deactivateMobileWallet(actorUserId: string, id: string, tErrors: ErrorsLabels) {
-    await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedMobileWalletRepository.deactivate(id, tErrors);
+    return mobileWalletCatalog.deactivate(actorUserId, id, tErrors);
   }
 
   // ─── Payment Links ───────────────────────────────────────────────────────
@@ -79,11 +126,7 @@ export namespace PaymentCatalogService {
     tErrors: ErrorsLabels,
     filters?: { direction?: PaymentDirection; activeOnly?: boolean }
   ) {
-    await assertCatalogAdmin(actorUserId, tErrors);
-    if (filters?.activeOnly !== false) {
-      return SupportedPaymentLinkRepository.listActive({ direction: filters?.direction });
-    }
-    return SupportedPaymentLinkRepository.listAll();
+    return paymentLinkCatalog.list(actorUserId, tErrors, filters);
   }
 
   export async function createPaymentLink(
@@ -91,8 +134,7 @@ export namespace PaymentCatalogService {
     input: SupportedPaymentLinkSubmitInput,
     tErrors: ErrorsLabels
   ) {
-    await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedPaymentLinkRepository.create(input);
+    return paymentLinkCatalog.create(actorUserId, input, tErrors);
   }
 
   export async function updatePaymentLink(
@@ -101,13 +143,11 @@ export namespace PaymentCatalogService {
     input: UpdateSupportedPaymentLinkInput,
     tErrors: ErrorsLabels
   ) {
-    await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedPaymentLinkRepository.update(id, input, tErrors);
+    return paymentLinkCatalog.update(actorUserId, id, input, tErrors);
   }
 
   export async function deactivatePaymentLink(actorUserId: string, id: string, tErrors: ErrorsLabels) {
-    await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedPaymentLinkRepository.deactivate(id, tErrors);
+    return paymentLinkCatalog.deactivate(actorUserId, id, tErrors);
   }
 
   // ─── Online Accounts ─────────────────────────────────────────────────────
@@ -116,11 +156,7 @@ export namespace PaymentCatalogService {
     tErrors: ErrorsLabels,
     filters?: { direction?: PaymentDirection; activeOnly?: boolean }
   ) {
-    await assertCatalogAdmin(actorUserId, tErrors);
-    const showAll = filters?.activeOnly === false;
-    return showAll
-      ? SupportedOnlineAccountRepository.listAll()
-      : SupportedOnlineAccountRepository.listActive({ direction: filters?.direction });
+    return onlineAccountCatalog.list(actorUserId, tErrors, filters);
   }
 
   export async function createOnlineAccount(
@@ -128,8 +164,7 @@ export namespace PaymentCatalogService {
     input: SupportedOnlineAccountSubmitInput,
     tErrors: ErrorsLabels
   ) {
-    await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedOnlineAccountRepository.create(input);
+    return onlineAccountCatalog.create(actorUserId, input, tErrors);
   }
 
   export async function updateOnlineAccount(
@@ -138,13 +173,11 @@ export namespace PaymentCatalogService {
     input: UpdateSupportedOnlineAccountInput,
     tErrors: ErrorsLabels
   ) {
-    await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedOnlineAccountRepository.update(id, input, tErrors);
+    return onlineAccountCatalog.update(actorUserId, id, input, tErrors);
   }
 
   export async function deactivateOnlineAccount(actorUserId: string, id: string, tErrors: ErrorsLabels) {
-    await assertCatalogAdmin(actorUserId, tErrors);
-    return SupportedOnlineAccountRepository.deactivate(id, tErrors);
+    return onlineAccountCatalog.deactivate(actorUserId, id, tErrors);
   }
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────

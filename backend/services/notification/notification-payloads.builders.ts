@@ -99,11 +99,65 @@ function buildPerChannel(
   return payloads;
 }
 
+/**
+ * Fan out a single rendered `{ title, body }` to every affected user across
+ * all four channels. Shared by the multi-recipient lifecycle builders
+ * (class, student, lesson-report-submitted, new-complaint) so the
+ * `for (const userId of affectedUserIds) { ... buildPerChannel(...) }`
+ * shape lives in exactly one place.
+ */
+function fanOutToUsers(
+  affectedUserIds: readonly string[],
+  eventType: NotificationEventType,
+  title: string,
+  body: string,
+  sharedMetadata: PayloadMetadata
+): CommunicationPayload[] {
+  const payloads: CommunicationPayload[] = [];
+  for (const userId of affectedUserIds) {
+    payloads.push(...buildPerChannel(userId, eventType, title, body, sharedMetadata));
+  }
+  return payloads;
+}
+
 function classBodyParams(classInstance: ClassInstanceSelectType, studentName: string): ClassLifecycleBodyParams {
   return {
     studentName,
     scheduledStartAt: classInstance.scheduledStartAt.toISOString(),
   };
+}
+
+/**
+ * Shared skeleton for the class/student lifecycle builders. Encapsulates the
+ * common shape — empty-guard → event-set guard → render → assemble metadata →
+ * fan out — so each domain builder only supplies its render callback, event
+ * set, and base metadata. Eliminates the CodeScene Code Duplication between
+ * `buildClassLifecyclePayloads` and `buildStudentLifecyclePayloads`.
+ */
+function buildLifecyclePayloads(
+  affectedUserIds: string[],
+  eventType: NotificationEventType,
+  allowedEvents: ReadonlySet<NotificationEventType>,
+  locale: string | undefined,
+  metadata: Record<string, string> | undefined,
+  baseMetadata: PayloadMetadata,
+  render: (labels: NotificationsLabels) => { title: string; body: string } | null
+): CommunicationPayload[] {
+  if (affectedUserIds.length === 0) return [];
+  if (!allowedEvents.has(eventType)) return [];
+
+  const labels = labelsFor(locale);
+  const rendered = render(labels);
+  if (!rendered) return [];
+  const { title, body } = rendered;
+
+  const sharedMetadata: PayloadMetadata = {
+    ...baseMetadata,
+    totalRecipients: affectedUserIds.length,
+    ...metadata,
+  };
+
+  return fanOutToUsers(affectedUserIds, eventType, title, body, sharedMetadata);
 }
 
 function formatInvoiceAmount(invoice: InvoiceSelectType): { amount: string; currency: string } {
@@ -355,33 +409,26 @@ export function buildClassLifecyclePayloads(
   locale?: string,
   metadata?: Record<string, string>
 ): CommunicationPayload[] {
-  if (affectedUserIds.length === 0) return [];
-  if (!CLASS_LIFECYCLE_EVENTS.has(eventType)) return [];
-
-  const labels = labelsFor(locale);
   const studentName = metadata?.studentName ?? "—";
   const baseParams = classBodyParams(classInstance, studentName);
-
-  const rendered = renderClassLifecycle(labels, eventType, baseParams, metadata);
-  if (!rendered) return [];
-  const { title, body } = rendered;
-
-  const sharedMetadata: PayloadMetadata = {
+  const baseMetadata: PayloadMetadata = {
     entityKind: "class",
     entityId: classInstance.id,
     classInstanceId: classInstance.id,
     studentName,
     scheduledStartAt: baseParams.scheduledStartAt,
     newStartAt: metadata?.newStartAt,
-    totalRecipients: affectedUserIds.length,
-    ...metadata,
   };
 
-  const payloads: CommunicationPayload[] = [];
-  for (const userId of affectedUserIds) {
-    payloads.push(...buildPerChannel(userId, eventType, title, body, sharedMetadata));
-  }
-  return payloads;
+  return buildLifecyclePayloads(
+    affectedUserIds,
+    eventType,
+    CLASS_LIFECYCLE_EVENTS,
+    locale,
+    metadata,
+    baseMetadata,
+    labels => renderClassLifecycle(labels, eventType, baseParams, metadata)
+  );
 }
 
 // ─── Student lifecycle event builder ──────────────────────────────────
@@ -427,32 +474,25 @@ export function buildStudentLifecyclePayloads(
   locale?: string,
   metadata?: Record<string, string>
 ): CommunicationPayload[] {
-  if (affectedUserIds.length === 0) return [];
-  if (!STUDENT_LIFECYCLE_EVENTS.has(eventType)) return [];
-
-  const labels = labelsFor(locale);
   const studentName = metadata?.studentName ?? "—";
-
-  const rendered = renderStudentLifecycle(labels, eventType, studentName, metadata);
-  if (!rendered) return [];
-  const { title, body } = rendered;
-
-  const sharedMetadata: PayloadMetadata = {
+  const baseMetadata: PayloadMetadata = {
     entityKind: "student",
     entityId: studentId,
     studentId,
     studentName,
     oldStatus: metadata?.oldStatus,
     newStatus: metadata?.newStatus,
-    totalRecipients: affectedUserIds.length,
-    ...metadata,
   };
 
-  const payloads: CommunicationPayload[] = [];
-  for (const userId of affectedUserIds) {
-    payloads.push(...buildPerChannel(userId, eventType, title, body, sharedMetadata));
-  }
-  return payloads;
+  return buildLifecyclePayloads(
+    affectedUserIds,
+    eventType,
+    STUDENT_LIFECYCLE_EVENTS,
+    locale,
+    metadata,
+    baseMetadata,
+    labels => renderStudentLifecycle(labels, eventType, studentName, metadata)
+  );
 }
 
 // ─── Lesson report event builders ─────────────────────────────────────
@@ -487,13 +527,13 @@ export function buildLessonReportSubmittedPayloads(
     totalRecipients: affectedUserIds.length,
   };
 
-  const payloads: CommunicationPayload[] = [];
-  for (const userId of affectedUserIds) {
-    payloads.push(
-      ...buildPerChannel(userId, NotificationEventType.LESSON_REPORT_SUBMITTED, labels.title, body, sharedMetadata)
-    );
-  }
-  return payloads;
+  return fanOutToUsers(
+    affectedUserIds,
+    NotificationEventType.LESSON_REPORT_SUBMITTED,
+    labels.title,
+    body,
+    sharedMetadata
+  );
 }
 
 /**
@@ -556,11 +596,7 @@ export function buildNewComplaintPayloads(
     totalRecipients: affectedUserIds.length,
   };
 
-  const payloads: CommunicationPayload[] = [];
-  for (const userId of affectedUserIds) {
-    payloads.push(...buildPerChannel(userId, NotificationEventType.NEW_COMPLAINT, labels.title, body, sharedMetadata));
-  }
-  return payloads;
+  return fanOutToUsers(affectedUserIds, NotificationEventType.NEW_COMPLAINT, labels.title, body, sharedMetadata);
 }
 
 // Re-exported type so consumers can typehint dispatch results without

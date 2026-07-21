@@ -55,16 +55,10 @@ export namespace TeacherDueRepository {
       .orderBy(teacherDues.approvedAt);
   }
 
-  export async function getMonthlyReport(
+  async function fetchTeacherIdentity(
     teacherId: string,
-    year: number,
-    month: number,
-    tx?: DBTransaction
-  ): Promise<TeacherMonthlyReportReturnType> {
-    const executor = tx ?? db;
-    const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
-    const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0));
-
+    executor: DBTransaction | typeof db
+  ): Promise<{ teacherName: string; currency: CurrencyCode }> {
     const [teacherRow] = await executor
       .select({
         teacherId: teachers.id,
@@ -75,10 +69,18 @@ export namespace TeacherDueRepository {
       .innerJoin(users, eq(teachers.userId, users.id))
       .where(eq(teachers.id, teacherId))
       .limit(1);
+    return {
+      teacherName: teacherRow?.teacherName ?? "",
+      currency: teacherRow?.currency ?? CurrencyCode.SAR,
+    };
+  }
 
-    const teacherName = teacherRow?.teacherName ?? "";
-    const currency: CurrencyCode = teacherRow?.currency ?? CurrencyCode.SAR;
-
+  async function fetchMonthlyClassAggregates(
+    teacherId: string,
+    startDate: Date,
+    endDate: Date,
+    executor: DBTransaction | typeof db
+  ): Promise<{ lessonsTaught: number; cancelledCount: number }> {
     const [classAgg] = await executor
       .select({
         lessonsTaught:
@@ -98,7 +100,23 @@ export namespace TeacherDueRepository {
           isNull(classInstances.deletedAt)
         )
       );
+    return {
+      lessonsTaught: classAgg?.lessonsTaught ?? 0,
+      cancelledCount: classAgg?.cancelledCount ?? 0,
+    };
+  }
 
+  async function fetchMonthlyDueAggregates(
+    teacherId: string,
+    startDate: Date,
+    endDate: Date,
+    executor: DBTransaction | typeof db
+  ): Promise<{
+    approvedCount: number;
+    totalAccruedHours: number;
+    totalDueAmount: number;
+    totalPaidAmount: number;
+  }> {
     const [dueAgg] = await executor
       .select({
         approvedCount: sql<number>`count(*)`.mapWith(Number),
@@ -120,18 +138,49 @@ export namespace TeacherDueRepository {
           sql`${teacherDues.approvedAt} < ${endDate}`
         )
       );
+    return {
+      approvedCount: dueAgg?.approvedCount ?? 0,
+      totalAccruedHours: dueAgg?.totalAccruedHours ?? 0,
+      totalDueAmount: dueAgg?.totalDueAmount ?? 0,
+      totalPaidAmount: dueAgg?.totalPaidAmount ?? 0,
+    };
+  }
+
+  export async function getMonthlyReport(
+    teacherId: string,
+    year: number,
+    month: number,
+    tx?: DBTransaction
+  ): Promise<TeacherMonthlyReportReturnType> {
+    const executor = tx ?? db;
+    const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0));
+
+    const { teacherName, currency } = await fetchTeacherIdentity(teacherId, executor);
+    const { lessonsTaught, cancelledCount } = await fetchMonthlyClassAggregates(
+      teacherId,
+      startDate,
+      endDate,
+      executor
+    );
+    const { approvedCount, totalAccruedHours, totalDueAmount, totalPaidAmount } = await fetchMonthlyDueAggregates(
+      teacherId,
+      startDate,
+      endDate,
+      executor
+    );
 
     return {
       teacherId,
       teacherName,
       year,
       month,
-      lessonsTaught: classAgg?.lessonsTaught ?? 0,
-      approvedCount: dueAgg?.approvedCount ?? 0,
-      cancelledCount: classAgg?.cancelledCount ?? 0,
-      totalAccruedHours: dueAgg?.totalAccruedHours ?? 0,
-      totalDueAmount: dueAgg?.totalDueAmount ?? 0,
-      totalPaidAmount: dueAgg?.totalPaidAmount ?? 0,
+      lessonsTaught,
+      approvedCount,
+      cancelledCount,
+      totalAccruedHours,
+      totalDueAmount,
+      totalPaidAmount,
       currency,
     };
   }

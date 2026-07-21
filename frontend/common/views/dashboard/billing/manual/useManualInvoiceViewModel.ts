@@ -96,56 +96,51 @@ function useAutoDismissOnSuccess(showSuccess: boolean, onDismissSuccess: () => v
   }, [showSuccess, onDismissSuccess]);
 }
 
-export function useManualInvoiceViewModel(_props: Readonly<UseManualInvoiceViewModelProps>): ManualInvoiceViewModel {
-  const t = useAppTranslation().dashboardTranslations.billingManual;
-  const labels = buildManualInvoiceLabels(t);
-  const router = useRouter();
-  const hasPermission = useUserStore(state => state.hasPermission);
-  const canCreate = hasPermission(AppPermission.BillingCreateInvoice);
-  const canSendEmail = hasPermission(AppPermission.SystemDispatchEmail);
+interface ParentChangeSync {
+  readonly currentParentId: string | null;
+  readonly selectedParentId: string | null;
+  readonly onParentChange: (parentId: string | null) => void;
+}
 
-  const selectedParentId = useManualInvoiceUiStore(state => state.selectedParentId);
-  const setSelectedParentId = useManualInvoiceUiStore(state => state.setSelectedParentId);
-  const isSubmitting = useManualInvoiceUiStore(state => state.isSubmitting);
-  const setIsSubmitting = useManualInvoiceUiStore(state => state.setIsSubmitting);
-  const showSuccess = useManualInvoiceUiStore(state => state.showSuccess);
-  const setShowSuccess = useManualInvoiceUiStore(state => state.setShowSuccess);
-  const dismissSuccess = useManualInvoiceUiStore(state => state.dismissSuccess);
-
-  const schema = manualInvoiceSchema(labels.validation);
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<ManualInvoiceFormData>({
-    resolver: zodResolver(schema),
-    defaultValues: buildDefaultFormValues(),
-  });
-
-  const feeAmount = useWatch({ control, name: "feeAmount" });
-  const billingMonths = useWatch({ control, name: "billingMonths" });
-  const draftCurrency = useWatch({ control, name: "currency" }) ?? CurrencyCode.Usd;
-  const currentParentId = useWatch({ control, name: "parentId" });
-  const monthCount = billingMonths.length;
-  const totalFormatted = formatDraftTotal(feeAmount, monthCount);
-
-  const onParentChange = useCallback(
-    (parentId: string | null) => {
-      setSelectedParentId(parentId);
-    },
-    [setSelectedParentId]
-  );
-
-  useResetStudentOnParentChange(currentParentId ?? "", setValue);
-  useAutoDismissOnSuccess(showSuccess, dismissSuccess);
-
+function useSyncFormParentIdToStore({ currentParentId, selectedParentId, onParentChange }: ParentChangeSync): void {
   useEffect(() => {
     if ((currentParentId ?? "") !== selectedParentId) {
       onParentChange((currentParentId ?? "") || null);
     }
   }, [currentParentId, onParentChange, selectedParentId]);
+}
 
+interface DraftTotals {
+  readonly totalFormatted: string;
+  readonly draftCurrency: CurrencyCode;
+}
+
+function useDraftTotals(control: Control<ManualInvoiceFormData>): DraftTotals {
+  const feeAmount = useWatch({ control, name: "feeAmount" });
+  const billingMonths = useWatch({ control, name: "billingMonths" });
+  const draftCurrency = useWatch({ control, name: "currency" }) ?? CurrencyCode.Usd;
+  const monthCount = billingMonths.length;
+  const totalFormatted = formatDraftTotal(feeAmount, monthCount);
+  return { totalFormatted, draftCurrency };
+}
+
+interface PermissionFlags {
+  readonly canCreate: boolean;
+  readonly canSendEmail: boolean;
+}
+
+function useInvoicePermissions(): PermissionFlags {
+  const hasPermission = useUserStore(state => state.hasPermission);
+  return {
+    canCreate: hasPermission(AppPermission.BillingCreateInvoice),
+    canSendEmail: hasPermission(AppPermission.SystemDispatchEmail),
+  };
+}
+
+function useCreateManualInvoice(
+  setIsSubmitting: (isSubmitting: boolean) => void,
+  setShowSuccess: (showSuccess: boolean) => void
+): (data: ManualInvoiceFormData, sendEmail: boolean) => void {
   const [createManualInvoiceMutation] = useMutation(createManualInvoiceMutationDocument, {
     onCompleted: () => {
       setIsSubmitting(false);
@@ -157,7 +152,7 @@ export function useManualInvoiceViewModel(_props: Readonly<UseManualInvoiceViewM
     },
   });
 
-  const onSubmit = useCallback(
+  return useCallback(
     (data: ManualInvoiceFormData, sendEmail: boolean) => {
       setIsSubmitting(true);
       createManualInvoiceMutation({
@@ -178,6 +173,61 @@ export function useManualInvoiceViewModel(_props: Readonly<UseManualInvoiceViewM
     },
     [createManualInvoiceMutation, setIsSubmitting]
   );
+}
+
+interface InvoiceForm {
+  readonly control: Control<ManualInvoiceFormData>;
+  readonly handleSubmit: UseFormHandleSubmit<ManualInvoiceFormData>;
+  readonly errors: FieldErrors<ManualInvoiceFormData>;
+  readonly setValue: UseFormSetValue<ManualInvoiceFormData>;
+  readonly currentParentId: string | null;
+}
+
+function useInvoiceForm(labels: ManualInvoiceLabels): InvoiceForm {
+  const schema = manualInvoiceSchema(labels.validation);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm<ManualInvoiceFormData>({
+    resolver: zodResolver(schema),
+    defaultValues: buildDefaultFormValues(),
+  });
+  const currentParentId = useWatch({ control, name: "parentId" });
+  return { control, handleSubmit, errors, setValue, currentParentId };
+}
+
+export function useManualInvoiceViewModel(_props: Readonly<UseManualInvoiceViewModelProps>): ManualInvoiceViewModel {
+  const t = useAppTranslation().dashboardTranslations.billingManual;
+  const labels = buildManualInvoiceLabels(t);
+  const router = useRouter();
+
+  const { canCreate, canSendEmail } = useInvoicePermissions();
+
+  const selectedParentId = useManualInvoiceUiStore(state => state.selectedParentId);
+  const setSelectedParentId = useManualInvoiceUiStore(state => state.setSelectedParentId);
+  const setIsSubmitting = useManualInvoiceUiStore(state => state.setIsSubmitting);
+  const setShowSuccess = useManualInvoiceUiStore(state => state.setShowSuccess);
+  const isSubmitting = useManualInvoiceUiStore(state => state.isSubmitting);
+  const showSuccess = useManualInvoiceUiStore(state => state.showSuccess);
+  const dismissSuccess = useManualInvoiceUiStore(state => state.dismissSuccess);
+
+  const { control, handleSubmit, errors, setValue, currentParentId } = useInvoiceForm(labels);
+  const { totalFormatted, draftCurrency } = useDraftTotals(control);
+
+  const onParentChange = useCallback(
+    (parentId: string | null) => {
+      setSelectedParentId(parentId);
+    },
+    [setSelectedParentId]
+  );
+
+  useResetStudentOnParentChange(currentParentId ?? "", setValue);
+  useAutoDismissOnSuccess(showSuccess, dismissSuccess);
+  useSyncFormParentIdToStore({ currentParentId, selectedParentId, onParentChange });
+
+  const onSubmit = useCreateManualInvoice(setIsSubmitting, setShowSuccess);
 
   const onBack = useCallback(() => {
     router.push("/billing");

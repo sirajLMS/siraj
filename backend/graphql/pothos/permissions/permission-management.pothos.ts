@@ -4,12 +4,16 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { OverrideStatePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
 import type {
+  BulkGroupMembershipInput,
+  GroupMembershipInput,
   GroupUserEntity,
   GroupWithPermissionIds,
+  PermissionCtx,
   PermissionEntity,
   UserOverrideEntity,
   UserOverrideReturnType,
 } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 /**
  * Type guard to validate if a string is a valid OverrideState.
@@ -44,6 +48,39 @@ function clearGroupUsersCache() {
 async function getGroupUsersMap(): Promise<Map<string, GroupUserEntity[]>> {
   groupUsersCache ??= await PermissionManagementRepository.listAllGroupUsers();
   return groupUsersCache;
+}
+
+interface ErrorsTranslationsHolder {
+  t(): { errorsTranslations: ErrorsLabels };
+}
+
+function resolveActorId(ctx: PermissionCtx): string {
+  return ctx.user?.id || "";
+}
+
+function resolveErrorsTranslations(ctx: ErrorsTranslationsHolder): ErrorsLabels {
+  return ctx.t().errorsTranslations;
+}
+
+async function runGroupMembershipMutation<T extends GroupMembershipInput>(
+  ctx: PermissionCtx & ErrorsTranslationsHolder,
+  input: T,
+  service: (actorId: string, body: T, tErrors: ErrorsLabels) => Promise<unknown>
+): Promise<boolean> {
+  clearGroupUsersCache();
+  await service(resolveActorId(ctx), input, resolveErrorsTranslations(ctx));
+  return true;
+}
+
+async function runBulkGroupMembershipMutation<T extends BulkGroupMembershipInput>(
+  ctx: PermissionCtx & ErrorsTranslationsHolder,
+  input: T,
+  service: (actorId: string, body: T, tErrors: ErrorsLabels) => Promise<unknown>
+): Promise<boolean> {
+  clearGroupUsersCache();
+  const tErrors = resolveErrorsTranslations(ctx);
+  await service(resolveActorId(ctx), input, tErrors);
+  return true;
 }
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
@@ -143,19 +180,16 @@ gqlSchemaBuilder.queryFields(t => ({
     type: [PermissionObject],
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
     description: "List all permission catalog entries.",
-    resolve: async (_root, _args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      return PermissionManagementService.listPermissions(ctx.user?.id || "", tErrors);
-    },
+    resolve: async (_root, _args, ctx) =>
+      PermissionManagementService.listPermissions(resolveActorId(ctx), resolveErrorsTranslations(ctx)),
   }),
   permissionGroups: t.field({
     type: [PermissionGroupObject],
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
     description: "List all permission groups with their permission IDs.",
     resolve: async (_root, _args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
       clearGroupUsersCache();
-      return PermissionManagementService.listGroups(ctx.user?.id || "", tErrors);
+      return PermissionManagementService.listGroups(resolveActorId(ctx), resolveErrorsTranslations(ctx));
     },
   }),
   permissionGroup: t.field({
@@ -163,40 +197,38 @@ gqlSchemaBuilder.queryFields(t => ({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
     args: { id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "Fetch a single permission group by ID.",
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      return PermissionManagementService.getGroup(ctx.user?.id || "", args.id, tErrors);
-    },
+    resolve: async (_root, args, ctx) =>
+      PermissionManagementService.getGroup(resolveActorId(ctx), args.id, resolveErrorsTranslations(ctx)),
   }),
   userPermissionGroups: t.stringList({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
     args: { userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "Return group IDs assigned to a user.",
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      return PermissionManagementService.listGroupsForUser(ctx.user?.id || "", args.userId, tErrors);
-    },
+    resolve: async (_root, args, ctx) =>
+      PermissionManagementService.listGroupsForUser(resolveActorId(ctx), args.userId, resolveErrorsTranslations(ctx)),
   }),
   userOverrides: t.field({
     type: [UserOverrideObject],
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
     args: { userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "List overrides for a user.",
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      return PermissionManagementService.listUserOverrides(ctx.user?.id || "", args.userId, tErrors).then(overrides =>
-        mapUserOverridesSafely(overrides)
-      );
-    },
+    resolve: async (_root, args, ctx) =>
+      PermissionManagementService.listUserOverrides(
+        resolveActorId(ctx),
+        args.userId,
+        resolveErrorsTranslations(ctx)
+      ).then(mapUserOverridesSafely),
   }),
   effectiveUserPermissions: t.stringList({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
     args: { userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "Return effective permissions for a user, combining groups and overrides.",
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      return PermissionManagementService.getEffectiveUserPermissions(ctx.user?.id || "", args.userId, tErrors);
-    },
+    resolve: async (_root, args, ctx) =>
+      PermissionManagementService.getEffectiveUserPermissions(
+        resolveActorId(ctx),
+        args.userId,
+        resolveErrorsTranslations(ctx)
+      ),
   }),
 }));
 
@@ -207,73 +239,60 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: PermissionGroupObject,
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
     args: { input: t.arg({ type: CreatePermissionGroupInput, required: true }) },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      return PermissionManagementService.createGroup(
-        ctx.user?.id || "",
+    resolve: async (_root, args, ctx) =>
+      PermissionManagementService.createGroup(
+        resolveActorId(ctx),
         {
           name: args.input.name,
           description: args.input.description ?? null,
           permissionIds: args.input.permissionIds,
         },
-        tErrors
-      );
-    },
+        resolveErrorsTranslations(ctx)
+      ),
   }),
   updatePermissionGroup: t.field({
     type: PermissionGroupObject,
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
     args: { input: t.arg({ type: UpdatePermissionGroupInput, required: true }) },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      return PermissionManagementService.updateGroup(
-        ctx.user?.id || "",
+    resolve: async (_root, args, ctx) =>
+      PermissionManagementService.updateGroup(
+        resolveActorId(ctx),
         {
           groupId: args.input.groupId,
           name: args.input.name ?? undefined,
           description: args.input.description ?? undefined,
           permissionIds: args.input.permissionIds ?? undefined,
         },
-        tErrors
-      );
-    },
+        resolveErrorsTranslations(ctx)
+      ),
   }),
   deletePermissionGroup: t.boolean({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
     args: { groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      await PermissionManagementService.deleteGroup(ctx.user?.id || "", args.groupId, tErrors);
+      await PermissionManagementService.deleteGroup(resolveActorId(ctx), args.groupId, resolveErrorsTranslations(ctx));
       return true;
     },
   }),
   assignPermissionGroupToUser: t.boolean({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
     args: { input: t.arg({ type: AssignPermissionGroupToUserInput, required: true }) },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      clearGroupUsersCache();
-      await PermissionManagementService.assignGroupToUser(
-        ctx.user?.id || "",
+    resolve: async (_root, args, ctx) =>
+      runGroupMembershipMutation(
+        ctx,
         { userId: args.input.userId, groupId: args.input.groupId },
-        tErrors
-      );
-      return true;
-    },
+        (actorId, body, tErrors) => PermissionManagementService.assignGroupToUser(actorId, body, tErrors)
+      ),
   }),
   revokePermissionGroupFromUser: t.boolean({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
     args: { input: t.arg({ type: RevokePermissionGroupFromUserInput, required: true }) },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      clearGroupUsersCache();
-      await PermissionManagementService.revokeGroupFromUser(
-        ctx.user?.id || "",
+    resolve: async (_root, args, ctx) =>
+      runGroupMembershipMutation(
+        ctx,
         { userId: args.input.userId, groupId: args.input.groupId },
-        tErrors
-      );
-      return true;
-    },
+        (actorId, body, tErrors) => PermissionManagementService.revokeGroupFromUser(actorId, body, tErrors)
+      ),
   }),
   bulkAssignUsersToGroup: t.boolean({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
@@ -281,16 +300,10 @@ gqlSchemaBuilder.mutationFields(t => ({
       groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       userIds: t.arg.stringList({ required: true, directives: { constraint: { maxItems: 100 } } }),
     },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      clearGroupUsersCache();
-      await PermissionManagementService.bulkAssignUsersToGroup(
-        ctx.user?.id || "",
-        { userIds: args.userIds, groupId: args.groupId },
-        tErrors
-      );
-      return true;
-    },
+    resolve: async (_root, args, ctx) =>
+      runBulkGroupMembershipMutation(ctx, { userIds: args.userIds, groupId: args.groupId }, (actorId, body, tErrors) =>
+        PermissionManagementService.bulkAssignUsersToGroup(actorId, body, tErrors)
+      ),
   }),
   bulkRevokeUsersFromGroup: t.boolean({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
@@ -298,16 +311,10 @@ gqlSchemaBuilder.mutationFields(t => ({
       groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       userIds: t.arg.stringList({ required: true, directives: { constraint: { maxItems: 100 } } }),
     },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      clearGroupUsersCache();
-      await PermissionManagementService.bulkRevokeUsersFromGroup(
-        ctx.user?.id || "",
-        { userIds: args.userIds, groupId: args.groupId },
-        tErrors
-      );
-      return true;
-    },
+    resolve: async (_root, args, ctx) =>
+      runBulkGroupMembershipMutation(ctx, { userIds: args.userIds, groupId: args.groupId }, (actorId, body, tErrors) =>
+        PermissionManagementService.bulkRevokeUsersFromGroup(actorId, body, tErrors)
+      ),
   }),
   updateUserOverrides: t.boolean({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
@@ -316,15 +323,14 @@ gqlSchemaBuilder.mutationFields(t => ({
       overrides: t.arg({ type: [UserOverrideInputRef], required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
       const formattedOverrides = args.overrides.map(o => ({
         permissionId: o.permissionId,
         state: o.state,
       }));
       await PermissionManagementService.updateUserOverrides(
-        ctx.user?.id || "",
+        resolveActorId(ctx),
         { userId: args.userId, overrides: formattedOverrides },
-        tErrors
+        resolveErrorsTranslations(ctx)
       );
       return true;
     },

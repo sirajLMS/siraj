@@ -33,6 +33,20 @@ async function insertReturning<T>(
   return tx ? runner(tx) : db.transaction(runner);
 }
 
+async function insertManyReturning<T>(
+  table: Parameters<typeof db.insert>[0],
+  inputs: readonly Record<string, unknown>[],
+  tx?: DBTransaction
+): Promise<T[]> {
+  if (inputs.length === 0) return [];
+  const runner = async (t: DBTransaction) =>
+    t
+      .insert(table)
+      .values([...inputs])
+      .returning() as Promise<T[]>;
+  return tx ? runner(tx) : db.transaction(runner);
+}
+
 export namespace GroupClassRepository {
   export async function getByClassInstanceId(
     classInstanceId: string,
@@ -85,13 +99,7 @@ export namespace GroupClassRepository {
     inputs: GroupClassEnrollmentCreateInput[],
     tx?: DBTransaction
   ): Promise<GroupClassEnrollmentSelectType[]> {
-    if (inputs.length === 0) return [];
-
-    const runner = async (t: DBTransaction) => {
-      return t.insert(groupClassEnrollments).values(inputs).returning();
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
+    return insertManyReturning<GroupClassEnrollmentSelectType>(groupClassEnrollments, inputs, tx);
   }
 
   export async function getCommunications(
@@ -207,9 +215,7 @@ export namespace GroupClassRepository {
     inputs: GroupClassCreateInput[],
     tx?: DBTransaction
   ): Promise<GroupClassSelectType[]> {
-    if (inputs.length === 0) return [];
-    const runner = async (t: DBTransaction) => t.insert(groupClasses).values(inputs).returning();
-    return tx ? runner(tx) : db.transaction(runner);
+    return insertManyReturning<GroupClassSelectType>(groupClasses, inputs, tx);
   }
 
   export async function findEnrollmentKeys(
@@ -295,8 +301,6 @@ export namespace GroupClassRepository {
     inputs: ClassCommunicationCreateInput[],
     tx?: DBTransaction
   ): Promise<ClassCommunicationSelectType[]> {
-    if (inputs.length === 0) return [];
-    const runner = async (t: DBTransaction) => t.insert(classCommunications).values(inputs).returning();
-    return tx ? runner(tx) : db.transaction(runner);
+    return insertManyReturning<ClassCommunicationSelectType>(classCommunications, inputs, tx);
   }
 }

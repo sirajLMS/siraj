@@ -7,6 +7,11 @@ import { FeesContractSection } from "@/frontend/common/views/dashboard/admin/par
 import { ParentInfoSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentInfoSection";
 import { ParentMeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentMeetingConfigOnboardingSection";
 import { SocialCommsSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/SocialCommsSection";
+import type {
+  MeetingConfigAlertProps,
+  OnboardingFormSectionsProps,
+  SubmitActionSectionProps,
+} from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 import type { ParentOnboardingViewModel } from "@/frontend/common/views/dashboard/admin/parents/onboarding/useParentOnboardingViewModel";
 import {
   MobileFormSuccessSnackbar,
@@ -39,45 +44,20 @@ export function ParentOnboardingMobileView({
 
   return (
     <MobilePageContainer>
-      {meetingConfigWarning ? (
-        <Alert
-          severity="warning"
-          onClose={clearMeetingConfigWarning}
-          action={
-            meetingSetupHref ? (
-              <Button color="inherit" size="small" onClick={() => router.push(meetingSetupHref)}>
-                {tJoin.setupLink}
-              </Button>
-            ) : undefined
-          }
-          sx={{ mx: 2, mt: 1 }}
-        >
-          {tMeeting.postCreateFailure}
-        </Alert>
-      ) : null}
+      <MeetingConfigAlert
+        meetingConfigWarning={meetingConfigWarning}
+        meetingSetupHref={meetingSetupHref}
+        onClearWarning={clearMeetingConfigWarning}
+        onVisitSetup={() => router.push(meetingSetupHref ?? "")}
+        failureMessage={tMeeting.postCreateFailure}
+        setupLinkLabel={tJoin.setupLink}
+      />
 
       <MobilePageHeader
         title={t.pageTitle}
         subtitle={t.pageSubtitle}
         edgeToEdge={false}
-        actions={
-          <Stack
-            sx={theme => ({
-              display: "flex",
-              flexDirection: "row",
-              gap: 1,
-              alignItems: "center",
-              backgroundColor: theme.palette.primaryContainer,
-              color: theme.palette.onPrimaryContainer,
-              px: 1.5,
-              py: 0.5,
-              borderRadius: 2,
-            })}
-          >
-            <InfoOutlined sx={{ fontSize: 18 }} />
-            <Typography variant="labelSm">{t.statusBanner}</Typography>
-          </Stack>
-        }
+        actions={<StatusBadge bannerText={t.statusBanner} />}
       />
 
       <FormProvider {...form}>
@@ -88,61 +68,160 @@ export function ParentOnboardingMobileView({
           }}
           sx={{ display: "flex", flexDirection: "column", gap: 2, px: { xs: 2, md: 3 }, pb: 4 }}
         >
-          <ParentInfoSection register={register} control={control} errors={errors} onUploadAvatar={onUploadAvatar} />
-          <SocialCommsSection register={register} control={control} />
-          <FeesContractSection register={register} control={control} errors={errors} />
-          <MobileSectionPanel title={t.sections.meetingConfig}>
-            <ParentMeetingConfigOnboardingSection
-              register={register}
-              control={control}
-              errors={errors}
-              labels={{
-                sectionTitle: t.sections.meetingConfig,
-                optionalHint: t.optionalHint,
-                fields: {
-                  meetingProvider: t.fields.meetingProvider,
-                  meetingUrl: t.fields.meetingUrl,
-                  meetingLabel: t.fields.meetingLabel,
-                },
-                placeholders: {
-                  meetingUrl: t.placeholders.meetingUrl,
-                  meetingLabel: t.placeholders.meetingLabel,
-                },
-              }}
-            />
-          </MobileSectionPanel>
+          <OnboardingFormSections
+            register={register}
+            control={control}
+            errors={errors}
+            onUploadAvatar={onUploadAvatar}
+            meetingConfigLabels={{
+              sectionTitle: t.sections.meetingConfig,
+              optionalHint: t.optionalHint,
+              fields: {
+                meetingProvider: t.fields.meetingProvider,
+                meetingUrl: t.fields.meetingUrl,
+                meetingLabel: t.fields.meetingLabel,
+              },
+              placeholders: {
+                meetingUrl: t.placeholders.meetingUrl,
+                meetingLabel: t.placeholders.meetingLabel,
+              },
+            }}
+          />
 
-          <Box
-            sx={theme => ({
-              p: 2,
-              backgroundColor: theme.palette.surfaceContainerLow,
-              borderRadius: 3,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "stretch",
-              gap: 2,
-            })}
-          >
-            <MobilePrimaryPageAction
-              type="submit"
-              disabled={isSubmitting}
-              fullWidth
-              sx={{
-                py: 2,
-                fontWeight: "bold",
-                letterSpacing: "0.1em",
-              }}
-            >
-              {isSubmitting ? t.actions.processing : t.actions.signup}
-            </MobilePrimaryPageAction>
-            <Typography variant="labelMd" sx={theme => ({ fontStyle: "italic", color: theme.palette.text.secondary })}>
-              {t.privacyNote}
-            </Typography>
-          </Box>
+          <SubmitActionSection
+            isSubmitting={isSubmitting}
+            processingLabel={t.actions.processing}
+            signupLabel={t.actions.signup}
+            privacyNote={t.privacyNote}
+          />
         </Box>
       </FormProvider>
 
       <MobileFormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
     </MobilePageContainer>
+  );
+}
+
+function MeetingConfigAlert({
+  meetingConfigWarning,
+  meetingSetupHref,
+  failureMessage,
+  setupLinkLabel,
+  onClearWarning,
+  onVisitSetup,
+}: Readonly<MeetingConfigAlertProps>) {
+  if (!meetingConfigWarning) {
+    return null;
+  }
+
+  return (
+    <Alert
+      severity="warning"
+      onClose={onClearWarning}
+      action={
+        meetingSetupHref ? (
+          <Button color="inherit" size="small" onClick={onVisitSetup}>
+            {setupLinkLabel}
+          </Button>
+        ) : undefined
+      }
+      sx={{ mx: 2, mt: 1 }}
+    >
+      {failureMessage}
+    </Alert>
+  );
+}
+
+function StatusBadge({ bannerText }: Readonly<{ bannerText: string }>) {
+  return (
+    <Stack
+      sx={theme => ({
+        display: "flex",
+        flexDirection: "row",
+        gap: 1,
+        alignItems: "center",
+        backgroundColor: theme.palette.primaryContainer,
+        color: theme.palette.onPrimaryContainer,
+        px: 1.5,
+        py: 0.5,
+        borderRadius: 2,
+      })}
+    >
+      <InfoOutlined sx={{ fontSize: 18 }} />
+      <Typography variant="labelSm">{bannerText}</Typography>
+    </Stack>
+  );
+}
+
+function OnboardingFormSections({
+  register,
+  control,
+  errors,
+  onUploadAvatar,
+  meetingConfigLabels,
+}: Readonly<OnboardingFormSectionsProps>) {
+  return (
+    <>
+      <ParentInfoSection register={register} control={control} errors={errors} onUploadAvatar={onUploadAvatar} />
+      <SocialCommsSection register={register} control={control} />
+      <FeesContractSection register={register} control={control} errors={errors} />
+      <MobileSectionPanel title={meetingConfigLabels.sectionTitle}>
+        <ParentMeetingConfigOnboardingSection
+          register={register}
+          control={control}
+          errors={errors}
+          labels={{
+            sectionTitle: meetingConfigLabels.sectionTitle,
+            optionalHint: meetingConfigLabels.optionalHint,
+            fields: {
+              meetingProvider: meetingConfigLabels.fields.meetingProvider,
+              meetingUrl: meetingConfigLabels.fields.meetingUrl,
+              meetingLabel: meetingConfigLabels.fields.meetingLabel,
+            },
+            placeholders: {
+              meetingUrl: meetingConfigLabels.placeholders.meetingUrl,
+              meetingLabel: meetingConfigLabels.placeholders.meetingLabel,
+            },
+          }}
+        />
+      </MobileSectionPanel>
+    </>
+  );
+}
+
+function SubmitActionSection({
+  isSubmitting,
+  processingLabel,
+  signupLabel,
+  privacyNote,
+}: Readonly<SubmitActionSectionProps>) {
+  return (
+    <Box
+      sx={theme => ({
+        p: 2,
+        backgroundColor: theme.palette.surfaceContainerLow,
+        borderRadius: 3,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "stretch",
+        gap: 2,
+      })}
+    >
+      <MobilePrimaryPageAction
+        type="submit"
+        disabled={isSubmitting}
+        fullWidth
+        sx={{
+          py: 2,
+          fontWeight: "bold",
+          letterSpacing: "0.1em",
+        }}
+      >
+        {isSubmitting ? processingLabel : signupLabel}
+      </MobilePrimaryPageAction>
+      <Typography variant="labelMd" sx={theme => ({ fontStyle: "italic", color: theme.palette.text.secondary })}>
+        {privacyNote}
+      </Typography>
+    </Box>
   );
 }

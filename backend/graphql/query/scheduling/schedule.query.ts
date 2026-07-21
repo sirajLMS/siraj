@@ -1,3 +1,4 @@
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { RecurringScheduleDetailPothosObject } from "@/backend/graphql/pothos/scheduling/recurring-schedule.pothos";
 import {
@@ -18,7 +19,8 @@ import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { RecurringScheduleDetailService } from "@/backend/services/schedule/recurring-schedule-detail.service";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
-import { PaginationArgs, type PaginationInput } from "@/backend/types";
+import { type DailyScheduleArgs, PaginationArgs, type PaginationInput } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 function toPaginationArgs(input?: PaginationInput | null): PaginationArgs | null {
   if (!input) return null;
@@ -31,6 +33,26 @@ function toPaginationArgs(input?: PaginationInput | null): PaginationArgs | null
     page: input.page ?? null,
     maxCount: input.maxCount ?? null,
   });
+}
+
+type AdminDashboardResult = Awaited<ReturnType<typeof ScheduleService.getAdminDashboardSchedule>>;
+
+async function fetchDailySchedule(
+  ctx: BaseContext,
+  args: DailyScheduleArgs,
+  tErrors: ErrorsLabels
+): Promise<AdminDashboardResult> {
+  const userId = await requireAuth(ctx);
+  return ScheduleService.getAdminDashboardSchedule(userId, args, tErrors);
+}
+
+function selectDailySchedule<T>(
+  ctx: BaseContext,
+  args: DailyScheduleArgs,
+  tErrors: ErrorsLabels,
+  select: (result: AdminDashboardResult) => T
+): Promise<T> {
+  return fetchDailySchedule(ctx, args, tErrors).then(select);
 }
 
 gqlSchemaBuilder.queryField("adminDashboardSchedule", t =>
@@ -67,14 +89,13 @@ gqlSchemaBuilder.queryField("dailyScheduleMetrics", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      const result = await ScheduleService.getAdminDashboardSchedule(
-        userId,
+      return selectDailySchedule(
+        ctx,
         { date: args.date, teacherId: args.teacherId },
-        tErrors
+        tErrors,
+        result => result.metrics
       );
-      return result.metrics;
     },
   })
 );
@@ -90,19 +111,18 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      const result = await ScheduleService.getAdminDashboardSchedule(
-        userId,
+      return selectDailySchedule(
+        ctx,
         {
           date: args.date,
           teacherId: args.teacherId,
           search: args.search,
           metricFilter: args.metricFilter,
         },
-        tErrors
+        tErrors,
+        result => result.rows
       );
-      return result.rows;
     },
   })
 );

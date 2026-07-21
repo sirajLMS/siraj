@@ -86,30 +86,58 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       );
     });
 
-    testRepoError("throws on teacher overlap", async tx => {
-      const { student, teacher, now } = await setupTestEntities(tx, "Create3");
-      const start = new Date(now.getTime() + 86400000);
-      const end = new Date(start.getTime() + 3600000);
-      await createMockClassInstance(tx, student.id, teacher.id, { scheduledStartAt: start, scheduledEndAt: end });
-      const { student: student2 } = await setupTestEntities(tx, "Create4");
-      await tx.insert(teacherAssignments).values({ studentId: student2.id, teacherId: teacher.id, assignedAt: now });
+    const expectOverlapError = async (
+      tx: DBTransaction,
+      firstEntities: { studentId: string; teacherId: string },
+      secondEntities: { studentId: string; teacherId: string },
+      assignedAt: Date
+    ) => {
+      const now = new Date(assignedAt.getTime() + 86400000);
+      const end = new Date(now.getTime() + 3600000);
+      await createMockClassInstance(tx, firstEntities.studentId, firstEntities.teacherId, {
+        scheduledStartAt: now,
+        scheduledEndAt: end,
+      });
+      await tx.insert(teacherAssignments).values({
+        studentId: secondEntities.studentId,
+        teacherId: secondEntities.teacherId,
+        assignedAt,
+      });
       await SchedulingRepository.createClassInstance(
-        await getCreatePayload(tx, student2.id, teacher.id, start, end),
+        await getCreatePayload(tx, secondEntities.studentId, secondEntities.teacherId, now, end),
         tx
       );
+    };
+
+    const setupOverlapScenario = async (
+      tx: DBTransaction,
+      firstPrefix: string,
+      secondPrefix: string,
+      variant: "teacher" | "student"
+    ) => {
+      const first = await setupTestEntities(tx, firstPrefix);
+      const second = await setupTestEntities(tx, secondPrefix);
+      const firstEntities = { studentId: first.student.id, teacherId: first.teacher.id };
+      const secondEntities =
+        variant === "teacher"
+          ? { studentId: second.student.id, teacherId: first.teacher.id }
+          : { studentId: first.student.id, teacherId: second.teacher.id };
+      return { first, second, firstEntities, secondEntities, now: first.now };
+    };
+
+    testRepoError("throws on teacher overlap", async tx => {
+      const { firstEntities, secondEntities, now } = await setupOverlapScenario(tx, "Create3", "Create4", "teacher");
+      await expectOverlapError(tx, firstEntities, secondEntities, now);
     });
 
     testRepoError("throws on student overlap", async tx => {
-      const { student, teacher, now } = await setupTestEntities(tx, "CreateStudentOver");
-      const start = new Date(now.getTime() + 86400000);
-      const end = new Date(start.getTime() + 3600000);
-      await createMockClassInstance(tx, student.id, teacher.id, { scheduledStartAt: start, scheduledEndAt: end });
-      const { teacher: teacher2 } = await setupTestEntities(tx, "CreateStudentOver2");
-      await tx.insert(teacherAssignments).values({ studentId: student.id, teacherId: teacher2.id, assignedAt: now });
-      await SchedulingRepository.createClassInstance(
-        await getCreatePayload(tx, student.id, teacher2.id, start, end),
-        tx
+      const { firstEntities, secondEntities, now } = await setupOverlapScenario(
+        tx,
+        "CreateStudentOver",
+        "CreateStudentOver2",
+        "student"
       );
+      await expectOverlapError(tx, firstEntities, secondEntities, now);
     });
 
     testRepoError("throws on zoomUrl overlap", async tx => {
@@ -528,58 +556,84 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       });
     });
 
-    test("activateClassInstance sets flags and creates event", async () => {
-      await runInRollback(async tx => {
-        const { student, teacher } = await setupTestEntities(tx, "activate");
-        const instance = await createMockClassInstance(tx, student.id, teacher.id, {
-          executionState: "NOT_ACTIVATED",
-        });
+    const expectStateTransitionEvent = async (
+      tx: DBTransaction,
+      instanceId: string,
+      expectedState: ClassStatusEventState
+    ) => {
+      const [event] = await tx
+        .select()
+        .from(classStatusEvents)
+        .where(eq(classStatusEvents.classInstanceId, instanceId));
+      expect(event).toBeDefined();
+      expect(event.eventType).toBe("STATE_CHANGE");
+      expect((event.toState as ClassStatusEventState).executionState).toBe(expectedState.executionState);
+      if (expectedState.outcome !== undefined) {
+        expect((event.toState as ClassStatusEventState).outcome).toBe(expectedState.outcome);
+      }
+    };
 
-        const updated = await SchedulingRepository.activateClassInstance(
-          instance.id,
-          teacher.userId,
-          { force: true },
-          tx
-        );
-        if (!updated) throw new Error("Failed to activate class instance");
+    interface StateTransitionExpectations {
+      executionState: string;
+      outcome?: string;
+      expectForceActivated?: boolean;
+      expectActualEndAt?: boolean;
+    }
 
-        expect(updated.executionState).toBe("ACTIVATED");
+    const runStateTransitionTest = async (
+      tx: DBTransaction,
+      prefix: string,
+      instanceOverrides: Partial<typeof classInstances.$inferInsert>,
+      transitionFn: (
+        instanceId: string,
+        userId: string,
+        t: DBTransaction
+      ) => Promise<typeof classInstances.$inferSelect | null>,
+      expectations: StateTransitionExpectations
+    ) => {
+      const { student, teacher } = await setupTestEntities(tx, prefix);
+      const instance = await createMockClassInstance(tx, student.id, teacher.id, instanceOverrides);
+      const updated = await transitionFn(instance.id, teacher.userId, tx);
+      if (!updated) throw new Error(`Failed to ${prefix} class instance`);
+
+      expect(updated.executionState).toBe(expectations.executionState);
+      if (expectations.outcome !== undefined) expect(updated.outcome).toBe(expectations.outcome);
+      if (expectations.expectForceActivated) {
         expect(updated.forceActivated).toBe(true);
         expect(updated.forceActivatedByUserId).toBe(teacher.userId);
+      }
+      if (expectations.expectActualEndAt) expect(updated.actualEndAt).toBeDefined();
 
-        const [event] = await tx
-          .select()
-          .from(classStatusEvents)
-          .where(eq(classStatusEvents.classInstanceId, instance.id));
-        expect(event).toBeDefined();
-        expect(event.eventType).toBe("STATE_CHANGE");
-        expect((event.toState as ClassStatusEventState).executionState).toBe("ACTIVATED");
+      await expectStateTransitionEvent(tx, instance.id, {
+        executionState: expectations.executionState,
+        outcome: expectations.outcome,
+      });
+      return updated;
+    };
+
+    test("activateClassInstance sets flags and creates event", async () => {
+      await runInRollback(async tx => {
+        const result = await runStateTransitionTest(
+          tx,
+          "activate",
+          { executionState: "NOT_ACTIVATED" },
+          (id, userId, t) => SchedulingRepository.activateClassInstance(id, userId, { force: true }, t),
+          { executionState: "ACTIVATED", expectForceActivated: true }
+        );
+        expect(result.executionState).toBe("ACTIVATED");
       });
     });
 
     test("stopClassInstance sets flags and creates event", async () => {
       await runInRollback(async tx => {
-        const { student, teacher } = await setupTestEntities(tx, "stop");
-        const instance = await createMockClassInstance(tx, student.id, teacher.id, {
-          executionState: "RUNNING",
-          actualStartAt: new Date(),
-        });
-
-        const updated = await SchedulingRepository.stopClassInstance(instance.id, teacher.userId, tx);
-        if (!updated) throw new Error("Failed to stop class instance");
-
-        expect(updated.executionState).toBe("COMPLETED");
-        expect(updated.outcome).toBe("TAKEN");
-        expect(updated.actualEndAt).toBeDefined();
-
-        const [event] = await tx
-          .select()
-          .from(classStatusEvents)
-          .where(eq(classStatusEvents.classInstanceId, instance.id));
-        expect(event).toBeDefined();
-        expect(event.eventType).toBe("STATE_CHANGE");
-        expect((event.toState as ClassStatusEventState).executionState).toBe("COMPLETED");
-        expect((event.toState as ClassStatusEventState).outcome).toBe("TAKEN");
+        const result = await runStateTransitionTest(
+          tx,
+          "stop",
+          { executionState: "RUNNING", actualStartAt: new Date() },
+          (id, userId, t) => SchedulingRepository.stopClassInstance(id, userId, t),
+          { executionState: "COMPLETED", outcome: "TAKEN", expectActualEndAt: true }
+        );
+        expect(result.executionState).toBe("COMPLETED");
       });
     });
 

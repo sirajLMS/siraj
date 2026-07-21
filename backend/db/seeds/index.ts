@@ -140,9 +140,7 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   await runLmsWorkflowSeeds(context, step, config);
   await runGroupClassSeeds(context, step, config);
 
-  await seedTeacherAvailability(context, step, config);
-  await seedTeacherUnavailability(context, step, config);
-  await seedTeacherVacations(context, step, config);
+  await seedTeacherScheduleWindows(context, step, config);
   await seedLeaveRequests(context, step, config);
   await seedStudentProgress(context, step, config);
   await seedStudentStatusHistory(context, step, config);
@@ -251,27 +249,22 @@ async function seedStudentsAndCredits(context: SeedContext, step: RunStep, confi
   }
 }
 
-async function seedTeacherAvailability(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
-  await step("teacher-availability-windows", () =>
-    seedOrGetTeacherAvailabilityWindows(context.teachers ?? [], context.users ?? [], context.timezones ?? [], config)
-  );
-}
+async function seedTeacherScheduleWindows(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  const teachers = context.teachers ?? [];
+  const users = context.users ?? [];
+  const timezones = context.timezones ?? [];
+  const windowSeeds: Array<[string, () => Promise<unknown>]> = [
+    ["teacher-availability-windows", () => seedOrGetTeacherAvailabilityWindows(teachers, users, timezones, config)],
+    [
+      "teacher-recurring-unavailability",
+      () => seedOrGetTeacherRecurringUnavailability(teachers, users, timezones, config),
+    ],
+    ["teacher-vacation-requests", () => seedOrGetTeacherVacationRequests(teachers, users, timezones, config)],
+  ];
 
-async function seedTeacherUnavailability(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
-  await step("teacher-recurring-unavailability", () =>
-    seedOrGetTeacherRecurringUnavailability(
-      context.teachers ?? [],
-      context.users ?? [],
-      context.timezones ?? [],
-      config
-    )
-  );
-}
-
-async function seedTeacherVacations(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
-  await step("teacher-vacation-requests", () =>
-    seedOrGetTeacherVacationRequests(context.teachers ?? [], context.users ?? [], context.timezones ?? [], config)
-  );
+  for (const [name, run] of windowSeeds) {
+    await step(name, run);
+  }
 }
 
 async function seedLeaveRequests(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {

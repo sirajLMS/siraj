@@ -163,8 +163,18 @@ function isValidLogEntry(log: LogEntry): boolean {
   return !!(log.sessionId && log.level && log.message && typeof log.sequence === "number");
 }
 
+// Gate client log ingestion on the server. Mirrors the server-side
+// `BaseLogger` gate at `shared/lib/logger/base-logger.ts:24`: enabled in dev
+// by default, and in prod only when the operator explicitly sets
+// `ENABLE_LOGGING=true`. This lets prod deployments opt into writing
+// `logs/client_<sessionId>.log` files for triaging browser-side diagnostics
+// (e.g. the auth recovery path) without requiring the user to copy logs out
+// of DevTools.
+const CLIENT_LOGS_ENABLED =
+  process.env.NODE_ENV === "development" || process.env.ENABLE_LOGGING === "true";
+
 export async function POST(request: NextRequest) {
-  if (process.env.NODE_ENV !== "development") {
+  if (!CLIENT_LOGS_ENABLED) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

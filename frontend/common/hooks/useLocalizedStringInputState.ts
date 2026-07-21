@@ -51,6 +51,189 @@ export type LocalizedStringInputState = {
   readonly setDrawerOpen: (open: boolean) => void;
 };
 
+type LocalizedStringT = ReturnType<typeof useAppTranslation>["uiTranslations"]["localizedString"];
+
+const SUCCESS_FIELD_SX: SxProps<Theme> = {
+  "& .MuiOutlinedInput-root": {
+    borderColor: (theme: Theme) => theme.palette.success.main,
+  },
+  transition: (theme: Theme) => theme.transitions.create("border-color", { duration: 500 }),
+};
+
+const MULTILINE_ADORNMENT_TOP_SX = { alignSelf: "flex-start", height: "auto", marginTop: 1.75 } as const;
+
+const buildInlineHelperText = (args: {
+  errorMessage?: string;
+  helperText?: string;
+  activeRequired: boolean;
+  isFieldEmpty: boolean;
+  required: boolean;
+  activeLocale: AppLocale;
+  uiLocale: string;
+  t: LocalizedStringT;
+}): string | undefined => {
+  if (args.errorMessage) return args.errorMessage;
+  if (args.activeRequired && args.isFieldEmpty && args.required) {
+    return args.t.localeRequiredEntry(getLanguageDisplayName(args.activeLocale, args.uiLocale));
+  }
+  return args.helperText;
+};
+
+const shouldFlashSuccess = (
+  draft: LocalizedString,
+  fromLocale: AppLocale,
+  error: boolean,
+  requiredLocales: readonly AppLocale[]
+): boolean => {
+  const currentValue = draft[fromLocale] ?? "";
+  const wasValid = currentValue.trim() !== "" && (!requiredLocales.includes(fromLocale) || currentValue.trim() !== "");
+  return wasValid && !error;
+};
+
+const buildSuccessSx = (successSwitch: boolean, showInlineError: boolean): SxProps<Theme> | undefined =>
+  successSwitch && !showInlineError ? SUCCESS_FIELD_SX : undefined;
+
+const buildAdornmentTopSx = (
+  multiline?: boolean
+): { alignSelf: string; height: string; marginTop: number } | undefined =>
+  multiline ? MULTILINE_ADORNMENT_TOP_SX : undefined;
+
+const buildDrawerTitle = (drawerTitle: string | undefined, label: string | undefined, t: LocalizedStringT): string =>
+  drawerTitle ?? label ?? t.editTranslations;
+
+type ChangeHandlers = Pick<
+  LocalizedStringInputState,
+  "handleFieldChange" | "handleLocaleSwitch" | "handleDrawerSave" | "handleDrawerCancel"
+>;
+
+function useChangeHandlers(args: {
+  readonly emitChange: (next: LocalizedString) => void;
+  readonly draft: LocalizedString;
+  readonly activeLocale: AppLocale;
+  readonly setActiveLocale: (next: AppLocale) => void;
+  readonly error: boolean;
+  readonly resolvedRequiredLocales: readonly AppLocale[];
+  readonly triggerSuccess: () => void;
+  readonly drawerAutosave: boolean;
+  readonly setDrawerOpen: (open: boolean) => void;
+}): ChangeHandlers {
+  const {
+    emitChange,
+    draft,
+    activeLocale,
+    setActiveLocale,
+    error,
+    resolvedRequiredLocales,
+    triggerSuccess,
+    drawerAutosave,
+    setDrawerOpen,
+  } = args;
+
+  const handleFieldChange = useCallback(
+    (text: string) => emitChange(setLocalizedString(draft, activeLocale, text)),
+    [draft, activeLocale, emitChange]
+  );
+
+  const handleLocaleSwitch = useCallback(
+    (nextLocale: AppLocale) => {
+      if (shouldFlashSuccess(draft, activeLocale, error, resolvedRequiredLocales)) {
+        triggerSuccess();
+      }
+      setActiveLocale(nextLocale);
+    },
+    [draft, activeLocale, error, resolvedRequiredLocales, triggerSuccess, setActiveLocale]
+  );
+
+  const handleDrawerSave = useCallback(
+    (next: LocalizedString) => {
+      emitChange(next);
+      if (!drawerAutosave) setDrawerOpen(false);
+    },
+    [emitChange, drawerAutosave, setDrawerOpen]
+  );
+
+  const handleDrawerCancel = useCallback(() => setDrawerOpen(false), [setDrawerOpen]);
+
+  return { handleFieldChange, handleLocaleSwitch, handleDrawerSave, handleDrawerCancel };
+}
+
+type DisplayState = Pick<
+  LocalizedStringInputState,
+  | "fieldValue"
+  | "isRtl"
+  | "showInlineError"
+  | "inlineHelperText"
+  | "drawerResolvedTitle"
+  | "textFieldSuccessSx"
+  | "adornmentTopSx"
+>;
+
+function useDisplayState(args: {
+  readonly draft: LocalizedString;
+  readonly activeLocale: AppLocale;
+  readonly error: boolean;
+  readonly required: boolean;
+  readonly multiline?: boolean;
+  readonly successSwitch: boolean;
+  readonly requiredSet: Set<AppLocale>;
+  readonly errorMessage?: string;
+  readonly helperText?: string;
+  readonly label?: string;
+  readonly drawerTitle?: string;
+  readonly uiLocale: string;
+  readonly t: LocalizedStringT;
+}): DisplayState {
+  const activeRequired = args.requiredSet.has(args.activeLocale);
+  const fieldValue = args.draft[args.activeLocale] ?? "";
+  const isRtl = args.activeLocale === "ar";
+  const isFieldEmpty = fieldValue.trim() === "";
+  const showInlineError = args.error || (activeRequired && isFieldEmpty && args.required);
+
+  const inlineHelperText = useMemo(
+    () =>
+      buildInlineHelperText({
+        errorMessage: args.errorMessage,
+        helperText: args.helperText,
+        activeRequired,
+        isFieldEmpty,
+        required: args.required,
+        activeLocale: args.activeLocale,
+        uiLocale: args.uiLocale,
+        t: args.t,
+      }),
+    [
+      args.errorMessage,
+      args.helperText,
+      activeRequired,
+      isFieldEmpty,
+      args.required,
+      args.t,
+      args.activeLocale,
+      args.uiLocale,
+    ]
+  );
+
+  const drawerResolvedTitle = useMemo(
+    () => buildDrawerTitle(args.drawerTitle, args.label, args.t),
+    [args.drawerTitle, args.label, args.t]
+  );
+  const textFieldSuccessSx = useMemo(
+    () => buildSuccessSx(args.successSwitch, showInlineError),
+    [args.successSwitch, showInlineError]
+  );
+  const adornmentTopSx = useMemo(() => buildAdornmentTopSx(args.multiline), [args.multiline]);
+
+  return {
+    fieldValue,
+    isRtl,
+    showInlineError,
+    inlineHelperText,
+    drawerResolvedTitle,
+    textFieldSuccessSx,
+    adornmentTopSx,
+  };
+}
+
 export const useLocalizedStringInputState = (props: LocalizedStringInputStateProps): LocalizedStringInputState => {
   const {
     value,
@@ -74,11 +257,11 @@ export const useLocalizedStringInputState = (props: LocalizedStringInputStatePro
     () => requiredLocales ?? (required ? [DEFAULT_CONTENT_LOCALE] : []),
     [requiredLocales, required]
   );
+  const requiredSet = useMemo(() => new Set<AppLocale>(resolvedRequiredLocales), [resolvedRequiredLocales]);
 
   const [activeLocale, setActiveLocale] = useState<AppLocale>(() => pickInitialActiveLocale(uiLocale));
   const [draft, setDraft] = useState<LocalizedString>(value);
   const [drawerOpen, setDrawerOpen] = useState(false);
-
   const { successSwitch, triggerSuccess } = useLocaleSwitchSuccess();
 
   useEffect(() => {
@@ -93,64 +276,33 @@ export const useLocalizedStringInputState = (props: LocalizedStringInputStatePro
     [onChangeAction]
   );
 
-  const handleFieldChange = useCallback(
-    (text: string) => {
-      emitChange(setLocalizedString(draft, activeLocale, text));
-    },
-    [draft, activeLocale, emitChange]
-  );
+  const handlers = useChangeHandlers({
+    emitChange,
+    draft,
+    activeLocale,
+    setActiveLocale,
+    error,
+    resolvedRequiredLocales,
+    triggerSuccess,
+    drawerAutosave,
+    setDrawerOpen,
+  });
 
-  const handleLocaleSwitch = useCallback(
-    (nextLocale: AppLocale) => {
-      const currentValue = draft[activeLocale] ?? "";
-      const wasValid =
-        currentValue.trim() !== "" && (!resolvedRequiredLocales.includes(activeLocale) || currentValue.trim() !== "");
-      setActiveLocale(nextLocale);
-      if (wasValid && !error) {
-        triggerSuccess();
-      }
-    },
-    [draft, activeLocale, error, resolvedRequiredLocales, triggerSuccess]
-  );
-
-  const handleDrawerSave = useCallback(
-    (next: LocalizedString) => {
-      emitChange(next);
-      if (!drawerAutosave) {
-        setDrawerOpen(false);
-      }
-    },
-    [emitChange, drawerAutosave]
-  );
-
-  const handleDrawerCancel = useCallback(() => setDrawerOpen(false), []);
-
-  const fieldValue = draft[activeLocale] ?? "";
-  const isRtl = activeLocale === "ar";
-
-  const requiredSet = useMemo(() => new Set<AppLocale>(resolvedRequiredLocales), [resolvedRequiredLocales]);
-
-  const activeRequired = requiredSet.has(activeLocale);
-  const showInlineError = error || (activeRequired && fieldValue.trim() === "" && required);
-  const inlineHelperText =
-    errorMessage ??
-    (activeRequired && fieldValue.trim() === "" && required
-      ? t.localeRequiredEntry(getLanguageDisplayName(activeLocale, uiLocale))
-      : helperText);
-
-  const drawerResolvedTitle = drawerTitle ?? label ?? t.editTranslations;
-
-  const textFieldSuccessSx =
-    successSwitch && !showInlineError
-      ? {
-          "& .MuiOutlinedInput-root": {
-            borderColor: (theme: Theme) => theme.palette.success.main,
-          },
-          transition: (theme: Theme) => theme.transitions.create("border-color", { duration: 500 }),
-        }
-      : undefined;
-
-  const adornmentTopSx = multiline ? { alignSelf: "flex-start", height: "auto", marginTop: 1.75 } : undefined;
+  const display = useDisplayState({
+    draft,
+    activeLocale,
+    error,
+    required,
+    multiline,
+    successSwitch,
+    requiredSet,
+    errorMessage,
+    helperText,
+    label,
+    drawerTitle,
+    uiLocale,
+    t,
+  });
 
   return {
     isCompact,
@@ -159,17 +311,8 @@ export const useLocalizedStringInputState = (props: LocalizedStringInputStatePro
     drawerOpen,
     successSwitch,
     resolvedRequiredLocales,
-    fieldValue,
-    isRtl,
-    showInlineError,
-    inlineHelperText,
-    drawerResolvedTitle,
-    textFieldSuccessSx,
-    adornmentTopSx,
-    handleFieldChange,
-    handleLocaleSwitch,
-    handleDrawerSave,
-    handleDrawerCancel,
+    ...display,
+    ...handlers,
     setDrawerOpen,
   };
 };

@@ -49,6 +49,15 @@ const baseMethodBankTransfer = {
   },
 };
 
+const mobileWalletCreateInput = {
+  userId: OWNER_ID,
+  type: PaymentMethodType.MOBILE_WALLET,
+  direction: PaymentDirection.PAYIN,
+  isDefault: false,
+  label: "Test wallet",
+  details: { walletId: WALLET_ID, phone: "01012345678" },
+};
+
 describe("PaymentMethodService notification dispatch", () => {
   const spies: ReturnType<typeof spyOn>[] = [];
   let dispatchMultiSpy: ReturnType<typeof spyOn>;
@@ -110,32 +119,26 @@ describe("PaymentMethodService notification dispatch", () => {
     return payloads;
   }
 
+  // Shared spy setup for mutation paths that route through `updateUserPaymentMethodCore`
+  // (update + setDefault both mock the same getById/update/clearDefaultsInSlot trio).
+  function setupUpdateCoreSpies(updatedMethod: typeof baseMethod) {
+    const existingSpy = track(spyOn(UserPaymentMethodRepository, "getById").mockResolvedValue({ ...baseMethod }));
+    const updateSpy = track(spyOn(UserPaymentMethodRepository, "update").mockResolvedValue({ ...updatedMethod }));
+    track(spyOn(UserPaymentMethodRepository, "clearDefaultsInSlot").mockResolvedValue(undefined));
+    return { existingSpy, updateSpy };
+  }
+
   test("createUserPaymentMethod dispatches PAYMENT_METHOD_CHANGED once with action=created and userId=owner", async () => {
     const createSpy = track(spyOn(UserPaymentMethodRepository, "create").mockResolvedValue({ ...baseMethod }));
 
-    await PaymentMethodService.createUserPaymentMethod(
-      ACTOR_ID,
-      {
-        userId: OWNER_ID,
-        type: PaymentMethodType.MOBILE_WALLET,
-        direction: PaymentDirection.PAYIN,
-        isDefault: false,
-        label: "Test wallet",
-        details: { walletId: WALLET_ID, phone: "01012345678" },
-      },
-      tErrors
-    );
+    await PaymentMethodService.createUserPaymentMethod(ACTOR_ID, mobileWalletCreateInput, tErrors);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     assertPaymentMethodChangedPayloads();
   });
 
   test("updateUserPaymentMethod dispatches PAYMENT_METHOD_CHANGED once with action=updated", async () => {
-    const existingSpy = track(spyOn(UserPaymentMethodRepository, "getById").mockResolvedValue({ ...baseMethod }));
-    const updateSpy = track(
-      spyOn(UserPaymentMethodRepository, "update").mockResolvedValue({ ...baseMethod, label: "Updated" })
-    );
-    track(spyOn(UserPaymentMethodRepository, "clearDefaultsInSlot").mockResolvedValue(undefined));
+    const { existingSpy, updateSpy } = setupUpdateCoreSpies({ ...baseMethod, label: "Updated" });
 
     await PaymentMethodService.updateUserPaymentMethod(ACTOR_ID, METHOD_ID, { label: "Updated" }, tErrors);
 
@@ -156,11 +159,7 @@ describe("PaymentMethodService notification dispatch", () => {
   });
 
   test("setDefaultUserPaymentMethod dispatches PAYMENT_METHOD_CHANGED exactly once with action=setDefault", async () => {
-    const existingSpy = track(spyOn(UserPaymentMethodRepository, "getById").mockResolvedValue({ ...baseMethod }));
-    const updateSpy = track(
-      spyOn(UserPaymentMethodRepository, "update").mockResolvedValue({ ...baseMethod, isDefault: true })
-    );
-    track(spyOn(UserPaymentMethodRepository, "clearDefaultsInSlot").mockResolvedValue(undefined));
+    const { existingSpy, updateSpy } = setupUpdateCoreSpies({ ...baseMethod, isDefault: true });
 
     await PaymentMethodService.setDefaultUserPaymentMethod(ACTOR_ID, METHOD_ID, tErrors);
 
@@ -193,18 +192,7 @@ describe("PaymentMethodService notification dispatch", () => {
 
     let err: unknown = null;
     try {
-      const result = await PaymentMethodService.createUserPaymentMethod(
-        ACTOR_ID,
-        {
-          userId: OWNER_ID,
-          type: PaymentMethodType.MOBILE_WALLET,
-          direction: PaymentDirection.PAYIN,
-          isDefault: false,
-          label: "Test wallet",
-          details: { walletId: WALLET_ID, phone: "01012345678" },
-        },
-        tErrors
-      );
+      const result = await PaymentMethodService.createUserPaymentMethod(ACTOR_ID, mobileWalletCreateInput, tErrors);
       expect(result).toBeDefined();
     } catch (e) {
       err = e;

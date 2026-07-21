@@ -27,6 +27,46 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   return errorCaught as Error;
 }
 
+async function expectRepoErrorMessage(fn: () => Promise<unknown>, expectedSubstring: string): Promise<void> {
+  const error = await expectRepoError(fn);
+  expect(error.message.toLowerCase()).toContain(expectedSubstring.toLowerCase());
+}
+
+function testInvoiceError(
+  name: string,
+  action: (tx: DBTransaction, invoiceId: string) => () => Promise<unknown>,
+  expectedSubstring: string,
+  prelude?: (tx: DBTransaction) => Promise<string>
+): void {
+  test(name, async () => {
+    await runInRollback(async tx => {
+      const invoiceId = prelude ? await prelude(tx) : "";
+      await expectRepoErrorMessage(action(tx, invoiceId), expectedSubstring);
+    });
+  });
+}
+
+async function fetchLatestAuditLog(
+  tx: DBTransaction,
+  fromCurrency: CurrencyCode,
+  toCurrency: CurrencyCode,
+  newRate: string
+) {
+  const auditRows = await tx
+    .select()
+    .from(currencyExchangeAuditLogs)
+    .where(
+      and(
+        eq(currencyExchangeAuditLogs.fromCurrency, fromCurrency),
+        eq(currencyExchangeAuditLogs.toCurrency, toCurrency),
+        eq(currencyExchangeAuditLogs.newRate, newRate)
+      )
+    )
+    .orderBy(desc(currencyExchangeAuditLogs.createdAt))
+    .limit(1);
+  return auditRows[0];
+}
+
 async function createOverdueInvoice(
   tx: Parameters<typeof runInRollback>[0] extends (tx: infer T) => unknown ? T : never,
   parentId: string,
@@ -263,23 +303,22 @@ describe("BillingRepository — deleteInvoice", () => {
     });
   });
 
-  test("throws when deleting a non-existent invoice", async () => {
-    await runInRollback(async tx => {
-      const error = await expectRepoError(() =>
-        BillingRepository.deleteInvoice("00000000-0000-0000-0000-000000000000", tErrors, tx)
-      );
-      expect(error.message).toContain("not found");
-    });
-  });
+  testInvoiceError(
+    "throws when deleting a non-existent invoice",
+    tx => () => BillingRepository.deleteInvoice("00000000-0000-0000-0000-000000000000", tErrors, tx),
+    "not found"
+  );
 
-  test("throws when deleting an already-deleted invoice", async () => {
-    await runInRollback(async tx => {
+  testInvoiceError(
+    "throws when deleting an already-deleted invoice",
+    (tx, invoiceId) => () => BillingRepository.deleteInvoice(invoiceId, tErrors, tx),
+    "not found",
+    async tx => {
       const { invoice } = await setupInvoiceTest(tx);
       await BillingRepository.deleteInvoice(invoice.id, tErrors, tx);
-      const error = await expectRepoError(() => BillingRepository.deleteInvoice(invoice.id, tErrors, tx));
-      expect(error.message).toContain("not found");
-    });
-  });
+      return invoice.id;
+    }
+  );
 
   test("excludes soft-deleted invoices from getInvoicesForParent", async () => {
     await runInRollback(async tx => {
@@ -317,44 +356,43 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
     });
   });
 
-  test("throws when marking a PAID invoice as paid again", async () => {
-    await runInRollback(async tx => {
+  testInvoiceError(
+    "throws when marking a PAID invoice as paid again",
+    (tx, invoiceId) => () => BillingRepository.markInvoiceAsPaid(invoiceId, tErrors, undefined, tx),
+    "already",
+    async tx => {
       const { invoice } = await setupUnpaidInvoice(tx);
       await BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, undefined, tx);
-      const error = await expectRepoError(() =>
-        BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, undefined, tx)
-      );
-      expect(error.message.toLowerCase()).toContain("already");
-    });
-  });
+      return invoice.id;
+    }
+  );
 
-  test("throws when invoice ID does not exist", async () => {
-    await runInRollback(async tx => {
-      const error = await expectRepoError(() =>
-        BillingRepository.markInvoiceAsPaid("00000000-0000-0000-0000-000000000001", tErrors, undefined, tx)
-      );
-      expect(error.message).toContain("not found");
-    });
-  });
+  testInvoiceError(
+    "throws when invoice ID does not exist",
+    tx => () => BillingRepository.markInvoiceAsPaid("00000000-0000-0000-0000-000000000001", tErrors, undefined, tx),
+    "not found"
+  );
 
-  test("throws when invoice is soft-deleted", async () => {
-    await runInRollback(async tx => {
+  testInvoiceError(
+    "throws when invoice is soft-deleted",
+    (tx, invoiceId) => () => BillingRepository.markInvoiceAsPaid(invoiceId, tErrors, undefined, tx),
+    "not found",
+    async tx => {
       const { invoice } = await setupUnpaidInvoice(tx);
       await BillingRepository.deleteInvoice(invoice.id, tErrors, tx);
-      const error = await expectRepoError(() =>
-        BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, undefined, tx)
-      );
-      expect(error.message).toContain("not found");
-    });
-  });
+      return invoice.id;
+    }
+  );
 
-  test("throws on version mismatch", async () => {
-    await runInRollback(async tx => {
+  testInvoiceError(
+    "throws on version mismatch",
+    (tx, invoiceId) => () => BillingRepository.markInvoiceAsPaid(invoiceId, tErrors, 9999, tx),
+    "version mismatch",
+    async tx => {
       const { invoice } = await setupUnpaidInvoice(tx);
-      const error = await expectRepoError(() => BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, 9999, tx));
-      expect(error.message).toContain("version mismatch");
-    });
-  });
+      return invoice.id;
+    }
+  );
 
   test("succeeds when expectedVersion matches", async () => {
     await runInRollback(async tx => {
@@ -410,20 +448,7 @@ describe("BillingRepository — updateExchangeRate", () => {
       expect(result.toCurrency).toBe(CurrencyCode.EGP);
       expect(result.rate).toBe("48.123456");
 
-      const auditRows = await tx
-        .select()
-        .from(currencyExchangeAuditLogs)
-        .where(
-          and(
-            eq(currencyExchangeAuditLogs.fromCurrency, CurrencyCode.USD),
-            eq(currencyExchangeAuditLogs.toCurrency, CurrencyCode.EGP),
-            eq(currencyExchangeAuditLogs.newRate, "48.123456")
-          )
-        )
-        .orderBy(desc(currencyExchangeAuditLogs.createdAt))
-        .limit(1);
-
-      const audit = auditRows[0];
+      const audit = await fetchLatestAuditLog(tx, CurrencyCode.USD, CurrencyCode.EGP, "48.123456");
       expect(audit).toBeDefined();
       expect(audit?.changedByUserId).toBeNull();
       expect(audit?.source).toBe("cron");
@@ -449,20 +474,7 @@ describe("BillingRepository — updateExchangeRate", () => {
 
       expect(result.rate).toBe("3.760000");
 
-      const auditRows = await tx
-        .select()
-        .from(currencyExchangeAuditLogs)
-        .where(
-          and(
-            eq(currencyExchangeAuditLogs.fromCurrency, CurrencyCode.USD),
-            eq(currencyExchangeAuditLogs.toCurrency, CurrencyCode.SAR),
-            eq(currencyExchangeAuditLogs.newRate, "3.760000")
-          )
-        )
-        .orderBy(desc(currencyExchangeAuditLogs.createdAt))
-        .limit(1);
-
-      const audit = auditRows[0];
+      const audit = await fetchLatestAuditLog(tx, CurrencyCode.USD, CurrencyCode.SAR, "3.760000");
       expect(audit).toBeDefined();
       expect(audit?.oldRate).toBe("3.750000");
       expect(audit?.newRate).toBe("3.760000");
@@ -489,20 +501,7 @@ describe("BillingRepository — updateExchangeRateInTx", () => {
       expect(result.fromCurrency).toBe(CurrencyCode.EUR);
       expect(result.rate).toBe("1.085000");
 
-      const auditRows = await tx
-        .select()
-        .from(currencyExchangeAuditLogs)
-        .where(
-          and(
-            eq(currencyExchangeAuditLogs.fromCurrency, CurrencyCode.EUR),
-            eq(currencyExchangeAuditLogs.toCurrency, CurrencyCode.USD),
-            eq(currencyExchangeAuditLogs.newRate, "1.085000")
-          )
-        )
-        .orderBy(desc(currencyExchangeAuditLogs.createdAt))
-        .limit(1);
-
-      const audit = auditRows[0];
+      const audit = await fetchLatestAuditLog(tx, CurrencyCode.EUR, CurrencyCode.USD, "1.085000");
       expect(audit).toBeDefined();
       expect(audit?.changedByUserId).toBeNull();
     });

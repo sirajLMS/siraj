@@ -109,77 +109,100 @@ export namespace RecurringClassService {
     }
   }
 
+  /**
+   * Validate the recurring-class input before any DB work: checks permission,
+   * required fields, duration, subject existence and active balance.
+   * Throws localized `tErrors.*` messages on any failure.
+   */
+  async function validateCreateRecurringClass(userId: string, input: CreateRecurringClassInput, tErrors: ErrorsLabels) {
+    const hasCreateAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
+    if (!hasCreateAccess) {
+      throw new Error(tErrors.unauthorizedAction);
+    }
+
+    if (!input.days || input.days.length === 0) {
+      throw new Error(tErrors.invalidInput);
+    }
+
+    if (input.durationMinutes <= 0) {
+      throw new Error(tErrors.invalidInput);
+    }
+
+    if (!input.subjectId) {
+      throw new Error(tErrors.invalidInput);
+    }
+
+    let subject: Awaited<ReturnType<typeof ClassSubjectRepository.getSubjectById>>;
+    try {
+      subject = await ClassSubjectRepository.getSubjectById(input.subjectId);
+    } catch {
+      throw new Error(tErrors.invalidInput);
+    }
+    if (!subject.isActive) {
+      throw new Error(tErrors.invalidInput);
+    }
+
+    const activeDays = input.days.filter(d => d.isActive);
+    if (activeDays.length === 0) {
+      throw new Error(tErrors.invalidInput);
+    }
+
+    const balance = await CreditRepository.getBalance(db, input.studentId);
+    if (balance.classesRemaining <= 0) {
+      throw new Error(
+        tErrors.credit.insufficientBalance({
+          studentId: input.studentId,
+          remaining: balance.classesRemaining,
+        })
+      );
+    }
+
+    return subject;
+  }
+
+  /**
+   * Persist the recurring schedule plus its generated instances, then deduct
+   * one credit per instance — all within a single transaction.
+   */
+  async function createScheduleAndDeductCredits(
+    userId: string,
+    input: CreateRecurringClassInput,
+    tErrors: ErrorsLabels
+  ) {
+    return db.transaction(async tx => {
+      const created = await SchedulingRepository.createRecurringScheduleWithInstances(
+        {
+          studentId: input.studentId,
+          teacherId: input.teacherId,
+          subjectId: input.subjectId,
+          durationMinutes: input.durationMinutes,
+          defaultStartTime: input.defaultStartTime,
+          timezone: input.timezone,
+          timezoneId: input.timezoneId,
+          effectiveFrom: input.effectiveFrom ? new Date(input.effectiveFrom) : null,
+          effectiveUntil: input.effectiveUntil ? new Date(input.effectiveUntil) : null,
+          days: input.days,
+          classType: input.classType,
+          generateInstancesForWeeks: input.generateInstancesForWeeks,
+          quotaDeducted: true,
+        },
+        tx
+      );
+
+      for (const classInstanceId of created.classInstanceIds) {
+        const idempotencyKey = `credit-deduction:${classInstanceId}`;
+        await CreditService.deductForBooking(input.studentId, classInstanceId, userId, idempotencyKey, tx, tErrors);
+      }
+
+      return created;
+    });
+  }
+
   export async function createRecurringClass(userId: string, input: CreateRecurringClassInput, tErrors: ErrorsLabels) {
     try {
-      const hasCreateAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
-      if (!hasCreateAccess) {
-        throw new Error(tErrors.unauthorizedAction);
-      }
+      await validateCreateRecurringClass(userId, input, tErrors);
 
-      if (!input.days || input.days.length === 0) {
-        throw new Error(tErrors.invalidInput);
-      }
-
-      if (input.durationMinutes <= 0) {
-        throw new Error(tErrors.invalidInput);
-      }
-
-      if (!input.subjectId) {
-        throw new Error(tErrors.invalidInput);
-      }
-
-      let subject: Awaited<ReturnType<typeof ClassSubjectRepository.getSubjectById>>;
-      try {
-        subject = await ClassSubjectRepository.getSubjectById(input.subjectId);
-      } catch {
-        throw new Error(tErrors.invalidInput);
-      }
-      if (!subject.isActive) {
-        throw new Error(tErrors.invalidInput);
-      }
-
-      const activeDays = input.days.filter(d => d.isActive);
-      if (activeDays.length === 0) {
-        throw new Error(tErrors.invalidInput);
-      }
-
-      const balance = await CreditRepository.getBalance(db, input.studentId);
-      if (balance.classesRemaining <= 0) {
-        throw new Error(
-          tErrors.credit.insufficientBalance({
-            studentId: input.studentId,
-            remaining: balance.classesRemaining,
-          })
-        );
-      }
-
-      const result = await db.transaction(async tx => {
-        const created = await SchedulingRepository.createRecurringScheduleWithInstances(
-          {
-            studentId: input.studentId,
-            teacherId: input.teacherId,
-            subjectId: input.subjectId,
-            durationMinutes: input.durationMinutes,
-            defaultStartTime: input.defaultStartTime,
-            timezone: input.timezone,
-            timezoneId: input.timezoneId,
-            effectiveFrom: input.effectiveFrom ? new Date(input.effectiveFrom) : null,
-            effectiveUntil: input.effectiveUntil ? new Date(input.effectiveUntil) : null,
-            days: input.days,
-            classType: input.classType,
-            generateInstancesForWeeks: input.generateInstancesForWeeks,
-            quotaDeducted: true,
-          },
-          tx
-        );
-
-        for (const classInstanceId of created.classInstanceIds) {
-          const idempotencyKey = `credit-deduction:${classInstanceId}`;
-          await CreditService.deductForBooking(input.studentId, classInstanceId, userId, idempotencyKey, tx, tErrors);
-        }
-
-        return created;
-      });
+      const result = await createScheduleAndDeductCredits(userId, input, tErrors);
 
       await dispatchClassScheduledNotifications(result.classInstanceIds, input.studentId, input.locale);
 

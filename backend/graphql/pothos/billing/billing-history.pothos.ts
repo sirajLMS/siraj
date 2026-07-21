@@ -42,6 +42,20 @@ function parsePaginationArgs(input: PaginationInput | null | undefined): Paginat
   });
 }
 
+interface ParentScopedResolverArgs {
+  parentId?: string | null;
+  userId?: string | null;
+}
+
+async function prepareParentScopedResolver(
+  ctx: import("@/backend/graphql/gqlContext").BaseContext,
+  args: ParentScopedResolverArgs
+) {
+  const callerUserId = await requireAuth(ctx);
+  await setBillingFxDisplayCurrencyForSubject(ctx, args.userId ?? null, callerUserId);
+  return { callerUserId, tErrors: ctx.t().errorsTranslations };
+}
+
 const ParentInvoiceRowRef = gqlSchemaBuilder.objectRef<InvoiceHistoryRow>("ParentInvoiceRow");
 
 export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
@@ -188,12 +202,9 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
       search: t.arg.string({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
-      const callerUserId = await requireAuth(ctx);
+      const { callerUserId, tErrors } = await prepareParentScopedResolver(ctx, args);
       const pagination = parsePaginationArgs(args.paginationArgs);
 
-      await setBillingFxDisplayCurrencyForSubject(ctx, args.userId ?? null, callerUserId);
-
-      const tErrors = ctx.t().errorsTranslations;
       return BillingHistoryService.getParentInvoiceHistory(
         callerUserId,
         args.parentId ?? null,
@@ -262,11 +273,8 @@ gqlSchemaBuilder.queryField("parentBillingSummary", t =>
       userId: t.arg.string({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
-      const callerUserId = await requireAuth(ctx);
+      const { callerUserId, tErrors } = await prepareParentScopedResolver(ctx, args);
 
-      await setBillingFxDisplayCurrencyForSubject(ctx, args.userId ?? null, callerUserId);
-
-      const tErrors = ctx.t().errorsTranslations;
       return BillingHistoryService.getParentBillingSummary(
         callerUserId,
         args.parentId ?? null,

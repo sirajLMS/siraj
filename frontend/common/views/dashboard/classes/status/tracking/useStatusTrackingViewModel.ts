@@ -22,6 +22,16 @@ import { useStatusTrackingLabels } from "@/frontend/common/views/dashboard/class
 import { useStatusTrackingMetrics } from "@/frontend/common/views/dashboard/classes/status/tracking/useStatusTrackingMetrics";
 import { useRouter } from "@/shared/i18n/navigation";
 
+type RouterLike = ReturnType<typeof useRouter>;
+type NotificationsLike = ReturnType<typeof useNotifications>;
+type HasPermissionFn = (permission: AppPermission) => boolean;
+type SetRescheduleSessionFn = (session: {
+  readonly sessionId: string;
+  readonly teacherName: string;
+  readonly studentName: string;
+  readonly teacherTimezone: string;
+}) => void;
+
 export interface StatusTrackingViewModel extends MobileLayoutProps, DesktopLayoutProps {}
 
 export interface UseStatusTrackingViewModelProps {
@@ -62,6 +72,55 @@ function buildAnalyticsLabels(labels: StatusTrackingLabels): SuspensionAnalytics
   };
 }
 
+function buildRescheduleHandler(
+  rows: readonly StatusTrackingRow[],
+  setRescheduleSession: SetRescheduleSessionFn,
+  router: RouterLike
+) {
+  return (id: string) => {
+    const row = rows.find(session => session.id === id);
+    if (row) {
+      setRescheduleSession({
+        sessionId: id,
+        teacherName: row.teacherName ?? "",
+        studentName: row.studentName ?? "",
+        teacherTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
+    }
+    router.push(`/reschedule?classInstanceId=${id}`);
+  };
+}
+
+function buildActivateHandler(rows: readonly StatusTrackingRow[], hasPermission: HasPermissionFn, router: RouterLike) {
+  return (id: string) => {
+    if (!hasPermission(AppPermission.SessionActivateClass)) {
+      return;
+    }
+    const row = rows.find(session => session.id === id);
+    if (!row || row.isFrozen) {
+      return;
+    }
+    router.push(`/classes/${id}`);
+  };
+}
+
+function buildVerifyHandler(
+  rows: readonly StatusTrackingRow[],
+  router: RouterLike,
+  notifications: NotificationsLike,
+  errorNoStudentId: string
+) {
+  return (id: string) => {
+    const row = rows.find(session => session.id === id);
+    const studentId = row?.studentId;
+    if (studentId) {
+      router.push(studentProfileTabHref(studentId, "status"));
+    } else {
+      notifications.show(errorNoStudentId, { severity: "warning", autoHideDuration: 4000 });
+    }
+  };
+}
+
 export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingViewModelProps>): StatusTrackingViewModel {
   const { onActivate, onReschedule, onVerify, onNewReport, onOpenAuditLogs } = props;
   const router = useRouter();
@@ -87,45 +146,17 @@ export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingView
   const { metrics, suspendedCount } = useStatusTrackingMetrics(rows);
 
   const handleReschedule = useCallback(
-    (id: string) => {
-      const row = rows.find(session => session.id === id);
-      if (row) {
-        setRescheduleSession({
-          sessionId: id,
-          teacherName: row.teacherName ?? "",
-          studentName: row.studentName ?? "",
-          teacherTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        });
-      }
-      router.push(`/reschedule?classInstanceId=${id}`);
-    },
+    () => buildRescheduleHandler(rows, setRescheduleSession, router),
     [rows, setRescheduleSession, router]
   );
 
   const handleActivate = useCallback(
-    (id: string) => {
-      if (!hasPermission(AppPermission.SessionActivateClass)) {
-        return;
-      }
-      const row = rows.find(session => session.id === id);
-      if (!row || row.isFrozen) {
-        return;
-      }
-      router.push(`/classes/${id}`);
-    },
+    () => buildActivateHandler(rows, hasPermission, router),
     [rows, hasPermission, router]
   );
 
   const handleVerify = useCallback(
-    (id: string) => {
-      const row = rows.find(session => session.id === id);
-      const studentId = row?.studentId;
-      if (studentId) {
-        router.push(studentProfileTabHref(studentId, "status"));
-      } else {
-        notifications.show(labels.errorNoStudentId, { severity: "warning", autoHideDuration: 4000 });
-      }
-    },
+    () => buildVerifyHandler(rows, router, notifications, labels.errorNoStudentId),
     [rows, router, notifications, labels]
   );
 

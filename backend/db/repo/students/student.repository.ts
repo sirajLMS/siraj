@@ -636,12 +636,11 @@ export namespace StudentRepository {
     readonly updatedAt: Date;
   };
 
-  export const findProfileById = async (studentId: string, tx?: DBTransaction): Promise<StudentProfileRow | null> => {
-    const queryDb = tx ?? db;
+  function buildStudentProfileSelect(queryDb: typeof db | DBTransaction) {
     const parentUser = alias(users, "parent_user");
     const studentUser = alias(users, "student_user");
 
-    const results = await queryDb
+    return queryDb
       .select({
         id: students.id,
         userId: students.userId,
@@ -673,15 +672,10 @@ export namespace StudentRepository {
       .leftJoin(parentUser, eq(parents.userId, parentUser.id))
       .leftJoin(teachers, eq(students.primaryTeacherId, teachers.id))
       .leftJoin(users, eq(teachers.userId, users.id))
-      .leftJoin(studentUser, eq(students.userId, studentUser.id))
-      .where(eq(students.id, studentId))
-      .limit(1);
+      .leftJoin(studentUser, eq(students.userId, studentUser.id));
+  }
 
-    if (results.length === 0) {
-      return null;
-    }
-
-    const row = results[0];
+  function mapStudentProfileRow(row: Awaited<ReturnType<typeof buildStudentProfileSelect>>[number]): StudentProfileRow {
     return {
       id: row.id,
       userId: row.userId,
@@ -708,5 +702,17 @@ export namespace StudentRepository {
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };
+  }
+
+  export const findProfileById = async (studentId: string, tx?: DBTransaction): Promise<StudentProfileRow | null> => {
+    const queryDb = tx ?? db;
+
+    const results = await buildStudentProfileSelect(queryDb).where(eq(students.id, studentId)).limit(1);
+
+    if (results.length === 0) {
+      return null;
+    }
+
+    return mapStudentProfileRow(results[0]);
   };
 }

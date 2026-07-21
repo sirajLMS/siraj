@@ -20,3 +20,14 @@ export interface CreditBalanceReturnType {
   classesTotal: number;
   classesRemaining: number;
 }
+
+export interface CreditInsertInput {
+  studentId: string;
+  changeAmount: number;
+  reason: CreditReason;
+  sourcePaymentId?: string | null;
+  classInstanceId?: string | null;
+  notes?: string | null;
+  creditedByUserId: string;
+  idempotencyKey: string;
+}

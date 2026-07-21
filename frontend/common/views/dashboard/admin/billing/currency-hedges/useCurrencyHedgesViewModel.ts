@@ -3,6 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { currencyHedgesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -17,6 +18,97 @@ export type HedgeRow = {
 
 const HEDGE_TYPE_LONG = "LONG";
 const INITIAL_HEDGE_TYPE = "SHORT";
+
+type CurrencyFormSetters = {
+  readonly setCurrency: (code: CurrencyCode) => void;
+  readonly setAmount: (amount: string) => void;
+  readonly setHedgeType: (hedgeType: string) => void;
+  readonly setNotes: (notes: string) => void;
+  readonly setEditingRow: (row: HedgeRow | null) => void;
+};
+
+type DialogSetters = CurrencyFormSetters & {
+  readonly setDialogOpen: (open: boolean) => void;
+};
+
+type DeleteSetters = {
+  readonly setDeletingRow: (row: HedgeRow | null) => void;
+  readonly setDeleteOpen: (open: boolean) => void;
+};
+
+function applyHedgeForm(setters: CurrencyFormSetters, row: HedgeRow) {
+  setters.setCurrency(row.currency);
+  setters.setAmount(row.amount);
+  setters.setHedgeType(row.hedgeType);
+  setters.setNotes(row.notes ?? "");
+  setters.setEditingRow(row);
+}
+
+function resetHedgeForm(setters: CurrencyFormSetters) {
+  setters.setCurrency(CurrencyCode.Usd);
+  setters.setAmount("");
+  setters.setHedgeType(HEDGE_TYPE_LONG);
+  setters.setNotes("");
+  setters.setEditingRow(null);
+}
+
+function openAddDialog(setters: DialogSetters) {
+  resetHedgeForm(setters);
+  setters.setDialogOpen(true);
+}
+
+function openEditDialog(setters: DialogSetters, row: HedgeRow) {
+  applyHedgeForm(setters, row);
+  setters.setDialogOpen(true);
+}
+
+function openDeleteDialog(setters: DeleteSetters, row: HedgeRow) {
+  setters.setDeletingRow(row);
+  setters.setDeleteOpen(true);
+}
+
+function toHedgeRows(data: Operations.CurrencyHedgesQuery_Query | undefined): readonly HedgeRow[] {
+  return (data?.currencyHedges ?? [])
+    .filter((row): row is NonNullable<typeof row> => row != null && row.id != null)
+    .map(row => ({
+      id: row.id ?? "",
+      currency: row.currency ?? CurrencyCode.Usd,
+      amount: row.amount ?? "0",
+      hedgeType: row.hedgeType ?? "",
+      notes: row.notes ?? null,
+      updatedAt: row.updatedAt ?? null,
+    }));
+}
+
+function buildCurrencyHedgesViewModel(args: {
+  readonly rows: readonly HedgeRow[];
+  readonly loading: boolean;
+  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["billingCurrencyHedges"];
+  readonly onEdit: (row: HedgeRow) => void;
+  readonly onDelete: (row: HedgeRow) => void;
+  readonly onAdd: () => void;
+}): CurrencyHedgesViewModel {
+  const { rows, loading, t, onEdit, onDelete, onAdd } = args;
+  return {
+    rows,
+    loading,
+    pageTitle: t.pageTitle,
+    pageSubtitle: t.pageSubtitle,
+    emptyMessage: t.empty,
+    addHedgeLabel: t.addHedge,
+    currencyColumnLabel: t.columns.currency,
+    amountColumnLabel: t.columns.amount,
+    hedgeTypeColumnLabel: t.columns.hedgeType,
+    notesColumnLabel: t.columns.notes,
+    updatedAtColumnLabel: t.columns.updatedAt,
+    actionsColumnLabel: t.columns.actions,
+    editHedgeLabel: t.editHedge,
+    deleteHedgeLabel: t.deleteHedge,
+    onEdit,
+    onDelete,
+    onAdd,
+  };
+}
 
 export type UseCurrencyHedgesViewModelProps = Record<string, never>;
 
@@ -48,72 +140,45 @@ export function useCurrencyHedgesViewModel(_props: Readonly<UseCurrencyHedgesVie
   const [, setDeletingRow] = useState<HedgeRow | null>(null);
   const [, setCurrency] = useState<CurrencyCode>(CurrencyCode.Usd);
   const [, setAmount] = useState("");
-  const [, setHedgeType] = useState(INITIAL_HEDGE_TYPE);
+  const [, setHedgeType] = useState<string>(INITIAL_HEDGE_TYPE);
   const [, setNotes] = useState("");
 
   const { data, loading } = useQuery(currencyHedgesQueryDocument, {
     fetchPolicy: "cache-and-network",
   });
 
-  const rows = useMemo<HedgeRow[]>(
-    () =>
-      (data?.currencyHedges ?? [])
-        .filter((row): row is NonNullable<typeof row> => row != null && row.id != null)
-        .map(row => ({
-          id: row.id ?? "",
-          currency: row.currency ?? CurrencyCode.Usd,
-          amount: row.amount ?? "0",
-          hedgeType: row.hedgeType ?? "",
-          notes: row.notes ?? null,
-          updatedAt: row.updatedAt ?? null,
-        })),
-    [data?.currencyHedges]
+  const rows = useMemo<readonly HedgeRow[]>(() => toHedgeRows(data), [data]);
+
+  const dialogSetters = useMemo<DialogSetters>(
+    () => ({
+      setCurrency,
+      setAmount,
+      setHedgeType,
+      setNotes,
+      setEditingRow,
+      setDialogOpen,
+    }),
+    []
+  );
+  const deleteSetters = useMemo<DeleteSetters>(() => ({ setDeletingRow, setDeleteOpen }), []);
+
+  const onAdd = useCallback(() => {
+    openAddDialog(dialogSetters);
+  }, [dialogSetters]);
+
+  const onEdit = useCallback(
+    (row: HedgeRow) => {
+      openEditDialog(dialogSetters, row);
+    },
+    [dialogSetters]
   );
 
-  const resetForm = () => {
-    setCurrency(CurrencyCode.Usd);
-    setAmount("");
-    setHedgeType(HEDGE_TYPE_LONG);
-    setNotes("");
-    setEditingRow(null);
-  };
+  const onDelete = useCallback(
+    (row: HedgeRow) => {
+      openDeleteDialog(deleteSetters, row);
+    },
+    [deleteSetters]
+  );
 
-  const onAdd = () => {
-    resetForm();
-    setDialogOpen(true);
-  };
-
-  const onEdit = useCallback((row: HedgeRow) => {
-    setEditingRow(row);
-    setCurrency(row.currency);
-    setAmount(row.amount);
-    setHedgeType(row.hedgeType);
-    setNotes(row.notes ?? "");
-    setDialogOpen(true);
-  }, []);
-
-  const onDelete = (row: HedgeRow) => {
-    setDeletingRow(row);
-    setDeleteOpen(true);
-  };
-
-  return {
-    rows,
-    loading,
-    pageTitle: t.pageTitle,
-    pageSubtitle: t.pageSubtitle,
-    emptyMessage: t.empty,
-    addHedgeLabel: t.addHedge,
-    currencyColumnLabel: t.columns.currency,
-    amountColumnLabel: t.columns.amount,
-    hedgeTypeColumnLabel: t.columns.hedgeType,
-    notesColumnLabel: t.columns.notes,
-    updatedAtColumnLabel: t.columns.updatedAt,
-    actionsColumnLabel: t.columns.actions,
-    editHedgeLabel: t.editHedge,
-    deleteHedgeLabel: t.deleteHedge,
-    onEdit,
-    onDelete,
-    onAdd,
-  };
+  return buildCurrencyHedgesViewModel({ rows, loading, t, onEdit, onDelete, onAdd });
 }

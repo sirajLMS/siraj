@@ -234,37 +234,24 @@ export namespace CreditService {
       );
     }
 
-    const ledgerKey = deriveBookingIdempotencyKey({
+    await runIdempotentBookingLedgerOp({
       studentId,
       classInstanceId,
+      creditedByUserId,
+      idempotencyKey,
+      tx,
       operation: "deduct",
-    });
-
-    try {
-      const existing = await CreditRepository.findByIdempotencyKeys([ledgerKey, idempotencyKey], tx);
-      if (existing.length === 0) {
-        await CreditRepository.deductForBooking(tx, {
+      successLogMessage: "Credit deducted for booking",
+      errorLogMessage: "Failed to deduct credit for booking",
+      applyLedgerChange: async effectiveIdempotencyKey =>
+        CreditRepository.deductForBooking(tx, {
           studentId,
           classInstanceId,
           creditedByUserId,
-          idempotencyKey: ledgerKey,
-        });
-        await StudentRepository.deductClasses(studentId, 1, tErrors, undefined, tx);
-      }
-
-      logger.info("Credit deducted for booking", {
-        studentId,
-        classInstanceId,
-        creditedByUserId,
-      });
-    } catch (error) {
-      logger.error("Failed to deduct credit for booking", {
-        studentId,
-        classInstanceId,
-        error,
-      });
-      throw error;
-    }
+          idempotencyKey: effectiveIdempotencyKey,
+        }),
+      adjustStudentClasses: () => StudentRepository.deductClasses(studentId, 1, tErrors, undefined, tx),
+    });
   }
 
   export async function refundOnCancel(
@@ -275,36 +262,66 @@ export namespace CreditService {
     tx: DBTransaction,
     tErrors: ErrorsLabels
   ): Promise<void> {
-    const ledgerKey = deriveBookingIdempotencyKey({
+    await runIdempotentBookingLedgerOp({
       studentId,
       classInstanceId,
+      creditedByUserId,
+      idempotencyKey,
+      tx,
       operation: "refund",
-    });
-
-    try {
-      const existing = await CreditRepository.findByIdempotencyKeys([ledgerKey, idempotencyKey], tx);
-      if (existing.length === 0) {
-        await CreditRepository.refundOnCancel(tx, {
+      successLogMessage: "Credit refunded on cancel",
+      errorLogMessage: "Failed to refund credit on cancel",
+      applyLedgerChange: async effectiveIdempotencyKey =>
+        CreditRepository.refundOnCancel(tx, {
           studentId,
           classInstanceId,
           creditedByUserId,
-          idempotencyKey: ledgerKey,
-        });
-        await StudentRepository.addClasses(studentId, 1, tErrors, undefined, tx);
-      }
+          idempotencyKey: effectiveIdempotencyKey,
+        }),
+      adjustStudentClasses: () => StudentRepository.addClasses(studentId, 1, tErrors, undefined, tx),
+    });
+  }
+}
 
-      logger.info("Credit refunded on cancel", {
-        studentId,
-        classInstanceId,
-        creditedByUserId,
-      });
-    } catch (error) {
-      logger.error("Failed to refund credit on cancel", {
-        studentId,
-        classInstanceId,
-        error,
-      });
-      throw error;
+interface IdempotentBookingLedgerOp {
+  studentId: string;
+  classInstanceId: string;
+  creditedByUserId: string;
+  idempotencyKey: string;
+  tx: DBTransaction;
+  operation: "deduct" | "refund";
+  successLogMessage: string;
+  errorLogMessage: string;
+  applyLedgerChange: (effectiveIdempotencyKey: string) => Promise<unknown>;
+  adjustStudentClasses: () => Promise<unknown>;
+}
+
+async function runIdempotentBookingLedgerOp(op: IdempotentBookingLedgerOp): Promise<void> {
+  const ledgerKey = deriveBookingIdempotencyKey({
+    studentId: op.studentId,
+    classInstanceId: op.classInstanceId,
+    operation: op.operation,
+  });
+
+  const logContext = {
+    studentId: op.studentId,
+    classInstanceId: op.classInstanceId,
+    creditedByUserId: op.creditedByUserId,
+  };
+
+  try {
+    const existing = await CreditRepository.findByIdempotencyKeys([ledgerKey, op.idempotencyKey], op.tx);
+    if (existing.length === 0) {
+      await op.applyLedgerChange(ledgerKey);
+      await op.adjustStudentClasses();
     }
+
+    logger.info(op.successLogMessage, logContext);
+  } catch (error) {
+    logger.error(op.errorLogMessage, {
+      ...logContext,
+      error,
+    });
+    throw error;
   }
 }

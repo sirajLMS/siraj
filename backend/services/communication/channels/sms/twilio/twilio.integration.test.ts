@@ -68,6 +68,35 @@ describeLive("TwilioSmsAdapter @live-comm", () => {
   let createDeliverySpy: ReturnType<typeof spyOn>;
   let updateDeliveryStatusSpy: ReturnType<typeof spyOn>;
 
+  /**
+   * Sends an SMS to the `TWILIO_VERIFIED_TEST_RECIPIENT` (when present) and
+   * asserts the adapter returns a successful result with a Twilio `SM…` SID.
+   * Shared by the T2 / T6 / T7 live-recipient tests to avoid Code Duplication.
+   * Throws synchronously if the env var is missing so Bun reports a setup error
+   * rather than a false assertion failure.
+   */
+  async function sendAndAssertSmsResponse(options: { smsCountInLastHour?: number; testLabel: string }) {
+    const verifiedTo = process.env.TWILIO_VERIFIED_TEST_RECIPIENT;
+    if (!verifiedTo) {
+      throw new Error("set TWILIO_VERIFIED_TEST_RECIPIENT to run");
+    }
+    if (options.smsCountInLastHour !== undefined) {
+      getSmsCountSpy.mockResolvedValue(options.smsCountInLastHour);
+    }
+
+    const adapter = new TwilioSmsAdapter();
+    const result = await adapter.send(smsPayload({ to: verifiedTo }));
+
+    testLogger.debug(`${options.testLabel} Twilio send result`, {
+      success: result.success,
+      hasProviderMessageId: Boolean(result.providerMessageId),
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.providerMessageId).toMatch(/^SM[a-f0-9]{30,}$/i);
+    return result;
+  }
+
   beforeEach(() => {
     getSmsCountSpy = spyOn(NotificationRepository, "getSmsCountInLastHour").mockResolvedValue(0);
     createDeliverySpy = spyOn(NotificationRepository, "createDelivery").mockResolvedValue(mockDelivery);
@@ -90,20 +119,7 @@ describeLive("TwilioSmsAdapter @live-comm", () => {
   test.skipIf(!process.env.TWILIO_VERIFIED_TEST_RECIPIENT)(
     "T2: send() to verified recipient returns success with SM… providerMessageId",
     async () => {
-      const verifiedTo = process.env.TWILIO_VERIFIED_TEST_RECIPIENT;
-      if (!verifiedTo) {
-        throw new Error("set TWILIO_VERIFIED_TEST_RECIPIENT to run");
-      }
-      const adapter = new TwilioSmsAdapter();
-      const result = await adapter.send(smsPayload({ to: verifiedTo }));
-
-      testLogger.debug("T2 Twilio send result", {
-        success: result.success,
-        hasProviderMessageId: Boolean(result.providerMessageId),
-      });
-
-      expect(result.success).toBe(true);
-      expect(result.providerMessageId).toMatch(/^SM[a-f0-9]{30,}$/i);
+      await sendAndAssertSmsResponse({ testLabel: "T2" });
     }
   );
 
@@ -160,22 +176,7 @@ describeLive("TwilioSmsAdapter @live-comm", () => {
   test.skipIf(!process.env.TWILIO_VERIFIED_TEST_RECIPIENT)(
     "T6: just-under rate limit (2/3) proceeds and returns real providerMessageId",
     async () => {
-      const verifiedTo = process.env.TWILIO_VERIFIED_TEST_RECIPIENT;
-      if (!verifiedTo) {
-        throw new Error("set TWILIO_VERIFIED_TEST_RECIPIENT to run");
-      }
-      getSmsCountSpy.mockResolvedValue(2);
-
-      const adapter = new TwilioSmsAdapter();
-      const result = await adapter.send(smsPayload({ to: verifiedTo }));
-
-      testLogger.debug("T6 Twilio send result", {
-        success: result.success,
-        hasProviderMessageId: Boolean(result.providerMessageId),
-      });
-
-      expect(result.success).toBe(true);
-      expect(result.providerMessageId).toMatch(/^SM[a-f0-9]{30,}$/i);
+      await sendAndAssertSmsResponse({ testLabel: "T6", smsCountInLastHour: 2 });
     }
   );
 
@@ -183,15 +184,7 @@ describeLive("TwilioSmsAdapter @live-comm", () => {
   test.skipIf(!process.env.TWILIO_VERIFIED_TEST_RECIPIENT)(
     "T7: successful send updates delivery status to SENT with real SM SID",
     async () => {
-      const verifiedTo = process.env.TWILIO_VERIFIED_TEST_RECIPIENT;
-      if (!verifiedTo) {
-        throw new Error("set TWILIO_VERIFIED_TEST_RECIPIENT to run");
-      }
-      const adapter = new TwilioSmsAdapter();
-      const result = await adapter.send(smsPayload({ to: verifiedTo }));
-
-      expect(result.success).toBe(true);
-      expect(result.providerMessageId).toMatch(/^SM[a-f0-9]{30,}$/i);
+      const result = await sendAndAssertSmsResponse({ testLabel: "T7" });
 
       expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
         expect.objectContaining({

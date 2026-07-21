@@ -30,7 +30,14 @@ async function getSessionCookies(): Promise<{ sessionId: string | null; token: s
   };
 }
 
-async function validateSessionAndToken(sessionId: string, token: string): Promise<{ userId: string } | null> {
+/**
+ * Validate the long-lived `session_id` cookie against the DB session store.
+ * The `session_id` cookie has a 7-day lifetime and survives the 15-minute
+ * `access_token` cookie expiry window — so it is the right anchor for SSR
+ * auth (see docs/auth/REDIRECT_LOOP_FIX.md). Returns the userId bound to the
+ * session, or null when the session is missing/invalid.
+ */
+async function validateSession(sessionId: string): Promise<{ userId: string } | null> {
   let session: Awaited<ReturnType<typeof SessionService.validateSession>>;
   try {
     session = await SessionService.validateSession(sessionId);
@@ -48,6 +55,16 @@ async function validateSessionAndToken(sessionId: string, token: string): Promis
     return null;
   }
 
+  return { userId: session.userId };
+}
+
+/**
+ * Verify the short-lived `access_token` cookie JWT. The cookie expires after
+ * 15 minutes by design (matches `JWT_ACCESS_TOKEN_EXPIRY`); an absent or
+ * expired cookie here does NOT invalidate the SSR session — the caller falls
+ * back to session-only auth + a baseline permission context.
+ */
+async function verifyAccessToken(token: string): Promise<CustomJWTPayload | null> {
   const payload = await verifyToken(token);
   if (payload?.type !== "access") {
     logger.info("[AuthRedirect] getServerUserContext: access token invalid or wrong type", {
@@ -55,8 +72,7 @@ async function validateSessionAndToken(sessionId: string, token: string): Promis
     });
     return null;
   }
-
-  return { userId: session.userId };
+  return payload;
 }
 
 async function resolveImpersonation(
@@ -107,25 +123,60 @@ async function resolveGroupSimulation(
   };
 }
 
+/**
+ * Baseline context when the `access_token` cookie is absent/expired but the
+ * `session_id` cookie still resolves to a valid DB session. The client-side
+ * `AuthProvider` will rotate the access token via the `refreshToken` GraphQL
+ * mutation on the next mount/reload; in the meantime SSR must not bounce the
+ * user to /login just because the 15-min cookie expired between navigations.
+ */
+async function buildSessionOnlyContext(userId: string): Promise<ServerUserContextResult> {
+  const context = await PermissionsService.getUserContext(userId);
+  return {
+    userId,
+    isImpersonating: false,
+    isSimulatingGroup: false,
+    context,
+  };
+}
+
 async function getServerUserContextImpl(): Promise<ServerUserContextResult> {
   const { sessionId, token } = await getSessionCookies();
 
-  if (!sessionId || !token) {
-    logger.info("[AuthRedirect] getServerUserContext: no session cookies", {
-      hasSessionId: Boolean(sessionId),
+  if (!sessionId) {
+    logger.info("[AuthRedirect] getServerUserContext: no session_id cookie", {
+      hasSessionId: false,
       hasAccessToken: Boolean(token),
     });
     return emptyContextResult();
   }
 
-  const sessionInfo = await validateSessionAndToken(sessionId, token);
+  const sessionInfo = await validateSession(sessionId);
   if (!sessionInfo) {
     return emptyContextResult();
   }
 
-  const payload = await verifyToken(token);
+  // No access_token cookie (or it expired after 15 min). Trust the long-lived
+  // session_id cookie alone — the documented architecture (see
+  // docs/auth/REDIRECT_LOOP_FIX.md) treats absence of the access_token cookie
+  // as "stale cookie, client will rotate", not as "logged out".
+  if (!token) {
+    logger.info("[AuthRedirect] getServerUserContext: no access_token cookie — using session-only auth", {
+      hasSessionId: true,
+      hasAccessToken: false,
+      userId: sessionInfo.userId,
+    });
+    return buildSessionOnlyContext(sessionInfo.userId);
+  }
+
+  const payload = await verifyAccessToken(token);
   if (!payload) {
-    return emptyContextResult();
+    logger.info("[AuthRedirect] getServerUserContext: access_token cookie expired/invalid — using session-only auth", {
+      hasSessionId: true,
+      hasAccessToken: true,
+      userId: sessionInfo.userId,
+    });
+    return buildSessionOnlyContext(sessionInfo.userId);
   }
 
   const impersonationResult = await resolveImpersonation(payload, sessionId);
@@ -134,7 +185,7 @@ async function getServerUserContextImpl(): Promise<ServerUserContextResult> {
   }
 
   const groupSimulationResult = await resolveGroupSimulation(payload, sessionId);
-  return groupSimulationResult ?? emptyContextResult();
+  return groupSimulationResult ?? buildSessionOnlyContext(sessionInfo.userId);
 }
 
 export const getServerUserContext = cache(getServerUserContextImpl);

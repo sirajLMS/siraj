@@ -116,124 +116,121 @@ const MOCK_REPORTS = [
   },
 ];
 
+function pendingLessonReportsMock(): MockLink.MockedResponse {
+  return {
+    request: {
+      query: pendingLessonReportsQueryDocument,
+      variables: {
+        teacherId: null,
+        studentId: null,
+        paginationArgs: { first: 25, page: 1, after: null, before: null, last: null, maxCount: null, skip: null },
+      },
+    },
+    result: { data: { pendingLessonReports: { rows: MOCK_REPORTS, totalCount: MOCK_REPORTS.length } } },
+  };
+}
+
+function makeTeacherRow(id: string, userId: string, index: number, name: string) {
+  return { id, userId, index, name, status: "ACTIVE", email: null, avatarUrl: null };
+}
+
+function makeTeacherDirectoryMock(): MockLink.MockedResponse {
+  return {
+    request: {
+      query: teacherDirectoryQueryDocument,
+      variables: { search: null, paginationArgs: DIRECTORY_PAGINATION },
+    },
+    result: {
+      data: {
+        teacherDirectory: {
+          id: "dir",
+          metrics: { id: "m", activated: 0, deactivated: 0 },
+          rows: [
+            makeTeacherRow("teacher-1", "user-t1", 1, "Teacher One"),
+            makeTeacherRow("teacher-2", "user-t2", 2, "Teacher Two"),
+          ],
+          totalTeachers: 2,
+          pageInfo: {
+            count: 2,
+            currentPage: 1,
+            firstItem: null,
+            hasMorePages: false,
+            lastItem: null,
+            lastPage: 1,
+            perPage: 100,
+            total: 2,
+          },
+        },
+      },
+    },
+  };
+}
+
+function makeStudentRow(id: string, name: string) {
+  return {
+    id,
+    name,
+    email: null,
+    avatarUrl: null,
+    status: "ACTIVE",
+    classesRemaining: null,
+    classesTotal: null,
+    hoursPerWeek: null,
+    teacherName: null,
+    createdAt: null,
+    updatedAt: null,
+  };
+}
+
+function makeStudentsDirectoryMock(): MockLink.MockedResponse {
+  return {
+    request: {
+      query: studentsDirectoryQueryDocument,
+      variables: { search: null, limit: 100 },
+    },
+    result: {
+      data: {
+        studentsDirectory: [makeStudentRow("student-1", "Student One"), makeStudentRow("student-2", "Student Two")],
+      },
+    },
+  };
+}
+
+function approveLessonReportMock(): MockLink.MockedResponse {
+  return {
+    request: {
+      query: approveLessonReportMutationDocument,
+      variables: { reportId: "report-1" },
+    },
+    result: { data: { approveLessonReport: { ...MOCK_REPORTS[0], status: LessonReportStatus.Approved } } },
+  };
+}
+
+function rejectLessonReportMock(): MockLink.MockedResponse {
+  return {
+    request: {
+      query: rejectLessonReportMutationDocument,
+      variables: { reportId: "report-2", rejectionReason: "Incomplete" },
+    },
+    result: {
+      data: {
+        rejectLessonReport: {
+          ...MOCK_REPORTS[1],
+          status: LessonReportStatus.Rejected,
+          rejectionReason: "Incomplete",
+        },
+      },
+    },
+  };
+}
+
 function createMocks(): MockLink.MockedResponse[] {
   return [
-    {
-      request: {
-        query: pendingLessonReportsQueryDocument,
-        variables: {
-          teacherId: null,
-          studentId: null,
-          paginationArgs: { first: 25, page: 1, after: null, before: null, last: null, maxCount: null, skip: null },
-        },
-      },
-      result: { data: { pendingLessonReports: { rows: MOCK_REPORTS, totalCount: MOCK_REPORTS.length } } },
-    },
-    {
-      request: {
-        query: teacherDirectoryQueryDocument,
-        variables: { search: null, paginationArgs: DIRECTORY_PAGINATION },
-      },
-      result: {
-        data: {
-          teacherDirectory: {
-            id: "dir",
-            metrics: { id: "m", activated: 0, deactivated: 0 },
-            rows: [
-              {
-                id: "teacher-1",
-                userId: "user-t1",
-                index: 1,
-                name: "Teacher One",
-                status: "ACTIVE",
-                email: null,
-                avatarUrl: null,
-              },
-              {
-                id: "teacher-2",
-                userId: "user-t2",
-                index: 2,
-                name: "Teacher Two",
-                status: "ACTIVE",
-                email: null,
-                avatarUrl: null,
-              },
-            ],
-            totalTeachers: 2,
-            pageInfo: {
-              count: 2,
-              currentPage: 1,
-              firstItem: null,
-              hasMorePages: false,
-              lastItem: null,
-              lastPage: 1,
-              perPage: 100,
-              total: 2,
-            },
-          },
-        },
-      },
-    },
-    {
-      request: {
-        query: studentsDirectoryQueryDocument,
-        variables: { search: null, limit: 100 },
-      },
-      result: {
-        data: {
-          studentsDirectory: [
-            {
-              id: "student-1",
-              name: "Student One",
-              email: null,
-              avatarUrl: null,
-              status: "ACTIVE",
-              classesRemaining: null,
-              classesTotal: null,
-              hoursPerWeek: null,
-              teacherName: null,
-              createdAt: null,
-              updatedAt: null,
-            },
-            {
-              id: "student-2",
-              name: "Student Two",
-              email: null,
-              avatarUrl: null,
-              status: "ACTIVE",
-              classesRemaining: null,
-              classesTotal: null,
-              hoursPerWeek: null,
-              teacherName: null,
-              createdAt: null,
-              updatedAt: null,
-            },
-          ],
-        },
-      },
-    },
-    {
-      request: {
-        query: approveLessonReportMutationDocument,
-        variables: { reportId: "report-1" },
-      },
-      result: { data: { approveLessonReport: { ...MOCK_REPORTS[0], status: LessonReportStatus.Approved } } },
-    },
-    {
-      request: {
-        query: rejectLessonReportMutationDocument,
-        variables: { reportId: "report-2", rejectionReason: "Incomplete" },
-      },
-      result: {
-        data: {
-          rejectLessonReport: {
-            ...MOCK_REPORTS[1],
-            status: LessonReportStatus.Rejected,
-            rejectionReason: "Incomplete",
-          },
-        },
-      },
-    },
+    pendingLessonReportsMock(),
+    makeTeacherDirectoryMock(),
+    makeStudentsDirectoryMock(),
+    approveLessonReportMock(),
+    rejectLessonReportMock(),
   ];
 }
 
@@ -279,7 +276,7 @@ describe("PendingReviewsContainer", () => {
     });
   });
 
-  test("renders an approve button for each pending review row", async () => {
+  async function renderAndFindReviewButtons(buttonName: string): Promise<HTMLElement[]> {
     renderWithWrapper(<PendingReviewsEntry />, {
       locale: "en",
       permissions: [],
@@ -287,23 +284,18 @@ describe("PendingReviewsContainer", () => {
       mocks: createMocks(),
     });
 
-    const approveButtons = await screen.findAllByRole("button", { name: "Approve" });
-    expect(approveButtons).toHaveLength(2);
-    expect(approveButtons[0]).toBeVisible();
-    expect(approveButtons[1]).toBeVisible();
+    const buttons = await screen.findAllByRole("button", { name: buttonName });
+    expect(buttons).toHaveLength(2);
+    expect(buttons[0]).toBeVisible();
+    expect(buttons[1]).toBeVisible();
+    return buttons;
+  }
+
+  test("renders an approve button for each pending review row", async () => {
+    await renderAndFindReviewButtons("Approve");
   });
 
   test("renders a reject button for each pending review row", async () => {
-    renderWithWrapper(<PendingReviewsEntry />, {
-      locale: "en",
-      permissions: [],
-      viewport: "desktop",
-      mocks: createMocks(),
-    });
-
-    const rejectButtons = await screen.findAllByRole("button", { name: "Reject" });
-    expect(rejectButtons).toHaveLength(2);
-    expect(rejectButtons[0]).toBeVisible();
-    expect(rejectButtons[1]).toBeVisible();
+    await renderAndFindReviewButtons("Reject");
   });
 });

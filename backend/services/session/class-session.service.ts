@@ -104,7 +104,7 @@ export namespace ClassSessionService {
    *                        so the `deletedAt IS NULL` filter in
    *                        `getClassInstanceAffectedUsers` does not yield
    *                        `null` after the soft-delete commit).
-   * @param metadata         Optional metadata bag (e.g. `override`, `newStartAt`).
+   * @param metadata         Optional metadata bag (_e._g. `override`, `_newStartAt`).
    * @param locale           Optional locale forwarded to `dispatchWithPreferences`.
    */
   async function notifyClassLifecycle(
@@ -145,6 +145,25 @@ export namespace ClassSessionService {
     if (!instance.quotaDeducted) return;
     const idempotencyKey = `credit-refund:${instance.id}`;
     await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, tErrors);
+  }
+
+  /**
+   * Shared post-action dispatch: resolves affected users from the live row
+   * and emits the given lifecycle event. Consolidates the duplicated
+   * `if (result) { resolve + notify }` block repeated across all state
+   * changes whose row stays live after commit. The `dispatch` value is
+   * loosely typed so callers can pass either a boolean flag or an
+   * optional object that is truthy when the action succeeded.
+   */
+  async function notifyAffectedForInstance(
+    dispatch: unknown,
+    classInstanceId: string,
+    eventType: NotificationEventType,
+    metadata?: Record<string, string>
+  ): Promise<void> {
+    if (!dispatch) return;
+    const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
+    await notifyClassLifecycle(classInstanceId, eventType, affected, metadata);
   }
 
   async function assertSessionActivated(
@@ -199,11 +218,7 @@ export namespace ClassSessionService {
     const instance = await getOrThrow(classInstanceId, tErrors);
     await SystemRulesService.assertActivationTimeWindow(instance);
     const result = await SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: false });
-
-    if (result) {
-      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
-      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_ACTIVATED, affected);
-    }
+    await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_ACTIVATED);
     return result;
   }
 
@@ -212,24 +227,16 @@ export namespace ClassSessionService {
     await assertPermission(userId, AppPermission.SESSION_ACTIVATE_OVERRIDE, tErrors);
     await getOrThrow(classInstanceId, tErrors);
     const result = await SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: true });
-
-    if (result) {
-      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
-      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_ACTIVATED, affected, {
-        override: "true",
-      });
-    }
+    await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_ACTIVATED, {
+      override: "true",
+    });
     return result;
   }
 
   export async function stop(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
     const result = await SchedulingRepository.stopClassInstance(classInstanceId, userId);
-
-    if (result) {
-      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
-      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_COMPLETED, affected);
-    }
+    await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_COMPLETED);
     return result;
   }
 
@@ -269,11 +276,7 @@ export namespace ClassSessionService {
       () => SchedulingRepository.startClassInstance(classInstanceId, userId),
       tErrors
     );
-
-    if (result) {
-      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
-      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_STARTED, affected);
-    }
+    await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_STARTED);
     return result;
   };
 
@@ -288,11 +291,7 @@ export namespace ClassSessionService {
       },
       tErrors
     );
-
-    if (result) {
-      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
-      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_MARKED_ABSENT, affected);
-    }
+    await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_MARKED_ABSENT);
     return result;
   };
 
@@ -315,11 +314,75 @@ export namespace ClassSessionService {
       return processed;
     });
 
-    if (result) {
-      const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
-      await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_LEAVE_REQUESTED, affected);
-    }
+    await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_LEAVE_REQUESTED);
     return result;
+  }
+
+  /**
+   * Compute a teacher-leave quota warning note for the reschedule. Returns
+   * `null` when the existing instance has no teacher or the leave quota is
+   * not yet exhausted.
+   */
+  async function computeLeaveQuotaNote(teacherId: string | null, tSession: SessionLabels): Promise<string | null> {
+    if (!teacherId) return null;
+
+    const now = new Date();
+    const periodYear = now.getUTCFullYear();
+    const periodMonth = now.getUTCMonth() + 1;
+    const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2);
+    const usedLeaves = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacherId, periodYear, periodMonth);
+
+    if (usedLeaves >= maxLeaves) {
+      return tSession.teacherQuotaExhaustedNote(usedLeaves, maxLeaves);
+    }
+    return null;
+  }
+
+  /**
+   * Combine existing remarks with an appended quota note (if any). Existing
+   * remarks are preserved verbatim; the quota note is joined on its own
+   * line. Returns `null` when both are absent.
+   */
+  function buildRescheduleRemarks(existingRemarks: string | null, quotaNote: string | null): string | null {
+    const parts: string[] = [];
+    if (existingRemarks) parts.push(existingRemarks);
+    if (quotaNote) parts.push(quotaNote);
+    return parts.length > 0 ? parts.join("\n") : null;
+  }
+
+  /**
+   * Assemble the successor instance insert payload for `reschedule`. Copies
+   * identity/billing fields from the existing instance, resets lifecycle
+   * flags, and stamps a unique idempotency key derived from the new start
+   * time.
+   */
+  function buildRescheduleInsert(
+    classInstanceId: string,
+    existing: Awaited<ReturnType<typeof getOrThrow>>,
+    input: { scheduledStartAt: Date; scheduledEndAt: Date; durationMinutes: number },
+    finalRemarks: string | null
+  ) {
+    const idempotencyKey = `manual-reschedule-${classInstanceId}-${input.scheduledStartAt.toISOString()}`;
+    return {
+      studentId: existing.studentId,
+      teacherId: existing.teacherId,
+      subjectId: existing.subjectId,
+      recurringScheduleId: existing.recurringScheduleId,
+      scheduledStartAt: input.scheduledStartAt,
+      scheduledEndAt: input.scheduledEndAt,
+      durationMinutes: input.durationMinutes,
+      classType: existing.classType,
+      executionState: "NOT_ACTIVATED" as const,
+      outcome: "PENDING" as const,
+      isRescheduled: false,
+      quotaDeducted: false,
+      payrollCredited: false,
+      rateAmount: existing.rateAmount,
+      rateCurrency: existing.rateCurrency,
+      isRateOverridden: existing.isRateOverridden,
+      remarks: finalRemarks,
+      idempotencyKey,
+    };
   }
 
   export async function reschedule(
@@ -336,58 +399,12 @@ export namespace ClassSessionService {
     await assertPermission(userId, AppPermission.SESSION_RESCHEDULE, tErrors);
     const existing = await getOrThrow(classInstanceId, tErrors);
 
-    let quotaNote: string | null = null;
-    if (existing.teacherId) {
-      const now = new Date();
-      const periodYear = now.getUTCFullYear();
-      const periodMonth = now.getUTCMonth() + 1;
-      const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2);
-      const usedLeaves = await SchedulingRepository.getTeacherLeaveQuotaUsage(
-        existing.teacherId,
-        periodYear,
-        periodMonth
-      );
+    const quotaNote = await computeLeaveQuotaNote(existing.teacherId, tSession);
+    const finalRemarks = buildRescheduleRemarks(existing.remarks, quotaNote);
 
-      if (usedLeaves >= maxLeaves) {
-        quotaNote = tSession.teacherQuotaExhaustedNote(usedLeaves, maxLeaves);
-      }
-    }
-
-    const remarksParts: string[] = [];
-    if (existing.remarks) {
-      remarksParts.push(existing.remarks);
-    }
-    if (quotaNote) {
-      remarksParts.push(quotaNote);
-    }
-    const finalRemarks = remarksParts.length > 0 ? remarksParts.join("\n") : null;
-
-    const idempotencyKey = `manual-reschedule-${classInstanceId}-${input.scheduledStartAt.toISOString()}`;
     const created = await db.transaction(async tx => {
-      const newInstance = await SchedulingRepository.rescheduleClassInstance(
-        classInstanceId,
-        {
-          studentId: existing.studentId,
-          teacherId: existing.teacherId,
-          subjectId: existing.subjectId,
-          recurringScheduleId: existing.recurringScheduleId,
-          scheduledStartAt: input.scheduledStartAt,
-          scheduledEndAt: input.scheduledEndAt,
-          durationMinutes: input.durationMinutes,
-          classType: existing.classType,
-          executionState: "NOT_ACTIVATED" as const,
-          outcome: "PENDING" as const,
-          isRescheduled: false,
-          quotaDeducted: false,
-          payrollCredited: false,
-          rateAmount: existing.rateAmount,
-          rateCurrency: existing.rateCurrency,
-          isRateOverridden: existing.isRateOverridden,
-          remarks: finalRemarks,
-          idempotencyKey,
-        },
-        tx
-      );
+      const insertPayload = buildRescheduleInsert(classInstanceId, existing, input, finalRemarks);
+      const newInstance = await SchedulingRepository.rescheduleClassInstance(classInstanceId, insertPayload, tx);
 
       if (existing.quotaDeducted && existing.deletedAt === null) {
         const tErrorsLocal = getServerTranslations("ar").errorsTranslations;

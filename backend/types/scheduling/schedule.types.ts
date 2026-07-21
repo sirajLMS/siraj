@@ -139,6 +139,13 @@ export type AdminDashboardScheduleInputType = {
   paginationArgs?: import("@/backend/types/shared/pagination.types").PaginationInput | null;
 };
 
+export type DailyScheduleArgs = {
+  date: string;
+  teacherId?: string | null;
+  search?: string | null;
+  metricFilter?: string | null;
+};
+
 export type AdminDashboardScheduleReturnType = {
   id: string;
   totalCount: number;

@@ -2,113 +2,161 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { NotificationRepository } from "@/backend/db/repo";
 import { complaints, notificationDeliveries } from "@/backend/db/schema";
-import {
-  AppPermission,
-  ComplaintStatus,
-  type NotificationChannel,
-  NotificationDeliveryStatus,
-  type NotificationEventType,
-} from "@/backend/enum";
+import { AppPermission, ComplaintStatus, NotificationDeliveryStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { NotificationAlertReturnType, NotificationAlertsPaginatedReturnType } from "@/backend/types";
+import type {
+  MarkableDeliveryRow,
+  NotificationAlertReturnType,
+  NotificationAlertsPaginatedReturnType,
+  RecentNotificationRow,
+  UnansweredComplaintRow,
+} from "@/backend/types";
 import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
 import { getServerTranslations } from "@/shared/locale";
+
+const COMPLAINT_ALERT_BODY_LIMIT = 100;
+const ALERTS_PAGE_SIZE = 20;
+const ALERTS_FEED_ID_PREFIX = "notification-alerts-";
+
+function emptyAlertsResult(userId: string): NotificationAlertsPaginatedReturnType {
+  return {
+    id: `${ALERTS_FEED_ID_PREFIX}${userId}`,
+    alerts: [],
+    totalCount: 0,
+    unreadCount: 0,
+  };
+}
+
+function raiseUnauthorizedAction(locale?: string): never {
+  const t = getServerTranslations(locale ?? "en").errorsTranslations;
+  throw new Error(t.unauthorizedAction);
+}
+
+function fetchUnansweredComplaintRows(): Promise<UnansweredComplaintRow[]> {
+  return db
+    .select({
+      id: complaints.id,
+      body: complaints.body,
+      createdAt: complaints.createdAt,
+    })
+    .from(complaints)
+    .where(and(eq(complaints.status, ComplaintStatus.UNANSWERED), isNull(complaints.deletedAt)))
+    .orderBy(desc(complaints.createdAt))
+    .limit(ALERTS_PAGE_SIZE);
+}
+
+function fetchRecentNotificationRows(userId: string): Promise<RecentNotificationRow[]> {
+  return db
+    .select({
+      id: notificationDeliveries.id,
+      title: notificationDeliveries.title,
+      body: notificationDeliveries.body,
+      createdAt: notificationDeliveries.createdAt,
+      status: notificationDeliveries.status,
+      eventType: notificationDeliveries.eventType,
+      channel: notificationDeliveries.channel,
+      metadata: notificationDeliveries.metadata,
+      openedAt: notificationDeliveries.openedAt,
+    })
+    .from(notificationDeliveries)
+    .where(eq(notificationDeliveries.userId, userId))
+    .orderBy(desc(notificationDeliveries.createdAt))
+    .limit(ALERTS_PAGE_SIZE) as Promise<RecentNotificationRow[]>;
+}
+
+async function fetchMarkableDeliveryRows(userId: string): Promise<MarkableDeliveryRow[]> {
+  const rows = await db
+    .select({
+      id: notificationDeliveries.id,
+      status: notificationDeliveries.status,
+    })
+    .from(notificationDeliveries)
+    .where(eq(notificationDeliveries.userId, userId))
+    .orderBy(desc(notificationDeliveries.createdAt))
+    .limit(ALERTS_PAGE_SIZE);
+  return rows as MarkableDeliveryRow[];
+}
+
+function buildComplaintAlert(complaint: UnansweredComplaintRow, title: string): NotificationAlertReturnType {
+  return {
+    id: `complaint-${complaint.id}`,
+    deliveryId: null,
+    type: "complaint",
+    eventType: null,
+    channel: null,
+    metadata: { entityKind: "complaint", entityId: complaint.id },
+    title,
+    body:
+      complaint.body.length > COMPLAINT_ALERT_BODY_LIMIT
+        ? `${complaint.body.substring(0, COMPLAINT_ALERT_BODY_LIMIT)}...`
+        : complaint.body,
+    createdAt: complaint.createdAt,
+    severity: "warning",
+    readAt: null,
+  };
+}
+
+function buildNotificationAlert(
+  notification: RecentNotificationRow,
+  defaultTitle: string
+): NotificationAlertReturnType {
+  return {
+    id: `notification-${notification.id}`,
+    deliveryId: notification.id,
+    type: "notification",
+    eventType: notification.eventType,
+    channel: notification.channel,
+    metadata: notification.metadata as NotificationMetadata | null,
+    title: notification.title ?? defaultTitle,
+    body: notification.body,
+    createdAt: notification.createdAt,
+    severity: notification.status === NotificationDeliveryStatus.FAILED ? "error" : "info",
+    readAt: notification.openedAt ?? null,
+  };
+}
+
+function buildAlertsFeed(
+  userId: string,
+  alerts: NotificationAlertReturnType[],
+  unreadCount: number
+): NotificationAlertsPaginatedReturnType {
+  return {
+    id: `${ALERTS_FEED_ID_PREFIX}${userId}`,
+    alerts,
+    totalCount: alerts.length,
+    unreadCount,
+  };
+}
 
 export namespace NotificationAlertsService {
   export async function getAlerts(userId: string, locale?: string): Promise<NotificationAlertsPaginatedReturnType> {
     try {
       const canViewAlerts = await PermissionsService.hasPermission(userId, AppPermission.NOTIFICATION_VIEW_ALERTS);
       if (!canViewAlerts) {
-        // Navbar always queries this field for logged-in users. Return an empty
-        // feed instead of throwing so missing permission does not surface as a
-        // GraphQL error on every page load.
-        return {
-          id: `notification-alerts-${userId}`,
-          alerts: [],
-          totalCount: 0,
-          unreadCount: 0,
-        };
+        return emptyAlertsResult(userId);
       }
 
       const tNotifications = getServerTranslations(locale ?? "en").dashboardTranslations.coreNotifications;
 
       const canListComplaints = await PermissionsService.hasPermission(userId, AppPermission.COMPLAINTS_LIST);
+      const unansweredComplaints = canListComplaints ? await fetchUnansweredComplaintRows() : [];
 
-      const unansweredComplaints = canListComplaints
-        ? await db
-            .select({
-              id: complaints.id,
-              body: complaints.body,
-              createdAt: complaints.createdAt,
-            })
-            .from(complaints)
-            .where(and(eq(complaints.status, ComplaintStatus.UNANSWERED), isNull(complaints.deletedAt)))
-            .orderBy(desc(complaints.createdAt))
-            .limit(20)
-        : [];
-
-      const recentNotifications = await db
-        .select({
-          id: notificationDeliveries.id,
-          title: notificationDeliveries.title,
-          body: notificationDeliveries.body,
-          createdAt: notificationDeliveries.createdAt,
-          status: notificationDeliveries.status,
-          eventType: notificationDeliveries.eventType,
-          channel: notificationDeliveries.channel,
-          metadata: notificationDeliveries.metadata,
-          openedAt: notificationDeliveries.openedAt,
-        })
-        .from(notificationDeliveries)
-        .where(eq(notificationDeliveries.userId, userId))
-        .orderBy(desc(notificationDeliveries.createdAt))
-        .limit(20);
+      const recentNotifications = await fetchRecentNotificationRows(userId);
 
       const alerts: NotificationAlertReturnType[] = [];
-
       for (const complaint of unansweredComplaints) {
-        alerts.push({
-          id: `complaint-${complaint.id}`,
-          deliveryId: null,
-          type: "complaint",
-          eventType: null,
-          channel: null,
-          metadata: { entityKind: "complaint", entityId: complaint.id },
-          title: tNotifications.newUnansweredComplaint,
-          body: complaint.body.length > 100 ? `${complaint.body.substring(0, 100)}...` : complaint.body,
-          createdAt: complaint.createdAt,
-          severity: "warning",
-          readAt: null,
-        });
+        alerts.push(buildComplaintAlert(complaint, tNotifications.newUnansweredComplaint));
       }
-
       for (const notification of recentNotifications) {
-        alerts.push({
-          id: `notification-${notification.id}`,
-          deliveryId: notification.id,
-          type: "notification",
-          eventType: notification.eventType as NotificationEventType,
-          channel: notification.channel as NotificationChannel,
-          metadata: notification.metadata as NotificationMetadata | null,
-          title: notification.title ?? tNotifications.defaultSystemNotification,
-          body: notification.body,
-          createdAt: notification.createdAt,
-          severity: notification.status === NotificationDeliveryStatus.FAILED ? "error" : "info",
-          readAt: notification.openedAt ?? null,
-        });
+        alerts.push(buildNotificationAlert(notification, tNotifications.defaultSystemNotification));
       }
 
       alerts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
       const unreadCount = recentNotifications.filter(n => n.status !== NotificationDeliveryStatus.OPENED).length;
 
-      return {
-        id: `notification-alerts-${userId}`,
-        alerts,
-        totalCount: alerts.length,
-        unreadCount,
-      };
+      return buildAlertsFeed(userId, alerts, unreadCount);
     } catch (error) {
       logger.error("Error fetching notification alerts", { userId, error });
       throw error;
@@ -134,20 +182,10 @@ export namespace NotificationAlertsService {
     try {
       const canViewAlerts = await PermissionsService.hasPermission(actorUserId, AppPermission.NOTIFICATION_VIEW_ALERTS);
       if (!canViewAlerts) {
-        const t = getServerTranslations(locale ?? "en").errorsTranslations;
-        throw new Error(t.unauthorizedAction);
+        raiseUnauthorizedAction(locale);
       }
 
-      const recentNotifications = await db
-        .select({
-          id: notificationDeliveries.id,
-          status: notificationDeliveries.status,
-        })
-        .from(notificationDeliveries)
-        .where(eq(notificationDeliveries.userId, actorUserId))
-        .orderBy(desc(notificationDeliveries.createdAt))
-        .limit(20);
-
+      const recentNotifications = await fetchMarkableDeliveryRows(actorUserId);
       const candidates = recentNotifications.filter(n => n.status !== NotificationDeliveryStatus.OPENED);
 
       let updatedCount = 0;
@@ -174,8 +212,7 @@ export namespace NotificationAlertsService {
     try {
       const canViewAlerts = await PermissionsService.hasPermission(actorUserId, AppPermission.NOTIFICATION_VIEW_ALERTS);
       if (!canViewAlerts) {
-        const t = getServerTranslations(locale ?? "en").errorsTranslations;
-        throw new Error(t.unauthorizedAction);
+        raiseUnauthorizedAction(locale);
       }
 
       const [delivery] = await db

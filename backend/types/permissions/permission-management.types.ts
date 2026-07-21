@@ -35,3 +35,9 @@ export type UserOverrideInput = {
 };
 
 export type GroupUserEntity = Pick<UserReturnType, "id" | "name" | "email">;
+
+export type PermissionCtx = { user?: { id: string } | null };
+
+export type GroupMembershipInput = { userId: string; groupId: string };
+
+export type BulkGroupMembershipInput = { userIds: string[]; groupId: string };

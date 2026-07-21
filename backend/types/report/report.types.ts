@@ -16,6 +16,12 @@ export interface StudentMonthlyReportReturnType {
   readonly creditsBalance: number;
 }
 
+export interface StudentHeader {
+  readonly studentId: string;
+  readonly studentName: string;
+  readonly classesRemaining: number;
+}
+
 // Re-export the canonical TeacherMonthlyReportReturnType so consumers of the report
 // types barrel can import it from a single location. The canonical definition lives in
 // `@/backend/types/teachers/teacher-due.types.ts` (single-source-of-truth rule).

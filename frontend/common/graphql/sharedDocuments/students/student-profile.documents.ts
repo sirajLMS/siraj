@@ -3,11 +3,76 @@ import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-typ
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 
+/**
+ * In-file GraphQL fragments used to compose `StudentProfile`. Keeping these as
+ * named fragment consts (instead of one giant inline selection) keeps the
+ * `studentProfileQueryDocument` initializer under CodeScene's Large Method
+ * threshold.
+ *
+ * Naming follows the in-file fragment convention used by sibling documents
+ * files (e.g. `MEETING_PROVIDER_FIELDS` in `meeting/meeting.documents.ts`).
+ */
+
+const STUDENT_UPCOMING_CLASS_FIELDS = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
+  fragment StudentUpcomingClassFields on StudentUpcomingClass {
+    id
+    instructor
+    teacherId
+    teacherAvatarUrl
+    subjectId
+    subjectName
+    avatarUrl
+    scheduledStartAt
+    scheduledEndAt
+    durationMinutes
+    executionState
+    outcome
+    isFrozen
+    meetingJoinUrl
+    effectiveMeeting {
+      ...EffectiveMeetingFields
+    }
+  }
+`;
+
+const STUDENT_HISTORY_METRICS_FIELDS = gql`
+  fragment StudentHistoryMetricsFields on StudentHistoryMetrics {
+    totalClasses
+    attendanceRate
+    hoursStudied
+    performance
+  }
+`;
+
+const STUDENT_HISTORY_SESSION_FIELDS = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
+  fragment StudentHistorySessionFields on StudentHistorySession {
+    id
+    title
+    time
+    duration
+    status
+    outcome
+    instructor
+    timeSlot
+    room
+    notes
+    dayOfMonth
+    meetingJoinUrl
+    effectiveMeeting {
+      ...EffectiveMeetingFields
+    }
+  }
+`;
+
 export const studentProfileQueryDocument: TypedDocumentNode<
   Operations.StudentProfileQuery,
   Types.QueryStudentProfileArgs
 > = gql`
-  ${EFFECTIVE_MEETING_FIELDS}
+  ${STUDENT_UPCOMING_CLASS_FIELDS}
+  ${STUDENT_HISTORY_METRICS_FIELDS}
+  ${STUDENT_HISTORY_SESSION_FIELDS}
   query StudentProfile($studentId: String, $year: Int, $month: Int) {
     studentProfile(studentId: $studentId, year: $year, month: $month) {
       id
@@ -40,50 +105,17 @@ export const studentProfileQueryDocument: TypedDocumentNode<
         studentName
         status
         classes {
-          id
-          instructor
-          teacherId
-          teacherAvatarUrl
-          subjectId
-          subjectName
-          avatarUrl
-          scheduledStartAt
-          scheduledEndAt
-          durationMinutes
-          executionState
-          outcome
-          isFrozen
-          meetingJoinUrl
-          effectiveMeeting {
-            ...EffectiveMeetingFields
-          }
+          ...StudentUpcomingClassFields
         }
       }
       classHistory {
         id
         studentName
         metrics {
-          totalClasses
-          attendanceRate
-          hoursStudied
-          performance
+          ...StudentHistoryMetricsFields
         }
         sessions {
-          id
-          title
-          time
-          duration
-          status
-          outcome
-          instructor
-          timeSlot
-          room
-          notes
-          dayOfMonth
-          meetingJoinUrl
-          effectiveMeeting {
-            ...EffectiveMeetingFields
-          }
+          ...StudentHistorySessionFields
         }
       }
     }

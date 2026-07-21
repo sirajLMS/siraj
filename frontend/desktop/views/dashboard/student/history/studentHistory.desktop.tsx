@@ -100,6 +100,167 @@ function buildColumns(
   ];
 }
 
+function MonthNavigator({
+  monthLabel,
+  canGoNext,
+  labels,
+  onPrevMonth,
+  onNextMonth,
+}: Readonly<{
+  monthLabel: string;
+  canGoNext: boolean;
+  labels: StudentHistoryViewModel["labels"];
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+}>) {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 3, gap: 2 }}>
+      <Button
+        aria-label={labels.previousMonth}
+        onClick={onPrevMonth}
+        sx={theme => ({
+          minWidth: 40,
+          transform: theme.direction === "rtl" ? "scaleX(-1)" : undefined,
+        })}
+      >
+        <ChevronLeft />
+      </Button>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <CalendarToday sx={theme => ({ fontSize: 20, color: theme.palette.primary.main })} />
+        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+          {monthLabel}
+        </Typography>
+      </Box>
+      <Button
+        aria-label={labels.nextMonth}
+        onClick={onNextMonth}
+        disabled={!canGoNext}
+        sx={theme => ({
+          minWidth: 40,
+          transform: theme.direction === "rtl" ? "scaleX(-1)" : undefined,
+          opacity: canGoNext ? 1 : 0.5,
+        })}
+      >
+        <ChevronRight />
+      </Button>
+    </Box>
+  );
+}
+
+function HistoryMetricsRow({
+  metrics,
+  labels,
+}: Readonly<{ metrics: StudentHistoryViewModel["metrics"]; labels: StudentHistoryViewModel["labels"] }>) {
+  return (
+    <Box sx={{ mb: 3 }}>
+      <DesktopMetricCardGrid
+        metrics={
+          [
+            {
+              key: "total-classes",
+              count: metrics.totalClasses,
+              labelKey: "total-classes",
+              label: labels.totalClasses,
+              icon: SchoolOutlined,
+            },
+            {
+              key: "attendance-rate",
+              count: `${metrics.attendanceRate}%`,
+              labelKey: "attendance-rate",
+              label: labels.attendanceRate,
+              icon: VerifiedUserOutlined,
+            },
+            {
+              key: "hours-studied",
+              count: `${metrics.hoursStudied}h`,
+              labelKey: "hours-studied",
+              label: labels.hoursStudied,
+              icon: TimerOutlined,
+            },
+            {
+              key: "performance",
+              count: `${metrics.performance}%`,
+              labelKey: "performance",
+              label: labels.performance,
+              icon: TrendingUpOutlined,
+            },
+          ] satisfies MetricItem[]
+        }
+        size={{ xs: 12, sm: 6, md: 3 }}
+      />
+    </Box>
+  );
+}
+
+function HistoryFilters({
+  subjectFilter,
+  statusFilter,
+  subjectOptions,
+  statusOptions,
+  labels,
+  onSubjectFilterChange,
+  onStatusFilterChange,
+}: Readonly<{
+  subjectFilter: string;
+  statusFilter: string;
+  subjectOptions: readonly string[];
+  statusOptions: readonly string[];
+  labels: StudentHistoryViewModel["labels"];
+  onSubjectFilterChange: (value: string) => void;
+  onStatusFilterChange: (value: string) => void;
+}>) {
+  return (
+    <Stack direction="row" spacing={2}>
+      <FormControl size="small" sx={{ minWidth: 160 }}>
+        <InputLabel id="history-subject-filter" shrink>
+          {labels.filterBySubject}
+        </InputLabel>
+        <Select
+          labelId="history-subject-filter"
+          label={labels.filterBySubject}
+          value={subjectFilter}
+          onChange={e => onSubjectFilterChange(e.target.value)}
+        >
+          <MenuItem value="">{labels.allSubjects}</MenuItem>
+          {subjectOptions.map(subject => (
+            <MenuItem key={subject} value={subject}>
+              {subject}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <FormControl size="small" sx={{ minWidth: 160 }}>
+        <InputLabel id="history-status-filter" shrink>
+          {labels.filterByStatus}
+        </InputLabel>
+        <Select
+          labelId="history-status-filter"
+          label={labels.filterByStatus}
+          value={statusFilter}
+          onChange={e => onStatusFilterChange(e.target.value)}
+        >
+          <MenuItem value="">{labels.allStatuses}</MenuItem>
+          {statusOptions.map(status => (
+            <MenuItem key={status} value={status}>
+              {status}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Stack>
+  );
+}
+
+function LoadingHistoryView({ labels }: Readonly<{ labels: StudentHistoryViewModel["labels"] }>) {
+  return (
+    <DesktopPageContainer>
+      <Typography variant="bodyMd" sx={{ p: 3 }}>
+        {labels.loadingMessage}
+      </Typography>
+    </DesktopPageContainer>
+  );
+}
+
 export function StudentHistoryDesktopView({
   metrics,
   filteredSessions,
@@ -133,87 +294,22 @@ export function StudentHistoryDesktopView({
   }, [filteredSessions, selectedDay]);
 
   if (loading && metrics.totalClasses === 0) {
-    return (
-      <DesktopPageContainer>
-        <Typography variant="bodyMd" sx={{ p: 3 }}>
-          {labels.loadingMessage}
-        </Typography>
-      </DesktopPageContainer>
-    );
+    return <LoadingHistoryView labels={labels} />;
   }
 
   return (
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.pageTitle} />
 
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 3, gap: 2 }}>
-        <Button
-          aria-label={labels.previousMonth}
-          onClick={onPrevMonth}
-          sx={theme => ({
-            minWidth: 40,
-            transform: theme.direction === "rtl" ? "scaleX(-1)" : undefined,
-          })}
-        >
-          <ChevronLeft />
-        </Button>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <CalendarToday sx={theme => ({ fontSize: 20, color: theme.palette.primary.main })} />
-          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-            {monthLabel}
-          </Typography>
-        </Box>
-        <Button
-          aria-label={labels.nextMonth}
-          onClick={onNextMonth}
-          disabled={!canGoNext}
-          sx={theme => ({
-            minWidth: 40,
-            transform: theme.direction === "rtl" ? "scaleX(-1)" : undefined,
-            opacity: canGoNext ? 1 : 0.5,
-          })}
-        >
-          <ChevronRight />
-        </Button>
-      </Box>
+      <MonthNavigator
+        monthLabel={monthLabel}
+        canGoNext={canGoNext}
+        labels={labels}
+        onPrevMonth={onPrevMonth}
+        onNextMonth={onNextMonth}
+      />
 
-      <Box sx={{ mb: 3 }}>
-        <DesktopMetricCardGrid
-          metrics={
-            [
-              {
-                key: "total-classes",
-                count: metrics.totalClasses,
-                labelKey: "total-classes",
-                label: labels.totalClasses,
-                icon: SchoolOutlined,
-              },
-              {
-                key: "attendance-rate",
-                count: `${metrics.attendanceRate}%`,
-                labelKey: "attendance-rate",
-                label: labels.attendanceRate,
-                icon: VerifiedUserOutlined,
-              },
-              {
-                key: "hours-studied",
-                count: `${metrics.hoursStudied}h`,
-                labelKey: "hours-studied",
-                label: labels.hoursStudied,
-                icon: TimerOutlined,
-              },
-              {
-                key: "performance",
-                count: `${metrics.performance}%`,
-                labelKey: "performance",
-                label: labels.performance,
-                icon: TrendingUpOutlined,
-              },
-            ] satisfies MetricItem[]
-          }
-          size={{ xs: 12, sm: 6, md: 3 }}
-        />
-      </Box>
+      <HistoryMetricsRow metrics={metrics} labels={labels} />
 
       <DesktopSectionPanel title={labels.lessonHistory} sx={{ mb: 3 }}>
         <StudentPortalHistoryCalendar
@@ -228,44 +324,15 @@ export function StudentHistoryDesktopView({
       <DesktopSectionPanel
         title={labels.lessonHistory}
         actions={
-          <Stack direction="row" spacing={2}>
-            <FormControl size="small" sx={{ minWidth: 160 }}>
-              <InputLabel id="history-subject-filter" shrink>
-                {labels.filterBySubject}
-              </InputLabel>
-              <Select
-                labelId="history-subject-filter"
-                label={labels.filterBySubject}
-                value={subjectFilter}
-                onChange={e => onSubjectFilterChange(e.target.value)}
-              >
-                <MenuItem value="">{labels.allSubjects}</MenuItem>
-                {subjectOptions.map(subject => (
-                  <MenuItem key={subject} value={subject}>
-                    {subject}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ minWidth: 160 }}>
-              <InputLabel id="history-status-filter" shrink>
-                {labels.filterByStatus}
-              </InputLabel>
-              <Select
-                labelId="history-status-filter"
-                label={labels.filterByStatus}
-                value={statusFilter}
-                onChange={e => onStatusFilterChange(e.target.value)}
-              >
-                <MenuItem value="">{labels.allStatuses}</MenuItem>
-                {statusOptions.map(status => (
-                  <MenuItem key={status} value={status}>
-                    {status}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Stack>
+          <HistoryFilters
+            subjectFilter={subjectFilter}
+            statusFilter={statusFilter}
+            subjectOptions={subjectOptions}
+            statusOptions={statusOptions}
+            labels={labels}
+            onSubjectFilterChange={onSubjectFilterChange}
+            onStatusFilterChange={onStatusFilterChange}
+          />
         }
       >
         <DesktopAppDataGrid

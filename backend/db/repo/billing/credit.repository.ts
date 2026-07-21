@@ -5,7 +5,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
-import type { CreditTransactionSelectType, PaginationArgs } from "@/backend/types";
+import type { CreditInsertInput, CreditTransactionSelectType, PaginationArgs } from "@/backend/types";
 
 type ReadExecutor = DBTransaction | typeof db;
 
@@ -51,16 +51,9 @@ export namespace CreditRepository {
     return Number(row?.value ?? 0);
   };
 
-  export const createPurchase = async (
+  const insertCreditTransaction = async (
     tx: DBTransaction,
-    input: {
-      studentId: string;
-      changeAmount: number;
-      sourcePaymentId?: string | null;
-      notes?: string | null;
-      creditedByUserId: string;
-      idempotencyKey: string;
-    }
+    input: CreditInsertInput
   ): Promise<CreditTransactionSelectType> => {
     const now = new Date();
     const [row] = await tx
@@ -68,9 +61,9 @@ export namespace CreditRepository {
       .values({
         studentId: input.studentId,
         changeAmount: input.changeAmount,
-        reason: CreditReason.PURCHASE,
+        reason: input.reason,
         sourcePaymentId: input.sourcePaymentId ?? null,
-        classInstanceId: null,
+        classInstanceId: input.classInstanceId ?? null,
         notes: input.notes ?? null,
         creditedByUserId: input.creditedByUserId,
         idempotencyKey: input.idempotencyKey,
@@ -82,6 +75,19 @@ export namespace CreditRepository {
     return row;
   };
 
+  export const createPurchase = async (
+    tx: DBTransaction,
+    input: {
+      studentId: string;
+      changeAmount: number;
+      sourcePaymentId?: string | null;
+      notes?: string | null;
+      creditedByUserId: string;
+      idempotencyKey: string;
+    }
+  ): Promise<CreditTransactionSelectType> =>
+    insertCreditTransaction(tx, { ...input, reason: CreditReason.PURCHASE, classInstanceId: null });
+
   export const deductForBooking = async (
     tx: DBTransaction,
     input: {
@@ -90,26 +96,14 @@ export namespace CreditRepository {
       creditedByUserId: string;
       idempotencyKey: string;
     }
-  ): Promise<CreditTransactionSelectType> => {
-    const now = new Date();
-    const [row] = await tx
-      .insert(creditTransactions)
-      .values({
-        studentId: input.studentId,
-        changeAmount: -1,
-        reason: CreditReason.DEDUCTION,
-        sourcePaymentId: null,
-        classInstanceId: input.classInstanceId,
-        notes: null,
-        creditedByUserId: input.creditedByUserId,
-        idempotencyKey: input.idempotencyKey,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-    if (!row) throw new Error("Credit transaction insert returned no rows");
-    return row;
-  };
+  ): Promise<CreditTransactionSelectType> =>
+    insertCreditTransaction(tx, {
+      ...input,
+      changeAmount: -1,
+      reason: CreditReason.DEDUCTION,
+      sourcePaymentId: null,
+      notes: null,
+    });
 
   export const refundOnCancel = async (
     tx: DBTransaction,
@@ -119,26 +113,14 @@ export namespace CreditRepository {
       creditedByUserId: string;
       idempotencyKey: string;
     }
-  ): Promise<CreditTransactionSelectType> => {
-    const now = new Date();
-    const [row] = await tx
-      .insert(creditTransactions)
-      .values({
-        studentId: input.studentId,
-        changeAmount: 1,
-        reason: CreditReason.REFUND,
-        sourcePaymentId: null,
-        classInstanceId: input.classInstanceId,
-        notes: null,
-        creditedByUserId: input.creditedByUserId,
-        idempotencyKey: input.idempotencyKey,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-    if (!row) throw new Error("Credit transaction insert returned no rows");
-    return row;
-  };
+  ): Promise<CreditTransactionSelectType> =>
+    insertCreditTransaction(tx, {
+      ...input,
+      changeAmount: 1,
+      reason: CreditReason.REFUND,
+      sourcePaymentId: null,
+      notes: null,
+    });
 
   export const findByIdempotencyKeys = async (
     keys: string[],
