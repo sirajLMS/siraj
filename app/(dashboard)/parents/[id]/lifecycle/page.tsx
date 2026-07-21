@@ -6,33 +6,27 @@ import {
   AccountStatus as GraphQLAccountStatus,
   ParentStatus as GraphQLParentStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { ParentLifecycleContainer } from "@/frontend/common/views/dashboard/parents/lifecycle/ParentLifecycleContainer";
-import { getTranslations } from "@/shared/locale/server";
+import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
-export async function generateMetadata({
-  params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.parentLifecycle;
   return { title: t.pageTitle };
 }
 
-export default async function ParentLifecyclePage({
-  params,
-}: {
-  readonly params: Promise<{ readonly locale: string; readonly id: string }>;
-}) {
-  const { locale, id } = await params;
+export default async function ParentLifecyclePage({ params }: { readonly params: Promise<{ readonly id: string }> }) {
+  const { id } = await params;
   const { userId, context } = await getServerUserContext();
   if (!userId || !context) {
-    redirect(`/${locale}/login`);
+    await redirectToLogin();
   }
 
   const parent = await ParentLifecycleService.getParentLifecycleData(id);
   if (!parent) {
-    redirect(`/${locale}/parents`);
+    redirect("/parents");
   }
 
   // Convert backend enums to GraphQL enums

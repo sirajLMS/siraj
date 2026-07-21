@@ -7,23 +7,13 @@ import { ManagersContainer } from "@/frontend/common/views/dashboard/managers/ho
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
-interface Props {
-  params: Promise<{ locale: string }>;
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.managersDirectory;
   return { title: t.pageTitle };
 }
 
-export default async function ManagersPage({ params }: Readonly<Props>) {
-  await params;
-
+export default async function ManagersPage() {
   const locale = await getLocale();
   const { userId, context } = await getServerUserContext();
   if (!userId) {

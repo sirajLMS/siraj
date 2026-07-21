@@ -7,12 +7,8 @@ import { ExchangeRatesContainer } from "@/frontend/common/views/dashboard/admin/
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
-export async function generateMetadata({
-  params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.billing;
   return { title: t.exchangeRates.pageTitle };
 }

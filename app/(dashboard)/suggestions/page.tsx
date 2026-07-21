@@ -7,12 +7,8 @@ import { ParentSuggestionsContainer } from "@/frontend/common/views/dashboard/su
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
-export async function generateMetadata({
-  params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.suggestions;
   return { title: t.parent.pageTitle };
 }

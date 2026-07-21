@@ -7,23 +7,13 @@ import { ParentRulesContainer } from "@/frontend/common/views/dashboard/parent/r
 import { getTranslations } from "@/shared/locale/server";
 import { getLocale } from "@/shared/locale/server-cookies";
 
-export async function generateMetadata({
-  params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.parentRules;
   return { title: t.pageTitle };
 }
 
-interface PageProps {
-  readonly params: Promise<{ readonly locale: string }>;
-}
-
-export default async function ParentRulesPage({ params }: PageProps) {
-  await params;
-
+export default async function ParentRulesPage() {
   const locale = await getLocale();
   const { userId, context } = await getServerUserContext();
   if (!userId) {

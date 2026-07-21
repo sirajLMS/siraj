@@ -11,9 +11,10 @@ import { getLocale } from "@/shared/locale/server-cookies";
 export async function generateMetadata({
   params,
 }: {
-  readonly params: Promise<{ readonly id: string; readonly locale: string }>;
+  readonly params: Promise<{ readonly id: string }>;
 }): Promise<Metadata> {
-  const { id, locale } = await params;
+  const { id } = await params;
+  const locale = await getLocale();
   const t = getTranslations(locale).commonTranslations;
   const scheduleName = await getRecurringSchedulePageTitle(id);
   if (scheduleName) {

@@ -2,11 +2,9 @@ import { redirect } from "@/shared/i18n/routing";
 
 interface NewStudentPageProps {
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
-  readonly params: Promise<{ locale: string }>;
 }
 
-export default async function NewStudentPage({ searchParams, params }: NewStudentPageProps) {
-  const [{ locale }] = await Promise.all([params]);
+export default async function NewStudentPage({ searchParams }: NewStudentPageProps) {
   const search = await searchParams;
   const query = new URLSearchParams();
 
@@ -21,5 +19,5 @@ export default async function NewStudentPage({ searchParams, params }: NewStuden
   }
 
   const suffix = query.toString();
-  redirect({ href: suffix ? `/students/onboarding?${suffix}` : "/students/onboarding", locale });
+  redirect({ href: suffix ? `/students/onboarding?${suffix}` : "/students/onboarding" });
 }

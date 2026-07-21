@@ -11,16 +11,12 @@ import { getLocale } from "@/shared/locale/server-cookies";
 interface PageProps {
   readonly params: Promise<{
     readonly id: string;
-    readonly locale: string;
   }>;
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ readonly id: string; readonly locale: string }>;
-}): Promise<Metadata> {
-  const { id, locale } = await params;
+export async function generateMetadata({ params }: { params: Promise<{ readonly id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.teacherWeeklySchedule;
   const teacherName = await getTeacherPageTitle(id);
   if (teacherName) {

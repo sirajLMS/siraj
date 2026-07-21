@@ -181,17 +181,6 @@ const eslintConfig = defineConfig([
     },
   },
 
-  // // Local custom rules
-  // import { localRulesPlugin } from "./scripts/eslint-rules/index.mjs";
-  //   {
-  //     files: ["**/*.{tsx}"],
-  //     plugins: {
-  //       "local-rules": localRulesPlugin,
-  //     },
-  //     rules: {
-  //       "local-rules/no-hardcoded-colors": "error",
-  //     },
-  //   },
 
   // Enforce @/ path alias — relative ./ or ../ imports are banned
   // except for barrel files (**/index.ts) which legitimately re-export siblings.

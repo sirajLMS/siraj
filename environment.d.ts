@@ -101,6 +101,21 @@ declare global {
       // guard — it must be "true" for demo login to work server-side.
       NEXT_PUBLIC_IS_DEMO?: string;
       IS_DEMO?: string;
+
+      // Logging
+      // ENABLE_LOGGING gates the server-side BaseLogger (shared/lib/logger/base-logger.ts)
+      // AND the client-log ingestion route (app/api/logs/route.ts). When "true", the
+      // server logger writes logs/server.log and the /api/logs route accepts client
+      // batch POSTs, writing logs/client_<sessionId>.log. Defaults to "development"
+      // implicitly — set to "true" on prod to triage browser-side diagnostics
+      // (e.g. the [AuthRedirect] recovery path) without requiring the user to open
+      // DevTools. ENABLE_LOGGING must be the server-side var (no NEXT_PUBLIC_ prefix)
+      // because /api/logs/route.ts runs in the Node runtime.
+      // NEXT_PUBLIC_ENABLE_LOGGING additionally ungates the CLIENT logger's browser
+      // console output (frontend/common/lib/logger/index.ts) — set BOTH to surface
+      // client diagnostics in both the browser console AND server log files.
+      ENABLE_LOGGING?: string;
+      NEXT_PUBLIC_ENABLE_LOGGING?: string;
     }
   }
 }

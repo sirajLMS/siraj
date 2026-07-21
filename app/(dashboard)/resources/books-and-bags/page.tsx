@@ -5,7 +5,6 @@ import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { BookService } from "@/backend/services/resource/book.service";
 import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import type { BooksAndBagsPageProps } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
 import { BooksAndBagsView } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBagsView";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
@@ -17,25 +16,20 @@ function mapAvailabilityStatus(status: string): AvailabilityStatus {
   return AvailabilityStatus.Available;
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.booksAndBags;
   return { title: t.pageTitle };
 }
 
-export default async function BooksAndBagsPage({ params }: BooksAndBagsPageProps) {
-  const { locale } = await params;
-  const permissionLocale = await getLocale();
+export default async function BooksAndBagsPage() {
+  const locale = await getLocale();
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
     return;
   }
-  await requirePermissionForPage(userId, [AppPermission.RESOURCES_LIST], permissionLocale, context);
+  await requirePermissionForPage(userId, [AppPermission.RESOURCES_LIST], locale, context);
 
   const books = await BookService.listBooks(userId, locale);
 

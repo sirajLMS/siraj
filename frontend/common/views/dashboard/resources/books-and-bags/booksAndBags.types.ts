@@ -35,7 +35,3 @@ export interface BooksAndBagsGridProps {
   readonly labels: BooksAndBagsLabels;
   readonly onDelete: (bookId: string) => Promise<void>;
 }
-
-export interface BooksAndBagsPageProps {
-  readonly params: Promise<{ locale: string }>;
-}

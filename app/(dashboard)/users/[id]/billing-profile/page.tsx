@@ -9,11 +9,12 @@ import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
 interface BillingProfilePageProps {
-  readonly params: Promise<{ id: string; locale: string }>;
+  readonly params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: BillingProfilePageProps): Promise<Metadata> {
-  const { id, locale } = await params;
+  const { id } = await params;
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.billing;
   const userName = await getUserPageTitle(id);
   if (userName) {

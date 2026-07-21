@@ -4,24 +4,16 @@ import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { FutureScheduleContainer } from "@/frontend/common/views/dashboard/teachers/futureSchedule/FutureScheduleContainer";
 import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
-interface PageProps {
-  readonly params: Promise<{ readonly locale: string }>;
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.teacherFutureSchedule;
   return { title: t.pageTitle };
 }
 
-export default async function TeacherMeFutureSchedulePage({ params }: PageProps) {
-  const { locale } = await params;
-
+export default async function TeacherMeFutureSchedulePage() {
+  const locale = await getLocale();
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();

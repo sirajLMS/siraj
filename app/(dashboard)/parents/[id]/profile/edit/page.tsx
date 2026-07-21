@@ -4,11 +4,11 @@ import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { redirect } from "@/shared/i18n";
 
 interface PageProps {
-  readonly params: Promise<{ readonly id: string; readonly locale: string }>;
+  readonly params: Promise<{ readonly id: string }>;
 }
 
 export default async function ParentProfileEditRedirectPage({ params }: PageProps) {
-  const { id, locale } = await params;
+  const { id } = await params;
 
   const { userId } = await getServerUserContext();
   if (!userId) {
@@ -18,9 +18,9 @@ export default async function ParentProfileEditRedirectPage({ params }: PageProp
 
   const targetUserId = await ProfileService.resolveUserIdForParentId(id);
   if (!targetUserId) {
-    redirect({ href: "/dashboard", locale });
+    redirect({ href: "/dashboard" });
     return;
   }
 
-  redirect({ href: `/users/${targetUserId}/profile/edit`, locale });
+  redirect({ href: `/users/${targetUserId}/profile/edit` });
 }

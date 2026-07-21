@@ -14,7 +14,7 @@ import {
 import { StudentStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { StudentBootstrapService } from "@/backend/services/student/student-bootstrap.service";
-import type { ParentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
+import type { ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 
 const DEMO_STUDENTS = [
   { name: "Demo Student", idempotencyKey: "demo_student_1", timezoneOverride: null as string | null, avatarIndex: 1 },
@@ -131,7 +131,7 @@ function buildStudentRowSpec(
   };
 }
 
-async function upsertStudentRow(spec: StudentRowSpec, assignmentDate: Date): Promise<{ id: string }> {
+async function upsertStudentRow(spec: StudentRowSpec, assignmentDate: Date): Promise<StudentEntity> {
   const student = await StudentBootstrapService.upsertByIdempotencyKey({
     parentId: spec.parentId,
     userId: spec.userId,
@@ -160,7 +160,7 @@ export async function seedOrGet(
 
   const ctx = await prepareStudentSeedContext(users, seedConfig, parentsList, teachersList);
 
-  const results: { id: string }[] = [];
+  const results: StudentEntity[] = [];
   const assignmentDate = new Date("2020-01-01");
 
   for (let i = 0; i < ctx.totalStudents; i++) {

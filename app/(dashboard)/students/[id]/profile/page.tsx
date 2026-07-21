@@ -11,9 +11,10 @@ import { getLocale } from "@/shared/locale/server-cookies";
 export async function generateMetadata({
   params,
 }: {
-  readonly params: Promise<{ readonly id: string; readonly locale: string }>;
+  readonly params: Promise<{ readonly id: string }>;
 }): Promise<Metadata> {
-  const { id, locale } = await params;
+  const { id } = await params;
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.studentProfile;
   const studentName = await getStudentPageTitle(id);
   if (studentName) {

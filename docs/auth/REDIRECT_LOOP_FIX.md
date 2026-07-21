@@ -90,9 +90,9 @@ This aligns server-side auth with the reality of what cookies are available.
 
 ### Secondary Fixes
 
-1. **Add `(auth)/layout.tsx`**: Server-side auth guard on login that redirects authenticated users to `/dashboard`, eliminating the client-side redirect flash.
+1. **Add `app/(auth)/layout.tsx`**: Server-side auth guard on login that redirects authenticated users to `/dashboard`, eliminating the client-side redirect flash.
 
-2. **Fix `app/[locale]/page.tsx`**: Smart redirect based on auth state instead of unconditionally redirecting to `/login`.
+2. **Fix `app/page.tsx`**: Smart redirect based on auth state instead of unconditionally redirecting to `/login`.
 
 ## Security Considerations
 
@@ -123,9 +123,9 @@ Auth cookies use `sameSite: "strict"`, which blocks cookies on cross-site naviga
 | `frontend/views/auth/login/index.tsx` | Login container (client redirect logic) |
 | `frontend/lib/safeRedirect.ts` | Safe redirect URL validation |
 | `frontend/hooks/useAuthToken.ts` | Hook for auth token in React state |
-| `app/[locale]/(dashboard)/layout.tsx` | Dashboard layout (server auth guard) |
-| `app/[locale]/(auth)/login/page.tsx` | Login page (server component) |
-| `app/[locale]/page.tsx` | Root locale page (unconditional login redirect) |
+| `app/(dashboard)/layout.tsx` | Dashboard layout (server auth guard) |
+| `app/(auth)/layout.tsx` | Auth layout (server guard for authenticated users) |
+| `app/page.tsx` | Root page (unconditional login redirect) |
 | `app/layout.tsx` | Root layout (providers including AuthProvider) |
 
 ## Cookie Configuration

@@ -1,5 +1,6 @@
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
 import { getStringEnv } from "@/backend/lib/env";
+import { logger } from "@/backend/lib/logger";
 
 export function setAuthCookies(
   cookies: ResponseCookies | undefined,
@@ -9,8 +10,23 @@ export function setAuthCookies(
 ): void {
   if (!cookies) return;
 
-  const isSecure =
-    process.env.NODE_ENV === "production" && (getStringEnv("ALLOWED_ORIGIN")?.startsWith("https://") ?? false);
+  // Production is served exclusively over HTTPS, so the Secure flag must always
+  // be set in production regardless of how ALLOWED_ORIGIN is configured. The
+  // previous behavior (secure = NODE_ENV === "production" && ALLOWED_ORIGIN
+  // starts with https://) shipped insecure cookies whenever an operator
+  // copied .env.example (which defaults to http://localhost:3000) into a
+  // production deployment without overriding ALLOWED_ORIGIN.
+  const isProduction = process.env.NODE_ENV === "production";
+  const isSecure = isProduction;
+  if (isProduction) {
+    const allowedOrigin = getStringEnv("ALLOWED_ORIGIN");
+    if (allowedOrigin?.startsWith("http://")) {
+      logger.warn(
+        "[cookies] ALLOWED_ORIGIN starts with http:// in production — auth cookies will still be Secure, but CORS may be misconfigured",
+        { allowedOrigin }
+      );
+    }
+  }
 
   const options = {
     httpOnly: true,

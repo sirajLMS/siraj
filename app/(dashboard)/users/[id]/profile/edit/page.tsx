@@ -13,9 +13,11 @@ import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { ProfilePageClient } from "@/frontend/common/views/dashboard/profile/core/ProfilePageClient";
 import { redirect } from "@/shared/i18n/routing";
 import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id, locale } = await params;
+  const { id } = await params;
+  const locale = await getLocale();
   const t = getTranslations(locale).profileTranslations.base;
   const userName = await getUserPageTitle(id);
   if (userName) {
@@ -25,11 +27,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 interface PageProps {
-  readonly params: Promise<{ readonly id: string; readonly locale: string }>;
+  readonly params: Promise<{ readonly id: string }>;
 }
 
 export default async function UserProfileEditPage({ params }: PageProps) {
-  const { id, locale } = await params;
+  const { id } = await params;
 
   const { userId, context } = await getServerUserContext();
   if (!userId) {
@@ -42,7 +44,7 @@ export default async function UserProfileEditPage({ params }: PageProps) {
     mode: ProfileMode.EDIT,
   });
   if ("redirect" in resolution) {
-    redirect({ href: resolution.redirect, locale });
+    redirect({ href: resolution.redirect });
     return;
   }
 

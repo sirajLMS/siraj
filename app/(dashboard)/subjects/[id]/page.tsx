@@ -4,13 +4,15 @@ import { getSubjectPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { SubjectDetailView } from "@/frontend/common/views/dashboard/subjects/detail/SubjectDetailContainer";
 import { getTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
 export async function generateMetadata({
   params,
 }: {
-  readonly params: Promise<{ readonly id: string; readonly locale: string }>;
+  readonly params: Promise<{ readonly id: string }>;
 }): Promise<Metadata> {
-  const { id, locale } = await params;
+  const { id } = await params;
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.subjects;
   const subjectName = await getSubjectPageTitle(id);
   if (subjectName) {
@@ -19,11 +21,7 @@ export async function generateMetadata({
   return { title: t.pageTitle };
 }
 
-export default async function SubjectDetailPage({
-  params,
-}: {
-  readonly params: Promise<{ readonly id: string; readonly locale: string }>;
-}) {
+export default async function SubjectDetailPage({ params }: { readonly params: Promise<{ readonly id: string }> }) {
   const { id } = await params;
 
   const { userId } = await getServerUserContext();

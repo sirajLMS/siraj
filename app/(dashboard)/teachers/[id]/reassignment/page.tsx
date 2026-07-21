@@ -7,12 +7,8 @@ import { TeacherReassignmentContainer } from "@/frontend/common/views/dashboard/
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ readonly locale: string; readonly id: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.teacherReassignment;
   return { title: t.pageTitle };
 }
