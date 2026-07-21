@@ -65,11 +65,20 @@ function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter =
 
 function SidebarNavItem({ item, isActive = false, isCollapsed, isFooter = false }: SidebarNavItemProps) {
   const IconComponent = item.icon;
+  const isLogout = item.href === "/logout";
 
   const button = (
     <ListItemButton
-      component={Link}
-      href={item.href}
+      {...(isLogout
+        ? {
+            // We use a normal onClick for logout instead of Next.js <Link> to prevent Next.js
+            // from aggressively prefetching the /logout route in production when the sidebar
+            // is visible, which would prematurely destroy the user's session in the background.
+            onClick: () => {
+              globalThis.location.href = item.href;
+            },
+          }
+        : { component: Link, href: item.href })}
       selected={!isFooter && isActive}
       sx={getSidebarItemStyles(isCollapsed, isActive, isFooter)}
     >

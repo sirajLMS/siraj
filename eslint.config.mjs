@@ -181,7 +181,6 @@ const eslintConfig = defineConfig([
     },
   },
 
-
   // Enforce @/ path alias — relative ./ or ../ imports are banned
   // except for barrel files (**/index.ts) which legitimately re-export siblings.
   {
