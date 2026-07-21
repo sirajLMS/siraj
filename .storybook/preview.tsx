@@ -1,8 +1,8 @@
 // cspell:ignore circlehollow
 import type { Decorator, Preview } from "@storybook/react";
 import { initialize, mswLoader } from "msw-storybook-addon";
-import { mswHandlers } from "@/.storybook/msw-handlers";
-import { StoryWrapper } from "@/.storybook/StoryWrapper";
+import { mswHandlers } from "./msw-handlers";
+import { StoryWrapper } from "./StoryWrapper";
 
 // Import global styles
 import "@/app/index.css";

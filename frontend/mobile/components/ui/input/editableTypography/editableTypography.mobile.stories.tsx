@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import type { TypographyProps } from "@mui/material/Typography";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
+import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { EditableTypographyMobile } from "@/frontend/mobile/components/ui/input/editableTypography/editableTypography.mobile";
 
 type EditableTypographyStoryProps = {
@@ -52,24 +53,7 @@ const meta: Meta<typeof EditableTypographyStory> = {
   parameters: {
     viewport: {
       defaultViewport: "mobile1",
-      viewports: {
-        mobile1: {
-          name: "Mobile (375px)",
-          styles: { width: "375px", height: "667px" },
-        },
-        mobile2: {
-          name: "Mobile Large (414px)",
-          styles: { width: "414px", height: "896px" },
-        },
-        tablet: {
-          name: "Tablet (768px)",
-          styles: { width: "768px", height: "1024px" },
-        },
-        desktop: {
-          name: "Desktop (1280px)",
-          styles: { width: "1280px", height: "800px" },
-        },
-      },
+      viewports: MOBILE_VIEWPORTS,
     },
   },
 };

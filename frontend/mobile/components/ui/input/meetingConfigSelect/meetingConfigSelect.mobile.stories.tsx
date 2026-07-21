@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import {
   MeetingConfigSelectMobile,
   type MeetingConfigSelectProps,
@@ -82,24 +83,7 @@ const meta: Meta<typeof MeetingConfigSelectStory> = {
   parameters: {
     viewport: {
       defaultViewport: "mobile1",
-      viewports: {
-        mobile1: {
-          name: "Mobile (375px)",
-          styles: { width: "375px", height: "667px" },
-        },
-        mobile2: {
-          name: "Mobile Large (414px)",
-          styles: { width: "414px", height: "896px" },
-        },
-        tablet: {
-          name: "Tablet (768px)",
-          styles: { width: "768px", height: "1024px" },
-        },
-        desktop: {
-          name: "Desktop (1280px)",
-          styles: { width: "1280px", height: "800px" },
-        },
-      },
+      viewports: MOBILE_VIEWPORTS,
     },
   },
 };

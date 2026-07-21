@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/input/localizedString/types";
+import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { LocalizedStringInputMobile } from "@/frontend/mobile/components/ui/input/localizedString/localizedStringInput.mobile";
 
@@ -25,24 +26,7 @@ const meta: Meta<typeof LocalizedStringInputStory> = {
   parameters: {
     viewport: {
       defaultViewport: "mobile1",
-      viewports: {
-        mobile1: {
-          name: "Mobile (375px)",
-          styles: { width: "375px", height: "667px" },
-        },
-        mobile2: {
-          name: "Mobile Large (414px)",
-          styles: { width: "414px", height: "896px" },
-        },
-        tablet: {
-          name: "Tablet (768px)",
-          styles: { width: "768px", height: "1024px" },
-        },
-        desktop: {
-          name: "Desktop (1280px)",
-          styles: { width: "1280px", height: "800px" },
-        },
-      },
+      viewports: MOBILE_VIEWPORTS,
     },
   },
 };

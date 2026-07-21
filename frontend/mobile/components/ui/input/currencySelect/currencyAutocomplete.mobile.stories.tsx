@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { CurrencyAutocompleteProps } from "@/frontend/common/components/ui/input/currencySelect/types";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
+import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { CurrencyAutocompleteMobile } from "@/frontend/mobile/components/ui/input/currencySelect/currencyAutocomplete.mobile";
 
 function CurrencyAutocompleteStory({
@@ -29,24 +30,7 @@ const meta: Meta<typeof CurrencyAutocompleteStory> = {
   parameters: {
     viewport: {
       defaultViewport: "mobile1",
-      viewports: {
-        mobile1: {
-          name: "Mobile (375px)",
-          styles: { width: "375px", height: "667px" },
-        },
-        mobile2: {
-          name: "Mobile Large (414px)",
-          styles: { width: "414px", height: "896px" },
-        },
-        tablet: {
-          name: "Tablet (768px)",
-          styles: { width: "768px", height: "1024px" },
-        },
-        desktop: {
-          name: "Desktop (1280px)",
-          styles: { width: "1280px", height: "800px" },
-        },
-      },
+      viewports: MOBILE_VIEWPORTS,
     },
   },
 };

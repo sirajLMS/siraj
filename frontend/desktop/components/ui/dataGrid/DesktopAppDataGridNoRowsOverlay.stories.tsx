@@ -1,11 +1,10 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
+import { createDesktopStoryMeta } from "@/frontend/common/stories";
 import { DesktopAppDataGridNoRowsOverlay } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGridNoRowsOverlay";
 
 const meta: Meta<typeof DesktopAppDataGridNoRowsOverlay> = {
-  title: "UI/AppDataGridNoRowsOverlay/Desktop",
-  component: DesktopAppDataGridNoRowsOverlay,
-  tags: ["ai-generated"],
+  ...createDesktopStoryMeta(DesktopAppDataGridNoRowsOverlay, "UI/AppDataGridNoRowsOverlay/Desktop"),
   decorators: [
     Story => (
       <Box sx={{ height: 200, position: "relative" }}>

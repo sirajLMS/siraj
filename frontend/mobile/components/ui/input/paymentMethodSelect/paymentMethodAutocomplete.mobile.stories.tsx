@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { PaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
+import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { PaymentMethodAutocompleteMobile } from "@/frontend/mobile/components/ui/input/paymentMethodSelect/paymentMethodAutocomplete.mobile";
 
 const MOCK_OPTIONS: readonly PaymentMethodCatalogOption[] = [
@@ -63,24 +64,7 @@ const meta: Meta<typeof PaymentMethodAutocompleteStory> = {
   parameters: {
     viewport: {
       defaultViewport: "mobile1",
-      viewports: {
-        mobile1: {
-          name: "Mobile (375px)",
-          styles: { width: "375px", height: "667px" },
-        },
-        mobile2: {
-          name: "Mobile Large (414px)",
-          styles: { width: "414px", height: "896px" },
-        },
-        tablet: {
-          name: "Tablet (768px)",
-          styles: { width: "768px", height: "1024px" },
-        },
-        desktop: {
-          name: "Desktop (1280px)",
-          styles: { width: "1280px", height: "800px" },
-        },
-      },
+      viewports: MOBILE_VIEWPORTS,
     },
   },
 };

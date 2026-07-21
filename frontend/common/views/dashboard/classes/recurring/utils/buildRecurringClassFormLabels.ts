@@ -1,33 +1,36 @@
 // NEW FOR PLAN v5: buildFormLabels lifted out of tier CreateRecurringClassView twins
 // (was duplicated byte-identically in createRecurringClassView.{mobile,desktop}.tsx).
+// Sonar cluster 27: RecurringClassFormLabels is now derived via Pick from CreateRecurringClassLabels
+// to eliminate the structural duplication between this type and the locale label interface.
 import type { CreateRecurringClassLabels } from "@/shared/locale";
 
-export type RecurringClassFormLabels = {
-  readonly add: string;
-  readonly addClass: string;
-  readonly addedSuccessfully: string;
-  readonly students: string;
-  readonly studentsPlaceholder: string;
-  readonly teacher: string;
-  readonly teacherPlaceholder: string;
-  readonly subject: string;
-  readonly subjectPlaceholder: string;
-  readonly defaultStartTime: string;
-  readonly duration: string;
-  readonly durationHours: string;
-  readonly durationMinutes: string;
-  readonly hours: string;
-  readonly minutes: string;
-  readonly daysSelection: string;
-  readonly classSchedule: string;
-  readonly timeOverride: string;
-  readonly weekendOff: string;
-  readonly timezone: string;
-  readonly timezonePlaceholder: string;
-  readonly classType: string;
-  readonly classTypePlaceholder: string;
-  readonly days: CreateRecurringClassLabels["days"];
-};
+export type RecurringClassFormLabels = Pick<
+  CreateRecurringClassLabels,
+  | "add"
+  | "addClass"
+  | "addedSuccessfully"
+  | "students"
+  | "studentsPlaceholder"
+  | "teacher"
+  | "teacherPlaceholder"
+  | "subject"
+  | "subjectPlaceholder"
+  | "defaultStartTime"
+  | "duration"
+  | "durationHours"
+  | "durationMinutes"
+  | "hours"
+  | "minutes"
+  | "daysSelection"
+  | "classSchedule"
+  | "timeOverride"
+  | "weekendOff"
+  | "timezone"
+  | "timezonePlaceholder"
+  | "classType"
+  | "classTypePlaceholder"
+  | "days"
+>;
 
 export function buildRecurringClassFormLabels(labels: CreateRecurringClassLabels): RecurringClassFormLabels {
   return {

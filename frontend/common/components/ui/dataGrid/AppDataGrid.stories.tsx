@@ -1,29 +1,12 @@
 import { Box } from "@mui/material";
-import type { GridColDef } from "@mui/x-data-grid";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
+import { createDesktopStoryMeta, SAMPLE_GRID_COLUMNS, SAMPLE_GRID_ROWS } from "@/frontend/common/stories";
 
 // cspell:ignore Lannister, Cersei, Targaryen, Daenerys
 
-const columns: GridColDef[] = [
-  { field: "id", headerName: "ID", width: 90 },
-  { field: "firstName", headerName: "First name", width: 150 },
-  { field: "lastName", headerName: "Last name", width: 150 },
-  { field: "age", headerName: "Age", type: "number", width: 110 },
-];
-
-const rows = [
-  { id: 1, lastName: "Snow", firstName: "Jon", age: 35 },
-  { id: 2, lastName: "Lannister", firstName: "Cersei", age: 42 },
-  { id: 3, lastName: "Lannister", firstName: "Jaime", age: 45 },
-  { id: 4, lastName: "Stark", firstName: "Arya", age: 16 },
-  { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null },
-];
-
-const meta: Meta<typeof AppDataGrid> = {
-  title: "UI/AppDataGrid",
-  component: AppDataGrid,
-  tags: ["ai-generated"],
+const meta = {
+  ...createDesktopStoryMeta(AppDataGrid, "UI/AppDataGrid"),
   decorators: [
     Story => (
       <Box sx={{ height: 400, width: "100%" }}>
@@ -31,15 +14,15 @@ const meta: Meta<typeof AppDataGrid> = {
       </Box>
     ),
   ],
-};
+} satisfies Meta<typeof AppDataGrid>;
 
 export default meta;
-type Story = StoryObj<typeof AppDataGrid>;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    rows,
-    columns,
+    rows: SAMPLE_GRID_ROWS,
+    columns: SAMPLE_GRID_COLUMNS,
     paginationOptions: { mode: "client" },
   },
 };
@@ -47,7 +30,7 @@ export const Default: Story = {
 export const Loading: Story = {
   args: {
     rows: [],
-    columns,
+    columns: SAMPLE_GRID_COLUMNS,
     loading: true,
     paginationOptions: { mode: "client" },
   },
@@ -56,7 +39,7 @@ export const Loading: Story = {
 export const Empty: Story = {
   args: {
     rows: [],
-    columns,
+    columns: SAMPLE_GRID_COLUMNS,
     emptyMessage: "No users found in the system.",
     paginationOptions: { mode: "client" },
   },

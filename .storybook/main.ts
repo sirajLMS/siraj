@@ -1,6 +1,9 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { StorybookConfig } from "@storybook/nextjs-vite";
 import { mergeConfig } from "vite";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const config: StorybookConfig = {
   stories: ["../frontend/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
@@ -20,6 +23,7 @@ const config: StorybookConfig = {
         alias: {
           "react-leaflet/package.json": path.resolve("node_modules/react-leaflet/package.json"),
           "@react-leaflet/core/package.json": path.resolve("node_modules/@react-leaflet/core/package.json"),
+          "@": path.resolve(__dirname, ".."),
         },
       },
       optimizeDeps: {

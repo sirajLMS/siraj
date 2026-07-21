@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
+import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import type { MobileMeetingConfigDisplayData } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { MobileMeetingConfigDisplay } from "@/frontend/mobile/components/ui/display/meetingConfig/MeetingConfigDisplay.mobile";
@@ -28,24 +29,7 @@ const meta: Meta<typeof MobileMeetingConfigDisplay> = {
   parameters: {
     viewport: {
       defaultViewport: "mobile1",
-      viewports: {
-        mobile1: {
-          name: "Mobile (375px)",
-          styles: { width: "375px", height: "667px" },
-        },
-        mobile2: {
-          name: "Mobile Large (414px)",
-          styles: { width: "414px", height: "896px" },
-        },
-        tablet: {
-          name: "Tablet (768px)",
-          styles: { width: "768px", height: "1024px" },
-        },
-        desktop: {
-          name: "Desktop (1280px)",
-          styles: { width: "1280px", height: "800px" },
-        },
-      },
+      viewports: MOBILE_VIEWPORTS,
     },
   },
   decorators: [

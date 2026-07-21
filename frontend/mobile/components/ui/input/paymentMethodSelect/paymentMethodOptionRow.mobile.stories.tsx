@@ -2,6 +2,7 @@ import { Box, Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
+import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { PaymentMethodOptionRowMobile } from "@/frontend/mobile/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.mobile";
 
 const MOCK_OPTIONS: readonly PaymentMethodCatalogOption[] = [
@@ -32,24 +33,7 @@ const meta: Meta<typeof PaymentMethodOptionRowMobile> = {
   parameters: {
     viewport: {
       defaultViewport: "mobile1",
-      viewports: {
-        mobile1: {
-          name: "Mobile (375px)",
-          styles: { width: "375px", height: "667px" },
-        },
-        mobile2: {
-          name: "Mobile Large (414px)",
-          styles: { width: "414px", height: "896px" },
-        },
-        tablet: {
-          name: "Tablet (768px)",
-          styles: { width: "768px", height: "1024px" },
-        },
-        desktop: {
-          name: "Desktop (1280px)",
-          styles: { width: "1280px", height: "800px" },
-        },
-      },
+      viewports: MOBILE_VIEWPORTS,
     },
   },
 };
