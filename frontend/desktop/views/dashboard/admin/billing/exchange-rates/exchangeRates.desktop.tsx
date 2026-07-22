@@ -177,7 +177,7 @@ export function ExchangeRatesDesktopView({
           severity="warning"
           sx={{ mb: 2 }}
           action={
-            <Button color="inherit" size="small" onClick={() => void refetchRates()}>
+            <Button color="inherit" size="small" onClick={() => refetchRates()}>
               {labels.errors.retry}
             </Button>
           }
@@ -190,7 +190,7 @@ export function ExchangeRatesDesktopView({
           severity="warning"
           sx={{ mb: 2 }}
           action={
-            <Button color="inherit" size="small" onClick={() => void refetchSync()}>
+            <Button color="inherit" size="small" onClick={() => refetchSync()}>
               {labels.errors.retry}
             </Button>
           }

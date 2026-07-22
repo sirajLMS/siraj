@@ -1,1 +1,1 @@
-export * from "@/backend/enum/students/student-lifecycle.enum";
+export * from "./student-lifecycle.enum";

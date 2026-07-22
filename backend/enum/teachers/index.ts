@@ -1,2 +1,2 @@
-export * from "@/backend/enum/teachers/teacher-availability.enum";
-export * from "@/backend/enum/teachers/teacher-due.enum";
+export * from "./teacher-availability.enum";
+export * from "./teacher-due.enum";

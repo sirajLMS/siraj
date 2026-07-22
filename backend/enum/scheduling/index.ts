@@ -1,2 +1,2 @@
-export * from "@/backend/enum/scheduling/schedule.enum";
-export * from "@/backend/enum/scheduling/scheduling.enum";
+export * from "./schedule.enum";
+export * from "./scheduling.enum";

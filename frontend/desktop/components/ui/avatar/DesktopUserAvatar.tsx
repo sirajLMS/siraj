@@ -1,12 +1,8 @@
 "use client";
 
 import type { Theme } from "@mui/material/styles";
-import type { BaseAvatarProps } from "@/frontend/desktop/components/ui/avatar/DesktopBaseAvatar";
+import type { UserAvatarProps } from "@/frontend/common/components/ui/avatar";
 import { DesktopBaseAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopBaseAvatar";
-
-export type UserAvatarProps = Omit<BaseAvatarProps, "variant"> & {
-  readonly variant?: BaseAvatarProps["variant"];
-};
 
 const FALLBACK_SX = {
   typography: "labelMd",

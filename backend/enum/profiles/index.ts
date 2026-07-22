@@ -1,1 +1,1 @@
-export * from "@/backend/enum/profiles/profile.enum";
+export * from "./profile.enum";

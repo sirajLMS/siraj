@@ -15,7 +15,6 @@ import {
   DesktopPrimaryPageAction,
 } from "@/frontend/desktop/components/ui";
 import { DesktopBaseDeleteDialog } from "@/frontend/desktop/components/ui/dialog/DesktopBaseDeleteDialog";
-import type { LocalizedString } from "@/shared/types";
 
 function MeetingProvidersDesktopEmptyState({ title, body }: Readonly<{ title: string; body: string }>) {
   return (
@@ -92,10 +91,7 @@ export function MeetingProvidersDesktopView({
         onConfirm={onDeleteConfirm}
         isLoading={deleting}
         title={t.deleteTitle}
-        body={`${t.deleteConfirm} ${resolveLocalizedString(
-          (deleteProvider?.name as LocalizedString | null | undefined) ?? null,
-          locale
-        )}`}
+        body={`${t.deleteConfirm} ${resolveLocalizedString(deleteProvider?.name ?? null, locale)}`}
         cancelLabel={t.cancel}
         confirmLabel={t.delete}
       />

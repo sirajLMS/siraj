@@ -109,20 +109,29 @@ export function ParentScheduleCardDesktop({ row, labels }: Readonly<ParentSchedu
             emphasizeLink={Boolean(teacherProfileHref)}
           />
         </Stack>
-        {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen }) ? (
-          <DesktopMeetingJoinAction
-            variant="icon"
-            joinUrl={row.meetingJoinUrl}
-            meeting={row.effectiveMeeting}
-            disabled={!row.videoEnabled}
-            label={labels.schedule.joinVideo}
-            emptyRole="parent"
-          />
-        ) : row.isFrozen ? (
-          <Tooltip title={labels.schedule.contactAdmin}>
-            <AcUnitOutlined sx={theme => ({ fontSize: 22, color: theme.palette.info.main, opacity: 0.7 })} />
-          </Tooltip>
-        ) : null}
+        {(() => {
+          const canJoin = isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen });
+          if (canJoin) {
+            return (
+              <DesktopMeetingJoinAction
+                variant="icon"
+                joinUrl={row.meetingJoinUrl}
+                meeting={row.effectiveMeeting}
+                disabled={!row.videoEnabled}
+                label={labels.schedule.joinVideo}
+                emptyRole="parent"
+              />
+            );
+          }
+          if (row.isFrozen) {
+            return (
+              <Tooltip title={labels.schedule.contactAdmin}>
+                <AcUnitOutlined sx={theme => ({ fontSize: 22, color: theme.palette.info.main, opacity: 0.7 })} />
+              </Tooltip>
+            );
+          }
+          return null;
+        })()}
       </Box>
     </Box>
   );

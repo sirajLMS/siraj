@@ -15,8 +15,6 @@ import {
 import { buildInvoiceTarget } from "@/frontend/common/views/dashboard/billing/utils/parentInvoiceFormatters";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
 
-export type { ParentInvoiceRowActionLabels } from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
-
 function PaidRowActionsDesktop({
   labels,
   onOpenDetails,

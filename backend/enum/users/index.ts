@@ -1,2 +1,2 @@
-export * from "@/backend/enum/users/user.enum";
-export * from "@/backend/enum/users/userDeviceTokens.enum";
+export * from "./user.enum";
+export * from "./userDeviceTokens.enum";

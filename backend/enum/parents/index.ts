@@ -1,2 +1,2 @@
-export * from "@/backend/enum/parents/parent.enum";
-export * from "@/backend/enum/parents/suggestions.enum";
+export * from "./parent.enum";
+export * from "./suggestions.enum";
