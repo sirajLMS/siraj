@@ -25,6 +25,16 @@ export interface ManagerOnboardingResult {
   readonly assignedGroupSlug: string;
 }
 
+function resolveTargetGroupSlug(accountType: ManagerOnboardingInput["accountType"]): SystemPermissionGroupSlug {
+  if (accountType === "admin") {
+    return SystemPermissionGroupSlug.ACADEMY_ADMIN;
+  }
+  if (accountType === "supervisor") {
+    return SystemPermissionGroupSlug.SUPERVISOR_DEFAULT;
+  }
+  return SystemPermissionGroupSlug.STAFF_DEFAULT;
+}
+
 export namespace ManagerOnboardingService {
   export async function createManager(
     actorUserId: string,
@@ -53,12 +63,7 @@ export namespace ManagerOnboardingService {
     }
 
     // Determine permission group based on account type
-    const targetGroupSlug =
-      input.accountType === "admin"
-        ? SystemPermissionGroupSlug.ACADEMY_ADMIN
-        : input.accountType === "supervisor"
-          ? SystemPermissionGroupSlug.SUPERVISOR_DEFAULT
-          : SystemPermissionGroupSlug.STAFF_DEFAULT;
+    const targetGroupSlug = resolveTargetGroupSlug(input.accountType);
 
     const run = async (txObj: DBTransaction) => {
       // Step 1: Create user record
@@ -67,7 +72,7 @@ export namespace ManagerOnboardingService {
           name: input.name,
           email: { value: input.email },
           password: input.password,
-          ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
+          ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
         },
         locale,
         txObj

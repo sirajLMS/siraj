@@ -18,7 +18,7 @@ export namespace TeacherMonthlyReportService {
     if (hasDuesPermission) return;
 
     const ownTeacher = await TeacherRepository.findByUserId(actorUserId);
-    if (ownTeacher && ownTeacher.id === teacherId) return;
+    if (ownTeacher?.id === teacherId) return;
 
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
     throw new Error(tErrors.unauthorizedAction);

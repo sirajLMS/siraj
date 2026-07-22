@@ -292,16 +292,14 @@ export namespace PaymentMethodService {
     await assertActorCanManageTarget(actorUserId, existing.userId, tErrors);
 
     const run = async (t: DBTransaction) => {
-      const details =
-        input.details !== undefined
-          ? encryptDetailsForStorage(existing.type as PaymentMethodType, input.details)
-          : undefined;
+      const inputDetails = input.details;
+      const details = inputDetails ? encryptDetailsForStorage(existing.type, inputDetails) : undefined;
 
-      if (input.details !== undefined) {
-        await assertCatalogActive(existing.type as PaymentMethodType, input.details, tErrors, t);
+      if (inputDetails) {
+        await assertCatalogActive(existing.type, inputDetails, tErrors, t);
       }
 
-      const direction = input.direction ?? (existing.direction as PaymentDirection);
+      const direction = input.direction ?? existing.direction;
       if (input.isDefault) {
         for (const slot of slotsForDirection(direction)) {
           await UserPaymentMethodRepository.clearDefaultsInSlot(existing.userId, slot, t);
@@ -312,7 +310,7 @@ export namespace PaymentMethodService {
         id,
         {
           ...input,
-          ...(details !== undefined ? { details } : {}),
+          ...(details ? { details } : {}),
         },
         tErrors,
         t
@@ -356,7 +354,7 @@ export namespace PaymentMethodService {
     const result = await updateUserPaymentMethodCore(
       actorUserId,
       id,
-      { isDefault: true, direction: existing.direction as PaymentDirection },
+      { isDefault: true, direction: existing.direction },
       tErrors,
       tx
     );
@@ -418,7 +416,7 @@ export namespace PaymentMethodService {
           tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: input.userPaymentMethodId })
         );
       }
-      if (!supportsTransactionDirection(method.direction as PaymentDirection, PaymentDirection.PAYIN)) {
+      if (!supportsTransactionDirection(method.direction, PaymentDirection.PAYIN)) {
         throw new Error(tErrors.insufficientPermissions);
       }
       snapshotSource = { userPaymentMethodId: input.userPaymentMethodId };
@@ -464,7 +462,7 @@ export namespace PaymentMethodService {
       );
     }
 
-    if (!supportsTransactionDirection(method.direction as PaymentDirection, PaymentDirection.PAYOUT)) {
+    if (!supportsTransactionDirection(method.direction, PaymentDirection.PAYOUT)) {
       throw new Error(tErrors.insufficientPermissions);
     }
 

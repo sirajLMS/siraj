@@ -148,5 +148,3 @@ export interface ClassDetailsLabels {
   readonly reschedule: string;
   readonly invalidClassId: string;
 }
-
-export type { AdminViewLabels } from "@/shared/locale/types/dashboard/admin/view";

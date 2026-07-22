@@ -8,10 +8,7 @@ import type {
   UserSelectAudience,
   UserSelectScope,
 } from "@/frontend/common/components/ui/input/userSelect/types";
-import {
-  USER_SELECT_DEBOUNCE_MS,
-  USER_SELECT_LIMIT,
-} from "@/frontend/common/components/ui/input/userSelect/userSelect.constants";
+import { USER_SELECT_DEBOUNCE_MS } from "@/frontend/common/components/ui/input/userSelect/userSelect.constants";
 import {
   buildUserSelectCacheKey,
   mapRowsToPersonOptions,
@@ -58,10 +55,10 @@ export function useAudienceAutocomplete({
   const getResults = useUserAutocompleteStore(state => state.getResults);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const timer = setTimeout(() => {
       setDebouncedSearch(inputValue.trim());
     }, USER_SELECT_DEBOUNCE_MS);
-    return () => window.clearTimeout(timer);
+    return () => clearTimeout(timer);
   }, [inputValue]);
 
   const cacheKey = buildUserSelectCacheKey(audience, debouncedSearch, scope);
@@ -96,5 +93,3 @@ export function useAudienceAutocomplete({
     onInputChange: setInputValue,
   };
 }
-
-export { USER_SELECT_LIMIT };

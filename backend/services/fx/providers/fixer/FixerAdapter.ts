@@ -23,17 +23,6 @@ function buildSymbolsParam(): string {
 }
 
 /**
- * Format a number into a decimal string suitable for the `numeric(12,6)`
- * DB column. We pass the full-precision float through `String()` rather
- * than truncating to 6 decimals — the DB column is wide enough to hold the
- * float64 representation exactly for all realistic FX rates, and preserving
- * precision avoids compounding rounding across the USD-hub conversion.
- */
-function toRateString(rate: number): string {
-  return String(rate);
-}
-
-/**
  * Normalise Fixer's EUR-hub rates into a USD-hub map.
  *
  * Math: given any currency X, EUR->X = EUR->USD * USD->X, therefore
@@ -73,15 +62,19 @@ function normaliseToUsdHub(eurRates: Record<string, number>): ReadonlyMap<Curren
       continue;
     }
 
-    // USD->X = EUR->X / EUR->USD
+    // USD->X = EUR->X / EUR->USD. Pass the full-precision float through
+    // `String()` rather than truncating to 6 decimals — the `numeric(12,6)`
+    // DB column is wide enough to hold the float64 representation exactly
+    // for all realistic FX rates, and preserving precision avoids
+    // compounding rounding across the USD-hub conversion.
     const usdToX = eurToX / eurToUsd;
-    usdHub.set(code, toRateString(usdToX));
+    usdHub.set(code, String(usdToX));
   }
 
   // EUR is excluded from TARGET_SYMBOLS, so Fixer never returns EUR->EUR.
   // Synthesise USD->EUR = 1 / (EUR->USD) so the USD hub covers every code.
   if (!usdHub.has(CurrencyCode.EUR)) {
-    usdHub.set(CurrencyCode.EUR, toRateString(1 / eurToUsd));
+    usdHub.set(CurrencyCode.EUR, String(1 / eurToUsd));
   }
 
   return usdHub;

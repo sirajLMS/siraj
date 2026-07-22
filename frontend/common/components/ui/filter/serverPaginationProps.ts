@@ -2,25 +2,15 @@
 
 import {
   buildServerPaginationOptions,
-  type ListPaginationOptions,
   type ServerListPaginationOptions,
 } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-
-export type { ListPaginationOptions, ServerListPaginationOptions };
-export { buildServerPaginationOptions };
-
-/** @deprecated Prefer `buildServerPaginationOptions` — returns list config, not MUI props. */
-export interface ServerPaginationConfig {
-  readonly page: number;
-  readonly pageSize: number;
-}
 
 /**
  * Builds server `ListPaginationOptions` when totalCount + onPageChange are present.
  * Returns `false` when server pagination is not active (caller may use client mode instead).
  */
 export function getServerPaginationOptions(
-  config: ServerPaginationConfig,
+  config: { readonly page: number; readonly pageSize: number },
   totalCount: number | undefined,
   onPageChange: ((page: number) => void) | undefined
 ): ServerListPaginationOptions | false {
@@ -42,6 +32,3 @@ export function isServerPagination(
 ): boolean {
   return totalCount !== undefined && onPageChange !== undefined;
 }
-
-/** @deprecated Use `getServerPaginationOptions` */
-export const getServerPaginationProps = getServerPaginationOptions;

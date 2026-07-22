@@ -66,7 +66,7 @@ describe("FxRateLimitService.checkManualRefreshRateLimit", () => {
 
     for (let i = 1; i <= 3; i++) {
       incrMock.mockResolvedValueOnce(i);
-      await expect(FxRateLimitService.checkManualRefreshRateLimit("user-1")).resolves.toBeUndefined();
+      await FxRateLimitService.checkManualRefreshRateLimit("user-1");
     }
 
     expect(incrMock).toHaveBeenCalledTimes(3);

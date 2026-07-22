@@ -60,6 +60,3 @@ export interface WorkshopPromoCardProps {
   readonly labels: WorkshopPromoCardLabels;
   readonly onLearnMore: () => void;
 }
-
-// Re-exported for tier convenience so the schedule components can keep a single import.
-export type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";

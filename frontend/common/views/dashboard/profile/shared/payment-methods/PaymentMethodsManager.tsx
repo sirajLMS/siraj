@@ -6,10 +6,8 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Button, Stack } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorState } from "@/frontend/common/components/ui";
-import {
-  PaymentMethodList,
-  type PaymentMethodRow,
-} from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodList";
+import { PaymentMethodList } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodList";
+import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import {
   AppPermission,
   PaymentDirection,

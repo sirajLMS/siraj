@@ -1,14 +1,12 @@
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { FxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import { formatLockedAmount, getCurrencyDecimals } from "@/frontend/common/lib/currency";
+import { formatLockedAmount } from "@/frontend/common/lib/currency";
 
 export type DisplayAmountLike = {
   readonly amount?: string | null;
   readonly currency: CurrencyCode | null;
   readonly stale: boolean | null;
 };
-
-export { formatLockedAmount, getCurrencyDecimals };
 
 export type FormatCurrencyMessages = Pick<
   FxDisplayMessages,

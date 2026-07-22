@@ -104,9 +104,7 @@ export function buildMaskedPaymentMethod(
 ): UserPaymentMethodReturnType {
   return {
     ...method,
-    type: method.type as UserPaymentMethodReturnType["type"],
-    direction: method.direction as UserPaymentMethodReturnType["direction"],
-    details: maskDetails(method.type as PaymentMethodType, method.details, revealSensitive),
+    details: maskDetails(method.type, method.details, revealSensitive),
   };
 }
 

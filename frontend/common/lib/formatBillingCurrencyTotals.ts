@@ -26,7 +26,7 @@ export function mapBillingCurrencyBuckets(
   rows: readonly GqlCurrencyBucket[] | null | undefined
 ): BillingCurrencyBucket[] {
   return (rows ?? [])
-    .filter((row): row is NonNullable<typeof row> & { currency: CurrencyCode } => row != null && row.currency != null)
+    .filter((row): row is NonNullable<typeof row> & { currency: CurrencyCode } => row?.currency != null)
     .map(row => ({
       amount: row.amount ?? "0.00",
       currency: row.currency,

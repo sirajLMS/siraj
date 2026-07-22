@@ -9,6 +9,7 @@
  */
 
 export type { DstMigrationLabels } from "./dstMigration";
+export type { AdminViewLabels, ClassDetailsPerformanceLabels } from "./view";
 
 export interface AdminDashboardLabels {
   // ─── Static strings ────────────────────────────────────────────────

@@ -104,7 +104,7 @@ export namespace ClassMeetingConfigService {
     const providerId = input.providerId ?? existing.providerId;
     const provider = await MeetingProviderRepository.getByIdOrThrow(providerId, tErrors);
 
-    const details = input.details !== undefined ? parseMeetingConfigDetails(provider, input.details) : undefined;
+    const details = input.details === undefined ? undefined : parseMeetingConfigDetails(provider, input.details);
 
     const updated = await ClassMeetingConfigRepository.update(
       id,
@@ -112,7 +112,7 @@ export namespace ClassMeetingConfigService {
         label: input.label,
         isDefault: input.isDefault,
         details,
-        encryptedSecret: input.password !== undefined ? input.password : undefined,
+        encryptedSecret: input.password === undefined ? undefined : input.password,
         providerId: input.providerId,
       },
       tErrors
@@ -155,7 +155,7 @@ async function getTeacherUserId(teacherId: string, tx?: DBTransaction): Promise<
 function extractMeetingId(url: string): string | null {
   try {
     const parsed = new URL(url);
-    const lastSegment = parsed.pathname.split("/").filter(Boolean).pop();
+    const lastSegment = parsed.pathname.split("/").findLast(segment => segment !== "");
     return lastSegment ?? null;
   } catch {
     return null;

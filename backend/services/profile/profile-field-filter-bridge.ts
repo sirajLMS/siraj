@@ -1,16 +1,11 @@
 import { AppPermission, ProfileAudience, ProfileScope } from "@/backend/enum";
 import type { FieldFilterContext, StudentFieldFilterContext } from "@/backend/services/profile/profile-field-filter";
 import type { ProfileFieldGroupDefinition, ProfileFieldGroupKey } from "@/backend/types/profile/profile-field-manifest";
-import {
-  getProfileEditPermission,
-  getProfileViewPermission,
-  PROFILE_FIELD_GROUPS,
-} from "@/backend/types/profile/profile-field-manifest";
+import { getProfileEditPermission, getProfileViewPermission } from "@/backend/types/profile/profile-field-manifest";
 import type {
   StudentFieldGroupDefinition,
   StudentFieldGroupKey,
 } from "@/backend/types/students/student-field-manifest";
-import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
 
 const PARENT_VIEW_OTHER_GROUPS: readonly ProfileFieldGroupKey[] = [
   "parent_social",
@@ -39,22 +34,22 @@ const PARENT_VIEW_OWN_GROUPS: readonly ProfileFieldGroupKey[] = [
 
 const STAFF_VIEW_OTHER_GROUPS: readonly ProfileFieldGroupKey[] = ["staff_role", "staff_permissions"];
 
-const ASSOCIATED_STUDENT_VIEW_OWN_GROUPS: readonly StudentFieldGroupKey[] = [
+const ASSOCIATED_STUDENT_VIEW_OWN_GROUPS = new Set<StudentFieldGroupKey>([
   "student_identity",
   "student_academic",
   "student_teacher",
   "student_schedule",
   "student_history",
-];
+]);
 
-const ASSOCIATED_STUDENT_VIEW_OTHER_GROUPS: readonly StudentFieldGroupKey[] = [
+const ASSOCIATED_STUDENT_VIEW_OTHER_GROUPS = new Set<StudentFieldGroupKey>([
   "student_identity",
   "student_academic",
   "student_teacher",
   "student_parent",
   "student_schedule",
   "student_history",
-];
+]);
 
 const STAFF_EDIT_OTHER_GROUPS: readonly ProfileFieldGroupKey[] = [
   "staff_role",
@@ -238,10 +233,10 @@ function hasLegacyStudentGroupView(ctx: StudentFieldFilterContext, group: Studen
   const groupKey = group.groupKey;
 
   if (permissionsInclude(permissions, AppPermission.STUDENT_VIEW_ASSOCIATED)) {
-    if (isAssociatedViewer && ASSOCIATED_STUDENT_VIEW_OWN_GROUPS.includes(groupKey)) {
+    if (isAssociatedViewer && ASSOCIATED_STUDENT_VIEW_OWN_GROUPS.has(groupKey)) {
       return true;
     }
-    if (!isAssociatedViewer && ASSOCIATED_STUDENT_VIEW_OTHER_GROUPS.includes(groupKey)) {
+    if (!isAssociatedViewer && ASSOCIATED_STUDENT_VIEW_OTHER_GROUPS.has(groupKey)) {
       return true;
     }
   }
@@ -291,5 +286,3 @@ export function hasStudentGroupEditPermission(
 function getStudentScope(ctx: StudentFieldFilterContext): ProfileScope {
   return ctx.isAssociatedViewer ? ProfileScope.OWN : ProfileScope.OTHER;
 }
-
-export { PROFILE_FIELD_GROUPS, STUDENT_FIELD_GROUPS };

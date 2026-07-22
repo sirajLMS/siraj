@@ -8,7 +8,6 @@ import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDoc
 import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useStudentPortalHistoryStore } from "@/frontend/common/stores/studentPortalHistoryStore";
-import type { StudentHistoryLabels } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryLabels";
 import type {
   StudentHistoryMetrics,
   StudentHistorySessionRow,
@@ -24,9 +23,9 @@ import {
   mapStudentHistorySessions,
 } from "@/frontend/common/views/dashboard/student/history/utils/studentHistoryMappers";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type StudentPortalHistoryLabels, useAppTranslation } from "@/shared/locale";
+import { type StudentPortalHistoryLabels as StudentHistoryLabels, useAppTranslation } from "@/shared/locale";
 
-function useStudentHistoryLabels(t: StudentPortalHistoryLabels): StudentHistoryLabels {
+function useStudentHistoryLabels(t: StudentHistoryLabels): StudentHistoryLabels {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,

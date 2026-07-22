@@ -22,7 +22,7 @@ export namespace TeacherDueService {
     if (canViewAll) return;
 
     const ownTeacher = await TeacherRepository.findByUserId(actorUserId);
-    if (ownTeacher && ownTeacher.id === teacherId) return;
+    if (ownTeacher?.id === teacherId) return;
 
     const t = getServerTranslations(locale ?? "en").errorsTranslations;
     throw new Error(t.unauthorizedAction);
@@ -77,8 +77,6 @@ export namespace TeacherDueService {
     const row: TeacherDueSelectType = await TeacherDueRepository.create(insertPayload, tx);
     return {
       ...row,
-      status: row.status as TeacherDueStatus,
-      currency: row.currency as CurrencyCode,
     };
   }
 
@@ -108,8 +106,6 @@ export namespace TeacherDueService {
     if (existing) {
       return {
         ...existing,
-        status: existing.status as TeacherDueStatus,
-        currency: existing.currency as CurrencyCode,
       };
     }
 
@@ -132,8 +128,6 @@ export namespace TeacherDueService {
     const row: TeacherDueSelectType = await TeacherDueRepository.create(insertPayload, input.tx);
     return {
       ...row,
-      status: row.status as TeacherDueStatus,
-      currency: row.currency as CurrencyCode,
     };
   }
 
@@ -165,8 +159,6 @@ export namespace TeacherDueService {
     const rows = await TeacherDueRepository.getPendingDues(teacherId);
     return rows.map(row => ({
       ...row,
-      status: row.status as TeacherDueStatus,
-      currency: row.currency as CurrencyCode,
     }));
   }
 
@@ -196,8 +188,6 @@ export namespace TeacherDueService {
     const updated = await TeacherDueRepository.markAsPaid([...dueIds], teacherPaymentId);
     return updated.map(row => ({
       ...row,
-      status: row.status as TeacherDueStatus,
-      currency: row.currency as CurrencyCode,
     }));
   }
 }

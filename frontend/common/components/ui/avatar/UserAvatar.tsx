@@ -14,7 +14,7 @@ const FALLBACK_SX = {
 } as const;
 
 export function UserAvatar({ variant = "circular", sx, ...props }: UserAvatarProps) {
-  const normalizedSx = Array.isArray(sx) ? sx : ([sx].filter(Boolean) as (typeof sx)[]);
+  const normalizedSx = Array.isArray(sx) ? sx : [sx].filter(Boolean);
   return <BaseAvatar variant={variant} sx={[theme => getAvatarSx(theme, props.src), ...normalizedSx]} {...props} />;
 }
 

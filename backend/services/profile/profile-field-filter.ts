@@ -38,7 +38,7 @@ function setValueAtPath(target: Record<string, unknown>, path: string, value: un
     current = next as Record<string, unknown>;
   }
 
-  current[segments[segments.length - 1]] = value;
+  current[segments.at(-1) as string] = value;
 }
 
 function cloneForFiltering<T>(payload: T): T {

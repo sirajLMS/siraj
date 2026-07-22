@@ -37,7 +37,7 @@ export namespace StudentMonthlyReportService {
     // Parent: parent viewing child's report
     if (studentRow.parentId) {
       const parent = await ParentRepository.findByUserId(actorUserId);
-      if (parent && parent.id === studentRow.parentId) return;
+      if (parent?.id === studentRow.parentId) return;
     }
 
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;

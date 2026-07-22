@@ -1,9 +1,8 @@
 "use client";
 
 import { buildManualInvoiceLabels } from "@/frontend/common/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
-import type { BillingLabels, BillingManualLabels } from "@/shared/locale";
+import type { BillingLabels } from "@/shared/locale";
 
-export type { BillingManualLabels };
 export { buildManualInvoiceLabels };
 export type BillingTranslator = BillingLabels;
 

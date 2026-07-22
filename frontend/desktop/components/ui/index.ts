@@ -1,16 +1,16 @@
 // Top-level desktop UI primitives barrel
-export * from "@/frontend/desktop/components/ui/badge";
-export * from "@/frontend/desktop/components/ui/button";
-export * from "@/frontend/desktop/components/ui/card";
-export * from "@/frontend/desktop/components/ui/container";
+export * from "./badge";
+export * from "./button";
+export * from "./card";
+export * from "./container";
 export {
   DesktopAppDataGrid,
   type DesktopAppDataGridProps,
-} from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
-export { DesktopAppDataGridLoadingOverlay } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGridLoadingOverlay";
-export { DesktopAppDataGridNoRowsOverlay } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGridNoRowsOverlay";
-export * from "@/frontend/desktop/components/ui/display";
-export * from "@/frontend/desktop/components/ui/filter";
-export * from "@/frontend/desktop/components/ui/form";
-export * from "@/frontend/desktop/components/ui/input";
-export * from "@/frontend/desktop/components/ui/state";
+} from "./dataGrid/DesktopAppDataGrid";
+export { DesktopAppDataGridLoadingOverlay } from "./dataGrid/DesktopAppDataGridLoadingOverlay";
+export { DesktopAppDataGridNoRowsOverlay } from "./dataGrid/DesktopAppDataGridNoRowsOverlay";
+export * from "./display";
+export * from "./filter";
+export * from "./form";
+export * from "./input";
+export * from "./state";

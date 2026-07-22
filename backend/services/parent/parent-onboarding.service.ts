@@ -64,13 +64,13 @@ export namespace ParentOnboardingService {
           name: input.name,
           email: { value: input.email },
           password: input.password,
-          ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
+          ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
         },
         undefined,
         txObj
       );
 
-      await UserRepository.updateTimezone(user.id, input.timezone ?? IanaTimezone.UTC, txObj, undefined);
+      await UserRepository.updateTimezone(user.id, input.timezone ?? IanaTimezone.UTC, txObj);
       if (input.phone != null) {
         await UserRepository.updateProfileFields(user.id, { phone: input.phone }, undefined, txObj);
       }
@@ -90,8 +90,7 @@ export namespace ParentOnboardingService {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-        txObj,
-        undefined
+        txObj
       );
 
       // Step 3: Assign permission group

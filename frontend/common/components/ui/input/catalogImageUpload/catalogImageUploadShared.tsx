@@ -171,6 +171,142 @@ export interface CatalogImageUploadScaffoldProps {
   readonly slots?: CatalogImageUploadSlotProps;
 }
 
+interface CatalogImageUploadBodyProps {
+  readonly previewUrl: string | null;
+  readonly label: string | undefined;
+  readonly showError: boolean;
+  readonly isUploading: boolean;
+  readonly resolvedError: string | null;
+  readonly resolvedHelperText: string;
+  readonly uploadLabel: string;
+  readonly uploadingLabel: string;
+  readonly removeLabel: string;
+  readonly previewAlt: string;
+  readonly previewShape: "square" | "circle";
+  readonly onUploadClick: () => void;
+  readonly onRemoveClick: () => void;
+  readonly disabled: boolean;
+  readonly fileInputRef: React.RefObject<HTMLInputElement | null>;
+  readonly onFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  readonly allowUrlFallback: boolean;
+  readonly imageUrl: string | null;
+  readonly onUrlChange: (value: string) => void;
+  readonly logoUrlLabel: string | undefined;
+  readonly optionalLabel: string | undefined;
+}
+
+function CatalogImageUploadBody({
+  previewUrl,
+  label,
+  showError,
+  isUploading,
+  resolvedError,
+  resolvedHelperText,
+  uploadLabel,
+  uploadingLabel,
+  removeLabel,
+  previewAlt,
+  previewShape,
+  onUploadClick,
+  onRemoveClick,
+  disabled,
+  fileInputRef,
+  onFileSelect,
+  allowUrlFallback,
+  imageUrl,
+  onUrlChange,
+  logoUrlLabel,
+  optionalLabel,
+}: Readonly<CatalogImageUploadBodyProps>): React.ReactNode {
+  return (
+    <>
+      {label ? (
+        <Typography variant="labelMd" component="span" sx={theme => ({ color: theme.palette.text.secondary })}>
+          {label}
+        </Typography>
+      ) : null}
+      <Box
+        sx={
+          previewShape === "circle"
+            ? {
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: 1.5,
+                minWidth: 0,
+              }
+            : {
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 2,
+                minWidth: 0,
+              }
+        }
+      >
+        <PreviewBox
+          previewUrl={previewUrl}
+          label={label}
+          showError={showError}
+          isUploading={isUploading}
+          previewAlt={previewAlt}
+          previewShape={previewShape}
+        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            minWidth: 0,
+            width: previewShape === "circle" ? "100%" : "auto",
+          }}
+        >
+          <UploadButtons
+            onUploadClick={onUploadClick}
+            onRemoveClick={onRemoveClick}
+            disabled={disabled}
+            isUploading={isUploading}
+            hasPreview={previewUrl !== null}
+            uploadLabel={uploadLabel}
+            uploadingLabel={uploadingLabel}
+            removeLabel={removeLabel}
+            horizontal={previewShape === "circle"}
+          />
+          <Typography
+            sx={theme => ({
+              typography: "bodySm",
+              color: theme.palette.text.secondary,
+            })}
+          >
+            {resolvedHelperText}
+          </Typography>
+          {showError && resolvedError ? <ErrorDisplay errorMessage={resolvedError} /> : null}
+        </Box>
+      </Box>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={ACCEPTED_TYPES.join(",")}
+        onChange={onFileSelect}
+        disabled={disabled}
+        hidden
+        aria-label={label ?? uploadLabel}
+      />
+      {allowUrlFallback ? (
+        <UrlFallbackField
+          imageUrl={imageUrl}
+          onUrlChange={onUrlChange}
+          disabled={disabled || isUploading}
+          showError={showError}
+          errorMessage={resolvedError}
+          label={logoUrlLabel}
+          optionalLabel={optionalLabel}
+        />
+      ) : null}
+    </>
+  );
+}
+
 export function CatalogImageUploadScaffold({
   props,
   slots,
@@ -209,91 +345,29 @@ export function CatalogImageUploadScaffold({
   const resolvedHelperText = helperText ?? t.helperText(maxSizeMb);
 
   const body = (
-    <>
-      {label ? (
-        <Typography variant="labelMd" component="span" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {label}
-        </Typography>
-      ) : null}
-      <Box
-        sx={
-          previewShape === "circle"
-            ? {
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                gap: 1.5,
-                minWidth: 0,
-              }
-            : {
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 2,
-                minWidth: 0,
-              }
-        }
-      >
-        <PreviewBox
-          previewUrl={resolvedPreview}
-          label={label}
-          showError={showError}
-          isUploading={upload.isUploading}
-          previewAlt={t.previewAlt}
-          previewShape={previewShape}
-        />
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-            minWidth: 0,
-            width: previewShape === "circle" ? "100%" : "auto",
-          }}
-        >
-          <UploadButtons
-            onUploadClick={triggerFileInput}
-            onRemoveClick={upload.handleRemove}
-            disabled={disabled}
-            isUploading={upload.isUploading}
-            hasPreview={resolvedPreview !== null}
-            uploadLabel={t.upload}
-            uploadingLabel={t.uploading}
-            removeLabel={t.remove}
-            horizontal={previewShape === "circle"}
-          />
-          <Typography
-            sx={theme => ({
-              typography: "bodySm",
-              color: theme.palette.text.secondary,
-            })}
-          >
-            {resolvedHelperText}
-          </Typography>
-          {showError && resolvedError ? <ErrorDisplay errorMessage={resolvedError} /> : null}
-        </Box>
-      </Box>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={ACCEPTED_TYPES.join(",")}
-        onChange={upload.handleFileSelect}
-        disabled={disabled}
-        hidden
-        aria-label={label ?? t.upload}
-      />
-      {allowUrlFallback ? (
-        <UrlFallbackField
-          imageUrl={imageUrl ?? null}
-          onUrlChange={upload.handleUrlChange}
-          disabled={disabled || upload.isUploading}
-          showError={showError}
-          errorMessage={resolvedError}
-          label={t.logoUrlLabel}
-          optionalLabel={t.optional}
-        />
-      ) : null}
-    </>
+    <CatalogImageUploadBody
+      previewUrl={resolvedPreview}
+      label={label}
+      showError={showError}
+      isUploading={upload.isUploading}
+      resolvedError={resolvedError}
+      resolvedHelperText={resolvedHelperText}
+      uploadLabel={t.upload}
+      uploadingLabel={t.uploading}
+      removeLabel={t.remove}
+      previewAlt={t.previewAlt}
+      previewShape={previewShape}
+      onUploadClick={triggerFileInput}
+      onRemoveClick={upload.handleRemove}
+      disabled={disabled}
+      fileInputRef={fileInputRef}
+      onFileSelect={upload.handleFileSelect}
+      allowUrlFallback={allowUrlFallback}
+      imageUrl={imageUrl ?? null}
+      onUrlChange={upload.handleUrlChange}
+      logoUrlLabel={t.logoUrlLabel}
+      optionalLabel={t.optional}
+    />
   );
 
   const { ContainerWrapper } = slots ?? {};

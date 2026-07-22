@@ -12,6 +12,38 @@ import { logger } from "@/frontend/common/utils/logger";
 
 const VISIBILITY_FETCH_DEBOUNCE_MS = 30_000;
 
+function onFetchFailed(error: unknown) {
+  logger.warn("FX live refresh visibilitychange fetch failed", {
+    error: error instanceof Error ? error.message : String(error),
+  });
+}
+
+function onRefetchFailed(error: unknown) {
+  logger.warn("FX live refresh refetch failed", {
+    error: error instanceof Error ? error.message : String(error),
+  });
+}
+
+function onMeFetched(
+  client: ReturnType<typeof useApolloClient>,
+  refetchFxHealth: () => Promise<{ data: unknown; error?: Error }>,
+  syncViewerFromProfile: typeof import("@/frontend/common/lib/sync-viewer-profile").syncViewerFromProfile,
+  result: Awaited<ReturnType<typeof client.query>>
+) {
+  const me = result.data?.me;
+  if (!me) {
+    return;
+  }
+
+  // Only sync if displayCurrency is explicitly set (not null/undefined)
+  if (me.displayCurrency !== null && me.displayCurrency !== undefined) {
+    syncViewerFromProfile(client, { displayCurrency: me.displayCurrency });
+    if (me.displayCurrency) {
+      refetchFxHealth().catch(onRefetchFailed);
+    }
+  }
+}
+
 export function useFxLiveRefresh(): void {
   const client = useApolloClient();
   const displayCurrency = useUserStore(state => state.displayCurrency);
@@ -34,34 +66,10 @@ export function useFxLiveRefresh(): void {
       }
       lastFetchRef.current = now;
 
-      client.query({ query: meQueryDocument, fetchPolicy: "network-only" }).then(onMeFetched).catch(onFetchFailed);
-
-      function onMeFetched(result: Awaited<ReturnType<typeof client.query>>) {
-        const me = result.data?.me;
-        if (!me) {
-          return;
-        }
-
-        // Only sync if displayCurrency is explicitly set (not null/undefined)
-        if (me.displayCurrency !== null && me.displayCurrency !== undefined) {
-          syncViewerFromProfile(client, { displayCurrency: me.displayCurrency });
-          if (me.displayCurrency) {
-            refetchFxHealth().catch(onRefetchFailed);
-          }
-        }
-      }
-
-      function onFetchFailed(error: unknown) {
-        logger.warn("FX live refresh visibilitychange fetch failed", {
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-
-      function onRefetchFailed(error: unknown) {
-        logger.warn("FX live refresh refetch failed", {
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
+      client
+        .query({ query: meQueryDocument, fetchPolicy: "network-only" })
+        .then(result => onMeFetched(client, refetchFxHealth, syncViewerFromProfile, result))
+        .catch(onFetchFailed);
     };
 
     const handleStorageChange = (event: StorageEvent) => {
@@ -88,10 +96,10 @@ export function useFxLiveRefresh(): void {
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("storage", handleStorageChange);
+    globalThis.addEventListener("storage", handleStorageChange);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("storage", handleStorageChange);
+      globalThis.removeEventListener("storage", handleStorageChange);
     };
   }, [client, refetchFxHealth]);
 }

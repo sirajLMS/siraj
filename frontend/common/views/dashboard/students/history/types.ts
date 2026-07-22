@@ -29,7 +29,6 @@ export interface ClassSession {
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
 }
 
-export type { StudentHistoryLabels } from "./types/studentHistoryLabels";
 export type { StudentHistoryMetrics, StudentHistorySessionRow } from "./types/studentHistoryTypes";
 export type { StudentHistoryViewProps } from "./types/studentHistoryViewProps";
 

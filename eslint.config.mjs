@@ -196,7 +196,7 @@ const eslintConfig = defineConfig([
       "no-restricted-syntax": [
         "error",
         {
-          selector: "ImportDeclaration[source.value=/^\\.\\.?\\//]",
+          selector: "ImportDeclaration[source.value=/^\\.\\.?\\//]", // NoSonar
           message: "Imports must use @/ path alias, not relative ./ or ../ — see AGENTS.md",
         },
       ],
@@ -338,7 +338,7 @@ const eslintConfig = defineConfig([
         {
           patterns: [
             {
-              regex: "\\.desktop(\\.tsx?)?$",
+              regex: "\\.desktop(\\.tsx?)?$", // NoSonar
               message: "Mobile components must not import desktop components — see architecture rules in AGENTS.md",
             },
           ],
@@ -354,7 +354,7 @@ const eslintConfig = defineConfig([
         {
           patterns: [
             {
-              regex: "\\.mobile(\\.tsx?)?$",
+              regex: "\\.mobile(\\.tsx?)?$", // NoSonar
               message: "Desktop components must not import mobile components — see architecture rules in AGENTS.md",
             },
           ],

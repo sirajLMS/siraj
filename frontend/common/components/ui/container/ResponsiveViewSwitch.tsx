@@ -38,7 +38,7 @@ class ViewSwitchErrorBoundary extends Component<ViewSwitchErrorBoundaryProps, Vi
           severity="error"
           sx={{ m: 2 }}
           action={
-            <Button color="inherit" size="small" onClick={() => window.location.reload()}>
+            <Button color="inherit" size="small" onClick={() => globalThis.location.reload()}>
               Retry
             </Button>
           }

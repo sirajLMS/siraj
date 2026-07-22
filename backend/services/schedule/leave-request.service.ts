@@ -1,13 +1,13 @@
 import type { DBTransaction } from "@/backend/db/db.types";
-import type { LeaveQuotaUsageRow } from "@/backend/db/repo/scheduling/leave-quota-usage.repository";
 import {
   LeaveQuotaUsageRepository,
+  type LeaveQuotaUsageRow,
   type UpsertStudentLeaveQuotaInput,
 } from "@/backend/db/repo/scheduling/leave-quota-usage.repository";
-import type { LeaveRequestRow } from "@/backend/db/repo/scheduling/leave-request.repository";
 import {
   type CreateLeaveRequestInput,
   LeaveRequestRepository,
+  type LeaveRequestRow,
 } from "@/backend/db/repo/scheduling/leave-request.repository";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 

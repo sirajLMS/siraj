@@ -24,7 +24,6 @@
 
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import type {
-  ChannelDispatchResult,
   ClassInstanceSelectType,
   CommunicationChannelType,
   CommunicationPayload,
@@ -598,7 +597,3 @@ export function buildNewComplaintPayloads(
 
   return fanOutToUsers(affectedUserIds, NotificationEventType.NEW_COMPLAINT, labels.title, body, sharedMetadata);
 }
-
-// Re-exported type so consumers can typehint dispatch results without
-// reaching into `@/backend/types` directly from this module.
-export type { ChannelDispatchResult };

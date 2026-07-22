@@ -24,7 +24,7 @@ gqlSchemaBuilder.queryField("studentProfile", t =>
           throw new Error(tErrors.studentNotFound(ctx.user.id));
         }
       }
-      return StudentProfileService.getProfile(ctx.user.id, studentId, { year: args.year, month: args.month }, tErrors);
+      return StudentProfileService.getProfile(ctx.user.id, studentId, tErrors, { year: args.year, month: args.month });
     },
   })
 );

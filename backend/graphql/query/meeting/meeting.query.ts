@@ -18,7 +18,7 @@ gqlSchemaBuilder.queryField("meetingProviders", t =>
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      return MeetingProviderCatalogService.listProviders(userId, args.activeOnly ?? true, tErrors);
+      return MeetingProviderCatalogService.listProviders(userId, tErrors, args.activeOnly ?? true);
     },
   })
 );

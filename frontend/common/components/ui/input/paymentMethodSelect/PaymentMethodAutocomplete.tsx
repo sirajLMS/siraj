@@ -137,7 +137,7 @@ const buildListAttachedSx = (
   isOpen: boolean
 ): React.CSSProperties => {
   if (!listAttached) {
-    return { ...(style ?? {}) };
+    return style ?? {};
   }
   const listAttachedOverrides: Record<string, React.CSSProperties> = {
     "& .MuiOutlinedInput-root": {
@@ -151,10 +151,7 @@ const buildListAttachedSx = (
         : {}),
     },
   };
-  return {
-    ...(style ?? {}),
-    ...listAttachedOverrides,
-  };
+  return style ? { ...style, ...listAttachedOverrides } : listAttachedOverrides;
 };
 
 const buildSlotProps = (

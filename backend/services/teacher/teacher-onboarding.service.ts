@@ -49,7 +49,7 @@ export namespace TeacherOnboardingService {
         name: input.name,
         email: { value: input.email },
         password: input.password,
-        ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
+        ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
       },
       locale,
       txObj

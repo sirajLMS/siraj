@@ -1,4 +1,3 @@
-import type { SchemaTypes } from "@pothos/core";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
@@ -30,6 +29,3 @@ export function registerDeleteMutation(
     })
   );
 }
-
-// Re-export for type-checking convenience
-export type { BaseContext, SchemaTypes };

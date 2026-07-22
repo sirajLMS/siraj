@@ -152,7 +152,7 @@ const createHandleUrlChange =
 const emitUrlChange = (handlers: UrlChangeHandlers, value: string): void => createHandleUrlChange(handlers)(value);
 
 type ObjectPreviewApi = {
-  readonly objectUrlRef: React.MutableRefObject<string | null>;
+  readonly objectUrlRef: React.RefObject<string | null>;
   readonly previewUrl: string | null;
   readonly revokeObjectUrl: () => void;
   readonly setLocalPreview: (file: File) => void;
@@ -230,32 +230,9 @@ const applyFileSelectResult = async (result: SelectResult, deps: FileSelectDeps)
   }
 };
 
-const runFileSelect = async (
-  event: React.ChangeEvent<HTMLInputElement>,
-  maxBytes: number,
-  maxSizeMb: number,
-  t: TranslationBundle,
-  notify: NotifyFn,
-  onUploadAction: ((file: File) => Promise<{ url: string; filePath?: string }>) | undefined,
-  onImageUrlChangeAction: ((url: string | null) => void) | undefined,
-  onFilePathChangeAction: ((filePath: string | null) => void) | undefined,
-  setLocalError: (value: string | null) => void,
-  setUploadState: (state: UploadState) => void,
-  setLocalPreview: (file: File) => void
-): Promise<void> => {
-  const result = buildSelectResult(event, maxBytes, maxSizeMb, t, notify);
-  return applyFileSelectResult(result, {
-    maxBytes,
-    maxSizeMb,
-    t,
-    notify,
-    onUploadAction,
-    onImageUrlChangeAction,
-    onFilePathChangeAction,
-    setLocalError,
-    setUploadState,
-    setLocalPreview,
-  });
+const runFileSelect = async (event: React.ChangeEvent<HTMLInputElement>, deps: FileSelectDeps): Promise<void> => {
+  const result = buildSelectResult(event, deps.maxBytes, deps.maxSizeMb, deps.t, deps.notify);
+  return applyFileSelectResult(result, deps);
 };
 
 const applyUploadOutcome = (
@@ -289,8 +266,7 @@ export function useImageUpload(params: ImageUploadHookParams): UseImageUploadRes
 
   const handleFileSelect = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> =>
-      runFileSelect(
-        event,
+      runFileSelect(event, {
         maxBytes,
         maxSizeMb,
         t,
@@ -300,8 +276,8 @@ export function useImageUpload(params: ImageUploadHookParams): UseImageUploadRes
         onFilePathChangeAction,
         setLocalError,
         setUploadState,
-        setLocalPreview
-      ),
+        setLocalPreview,
+      }),
     [maxBytes, maxSizeMb, notify, onFilePathChangeAction, onImageUrlChangeAction, onUploadAction, setLocalPreview, t]
   );
 

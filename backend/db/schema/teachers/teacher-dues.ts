@@ -28,7 +28,7 @@ export const teacherDues = pgTable(
     hours: numeric("hours", { precision: 8, scale: 2 }).notNull(),
     amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
     currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
-    status: teacherDueStatusEnum("status").notNull().default(TeacherDueStatus.PENDING),
+    status: teacherDueStatusEnum("status").notNull().default(TeacherDueStatus.PENDING).$type<TeacherDueStatus>(),
     approvedByUserId: uuid("approved_by_user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),

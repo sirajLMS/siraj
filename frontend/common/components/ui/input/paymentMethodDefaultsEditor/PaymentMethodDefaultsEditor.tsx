@@ -14,7 +14,7 @@ import { filterMethodsForDirection } from "@/frontend/common/components/ui/input
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { useAppTranslation } from "@/shared/locale";
 
-export type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
+export type { PaymentMethodDefaultsEditorProps } from "./types";
 
 export function PaymentMethodDefaultsEditor({
   methods,

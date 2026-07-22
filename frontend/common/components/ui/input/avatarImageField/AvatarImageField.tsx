@@ -389,7 +389,7 @@ export function AvatarImageField<T extends FieldValues>(props: Readonly<AvatarIm
         control={props.control}
         render={({ field }) => (
           <AvatarEditorBody
-            imageUrl={(field.value as string | null | undefined) ?? null}
+            imageUrl={field.value ?? null}
             onImageUrlChange={url => field.onChange(url ?? undefined)}
             onUploadAvatar={onUploadAvatar}
             label={label}

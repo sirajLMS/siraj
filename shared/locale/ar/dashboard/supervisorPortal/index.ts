@@ -1,5 +1,5 @@
-export { dashboardSupervisorPortalMonthlyReportsAr as monthlyReports } from "@/shared/locale/ar/dashboard/supervisorPortal/monthlyReports";
-export { dashboardSupervisorPortalPendingReviewsAr as pendingReviews } from "@/shared/locale/ar/dashboard/supervisorPortal/pendingReviews";
-export { dashboardSupervisorPortalProfileAr as profile } from "@/shared/locale/ar/dashboard/supervisorPortal/profile";
-export { dashboardSupervisorPortalDashboardAr as supervisorDashboard } from "@/shared/locale/ar/dashboard/supervisorPortal/supervisorDashboard";
-export { dashboardSupervisorPortalTeacherDuesAr as teacherDues } from "@/shared/locale/ar/dashboard/supervisorPortal/teacherDues";
+export { dashboardSupervisorPortalMonthlyReportsAr as monthlyReports } from "./monthlyReports";
+export { dashboardSupervisorPortalPendingReviewsAr as pendingReviews } from "./pendingReviews";
+export { dashboardSupervisorPortalProfileAr as profile } from "./profile";
+export { dashboardSupervisorPortalDashboardAr as supervisorDashboard } from "./supervisorDashboard";
+export { dashboardSupervisorPortalTeacherDuesAr as teacherDues } from "./teacherDues";

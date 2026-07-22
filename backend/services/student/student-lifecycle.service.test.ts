@@ -300,7 +300,7 @@ describe("StudentLifecycleService — notification dispatch", () => {
       expect(builderCall?.[1]).toBe(NotificationEventType.STUDENT_STATUS_CHANGED);
       expect(builderCall?.[2]).toEqual([PARENT_USER_ID]);
       expect(builderCall?.[3]).toBe("en");
-      const metadata = builderCall?.[4] as Record<string, string>;
+      const metadata = builderCall?.[4];
       expect(metadata.studentName).toBe("Test Student");
       expect(metadata.oldStatus).toBe(StudentStatus.REGULAR);
       expect(metadata.newStatus).toBe(StudentStatus.SUSPENDED);

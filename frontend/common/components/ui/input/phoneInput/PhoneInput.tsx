@@ -51,7 +51,7 @@ type CountryAdornmentProps = {
   readonly onOpenCountryPicker: (event: React.MouseEvent<HTMLElement>) => void;
   readonly onPrefixFocus: () => void;
   readonly onPrefixKeyDown: React.KeyboardEventHandler<HTMLInputElement>;
-  readonly onPrefixInput: React.FormEventHandler<HTMLInputElement>;
+  readonly onPrefixInput: React.ReactEventHandler<HTMLInputElement>;
   readonly selectCountryLabel: string;
 };
 
@@ -131,7 +131,7 @@ type PhoneTextFieldProps = {
   readonly countryPickerOpen: boolean;
   readonly onNationalKeyDown: React.KeyboardEventHandler<HTMLInputElement>;
   readonly onNationalFocus: () => void;
-  readonly onNationalInput: React.FormEventHandler<HTMLInputElement>;
+  readonly onNationalInput: React.ReactEventHandler<HTMLInputElement>;
   readonly onNationalSelect: React.ReactEventHandler<HTMLInputElement>;
   readonly startAdornment: React.ReactNode;
 };
@@ -235,13 +235,18 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   const isEmpty = prefixDigits.length === 0 && nationalDigits.length === 0;
   const showRequiredError = Boolean(required) && isEmpty;
   const showError = Boolean(error) || prefixInvalid || showRequiredError || phoneInvalid;
-  const resolvedHelperText = prefixInvalid
-    ? t.invalidPrefix
-    : showRequiredError
-      ? t.required
-      : phoneInvalid
-        ? t.invalidPhone
-        : helperText;
+
+  let resolvedHelperText: string | undefined;
+  if (prefixInvalid) {
+    resolvedHelperText = t.invalidPrefix;
+  } else if (showRequiredError) {
+    resolvedHelperText = t.required;
+  } else if (phoneInvalid) {
+    resolvedHelperText = t.invalidPhone;
+  } else {
+    resolvedHelperText = helperText;
+  }
+
   const resolvedLabel = hideLabel ? undefined : (label ?? t.label);
 
   const startAdornment = (

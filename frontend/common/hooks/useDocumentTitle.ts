@@ -7,6 +7,9 @@ const APP_NAME = "Siraj";
 
 type NamespaceKey = "auth" | "common" | "errors" | "emails" | "session" | "sms" | "ui" | "dashboard" | "profile";
 
+/** A single-segment {@link NamespaceKey} or a dotted sub-segment path. */
+type NamespacePath = NamespaceKey | `${NamespaceKey}.${string}`;
+
 const NAMESPACE_TO_GROUP: Record<NamespaceKey, keyof Translations> = {
   auth: "authTranslations",
   common: "commonTranslations",
@@ -38,14 +41,14 @@ function resolveNamespace(translations: Translations, dotted: string): Record<st
     target = (target as { base: unknown }).base;
   } else if (subParts.length === 1) {
     const camelKey = subParts[0];
-    if (target && typeof target === "object" && camelKey in (target as object)) {
+    if (target && typeof target === "object" && camelKey in target) {
       target = (target as Record<string, unknown>)[camelKey];
     } else {
       return {};
     }
   } else if (subParts.length > 1) {
     const camelKey = subParts.map((seg, i) => (i === 0 ? seg : seg[0].toUpperCase() + seg.slice(1))).join("");
-    if (target && typeof target === "object" && camelKey in (target as object)) {
+    if (target && typeof target === "object" && camelKey in target) {
       target = (target as Record<string, unknown>)[camelKey];
     } else {
       return {};
@@ -56,7 +59,7 @@ function resolveNamespace(translations: Translations, dotted: string): Record<st
 
 export function useDocumentTitle(
   title: string | null | undefined,
-  fallbackNamespace?: NamespaceKey | string,
+  fallbackNamespace?: NamespacePath,
   fallbackKey?: string,
   values?: Record<string, string | number>
 ): void {

@@ -145,8 +145,8 @@ gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
       const result = await ScheduleService.getRescheduleTracking(
         userId,
         { search: args.search ?? null, status: args.status ?? null },
-        pagination,
-        tErrors
+        tErrors,
+        pagination
       );
 
       return {

@@ -8,7 +8,6 @@ export type {
   ComplaintResponse,
   ComplaintSubmitInput,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-export { ComplaintCategory } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export { ComplaintStatus };
 

@@ -37,7 +37,7 @@ export function LocalizedStringFormField<T extends FieldValues>({
         if (typeof rawValue === "string") {
           normalized = rawValue === "" ? {} : { en: rawValue };
         } else if (rawValue !== null && typeof rawValue === "object") {
-          normalized = rawValue as LocalizedString;
+          normalized = rawValue;
         } else {
           normalized = {};
         }

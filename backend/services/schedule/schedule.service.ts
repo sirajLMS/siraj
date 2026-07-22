@@ -211,8 +211,8 @@ export namespace ScheduleService {
   export async function getRescheduleTracking(
     userId: string,
     input: RescheduleTrackingInput,
-    pagination: PaginationArgs | null = null,
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    pagination: PaginationArgs | null = null
   ) {
     const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SESSION_RESCHEDULE);
     if (!isAuthorized) {

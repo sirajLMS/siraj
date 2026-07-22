@@ -4,10 +4,10 @@ import {
   StudentProgressRepository,
   type StudentProgressUpsertInput,
 } from "@/backend/db/repo/students/student-progress.repository";
-import type { StudentStatusHistoryRow } from "@/backend/db/repo/students/student-status-history.repository";
 import {
   type CreateInitialStatusHistoryInput,
   StudentStatusHistoryRepository,
+  type StudentStatusHistoryRow,
 } from "@/backend/db/repo/students/student-status-history.repository";
 import type { StudentStatus } from "@/backend/enum";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";

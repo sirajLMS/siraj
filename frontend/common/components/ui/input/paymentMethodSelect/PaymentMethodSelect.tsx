@@ -6,10 +6,8 @@ import type {
   PaymentMethodAutocompleteProps,
   PaymentMethodSelectProps,
 } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
-import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 
-export type { PaymentMethodSelectProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
-export type { PaymentMethodCatalogOption };
+export type { PaymentMethodSelectProps } from "./types";
 
 /**
  * PaymentMethodSelect allows the operator to pick a catalog-backed payment

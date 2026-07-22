@@ -136,7 +136,7 @@ export namespace MeetingConfigService {
         label: input.label,
         isDefault: input.isDefault,
         details,
-        encryptedSecret: input.password !== undefined ? input.password : undefined,
+        encryptedSecret: input.password,
       },
       tErrors
     );

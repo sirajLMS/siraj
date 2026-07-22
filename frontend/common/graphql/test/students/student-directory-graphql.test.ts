@@ -9,35 +9,62 @@ import {
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 
+interface ProvisionedEntities {
+  superAdminToken: string;
+  teacherId: string;
+  studentId: string;
+  studentUserId: string;
+  teacherUserId: string;
+  parentUserId: string;
+  parentId: string;
+}
+
+async function expectDemoUserDenied(demoUser: string) {
+  const token = await loginDemoUser(demoUser);
+  const result = await testClient.query({
+    query: studentDirectoryQueryDocument,
+    variables: {
+      paginationArgs: null,
+      filterArgs: null,
+      orderBy: null,
+    },
+    context: { headers: { Authorization: `Bearer ${token}` } },
+    errorPolicy: "all",
+  });
+  expect(result.error).toBeDefined();
+}
+
 describe("studentDirectory GraphQL Integration Tests", () => {
   setupTestServerLifecycle();
 
-  let superAdminToken = "";
-  let teacherId = "";
-  let studentId = "";
-  let studentUserId = "";
-  let teacherUserId = "";
-  let parentUserId = "";
-  let parentId = "";
+  const entities: ProvisionedEntities = {
+    superAdminToken: "",
+    teacherId: "",
+    studentId: "",
+    studentUserId: "",
+    teacherUserId: "",
+    parentUserId: "",
+    parentId: "",
+  };
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("StudentDirTest");
-    superAdminToken = r.superAdminToken;
-    teacherId = r.teacherId;
-    studentId = r.studentId;
-    studentUserId = r.studentUserId;
-    teacherUserId = r.teacherUserId;
-    parentUserId = r.parentUserId;
-    parentId = r.parentId;
+    entities.superAdminToken = r.superAdminToken;
+    entities.teacherId = r.teacherId;
+    entities.studentId = r.studentId;
+    entities.studentUserId = r.studentUserId;
+    entities.teacherUserId = r.teacherUserId;
+    entities.parentUserId = r.parentUserId;
+    entities.parentId = r.parentId;
 
-    expect(superAdminToken).toBeTruthy();
-    expect(teacherId).toBeTruthy();
-    expect(studentId).toBeTruthy();
-    expect(parentId).toBeTruthy();
+    expect(entities.superAdminToken).toBeTruthy();
+    expect(entities.teacherId).toBeTruthy();
+    expect(entities.studentId).toBeTruthy();
+    expect(entities.parentId).toBeTruthy();
   });
 
   test("Admin can query student directory", async () => {
-    const data = await authenticatedRequest(superAdminToken, "query", studentDirectoryQueryDocument, {
+    const data = await authenticatedRequest(entities.superAdminToken, "query", studentDirectoryQueryDocument, {
       paginationArgs: null,
       filterArgs: null,
       orderBy: null,
@@ -67,7 +94,7 @@ describe("studentDirectory GraphQL Integration Tests", () => {
   test("Staff can query student directory", async () => {
     // staff_default/teacher_default/parent_default logins are pre-existing seed-dependent
     // Using loginAndProvision entities for verification instead
-    const data = await authenticatedRequest(superAdminToken, "query", studentDirectoryQueryDocument, {
+    const data = await authenticatedRequest(entities.superAdminToken, "query", studentDirectoryQueryDocument, {
       paginationArgs: null,
       filterArgs: null,
       orderBy: null,
@@ -81,21 +108,6 @@ describe("studentDirectory GraphQL Integration Tests", () => {
     expect(Array.isArray(students)).toBeTrue();
     expect(students.length).toBeGreaterThan(0);
   });
-
-  async function expectDemoUserDenied(demoUser: string) {
-    const token = await loginDemoUser(demoUser);
-    const result = await testClient.query({
-      query: studentDirectoryQueryDocument,
-      variables: {
-        paginationArgs: null,
-        filterArgs: null,
-        orderBy: null,
-      },
-      context: { headers: { Authorization: `Bearer ${token}` } },
-      errorPolicy: "all",
-    });
-    expect(result.error).toBeDefined();
-  }
 
   test("Teacher denied from student directory", async () => {
     await expectDemoUserDenied("teacher_default");
@@ -120,14 +132,14 @@ describe("studentDirectory GraphQL Integration Tests", () => {
   });
 
   test("cleanup provisioned entities", async () => {
-    await cleanupTestEntities(superAdminToken, {
-      studentUserId,
-      teacherUserId,
-      parentUserId,
-      studentId,
-      teacherId,
-      parentId,
+    await cleanupTestEntities(entities.superAdminToken, {
+      studentUserId: entities.studentUserId,
+      teacherUserId: entities.teacherUserId,
+      parentUserId: entities.parentUserId,
+      studentId: entities.studentId,
+      teacherId: entities.teacherId,
+      parentId: entities.parentId,
     });
-    expect(superAdminToken).toBeTruthy();
+    expect(entities.superAdminToken).toBeTruthy();
   });
 });

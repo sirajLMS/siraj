@@ -46,12 +46,12 @@ async function resolveIsAssociatedViewer(actorUserId: string, studentId: string)
   }
 
   const parent = await ParentRepository.findByUserId(actorUserId);
-  if (parent && parent.id === profile.parentId) {
+  if (parent?.id === profile.parentId) {
     return true;
   }
 
   const teacher = await TeacherRepository.findByUserId(actorUserId);
-  if (teacher && profile.primaryTeacherId === teacher.id) {
+  if (profile.primaryTeacherId === teacher?.id) {
     return true;
   }
 
@@ -117,8 +117,8 @@ export namespace StudentProfileService {
   export async function getProfile(
     actorUserId: string,
     studentId: string,
-    options: GetProfileOptions = {},
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    options: GetProfileOptions = {}
   ): Promise<StudentProfileReturnType> {
     await assertCanViewStudentProfile(actorUserId, tErrors);
 
@@ -193,7 +193,7 @@ export namespace StudentProfileService {
     await assertCanEditSubmittedGroups(actorUserId, studentId, submittedGroups, tErrors);
     await applyStudentProfileEdit(actorUserId, studentId, profile, input, tErrors, locale);
 
-    return getProfile(actorUserId, studentId, {}, tErrors);
+    return getProfile(actorUserId, studentId, tErrors, {});
   }
 }
 

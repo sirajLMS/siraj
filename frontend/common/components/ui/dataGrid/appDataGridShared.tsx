@@ -16,7 +16,7 @@ export function AppDataGridChrome<R extends GridValidRowModel>({
   slots,
 }: {
   props: Readonly<AppDataGridSharedProps<R>>;
-  slots: AppDataGridSlotProps<R>;
+  slots: Readonly<AppDataGridSlotProps<R>>;
 }) {
   const {
     emptyMessage = "No entries found",

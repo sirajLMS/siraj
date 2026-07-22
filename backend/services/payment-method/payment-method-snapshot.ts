@@ -64,14 +64,14 @@ export function buildTransactionSnapshotFromMethod(
   catalog: PaymentMethodCatalogSnapshot | null,
   transactionDirection: TransactionDirection
 ): PaymentMethodTransactionSnapshot {
-  const validatedDetails = parsePaymentMethodDetails(method.type as PaymentMethodType, method.details);
+  const validatedDetails = parsePaymentMethodDetails(method.type, method.details);
 
   return {
     userPaymentMethodId: method.id,
-    type: method.type as PaymentMethodType,
+    type: method.type,
     direction: transactionDirection,
     label: method.label,
-    details: encryptDetailsForSnapshot(method.type as PaymentMethodType, validatedDetails),
+    details: encryptDetailsForSnapshot(method.type, validatedDetails),
     catalog,
     snapshottedAt: new Date().toISOString(),
   };
@@ -108,7 +108,7 @@ export namespace PaymentMethodSnapshotService {
       if (!method) {
         throw new Error(`User payment method not found: ${source.userPaymentMethodId}`);
       }
-      const catalog = await resolveCatalogSnapshot(method.type as PaymentMethodType, method.details, tx);
+      const catalog = await resolveCatalogSnapshot(method.type, method.details, tx);
       return buildTransactionSnapshotFromMethod(method, catalog, transactionDirection);
     }
 

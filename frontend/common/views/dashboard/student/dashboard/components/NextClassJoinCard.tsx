@@ -4,10 +4,9 @@ import { PlayCircleOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, LinearProgress, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { formatDateTime } from "@/frontend/common/components/intl/dateFormat";
-import type { StudentDashboardLabels } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardLabels";
 import type { UpcomingLessonRow } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import type { AppLocale } from "@/shared/locale";
+import type { AppLocale, StudentPortalDashboardLabels as StudentDashboardLabels } from "@/shared/locale";
 
 export interface NextClassJoinCardProps {
   readonly lesson: UpcomingLessonRow | null;

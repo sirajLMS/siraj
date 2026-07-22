@@ -42,8 +42,9 @@ export function resolveMetricLabel(path: string, translations: ReturnType<typeof
   }
 
   const commonT = translations.commonTranslations as unknown as Record<string, unknown>;
-  if (path in commonT && typeof commonT[path] === "string") {
-    return commonT[path] as string;
+  const commonValue = commonT[path];
+  if (typeof commonValue === "string") {
+    return commonValue;
   }
 
   return path;

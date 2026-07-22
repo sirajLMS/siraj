@@ -71,7 +71,7 @@ describe("GraphQL Meeting Config Integration Tests", () => {
   });
 
   test("super admin can create a meeting provider", async () => {
-    const slug = `zoom_${randomUUID().replace(/-/g, "").slice(0, 8)}`;
+    const slug = `zoom_${randomUUID().replaceAll("-", "").slice(0, 8)}`;
     const data = await authenticatedRequest(superAdminToken, "mutate", createMeetingProviderMutationDocument, {
       input: buildProviderInput(slug),
     });

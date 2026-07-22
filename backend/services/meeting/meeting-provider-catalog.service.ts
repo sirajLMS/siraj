@@ -24,8 +24,8 @@ export namespace MeetingProviderCatalogService {
 
   export async function listProviders(
     userId: string,
-    activeOnly = false,
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    activeOnly = false
   ): Promise<MeetingProviderSelectType[]> {
     if (activeOnly) {
       return MeetingProviderRepository.listActive();

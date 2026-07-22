@@ -63,7 +63,7 @@ export namespace StudentOnboardingService {
           name: input.name,
           email: { value: email },
           password,
-          ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
+          ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
         },
         locale,
         txObj
@@ -95,7 +95,7 @@ export namespace StudentOnboardingService {
           classesTotal: input.classesTotal ?? 0,
           classesRemaining: input.classesRemaining ?? 0,
           idempotencyKey: randomUUID(),
-          ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
+          ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
         },
         tErrors,
         txObj

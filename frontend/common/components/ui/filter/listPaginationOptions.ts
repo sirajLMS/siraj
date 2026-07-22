@@ -36,7 +36,7 @@ export function buildServerPaginationOptions(args: {
     pageSize: args.pageSize,
     totalCount: args.totalCount,
     onPageChange: args.onPageChange,
-    ...(args.onPageSizeChange !== undefined ? { onPageSizeChange: args.onPageSizeChange } : {}),
-    ...(args.pageSizeOptions !== undefined ? { pageSizeOptions: args.pageSizeOptions } : {}),
+    onPageSizeChange: args.onPageSizeChange,
+    pageSizeOptions: args.pageSizeOptions,
   };
 }

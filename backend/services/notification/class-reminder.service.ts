@@ -106,7 +106,7 @@ async function dispatchForInstance(instance: ClassInstanceSelectType, locale: st
   const { studentId } = affected;
 
   const student = await StudentRepository.findById(studentId);
-  const studentName = (student?.name as string | undefined) ?? "—";
+  const studentName = student?.name ?? "—";
 
   // UTC-DATE bucket idempotency key: runs twice on the same UTC day
   // produce the SAME key per (instance, day) pair; the next UTC day produces

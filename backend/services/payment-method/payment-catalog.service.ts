@@ -91,12 +91,12 @@ export namespace PaymentCatalogService {
   ) {
     await assertCatalogAdmin(actorUserId, tErrors);
     if (filters?.activeOnly === false) {
-      return SupportedMobileWalletRepository.listAll(undefined);
+      return SupportedMobileWalletRepository.listAll();
     }
-    return SupportedMobileWalletRepository.listActive(
-      { countryCode: filters?.countryCode, direction: filters?.direction },
-      undefined
-    );
+    return SupportedMobileWalletRepository.listActive({
+      countryCode: filters?.countryCode,
+      direction: filters?.direction,
+    });
   }
 
   export async function createMobileWallet(

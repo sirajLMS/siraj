@@ -8,7 +8,6 @@ import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDoc
 import { useStudentDashboardStore } from "@/frontend/common/stores/studentDashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
-import type { StudentDashboardLabels } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardLabels";
 import type {
   RecentLessonReportRow,
   StudentCreditBalanceRow,
@@ -22,9 +21,14 @@ import {
   mapUpcomingLessons,
 } from "@/frontend/common/views/dashboard/student/dashboard/utils/studentDashboardMappers";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type AppLocale, type StudentPortalDashboardLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
+import {
+  type AppLocale,
+  type StudentPortalDashboardLabels as StudentDashboardLabels,
+  useAppLocale,
+  useAppTranslation,
+} from "@/shared/locale";
 
-function useStudentDashboardLabels(t: StudentPortalDashboardLabels): StudentDashboardLabels {
+function useStudentDashboardLabels(t: StudentDashboardLabels): StudentDashboardLabels {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,

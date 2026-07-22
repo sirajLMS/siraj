@@ -1,5 +1,3 @@
-import type { Meta } from "@storybook/react";
-
 /**
  * Shared viewport presets used across mobile stories.
  *
@@ -108,9 +106,3 @@ export function createDesktopStoryMeta<TComponent>(
     ...(options.layout ? { parameters: { layout: options.layout } } : {}),
   };
 }
-
-/**
- * Re-exports `Meta` for stories that still need to reference the type
- * directly when calling `satisfies` at the call site.
- */
-export type { Meta };

@@ -5,7 +5,7 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { AppLocale } from "@/shared/i18n/routing";
 
 export function useLanguageSwitch() {
-  const currentLocale = useAppLocale() as AppLocale;
+  const currentLocale = useAppLocale();
   const [isPending, setIsPending] = useState(false);
 
   const switchLanguage = (newLocale: AppLocale) => {
