@@ -1,6 +1,8 @@
 import type { users } from "@/backend/db/schema/users/users";
 import type { AccountStatus, CurrencyCode, UserRole } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { PageInfo } from "@/backend/types/shared/pagination.types";
+
 // Alias AccountStatus as UserStatus for canonical pattern compliance
 // This aligns with the existing DB schema and UserStatus usage in the codebase
 export type UserStatus = AccountStatus;
@@ -52,4 +54,14 @@ export type UserCreateInput = {
   email: { value: string };
   password: string;
   avatarUrl?: string | null;
+};
+
+export type PaginatedUsersResponseSelectType = {
+  data: UserReturnType[];
+  pageInfo: PageInfo;
+};
+
+export type PaginatedUsersResponse = {
+  data: UserReturnType[];
+  pageInfo: PageInfo;
 };

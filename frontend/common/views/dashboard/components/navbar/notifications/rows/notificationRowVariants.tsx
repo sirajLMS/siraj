@@ -29,34 +29,10 @@ import {
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { NotificationDrawerAlert } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
-
-export type { NotificationsDrawerViewModel } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
-export type { NotificationDrawerAlert };
-
-/** Frontend-safe metadata mirror until GraphQL codegen exposes NotificationMetadata. */
-export interface NotificationMetadata {
-  readonly entityKind:
-    | "invoice"
-    | "class"
-    | "student"
-    | "complaint"
-    | "suggestion"
-    | "paymentMethod"
-    | "schedule"
-    | "lessonReport";
-  readonly entityId: string;
-  readonly amount?: string;
-  readonly currency?: string;
-  readonly newStatus?: string;
-  readonly proofPending?: boolean;
-  readonly classInstanceId?: string;
-  readonly studentName?: string;
-  readonly scheduledStartAt?: string;
-  readonly newStartAt?: string;
-  readonly oldStatus?: string;
-  readonly decision?: "approved" | "rejected";
-}
+import type {
+  NotificationDrawerAlert,
+  NotificationMetadata,
+} from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
 
 export interface EventVariantConfig {
   readonly icon: ReactNode;

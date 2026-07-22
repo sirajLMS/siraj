@@ -7,7 +7,7 @@ import { ImpersonationService } from "@/backend/services/auth/impersonation.serv
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
-import type { CurrentUserProfile, SessionEntity } from "@/backend/types";
+import type { CurrentUserProfile, SessionSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -29,7 +29,7 @@ export namespace SessionService {
    *     so subsequent lookups hit the fast path.
    *  4. Delegate TTL / activity validation to the repo.
    */
-  export async function validateSession(rawSessionId: string): Promise<SessionEntity | null> {
+  export async function validateSession(rawSessionId: string): Promise<SessionSelectType | null> {
     const { hmacHash, legacyHash } = computeSessionHashes(rawSessionId);
 
     // 1. Fast path — session was already stored with HMAC hash

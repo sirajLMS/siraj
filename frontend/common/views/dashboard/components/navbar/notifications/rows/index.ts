@@ -6,9 +6,6 @@ export {
   type EventVariantConfig,
   isClassMetadata,
   isInvoiceMetadata,
-  type NotificationDrawerAlert,
-  type NotificationMetadata,
-  type NotificationsDrawerViewModel,
   resolveEventVariant,
 } from "./notificationRowVariants";
 export {

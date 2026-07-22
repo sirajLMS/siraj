@@ -26,7 +26,6 @@ import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAdminBillingStore } from "@/frontend/common/stores/adminBillingStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { buildBillingLabels } from "@/frontend/common/views/dashboard/admin/billing/utils/buildBillingLabels";
 import { useBillingPollInterval } from "@/frontend/common/views/dashboard/billing/hooks/useBillingPollInterval";
 import { useRefetchOnWindowFocus } from "@/frontend/common/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import type {
@@ -37,6 +36,7 @@ import type {
   PaymentDetailsTarget,
   StudentCreditRow,
 } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
+import { buildBillingLabels } from "@/frontend/common/views/dashboard/billing/utils/buildBillingLabels";
 import { formatBillingDate } from "@/frontend/common/views/dashboard/billing/utils/formatBillingDate";
 import { deriveAdminInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 import { useRouter } from "@/shared/i18n/navigation";

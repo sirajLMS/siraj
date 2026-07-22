@@ -7,11 +7,11 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { GroupClassService } from "@/backend/services/group-class/group-class.service";
 import type {
-  AdminNoteReturnType,
-  CommunicationLogEntryReturnType,
+  GroupClassAdminNoteReturnType,
   GroupClassAuditReturnType,
+  GroupClassCommunicationLogEntryReturnType,
+  GroupClassOnlineMeetingInfoReturnType,
   GroupClassStudentReturnType,
-  OnlineMeetingInfoReturnType,
 } from "@/backend/types";
 
 const GroupClassStudentRef = gqlSchemaBuilder.objectRef<GroupClassStudentReturnType>("GroupClassStudent");
@@ -27,7 +27,7 @@ export const GroupClassStudentPothosObject = GroupClassStudentRef.implement({
   }),
 });
 
-const OnlineMeetingInfoRef = gqlSchemaBuilder.objectRef<OnlineMeetingInfoReturnType>("OnlineMeetingInfo");
+const OnlineMeetingInfoRef = gqlSchemaBuilder.objectRef<GroupClassOnlineMeetingInfoReturnType>("OnlineMeetingInfo");
 
 export const OnlineMeetingInfoPothosObject = OnlineMeetingInfoRef.implement({
   fields: t => ({
@@ -40,7 +40,8 @@ export const OnlineMeetingInfoPothosObject = OnlineMeetingInfoRef.implement({
   }),
 });
 
-const CommunicationLogEntryRef = gqlSchemaBuilder.objectRef<CommunicationLogEntryReturnType>("CommunicationLogEntry");
+const CommunicationLogEntryRef =
+  gqlSchemaBuilder.objectRef<GroupClassCommunicationLogEntryReturnType>("CommunicationLogEntry");
 
 export const CommunicationLogEntryPothosObject = CommunicationLogEntryRef.implement({
   fields: t => ({
@@ -54,7 +55,7 @@ export const CommunicationLogEntryPothosObject = CommunicationLogEntryRef.implem
   }),
 });
 
-const AdminNoteRef = gqlSchemaBuilder.objectRef<AdminNoteReturnType>("AdminNoteInfo");
+const AdminNoteRef = gqlSchemaBuilder.objectRef<GroupClassAdminNoteReturnType>("AdminNoteInfo");
 
 export const AdminNotePothosObject = AdminNoteRef.implement({
   fields: t => ({

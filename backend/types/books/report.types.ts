@@ -1,7 +1,5 @@
 import type { CurrencyCode } from "@/backend/enum";
 
-export type { AttendanceReportFilters, ReportGroupingMode } from "@/backend/db/repo/books/report.repository";
-
 export interface AttendanceReportPaidAmountReturnType {
   readonly id: string;
   readonly amount: string;

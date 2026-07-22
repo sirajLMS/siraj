@@ -3,8 +3,8 @@
 import { Box, FormHelperText } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { StyledSectionLabel } from "@/frontend/common/views/dashboard/billing/manual/components/billingMonthSelectorShared.styles";
-import { BILLING_MONTH_IDS } from "@/frontend/common/views/dashboard/billing/manual/constants/billingMonths";
 import type { BillingMonthSelectorSharedProps } from "@/frontend/common/views/dashboard/billing/manual/types/billingMonthSelectorShared.types";
+import { BILLING_MONTH_IDS } from "@/shared/constants/billing-months";
 
 export function BillingMonthSelectorShared({ props, slots }: Readonly<BillingMonthSelectorSharedProps>) {
   const { control, errors, labels } = props;

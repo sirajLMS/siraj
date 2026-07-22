@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
 import { useForm } from "react-hook-form";
-import { CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateParentOnboarding } from "@/frontend/common/hooks/useCreateParentOnboarding";
 import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
@@ -35,7 +35,7 @@ const defaultValues: ParentOnboardingFormData = {
     details: {},
   },
   currency: CurrencyCode.Usd,
-  timezone: IanaTimezone.AfricaCairo,
+  timezone: "Africa/Cairo",
   meetingProvider: null,
   meetingUrl: "",
   meetingLabel: "",

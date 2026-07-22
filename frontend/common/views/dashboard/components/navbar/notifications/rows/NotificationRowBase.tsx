@@ -5,9 +5,11 @@ import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { NotificationMetadata } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows/notificationRowVariants";
 import { RowMarkReadAction } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows/RowMarkReadAction";
-import type { NotificationDrawerAlert } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
+import type {
+  NotificationDrawerAlert,
+  NotificationMetadata,
+} from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
 
 export interface NotificationRowBaseProps {
   readonly alert: NotificationDrawerAlert;

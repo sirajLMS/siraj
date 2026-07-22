@@ -100,16 +100,21 @@ function WrapInvoiceActions(primary: ReactNode, deleteButton: ReactNode) {
   );
 }
 
+interface RenderInvoiceActionConfig {
+  readonly row: AdminInvoiceRow;
+  readonly labels: AdminInvoicesDataGridLabels;
+  readonly canManage: boolean;
+  readonly canDelete: boolean;
+  readonly billingActionsDisabled: boolean;
+}
+
 function RenderInvoiceAction(
-  row: AdminInvoiceRow,
-  labels: AdminInvoicesDataGridLabels,
-  canManage: boolean,
-  canDelete: boolean,
-  billingActionsDisabled: boolean,
+  config: RenderInvoiceActionConfig,
   onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void,
   onViewPaymentDetails?: (target: PaymentDetailsTarget) => void,
   onDeleteInvoice?: (invoiceId: string) => void
 ) {
+  const { row, labels, canManage, canDelete, billingActionsDisabled } = config;
   const deleteButton = RenderDeleteInvoiceButton(row, labels, canDelete, billingActionsDisabled, onDeleteInvoice);
 
   if (row.status === InvoiceStatus.Paid) {
@@ -226,7 +231,17 @@ export function AdminInvoicesDataGridDesktop({
   onPageChange,
   loading = false,
 }: Readonly<AdminInvoicesDataGridProps>) {
-  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid
+  const config = useMemo<RenderInvoiceActionConfig>(
+    () => ({
+      row: {} as AdminInvoiceRow, // placeholder, will be replaced in renderCell
+      labels,
+      canManage,
+      canDelete,
+      billingActionsDisabled,
+    }),
+    [canManage, canDelete, billingActionsDisabled, labels]
+  );
+
   const columns = useMemo<GridColDef<AdminInvoiceRow>[]>(
     () => [
       {
@@ -290,19 +305,10 @@ export function AdminInvoicesDataGridDesktop({
         align: "right",
         headerAlign: "right",
         renderCell: ({ row }) =>
-          RenderInvoiceAction(
-            row,
-            labels,
-            canManage,
-            canDelete,
-            billingActionsDisabled,
-            onMarkAsPaid,
-            onViewPaymentDetails,
-            onDeleteInvoice
-          ),
+          RenderInvoiceAction({ ...config, row }, onMarkAsPaid, onViewPaymentDetails, onDeleteInvoice),
       },
     ],
-    [billingActionsDisabled, canDelete, canManage, labels, onDeleteInvoice, onMarkAsPaid, onViewPaymentDetails]
+    [labels, onDeleteInvoice, onMarkAsPaid, onViewPaymentDetails, config]
   );
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;

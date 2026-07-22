@@ -1,25 +1,20 @@
-export {
-  CURRENCY_DISPLAY_PART_ORDER,
-  CurrencyDisplayPart,
-  type CurrencyDisplayPartValue,
-} from "@/frontend/common/components/ui/display/currencyDisplay/constants";
-export * from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
-export * from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLinkCell.mobile";
-export { MobileCountryDisplay } from "@/frontend/mobile/components/ui/display/countryDisplay/countryDisplay.mobile";
+export * from "./classProfileLink/ClassProfileLink.mobile";
+export * from "./classProfileLink/ClassProfileLinkCell.mobile";
+export { MobileCountryDisplay } from "./countryDisplay/countryDisplay.mobile";
 export {
   MobileCurrencyDisplay,
   type MobileCurrencyDisplayProps,
-} from "@/frontend/mobile/components/ui/display/currencyDisplay/CurrencyDisplay.mobile";
-export { MobileLanguageDisplay } from "@/frontend/mobile/components/ui/display/language/languageDisplay.mobile";
-export { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
-export { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay/localizedStringDisplay.mobile";
-export * from "@/frontend/mobile/components/ui/display/meetingConfig";
-export { MobilePaymentMethodDisplay } from "@/frontend/mobile/components/ui/display/paymentMethod/paymentMethodDisplay.mobile";
+} from "./currencyDisplay/CurrencyDisplay.mobile";
+export { MobileLanguageDisplay } from "./language/languageDisplay.mobile";
+export { MobileLocaleEmoji } from "./localeEmoji/localeEmoji.mobile";
+export { MobileLocalizedStringDisplay } from "./localizedStringDisplay/localizedStringDisplay.mobile";
+export * from "./meetingConfig";
+export { MobilePaymentMethodDisplay } from "./paymentMethod/paymentMethodDisplay.mobile";
 export {
   MobilePaymentMethodList,
   type PaymentMethodRow,
-} from "@/frontend/mobile/components/ui/display/paymentMethod/paymentMethodList.mobile";
-export * from "@/frontend/mobile/components/ui/display/personProfileLink/PersonProfileLink.mobile";
-export * from "@/frontend/mobile/components/ui/display/personProfileLink/PersonProfileLinkCell.mobile";
-export { MobilePhoneDisplay } from "@/frontend/mobile/components/ui/display/phoneDisplay/phoneDisplay.mobile";
-export { MobileTimezoneDisplay } from "@/frontend/mobile/components/ui/display/timezoneDisplay/timezoneDisplay.mobile";
+} from "./paymentMethod/paymentMethodList.mobile";
+export * from "./personProfileLink/PersonProfileLink.mobile";
+export * from "./personProfileLink/PersonProfileLinkCell.mobile";
+export { MobilePhoneDisplay } from "./phoneDisplay/phoneDisplay.mobile";
+export { MobileTimezoneDisplay } from "./timezoneDisplay/timezoneDisplay.mobile";

@@ -6,8 +6,8 @@ import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
-import type { ManagerOnboardingFormData } from "@/frontend/common/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
-import { ManagerAccountType } from "@/frontend/common/views/dashboard/managers/onboarding/types";
+import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { useAppTranslation } from "@/shared/locale";
 
 const ACCOUNT_TYPES: readonly ManagerAccountType[] = [ManagerAccountType.Manager, ManagerAccountType.Admin];

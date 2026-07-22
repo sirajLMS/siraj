@@ -5,8 +5,8 @@ import {
   AppPermissionPothosEnum,
   CurrencyCodePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { UserReturnType } from "@/backend/types/auth/auth.types";
+import { PermissionsService } from "@/backend/services";
+import type { UserReturnType } from "@/backend/types";
 
 const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserReturnType>("User");
 

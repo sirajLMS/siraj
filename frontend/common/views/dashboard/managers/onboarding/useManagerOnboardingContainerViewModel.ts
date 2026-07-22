@@ -3,14 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateManagerOnboarding } from "@/frontend/common/hooks/useCreateManagerOnboarding";
+import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
-import {
-  type ManagerOnboardingFormData,
-  managerOnboardingSchema,
-} from "@/frontend/common/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
-import { ManagerAccountType } from "@/frontend/common/views/dashboard/managers/onboarding/types";
+import { managerOnboardingSchema } from "@/frontend/common/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
 import type { OnboardingMetricsViewModel } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
 import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
 import { useRouter } from "@/shared/i18n/navigation";

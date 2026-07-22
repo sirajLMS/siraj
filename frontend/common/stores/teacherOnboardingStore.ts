@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import type { TeacherOnboardingCreateResult } from "@/frontend/common/views/dashboard/teachers/onboarding/types";
+import type { TeacherOnboarding } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 interface TeacherOnboardingState {
   readonly isSubmitting: boolean;
   readonly error: string | null;
-  readonly result: TeacherOnboardingCreateResult | null;
+  readonly result: TeacherOnboarding | null;
   readonly reset: () => void;
 }
 

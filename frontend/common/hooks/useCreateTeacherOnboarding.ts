@@ -3,6 +3,7 @@ import { useState } from "react";
 import {
   PaymentDirection,
   type PaymentMethodDetailsInput,
+  type TeacherOnboarding,
   type TeacherOnboardingInput,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
@@ -11,10 +12,7 @@ import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useTeacherOnboardingStore } from "@/frontend/common/stores/teacherOnboardingStore";
 import { logger } from "@/frontend/common/utils/logger";
 import { formDetailsToInput } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
-import type {
-  TeacherOnboardingCreateResult,
-  TeacherOnboardingFormData,
-} from "@/frontend/common/views/dashboard/teachers/onboarding/types";
+import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
 export function useCreateTeacherOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createTeacherMutationDocument);
@@ -76,13 +74,13 @@ export function useCreateTeacherOnboarding() {
     }
   };
 
-  const handleTeacherCreated = (created: TeacherOnboardingCreateResult): void => {
+  const handleTeacherCreated = (created: TeacherOnboarding): void => {
     cache.evict({ id: "ROOT_QUERY", fieldName: "teacherDirectory" });
     cache.gc();
     useTeacherOnboardingStore.setState({ result: created, isSubmitting: false });
   };
 
-  const execute = async (formData: TeacherOnboardingFormData): Promise<TeacherOnboardingCreateResult> => {
+  const execute = async (formData: TeacherOnboardingFormData): Promise<TeacherOnboarding> => {
     useTeacherOnboardingStore.getState().reset();
     useTeacherOnboardingStore.setState({ isSubmitting: true });
     setMeetingConfigWarning(false);

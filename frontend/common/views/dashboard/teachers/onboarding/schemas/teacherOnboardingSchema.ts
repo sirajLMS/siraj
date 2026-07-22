@@ -1,9 +1,8 @@
 import { z } from "zod";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CountryCode, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
-import { CountryCode, Gender } from "@/frontend/common/views/dashboard/teachers/onboarding/types";
 
 export const teacherOnboardingSchema = (validationLabels: {
   readonly fullNameRequired: string;
@@ -72,3 +71,5 @@ export const teacherOnboardingSchema = (validationLabels: {
         }
       }
     });
+
+export type TeacherOnboardingFormData = z.infer<ReturnType<typeof teacherOnboardingSchema>>;

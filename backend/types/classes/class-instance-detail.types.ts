@@ -1,25 +1,12 @@
 import type { classInstances } from "@/backend/db/schema/classes/scheduling";
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
+
 // Foundation types from schema
 export type ClassInstanceSelectType = typeof classInstances.$inferSelect;
 export type ClassInstanceInsertType = typeof classInstances.$inferInsert;
-
-export type ClassInstancePerformanceReturnType = {
-  id: string;
-  engagementScore: number | null;
-  assessmentProgress: number | null;
-  assessmentTotal: number | null;
-  focusLevel: string | null;
-  sessionHealth: string | null;
-  heatmapData: number[] | null;
-  latencyMs: number | null;
-  authorizationLabel: string | null;
-  attendanceRate: number | null;
-  avgGrade: string | null;
-  lastClassDaysAgo: number | null;
-};
 
 export type ClassInstanceStudentReturnType = {
   id: string;
@@ -64,7 +51,7 @@ export type ClassInstanceDetailReturnType = Omit<
   subjectAvatarUrl: string | null;
   student: ClassInstanceStudentReturnType;
   teacher: ClassInstanceTeacherReturnType;
-  performance: ClassInstancePerformanceReturnType | null;
+  performance: ClassInstancePerformanceSelectType | null;
 };
 
 export type ClassStatusEventReturnType = {

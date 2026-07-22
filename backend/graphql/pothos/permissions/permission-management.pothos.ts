@@ -9,7 +9,7 @@ import type {
   GroupUserEntity,
   GroupWithPermissionIds,
   PermissionCtx,
-  PermissionEntity,
+  PermissionReturnType,
   UserOverrideEntity,
   UserOverrideReturnType,
 } from "@/backend/types";
@@ -85,7 +85,7 @@ async function runBulkGroupMembershipMutation<T extends BulkGroupMembershipInput
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
-export const PermissionObject = gqlSchemaBuilder.objectRef<PermissionEntity>("Permission").implement({
+export const PermissionObject = gqlSchemaBuilder.objectRef<PermissionReturnType>("Permission").implement({
   fields: t => ({
     id: t.exposeString("id"),
     key: t.exposeString("key"),

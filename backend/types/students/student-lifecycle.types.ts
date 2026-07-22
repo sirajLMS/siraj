@@ -1,6 +1,5 @@
 import type { StudentStatus } from "@/backend/enum";
 
-export { ALLOWED_STATUS_TRANSITIONS } from "@/backend/enum";
 export interface LeaveProcessingResult {
   readonly processedCount: number;
   readonly successorIds: string[];

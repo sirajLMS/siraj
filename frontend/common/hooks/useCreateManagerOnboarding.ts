@@ -5,8 +5,8 @@ import type {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useManagerOnboardingStore } from "@/frontend/common/stores/managerOnboardingStore";
+import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
-import type { ManagerOnboardingFormData } from "@/frontend/common/views/dashboard/managers/onboarding/types";
 
 export function useCreateManagerOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createManagerMutationDocument);

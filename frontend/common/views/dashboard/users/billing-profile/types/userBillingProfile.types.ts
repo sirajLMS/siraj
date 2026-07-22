@@ -9,9 +9,6 @@ import type {
 import type { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import type { BillingLabels } from "@/shared/locale";
 
-export type { UserBillingProfileState } from "@/frontend/common/stores/userBillingProfileStore";
-export { DEFAULT_PAGE_SIZE } from "@/frontend/common/stores/userBillingProfileStore";
-
 export interface UserBillingProfileContainerProps {
   readonly userId: string;
 }
@@ -42,7 +39,3 @@ export interface UserBillingProfileViewProps {
   readonly loading: boolean;
   readonly userId: string;
 }
-
-export type UserBillingProfileDesktopViewProps = UserBillingProfileViewProps;
-
-export type UserBillingProfileMobileViewProps = UserBillingProfileViewProps;

@@ -120,7 +120,3 @@ export function buildAdminDashboardViewProps(params: BuildAdminDashboardViewProp
     onSubmit: params.onSubmit,
   };
 }
-
-export { ADMIN_DASHBOARD_PAGE_SIZE } from "@/frontend/common/views/dashboard/admin/__shared__/useAdminDashboard";
-export type { AdminDashboardViewLabels } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardViewLabels";
-export { buildAdminDashboardViewLabels } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardViewLabels";

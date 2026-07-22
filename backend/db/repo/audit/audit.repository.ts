@@ -29,7 +29,7 @@ export namespace AuditRepository {
   export const createAuditLog = async (
     input: Types.CreateAuditLogInput,
     tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity> => {
+  ): Promise<Types.AuditLogSelectType> => {
     return runInTransaction(tx, async t => {
       const [created] = await t
         .insert(auditLogs)
@@ -82,13 +82,13 @@ export namespace AuditRepository {
   export const createManyAuditLogs = async (
     inputs: readonly Types.CreateAuditLogInput[],
     tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity[]> => {
+  ): Promise<Types.AuditLogSelectType[]> => {
     if (inputs.length === 0) return [];
 
-    const run = async (t: DBTransaction): Promise<Types.AuditLogEntity[]> => {
+    const run = async (t: DBTransaction): Promise<Types.AuditLogSelectType[]> => {
       const rows = mapAuditLogRows(inputs);
 
-      const results: Types.AuditLogEntity[] = [];
+      const results: Types.AuditLogSelectType[] = [];
       for (let i = 0; i < rows.length; i += DEFAULT_BULK_CHUNK_SIZE) {
         const chunk = rows.slice(i, i + DEFAULT_BULK_CHUNK_SIZE);
         const inserted = await t.insert(auditLogs).values(chunk).returning();
@@ -215,7 +215,7 @@ export namespace AuditRepository {
   async function createTypedAuditLog(
     tx: DBTransaction | undefined,
     input: TypedAuditLogInput
-  ): Promise<Types.AuditLogEntity> {
+  ): Promise<Types.AuditLogSelectType> {
     return await createAuditLog(
       {
         ...input,
@@ -234,7 +234,7 @@ export namespace AuditRepository {
       previousState: Record<string, unknown> | null;
       newState: Record<string, unknown> | null;
     }
-  ): Promise<Types.AuditLogEntity> {
+  ): Promise<Types.AuditLogSelectType> {
     return await createTypedAuditLog(tx, {
       ...input,
       changes: computeChanges(input.previousState, input.newState),
@@ -257,7 +257,7 @@ export namespace AuditRepository {
       newValue: unknown;
       metadata?: Record<string, unknown> | null;
     }
-  ): Promise<Types.AuditLogEntity> {
+  ): Promise<Types.AuditLogSelectType> {
     return await logStateTransition(tx, {
       actorUserId: input.actorUserId,
       entityType: input.entityType,
@@ -319,7 +319,7 @@ export namespace AuditRepository {
     entityId: string,
     limit: number = 50,
     tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity[]> => {
+  ): Promise<Types.AuditLogSelectType[]> => {
     const result = await queryAuditLogs({ entityType, entityId, limit }, tx);
     return result.logs;
   };
@@ -331,7 +331,7 @@ export namespace AuditRepository {
     actorUserId: string,
     limit: number = 50,
     tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity[]> => {
+  ): Promise<Types.AuditLogSelectType[]> => {
     const result = await queryAuditLogs({ actorUserId, limit }, tx);
     return result.logs;
   };
@@ -342,7 +342,7 @@ export namespace AuditRepository {
   export const getRecentAuditLogs = async (
     limit: number = 100,
     tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity[]> => {
+  ): Promise<Types.AuditLogSelectType[]> => {
     const result = await queryAuditLogs({ limit }, tx);
     return result.logs;
   };
@@ -433,7 +433,7 @@ export namespace AuditRepository {
   export const logInvoiceChange = async (
     input: InvoiceChangeInput,
     tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity> => {
+  ): Promise<Types.AuditLogSelectType> => {
     const { invoiceId, action, previousState, newState, actorUserId, description } = input;
     return await logStateTransition(tx, {
       actorUserId,
@@ -460,7 +460,7 @@ export namespace AuditRepository {
   export const logPaymentRefund = async (
     input: PaymentRefundInput,
     tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity> => {
+  ): Promise<Types.AuditLogSelectType> => {
     const { paymentId, refundAmount, currency, actorUserId, reason } = input;
     return await createTypedAuditLog(tx, {
       actorUserId,
@@ -487,7 +487,7 @@ export namespace AuditRepository {
   export const logPermissionChange = async (
     input: PermissionChangeInput,
     tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity> => {
+  ): Promise<Types.AuditLogSelectType> => {
     const { userId, action, permissionOrGroupId, permissionType, actorUserId, description } = input;
     return await createTypedAuditLog(tx, {
       actorUserId,
@@ -516,7 +516,7 @@ export namespace AuditRepository {
   export const logExchangeRateUpdate = async (
     input: ExchangeRateUpdateInput,
     tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity> => {
+  ): Promise<Types.AuditLogSelectType> => {
     const { rateId, fromCurrency, toCurrency, oldRate, newRate, actorUserId, source } = input;
     const rateDisplay = oldRate ? `${oldRate} → ${newRate}` : newRate;
 

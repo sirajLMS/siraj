@@ -1,8 +1,3 @@
-export type { ManagerOnboardingResult } from "@/frontend/common/graphql/generated/gql/graphql-types";
-export { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-
-export type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
-
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import type { OnboardingMetricsViewModel } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";

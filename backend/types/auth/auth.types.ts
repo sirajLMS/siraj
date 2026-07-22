@@ -3,8 +3,6 @@ import type {
   authRateLimits,
   groupPermissions,
   passwordResetTokens,
-  permissionGroups,
-  permissions,
   sessionConfig,
   sessionMetadata,
   sessions,
@@ -12,43 +10,13 @@ import type {
 } from "@/backend/db/schema";
 import type { AccountStatus, AppPermission, UserRole } from "@/backend/enum";
 import type { Email } from "@/backend/lib/email";
-import type { PageInfo } from "@/backend/types/shared/pagination.types";
 import type { SafeUser, UserReturnType } from "@/backend/types/users/user.types";
-
-export type { PermissionGroupReturnType } from "@/backend/types/permissions/permission-group.types";
-export type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types/users/user.types";
-
-export type UserCreateInput = {
-  name: string;
-  email: Email;
-  password: string;
-};
 
 export type UserUpdateInput = {
   name: string;
   email: Email;
   password: string;
 };
-
-export type PaginatedUsersResponseSelectType = {
-  data: UserReturnType[];
-  pageInfo: PageInfo;
-};
-
-export type PaginatedUsersResponse = {
-  data: UserReturnType[];
-  pageInfo: PageInfo;
-};
-
-export type PermissionSelectType = typeof permissions.$inferSelect;
-export type PermissionInsertType = typeof permissions.$inferInsert;
-
-export type PermissionSubmitInput = Omit<PermissionInsertType, "id" | "createdAt" | "updatedAt">;
-
-export type PermissionGroupSelectType = typeof permissionGroups.$inferSelect;
-export type PermissionGroupInsertType = typeof permissionGroups.$inferInsert;
-
-export type PermissionGroupSubmitInput = Omit<PermissionGroupInsertType, "id" | "createdAt" | "updatedAt">;
 
 export type CurrentUserProfile = UserReturnType & {
   permissions: AppPermission[];

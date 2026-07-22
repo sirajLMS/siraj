@@ -47,7 +47,7 @@ export namespace ParentOnboardingService {
   ): Promise<ParentOnboardingResult> {
     // Permission check
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENTS_CREATE);
-    if (!hasPermission) {
+    if (hasPermission === false) {
       throw new Error(tErrors.insufficientPermissions);
     }
 
@@ -96,7 +96,7 @@ export namespace ParentOnboardingService {
       // Step 3: Assign permission group
       const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
       const targetGroup = groups.find(g => g.slug === SystemPermissionGroupSlug.PARENT_DEFAULT);
-      if (!targetGroup) {
+      if (targetGroup === undefined) {
         throw new Error(tErrors.permissionGroup.permissionGroupNotFound);
       }
 

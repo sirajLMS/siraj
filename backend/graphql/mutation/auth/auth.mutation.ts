@@ -22,7 +22,7 @@ import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 import { SessionService } from "@/backend/services/auth/session.service";
-import type { SafeUser, SessionEntity, UserSelectType } from "@/backend/types";
+import type { SafeUser, SessionSelectType, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 
 function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: string, accessToken?: string) {
@@ -31,7 +31,7 @@ function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: strin
 
 async function resolveUserFromSession(
   sessionId: string
-): Promise<{ session: SessionEntity | null; user: UserSelectType | null }> {
+): Promise<{ session: SessionSelectType | null; user: UserSelectType | null }> {
   const session = await SessionService.validateSession(sessionId);
   if (!session?.userId) return { session: session ?? null, user: null };
 
@@ -46,7 +46,7 @@ async function resolveUserFromSession(
 
 async function resolveUserFromRefreshToken(
   refreshToken: string
-): Promise<{ session: SessionEntity | null; user: UserSelectType | null }> {
+): Promise<{ session: SessionSelectType | null; user: UserSelectType | null }> {
   const payload = await verifyToken(refreshToken);
   if (payload?.type !== "refresh") return { session: null, user: null };
 
@@ -64,7 +64,7 @@ async function resolveUserFromRefreshToken(
 
 async function validateRefreshTokenJti(
   refreshToken: string | undefined,
-  session: SessionEntity,
+  session: SessionSelectType,
   resolvedViaSessionId = false
 ): Promise<boolean> {
   // Session cookie alone is sufficient when the refresh_token cookie is absent
@@ -91,7 +91,7 @@ async function validateRefreshTokenJti(
 
 async function rotateTokensAndSession(
   user: UserSelectType,
-  session: SessionEntity,
+  session: SessionSelectType,
   ctx: BaseContext,
   rawSessionId?: string
 ): Promise<{ token: string; user: SafeUser } | null> {
@@ -287,7 +287,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         return null;
       }
 
-      let session: SessionEntity | null = null;
+      let session: SessionSelectType | null = null;
       let user: UserSelectType | null = null;
       let resolvedViaSessionId = false;
 

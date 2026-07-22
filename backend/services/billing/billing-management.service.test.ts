@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { NotificationEventType } from "@/backend/enum";
+import { CurrencyCode, InvoiceType, NotificationEventType } from "@/backend/enum";
 
 // ---------------------------------------------------------------------------
 // Mocks — registered before the service module is imported.
@@ -458,8 +458,8 @@ function createManualInvoiceInput(sendEmail: boolean | null) {
     parentId: PARENT_ID,
     studentId: null,
     amount: "100.00",
-    currency: "SAR" as never,
-    invoiceType: "MONTHLY" as never,
+    currency: CurrencyCode.SAR,
+    invoiceType: InvoiceType.MONTHLY,
     issueDate: "2026-07-01",
     dueDate: "2026-07-31",
     exchangeRateSnapshot: null,
@@ -480,7 +480,7 @@ describe("BillingManagementService notification dispatch", () => {
 
       await BillingManagementService.createManualInvoice(
         ACTOR_ID,
-        createManualInvoiceInput(null) as never,
+        createManualInvoiceInput(null),
         tErrorsStub as never,
         "en"
       );
@@ -505,7 +505,7 @@ describe("BillingManagementService notification dispatch", () => {
 
       await BillingManagementService.createManualInvoice(
         ACTOR_ID,
-        createManualInvoiceInput(true) as never,
+        createManualInvoiceInput(true),
         tErrorsStub as never,
         "en"
       );
@@ -630,7 +630,7 @@ describe("BillingManagementService notification dispatch", () => {
 
       const result = await BillingManagementService.createManualInvoice(
         ACTOR_ID,
-        createManualInvoiceInput(null) as never,
+        createManualInvoiceInput(null),
         tErrorsStub as never,
         "en"
       );

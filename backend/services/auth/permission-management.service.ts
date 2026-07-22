@@ -7,7 +7,7 @@ import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   GroupWithPermissionIds,
-  PermissionEntity,
+  PermissionReturnType,
   SystemPermissionUpsertInput,
   UserOverrideEntity,
   UserOverrideInput,
@@ -150,7 +150,7 @@ export namespace PermissionManagementService {
    * Creating new system permissions or converting existing custom permissions to system permissions is strictly
    * prohibited by the database schema. All system permissions are seeded and immutable.
    */
-  export async function listPermissions(actorUserId: string, tErrors: ErrorsLabels): Promise<PermissionEntity[]> {
+  export async function listPermissions(actorUserId: string, tErrors: ErrorsLabels): Promise<PermissionReturnType[]> {
     await requireManageAccess(actorUserId, tErrors);
     return PermissionManagementRepository.listAllPermissions();
   }

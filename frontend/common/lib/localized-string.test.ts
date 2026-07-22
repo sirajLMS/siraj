@@ -8,7 +8,7 @@ import {
   setLocalizedString,
   unusedLocales,
 } from "@/frontend/common/lib/localized-string";
-import type { AppLocale } from "@/shared/i18n/routing";
+import type { AppLocale } from "@/frontend/common/lib/localized-string.validation";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 describe("resolveLocalizedString", () => {

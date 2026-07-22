@@ -4,16 +4,22 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { users } from "@/backend/db/schema";
-import type { AccountStatus } from "@/backend/enum";
-import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
-import { validatePasswordStrength } from "@/backend/lib/auth/password";
-import { parseAccountStatus } from "@/backend/lib/enum";
-import logger from "@/backend/lib/logger";
-import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
-import type { PaginatedUsersResponseSelectType } from "@/backend/types/auth/auth.types";
-import type { PaginationInput } from "@/backend/types/shared/pagination.types";
-import { PaginationArgsDefault } from "@/backend/types/shared/pagination.types";
-import type { UserCreateInput, UserReturnType, UserSelectType } from "@/backend/types/users/user.types";
+import type { AccountStatus, CurrencyCode } from "@/backend/enum";
+import {
+  isValidIanaTimezone,
+  logger,
+  normalizeIanaTimezone,
+  parseAccountStatus,
+  validatePasswordStrength,
+} from "@/backend/lib";
+import {
+  type PaginatedUsersResponseSelectType,
+  PaginationArgsDefault,
+  type PaginationInput,
+  type UserCreateInput,
+  type UserReturnType,
+  type UserSelectType,
+} from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
 

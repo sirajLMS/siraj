@@ -13,8 +13,6 @@ export { SuggestionStatus };
 
 export type SearchResult = Operations.SearchSuggestionsQuery_searchSuggestions_SuggestionSearchResult;
 
-export type { AdminSuggestionsState } from "@/frontend/common/stores/adminSuggestionsStore";
-
 export interface AdminSuggestionsSummary {
   readonly pending: number;
   readonly reviewed: number;

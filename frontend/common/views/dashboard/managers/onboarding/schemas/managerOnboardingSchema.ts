@@ -1,7 +1,5 @@
 import { z } from "zod";
-import { ManagerAccountType } from "@/frontend/common/views/dashboard/managers/onboarding/types";
-
-export type { ManagerOnboardingFormData } from "@/frontend/common/views/dashboard/managers/onboarding/types";
+import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export const managerOnboardingSchema = z.object({
   name: z.string().min(1, "fullNameRequired"),

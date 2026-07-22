@@ -5,11 +5,10 @@ import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
+import type { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
-
-import type { CountryCode } from "@/frontend/common/views/dashboard/teachers/onboarding/types";
 
 interface OfficialDetailsSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;

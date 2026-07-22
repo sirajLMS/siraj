@@ -13,6 +13,8 @@ export const createTeacherMutationDocument: TypedDocumentNode<
       name
       email
       status
+      gender
+      timezoneDisplay
     }
   }
 `;

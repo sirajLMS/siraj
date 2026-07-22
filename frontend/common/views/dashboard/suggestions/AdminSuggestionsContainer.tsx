@@ -29,5 +29,3 @@ export function AdminSuggestionsContainer() {
     </RequirePermission>
   );
 }
-
-export type { AdminSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useAdminSuggestionsViewModel";

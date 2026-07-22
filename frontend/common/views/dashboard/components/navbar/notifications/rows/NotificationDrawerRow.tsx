@@ -6,13 +6,15 @@ import { NotificationRowBase } from "@/frontend/common/views/dashboard/component
 import {
   isClassMetadata,
   isInvoiceMetadata,
-  type NotificationDrawerAlert,
-  type NotificationsDrawerViewModel,
   resolveEventVariant,
 } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows/notificationRowVariants";
 import { RowInvoiceApproveRejectAction } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows/RowInvoiceApproveRejectAction";
 import { RowRescheduleAction } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows/RowRescheduleAction";
 import { RowViewEntityAction } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows/RowViewEntityAction";
+import type {
+  NotificationDrawerAlert,
+  NotificationsDrawerViewModel,
+} from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
 
 export interface NotificationDrawerRowProps {
   readonly alert: NotificationDrawerAlert;

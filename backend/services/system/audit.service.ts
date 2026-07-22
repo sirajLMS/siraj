@@ -3,13 +3,13 @@ import { AuditRepository } from "@/backend/db/repo";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type {
   AdminAuditLogSelectType,
-  AuditLogEntity,
+  AuditLogSelectType,
   CreateAdminAuditLogInput,
   CreateAuditLogInput,
 } from "@/backend/types";
 
 export namespace AuditService {
-  export async function listAuditLogs(limit = 50, tx?: DBTransaction): Promise<AuditLogEntity[]> {
+  export async function listAuditLogs(limit = 50, tx?: DBTransaction): Promise<AuditLogSelectType[]> {
     return AuditRepository.getRecentAuditLogs(limit, tx);
   }
 
@@ -28,7 +28,7 @@ export namespace AuditService {
   export async function createManyAuditLogs(
     inputs: readonly CreateAuditLogInput[],
     tx?: DBTransaction
-  ): Promise<AuditLogEntity[]> {
+  ): Promise<AuditLogSelectType[]> {
     if (inputs.length === 0) return [];
 
     try {

@@ -13,7 +13,7 @@ import type {
   StudentStatus,
 } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import type { ClassInstancePerformanceReturnType } from "@/backend/types/classes/class-instance-detail.types";
+import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 import type { PageInfo, PaginationArgs } from "@/backend/types/shared/pagination.types";
 import type { StudentEntity } from "@/backend/types/students/student.types";
 import type { TeacherEntity } from "@/backend/types/teachers/teacher.types";
@@ -44,7 +44,7 @@ export type DailyScheduleResult = Omit<ClassInstanceEntity, "deletedAt" | "creat
   hasTimezoneMismatch: boolean;
   studentTimezone: IanaTimezone | null;
   teacherTimezone: IanaTimezone | null;
-  performance: ClassInstancePerformanceReturnType | null;
+  performance: ClassInstancePerformanceSelectType | null;
   student?: StudentEntity;
   teacher?: DailyScheduleTeacher;
   yourTimeFormatted?: string;

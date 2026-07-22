@@ -2,7 +2,7 @@
 
 import { PersonOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
-import type { RescheduleSession } from "@/frontend/common/views/dashboard/reschedule/home/types";
+import type { RescheduleSession } from "@/frontend/common/types/shared.types";
 import { useAppTranslation } from "@/shared/locale";
 
 interface Props {
