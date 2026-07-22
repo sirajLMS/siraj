@@ -7,14 +7,13 @@ import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   GroupWithPermissionIds,
-  LocalizedString,
   PermissionEntity,
   SystemPermissionUpsertInput,
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
-import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
 import type { ErrorsLabels } from "@/shared/locale";
+import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
 
 export namespace PermissionManagementService {
   // ─── Private Guards ───────────────────────────────────────────────────────

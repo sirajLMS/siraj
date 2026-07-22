@@ -2,8 +2,8 @@
 
 import { AnalyticsOutlined, ErrorOutlined, HistoryOutlined, VerifiedOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { DstMigrationMetrics } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { useAppTranslation } from "@/shared/locale";
 

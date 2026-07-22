@@ -3,7 +3,7 @@
 import { AccessTimeOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import type { GridSize } from "@mui/material/Grid";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 

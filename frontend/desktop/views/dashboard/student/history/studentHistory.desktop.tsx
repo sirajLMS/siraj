@@ -15,9 +15,9 @@ import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, Typograp
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";

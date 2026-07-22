@@ -1,9 +1,4 @@
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
-import {
-  DEFAULT_CONTENT_LOCALE,
-  isAppLocale,
-  normalizeContentLocale,
-} from "@/backend/types/shared/localized-string.types";
+import { DEFAULT_CONTENT_LOCALE, type LocalizedString, normalizeContentLocale } from "@/shared/types";
 
 /**
  * Resolve a localized JSONB map to a single string for the request locale.
@@ -72,5 +67,3 @@ export function omitEmptyLocalized(map: LocalizedString | null | undefined): Loc
   }
   return next as unknown as LocalizedString;
 }
-
-export { DEFAULT_CONTENT_LOCALE, isAppLocale, normalizeContentLocale };

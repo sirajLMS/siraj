@@ -2,8 +2,8 @@
 
 import { HistoryOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";

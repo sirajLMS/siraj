@@ -1,7 +1,7 @@
 "use client";
 
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 
 interface TodayClassesSectionProps {
   readonly title: string;

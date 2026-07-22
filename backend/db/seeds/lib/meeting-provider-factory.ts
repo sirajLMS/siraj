@@ -1,5 +1,5 @@
 import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 export type MeetingProviderCatalogSeed = {
   readonly slug: string;

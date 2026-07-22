@@ -4,6 +4,7 @@ import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { useMemo } from "react";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type {
   MonthlyReportsViewModel,
   PeriodFieldsProps,
@@ -11,7 +12,6 @@ import type {
   ReportTypeToggleProps,
   ScopeSelectProps,
 } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileContentStack,
   MobileFilterButton,

@@ -4,13 +4,13 @@ import { FilterListOutlined, IosShareOutlined } from "@mui/icons-material";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type {
   AcademicClassRow,
   AlertsMetric,
   ScheduleAlert,
   ScheduleAlertsLabels,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileContentInset,
   MobileContentStack,

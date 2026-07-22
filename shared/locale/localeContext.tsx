@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import type { AppLocale } from "./AppLocale";
-import type { Translations } from "./types/message";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import type { Translations } from "@/shared/locale/types/message";
 
 export interface LocaleContextValue {
   translations: Translations;

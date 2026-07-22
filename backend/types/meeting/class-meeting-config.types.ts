@@ -1,5 +1,6 @@
 import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+import type { LocalizedString } from "@/shared/types";
 
 export type ClassMeetingConfigScope = "class_instance" | "recurring_schedule";
 
@@ -50,7 +51,7 @@ export type EffectiveMeetingSource = "class" | "recurring" | "teacher" | "none";
 export type EffectiveMeetingReturnType = {
   readonly joinUrl: string | null;
   readonly providerSlug: string | null;
-  readonly providerName: import("@/backend/types/shared/localized-string.types").LocalizedString | null;
+  readonly providerName: LocalizedString | null;
   readonly logoUrl: string | null;
   readonly meetingId: string | null;
   readonly source: EffectiveMeetingSource;

@@ -1,5 +1,5 @@
 import type { permissions } from "@/backend/db/schema/permissions/permissions";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 // Canonical: {Entity}SelectType and {Entity}InsertType must be derived from Drizzle
 //--------------------------------------------------------------------------------

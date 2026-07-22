@@ -2,7 +2,7 @@ import ClassIcon from "@mui/icons-material/Class";
 import PeopleIcon from "@mui/icons-material/People";
 import WarningIcon from "@mui/icons-material/Warning";
 import type { Meta, StoryObj } from "@storybook/react";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid/DesktopMetricCardGrid";
 
 const sampleMetrics: readonly MetricItem[] = [

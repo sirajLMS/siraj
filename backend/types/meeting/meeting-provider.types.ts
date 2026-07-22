@@ -1,4 +1,4 @@
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 // ============================================================================
 // `meeting_providers` — admin-managed catalog (no provider enums)

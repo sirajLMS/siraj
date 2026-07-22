@@ -7,8 +7,8 @@ import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileCardList,
   MobileCardListItem,

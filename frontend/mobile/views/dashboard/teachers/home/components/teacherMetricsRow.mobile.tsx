@@ -2,7 +2,7 @@
 
 import { CancelOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { useMemo } from "react";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 

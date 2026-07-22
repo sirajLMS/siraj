@@ -1,5 +1,5 @@
 import { CountryCode, CurrencyCode, IdentifierKind, PaymentDirection } from "@/backend/enum";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 export type MobileWalletCatalogSeed = {
   slug: string;

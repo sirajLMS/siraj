@@ -11,6 +11,7 @@ import {
 import { Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { AvatarImageField, ProfileAvatarView } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AppLanguage, Gender, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import type {
   AcademicMetricsGridProps,
@@ -20,7 +21,6 @@ import type {
   ProfileSnackbarProps,
 } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileContentStack,
   MobileMetricCardGrid,

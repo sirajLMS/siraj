@@ -1,5 +1,5 @@
 import { ParentRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
-import { AppPermission, StudentStatus } from "@/backend/enum";
+import { type AppLanguage, AppPermission, type Gender, StudentStatus } from "@/backend/enum";
 import { parseAppLanguage, parseGender, parseStudentStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
@@ -249,19 +249,31 @@ async function applyStudentProfileEdit(
   tErrors: ErrorsLabels,
   locale?: string
 ): Promise<void> {
-  const hasIdentityUpdate =
-    input.dateOfBirth !== undefined ||
-    input.gender !== undefined ||
-    input.language !== undefined ||
-    input.avatarUrl !== undefined;
-  if (hasIdentityUpdate) {
+  const identityUpdates: {
+    dateOfBirth?: Date | null;
+    gender?: Gender | null;
+    language?: AppLanguage | null;
+    avatarUrl?: string | null;
+  } = {};
+
+  if ("dateOfBirth" in input) {
+    identityUpdates.dateOfBirth = input.dateOfBirth;
+  }
+  if ("gender" in input) {
+    identityUpdates.gender = input.gender;
+  }
+  if ("language" in input) {
+    identityUpdates.language = input.language;
+  }
+  if ("avatarUrl" in input) {
+    identityUpdates.avatarUrl = input.avatarUrl;
+  }
+
+  if (Object.keys(identityUpdates).length > 0) {
     await StudentRepository.partiallyUpdate(
       {
         id: studentId,
-        ...(input.dateOfBirth !== undefined ? { dateOfBirth: input.dateOfBirth } : {}),
-        ...(input.gender !== undefined ? { gender: input.gender } : {}),
-        ...(input.language !== undefined ? { language: input.language } : {}),
-        ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
+        ...identityUpdates,
       },
       tErrors,
       locale
@@ -284,17 +296,11 @@ function collectStudentProfileEditGroups(input: StudentProfileEditInput): string
   const groups: string[] = [];
 
   // Phone lives on users but is gated with identity edit_own (no separate student contact group).
-  if (
-    input.phone !== undefined ||
-    input.dateOfBirth !== undefined ||
-    input.gender !== undefined ||
-    input.language !== undefined ||
-    input.avatarUrl !== undefined
-  ) {
+  if ("phone" in input || "dateOfBirth" in input || "gender" in input || "language" in input || "avatarUrl" in input) {
     groups.push("student_identity");
   }
 
-  if (input.parentPhone !== undefined) {
+  if ("parentPhone" in input) {
     groups.push("student_parent");
   }
 

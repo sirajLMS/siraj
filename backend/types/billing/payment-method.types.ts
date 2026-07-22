@@ -1,5 +1,5 @@
 import type { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 // ============================================================================
 // Details discriminated union (spec § Data model)

@@ -39,7 +39,7 @@ export function SupportedCurrenciesDesktopView({
     <DesktopPageContainer>
       <DesktopPageHeader title={pageTitle} subtitle={pageSubtitle} />
       <DesktopAppDataGrid
-        rows={rows as readonly DesktopRow[]}
+        rows={rows}
         columns={columns}
         emptyMessage={emptyMessage}
         getRowId={row => row.id}

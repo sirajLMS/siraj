@@ -1,6 +1,6 @@
 import { boolean, jsonb, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { paymentDirectionEnum } from "@/backend/db/schema/enums";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 export const supportedPaymentLinks = pgTable("supported_payment_links", {
   id: uuid("id").defaultRandom().primaryKey(),

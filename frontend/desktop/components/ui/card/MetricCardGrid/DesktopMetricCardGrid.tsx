@@ -3,7 +3,7 @@
 import type { Breakpoint } from "@mui/material";
 import { Box } from "@mui/material";
 import Grid, { type GridSize } from "@mui/material/Grid";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard/DesktopMetricCard";
 import { DesktopHorizontalScrollRow } from "@/frontend/desktop/components/ui/container/DesktopHorizontalScrollRow";
 import { useAppTranslation } from "@/shared/locale";

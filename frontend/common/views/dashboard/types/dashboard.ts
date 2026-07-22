@@ -38,6 +38,23 @@ export interface PerformanceMetric {
   readonly value: string;
 }
 
+export type ScheduleOverviewDataHeaders = {
+  readonly className: string;
+  readonly student: string;
+  readonly teacher: string;
+  readonly time: string;
+  readonly yourTime: string;
+  readonly teacherTime: string;
+  readonly studentTime: string;
+  readonly duration: string;
+  readonly status: string;
+  readonly actions: string;
+  readonly history: string;
+  readonly joinVideo: string;
+};
+
+export type ScheduleOverviewDataStatusLabels = Record<ClassOutcome | ClassExecutionState, string>;
+
 export interface ScheduleOverviewData {
   readonly searchPlaceholder: string;
   readonly searchValue: string;
@@ -48,21 +65,8 @@ export interface ScheduleOverviewData {
   readonly submitLabel: string;
   readonly teachers: readonly TeacherFilterItem[];
   readonly rows: readonly DailyScheduleRow[];
-  readonly headers: {
-    readonly className: string;
-    readonly student: string;
-    readonly teacher: string;
-    readonly time: string;
-    readonly yourTime: string;
-    readonly teacherTime: string;
-    readonly studentTime: string;
-    readonly duration: string;
-    readonly status: string;
-    readonly actions: string;
-    readonly history: string;
-    readonly joinVideo: string;
-  };
-  readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
+  readonly headers: ScheduleOverviewDataHeaders;
+  readonly statusLabels: ScheduleOverviewDataStatusLabels;
   readonly detailsLabel: string;
   readonly emptyMessage: string;
   readonly selectedMetricLabel?: string | null;

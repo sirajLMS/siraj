@@ -153,8 +153,9 @@ export * from "@/backend/types/scheduling/dst-migration.types";
 export * from "@/backend/types/scheduling/schedule.types";
 export * from "@/backend/types/scheduling/scheduling.types";
 // Shared types (localized-string, pagination, system-settings, manager-onboarding)
-export * from "@/backend/types/shared";
-export * from "@/backend/types/staff/staff-profile.types";
+export * from "@/backend/types/shared/manager-onboarding.types";
+export * from "@/backend/types/shared/pagination.types";
+export * from "@/backend/types/shared/system-settings.types";
 export * from "@/backend/types/storage/learning-resources.types";
 export type { SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
 export * from "@/backend/types/storage/storage.types";

@@ -25,9 +25,9 @@ import {
 } from "@mui/material";
 import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileCardList,
   MobileCardListItem,

@@ -2,9 +2,9 @@
 
 import { CheckCircleOutlined, ContentCopyOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { AdminQueueEfficiencyBanner } from "@/frontend/common/views/dashboard/shared/AdminQueueEfficiencyBanner";
 import type { SuggestionsMetricsRowProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 
 export function SuggestionsMetricsRowDesktop({

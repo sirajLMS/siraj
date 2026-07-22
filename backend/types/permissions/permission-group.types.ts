@@ -1,5 +1,5 @@
 import type { permissionGroups } from "@/backend/db/schema/permissions/permissions";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 // Canonical: PermissionGroup types (moved from auth.types.ts)
 export type PermissionGroupSelectType = typeof permissionGroups.$inferSelect;

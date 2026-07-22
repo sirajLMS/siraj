@@ -6,9 +6,9 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { StudentCreditTransactionRow } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   MobileCardList,
   MobileCardListItem,

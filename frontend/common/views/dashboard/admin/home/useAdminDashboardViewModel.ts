@@ -2,6 +2,7 @@
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import {
   ADMIN_DASHBOARD_PAGE_SIZE,
   useAdminDashboardHandlers,
@@ -11,6 +12,10 @@ import {
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { useAdminDashboardLabels } from "@/frontend/common/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
+import type {
+  ScheduleOverviewDataHeaders,
+  ScheduleOverviewDataStatusLabels,
+} from "@/frontend/common/views/dashboard/types/dashboard";
 import type { AdminDashboardLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -22,7 +27,7 @@ export interface AdminDashboardViewModel {
   readonly t: AdminDashboardLabels;
   readonly loading: boolean;
   readonly lastUpdated: string;
-  readonly metrics: readonly import("@/frontend/common/views/dashboard/types/dashboard").MetricItem[];
+  readonly metrics: readonly MetricItem[];
   readonly onMetricClick: (key: string) => void;
   readonly selectedMetricKey?: string;
   readonly selectedMetricLabel: string | null;
@@ -30,8 +35,8 @@ export interface AdminDashboardViewModel {
   readonly dateValue: string;
   readonly selectedTeacher: PersonOption | null;
   readonly rows: readonly DailyScheduleRow[];
-  readonly headers: import("@/frontend/common/views/dashboard/types/dashboard").ScheduleOverviewData["headers"];
-  readonly statusLabels: import("@/frontend/common/views/dashboard/types/dashboard").ScheduleOverviewData["statusLabels"];
+  readonly headers: ScheduleOverviewDataHeaders;
+  readonly statusLabels: ScheduleOverviewDataStatusLabels;
   readonly page: number;
   readonly totalCount?: number;
   readonly onPageChange: (page: number) => void;

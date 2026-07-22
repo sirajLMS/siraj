@@ -16,15 +16,14 @@ import type {
   CreateGroupInput,
   GroupUserEntity,
   GroupWithPermissionIds,
-  LocalizedString,
   PermissionReturnType,
   PermissionSelectType,
   UpdateGroupInput,
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
-import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
 import { getServerTranslations } from "@/shared/locale";
+import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
 
 function toPermissionReturn(row: PermissionSelectType, locale?: string): PermissionReturnType {
   return {

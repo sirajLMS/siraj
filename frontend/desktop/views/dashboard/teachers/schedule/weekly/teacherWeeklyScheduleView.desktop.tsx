@@ -15,8 +15,8 @@ import {
 } from "@mui/material";
 import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import WeeklyScheduleGrid from "@/frontend/desktop/views/dashboard/teachers/schedule/weekly/components/weeklyScheduleGrid.desktop";

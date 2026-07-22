@@ -12,10 +12,10 @@ import {
 } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import { ExportButton } from "@/frontend/common/components/ui/button";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryViewModel";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { CalendarGridDesktop } from "@/frontend/desktop/views/dashboard/students/history/components/calendarGrid.desktop";

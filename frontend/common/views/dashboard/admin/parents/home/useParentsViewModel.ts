@@ -8,6 +8,7 @@ import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { parentDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-directory.documents";
 import { useParentsStore } from "@/frontend/common/stores/parentsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { exportParentDirectory } from "@/frontend/common/utils/excel-export/parent-directory-export";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import {
@@ -20,7 +21,6 @@ import {
   toParentAccountStatusKey,
   toParentLifecycleStatus,
 } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents";

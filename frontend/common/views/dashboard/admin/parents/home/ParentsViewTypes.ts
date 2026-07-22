@@ -1,5 +1,5 @@
 import { AccountStatus, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { ParentLifecycleStatus as BaseParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";
 import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents";
 

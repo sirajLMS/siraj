@@ -8,6 +8,7 @@ import {
 } from "@mui/icons-material";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentDirectoryQuery } from "@/frontend/common/graphql/generated/gql/operations";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type {
   StudentAccountStatus,
   StudentDirectoryRowExtended,
@@ -18,7 +19,6 @@ import {
   StudentEnrollmentStatus as EnrollmentEnum,
   STUDENT_STATUS_TO_ACCOUNT_STATUS,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { StudentDirectoryLabels } from "@/shared/locale";
 
 const METRIC_DEFINITIONS = [

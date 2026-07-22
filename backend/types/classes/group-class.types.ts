@@ -1,5 +1,6 @@
 import type { classCommunications, groupClassEnrollments, groupClasses } from "@/backend/db/schema";
 import type { ClassExecutionState, ClassOutcome, GroupClassAttendanceStatus } from "@/backend/enum";
+import type { LocalizedString } from "@/shared/types";
 export type GroupClassSelectType = typeof groupClasses.$inferSelect;
 export type GroupClassInsertType = typeof groupClasses.$inferInsert;
 export type GroupClassCreateInput = Omit<GroupClassInsertType, "id" | "createdAt" | "updatedAt">;
@@ -54,7 +55,7 @@ export type GroupClassOnlineMeetingInfoReturnType = {
   meetingId: string | null;
   joinUrl: string | null;
   logoUrl?: string | null;
-  providerName?: import("@/backend/types/shared/localized-string.types").LocalizedString | null;
+  providerName?: LocalizedString | null;
   source?: string | null;
 };
 

@@ -15,7 +15,6 @@ import { AccountStatus, OverrideState } from "@/backend/enum";
 import { parseAccountStatus, parseOverrideState } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
-  LocalizedString,
   ManagerDirectoryFilters,
   ManagerDirectoryMetrics,
   ManagerDirectoryResult,
@@ -28,8 +27,8 @@ import type {
   StaffProfileCreateResult,
   StaffProfileEntityInput,
 } from "@/backend/types";
-import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
 import { getServerTranslations } from "@/shared/locale";
+import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
 
 export interface ManagerProfileUpdateInput {
   readonly phone?: string | null;

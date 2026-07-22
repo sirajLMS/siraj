@@ -2,13 +2,13 @@
 
 import { FileDownloadOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type {
   AcademicClassRow,
   AlertsMetric,
   ScheduleAlert,
   ScheduleAlertsLabels,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   DesktopExportButton,
   DesktopFilterButton,

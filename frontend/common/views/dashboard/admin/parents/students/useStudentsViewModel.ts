@@ -8,6 +8,7 @@ import type { StudentDirectoryQuery } from "@/frontend/common/graphql/generated/
 import { studentDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-directory.documents";
 import { useStudentDirectoryStore } from "@/frontend/common/stores/studentDirectoryStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   StudentDirectoryRowExtended,
@@ -19,7 +20,6 @@ import {
   buildStudentRows,
   buildViewMetrics,
 } from "@/frontend/common/views/dashboard/admin/parents/students/utils";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/navigation";
 import { type StudentDirectoryLabels, useAppTranslation } from "@/shared/locale";
 

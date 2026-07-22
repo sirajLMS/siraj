@@ -218,7 +218,7 @@ function MobileLoadFailedAlert({
       severity="warning"
       sx={{ mb: 2 }}
       action={
-        <Button color="inherit" size="small" onClick={() => onRetry()}>
+        <Button color="inherit" size="small" onClick={onRetry}>
           {labels.errors.retry}
         </Button>
       }

@@ -234,10 +234,10 @@ export namespace PaymentMethodService {
   ): Promise<UserPaymentMethodReturnType> {
     await assertActorCanManageTarget(actorUserId, input.userId, tErrors);
     const parsed = userPaymentMethodSubmitInputSchema.parse(input);
-    const encryptedDetails = encryptDetailsForStorage(parsed.type, parsed.details);
+    const encryptedDetails = encryptDetailsForStorage(parsed.type, input.details);
 
     const run = async (t: DBTransaction) => {
-      await assertCatalogActive(parsed.type, parsed.details, tErrors, t);
+      await assertCatalogActive(parsed.type, input.details, tErrors, t);
 
       if (parsed.isDefault) {
         for (const slot of slotsForDirection(parsed.direction)) {
@@ -285,7 +285,7 @@ export namespace PaymentMethodService {
     tx?: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
     const existing = await UserPaymentMethodRepository.getById(id, tx);
-    if (!existing) {
+    if (existing === null) {
       throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
     }
 
@@ -295,7 +295,7 @@ export namespace PaymentMethodService {
       const inputDetails = input.details;
       const details = inputDetails ? encryptDetailsForStorage(existing.type, inputDetails) : undefined;
 
-      if (inputDetails) {
+      if (inputDetails !== undefined) {
         await assertCatalogActive(existing.type, inputDetails, tErrors, t);
       }
 
@@ -347,7 +347,7 @@ export namespace PaymentMethodService {
     tx?: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
     const existing = await UserPaymentMethodRepository.getById(id, tx);
-    if (!existing) {
+    if (existing === null) {
       throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
     }
 
@@ -411,7 +411,7 @@ export namespace PaymentMethodService {
 
     if (input.userPaymentMethodId) {
       const method = await UserPaymentMethodRepository.getById(input.userPaymentMethodId, tx);
-      if (!method) {
+      if (method === null) {
         throw new Error(
           tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: input.userPaymentMethodId })
         );
@@ -456,7 +456,7 @@ export namespace PaymentMethodService {
     }
 
     const method = await UserPaymentMethodRepository.getById(input.userPaymentMethodId, tx);
-    if (!method) {
+    if (method === null) {
       throw new Error(
         tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: input.userPaymentMethodId })
       );
@@ -466,7 +466,7 @@ export namespace PaymentMethodService {
       throw new Error(tErrors.insufficientPermissions);
     }
 
-    if (!input.isTestPayment && method.type === PaymentMethodType.BANK_TRANSFER && !method.verifiedAt) {
+    if (!input.isTestPayment && method.type === PaymentMethodType.BANK_TRANSFER && method.verifiedAt === null) {
       throw new Error(tErrors.billing.invoiceNotFound(input.teacherId));
     }
 
@@ -505,10 +505,10 @@ export namespace PaymentMethodService {
     tx: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
     const parsed = userPaymentMethodSubmitInputSchema.parse(input);
-    const encryptedDetails = encryptDetailsForStorage(parsed.type, parsed.details);
+    const encryptedDetails = encryptDetailsForStorage(parsed.type, input.details);
 
     const tErrors = getServerTranslations("en").errorsTranslations;
-    await assertCatalogActive(parsed.type, parsed.details, tErrors, tx);
+    await assertCatalogActive(parsed.type, input.details, tErrors, tx);
 
     if (parsed.isDefault) {
       for (const slot of slotsForDirection(parsed.direction)) {

@@ -2,6 +2,7 @@
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type {
   DateRangeSelectorProps,
   FilterPanelProps,
@@ -11,7 +12,6 @@ import type {
   ReportTypeFilterProps,
   TargetSelectSectionProps,
 } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";

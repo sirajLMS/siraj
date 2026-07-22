@@ -1,6 +1,6 @@
 import { boolean, index, jsonb, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { countryCodeEnum, currencyCodeEnum, paymentDirectionEnum } from "@/backend/db/schema/enums";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 export const supportedMobileWallets = pgTable(
   "supported_mobile_wallets",

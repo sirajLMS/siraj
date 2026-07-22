@@ -10,8 +10,8 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
 import type { RedisGroupSimulationSessionData } from "@/backend/types/auth/auth.types";
-import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
 import type { ErrorsLabels } from "@/shared/locale";
+import { DEFAULT_CONTENT_LOCALE } from "@/shared/types";
 
 export const GROUP_SIMULATION_TTL_MS = 30 * 60 * 1000;
 

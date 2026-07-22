@@ -1,5 +1,5 @@
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 // ============================================================================
 // User meeting config details (JSONB on `user_meeting_configs`)

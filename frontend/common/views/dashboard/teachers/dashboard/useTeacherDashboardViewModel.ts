@@ -5,8 +5,8 @@ import type {
   StudentProgressFeedItem,
   TeacherScheduleRow,
 } from "@/frontend/common/stores/teacherDashboardTypes";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 
 /**
  * TeacherDashboard ViewModel.

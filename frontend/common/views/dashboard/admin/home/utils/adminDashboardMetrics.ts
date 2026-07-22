@@ -14,7 +14,7 @@ import {
   ThumbDownOutlined,
 } from "@mui/icons-material";
 import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics } from "@/frontend/common/graphql/generated/gql/operations";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { AdminDashboardLabels } from "@/shared/locale";
 
 export type RawMetrics =

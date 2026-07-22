@@ -11,11 +11,11 @@ import {
   useForm,
 } from "react-hook-form";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
+import type { RescheduleSession } from "@/frontend/common/types/shared.types";
 import {
   type RescheduleFormData,
   rescheduleSchema,
 } from "@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema";
-import type { RescheduleSession } from "@/frontend/common/views/dashboard/reschedule/home/types";
 
 export interface UseRescheduleViewModelProps {
   readonly session: RescheduleSession;

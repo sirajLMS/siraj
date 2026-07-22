@@ -1,6 +1,6 @@
 import { boolean, index, jsonb, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 export const meetingProviders = pgTable(
   "meeting_providers",

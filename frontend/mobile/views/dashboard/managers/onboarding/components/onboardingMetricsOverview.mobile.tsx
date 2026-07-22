@@ -2,10 +2,10 @@
 
 import { GroupsOutlined, PendingActionsOutlined, SpeedOutlined } from "@mui/icons-material";
 import { useMemo } from "react";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { OnboardingMetricsOverviewProps } from "@/frontend/common/views/dashboard/managers/onboarding/types";
 import type { OnboardingMetricKey } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
 import { resolveMetricValue } from "@/frontend/common/views/dashboard/managers/onboarding/useOnboardingMetrics";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 import { useAppTranslation } from "@/shared/locale";
 

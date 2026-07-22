@@ -12,8 +12,8 @@ import {
   Stack,
 } from "@mui/material";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
-import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";

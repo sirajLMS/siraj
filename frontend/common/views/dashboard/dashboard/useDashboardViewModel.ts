@@ -5,7 +5,8 @@ import { useEffect, useMemo } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import type { MetricItem, ScheduleOverviewData } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
+import type { ScheduleOverviewData } from "@/frontend/common/views/dashboard/types/dashboard";
 import { useAppTranslation } from "@/shared/locale";
 
 function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {

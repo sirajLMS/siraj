@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { ObservableQuery, OperationVariables, TypedDocumentNode } from "@apollo/client";
+import type { ApolloClient, OperationVariables, TypedDocumentNode } from "@apollo/client";
 import {
   parentAssignedStudentsQueryDocument,
   parentHandbookUrlQueryDocument,
@@ -16,13 +16,13 @@ import { testClient } from "@/frontend/common/graphql/test/testClient";
 async function queryAsDemoUser<TData, TVars extends OperationVariables = OperationVariables>(
   groupSlug: string,
   document: TypedDocumentNode<TData, TVars>
-): Promise<ObservableQuery.Result<TData>> {
+): Promise<ApolloClient.QueryResult<TData>> {
   const token = await loginDemoUser(groupSlug);
   const result = await testClient.query({
     query: document,
     context: { headers: { Authorization: `Bearer ${token}` } },
   } as Parameters<typeof testClient.query>[0]);
-  return result as ObservableQuery.Result<TData>;
+  return result as ApolloClient.QueryResult<TData>;
 }
 
 /**
