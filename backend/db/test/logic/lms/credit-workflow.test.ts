@@ -76,7 +76,7 @@ describe("Credit workflow — purchase, deduct, refund, idempotency", () => {
       });
 
       // Apply the purchase to the student balance via StudentRepository.addClasses
-      await StudentRepository.addClasses(entities.student.id, 10, tErrors, undefined, tx);
+      await StudentRepository.addClasses(entities.student.id, tErrors, 10, undefined, tx);
 
       const balanceAfterPurchase = await CreditRepository.getBalance(tx, entities.student.id);
       expect(balanceAfterPurchase.classesTotal).toBe(10);
@@ -92,7 +92,7 @@ describe("Credit workflow — purchase, deduct, refund, idempotency", () => {
       });
 
       // Apply the deduction to the student balance via StudentRepository.deductClasses
-      await StudentRepository.deductClasses(entities.student.id, 1, tErrors, undefined, tx);
+      await StudentRepository.deductClasses(entities.student.id, tErrors, 1, undefined, tx);
 
       // 4. Verify student balance decreased by 1
       const balanceAfterDeduct = await CreditRepository.getBalance(tx, entities.student.id);
@@ -114,7 +114,7 @@ describe("Credit workflow — purchase, deduct, refund, idempotency", () => {
       });
 
       // Apply the refund to the student balance via StudentRepository.addClasses
-      await StudentRepository.addClasses(entities.student.id, 1, tErrors, undefined, tx);
+      await StudentRepository.addClasses(entities.student.id, tErrors, 1, undefined, tx);
 
       // 7. Verify student balance restored
       const balanceAfterRefund = await CreditRepository.getBalance(tx, entities.student.id);
@@ -147,7 +147,7 @@ describe("Credit workflow — purchase, deduct, refund, idempotency", () => {
         creditedByUserId,
         idempotencyKey,
       });
-      await StudentRepository.deductClasses(entities.student.id, 1, tErrors, undefined, tx);
+      await StudentRepository.deductClasses(entities.student.id, tErrors, 1, undefined, tx);
 
       const balanceAfterFirstDeduct = await CreditRepository.getBalance(tx, entities.student.id);
       expect(balanceAfterFirstDeduct.classesRemaining).toBe(9);

@@ -19,7 +19,6 @@ import {
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
-import type { LocalizedString } from "@/shared/types";
 
 function MeetingProvidersMobileEmptyState({ title, body }: Readonly<{ title: string; body: string }>) {
   return (
@@ -151,10 +150,7 @@ export function MeetingProvidersMobileView({
         onConfirm={onDeleteConfirm}
         isLoading={deleting}
         title={t.deleteTitle}
-        body={`${t.deleteConfirm} ${resolveLocalizedString(
-          (deleteProvider?.name as LocalizedString | null | undefined) ?? null,
-          locale
-        )}`}
+        body={`${t.deleteConfirm} ${resolveLocalizedString(deleteProvider?.name ?? null, locale)}`}
         cancelLabel={t.cancel}
         confirmLabel={t.delete}
       />

@@ -72,6 +72,7 @@ export const TeacherPaymentPothosObject = TeacherPaymentRef.implement({
     }),
     paymentMethodSnapshot: t.field({
       type: PaymentMethodTransactionSnapshotPothosObject,
+      nullable: true,
       resolve: async (parent, _args, ctx) => {
         if (!parent.paymentMethodSnapshot) return null;
         if (parent.paymentMethodType === PaymentMethodType.PROOF_UPLOAD) return null;

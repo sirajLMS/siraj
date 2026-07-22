@@ -137,7 +137,7 @@ export function OverridesDataGridDesktop({
 
   return (
     <DesktopAppDataGrid<Permission>
-      rows={filteredPermissions as Permission[]}
+      rows={filteredPermissions}
       columns={columns}
       getRowId={row => row.id ?? row.key ?? ""}
       loading={isDialogLoading && filteredPermissions.length === 0}

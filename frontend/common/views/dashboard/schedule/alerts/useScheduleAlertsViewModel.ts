@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
+import { PeopleOutlined, SchoolOutlined } from "@mui/icons-material";
 import { useCallback, useMemo } from "react";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList as ScheduleRow } from "@/frontend/common/graphql/generated/gql/operations";
@@ -172,7 +173,30 @@ export function useScheduleAlertsViewModel(): ScheduleAlertsViewModel {
   const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
 
   const alerts: ScheduleAlert[] = [];
-  const metrics: AlertsMetric[] = useMemo(() => [], []);
+
+  const metrics: AlertsMetric[] = useMemo(() => {
+    const m = scheduleResult?.metrics;
+    if (!m) return [];
+    return [
+      {
+        key: "totalStudents",
+        value: m.total ?? 0,
+        labelKey: "totalStudents",
+        subLabelKey: "totalStudentsTrend",
+        icon: PeopleOutlined,
+        trend: undefined, // trend not available in metrics yet
+      },
+      {
+        key: "activeCourses",
+        value: m.regular ?? 0,
+        labelKey: "activeCourses",
+        subLabelKey: "activeCoursesSub",
+        icon: SchoolOutlined,
+        trend: undefined,
+      },
+    ];
+  }, [scheduleResult?.metrics]);
+
   const labels = buildScheduleLabels(t);
 
   const metricLabels: Record<string, { label: string; subLabel: string }> = useMemo(
@@ -181,8 +205,8 @@ export function useScheduleAlertsViewModel(): ScheduleAlertsViewModel {
         metrics.map(metric => [
           metric.key,
           {
-            label: String(t[metric.labelKey.replace("dashboard.scheduleAlerts.", "") as keyof typeof t]),
-            subLabel: String(t[metric.subLabelKey.replace("dashboard.scheduleAlerts.", "") as keyof typeof t]),
+            label: String(t.metrics[metric.labelKey as keyof typeof t.metrics]),
+            subLabel: String(t.metrics[metric.subLabelKey as keyof typeof t.metrics]),
           },
         ])
       ),

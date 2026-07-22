@@ -197,8 +197,12 @@ function ContactSectionView(props: ContactSectionViewProps): ReactElement {
   );
 }
 
+function isEditMode(props: ContactSectionProps): props is ContactSectionOwnEditProps | ContactSectionAdminEditProps {
+  return props.mode === "edit";
+}
+
 export function ContactSection(props: ContactSectionProps): ReactElement | null {
-  if (props.mode === "edit") {
+  if (isEditMode(props)) {
     return <ContactSectionEdit {...props} />;
   }
   return <ContactSectionView {...props} />;

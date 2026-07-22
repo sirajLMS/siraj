@@ -126,9 +126,9 @@ describe("Concurrency Control Tests", () => {
         testLogger.info(`Created student with ID: ${testStudent.id}, classesRemaining: 10`);
 
         // Execute multiple deductions sequentially (simulating what would happen with optimistic locking)
-        await StudentRepository.deductClasses(testStudent.id, 1, tErrors, undefined, tx);
-        await StudentRepository.deductClasses(testStudent.id, 1, tErrors, undefined, tx);
-        await StudentRepository.deductClasses(testStudent.id, 1, tErrors, undefined, tx);
+        await StudentRepository.deductClasses(testStudent.id, tErrors, 1, undefined, tx);
+        await StudentRepository.deductClasses(testStudent.id, tErrors, 1, undefined, tx);
+        await StudentRepository.deductClasses(testStudent.id, tErrors, 1, undefined, tx);
 
         // Verify final state
         const [updatedStudent] = await tx.select().from(students).where(eq(students.id, testStudent.id));
@@ -149,9 +149,9 @@ describe("Concurrency Control Tests", () => {
         testLogger.info(`Initial classesRemaining: 10`);
 
         // Execute operations sequentially (2 bookings and 1 refund)
-        await StudentRepository.deductClasses(testStudent.id, 1, tErrors, undefined, tx);
-        await StudentRepository.deductClasses(testStudent.id, 1, tErrors, undefined, tx);
-        await StudentRepository.addClasses(testStudent.id, 5, tErrors, undefined, tx);
+        await StudentRepository.deductClasses(testStudent.id, tErrors, 1, undefined, tx);
+        await StudentRepository.deductClasses(testStudent.id, tErrors, 1, undefined, tx);
+        await StudentRepository.addClasses(testStudent.id, tErrors, 5, undefined, tx);
 
         const [updatedStudent] = await tx.select().from(students).where(eq(students.id, testStudent.id));
 
@@ -170,8 +170,8 @@ describe("Concurrency Control Tests", () => {
 
         await verifyOptimisticLock(
           testStudent.version,
-          () => StudentRepository.deductClasses(testStudent.id, 1, tErrors, testStudent.version, tx),
-          () => StudentRepository.deductClasses(testStudent.id, 1, tErrors, testStudent.version, tx),
+          () => StudentRepository.deductClasses(testStudent.id, tErrors, 1, testStudent.version, tx),
+          () => StudentRepository.deductClasses(testStudent.id, tErrors, 1, testStudent.version, tx),
           async () => {
             const [finalStudent] = await tx.select().from(students).where(eq(students.id, testStudent.id));
             expect(finalStudent.classesRemaining).toBe(9); // Only one deduction succeeded
@@ -190,7 +190,7 @@ describe("Concurrency Control Tests", () => {
 
         // Try to deduct 3 classes (should fail)
         await expectRepositoryError(
-          () => StudentRepository.deductClasses(testStudent.id, 3, tErrors, undefined, tx),
+          () => StudentRepository.deductClasses(testStudent.id, tErrors, 3, undefined, tx),
           "Insufficient class balance"
         );
 

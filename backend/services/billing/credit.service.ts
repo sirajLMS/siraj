@@ -95,7 +95,7 @@ export namespace CreditService {
         idempotencyKey,
       });
 
-      await StudentRepository.addClasses(input.studentId, input.hours, tErrors, undefined, tx);
+      await StudentRepository.addClasses(input.studentId, tErrors, input.hours, undefined, tx);
       return ledgerRow;
     });
 
@@ -148,7 +148,7 @@ export namespace CreditService {
           idempotencyKey,
         });
 
-        await StudentRepository.addClasses(input.studentId, input.hours, tErrors, undefined, tx);
+        await StudentRepository.addClasses(input.studentId, tErrors, input.hours, undefined, tx);
 
         return ledgerRow;
       });
@@ -250,7 +250,7 @@ export namespace CreditService {
           creditedByUserId,
           idempotencyKey: effectiveIdempotencyKey,
         }),
-      adjustStudentClasses: () => StudentRepository.deductClasses(studentId, 1, tErrors, undefined, tx),
+      adjustStudentClasses: () => StudentRepository.deductClasses(studentId, tErrors, 1, undefined, tx),
     });
   }
 
@@ -278,7 +278,7 @@ export namespace CreditService {
           creditedByUserId,
           idempotencyKey: effectiveIdempotencyKey,
         }),
-      adjustStudentClasses: () => StudentRepository.addClasses(studentId, 1, tErrors, undefined, tx),
+      adjustStudentClasses: () => StudentRepository.addClasses(studentId, tErrors, 1, undefined, tx),
     });
   }
 }

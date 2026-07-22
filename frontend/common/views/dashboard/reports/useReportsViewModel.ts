@@ -121,9 +121,7 @@ export interface ReportsViewModel {
   readonly formatPaidAmounts: (paidAmounts: readonly ReportPaidAmount[]) => string;
 }
 
-export function useReportsViewModel(
-  props: Readonly<UseReportsViewModelProps> = {} as Readonly<UseReportsViewModelProps>
-): ReportsViewModel {
+export function useReportsViewModel(props: Readonly<UseReportsViewModelProps> = {}): ReportsViewModel {
   const fromDate = useReportsStore(state => state.fromDate);
   const toDate = useReportsStore(state => state.toDate);
   const teacherId = useReportsStore(state => state.teacherId);

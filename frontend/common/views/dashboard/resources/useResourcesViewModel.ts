@@ -2,9 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useRef, useState } from "react";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   deleteLearningResourceMutationDocument,
   learningResourcesQueryDocument,
@@ -81,13 +79,10 @@ function useResourcePermissions(): { canResourcesList: boolean; canResourcesDele
 }
 
 function useResourcesQuery(searchQuery: string): LearningResourceRow[] {
-  const { data } = useQuery<Operations.LearningResourcesQuery, Types.QueryLearningResourcesArgs>(
-    learningResourcesQueryDocument,
-    {
-      variables: { searchQuery: searchQuery || null },
-      fetchPolicy: "cache-and-network",
-    }
-  );
+  const { data } = useQuery(learningResourcesQueryDocument, {
+    variables: { searchQuery: searchQuery || null },
+    fetchPolicy: "cache-and-network",
+  });
   return useMemo(() => {
     return (data?.learningResources ?? []).map(resource => {
       const contentType = resource.contentType ?? "";
@@ -156,22 +151,9 @@ interface UploadHandlers {
   readonly handleFormSubmit: () => Promise<void>;
 }
 
-function useUploadMutations(): {
-  readonly uploading: boolean;
-  readonly uploadMutation: ReturnType<
-    typeof useMutation<Operations.UploadLearningResourceMutation, Types.MutationUploadLearningResourceArgs>
-  >[0];
-  readonly prepareUploadMutation: ReturnType<
-    typeof useMutation<Operations.PrepareUploadMutation, Types.MutationPrepareUploadArgs>
-  >[0];
-} {
-  const [uploadMutation, { loading: uploading }] = useMutation<
-    Operations.UploadLearningResourceMutation,
-    Types.MutationUploadLearningResourceArgs
-  >(uploadLearningResourceMutationDocument);
-  const [prepareUploadMutation] = useMutation<Operations.PrepareUploadMutation, Types.MutationPrepareUploadArgs>(
-    prepareUploadMutationDocument
-  );
+function useUploadMutations() {
+  const [uploadMutation, { loading: uploading }] = useMutation(uploadLearningResourceMutationDocument);
+  const [prepareUploadMutation] = useMutation(prepareUploadMutationDocument);
   return { uploading, uploadMutation, prepareUploadMutation };
 }
 
@@ -233,12 +215,8 @@ interface DeleteHandlers {
   readonly deleting: boolean;
 }
 
-function useDeleteMutation(): ReturnType<
-  typeof useMutation<Operations.DeleteLearningResourceMutation, Types.MutationDeleteLearningResourceArgs>
-> {
-  return useMutation<Operations.DeleteLearningResourceMutation, Types.MutationDeleteLearningResourceArgs>(
-    deleteLearningResourceMutationDocument
-  );
+function useDeleteMutation() {
+  return useMutation(deleteLearningResourceMutationDocument);
 }
 
 function useDeleteCallbacks(params: {
