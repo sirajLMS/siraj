@@ -3436,7 +3436,7 @@ Now let me check the existing migration file, enum schema, and the current compl
 39: 
 40: export const studentStatusEnum = createPgEnumFromEnum("student_status", StudentStatus);
 41: 
-42: export const classTypeEnum = createPgEnumFromEnum("class_type", ClassType);
+42: export const ClassType = createPgEnumFromEnum("class_type", ClassType);
 43: 
 44: export const classOutcomeEnum = createPgEnumFromEnum("class_outcome", ClassOutcome);
 45: 
@@ -5530,7 +5530,7 @@ Let me read the schema files I haven't fully analyzed yet:
 39: 
 40: export const studentStatusEnum = createPgEnumFromEnum("student_status", StudentStatus);
 41: 
-42: export const classTypeEnum = createPgEnumFromEnum("class_type", ClassType);
+42: export const ClassType = createPgEnumFromEnum("class_type", ClassType);
 43: 
 44: export const classOutcomeEnum = createPgEnumFromEnum("class_outcome", ClassOutcome);
 45: 

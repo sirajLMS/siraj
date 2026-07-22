@@ -2,12 +2,14 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import type { ReactNode } from "react";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 import type { OverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { OverrideEditControlsMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEditControls.mobile";
 import { OverrideEffectiveDisplayMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEffectiveDisplay.mobile";
-import { useAppTranslation } from "@/shared/locale";
+import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 const StyledPermissionKeyText = styled(Typography)(({ theme }) => ({
   fontFamily: "JetBrains Mono, monospace",
@@ -36,6 +38,7 @@ export function OverridesDataGridMobile({
   handleOverrideChange,
 }: Readonly<OverridesDataGridProps>) {
   const t = useAppTranslation().dashboardTranslations.permissions;
+  const locale = useAppLocale();
 
   return (
     <Box sx={{ p: 2 }}>
@@ -53,7 +56,9 @@ export function OverridesDataGridMobile({
           );
           const isAllowedByGroup = baselineGroups.length > 0;
           const baselineText = isAllowedByGroup
-            ? t.allowedViaGroups(baselineGroups.map(g => g.name).join(", "))
+            ? t.allowedViaGroups(
+                baselineGroups.map(g => resolveLocalizedString(g.name, locale) || g.slug || "").join(", ")
+              )
             : t.notSet;
           const overrideState: OverrideState = (permission.id && localOverrides[permission.id]) || "INHERIT";
 
@@ -66,6 +71,21 @@ export function OverridesDataGridMobile({
             effectiveState = "allowed";
           } else {
             effectiveState = "not_set";
+          }
+
+          let overrideControls: ReactNode = null;
+          if (permission.id) {
+            overrideControls =
+              mode === "effective" ? (
+                <OverrideEffectiveDisplayMobile effectiveState={effectiveState} overrideState={overrideState} />
+              ) : (
+                <OverrideEditControlsMobile
+                  permissionId={permission.id}
+                  overrideState={overrideState}
+                  isDialogLoading={isDialogLoading}
+                  handleOverrideChange={handleOverrideChange}
+                />
+              );
           }
 
           return (
@@ -93,18 +113,7 @@ export function OverridesDataGridMobile({
                   <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary, mb: 0.5 })}>
                     {t.columnOverrideControl}
                   </Typography>
-                  {permission.id ? (
-                    mode === "effective" ? (
-                      <OverrideEffectiveDisplayMobile effectiveState={effectiveState} overrideState={overrideState} />
-                    ) : (
-                      <OverrideEditControlsMobile
-                        permissionId={permission.id}
-                        overrideState={overrideState}
-                        isDialogLoading={isDialogLoading}
-                        handleOverrideChange={handleOverrideChange}
-                      />
-                    )
-                  ) : null}
+                  {overrideControls}
                 </Box>
               </Box>
             </MobileCardListItem>

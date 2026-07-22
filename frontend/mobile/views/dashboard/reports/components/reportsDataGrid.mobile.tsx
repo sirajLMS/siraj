@@ -8,10 +8,7 @@ import type {
 import type { ReportsDataGridProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import { reportNameHrefForRow } from "@/frontend/common/views/dashboard/reports/utils/reportNameHrefForRow.utils";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
-import {
-  PerformanceLedgerCardMobile,
-  type PerformanceLedgerCardMobileLabels,
-} from "@/frontend/mobile/views/dashboard/reports/components/performanceLedgerCard.mobile";
+import { PerformanceLedgerCardMobile } from "@/frontend/mobile/views/dashboard/reports/components/performanceLedgerCard.mobile";
 
 export type ReportsDataGridMobileLabels = ReportsDataGridLabels;
 
@@ -40,7 +37,7 @@ export function ReportsDataGridMobile({
     leave: labels.leave,
     pending: labels.pending,
     hours: labels.hours,
-  } as PerformanceLedgerCardLabels as PerformanceLedgerCardMobileLabels;
+  } as PerformanceLedgerCardLabels;
 
   return (
     <Box sx={{ px: { xs: 0 }, pb: 1 }}>

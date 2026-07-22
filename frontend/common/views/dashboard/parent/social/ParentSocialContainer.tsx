@@ -4,7 +4,6 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ParentSocialView } from "@/frontend/common/views/dashboard/parent/social/ParentSocialView";
 import {
-  type ParentSocialViewModel,
   type UseParentSocialViewModelProps,
   useParentSocialViewModel,
 } from "@/frontend/common/views/dashboard/parent/social/useParentSocialViewModel";
@@ -18,5 +17,3 @@ export function ParentSocialContainer(_props: Readonly<UseParentSocialViewModelP
     </RequirePermission>
   );
 }
-
-export type { ParentSocialViewModel, UseParentSocialViewModelProps };

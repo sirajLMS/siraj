@@ -5,20 +5,6 @@
 // per specs.md §5.
 import { z } from "zod";
 
-import {
-  type CategoryFormValues,
-  categoryFormSchema,
-  emptyCategoryFormValues,
-} from "@/frontend/common/views/dashboard/subjects/home/schemas/category.schema";
-import {
-  emptySubjectFormValues,
-  type SubjectFormValues,
-  subjectFormSchema,
-} from "@/frontend/common/views/dashboard/subjects/home/schemas/subject.schema";
-
-export type { CategoryFormValues, SubjectFormValues };
-export { categoryFormSchema, emptyCategoryFormValues, emptySubjectFormValues, subjectFormSchema };
-
 /**
  * Lowercases, trims, and kebab-cases the given text for use as a URL slug.
  * Shared across the create/edit category and subject dialogs so the

@@ -2,10 +2,7 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type {
-  CreateRecurringClassViewModel,
-  UseCreateRecurringClassViewModelProps,
-} from "@/frontend/common/views/dashboard/classes/recurring/useCreateRecurringClassViewModel";
+import type { CreateRecurringClassViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useCreateRecurringClassViewModel";
 
 const lazyViews = createLazyView<CreateRecurringClassViewModel>(
   () =>
@@ -21,5 +18,3 @@ const lazyViews = createLazyView<CreateRecurringClassViewModel>(
 export function CreateRecurringClassView(props: Readonly<CreateRecurringClassViewModel>) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }
-
-export type { CreateRecurringClassViewModel, UseCreateRecurringClassViewModelProps };

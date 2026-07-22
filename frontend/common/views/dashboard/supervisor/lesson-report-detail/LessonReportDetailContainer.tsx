@@ -2,11 +2,8 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import {
-  type LessonReportDetailViewModel,
-  type UseLessonReportDetailViewModelProps,
-  useLessonReportDetailViewModel,
-} from "@/frontend/common/views/dashboard/supervisor/lesson-report-detail/useLessonReportDetailViewModel";
+import type { LessonReportDetailViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-report-detail/useLessonReportDetailViewModel";
+import { useLessonReportDetailViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-report-detail/useLessonReportDetailViewModel";
 
 const lazyViews = createLazyView<LessonReportDetailViewModel>(
   () =>
@@ -23,5 +20,3 @@ export function LessonReportDetailContainer() {
   const viewModel = useLessonReportDetailViewModel({});
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { LessonReportDetailViewModel, UseLessonReportDetailViewModelProps };

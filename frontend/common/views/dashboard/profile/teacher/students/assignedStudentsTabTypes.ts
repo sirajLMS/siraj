@@ -1,5 +1,4 @@
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
-import type { ProfileStudentsLabels } from "@/shared/locale";
 
 /**
  * Shared ViewModel contract for AssignedStudentsTab tier variants.
@@ -32,5 +31,3 @@ export interface AssignedStudentsTabViewModel {
     readonly onPaginationModelChange: (page: number, pageSize: number) => void;
   };
 }
-
-export type { AssignedStudentsRow, ProfileStudentsLabels };

@@ -83,7 +83,6 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
           {isFutureClassJoinable(item) ? (
             <MobileMeetingJoinAction
               variant="icon"
-              joinUrl={item.meetingJoinUrl}
               meeting={item.effectiveMeeting}
               emptyRole="teacher"
               label={t.actions.joinVideo}

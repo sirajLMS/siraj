@@ -4,7 +4,7 @@ import type { SvgIconComponent } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { motion } from "framer-motion";
-import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
+import { BaseCard } from "@/frontend/common/components/ui";
 import {
   filledIconWrapSx,
   interactiveIconActiveSx,
@@ -20,7 +20,7 @@ export interface StyledCardProps {
 }
 
 /** Desktop layout: horizontal row chrome. */
-export const StyledCard = styled(DesktopBaseCard, {
+export const StyledCard = styled(BaseCard, {
   shouldForwardProp: prop => prop !== "isHighlight" && prop !== "isError" && prop !== "isInteractive",
 })<StyledCardProps>(({ theme, isHighlight, isError, isInteractive }) => ({
   padding: theme.spacing(2.5),

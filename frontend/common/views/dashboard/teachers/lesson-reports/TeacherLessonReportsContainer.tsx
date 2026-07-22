@@ -4,7 +4,6 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { TeacherLessonReportsView } from "@/frontend/common/views/dashboard/teachers/lesson-reports/TeacherLessonReportsView";
 import {
-  type TeacherLessonReportsViewModel,
   type UseTeacherLessonReportsViewModelProps,
   useTeacherLessonReportsViewModel,
 } from "@/frontend/common/views/dashboard/teachers/lesson-reports/useTeacherLessonReportsViewModel";
@@ -18,5 +17,3 @@ export function TeacherLessonReportsContainer(props: Readonly<UseTeacherLessonRe
     </RequirePermission>
   );
 }
-
-export type { TeacherLessonReportsViewModel, UseTeacherLessonReportsViewModelProps };

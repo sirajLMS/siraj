@@ -2,8 +2,8 @@
 
 import { AutoAwesomeOutlined, SecurityOutlined, UpdateOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { SuggestionSupportCardsProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
-import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 
 const SUPPORT_CARDS = [
   { key: "privacy", icon: SecurityOutlined },
@@ -26,7 +26,7 @@ export function SuggestionSupportCardsDesktop({ labels }: Readonly<Omit<Suggesti
         const Icon = card.icon;
 
         return (
-          <DesktopBaseCard key={card.key} sx={{ flex: 1, textAlign: "center" }}>
+          <BaseCard key={card.key} sx={{ flex: 1, textAlign: "center" }}>
             <Box
               sx={theme => ({
                 width: 48,
@@ -49,7 +49,7 @@ export function SuggestionSupportCardsDesktop({ labels }: Readonly<Omit<Suggesti
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {cardLabels.body}
             </Typography>
-          </DesktopBaseCard>
+          </BaseCard>
         );
       })}
     </Box>

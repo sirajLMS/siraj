@@ -3,17 +3,17 @@
 
 import { HistoryOutlined, MailOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type {
   BentoCardProps,
   ReassignmentBentoGridProps,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
-import { DesktopBaseCard } from "@/frontend/desktop/components/ui";
 import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
 import { useAppTranslation } from "@/shared/locale";
 
 function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardProps>) {
   return (
-    <DesktopBaseCard
+    <BaseCard
       onClick={onClick}
       sx={theme => ({
         display: "flex",
@@ -42,7 +42,7 @@ function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardP
           {subtitle}
         </Typography>
       </Box>
-    </DesktopBaseCard>
+    </BaseCard>
   );
 }
 

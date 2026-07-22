@@ -2,8 +2,9 @@
 
 import { FileDownloadOutlined, PrintOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { ReportsViewModel } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
-import { DesktopBaseCard, DesktopFilterButton, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { DesktopFilterButton, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { EngagementRateCardDesktop } from "@/frontend/desktop/views/dashboard/reports/components/engagementRateCard.desktop";
 import { FinancialDistributionCardDesktop } from "@/frontend/desktop/views/dashboard/reports/components/financialDistributionCard.desktop";
@@ -50,7 +51,7 @@ export function ReportsDesktopView({
         }
       />
 
-      <DesktopBaseCard>
+      <BaseCard>
         <ReportFiltersFormDesktop
           fromDate={fromDate}
           toDate={toDate}
@@ -64,7 +65,7 @@ export function ReportsDesktopView({
           onReportTypeChange={onReportTypeChange}
           onSubmit={onSubmit}
         />
-      </DesktopBaseCard>
+      </BaseCard>
 
       <DesktopSectionPanel>
         <ReportsDataGridDesktop

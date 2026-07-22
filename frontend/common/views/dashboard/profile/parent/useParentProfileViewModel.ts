@@ -20,7 +20,6 @@ import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/
 import type {
   AssociatedStudents,
   ParentAdminData,
-  ParentOwnData,
   ParentViewData,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
@@ -186,5 +185,3 @@ export function useParentProfileViewModel(
     canView,
   };
 }
-
-export type { ParentAdminData, ParentOwnData, ParentViewData };

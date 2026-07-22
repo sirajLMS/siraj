@@ -16,5 +16,5 @@ export function usePathname(): string {
 }
 
 export function useRouter(): AppRouter {
-  return useNextRouter() as AppRouter;
+  return useNextRouter();
 }

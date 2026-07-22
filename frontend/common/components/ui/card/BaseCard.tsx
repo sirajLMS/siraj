@@ -5,7 +5,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { edgeToEdgeCardPaddingSx, edgeToEdgeCardShellSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
-interface BaseCardProps extends CardProps {
+export interface BaseCardProps extends CardProps {
   readonly interactive?: boolean;
   readonly edgeToEdge?: boolean;
   /** When false, only the shell is flush; children supply their own inner padding. */

@@ -10,7 +10,7 @@ import type {
   TeacherLessonReportRow,
   TeacherLessonReportsViewModel,
 } from "@/frontend/common/views/dashboard/teachers/lesson-reports/useTeacherLessonReportsViewModel";
-import type { LessonReportLabels, useAppLocale } from "@/shared/locale";
+import type { useAppLocale } from "@/shared/locale";
 
 // NEW FOR PLAN v5: LessonReportCardProps — byte-identical pair lifted from
 // the mobile + desktop `teacherLessonReportsView.*` tier files. Both tier
@@ -22,7 +22,3 @@ export interface LessonReportCardProps {
   readonly locale: ReturnType<typeof useAppLocale>;
   readonly resolveStatusLabel: (status: LessonReportStatus) => string;
 }
-
-// Re-export the view-model-facing label type so consumers can lift from one
-// import barrel without re-reaching across modules.
-export type { LessonReportLabels };

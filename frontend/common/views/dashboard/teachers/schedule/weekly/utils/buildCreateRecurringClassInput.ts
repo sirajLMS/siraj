@@ -6,11 +6,7 @@
 // was byte-identical across the two tier files; both now import this single
 // shared implementation.
 
-import type {
-  ClassType as ClassTypeEnum,
-  CreateRecurringClassInput,
-  DayOfWeek,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassType, CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
 
@@ -24,7 +20,7 @@ export function buildCreateRecurringClassInput(
   duration: number,
   defaultStartTime: string,
   timezone: string,
-  classType: ClassTypeEnum,
+  classType: ClassType,
   days: readonly DayScheduleConfig[]
 ): CreateRecurringClassInput {
   const activeDays = days.filter(d => d.enabled);
@@ -46,7 +42,3 @@ export function buildCreateRecurringClassInput(
     effectiveUntil: null,
   };
 }
-
-// Re-export DayOfWeek + ClassTypeEnum so the tier prop signatures can keep
-// importing from this barrel instead of reaching across modules.
-export type { ClassTypeEnum, DayOfWeek };

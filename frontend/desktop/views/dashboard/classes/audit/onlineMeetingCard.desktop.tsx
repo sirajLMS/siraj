@@ -3,9 +3,9 @@
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { OnlineMeetingCardDesktopProps } from "@/frontend/common/views/dashboard/classes/audit/onlineMeetingCard.types";
 import { resolveProviderDisplayName, toEffectiveMeeting } from "@/frontend/common/views/dashboard/classes/audit/utils";
-import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { useAppLocale } from "@/shared/locale";
 
@@ -92,7 +92,7 @@ export function OnlineMeetingCardDesktop({
   const meeting = toEffectiveMeeting(meetingInfo);
 
   return (
-    <DesktopBaseCard>
+    <BaseCard>
       <StyledSectionTitle variant="titleLg" sx={{ mb: 2 }}>
         {labels.title}
       </StyledSectionTitle>
@@ -138,6 +138,6 @@ export function OnlineMeetingCardDesktop({
           />
         ) : null}
       </StyledMeetingInfoRow>
-    </DesktopBaseCard>
+    </BaseCard>
   );
 }

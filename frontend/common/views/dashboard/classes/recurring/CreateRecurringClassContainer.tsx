@@ -4,7 +4,6 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CreateRecurringClassView } from "@/frontend/common/views/dashboard/classes/recurring/CreateRecurringClassView";
 import {
-  type CreateRecurringClassViewModel,
   type UseCreateRecurringClassViewModelProps,
   useCreateRecurringClassViewModel,
 } from "@/frontend/common/views/dashboard/classes/recurring/useCreateRecurringClassViewModel";
@@ -18,5 +17,3 @@ export function CreateRecurringClassContainer(props: UseCreateRecurringClassView
     </RequirePermission>
   );
 }
-
-export type { CreateRecurringClassViewModel, UseCreateRecurringClassViewModelProps };

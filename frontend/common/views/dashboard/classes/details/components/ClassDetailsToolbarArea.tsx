@@ -69,7 +69,7 @@ export function ClassDetailsToolbarArea({
 }: ClassDetailsToolbarAreaProps) {
   const tJoin = useAppTranslation().uiTranslations.meetingConfig.join;
   const meeting = instance.effectiveMeeting;
-  const joinUrl = meeting?.joinUrl?.trim() || instance.meetingJoinUrl?.trim();
+  const joinUrl = meeting?.joinUrl?.trim() ?? null;
   const joinLabel = tJoin.joinMeeting;
   const instanceId = instance.id ?? "";
   const emptyState = resolveJoinEmptyState(viewMode, instanceId);
@@ -103,7 +103,7 @@ export function ClassDetailsToolbarArea({
         </Stack>
       ) : null}
 
-      {viewMode !== "parent" ? (
+      {viewMode === "parent" ? null : (
         <Box sx={classDetailsContentPaddingSx}>
           <LiveSessionToolbar
             classInstanceId={instanceId}
@@ -119,7 +119,7 @@ export function ClassDetailsToolbarArea({
             error={error}
           />
         </Box>
-      ) : null}
+      )}
     </Box>
   );
 }

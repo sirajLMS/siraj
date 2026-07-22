@@ -113,12 +113,12 @@ function DesktopView({ metrics, invoices, labels, searchQuery, onSearchChange }:
 
 function MobileView({ metrics, invoices, labels, searchQuery, onSearchChange }: MockViewProps) {
   const hasInvoices = invoices.length > 0;
-  const emptyState = !hasInvoices ? (
+  const emptyState = hasInvoices ? null : (
     <div>
       <div>{labels.parentTable?.emptyTitle ?? ""}</div>
       <div>{labels.parentTable?.emptySubtitle ?? ""}</div>
     </div>
-  ) : null;
+  );
 
   return (
     <div>

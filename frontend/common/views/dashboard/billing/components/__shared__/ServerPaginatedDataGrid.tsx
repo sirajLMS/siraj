@@ -31,8 +31,8 @@ export function ServerPaginatedDataGrid<R extends GridValidRowModel>({
 }: Readonly<ServerPaginatedDataGridProps<R>>) {
   return (
     <AppDataGrid<R>
-      rows={rows as R[]}
-      columns={columns as GridColDef<R>[]}
+      rows={rows}
+      columns={columns}
       loading={loading}
       getRowId={getRowId}
       emptyMessage={emptyMessage}

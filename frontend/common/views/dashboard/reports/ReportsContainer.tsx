@@ -8,8 +8,6 @@ import {
   useReportsViewModel,
 } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
 
-export type { UseReportsViewModelProps } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
-
 const lazyViews = createLazyView<ReportsViewModel>(
   () =>
     import("@/frontend/mobile/views/dashboard/reports/reports.mobile").then(m => ({ default: m.ReportsMobileView })),

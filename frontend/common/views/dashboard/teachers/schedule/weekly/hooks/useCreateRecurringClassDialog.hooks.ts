@@ -14,7 +14,7 @@
 import type { useNotifications } from "@toolpad/core/useNotifications";
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { ClassType as ClassTypeEnum } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import {
   emptyRecurringMeetingConfigState,
@@ -46,8 +46,8 @@ export interface CreateRecurringClassDialogFormState {
   readonly setDefaultStartTime: Dispatch<SetStateAction<string>>;
   readonly timezone: string;
   readonly setTimezone: Dispatch<SetStateAction<string>>;
-  readonly classType: ClassTypeEnum;
-  readonly setClassType: Dispatch<SetStateAction<ClassTypeEnum>>;
+  readonly classType: ClassType;
+  readonly setClassType: Dispatch<SetStateAction<ClassType>>;
   readonly meetingConfig: RecurringMeetingConfigFormState;
   readonly setMeetingConfig: Dispatch<SetStateAction<RecurringMeetingConfigFormState>>;
   readonly meetingConfigWarning: boolean;
@@ -66,7 +66,7 @@ export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void)
   const [duration, setDuration] = useState(60);
   const [defaultStartTime, setDefaultStartTime] = useState("09:00");
   const [timezone, setTimezone] = useState("Africa/Cairo");
-  const [classType, setClassType] = useState<ClassTypeEnum>(ClassTypeEnum.Regular);
+  const [classType, setClassType] = useState<ClassType>(ClassType.Regular);
   const [meetingConfig, setMeetingConfig] = useState<RecurringMeetingConfigFormState>(emptyRecurringMeetingConfigState);
   const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
   const [createdClassInstanceId, setCreatedClassInstanceId] = useState<string | null>(null);
@@ -78,7 +78,7 @@ export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void)
       setDuration(60);
       setDefaultStartTime("09:00");
       setTimezone("Africa/Cairo");
-      setClassType(ClassTypeEnum.Regular);
+      setClassType(ClassType.Regular);
       setMeetingConfig(emptyRecurringMeetingConfigState());
       setMeetingConfigWarning(false);
       setCreatedClassInstanceId(null);

@@ -1,10 +1,10 @@
 import { Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card/DesktopBaseCard";
+import { BaseCard } from "@/frontend/common/components/ui";
 
-const meta: Meta<typeof DesktopBaseCard> = {
+const meta: Meta<typeof BaseCard> = {
   title: "UI/BaseCard/Desktop",
-  component: DesktopBaseCard,
+  component: BaseCard,
   tags: ["ai-generated"],
   args: {
     children: (
@@ -16,7 +16,7 @@ const meta: Meta<typeof DesktopBaseCard> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof DesktopBaseCard>;
+type Story = StoryObj<typeof BaseCard>;
 
 export const Default: Story = {};
 

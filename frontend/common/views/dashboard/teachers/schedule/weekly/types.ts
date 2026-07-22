@@ -1,7 +1,6 @@
 import type {
   ClassExecutionState,
   ClassOutcome,
-  ClassType as ClassTypeEnum,
   DayOfWeek,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass } from "@/frontend/common/graphql/generated/gql/operations";
@@ -102,11 +101,6 @@ export interface CreateRecurringClassDialogViewModel {
   // POST-CREATE NAVIGATION (owned by the VM via `useRouter` — specs N8)
   readonly onGoToCreatedClass: () => void;
 }
-
-// Re-export `DayOfWeek` + `ClassTypeEnum` so the tier `DialogFormContent`
-// prop signatures can keep importing them from this single contract
-// (specs §4 ONE-PER-CONTRACT).
-export type { ClassTypeEnum, DayOfWeek };
 
 export interface CreateRecurringClassDialogProps {
   readonly teacherId: string;

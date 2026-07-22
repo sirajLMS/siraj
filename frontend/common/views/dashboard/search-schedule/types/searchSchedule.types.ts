@@ -6,7 +6,9 @@ import type {
 import type {
   SearchSchedulePageInfo,
   SearchScheduleResultItem,
+  SearchScheduleResultSummary,
 } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
+import type { useAppTranslation } from "@/shared/locale";
 
 // Shared tier-agnostic gap row shape used by day-pill, calendar-grid, and month-drawer.
 export interface TeacherAvailabilityGapItem {
@@ -99,4 +101,30 @@ export interface TeacherAvailabilityMonthDrawerProps {
   readonly onMonthChange: (next: Date) => void;
 }
 
-export type SearchSchedulePageInfoRef = SearchSchedulePageInfo;
+// Mobile-only body wrapper props (no desktop counterpart — desktop renders results inline).
+export interface SearchScheduleMobileBodyProps {
+  readonly isInitialLoading: boolean;
+  readonly searchResult: SearchScheduleResultSummary | null | undefined;
+  readonly columnCount: number;
+  readonly fromDate: string;
+  readonly toDate: string;
+  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreSearchSchedule"];
+  readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
+  readonly pageInfo: SearchSchedulePageInfo | null | undefined;
+  readonly teacherCount: number;
+  readonly onPageChange: (page: number) => void;
+  readonly showPaginationFooter: boolean;
+}
+
+// Mobile results section props — Mobile-specific pagination lives in the list primitive.
+export interface SearchScheduleMobileResultsProps {
+  readonly searchResult: SearchScheduleResultSummary | null | undefined;
+  readonly fromDate: string;
+  readonly toDate: string;
+  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreSearchSchedule"];
+  readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
+  readonly pageInfo: SearchSchedulePageInfo | null | undefined;
+  readonly teacherCount: number;
+  readonly onPageChange: (page: number) => void;
+  readonly showPagination: boolean;
+}

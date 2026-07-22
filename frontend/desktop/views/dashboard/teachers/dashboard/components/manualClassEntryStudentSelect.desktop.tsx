@@ -1,7 +1,6 @@
 "use client";
 
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
-import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import { useManualClassEntryStudentField } from "@/frontend/common/views/dashboard/teachers/dashboard/components/manualClassEntryStudentFieldContext";
 import { StudentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { useAppTranslation } from "@/shared/locale";
@@ -27,5 +26,3 @@ export function ManualClassEntryStudentSelectDesktop({
     />
   );
 }
-
-export { ManualClassEntryDialog };

@@ -2,6 +2,8 @@
 export type { SearchScheduleFilterDrawerProps } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterDrawer.types";
 export type {
   SearchScheduleFormProps,
+  SearchScheduleMobileBodyProps,
+  SearchScheduleMobileResultsProps,
   SearchSchedulePaginationFooterProps,
   SearchScheduleResultsSkeletonProps,
   SearchScheduleSortMenuProps,

@@ -6,11 +6,11 @@ import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
-import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -132,7 +132,7 @@ export function DesktopPaymentMethodList({
   }, [onDeleteAction, onEditAction, onSetDefaultAction, t, tList]);
 
   return (
-    <DesktopBaseCard edgeToEdge>
+    <BaseCard edgeToEdge>
       {title ? (
         <Box sx={{ px: 2, pt: 2, pb: 1 }}>
           <Typography sx={{ typography: "titleLg" }}>{title}</Typography>
@@ -149,6 +149,6 @@ export function DesktopPaymentMethodList({
           emptyMessage={emptyMessage ?? tList.empty}
         />
       </Box>
-    </DesktopBaseCard>
+    </BaseCard>
   );
 }

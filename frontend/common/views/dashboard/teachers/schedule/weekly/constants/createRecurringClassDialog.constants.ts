@@ -12,7 +12,6 @@
 // helpers so the tier files don't repeat the `Record<string,string>`
 // literal.
 
-import type { DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherCreateRecurringClassLabels } from "@/shared/locale";
 
 // NEW FOR PLAN v5: buildClassTypeLabels — returns the per-class-type lookup
@@ -41,8 +40,3 @@ export function buildDayLabels(t: TeacherCreateRecurringClassLabels): Record<str
     sunday: t.days.sunday,
   };
 }
-
-// Re-export DayOfWeek so the tier `TimezoneClassTypeFields`/`DayScheduleItem`
-// props can keep their existing `DayOfWeek` import sites without reaching
-// across modules.
-export type { DayOfWeek };

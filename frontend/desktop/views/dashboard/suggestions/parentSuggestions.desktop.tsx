@@ -2,8 +2,9 @@
 
 import { SendOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { ParentSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useParentSuggestionsViewModel";
-import { DesktopBaseCard, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { SuggestionFormFieldsDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionFormFields.desktop";
 import { SuggestionHeroBannerDesktop } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionHeroBanner.desktop";
@@ -25,7 +26,7 @@ export function ParentSuggestionsDesktopView({
       <SuggestionHeroBannerDesktop labels={labels} />
 
       <Box sx={{ maxWidth: 960, mx: "auto", width: "100%" }}>
-        <DesktopBaseCard>
+        <BaseCard>
           <SuggestionFormFieldsDesktop control={control} errors={errors} labels={labels} />
 
           <Box
@@ -48,7 +49,7 @@ export function ParentSuggestionsDesktopView({
             </DesktopPrimaryPageAction>
             <SuggestionSocialProofDesktop labels={labels} />
           </Box>
-        </DesktopBaseCard>
+        </BaseCard>
 
         <SuggestionSupportCardsDesktop labels={labels} />
       </Box>

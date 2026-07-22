@@ -1,5 +1,3 @@
-import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-
 /**
  * Shared props for MeetingConfigsTab tier variants (mobile/desktop).
  *
@@ -12,5 +10,3 @@ export interface MeetingConfigsTabViewModel {
   readonly canManage: boolean;
   readonly sectionTitle: string;
 }
-
-export type { ProfileScope };

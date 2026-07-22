@@ -14,8 +14,8 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { ResponsiveViewSwitch } from "@/frontend/common/components/ui";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
   AccountStatus,
   CurrencyCode,
@@ -24,7 +24,7 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileView";
+import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;

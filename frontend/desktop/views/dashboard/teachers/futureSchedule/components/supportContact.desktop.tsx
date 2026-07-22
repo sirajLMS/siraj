@@ -1,9 +1,9 @@
 "use client";
 
 import { Box, Button, Stack, Typography } from "@mui/material";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { SupportContactProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
-import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 import { DesktopPhoneDisplay } from "@/frontend/desktop/components/ui/display";
 
 /**
@@ -23,7 +23,7 @@ export function SupportContactDesktop({
   contactAdminLabel,
 }: Readonly<SupportContactProps>) {
   return (
-    <DesktopBaseCard
+    <BaseCard
       sx={theme => ({
         p: 3,
         backgroundColor: theme.palette.background.paper,
@@ -81,6 +81,6 @@ export function SupportContactDesktop({
       >
         {contactAdminLabel}
       </Button>
-    </DesktopBaseCard>
+    </BaseCard>
   );
 }

@@ -1,5 +1,4 @@
 import { useClassDetailsStore } from "@/frontend/common/stores/classDetailsStore";
-import type { ActionFeedbackState } from "@/frontend/common/views/dashboard/classes/details/types";
 
 export function useClassDetailsContainerState() {
   const isWarningDismissed = useClassDetailsStore(state => state.isWarningDismissed);
@@ -22,5 +21,3 @@ export function useClassDetailsContainerState() {
     setDeleteDialogOpen,
   };
 }
-
-export type { ActionFeedbackState };

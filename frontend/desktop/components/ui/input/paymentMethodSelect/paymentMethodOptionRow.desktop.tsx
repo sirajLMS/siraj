@@ -6,10 +6,6 @@ import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import type { PaymentMethodOptionRowProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
 import { resolvePaymentMethodTypeIcon } from "@/frontend/common/components/ui/input/paymentMethodSelect/utils";
-import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
-
-export type { PaymentMethodCatalogOption, PaymentMethodOptionRowProps };
 
 export function PaymentMethodOptionRowDesktop({
   option,
@@ -34,5 +30,3 @@ export function PaymentMethodOptionRowDesktop({
     </Box>
   );
 }
-
-export { PaymentMethodType };

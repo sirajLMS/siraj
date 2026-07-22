@@ -15,6 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect/userSelect.utils";
 import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -22,7 +23,6 @@ import { ALLOWED_TARGET_STATUSES } from "@/frontend/common/utils/student-status-
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { ManagementControlsCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
-import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 import { outlinedInputSx } from "@/frontend/desktop/components/ui/form/field/formFieldStyles.desktop";
 import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { useAppTranslation } from "@/shared/locale";
@@ -210,7 +210,7 @@ export function ManagementControlsCardDesktop({
   const t = useAppTranslation().dashboardTranslations.teacherReassignment;
 
   return (
-    <DesktopBaseCard sx={{ p: 4, boxShadow: theme => theme.palette.shadow.card }}>
+    <BaseCard sx={{ p: 4, boxShadow: theme => theme.palette.shadow.card }}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700, mb: 1 })}>
           {t.controls.title}
@@ -229,6 +229,6 @@ export function ManagementControlsCardDesktop({
         />
         <ActionButtons loading={isSubmitting} saved={saved} onCancel={onCancel} />
       </Stack>
-    </DesktopBaseCard>
+    </BaseCard>
   );
 }

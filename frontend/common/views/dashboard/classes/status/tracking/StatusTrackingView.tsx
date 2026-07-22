@@ -1,10 +1,7 @@
 "use client";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type {
-  StatusTrackingViewModel,
-  UseStatusTrackingViewModelProps,
-} from "@/frontend/common/views/dashboard/classes/status/tracking/useStatusTrackingViewModel";
+import type { StatusTrackingViewModel } from "@/frontend/common/views/dashboard/classes/status/tracking/useStatusTrackingViewModel";
 
 const lazyViews = createLazyView<StatusTrackingViewModel>(
   () =>
@@ -20,4 +17,3 @@ const lazyViews = createLazyView<StatusTrackingViewModel>(
 export function StatusTrackingView(props: Readonly<StatusTrackingViewModel>) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }
-export type { StatusTrackingViewModel, UseStatusTrackingViewModelProps };

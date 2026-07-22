@@ -4,8 +4,9 @@
 import { ArrowBackOutlined } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { ManualInvoiceViewModel } from "@/frontend/common/views/dashboard/billing/manual/useManualInvoiceViewModel";
-import { DesktopBaseCard, DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { BillingMonthSelectorDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/billingMonthSelector.desktop";
 import { InvoiceDraftSummaryCardDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/invoiceDraftSummaryCard.desktop";
 import { ManualInvoiceActionsDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceActions.desktop";
@@ -61,7 +62,7 @@ export function ManualInvoiceDesktopView({
         }}
         sx={{ maxWidth: 960, mx: "auto", width: "100%" }}
       >
-        <DesktopBaseCard sx={{ p: { xs: 3, md: 5 } }}>
+        <BaseCard sx={{ p: { xs: 3, md: 5 } }}>
           <StyledFormFieldset disabled={!canCreate}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
               <ManualInvoiceFormFieldsDesktop
@@ -86,7 +87,7 @@ export function ManualInvoiceDesktopView({
               />
             </Box>
           </StyledFormFieldset>
-        </DesktopBaseCard>
+        </BaseCard>
       </Box>
 
       <ManualInvoiceSupportCardsDesktop labels={labels} />

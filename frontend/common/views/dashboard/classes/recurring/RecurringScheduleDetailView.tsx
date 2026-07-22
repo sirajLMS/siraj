@@ -1,10 +1,7 @@
 "use client";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type {
-  RecurringScheduleDetailViewModel,
-  UseRecurringScheduleDetailViewModelProps,
-} from "@/frontend/common/views/dashboard/classes/recurring/useRecurringScheduleDetailViewModel";
+import type { RecurringScheduleDetailViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useRecurringScheduleDetailViewModel";
 
 const lazyViews = createLazyView<RecurringScheduleDetailViewModel>(
   () =>
@@ -20,5 +17,3 @@ const lazyViews = createLazyView<RecurringScheduleDetailViewModel>(
 export function RecurringScheduleDetailView(props: Readonly<RecurringScheduleDetailViewModel>) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }
-
-export type { RecurringScheduleDetailViewModel, UseRecurringScheduleDetailViewModelProps };

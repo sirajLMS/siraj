@@ -1,18 +1,18 @@
 import { PersonSearchOutlined, PublicOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { AvatarGroup, Box, Tooltip, Typography } from "@mui/material";
+import { BaseCard } from "@/frontend/common/components/ui";
 import { AvailabilityInsightsLayout } from "@/frontend/common/views/dashboard/teachers/availability/components/availabilityInsightsLayout";
 import type {
   AvailabilityInsightsProps,
   InsightCardProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
 import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
-import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 import { DesktopTimezoneDisplay } from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
 
 function InsightCard({ title, value, description, icon }: Readonly<InsightCardProps>) {
   return (
-    <DesktopBaseCard
+    <BaseCard
       sx={theme => ({
         p: theme.layout.cardPadding,
         display: "flex",
@@ -34,7 +34,7 @@ function InsightCard({ title, value, description, icon }: Readonly<InsightCardPr
           {description}
         </Typography>
       </Box>
-    </DesktopBaseCard>
+    </BaseCard>
   );
 }
 
@@ -43,7 +43,7 @@ function TimezoneInsight({
   labels,
 }: Readonly<{ timezones: readonly string[]; labels: { title: string; description: string } }>) {
   return (
-    <DesktopBaseCard
+    <BaseCard
       sx={theme => ({
         p: theme.layout.cardPadding,
         display: "flex",
@@ -107,7 +107,7 @@ function TimezoneInsight({
       >
         <PublicOutlined sx={theme => ({ fontSize: 120, color: theme.palette.primary.main })} />
       </Box>
-    </DesktopBaseCard>
+    </BaseCard>
   );
 }
 

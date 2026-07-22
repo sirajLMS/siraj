@@ -4,10 +4,8 @@ import { Alert, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ParentProfileEditForm } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileEditForm";
-import type {
-  ParentAdminData,
-  ParentProfileViewModel,
-} from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
+import type { ParentAdminData } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
 import {
   hasParentBillingData,
   hasParentIdentityData,

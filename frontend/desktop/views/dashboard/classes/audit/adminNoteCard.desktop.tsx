@@ -3,8 +3,8 @@
 import { AdminPanelSettingsOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { AdminNoteCardDesktopProps } from "@/frontend/common/views/dashboard/classes/audit/adminNoteCard.types";
-import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 
 const StyledDesktopFooter = styled(Box)(({ theme }) => ({
   pt: 2,
@@ -57,7 +57,7 @@ export function AdminNoteCardDesktop({ note, labels, onUpdate }: Readonly<AdminN
   const content = note?.content ?? "";
 
   return (
-    <DesktopBaseCard
+    <BaseCard
       sx={theme => ({
         backgroundColor: theme.palette.sidebar,
         color: theme.palette.onSidebar,
@@ -71,6 +71,6 @@ export function AdminNoteCardDesktop({ note, labels, onUpdate }: Readonly<AdminN
       </Typography>
 
       <NoteFooterDesktop lastUpdatedText={lastUpdatedText} updateLabel={labels.update} onUpdate={onUpdate} />
-    </DesktopBaseCard>
+    </BaseCard>
   );
 }

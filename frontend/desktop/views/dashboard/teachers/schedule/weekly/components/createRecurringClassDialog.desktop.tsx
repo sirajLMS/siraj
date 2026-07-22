@@ -19,6 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
+import type { ClassType, DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
@@ -29,10 +30,8 @@ import {
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/constants";
 import type { CreateRecurringClassDialogFormState } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
 import type {
-  ClassTypeEnum,
   CreateRecurringClassDialogProps,
   CreateRecurringClassDialogViewModel,
-  DayOfWeek,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { StudentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import type {
@@ -155,7 +154,7 @@ function TimezoneClassTypeFields({
 }: {
   readonly timezone: string;
   readonly setTimezone: (value: string) => void;
-  readonly classType: ClassTypeEnum;
+  readonly classType: ClassType;
   readonly setClassType: (value: string) => void;
   readonly mutationLoading: boolean;
   readonly t: TeacherCreateRecurringClassLabels;
@@ -369,7 +368,7 @@ function DialogFormContent({
           timezone={state.timezone}
           setTimezone={state.setTimezone}
           classType={state.classType}
-          setClassType={value => state.setClassType(value as ClassTypeEnum)}
+          setClassType={value => state.setClassType(value as ClassType)}
           mutationLoading={mutationLoading}
           t={t}
         />

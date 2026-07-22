@@ -1,3 +1,1 @@
-import type { StudentPortalHistoryLabels } from "@/shared/locale";
-
-export type { StudentPortalHistoryLabels as StudentHistoryLabels };
+export type { StudentPortalHistoryLabels as StudentHistoryLabels } from "@/shared/locale";

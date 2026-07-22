@@ -1,9 +1,11 @@
 import { Box, Typography } from "@mui/material";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type {
-  SearchSchedulePageInfo,
+  SearchScheduleMobileBodyProps,
+  SearchScheduleMobileResultsProps,
+} from "@/frontend/common/views/dashboard/search-schedule/types";
+import type {
   SearchScheduleResultItem,
-  SearchScheduleResultSummary,
   SearchScheduleViewModel,
 } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
 import {
@@ -17,20 +19,6 @@ import { SearchScheduleResultsSkeletonMobile } from "@/frontend/mobile/views/das
 import { TeacherAvailabilityGridMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityGrid.mobile";
 import { TeacherAvailabilityMonthDrawerMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.mobile";
 import { useAppTranslation } from "@/shared/locale";
-
-interface SearchScheduleMobileBodyProps {
-  readonly isInitialLoading: boolean;
-  readonly searchResult: SearchScheduleResultSummary | null | undefined;
-  readonly columnCount: number;
-  readonly fromDate: string;
-  readonly toDate: string;
-  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreSearchSchedule"];
-  readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
-  readonly pageInfo: SearchSchedulePageInfo | null | undefined;
-  readonly teacherCount: number;
-  readonly onPageChange: (page: number) => void;
-  readonly showPaginationFooter: boolean;
-}
 
 function SearchScheduleMobileBody({
   isInitialLoading,
@@ -66,18 +54,6 @@ function SearchScheduleMobileBody({
       showPagination={showPaginationFooter}
     />
   );
-}
-
-interface SearchScheduleMobileResultsProps {
-  readonly searchResult: SearchScheduleResultSummary | null | undefined;
-  readonly fromDate: string;
-  readonly toDate: string;
-  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreSearchSchedule"];
-  readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
-  readonly pageInfo: SearchSchedulePageInfo | null | undefined;
-  readonly teacherCount: number;
-  readonly onPageChange: (page: number) => void;
-  readonly showPagination: boolean;
 }
 
 function SearchScheduleMobileResults({
