@@ -1,7 +1,6 @@
 import { z } from "zod";
-import { CountryCode, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CountryCode, CurrencyCode, Gender, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 
 export const teacherOnboardingSchema = (validationLabels: {
@@ -38,10 +37,12 @@ export const teacherOnboardingSchema = (validationLabels: {
         val => typeof val === "string" && Object.values(CountryCode).includes(val as CountryCode),
         { message: validationLabels.countryRequired }
       ),
-      timezone: z
-        .string()
-        .min(1, validationLabels.timezoneRequired)
-        .refine(value => isValidIanaTimezoneId(value), { message: validationLabels.timezoneRequired }),
+      timezone: z.custom<IanaTimezone>(
+        val => typeof val === "string" && (Object.values(IanaTimezone) as readonly string[]).includes(val),
+        {
+          message: validationLabels.timezoneRequired,
+        }
+      ),
       hourlyRate: z.string().min(1, validationLabels.salaryAmountRequired),
       rateCurrency: z.enum(CurrencyCode).refine(v => !!v, { message: validationLabels.currencyRequired }),
       payoutMethod: onboardingPaymentMethodSchema,

@@ -67,22 +67,10 @@ function buildTeacherParticipant(instance: ClassInstanceWithRelations, unknownNa
   };
 }
 
-function buildPerformanceBlock(perf: ClassInstancePerformanceSelectType | null) {
-  if (!perf) return null;
-  return {
-    id: perf.id,
-    engagementScore: perf.engagementScore ?? null,
-    assessmentProgress: perf.assessmentProgress ?? null,
-    assessmentTotal: perf.assessmentTotal ?? null,
-    focusLevel: perf.focusLevel ?? null,
-    sessionHealth: perf.sessionHealth ?? null,
-    heatmapData: perf.heatmapData ?? null,
-    latencyMs: perf.latencyMs ?? null,
-    authorizationLabel: perf.authorizationLabel ?? null,
-    attendanceRate: perf.attendanceRate ?? null,
-    avgGrade: perf.avgGrade ?? null,
-    lastClassDaysAgo: perf.lastClassDaysAgo ?? null,
-  };
+function buildPerformanceBlock(
+  perf: ClassInstancePerformanceSelectType | null
+): ClassInstancePerformanceSelectType | null {
+  return perf;
 }
 
 export async function buildClassInstanceDetail(

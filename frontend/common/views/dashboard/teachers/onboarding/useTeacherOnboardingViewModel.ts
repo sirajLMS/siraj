@@ -4,7 +4,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
 import { useForm } from "react-hook-form";
-import { CurrencyCode, IanaTimezone, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  CountryCode,
+  CurrencyCode,
+  Gender,
+  IanaTimezone,
+  PaymentMethodType,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateTeacherOnboarding } from "@/frontend/common/hooks/useCreateTeacherOnboarding";
 import { useTeacherOnboardingStore } from "@/frontend/common/stores/teacherOnboardingStore";
@@ -12,7 +18,6 @@ import { logger } from "@/frontend/common/utils/logger";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import { teacherOnboardingSchema } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
-import { CountryCode, Gender } from "@/frontend/common/views/dashboard/teachers/onboarding/types";
 import type { TeacherOnboardingLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 

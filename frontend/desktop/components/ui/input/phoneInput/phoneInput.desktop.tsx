@@ -5,6 +5,7 @@ import ClickAwayListener from "@mui/material/ClickAwayListener";
 import FormHelperText from "@mui/material/FormHelperText";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
+import { styled } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
 import { usePhoneInput } from "@/frontend/common/hooks/usePhoneInput";
@@ -12,6 +13,8 @@ import { LtrScope } from "@/frontend/common/providers/theme/LtrScope";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { PhoneCountryPickerDesktop } from "@/frontend/desktop/components/ui/input/phoneInput/phoneCountryPicker.desktop";
 import { useAppTranslation } from "@/shared/locale";
+
+const StyledInput = styled("input")();
 
 export type PhoneInputProps = {
   readonly value: string | null;
@@ -51,7 +54,7 @@ type CountryAdornmentProps = {
   readonly onOpenCountryPicker: (event: React.MouseEvent<HTMLElement>) => void;
   readonly onPrefixFocus: () => void;
   readonly onPrefixKeyDown: React.KeyboardEventHandler<HTMLInputElement>;
-  readonly onPrefixInput: React.ChangeEventHandler<HTMLInputElement>;
+  readonly onPrefixInput: (event: React.FormEvent<HTMLInputElement>) => void;
   readonly selectCountryLabel: string;
 };
 
@@ -95,8 +98,7 @@ const CountryAdornment: React.FC<CountryAdornmentProps> = ({
     >
       <DesktopLocaleEmoji emoji={countryEmoji ?? "🌐"} />
     </IconButton>
-    <Box
-      component="input"
+    <StyledInput
       ref={prefixInputRef}
       value={`+${prefixDigits}`}
       maxLength={maxPrefixDisplayLength}
@@ -236,7 +238,7 @@ export const PhoneInputDesktop: React.FC<PhoneInputProps> = ({
   const showRequiredError = Boolean(required) && isEmpty;
   const showError = Boolean(error) || prefixInvalid || showRequiredError || phoneInvalid;
 
-  let resolvedHelperText: string;
+  let resolvedHelperText: string | undefined;
   if (prefixInvalid) {
     resolvedHelperText = t.invalidPrefix;
   } else if (showRequiredError) {
