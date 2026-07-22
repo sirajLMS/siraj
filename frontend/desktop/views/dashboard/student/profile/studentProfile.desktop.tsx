@@ -197,7 +197,7 @@ function PersonalInfoEditView({
           labelId="profile-gender-label"
           label={labels.gender}
           value={draft.gender}
-          onChange={e => onDraftChange({ gender: e.target.value as Gender | "" })}
+          onChange={e => onDraftChange({ gender: e.target.value })}
         >
           <MenuItem value="">—</MenuItem>
           <MenuItem value={Gender.Male}>{Gender.Male}</MenuItem>
@@ -212,7 +212,7 @@ function PersonalInfoEditView({
           labelId="profile-language-label"
           label={labels.language}
           value={draft.language}
-          onChange={e => onDraftChange({ language: e.target.value as AppLanguage | "" })}
+          onChange={e => onDraftChange({ language: e.target.value })}
         >
           <MenuItem value="">—</MenuItem>
           <MenuItem value={AppLanguage.En}>English</MenuItem>

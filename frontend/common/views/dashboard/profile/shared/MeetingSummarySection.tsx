@@ -34,23 +34,31 @@ export function MeetingSummarySection({ userId, meetingTabHref }: MeetingSummary
   const configs = data?.userMeetingConfigs ?? [];
   const defaultConfig = configs.find(config => config.isDefault) ?? (configs.length === 1 ? configs[0] : null);
 
+  const renderConfigContent = () => {
+    if (loading) {
+      return (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.5 }}>
+          <CircularProgress size={18} />
+          <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.onSurfaceVariant })}>
+            {t.loading}
+          </Typography>
+        </Box>
+      );
+    }
+
+    if (defaultConfig) {
+      return <MeetingConfigDisplay config={toDisplayData(defaultConfig)} compact />;
+    }
+
+    return (
+      <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.onSurfaceVariant })}>{t.empty}</Typography>
+    );
+  };
+
   return (
     <SectionPanel title={t.sectionTitle}>
       <Stack spacing={1.5}>
-        {loading ? (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.5 }}>
-            <CircularProgress size={18} />
-            <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.onSurfaceVariant })}>
-              {t.loading}
-            </Typography>
-          </Box>
-        ) : defaultConfig ? (
-          <MeetingConfigDisplay config={toDisplayData(defaultConfig as UserMeetingConfigFieldsFragment)} compact />
-        ) : (
-          <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.onSurfaceVariant })}>
-            {t.empty}
-          </Typography>
-        )}
+        {renderConfigContent()}
         {meetingTabHref ? (
           <Link href={meetingTabHref} underline="hover" sx={{ typography: "labelMd" }}>
             {t.manageLink}

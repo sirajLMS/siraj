@@ -37,7 +37,10 @@ export function setLocalizedString(
   locale: AppLocale,
   text: string
 ): LocalizedString {
-  return { ...(map ?? {}), [locale]: text };
+  if (!map) {
+    return { [locale]: text };
+  }
+  return { ...map, [locale]: text };
 }
 
 /** Remove a locale entry from the map (returns a new object). */
@@ -47,7 +50,7 @@ export function removeLocalizedString(map: LocalizedString | null | undefined, l
   }
   const next: Record<string, string> = { ...map };
   delete next[locale];
-  return next as unknown as LocalizedString;
+  return next;
 }
 
 /** Drop entries whose value is empty/whitespace. */
@@ -61,7 +64,7 @@ export function omitEmptyLocalizedString(map: LocalizedString | null | undefined
       next[locale] = value;
     }
   }
-  return next as unknown as LocalizedString;
+  return next as LocalizedString;
 }
 
 /**
@@ -86,7 +89,7 @@ export function hasRequiredLocalizedValue(
 /** Pick the locale to start editing on: the UI display locale if allowed, else the default content locale. */
 export function pickInitialActiveLocale(uiLocale?: string): AppLocale {
   if (uiLocale && isAppLocale(uiLocale)) {
-    return uiLocale as AppLocale;
+    return uiLocale;
   }
   return DEFAULT_CONTENT_LOCALE;
 }

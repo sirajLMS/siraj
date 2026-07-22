@@ -91,20 +91,22 @@ function buildStudentFromProfile(profile: NonNullable<StudentProfileQueryData>):
 }
 
 function buildStudentFromQuery(student: StudentByIdType, upcoming: StudentUpcomingType): StudentStatusPageData | null {
-  if (!student.id || !student.name) return null;
-  return {
-    id: student.id,
-    name: student.name,
-    status: upcoming?.status ?? student.status ?? StudentStatus.Regular,
-    avatarUrl: null,
-    primaryTeacherId: student.primaryTeacherId ?? null,
-    teacherName: student.teacherName ?? null,
-    hoursPerWeek: student.hoursPerWeek ?? null,
-    classesRemaining: student.classesRemaining ?? 0,
-    classesTotal: student.classesTotal ?? 0,
-    version: student.version ?? null,
-    upcomingClasses: mapUpcomingClasses(upcoming?.classes),
-  };
+  if (student.id && student.name) {
+    return {
+      id: student.id,
+      name: student.name,
+      status: upcoming?.status ?? student.status ?? StudentStatus.Regular,
+      avatarUrl: null,
+      primaryTeacherId: student.primaryTeacherId ?? null,
+      teacherName: student.teacherName ?? null,
+      hoursPerWeek: student.hoursPerWeek ?? null,
+      classesRemaining: student.classesRemaining ?? 0,
+      classesTotal: student.classesTotal ?? 0,
+      version: student.version ?? null,
+      upcomingClasses: mapUpcomingClasses(upcoming?.classes),
+    };
+  }
+  return null;
 }
 
 export interface UseStudentStatusViewModelProps {

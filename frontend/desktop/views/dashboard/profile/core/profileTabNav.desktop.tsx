@@ -29,7 +29,7 @@ export function ProfileTabNavDesktopView({
           <Tab
             key={tab.id}
             value={tab.id}
-            label={t.shell.tabs[tab.id as keyof typeof t.shell.tabs]}
+            label={t.shell.tabs[tab.id]}
             sx={theme => ({
               fontSize: theme.typography.bodyMd.fontSize,
               ...(currentTab === tab.id

@@ -118,14 +118,14 @@ export function StudentsMobileView({
           gap={2}
           layout="rounded"
           paginationOptions={
-            totalStudents !== undefined
-              ? buildServerPaginationOptions({
+            totalStudents === undefined
+              ? { mode: "client" }
+              : buildServerPaginationOptions({
                   page,
                   pageSize,
                   totalCount: totalStudents,
                   onPageChange,
                 })
-              : { mode: "client" }
           }
         />
 

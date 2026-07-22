@@ -167,11 +167,11 @@ export namespace ClassMeetingConfigRepository {
       const [result] = await t
         .update(classMeetingConfigs)
         .set({
-          ...(input.label !== undefined ? { label: input.label } : {}),
-          ...(input.isDefault !== undefined ? { isDefault: input.isDefault } : {}),
-          ...(input.details !== undefined ? { details: input.details } : {}),
-          ...(input.encryptedSecret !== undefined ? { encryptedSecret: input.encryptedSecret } : {}),
-          ...(input.providerId !== undefined ? { providerId: input.providerId } : {}),
+          ...(typeof input.label !== "undefined" ? { label: input.label } : {}),
+          ...(typeof input.isDefault !== "undefined" ? { isDefault: input.isDefault } : {}),
+          ...(typeof input.details !== "undefined" ? { details: input.details } : {}),
+          ...(typeof input.encryptedSecret !== "undefined" ? { encryptedSecret: input.encryptedSecret } : {}),
+          ...(typeof input.providerId !== "undefined" ? { providerId: input.providerId } : {}),
           updatedAt: new Date(),
         })
         .where(eq(classMeetingConfigs.id, id))

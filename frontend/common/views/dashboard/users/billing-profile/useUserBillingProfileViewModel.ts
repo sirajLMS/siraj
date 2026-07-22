@@ -389,13 +389,13 @@ function useBillingProfileActions({
   readonly refetchSummary: () => void;
 }) {
   const refreshBillingData = useCallback(() => {
-    void refetch();
-    void refetchSummary();
+    refetch();
+    refetchSummary();
   }, [refetch, refetchSummary]);
 
   const refreshAfterDialogClose = useCallback(() => {
-    void refetch();
-    void refetchSummary();
+    refetch();
+    refetchSummary();
   }, [refetch, refetchSummary]);
 
   const openProofDialog = useCallback(

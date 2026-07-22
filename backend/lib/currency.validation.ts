@@ -21,7 +21,7 @@ export function isCurrencyCode(value: unknown): value is CurrencyCode {
  * Zod schema for CurrencyCode validation.
  * Use this for form data, input validation, etc.
  */
-export const currencyCodeSchema = z.nativeEnum(CurrencyCode);
+export const currencyCodeSchema = z.enum(CurrencyCode);
 
 /**
  * Safe parse function for CurrencyCode.

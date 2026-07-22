@@ -145,9 +145,13 @@ export function ParentScheduleDataGridDesktop({
         sortable: false,
         align: "center",
         headerAlign: "center",
-        renderCell: ({ row }) => (
-          <Box sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}>
-            {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen }) ? (
+        renderCell: ({ row }) => {
+          const isJoinable = isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen });
+          const isFrozen = row.isFrozen;
+
+          let contactContent: React.ReactNode = null;
+          if (isJoinable) {
+            contactContent = (
               <DesktopMeetingJoinAction
                 variant="icon"
                 joinUrl={row.meetingJoinUrl}
@@ -156,13 +160,23 @@ export function ParentScheduleDataGridDesktop({
                 label={labels.schedule.joinVideo}
                 emptyRole="parent"
               />
-            ) : row.isFrozen ? (
+            );
+          } else if (isFrozen) {
+            contactContent = (
               <Tooltip title={labels.schedule.contactAdmin}>
                 <AcUnitOutlined sx={theme => ({ fontSize: 22, color: theme.palette.info.main, opacity: 0.7 })} />
               </Tooltip>
-            ) : null}
-          </Box>
-        ),
+            );
+          }
+
+          return (
+            <Box
+              sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
+            >
+              {contactContent}
+            </Box>
+          );
+        },
       },
       {
         field: "liveClassStatus",

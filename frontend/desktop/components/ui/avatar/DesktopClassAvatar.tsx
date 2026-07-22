@@ -14,7 +14,7 @@ const FALLBACK_SX = {
 } as const;
 
 export function DesktopClassAvatar({ variant = "rounded", sx, ...props }: ClassAvatarProps) {
-  const normalizedSx = Array.isArray(sx) ? sx : ([sx].filter(Boolean) as (typeof sx)[]);
+  const normalizedSx = Array.isArray(sx) ? sx : [sx].filter(Boolean);
   return (
     <DesktopBaseAvatar variant={variant} sx={[theme => getFallbackSx(theme, props.src), ...normalizedSx]} {...props} />
   );

@@ -70,7 +70,7 @@ function openDeleteDialog(setters: DeleteSetters, row: HedgeRow) {
 function toHedgeRows(data: Operations.CurrencyHedgesQuery_Query | undefined): readonly HedgeRow[] {
   const hedges = data?.currencyHedges ?? [];
   return hedges
-    .filter((row): row is NonNullable<typeof row> => row != null && row.id != null)
+    .filter((row): row is NonNullable<typeof row> => row?.id != null)
     .map(row => ({
       id: row.id ?? "",
       currency: row.currency ?? CurrencyCode.Usd,

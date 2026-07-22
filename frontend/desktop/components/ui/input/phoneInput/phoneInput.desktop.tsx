@@ -7,7 +7,6 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import { styled } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
-import type * as React from "react";
 import { usePhoneInput } from "@/frontend/common/hooks/usePhoneInput";
 import { LtrScope } from "@/frontend/common/providers/theme/LtrScope";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
@@ -54,7 +53,7 @@ type CountryAdornmentProps = {
   readonly onOpenCountryPicker: (event: React.MouseEvent<HTMLElement>) => void;
   readonly onPrefixFocus: () => void;
   readonly onPrefixKeyDown: React.KeyboardEventHandler<HTMLInputElement>;
-  readonly onPrefixInput: (event: React.FormEvent<HTMLInputElement>) => void;
+  readonly onPrefixInput: React.InputEventHandler<HTMLInputElement>;
   readonly selectCountryLabel: string;
 };
 

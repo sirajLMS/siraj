@@ -13,7 +13,7 @@ export type ProfileTabDefinition = {
 
 type TabVisibilityKey = `${ProfileAudience}-${ProfileScope}`;
 
-const STUDENT_OWN: TabVisibilityKey = "STUDENT-OWN" as TabVisibilityKey;
+const STUDENT_OWN: TabVisibilityKey = "STUDENT-OWN";
 
 const TAB_VISIBILITY: Record<ProfileTabId, readonly TabVisibilityKey[]> = {
   profile: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER", "STAFF-OWN", "STAFF-OTHER", STUDENT_OWN],

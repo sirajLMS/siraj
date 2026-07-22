@@ -8,7 +8,6 @@ import {
   setLocalizedString,
   unusedLocales,
 } from "@/frontend/common/lib/localized-string";
-import type { AppLocale } from "@/frontend/common/lib/localized-string.validation";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 describe("resolveLocalizedString", () => {
@@ -61,7 +60,7 @@ describe("hasRequiredLocalizedValue", () => {
   });
 
   it("returns false when map is empty but locale required", () => {
-    expect(hasRequiredLocalizedValue({}, ["ar" as AppLocale])).toBe(false);
+    expect(hasRequiredLocalizedValue({}, ["ar"])).toBe(false);
   });
 
   it("returns true when no locales required", () => {

@@ -146,8 +146,16 @@ function useStudentProfileQueryState(
     fetchPolicy: "cache-and-network",
   });
 
-  const profile = (data?.studentProfile ?? undefined) as StudentProfileQueryData | undefined;
-  const loadingState: StudentProfileLoadingState = loading && !profile ? "loading" : !profile ? "notFound" : "ready";
+  const profile = data?.studentProfile ?? undefined;
+
+  let loadingState: StudentProfileLoadingState;
+  if (loading && !profile) {
+    loadingState = "loading";
+  } else if (!profile) {
+    loadingState = "notFound";
+  } else {
+    loadingState = "ready";
+  }
 
   return {
     profile,

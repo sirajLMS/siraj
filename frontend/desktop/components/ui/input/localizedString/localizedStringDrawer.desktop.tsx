@@ -135,43 +135,46 @@ const LocaleField: React.FC<LocaleFieldProps> = ({
   disabled,
   onChange,
   t,
-}) => (
-  <TextField
-    key={locale}
-    label={
-      multiline ? (
-        <>
-          <DesktopLocaleEmoji emoji={emoji} sx={{ marginInlineEnd: 0.5 }} />
-          {languageName}
-          {isLocaleRequired ? " *" : ""}
-        </>
-      ) : (
-        `${languageName}${isLocaleRequired ? " *" : ""}`
-      )
-    }
-    value={fieldValue}
-    onChange={event => onChange(locale, event.target.value)}
-    multiline={multiline}
-    minRows={minRows}
-    error={showError}
-    helperText={showError ? t.localeRequiredEntry(languageName) : undefined}
-    disabled={disabled}
-    dir={isRtl ? "rtl" : "ltr"}
-    slotProps={{
-      inputLabel: { shrink: true },
-      input: multiline
-        ? undefined
-        : {
-            startAdornment: (
-              <InputAdornment position="start">
-                <DesktopLocaleEmoji emoji={emoji} />
-              </InputAdornment>
-            ),
-          },
-      htmlInput: { dir: isRtl ? "rtl" : "ltr" },
-    }}
-  />
-);
+}) => {
+  const requiredIndicator = isLocaleRequired ? " *" : "";
+  const label = multiline ? (
+    <>
+      <DesktopLocaleEmoji emoji={emoji} sx={{ marginInlineEnd: 0.5 }} />
+      {languageName}
+      {requiredIndicator}
+    </>
+  ) : (
+    `${languageName}${requiredIndicator}`
+  );
+
+  return (
+    <TextField
+      key={locale}
+      label={label}
+      value={fieldValue}
+      onChange={event => onChange(locale, event.target.value)}
+      multiline={multiline}
+      minRows={minRows}
+      error={showError}
+      helperText={showError ? t.localeRequiredEntry(languageName) : undefined}
+      disabled={disabled}
+      dir={isRtl ? "rtl" : "ltr"}
+      slotProps={{
+        inputLabel: { shrink: true },
+        input: multiline
+          ? undefined
+          : {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <DesktopLocaleEmoji emoji={emoji} />
+                </InputAdornment>
+              ),
+            },
+        htmlInput: { dir: isRtl ? "rtl" : "ltr" },
+      }}
+    />
+  );
+};
 
 type DrawerFooterProps = {
   readonly canSave: boolean;

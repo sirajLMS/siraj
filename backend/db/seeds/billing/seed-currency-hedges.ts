@@ -49,5 +49,5 @@ export async function seedOrGet(config?: SeedConfig) {
   });
 
   logger.info(`Currency hedges seeded (${results.length} rows).`);
-  return results as CurrencyHedgeSelectType[];
+  return results;
 }

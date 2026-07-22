@@ -14,10 +14,10 @@ import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 export function AppDataGridChrome<R extends GridValidRowModel>({
   props,
   slots,
-}: {
+}: Readonly<{
   props: Readonly<AppDataGridSharedProps<R>>;
   slots: Readonly<AppDataGridSlotProps<R>>;
-}) {
+}>) {
   const {
     emptyMessage = "No entries found",
     ariaLabel,

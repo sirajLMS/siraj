@@ -27,7 +27,13 @@ function formatDuration(minutes: number | undefined, formatFn: (minutes: number)
   return formatFn(minutes);
 }
 
-function TimeRangeCell({ row, labels }: { row: TeacherScheduleRow; labels: TeacherDashboardViewLabels }) {
+function TimeRangeCell({
+  row,
+  labels,
+}: {
+  readonly row: TeacherScheduleRow;
+  readonly labels: TeacherDashboardViewLabels;
+}) {
   return (
     <Box sx={{ alignSelf: "center", display: "flex", alignItems: "center", height: "100%" }}>
       <Typography sx={{ typography: "bodyMd", fontWeight: 700 }}>{row.timeRange}</Typography>
@@ -40,7 +46,7 @@ function TimeRangeCell({ row, labels }: { row: TeacherScheduleRow; labels: Teach
   );
 }
 
-function FrozenStatusCell({ labels }: { labels: TeacherDashboardViewLabels }) {
+function FrozenStatusCell({ labels }: { readonly labels: TeacherDashboardViewLabels }) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
       <Tooltip title={labels.schedule.contactAdmin}>
@@ -60,9 +66,9 @@ function StatusCell({
   labels,
   instanceStatusLabels,
 }: {
-  row: TeacherScheduleRow;
-  labels: TeacherDashboardViewLabels;
-  instanceStatusLabels: Record<ClassOutcome | ClassExecutionState, string>;
+  readonly row: TeacherScheduleRow;
+  readonly labels: TeacherDashboardViewLabels;
+  readonly instanceStatusLabels: Record<ClassOutcome | ClassExecutionState, string>;
 }) {
   if (row.isFrozen) {
     return <FrozenStatusCell labels={labels} />;

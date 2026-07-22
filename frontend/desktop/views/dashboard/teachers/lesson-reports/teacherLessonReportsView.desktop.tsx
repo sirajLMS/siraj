@@ -30,7 +30,7 @@ export function TeacherLessonReportsDesktopView({
             labelId="lesson-report-status-filter-label"
             value={statusFilter}
             label={labels.filterAll}
-            onChange={e => onStatusFilterChange(e.target.value as typeof statusFilter)}
+            onChange={e => onStatusFilterChange(e.target.value)}
           >
             {statusOptions.map(option => (
               <MenuItem key={option.value} value={option.value}>

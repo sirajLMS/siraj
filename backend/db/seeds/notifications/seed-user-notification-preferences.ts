@@ -18,10 +18,10 @@ import {
 
 function eventTypesForUser(email: string): readonly NotificationEventType[] {
   if (email === STUDENT_USER_EMAIL || /^student-\d+@seed\.siraj\.local$/.test(email)) {
-    return STUDENT_NOTIFICATION_EVENTS.map(key => NotificationEventType[key as keyof typeof NotificationEventType]);
+    return STUDENT_NOTIFICATION_EVENTS.map(key => NotificationEventType[key]);
   }
   if (email === SUPERVISOR_USER_EMAIL) {
-    return SUPERVISOR_NOTIFICATION_EVENTS.map(key => NotificationEventType[key as keyof typeof NotificationEventType]);
+    return SUPERVISOR_NOTIFICATION_EVENTS.map(key => NotificationEventType[key]);
   }
   return ALL_NOTIFICATION_EVENT_TYPES;
 }

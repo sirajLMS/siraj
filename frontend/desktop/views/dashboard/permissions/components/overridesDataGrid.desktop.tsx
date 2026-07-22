@@ -56,7 +56,7 @@ export function OverridesDataGridDesktop({
         flex: 1,
         minWidth: 200,
         renderCell: params => {
-          const permission = params.row as Permission;
+          const permission = params.row;
           return (
             <StyledPermissionKeyContainer>
               <StyledPermissionKeyText variant="bodyMd">{permission.key}</StyledPermissionKeyText>
@@ -72,7 +72,7 @@ export function OverridesDataGridDesktop({
         minWidth: 200,
         sortable: false,
         renderCell: params => {
-          const permission = params.row as Permission;
+          const permission = params.row;
           const baselineGroups = userGroups.filter(
             g =>
               (permission.id && g.permissionIds?.includes(permission.id)) ||
@@ -96,7 +96,7 @@ export function OverridesDataGridDesktop({
         width: 320,
         sortable: false,
         renderCell: params => {
-          const permission = params.row as Permission;
+          const permission = params.row;
           if (!permission.id) return null;
 
           const baselineGroups = userGroups.filter(

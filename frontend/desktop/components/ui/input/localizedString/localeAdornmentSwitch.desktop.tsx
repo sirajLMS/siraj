@@ -47,7 +47,7 @@ function DesktopLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<Desktop
             aria-selected={isSelected}
             isSelected={isSelected}
             isLastItem={isLastItem}
-            onClick={() => onPick(language.code as AppLocale)}
+            onClick={() => onPick(language.code)}
           >
             <DesktopLocaleEmoji emoji={language.emoji} />
             <Typography component="span" sx={{ flex: 1, fontSize: "0.875rem" }}>

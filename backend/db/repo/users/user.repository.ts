@@ -226,7 +226,7 @@ export namespace UserRepository {
           emailVerifiedAt: now,
           createdAt: now,
           updatedAt: now,
-          ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
+          ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
         })
         .returning();
       return AuthUtils.toUserReturnType(result);

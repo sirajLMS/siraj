@@ -299,7 +299,7 @@ export function ClassMeetingConfigsSection({
   const deleteLabel = useMemo(() => {
     if (!deleteId) return "";
     const config = configs.find(c => c.id === deleteId);
-    return config ? configLabel(config as ClassMeetingConfigFieldsFragment, locale) : "";
+    return config ? configLabel(config, locale) : "";
   }, [configs, deleteId, locale]);
 
   const handleEdit = useCallback((config: unknown) => {

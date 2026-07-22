@@ -116,7 +116,7 @@ export function AdminDashboardMobileView({
             <TextField
               placeholder={t.searchPlaceholder}
               value={searchValue}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={event => {
                 onSearchChange(event.target.value);
               }}
               fullWidth

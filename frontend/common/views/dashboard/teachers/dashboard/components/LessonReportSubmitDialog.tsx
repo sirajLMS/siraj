@@ -33,9 +33,9 @@ const ATTENDANCE_OPTIONS: ReadonlyArray<{
   readonly value: AttendanceEvaluationValue;
   readonly labelKey: "present" | "absent" | "late";
 }> = [
-  { value: AttendanceEvaluation.Present as AttendanceEvaluationValue, labelKey: "present" },
-  { value: AttendanceEvaluation.Absent as AttendanceEvaluationValue, labelKey: "absent" },
-  { value: AttendanceEvaluation.Late as AttendanceEvaluationValue, labelKey: "late" },
+  { value: AttendanceEvaluation.Present, labelKey: "present" },
+  { value: AttendanceEvaluation.Absent, labelKey: "absent" },
+  { value: AttendanceEvaluation.Late, labelKey: "late" },
 ];
 
 interface LessonReportSubmitDialogProps {
@@ -129,7 +129,7 @@ export function LessonReportSubmitDialog({
                 label={labels.attendanceEvaluation}
                 disabled={submitting}
                 onChange={e => {
-                  setForm(prev => ({ ...prev, attendanceEvaluation: e.target.value as AttendanceEvaluationValue }));
+                  setForm(prev => ({ ...prev, attendanceEvaluation: e.target.value }));
                   setErrors(prev => ({ ...prev, attendanceEvaluation: "" }));
                 }}
               >

@@ -1,9 +1,4 @@
-import type {
-  ClassExecutionState,
-  ClassOutcome,
-  EffectiveMeeting,
-  LessonReportStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { EffectiveMeeting } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import type {
   RecentLessonReportRow,
@@ -29,8 +24,8 @@ export function mapUpcomingLesson(raw: UpcomingClassItem): UpcomingLessonRow {
     scheduledStartAt: raw.scheduledStartAt ?? null,
     scheduledEndAt: raw.scheduledEndAt ?? null,
     durationMinutes: raw.durationMinutes ?? 0,
-    executionState: (raw.executionState ?? null) as ClassExecutionState | null,
-    outcome: (raw.outcome ?? null) as ClassOutcome | null,
+    executionState: raw.executionState ?? null,
+    outcome: raw.outcome ?? null,
     isFrozen: raw.isFrozen ?? false,
     meetingJoinUrl: resolveJoinUrl(raw.meetingJoinUrl, raw.effectiveMeeting),
     effectiveMeeting: raw.effectiveMeeting ?? null,
@@ -56,7 +51,7 @@ export function mapRecentLessonReport(raw: RecentReportItem): RecentLessonReport
     teacherName: raw.teacherName ?? null,
     lessonDate: raw.lessonDate ?? null,
     durationMinutes: raw.durationMinutes ?? 0,
-    status: (raw.status ?? null) as LessonReportStatus | null,
+    status: raw.status ?? null,
     completionPercentage: raw.completionPercentage ?? 0,
     attendanceEvaluation: raw.attendanceEvaluation ?? null,
     teacherNotes: raw.teacherNotes ?? null,

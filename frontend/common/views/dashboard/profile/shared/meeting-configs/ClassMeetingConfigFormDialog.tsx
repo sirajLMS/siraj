@@ -11,10 +11,7 @@ import type {
   UpdateClassMeetingConfigMutationVariables,
 } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { MeetingConfigFormDialogContent } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialogContent";
-import {
-  type MeetingConfigFormEditInfo,
-  useMeetingConfigFormState,
-} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
+import { useMeetingConfigFormState } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
 
 export type ClassMeetingConfigFormDialogProps = {
   readonly open: boolean;
@@ -47,7 +44,7 @@ export function ClassMeetingConfigFormDialog({
 }: ClassMeetingConfigFormDialogProps) {
   const state = useMeetingConfigFormState({
     open,
-    editConfig: editConfig as MeetingConfigFormEditInfo | null,
+    editConfig,
     existingCount,
   });
   const { isEdit, label, isDefault, details, provider, providerChanged, validateUrl, setSaveError, t } = state;

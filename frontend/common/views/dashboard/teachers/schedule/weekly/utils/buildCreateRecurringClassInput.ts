@@ -10,19 +10,24 @@ import type { ClassType, CreateRecurringClassInput } from "@/frontend/common/gra
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
 
+export interface BuildCreateRecurringClassInputParams {
+  studentId: string;
+  teacherId: string;
+  subjectId: string;
+  duration: number;
+  defaultStartTime: string;
+  timezone: string;
+  classType: ClassType;
+  days: readonly DayScheduleConfig[];
+}
+
 // NEW FOR PLAN v5: buildCreateRecurringClassInput — lifts the previously
 // inline pure-data builder out of the tier files. The tier now calls this
 // helper instead of re-declaring it.
 export function buildCreateRecurringClassInput(
-  studentId: string,
-  teacherId: string,
-  subjectId: string,
-  duration: number,
-  defaultStartTime: string,
-  timezone: string,
-  classType: ClassType,
-  days: readonly DayScheduleConfig[]
+  params: BuildCreateRecurringClassInputParams
 ): CreateRecurringClassInput {
+  const { studentId, teacherId, subjectId, duration, defaultStartTime, timezone, classType, days } = params;
   const activeDays = days.filter(d => d.enabled);
   return {
     studentId,

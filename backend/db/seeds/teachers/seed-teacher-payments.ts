@@ -35,8 +35,8 @@ function buildSnapshotFromPayoutMethod(
 ): PaymentMethodTransactionSnapshot {
   return {
     userPaymentMethodId: payoutMethod.id,
-    type: payoutMethod.type as PaymentMethodType,
-    direction: payoutMethod.direction as PaymentDirection,
+    type: payoutMethod.type,
+    direction: payoutMethod.direction,
     label: payoutMethod.label,
     details: payoutMethod.details,
     catalog: null,
@@ -63,7 +63,7 @@ export async function seedOrGet(teachersList: TeacherEntity[], _usersList: UserS
     const snapshot = payoutMethod
       ? buildSnapshotFromPayoutMethod(payoutMethod, snapshottedAt)
       : buildBankTransferSnapshot(null, snapshottedAt);
-    const paymentMethodType = (payoutMethod?.type as PaymentMethodType | undefined) ?? PaymentMethodType.BANK_TRANSFER;
+    const paymentMethodType = payoutMethod?.type ?? PaymentMethodType.BANK_TRANSFER;
 
     for (let m = 1; m <= monthsBack; m++) {
       const paymentDate = addMonths(anchor, -m);

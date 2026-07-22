@@ -307,8 +307,8 @@ export namespace StudentRepository {
 
   export const deductClasses = async (
     studentId: string,
-    amount: number = 1,
     tErrors: ErrorsLabels,
+    amount: number = 1,
     expectedVersion?: number,
     tx?: DBTransaction
   ): Promise<Types.StudentEntity> => {
@@ -333,8 +333,8 @@ export namespace StudentRepository {
 
   export const addClasses = async (
     studentId: string,
-    amount: number = 1,
     tErrors: ErrorsLabels,
+    amount: number = 1,
     expectedVersion?: number,
     tx?: DBTransaction
   ): Promise<Types.StudentEntity> => {

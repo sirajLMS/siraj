@@ -106,7 +106,7 @@ describe("ParentProfileView admin sections", () => {
         loading={false}
         error={null}
         isSaving={false}
-        onSubmit={noop as (formData: ParentAdminEditFormData) => Promise<void>}
+        onSubmit={noop}
         onRetry={noopVoid}
         parentData={parentOwnProfile as ParentViewData}
         editData={baseEditData}
@@ -122,7 +122,7 @@ describe("ParentProfileView admin sections", () => {
 
     expect(screen.queryByText("Identity")).toBeNull();
     expect(screen.queryByText("Billing")).toBeNull();
-    expect(screen.getByText("Associated Students")).toBeTruthy();
+    expect(screen.getByText("Associated Students")).toBeInTheDocument();
   });
 
   test("shows identity and billing sections for admin scope", () => {

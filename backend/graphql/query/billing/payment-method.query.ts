@@ -1,5 +1,3 @@
-import type { CountryCode } from "@/backend/enum";
-import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   SupportedMobileWalletPothosObject,
@@ -60,8 +58,8 @@ gqlSchemaBuilder.queryField("supportedMobileWallets", t =>
       const actorUserId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.listMobileWallets(actorUserId, tErrors, {
-        countryCode: (args.countryCode as CountryCode | null | undefined) ?? undefined,
-        direction: (args.direction as PaymentDirection | null | undefined) ?? undefined,
+        countryCode: args.countryCode ?? undefined,
+        direction: args.direction ?? undefined,
         activeOnly: args.activeOnly ?? true,
       });
     },
@@ -80,7 +78,7 @@ gqlSchemaBuilder.queryField("supportedPaymentLinks", t =>
       const actorUserId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.listPaymentLinks(actorUserId, tErrors, {
-        direction: (args.direction as PaymentDirection | null | undefined) ?? undefined,
+        direction: args.direction ?? undefined,
         activeOnly: args.activeOnly ?? true,
       });
     },
@@ -99,7 +97,7 @@ gqlSchemaBuilder.queryField("supportedOnlineAccounts", t =>
       const actorUserId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
       return PaymentCatalogService.listOnlineAccounts(actorUserId, tErrors, {
-        direction: (args.direction as PaymentDirection | null | undefined) ?? undefined,
+        direction: args.direction ?? undefined,
         activeOnly: args.activeOnly ?? true,
       });
     },

@@ -46,6 +46,21 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass }: Readonly<Slot
   const isTerminal = isTerminalClassInstance(classItem.executionState, classItem.outcome);
   const showDelete = !classItem.isFrozen && !isTerminal;
 
+  const slotAction = canJoin ? (
+    <MeetingJoinAction
+      variant="icon"
+      joinUrl={classItem.meetingJoinUrl}
+      meeting={classItem.effectiveMeeting}
+      emptyRole="teacher"
+      label={tMeeting.joinMeeting}
+      setupHref="/profile?tab=meeting"
+    />
+  ) : isTerminal ? (
+    <Typography variant="labelMd" sx={{ opacity: 0.7, color: "inherit", fontSize: 10 }}>
+      {t.grid.sessionEnded}
+    </Typography>
+  ) : null;
+
   return (
     <>
       <Box
@@ -67,20 +82,7 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass }: Readonly<Slot
           </Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          {canJoin ? (
-            <MeetingJoinAction
-              variant="icon"
-              joinUrl={classItem.meetingJoinUrl}
-              meeting={classItem.effectiveMeeting}
-              emptyRole="teacher"
-              label={tMeeting.joinMeeting}
-              setupHref="/profile?tab=meeting"
-            />
-          ) : isTerminal ? (
-            <Typography variant="labelMd" sx={{ opacity: 0.7, color: "inherit", fontSize: 10 }}>
-              {t.grid.sessionEnded}
-            </Typography>
-          ) : null}
+          {slotAction}
           {showDelete && hasScheduleDeleteClass ? (
             <Box
               component="span"

@@ -85,6 +85,17 @@ function VerifyBankTransferButtons({ methods, verifying, onVerify, t, tType }: V
   ));
 }
 
+type PaymentMethodFormDialogWrappedProps = {
+  readonly formOpen: boolean;
+  readonly targetUserId: string;
+  readonly slotDirection: PaymentDirection.Payin | PaymentDirection.Payout;
+  readonly allowedDirections: readonly PaymentDirection[];
+  readonly editMethod: UserPaymentMethodFieldsFragment | null;
+  readonly setFormOpen: (open: boolean) => void;
+  readonly setEditMethod: (method: UserPaymentMethodFieldsFragment | null) => void;
+  readonly onSaved: () => Promise<void>;
+};
+
 function PaymentMethodFormDialogWrapped({
   formOpen,
   targetUserId,
@@ -94,16 +105,7 @@ function PaymentMethodFormDialogWrapped({
   setFormOpen,
   setEditMethod,
   onSaved,
-}: {
-  formOpen: boolean;
-  targetUserId: string;
-  slotDirection: PaymentDirection.Payin | PaymentDirection.Payout;
-  allowedDirections: readonly PaymentDirection[];
-  editMethod: UserPaymentMethodFieldsFragment | null;
-  setFormOpen: (open: boolean) => void;
-  setEditMethod: (method: UserPaymentMethodFieldsFragment | null) => void;
-  onSaved: () => Promise<void>;
-}) {
+}: PaymentMethodFormDialogWrappedProps) {
   return (
     <PaymentMethodFormDialog
       open={formOpen}
@@ -138,7 +140,7 @@ function useMethodById(data: PaymentMethodsManagerData | undefined) {
   return useMemo(() => {
     const map = new Map<string, UserPaymentMethodFieldsFragment>();
     for (const method of data?.userPaymentMethods ?? []) {
-      if (method.id) map.set(method.id, method as UserPaymentMethodFieldsFragment);
+      if (method.id) map.set(method.id, method);
     }
     return map;
   }, [data?.userPaymentMethods]);

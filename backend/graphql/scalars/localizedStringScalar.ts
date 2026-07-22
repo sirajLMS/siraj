@@ -1,4 +1,5 @@
 import { GraphQLError, GraphQLScalarType, Kind, type ValueNode } from "graphql";
+import type { AppLocale } from "@/shared/locale";
 import type { LocalizedString } from "@/shared/types/localized-string";
 import { isAppLocale } from "@/shared/types/localized-string";
 
@@ -10,7 +11,7 @@ function validateLocalizedMap(value: unknown): LocalizedString {
   }
 
   const obj = value as Record<string, unknown>;
-  const result: Record<string, string> = {};
+  const result: Partial<Record<AppLocale, string>> = {};
 
   for (const [key, val] of Object.entries(obj)) {
     if (!isAppLocale(key)) {
@@ -27,7 +28,7 @@ function validateLocalizedMap(value: unknown): LocalizedString {
     result[key] = val;
   }
 
-  return result as unknown as LocalizedString;
+  return result;
 }
 
 function parseLiteral(ast: ValueNode): LocalizedString {
@@ -53,7 +54,7 @@ function parseLiteral(ast: ValueNode): LocalizedString {
     result[key] = field.value.value;
   }
 
-  return result as unknown as LocalizedString;
+  return result;
 }
 
 /**

@@ -96,7 +96,7 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved, onError }:
   };
 
   const canSave =
-    loading === false &&
+    !loading &&
     slug.trim() !== "" &&
     Boolean(name.en?.trim()) &&
     parsedAllowlist.length > 0 &&

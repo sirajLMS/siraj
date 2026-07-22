@@ -115,7 +115,7 @@ export function HEAD() {
  */
 async function flushPendingCookies(response: Response): Promise<Response> {
   const cookieStore = await nextCookies();
-  appendMutableCookies(response.headers, cookieStore as never);
+  appendMutableCookies(response.headers, cookieStore);
   return response;
 }
 

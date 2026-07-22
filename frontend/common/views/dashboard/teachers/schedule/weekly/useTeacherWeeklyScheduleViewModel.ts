@@ -311,16 +311,16 @@ function useHandleSubmit(args: {
       }
 
       try {
-        const input = buildCreateRecurringClassInput(
-          formState.studentId,
+        const input = buildCreateRecurringClassInput({
+          studentId: formState.studentId,
           teacherId,
-          formState.subjectId,
-          formState.duration,
-          formState.defaultStartTime,
-          formState.timezone,
-          formState.classType,
-          days
-        );
+          subjectId: formState.subjectId,
+          duration: formState.duration,
+          defaultStartTime: formState.defaultStartTime,
+          timezone: formState.timezone,
+          classType: formState.classType,
+          days,
+        });
 
         const { data } = await createClassMutation({ variables: { input } });
 

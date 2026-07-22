@@ -129,7 +129,7 @@ function PaymentMethodFormFields({
 
   return (
     <Stack spacing={2.5} sx={{ pt: 1 }}>
-      {!isEdit ? (
+      {isEdit ? null : (
         <PaymentMethodTypeSelector
           type={watchedType}
           setTypeAction={type => {
@@ -138,7 +138,7 @@ function PaymentMethodFormFields({
           required
           fullWidth
         />
-      ) : null}
+      )}
 
       <DirectionControllerField control={form.control} label={t.direction} options={directionOptions} />
 

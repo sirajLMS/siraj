@@ -85,6 +85,15 @@ export function StaffProfileEditForm({
     canView("staff_role") && (isAdminScope || Boolean(staffData.hourlyRate || staffData.rateCurrency));
   const showCompensationEditSection = isAdminScope && canEdit("staff_role");
 
+  let compensationSection: React.ReactNode = null;
+  if (showCompensationEditSection) {
+    compensationSection = <CompensationSection mode="edit" register={form.register} control={form.control} />;
+  } else if (showCompensationViewSection) {
+    compensationSection = (
+      <CompensationSection mode="view" staffData={staffData} subjectUserId={staffData.id ?? undefined} />
+    );
+  }
+
   return (
     <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
       <Stack spacing={3}>
@@ -120,11 +129,7 @@ export function StaffProfileEditForm({
             />
           ) : null}
           {canEdit("core_contact") ? <ContactSection mode="edit" scope={scope} control={form.control} /> : null}
-          {showCompensationEditSection ? (
-            <CompensationSection mode="edit" register={form.register} control={form.control} />
-          ) : showCompensationViewSection ? (
-            <CompensationSection mode="view" staffData={staffData} subjectUserId={staffData.id ?? undefined} />
-          ) : null}
+          {compensationSection}
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>
           {tc.actions.save}

@@ -35,13 +35,15 @@ type BillingSectionProps =
     };
 
 function resolveLifecycleStatus(adminData: ParentAdminData): string {
-  const raw =
-    "lifecycleStatus" in adminData && adminData.lifecycleStatus
-      ? adminData.lifecycleStatus
-      : "status" in adminData
-        ? adminData.status
-        : "REGULAR";
-  return String(raw ?? "REGULAR").toLowerCase();
+  let raw: string;
+  if ("lifecycleStatus" in adminData && adminData.lifecycleStatus) {
+    raw = adminData.lifecycleStatus;
+  } else if ("accountStatus" in adminData && adminData.accountStatus) {
+    raw = adminData.accountStatus;
+  } else {
+    raw = "REGULAR";
+  }
+  return String(raw).toLowerCase();
 }
 
 function BillingEditSection({

@@ -9,10 +9,7 @@ import {
   updateUserMeetingConfigMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { MeetingConfigFormDialogContent } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialogContent";
-import {
-  type MeetingConfigFormEditInfo,
-  useMeetingConfigFormState,
-} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
+import { useMeetingConfigFormState } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
 
 export type MeetingConfigDetailsForm = {
   meetingUrl: string;
@@ -40,7 +37,7 @@ export function MeetingConfigFormDialog({
 }: MeetingConfigFormDialogProps) {
   const state = useMeetingConfigFormState({
     open,
-    editConfig: editConfig as MeetingConfigFormEditInfo | null,
+    editConfig,
     existingCount,
   });
   const { isEdit, label, isDefault, details, provider, providerChanged, validateUrl, setSaveError, t } = state;

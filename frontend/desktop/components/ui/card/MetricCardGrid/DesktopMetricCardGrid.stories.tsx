@@ -73,16 +73,20 @@ export const ScrollLayout: Story = {
 export const Arabic: Story = {
   globals: { locale: "ar" },
   args: {
-    metrics: sampleMetrics.map(metric => ({
-      ...metric,
-      label:
+    metrics: sampleMetrics.map(metric => {
+      const arabicLabel =
         metric.key === "students"
           ? "إجمالي الطلاب"
           : metric.key === "classes"
             ? "الحصص النشطة"
             : metric.key === "suspended"
               ? "حسابات موقوفة"
-              : "المعلمون",
-    })),
+              : "المعلمون";
+
+      return {
+        ...metric,
+        label: arabicLabel,
+      };
+    }),
   },
 };

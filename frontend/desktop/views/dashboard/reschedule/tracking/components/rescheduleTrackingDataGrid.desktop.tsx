@@ -129,12 +129,13 @@ export function RescheduleTrackingDataGridDesktop({
         flex: 1,
         renderCell: ({ row }) => {
           const status = row.status ?? LeaveRequestStatus.Pending;
+          const hasStatus = row.status !== null;
           return (
             <DesktopStatusBadge
               category="trackingStatus"
               status={status}
-              label={row.status !== null ? getTrackingStatusLabel(status, { ...labels, filterAll: "" }) : ""}
-              icon={row.status !== null ? getTrackingStatusIcon(status, { fontSize: 14, color: "inherit" }) : null}
+              label={hasStatus ? getTrackingStatusLabel(status, { ...labels, filterAll: "" }) : ""}
+              icon={hasStatus ? getTrackingStatusIcon(status, { fontSize: 14, color: "inherit" }) : null}
             />
           );
         },
@@ -148,7 +149,7 @@ export function RescheduleTrackingDataGridDesktop({
         headerAlign: "center",
         renderCell: ({ row }) => {
           const rowId = row.id ?? "";
-          if (row.status != null && row.status === LeaveRequestStatus.Pending) {
+          if (row.status !== null && row.status === LeaveRequestStatus.Pending) {
             return (
               <Box sx={{ height: "100%", display: "flex", alignItems: "center" }}>
                 <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, width: "100%" }}>

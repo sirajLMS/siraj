@@ -295,17 +295,30 @@ function useSearchScheduleMainQuery(activeInput: AvailabilitySearchInput | null)
   };
 }
 
-function useSearchScheduleMonthDrawer(
-  draft: SearchScheduleDraftFilters,
-  activeFromDate: string,
-  monthDrawerOpen: boolean,
-  monthDrawerTeacher: SearchScheduleMonthDrawerTeacher | null,
-  monthDrawerCurrentMonthIso: string,
-  monthDrawerAnchorFromDate: string,
-  openMonthDrawer: (teacher: SearchScheduleMonthDrawerTeacher, anchorFromDate: string) => void,
-  closeMonthDrawer: () => void,
-  setMonthDrawerCurrentMonth: (isoMonth: string) => void
-) {
+interface UseSearchScheduleMonthDrawerParams {
+  draft: SearchScheduleDraftFilters;
+  activeFromDate: string;
+  monthDrawerOpen: boolean;
+  monthDrawerTeacher: SearchScheduleMonthDrawerTeacher | null;
+  monthDrawerCurrentMonthIso: string;
+  monthDrawerAnchorFromDate: string;
+  openMonthDrawer: (teacher: SearchScheduleMonthDrawerTeacher, anchorFromDate: string) => void;
+  closeMonthDrawer: () => void;
+  setMonthDrawerCurrentMonth: (isoMonth: string) => void;
+}
+
+function useSearchScheduleMonthDrawer(params: UseSearchScheduleMonthDrawerParams) {
+  const {
+    draft,
+    activeFromDate,
+    monthDrawerOpen,
+    monthDrawerTeacher,
+    monthDrawerCurrentMonthIso,
+    monthDrawerAnchorFromDate,
+    openMonthDrawer,
+    closeMonthDrawer,
+    setMonthDrawerCurrentMonth,
+  } = params;
   const monthDrawerCurrentDate = useMemo(() => {
     if (!monthDrawerCurrentMonthIso) {
       // Fall back to the anchor date or today when no month has been navigated yet.
@@ -339,7 +352,7 @@ function useSearchScheduleMonthDrawer(
     const teachers = monthDrawerData?.searchTeacherAvailability?.teachers ?? [];
     const teacherId = monthDrawerTeacher?.id;
     const matchedById = teacherId ? teachers.find(item => item?.id === teacherId) : null;
-    return (matchedById ?? teachers[0] ?? null) as SearchScheduleResultItem | null;
+    return matchedById ?? teachers[0] ?? null;
   }, [monthDrawerData?.searchTeacherAvailability?.teachers, monthDrawerTeacher?.id]);
 
   const monthDrawerGaps = (monthDrawerResultItem?.gaps ?? null) as
@@ -411,17 +424,17 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
 
   // NEW FOR PLAN v5: month drawer query — uses the same draft + a teacher-specific month window.
   // This was previously an inline custom hook `useMonthDrawerQuery` in the tier files (N25 violation).
-  const monthDrawer = useSearchScheduleMonthDrawer(
-    store.draft,
+  const monthDrawer = useSearchScheduleMonthDrawer({
+    draft: store.draft,
     activeFromDate,
-    store.monthDrawerOpen,
-    store.monthDrawerTeacher,
-    store.monthDrawerCurrentMonthIso,
-    store.monthDrawerAnchorFromDate,
-    store.openMonthDrawer,
-    store.closeMonthDrawer,
-    store.setMonthDrawerCurrentMonth
-  );
+    monthDrawerOpen: store.monthDrawerOpen,
+    monthDrawerTeacher: store.monthDrawerTeacher,
+    monthDrawerCurrentMonthIso: store.monthDrawerCurrentMonthIso,
+    monthDrawerAnchorFromDate: store.monthDrawerAnchorFromDate,
+    openMonthDrawer: store.openMonthDrawer,
+    closeMonthDrawer: store.closeMonthDrawer,
+    setMonthDrawerCurrentMonth: store.setMonthDrawerCurrentMonth,
+  });
 
   return buildSearchScheduleViewModel({
     requiredPermission,

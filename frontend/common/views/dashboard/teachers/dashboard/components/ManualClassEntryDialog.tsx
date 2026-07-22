@@ -14,7 +14,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { logger } from "@/frontend/common/utils/logger";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import { ManualClassEntryStudentFieldContext } from "@/frontend/common/views/dashboard/teachers/dashboard/components/manualClassEntryStudentFieldContext";
@@ -128,7 +128,9 @@ export function ManualClassEntryDialog({
           {defaultActive ? t.manualClassEntry.titleCreateActive : t.manualClassEntry.titleCreate}
         </DialogTitle>
         <DialogContent dividers>
-          <ManualClassEntryStudentFieldContext.Provider value={{ studentId, setStudentId, disabled: submitting }}>
+          <ManualClassEntryStudentFieldContext.Provider
+            value={useMemo(() => ({ studentId, setStudentId, disabled: submitting }), [studentId, submitting])}
+          >
             <ManualClassEntryFormFields
               error={error}
               studentSelect={studentSelect}

@@ -28,12 +28,7 @@ gqlSchemaBuilder.mutationField("recordStudentProfileEdit", t =>
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      return StudentProfileService.recordStudentProfileEdit(
-        actorUserId,
-        args.input as StudentProfileEditInput,
-        tErrors,
-        ctx.locale
-      );
+      return StudentProfileService.recordStudentProfileEdit(actorUserId, args.input, tErrors, ctx.locale);
     },
   })
 );

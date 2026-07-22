@@ -155,7 +155,7 @@ function QuotaFormCardDesktop({
 >) {
   return (
     <>
-      {!embedded ? (
+      {embedded ? null : (
         <Box sx={{ display: "flex", mb: 3 }}>
           <DesktopPageHeader
             title={t.breadcrumbs.adjustQuota}
@@ -163,7 +163,7 @@ function QuotaFormCardDesktop({
             breadcrumbs={DesktopBreadcrumbs(t)}
           />
         </Box>
-      ) : null}
+      )}
 
       <Box
         sx={theme => ({
@@ -216,11 +216,11 @@ function QuotaFormCardDesktop({
         </FormProvider>
       </Box>
 
-      {!embedded ? (
+      {embedded ? null : (
         <Box sx={{ maxWidth: "4xl", mx: "auto" }}>
           <ContextualHelperCardsDesktop />
         </Box>
-      ) : null}
+      )}
     </>
   );
 }

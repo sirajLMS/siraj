@@ -51,10 +51,10 @@ type PendingLessonReportsRow = NonNullable<
 
 const STATUS_OPTION_KEYS: readonly StatusFilterValue[] = [
   "ALL",
-  LessonReportStatus.PendingReview as LessonReportStatusValue,
-  LessonReportStatus.Approved as LessonReportStatusValue,
-  LessonReportStatus.Rejected as LessonReportStatusValue,
-  LessonReportStatus.Draft as LessonReportStatusValue,
+  LessonReportStatus.PendingReview,
+  LessonReportStatus.Approved,
+  LessonReportStatus.Rejected,
+  LessonReportStatus.Draft,
 ];
 
 export function useTeacherLessonReportsViewModel({

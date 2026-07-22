@@ -57,7 +57,7 @@ function PermissionsOverridesGrid({ overrides }: Readonly<PermissionsOverridesGr
 
   return (
     <AppDataGrid<StaffPermissionOverride>
-      rows={overrides as StaffPermissionOverride[]}
+      rows={overrides}
       columns={columns}
       getRowId={row => row.id ?? ""}
       paginationOptions={false}

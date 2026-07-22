@@ -352,12 +352,14 @@ export namespace PermissionManagementRepository {
 
       const now = new Date();
       const nextName = input.name === undefined ? existing.name : omitEmptyLocalized(input.name);
-      const nextDescription =
-        input.description === undefined
-          ? existing.description
-          : input.description === null
-            ? null
-            : omitEmptyLocalized(input.description);
+      let nextDescription: typeof existing.description;
+      if (input.description === undefined) {
+        nextDescription = existing.description;
+      } else if (input.description === null) {
+        nextDescription = null;
+      } else {
+        nextDescription = omitEmptyLocalized(input.description);
+      }
 
       const [updatedGroup] = await t
         .update(permissionGroups)

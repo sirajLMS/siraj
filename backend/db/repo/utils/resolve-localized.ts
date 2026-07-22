@@ -57,7 +57,7 @@ export function localeJsonKey(locale?: string): string {
  */
 export function omitEmptyLocalized(map: LocalizedString | null | undefined): LocalizedString {
   if (!map) {
-    return {};
+    return {} as LocalizedString;
   }
   const next: Record<string, string> = {};
   for (const [locale, value] of Object.entries(map)) {
@@ -65,5 +65,5 @@ export function omitEmptyLocalized(map: LocalizedString | null | undefined): Loc
       next[locale] = value;
     }
   }
-  return next as unknown as LocalizedString;
+  return next as LocalizedString;
 }

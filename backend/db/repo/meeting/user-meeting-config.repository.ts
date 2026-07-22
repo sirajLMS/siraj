@@ -119,16 +119,36 @@ export namespace UserMeetingConfigRepository {
         await clearDefault(existing.userId, t);
       }
 
+      const updateData: Partial<{
+        providerId: string;
+        label: string | null;
+        isDefault: boolean;
+        details: UserMeetingConfigInsertType["details"];
+        encryptedSecret: string | null;
+        updatedAt: Date;
+      }> = {
+        updatedAt: new Date(),
+      };
+
+      if (input.providerId !== undefined) {
+        updateData.providerId = input.providerId;
+      }
+      if (input.label !== undefined) {
+        updateData.label = input.label;
+      }
+      if (input.isDefault !== undefined) {
+        updateData.isDefault = input.isDefault;
+      }
+      if (input.details !== undefined) {
+        updateData.details = input.details;
+      }
+      if (input.encryptedSecret !== undefined) {
+        updateData.encryptedSecret = input.encryptedSecret;
+      }
+
       const [result] = await t
         .update(userMeetingConfigs)
-        .set({
-          ...(input.providerId !== undefined ? { providerId: input.providerId } : {}),
-          ...(input.label !== undefined ? { label: input.label } : {}),
-          ...(input.isDefault !== undefined ? { isDefault: input.isDefault } : {}),
-          ...(input.details !== undefined ? { details: input.details } : {}),
-          ...(input.encryptedSecret !== undefined ? { encryptedSecret: input.encryptedSecret } : {}),
-          updatedAt: new Date(),
-        })
+        .set(updateData)
         .where(eq(userMeetingConfigs.id, id))
         .returning();
 

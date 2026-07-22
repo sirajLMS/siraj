@@ -4,7 +4,6 @@ import { Grid, Stack, TextField, Typography } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
 type MeetingConfigOnboardingSectionProps = {
@@ -41,7 +40,7 @@ export function MeetingConfigOnboardingSection({
             name="meetingProvider"
             render={({ field }) => (
               <MeetingProviderSelect
-                value={(field.value as MeetingProviderFieldsFragment | null | undefined) ?? null}
+                value={field.value ?? null}
                 onChangeAction={value => field.onChange(value)}
                 label={labels.fields.meetingProvider}
               />

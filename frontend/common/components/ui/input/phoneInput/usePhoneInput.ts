@@ -50,8 +50,8 @@ export type UsePhoneInputResult = {
   readonly handlePrefixKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   readonly handleNationalKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   readonly handleNationalSelect: (event: React.SyntheticEvent<HTMLInputElement>) => void;
-  readonly resetPrefixDisplay: (event: React.FormEvent<HTMLInputElement>) => void;
-  readonly resetNationalDisplay: (event: React.FormEvent<HTMLInputElement>) => void;
+  readonly resetPrefixDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
+  readonly resetNationalDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
   readonly prefixInputRef: React.RefObject<HTMLInputElement | null>;
   readonly nationalInputRef: React.RefObject<HTMLInputElement | null>;
   readonly maxPrefixDisplayLength: number;
@@ -291,18 +291,18 @@ function useResetHandlers(
   prefixDigits: string,
   nationalDisplay: string
 ): {
-  readonly resetPrefixDisplay: (event: React.FormEvent<HTMLInputElement>) => void;
-  readonly resetNationalDisplay: (event: React.FormEvent<HTMLInputElement>) => void;
+  readonly resetPrefixDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
+  readonly resetNationalDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
 } {
   const resetPrefixDisplay = useCallback(
-    (event: React.FormEvent<HTMLInputElement>) => {
+    (event: React.SyntheticEvent<HTMLInputElement>) => {
       event.currentTarget.value = `+${prefixDigits}`;
     },
     [prefixDigits]
   );
 
   const resetNationalDisplay = useCallback(
-    (event: React.FormEvent<HTMLInputElement>) => {
+    (event: React.SyntheticEvent<HTMLInputElement>) => {
       event.currentTarget.value = nationalDisplay;
     },
     [nationalDisplay]
@@ -372,8 +372,8 @@ type PhoneInputHandlers = {
   readonly handlePrefixKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   readonly handleNationalKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   readonly handleNationalSelect: (event: React.SyntheticEvent<HTMLInputElement>) => void;
-  readonly resetPrefixDisplay: (event: React.FormEvent<HTMLInputElement>) => void;
-  readonly resetNationalDisplay: (event: React.FormEvent<HTMLInputElement>) => void;
+  readonly resetPrefixDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
+  readonly resetNationalDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
 };
 
 function usePhoneInputHandlers(

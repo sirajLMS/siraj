@@ -155,17 +155,23 @@ export function SearchScheduleDesktopView({
 
         {error ? <Typography color="error">{t.errorLoading}</Typography> : null}
 
-        {isInitialLoading ? (
-          <SearchScheduleResultsSkeletonDesktop columnCount={columnCount} />
-        ) : searchResult || undefined ? (
-          <SearchScheduleDesktopResults
-            searchResult={searchResult}
-            fromDate={fromDate}
-            toDate={toDate}
-            t={t}
-            onOpenMonthDrawer={onOpenMonthDrawer}
-          />
-        ) : null}
+        {(() => {
+          if (isInitialLoading) {
+            return <SearchScheduleResultsSkeletonDesktop columnCount={columnCount} />;
+          }
+          if (searchResult) {
+            return (
+              <SearchScheduleDesktopResults
+                searchResult={searchResult}
+                fromDate={fromDate}
+                toDate={toDate}
+                t={t}
+                onOpenMonthDrawer={onOpenMonthDrawer}
+              />
+            );
+          }
+          return null;
+        })()}
 
         {showPaginationFooter && pageInfo ? (
           <SearchSchedulePaginationFooterDesktop

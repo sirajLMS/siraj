@@ -54,7 +54,7 @@ describe("ClassMeetingConfigRepository", () => {
   });
 
   configTest("getByIdOrThrow throws when config is missing", async tx => {
-    await expect(ClassMeetingConfigRepository.getByIdOrThrow(NIL_UUID, tErrors, tx)).rejects.toThrow();
+    expect(ClassMeetingConfigRepository.getByIdOrThrow(NIL_UUID, tErrors, tx)).rejects.toThrow();
   });
 
   configTest("setDefault clears previous default within same class instance", async tx => {

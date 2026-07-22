@@ -58,7 +58,7 @@ function makeRequest(method: string, headers: Record<string, string | null> = {}
 }
 
 async function parseJson(response: Response): Promise<Record<string, unknown>> {
-  return (await response.json()) as Record<string, unknown>;
+  return await response.json();
 }
 
 const originalNodeEnv = process.env.NODE_ENV;

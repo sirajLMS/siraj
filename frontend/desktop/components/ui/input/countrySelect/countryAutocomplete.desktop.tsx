@@ -1,7 +1,6 @@
 "use client";
 
-import type { AutocompleteProps } from "@mui/material/Autocomplete";
-import Autocomplete, { type AutocompleteRenderInputParams } from "@mui/material/Autocomplete";
+import Autocomplete, { type AutocompleteProps, type AutocompleteRenderInputParams } from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import type { Theme } from "@mui/material/styles";

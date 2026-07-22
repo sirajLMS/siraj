@@ -65,8 +65,15 @@ function buildReportSpecs(
 
     const attendanceEvaluation = pickAttendanceEvaluation(i);
     const { status, rejectionReason } = pickStatus(i);
-    const completionPercentage =
-      status === LessonReportStatus.APPROVED ? 100 : status === LessonReportStatus.REJECTED ? 40 : 75 + (i % 25);
+
+    let completionPercentage: number;
+    if (status === LessonReportStatus.APPROVED) {
+      completionPercentage = 100;
+    } else if (status === LessonReportStatus.REJECTED) {
+      completionPercentage = 40;
+    } else {
+      completionPercentage = 75 + (i % 25);
+    }
 
     specs.push({
       classInstance: instance,

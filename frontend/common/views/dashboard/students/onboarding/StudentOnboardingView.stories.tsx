@@ -1,11 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import {
-  type Control,
-  type FieldErrors,
-  type UseFormHandleSubmit,
-  type UseFormRegister,
-  useForm,
-} from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import type { StudentOnboardingViewModel } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
@@ -67,10 +61,10 @@ function StudentOnboardingStory() {
   });
 
   const viewModel: StudentOnboardingViewModel = {
-    register: register as UseFormRegister<StudentOnboardingFormData>,
-    control: control as Control<StudentOnboardingFormData>,
-    errors: formState.errors as FieldErrors<StudentOnboardingFormData>,
-    handleSubmit: handleSubmit as UseFormHandleSubmit<StudentOnboardingFormData>,
+    register,
+    control,
+    errors: formState.errors,
+    handleSubmit,
     isSubmitting: false,
     parentLocked: true,
     labels,

@@ -38,7 +38,7 @@ function buildSpecs(
     if (!instance || instance.executionState !== ClassExecutionState.COMPLETED) continue;
 
     const teacher = teacherById.get(report.teacherId);
-    if (!teacher) continue;
+    if (!teacher?.hourlyRate) continue;
 
     const hourlyRateStr = teacher.hourlyRate ?? String(DEFAULT_HOURLY_RATE);
     const rateCurrency = (teacher.rateCurrency ?? CurrencyCode.SAR) as CurrencyCode;

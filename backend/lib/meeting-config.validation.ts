@@ -35,7 +35,7 @@ function buildMeetingConfigDetailsSchema(provider: MeetingProviderSelectType): z
         input: ctx.value,
       });
     }
-    if (provider.fieldSchema.supportsUsername && data.username !== undefined && data.username.trim() === "") {
+    if (provider.fieldSchema.supportsUsername && data.username?.trim() === "") {
       ctx.issues.push({
         code: "custom",
         message: "usernameRequired",
@@ -43,7 +43,7 @@ function buildMeetingConfigDetailsSchema(provider: MeetingProviderSelectType): z
         input: ctx.value,
       });
     }
-    if (provider.fieldSchema.supportsTenantId && data.tenantId !== undefined && data.tenantId.trim() === "") {
+    if (provider.fieldSchema.supportsTenantId && data.tenantId?.trim() === "") {
       ctx.issues.push({
         code: "custom",
         message: "tenantIdRequired",

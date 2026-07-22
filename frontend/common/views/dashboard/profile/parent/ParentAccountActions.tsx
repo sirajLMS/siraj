@@ -33,11 +33,21 @@ function AccountActionDialog({ open, onClose, onConfirm, loading, error, mode }:
   const t = useAppTranslation().profileTranslations.parent.actions;
   const isDeactivate = mode === "deactivate";
 
+  const dialogTitle = isDeactivate ? t.deactivateDialogTitle : t.reactivateDialogTitle;
+  const confirmText = isDeactivate ? t.deactivateConfirmText : t.reactivateConfirmText;
+  const buttonColor = isDeactivate ? "error" : "success";
+  let buttonText: string;
+  if (loading) {
+    buttonText = isDeactivate ? t.deactivating : t.reactivating;
+  } else {
+    buttonText = isDeactivate ? t.deactivateAccount : t.reactivateAccount;
+  }
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{isDeactivate ? t.deactivateDialogTitle : t.reactivateDialogTitle}</DialogTitle>
+      <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent>
-        <Typography variant="bodyMd">{isDeactivate ? t.deactivateConfirmText : t.reactivateConfirmText}</Typography>
+        <Typography variant="bodyMd">{confirmText}</Typography>
         {error ? (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main, mt: 2 })}>
             {error}
@@ -48,14 +58,8 @@ function AccountActionDialog({ open, onClose, onConfirm, loading, error, mode }:
         <Button onClick={onClose} disabled={loading}>
           {t.cancel}
         </Button>
-        <Button onClick={onConfirm} variant="contained" color={isDeactivate ? "error" : "success"} disabled={loading}>
-          {loading
-            ? isDeactivate
-              ? t.deactivating
-              : t.reactivating
-            : isDeactivate
-              ? t.deactivateAccount
-              : t.reactivateAccount}
+        <Button onClick={onConfirm} variant="contained" color={buttonColor} disabled={loading}>
+          {buttonText}
         </Button>
       </DialogActions>
     </Dialog>

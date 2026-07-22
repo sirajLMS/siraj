@@ -65,14 +65,11 @@ const EndAdornment: React.FC<{
   readonly existingAdornment: React.ReactNode;
 }> = ({ option, existingAdornment }) =>
   option ? (
-    <>
-      {existingAdornment}
-      <InputAdornment position="end">
-        <Typography component="span" dir="ltr" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}>
-          {option.slug}
-        </Typography>
-      </InputAdornment>
-    </>
+    <InputAdornment position="end">
+      <Typography component="span" dir="ltr" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}>
+        {option.slug}
+      </Typography>
+    </InputAdornment>
   ) : (
     existingAdornment
   );
@@ -178,7 +175,7 @@ const useListAttachedSx = (
 ): React.CSSProperties =>
   useMemo<React.CSSProperties>(
     () => ({
-      ...(style ?? {}),
+      ...style,
       ...(listAttached
         ? {
             "& .MuiOutlinedInput-root": {
@@ -189,10 +186,10 @@ const useListAttachedSx = (
                     borderBottomLeftRadius: 0,
                     borderBottomRightRadius: 0,
                   }
-                : {}),
+                : null),
             },
           }
-        : {}),
+        : null),
     }),
     [style, listAttached, isOpen]
   );
@@ -222,7 +219,14 @@ const resolveFieldText = (
 } => {
   const showRequiredError = Boolean(required) && !option;
   const showError = Boolean(error) || showRequiredError;
-  const resolvedHelperText = helperText ?? (showRequiredError ? requiredLabel : undefined);
+
+  let resolvedHelperText: string | undefined;
+  if (showRequiredError) {
+    resolvedHelperText = requiredLabel;
+  } else {
+    resolvedHelperText = helperText;
+  }
+
   return { showError, resolvedHelperText };
 };
 
@@ -236,8 +240,17 @@ const resolveDisplayLabels = (
   readonly resolvedLabel: string | undefined;
   readonly resolvedPlaceholder: string | undefined;
 } => {
-  const resolvedLabel = listAttached ? undefined : (label ?? selectMethodLabel);
-  const resolvedPlaceholder = listAttached ? (label ?? selectMethodLabel) : (placeholder ?? searchBySlugLabel);
+  let resolvedLabel: string | undefined;
+  let resolvedPlaceholder: string | undefined;
+
+  if (listAttached) {
+    resolvedLabel = undefined;
+    resolvedPlaceholder = label ?? selectMethodLabel;
+  } else {
+    resolvedLabel = label ?? selectMethodLabel;
+    resolvedPlaceholder = placeholder ?? searchBySlugLabel;
+  }
+
   return { resolvedLabel, resolvedPlaceholder };
 };
 
@@ -299,7 +312,7 @@ const AutocompleteContent: React.FC<{
   );
 
   const renderOption = useCallback(
-    (props: React.HTMLAttributes<HTMLLIElement> & { readonly key?: React.Key }, entry: PaymentMethodCatalogOption) => (
+    (props: React.HTMLAttributes<HTMLLIElement>, entry: PaymentMethodCatalogOption) => (
       <PaymentMethodOption props={props} entry={entry} type={type} showSlug={showSlug} />
     ),
     [type, showSlug]
@@ -308,7 +321,7 @@ const AutocompleteContent: React.FC<{
   return (
     <Autocomplete<PaymentMethodCatalogOption, false, false, false>
       fullWidth={fullWidth}
-      options={options as PaymentMethodCatalogOption[]}
+      options={options}
       autoHighlight
       disabled={disabled}
       open={isOpen}

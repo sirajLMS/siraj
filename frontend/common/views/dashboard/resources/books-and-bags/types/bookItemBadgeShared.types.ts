@@ -9,5 +9,5 @@ export interface BookItemBadgeProps {
    * `on${PaletteKey}Container` are derived from this value. Kept as a plain
    * string union to mirror the `BookItemCard` `statusPaletteKey` maps.
    */
-  readonly paletteKey: "active" | "blocked" | "success" | "warning" | "error" | "info" | "neutral" | string;
+  readonly paletteKey: "active" | "blocked" | "success" | "warning" | "error" | "info" | "neutral" | (string & {});
 }

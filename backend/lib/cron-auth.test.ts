@@ -46,7 +46,7 @@ function makeRequest(method: string, headers: Record<string, string | null> = {}
 }
 
 async function parseJson(response: Response): Promise<Record<string, unknown>> {
-  return (await response.json()) as Record<string, unknown>;
+  return await response.json();
 }
 
 describe("verifyCronSecretAuth (R1–R11)", () => {

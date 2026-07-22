@@ -122,7 +122,7 @@ export function MeetingProvidersMobileView({
       ) : null}
 
       <MobileCardList
-        rows={rows as readonly MeetingProviderFieldsFragment[]}
+        rows={rows}
         loading={loading}
         emptyMessage={t.emptyCatalogBody}
         gap={1.5}

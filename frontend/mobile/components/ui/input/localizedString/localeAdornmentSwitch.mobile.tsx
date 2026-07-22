@@ -49,7 +49,7 @@ function MobileLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<MobileLo
             aria-selected={isSelected}
             isSelected={isSelected}
             isLastItem={isLastItem}
-            onClick={() => onPick(language.code as AppLocale)}
+            onClick={() => onPick(language.code)}
           >
             <MobileLocaleEmoji emoji={language.emoji} />
             <Typography component="span" sx={{ flex: 1, fontSize: "0.875rem" }}>

@@ -80,7 +80,7 @@ function InvoicesSection({
     | "onPageChange"
   >
 >) {
-  const invoicesList = invoices as readonly (typeof invoices)[number][];
+  const invoicesList = invoices;
   const loading = isSearchPending || (invoicesLoading && invoices.length === 0);
 
   const renderItem = (row: (typeof invoices)[number]): ReactNode => (
@@ -116,7 +116,7 @@ function InvoicesSection({
         gap={2}
         layout="edge-to-edge"
         paginationOptions={
-          totalCount !== undefined
+          totalCount != null
             ? buildServerPaginationOptions({
                 page: page ?? 0,
                 pageSize: pageSize ?? 10,

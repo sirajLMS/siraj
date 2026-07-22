@@ -141,15 +141,15 @@ export const cashDetailsSchema = z.object({
 export function parsePaymentMethodDetails(type: PaymentMethodType, details: unknown): PaymentMethodDetails {
   switch (type) {
     case PaymentMethodType.MOBILE_WALLET:
-      return mobileWalletDetailsSchema.parse(details) as MobileWalletDetails;
+      return mobileWalletDetailsSchema.parse(details);
     case PaymentMethodType.PAYMENT_LINK:
-      return paymentLinkDetailsSchema.parse(details) as PaymentLinkDetails;
+      return paymentLinkDetailsSchema.parse(details);
     case PaymentMethodType.ONLINE_ACCOUNT:
-      return onlineAccountDetailsSchema.parse(details) as OnlineAccountDetails;
+      return onlineAccountDetailsSchema.parse(details);
     case PaymentMethodType.BANK_TRANSFER:
-      return bankTransferDetailsSchema.parse(details) as BankTransferDetails;
+      return bankTransferDetailsSchema.parse(details);
     case PaymentMethodType.CASH:
-      return cashDetailsSchema.parse(details) as CashDetails;
+      return cashDetailsSchema.parse(details);
     case PaymentMethodType.PROOF_UPLOAD:
       throw new Error("Proof upload is not a configurable payment method type");
     default: {

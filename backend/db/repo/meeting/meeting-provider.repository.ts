@@ -98,15 +98,15 @@ export namespace MeetingProviderRepository {
       const [result] = await t
         .update(meetingProviders)
         .set({
-          ...(input.slug !== undefined ? { slug: input.slug } : {}),
-          ...(input.name !== undefined ? { name: input.name } : {}),
-          ...(input.description !== undefined ? { description: input.description } : {}),
-          ...(input.instructions !== undefined ? { instructions: input.instructions } : {}),
-          ...(input.urlAllowlist !== undefined ? { urlAllowlist: input.urlAllowlist } : {}),
-          ...(input.urlExample !== undefined ? { urlExample: input.urlExample } : {}),
-          ...(input.logoUrl !== undefined ? { logoUrl: input.logoUrl } : {}),
-          ...(input.fieldSchema !== undefined ? { fieldSchema: input.fieldSchema } : {}),
-          ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
+          ...(Object.hasOwn(input, "slug") ? { slug: input.slug } : {}),
+          ...(Object.hasOwn(input, "name") ? { name: input.name } : {}),
+          ...(Object.hasOwn(input, "description") ? { description: input.description } : {}),
+          ...(Object.hasOwn(input, "instructions") ? { instructions: input.instructions } : {}),
+          ...(Object.hasOwn(input, "urlAllowlist") ? { urlAllowlist: input.urlAllowlist } : {}),
+          ...(Object.hasOwn(input, "urlExample") ? { urlExample: input.urlExample } : {}),
+          ...(Object.hasOwn(input, "logoUrl") ? { logoUrl: input.logoUrl } : {}),
+          ...(Object.hasOwn(input, "fieldSchema") ? { fieldSchema: input.fieldSchema } : {}),
+          ...(Object.hasOwn(input, "isActive") ? { isActive: input.isActive } : {}),
           updatedAt: new Date(),
         })
         .where(eq(meetingProviders.id, id))

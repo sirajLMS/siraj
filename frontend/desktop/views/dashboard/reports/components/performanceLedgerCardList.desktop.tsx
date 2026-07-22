@@ -3,10 +3,7 @@
 import { Box } from "@mui/material";
 import type { PerformanceLedgerCardLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { PerformanceLedgerCardListProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
-import {
-  PerformanceLedgerCardDesktop,
-  type PerformanceLedgerCardDesktopLabels,
-} from "@/frontend/desktop/views/dashboard/reports/components/performanceLedgerCard.desktop";
+import { PerformanceLedgerCardDesktop } from "@/frontend/desktop/views/dashboard/reports/components/performanceLedgerCard.desktop";
 
 export type PerformanceLedgerCardListDesktopLabels = PerformanceLedgerCardLabels;
 
@@ -33,7 +30,7 @@ export function PerformanceLedgerCardListDesktop({
         <PerformanceLedgerCardDesktop
           key={row.id}
           row={row}
-          labels={labels as PerformanceLedgerCardDesktopLabels}
+          labels={labels}
           showFinancials={showFinancials}
           paidLabel={formatPaidAmounts(row.paidAmounts)}
           onClick={onRowClick}

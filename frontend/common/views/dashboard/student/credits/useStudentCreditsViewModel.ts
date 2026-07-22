@@ -57,7 +57,7 @@ function mapTransaction(raw: TransactionItem): StudentCreditTransactionRow {
   return {
     id: raw.id ?? "",
     changeAmount: raw.changeAmount ?? 0,
-    reason: (raw.reason ?? null) as CreditReason | null,
+    reason: raw.reason ?? null,
     notes: raw.notes ?? null,
     createdAt: raw.createdAt ?? null,
   };

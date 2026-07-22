@@ -42,8 +42,7 @@ export async function seedOrGet(teachersList: TeacherEntity[], studentsList: Stu
   const results = await RecurringClassService.upsertManyRecurringSchedules(inputs);
 
   if (shouldSeedExtendedFiles(seedConfig)) {
-    for (let i = 0; i < results.length; i++) {
-      const schedule = results[i];
+    for (const schedule of results) {
       if (!schedule) continue;
 
       try {

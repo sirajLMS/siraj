@@ -3,9 +3,9 @@
 import { Grid } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
+import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { OnboardingIdentityFields } from "@/frontend/common/views/dashboard/components/onboarding/OnboardingIdentityFields";
 import { useAppTranslation } from "@/shared/locale";
-import { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 
 interface Props {
   readonly register: UseFormRegister<ManagerOnboardingFormData>;

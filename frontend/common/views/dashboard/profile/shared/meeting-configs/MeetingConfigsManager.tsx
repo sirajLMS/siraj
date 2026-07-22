@@ -51,7 +51,7 @@ function useMeetingConfigsState(targetUserId: string) {
   const configById = useMemo(() => {
     const map = new Map<string, UserMeetingConfigFieldsFragment>();
     for (const config of configs) {
-      if (config.id) map.set(config.id, config as UserMeetingConfigFieldsFragment);
+      if (config.id) map.set(config.id, config);
     }
     return map;
   }, [configs]);

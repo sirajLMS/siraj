@@ -5,7 +5,6 @@ import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
-import type { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
@@ -35,7 +34,7 @@ export function OfficialDetailsSection({ control, errors, labels }: Readonly<Off
             return (
               <CountrySelect
                 country={selectedCountry}
-                setCountryAction={country => field.onChange((country?.code ?? "") as CountryCode)}
+                setCountryAction={country => field.onChange(country?.code ?? "")}
                 label={`${labels.fields.country} *`}
                 required
                 error={!!errors.countryCode}

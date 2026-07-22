@@ -54,6 +54,71 @@ export function NextClassJoinCard({ lesson, labels, locale, onJoin }: Readonly<N
   const countdown = formatCountdown(lesson.scheduledStartAt);
   const scheduledLabel = lesson.scheduledStartAt ? formatDateTime(lesson.scheduledStartAt, locale) : "";
 
+  // Extract nested ternary for chip content
+  let chipContent: ReactNode = null;
+  if (lesson.isFrozen) {
+    chipContent = (
+      <Chip
+        size="small"
+        label="Frozen"
+        sx={theme => ({
+          backgroundColor: theme.palette.errorContainer,
+          color: theme.palette.onErrorContainer,
+        })}
+      />
+    );
+  } else if (countdown) {
+    chipContent = (
+      <Chip
+        size="small"
+        label={countdown}
+        sx={theme => ({
+          backgroundColor: theme.palette.tertiaryContainer,
+          color: theme.palette.onTertiaryContainer,
+          fontWeight: 700,
+        })}
+      />
+    );
+  }
+
+  // Extract nested ternary for action button/content
+  let actionContent: ReactNode = null;
+  if (joinable) {
+    actionContent = (
+      <Button
+        variant="contained"
+        size="large"
+        startIcon={<PlayCircleOutlined />}
+        onClick={() => onJoin(lesson.id)}
+        sx={theme => ({
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.onPrimary,
+          fontWeight: 700,
+          borderRadius: 2,
+          py: 1.25,
+          "&:hover": {
+            backgroundColor: theme.palette.primary.dark ?? theme.palette.primary.main,
+          },
+        })}
+      >
+        {labels.joinNow}
+      </Button>
+    );
+  } else if (countdown) {
+    actionContent = (
+      <Box>
+        <LinearProgress
+          sx={theme => ({
+            backgroundColor: theme.palette.onPrimaryContainer,
+            "& .MuiLinearProgress-bar": {
+              backgroundColor: theme.palette.primary.main,
+            },
+          })}
+        />
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={theme => ({
@@ -70,26 +135,7 @@ export function NextClassJoinCard({ lesson, labels, locale, onJoin }: Readonly<N
         <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onPrimaryContainer, opacity: 0.8 })}>
           {labels.nextClass}
         </Typography>
-        {lesson.isFrozen ? (
-          <Chip
-            size="small"
-            label="Frozen"
-            sx={theme => ({
-              backgroundColor: theme.palette.errorContainer,
-              color: theme.palette.onErrorContainer,
-            })}
-          />
-        ) : countdown ? (
-          <Chip
-            size="small"
-            label={countdown}
-            sx={theme => ({
-              backgroundColor: theme.palette.tertiaryContainer,
-              color: theme.palette.onTertiaryContainer,
-              fontWeight: 700,
-            })}
-          />
-        ) : null}
+        {chipContent}
       </Stack>
 
       <Box>
@@ -104,37 +150,7 @@ export function NextClassJoinCard({ lesson, labels, locale, onJoin }: Readonly<N
         </Typography>
       </Box>
 
-      {joinable ? (
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<PlayCircleOutlined />}
-          onClick={() => onJoin(lesson.id)}
-          sx={theme => ({
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            fontWeight: 700,
-            borderRadius: 2,
-            py: 1.25,
-            "&:hover": {
-              backgroundColor: theme.palette.primary.dark ?? theme.palette.primary.main,
-            },
-          })}
-        >
-          {labels.joinNow}
-        </Button>
-      ) : countdown ? (
-        <Box>
-          <LinearProgress
-            sx={theme => ({
-              backgroundColor: theme.palette.onPrimaryContainer,
-              "& .MuiLinearProgress-bar": {
-                backgroundColor: theme.palette.primary.main,
-              },
-            })}
-          />
-        </Box>
-      ) : null}
+      {actionContent}
     </Box>
   );
 }

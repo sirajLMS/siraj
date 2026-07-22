@@ -19,7 +19,6 @@ import { logger } from "@/frontend/common/utils/logger";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import type {
   AssociatedStudents,
-  ParentAdminData,
   ParentViewData,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
@@ -36,7 +35,7 @@ function toEditData(
   avatarUrl: string | null | undefined,
   displayCurrency: CurrencyCode | null | undefined
 ): ParentAdminEditFormData {
-  const adminData = parentData && "nationality" in parentData ? (parentData as ParentAdminData) : null;
+  const adminData = parentData && "nationality" in parentData ? parentData : null;
   return {
     name: parentData?.name ?? "",
     email: parentData?.email ?? "",

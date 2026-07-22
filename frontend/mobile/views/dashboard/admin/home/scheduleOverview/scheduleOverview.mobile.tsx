@@ -141,7 +141,7 @@ export function ScheduleOverviewMobileView({
         </StyledMobileSectionBody>
 
         <MobileCardList<DailyScheduleRow>
-          rows={rows as readonly DailyScheduleRow[]}
+          rows={rows}
           loading={loading}
           emptyMessage={emptyMessage}
           gap={2}

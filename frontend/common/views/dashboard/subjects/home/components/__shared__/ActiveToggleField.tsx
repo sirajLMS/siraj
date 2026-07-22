@@ -29,11 +29,7 @@ export function ActiveToggleField<T extends FieldValues>({
       control={control}
       render={({ field }) => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Switch
-            checked={(field.value as boolean | undefined) ?? true}
-            onChange={field.onChange}
-            disabled={disabled}
-          />
+          <Switch checked={field.value ?? true} onChange={field.onChange} disabled={disabled} />
           <Typography variant="bodyMd">{label}</Typography>
         </Box>
       )}
