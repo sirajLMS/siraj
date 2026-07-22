@@ -3,10 +3,7 @@
 import type { PerformanceLedgerCardLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { PerformanceLedgerCardListProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import { MobileCardList, MobileCardListItem, MobileContentStack } from "@/frontend/mobile/components/ui";
-import {
-  PerformanceLedgerCardMobile,
-  type PerformanceLedgerCardMobileLabels,
-} from "@/frontend/mobile/views/dashboard/reports/components/performanceLedgerCard.mobile";
+import { PerformanceLedgerCardMobile } from "@/frontend/mobile/views/dashboard/reports/components/performanceLedgerCard.mobile";
 
 export type PerformanceLedgerCardListMobileLabels = PerformanceLedgerCardLabels;
 
@@ -30,7 +27,7 @@ export function PerformanceLedgerCardListMobile({
           <MobileCardListItem key={row.id} interactive={Boolean(onRowClick)}>
             <PerformanceLedgerCardMobile
               row={row}
-              labels={labels as PerformanceLedgerCardMobileLabels}
+              labels={labels}
               showFinancials={showFinancials}
               paidLabel={formatPaidAmounts(row.paidAmounts)}
               onClick={onRowClick}

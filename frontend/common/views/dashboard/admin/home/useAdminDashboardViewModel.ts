@@ -52,10 +52,6 @@ export interface AdminDashboardViewModel {
   readonly canScheduleViewTimezones: boolean;
 }
 
-function isAdminMetricKey(key: string | null): key is string {
-  return key !== null && key !== undefined;
-}
-
 export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardViewModelProps>): AdminDashboardViewModel {
   const t = useAppTranslation().dashboardTranslations.admin;
   const { headers, statusLabels } = useAdminDashboardLabels();
@@ -87,10 +83,7 @@ export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardVie
   const rows = (scheduleResult?.rows ?? []) as unknown as readonly DailyScheduleRow[];
   const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
 
-  const selectedMetricLabel =
-    filters.selectedStatus && isAdminMetricKey(filters.selectedStatus)
-      ? t.metrics[filters.selectedStatus as keyof AdminDashboardLabels["metrics"]]
-      : null;
+  const selectedMetricLabel = filters.selectedStatus ? t.metrics[filters.selectedStatus] : null;
 
   const pageCount =
     totalCount !== undefined && ADMIN_DASHBOARD_PAGE_SIZE > 0

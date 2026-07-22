@@ -10,7 +10,6 @@ import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   AdminInvoiceRow,
-  AdminInvoiceStatus,
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
 } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
@@ -20,6 +19,7 @@ import {
   shouldShowViewRejection,
 } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
+import type { AdminInvoiceStatus } from "@/shared/types";
 
 export interface AdminInvoicesDataGridLabels {
   readonly invoiceId: string;

@@ -381,7 +381,7 @@ export function SubmitPaymentProofDialog({
   };
 
   const title = mode === "submit" ? t.titleSubmit : t.titleMarkPaid;
-  const confirmLabel = mode === "markPaid" && !busy ? t.confirmMarkPaid : busy ? t.confirming : t.confirm;
+  const confirmLabel = busy ? t.confirming : mode === "markPaid" ? t.confirmMarkPaid : t.confirm;
   const canConfirm = Boolean(invoiceId && selectedFile && !busy && !billingActionsDisabled);
 
   return (
@@ -403,7 +403,7 @@ export function SubmitPaymentProofDialog({
             {t.impersonationBlocked}
           </Alert>
         ) : null}
-        {!displayCurrency ? <DisplayCurrencyHint /> : null}
+        {displayCurrency ? null : <DisplayCurrencyHint />}
         <SubmitPaymentProofDialogBody
           invoice={invoice}
           busy={busy}

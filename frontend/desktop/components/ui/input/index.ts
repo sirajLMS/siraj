@@ -1,4 +1,4 @@
-export * from "@/frontend/desktop/components/ui/input/catalogImageUpload";
+export * from "@/frontend/desktop/components/ui/input/catalogImageUpload/catalogImageUpload.desktop";
 export * from "@/frontend/desktop/components/ui/input/countrySelect";
 export * from "@/frontend/desktop/components/ui/input/currencySelect";
 export * from "@/frontend/desktop/components/ui/input/editableTypography";

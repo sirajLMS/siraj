@@ -40,7 +40,14 @@ export function ViewportProvider({ children, viewport }: ViewportProviderProps) 
     if (viewport) {
       return tierToContext(viewport);
     }
-    const detected: ViewportTier = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
+    let detected: ViewportTier;
+    if (isMobile) {
+      detected = "mobile";
+    } else if (isTablet) {
+      detected = "tablet";
+    } else {
+      detected = "desktop";
+    }
     return tierToContext(detected);
   }, [viewport, isMobile, isTablet]);
 

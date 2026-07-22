@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
-import type { ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission, type PaginationArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   adminComplaintQueueQueryDocument,
@@ -97,7 +96,7 @@ export function useAdminComplaintsViewModel(
     variables: {
       filter: {
         search: searchQuery || null,
-        status: activeTab === "all" ? null : (activeTab as ComplaintStatus),
+        status: activeTab === "all" ? null : activeTab,
       },
       paginationArgs,
     },
@@ -180,7 +179,7 @@ export function useAdminComplaintsViewModel(
     loading,
     error: error ?? null,
     onSearchChange: setSearchQuery,
-    onTabChange: setActiveTab as (tab: ComplaintTab) => void,
+    onTabChange: setActiveTab,
     onDraftChange: setDraftResponse,
     onAnswer: handleAnswer,
     onDelete: handleDelete,

@@ -17,7 +17,7 @@ import type {
   TrackingRow,
 } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
-import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 
 export function RescheduleTrackingDataGridDesktop({

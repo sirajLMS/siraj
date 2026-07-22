@@ -5,7 +5,12 @@ export * from "@/frontend/mobile/components/ui/button";
 export * from "@/frontend/mobile/components/ui/card";
 export * from "@/frontend/mobile/components/ui/container";
 export * from "@/frontend/mobile/components/ui/container/page";
-export * from "@/frontend/mobile/components/ui/dataGrid";
+export {
+  MobileAppDataGrid,
+  type MobileAppDataGridProps,
+} from "@/frontend/mobile/components/ui/dataGrid/MobileAppDataGrid";
+export { MobileAppDataGridLoadingOverlay } from "@/frontend/mobile/components/ui/dataGrid/MobileAppDataGridLoadingOverlay";
+export { MobileAppDataGridNoRowsOverlay } from "@/frontend/mobile/components/ui/dataGrid/MobileAppDataGridNoRowsOverlay";
 export * from "@/frontend/mobile/components/ui/dialog";
 export * from "@/frontend/mobile/components/ui/display";
 export * from "@/frontend/mobile/components/ui/filter";

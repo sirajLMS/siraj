@@ -6,7 +6,8 @@ import MenuBookOutlined from "@mui/icons-material/MenuBookOutlined";
 import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { BaseCard, UserAvatar } from "@/frontend/common/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui";
+import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import type {
   ClassInstanceStudentInfo,
   ClassInstanceTeacherInfo,

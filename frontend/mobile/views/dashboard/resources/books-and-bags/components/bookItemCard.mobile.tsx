@@ -7,6 +7,7 @@ import type {
   BookItemCardProps,
   BooksAndBagsLabels,
 } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
+import { BookItemStatusBadge } from "@/frontend/common/views/dashboard/resources/books-and-bags/components/bookItemBadge";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 
 const statusLabelMap: Record<AvailabilityStatus, keyof BooksAndBagsLabels> = {
@@ -47,28 +48,7 @@ export function BookItemCardMobile({ book, labels, onDelete }: Readonly<BookItem
           <DeleteOutlined />
         </IconButton>
       </Box>
-      <Box
-        component="span"
-        sx={theme => {
-          const containerKey = `${paletteKey}Container` as keyof typeof theme.palette.status;
-          const onContainerKey =
-            `on${paletteKey.charAt(0).toUpperCase()}${paletteKey.slice(1)}Container` as keyof typeof theme.palette.status;
-          return {
-            display: "inline-flex",
-            alignItems: "center",
-            px: 1.5,
-            py: 0.5,
-            borderRadius: theme.layout.radius.badge,
-            backgroundColor: theme.palette.status[containerKey],
-            color: theme.palette.status[onContainerKey],
-            alignSelf: "flex-start",
-          };
-        }}
-      >
-        <Typography variant="labelUppercase" sx={{ lineHeight: 1 }}>
-          {statusLabel}
-        </Typography>
-      </Box>
+      <BookItemStatusBadge statusLabel={statusLabel} paletteKey={paletteKey} />
     </MobileCardListItem>
   );
 }

@@ -7,8 +7,8 @@ import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { profileHrefForUser, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import type { StudentStatusHeaderProps } from "@/frontend/common/views/dashboard/students/status/types";
+import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
-import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/display";
 import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 

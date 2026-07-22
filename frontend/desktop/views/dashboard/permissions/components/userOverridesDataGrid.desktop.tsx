@@ -9,7 +9,7 @@ import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { OverridesCell } from "@/frontend/common/views/dashboard/permissions/components/OverridesCell";
 import type { UserOverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { getUserGroupsForUser } from "@/frontend/common/views/dashboard/permissions/utils";
-import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
 

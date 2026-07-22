@@ -4,7 +4,7 @@ import { Box, Chip, Grid, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ClassAuditDetailsCard } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
 import type { ClassAuditViewProps } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
-import { RegisteredStudentsSection } from "@/frontend/common/views/dashboard/classes/audit/RegisteredStudentsSection";
+import { ClassAuditGrid } from "@/frontend/common/views/dashboard/classes/audit/components/classAuditGrid";
 import { buildDetailsLabels } from "@/frontend/common/views/dashboard/classes/audit/utils";
 import { MobileFilterButton, MobilePageContainer, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import { AdminNoteCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/adminNoteCard.mobile";
@@ -79,35 +79,25 @@ export function ClassAuditViewMobile({
           />
         </Grid>
 
-        <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 3, lg: 4 } }}>
-          <Box sx={{ mt: { lg: 0 } }}>
-            <CommunicationLogCardMobile
-              entries={audit.communications}
-              labels={labels.communicationLog}
-              onResend={onResendNotifications}
-              isResending={isResending}
-            />
-          </Box>
-        </Grid>
-
-        <Grid size={{ xs: 12, lg: 8 }} sx={{ order: { xs: 4, lg: 3 } }}>
-          <RegisteredStudentsSection
-            students={audit.students}
-            registeredCount={audit.registeredStudentCount ?? 0}
-            labels={labels.registeredStudents}
-            onExport={onExportStudents}
-            onViewStudent={onViewStudent}
-          />
-        </Grid>
-
-        <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 5, lg: 5 } }}>
-          <AdminNoteCardMobile
-            note={audit.adminNote}
-            labels={labels.adminNote}
-            onUpdate={onUpdateAdminNote}
-            onEdit={onEditAdminNote}
-          />
-        </Grid>
+        <ClassAuditGrid
+          communications={audit.communications}
+          communicationLogLabels={labels.communicationLog}
+          onResendNotifications={onResendNotifications}
+          isResending={isResending}
+          students={audit.students}
+          registeredStudentCount={audit.registeredStudentCount ?? 0}
+          registeredStudentsLabels={labels.registeredStudents}
+          onExportStudents={onExportStudents}
+          onViewStudent={onViewStudent}
+          adminNote={audit.adminNote}
+          adminNoteLabels={labels.adminNote}
+          onUpdateAdminNote={onUpdateAdminNote}
+          onEditAdminNote={onEditAdminNote}
+          slots={{
+            CommunicationLogCard: CommunicationLogCardMobile,
+            AdminNoteCard: AdminNoteCardMobile,
+          }}
+        />
       </Grid>
     </MobilePageContainer>
   );

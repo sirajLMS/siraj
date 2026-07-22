@@ -22,7 +22,7 @@ function trimToLru(
   const keys = Object.keys(next);
   const overflow = keys.length - USER_SELECT_CACHE_MAX_KEYS_PER_AUDIENCE;
   if (overflow > 0) {
-    const sorted = keys.sort((a, b) => (next[a]?.updatedAt ?? 0) - (next[b]?.updatedAt ?? 0));
+    const sorted = keys.toSorted((a, b) => (next[a]?.updatedAt ?? 0) - (next[b]?.updatedAt ?? 0));
     for (let i = 0; i < overflow; i += 1) {
       const key = sorted[i];
       if (key) {

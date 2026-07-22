@@ -121,6 +121,16 @@ function RecurringMeetingConfigNewModeFields({
   );
 }
 
+function resolveMode(value: RecurringMeetingConfigFormState): "default" | "existing" | "new" {
+  if (value.useTeacherDefault) {
+    return "default";
+  }
+  if (value.selectedConfig) {
+    return "existing";
+  }
+  return "new";
+}
+
 export function RecurringMeetingConfigSection({
   teacherId,
   value,
@@ -142,7 +152,7 @@ export function RecurringMeetingConfigSection({
     .filter((config): config is UserMeetingConfigFieldsFragment => Boolean(config.id))
     .map(toSelectOption);
 
-  const mode = value.useTeacherDefault ? "default" : value.selectedConfig ? "existing" : "new";
+  const mode = resolveMode(value);
 
   const instructions = useMemo(() => {
     if (!value.newProvider?.instructions) return null;
@@ -232,9 +242,7 @@ export function RecurringMeetingConfigSection({
           allowEmpty={false}
           value={value.selectedConfig ? toSelectOption(value.selectedConfig) : null}
           onChangeAction={option => {
-            const match = configs.find(config => config.id === option?.id) as
-              | UserMeetingConfigFieldsFragment
-              | undefined;
+            const match = configs.find(config => config.id === option?.id);
             onChangeAction({ ...value, useTeacherDefault: false, selectedConfig: match ?? null });
           }}
         />

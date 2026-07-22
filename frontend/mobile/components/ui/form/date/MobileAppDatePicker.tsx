@@ -17,6 +17,8 @@ export type MobileAppDatePickerProps = {
   readonly slotProps?: {
     readonly textField?: Partial<React.ComponentProps<typeof TextField>>;
   };
+  /** Accepted for cross-tier parity with `AppDatePicker` / `DesktopAppDatePicker`; ignored by the native mobile input. */
+  readonly minDate?: Date;
 };
 
 /**

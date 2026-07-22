@@ -7,7 +7,8 @@ import type {
   BentoCardProps,
   ReassignmentBentoGridProps,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
-import { DesktopBaseCard, DesktopUserAvatar } from "@/frontend/desktop/components/ui";
+import { DesktopBaseCard } from "@/frontend/desktop/components/ui";
+import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
 import { useAppTranslation } from "@/shared/locale";
 
 function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardProps>) {

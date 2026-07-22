@@ -4,7 +4,6 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ParentDashboardView } from "@/frontend/common/views/dashboard/parent/dashboard/ParentDashboardView";
 import {
-  type ParentDashboardViewModel,
   type UseParentDashboardViewModelProps,
   useParentDashboardViewModel,
 } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
@@ -18,5 +17,3 @@ export function ParentDashboardContainer(props: UseParentDashboardViewModelProps
     </RequirePermission>
   );
 }
-
-export type { ParentDashboardViewModel, UseParentDashboardViewModelProps };

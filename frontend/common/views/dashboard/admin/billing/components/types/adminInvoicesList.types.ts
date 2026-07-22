@@ -7,10 +7,10 @@
 // with a `// VARIANT JUSTIFICATION: extra field <name>` line.
 import type {
   AdminInvoiceRow,
-  AdminInvoiceStatus,
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
 } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
+import type { AdminInvoiceStatus } from "@/shared/types";
 
 export interface BaseAdminInvoicesListLabels {
   readonly markAsPaid: string;

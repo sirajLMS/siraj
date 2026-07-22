@@ -4,9 +4,7 @@ import type {
   ParentInvoiceRow,
 } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
 import type { BillingLabels } from "@/shared/locale";
-import type { AdminInvoiceStatus, CoreInvoiceStatus, StudentCreditStatus } from "@/shared/types/billing-view";
-
-export type { AdminInvoiceStatus, CoreInvoiceStatus, StudentCreditStatus };
+import type { AdminInvoiceStatus, StudentCreditStatus } from "@/shared/types/billing-view";
 
 export interface MarkPaidInvoiceTarget {
   readonly id: string;

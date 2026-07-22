@@ -101,8 +101,8 @@ export function renderAdminDashboardView(input: AdminDashboardViewInput) {
       teacherPlaceholder={t.selectTeacher}
       teacherValue={teacherValue}
       submitLabel={t.submit}
-      teachers={teachers as readonly TeacherFilterItem[]}
-      rows={rows as readonly DailyScheduleRow[]}
+      teachers={teachers}
+      rows={rows}
       headers={headers}
       statusLabels={statusLabels}
       detailsLabel={t.details}

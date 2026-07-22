@@ -190,9 +190,9 @@ function QuotaFormCardMobile({
 
   return (
     <>
-      {!embedded ? (
+      {embedded ? null : (
         <MobileProfileHeader studentData={studentData} showAvatarEdit={showAvatarEdit} onEditAvatar={undefined} />
-      ) : null}
+      )}
 
       <Box
         sx={{
@@ -243,11 +243,11 @@ function QuotaFormCardMobile({
         </FormProvider>
       </Box>
 
-      {!embedded ? (
+      {embedded ? null : (
         <Box sx={{ maxWidth: "4xl", mx: "auto" }}>
           <ContextualHelperCardsMobile />
         </Box>
-      ) : null}
+      )}
     </>
   );
 }

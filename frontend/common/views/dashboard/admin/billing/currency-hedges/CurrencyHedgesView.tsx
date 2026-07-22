@@ -2,10 +2,7 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type {
-  CurrencyHedgesViewModel,
-  HedgeRow,
-} from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/useCurrencyHedgesViewModel";
+import type { CurrencyHedgesViewModel } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/useCurrencyHedgesViewModel";
 
 const lazyViews = createLazyView<CurrencyHedgesViewModel>(
   () =>
@@ -21,5 +18,3 @@ const lazyViews = createLazyView<CurrencyHedgesViewModel>(
 export function CurrencyHedgesView(props: Readonly<CurrencyHedgesViewModel>) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }
-
-export type { CurrencyHedgesViewModel, HedgeRow };

@@ -11,8 +11,7 @@ import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graph
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
-import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
-import { DesktopPaymentMethodDisplay } from "@/frontend/desktop/components/ui/display/paymentMethod/paymentMethodDisplay.desktop";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { useAppTranslation } from "@/shared/locale";
 
 export type { PaymentMethodRow };
@@ -153,5 +152,3 @@ export function DesktopPaymentMethodList({
     </DesktopBaseCard>
   );
 }
-
-export { DesktopPaymentMethodDisplay };

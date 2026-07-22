@@ -24,6 +24,11 @@ interface ReportExportLabels {
   };
 }
 
+interface FinancialsContext {
+  readonly locale: string;
+  readonly fxMessages: FormatCurrencyMessages;
+}
+
 interface ReportExportData {
   readonly rows: readonly ReportLedgerRow[];
   readonly summary: ReportsSummary;
@@ -133,11 +138,12 @@ export async function exportAttendanceReport(data: ReportExportData): Promise<vo
   const headers = buildHeaders(labels, showFinancials);
   const financialColStart = 6;
   const totalCols = headers.length;
+  const financialsCtx: FinancialsContext = { locale, fxMessages };
 
   writeTitleAndSubtitle(XLSX, ws, labels.pageTitle, fromDate, toDate, totalCols);
   writeHeaderRow(XLSX, ws, headers);
-  writeDataRows(XLSX, ws, rows, showFinancials, financialColStart, locale, fxMessages);
-  writeTotalsRow(XLSX, ws, rows, summary, labels.totalsLabel, showFinancials, locale, fxMessages);
+  writeDataRows(XLSX, ws, rows, showFinancials, financialColStart, financialsCtx);
+  writeTotalsRow(XLSX, ws, rows, summary, labels.totalsLabel, showFinancials, financialsCtx);
   applyColumnWidths(ws, headers, rows, showFinancials);
   applyRowHeights(ws);
 
@@ -148,7 +154,7 @@ export async function exportAttendanceReport(data: ReportExportData): Promise<vo
 }
 
 function buildHeaders(labels: ReportExportLabels, showFinancials: boolean): string[] {
-  const headers = [
+  const baseHeaders = [
     labels.tableLabels.name,
     labels.tableLabels.taken,
     labels.tableLabels.absent,
@@ -157,12 +163,7 @@ function buildHeaders(labels: ReportExportLabels, showFinancials: boolean): stri
     labels.tableLabels.hours,
   ];
 
-  if (showFinancials) {
-    headers.push(labels.tableLabels.paid);
-    headers.push(labels.tableLabels.paidLocked);
-  }
-
-  return headers;
+  return showFinancials ? [...baseHeaders, labels.tableLabels.paid, labels.tableLabels.paidLocked] : baseHeaders;
 }
 
 function writeTitleAndSubtitle(
@@ -201,18 +202,18 @@ function writeDataRows(
   rows: readonly ReportLedgerRow[],
   showFinancials: boolean,
   financialColStart: number,
-  locale: string,
-  fxMessages: ReportExportData["fxMessages"]
+  financialsCtx: FinancialsContext
 ): void {
   const dataStartRow = 4;
   rows.forEach((row, idx) => {
     const r = dataStartRow + idx;
-    const values = buildRowValues(row, showFinancials, locale, fxMessages);
+    const values = buildRowValues(row, showFinancials, financialsCtx);
     writeRowCells(XLSX, ws, r, idx, values, showFinancials, financialColStart);
   });
 }
 
-function formatPaidCell(row: ReportLedgerRow, locale: string, fxMessages: ReportExportData["fxMessages"]): string {
+function formatPaidCell(row: ReportLedgerRow, financialsCtx: FinancialsContext): string {
+  const { locale, fxMessages } = financialsCtx;
   return (
     formatReportPaidAmounts(row.paidAmounts, locale, fxMessages) ||
     row.paidAmounts.map(paid => `${paid.amount} ${paid.currency}`).join(" | ") ||
@@ -227,15 +228,11 @@ function formatPaidCellLocked(row: ReportLedgerRow): string {
 function buildRowValues(
   row: ReportLedgerRow,
   showFinancials: boolean,
-  locale: string,
-  fxMessages: ReportExportData["fxMessages"]
+  financialsCtx: FinancialsContext
 ): (string | number)[] {
-  const values: (string | number)[] = [row.name, row.taken, row.absent, row.leave, row.pending, row.hours];
-  if (showFinancials) {
-    values.push(formatPaidCell(row, locale, fxMessages));
-    values.push(formatPaidCellLocked(row));
-  }
-  return values;
+  const baseValues: (string | number)[] = [row.name, row.taken, row.absent, row.leave, row.pending, row.hours];
+
+  return showFinancials ? [...baseValues, formatPaidCell(row, financialsCtx), formatPaidCellLocked(row)] : baseValues;
 }
 
 function writeRowCells(
@@ -271,13 +268,12 @@ function writeTotalsRow(
   summary: ReportsSummary,
   totalsLabel: string,
   showFinancials: boolean,
-  locale: string,
-  fxMessages: ReportExportData["fxMessages"]
+  financialsCtx: FinancialsContext
 ): void {
   const dataStartRow = 4;
   const totalsRow = dataStartRow + rows.length;
 
-  const totalsValues: (string | number)[] = [
+  const baseTotals: (string | number)[] = [
     totalsLabel,
     rows.reduce((sum, r) => sum + r.taken, 0),
     rows.reduce((sum, r) => sum + r.absent, 0),
@@ -286,15 +282,9 @@ function writeTotalsRow(
     summary.totalHours,
   ];
 
-  if (showFinancials) {
-    const paidTotals = aggregatePaidAmountTotals(rows);
-    totalsValues.push(formatReportPaidAmounts(paidTotals, locale, fxMessages));
-    totalsValues.push(
-      paidTotals.map(paid => `${paid.amount} ${paid.currency}`).join(" | ") ||
-        summary.currencyDistribution.map(slice => `${slice.amount} ${slice.currency}`).join(" | ") ||
-        "—"
-    );
-  }
+  const totalsValues = showFinancials
+    ? [...baseTotals, ...buildFinancialTotals(rows, summary, financialsCtx)]
+    : baseTotals;
 
   totalsValues.forEach((val, col) => {
     const cell = XLSX.utils.encode_cell({ r: totalsRow, c: col });
@@ -304,6 +294,21 @@ function writeTotalsRow(
       s: totalsStyle,
     };
   });
+}
+
+function buildFinancialTotals(
+  rows: readonly ReportLedgerRow[],
+  summary: ReportsSummary,
+  financialsCtx: FinancialsContext
+): (string | number)[] {
+  const { locale, fxMessages } = financialsCtx;
+  const paidTotals = aggregatePaidAmountTotals(rows);
+  return [
+    formatReportPaidAmounts(paidTotals, locale, fxMessages),
+    paidTotals.map(paid => `${paid.amount} ${paid.currency}`).join(" | ") ||
+      summary.currencyDistribution.map(slice => `${slice.amount} ${slice.currency}`).join(" | ") ||
+      "—",
+  ];
 }
 
 function applyColumnWidths(

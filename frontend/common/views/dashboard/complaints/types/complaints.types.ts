@@ -32,8 +32,6 @@ export interface ParentComplaintRecord {
   readonly adminResponse?: ParentComplaintRecordResponse;
 }
 
-export type { ParentStudentOption } from "@/frontend/common/types/shared.types";
-
 export interface AdminComplaintsSummary {
   readonly unanswered: number;
   readonly answered: number;

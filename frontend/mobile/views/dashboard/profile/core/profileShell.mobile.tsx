@@ -3,11 +3,7 @@
 import { Box, Button, Skeleton, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { ProfileAvatarView } from "@/frontend/common/components/ui/input/avatarImageField";
-import {
-  type ProfileAudience,
-  ProfileMode,
-  type ProfileScope,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileHeader } from "@/frontend/common/views/dashboard/profile/core/ProfileHeader";
 import { ProfileSkeleton } from "@/frontend/common/views/dashboard/profile/core/ProfileSkeleton";
 import { ProfileTabNav } from "@/frontend/common/views/dashboard/profile/core/ProfileTabNav";
@@ -77,30 +73,28 @@ function renderBody(
         },
       })}
     >
-      {isEditMode ? (
-        actions ? (
-          <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>{actions}</Box>
-        ) : null
-      ) : (
-        <>
-          <ProfileAvatarView imageUrl={avatarUrl} label={name ?? t.avatar} title={name ?? t.avatar} />
-          <ProfileHeader
-            name={name ?? ""}
-            email={email ?? ""}
-            roleLabel={roleLabel}
-            avatarUrl={avatarUrl}
-            showAvatar={false}
-            actions={actions}
-          />
-        </>
-      )}
+      {(() => {
+        if (isEditMode) {
+          return actions ? (
+            <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>{actions}</Box>
+          ) : null;
+        }
+        return (
+          <>
+            <ProfileAvatarView imageUrl={avatarUrl} label={name ?? t.avatar} title={name ?? t.avatar} />
+            <ProfileHeader
+              name={name ?? ""}
+              email={email ?? ""}
+              roleLabel={roleLabel}
+              avatarUrl={avatarUrl}
+              showAvatar={false}
+              actions={actions}
+            />
+          </>
+        );
+      })()}
       {showTabs ? (
-        <ProfileTabNav
-          audience={audience as ProfileAudience}
-          scope={scope as ProfileScope}
-          currentTab={currentTab}
-          onTabChange={onTabChange}
-        />
+        <ProfileTabNav audience={audience} scope={scope} currentTab={currentTab} onTabChange={onTabChange} />
       ) : null}
       <Box
         key={currentTab ?? "content"}

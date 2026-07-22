@@ -1,7 +1,6 @@
 // NEW FOR PLAN v5: Lifted tier-paired Props out of mobile/desktop per specs.md §4.1
 // (Class B — unified originals; the mobile/desktop twin interfaces were byte-equal
 // modulo whitespace). Both tier files now import these shared declarations.
-import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type {
   ParentDashboardMetrics,
   ParentLiveClassStatus,
@@ -63,4 +62,4 @@ export interface WorkshopPromoCardProps {
 }
 
 // Re-exported for tier convenience so the schedule components can keep a single import.
-export type { ParentDashboardLabels };
+export type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";

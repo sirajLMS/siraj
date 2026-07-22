@@ -17,7 +17,7 @@ export function ParentsMetricGrid({ metrics }: Readonly<ParentsMetricGridProps>)
     <Grid container spacing={2} sx={{ mb: 4 }}>
       {metrics.map(metric => {
         const parts = metric.labelKey.split(".");
-        const key = parts[parts.length - 1];
+        const key = parts.at(-1);
         const label = parents.metrics[key as keyof typeof parents.metrics] ?? metric.labelKey;
         return (
           <Grid key={metric.key} size={{ xs: 6, md: 3 }}>

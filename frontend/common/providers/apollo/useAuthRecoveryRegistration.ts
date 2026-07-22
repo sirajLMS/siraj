@@ -44,15 +44,13 @@ export function useAuthRecoveryRegistration(
       // `false` = do not force a network-only refetch — re-issue the
       // active observable queries with their existing fetch policies but
       // with the new Authorization header that authLink will now read
-      // from the in-memory token.
-      try {
-        apolloClient.reFetchObservableQueries(false).catch(() => {
-          // Swallow — the redirect/recovery logic must not throw if Apollo
-          // refuses to re-issue (e.g. during teardown).
-        });
-      } catch {
-        // Swallow — same reason as above, for synchronous throws.
-      }
+      // from the in-memory token. The caller (recoverFromUnauthenticated
+      // in utils.ts) wraps this in try/catch, so sync throws propagate
+      // there; async rejection is handled by .catch() below.
+      apolloClient.refetchObservableQueries(false).catch(() => {
+        // Swallow — the redirect/recovery logic must not throw if Apollo
+        // refuses to re-issue (e.g. during teardown).
+      });
     };
 
     registerAuthRecovery({ refresh, reFetch });

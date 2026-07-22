@@ -1,10 +1,11 @@
 import { PersonSearchOutlined, PublicOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { AvatarGroup, Box, Tooltip, Typography } from "@mui/material";
+import { AvailabilityInsightsLayout } from "@/frontend/common/views/dashboard/teachers/availability/components/availabilityInsightsLayout";
 import type {
   AvailabilityInsightsProps,
   InsightCardProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
-import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar";
+import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
 import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 import { DesktopTimezoneDisplay } from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
@@ -114,35 +115,39 @@ export function AvailabilityInsightsDesktop({ insights }: Readonly<AvailabilityI
   const t = useAppTranslation().dashboardTranslations.teacherAvailability.insights;
 
   return (
-    <Box
-      sx={{
+    <AvailabilityInsightsLayout
+      insights={insights}
+      layoutSx={{
         display: "grid",
         gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
         gap: 3,
         mt: 4,
       }}
-    >
-      <InsightCard
-        title={t.peakLoad}
-        value={insights.peakLoad}
-        description={t.peakLoadDesc}
-        icon={<TrendingUpOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
-      />
-
-      <InsightCard
-        title={t.availableStaff}
-        value={t.teachersCount(insights.availableStaff)}
-        description={t.availableStaffDesc}
-        icon={<PersonSearchOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
-      />
-
-      <TimezoneInsight
-        timezones={insights.timezones}
-        labels={{
-          title: t.localTimezones,
-          description: t.localTimezonesDesc,
-        }}
-      />
-    </Box>
+      peakLoadCard={
+        <InsightCard
+          title={t.peakLoad}
+          value={insights.peakLoad}
+          description={t.peakLoadDesc}
+          icon={<TrendingUpOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
+        />
+      }
+      availableStaffCard={
+        <InsightCard
+          title={t.availableStaff}
+          value={t.teachersCount(insights.availableStaff)}
+          description={t.availableStaffDesc}
+          icon={<PersonSearchOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
+        />
+      }
+      timezoneInsightCard={
+        <TimezoneInsight
+          timezones={insights.timezones}
+          labels={{
+            title: t.localTimezones,
+            description: t.localTimezonesDesc,
+          }}
+        />
+      }
+    />
   );
 }

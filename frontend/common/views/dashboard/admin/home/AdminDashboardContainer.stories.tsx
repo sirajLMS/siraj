@@ -75,7 +75,7 @@ export function MockAdminDashboardContainer() {
   const filteredRows = baseRows.filter(row => matchesDailyScheduleMetricFilter(row, metricFilter));
   const paginatedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
 
-  const selectedMetricLabel = filters.selectedStatus ? (t.metrics[filters.selectedStatus] as string) : null;
+  const selectedMetricLabel = filters.selectedStatus ? t.metrics[filters.selectedStatus] : null;
 
   const handleMetricClick = (key: string) => {
     setPage(0);
@@ -100,7 +100,7 @@ export function MockAdminDashboardContainer() {
       searchValue={filters.searchQuery}
       dateValue={filters.date}
       selectedTeacher={filters.selectedTeacher}
-      rows={paginatedRows as readonly (typeof paginatedRows)[number][]}
+      rows={paginatedRows}
       headers={headers}
       statusLabels={statusLabels}
       page={page}

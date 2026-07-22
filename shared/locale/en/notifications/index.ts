@@ -143,6 +143,9 @@ export const notificationsEn: NotificationsLabels = {
   approveInvoice: "Approve invoice",
   rejectInvoice: "Reject invoice",
   noNotifications: "No notifications",
-  unreadCount: count =>
-    count === 0 ? "No unread notifications" : count === 1 ? "1 unread notification" : `${count} unread notifications`,
+  unreadCount: (count: number) => {
+    if (count === 0) return "No unread notifications";
+    if (count === 1) return "1 unread notification";
+    return `${count} unread notifications`;
+  },
 };

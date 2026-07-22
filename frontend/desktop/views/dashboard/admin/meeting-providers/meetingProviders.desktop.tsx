@@ -3,19 +3,19 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { CreateMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/CreateMeetingProviderDialog";
 import { EditMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/EditMeetingProviderDialog";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import {
   DesktopAppDataGrid,
-  DesktopBaseDeleteDialog,
   DesktopFormErrorSnackbar,
   DesktopFormSuccessSnackbar,
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
 } from "@/frontend/desktop/components/ui";
+import { DesktopBaseDeleteDialog } from "@/frontend/desktop/components/ui/dialog/DesktopBaseDeleteDialog";
+import type { LocalizedString } from "@/shared/types";
 
 function MeetingProvidersDesktopEmptyState({ title, body }: Readonly<{ title: string; body: string }>) {
   return (

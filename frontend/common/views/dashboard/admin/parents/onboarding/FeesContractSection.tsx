@@ -177,7 +177,7 @@ function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "erro
               <CurrencySelect
                 currency={option}
                 setCurrencyAction={selected => {
-                  field.onChange(selected.code as string);
+                  field.onChange(selected.code);
                 }}
                 onBlurAction={field.onBlur}
                 label={t.fields.currency}

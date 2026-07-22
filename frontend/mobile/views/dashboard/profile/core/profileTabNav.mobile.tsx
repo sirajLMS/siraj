@@ -36,7 +36,7 @@ export function ProfileTabNavMobileView({
             role="tab"
             tabIndex={0}
             aria-selected={currentTab === tab.id}
-            label={t.shell.tabs[tab.id as keyof typeof t.shell.tabs]}
+            label={t.shell.tabs[tab.id]}
             onClick={() => onTabChange(tab.id)}
             onKeyDown={event => {
               if (event.key === "Enter" || event.key === " ") {

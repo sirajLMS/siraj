@@ -38,11 +38,11 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
 import { type CurrencyOption, getCurrencyOptions } from "@/frontend/common/lib/currency";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { logger } from "@/frontend/common/utils/logger";
 import type { CatalogEditDialogProps } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
 import { EntityFormDialogActions } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions";
 import { useAppTranslation } from "@/shared/locale";
+import type { LocalizedString } from "@/shared/types";
 
 const FORM_ID = "payment-catalog-edit-form";
 

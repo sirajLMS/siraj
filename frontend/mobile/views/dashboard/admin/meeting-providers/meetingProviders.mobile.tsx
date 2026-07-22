@@ -6,7 +6,6 @@ import type { ReactNode } from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { CreateMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/CreateMeetingProviderDialog";
 import { EditMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/EditMeetingProviderDialog";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
@@ -20,6 +19,7 @@ import {
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
+import type { LocalizedString } from "@/shared/types";
 
 function MeetingProvidersMobileEmptyState({ title, body }: Readonly<{ title: string; body: string }>) {
   return (

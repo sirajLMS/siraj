@@ -5,7 +5,7 @@ import { GroupsOutlined, LoginOutlined, LogoutOutlined, PersonOutlineOutlined } 
 import { Box, ButtonBase, Divider, Menu, MenuItem, Typography } from "@mui/material";
 import type React from "react";
 import { useMemo, useState } from "react";
-import { UserAvatar } from "@/frontend/common/components/ui";
+import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import type { SimulatablePermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { simulatablePermissionGroupsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";

@@ -2,10 +2,7 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type {
-  PaymentCatalogAdminViewModel,
-  UsePaymentCatalogAdminViewModelProps,
-} from "@/frontend/common/views/dashboard/admin/payment-catalogs/usePaymentCatalogAdminViewModel";
+import type { PaymentCatalogAdminViewModel } from "@/frontend/common/views/dashboard/admin/payment-catalogs/usePaymentCatalogAdminViewModel";
 
 const lazyViews = createLazyView<PaymentCatalogAdminViewModel>(
   () =>
@@ -21,5 +18,3 @@ const lazyViews = createLazyView<PaymentCatalogAdminViewModel>(
 export function PaymentCatalogAdminView(props: Readonly<PaymentCatalogAdminViewModel>) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }
-
-export type { PaymentCatalogAdminViewModel, UsePaymentCatalogAdminViewModelProps };

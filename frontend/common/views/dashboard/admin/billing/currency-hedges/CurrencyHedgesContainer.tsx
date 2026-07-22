@@ -4,7 +4,6 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CurrencyHedgesView } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/CurrencyHedgesView";
 import {
-  type CurrencyHedgesViewModel,
   type UseCurrencyHedgesViewModelProps,
   useCurrencyHedgesViewModel,
 } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/useCurrencyHedgesViewModel";
@@ -18,5 +17,3 @@ export function CurrencyHedgesContainer(_props: Readonly<UseCurrencyHedgesViewMo
     </RequirePermission>
   );
 }
-
-export type { CurrencyHedgesViewModel, UseCurrencyHedgesViewModelProps };

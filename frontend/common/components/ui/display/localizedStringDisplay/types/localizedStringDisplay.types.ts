@@ -2,7 +2,7 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 import type * as React from "react";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 export type LocalizedStringDisplayProps = {
   readonly value?: LocalizedString | null;

@@ -58,15 +58,15 @@ export function ScheduleOverviewDataGrid({
       getRowId={row => row.id ?? ""}
       loading={loading}
       paginationOptions={
-        totalCount !== undefined
-          ? buildServerPaginationOptions({
+        totalCount === undefined
+          ? { mode: "client", pageSize, pageSizeOptions: [pageSize] }
+          : buildServerPaginationOptions({
               page,
               pageSize,
               totalCount,
               onPageChange,
               pageSizeOptions: [pageSize],
             })
-          : { mode: "client", pageSize, pageSizeOptions: [pageSize] }
       }
       autoHeight
       rowHeight={60}

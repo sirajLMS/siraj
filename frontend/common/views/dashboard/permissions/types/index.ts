@@ -3,7 +3,22 @@ export type { AddPermissionBulkBarProps } from "./addPermissionBulkBar.types";
 export type { AddPermissionFilterBarProps } from "./addPermissionFilterBar.types";
 export type { AddPermissionsTabProps } from "./addPermissionsTab.types";
 export type { AssignedUsersTabProps } from "./assignedUsersTab.types";
+export type {
+  AssignedUsersBulkActionBarSlotProps,
+  AssignedUsersListSlotLabels,
+  AssignedUsersListSlotProps,
+  AssignedUsersTabSharedLabels,
+  AssignedUsersTabSharedProps,
+  AssignedUsersTabSlotProps,
+  AssignedUsersToolbarSlotProps,
+} from "./assignedUsersTabShared.types";
 export type { AssignGroupDialogProps } from "./assignGroupDialog.types";
+export type {
+  AssignGroupDialogSharedProps,
+  AssignGroupDialogSlotProps,
+  AssignGroupDialogVariant,
+  AssignGroupUserAutocompleteSlot,
+} from "./assignGroupDialogShared.types";
 export type { CurrentPermissionsTabProps } from "./currentPermissionsTab.types";
 export type { DeleteGroupDialogProps } from "./deleteGroupDialog.types";
 export type { ManageOverridesDialogProps } from "./manageOverridesDialog.types";

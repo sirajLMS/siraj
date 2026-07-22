@@ -1,7 +1,8 @@
 "use client";
 
-import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Box, Chip, IconButton, Stack } from "@mui/material";
+import { AddOutlined } from "@mui/icons-material";
+import { Chip, IconButton, Stack } from "@mui/material";
+import { CategoryChip } from "@/frontend/common/views/dashboard/subjects/home/components/categoryChip";
 import type { CategoriesSectionProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { useAppTranslation } from "@/shared/locale";
@@ -43,30 +44,15 @@ export function CategoriesSectionDesktop({
           onClick={() => onCategoryChange(null)}
         />
         {categories.map(cat => (
-          <Chip
+          <CategoryChip
             key={cat.id}
             label={cat.name}
-            variant={activeCategoryId === cat.id ? "filled" : "outlined"}
-            color={activeCategoryId === cat.id ? "primary" : "default"}
+            isActive={activeCategoryId === cat.id}
             onClick={() => onCategoryChange(cat.id ?? null)}
-            onDelete={canManage ? () => onDeleteCategory(cat.id ?? "") : undefined}
-            deleteIcon={
-              canManage ? (
-                <Box sx={{ display: "flex" }}>
-                  <IconButton
-                    size="small"
-                    onClick={e => {
-                      e.stopPropagation();
-                      onEditCategory(cat.id ?? "");
-                    }}
-                    aria-label={t.editCategory}
-                  >
-                    <EditOutlined sx={{ fontSize: 14 }} />
-                  </IconButton>
-                  <DeleteOutlined sx={{ fontSize: 16 }} />
-                </Box>
-              ) : undefined
-            }
+            onDelete={() => onDeleteCategory(cat.id ?? "")}
+            onEdit={() => onEditCategory(cat.id ?? "")}
+            canManage={canManage}
+            editAriaLabel={t.editCategory}
           />
         ))}
       </Stack>

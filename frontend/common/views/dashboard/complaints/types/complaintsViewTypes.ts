@@ -7,7 +7,18 @@ import type {
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsLabels } from "@/shared/locale/types/dashboard/complaints";
 
-export type { ComplaintsLabels };
+export interface DeleteComplaintDialogProps {
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly onConfirm: () => void;
+  readonly isDeleting: boolean;
+  readonly labels: {
+    readonly deleteConfirmTitle: string;
+    readonly deleteConfirmBody: string;
+    readonly deleteConfirmCancel: string;
+    readonly deleteConfirmConfirm: string;
+  };
+}
 
 export interface ParentComplaintsViewProps {
   readonly labels: ComplaintsLabels["parent"];

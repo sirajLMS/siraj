@@ -43,7 +43,7 @@ describe("Availability Search E2E", () => {
     await navItem.click();
 
     await page.waitForURL("**/search-schedule**");
-    expect(await page.url()).toContain("/search-schedule");
+    expect(page.url()).toContain("/search-schedule");
 
     const heading = page.getByText("البحث عن توفر الجدول");
     expect(await heading.isVisible()).toBe(true);

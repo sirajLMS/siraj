@@ -25,7 +25,8 @@ import {
   Typography,
 } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import { FormErrorSnackbar, FormSuccessSnackbar, UserAvatar } from "@/frontend/common/components/ui";
+import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
+import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AppLanguage, Gender, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentPortalProfileEditDraft } from "@/frontend/common/stores/studentPortalProfileStore";

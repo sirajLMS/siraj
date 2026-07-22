@@ -5,9 +5,10 @@ import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type ReportsViewModel,
-  type UseReportsViewModelProps,
   useReportsViewModel,
 } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
+
+export type { UseReportsViewModelProps } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
 
 const lazyViews = createLazyView<ReportsViewModel>(
   () =>
@@ -24,4 +25,3 @@ export function ReportsContainer() {
     </RequirePermission>
   );
 }
-export type { ReportsViewModel, UseReportsViewModelProps };

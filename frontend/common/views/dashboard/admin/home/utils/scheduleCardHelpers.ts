@@ -42,19 +42,11 @@ export function buildScheduleMetaItems(
   duration: string,
   showTimezones: boolean
 ): MetaStatItem[] {
-  const items: MetaStatItem[] = [];
-  if (showTimezones) {
-    items.push({
-      label: headers.teacherTime,
-      value: teacherTimeCell,
-      tone: "teacher",
-    });
-    items.push({
-      label: headers.studentTime,
-      value: studentTimeCell,
-      tone: "student",
-    });
-  }
-  items.push({ label: headers.duration, value: duration, tone: "default" });
-  return items;
+  const timezoneItems: MetaStatItem[] = showTimezones
+    ? [
+        { label: headers.teacherTime, value: teacherTimeCell, tone: "teacher" },
+        { label: headers.studentTime, value: studentTimeCell, tone: "student" },
+      ]
+    : [];
+  return [...timezoneItems, { label: headers.duration, value: duration, tone: "default" }];
 }

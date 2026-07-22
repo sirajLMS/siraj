@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import type {
   CurrencyHedgesViewModel,
   HedgeRow,
-} from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/CurrencyHedgesView";
+} from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/useCurrencyHedgesViewModel";
 import { buildCurrencyHedgeColumns } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/utils";
 import {
   DesktopAppDataGrid,

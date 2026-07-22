@@ -18,6 +18,56 @@ import { TeacherAvailabilityGridMobile } from "@/frontend/mobile/views/dashboard
 import { TeacherAvailabilityMonthDrawerMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
+interface SearchScheduleMobileBodyProps {
+  readonly isInitialLoading: boolean;
+  readonly searchResult: SearchScheduleResultSummary | null | undefined;
+  readonly columnCount: number;
+  readonly fromDate: string;
+  readonly toDate: string;
+  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreSearchSchedule"];
+  readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
+  readonly pageInfo: SearchSchedulePageInfo | null | undefined;
+  readonly teacherCount: number;
+  readonly onPageChange: (page: number) => void;
+  readonly showPaginationFooter: boolean;
+}
+
+function SearchScheduleMobileBody({
+  isInitialLoading,
+  searchResult,
+  columnCount,
+  fromDate,
+  toDate,
+  t,
+  onOpenMonthDrawer,
+  pageInfo,
+  teacherCount,
+  onPageChange,
+  showPaginationFooter,
+}: Readonly<SearchScheduleMobileBodyProps>) {
+  if (isInitialLoading) {
+    return <SearchScheduleResultsSkeletonMobile columnCount={columnCount} />;
+  }
+
+  if (!searchResult) {
+    return null;
+  }
+
+  return (
+    <SearchScheduleMobileResults
+      searchResult={searchResult}
+      fromDate={fromDate}
+      toDate={toDate}
+      t={t}
+      onOpenMonthDrawer={onOpenMonthDrawer}
+      pageInfo={pageInfo}
+      teacherCount={teacherCount}
+      onPageChange={onPageChange}
+      showPagination={showPaginationFooter}
+    />
+  );
+}
+
 interface SearchScheduleMobileResultsProps {
   readonly searchResult: SearchScheduleResultSummary | null | undefined;
   readonly fromDate: string;
@@ -172,21 +222,19 @@ export function SearchScheduleMobileView({
           </Typography>
         ) : null}
 
-        {isInitialLoading ? (
-          <SearchScheduleResultsSkeletonMobile columnCount={columnCount} />
-        ) : searchResult || undefined ? (
-          <SearchScheduleMobileResults
-            searchResult={searchResult}
-            fromDate={fromDate}
-            toDate={toDate}
-            t={t}
-            onOpenMonthDrawer={onOpenMonthDrawer}
-            pageInfo={pageInfo}
-            teacherCount={teacherCount}
-            onPageChange={onPageChange}
-            showPagination={showPaginationFooter}
-          />
-        ) : null}
+        <SearchScheduleMobileBody
+          isInitialLoading={isInitialLoading}
+          searchResult={searchResult}
+          columnCount={columnCount}
+          fromDate={fromDate}
+          toDate={toDate}
+          t={t}
+          onOpenMonthDrawer={onOpenMonthDrawer}
+          pageInfo={pageInfo}
+          teacherCount={teacherCount}
+          onPageChange={onPageChange}
+          showPaginationFooter={showPaginationFooter}
+        />
       </Box>
 
       <TeacherAvailabilityMonthDrawerMobile

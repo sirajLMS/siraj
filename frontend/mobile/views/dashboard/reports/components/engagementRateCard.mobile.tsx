@@ -35,7 +35,7 @@ export function EngagementRateCardMobile({
             {`${rate}%`}
           </Typography>
           <Typography variant="labelMd" sx={theme => ({ color: theme.palette.primary.main, opacity: 0.7 })}>
-            {growth !== null ? `+${growth}% vs prev` : increaseLabel}
+            {growth === null ? increaseLabel : `+${growth}% vs prev`}
           </Typography>
         </Box>
       </Box>

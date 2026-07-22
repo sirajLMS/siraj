@@ -4,7 +4,6 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { SupportedCurrenciesView } from "@/frontend/common/views/dashboard/admin/billing/currencies/SupportedCurrenciesView";
 import {
-  type SupportedCurrenciesViewModel,
   type UseSupportedCurrenciesViewModelProps,
   useSupportedCurrenciesViewModel,
 } from "@/frontend/common/views/dashboard/admin/billing/currencies/useSupportedCurrenciesViewModel";
@@ -18,5 +17,3 @@ export function SupportedCurrenciesContainer(_props: Readonly<UseSupportedCurren
     </RequirePermission>
   );
 }
-
-export type { SupportedCurrenciesViewModel, UseSupportedCurrenciesViewModelProps };

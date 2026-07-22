@@ -8,7 +8,7 @@ import {
   NOTIFICATION_CHANNELS,
   type PreferenceMatrixRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
-import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { useAppTranslation } from "@/shared/locale";
 
 interface PreferencesMatrixDesktopViewProps {

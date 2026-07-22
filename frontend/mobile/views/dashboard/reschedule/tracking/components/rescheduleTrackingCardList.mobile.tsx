@@ -24,7 +24,7 @@ import { MobileCardList, MobileCardListItem, MobileEmptyState } from "@/frontend
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 
-function TrackingCardHeader({ row, onView }: { row: TrackingRow; onView: (id: string) => void }) {
+function TrackingCardHeader({ row, onView }: Readonly<{ row: TrackingRow; onView: (id: string) => void }>) {
   const rowId = row.id ?? "";
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
@@ -59,7 +59,7 @@ function TrackingCardHeader({ row, onView }: { row: TrackingRow; onView: (id: st
   );
 }
 
-function TrackingCardBody({ row }: { row: TrackingRow }) {
+function TrackingCardBody({ row }: Readonly<{ row: TrackingRow }>) {
   return (
     <Box sx={{ mb: 2 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}>
@@ -92,11 +92,11 @@ function TrackingCardFooter({
   row,
   labels,
   isLeave,
-}: {
+}: Readonly<{
   row: TrackingRow;
   labels: RescheduleTrackingCardListProps["labels"];
   isLeave: boolean;
-}) {
+}>) {
   return (
     <Box
       sx={theme => ({
@@ -137,18 +137,20 @@ function TrackingCardFooter({
         </Typography>
       </Box>
 
-      <MobileStatusBadge
-        category="trackingStatus"
-        status={row.status ?? LeaveRequestStatus.Pending}
-        label={
-          row.status !== null
-            ? getTrackingStatusLabel(row.status ?? LeaveRequestStatus.Pending, { ...labels, filterAll: "" })
-            : ""
+      {(() => {
+        if (row.status === null) {
+          return null;
         }
-        icon={
-          row.status !== null ? getTrackingStatusIcon(row.status ?? LeaveRequestStatus.Pending, { fontSize: 14 }) : null
-        }
-      />
+        const status = row.status ?? LeaveRequestStatus.Pending;
+        return (
+          <MobileStatusBadge
+            category="trackingStatus"
+            status={status}
+            label={getTrackingStatusLabel(status, { ...labels, filterAll: "" })}
+            icon={getTrackingStatusIcon(status, { fontSize: 14 })}
+          />
+        );
+      })()}
     </Box>
   );
 }

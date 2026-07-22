@@ -5,27 +5,18 @@ import { Avatar, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
-import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types";
+import { AssignedUsersTabShared } from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared";
+import {
+  StyledBulkActionBar,
+  StyledRemoveButton,
+  StyledRemoveSelectedButton,
+  StyledUserToolbar,
+} from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared.styles";
+import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTab.types";
+import type { AssignedUsersListSlotProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTabShared.types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
-
-const StyledTabContainer = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(3),
-}));
-
-const StyledUserToolbar = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderRadius: Number(theme.shape.borderRadius) * 2,
-  backgroundColor: theme.palette.surfaceContainerLow ?? theme.palette.background.paper,
-  border: `1px solid ${theme.palette.divider}`,
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(2),
-  alignItems: "stretch",
-}));
 
 const StyledAssignUsersButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -39,26 +30,6 @@ const StyledAssignUsersButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const StyledBulkActionBar = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderRadius: Number(theme.shape.borderRadius) * 1.5,
-  backgroundColor: theme.palette.errorContainer ?? theme.palette.error.main,
-  color: theme.palette.onErrorContainer ?? theme.palette.error.main,
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(1.5),
-  justifyContent: "space-between",
-  alignItems: "stretch",
-  boxShadow: theme.palette.shadow.card,
-}));
-
-const StyledRemoveSelectedButton = styled(Button)(({ theme }) => ({
-  textTransform: "none",
-  fontWeight: 700,
-  borderRadius: Number(theme.shape.borderRadius) * 1.5,
-  width: "100%",
-}));
-
 const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
   width: 40,
   height: 40,
@@ -68,78 +39,6 @@ const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
   fontWeight: 600,
 }));
 
-const StyledRemoveButton = styled(Button)(() => ({
-  fontWeight: 600,
-  typography: "labelMd",
-}));
-
-export function AssignedUsersTabMobile({
-  group,
-  filteredAssignedUsers,
-  selectedAssignedUserIds,
-  searchQuery,
-  onBulkRevokeUsers,
-  onRevokeUser,
-  onUserToggle,
-  onSearchChange,
-  onAssignGroup,
-  loading = false,
-}: Readonly<AssignedUsersTabProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
-
-  return (
-    <StyledTabContainer>
-      <AssignedUsersToolbar
-        searchQuery={searchQuery}
-        onSearchChange={onSearchChange}
-        onAssignGroup={onAssignGroup}
-        groupId={group.id}
-        assignUsersLabel={t.assignUsers}
-        searchPlaceholder={t.searchAssignedUsers}
-        loading={loading}
-      />
-      {selectedAssignedUserIds.length > 0 ? (
-        <BulkActionBar
-          selectedCount={selectedAssignedUserIds.length}
-          onBulkRevokeUsers={onBulkRevokeUsers}
-          usersSelectedLabel={t.usersSelected}
-          removeSelectedLabel={t.removeSelected}
-        />
-      ) : null}
-      <MobileCardList
-        rows={filteredAssignedUsers}
-        emptyMessage={t.noAssignedUsers}
-        getKey={user => (user.id || user.email) ?? ""}
-        paginationOptions={{ mode: "client" }}
-        layout="edge-to-edge"
-        renderItem={user => (
-          <AssignedUserCard
-            user={user}
-            checked={selectedAssignedUserIds.includes(user.id ?? "")}
-            profileHref={user.id ? profileHrefForUser(user.id) : undefined}
-            assignedDateLabel={t.assignedDate}
-            removeUserLabel={t.removeUser}
-            groupCreatedAt={group.createdAt ?? undefined}
-            groupSlug={group.slug ?? undefined}
-            onUserToggle={onUserToggle}
-            onRevokeUser={onRevokeUser}
-          />
-        )}
-      />
-    </StyledTabContainer>
-  );
-}
-
-type AssignedUsersToolbarProps = {
-  readonly searchQuery: string;
-  readonly onSearchChange: (value: string) => void;
-  readonly onAssignGroup: (id: string) => void;
-  readonly groupId: string | null | undefined;
-  readonly assignUsersLabel: string;
-  readonly searchPlaceholder: string;
-  readonly loading: boolean;
-};
-
 function AssignedUsersToolbar({
   searchQuery,
   onSearchChange,
@@ -148,7 +47,15 @@ function AssignedUsersToolbar({
   assignUsersLabel,
   searchPlaceholder,
   loading,
-}: Readonly<AssignedUsersToolbarProps>) {
+}: Readonly<{
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  onAssignGroup: (id: string) => void;
+  groupId: string | null | undefined;
+  assignUsersLabel: string;
+  searchPlaceholder: string;
+  loading: boolean;
+}>) {
   return (
     <StyledUserToolbar>
       <Box
@@ -181,19 +88,17 @@ function AssignedUsersToolbar({
   );
 }
 
-type BulkActionBarProps = {
-  readonly selectedCount: number;
-  readonly onBulkRevokeUsers: () => void;
-  readonly usersSelectedLabel: (count: number) => string;
-  readonly removeSelectedLabel: string;
-};
-
 function BulkActionBar({
   selectedCount,
   onBulkRevokeUsers,
   usersSelectedLabel,
   removeSelectedLabel,
-}: Readonly<BulkActionBarProps>) {
+}: Readonly<{
+  selectedCount: number;
+  onBulkRevokeUsers: () => void;
+  usersSelectedLabel: (count: number) => string;
+  removeSelectedLabel: string;
+}>) {
   return (
     <StyledBulkActionBar>
       <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
@@ -211,18 +116,6 @@ function BulkActionBar({
   );
 }
 
-type AssignedUserCardProps = {
-  readonly user: AssignedUsersTabProps["filteredAssignedUsers"][number];
-  readonly checked: boolean;
-  readonly profileHref: string | undefined;
-  readonly assignedDateLabel: string;
-  readonly removeUserLabel: string;
-  readonly groupCreatedAt: string | undefined;
-  readonly groupSlug: string | undefined;
-  readonly onUserToggle: (id: string, checked: boolean) => void;
-  readonly onRevokeUser: (userId: string) => void;
-};
-
 function AssignedUserCard({
   user,
   checked,
@@ -233,7 +126,17 @@ function AssignedUserCard({
   groupSlug,
   onUserToggle,
   onRevokeUser,
-}: Readonly<AssignedUserCardProps>) {
+}: Readonly<{
+  user: AssignedUsersTabProps["filteredAssignedUsers"][number];
+  checked: boolean;
+  profileHref: string | undefined;
+  assignedDateLabel: string;
+  removeUserLabel: string;
+  groupCreatedAt: string | undefined;
+  groupSlug: string | undefined;
+  onUserToggle: (id: string, checked: boolean) => void;
+  onRevokeUser: (userId: string) => void;
+}>) {
   const id = user.id ?? "";
   const initials = user.name
     ?.split(" ")
@@ -309,5 +212,60 @@ function AssignedUserCard({
         </Box>
       </Box>
     </MobileCardListItem>
+  );
+}
+
+function AssignedUsersMobileList({ props, labels }: Readonly<AssignedUsersListSlotProps>) {
+  const { group, filteredAssignedUsers, selectedAssignedUserIds, onRevokeUser, onUserToggle } = props;
+
+  return (
+    <MobileCardList
+      rows={filteredAssignedUsers}
+      emptyMessage={labels.noAssignedUsers}
+      getKey={user => (user.id || user.email) ?? ""}
+      paginationOptions={{ mode: "client" }}
+      layout="edge-to-edge"
+      renderItem={user => (
+        <AssignedUserCard
+          user={user}
+          checked={selectedAssignedUserIds.includes(user.id ?? "")}
+          profileHref={user.id ? profileHrefForUser(user.id) : undefined}
+          assignedDateLabel={labels.assignDate}
+          removeUserLabel={labels.removeUser}
+          groupCreatedAt={group.createdAt ?? undefined}
+          groupSlug={group.slug ?? undefined}
+          onUserToggle={onUserToggle}
+          onRevokeUser={onRevokeUser}
+        />
+      )}
+    />
+  );
+}
+
+export function AssignedUsersTabMobile(props: Readonly<AssignedUsersTabProps>) {
+  const t = useAppTranslation().dashboardTranslations.permissions;
+
+  return (
+    <AssignedUsersTabShared
+      props={props}
+      slots={{
+        Toolbar: AssignedUsersToolbar,
+        BulkActionBar: BulkActionBar,
+        UsersList: AssignedUsersMobileList,
+      }}
+      labels={{
+        usersSelected: t.usersSelected,
+        removeSelected: t.removeSelected,
+        noAssignedUsers: t.noAssignedUsers,
+        searchAssignedUsers: t.searchAssignedUsers,
+        assignUsers: t.assignUsers,
+        assignDate: t.assignedDate,
+        removeUser: t.removeUser,
+        assignedGroupMembers: t.assignedGroupMembers,
+        columnName: t.columnName,
+        assignedBy: t.assignedBy,
+        assignedBySystem: t.assignedBySystem,
+      }}
+    />
   );
 }

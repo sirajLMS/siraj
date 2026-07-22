@@ -1,8 +1,8 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useForm } from "react-hook-form";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { LocalizedStringFormFieldDesktop } from "@/frontend/desktop/components/ui/input/localizedString/localizedStringFormField.desktop";
+import type { LocalizedString } from "@/shared/types";
 
 type FormValues = {
   name: LocalizedString;

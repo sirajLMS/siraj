@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
-import { FormProvider, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateParentOnboarding } from "@/frontend/common/hooks/useCreateParentOnboarding";
@@ -133,5 +133,3 @@ export function useParentOnboardingViewModel(): ParentOnboardingViewModel {
     onUploadAvatar,
   };
 }
-
-export { FormProvider };

@@ -3,7 +3,7 @@
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import { LocalizedStringInput } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringInput";
 import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/input/localizedString/types";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 type LocalizedStringFormFieldProps<T extends FieldValues> = Omit<
   LocalizedStringInputProps,

@@ -182,7 +182,7 @@ function ClassesLeftField() {
           />
         )}
       />
-      {!fieldDisabled ? (
+      {fieldDisabled ? null : (
         <Typography
           variant="bodyMd"
           sx={theme => ({
@@ -197,7 +197,7 @@ function ClassesLeftField() {
           <InfoOutlined sx={{ fontSize: 14, mt: 0.5 }} />
           {t.fields.overrideNotice}
         </Typography>
-      ) : null}
+      )}
     </Box>
   );
 }

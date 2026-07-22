@@ -13,6 +13,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  type SelectChangeEvent,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -113,11 +114,11 @@ export function ProviderSettingsSection({ labels, onFeedback, actionsDisabled = 
           ) : null}
           <FormControl fullWidth disabled={loading || saving || actionsDisabled}>
             <InputLabel id="fx-provider-select-label">{labels.activeProvider}</InputLabel>
-            <Select
+            <Select<FxProvider>
               labelId="fx-provider-select-label"
               label={labels.activeProvider}
               value={selectedProvider}
-              onChange={event => setSelectedProvider(event.target.value as FxProvider)}
+              onChange={(event: SelectChangeEvent<FxProvider>) => setSelectedProvider(event.target.value)}
             >
               <MenuItem value={FxProvider.Fixer}>Fixer</MenuItem>
               <MenuItem value={FxProvider.OpenExchangeRates}>OpenExchangeRates</MenuItem>

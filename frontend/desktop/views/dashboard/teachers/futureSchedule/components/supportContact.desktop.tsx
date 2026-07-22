@@ -2,7 +2,7 @@
 
 import { Box, Button, Stack, Typography } from "@mui/material";
 import type { SupportContactProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
-import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar";
+import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
 import { DesktopBaseCard } from "@/frontend/desktop/components/ui/card";
 import { DesktopPhoneDisplay } from "@/frontend/desktop/components/ui/display";
 

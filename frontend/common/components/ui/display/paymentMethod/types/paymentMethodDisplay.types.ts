@@ -4,7 +4,7 @@ import type {
   PaymentDirection,
   PaymentMethodType,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 export type PaymentMethodDisplayData = {
   readonly id?: string;

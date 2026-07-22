@@ -18,6 +18,6 @@ export function useNavLabels(): (labelKey: keyof DashboardNavigationLabels) => s
     if (labelKey === "nav") {
       throw new Error("nav is a nested object, use specific sub-keys like labels.nav.logout");
     }
-    return labels[labelKey] as string;
+    return labels[labelKey];
   };
 }

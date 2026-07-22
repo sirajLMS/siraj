@@ -4,6 +4,7 @@ import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
+import { BillingSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingSearchBar";
 import { buildAdminMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import {
   getAdminInvoiceGridLabels,
@@ -17,7 +18,6 @@ import {
 } from "@/frontend/desktop/components/ui";
 import { AdminInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/admin/billing/components/adminInvoicesDataGrid.desktop";
 import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
-import { BillingSearchBarDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingSearchBar.desktop";
 import { StudentCreditDataGridDesktop } from "@/frontend/desktop/views/dashboard/billing/components/studentCreditDataGrid.desktop";
 import { Link } from "@/shared/i18n/routing";
 
@@ -173,7 +173,7 @@ export function AdminBillingDesktopView({
       <DesktopSectionPanel
         title={labels.sections.recentInvoices}
         actions={
-          <BillingSearchBarDesktop
+          <BillingSearchBar
             value={searchQuery}
             placeholder={labels.search.invoicesPlaceholder}
             searchingLabel={labels.search.searching}

@@ -392,33 +392,35 @@ function buildScheduleMetaItems(
   duration: string,
   showTimezones: boolean
 ): MetaStatItem[] {
-  const items: MetaStatItem[] = [];
-  if (showTimezones) {
-    items.push({
-      label: headers.teacherTime,
-      value: (
-        <ScheduleTimezoneOffsetCell
-          timeValue={row.teacherTime}
-          timezone={row.teacherTimezone}
-          at={row.scheduledStartAt}
-        />
-      ),
-      tone: "teacher",
-    });
-    items.push({
-      label: headers.studentTime,
-      value: (
-        <ScheduleTimezoneOffsetCell
-          timeValue={row.studentTime}
-          timezone={row.studentTimezone}
-          at={row.scheduledStartAt}
-        />
-      ),
-      tone: "student",
-    });
-  }
-  items.push({ label: headers.duration, value: duration, tone: "default" });
-  return items;
+  return [
+    ...(showTimezones
+      ? ([
+          {
+            label: headers.teacherTime,
+            value: (
+              <ScheduleTimezoneOffsetCell
+                timeValue={row.teacherTime}
+                timezone={row.teacherTimezone}
+                at={row.scheduledStartAt}
+              />
+            ),
+            tone: "teacher",
+          },
+          {
+            label: headers.studentTime,
+            value: (
+              <ScheduleTimezoneOffsetCell
+                timeValue={row.studentTime}
+                timezone={row.studentTimezone}
+                at={row.scheduledStartAt}
+              />
+            ),
+            tone: "student",
+          },
+        ] satisfies MetaStatItem[])
+      : []),
+    { label: headers.duration, value: duration, tone: "default" },
+  ];
 }
 
 function ScheduleOverviewMobileCard({

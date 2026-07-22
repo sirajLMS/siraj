@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import crypto from "node:crypto";
 import {
   CurrencyCode as CurrencyCodeEnum,
   InvoiceStatus,
@@ -12,7 +11,6 @@ import {
   markInvoicePaidMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { invoicePaymentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/billing-payments.documents";
-import { prepareUploadMutationDocument } from "@/frontend/common/graphql/sharedDocuments/resources/learning-resource.documents";
 import {
   assertOperationDenied,
   authenticatedRequest,
@@ -23,7 +21,7 @@ import {
   provisionTestSuperAdmin,
 } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { getTestApiUrl } from "@/frontend/common/graphql/test/testClient";
+import { uploadFileToStorage } from "@/frontend/common/graphql/test/storageUploadHarness";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -57,42 +55,13 @@ async function createInvoice(token: string, parentId: string, amount: string): P
 }
 
 async function uploadProofFile(token: string): Promise<string> {
-  const fileContent = Buffer.from("billing payment proof test");
-  const contentHash = crypto.createHash("sha256").update(fileContent).digest("base64");
-  const filePath = `private/billing/proof-test-${Date.now()}.pdf`;
-
-  const prepData = await authenticatedRequest(token, "mutate", prepareUploadMutationDocument, {
-    input: {
-      path: filePath,
-      fileSize: fileContent.length,
-      contentType: "application/pdf",
-      contentHash,
-    },
+  const result = await uploadFileToStorage({
+    token,
+    fileContent: Buffer.from("billing payment proof test"),
+    filePath: `private/billing/proof-test-${Date.now()}.pdf`,
+    errorMessagePrefix: "Failed to upload proof file",
   });
-
-  const prep = prepData?.prepareUpload;
-  if (!prep) {
-    throw new Error("Failed to prepare upload");
-  }
-
-  const uploadUrl = getTestApiUrl(`/api/storage/upload/${prep.id}`);
-  const response = await Bun.fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-MD5": contentHash,
-      "Content-Length": String(fileContent.length),
-    },
-    body: fileContent,
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to upload proof file: ${response.status} - ${errorText}`);
-  }
-
-  const result = await response.json();
-  return result.id as string;
+  return result.id;
 }
 
 /** Mutable test state shared between provision, test body, and cleanup phases. */

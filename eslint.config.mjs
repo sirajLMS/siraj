@@ -227,6 +227,7 @@ const eslintConfig = defineConfig([
     files: ["frontend/**/*.{ts,tsx}"],
     ignores: [
       "frontend/common/components/ui/dataGrid/AppDataGrid.tsx",
+      "frontend/common/components/ui/dataGrid/appDataGridShared.tsx",
       "frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid.tsx",
       "frontend/mobile/components/ui/dataGrid/MobileAppDataGrid.tsx",
     ],

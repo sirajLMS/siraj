@@ -2,8 +2,8 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/input/localizedString/types";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { LocalizedStringInputDesktop } from "@/frontend/desktop/components/ui/input/localizedString/localizedStringInput.desktop";
+import type { LocalizedString } from "@/shared/types";
 
 function LocalizedStringInputStory({
   initialValue = {},

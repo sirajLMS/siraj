@@ -51,9 +51,7 @@ function SuggestionCardActions({
         <Button
           fullWidth
           variant="outlined"
-          onClick={() => {
-            void onMarkReviewed(row.id);
-          }}
+          onClick={() => onMarkReviewed(row.id)}
           sx={{ textTransform: "uppercase", fontWeight: 700 }}
         >
           {labels.table.markReviewed}
@@ -61,9 +59,7 @@ function SuggestionCardActions({
         <Button
           fullWidth
           variant="outlined"
-          onClick={() => {
-            void onRespond(row.id);
-          }}
+          onClick={() => onRespond(row.id)}
           sx={{ textTransform: "uppercase", fontWeight: 700 }}
         >
           {labels.table.respond}
@@ -71,9 +67,7 @@ function SuggestionCardActions({
         <Button
           fullWidth
           variant="outlined"
-          onClick={() => {
-            void onMarkDuplicate(row.id);
-          }}
+          onClick={() => onMarkDuplicate(row.id)}
           sx={{ textTransform: "uppercase", fontWeight: 700 }}
         >
           {labels.table.markDuplicate}
@@ -83,9 +77,7 @@ function SuggestionCardActions({
             fullWidth
             variant="outlined"
             color="error"
-            onClick={() => {
-              void onDelete(row.id);
-            }}
+            onClick={() => onDelete(row.id)}
             sx={{ textTransform: "uppercase", fontWeight: 700 }}
           >
             {labels.table.delete}
@@ -101,9 +93,7 @@ function SuggestionCardActions({
         fullWidth
         variant="outlined"
         color="error"
-        onClick={() => {
-          void onDelete(row.id);
-        }}
+        onClick={() => onDelete(row.id)}
         sx={{ textTransform: "uppercase", fontWeight: 700 }}
       >
         {labels.table.delete}

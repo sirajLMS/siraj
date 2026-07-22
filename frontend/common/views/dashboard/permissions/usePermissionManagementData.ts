@@ -17,8 +17,8 @@ import {
   usersQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { logger } from "@/frontend/common/utils/logger";
+import type { LocalizedString } from "@/shared/types";
 
 const USERS_QUERY_VARIABLES = { search: null, limit: 50, offset: 0 };
 

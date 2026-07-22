@@ -3,7 +3,8 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import type { StudentContextCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
-import { DesktopBaseCard, DesktopStatusBadge, DesktopUserAvatar } from "@/frontend/desktop/components/ui";
+import { DesktopBaseCard, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
+import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
 import { useAppTranslation } from "@/shared/locale";
 
 export function StudentContextCardDesktop({ student }: Readonly<StudentContextCardProps>) {

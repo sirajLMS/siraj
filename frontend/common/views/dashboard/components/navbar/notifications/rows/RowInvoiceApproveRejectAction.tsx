@@ -26,7 +26,7 @@ export function RowInvoiceApproveRejectAction({
         color="success"
         onClick={event => {
           event.stopPropagation();
-          void onApprove(deliveryId, invoiceId);
+          onApprove(deliveryId, invoiceId);
         }}
         sx={{ minWidth: 0, px: 0.5 }}
       >
@@ -38,7 +38,7 @@ export function RowInvoiceApproveRejectAction({
         color="error"
         onClick={event => {
           event.stopPropagation();
-          void onReject(deliveryId, invoiceId);
+          onReject(deliveryId, invoiceId);
         }}
         sx={{ minWidth: 0, px: 0.5 }}
       >

@@ -16,9 +16,9 @@ import { useEffect, useState } from "react";
 import { LocalizedStringInput } from "@/frontend/common/components/ui/input/localizedString";
 import { createMeetingProviderMutationDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { logger } from "@/frontend/common/utils/logger";
 import { useAppTranslation } from "@/shared/locale";
+import type { LocalizedString } from "@/shared/types/localized-string";
 
 type CreateMeetingProviderDialogProps = {
   readonly open: boolean;

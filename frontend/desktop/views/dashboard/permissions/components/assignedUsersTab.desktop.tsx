@@ -1,35 +1,31 @@
 "use client";
 
 import { DeleteOutlined, PersonAddOutlined, PersonRemoveOutlined, SearchOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, Checkbox, InputAdornment, TextField, Typography } from "@mui/material";
-import { alpha, styled } from "@mui/material/styles";
+import { Avatar, Box, Button, InputAdornment, TextField, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import type { GroupUser } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
-import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types";
+import { AssignedUsersTabShared } from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared";
+import {
+  StyledBulkActionBar,
+  StyledRemoveButton,
+  StyledRemoveSelectedButton,
+  StyledUserToolbar,
+} from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared.styles";
+import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTab.types";
+import type { AssignedUsersListSlotProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTabShared.types";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { Link } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale";
 
-const StyledTabContainer = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(3),
-}));
-
-const StyledUserToolbar = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderRadius: Number(theme.shape.borderRadius) * 2,
-  backgroundColor: theme.palette.surfaceContainerLow ?? theme.palette.background.paper,
-  border: `1px solid ${theme.palette.divider}`,
-  display: "flex",
+const StyledDesktopToolbar = styled(StyledUserToolbar)({
   flexDirection: "row",
-  gap: theme.spacing(2),
   alignItems: "center",
   justifyContent: "space-between",
-}));
+});
 
 const StyledAssignUsersButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -42,23 +38,6 @@ const StyledAssignUsersButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const StyledBulkActionBar = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderRadius: Number(theme.shape.borderRadius) * 1.5,
-  backgroundColor: theme.palette.errorContainer ?? alpha(theme.palette.error.main, 0.15),
-  color: theme.palette.onErrorContainer ?? theme.palette.error.main,
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  boxShadow: theme.palette.shadow.card,
-}));
-
-const StyledRemoveSelectedButton = styled(Button)(({ theme }) => ({
-  textTransform: "none",
-  fontWeight: 700,
-  borderRadius: Number(theme.shape.borderRadius) * 1.5,
-}));
-
 const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
   width: 32,
   height: 32,
@@ -68,45 +47,89 @@ const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
   fontWeight: 600,
 }));
 
-const StyledUserInfoContainer = styled(Box)({
-  display: "flex",
-  flexDirection: "column",
-  minWidth: 0,
-});
-
-const StyledUserNameText = styled(Typography)({
-  fontWeight: 600,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-});
-
-const StyledUserEmailText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  typography: "labelMd",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-}));
-
-const StyledRemoveButton = styled(Button)(() => ({
-  fontWeight: 600,
-  typography: "labelMd",
-}));
-
-export function AssignedUsersTabDesktop({
-  group,
-  filteredAssignedUsers,
-  selectedAssignedUserIds,
+function AssignedUsersDesktopToolbar({
   searchQuery,
-  onBulkRevokeUsers,
-  onRevokeUser,
-  onUserToggle,
   onSearchChange,
   onAssignGroup,
-  loading = false,
-}: Readonly<AssignedUsersTabProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  groupId,
+  assignUsersLabel,
+  searchPlaceholder,
+}: Readonly<{
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  onAssignGroup: (id: string) => void;
+  groupId: string | null | undefined;
+  assignUsersLabel: string;
+  searchPlaceholder: string;
+  loading: boolean;
+}>) {
+  return (
+    <StyledDesktopToolbar>
+      <TextField
+        size="small"
+        placeholder={searchPlaceholder}
+        value={searchQuery}
+        onChange={e => onSearchChange(e.target.value)}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchOutlined fontSize="small" />
+              </InputAdornment>
+            ),
+          },
+        }}
+        sx={{ width: 360 }}
+      />
+      <StyledAssignUsersButton
+        variant="contained"
+        startIcon={<PersonAddOutlined />}
+        onClick={() => groupId && onAssignGroup(groupId)}
+      >
+        {assignUsersLabel}
+      </StyledAssignUsersButton>
+    </StyledDesktopToolbar>
+  );
+}
+
+function DesktopBulkActionBar({
+  selectedCount,
+  onBulkRevokeUsers,
+  usersSelectedLabel,
+  removeSelectedLabel,
+}: Readonly<{
+  selectedCount: number;
+  onBulkRevokeUsers: () => void;
+  usersSelectedLabel: (count: number) => string;
+  removeSelectedLabel: string;
+}>) {
+  return (
+    <StyledBulkActionBar>
+      <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
+        {usersSelectedLabel(selectedCount)}
+      </Typography>
+      <StyledRemoveSelectedButton
+        variant="contained"
+        color="error"
+        startIcon={<DeleteOutlined />}
+        onClick={onBulkRevokeUsers}
+      >
+        {removeSelectedLabel}
+      </StyledRemoveSelectedButton>
+    </StyledBulkActionBar>
+  );
+}
+
+const userInitials = (name?: string | null): string =>
+  (name ?? "")
+    .split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+function AssignedUsersDataGrid({ props, labels }: Readonly<AssignedUsersListSlotProps>) {
+  const { group, filteredAssignedUsers, selectedAssignedUserIds, onRevokeUser, onUserToggle, loading } = props;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
   const assignedUsersColumns = useMemo<GridColDef<GroupUser>[]>(() => {
@@ -119,46 +142,43 @@ export function AssignedUsersTabDesktop({
         renderCell: (params: { row: GroupUser }) => {
           const id = params.row.id ?? "";
           const checked = selectedAssignedUserIds.includes(id);
-          return <Checkbox size="small" checked={checked} onChange={e => onUserToggle(id, e.target.checked)} />;
+          return <input type="checkbox" checked={checked} onChange={e => onUserToggle(id, e.target.checked)} />;
         },
       },
       {
         field: "name",
-        headerName: t.columnName,
+        headerName: labels.columnName,
         flex: 1.5,
         minWidth: 200,
         renderCell: (params: { row: GroupUser }) => {
           const user = params.row;
           const profileHref = user.id ? profileHrefForUser(user.id) : undefined;
-          const nameText = <StyledUserNameText variant="bodyMd">{user.name}</StyledUserNameText>;
-
           return (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1 }}>
-              <StyledUserAvatar>
-                {user.name
-                  ?.split(" ")
-                  .map((w: string) => w[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </StyledUserAvatar>
-              <StyledUserInfoContainer>
+              <StyledUserAvatar>{userInitials(user.name)}</StyledUserAvatar>
+              <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
                 {profileHref ? (
                   <Link href={profileHref} style={{ textDecoration: "none", color: "inherit" }}>
-                    {nameText}
+                    <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
+                      {user.name}
+                    </Typography>
                   </Link>
                 ) : (
-                  nameText
+                  <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
+                    {user.name}
+                  </Typography>
                 )}
-                <StyledUserEmailText variant="bodyMd">{user.email}</StyledUserEmailText>
-              </StyledUserInfoContainer>
+                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+                  {user.email}
+                </Typography>
+              </Box>
             </Box>
           );
         },
       },
       {
         field: "assignedDate",
-        headerName: t.assignedDate,
+        headerName: labels.assignDate,
         flex: 1.2,
         minWidth: 150,
         renderCell: () => {
@@ -172,12 +192,12 @@ export function AssignedUsersTabDesktop({
       },
       {
         field: "assignedBy",
-        headerName: t.assignedBy,
+        headerName: labels.assignedBy,
         flex: 1,
         minWidth: 120,
         renderCell: () => (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t.assignedBySystem}
+            {labels.assignedBySystem}
           </Typography>
         ),
       },
@@ -203,69 +223,64 @@ export function AssignedUsersTabDesktop({
               startIcon={<PersonRemoveOutlined fontSize="small" />}
               onClick={() => params.row.id && onRevokeUser(params.row.id)}
             >
-              {t.removeUser}
+              {labels.removeUser}
             </StyledRemoveButton>
           </Box>
         ),
       },
     ];
-  }, [t, group.createdAt, group.slug, selectedAssignedUserIds, onRevokeUser, onUserToggle]);
+  }, [
+    group.createdAt,
+    group.slug,
+    selectedAssignedUserIds,
+    onRevokeUser,
+    onUserToggle,
+    labels.columnName,
+    labels.assignDate,
+    labels.assignedBy,
+    labels.assignedBySystem,
+    labels.removeUser,
+  ]);
 
   return (
-    <StyledTabContainer>
-      <StyledUserToolbar>
-        <TextField
-          size="small"
-          placeholder={t.searchAssignedUsers}
-          value={searchQuery}
-          onChange={e => onSearchChange(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchOutlined fontSize="small" />
-                </InputAdornment>
-              ),
-            },
-          }}
-          sx={{ width: 360 }}
-        />
-        <StyledAssignUsersButton
-          variant="contained"
-          startIcon={<PersonAddOutlined />}
-          onClick={() => group.id && onAssignGroup(group.id)}
-        >
-          {t.assignUsers}
-        </StyledAssignUsersButton>
-      </StyledUserToolbar>
+    <DesktopSectionPanel title={labels.assignedGroupMembers}>
+      <DesktopAppDataGrid<GroupUser>
+        rows={filteredAssignedUsers}
+        columns={assignedUsersColumns}
+        getRowId={row => row.id ?? row.email ?? ""}
+        emptyMessage={labels.noAssignedUsers}
+        loading={loading ?? false}
+        autoHeight
+        paginationOptions={{ mode: "client" }}
+      />
+    </DesktopSectionPanel>
+  );
+}
 
-      {selectedAssignedUserIds.length > 0 && (
-        <StyledBulkActionBar>
-          <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-            {t.usersSelected(selectedAssignedUserIds.length)}
-          </Typography>
-          <StyledRemoveSelectedButton
-            variant="contained"
-            color="error"
-            startIcon={<DeleteOutlined />}
-            onClick={onBulkRevokeUsers}
-          >
-            {t.removeSelected}
-          </StyledRemoveSelectedButton>
-        </StyledBulkActionBar>
-      )}
+export function AssignedUsersTabDesktop(props: Readonly<AssignedUsersTabProps>) {
+  const t = useAppTranslation().dashboardTranslations.permissions;
 
-      <DesktopSectionPanel title={t.assignedGroupMembers}>
-        <DesktopAppDataGrid<GroupUser>
-          rows={filteredAssignedUsers}
-          columns={assignedUsersColumns}
-          getRowId={row => row.id ?? row.email ?? ""}
-          emptyMessage={t.noAssignedUsers}
-          loading={loading}
-          autoHeight
-          paginationOptions={{ mode: "client" }}
-        />
-      </DesktopSectionPanel>
-    </StyledTabContainer>
+  return (
+    <AssignedUsersTabShared
+      props={props}
+      slots={{
+        Toolbar: AssignedUsersDesktopToolbar,
+        BulkActionBar: DesktopBulkActionBar,
+        UsersList: AssignedUsersDataGrid,
+      }}
+      labels={{
+        usersSelected: t.usersSelected,
+        removeSelected: t.removeSelected,
+        noAssignedUsers: t.noAssignedUsers,
+        searchAssignedUsers: t.searchAssignedUsers,
+        assignUsers: t.assignUsers,
+        assignDate: t.assignedDate,
+        removeUser: t.removeUser,
+        assignedGroupMembers: t.assignedGroupMembers,
+        columnName: t.columnName,
+        assignedBy: t.assignedBy,
+        assignedBySystem: t.assignedBySystem,
+      }}
+    />
   );
 }

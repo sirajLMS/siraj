@@ -37,7 +37,7 @@ export function TeacherLessonReportsMobileView({
             labelId="lesson-report-status-filter-label"
             value={statusFilter}
             label={labels.filterAll}
-            onChange={e => onStatusFilterChange(e.target.value as typeof statusFilter)}
+            onChange={e => onStatusFilterChange(e.target.value)}
           >
             {statusOptions.map(option => (
               <MenuItem key={option.value} value={option.value}>
@@ -49,7 +49,7 @@ export function TeacherLessonReportsMobileView({
 
         {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{noReportsMessage}</Typography> : null}
 
-        {!error ? (
+        {!error && (
           <MobileCardList
             rows={rows}
             loading={loading}
@@ -66,7 +66,7 @@ export function TeacherLessonReportsMobileView({
               />
             )}
           />
-        ) : null}
+        )}
       </MobileContentStack>
     </MobilePageContainer>
   );
@@ -98,16 +98,16 @@ function LessonReportCardMobile({ row, labels, locale, resolveStatusLabel }: Rea
         ) : null}
       </Box>
       <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", gap: 1, mt: 1 }}>
-        {row.durationMinutes != null ? (
+        {row.durationMinutes != null && (
           <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
             {labels.durationMinutes}: {row.durationMinutes}
           </Typography>
-        ) : null}
-        {row.completionPercentage != null ? (
+        )}
+        {row.completionPercentage != null && (
           <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
             {labels.completionPercentage}: {row.completionPercentage}%
           </Typography>
-        ) : null}
+        )}
         {row.submittedAt ? (
           <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
             {labels.submittedAt}: {new Date(row.submittedAt).toLocaleDateString(locale)}

@@ -95,7 +95,7 @@ function mapExchangeRatesToRows(
     | undefined
 ): ExchangeRateRow[] {
   return (rates ?? [])
-    .filter((rate): rate is NonNullable<typeof rate> => rate != null && rate.id != null)
+    .filter((rate): rate is NonNullable<typeof rate> => rate?.id != null)
     .map(rate => ({
       id: rate.id ?? "",
       fromCurrency: parseCurrencyCode(rate.fromCurrency) ?? CurrencyCode.Usd,

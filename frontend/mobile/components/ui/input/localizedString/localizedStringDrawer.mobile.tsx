@@ -19,9 +19,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { LocalizedStringDrawerProps } from "@/frontend/common/components/ui/input/localizedString/types";
 import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
-import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
+import type { AppLocale } from "@/shared/locale";
 import { type LocalizedStringLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
+import type { LocalizedString } from "@/shared/types";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 type HelperTextParams = {

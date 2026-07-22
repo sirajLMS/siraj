@@ -1,9 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import crypto from "node:crypto";
 import {
   deleteLearningResourceMutationDocument,
   learningResourcesQueryDocument,
-  prepareUploadMutationDocument,
   uploadLearningResourceMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/resources/learning-resource.documents";
 import {
@@ -14,47 +12,19 @@ import {
   provisionTestSuperAdmin,
 } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { getTestApiUrl, testClient } from "@/frontend/common/graphql/test/testClient";
+import { uploadFileToStorage } from "@/frontend/common/graphql/test/storageUploadHarness";
+import { testClient } from "@/frontend/common/graphql/test/testClient";
 
 async function uploadDummyFile(token: string): Promise<{ id: string; path: string }> {
-  const fileContent = Buffer.from("hello world");
-  const contentHash = crypto.createHash("sha256").update(fileContent).digest("base64");
-  const filePath = `public/resources/test-${Date.now()}.pdf`;
-
-  const prepData = await authenticatedRequest(token, "mutate", prepareUploadMutationDocument, {
-    input: {
-      path: filePath,
-      fileSize: fileContent.length,
-      contentType: "application/pdf",
-      contentHash,
-    },
+  const result = await uploadFileToStorage({
+    token,
+    fileContent: Buffer.from("hello world"),
+    filePath: `public/resources/test-${Date.now()}.pdf`,
+    errorMessagePrefix: "Failed to upload file to storage",
   });
-
-  const prep = prepData?.prepareUpload;
-  if (!prep) {
-    throw new Error("Failed to prepare upload");
-  }
-
-  const uploadUrl = getTestApiUrl(`/api/storage/upload/${prep.id}`);
-  const response = await Bun.fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-MD5": contentHash,
-      "Content-Length": String(fileContent.length),
-    },
-    body: fileContent,
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to upload file to storage: ${response.status} - ${errorText}`);
-  }
-
-  const result = await response.json();
   return {
     id: result.id,
-    path: result.path,
+    path: result.path ?? "",
   };
 }
 

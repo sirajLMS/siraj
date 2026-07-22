@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 import type { OverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { OverrideEditControlsDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEditControls.desktop";
 import { OverrideEffectiveDisplayDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEffectiveDisplay.desktop";
 import { useAppTranslation } from "@/shared/locale";

@@ -4,7 +4,6 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AdminComplaintsView } from "@/frontend/common/views/dashboard/complaints/AdminComplaintsView";
 import {
-  type AdminComplaintsViewModel,
   type UseAdminComplaintsViewModelProps,
   useAdminComplaintsViewModel,
 } from "@/frontend/common/views/dashboard/complaints/useAdminComplaintsViewModel";
@@ -18,5 +17,3 @@ export function AdminComplaintsContainer(props: UseAdminComplaintsViewModelProps
     </RequirePermission>
   );
 }
-
-export type { AdminComplaintsViewModel, UseAdminComplaintsViewModelProps };

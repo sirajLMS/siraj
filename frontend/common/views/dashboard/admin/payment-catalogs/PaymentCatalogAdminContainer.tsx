@@ -4,7 +4,6 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PaymentCatalogAdminView } from "@/frontend/common/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminView";
 import {
-  type PaymentCatalogAdminViewModel,
   type UsePaymentCatalogAdminViewModelProps,
   usePaymentCatalogAdminViewModel,
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/usePaymentCatalogAdminViewModel";
@@ -17,5 +16,3 @@ export function PaymentCatalogAdminContainer(props: Readonly<UsePaymentCatalogAd
     </RequirePermission>
   );
 }
-
-export type { PaymentCatalogAdminViewModel, UsePaymentCatalogAdminViewModelProps };

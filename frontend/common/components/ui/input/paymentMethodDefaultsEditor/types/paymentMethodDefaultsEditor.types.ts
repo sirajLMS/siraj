@@ -3,7 +3,7 @@
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CurrencyOption } from "@/frontend/common/lib/currency";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 // NEW FOR PLAN v5: PaymentMethodRow is reused from @/frontend/common/components/ui/display/paymentMethod/types (canonical common home per MA1 wave).
 // NEW FOR PLAN v5: instructionsOpen / onInstructionsOpenChangeAction added as controlled-prop pattern (lifted from tier useState per specs.md §6 / N7).

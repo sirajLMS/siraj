@@ -8,6 +8,7 @@ import type {
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
 } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
+import type { AdminInvoiceStatus } from "@/shared/types/billing-view";
 
 export interface AdminInvoiceCardProps {
   readonly row: AdminInvoiceRow;
@@ -18,4 +19,24 @@ export interface AdminInvoiceCardProps {
   readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly onDeleteInvoice?: (invoiceId: string) => void;
+}
+
+/**
+ * Slot props supplied by each tier wrapper to `AdminInvoiceCardShared`.
+ * Only the tier-specific primitives (`StatusBadge`, `PersonProfileLink`) vary
+ * between desktop and mobile — everything else is byte-identical scaffold.
+ */
+export interface AdminInvoiceCardSlotProps {
+  readonly StatusBadge: React.ComponentType<{
+    readonly category: "invoice";
+    readonly status: AdminInvoiceStatus;
+    readonly label: string;
+  }>;
+  readonly PersonProfileLink: React.ComponentType<{
+    readonly href?: string;
+    readonly name: string;
+    readonly avatarSize: number;
+    readonly typographyVariant: "titleLg";
+    readonly fontWeight: number;
+  }>;
 }

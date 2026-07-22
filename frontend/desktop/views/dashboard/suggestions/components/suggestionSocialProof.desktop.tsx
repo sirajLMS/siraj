@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Box, Typography } from "@mui/material";
 import { suggestionContributorStatsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { SuggestionSocialProofProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
-import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/display";
+import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
 
 const CONTRIBUTOR_AVATAR_LIMIT = 3;
 const CONTRIBUTOR_STATS_DAYS = 30;

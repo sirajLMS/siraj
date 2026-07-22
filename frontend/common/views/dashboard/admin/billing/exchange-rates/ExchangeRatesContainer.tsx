@@ -4,7 +4,6 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ExchangeRatesView } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ExchangeRatesView";
 import {
-  type ExchangeRatesViewModel,
   type UseExchangeRatesViewModelProps,
   useExchangeRatesViewModel,
 } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/useExchangeRatesViewModel";
@@ -18,5 +17,3 @@ export function ExchangeRatesContainer(_props: Readonly<UseExchangeRatesViewMode
     </RequirePermission>
   );
 }
-
-export type { ExchangeRatesViewModel, UseExchangeRatesViewModelProps };

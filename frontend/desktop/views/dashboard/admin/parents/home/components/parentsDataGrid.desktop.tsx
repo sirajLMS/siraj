@@ -18,7 +18,7 @@ import type {
   ParentsDataGridLabels,
 } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
-import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 import { Link } from "@/shared/i18n/routing";
 

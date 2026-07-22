@@ -9,7 +9,6 @@ import type {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PermissionManagementTab } from "@/frontend/common/stores/permissionManagementStore";
 import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import {
   type AssignGroupFormBindings,
   useAssignGroupForm,
@@ -35,6 +34,7 @@ import {
   useSingleGroupState,
 } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
 import { usePermissionManagementData } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementData";
+import type { LocalizedString } from "@/shared/types";
 
 export interface PermissionManagementViewModel {
   readonly permissions: readonly Permission[];

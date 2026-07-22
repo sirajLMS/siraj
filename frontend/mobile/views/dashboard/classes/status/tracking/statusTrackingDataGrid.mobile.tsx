@@ -17,7 +17,7 @@ import {
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { getStatusIcon } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
-import { MobileAppDataGrid } from "@/frontend/mobile/components/ui/dataGrid";
+import { MobileAppDataGrid } from "@/frontend/mobile/components/ui/dataGrid/MobileAppDataGrid";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import {
   MobilePersonProfileLink,

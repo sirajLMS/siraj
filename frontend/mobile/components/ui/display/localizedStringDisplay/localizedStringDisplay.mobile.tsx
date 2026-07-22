@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 export type MobileLocalizedStringDisplayProps = {
   readonly value?: LocalizedString | null;

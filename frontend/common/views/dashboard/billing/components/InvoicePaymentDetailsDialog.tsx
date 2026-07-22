@@ -258,7 +258,15 @@ function PaymentProofReviewActions({
               onClick={showRejectConfirm ? onConfirmReject : onRequestReject}
               disabled={reviewBusy}
             >
-              {rejecting ? labels.rejecting : showRejectConfirm ? labels.confirmReject : labels.reject}
+              {(() => {
+                if (rejecting) {
+                  return labels.rejecting;
+                }
+                if (showRejectConfirm) {
+                  return labels.confirmReject;
+                }
+                return labels.reject;
+              })()}
             </Button>
           </>
         ) : (
@@ -361,8 +369,6 @@ type PaymentDetailsContentProps = {
   readonly onConfirmReject: () => void;
   readonly amountLabel: string;
   readonly dateLabel: string;
-  readonly submittedAtLabel: string;
-  readonly closeLabel: string;
   readonly emptyLabel: string;
   readonly fxMessages: FormatCurrencyMessages;
   readonly viewerDisplayCurrency?: string | null;
@@ -401,6 +407,60 @@ function PaymentDetailsDialogContent({
   fxMessages,
   viewerDisplayCurrency,
 }: PaymentDetailsContentProps): React.ReactNode {
+  const renderFxConversionNote = ({
+    subjectUserId,
+    viewerDisplayCurrency,
+  }: {
+    readonly subjectUserId?: string | null;
+    readonly viewerDisplayCurrency?: string | null;
+  }): React.ReactNode => {
+    if (subjectUserId) {
+      return <FxConversionNote mode="subject" subjectUserId={subjectUserId} />;
+    }
+    if (viewerDisplayCurrency) {
+      return <FxConversionNote mode="viewer" />;
+    }
+    return null;
+  };
+
+  const renderPaymentsOrEmpty = ({
+    payments,
+    locale,
+    amountLabel,
+    dateLabel,
+    fxMessages,
+    submission,
+    emptyLabel,
+  }: {
+    readonly payments: readonly PaymentRow[];
+    readonly locale: string;
+    readonly amountLabel: string;
+    readonly dateLabel: string;
+    readonly fxMessages: FormatCurrencyMessages;
+    readonly submission: SubmissionRow | null;
+    readonly emptyLabel: string;
+  }): React.ReactNode => {
+    if (payments.length > 0) {
+      return (
+        <PaymentRecordsSection
+          payments={payments}
+          locale={locale}
+          amountLabel={amountLabel}
+          dateLabel={dateLabel}
+          fxMessages={fxMessages}
+        />
+      );
+    }
+    if (submission === null) {
+      return (
+        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+          {emptyLabel}
+        </Typography>
+      );
+    }
+    return null;
+  };
+
   if (loading) {
     return (
       <Stack sx={{ alignItems: "center", py: 3 }}>
@@ -425,11 +485,7 @@ function PaymentDetailsDialogContent({
   return (
     <Stack spacing={2} sx={{ py: 1 }}>
       {showDisplayCurrencyHint ? <DisplayCurrencyHint /> : null}
-      {subjectUserId ? (
-        <FxConversionNote mode="subject" subjectUserId={subjectUserId} />
-      ) : viewerDisplayCurrency ? (
-        <FxConversionNote mode="viewer" />
-      ) : null}
+      {renderFxConversionNote({ subjectUserId, viewerDisplayCurrency })}
       {submission ? (
         <SubmissionDetailsSection submission={submission} locale={locale} labels={submissionLabels} />
       ) : null}
@@ -453,19 +509,15 @@ function PaymentDetailsDialogContent({
         />
       ) : null}
 
-      {payments.length > 0 ? (
-        <PaymentRecordsSection
-          payments={payments}
-          locale={locale}
-          amountLabel={amountLabel}
-          dateLabel={dateLabel}
-          fxMessages={fxMessages}
-        />
-      ) : !submission ? (
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-          {emptyLabel}
-        </Typography>
-      ) : null}
+      {renderPaymentsOrEmpty({
+        payments,
+        locale,
+        amountLabel,
+        dateLabel,
+        fxMessages,
+        submission,
+        emptyLabel,
+      })}
     </Stack>
   );
 }
@@ -770,8 +822,6 @@ function DialogContentBody({
       onConfirmReject={handlers.onConfirmReject}
       amountLabel={labels.amount}
       dateLabel={labels.date}
-      submittedAtLabel={labels.submittedAt}
-      closeLabel={labels.close}
       emptyLabel={labels.empty}
       fxMessages={fxMessages}
     />

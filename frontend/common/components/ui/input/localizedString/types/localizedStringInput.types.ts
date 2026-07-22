@@ -1,6 +1,7 @@
 // NEW FOR PLAN v5: lifted to common to unify tier-localizedString duplicated type declarations.
 import type { SxProps, Theme } from "@mui/material/styles";
-import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
+import type { AppLocale } from "@/shared/locale";
+import type { LocalizedString } from "@/shared/types";
 
 export type LocalizedStringInputProps = {
   readonly value: LocalizedString;

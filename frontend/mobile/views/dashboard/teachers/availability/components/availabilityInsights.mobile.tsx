@@ -3,6 +3,7 @@
 
 import { PersonSearchOutlined, PublicOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { AvatarGroup, Box, Tooltip, Typography } from "@mui/material";
+import { AvailabilityInsightsLayout } from "@/frontend/common/views/dashboard/teachers/availability/components/availabilityInsightsLayout";
 import type {
   AvailabilityInsightsProps,
   InsightCardProps,
@@ -119,35 +120,39 @@ export function AvailabilityInsightsMobile({ insights }: Readonly<AvailabilityIn
   const t = useAppTranslation().dashboardTranslations.teacherAvailability.insights;
 
   return (
-    <Box
-      sx={{
+    <AvailabilityInsightsLayout
+      insights={insights}
+      layoutSx={{
         display: "flex",
         flexDirection: "column",
         gap: 2,
         mt: 3,
       }}
-    >
-      <InsightCard
-        title={t.peakLoad}
-        value={insights.peakLoad}
-        description={t.peakLoadDesc}
-        icon={<TrendingUpOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
-      />
-
-      <InsightCard
-        title={t.availableStaff}
-        value={t.teachersCount(insights.availableStaff)}
-        description={t.availableStaffDesc}
-        icon={<PersonSearchOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
-      />
-
-      <TimezoneInsight
-        timezones={insights.timezones}
-        labels={{
-          title: t.localTimezones,
-          description: t.localTimezonesDesc,
-        }}
-      />
-    </Box>
+      peakLoadCard={
+        <InsightCard
+          title={t.peakLoad}
+          value={insights.peakLoad}
+          description={t.peakLoadDesc}
+          icon={<TrendingUpOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
+        />
+      }
+      availableStaffCard={
+        <InsightCard
+          title={t.availableStaff}
+          value={t.teachersCount(insights.availableStaff)}
+          description={t.availableStaffDesc}
+          icon={<PersonSearchOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
+        />
+      }
+      timezoneInsightCard={
+        <TimezoneInsight
+          timezones={insights.timezones}
+          labels={{
+            title: t.localTimezones,
+            description: t.localTimezonesDesc,
+          }}
+        />
+      }
+    />
   );
 }

@@ -1,4 +1,3 @@
-export * from "@/frontend/common/components/ui/avatar";
 export * from "@/frontend/common/components/ui/badge";
 export { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 export * from "@/frontend/common/components/ui/button";
@@ -8,10 +7,9 @@ export * from "@/frontend/common/components/ui/card";
 export * from "@/frontend/common/components/ui/container";
 export { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 export { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
-export * from "@/frontend/common/components/ui/dataGrid";
-export { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
-export * from "@/frontend/common/components/ui/dialog";
-export { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
+export { AppDataGrid, type AppDataGridProps } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
+export { AppDataGridLoadingOverlay } from "@/frontend/common/components/ui/dataGrid/AppDataGridLoadingOverlay";
+export { AppDataGridNoRowsOverlay } from "@/frontend/common/components/ui/dataGrid/AppDataGridNoRowsOverlay";
 export * from "@/frontend/common/components/ui/display";
 export { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 export { PersonProfileLink } from "@/frontend/common/components/ui/display/personProfileLink/PersonProfileLink";

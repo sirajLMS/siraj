@@ -84,16 +84,12 @@ export function TeachersMobileView({
           rows={rows}
           searchQuery={searchQuery}
           onSearchChange={onSearchChange}
-          paginationOptions={
-            totalCount !== undefined
-              ? buildServerPaginationOptions({
-                  page,
-                  pageSize,
-                  totalCount,
-                  onPageChange,
-                })
-              : false
-          }
+          paginationOptions={buildServerPaginationOptions({
+            page,
+            pageSize,
+            totalCount,
+            onPageChange,
+          })}
           onNavigateToSchedule={onNavigateToSchedule}
           onNavigateToProfile={onNavigateToProfile}
         />

@@ -1,8 +1,8 @@
 // NON-BLOCKING baseline note: pre-existing Storybook import mismatches predate Plan v5.
-// The story imports `ParentProfileView` from
-// `@/frontend/common/views/dashboard/profile/parent/ParentProfileView`. The
-// module is now a ResponsiveViewSwitch switcher exported from
-// `ParentProfileContainer.tsx`; the previous common ParentProfileView component
+// This story renders the tier switch directly via `ResponsiveViewSwitch` +
+// `createLazyView` (the same primitives `ParentProfileView.tsx` delegates to
+// on the fabricated-ViewModel path) instead of importing the deprecated
+// `ParentProfileView` alias. The previous common ParentProfileView component
 // has been split into tier views under
 // `frontend/{mobile,desktop}/views/dashboard/profile/parent/parentProfile.{mobile,desktop}.tsx`.
 // The fixture also no longer matches the current `ParentProfileViewModel`
@@ -14,6 +14,8 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import {
   AccountStatus,
   CurrencyCode,
@@ -22,7 +24,7 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { ParentProfileView } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileView";
+import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileView";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;
@@ -95,9 +97,27 @@ const associatedStudents: NonNullable<AssociatedStudents> = {
   ],
 };
 
-const meta: Meta<typeof ParentProfileView> = {
+// Mirrors the lazy view setup in ParentProfileView.tsx so stories render the
+// tier switch directly (the non-Container path) rather than via the
+// deprecated `ParentProfileView` alias.
+const lazyViews = createLazyView<ParentProfileViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/profile/parent/parentProfile.mobile").then(m => ({
+      default: m.ParentProfileMobileView,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/profile/parent/parentProfile.desktop").then(m => ({
+      default: m.ParentProfileDesktopView,
+    }))
+);
+
+function ParentProfileStory(props: Readonly<ParentProfileViewModel>) {
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
+}
+
+const meta: Meta<typeof ParentProfileStory> = {
   title: "Views/profile/parent",
-  component: ParentProfileView,
+  component: ParentProfileStory,
   tags: ["autodocs"],
   decorators: [
     Story => (
@@ -109,7 +129,7 @@ const meta: Meta<typeof ParentProfileView> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof ParentProfileView>;
+type Story = StoryObj<typeof ParentProfileStory>;
 
 export const Default: Story = {
   args: {

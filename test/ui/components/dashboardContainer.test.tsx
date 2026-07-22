@@ -1,4 +1,4 @@
-import { mock } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 
 mock.module("@/frontend/common/views/dashboard/admin/home/AdminDashboardContainer", () => ({
   AdminDashboardContainer: () => <div data-testid="admin-dashboard">Admin Dashboard</div>,
@@ -16,7 +16,6 @@ mock.module("@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboa
   TeacherDashboardContainer: () => <div data-testid="teacher-dashboard">Teacher Dashboard</div>,
 }));
 
-import { afterEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";
 

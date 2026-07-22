@@ -4,7 +4,6 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AdminDashboardView } from "@/frontend/common/views/dashboard/admin/home/AdminDashboardView";
 import {
-  type AdminDashboardViewModel,
   type UseAdminDashboardViewModelProps,
   useAdminDashboardViewModel,
 } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
@@ -18,5 +17,3 @@ export function AdminDashboardContainer(props: UseAdminDashboardViewModelProps) 
     </RequirePermission>
   );
 }
-
-export type { AdminDashboardViewModel, UseAdminDashboardViewModelProps };

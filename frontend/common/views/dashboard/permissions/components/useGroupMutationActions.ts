@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import type { LocalizedString } from "@/shared/types";
 
 interface UseGroupMutationActionsProps {
   readonly group: PermissionGroup;

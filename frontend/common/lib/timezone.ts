@@ -18,7 +18,7 @@ export type TimezoneOption = {
 };
 
 function normalizeIanaTimezoneId(value: string): string {
-  const slashNormalized = value.includes("/") ? value : value.replace(/_/g, "/");
+  const slashNormalized = value.includes("/") ? value : value.replaceAll("_", "/");
   return resolveExcludedIanaTimezoneId(slashNormalized);
 }
 
@@ -32,12 +32,12 @@ export function fromGraphqlIanaTimezone(value: IanaTimezone | string): IanaTimez
 
 export function toGraphqlIanaTimezone(value: IanaTimezoneId | string | null | undefined): IanaTimezone {
   const normalized = normalizeIanaTimezoneId(value ?? "UTC");
-  return normalized.replace(/\//g, "_") as IanaTimezone;
+  return normalized.replaceAll("/", "_") as IanaTimezone;
 }
 
 export function resolveBrowserIanaTimezoneId(): IanaTimezoneId {
   const browserTimezone = normalizeIanaTimezoneId(Intl.DateTimeFormat().resolvedOptions().timeZone);
-  return isValidIanaTimezoneId(browserTimezone) ? (browserTimezone as IanaTimezoneId) : "Africa/Cairo";
+  return isValidIanaTimezoneId(browserTimezone) ? browserTimezone : "Africa/Cairo";
 }
 
 export function getTimezonePathLabel(ianaTimezone: string, locale?: string): string {

@@ -2,7 +2,8 @@
 import { InfoOutlined, MenuBookOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard, UserAvatar } from "@/frontend/common/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui";
+import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import { StudentEntityLink } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
 import type { ClassInstanceStatus } from "@/frontend/common/views/dashboard/types/dashboard";
 import { Link } from "@/shared/i18n/routing";

@@ -1,4 +1,4 @@
-export * from "@/frontend/mobile/components/ui/input/catalogImageUpload";
+export * from "@/frontend/mobile/components/ui/input/catalogImageUpload/catalogImageUpload.mobile";
 export * from "@/frontend/mobile/components/ui/input/countrySelect";
 export * from "@/frontend/mobile/components/ui/input/currencySelect";
 export * from "@/frontend/mobile/components/ui/input/editableTypography";
