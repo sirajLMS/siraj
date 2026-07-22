@@ -1,7 +1,7 @@
 "use client";
 
-import { useAppLocale, useLocaleContext } from "./localeContext";
-import type { Translations } from "./types/message";
+import { useAppLocale, useLocaleContext } from "@/shared/locale/localeContext";
+import type { Translations } from "@/shared/locale/types/message";
 
 export function useAppTranslation(): Translations {
   return useLocaleContext().translations;

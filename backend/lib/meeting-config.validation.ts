@@ -1,13 +1,7 @@
 import { z } from "zod";
 import { localizedStringRequiredSchema } from "@/backend/lib/payment-method.validation";
-import type {
-  MeetingConfigDetails,
-  MeetingConfigSnapshot,
-  MeetingProviderCatalogSnapshot,
-  UserMeetingConfigSubmitInput,
-} from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
-
 // ============================================================================
 // URL allowlist — host must match one of the provider patterns
 // ============================================================================
@@ -26,34 +20,38 @@ export function isUrlAllowedByProvider(url: string, allowlist: readonly string[]
 
 function buildMeetingConfigDetailsSchema(provider: MeetingProviderSelectType): z.ZodType<MeetingConfigDetails> {
   const base = z.object({
-    meetingUrl: z.string().url(),
+    meetingUrl: z.url(),
     username: z.string().optional(),
     tenantId: z.string().optional(),
   });
 
-  return base.superRefine((data, ctx) => {
+  return base.check(ctx => {
+    const data = ctx.value;
     if (!isUrlAllowedByProvider(data.meetingUrl, provider.urlAllowlist)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+      ctx.issues.push({
+        code: "custom",
         message: "meetingUrlHostNotAllowed",
         path: ["meetingUrl"],
+        input: ctx.value,
       });
     }
     if (provider.fieldSchema.supportsUsername && data.username !== undefined && data.username.trim() === "") {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+      ctx.issues.push({
+        code: "custom",
         message: "usernameRequired",
         path: ["username"],
+        input: ctx.value,
       });
     }
     if (provider.fieldSchema.supportsTenantId && data.tenantId !== undefined && data.tenantId.trim() === "") {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+      ctx.issues.push({
+        code: "custom",
         message: "tenantIdRequired",
         path: ["tenantId"],
+        input: ctx.value,
       });
     }
-  }) as z.ZodType<MeetingConfigDetails>;
+  });
 }
 
 export function parseMeetingConfigDetails(provider: MeetingProviderSelectType, details: unknown): MeetingConfigDetails {
@@ -61,46 +59,46 @@ export function parseMeetingConfigDetails(provider: MeetingProviderSelectType, d
 }
 
 export const meetingProviderCatalogSnapshotSchema = z.object({
-  catalogId: z.string().uuid(),
+  catalogId: z.guid(),
   catalogSlug: z.string(),
   catalogName: localizedStringRequiredSchema(),
-  logoUrl: z.string().url().nullable(),
-}) as z.ZodType<MeetingProviderCatalogSnapshot>;
+  logoUrl: z.url().nullable(),
+});
 
 export const meetingConfigSnapshotSchema = z.object({
-  userMeetingConfigId: z.string().uuid().nullable(),
-  providerId: z.string().uuid(),
+  userMeetingConfigId: z.guid().nullable(),
+  providerId: z.guid(),
   label: z.string().nullable(),
   details: z.object({
-    meetingUrl: z.string().url(),
+    meetingUrl: z.url(),
     username: z.string().optional(),
     tenantId: z.string().optional(),
   }),
   provider: meetingProviderCatalogSnapshotSchema,
-  snapshottedAt: z.string().refine(s => !Number.isNaN(Date.parse(s)), {
-    message: "snapshottedAt must be an ISO timestamp",
-  }),
-}) as z.ZodType<MeetingConfigSnapshot>;
+  snapshottedAt: z.iso.datetime({ message: "snapshottedAt must be an ISO timestamp" }),
+});
 
 export function buildUserMeetingConfigSubmitInputSchema(provider: MeetingProviderSelectType) {
   return z
     .object({
-      userId: z.string().uuid(),
-      providerId: z.string().uuid(),
+      userId: z.guid(),
+      providerId: z.guid(),
       label: z.string().max(100).nullable().optional(),
       isDefault: z.boolean(),
       password: z.string().nullable().optional(),
       details: z.unknown(),
     })
-    .refine(
-      data => {
-        try {
-          parseMeetingConfigDetails(provider, data.details);
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      { message: "details do not match provider field schema" }
-    ) as z.ZodType<UserMeetingConfigSubmitInput>;
+    .check(ctx => {
+      const data = ctx.value;
+      try {
+        parseMeetingConfigDetails(provider, data.details);
+      } catch {
+        ctx.issues.push({
+          code: "custom",
+          message: "details do not match provider field schema",
+          path: ["details"],
+          input: ctx.value,
+        });
+      }
+    });
 }

@@ -11,7 +11,7 @@ export const meetingProviderFieldSchemaSchema = z.object({
   supportsUsername: z.boolean().optional(),
   supportsPassword: z.boolean().optional(),
   supportsTenantId: z.boolean().optional(),
-}) as z.ZodType<MeetingProviderFieldSchema>;
+}) satisfies z.ZodType<MeetingProviderFieldSchema>;
 
 export const meetingProviderSubmitInputSchema = z.object({
   slug: z
@@ -23,8 +23,8 @@ export const meetingProviderSubmitInputSchema = z.object({
   description: localizedStringSchema.nullable().optional(),
   instructions: localizedStringSchema.nullable().optional(),
   urlAllowlist: z.array(z.string().min(1)).min(1),
-  urlExample: z.string().url().nullable().optional(),
-  logoUrl: z.string().url().nullable().optional(),
+  urlExample: z.url({ message: "Invalid URL" }).nullable().optional(),
+  logoUrl: z.url({ message: "Invalid URL" }).nullable().optional(),
   fieldSchema: meetingProviderFieldSchemaSchema,
   isActive: z.boolean().optional(),
 }) satisfies z.ZodType<MeetingProviderSubmitInput>;
@@ -40,8 +40,8 @@ export const updateMeetingProviderInputSchema = z.object({
   description: localizedStringSchema.nullable().optional(),
   instructions: localizedStringSchema.nullable().optional(),
   urlAllowlist: z.array(z.string().min(1)).min(1).optional(),
-  urlExample: z.string().url().nullable().optional(),
-  logoUrl: z.string().url().nullable().optional(),
+  urlExample: z.url({ message: "Invalid URL" }).nullable().optional(),
+  logoUrl: z.url({ message: "Invalid URL" }).nullable().optional(),
   fieldSchema: meetingProviderFieldSchemaSchema.optional(),
   isActive: z.boolean().optional(),
 }) satisfies z.ZodType<UpdateMeetingProviderInput>;

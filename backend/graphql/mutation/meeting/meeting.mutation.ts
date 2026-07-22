@@ -47,9 +47,9 @@ function normalizeFieldSchema(input: {
 }): MeetingProviderFieldSchema {
   return {
     requiresMeetingUrl: input.requiresMeetingUrl,
-    ...(input.supportsUsername != null ? { supportsUsername: input.supportsUsername } : {}),
-    ...(input.supportsPassword != null ? { supportsPassword: input.supportsPassword } : {}),
-    ...(input.supportsTenantId != null ? { supportsTenantId: input.supportsTenantId } : {}),
+    ...(input.supportsUsername == null ? {} : { supportsUsername: input.supportsUsername }),
+    ...(input.supportsPassword == null ? {} : { supportsPassword: input.supportsPassword }),
+    ...(input.supportsTenantId == null ? {} : { supportsTenantId: input.supportsTenantId }),
   };
 }
 
@@ -60,8 +60,8 @@ function normalizeMeetingConfigDetails(input: {
 }): MeetingConfigDetails {
   return {
     meetingUrl: input.meetingUrl,
-    ...(input.username != null && input.username !== "" ? { username: input.username } : {}),
-    ...(input.tenantId != null && input.tenantId !== "" ? { tenantId: input.tenantId } : {}),
+    ...(input.username == null || input.username === "" ? {} : { username: input.username }),
+    ...(input.tenantId == null || input.tenantId === "" ? {} : { tenantId: input.tenantId }),
   };
 }
 
@@ -82,15 +82,15 @@ function normalizeProviderUpdateInput(input: {
   readonly isActive?: boolean | null;
 }) {
   return {
-    ...(input.slug != null ? { slug: input.slug } : {}),
-    ...(input.name != null ? { name: input.name } : {}),
-    ...(input.description !== undefined ? { description: input.description } : {}),
-    ...(input.instructions !== undefined ? { instructions: input.instructions } : {}),
-    ...(input.urlAllowlist != null ? { urlAllowlist: input.urlAllowlist } : {}),
-    ...(input.urlExample !== undefined ? { urlExample: input.urlExample } : {}),
-    ...(input.logoUrl !== undefined ? { logoUrl: input.logoUrl } : {}),
-    ...(input.fieldSchema != null ? { fieldSchema: normalizeFieldSchema(input.fieldSchema) } : {}),
-    ...(input.isActive != null ? { isActive: input.isActive } : {}),
+    ...(input.slug == null ? {} : { slug: input.slug }),
+    ...(input.name == null ? {} : { name: input.name }),
+    ...(input.description === undefined ? {} : { description: input.description }),
+    ...(input.instructions === undefined ? {} : { instructions: input.instructions }),
+    ...(input.urlAllowlist == null ? {} : { urlAllowlist: input.urlAllowlist }),
+    ...(input.urlExample === undefined ? {} : { urlExample: input.urlExample }),
+    ...(input.logoUrl === undefined ? {} : { logoUrl: input.logoUrl }),
+    ...(input.fieldSchema == null ? {} : { fieldSchema: normalizeFieldSchema(input.fieldSchema) }),
+    ...(input.isActive == null ? {} : { isActive: input.isActive }),
   };
 }
 
@@ -106,11 +106,11 @@ function normalizeConfigUpdateInput(input: {
   } | null;
 }) {
   return {
-    ...(input.providerId != null ? { providerId: input.providerId } : {}),
-    ...(input.label !== undefined ? { label: input.label } : {}),
-    ...(input.isDefault != null ? { isDefault: input.isDefault } : {}),
-    ...(input.password !== undefined ? { password: input.password } : {}),
-    ...(input.details != null ? { details: normalizeMeetingConfigDetails(input.details) } : {}),
+    ...(input.providerId == null ? {} : { providerId: input.providerId }),
+    ...(input.label === undefined ? {} : { label: input.label }),
+    ...(input.isDefault == null ? {} : { isDefault: input.isDefault }),
+    ...(input.password === undefined ? {} : { password: input.password }),
+    ...(input.details == null ? {} : { details: normalizeMeetingConfigDetails(input.details) }),
   };
 }
 

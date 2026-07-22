@@ -46,8 +46,7 @@ export function ParentStudentsMobileView({ labels, loading, error, rows }: Reado
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
       {error ? (
         <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.errors.failedToLoad}</Typography>
-      ) : null}
-      {!error ? (
+      ) : (
         <Stack spacing={1}>
           <MobileCardList
             rows={rows}
@@ -59,7 +58,7 @@ export function ParentStudentsMobileView({ labels, loading, error, rows }: Reado
             renderItem={row => <ParentStudentMobileCard row={row} labels={labels} />}
           />
         </Stack>
-      ) : null}
+      )}
     </MobilePageContainer>
   );
 }

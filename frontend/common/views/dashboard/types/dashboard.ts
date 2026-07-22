@@ -11,8 +11,6 @@ import type {
 import type { TeacherFilterItem } from "@/frontend/common/types/shared.types";
 import type { DashboardNavigationLabels } from "@/shared/locale";
 
-export type { DashboardFilters, MetricItem, Pagination, TeacherFilterItem } from "@/frontend/common/types/shared.types";
-
 export type DailyScheduleRow = DailyScheduleList;
 
 export type NavAudience = "teacher" | "parent" | "student" | "supervisor";

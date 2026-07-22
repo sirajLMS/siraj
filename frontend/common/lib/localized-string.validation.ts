@@ -47,7 +47,7 @@ export function localizedStringRequiredSchema(requiredLocales?: readonly AppLoca
     .superRefine((map: LocalizedString, ctx): void => {
       const issue = buildRefineIssue(map, required);
       if (issue) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: issue.message });
+        ctx.addIssue({ code: "custom", message: issue.message });
       }
     });
 }
@@ -69,7 +69,7 @@ export function localizedStringOptionalSchema(requiredLocales?: readonly AppLoca
       }
       const issue = buildRefineIssue(map, required);
       if (issue) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: issue.message });
+        ctx.addIssue({ code: "custom", message: issue.message });
       }
     });
 }

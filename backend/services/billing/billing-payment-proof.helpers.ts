@@ -113,7 +113,8 @@ export async function assertInvoiceBelongsToParentUser(
   tErrors: ErrorsLabels
 ): Promise<void> {
   const parent = await ParentRepository.findByUserId(actorUserId);
-  if (!parent || parent.id !== invoice.parentId) {
+  const parentId = parent?.id;
+  if (parentId !== invoice.parentId) {
     throw new Error(tErrors.insufficientPermissions);
   }
 }

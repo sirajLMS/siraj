@@ -209,9 +209,9 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
         callerUserId,
         args.parentId ?? null,
         args.userId ?? null,
+        tErrors,
         pagination,
-        args.search ?? null,
-        tErrors
+        args.search ?? null
       );
     },
   })
@@ -230,7 +230,7 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
       const pagination = parsePaginationArgs(args.paginationArgs);
 
       const tErrors = ctx.t().errorsTranslations;
-      const result = await BillingHistoryService.getAdminInvoices(userId, pagination, args.search ?? null, tErrors);
+      const result = await BillingHistoryService.getAdminInvoices(userId, tErrors, pagination, args.search ?? null);
       await populateBillingFxDisplayCurrencyByUserId(
         ctx,
         result.rows.map(row => row.parentUserId)

@@ -239,7 +239,7 @@ async function dispatchUnpaidInvoicesForStudent(studentId: string, locale?: stri
     .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
 
   for (const invoice of unpaidInvoices) {
-    await dispatchInvoiceGenerated(parentUserId, invoice as Types.InvoiceSelectType, locale);
+    await dispatchInvoiceGenerated(parentUserId, invoice, locale);
   }
 }
 
@@ -349,11 +349,7 @@ export namespace BillingManagementService {
     await validateManualInvoiceInput(input, tErrors);
 
     try {
-      const created = await BillingRepository.createInvoice(
-        buildInvoiceInsertPayload(actorUserId, input),
-        tErrors,
-        undefined
-      );
+      const created = await BillingRepository.createInvoice(buildInvoiceInsertPayload(actorUserId, input), tErrors);
 
       const billingMonths = input.billingMonths;
       if (billingMonths?.length) {

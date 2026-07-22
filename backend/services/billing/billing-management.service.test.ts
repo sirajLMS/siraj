@@ -487,11 +487,12 @@ describe("BillingManagementService notification dispatch", () => {
 
       // Builder called once for the parent.
       expect(buildInvoiceGeneratedPayloadsMock).toHaveBeenCalledTimes(1);
-      expect(buildInvoiceGeneratedCalls[0]?.userId).toBe(PARENT_USER_ID);
+      expect(buildInvoiceGeneratedCalls[0]?.userId).toEqual(PARENT_USER_ID);
 
       // Dispatch happens once, with the parent as the sole affected user.
       expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(1);
-      expect(dispatchCalls[0]?.affectedUserIds).toEqual([PARENT_USER_ID]);
+      const affectedUserIds = dispatchCalls[0]?.affectedUserIds;
+      expect(affectedUserIds).toEqual([PARENT_USER_ID]);
       const dispatched = dispatchCalls[0]?.payloads as Array<{ eventType: NotificationEventType; channel: string }>;
       expect(dispatched.every(p => p.eventType === NotificationEventType.INVOICE_GENERATED)).toBe(true);
       // 4 channels emitted by builder.

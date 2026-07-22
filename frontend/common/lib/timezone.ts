@@ -1,4 +1,3 @@
-import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 import { IANA_TIMEZONE_LABELS } from "@/shared/constants/iana-timezone-labels";
 import { IANA_TIMEZONE_TERRITORY_CODES } from "@/shared/constants/iana-timezone-territories";
@@ -26,13 +25,13 @@ function resolveLocaleKey(locale?: string): "en" | "ar" {
   return locale === "ar" ? "ar" : "en";
 }
 
-export function fromGraphqlIanaTimezone(value: IanaTimezone | string): IanaTimezoneId {
+export function fromGraphqlIanaTimezone(value: string): IanaTimezoneId {
   return normalizeIanaTimezoneId(value) as IanaTimezoneId;
 }
 
-export function toGraphqlIanaTimezone(value: IanaTimezoneId | string | null | undefined): IanaTimezone {
+export function toGraphqlIanaTimezone(value: IanaTimezoneId | string | null | undefined): string {
   const normalized = normalizeIanaTimezoneId(value ?? "UTC");
-  return normalized.replaceAll("/", "_") as IanaTimezone;
+  return normalized.replaceAll("/", "_");
 }
 
 export function resolveBrowserIanaTimezoneId(): IanaTimezoneId {

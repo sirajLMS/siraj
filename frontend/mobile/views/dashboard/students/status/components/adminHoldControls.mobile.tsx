@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, type SxProps, type Theme } from "@mui/material";
+import { Box } from "@mui/material";
 import type { ReactNode } from "react";
 import { AdminHoldControlsShared } from "@/frontend/common/views/dashboard/students/status/components/adminHoldControlsShared";
 import type { AdminHoldControlsProps } from "@/frontend/common/views/dashboard/students/status/types";
@@ -14,7 +14,7 @@ import {
 
 const MobileQuickReasonsContainer = ({ children }: Readonly<{ children: ReactNode }>) => (
   <Box sx={{ mt: 1.5 }}>
-    <MobileHorizontalScrollRow sx={{ paddingInlineStart: 0, paddingInlineEnd: 0 } as SxProps<Theme>}>
+    <MobileHorizontalScrollRow sx={{ paddingInlineStart: 0, paddingInlineEnd: 0 }}>
       {children}
     </MobileHorizontalScrollRow>
   </Box>

@@ -6,4 +6,3 @@ export {
   type TeacherOnboardingInput,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 export type TeacherOnboardingCreateResult = NonNullable<CreateTeacherMutation["createTeacher"]>;
-export type { TeacherOnboardingFormData } from "@/frontend/common/types/shared.types";

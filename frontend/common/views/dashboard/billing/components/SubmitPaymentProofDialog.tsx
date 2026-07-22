@@ -381,7 +381,16 @@ export function SubmitPaymentProofDialog({
   };
 
   const title = mode === "submit" ? t.titleSubmit : t.titleMarkPaid;
-  const confirmLabel = busy ? t.confirming : mode === "markPaid" ? t.confirmMarkPaid : t.confirm;
+
+  let confirmLabel: string;
+  if (busy) {
+    confirmLabel = t.confirming;
+  } else if (mode === "markPaid") {
+    confirmLabel = t.confirmMarkPaid;
+  } else {
+    confirmLabel = t.confirm;
+  }
+
   const canConfirm = Boolean(invoiceId && selectedFile && !busy && !billingActionsDisabled);
 
   return (

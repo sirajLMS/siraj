@@ -71,7 +71,7 @@ export function PreferencesChannelTabsMobileView({
 
   const handleChannelChange = (_: SyntheticEvent, value: ChannelId) => {
     const nextIndex = NOTIFICATION_CHANNELS.indexOf(value);
-    const prevIndex = NOTIFICATION_CHANNELS.indexOf(activeChannel as ChannelId);
+    const prevIndex = NOTIFICATION_CHANNELS.indexOf(activeChannel);
     const direction: "left" | "right" = nextIndex > prevIndex ? "left" : "right";
     onChannelChange(value, direction);
   };
@@ -80,7 +80,7 @@ export function PreferencesChannelTabsMobileView({
     return <ChannelTabsSkeleton />;
   }
 
-  const activeAccent: NotificationChannelAccent = NOTIFICATION_CHANNEL_ACCENTS[activeChannel as ChannelId];
+  const activeAccent: NotificationChannelAccent = NOTIFICATION_CHANNEL_ACCENTS[activeChannel];
 
   return (
     <Box

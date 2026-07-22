@@ -3,10 +3,7 @@
 import { buildManualInvoiceLabels } from "@/frontend/common/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
 import type { BillingLabels } from "@/shared/locale";
 
-export { buildManualInvoiceLabels };
-export type BillingTranslator = BillingLabels;
-
-export function buildPageLabels(t: BillingTranslator) {
+export function buildPageLabels(t: BillingLabels) {
   return {
     adminPageTitle: t.adminPageTitle,
     adminPageSubtitle: t.adminPageSubtitle,
@@ -25,7 +22,7 @@ export function buildPageLabels(t: BillingTranslator) {
   };
 }
 
-export function buildMetricLabels(t: BillingTranslator) {
+export function buildMetricLabels(t: BillingLabels) {
   return {
     adminMetrics: {
       totalOutstanding: t.adminMetrics.totalOutstanding,
@@ -42,7 +39,7 @@ export function buildMetricLabels(t: BillingTranslator) {
   };
 }
 
-export function buildSectionAndSearchLabels(t: BillingTranslator) {
+export function buildSectionAndSearchLabels(t: BillingLabels) {
   return {
     sections: {
       recentInvoices: t.sections.recentInvoices,
@@ -58,7 +55,7 @@ export function buildSectionAndSearchLabels(t: BillingTranslator) {
   };
 }
 
-export function buildTableLabels(t: BillingTranslator) {
+export function buildTableLabels(t: BillingLabels) {
   return {
     adminTable: {
       invoiceId: t.adminTable.invoiceId,
@@ -109,7 +106,7 @@ export function buildTableLabels(t: BillingTranslator) {
   };
 }
 
-export function buildStatusLabels(t: BillingTranslator) {
+export function buildStatusLabels(t: BillingLabels) {
   return {
     invoiceStatus: {
       OVERDUE: t.invoiceStatus.OVERDUE,
@@ -126,7 +123,7 @@ export function buildStatusLabels(t: BillingTranslator) {
   };
 }
 
-export function buildPaymentLabels(t: BillingTranslator) {
+export function buildPaymentLabels(t: BillingLabels) {
   return {
     paymentMethodSelector: {
       label: t.paymentMethodSelector.label,
@@ -148,7 +145,7 @@ export function buildPaymentLabels(t: BillingTranslator) {
   };
 }
 
-export function buildSubmitProofDialogLabels(t: BillingTranslator) {
+export function buildSubmitProofDialogLabels(t: BillingLabels) {
   return {
     submitProofDialog: {
       titleSubmit: t.submitProofDialog.titleSubmit,
@@ -173,7 +170,7 @@ export function buildSubmitProofDialogLabels(t: BillingTranslator) {
   };
 }
 
-export function buildPaymentDetailsDialogLabels(t: BillingTranslator) {
+export function buildPaymentDetailsDialogLabels(t: BillingLabels) {
   return {
     paymentDetailsDialog: {
       title: t.paymentDetailsDialog.title,
@@ -202,7 +199,7 @@ export function buildPaymentDetailsDialogLabels(t: BillingTranslator) {
   };
 }
 
-export function buildNotificationAndErrorLabels(t: BillingTranslator) {
+export function buildNotificationAndErrorLabels(t: BillingLabels) {
   return {
     notifications: {
       popupBlocked: t.notifications.popupBlocked,
@@ -215,7 +212,7 @@ export function buildNotificationAndErrorLabels(t: BillingTranslator) {
   };
 }
 
-export function buildFxAndCurrencyLabels(t: BillingTranslator) {
+export function buildFxAndCurrencyLabels(t: BillingLabels) {
   return {
     exchangeRates: t.exchangeRates,
     fxStaleBanner: {
@@ -245,7 +242,7 @@ export function buildFxAndCurrencyLabels(t: BillingTranslator) {
   };
 }
 
-export function buildSuccessLabels(t: BillingTranslator) {
+export function buildSuccessLabels(t: BillingLabels) {
   return {
     markAsPaidSuccess: t.markAsPaidSuccess,
     submitProofSuccess: t.submitProofSuccess,
@@ -264,7 +261,7 @@ export function buildSuccessLabels(t: BillingTranslator) {
   };
 }
 
-export function buildBillingLabels(t: BillingTranslator): BillingLabels {
+export function buildBillingLabels(t: BillingLabels): BillingLabels {
   return {
     ...buildPageLabels(t),
     ...buildMetricLabels(t),

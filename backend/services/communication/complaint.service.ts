@@ -418,7 +418,7 @@ async function validateComplaintFiles(files: ReadonlyArray<FileMetadata>, locale
   const maxSizeMb = await SystemSettingsRepository.getIntValue("complaint_max_file_size_mb", 25);
   const maxSizeBytes = maxSizeMb * 1024 * 1024;
 
-  const allowedMimeTypes = [
+  const allowedMimeTypes = new Set<string>([
     "image/jpeg",
     "image/png",
     "image/gif",
@@ -428,14 +428,14 @@ async function validateComplaintFiles(files: ReadonlyArray<FileMetadata>, locale
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "text/plain",
     "text/markdown",
-  ];
+  ]);
 
   for (const file of files) {
     if (file.sizeBytes > maxSizeBytes) {
       throw new Error(`complaint.fileTooLarge:${maxSizeMb}`);
     }
 
-    if (!allowedMimeTypes.includes(file.mimeType)) {
+    if (!allowedMimeTypes.has(file.mimeType)) {
       throw new Error(tErrors.file.invalidFileType);
     }
   }

@@ -57,7 +57,7 @@ describe("hasRequiredLocalizedValue", () => {
   });
 
   it("returns false when required locale missing", () => {
-    expect(hasRequiredLocalizedValue({ en: "English" }, ["ar" as AppLocale])).toBe(false);
+    expect(hasRequiredLocalizedValue({ en: "English" }, ["ar"])).toBe(false);
   });
 
   it("returns false when map is empty but locale required", () => {

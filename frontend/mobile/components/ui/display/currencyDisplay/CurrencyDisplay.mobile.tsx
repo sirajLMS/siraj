@@ -59,7 +59,7 @@ export const MobileCurrencyDisplay: React.FC<MobileCurrencyDisplayProps> = ({
   const flag = getCurrencyFlag(code);
   const longLabel = getCurrencyDisplayName(code, locale);
   const symbol = getCurrencySymbol(code);
-  const shortCode = code as string;
+  const shortCode = code;
 
   return (
     <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", ...sx }}>

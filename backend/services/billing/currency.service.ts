@@ -2,8 +2,12 @@ import { SupportedCurrencyRepository } from "@/backend/db/repo/billing/currency.
 import type { SupportedCurrencyReturnType } from "@/backend/types/billing/currency.types";
 
 export namespace CurrencyCatalogService {
-  export async function listSupportedCurrencies(activeOnly = true): Promise<SupportedCurrencyReturnType[]> {
-    return activeOnly ? SupportedCurrencyRepository.listActive() : SupportedCurrencyRepository.listAll();
+  export async function listActiveCurrencies(): Promise<SupportedCurrencyReturnType[]> {
+    return SupportedCurrencyRepository.listActive();
+  }
+
+  export async function listAllCurrencies(): Promise<SupportedCurrencyReturnType[]> {
+    return SupportedCurrencyRepository.listAll();
   }
 
   export async function upsertManyForSeed(

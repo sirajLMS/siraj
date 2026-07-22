@@ -12,7 +12,7 @@ export function PermissionCatalogCardListMobile({ permissions, groups }: Readonl
 
   return (
     <MobileCardList<Permission>
-      rows={permissions as Permission[]}
+      rows={permissions}
       getKey={permission => permission.id ?? permission.key ?? ""}
       emptyMessage={t.noPermissionsFound}
       paginationOptions={{ mode: "client" }}

@@ -17,10 +17,9 @@ import { DEFAULT_CONTENT_LOCALE, isAppLocale } from "@/shared/types/localized-st
 // ============================================================================
 // Enum schemas (runtime mirrors of `@/backend/enum/billing/payment-method.enum`)
 // ============================================================================
-
-export const paymentMethodTypeEnumSchema = z.nativeEnum(PaymentMethodType);
-export const paymentDirectionEnumSchema = z.nativeEnum(PaymentDirection);
-export const identifierKindEnumSchema = z.nativeEnum(IdentifierKind);
+export const paymentMethodTypeEnumSchema = z.enum(PaymentMethodType);
+export const paymentDirectionEnumSchema = z.enum(PaymentDirection);
+export const identifierKindEnumSchema = z.enum(IdentifierKind);
 
 // ============================================================================
 // LocalizedString schema
@@ -33,13 +32,15 @@ export const identifierKindEnumSchema = z.nativeEnum(IdentifierKind);
 
 export const localizedStringSchema = z
   .record(z.string(), z.string())
-  .superRefine((map, ctx): void => {
+  .check(ctx => {
+    const map = ctx.value;
     for (const key of Object.keys(map)) {
       if (!isAppLocale(key)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+        ctx.issues.push({
+          code: "custom",
           message: `Unknown locale key: ${key}`,
           path: [key],
+          input: ctx.value,
         });
       }
     }
@@ -50,32 +51,36 @@ export const localizedStringSchema = z
 export const localizedStringRequiredSchema = (requiredLocales: readonly string[] = [DEFAULT_CONTENT_LOCALE]) =>
   z
     .record(z.string(), z.string())
-    .superRefine((map, ctx): void => {
+    .check(ctx => {
+      const map = ctx.value;
       const entries = Object.entries(map);
       const hasAny = entries.some(([, v]) => typeof v === "string" && v.trim() !== "");
       if (!hasAny) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+        ctx.issues.push({
+          code: "custom",
           message: "atLeastOneTranslationRequired",
+          input: ctx.value,
         });
         return;
       }
       for (const key of Object.keys(map)) {
         if (!isAppLocale(key)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+          ctx.issues.push({
+            code: "custom",
             message: `Unknown locale key: ${key}`,
             path: [key],
+            input: ctx.value,
           });
         }
       }
       for (const locale of requiredLocales) {
         const v = map[locale];
         if (!(typeof v === "string" && v.trim() !== "")) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+          ctx.issues.push({
+            code: "custom",
             message: `localeRequired:${locale}`,
             path: [locale],
+            input: ctx.value,
           });
         }
       }
@@ -87,19 +92,19 @@ export const localizedStringRequiredSchema = (requiredLocales: readonly string[]
 // ============================================================================
 
 export const mobileWalletDetailsSchema = z.object({
-  walletId: z.string().uuid(),
+  walletId: z.guid(),
   phone: z.string().min(1), // E.164 validated at service layer against catalog phoneRegion
-}) as z.ZodType<MobileWalletDetails>;
+}) satisfies z.ZodType<MobileWalletDetails>;
 
 export const paymentLinkDetailsSchema = z.object({
-  paymentLinkId: z.string().uuid(),
-  url: z.string().url(),
-}) as z.ZodType<PaymentLinkDetails>;
+  paymentLinkId: z.guid(),
+  url: z.url(),
+}) satisfies z.ZodType<PaymentLinkDetails>;
 
 export const onlineAccountDetailsSchema = z.object({
-  onlineAccountId: z.string().uuid(),
+  onlineAccountId: z.guid(),
   identifier: z.string().min(1),
-}) as z.ZodType<OnlineAccountDetails>;
+}) satisfies z.ZodType<OnlineAccountDetails>;
 
 // At least one routing field; sensitive fields encrypted by service before persist
 export const bankTransferDetailsSchema = z
@@ -111,13 +116,20 @@ export const bankTransferDetailsSchema = z
     accountNumber: z.string().optional(),
     routingNumber: z.string().optional(),
   })
-  .refine(data => !!(data.iban || data.accountNumber || data.routingNumber || data.swiftBic), {
-    message: "At least one bank routing field is required",
-  }) as z.ZodType<BankTransferDetails>;
+  .check(ctx => {
+    const data = ctx.value;
+    if (!(data.iban || data.accountNumber || data.routingNumber || data.swiftBic)) {
+      ctx.issues.push({
+        code: "custom",
+        message: "At least one bank routing field is required",
+        input: ctx.value,
+      });
+    }
+  }) satisfies z.ZodType<BankTransferDetails>;
 
 export const cashDetailsSchema = z.object({
   note: z.string().optional(),
-}) as z.ZodType<CashDetails>;
+}) satisfies z.ZodType<CashDetails>;
 
 // ============================================================================
 // parsePaymentMethodDetails — runtime gate (spec line 211)
@@ -155,7 +167,7 @@ export const paymentMethodCatalogSnapshotSchema = z.object({
   catalogId: z.string(),
   catalogSlug: z.string(),
   catalogName: localizedStringRequiredSchema(),
-}) as z.ZodType<PaymentMethodCatalogSnapshot>;
+}) satisfies z.ZodType<PaymentMethodCatalogSnapshot>;
 
 // ============================================================================
 // PaymentMethodTransactionSnapshot — frozen on every pay-in/pay-out
@@ -163,30 +175,29 @@ export const paymentMethodCatalogSnapshotSchema = z.object({
 
 export const paymentMethodTransactionSnapshotSchema = z
   .object({
-    userPaymentMethodId: z.string().uuid().nullable(),
-    type: z.nativeEnum(PaymentMethodType),
-    direction: z.nativeEnum(PaymentDirection), // PAYIN or PAYOUT for a transaction
+    userPaymentMethodId: z.guid().nullable(),
+    type: paymentMethodTypeEnumSchema,
+    direction: paymentDirectionEnumSchema, // PAYIN or PAYOUT for a transaction
     label: z.string().nullable(),
     // `details` is validated via parsePaymentMethodDetails based on `type`
     // before snapshot creation; here it is opaque to avoid re-running the
     // discriminated parse on a frozen (and already-encrypted) payload.
-    details: z.unknown(),
+    details: z.unknown().pipe(z.custom<PaymentMethodDetails>()),
     catalog: paymentMethodCatalogSnapshotSchema.nullable(),
-    snapshottedAt: z.string().refine(s => !Number.isNaN(Date.parse(s)), {
-      message: "snapshottedAt must be an ISO timestamp",
-    }),
+    snapshottedAt: z.iso.datetime({ message: "snapshottedAt must be an ISO timestamp" }),
   })
-  .refine(
-    data => {
-      try {
-        parsePaymentMethodDetails(data.type, data.details);
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    { message: "details do not match the declared type" }
-  ) as z.ZodType<PaymentMethodTransactionSnapshot>;
+  .check(ctx => {
+    const data = ctx.value;
+    try {
+      parsePaymentMethodDetails(data.type as PaymentMethodType, data.details);
+    } catch {
+      ctx.issues.push({
+        code: "custom",
+        message: "details do not match the declared type",
+        input: ctx.value,
+      });
+    }
+  }) satisfies z.ZodType<PaymentMethodTransactionSnapshot>;
 
 // ============================================================================
 // UserPaymentMethodSubmitInput — service boundary gate
@@ -198,21 +209,23 @@ export const paymentMethodTransactionSnapshotSchema = z
 
 export const userPaymentMethodSubmitInputSchema = z
   .object({
-    userId: z.string().uuid(),
-    type: z.nativeEnum(PaymentMethodType),
-    direction: z.nativeEnum(PaymentDirection),
+    userId: z.guid(),
+    type: paymentMethodTypeEnumSchema,
+    direction: paymentDirectionEnumSchema,
     isDefault: z.boolean(),
     label: z.string().max(100).nullable().optional(),
     details: z.unknown(),
   })
-  .refine(
-    data => {
-      try {
-        parsePaymentMethodDetails(data.type, data.details);
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    { message: "details do not match the declared type" }
-  ) as z.ZodType<UserPaymentMethodSubmitInput>;
+  .check(ctx => {
+    const data = ctx.value;
+    try {
+      parsePaymentMethodDetails(data.type as PaymentMethodType, data.details);
+    } catch {
+      ctx.issues.push({
+        code: "custom",
+        message: "details do not match the declared type",
+        path: ["details"],
+        input: ctx.value,
+      });
+    }
+  }) satisfies z.ZodType<Omit<UserPaymentMethodSubmitInput, "details"> & { details: unknown }>;

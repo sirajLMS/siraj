@@ -43,7 +43,7 @@ export function extractMeetingId(providerSlug: string, url: string): string | nu
   if (!pattern) {
     return null;
   }
-  const match = url.match(pattern);
+  const match = pattern.exec(url);
   return match?.[1] ?? null;
 }
 

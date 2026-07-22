@@ -35,7 +35,11 @@ export const SAMPLE_GRID_ROWS: readonly SampleGridRow[] = [
  * The decorator that wraps a DataGrid story in the standard 400 px
  * height container — used by all three AppDataGrid stories.
  */
-export function DataGridHeightDecorator({ Story }: { Story: () => React.ReactNode }) {
+interface DataGridHeightDecoratorProps {
+  readonly Story: () => React.ReactNode;
+}
+
+export function DataGridHeightDecorator({ Story }: DataGridHeightDecoratorProps) {
   return (
     <div style={{ height: 400, width: "100%" }}>
       <Story />

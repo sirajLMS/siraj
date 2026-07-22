@@ -236,16 +236,20 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   const showRequiredError = Boolean(required) && isEmpty;
   const showError = Boolean(error) || prefixInvalid || showRequiredError || phoneInvalid;
 
-  let resolvedHelperText: string | undefined;
-  if (prefixInvalid) {
-    resolvedHelperText = t.invalidPrefix;
-  } else if (showRequiredError) {
-    resolvedHelperText = t.required;
-  } else if (phoneInvalid) {
-    resolvedHelperText = t.invalidPhone;
-  } else {
-    resolvedHelperText = helperText;
-  }
+  const getHelperText = (): string | undefined => {
+    if (prefixInvalid) {
+      return t.invalidPrefix;
+    }
+    if (showRequiredError) {
+      return t.required;
+    }
+    if (phoneInvalid) {
+      return t.invalidPhone;
+    }
+    return helperText;
+  };
+
+  const resolvedHelperText = getHelperText();
 
   const resolvedLabel = hideLabel ? undefined : (label ?? t.label);
 

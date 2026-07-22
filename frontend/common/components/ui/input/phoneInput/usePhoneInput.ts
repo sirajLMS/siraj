@@ -17,6 +17,17 @@ import {
   splitPhoneValueToParts,
 } from "@/shared/lib/phone";
 
+type NationalKeyDownParams = {
+  prefixDigits: string;
+  nationalDigits: string;
+  region: string | null;
+  defaultRegion: string;
+  nationalDisplay: string;
+  setNationalDigits: (digits: string) => void;
+  emitChange: (prefixDigits: string, nationalDigits: string) => void;
+  focusPrefix: () => void;
+};
+
 export type PhoneInputSlot = "prefix" | "national";
 
 export type UsePhoneInputOptions = {
@@ -168,16 +179,17 @@ function usePrefixKeyDown(
   );
 }
 
-function useNationalKeyDown(
-  prefixDigits: string,
-  nationalDigits: string,
-  region: string | null,
-  defaultRegion: string,
-  nationalDisplay: string,
-  setNationalDigits: (digits: string) => void,
-  emitChange: (prefixDigits: string, nationalDigits: string) => void,
-  focusPrefix: () => void
-): (event: React.KeyboardEvent<HTMLInputElement>) => void {
+function useNationalKeyDown(params: NationalKeyDownParams): (event: React.KeyboardEvent<HTMLInputElement>) => void {
+  const {
+    prefixDigits,
+    nationalDigits,
+    region,
+    defaultRegion,
+    nationalDisplay,
+    setNationalDigits,
+    emitChange,
+    focusPrefix,
+  } = params;
   return useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === "Backspace") {
@@ -395,16 +407,16 @@ function usePhoneInputHandlers(
     focusPrefix
   );
   const handlePrefixKeyDown = usePrefixKeyDown(prefixDigits, updateFromPrefix, focusNational);
-  const handleNationalKeyDown = useNationalKeyDown(
+  const handleNationalKeyDown = useNationalKeyDown({
     prefixDigits,
     nationalDigits,
     region,
     defaultRegion,
     nationalDisplay,
-    state.setNationalDigits,
+    setNationalDigits: state.setNationalDigits,
     emitChange,
-    focusPrefix
-  );
+    focusPrefix,
+  });
   const handleNationalSelect = useNationalSelect(nationalDisplay);
   const { resetPrefixDisplay, resetNationalDisplay } = useResetHandlers(prefixDigits, nationalDisplay);
 

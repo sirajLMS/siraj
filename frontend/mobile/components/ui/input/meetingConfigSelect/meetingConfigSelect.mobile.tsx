@@ -49,10 +49,7 @@ export function MeetingConfigSelectMobile({
     : options;
 
   const selectedValue =
-    value ??
-    (allowEmpty
-      ? ({ id: "", label: resolvedEmptyLabel, provider: null, isDefault: false } as MeetingConfigSelectOption)
-      : null);
+    value ?? (allowEmpty ? { id: "", label: resolvedEmptyLabel, provider: null, isDefault: false } : null);
 
   return (
     <Autocomplete

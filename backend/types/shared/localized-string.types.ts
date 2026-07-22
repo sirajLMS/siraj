@@ -8,7 +8,6 @@
  * for backwards compatibility — new code can import directly from
  * `@/shared/types/localized-string`.
  */
-export type { LocalizedString } from "@/shared/types/localized-string";
 export {
   DEFAULT_CONTENT_LOCALE,
   isAppLocale,

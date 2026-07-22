@@ -98,10 +98,7 @@ function maskDetails(
   }
 }
 
-export function buildMaskedPaymentMethod(
-  method: UserPaymentMethodSelectType,
-  revealSensitive: boolean
-): UserPaymentMethodReturnType {
+export function buildMaskedPaymentMethod(method: UserPaymentMethodSelectType, revealSensitive: boolean) {
   return {
     ...method,
     details: maskDetails(method.type, method.details, revealSensitive),

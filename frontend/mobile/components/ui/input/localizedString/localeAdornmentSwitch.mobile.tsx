@@ -57,7 +57,7 @@ function MobileLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<MobileLo
             </Typography>
             {isSelected ? (
               <Box
-                aria-hidden
+                aria-hidden={true}
                 sx={{
                   width: 6,
                   height: 6,

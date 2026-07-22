@@ -5,8 +5,6 @@ import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 import { CountryCode, Gender } from "@/frontend/common/views/dashboard/teachers/onboarding/types";
 
-export type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/types";
-
 export const teacherOnboardingSchema = (validationLabels: {
   readonly fullNameRequired: string;
   readonly emailRequired: string;

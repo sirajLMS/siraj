@@ -72,7 +72,7 @@ export function getCurrencyFlag(code: CurrencyCode | string): string {
 
 /** Resolve the symbol glyph for a currency, falling back to the code itself. */
 export function getCurrencySymbol(code: CurrencyCode | string): string {
-  return getCurrencyByCode(code)?.symbol ?? code;
+  return getCurrencyByCode(code)?.symbol ?? String(code);
 }
 
 /** ISO 4217 minor-unit decimals for currencies that differ from the default (2). */
@@ -132,9 +132,9 @@ export function formatLockedAmount(amount: string, currency: CurrencyCode, local
 export function getCurrencyDisplayName(code: CurrencyCode | string, locale?: string): string {
   try {
     const displayNames = new Intl.DisplayNames([locale ?? "en"], { type: "currency" });
-    return displayNames.of(code) ?? code;
+    return displayNames.of(code) ?? String(code);
   } catch {
-    return code;
+    return String(code);
   }
 }
 

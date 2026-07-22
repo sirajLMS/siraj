@@ -20,8 +20,8 @@ import type { LocalizedStringDrawerProps } from "@/frontend/common/components/ui
 import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
-import type { AppLocale } from "@/shared/locale";
-import { type LocalizedStringLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
+import type { AppLocale, LocalizedStringLabels } from "@/shared/locale";
+import { useAppLocale, useAppTranslation } from "@/shared/locale";
 import type { LocalizedString } from "@/shared/types";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
@@ -138,17 +138,7 @@ const LocaleField: React.FC<LocaleFieldProps> = ({
 }) => (
   <TextField
     key={locale}
-    label={
-      multiline ? (
-        <>
-          <MobileLocaleEmoji emoji={emoji} sx={{ marginInlineEnd: 0.5 }} />
-          {languageName}
-          {isLocaleRequired ? " *" : ""}
-        </>
-      ) : (
-        `${languageName}${isLocaleRequired ? " *" : ""}`
-      )
-    }
+    label={renderLabel({ languageName, isLocaleRequired, multiline, emoji })}
     value={fieldValue}
     onChange={event => onChange(locale, event.target.value)}
     multiline={multiline}
@@ -172,6 +162,24 @@ const LocaleField: React.FC<LocaleFieldProps> = ({
     }}
   />
 );
+
+function renderLabel({
+  languageName,
+  isLocaleRequired,
+  multiline,
+  emoji,
+}: Pick<LocaleFieldProps, "languageName" | "isLocaleRequired" | "multiline" | "emoji">) {
+  if (multiline) {
+    return (
+      <>
+        <MobileLocaleEmoji emoji={emoji} sx={{ marginInlineEnd: 0.5 }} />
+        {languageName}
+        {isLocaleRequired ? " *" : ""}
+      </>
+    );
+  }
+  return `${languageName}${isLocaleRequired ? " *" : ""}`;
+}
 
 type DrawerFooterProps = {
   readonly canSave: boolean;

@@ -26,7 +26,7 @@ const paymentMethodBaseSchema = z.object({
 });
 
 function addRequiredIssue(ctx: z.RefinementCtx, path: string): void {
-  ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: [path] });
+  ctx.addIssue({ code: "custom", message: "required", path: [path] });
 }
 
 type PaymentMethodDetailsValues = z.infer<typeof detailsSchema>;

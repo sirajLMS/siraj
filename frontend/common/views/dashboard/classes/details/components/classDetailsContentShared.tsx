@@ -45,41 +45,43 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
   } = props;
   const { Header } = slots;
 
+  const viewContent = canOverride ? (
+    <AdminView
+      instance={instance}
+      isWarningDismissed={isWarningDismissed}
+      onDismissWarning={onDismissWarning}
+      onForceActivate={handlers.handleForceActivate}
+      onStop={handlers.handleStop}
+      onGenerateLog={() => {}}
+      onReschedule={handlers.handleReschedule}
+      onDelete={() => {}}
+      formattedScheduledDate={formattedScheduledDate}
+      formattedStartTime={formattedStartTime}
+      formattedEndTime={formattedEndTime}
+      {...sessionActionProps}
+    />
+  ) : canViewSessionDetails ? (
+    <TeacherView
+      instance={instance}
+      viewMode={isParentView ? "parent" : "teacher"}
+      isWarningDismissed={isWarningDismissed}
+      onDismissWarning={onDismissWarning}
+      onActivate={handlers.handleActivate}
+      onStop={handlers.handleStop}
+      onInfoEdit={handlers.handleInfoEdit}
+      onDelete={() => {}}
+      formattedScheduledDate={formattedScheduledDate}
+      formattedStartTime={formattedStartTime}
+      formattedEndTime={formattedEndTime}
+      {...sessionActionProps}
+    />
+  ) : null;
+
   return (
     <>
       <Header instance={instance} canOverride={canOverride} />
       <ActionFeedbackAlert feedbackState={feedbackState} />
-      {canOverride ? (
-        <AdminView
-          instance={instance}
-          isWarningDismissed={isWarningDismissed}
-          onDismissWarning={onDismissWarning}
-          onForceActivate={handlers.handleForceActivate}
-          onStop={handlers.handleStop}
-          onGenerateLog={() => {}}
-          onReschedule={handlers.handleReschedule}
-          onDelete={() => {}}
-          formattedScheduledDate={formattedScheduledDate}
-          formattedStartTime={formattedStartTime}
-          formattedEndTime={formattedEndTime}
-          {...sessionActionProps}
-        />
-      ) : canViewSessionDetails ? (
-        <TeacherView
-          instance={instance}
-          viewMode={isParentView ? "parent" : "teacher"}
-          isWarningDismissed={isWarningDismissed}
-          onDismissWarning={onDismissWarning}
-          onActivate={handlers.handleActivate}
-          onStop={handlers.handleStop}
-          onInfoEdit={handlers.handleInfoEdit}
-          onDelete={() => {}}
-          formattedScheduledDate={formattedScheduledDate}
-          formattedStartTime={formattedStartTime}
-          formattedEndTime={formattedEndTime}
-          {...sessionActionProps}
-        />
-      ) : null}
+      {viewContent}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
         onClose={onCloseDeleteDialog}

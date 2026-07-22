@@ -68,10 +68,7 @@ export function useUserOverridesData(userId: string, groups: readonly Permission
     skip: !userId,
   });
 
-  const overrides = useMemo<readonly UserOverride[]>(
-    () => (data?.userOverrides ?? []) as readonly UserOverride[],
-    [data]
-  );
+  const overrides = useMemo<readonly UserOverride[]>(() => data?.userOverrides ?? [], [data]);
 
   const info = useMemo<UserOverrideInfo | null>(() => {
     if (!data?.userOverrides) return null;

@@ -11,10 +11,13 @@ export type ClassAvatarProps = Omit<BaseAvatarProps, "variant"> & {
 const FALLBACK_SX = {
   typography: "labelMd",
   fontWeight: 700,
-} as const;
+} as const satisfies {
+  readonly typography: "labelMd";
+  readonly fontWeight: 700;
+};
 
 export function ClassAvatar({ variant = "rounded", sx, ...props }: ClassAvatarProps) {
-  const normalizedSx = Array.isArray(sx) ? sx : ([sx].filter(Boolean) as (typeof sx)[]);
+  const normalizedSx = Array.isArray(sx) ? sx : [sx].filter(Boolean);
   return <BaseAvatar variant={variant} sx={[theme => getFallbackSx(theme, props.src), ...normalizedSx]} {...props} />;
 }
 

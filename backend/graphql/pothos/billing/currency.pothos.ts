@@ -22,6 +22,7 @@ gqlSchemaBuilder.queryField("supportedCurrencies", t =>
     args: {
       activeOnly: t.arg.boolean({ required: false }),
     },
-    resolve: (_root, args) => CurrencyService.listSupportedCurrencies(args.activeOnly ?? true),
+    resolve: (_root, args) =>
+      (args.activeOnly ?? true) ? CurrencyService.listActiveCurrencies() : CurrencyService.listAllCurrencies(),
   })
 );

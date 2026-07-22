@@ -17,11 +17,5 @@ const lazyViews = createLazyView<ProfileSkeletonViewProps>(
 );
 
 export function ProfileSkeleton() {
-  return (
-    <ResponsiveViewSwitch
-      mobile={lazyViews.mobile}
-      desktop={lazyViews.desktop}
-      props={{} as ProfileSkeletonViewProps}
-    />
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={{}} />;
 }

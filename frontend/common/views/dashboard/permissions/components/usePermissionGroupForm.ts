@@ -105,8 +105,8 @@ function buildPermissionGroupInitialValues(group: PermissionGroup | null): Permi
     return { name: {}, description: {}, permissionIds: [] };
   }
   return {
-    name: (group.name ?? {}) as PermissionGroupFormData["name"],
-    description: (group.description ?? {}) as PermissionGroupFormData["description"],
+    name: group.name ?? {},
+    description: group.description ?? {},
     permissionIds: (group.permissionIds ?? []).filter((id): id is string => !!id),
   };
 }

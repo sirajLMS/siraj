@@ -42,10 +42,10 @@ async function resolveAssociatedViewer(actorUserId: string, studentId: string): 
   if (!profile) return false;
 
   const parent = await ParentRepository.findByUserId(actorUserId);
-  if (parent && parent.id === profile.parentId) return true;
+  if (parent?.id === profile?.parentId) return true;
 
   const teacher = await TeacherRepository.findByUserId(actorUserId);
-  if (teacher && profile.primaryTeacherId === teacher.id) return true;
+  if (teacher?.id === profile?.primaryTeacherId) return true;
 
   return false;
 }

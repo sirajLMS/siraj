@@ -37,7 +37,9 @@ mock.module("@/backend/lib", () => ({
 // SUT import (deferred so mocks are registered first)
 // ---------------------------------------------------------------------------
 
-async function importService(): Promise<typeof import("@/backend/services/fx/fx-rate-limit.service")> {
+async function importService(): Promise<{
+  FxRateLimitService: { checkManualRefreshRateLimit: (userId: string) => Promise<void> };
+}> {
   return import("@/backend/services/fx/fx-rate-limit.service");
 }
 

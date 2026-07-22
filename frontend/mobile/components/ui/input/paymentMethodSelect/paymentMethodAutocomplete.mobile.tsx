@@ -203,7 +203,7 @@ const useListAttachedSx = (
 ): React.CSSProperties =>
   useMemo<React.CSSProperties>(
     () => ({
-      ...(style ?? {}),
+      ...style,
       ...(listAttached
         ? {
             "& .MuiOutlinedInput-root": {
@@ -241,21 +241,26 @@ interface PaymentMethodSelectTranslations {
   readonly searchByNameOrSlug: string;
 }
 
+interface ResolveDisplayValuesParams {
+  readonly t: PaymentMethodSelectTranslations;
+  readonly option: PaymentMethodCatalogOption | null | undefined;
+  readonly required: boolean | undefined;
+  readonly error: boolean | undefined;
+  readonly helperText: string | undefined;
+  readonly label: string | undefined;
+  readonly placeholder: string | undefined;
+  readonly listAttached: boolean;
+}
+
 const resolveDisplayValues = (
-  t: PaymentMethodSelectTranslations,
-  option: PaymentMethodCatalogOption | null | undefined,
-  required: boolean | undefined,
-  error: boolean | undefined,
-  helperText: string | undefined,
-  label: string | undefined,
-  placeholder: string | undefined,
-  listAttached: boolean
+  params: ResolveDisplayValuesParams
 ): {
   showError: boolean;
   resolvedHelperText: string | undefined;
   resolvedLabel: string | undefined;
   resolvedPlaceholder: string | undefined;
 } => {
+  const { t, option, required, error, helperText, label, placeholder, listAttached } = params;
   const showRequiredError = Boolean(required) && !option;
   const showError = Boolean(error) || showRequiredError;
   const resolvedHelperText = helperText ?? (showRequiredError ? t.required : undefined);
@@ -264,18 +269,31 @@ const resolveDisplayValues = (
   return { showError, resolvedHelperText, resolvedLabel, resolvedPlaceholder };
 };
 
-const renderAutocompleteInput = (
-  params: React.ComponentProps<typeof TextField>,
-  resolvedLabel: string | undefined,
-  resolvedPlaceholder: string | undefined,
-  required: boolean | undefined,
-  showError: boolean,
-  resolvedHelperText: string | undefined,
-  onBlur: (() => void) | undefined,
-  autoFocus: boolean | undefined,
-  autoComplete: string,
-  option: PaymentMethodCatalogOption | null | undefined
-): React.ReactNode => (
+interface RenderAutocompleteInputParams {
+  readonly params: React.ComponentProps<typeof TextField>;
+  readonly resolvedLabel: string | undefined;
+  readonly resolvedPlaceholder: string | undefined;
+  readonly required: boolean | undefined;
+  readonly showError: boolean;
+  readonly resolvedHelperText: string | undefined;
+  readonly onBlur: (() => void) | undefined;
+  readonly autoFocus: boolean | undefined;
+  readonly autoComplete: string;
+  readonly option: PaymentMethodCatalogOption | null | undefined;
+}
+
+const renderAutocompleteInput = ({
+  params,
+  resolvedLabel,
+  resolvedPlaceholder,
+  required,
+  showError,
+  resolvedHelperText,
+  onBlur,
+  autoFocus,
+  autoComplete,
+  option,
+}: RenderAutocompleteInputParams): React.ReactNode => (
   <AutocompleteTextField
     params={params}
     label={resolvedLabel}
@@ -322,7 +340,7 @@ export const PaymentMethodAutocompleteMobile: React.FC<PaymentMethodAutocomplete
   const renderOption = useRenderOption(type, showSlug);
   const listAttachedSx = useListAttachedSx(style, listAttached, isOpen);
   const autocompleteSlotProps = useAutocompleteSlotProps(matchAnchorWidth, disablePortal, listAttached);
-  const { showError, resolvedHelperText, resolvedLabel, resolvedPlaceholder } = resolveDisplayValues(
+  const { showError, resolvedHelperText, resolvedLabel, resolvedPlaceholder } = resolveDisplayValues({
     t,
     option,
     required,
@@ -330,8 +348,8 @@ export const PaymentMethodAutocompleteMobile: React.FC<PaymentMethodAutocomplete
     helperText,
     label,
     placeholder,
-    listAttached
-  );
+    listAttached,
+  });
 
   return (
     <Autocomplete<PaymentMethodCatalogOption, false, false, false>
@@ -352,7 +370,7 @@ export const PaymentMethodAutocompleteMobile: React.FC<PaymentMethodAutocomplete
       slotProps={autocompleteSlotProps}
       renderOption={renderOption}
       renderInput={params =>
-        renderAutocompleteInput(
+        renderAutocompleteInput({
           params,
           resolvedLabel,
           resolvedPlaceholder,
@@ -362,8 +380,8 @@ export const PaymentMethodAutocompleteMobile: React.FC<PaymentMethodAutocomplete
           onBlur,
           autoFocus,
           autoComplete,
-          option
-        )
+          option,
+        })
       }
     />
   );

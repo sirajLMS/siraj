@@ -75,9 +75,7 @@ export namespace TeacherDueService {
     };
 
     const row: TeacherDueSelectType = await TeacherDueRepository.create(insertPayload, tx);
-    return {
-      ...row,
-    };
+    return row;
   }
 
   /**
@@ -104,9 +102,7 @@ export namespace TeacherDueService {
   }): Promise<TeacherDueReturnType | null> {
     const existing = await TeacherDueRepository.findByClassInstanceId(input.classInstanceId, input.tx);
     if (existing) {
-      return {
-        ...existing,
-      };
+      return existing;
     }
 
     if (input.hours <= 0) throw new Error("hours must be greater than 0");
@@ -126,9 +122,7 @@ export namespace TeacherDueService {
     };
 
     const row: TeacherDueSelectType = await TeacherDueRepository.create(insertPayload, input.tx);
-    return {
-      ...row,
-    };
+    return row;
   }
 
   export async function getMonthlyReport(
@@ -157,9 +151,7 @@ export namespace TeacherDueService {
       }
     }
     const rows = await TeacherDueRepository.getPendingDues(teacherId);
-    return rows.map(row => ({
-      ...row,
-    }));
+    return rows;
   }
 
   export async function getPendingDuesSummary(
@@ -186,8 +178,6 @@ export namespace TeacherDueService {
       throw new Error(t.insufficientPermissions);
     }
     const updated = await TeacherDueRepository.markAsPaid([...dueIds], teacherPaymentId);
-    return updated.map(row => ({
-      ...row,
-    }));
+    return updated;
   }
 }
