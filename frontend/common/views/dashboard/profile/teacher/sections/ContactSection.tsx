@@ -24,14 +24,12 @@ import type {
 import { useAppTranslation } from "@/shared/locale";
 
 type ContactSectionViewProps = {
-  readonly mode: "view";
   readonly scope?: ProfileScope;
   readonly teacherData: TeacherViewData;
   readonly isAdminScope: boolean;
 };
 
 type ContactSectionOwnEditProps = {
-  readonly mode: "edit";
   readonly scope?: ProfileScope;
   readonly isAdminScope: false;
   readonly register: UseFormRegister<TeacherOwnEditFormData>;
@@ -39,7 +37,6 @@ type ContactSectionOwnEditProps = {
 };
 
 type ContactSectionAdminEditProps = {
-  readonly mode: "edit";
   readonly scope?: ProfileScope;
   readonly isAdminScope: true;
   readonly register: UseFormRegister<TeacherAdminEditFormData>;
@@ -198,7 +195,7 @@ function ContactSectionView(props: ContactSectionViewProps): ReactElement {
 }
 
 function isEditMode(props: ContactSectionProps): props is ContactSectionOwnEditProps | ContactSectionAdminEditProps {
-  return props.mode === "edit";
+  return "register" in props && "control" in props;
 }
 
 export function ContactSection(props: ContactSectionProps): ReactElement | null {

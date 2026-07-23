@@ -219,9 +219,10 @@ export function ParentScheduleDataGridDesktop({
               onPageChange: pagination.onPageChange,
               pageSizeOptions: [pagination.pageSize],
             })
-          : rows.length <= 10
-            ? false
-            : { mode: "client" }
+          : (() => {
+              if (rows.length <= 10) return false;
+              return { mode: "client" };
+            })()
       }
     />
   );

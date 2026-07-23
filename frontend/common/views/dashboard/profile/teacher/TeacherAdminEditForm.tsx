@@ -93,7 +93,7 @@ function TeacherFormSectionsGrid({ teacherData, targetUserId, scope, canEdit, fo
         />
       ) : null}
       {canEdit("core_contact") || canEdit("teacher_identity") ? (
-        <ContactSection mode="edit" scope={scope} isAdminScope register={form.register} control={form.control} />
+        <ContactSection scope={scope} isAdminScope register={form.register} control={form.control} />
       ) : null}
       <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} />
       {canEdit("teacher_professional") ? (

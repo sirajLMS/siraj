@@ -22,8 +22,7 @@ const lazyViews = createLazyView<ParentProfileViewModel>(
 );
 
 /**
- * @deprecated since Plan v5 — use `ParentProfileContainer` directly. This
- * alias is retained so the legacy test and Storybook fixtures in this
+ * This alias is retained so the legacy test and Storybook fixtures in this
  * package (which fabricate a full ViewModel and call
  * `ParentProfileView(...)`) keep compiling during the migration. New call
  * sites should use the Container.
@@ -33,7 +32,7 @@ const lazyViews = createLazyView<ParentProfileViewModel>(
  * path) it renders the tier switcher with the precomputed ViewModel as-is.
  */
 export function ParentProfileView(props: Readonly<ParentProfileViewModel>) {
-  if ("scope" in props && "mode" in props && "targetUserId" in props && !("parentData" in (props as object))) {
+  if ("scope" in props && "mode" in props && "targetUserId" in props && !("parentData" in props)) {
     return <ParentProfileContainer {...(props as unknown as UseParentProfileViewModelProps)} />;
   }
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;

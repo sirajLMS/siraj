@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
-import type { NextRequest } from "next/server";
 import { verifyCronSecretAuth } from "@/backend/lib/cron-auth";
 import type { EnvironmentConfig } from "@/backend/lib/env";
 import * as envModule from "@/backend/lib/env";
@@ -37,12 +36,12 @@ afterEach(() => {
   setEnv("CRON_SECRET", originalSecret ?? TEST_SECRET);
 });
 
-function makeRequest(method: string, headers: Record<string, string | null> = {}): NextRequest {
+function makeRequest(method: string, headers: Record<string, string | null> = {}) {
   const headersInit = new Headers();
   for (const [key, value] of Object.entries(headers)) {
     if (value !== null) headersInit.set(key, value);
   }
-  return new NextRequestImpl("http://localhost:3000/api/fx/refresh", { method, headers: headersInit }) as NextRequest;
+  return new NextRequestImpl("http://localhost:3000/api/fx/refresh", { method, headers: headersInit });
 }
 
 async function parseJson(response: Response): Promise<Record<string, unknown>> {

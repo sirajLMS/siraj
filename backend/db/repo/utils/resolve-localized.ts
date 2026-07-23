@@ -1,4 +1,4 @@
-import { DEFAULT_CONTENT_LOCALE, type LocalizedString, normalizeContentLocale } from "@/shared/types";
+import { DEFAULT_CONTENT_LOCALE, type LocalizedString, normalizeContentLocale } from "@/shared/types/localized-string";
 
 /**
  * Resolve a localized JSONB map to a single string for the request locale.
@@ -38,10 +38,10 @@ export function setLocalized(
   value: string
 ): LocalizedString {
   const key = normalizeContentLocale(locale);
-  return {
-    ...(existing ?? {}),
-    [key]: value,
-  };
+  if (existing) {
+    return { ...existing, [key]: value };
+  }
+  return { [key]: value };
 }
 
 /**
@@ -57,13 +57,13 @@ export function localeJsonKey(locale?: string): string {
  */
 export function omitEmptyLocalized(map: LocalizedString | null | undefined): LocalizedString {
   if (!map) {
-    return {} as LocalizedString;
+    return {};
   }
-  const next: Record<string, string> = {};
+  const next: LocalizedString = {};
   for (const [locale, value] of Object.entries(map)) {
     if (typeof value === "string" && value.trim() !== "") {
-      next[locale] = value;
+      next[locale as keyof LocalizedString] = value;
     }
   }
-  return next as LocalizedString;
+  return next;
 }

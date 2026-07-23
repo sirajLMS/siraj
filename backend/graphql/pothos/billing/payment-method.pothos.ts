@@ -227,19 +227,19 @@ export function normalizePaymentMethodDetailsInput(input: {
   readonly note?: string | null;
 }): PaymentMethodDetails {
   return {
-    ...(input.walletId !== null ? { walletId: input.walletId } : {}),
-    ...(input.phone !== null ? { phone: input.phone } : {}),
-    ...(input.paymentLinkId !== null ? { paymentLinkId: input.paymentLinkId } : {}),
-    ...(input.url !== null ? { url: input.url } : {}),
-    ...(input.onlineAccountId !== null ? { onlineAccountId: input.onlineAccountId } : {}),
-    ...(input.identifier !== null ? { identifier: input.identifier } : {}),
-    ...(input.iban !== null ? { iban: input.iban } : {}),
-    ...(input.bankName !== null ? { bankName: input.bankName } : {}),
-    ...(input.beneficiaryName !== null ? { beneficiaryName: input.beneficiaryName } : {}),
-    ...(input.swiftBic !== null ? { swiftBic: input.swiftBic } : {}),
-    ...(input.accountNumber !== null ? { accountNumber: input.accountNumber } : {}),
-    ...(input.routingNumber !== null ? { routingNumber: input.routingNumber } : {}),
-    ...(input.note !== null ? { note: input.note } : {}),
+    ...(input.walletId == null ? {} : { walletId: input.walletId }),
+    ...(input.phone == null ? {} : { phone: input.phone }),
+    ...(input.paymentLinkId == null ? {} : { paymentLinkId: input.paymentLinkId }),
+    ...(input.url == null ? {} : { url: input.url }),
+    ...(input.onlineAccountId == null ? {} : { onlineAccountId: input.onlineAccountId }),
+    ...(input.identifier == null ? {} : { identifier: input.identifier }),
+    ...(input.iban == null ? {} : { iban: input.iban }),
+    ...(input.bankName == null ? {} : { bankName: input.bankName }),
+    ...(input.beneficiaryName == null ? {} : { beneficiaryName: input.beneficiaryName }),
+    ...(input.swiftBic == null ? {} : { swiftBic: input.swiftBic }),
+    ...(input.accountNumber == null ? {} : { accountNumber: input.accountNumber }),
+    ...(input.routingNumber == null ? {} : { routingNumber: input.routingNumber }),
+    ...(input.note == null ? {} : { note: input.note }),
   };
 }
 

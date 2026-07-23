@@ -61,7 +61,7 @@ export function TeacherProfileDesktopView({
     <Box data-testid="teacher-profile-view">
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <ContactSection mode="view" scope={scope} teacherData={teacherData} isAdminScope={isAdminScope} />
+          <ContactSection scope={scope} teacherData={teacherData} isAdminScope={isAdminScope} />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <Stack spacing={3}>

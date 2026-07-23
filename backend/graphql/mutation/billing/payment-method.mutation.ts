@@ -77,13 +77,9 @@ gqlSchemaBuilder.mutationField("updateUserPaymentMethod", t =>
         args.id,
         {
           ...(args.input.direction != null ? { direction: args.input.direction } : {}),
-          ...(args.input.isDefault !== null && args.input.isDefault !== undefined
-            ? { isDefault: args.input.isDefault }
-            : {}),
+          ...(args.input.isDefault == null ? {} : { isDefault: args.input.isDefault }),
           ...(args.input.label !== undefined ? { label: args.input.label } : {}),
-          ...(args.input.details !== null && args.input.details !== undefined
-            ? { details: normalizePaymentMethodDetailsInput(args.input.details) }
-            : {}),
+          ...(args.input.details != null ? { details: normalizePaymentMethodDetailsInput(args.input.details) } : {}),
         },
         tErrors
       );

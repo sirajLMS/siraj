@@ -288,7 +288,7 @@ gqlSchemaBuilder.mutationField("updateClassMeetingConfig", t =>
         args.id,
         {
           ...normalizeConfigUpdateInput(args.input),
-          ...(args.input.providerId != null ? { providerId: args.input.providerId } : {}),
+          ...(args.input.providerId === null ? {} : { providerId: args.input.providerId }),
         },
         tErrors
       )

@@ -189,7 +189,7 @@ export const paymentMethodTransactionSnapshotSchema = z
   .check(ctx => {
     const data = ctx.value;
     try {
-      parsePaymentMethodDetails(data.type as PaymentMethodType, data.details);
+      parsePaymentMethodDetails(data.type, data.details);
     } catch {
       ctx.issues.push({
         code: "custom",
@@ -219,7 +219,7 @@ export const userPaymentMethodSubmitInputSchema = z
   .check(ctx => {
     const data = ctx.value;
     try {
-      parsePaymentMethodDetails(data.type as PaymentMethodType, data.details);
+      parsePaymentMethodDetails(data.type, data.details);
     } catch {
       ctx.issues.push({
         code: "custom",

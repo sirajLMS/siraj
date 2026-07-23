@@ -58,13 +58,13 @@ export function omitEmptyLocalizedString(map: LocalizedString | null | undefined
   if (!map) {
     return {};
   }
-  const next: Record<string, string> = {};
+  const next: LocalizedString = {};
   for (const [locale, value] of Object.entries(map)) {
     if (typeof value === "string" && value.trim() !== "") {
-      next[locale] = value;
+      next[locale as AppLocale] = value;
     }
   }
-  return next as LocalizedString;
+  return next;
 }
 
 /**

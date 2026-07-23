@@ -88,16 +88,16 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved, onError }:
       setSlugFormatError(null);
       return;
     }
-    if (!SLUG_REGEX.test(slug)) {
-      setSlugFormatError(t.fields.slugInvalidFormat);
-    } else {
+    if (SLUG_REGEX.test(slug)) {
       setSlugFormatError(null);
+    } else {
+      setSlugFormatError(t.fields.slugInvalidFormat);
     }
   };
 
   const canSave =
     !loading &&
-    slug.trim() !== "" &&
+    slug.trim().length > 0 &&
     Boolean(name.en?.trim()) &&
     parsedAllowlist.length > 0 &&
     slugFormatError === null;

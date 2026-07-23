@@ -102,13 +102,7 @@ export function TeacherProfileEditForm({
             />
           ) : null}
           {canEdit("core_contact") || canEdit("teacher_identity") ? (
-            <ContactSection
-              mode="edit"
-              scope={scope}
-              isAdminScope={false}
-              register={form.register}
-              control={form.control}
-            />
+            <ContactSection scope={scope} isAdminScope={false} register={form.register} control={form.control} />
           ) : null}
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>

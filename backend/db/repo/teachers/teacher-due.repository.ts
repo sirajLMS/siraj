@@ -246,8 +246,8 @@ export namespace TeacherDueRepository {
 
     return rows.map(row => ({
       ...row,
-      status: row.status as TeacherDueStatus,
-      currency: row.currency as CurrencyCode,
+      status: row.status,
+      currency: row.currency,
     }));
   }
 
@@ -259,7 +259,7 @@ export namespace TeacherDueRepository {
       .where(eq(teacherDues.status, TeacherDueStatus.PENDING));
     const totalCount = rows.length;
     const totalAmount = rows.reduce((sum, row) => sum + Number.parseFloat(row.amount), 0);
-    const currency: CurrencyCode = rows.length > 0 ? (rows[0].currency as CurrencyCode) : CurrencyCode.SAR;
+    const currency: CurrencyCode = rows.length > 0 ? rows[0].currency : CurrencyCode.SAR;
     return { totalCount, totalAmount, currency };
   }
 }

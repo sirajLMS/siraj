@@ -10,8 +10,8 @@ import { PaymentMethodTransactionSnapshotPothosObject } from "@/backend/graphql/
 import { CurrencyCodePothosObject, PaymentMethodTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PermissionsService } from "@/backend/services";
 import { buildMaskedTransactionSnapshot } from "@/backend/services/payment-method/payment-method-mask";
+import type { PaymentMethodTransactionSnapshot } from "@/backend/types";
 import type { PaymentSelectType } from "@/backend/types/billing/billing.types";
-import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
 import type { TeacherPaymentSelectType } from "@/backend/types/teachers/teacher.types";
 
 async function shouldRevealPaymentSnapshot(ctx: BaseContext): Promise<boolean> {
@@ -77,10 +77,7 @@ export const TeacherPaymentPothosObject = TeacherPaymentRef.implement({
         if (!parent.paymentMethodSnapshot) return null;
         if (parent.paymentMethodType === PaymentMethodType.PROOF_UPLOAD) return null;
         const revealSensitive = await shouldRevealPaymentSnapshot(ctx);
-        return buildMaskedTransactionSnapshot(
-          parent.paymentMethodSnapshot as PaymentMethodTransactionSnapshot,
-          revealSensitive
-        );
+        return buildMaskedTransactionSnapshot(parent.paymentMethodSnapshot, revealSensitive);
       },
     }),
     isTestPayment: t.exposeBoolean("isTestPayment"),

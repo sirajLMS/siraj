@@ -94,3 +94,5 @@ prompt/
 
 skills-lock.json
 .agent-canvas
+
+scripts/run-test/feedback/feedback*.md

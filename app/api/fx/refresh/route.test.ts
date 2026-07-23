@@ -54,7 +54,7 @@ function makeRequest(method: string, headers: Record<string, string | null> = {}
   for (const [key, value] of Object.entries(headers)) {
     if (value !== null) headersInit.set(key, value);
   }
-  return new NextRequestImpl("http://localhost:3000/api/fx/refresh", { method, headers: headersInit }) as NextRequest;
+  return new NextRequestImpl("http://localhost:3000/api/fx/refresh", { method, headers: headersInit });
 }
 
 async function parseJson(response: Response): Promise<Record<string, unknown>> {

@@ -54,6 +54,17 @@ function expectProviderIdsInclude(results: { id: string }[], expectedIds: string
   }
 }
 
+function setupActiveInactivePair(): (tx: DBTransaction) => Promise<{ activeId: string; inactiveId: string }> {
+  return async tx => {
+    const active = await createTestMeetingProvider(tx, { slug: `active-${randomUUID().slice(0, 8)}` });
+    const inactive = await createTestMeetingProvider(tx, {
+      slug: `inactive-${randomUUID().slice(0, 8)}`,
+      isActive: false,
+    });
+    return { activeId: active.id, inactiveId: inactive.id };
+  };
+}
+
 describe("MeetingProviderRepository", () => {
   providerTest("create inserts a meeting provider", async tx => {
     const tErrors = getServerTranslations("en").errorsTranslations;
@@ -95,21 +106,8 @@ describe("MeetingProviderRepository", () => {
     expect(found?.id).toBe(provider.id);
   });
 
-  function setupActiveInactivePair(): (tx: DBTransaction) => Promise<{ activeId: string; inactiveId: string }> {
-    return async tx => {
-      const active = await createTestMeetingProvider(tx, { slug: `active-${randomUUID().slice(0, 8)}` });
-      const inactive = await createTestMeetingProvider(tx, {
-        slug: `inactive-${randomUUID().slice(0, 8)}`,
-        isActive: false,
-      });
-      return { activeId: active.id, inactiveId: inactive.id };
-    };
-  }
-
-  const createProviderPair = setupActiveInactivePair();
-
   providerTest("listActive returns only active providers", async tx => {
-    const { activeId } = await createProviderPair(tx);
+    const { activeId } = await setupActiveInactivePair()(tx);
 
     const results = await MeetingProviderRepository.listActive(tx);
     expectProviderIdsInclude(results, [activeId]);
@@ -117,7 +115,7 @@ describe("MeetingProviderRepository", () => {
   });
 
   providerTest("listAll returns active and inactive providers", async tx => {
-    const { activeId, inactiveId } = await createProviderPair(tx);
+    const { activeId, inactiveId } = await setupActiveInactivePair()(tx);
 
     const results = await MeetingProviderRepository.listAll(tx);
     expectProviderIdsInclude(results, [activeId, inactiveId]);

@@ -61,7 +61,7 @@ export function TeacherProfileMobileView({
   return (
     <Box data-testid="teacher-profile-view">
       <MobileContentStack>
-        <ContactSection mode="view" scope={scope} teacherData={teacherData} isAdminScope={isAdminScope} />
+        <ContactSection scope={scope} teacherData={teacherData} isAdminScope={isAdminScope} />
         {showCompensation ? (
           <CompensationSection mode="view" teacherData={teacherData} subjectUserId={targetUserId} />
         ) : null}

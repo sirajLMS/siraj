@@ -45,37 +45,45 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
   } = props;
   const { Header } = slots;
 
-  const viewContent = canOverride ? (
-    <AdminView
-      instance={instance}
-      isWarningDismissed={isWarningDismissed}
-      onDismissWarning={onDismissWarning}
-      onForceActivate={handlers.handleForceActivate}
-      onStop={handlers.handleStop}
-      onGenerateLog={() => {}}
-      onReschedule={handlers.handleReschedule}
-      onDelete={() => {}}
-      formattedScheduledDate={formattedScheduledDate}
-      formattedStartTime={formattedStartTime}
-      formattedEndTime={formattedEndTime}
-      {...sessionActionProps}
-    />
-  ) : canViewSessionDetails ? (
-    <TeacherView
-      instance={instance}
-      viewMode={isParentView ? "parent" : "teacher"}
-      isWarningDismissed={isWarningDismissed}
-      onDismissWarning={onDismissWarning}
-      onActivate={handlers.handleActivate}
-      onStop={handlers.handleStop}
-      onInfoEdit={handlers.handleInfoEdit}
-      onDelete={() => {}}
-      formattedScheduledDate={formattedScheduledDate}
-      formattedStartTime={formattedStartTime}
-      formattedEndTime={formattedEndTime}
-      {...sessionActionProps}
-    />
-  ) : null;
+  const viewContent = (() => {
+    if (canOverride) {
+      return (
+        <AdminView
+          instance={instance}
+          isWarningDismissed={isWarningDismissed}
+          onDismissWarning={onDismissWarning}
+          onForceActivate={handlers.handleForceActivate}
+          onStop={handlers.handleStop}
+          onGenerateLog={() => {}}
+          onReschedule={handlers.handleReschedule}
+          onDelete={() => {}}
+          formattedScheduledDate={formattedScheduledDate}
+          formattedStartTime={formattedStartTime}
+          formattedEndTime={formattedEndTime}
+          {...sessionActionProps}
+        />
+      );
+    }
+    if (canViewSessionDetails) {
+      return (
+        <TeacherView
+          instance={instance}
+          viewMode={isParentView ? "parent" : "teacher"}
+          isWarningDismissed={isWarningDismissed}
+          onDismissWarning={onDismissWarning}
+          onActivate={handlers.handleActivate}
+          onStop={handlers.handleStop}
+          onInfoEdit={handlers.handleInfoEdit}
+          onDelete={() => {}}
+          formattedScheduledDate={formattedScheduledDate}
+          formattedStartTime={formattedStartTime}
+          formattedEndTime={formattedEndTime}
+          {...sessionActionProps}
+        />
+      );
+    }
+    return null;
+  })();
 
   return (
     <>

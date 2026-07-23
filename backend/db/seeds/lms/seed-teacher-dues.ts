@@ -21,8 +21,6 @@ type SeededDueSpec = {
   approvedAt: Date;
 };
 
-const DEFAULT_HOURLY_RATE = 60;
-
 function buildSpecs(
   approvedReports: LessonReportReturnType[],
   classInstanceById: Map<string, ClassInstanceEntity>,
@@ -35,13 +33,14 @@ function buildSpecs(
     if (!report) continue;
 
     const instance = classInstanceById.get(report.classInstanceId);
-    if (!instance || instance.executionState !== ClassExecutionState.COMPLETED) continue;
+    if (instance?.executionState !== ClassExecutionState.COMPLETED) continue;
 
     const teacher = teacherById.get(report.teacherId);
-    if (!teacher?.hourlyRate) continue;
+    const hourlyRate = teacher?.hourlyRate;
+    if (!hourlyRate) continue;
 
-    const hourlyRateStr = teacher.hourlyRate ?? String(DEFAULT_HOURLY_RATE);
-    const rateCurrency = (teacher.rateCurrency ?? CurrencyCode.SAR) as CurrencyCode;
+    const hourlyRateStr = hourlyRate;
+    const rateCurrency = teacher?.rateCurrency ?? CurrencyCode.SAR;
     const durationMinutes = instance.durationMinutes;
     const hours = +(durationMinutes / 60).toFixed(2);
     const amount = +(Number.parseFloat(hourlyRateStr) * hours).toFixed(2);

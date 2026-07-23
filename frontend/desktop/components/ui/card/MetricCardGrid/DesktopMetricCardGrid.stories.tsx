@@ -74,14 +74,16 @@ export const Arabic: Story = {
   globals: { locale: "ar" },
   args: {
     metrics: sampleMetrics.map(metric => {
-      const arabicLabel =
-        metric.key === "students"
-          ? "إجمالي الطلاب"
-          : metric.key === "classes"
-            ? "الحصص النشطة"
-            : metric.key === "suspended"
-              ? "حسابات موقوفة"
-              : "المعلمون";
+      let arabicLabel: string;
+      if (metric.key === "students") {
+        arabicLabel = "إجمالي الطلاب";
+      } else if (metric.key === "classes") {
+        arabicLabel = "الحصص النشطة";
+      } else if (metric.key === "suspended") {
+        arabicLabel = "حسابات موقوفة";
+      } else {
+        arabicLabel = "المعلمون";
+      }
 
       return {
         ...metric,
