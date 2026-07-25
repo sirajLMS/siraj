@@ -248,3 +248,12 @@ export const endPermissionGroupSimulationMutationDocument: TypedDocumentNode<Ope
     }
   }
 `;
+
+export const changePasswordMutationDocument: TypedDocumentNode<
+  Operations.ChangePasswordMutation,
+  Types.MutationChangePasswordArgs
+> = gql`
+  mutation changePassword($input: ChangePasswordInput!) {
+    changePassword(input: $input)
+  }
+`;

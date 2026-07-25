@@ -19,6 +19,7 @@ export const StudentProfilePothosObject = StudentProfileRef.implement({
     dateOfBirth: t.expose("dateOfBirth", { type: "DateTime", nullable: true }),
     gender: t.expose("gender", { type: GenderPothosObject, nullable: true }),
     language: t.expose("language", { type: AppLanguagePothosObject, nullable: true }),
+    timezoneOverride: t.exposeString("timezoneOverride", { nullable: true }),
     email: t.exposeString("email", { nullable: true }),
     phone: t.exposeString("phone", { nullable: true }),
     parentId: t.exposeString("parentId", { nullable: true }),

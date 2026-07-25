@@ -8,6 +8,7 @@ export interface StudentProfileRow {
   readonly dateOfBirth: string | null;
   readonly gender: string | null;
   readonly language: string | null;
+  readonly timezoneOverride: string | null;
   readonly email: string | null;
   readonly phone: string | null;
   readonly parentId: string | null;

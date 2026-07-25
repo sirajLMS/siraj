@@ -46,6 +46,7 @@ export type CoreUserProfileFields = {
   readonly avatarUrl?: string | null;
   readonly displayCurrency?: CurrencyCode | null;
   readonly phone?: string | null;
+  readonly timezone?: IanaTimezone | null;
 };
 
 export type ParentOwnProfileUpdateInput = {
@@ -53,6 +54,9 @@ export type ParentOwnProfileUpdateInput = {
   readonly facebook?: string | null;
   readonly whatsapp?: string | null;
   readonly twitter?: string | null;
+  readonly nationality?: string | null;
+  readonly address?: string | null;
+  readonly timezone?: IanaTimezone | null;
 };
 
 export type ParentAdminProfileUpdateInput = ParentOwnProfileUpdateInput & {

@@ -198,10 +198,10 @@ export type ParentOnboardingFormData = Omit<
   "phone" | "address" | "feeAmount" | "currency" | "invoiceType" | "initialPayinMethod" | "timezone"
 > & {
   phone?: string;
-  address: string;
-  feeAmount: string;
+  address?: string;
+  feeAmount?: string;
   currency: CurrencyCode;
-  invoiceType: InvoiceType;
+  invoiceType?: InvoiceType | null;
   payinMethod?: OnboardingPaymentMethodFormValues | null;
   timezone: string;
   meetingProvider?: MeetingProviderFieldsFragment | null;

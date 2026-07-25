@@ -343,4 +343,12 @@ export const profileAr: ProfileLabels = {
       LESSON_REPORT_REVIEWED: "مراجعة تقرير حصة",
     },
   },
+  changePassword: {
+    title: "تغيير كلمة المرور",
+    currentPassword: "كلمة المرور الحالية",
+    newPassword: "كلمة المرور الجديدة",
+    confirmPassword: "تأكيد كلمة المرور الجديدة",
+    submit: "تحديث كلمة المرور",
+    success: "تم تحديث كلمة المرور بنجاح",
+  },
 };

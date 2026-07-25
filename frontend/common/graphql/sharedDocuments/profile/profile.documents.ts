@@ -26,6 +26,12 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         name
         email
         phone
+        nationality
+        countryCode
+        dateOfBirth
+        gender
+        address
+        qualifications
         timezone
         hourlyRate
         rateCurrency
@@ -43,6 +49,8 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         email
         phone
         nationalId
+        nationality
+        countryCode
         dateOfBirth
         gender
         address
@@ -66,6 +74,8 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         name
         email
         phone
+        nationality
+        address
         facebook
         whatsapp
         twitter
@@ -194,7 +204,6 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
 `;
 
 export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.UpdateOwnProfileMutation> = gql`
-  ${USER_PAYMENT_METHOD_FIELDS}
   mutation UpdateOwnProfile($input: UpdateOwnProfileInput!) {
     updateOwnProfile(input: $input) {
       id
@@ -213,6 +222,12 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
         name
         email
         phone
+        nationality
+        countryCode
+        dateOfBirth
+        gender
+        address
+        qualifications
         timezone
         hourlyRate
         rateCurrency
@@ -223,6 +238,8 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
         name
         email
         phone
+        nationality
+        address
         facebook
         whatsapp
         twitter
@@ -269,6 +286,8 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         email
         phone
         nationalId
+        nationality
+        countryCode
         dateOfBirth
         gender
         address

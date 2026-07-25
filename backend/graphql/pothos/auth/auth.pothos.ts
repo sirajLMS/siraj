@@ -1,6 +1,12 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { UserPothosObject } from "@/backend/graphql/pothos/auth/user.pothos";
-import type { DemoLoginInput, LoginInput, LoginResponse, RefreshTokenResponse } from "@/backend/types";
+import type {
+  ChangePasswordInput,
+  DemoLoginInput,
+  LoginInput,
+  LoginResponse,
+  RefreshTokenResponse,
+} from "@/backend/types";
 
 export { UserPothosObject };
 
@@ -24,6 +30,16 @@ export const DemoLoginInputPothosObject = gqlSchemaBuilder.inputRef<DemoLoginInp
     }),
   }),
 });
+
+export const ChangePasswordInputPothosObject = gqlSchemaBuilder
+  .inputRef<ChangePasswordInput>("ChangePasswordInput")
+  .implement({
+    fields: t => ({
+      currentPassword: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
+      newPassword: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
+      confirmPassword: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
+    }),
+  });
 
 // Login response
 export const LoginResponsePothosObject = gqlSchemaBuilder.objectRef<LoginResponse>("LoginResponse").implement({

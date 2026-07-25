@@ -14,19 +14,19 @@ const ownParentSchema = z.object({
   facebook: z.string().optional(),
   whatsapp: z.string().optional(),
   twitter: z.string().optional(),
-});
-
-const adminParentSchema = ownParentSchema.extend({
-  lifecycleStatus: z.enum(ParentStatus).optional(),
   nationality: z.string().optional(),
   address: z.string().optional(),
-  invoiceType: z.string().optional(),
-  feeAmount: z.string().optional(),
-  currency: z.enum(CurrencyCode).optional(),
   timezone: z
     .string()
     .optional()
     .refine(value => !value || isValidIanaTimezoneId(value), { message: "Invalid timezone" }),
+});
+
+const adminParentSchema = ownParentSchema.extend({
+  lifecycleStatus: z.enum(ParentStatus).optional(),
+  invoiceType: z.string().optional(),
+  feeAmount: z.string().optional(),
+  currency: z.enum(CurrencyCode).optional(),
 });
 
 export const parentOwnEditSchema = z.object({ ...coreSchema.shape, ...ownParentSchema.shape });

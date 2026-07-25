@@ -30,6 +30,8 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
       authScopes: (_parent, _args, ctx) =>
         ctx.isSuperAdmin || ctx.permissions.includes(AppPermission.PROFILE_TEACHER_IDENTITY_VIEW_OTHER),
     }),
+    nationality: t.exposeString("nationality", { nullable: true }),
+    countryCode: t.exposeString("countryCode", { nullable: true }),
     dateOfBirth: t.exposeString("dateOfBirth", { nullable: true }),
     gender: t.expose("gender", { type: GenderPothosObject, nullable: true }),
     address: t.exposeString("address", {
@@ -68,6 +70,8 @@ export const TeacherProfileUpdateInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       nationalId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+      nationality: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+      countryCode: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       phone: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       dateOfBirth: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       gender: t.field({ type: GenderPothosObject, required: false }),

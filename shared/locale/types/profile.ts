@@ -331,6 +331,15 @@ export interface ProfileNotificationsLabels {
   };
 }
 
+export interface ProfileChangePasswordLabels {
+  readonly title: string;
+  readonly currentPassword: string;
+  readonly newPassword: string;
+  readonly confirmPassword: string;
+  readonly submit: string;
+  readonly success: string;
+}
+
 export interface ProfileLabels {
   readonly shell: ProfileShellLabels;
   readonly pageTitle: string;
@@ -342,6 +351,7 @@ export interface ProfileLabels {
   readonly role: ProfileRoleLabels;
   readonly actions: ProfileActionsLabels;
   readonly errors: ProfileErrorsLabels;
+  readonly changePassword: ProfileChangePasswordLabels;
   readonly convertedAmount: (
     lockedAmount: string,
     lockedCurrency: string,

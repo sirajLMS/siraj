@@ -323,6 +323,15 @@ export namespace UserRepository {
     return updated;
   }
 
+  export const updatePassword = async (
+    userId: string,
+    hashedPassword: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<UserSelectType> => {
+    return updateUserColumn(userId, { password: hashedPassword }, tx, locale);
+  };
+
   export const updateTimezone = async (
     userId: string,
     timezone: string,

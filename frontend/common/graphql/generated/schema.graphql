@@ -462,6 +462,12 @@ type ChangeParentLifecycleResult {
   lifecycleStatus: ParentStatus
 }
 
+input ChangePasswordInput {
+  confirmPassword: String!
+  currentPassword: String!
+  newPassword: String!
+}
+
 type ChangeStudentStatusResult {
   id: String
   status: StudentStatus
@@ -757,6 +763,7 @@ input CoreUserProfileFieldsInput {
   displayCurrency: CurrencyCode
   email: String
   name: String
+  timezone: IanaTimezone
 }
 
 enum CountryCode {
@@ -2368,6 +2375,7 @@ type Mutation {
   bulkAssignUsersToGroup(groupId: String!, userIds: [String!]!): Boolean
   bulkRevokeUsersFromGroup(groupId: String!, userIds: [String!]!): Boolean
   changeParentLifecycleStatus(newStatus: ParentStatus!, parentId: String!): ChangeParentLifecycleResult
+  changePassword(input: ChangePasswordInput!): Boolean
   changeStudentStatus(expectedVersion: Int, newStatus: StudentStatus!, studentId: String!): ChangeStudentStatusResult
   cleanupTestEntities(parentId: String!, parentUserId: String!, studentId: String!, studentUserId: String!, teacherId: String!, teacherUserId: String!): Boolean
   cleanupTestGroupClass(groupClassId: String!): Boolean
@@ -2878,18 +2886,23 @@ type ParentOnboardingResult {
 }
 
 type ParentOwnProfile {
+  address: String
   email: String
   facebook: String
   id: String
   name: String
+  nationality: String
   phone: String
   twitter: String
   whatsapp: String
 }
 
 input ParentOwnProfileUpdateInput {
+  address: String
   facebook: String
+  nationality: String
   phone: String
+  timezone: IanaTimezone
   twitter: String
   whatsapp: String
 }
@@ -3805,6 +3818,7 @@ type StudentProfile {
   status: StudentStatus
   teacherName: String
   teacherUserId: String
+  timezoneOverride: String
   upcomingClasses: StudentUpcomingClassesResult
   updatedAt: DateTime
   version: Int
@@ -3817,6 +3831,7 @@ input StudentProfileEditInput {
   language: AppLanguage
   parentPhone: String
   phone: String
+  timezoneOverride: String
 }
 
 type StudentProgress {
@@ -4416,19 +4431,32 @@ input TeacherOnboardingInput {
 }
 
 type TeacherOwnProfile {
+  address: String
+  countryCode: String
+  dateOfBirth: String
   displayAmount: DisplayAmount
   email: String
+  gender: Gender
   hourlyRate: String
   id: String
   name: String
+  nationality: String
   phone: String
+  qualifications: String
   rateCurrency: CurrencyCode
   timezone: IanaTimezone
   totalClasses: Int
 }
 
 input TeacherOwnProfileUpdateInput {
+  address: String
+  countryCode: String
+  dateOfBirth: String
+  gender: Gender
+  nationality: String
   phone: String
+  qualifications: String
+  timezone: IanaTimezone
 }
 
 type TeacherPayment {
@@ -4454,6 +4482,7 @@ type TeacherPendingDuesSummary {
 type TeacherProfileResult {
   address: String
   avgEngagementScore: Float
+  countryCode: String
   dateOfBirth: String
   displayAmount: DisplayAmount
   email: String
@@ -4462,6 +4491,7 @@ type TeacherProfileResult {
   id: String
   name: String
   nationalId: String
+  nationality: String
   phone: String
   qualifications: String
   rateCurrency: CurrencyCode
@@ -4474,10 +4504,12 @@ type TeacherProfileResult {
 
 input TeacherProfileUpdateInput {
   address: String
+  countryCode: String
   dateOfBirth: String
   gender: Gender
   hourlyRate: String
   nationalId: String
+  nationality: String
   phone: String
   qualifications: String
   rateCurrency: CurrencyCode

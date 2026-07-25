@@ -133,11 +133,7 @@ export function TeacherOnboardingDesktopView({
         message={labels.actions.successMessage}
         onClose={onDismissSuccess}
       />
-      <DesktopFormErrorSnackbar
-        open={Boolean(submitError)}
-        message={submitError ?? ""}
-        onClose={onDismissError}
-      />
+      <DesktopFormErrorSnackbar open={Boolean(submitError)} message={submitError ?? ""} onClose={onDismissError} />
     </DesktopPageContainer>
   );
 }

@@ -36,15 +36,15 @@ export async function askQuestion(rl: Interface, query: string): Promise<string>
  */
 export async function dispatchAction(key: string): Promise<number> {
   // Check for permanently disabled actions first
-  // if (isPermanentlyDisabled(key)) {
-  //   printPermanentlyDisabledBlock(key);
-  //   return 1;
-  // }
+  if (isPermanentlyDisabled(key)) {
+    printPermanentlyDisabledBlock(key);
+    return 1;
+  }
 
-  // if (isDestructiveActionBlocked(key)) {
-  //   printDestructiveActionBlock();
-  //   return 1;
-  // }
+  if (isDestructiveActionBlocked(key)) {
+    printDestructiveActionBlock();
+    return 1;
+  }
 
   switch (key) {
     case "1":
@@ -78,27 +78,27 @@ export async function executeAction(key: string, rl?: Interface): Promise<void> 
   if (!action) return;
 
   // Check for permanently disabled actions first
-  // if (isPermanentlyDisabled(key)) {
-  //   globalThis.console.log(`\nRunning: ${action.label}...\n`);
-  //   printPermanentlyDisabledBlock(key);
-  //   globalThis.console.log("\n✗ Failed (code 1)");
+  if (isPermanentlyDisabled(key)) {
+    globalThis.console.log(`\nRunning: ${action.label}...\n`);
+    printPermanentlyDisabledBlock(key);
+    globalThis.console.log("\n✗ Failed (code 1)");
 
-  //   if (rl) {
-  //     await askQuestion(rl, "\nPress Enter to continue...");
-  //   }
-  //   return;
-  // }
+    if (rl) {
+      await askQuestion(rl, "\nPress Enter to continue...");
+    }
+    return;
+  }
 
-  // if (isDestructiveActionBlocked(key)) {
-  //   globalThis.console.log(`\nRunning: ${action.label}...\n`);
-  //   printDestructiveActionBlock();
-  //   globalThis.console.log("\n✗ Failed (code 1)");
+  if (isDestructiveActionBlocked(key)) {
+    globalThis.console.log(`\nRunning: ${action.label}...\n`);
+    printDestructiveActionBlock();
+    globalThis.console.log("\n✗ Failed (code 1)");
 
-  //   if (rl) {
-  //     await askQuestion(rl, "\nPress Enter to continue...");
-  //   }
-  //   return;
-  // }
+    if (rl) {
+      await askQuestion(rl, "\nPress Enter to continue...");
+    }
+    return;
+  }
 
   globalThis.console.log(`\nRunning: ${action.label}...\n`);
   const code = await dispatchAction(key);

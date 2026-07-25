@@ -96,7 +96,9 @@ export function PaymentMethodSection({ control, errors }: Readonly<PaymentMethod
             }}
           />
           {errors.payoutMethod?.type?.message ? (
-            <span style={{ color: "var(--mui-palette-error-main)", fontSize: 12 }}>{errors.payoutMethod.type.message}</span>
+            <span style={{ color: "var(--mui-palette-error-main)", fontSize: 12 }}>
+              {errors.payoutMethod.type.message}
+            </span>
           ) : null}
         </>
       ) : null}

@@ -12,6 +12,8 @@ export const errorsAr: ErrorsLabels = {
     tooManyLoginAttempts: "عدد محاولات تسجيل الدخول كثيرة جداً. يرجى المحاولة لاحقاً.",
     serviceUnavailable: "خدمة المصادقة غير متاحة مؤقتاً",
     invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صالحة",
+    currentPasswordInvalid: "كلمة المرور الحالية غير صحيحة.",
+    passwordsDoNotMatch: "كلمة المرور الجديدة وتأكيد كلمة المرور غير متطابقين.",
     accountDeactivated: "تم إلغاء تفعيل هذا الحساب. يرجى التواصل مع الدعم.",
     accountLocked: "عدد محاولات تسجيل الدخول كثيرة جداً. تم قفل حسابك مؤقتاً.",
     demoLoginNotEnabled: "تسجيل الدخول التجريبي غير مفعل",

@@ -72,6 +72,7 @@ export interface StudentOnboardingInput {
   readonly email?: string | null;
   readonly password?: string | null;
   readonly timezone?: string | null;
+  readonly timezoneOverride?: string | null;
   readonly avatarUrl?: string | null;
 }
 

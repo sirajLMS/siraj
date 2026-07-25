@@ -30,12 +30,12 @@ export function useCreateParentOnboarding() {
         avatarUrl: formData.avatarUrl ?? null,
         phone: formData.phone || null,
         nationality: formData.nationality || null,
-        address: formData.address,
+        address: formData.address || null,
         whatsapp: formData.whatsapp || null,
         facebook: formData.facebook || null,
         twitter: formData.twitter || null,
-        invoiceType: formData.invoiceType,
-        feeAmount: formData.feeAmount,
+        invoiceType: formData.invoiceType ?? null,
+        feeAmount: formData.feeAmount || null,
         initialPayinMethod: formData.payinMethod?.type
           ? {
               type: formData.payinMethod.type,

@@ -20,10 +20,9 @@ export const parentOnboardingSchema = z
     facebook: z.string().optional(),
     twitter: z.string().optional(),
     invoiceType: z
-      .custom<InvoiceType>(
-        val => typeof val === "string" && (Object.values(InvoiceType) as string[]).includes(val),
-        { message: "invoiceTypeRequired" }
-      )
+      .custom<InvoiceType>(val => typeof val === "string" && (Object.values(InvoiceType) as string[]).includes(val), {
+        message: "invoiceTypeRequired",
+      })
       .optional()
       .nullable(),
     feeAmount: z.string().optional(),

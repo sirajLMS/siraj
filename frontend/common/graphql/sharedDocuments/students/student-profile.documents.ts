@@ -82,6 +82,7 @@ export const studentProfileQueryDocument: TypedDocumentNode<
       dateOfBirth
       gender
       language
+      timezoneOverride
       email
       phone
       parentId
@@ -122,11 +123,6 @@ export const studentProfileQueryDocument: TypedDocumentNode<
   }
 `;
 
-// NOTE: `Operations.RecordStudentProfileEditMutation` /
-// `Types.MutationRecordStudentProfileEditArgs` are produced by GraphQL Code
-// Generator after codegen. Until then, use a temporary local type mirroring
-// the expected codegen shape. Replace after
-// `bun run generate:gqlSchema && bun codegen` regenerates `operations.ts`.
 interface RecordStudentProfileEditMutationShape {
   recordStudentProfileEdit: {
     id: string | null;
@@ -136,6 +132,7 @@ interface RecordStudentProfileEditMutationShape {
     dateOfBirth: string | null;
     gender: string | null;
     language: string | null;
+    timezoneOverride: string | null;
     email: string | null;
     phone: string | null;
     parentPhone: string | null;
@@ -150,6 +147,7 @@ interface RecordStudentProfileEditMutationArgs {
     dateOfBirth?: string | null;
     gender?: string | null;
     language?: string | null;
+    timezoneOverride?: string | null;
     parentPhone?: string | null;
     avatarUrl?: string | null;
   };
@@ -168,6 +166,7 @@ export const recordStudentProfileEditMutationDocument: TypedDocumentNode<
       dateOfBirth
       gender
       language
+      timezoneOverride
       email
       phone
       parentPhone

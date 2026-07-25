@@ -11,6 +11,7 @@ import {
 import { ParentProfilePothosObject } from "@/backend/graphql/pothos/parents/parent-profile.pothos";
 import {
   CurrencyCodePothosObject,
+  GenderPothosObject,
   IanaTimezonePothosObject,
   OverrideStatePothosObject,
   ProfileAudiencePothosEnum,
@@ -114,6 +115,7 @@ export const CoreUserProfileFieldsInputPothosObject = gqlSchemaBuilder
       email: t.string({ required: false }),
       avatarUrl: t.string({ required: false }),
       displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
+      timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
     }),
   });
 
@@ -122,6 +124,13 @@ export const TeacherOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       phone: t.string({ required: false }),
+      nationality: t.string({ required: false }),
+      countryCode: t.string({ required: false }),
+      dateOfBirth: t.string({ required: false }),
+      gender: t.field({ type: GenderPothosObject, required: false }),
+      address: t.string({ required: false }),
+      qualifications: t.string({ required: false }),
+      timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
     }),
   });
 
@@ -133,6 +142,9 @@ export const ParentOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
       facebook: t.string({ required: false }),
       whatsapp: t.string({ required: false }),
       twitter: t.string({ required: false }),
+      nationality: t.string({ required: false }),
+      address: t.string({ required: false }),
+      timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
     }),
   });
 

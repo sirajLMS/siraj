@@ -77,8 +77,8 @@ export function toParentRepoInput(
   input: ParentOwnProfileUpdateInput | ParentAdminProfileUpdateInput
 ): ParentProfileUpdateInput {
   return {
-    nationality: "nationality" in input ? input.nationality : undefined,
-    address: "address" in input ? input.address : undefined,
+    nationality: input.nationality,
+    address: input.address,
     facebook: input.facebook,
     whatsapp: input.whatsapp,
     twitter: input.twitter,
@@ -542,6 +542,9 @@ export namespace ProfileService {
     }
 
     await UserRepository.updateProfileFields(targetUserId, core, locale);
+    if (core.timezone) {
+      await UserRepository.updateTimezone(targetUserId, core.timezone, undefined, locale);
+    }
   }
 
   type RoleSpecificUpdateInput = {
@@ -595,11 +598,8 @@ export namespace ProfileService {
       return;
     }
 
-    if (scope === ProfileScope.OTHER && "timezone" in parentInput) {
-      const parentTimezone = (parentInput as ParentAdminProfileUpdateInput).timezone;
-      if (parentTimezone != null) {
-        await UserRepository.updateTimezone(targetUserId, parentTimezone, undefined, locale);
-      }
+    if ("timezone" in parentInput && parentInput.timezone != null) {
+      await UserRepository.updateTimezone(targetUserId, parentInput.timezone, undefined, locale);
     }
 
     if (scope === ProfileScope.OWN) {

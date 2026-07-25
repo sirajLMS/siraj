@@ -15,6 +15,8 @@ export interface AuthErrors {
   readonly tooManyLoginAttempts: string;
   readonly serviceUnavailable: string;
   readonly invalidCredentials: string;
+  readonly currentPasswordInvalid: string;
+  readonly passwordsDoNotMatch: string;
   readonly accountDeactivated: string;
   readonly accountLocked: string;
   readonly demoLoginNotEnabled: string;

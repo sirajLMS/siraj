@@ -7,17 +7,20 @@ import { AccountStatus } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  ChangePasswordInputPothosObject,
   DemoLoginInputPothosObject,
   LoginInputPothosObject,
   LoginResponsePothosObject,
   RefreshTokenResponsePothosObject,
 } from "@/backend/graphql/pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { extractTokenFromHeader, generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
 import { setAuthCookies as applyAuthCookies, clearAuthCookies } from "@/backend/lib/auth/cookies";
 import { comparePassword } from "@/backend/lib/auth/password";
 import { getBooleanEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
+import { AuthPasswordService } from "@/backend/services/auth/auth-password.service";
 import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
@@ -350,6 +353,20 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       clearAuthCookies(ctx.cookies);
       return loggedOut;
+    },
+  }),
+
+  changePassword: t.field({
+    type: "Boolean",
+    authScopes: {
+      loggedIn: true,
+    },
+    args: {
+      input: t.arg({ type: ChangePasswordInputPothosObject, required: true }),
+    },
+    resolve: async (_parent, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return AuthPasswordService.changePassword(actorUserId, args.input, ctx.locale);
     },
   }),
 }));

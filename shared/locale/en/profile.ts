@@ -343,4 +343,12 @@ export const profileEn: ProfileLabels = {
       LESSON_REPORT_REVIEWED: "Lesson Report Reviewed",
     },
   },
+  changePassword: {
+    title: "Change Password",
+    currentPassword: "Current Password",
+    newPassword: "New Password",
+    confirmPassword: "Confirm New Password",
+    submit: "Update Password",
+    success: "Password updated successfully",
+  },
 };

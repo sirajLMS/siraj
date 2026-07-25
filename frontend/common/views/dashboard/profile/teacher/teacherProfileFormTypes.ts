@@ -11,10 +11,8 @@ const coreSchema = z.object({
 
 const ownTeacherSchema = z.object({
   phone: z.string().optional(),
-});
-
-const adminTeacherSchema = ownTeacherSchema.extend({
-  nationalId: z.string().optional(),
+  nationality: z.string().optional(),
+  countryCode: z.string().optional(),
   dateOfBirth: z.string().optional(),
   gender: z.enum(Gender).optional().nullable(),
   address: z.string().optional(),
@@ -23,6 +21,10 @@ const adminTeacherSchema = ownTeacherSchema.extend({
     .string()
     .optional()
     .refine(value => !value || isValidIanaTimezoneId(value), { message: "Invalid timezone" }),
+});
+
+const adminTeacherSchema = ownTeacherSchema.extend({
+  nationalId: z.string().optional(),
   hourlyRate: z.string().optional(),
   rateCurrency: z.enum(CurrencyCode).optional(),
   status: z.enum(AccountStatus).optional().nullable(),
@@ -41,6 +43,8 @@ export type TeacherEditData = {
   readonly displayCurrency?: CurrencyCode | null;
   readonly phone?: string | null;
   readonly nationalId?: string | null;
+  readonly nationality?: string | null;
+  readonly countryCode?: string | null;
   readonly dateOfBirth?: string | null;
   readonly gender?: Gender | null;
   readonly address?: string | null;

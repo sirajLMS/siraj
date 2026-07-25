@@ -36,6 +36,8 @@ const parentOwnProfile: ParentOwnData = {
   name: "Noor Abdullah",
   email: "noor.abdullah@example.com",
   phone: "+966 50 123 4567",
+  nationality: "Saudi Arabian",
+  address: "Riyadh, Saudi Arabia",
   facebook: "facebook.com/noor.abdullah",
   whatsapp: "+966501234567",
   twitter: "@noor_abdullah",

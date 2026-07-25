@@ -309,6 +309,12 @@ export type BookingStatus =
   | 'CONFIRMED'
   | 'RESCHEDULED';
 
+export type ChangePasswordInput = {
+  confirmPassword: string;
+  currentPassword: string;
+  newPassword: string;
+};
+
 export type ClassCategoryCreateInput = {
   description: string | null | undefined;
   isActive: boolean | null | undefined;
@@ -418,6 +424,7 @@ export type CoreUserProfileFieldsInput = {
   displayCurrency: CurrencyCode | null | undefined;
   email: string | null | undefined;
   name: string | null | undefined;
+  timezone: IanaTimezone | null | undefined;
 };
 
 export type CountryCode =
@@ -1437,8 +1444,11 @@ export type ParentOnboardingInput = {
 };
 
 export type ParentOwnProfileUpdateInput = {
+  address: string | null | undefined;
   facebook: string | null | undefined;
+  nationality: string | null | undefined;
   phone: string | null | undefined;
+  timezone: IanaTimezone | null | undefined;
   twitter: string | null | undefined;
   whatsapp: string | null | undefined;
 };
@@ -1606,6 +1616,7 @@ export type StudentProfileEditInput = {
   language: AppLanguage | null | undefined;
   parentPhone: string | null | undefined;
   phone: string | null | undefined;
+  timezoneOverride: string | null | undefined;
 };
 
 export type StudentStatus =
@@ -1766,15 +1777,24 @@ export type TeacherOnboardingInput = {
 };
 
 export type TeacherOwnProfileUpdateInput = {
+  address: string | null | undefined;
+  countryCode: string | null | undefined;
+  dateOfBirth: string | null | undefined;
+  gender: Gender | null | undefined;
+  nationality: string | null | undefined;
   phone: string | null | undefined;
+  qualifications: string | null | undefined;
+  timezone: IanaTimezone | null | undefined;
 };
 
 export type TeacherProfileUpdateInput = {
   address: string | null | undefined;
+  countryCode: string | null | undefined;
   dateOfBirth: string | null | undefined;
   gender: Gender | null | undefined;
   hourlyRate: string | null | undefined;
   nationalId: string | null | undefined;
+  nationality: string | null | undefined;
   phone: string | null | undefined;
   qualifications: string | null | undefined;
   rateCurrency: CurrencyCode | null | undefined;
@@ -2049,6 +2069,16 @@ export type EndPermissionGroupSimulationMutationVariables = Exact<{ [key: string
 
 
 export type EndPermissionGroupSimulationMutation = EndPermissionGroupSimulationMutation_Mutation;
+
+export type ChangePasswordMutation_Mutation = { changePassword: boolean | null };
+
+
+export type ChangePasswordMutationVariables = Exact<{
+  input: Types.ChangePasswordInput;
+}>;
+
+
+export type ChangePasswordMutation = ChangePasswordMutation_Mutation;
 
 export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary_overdueAmountsByCurrency_BillingCurrencyTotal_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
@@ -3887,13 +3917,13 @@ export type UpdateUserOverridesMutation = UpdateUserOverridesMutation_Mutation;
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile_displayAmount_DisplayAmount | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile_displayAmount_DisplayAmount | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
@@ -3937,9 +3967,9 @@ export type ProfileByUserIdQueryVariables = Exact<{
 
 export type ProfileByUserIdQuery = ProfileByUserIdQuery_Query;
 
-export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null };
+export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null };
 
-export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
+export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
 
 export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
@@ -3957,7 +3987,7 @@ export type UpdateOwnProfileMutationVariables = Exact<{
 
 export type UpdateOwnProfileMutation = UpdateOwnProfileMutation_Mutation;
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
@@ -4664,7 +4694,7 @@ export type StudentProfileQuery_studentProfile_StudentProfile_classHistory_Stude
 
 export type StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory = { id: string | null, studentName: string | null, metrics: StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory_metrics_StudentHistoryMetrics | null, sessions: Array<StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory_sessions_StudentHistorySession> | null };
 
-export type StudentProfileQuery_studentProfile_StudentProfile = { id: string | null, name: string | null, status: Types.StudentStatus | null, avatarUrl: string | null, dateOfBirth: string | null, gender: Types.Gender | null, language: Types.AppLanguage | null, email: string | null, phone: string | null, parentId: string | null, parentUserId: string | null, parentName: string | null, parentEmail: string | null, parentPhone: string | null, isAssociatedViewer: boolean | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null, version: number | null, createdAt: string | null, updatedAt: string | null, upcomingClasses: StudentProfileQuery_studentProfile_StudentProfile_upcomingClasses_StudentUpcomingClassesResult | null, classHistory: StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory | null };
+export type StudentProfileQuery_studentProfile_StudentProfile = { id: string | null, name: string | null, status: Types.StudentStatus | null, avatarUrl: string | null, dateOfBirth: string | null, gender: Types.Gender | null, language: Types.AppLanguage | null, timezoneOverride: string | null, email: string | null, phone: string | null, parentId: string | null, parentUserId: string | null, parentName: string | null, parentEmail: string | null, parentPhone: string | null, isAssociatedViewer: boolean | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null, version: number | null, createdAt: string | null, updatedAt: string | null, upcomingClasses: StudentProfileQuery_studentProfile_StudentProfile_upcomingClasses_StudentUpcomingClassesResult | null, classHistory: StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory | null };
 
 export type StudentProfileQuery_Query = { studentProfile: StudentProfileQuery_studentProfile_StudentProfile | null };
 
@@ -4678,7 +4708,7 @@ export type StudentProfileQueryVariables = Exact<{
 
 export type StudentProfileQuery = StudentProfileQuery_Query;
 
-export type RecordStudentProfileEditMutation_recordStudentProfileEdit_StudentProfile = { id: string | null, name: string | null, status: Types.StudentStatus | null, avatarUrl: string | null, dateOfBirth: string | null, gender: Types.Gender | null, language: Types.AppLanguage | null, email: string | null, phone: string | null, parentPhone: string | null, version: number | null, updatedAt: string | null };
+export type RecordStudentProfileEditMutation_recordStudentProfileEdit_StudentProfile = { id: string | null, name: string | null, status: Types.StudentStatus | null, avatarUrl: string | null, dateOfBirth: string | null, gender: Types.Gender | null, language: Types.AppLanguage | null, timezoneOverride: string | null, email: string | null, phone: string | null, parentPhone: string | null, version: number | null, updatedAt: string | null };
 
 export type RecordStudentProfileEditMutation_Mutation = { recordStudentProfileEdit: RecordStudentProfileEditMutation_recordStudentProfileEdit_StudentProfile | null };
 

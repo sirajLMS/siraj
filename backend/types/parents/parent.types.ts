@@ -214,6 +214,8 @@ export type ParentOwnProfileReturnType = {
   name: string;
   email: string;
   phone: string | null;
+  nationality: string | null;
+  address: string | null;
   facebook: string | null;
   whatsapp: string | null;
   twitter: string | null;

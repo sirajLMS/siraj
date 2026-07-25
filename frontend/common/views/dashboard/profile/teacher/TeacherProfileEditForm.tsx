@@ -8,6 +8,7 @@ import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/fro
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
+import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
@@ -69,52 +70,55 @@ export function TeacherProfileEditForm({
   };
 
   return (
-    <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
-      <Stack spacing={3}>
-        {canEdit("core_identity") ? (
-          <AvatarImageField
-            control={form.control}
-            name="avatarUrl"
-            label={t.fields.avatar}
-            title={base.editAvatarTitle}
-            onUploadAvatar={onUploadAvatar}
-          />
-        ) : null}
-        <Box
-          sx={{
-            display: "grid",
-            gap: 3,
-            minWidth: 0,
-            width: "100%",
-            gridTemplateColumns: {
-              xs: "minmax(0, 1fr)",
-              lg: "repeat(2, minmax(0, 1fr))",
-            },
-          }}
-        >
+    <Stack spacing={3}>
+      <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
+        <Stack spacing={3}>
           {canEdit("core_identity") ? (
-            <AccountSection
-              mode="edit"
-              scope={scope}
-              teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
-              register={form.register}
+            <AvatarImageField
               control={form.control}
+              name="avatarUrl"
+              label={t.fields.avatar}
+              title={base.editAvatarTitle}
+              onUploadAvatar={onUploadAvatar}
             />
           ) : null}
-          {canEdit("core_contact") || canEdit("teacher_identity") ? (
-            <ContactSection scope={scope} isAdminScope={false} register={form.register} control={form.control} />
-          ) : null}
-        </Box>
-        <PrimaryPageAction type="submit" disabled={isSaving}>
-          {isSaving ? t.shell.loading : t.actions.save}
-        </PrimaryPageAction>
-      </Stack>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              minWidth: 0,
+              width: "100%",
+              gridTemplateColumns: {
+                xs: "minmax(0, 1fr)",
+                lg: "repeat(2, minmax(0, 1fr))",
+              },
+            }}
+          >
+            {canEdit("core_identity") ? (
+              <AccountSection
+                mode="edit"
+                scope={scope}
+                teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
+                register={form.register}
+                control={form.control}
+              />
+            ) : null}
+            {canEdit("core_contact") || canEdit("teacher_identity") ? (
+              <ContactSection scope={scope} isAdminScope={false} register={form.register} control={form.control} />
+            ) : null}
+          </Box>
+          <PrimaryPageAction type="submit" disabled={isSaving}>
+            {isSaving ? t.shell.loading : t.actions.save}
+          </PrimaryPageAction>
+        </Stack>
+      </Box>
+      <ChangePasswordSection />
       <FormSuccessSnackbar
         open={successOpen}
         message={base.actions.saveSuccess}
         onClose={() => setSuccessOpen(false)}
       />
       <FormErrorSnackbar open={errorOpen} message={base.actions.saveError} onClose={() => setErrorOpen(false)} />
-    </Box>
+    </Stack>
   );
 }

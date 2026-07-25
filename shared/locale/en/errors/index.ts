@@ -12,6 +12,8 @@ export const errorsEn: ErrorsLabels = {
     tooManyLoginAttempts: "Too many login attempts. Please try again later.",
     serviceUnavailable: "Authentication service temporarily unavailable",
     invalidCredentials: "Invalid email or password",
+    currentPasswordInvalid: "Current password is incorrect.",
+    passwordsDoNotMatch: "New password and confirmation password do not match.",
     accountDeactivated: "This account has been deactivated. Please contact support.",
     accountLocked: "Too many login attempts. Your account has been temporarily locked.",
     demoLoginNotEnabled: "Demo login is not enabled",

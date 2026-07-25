@@ -35,7 +35,7 @@ function toEditData(
   avatarUrl: string | null | undefined,
   displayCurrency: CurrencyCode | null | undefined
 ): ParentAdminEditFormData {
-  const adminData = parentData && "nationality" in parentData ? parentData : null;
+  const adminData = parentData && "invoiceType" in parentData ? parentData : null;
   return {
     name: parentData?.name ?? "",
     email: parentData?.email ?? "",
@@ -45,8 +45,8 @@ function toEditData(
     facebook: parentData?.facebook ?? "",
     whatsapp: parentData?.whatsapp ?? "",
     twitter: parentData?.twitter ?? "",
-    nationality: adminData?.nationality ?? "",
-    address: adminData?.address ?? "",
+    nationality: parentData?.nationality ?? "",
+    address: parentData?.address ?? "",
     invoiceType: adminData?.invoiceType ?? "",
     feeAmount: adminData?.feeAmount ?? "",
     currency: adminData?.currency ?? undefined,

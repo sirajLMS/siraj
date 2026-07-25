@@ -10,6 +10,7 @@ export type StudentProfileReturnType = {
   readonly dateOfBirth: Date | null;
   readonly gender: Gender | null;
   readonly language: AppLanguage | null;
+  readonly timezoneOverride: string | null;
   readonly email: string | null;
   readonly phone: string | null;
   readonly parentId: string | null;
@@ -40,6 +41,7 @@ export type StudentProfileEditInput = {
   readonly dateOfBirth?: Date | null;
   readonly gender?: Gender | null;
   readonly language?: AppLanguage | null;
+  readonly timezoneOverride?: string | null;
   readonly avatarUrl?: string | null;
   /** Updates linked parent user phone when the student has a parent link. */
   readonly parentPhone?: string | null;

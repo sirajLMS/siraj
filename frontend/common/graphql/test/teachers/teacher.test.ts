@@ -23,6 +23,8 @@ function makeUpdateInput(overrides: Partial<TeacherProfileUpdateInput>): Teacher
     gender: overrides.gender ?? null,
     hourlyRate: overrides.hourlyRate ?? null,
     nationalId: overrides.nationalId ?? null,
+    nationality: overrides.nationality ?? null,
+    countryCode: overrides.countryCode ?? null,
     phone: overrides.phone ?? null,
     qualifications: overrides.qualifications ?? null,
     rateCurrency: overrides.rateCurrency ?? null,
@@ -203,7 +205,7 @@ describe("GraphQL Teacher Integration Tests", () => {
       mutation: updateTeacherProfileMutationDocument,
       variables: {
         teacherId: fakeTeacherIdVal,
-        input: {
+        input: makeUpdateInput({
           address: "Fake Address",
           dateOfBirth: "1990-01-01",
           gender: Gender.Male,
@@ -214,7 +216,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           rateCurrency: CurrencyCode.Usd,
           status: null,
           timezone: IanaTimezone.Utc,
-        },
+        }),
       },
       context: {
         headers: {
@@ -234,7 +236,7 @@ describe("GraphQL Teacher Integration Tests", () => {
       updateTeacherProfileMutationDocument,
       {
         teacherId,
-        input: {
+        input: makeUpdateInput({
           address: null,
           dateOfBirth: null,
           gender: Gender.Female,
@@ -245,7 +247,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           rateCurrency: null,
           status: null,
           timezone: IanaTimezone.AmericaNewYork,
-        },
+        }),
       }
     );
     expect(updateProfileData.updateTeacherProfile).toBeDefined();
@@ -260,7 +262,7 @@ describe("GraphQL Teacher Integration Tests", () => {
       updateTeacherProfileMutationDocument,
       {
         teacherId,
-        input: {
+        input: makeUpdateInput({
           address: "Updated by admin and verified by tests",
           dateOfBirth: "1985-05-15",
           gender: Gender.Male,
@@ -271,7 +273,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           rateCurrency: CurrencyCode.Usd,
           status: null,
           timezone: IanaTimezone.Utc,
-        },
+        }),
       }
     );
     expect(updateAnyTeacherData.updateTeacherProfile).toBeDefined();

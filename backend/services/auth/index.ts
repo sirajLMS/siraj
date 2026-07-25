@@ -1,3 +1,4 @@
+export * from "@/backend/services/auth/auth-password.service";
 export * from "@/backend/services/auth/demo-auth.service";
 export * from "@/backend/services/auth/impersonation.service";
 export * from "@/backend/services/auth/permission-group-simulation.service";

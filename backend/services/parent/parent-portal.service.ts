@@ -59,6 +59,8 @@ export namespace ParentPortalService {
       name: profile.name,
       email: profile.email,
       phone: profile.phone,
+      nationality: profile.nationality,
+      address: profile.address,
       facebook: profile.facebook,
       whatsapp: profile.whatsapp,
       twitter: profile.twitter,

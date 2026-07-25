@@ -189,6 +189,8 @@ export namespace TeacherRepository {
     email: users.email,
     phone: teachers.phone,
     nationalId: teachers.nationalId,
+    nationality: teachers.nationality,
+    countryCode: teachers.countryCode,
     dateOfBirth: teachers.dateOfBirth,
     gender: teachers.gender,
     address: teachers.address,
@@ -222,6 +224,8 @@ export namespace TeacherRepository {
     email: string;
     phone: string | null;
     nationalId: string | null;
+    nationality: string | null;
+    countryCode: string | null;
     dateOfBirth: string | Date | null;
     gender: Gender | null;
     address: string | null;
@@ -240,6 +244,8 @@ export namespace TeacherRepository {
     email: teacher.email,
     phone: teacher.phone,
     nationalId: teacher.nationalId,
+    nationality: teacher.nationality,
+    countryCode: teacher.countryCode,
     gender: teacher.gender,
     address: teacher.address,
     qualifications: teacher.qualifications,

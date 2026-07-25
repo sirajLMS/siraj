@@ -42,6 +42,8 @@ export const ParentOwnProfilePothosObject = ParentOwnProfileRef.implement({
     name: t.exposeString("name"),
     email: t.exposeString("email"),
     phone: t.exposeString("phone", { nullable: true }),
+    nationality: t.exposeString("nationality", { nullable: true }),
+    address: t.exposeString("address", { nullable: true }),
     facebook: t.exposeString("facebook", { nullable: true }),
     whatsapp: t.exposeString("whatsapp", { nullable: true }),
     twitter: t.exposeString("twitter", { nullable: true }),

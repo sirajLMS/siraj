@@ -93,6 +93,8 @@ export type TeacherProfileReturnType = Omit<
   email: string;
   status: AccountStatus;
   gender: Gender | null;
+  nationality: string | null;
+  countryCode: string | null;
   dateOfBirth: string | null;
   updatedAt: string;
   timezone: IanaTimezone;
@@ -101,14 +103,13 @@ export type TeacherProfileReturnType = Omit<
 };
 
 export type TeacherProfileUpdateInputType = Partial<
-  Omit<
-    TeacherEntityInput,
-    "id" | "userId" | "createdAt" | "updatedAt" | "nationality" | "countryCode" | "gender" | "paymentMethod"
-  >
+  Omit<TeacherEntityInput, "id" | "userId" | "createdAt" | "updatedAt" | "gender" | "paymentMethod">
 > & {
   readonly status?: AccountStatus | null;
   readonly gender?: Gender | null;
   readonly timezone?: IanaTimezone | null;
+  readonly nationality?: string | null;
+  readonly countryCode?: string | null;
 };
 
 export type TeacherDirectoryRow = {
@@ -159,6 +160,12 @@ export type TeacherOwnProfileReturnType = {
   name: string;
   email: string;
   phone: string | null;
+  nationality: string | null;
+  countryCode: string | null;
+  dateOfBirth: string | null;
+  gender: Gender | null;
+  address: string | null;
+  qualifications: string | null;
   timezone: IanaTimezone;
   hourlyRate: string | null;
   rateCurrency: CurrencyCode | null;
@@ -167,6 +174,13 @@ export type TeacherOwnProfileReturnType = {
 
 export type TeacherOwnProfileUpdateInput = {
   readonly phone?: string | null;
+  readonly nationality?: string | null;
+  readonly countryCode?: string | null;
+  readonly dateOfBirth?: string | null;
+  readonly gender?: Gender | null;
+  readonly address?: string | null;
+  readonly qualifications?: string | null;
+  readonly timezone?: IanaTimezone | null;
 };
 
 export type TeacherAssignedClassReturnType = {

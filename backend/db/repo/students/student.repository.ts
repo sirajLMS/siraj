@@ -240,6 +240,8 @@ export namespace StudentRepository {
       dateOfBirth: input.dateOfBirth === null ? null : (input.dateOfBirth ?? existingStudent.dateOfBirth),
       gender: input.gender === null ? null : (input.gender ?? existingStudent.gender),
       language: input.language === null ? null : (input.language ?? existingStudent.language),
+      timezoneOverride:
+        input.timezoneOverride === null ? null : (input.timezoneOverride ?? existingStudent.timezoneOverride),
       status: input.status ?? existingStudent.status,
       classesTotal: input.classesTotal ?? existingStudent.classesTotal,
       classesRemaining: input.classesRemaining ?? existingStudent.classesRemaining,
@@ -620,6 +622,7 @@ export namespace StudentRepository {
     readonly dateOfBirth: Date | null;
     readonly gender: string | null;
     readonly language: string | null;
+    readonly timezoneOverride: string | null;
     readonly parentId: string | null;
     readonly parentUserId: string | null;
     readonly parentName: string | null;
@@ -652,6 +655,7 @@ export namespace StudentRepository {
         dateOfBirth: students.dateOfBirth,
         gender: students.gender,
         language: students.language,
+        timezoneOverride: students.timezoneOverride,
         parentId: students.parentId,
         parentUserId: parentUser.id,
         parentName: parentUser.name,
@@ -687,6 +691,7 @@ export namespace StudentRepository {
       dateOfBirth: row.dateOfBirth,
       gender: row.gender,
       language: row.language,
+      timezoneOverride: row.timezoneOverride,
       parentId: row.parentId,
       parentUserId: row.parentUserId,
       parentName: row.parentName,

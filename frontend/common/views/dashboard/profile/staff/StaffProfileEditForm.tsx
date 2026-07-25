@@ -8,6 +8,7 @@ import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/fro
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
+import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/sections/AccountSection";
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/staff/sections/CompensationSection";
@@ -95,48 +96,51 @@ export function StaffProfileEditForm({
   }
 
   return (
-    <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
-      <Stack spacing={3}>
-        {canEdit("core_identity") ? (
-          <AvatarImageField
-            control={form.control}
-            name="avatarUrl"
-            label={st.fields.avatar}
-            title={tc.editAvatarTitle}
-            onUploadAvatar={onUploadAvatar}
-          />
-        ) : null}
-        <Box
-          sx={{
-            display: "grid",
-            gap: 3,
-            minWidth: 0,
-            width: "100%",
-            gridTemplateColumns: {
-              xs: "minmax(0, 1fr)",
-              lg: "repeat(2, minmax(0, 1fr))",
-            },
-          }}
-        >
-          {showAccountSection ? (
-            <AccountSection
-              mode="edit"
-              scope={scope}
-              staffData={staffData}
-              isAdminScope={isAdminScope}
-              register={form.register}
+    <Stack spacing={3}>
+      <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
+        <Stack spacing={3}>
+          {canEdit("core_identity") ? (
+            <AvatarImageField
               control={form.control}
+              name="avatarUrl"
+              label={st.fields.avatar}
+              title={tc.editAvatarTitle}
+              onUploadAvatar={onUploadAvatar}
             />
           ) : null}
-          {canEdit("core_contact") ? <ContactSection mode="edit" scope={scope} control={form.control} /> : null}
-          {compensationSection}
-        </Box>
-        <PrimaryPageAction type="submit" disabled={isSaving}>
-          {tc.actions.save}
-        </PrimaryPageAction>
-      </Stack>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              minWidth: 0,
+              width: "100%",
+              gridTemplateColumns: {
+                xs: "minmax(0, 1fr)",
+                lg: "repeat(2, minmax(0, 1fr))",
+              },
+            }}
+          >
+            {showAccountSection ? (
+              <AccountSection
+                mode="edit"
+                scope={scope}
+                staffData={staffData}
+                isAdminScope={isAdminScope}
+                register={form.register}
+                control={form.control}
+              />
+            ) : null}
+            {canEdit("core_contact") ? <ContactSection mode="edit" scope={scope} control={form.control} /> : null}
+            {compensationSection}
+          </Box>
+          <PrimaryPageAction type="submit" disabled={isSaving}>
+            {tc.actions.save}
+          </PrimaryPageAction>
+        </Stack>
+      </Box>
+      {!isAdminScope ? <ChangePasswordSection /> : null}
       <FormSuccessSnackbar open={successOpen} message={tc.actions.saveSuccess} onClose={() => setSuccessOpen(false)} />
       <FormErrorSnackbar open={errorOpen} message={tc.actions.saveError} onClose={() => setErrorOpen(false)} />
-    </Box>
+    </Stack>
   );
 }

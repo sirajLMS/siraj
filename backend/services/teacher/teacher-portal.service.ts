@@ -1,5 +1,5 @@
-import { SchedulingRepository, StudentRepository, TeacherRepository } from "@/backend/db";
-import { AppPermission } from "@/backend/enum";
+import { SchedulingRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
+import { AppPermission, type CountryCode } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type {
@@ -48,6 +48,12 @@ export namespace TeacherPortalService {
       name: profile.name,
       email: profile.email,
       phone: profile.phone,
+      nationality: profile.nationality,
+      countryCode: profile.countryCode,
+      dateOfBirth: profile.dateOfBirth,
+      gender: profile.gender,
+      address: profile.address,
+      qualifications: profile.qualifications,
       timezone: profile.timezone,
       hourlyRate: profile.hourlyRate,
       rateCurrency: profile.rateCurrency,
@@ -105,8 +111,18 @@ export namespace TeacherPortalService {
       throw new Error(tErrors.unauthorizedAction);
     }
 
+    if (input.timezone) {
+      await UserRepository.updateTimezone(userId, input.timezone);
+    }
+
     const success = await TeacherRepository.updateTeacherProfile(teacherId, {
       phone: input.phone ?? undefined,
+      nationality: (input.nationality as CountryCode) ?? undefined,
+      countryCode: (input.countryCode as CountryCode) ?? undefined,
+      dateOfBirth: input.dateOfBirth ?? undefined,
+      gender: input.gender ?? undefined,
+      address: input.address ?? undefined,
+      qualifications: input.qualifications ?? undefined,
     });
 
     if (!success) {

@@ -6,6 +6,7 @@ export interface StudentPortalProfileEditDraft {
   readonly dateOfBirth: string;
   readonly gender: Gender | "";
   readonly language: AppLanguage | "";
+  readonly timezoneOverride?: string;
   readonly parentPhone: string;
   readonly avatarUrl: string | null;
 }
@@ -33,6 +34,7 @@ const EMPTY_DRAFT: StudentPortalProfileEditDraft = {
   dateOfBirth: "",
   gender: "",
   language: "",
+  timezoneOverride: "",
   parentPhone: "",
   avatarUrl: null,
 };

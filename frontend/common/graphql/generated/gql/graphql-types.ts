@@ -496,6 +496,12 @@ export type ChangeParentLifecycleResult = {
   lifecycleStatus: Maybe<ParentStatus>;
 };
 
+export type ChangePasswordInput = {
+  confirmPassword: Scalars['String']['input'];
+  currentPassword: Scalars['String']['input'];
+  newPassword: Scalars['String']['input'];
+};
+
 export type ChangeStudentStatusResult = {
   __typename?: 'ChangeStudentStatusResult';
   id: Maybe<Scalars['String']['output']>;
@@ -808,6 +814,7 @@ export type CoreUserProfileFieldsInput = {
   displayCurrency: InputMaybe<CurrencyCode>;
   email: InputMaybe<Scalars['String']['input']>;
   name: InputMaybe<Scalars['String']['input']>;
+  timezone: InputMaybe<IanaTimezone>;
 };
 
 export enum CountryCode {
@@ -2446,6 +2453,7 @@ export type Mutation = {
   bulkAssignUsersToGroup: Maybe<Scalars['Boolean']['output']>;
   bulkRevokeUsersFromGroup: Maybe<Scalars['Boolean']['output']>;
   changeParentLifecycleStatus: Maybe<ChangeParentLifecycleResult>;
+  changePassword: Maybe<Scalars['Boolean']['output']>;
   changeStudentStatus: Maybe<ChangeStudentStatusResult>;
   cleanupTestEntities: Maybe<Scalars['Boolean']['output']>;
   cleanupTestGroupClass: Maybe<Scalars['Boolean']['output']>;
@@ -2648,6 +2656,11 @@ export type MutationBulkRevokeUsersFromGroupArgs = {
 export type MutationChangeParentLifecycleStatusArgs = {
   newStatus: ParentStatus;
   parentId: Scalars['String']['input'];
+};
+
+
+export type MutationChangePasswordArgs = {
+  input: ChangePasswordInput;
 };
 
 
@@ -3694,18 +3707,23 @@ export type ParentOnboardingResult = {
 
 export type ParentOwnProfile = {
   __typename?: 'ParentOwnProfile';
+  address: Maybe<Scalars['String']['output']>;
   email: Maybe<Scalars['String']['output']>;
   facebook: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
+  nationality: Maybe<Scalars['String']['output']>;
   phone: Maybe<Scalars['String']['output']>;
   twitter: Maybe<Scalars['String']['output']>;
   whatsapp: Maybe<Scalars['String']['output']>;
 };
 
 export type ParentOwnProfileUpdateInput = {
+  address: InputMaybe<Scalars['String']['input']>;
   facebook: InputMaybe<Scalars['String']['input']>;
+  nationality: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
+  timezone: InputMaybe<IanaTimezone>;
   twitter: InputMaybe<Scalars['String']['input']>;
   whatsapp: InputMaybe<Scalars['String']['input']>;
 };
@@ -5072,6 +5090,7 @@ export type StudentProfile = {
   status: Maybe<StudentStatus>;
   teacherName: Maybe<Scalars['String']['output']>;
   teacherUserId: Maybe<Scalars['String']['output']>;
+  timezoneOverride: Maybe<Scalars['String']['output']>;
   upcomingClasses: Maybe<StudentUpcomingClassesResult>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
   version: Maybe<Scalars['Int']['output']>;
@@ -5084,6 +5103,7 @@ export type StudentProfileEditInput = {
   language: InputMaybe<AppLanguage>;
   parentPhone: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
+  timezoneOverride: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StudentProgress = {
@@ -5698,19 +5718,32 @@ export type TeacherOnboardingInput = {
 
 export type TeacherOwnProfile = {
   __typename?: 'TeacherOwnProfile';
+  address: Maybe<Scalars['String']['output']>;
+  countryCode: Maybe<Scalars['String']['output']>;
+  dateOfBirth: Maybe<Scalars['String']['output']>;
   displayAmount: Maybe<DisplayAmount>;
   email: Maybe<Scalars['String']['output']>;
+  gender: Maybe<Gender>;
   hourlyRate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
+  nationality: Maybe<Scalars['String']['output']>;
   phone: Maybe<Scalars['String']['output']>;
+  qualifications: Maybe<Scalars['String']['output']>;
   rateCurrency: Maybe<CurrencyCode>;
   timezone: Maybe<IanaTimezone>;
   totalClasses: Maybe<Scalars['Int']['output']>;
 };
 
 export type TeacherOwnProfileUpdateInput = {
+  address: InputMaybe<Scalars['String']['input']>;
+  countryCode: InputMaybe<Scalars['String']['input']>;
+  dateOfBirth: InputMaybe<Scalars['String']['input']>;
+  gender: InputMaybe<Gender>;
+  nationality: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
+  qualifications: InputMaybe<Scalars['String']['input']>;
+  timezone: InputMaybe<IanaTimezone>;
 };
 
 export type TeacherPayment = {
@@ -5739,6 +5772,7 @@ export type TeacherProfileResult = {
   __typename?: 'TeacherProfileResult';
   address: Maybe<Scalars['String']['output']>;
   avgEngagementScore: Maybe<Scalars['Float']['output']>;
+  countryCode: Maybe<Scalars['String']['output']>;
   dateOfBirth: Maybe<Scalars['String']['output']>;
   displayAmount: Maybe<DisplayAmount>;
   email: Maybe<Scalars['String']['output']>;
@@ -5747,6 +5781,7 @@ export type TeacherProfileResult = {
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   nationalId: Maybe<Scalars['String']['output']>;
+  nationality: Maybe<Scalars['String']['output']>;
   phone: Maybe<Scalars['String']['output']>;
   qualifications: Maybe<Scalars['String']['output']>;
   rateCurrency: Maybe<CurrencyCode>;
@@ -5759,10 +5794,12 @@ export type TeacherProfileResult = {
 
 export type TeacherProfileUpdateInput = {
   address: InputMaybe<Scalars['String']['input']>;
+  countryCode: InputMaybe<Scalars['String']['input']>;
   dateOfBirth: InputMaybe<Scalars['String']['input']>;
   gender: InputMaybe<Gender>;
   hourlyRate: InputMaybe<Scalars['String']['input']>;
   nationalId: InputMaybe<Scalars['String']['input']>;
+  nationality: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
   qualifications: InputMaybe<Scalars['String']['input']>;
   rateCurrency: InputMaybe<CurrencyCode>;

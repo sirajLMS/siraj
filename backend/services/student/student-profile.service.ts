@@ -69,6 +69,7 @@ function mapProfileRow(
   | "dateOfBirth"
   | "gender"
   | "language"
+  | "timezoneOverride"
   | "email"
   | "phone"
   | "parentId"
@@ -94,6 +95,7 @@ function mapProfileRow(
     dateOfBirth: row.dateOfBirth,
     gender: row.gender ? (parseGender(row.gender) ?? null) : null,
     language: row.language ? (parseAppLanguage(row.language) ?? null) : null,
+    timezoneOverride: row.timezoneOverride,
     email: row.email,
     phone: row.phone,
     parentId: row.parentId,
@@ -253,6 +255,7 @@ async function applyStudentProfileEdit(
     dateOfBirth?: Date | null;
     gender?: Gender | null;
     language?: AppLanguage | null;
+    timezoneOverride?: string | null;
     avatarUrl?: string | null;
   } = {};
 
@@ -264,6 +267,9 @@ async function applyStudentProfileEdit(
   }
   if ("language" in input) {
     identityUpdates.language = input.language;
+  }
+  if ("timezoneOverride" in input) {
+    identityUpdates.timezoneOverride = input.timezoneOverride;
   }
   if ("avatarUrl" in input) {
     identityUpdates.avatarUrl = input.avatarUrl;

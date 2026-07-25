@@ -37,6 +37,7 @@ function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDra
     dateOfBirth: toDateInputValue(profile.dateOfBirth),
     gender: (profile.gender as Gender | null) ?? "",
     language: (profile.language as AppLanguage | null) ?? "",
+    timezoneOverride: profile.timezoneOverride ?? "",
     parentPhone: profile.parentPhone ?? "",
     avatarUrl: profile.avatarUrl ?? null,
   };
@@ -149,6 +150,7 @@ export function useStudentProfileViewModel({
       dateOfBirth: p.dateOfBirth ?? null,
       gender: p.gender ?? null,
       language: p.language ?? null,
+      timezoneOverride: p.timezoneOverride ?? null,
       email: p.email ?? null,
       phone: p.phone ?? null,
       parentId: p.parentId ?? null,
@@ -200,6 +202,7 @@ export function useStudentProfileViewModel({
             dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString() : null,
             gender: draft.gender || null,
             language: draft.language || null,
+            timezoneOverride: draft.timezoneOverride?.trim() || null,
             parentPhone: draft.parentPhone.trim() || null,
             avatarUrl: draft.avatarUrl,
           },

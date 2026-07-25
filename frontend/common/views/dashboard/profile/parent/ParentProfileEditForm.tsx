@@ -122,6 +122,8 @@ type ParentEditFormSectionsProps = {
   readonly control: Control<ParentAdminEditFormData>;
 };
 
+import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
+
 function ParentEditFormSections({
   parentData,
   targetUserId,
@@ -144,10 +146,10 @@ function ParentEditFormSections({
       ) : null}
       {canEdit("core_contact") ? <ContactSection mode="edit" scope={scope} control={control} /> : null}
       {canEdit("parent_social") ? <SocialSection mode="edit" register={register} control={control} /> : null}
+      {canEdit("parent_identity") ? <IdentitySection mode="edit" register={register} control={control} /> : null}
 
       {isAdminScope ? (
         <>
-          {canEdit("parent_identity") ? <IdentitySection mode="edit" register={register} control={control} /> : null}
           <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} />
           {canEdit("parent_billing") ? <BillingSection mode="edit" register={register} control={control} /> : null}
         </>
@@ -203,28 +205,31 @@ export function ParentProfileEditForm({
   const scopeContext: ScopeContext = { scope, isAdminScope, canEdit };
 
   return (
-    <Box component="form" onSubmit={form.handleSubmit(feedback.onValidSubmit)}>
-      <Stack spacing={3}>
-        {canEdit("core_identity") ? (
-          <AvatarImageField
+    <Stack spacing={3}>
+      <Box component="form" onSubmit={form.handleSubmit(feedback.onValidSubmit)}>
+        <Stack spacing={3}>
+          {canEdit("core_identity") ? (
+            <AvatarImageField
+              control={form.control}
+              name="avatarUrl"
+              label={pt.fields.avatar}
+              title={t.editAvatarTitle}
+              onUploadAvatar={onUploadAvatar}
+            />
+          ) : null}
+          <ParentEditFormSections
+            parentData={parentData}
+            targetUserId={targetUserId}
+            scopeContext={scopeContext}
+            register={form.register}
             control={form.control}
-            name="avatarUrl"
-            label={pt.fields.avatar}
-            title={t.editAvatarTitle}
-            onUploadAvatar={onUploadAvatar}
           />
-        ) : null}
-        <ParentEditFormSections
-          parentData={parentData}
-          targetUserId={targetUserId}
-          scopeContext={scopeContext}
-          register={form.register}
-          control={form.control}
-        />
-        <PrimaryPageAction type="submit" disabled={isSaving}>
-          {isSaving ? t.shell.loading : t.actions.save}
-        </PrimaryPageAction>
-      </Stack>
+          <PrimaryPageAction type="submit" disabled={isSaving}>
+            {isSaving ? t.shell.loading : t.actions.save}
+          </PrimaryPageAction>
+        </Stack>
+      </Box>
+      {!isAdminScope ? <ChangePasswordSection /> : null}
       <ParentEditFormSnackbars
         successOpen={feedback.successOpen}
         errorOpen={feedback.errorOpen}
@@ -232,6 +237,6 @@ export function ParentProfileEditForm({
         setErrorOpen={feedback.setErrorOpen}
         labels={{ saveSuccess: t.actions.saveSuccess, saveError: t.actions.saveError }}
       />
-    </Box>
+    </Stack>
   );
 }

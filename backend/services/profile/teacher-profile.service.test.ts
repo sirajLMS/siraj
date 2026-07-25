@@ -15,6 +15,8 @@ const baseProfile: TeacherProfileReturnType = {
   email: "ahmed@example.com",
   phone: "+966500000000",
   nationalId: "1234567890",
+  nationality: "Saudi Arabian",
+  countryCode: "SA",
   dateOfBirth: "1990-01-01T00:00:00.000Z",
   gender: null,
   address: "Riyadh",
