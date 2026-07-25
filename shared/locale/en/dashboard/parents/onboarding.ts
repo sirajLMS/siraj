@@ -14,6 +14,7 @@ export const dashboardParentOnboardingEn: ParentOnboardingLabels = {
   fields: {
     fullName: "Full Name",
     email: "Email",
+    password: "Password",
     phone: "Phone",
     nationality: "Nationality",
     address: "Address",
@@ -34,6 +35,7 @@ export const dashboardParentOnboardingEn: ParentOnboardingLabels = {
   placeholders: {
     fullName: "Enter full name",
     email: "Enter email",
+    password: "Enter password",
     phone: "Enter phone number",
     nationality: "Select nationality",
     address: "Enter address",
@@ -83,6 +85,7 @@ export const dashboardParentOnboardingEn: ParentOnboardingLabels = {
     fullNameRequired: "Full name is required",
     emailRequired: "Email is required",
     emailInvalid: "Email is invalid",
+    passwordRequired: "Password is required",
     phoneRequired: "Phone is required",
     addressRequired: "Address is required",
     feeAmountRequired: "Fee amount is required",

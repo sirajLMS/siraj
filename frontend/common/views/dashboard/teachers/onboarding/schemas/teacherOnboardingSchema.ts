@@ -7,6 +7,7 @@ export const teacherOnboardingSchema = (validationLabels: {
   readonly fullNameRequired: string;
   readonly emailRequired: string;
   readonly emailInvalid: string;
+  readonly passwordRequired: string;
   readonly nationalIdRequired: string;
   readonly phoneRequired: string;
   readonly genderRequired: string;
@@ -20,10 +21,11 @@ export const teacherOnboardingSchema = (validationLabels: {
     .object({
       name: z.string().min(1, validationLabels.fullNameRequired),
       email: z.email({ message: validationLabels.emailInvalid }),
+      password: z.string().min(8, validationLabels.passwordRequired),
       avatarUrl: z.string().optional(),
       nationality: z.string().optional(),
-      nationalId: z.string().min(1, validationLabels.nationalIdRequired),
-      phone: z.string().min(1, validationLabels.phoneRequired),
+      nationalId: z.string().optional(),
+      phone: z.string().optional(),
       dateOfBirth: z.string().optional(),
       gender: z.custom<Gender>(
         val => typeof val === "string" && (Object.values(Gender) as readonly string[]).includes(val),
@@ -45,7 +47,7 @@ export const teacherOnboardingSchema = (validationLabels: {
       ),
       hourlyRate: z.string().min(1, validationLabels.salaryAmountRequired),
       rateCurrency: z.enum(CurrencyCode).refine(v => !!v, { message: validationLabels.currencyRequired }),
-      payoutMethod: onboardingPaymentMethodSchema,
+      payoutMethod: onboardingPaymentMethodSchema.optional().nullable(),
       meetingProvider: z.custom<MeetingProviderFieldsFragment | null>().nullable().optional(),
       meetingUrl: z.string().optional(),
       meetingLabel: z.string().optional(),

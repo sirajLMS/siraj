@@ -97,7 +97,11 @@ export type PaymentMethodFormValues = z.infer<typeof paymentMethodFormSchema>;
 
 export const onboardingPaymentMethodSchema = paymentMethodBaseSchema
   .omit({ direction: true, isDefault: true })
-  .superRefine(paymentMethodRefinement);
+  .partial({ type: true })
+  .superRefine((value, ctx) => {
+    if (!value.type) return;
+    paymentMethodRefinement({ type: value.type, details: value.details }, ctx);
+  });
 
 export type OnboardingPaymentMethodFormValues = z.infer<typeof onboardingPaymentMethodSchema>;
 

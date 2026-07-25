@@ -127,11 +127,10 @@ function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "erro
           control={control}
           render={({ field }) => (
             <PaymentMethodTypeSelector
-              type={field.value}
+              type={field.value ?? null}
               setTypeAction={value => {
-                if (value) field.onChange(value);
+                field.onChange(value);
               }}
-              required
               fullWidth
             />
           )}

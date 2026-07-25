@@ -12,6 +12,7 @@ export interface ManagersDirectoryLabels {
     readonly allRoleTypes: string;
     readonly admin: string;
     readonly staff: string;
+    readonly supervisor: string;
     readonly statusAll: string;
     readonly active: string;
     readonly inactive: string;
@@ -46,6 +47,7 @@ export interface ManagersDirectoryLabels {
   readonly roles: {
     readonly admin: string;
     readonly staff: string;
+    readonly supervisor: string;
   };
   readonly showingOf: (count: number, total: number) => string;
   readonly noEntries: string;

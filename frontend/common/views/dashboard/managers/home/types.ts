@@ -3,7 +3,7 @@ import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/t
 
 export type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/types/shared.types";
 
-export type ManagerRole = "admin" | "staff";
+export type ManagerRole = "admin" | "staff" | "supervisor";
 
 export type ManagerStatus = "active" | "offline";
 

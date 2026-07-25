@@ -132,6 +132,21 @@ function buildScheduleLabels(t: ReturnType<typeof useAppTranslation>["dashboardT
   };
 }
 
+function buildMetricLabels(
+  metrics: readonly AlertsMetric[],
+  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreScheduleAlerts"]
+) {
+  return Object.fromEntries(
+    metrics.map(metric => [
+      metric.key,
+      {
+        label: String(t.metrics[metric.labelKey as keyof typeof t.metrics]),
+        subLabel: String(t.metrics[metric.subLabelKey as keyof typeof t.metrics]),
+      },
+    ])
+  );
+}
+
 export interface ScheduleAlertsViewModel {
   readonly alerts: readonly ScheduleAlert[];
   readonly metrics: readonly AlertsMetric[];
@@ -174,7 +189,7 @@ export function useScheduleAlertsViewModel(): ScheduleAlertsViewModel {
 
   const alerts: ScheduleAlert[] = [];
 
-  const metrics: AlertsMetric[] = useMemo(() => {
+  const metrics = useMemo(() => {
     const m = scheduleResult?.metrics;
     if (!m) return [];
     return [
@@ -198,20 +213,7 @@ export function useScheduleAlertsViewModel(): ScheduleAlertsViewModel {
   }, [scheduleResult?.metrics]);
 
   const labels = buildScheduleLabels(t);
-
-  const metricLabels: Record<string, { label: string; subLabel: string }> = useMemo(
-    () =>
-      Object.fromEntries(
-        metrics.map(metric => [
-          metric.key,
-          {
-            label: String(t.metrics[metric.labelKey as keyof typeof t.metrics]),
-            subLabel: String(t.metrics[metric.subLabelKey as keyof typeof t.metrics]),
-          },
-        ])
-      ),
-    [metrics, t]
-  );
+  const metricLabels = buildMetricLabels(metrics, t);
 
   const handlePageChange = useCallback(
     (newPage: number) => {

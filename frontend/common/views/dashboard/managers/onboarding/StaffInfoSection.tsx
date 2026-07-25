@@ -21,12 +21,14 @@ export function StaffInfoSection({ register, control, errors, onUploadAvatar }: 
     fields: {
       fullName: t.fields.fullName,
       email: t.fields.email,
+      password: t.fields.password,
       phone: t.fields.phone,
       avatar: t.fields.avatar,
     },
     placeholders: {
       fullName: t.placeholders.fullName,
       email: t.placeholders.email,
+      password: t.placeholders.password,
       phone: t.placeholders.phone,
     },
     validation: t.validation,

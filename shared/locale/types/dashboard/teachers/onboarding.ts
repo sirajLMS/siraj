@@ -7,11 +7,13 @@ export interface TeacherOnboardingLabels {
     readonly officialDetails: string;
     readonly salaryDetails: string;
     readonly paymentMethod: string;
+    readonly addPaymentMethod: string;
     readonly meetingConfig: string;
   };
   readonly fields: {
     readonly fullName: string;
     readonly email: string;
+    readonly password: string;
     readonly nationality: string;
     readonly nationalId: string;
     readonly phone: string;
@@ -33,6 +35,7 @@ export interface TeacherOnboardingLabels {
   readonly placeholders: {
     readonly fullName: string;
     readonly email: string;
+    readonly password: string;
     readonly nationality: string;
     readonly nationalId: string;
     readonly phone: string;
@@ -53,6 +56,7 @@ export interface TeacherOnboardingLabels {
     readonly fullNameRequired: string;
     readonly emailRequired: string;
     readonly emailInvalid: string;
+    readonly passwordRequired: string;
     readonly nationalIdRequired: string;
     readonly phoneRequired: string;
     readonly genderRequired: string;

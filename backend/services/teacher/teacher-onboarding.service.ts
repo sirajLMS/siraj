@@ -2,6 +2,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository, TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
+import { validatePasswordStrength } from "@/backend/lib/auth";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
@@ -122,6 +123,8 @@ export namespace TeacherOnboardingService {
     if (emailExists) {
       throw new Error(tErrors.userEmailExists);
     }
+
+    await validatePasswordStrength(input.password, locale);
 
     const run = async (txObj: DBTransaction) => {
       const { user, teacher } = await createUserAndTeacher(input, locale, txObj);

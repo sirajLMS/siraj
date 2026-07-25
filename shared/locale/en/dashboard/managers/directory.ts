@@ -14,6 +14,7 @@ export const dashboardManagersDirectoryEn: ManagersDirectoryLabels = {
     allRoleTypes: "All Role Types",
     admin: "Admin",
     staff: "Staff",
+    supervisor: "Supervisor",
     statusAll: "Status: All",
     active: "Active",
     inactive: "Inactive",
@@ -48,6 +49,7 @@ export const dashboardManagersDirectoryEn: ManagersDirectoryLabels = {
   roles: {
     admin: "Admin",
     staff: "Staff",
+    supervisor: "Supervisor",
   },
   showingOf: (count, total) => `Showing ${count} of ${total} results`,
   noEntries: "No managers",

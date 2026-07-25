@@ -27,10 +27,12 @@ export const dashboardManagerOnboardingAr: ManagerOnboardingLabels = {
     accountType: {
       manager: "مدير",
       admin: "مسؤول",
+      supervisor: "مشرف",
     },
     accountTypeDescriptions: {
       manager: "يتمتع المديرون بإشراف على المناهج والمعلمين مع وصول مالي محدود.",
       admin: "يتمتع المسؤولون بتحكم كامل في النظام، بما في ذلك الإدارة المالية والإعدادات العامة.",
+      supervisor: "يشرف المشرفون على المعلمين ويراجعون التقارير ويديرون الأنشطة التعليمية اليومية.",
     },
     department: {
       academic: "الشؤون الأكاديمية",

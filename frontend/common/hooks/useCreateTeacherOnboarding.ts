@@ -2,7 +2,6 @@ import { useApolloClient, useMutation } from "@apollo/client/react";
 import { useState } from "react";
 import {
   PaymentDirection,
-  type PaymentMethodDetailsInput,
   type TeacherOnboarding,
   type TeacherOnboardingInput,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -21,15 +20,14 @@ export function useCreateTeacherOnboarding() {
   const { cache } = client;
 
   const buildTeacherInput = (formData: TeacherOnboardingFormData): TeacherOnboardingInput => {
-    const details: PaymentMethodDetailsInput = formDetailsToInput(formData.payoutMethod.details);
     return {
       name: formData.name,
       email: formData.email,
-      password: "",
+      password: formData.password,
       avatarUrl: formData.avatarUrl ?? null,
       nationality: formData.nationality || null,
-      nationalId: formData.nationalId,
-      phone: formData.phone,
+      nationalId: formData.nationalId || null,
+      phone: formData.phone || null,
       dateOfBirth: formData.dateOfBirth || null,
       gender: formData.gender,
       address: formData.address || null,
@@ -38,13 +36,15 @@ export function useCreateTeacherOnboarding() {
       timezone: toGraphqlIanaTimezone(formData.timezone),
       hourlyRate: formData.hourlyRate,
       rateCurrency: formData.rateCurrency,
-      initialPayoutMethod: {
-        type: formData.payoutMethod.type,
-        direction: PaymentDirection.Payout,
-        isDefault: true,
-        label: formData.payoutMethod.label?.trim() || null,
-        details,
-      },
+      initialPayoutMethod: formData.payoutMethod?.type
+        ? {
+            type: formData.payoutMethod.type,
+            direction: PaymentDirection.Payout,
+            isDefault: true,
+            label: formData.payoutMethod.label?.trim() || null,
+            details: formDetailsToInput(formData.payoutMethod.details ?? {}),
+          }
+        : null,
     };
   };
 

@@ -9,6 +9,7 @@ import { SalaryDetailsSection } from "@/frontend/common/views/dashboard/teachers
 import { TeacherInfoSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/TeacherInfoSection";
 import type { TeacherOnboardingViewModel } from "@/frontend/common/views/dashboard/teachers/onboarding/useTeacherOnboardingViewModel";
 import {
+  DesktopFormErrorSnackbar,
   DesktopFormSuccessSnackbar,
   DesktopPrimaryPageAction,
   DesktopSectionPanel,
@@ -59,9 +60,11 @@ export function TeacherOnboardingDesktopView({
   handleSubmit,
   isSubmitting,
   showSuccess,
+  submitError,
   labels,
   onSubmit,
   onDismissSuccess,
+  onDismissError,
 }: Readonly<TeacherOnboardingViewModel>) {
   return (
     <DesktopPageContainer>
@@ -129,6 +132,11 @@ export function TeacherOnboardingDesktopView({
         open={showSuccess}
         message={labels.actions.successMessage}
         onClose={onDismissSuccess}
+      />
+      <DesktopFormErrorSnackbar
+        open={Boolean(submitError)}
+        message={submitError ?? ""}
+        onClose={onDismissError}
       />
     </DesktopPageContainer>
   );

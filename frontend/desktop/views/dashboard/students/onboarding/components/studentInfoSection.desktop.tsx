@@ -65,6 +65,32 @@ export function StudentInfoSection({
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
+            {...register("email")}
+            label="Email"
+            placeholder="Enter student email"
+            type="email"
+            required
+            error={Boolean(errors.email)}
+            helperText={errors.email?.message}
+            fullWidth
+            sx={outlinedInputSx}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <TextField
+            {...register("password")}
+            label="Password"
+            placeholder="Enter student password"
+            type="password"
+            required
+            error={Boolean(errors.password)}
+            helperText={errors.password?.message}
+            fullWidth
+            sx={outlinedInputSx}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <TextField
             {...register("dateOfBirth")}
             label={labels.dateOfBirth}
             type="date"

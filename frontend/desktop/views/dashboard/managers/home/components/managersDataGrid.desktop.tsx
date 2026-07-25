@@ -8,19 +8,33 @@ import { useMemo } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForStaff } from "@/frontend/common/utils/profileHref";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
-import type { BaseManagersListProps, Manager } from "@/frontend/common/views/dashboard/managers/home/types";
+import type {
+  BaseManagersListProps,
+  Manager,
+  ManagerRole,
+} from "@/frontend/common/views/dashboard/managers/home/types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopPersonProfileLinkCell, DesktopPhoneDisplay } from "@/frontend/desktop/components/ui/display";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledRoleChip = styled(Chip, {
-  shouldForwardProp: prop => prop !== "isStaff",
-})<{ isStaff: boolean }>(({ theme, isStaff }) => ({
+  shouldForwardProp: prop => prop !== "role",
+})<{ role: ManagerRole }>(({ theme, role }) => ({
   fontWeight: 700,
   textTransform: "uppercase",
-  backgroundColor: isStaff ? theme.palette.secondaryContainer : theme.palette.primaryContainer,
-  color: isStaff ? theme.palette.onSecondaryContainer : theme.palette.onPrimaryContainer,
+  backgroundColor:
+    role === "admin"
+      ? theme.palette.primaryContainer
+      : role === "supervisor"
+        ? theme.palette.tertiaryContainer
+        : theme.palette.secondaryContainer,
+  color:
+    role === "admin"
+      ? theme.palette.onPrimaryContainer
+      : role === "supervisor"
+        ? theme.palette.onTertiaryContainer
+        : theme.palette.onSecondaryContainer,
 }));
 
 const StyledDataGridWrapper = styled(Box)({
@@ -110,10 +124,7 @@ export function ManagersDataGridDesktop({
         field: "role",
         headerName: t.table.roleType,
         width: 120,
-        renderCell: params => {
-          const isStaff = params.row.role === "staff";
-          return <StyledRoleChip label={t.roles[params.row.role]} size="small" isStaff={isStaff} />;
-        },
+        renderCell: params => <StyledRoleChip label={t.roles[params.row.role]} size="small" role={params.row.role} />,
       },
       {
         field: "options",

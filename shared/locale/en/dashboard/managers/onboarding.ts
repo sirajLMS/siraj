@@ -27,10 +27,12 @@ export const dashboardManagerOnboardingEn: ManagerOnboardingLabels = {
     accountType: {
       manager: "Manager",
       admin: "Administrator",
+      supervisor: "Supervisor",
     },
     accountTypeDescriptions: {
       manager: "Managers oversee curricula and teaching staff with limited financial access.",
       admin: "Administrators have full system control, including financial management and general settings.",
+      supervisor: "Supervisors oversee teachers, review reports, and manage daily educational activities.",
     },
     department: {
       academic: "Academic Affairs",

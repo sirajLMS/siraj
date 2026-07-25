@@ -18,6 +18,7 @@ interface BaseSectionProps {
     readonly fields: {
       readonly fullName: string;
       readonly email: string;
+      readonly password: string;
       readonly nationality: string;
       readonly nationalId: string;
       readonly phone: string;
@@ -32,6 +33,7 @@ interface BaseSectionProps {
     readonly placeholders: {
       readonly fullName: string;
       readonly email: string;
+      readonly password: string;
       readonly nationality: string;
       readonly nationalId: string;
       readonly phone: string;
@@ -67,7 +69,7 @@ export function BasicInfoFields({
           onUploadAvatar={onUploadAvatar}
         />
       </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
+      <Grid size={{ xs: 12, md: 3 }}>
         <TextField
           {...register("name")}
           label={labels.fields.fullName}
@@ -79,7 +81,7 @@ export function BasicInfoFields({
           sx={outlinedInputSx}
         />
       </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
+      <Grid size={{ xs: 12, md: 3 }}>
         <TextField
           {...register("email")}
           label={labels.fields.email}
@@ -88,10 +90,24 @@ export function BasicInfoFields({
           error={!!errors.email}
           helperText={errors.email?.message}
           fullWidth
+          type="email"
           sx={outlinedInputSx}
         />
       </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
+      <Grid size={{ xs: 12, md: 3 }}>
+        <TextField
+          {...register("password")}
+          label={labels.fields.password}
+          placeholder={labels.placeholders.password}
+          required
+          type="text"
+          error={!!errors.password}
+          helperText={errors.password?.message}
+          fullWidth
+          sx={outlinedInputSx}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 3 }}>
         <Controller
           name="nationality"
           control={control}
@@ -124,7 +140,6 @@ export function IdentityFields({ register, control, errors, labels }: Readonly<S
           {...register("nationalId")}
           label={labels.fields.nationalId}
           placeholder={labels.placeholders.nationalId}
-          required
           error={!!errors.nationalId}
           helperText={errors.nationalId?.message}
           fullWidth
@@ -136,7 +151,6 @@ export function IdentityFields({ register, control, errors, labels }: Readonly<S
           name="phone"
           control={control}
           label={labels.fields.phone}
-          required
           placeholder={labels.placeholders.phone}
           error={!!errors.phone}
           helperText={errors.phone?.message}

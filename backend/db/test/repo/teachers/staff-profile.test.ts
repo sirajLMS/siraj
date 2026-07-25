@@ -172,6 +172,20 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
     expect(result.rows.find(r => r.id === noGroupUser.id)).toBeDefined();
   });
 
+  staffTest("filters by supervisor role", async tx => {
+    const { user: adminUser } = await createStaffAndGroup(tx, "AdminNoSuper", "Admin Z", `admin-z-${randomUUID()}`);
+    const { user: supervisorUser } = await createStaffAndGroup(
+      tx,
+      "SupervisorMatch",
+      "Supervisor S",
+      `supervisor-${randomUUID()}`
+    );
+
+    const result = await StaffProfileRepository.getManagerDirectory(null, { roleFilter: "supervisor" }, tx);
+    expect(result.rows.find(r => r.id === adminUser.id)).toBeUndefined();
+    expect(result.rows.find(r => r.id === supervisorUser.id)).toBeDefined();
+  });
+
   staffTest("filters by active status", async tx => {
     const activeUser = await createTestUser(tx, { name: "ActiveS", email: `active-s-${randomUUID()}@t.com` });
     await insertStaffProfile(tx, activeUser.id, AccountStatus.ACTIVATED);

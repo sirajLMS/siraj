@@ -77,6 +77,7 @@ export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
       }),
       initialPayoutMethod: t.field({
         type: UserPaymentMethodInitialInputPothos,
+        required: false,
         description: "Optional initial payout payment method for the teacher",
       }),
     }),

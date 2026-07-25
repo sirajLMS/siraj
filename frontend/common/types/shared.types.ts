@@ -89,7 +89,7 @@ export type ResourceFilterType = ResourceFileType | "all";
 
 // --- Managers Directory ---
 
-export type ManagerRoleFilter = "all" | "admin" | "staff";
+export type ManagerRoleFilter = "all" | "admin" | "staff" | "supervisor";
 
 export type ManagerStatusFilter = "all" | "active" | "offline";
 
@@ -195,14 +195,14 @@ export type ManagerOnboardingFormData = CleanInput<ManagerOnboardingInput>;
 
 export type ParentOnboardingFormData = Omit<
   CleanInput<ParentOnboardingInput>,
-  "password" | "phone" | "address" | "feeAmount" | "currency" | "invoiceType" | "initialPayinMethod" | "timezone"
+  "phone" | "address" | "feeAmount" | "currency" | "invoiceType" | "initialPayinMethod" | "timezone"
 > & {
-  phone: string;
+  phone?: string;
   address: string;
   feeAmount: string;
   currency: CurrencyCode;
   invoiceType: InvoiceType;
-  payinMethod: OnboardingPaymentMethodFormValues;
+  payinMethod?: OnboardingPaymentMethodFormValues | null;
   timezone: string;
   meetingProvider?: MeetingProviderFieldsFragment | null;
   meetingUrl?: string;
@@ -211,7 +211,6 @@ export type ParentOnboardingFormData = Omit<
 
 export type TeacherOnboardingFormData = Omit<
   CleanInput<TeacherOnboardingInput>,
-  | "password"
   | "timezoneId"
   | "nationalId"
   | "phone"
@@ -222,13 +221,13 @@ export type TeacherOnboardingFormData = Omit<
   | "initialPayoutMethod"
   | "gender"
 > & {
-  nationalId: string;
-  phone: string;
+  nationalId?: string;
+  phone?: string;
   countryCode: CountryCode;
   timezone: string;
   hourlyRate: string;
   rateCurrency: CurrencyCode;
-  payoutMethod: OnboardingPaymentMethodFormValues;
+  payoutMethod?: OnboardingPaymentMethodFormValues | null;
   gender: Gender;
   meetingProvider?: MeetingProviderFieldsFragment | null;
   meetingUrl?: string;

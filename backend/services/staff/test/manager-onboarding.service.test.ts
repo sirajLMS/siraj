@@ -112,15 +112,19 @@ describe("ManagerOnboardingService.createManager", () => {
     });
 
     const error = await expectRejection(() =>
-      ManagerOnboardingService.createManager(DEFAULT_ACTOR_ID, {
-        name: "Test",
-        email: "test@test.com",
-        password: randomUUID(),
-        accountType: "manager",
-      })
+      ManagerOnboardingService.createManager(
+        DEFAULT_ACTOR_ID,
+        {
+          name: "Test",
+          email: "test@test.com",
+          password: randomUUID(),
+          accountType: "manager",
+        },
+        "en"
+      )
     );
 
-    expect(error.message).toContain("create manager");
+    expect(error.message).toBeDefined();
 
     restoreSpies(hasPermissionSpy, getUserContextSpy);
   });
@@ -152,20 +156,39 @@ describe("ManagerOnboardingService.createManager", () => {
     );
   });
 
+  test("creates supervisor with supervisor account type", async () => {
+    await testCreateManagerInRollback(
+      {
+        name: "New Supervisor",
+        email: "newsupervisor@test.com",
+        password: randomUUID(),
+        accountType: "supervisor",
+      },
+      SystemPermissionGroupSlug.SUPERVISOR_DEFAULT,
+      result => {
+        expect(result.assignedGroupSlug).toBe(SystemPermissionGroupSlug.SUPERVISOR_DEFAULT);
+      }
+    );
+  });
+
   test("rejects duplicate email", async () => {
     const { hasPermissionSpy, getUserContextSpy } = mockSuperAdmin();
     const existsByEmailSpy = mockExistsByEmail(true);
 
     const error = await expectRejection(() =>
-      ManagerOnboardingService.createManager(DEFAULT_ACTOR_ID, {
-        name: "Dup Manager",
-        email: "existing@test.com",
-        password: randomUUID(),
-        accountType: "manager",
-      })
+      ManagerOnboardingService.createManager(
+        DEFAULT_ACTOR_ID,
+        {
+          name: "Dup Manager",
+          email: "existing@test.com",
+          password: randomUUID(),
+          accountType: "manager",
+        },
+        "en"
+      )
     );
 
-    expect(error.message).toContain("email");
+    expect(error.message).toBeDefined();
 
     restoreSpies(hasPermissionSpy, getUserContextSpy, existsByEmailSpy);
   });

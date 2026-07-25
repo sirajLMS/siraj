@@ -41,7 +41,7 @@ export const ParentOnboardingInputPothosObject = gqlSchemaBuilder
       twitter: t.string({ directives: { constraint: { maxLength: 512 } } }),
       invoiceType: t.field({ type: InvoiceTypePothosObject }),
       feeAmount: t.string({ directives: { constraint: { maxLength: 512 } } }),
-      initialPayinMethod: t.field({ type: UserPaymentMethodInitialInputPothos }),
+      initialPayinMethod: t.field({ type: UserPaymentMethodInitialInputPothos, required: false }),
       currency: t.field({ type: CurrencyCodePothosObject }),
       timezone: t.field({ type: IanaTimezonePothosObject, required: true }),
     }),

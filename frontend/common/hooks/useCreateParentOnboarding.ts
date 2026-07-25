@@ -28,7 +28,7 @@ export function useCreateParentOnboarding() {
         name: formData.name,
         email: formData.email,
         avatarUrl: formData.avatarUrl ?? null,
-        phone: formData.phone,
+        phone: formData.phone || null,
         nationality: formData.nationality || null,
         address: formData.address,
         whatsapp: formData.whatsapp || null,
@@ -36,16 +36,18 @@ export function useCreateParentOnboarding() {
         twitter: formData.twitter || null,
         invoiceType: formData.invoiceType,
         feeAmount: formData.feeAmount,
-        initialPayinMethod: {
-          type: formData.payinMethod.type,
-          direction: PaymentDirection.Payin,
-          isDefault: true,
-          label: formData.payinMethod.label?.trim() || null,
-          details: formDetailsToInput(formData.payinMethod.details),
-        },
+        initialPayinMethod: formData.payinMethod?.type
+          ? {
+              type: formData.payinMethod.type,
+              direction: PaymentDirection.Payin,
+              isDefault: true,
+              label: formData.payinMethod.label?.trim() || null,
+              details: formDetailsToInput(formData.payinMethod.details ?? {}),
+            }
+          : null,
         currency: formData.currency,
         timezone: toGraphqlIanaTimezone(formData.timezone || null),
-        password: "",
+        password: formData.password,
       };
 
       const result = await mutate({ variables: { input } });

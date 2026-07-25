@@ -10,6 +10,7 @@ interface IdentityFieldShape {
   readonly fullName?: string;
   readonly name?: string;
   readonly email: string;
+  readonly password: string;
   readonly phone?: string;
   readonly avatarUrl?: string | null;
 }
@@ -18,6 +19,7 @@ interface TranslationObject {
   readonly fields: {
     readonly fullName: string;
     readonly email: string;
+    readonly password: string;
     readonly phone: string;
     readonly avatar: string;
     [key: string]: string;
@@ -25,6 +27,7 @@ interface TranslationObject {
   readonly placeholders: {
     readonly fullName: string;
     readonly email: string;
+    readonly password: string;
     readonly phone: string;
     [key: string]: string;
   };
@@ -55,6 +58,7 @@ export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldVal
 }: Props<T>) {
   const nameField = ("name" in errors || !("fullName" in errors) ? "name" : "fullName") as Path<T>;
   const emailField = "email" as Path<T>;
+  const passwordField = "password" as Path<T>;
   const phoneField = "phone" as Path<T>;
   const avatarField = "avatarUrl" as Path<T>;
 
@@ -92,6 +96,19 @@ export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldVal
           helperText={validationMessage(translate, errors.email?.message as string | undefined)}
           fullWidth
           type="email"
+          sx={outlinedInputSx}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          {...register(passwordField)}
+          label={translate.fields.password ?? "Password"}
+          placeholder={translate.placeholders.password ?? "Enter password"}
+          required
+          type="text"
+          error={!!errors.password}
+          helperText={validationMessage(translate, errors.password?.message as string | undefined)}
+          fullWidth
           sx={outlinedInputSx}
         />
       </Grid>

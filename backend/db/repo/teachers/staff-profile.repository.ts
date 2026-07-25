@@ -155,10 +155,17 @@ export namespace StaffProfileRepository {
     if (filters?.roleFilter === "admin") {
       return ilike(permissionGroups.slug, "%admin%");
     }
+    if (filters?.roleFilter === "supervisor") {
+      return ilike(permissionGroups.slug, "%supervisor%");
+    }
     if (filters?.roleFilter === "staff") {
       return or(
         isNull(permissionGroups.slug),
-        and(notIlike(permissionGroups.slug, "%admin%"), ilike(permissionGroups.slug, "%staff%"))
+        and(
+          notIlike(permissionGroups.slug, "%admin%"),
+          notIlike(permissionGroups.slug, "%supervisor%"),
+          ilike(permissionGroups.slug, "%staff%")
+        )
       );
     }
     return undefined;

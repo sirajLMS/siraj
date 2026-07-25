@@ -14,6 +14,7 @@ export const dashboardManagersDirectoryAr: ManagersDirectoryLabels = {
     allRoleTypes: "جميع الأدوار",
     admin: "مدير",
     staff: "موظف",
+    supervisor: "مشرف",
     statusAll: "الحالة: الكل",
     active: "نشط",
     inactive: "غير نشط",
@@ -48,6 +49,7 @@ export const dashboardManagersDirectoryAr: ManagersDirectoryLabels = {
   roles: {
     admin: "مدير",
     staff: "موظف",
+    supervisor: "مشرف",
   },
   showingOf: (count, total) => `عرض ${count} من أصل ${total} نتيجة`,
   noEntries: "لا يوجد مديرين",

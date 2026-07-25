@@ -9,7 +9,6 @@ import {
   CurrencyCode,
   Gender,
   IanaTimezone,
-  PaymentMethodType,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateTeacherOnboarding } from "@/frontend/common/hooks/useCreateTeacherOnboarding";
@@ -42,9 +41,11 @@ export interface TeacherOnboardingViewModel {
   readonly handleSubmit: UseFormHandleSubmit<TeacherOnboardingFormData>;
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
+  readonly submitError: string | null;
   readonly labels: TeacherOnboardingLabels;
   readonly onSubmit: (data: TeacherOnboardingFormData) => Promise<void>;
   readonly onDismissSuccess: () => void;
+  readonly onDismissError: () => void;
   readonly meetingConfigWarning: boolean;
   readonly clearMeetingConfigWarning: () => void;
   readonly meetingSetupHref: string | undefined;
@@ -83,16 +84,15 @@ function useOnboardingForm(labels: TeacherOnboardingLabels): OnboardingForm {
   const form = useForm<TeacherOnboardingFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      name: "",
+      email: "",
+      password: "",
       gender: Gender.Male,
       countryCode: CountryCode.Eg,
       timezone: IanaTimezone.AfricaCairo,
       rateCurrency: CurrencyCode.Usd,
       avatarUrl: undefined,
-      payoutMethod: {
-        type: PaymentMethodType.BankTransfer,
-        label: "",
-        details: {},
-      },
+      payoutMethod: null,
     },
   });
   const { register, control, handleSubmit, formState } = form;
@@ -109,26 +109,36 @@ type OnboardingExecutor = (data: TeacherOnboardingFormData) => Promise<unknown>;
 
 interface OnboardingSubmit {
   readonly showSuccess: boolean;
+  readonly submitError: string | null;
   readonly onSubmit: (data: TeacherOnboardingFormData) => Promise<void>;
   readonly onDismissSuccess: () => void;
+  readonly onDismissError: () => void;
 }
 
 function useOnboardingSubmit(execute: OnboardingExecutor): OnboardingSubmit {
   const [showSuccess, setShowSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const onSubmit = useCallback(
     async (data: TeacherOnboardingFormData) => {
       logger.info("Submitting teacher onboarding data:", data);
+      setSubmitError(null);
       try {
         await execute(data);
         setShowSuccess(true);
       } catch (error) {
         logger.error("Failed to submit teacher onboarding form", { error });
+        const message = error instanceof Error ? error.message : "operationFailed";
+        setSubmitError(message);
       }
     },
     [execute]
   );
   const onDismissSuccess = useCallback(() => {
     setShowSuccess(false);
+  }, []);
+
+  const onDismissError = useCallback(() => {
+    setSubmitError(null);
   }, []);
 
   useEffect(() => {
@@ -141,7 +151,7 @@ function useOnboardingSubmit(execute: OnboardingExecutor): OnboardingSubmit {
     };
   }, [showSuccess, onDismissSuccess]);
 
-  return { showSuccess, onSubmit, onDismissSuccess };
+  return { showSuccess, submitError, onSubmit, onDismissSuccess, onDismissError };
 }
 
 function useOnboardingAvatar() {
@@ -164,7 +174,7 @@ export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
   const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateTeacherOnboarding();
   const { labels, tMeeting, tJoin } = useOnboardingTranslations();
   const { form, register, control, errors, handleSubmit } = useOnboardingForm(labels);
-  const { showSuccess, onSubmit, onDismissSuccess } = useOnboardingSubmit(execute);
+  const { showSuccess, submitError, onSubmit, onDismissSuccess, onDismissError } = useOnboardingSubmit(execute);
   const { onUploadAvatar } = useOnboardingAvatar();
   const meetingSetupHref = useMeetingSetupHref();
 
@@ -176,9 +186,11 @@ export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
     handleSubmit,
     isSubmitting: loading,
     showSuccess,
+    submitError,
     labels,
     onSubmit,
     onDismissSuccess,
+    onDismissError,
     meetingConfigWarning,
     clearMeetingConfigWarning,
     meetingSetupHref,

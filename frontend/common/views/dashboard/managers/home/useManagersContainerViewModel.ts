@@ -17,7 +17,9 @@ import type {
 
 function mapManagerRole(roleSlug: string | null | undefined): ManagerRole {
   if (!roleSlug) return "staff";
-  return roleSlug.includes("admin") ? "admin" : "staff";
+  if (roleSlug.includes("admin")) return "admin";
+  if (roleSlug.includes("supervisor")) return "supervisor";
+  return "staff";
 }
 
 function mapManagerStatus(status: string | null | undefined): ManagerStatus {

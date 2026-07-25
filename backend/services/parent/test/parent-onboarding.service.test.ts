@@ -51,7 +51,7 @@ describe("ParentOnboardingService.createParent", () => {
         actor.id,
         {
           name: "New Parent",
-          email: "newparent@test.com",
+          email: `newparent-${randomUUID()}@test.com`,
           password: generateTestPassword(),
           phone: "+1234567890",
           invoiceType: "MONTHLY",

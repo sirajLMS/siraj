@@ -20,6 +20,7 @@ import { useAppTranslation } from "@/shared/locale";
 const defaultValues: ParentOnboardingFormData = {
   name: "",
   email: "",
+  password: "",
   avatarUrl: undefined,
   phone: "",
   nationality: "",

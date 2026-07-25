@@ -21,8 +21,8 @@ export function useCreateStudentOnboarding() {
       primaryTeacherId: formData.primaryTeacherId || null,
       classesTotal: null,
       classesRemaining: null,
-      email: null,
-      password: null,
+      email: formData.email,
+      password: formData.password,
       timezone: null,
     };
 

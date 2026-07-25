@@ -5,7 +5,7 @@ import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { ManagerRowActions } from "@/frontend/common/views/dashboard/managers/home/ManagerRowActions";
-import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
+import type { Manager, ManagerRole } from "@/frontend/common/views/dashboard/managers/home/types";
 import { MobileCardListItem, MobilePhoneDisplay, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
 import { useAppTranslation } from "@/shared/locale";
@@ -37,14 +37,24 @@ const StyledStatusIndicator = styled(Box, {
 }));
 
 const StyledRoleChip = styled(Chip, {
-  shouldForwardProp: prop => prop !== "isStaff",
-})<{ isStaff: boolean }>(({ theme, isStaff }) => ({
+  shouldForwardProp: prop => prop !== "role",
+})<{ role: ManagerRole }>(({ theme, role }) => ({
   fontWeight: 700,
   textTransform: "uppercase",
   fontSize: theme.typography.labelSm.fontSize,
   height: 20,
-  backgroundColor: isStaff ? theme.palette.secondaryContainer : theme.palette.primaryContainer,
-  color: isStaff ? theme.palette.onSecondaryContainer : theme.palette.onPrimaryContainer,
+  backgroundColor:
+    role === "admin"
+      ? theme.palette.primaryContainer
+      : role === "supervisor"
+        ? theme.palette.tertiaryContainer
+        : theme.palette.secondaryContainer,
+  color:
+    role === "admin"
+      ? theme.palette.onPrimaryContainer
+      : role === "supervisor"
+        ? theme.palette.onTertiaryContainer
+        : theme.palette.onSecondaryContainer,
 }));
 
 const StyledContactItemBox = styled(Stack)(({ theme }) => ({
@@ -70,7 +80,6 @@ export function ManagersCardListMobile({ managers, paginationOptions }: Readonly
         emptyMessage={t.noEntries}
         layout="edge-to-edge"
         renderItem={manager => {
-          const isStaff = manager.role === "staff";
           const avatarFallback = manager.avatarUrl ? undefined : manager.name.charAt(0).toUpperCase();
           return (
             <MobileCardListItem variant="edge-to-edge" sx={{ position: "relative" }}>
@@ -94,7 +103,7 @@ export function ManagersCardListMobile({ managers, paginationOptions }: Readonly
                     {manager.name}
                   </Typography>
                   <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }} useFlexGap>
-                    <StyledRoleChip label={t.roles[manager.role]} size="small" isStaff={isStaff} />
+                    <StyledRoleChip label={t.roles[manager.role]} size="small" role={manager.role} />
                     <MobileStatusBadge
                       category="session"
                       status={manager.status === "active" ? "active" : "blocked"}

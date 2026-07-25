@@ -14,6 +14,7 @@ export const dashboardParentOnboardingAr: ParentOnboardingLabels = {
   fields: {
     fullName: "الاسم الكامل",
     email: "البريد الإلكتروني",
+    password: "كلمة المرور",
     phone: "رقم الهاتف",
     nationality: "الجنسية",
     address: "العنوان السكني",
@@ -34,6 +35,7 @@ export const dashboardParentOnboardingAr: ParentOnboardingLabels = {
   placeholders: {
     fullName: "مثال: أحمد الفارس",
     email: "email@example.com",
+    password: "أدخل كلمة المرور",
     phone: "+966 50 000 0000",
     nationality: "اختر الجنسية",
     address: "اسم الشارع، رقم المبنى، الحي",
@@ -83,6 +85,7 @@ export const dashboardParentOnboardingAr: ParentOnboardingLabels = {
     fullNameRequired: "الاسم الكامل مطلوب",
     emailRequired: "البريد الإلكتروني مطلوب",
     emailInvalid: "البريد الإلكتروني غير صالح",
+    passwordRequired: "كلمة المرور مطلوبة",
     phoneRequired: "رقم الهاتف مطلوب",
     addressRequired: "العنوان السكني مطلوب",
     feeAmountRequired: "مبلغ الرسوم مطلوب",

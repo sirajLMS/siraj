@@ -10,7 +10,11 @@ import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/grap
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { useAppTranslation } from "@/shared/locale";
 
-const ACCOUNT_TYPES: readonly ManagerAccountType[] = [ManagerAccountType.Manager, ManagerAccountType.Admin];
+const ACCOUNT_TYPES: readonly ManagerAccountType[] = [
+  ManagerAccountType.Manager,
+  ManagerAccountType.Admin,
+  ManagerAccountType.Supervisor,
+];
 
 const StyledAccountTypeContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -46,7 +50,7 @@ function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboa
         <StyledAccountTypeContainer>
           {ACCOUNT_TYPES.map(type => {
             const isSelected = field.value === type;
-            const labelKey = type.toLowerCase() as "manager" | "admin";
+            const labelKey = type.toLowerCase() as "manager" | "admin" | "supervisor";
             return (
               <StyledAccountTypeButton
                 key={type}
@@ -81,6 +85,9 @@ export function SystemAccessSection({ register, control, errors }: Props) {
     if (accountType === ManagerAccountType.Admin) {
       return t.options.accountTypeDescriptions.admin;
     }
+    if (accountType === ManagerAccountType.Supervisor) {
+      return t.options.accountTypeDescriptions.supervisor;
+    }
     return t.options.accountTypeDescriptions.manager;
   };
 
@@ -110,7 +117,7 @@ export function SystemAccessSection({ register, control, errors }: Props) {
             {...register("password")}
             label={t.fields.password}
             placeholder={t.placeholders.password}
-            type="password"
+            type="text"
             required
             error={!!errors.password}
             helperText={getPasswordError()}

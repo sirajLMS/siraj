@@ -96,6 +96,8 @@ function useStudentOnboardingForm(initialParentId: string): StudentOnboardingFor
     defaultValues: {
       parentId: initialParentId,
       name: "",
+      email: "",
+      password: "",
       avatarUrl: undefined,
       dateOfBirth: "",
       gender: null,
@@ -110,6 +112,8 @@ function buildResetPayload(initialParentId: string, formData: StudentOnboardingF
   return {
     parentId: initialParentId || formData.parentId,
     name: "",
+    email: "",
+    password: "",
     avatarUrl: undefined,
     dateOfBirth: "",
     gender: null,

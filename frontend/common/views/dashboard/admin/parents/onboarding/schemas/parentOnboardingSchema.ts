@@ -11,8 +11,9 @@ export const parentOnboardingSchema = z
   .object({
     name: z.string().min(1, "fullNameRequired"),
     email: z.email({ message: "emailInvalid" }),
+    password: z.string().min(8, "passwordRequired"),
     avatarUrl: z.string().optional(),
-    phone: z.string().min(1, "phoneRequired"),
+    phone: z.string().optional(),
     nationality: z.string().optional(),
     address: z.string().min(1, "addressRequired"),
     whatsapp: z.string().optional(),
@@ -23,7 +24,7 @@ export const parentOnboardingSchema = z
       { message: "invoiceTypeRequired" }
     ),
     feeAmount: z.string().min(1, "feeAmountRequired"),
-    payinMethod: onboardingPaymentMethodSchema,
+    payinMethod: onboardingPaymentMethodSchema.optional().nullable(),
     currency: z.enum(CurrencyCode).refine(v => !!v, { message: "currencyRequired" }),
     timezone: z
       .string()

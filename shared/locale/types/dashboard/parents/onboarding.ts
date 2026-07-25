@@ -12,6 +12,7 @@ export interface ParentOnboardingLabels {
   readonly fields: {
     readonly fullName: string;
     readonly email: string;
+    readonly password: string;
     readonly phone: string;
     readonly nationality: string;
     readonly address: string;
@@ -32,6 +33,7 @@ export interface ParentOnboardingLabels {
   readonly placeholders: {
     readonly fullName: string;
     readonly email: string;
+    readonly password: string;
     readonly phone: string;
     readonly nationality: string;
     readonly address: string;
@@ -81,6 +83,7 @@ export interface ParentOnboardingLabels {
     readonly fullNameRequired: string;
     readonly emailRequired: string;
     readonly emailInvalid: string;
+    readonly passwordRequired: string;
     readonly phoneRequired: string;
     readonly addressRequired: string;
     readonly feeAmountRequired: string;
