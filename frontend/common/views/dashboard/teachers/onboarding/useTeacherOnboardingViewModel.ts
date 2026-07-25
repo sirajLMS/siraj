@@ -9,6 +9,7 @@ import {
   CurrencyCode,
   Gender,
   IanaTimezone,
+  type TeacherOnboarding,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateTeacherOnboarding } from "@/frontend/common/hooks/useCreateTeacherOnboarding";
@@ -17,6 +18,7 @@ import { logger } from "@/frontend/common/utils/logger";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import { teacherOnboardingSchema } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
+import { useRouter } from "@/shared/i18n/navigation";
 import type { TeacherOnboardingLabels } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -105,7 +107,7 @@ function useOnboardingForm(labels: TeacherOnboardingLabels): OnboardingForm {
   };
 }
 
-type OnboardingExecutor = (data: TeacherOnboardingFormData) => Promise<unknown>;
+type OnboardingExecutor = (data: TeacherOnboardingFormData) => Promise<TeacherOnboarding>;
 
 interface OnboardingSubmit {
   readonly showSuccess: boolean;
@@ -116,6 +118,7 @@ interface OnboardingSubmit {
 }
 
 function useOnboardingSubmit(execute: OnboardingExecutor): OnboardingSubmit {
+  const router = useRouter();
   const [showSuccess, setShowSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const onSubmit = useCallback(
@@ -123,15 +126,19 @@ function useOnboardingSubmit(execute: OnboardingExecutor): OnboardingSubmit {
       logger.info("Submitting teacher onboarding data:", data);
       setSubmitError(null);
       try {
-        await execute(data);
+        const created = await execute(data);
         setShowSuccess(true);
+        const href = profileHrefForTeacher({ userId: created.userId, teacherId: created.id });
+        if (href) {
+          router.push(href);
+        }
       } catch (error) {
         logger.error("Failed to submit teacher onboarding form", { error });
         const message = error instanceof Error ? error.message : "operationFailed";
         setSubmitError(message);
       }
     },
-    [execute]
+    [execute, router]
   );
   const onDismissSuccess = useCallback(() => {
     setShowSuccess(false);

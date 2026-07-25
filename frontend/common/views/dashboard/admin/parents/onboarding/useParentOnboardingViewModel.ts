@@ -15,6 +15,7 @@ import {
   parentOnboardingSchema,
 } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType, PaymentMethodType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
+import { useRouter } from "@/shared/i18n/navigation";
 import { useAppTranslation } from "@/shared/locale";
 
 const defaultValues: ParentOnboardingFormData = {
@@ -89,13 +90,18 @@ export function useParentOnboardingViewModel(): ParentOnboardingViewModel {
   const { register, control, handleSubmit, formState, reset } = form;
   const errors = formState.errors;
 
+  const router = useRouter();
   const onSubmit = async (formData: ParentOnboardingFormData) => {
     try {
       logger.info("Submitting parent onboarding form", { formData });
-      await execute(formData);
+      const created = await execute(formData);
       logger.info("Parent onboarding form submitted successfully");
       setShowSuccess(true);
       reset(defaultValues);
+      const href = profileHrefForParent({ userId: created.userId, parentId: created.parentId });
+      if (href) {
+        router.push(href);
+      }
     } catch (error) {
       logger.error("Failed to submit parent onboarding form", { error });
     }
