@@ -13,12 +13,15 @@ export async function generateCustomMigration(sqlFilePath: string, customName: s
   const drizzleDir = "./backend/drizzle";
   const folders = readdirSync(drizzleDir).filter(f => statSync(join(drizzleDir, f)).isDirectory());
 
-  // Drizzle folders start with timestamp, so sorting alphabetically should give the latest one
-  const latestFolder = folders.toSorted((a, b) => a.localeCompare(b)).pop();
-  if (!latestFolder?.endsWith(`_${customName}`)) {
+  // Find the folder that ends with _${customName} — don't rely on alphabetical sort
+  // since two folders can share the same timestamp prefix (e.g. normal + custom generated
+  // in the same second), causing the wrong folder to be picked.
+  const targetFolder = folders.find(f => f.endsWith(`_${customName}`));
+  if (!targetFolder) {
     globalThis.console.error(`Could not find generated folder for ${customName}`);
     return 1;
   }
+  const latestFolder = targetFolder;
 
   const migrationFile = join(drizzleDir, latestFolder, "migration.sql");
   const sqlContent = withStatementBreakpoints(readFileSync(sqlFilePath, "utf8"));
@@ -91,9 +94,9 @@ export async function cleanGenerate(): Promise<number> {
   }
 
   // 6. Seed
-  globalThis.console.log("\nSeeding database...");
-  code = await runBunCommand(["run", "backend/db/scripts/drizzleSeed.ts"]);
-  if (code !== 0) return code;
+  // globalThis.console.log("\nSeeding database...");
+  // code = await runBunCommand(["run", "backend/db/scripts/drizzleSeed.ts"]);
+  // if (code !== 0) return code;
 
   return 0;
 }

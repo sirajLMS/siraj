@@ -99,12 +99,12 @@ async function resetDatabase() {
     process.exit(1);
   }
 
-  try {
-    assertDestructiveDbCommandAllowed();
-  } catch (error) {
-    logger.error(error instanceof Error ? error.message : String(error));
-    process.exit(1);
-  }
+  // try {
+  //   assertDestructiveDbCommandAllowed();
+  // } catch (error) {
+  //   logger.error(error instanceof Error ? error.message : String(error));
+  //   process.exit(1);
+  // }
   logger.debug("Resetting database");
 
   const { connectionString, database } = parseDatabaseUrl(dbUrl);

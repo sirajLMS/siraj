@@ -12,6 +12,7 @@ BEGIN
     gen_random_uuid(),
     'Super Admin',
     'admin@siraj.local',
+    -- Seed_Pass1!
     '$2b$12$nXFLfwUx0pdly5.UbZXA2O7XPh6LYz6bfP3X/MG9K/5VD/WuvUaku',
     true,
     'ACTIVATED',

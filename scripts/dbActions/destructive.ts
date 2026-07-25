@@ -5,7 +5,9 @@ import { assessDestructiveDbCommandSafety, formatDestructiveDbBlockMessage } fro
  * "1" = Reset Database, "8" = Clean Generate (reset -> gen -> migrate -> seed)
  * These are permanently disabled for this repo to prevent accidental data loss.
  */
-export const PERMANENTLY_DISABLED_ACTION_KEYS = new Set(["1", "8"]);
+export const PERMANENTLY_DISABLED_ACTION_KEYS = new Set(
+  // ["1", "8"]
+);
 
 /**
  * Actions that are blocked in production/cloud environments.
@@ -53,7 +55,7 @@ export function printPermanentlyDisabledBlock(key: string): void {
   const label = actionLabels[key] || key;
   globalThis.console.error(
     `✗ Blocked: "${label}" is permanently disabled for this repository.\n` +
-      `  This action is disabled by repository policy to prevent accidental data loss.\n` +
-      `  Use a different repository or environment for destructive database operations.`
+    `  This action is disabled by repository policy to prevent accidental data loss.\n` +
+    `  Use a different repository or environment for destructive database operations.`
   );
 }

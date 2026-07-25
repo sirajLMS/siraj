@@ -892,7 +892,7 @@ CREATE TABLE "student_status_history" (
 --> statement-breakpoint
 CREATE TABLE "students" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-	"parent_id" uuid NOT NULL,
+	"parent_id" uuid,
 	"user_id" uuid NOT NULL,
 	"primary_teacher_id" uuid,
 	"name" varchar(255) NOT NULL,
