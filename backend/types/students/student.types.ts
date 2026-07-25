@@ -58,7 +58,7 @@ export type StudentCreateInput = Omit<
 };
 
 export interface StudentOnboardingInput {
-  readonly parentId: string;
+  readonly parentId?: string | null;
   readonly name: string;
   readonly dateOfBirth?: Date | null;
   readonly gender?: Gender | null;
@@ -77,7 +77,7 @@ export interface StudentOnboardingInput {
 
 export interface StudentOnboardingResult {
   readonly studentId: string;
-  readonly parentId: string;
+  readonly parentId?: string | null;
   readonly userId?: string;
   readonly name: string;
   readonly status: StudentStatus;

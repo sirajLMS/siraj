@@ -2,7 +2,7 @@ import { z } from "zod";
 import { AppLanguage, Gender, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export const studentOnboardingSchema = z.object({
-  parentId: z.string().min(1, "parentRequired"),
+  parentId: z.string().optional().nullable(),
   name: z.string().min(3, "nameMinLength"),
   email: z.email({ message: "emailInvalid" }),
   password: z.string().min(8, "passwordRequired"),

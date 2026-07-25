@@ -12,7 +12,7 @@ export const StudentOnboardingInputPothosObject = gqlSchemaBuilder
   .implement({
     description: "Input for creating a new student profile under a parent",
     fields: t => ({
-      parentId: t.string({ required: true }),
+      parentId: t.string({ required: false }),
       name: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
       dateOfBirth: t.field({ type: "DateTime" }),
       gender: t.field({ type: GenderPothosObject }),
@@ -49,7 +49,7 @@ export const StudentOnboardingResultPothosObject = gqlSchemaBuilder
     description: "Result of student onboarding operation",
     fields: t => ({
       studentId: t.exposeString("studentId"),
-      parentId: t.exposeString("parentId"),
+      parentId: t.exposeString("parentId", { nullable: true }),
       name: t.exposeString("name"),
       status: t.expose("status", { type: StudentStatusPothosObject }),
       primaryTeacherId: t.exposeString("primaryTeacherId", { nullable: true }),

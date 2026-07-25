@@ -28,9 +28,11 @@ export namespace StudentOnboardingService {
       throw new Error(tErrors.insufficientPermissions);
     }
 
-    const parent = await ParentRepository.getParentProfile(input.parentId);
-    if (!parent) {
-      throw new Error(tErrors.parentNotFound);
+    if (input.parentId) {
+      const parent = await ParentRepository.getParentProfile(input.parentId);
+      if (!parent) {
+        throw new Error(tErrors.parentNotFound);
+      }
     }
 
     if (input.primaryTeacherId) {
@@ -84,7 +86,7 @@ export namespace StudentOnboardingService {
       // Step 3: Create the students record linked to the new user.
       const student = await StudentRepository.create(
         {
-          parentId: input.parentId,
+          parentId: input.parentId || null,
           userId: user.id,
           name: input.name,
           dateOfBirth: input.dateOfBirth ?? null,

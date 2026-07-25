@@ -4868,7 +4868,7 @@ export type Student = {
   id: Scalars['String']['output'];
   language: Maybe<AppLanguage>;
   name: Scalars['String']['output'];
-  parentId: Scalars['String']['output'];
+  parentId: Maybe<Scalars['String']['output']>;
   parentName: Maybe<Scalars['String']['output']>;
   primaryTeacherId: Maybe<Scalars['String']['output']>;
   status: StudentStatus;
@@ -5028,7 +5028,7 @@ export type StudentOnboardingInput = {
   gender: InputMaybe<Gender>;
   language: InputMaybe<AppLanguage>;
   name: Scalars['String']['input'];
-  parentId: Scalars['String']['input'];
+  parentId: InputMaybe<Scalars['String']['input']>;
   /** Student login password (required when email is provided) */
   password: InputMaybe<Scalars['String']['input']>;
   primaryTeacherId: InputMaybe<Scalars['String']['input']>;

@@ -1590,7 +1590,7 @@ export type StudentOnboardingInput = {
   gender: Gender | null | undefined;
   language: AppLanguage | null | undefined;
   name: string;
-  parentId: string;
+  parentId: string | null | undefined;
   /** Student login password (required when email is provided) */
   password: string | null | undefined;
   primaryTeacherId: string | null | undefined;

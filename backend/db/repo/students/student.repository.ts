@@ -620,7 +620,7 @@ export namespace StudentRepository {
     readonly dateOfBirth: Date | null;
     readonly gender: string | null;
     readonly language: string | null;
-    readonly parentId: string;
+    readonly parentId: string | null;
     readonly parentUserId: string | null;
     readonly parentName: string | null;
     readonly parentEmail: string | null;

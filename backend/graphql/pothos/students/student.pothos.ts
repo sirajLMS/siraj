@@ -33,7 +33,7 @@ export const StudentPothosObject = gqlSchemaBuilder
         nullable: true,
       }),
       avatarUrl: t.exposeString("avatarUrl"),
-      parentId: t.exposeString("parentId", { nullable: false }),
+      parentId: t.exposeString("parentId", { nullable: true }),
       parentName: t.exposeString("parentName"),
       primaryTeacherId: t.exposeString("primaryTeacherId", { nullable: true }),
       teacherName: t.exposeString("teacherName", { nullable: true }),

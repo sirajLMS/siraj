@@ -133,7 +133,7 @@ async function dispatchStudentReassignmentNotifications(
   newTeacher: NonNullable<Awaited<ReturnType<typeof TeacherRepository.findById>>>,
   locale?: string
 ): Promise<void> {
-  const parentUserId = await ParentRepository.findUserIdByParentId(student.parentId);
+  const parentUserId = student.parentId ? await ParentRepository.findUserIdByParentId(student.parentId) : null;
 
   const previousTeacherId = student.primaryTeacherId;
   let oldTeacher: TeacherEntity | null = null;
@@ -210,7 +210,7 @@ async function dispatchStudentStatusChangedNotifications(
   const student = await StudentRepository.findById(studentId);
   if (!student) return;
 
-  const parentUserId = await ParentRepository.findUserIdByParentId(student.parentId);
+  const parentUserId = student.parentId ? await ParentRepository.findUserIdByParentId(student.parentId) : null;
   if (!parentUserId) return;
 
   const targetUserIds = [parentUserId];

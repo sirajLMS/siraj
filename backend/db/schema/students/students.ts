@@ -48,9 +48,7 @@ export const students = pgTable(
   "students",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    parentId: uuid("parent_id")
-      .notNull()
-      .references(() => parents.id, { onDelete: "cascade" }),
+    parentId: uuid("parent_id").references(() => parents.id, { onDelete: "cascade" }),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),

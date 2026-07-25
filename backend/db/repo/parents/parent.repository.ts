@@ -280,7 +280,9 @@ export namespace ParentRepository {
       result.set(id, []);
     }
     for (const row of rows) {
-      result.get(row.parentId)?.push({ name: row.name });
+      if (row.parentId) {
+        result.get(row.parentId)?.push({ name: row.name });
+      }
     }
     return result;
   };

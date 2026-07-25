@@ -88,7 +88,7 @@ async function dispatchStudentQuotaOverriddenNotifications(
   const student = await StudentRepository.findById(studentId);
   if (!student) return;
 
-  const parentUserId = await ParentRepository.findUserIdByParentId(student.parentId);
+  const parentUserId = student.parentId ? await ParentRepository.findUserIdByParentId(student.parentId) : null;
   if (!parentUserId) return;
 
   const targetUserIds = [parentUserId];

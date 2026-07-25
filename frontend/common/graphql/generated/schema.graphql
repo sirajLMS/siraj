@@ -3605,7 +3605,7 @@ type Student {
   id: String!
   language: AppLanguage
   name: String!
-  parentId: String!
+  parentId: String
   parentName: String
   primaryTeacherId: String
   status: StudentStatus!
@@ -3761,7 +3761,7 @@ input StudentOnboardingInput {
   gender: Gender
   language: AppLanguage
   name: String!
-  parentId: String!
+  parentId: String
 
   """Student login password (required when email is provided)"""
   password: String

@@ -11,7 +11,7 @@ export function useCreateStudentOnboarding() {
 
   const execute = async (formData: StudentOnboardingFormData) => {
     const input: StudentOnboardingInput = {
-      parentId: formData.parentId,
+      parentId: formData.parentId || null,
       name: formData.name,
       avatarUrl: formData.avatarUrl ?? null,
       dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth : null,

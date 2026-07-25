@@ -130,7 +130,7 @@ export async function seedOrGet(
   const parentById = new Map(parentsList.map(p => [p.id, p]));
   const studentParentUserMap = new Map(
     studentsList
-      .map(s => [s.id, parentById.get(s.parentId)?.userId])
+      .map(s => [s.id, s.parentId ? parentById.get(s.parentId)?.userId : undefined])
       .filter((entry): entry is [string, string] => !!entry[1])
   );
   const adminUser = findAdminUser(usersList);
