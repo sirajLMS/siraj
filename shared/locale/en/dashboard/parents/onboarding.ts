@@ -10,6 +10,7 @@ export const dashboardParentOnboardingEn: ParentOnboardingLabels = {
     socialComms: "Communication Channels",
     feesContract: "Fees & Contract",
     meetingConfig: "Meeting Configuration",
+    addPaymentMethod: "Add payment method now",
   },
   fields: {
     fullName: "Full Name",

@@ -8,6 +8,7 @@ export interface ParentOnboardingLabels {
     readonly socialComms: string;
     readonly feesContract: string;
     readonly meetingConfig: string;
+    readonly addPaymentMethod: string;
   };
   readonly fields: {
     readonly fullName: string;

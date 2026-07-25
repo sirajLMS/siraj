@@ -29,7 +29,7 @@ export function ParentInfoSection({ register, control, errors, onUploadAvatar }:
           control={control}
           errors={errors}
           translate={t}
-          phoneRequired
+          phoneRequired={false}
           onUploadAvatar={onUploadAvatar}
         />
         <Grid size={{ xs: 12, md: 6 }}>
@@ -58,7 +58,6 @@ export function ParentInfoSection({ register, control, errors, onUploadAvatar }:
             {...register("address")}
             label={t.fields.address}
             placeholder={t.placeholders.address}
-            required
             error={!!errors.address}
             helperText={t.validation[errors.address?.message as keyof typeof t.validation]}
             fullWidth

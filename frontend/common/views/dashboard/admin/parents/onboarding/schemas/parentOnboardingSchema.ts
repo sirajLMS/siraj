@@ -15,15 +15,18 @@ export const parentOnboardingSchema = z
     avatarUrl: z.string().optional(),
     phone: z.string().optional(),
     nationality: z.string().optional(),
-    address: z.string().min(1, "addressRequired"),
+    address: z.string().optional(),
     whatsapp: z.string().optional(),
     facebook: z.string().optional(),
     twitter: z.string().optional(),
-    invoiceType: z.custom<InvoiceType>(
-      val => typeof val === "string" && (Object.values(InvoiceType) as string[]).includes(val),
-      { message: "invoiceTypeRequired" }
-    ),
-    feeAmount: z.string().min(1, "feeAmountRequired"),
+    invoiceType: z
+      .custom<InvoiceType>(
+        val => typeof val === "string" && (Object.values(InvoiceType) as string[]).includes(val),
+        { message: "invoiceTypeRequired" }
+      )
+      .optional()
+      .nullable(),
+    feeAmount: z.string().optional(),
     payinMethod: onboardingPaymentMethodSchema.optional().nullable(),
     currency: z.enum(CurrencyCode).refine(v => !!v, { message: "currencyRequired" }),
     timezone: z

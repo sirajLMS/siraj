@@ -10,6 +10,7 @@ export const dashboardParentOnboardingAr: ParentOnboardingLabels = {
     socialComms: "التواصل الاجتماعي والاتصالات",
     feesContract: "تفاصيل الرسوم والعقد",
     meetingConfig: "الاجتماع عبر الإنترنت",
+    addPaymentMethod: "إضافة طريقة دفع الآن",
   },
   fields: {
     fullName: "الاسم الكامل",
