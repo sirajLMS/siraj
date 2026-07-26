@@ -722,7 +722,7 @@ export namespace TeacherAvailabilityRepository {
       .from(teachers)
       .innerJoin(users, eq(teachers.userId, users.id))
       .where(and(...buildTeacherQueryConditions(gender, teacherNameSearch)))
-      .limit(100)
+      .orderBy(users.name)
       .then(rows =>
         rows.map(row => ({
           ...row,

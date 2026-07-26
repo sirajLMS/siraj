@@ -82,7 +82,7 @@ expect.extend(matchers);
 
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import { studentCreditBalanceQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/credit-lms.documents";
-import { pendingLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
+import { studentRecentLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useStudentDashboardStore } from "@/frontend/common/stores/studentDashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -182,8 +182,8 @@ const creditBalanceMockData = {
   },
 };
 
-const pendingReportsMockData = {
-  pendingLessonReports: {
+const recentReportsMockData = {
+  studentRecentLessonReports: {
     totalCount: 2,
     rows: [
       {
@@ -193,6 +193,12 @@ const pendingReportsMockData = {
         teacherId: "teacher-1",
         teacherName: null,
         studentName: null,
+        subjectName: null,
+        classAvatarUrl: null,
+        teacherAvatarUrl: null,
+        studentAvatarUrl: null,
+        teacherUserId: "teacher-1",
+        studentUserId: studentId,
         lessonDate: "2026-07-10",
         durationMinutes: 45,
         attendanceEvaluation: "PRESENT",
@@ -216,6 +222,12 @@ const pendingReportsMockData = {
         teacherId: "teacher-1",
         teacherName: null,
         studentName: null,
+        subjectName: null,
+        classAvatarUrl: null,
+        teacherAvatarUrl: null,
+        studentAvatarUrl: null,
+        teacherUserId: "teacher-1",
+        studentUserId: studentId,
         lessonDate: "2026-07-12",
         durationMinutes: 60,
         attendanceEvaluation: "LATE",
@@ -254,10 +266,8 @@ function createMocks(): MockLink.MockedResponse[] {
     },
     {
       request: {
-        query: pendingLessonReportsQueryDocument,
+        query: studentRecentLessonReportsQueryDocument,
         variables: {
-          studentId: "student-1",
-          teacherId: null,
           paginationArgs: {
             page: 1,
             first: 5,
@@ -269,7 +279,7 @@ function createMocks(): MockLink.MockedResponse[] {
           },
         },
       },
-      result: { data: pendingReportsMockData },
+      result: { data: recentReportsMockData },
     },
   ];
 }

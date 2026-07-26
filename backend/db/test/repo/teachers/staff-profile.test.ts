@@ -518,7 +518,7 @@ describe("StaffProfileRepository — create", () => {
     expect((error as Error).message).toContain("Failed");
   });
 
-  staffTest("supports calls without tx", async () => {
+  test("supports calls without tx", async () => {
     const fakeId = randomUUID();
     const result = await StaffProfileRepository.findByUserId(fakeId);
     expect(result).toBeNull();
