@@ -43,7 +43,7 @@ export type ClassMeetingConfigSubmitInput = Omit<
 };
 
 export type UpdateClassMeetingConfigInput = Partial<
-  Omit<ClassMeetingConfigSubmitInput, "classInstanceId" | "recurringScheduleId" | "providerId">
+  Omit<ClassMeetingConfigSubmitInput, "classInstanceId" | "recurringScheduleId">
 >;
 
 export type EffectiveMeetingSource = "class" | "recurring" | "teacher" | "none";

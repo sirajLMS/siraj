@@ -1,9 +1,11 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Chip, IconButton, Stack } from "@mui/material";
+import { DeleteOutlined, EditOutlined, VideocamOutlined } from "@mui/icons-material";
+import { Avatar, Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
+import { useNotifications } from "@toolpad/core/useNotifications";
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display/localizedStringDisplay/LocalizedStringDisplay";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -22,23 +24,86 @@ import type {
 import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 function buildMeetingProviderColumns(
-  labels: MeetingProvidersColumnLabels,
+  labels: MeetingProvidersViewLabels,
   onEdit: (row: MeetingProviderFieldsFragment) => void,
   onDelete: (row: MeetingProviderFieldsFragment) => void
 ): GridColDef<MeetingProviderFieldsFragment>[] {
   return [
-    { field: "slug", headerName: labels.slug, flex: 1, minWidth: 140 },
+    {
+      field: "logoUrl",
+      headerName: labels.logo ?? "Logo",
+      width: 72,
+      sortable: false,
+      filterable: false,
+      renderCell: ({ row }) => (
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+          {row.logoUrl ? (
+            <Avatar
+              src={row.logoUrl}
+              alt={row.slug ?? undefined}
+              variant="rounded"
+              sx={{ width: 36, height: 36, "& img": { objectFit: "contain" } }}
+            />
+          ) : (
+            <Avatar variant="rounded" sx={{ width: 36, height: 36 }}>
+              <VideocamOutlined fontSize="small" />
+            </Avatar>
+          )}
+        </Box>
+      ),
+    },
     {
       field: "name",
       headerName: labels.name,
+      flex: 1.2,
+      minWidth: 150,
+      renderCell: ({ row }) => <LocalizedStringDisplay value={row.name} />,
+    },
+    {
+      field: "description",
+      headerName: labels.description ?? "Description",
       flex: 1.5,
       minWidth: 180,
-      renderCell: ({ row }) => <LocalizedStringDisplay value={row.name} />,
+      renderCell: ({ row }) => (row.description ? <LocalizedStringDisplay value={row.description} /> : "—"),
+    },
+    {
+      field: "instructions",
+      headerName: labels.instructions ?? "Instructions",
+      flex: 1.5,
+      minWidth: 180,
+      renderCell: ({ row }) => (row.instructions ? <LocalizedStringDisplay value={row.instructions} /> : "—"),
+    },
+    {
+      field: "urlAllowlist",
+      headerName: labels.urlAllowlist ?? "Allowed Hosts",
+      flex: 1.5,
+      minWidth: 180,
+      renderCell: ({ row }) => (
+        <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5, py: 1 }}>
+          {(row.urlAllowlist ?? []).map(host => (
+            <Chip key={host} size="small" variant="outlined" label={host} />
+          ))}
+        </Stack>
+      ),
+    },
+    {
+      field: "urlExample",
+      headerName: labels.urlExample ?? "Example URL",
+      flex: 1.2,
+      minWidth: 160,
+      renderCell: ({ row }) =>
+        row.urlExample ? (
+          <Typography variant="body2" sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+            {row.urlExample}
+          </Typography>
+        ) : (
+          "—"
+        ),
     },
     {
       field: "isActive",
       headerName: labels.active,
-      width: 120,
+      width: 100,
       renderCell: ({ value }) => (
         <Chip size="small" color={value ? "success" : "default"} label={value ? labels.active : labels.inactive} />
       ),
@@ -46,7 +111,7 @@ function buildMeetingProviderColumns(
     {
       field: "actions",
       headerName: labels.actions,
-      width: 120,
+      width: 100,
       sortable: false,
       filterable: false,
       renderCell: ({ row }) => (
@@ -62,16 +127,6 @@ function buildMeetingProviderColumns(
     },
   ];
 }
-
-type MeetingProvidersColumnLabels = {
-  readonly slug: string;
-  readonly name: string;
-  readonly active: string;
-  readonly inactive: string;
-  readonly actions: string;
-  readonly edit: string;
-  readonly delete: string;
-};
 
 function useNotificationState(): MeetingProvidersNotificationState {
   const [errorOpen, setErrorOpen] = useState(false);
@@ -96,10 +151,6 @@ function useNotificationState(): MeetingProvidersNotificationState {
 }
 
 export type MeetingProvidersViewModel = MeetingProvidersViewProps & {
-  // NEW FOR PLAN v5: lifted permission boolean per specs.md §3 N3 + §6.1.
-  // Tier meeting-providers views no longer import `RequirePermission` or
-  // call `useUserStore()` — the Container wraps the View in
-  // `<RequirePermission>` and the tier view renders content unconditionally.
   readonly canManageCatalog: boolean;
 };
 
@@ -108,24 +159,21 @@ export type UseMeetingProvidersViewModelProps = Record<string, never>;
 export function useMeetingProvidersViewModel(
   _props: Readonly<UseMeetingProvidersViewModelProps>
 ): MeetingProvidersViewModel {
+  const router = useRouter();
   const t = useAppTranslation().dashboardTranslations.meetingProviders;
   const locale = useAppLocale();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editProvider, setEditProvider] = useState<MeetingProviderFieldsFragment | null>(null);
+
   const [deleteProvider, setDeleteProvider] = useState<MeetingProviderFieldsFragment | null>(null);
   const notifications = useNotificationState();
+  const toolpadNotifications = useNotifications();
 
-  // NEW FOR PLAN v5: read the user's permission ONCE in the ViewModel and
-  // expose a boolean gate. Tier meeting-providers views no longer import
-  // `RequirePermission` or call `useUserStore()` (specs.md §3 N3). The
-  // Container also wraps the View in `<RequirePermission>` so unauthorized
-  // users see the fallback (not a half-rendered page).
   const hasPermission = useUserStore(state => state.hasPermission);
   const canManageCatalog = hasPermission(AppPermission.MeetingProvidersManageCatalog);
 
   const { data, loading, refetch } = useQuery(meetingProvidersQueryDocument, {
     variables: { activeOnly: false },
   });
+
   const [deleteMeetingProvider, { loading: deleting }] = useMutation(deleteMeetingProviderMutationDocument, {
     onError: error => {
       logger.error("Delete meeting provider failed:", { error });
@@ -137,8 +185,14 @@ export function useMeetingProvidersViewModel(
 
   const columnLabels = useMemo<MeetingProvidersViewLabels>(
     () => ({
+      logo: t.columns.logo,
       slug: t.columns.slug,
       name: t.columns.name,
+      description: t.columns.description,
+      instructions: t.columns.instructions,
+      urlAllowlist: t.columns.urlAllowlist,
+      urlExample: t.columns.urlExample,
+      capabilities: t.columns.capabilities,
       active: t.active,
       inactive: t.inactive,
       actions: t.columns.actions,
@@ -156,26 +210,30 @@ export function useMeetingProvidersViewModel(
       deleteConfirm: t.deleteConfirm,
       cancel: t.cancel,
       operationFailed: t.operationFailed,
+      supportsUsername: t.fields.supportsUsername,
+      supportsPassword: t.fields.supportsPassword,
+      supportsTenantId: t.fields.supportsTenantId,
     }),
     [t]
   );
 
-  const columns = useMemo(
-    () => buildMeetingProviderColumns(columnLabels, setEditProvider, setDeleteProvider),
-    [columnLabels]
+  const handleEditRow = useCallback(
+    (row: MeetingProviderFieldsFragment) => {
+      if (row.id) {
+        router.push(`/meeting-providers/edit?id=${row.id}`);
+      }
+    },
+    [router]
   );
 
-  const handleCreateSaved = useCallback(async () => {
-    setCreateOpen(false);
-    await refetch();
-    notifications.showSuccess(t.createSuccess);
-  }, [refetch, notifications, t]);
+  const columns = useMemo(
+    () => buildMeetingProviderColumns(columnLabels, handleEditRow, setDeleteProvider),
+    [columnLabels, handleEditRow]
+  );
 
-  const handleEditSaved = useCallback(async () => {
-    setEditProvider(null);
-    await refetch();
-    notifications.showSuccess(t.updateSuccess);
-  }, [refetch, notifications, t]);
+  const handleCreateOpen = useCallback(() => {
+    router.push("/meeting-providers/create");
+  }, [router]);
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteProvider?.id) return;
@@ -184,10 +242,12 @@ export function useMeetingProvidersViewModel(
       setDeleteProvider(null);
       await refetch();
       notifications.showSuccess(t.deleteSuccess);
+      toolpadNotifications.show(t.deleteSuccess, { severity: "success", autoHideDuration: 3000 });
     } catch {
       notifications.showError(t.operationFailed);
+      toolpadNotifications.show(t.operationFailed, { severity: "error", autoHideDuration: 4000 });
     }
-  }, [deleteProvider, deleteMeetingProvider, refetch, notifications, t]);
+  }, [deleteProvider, deleteMeetingProvider, refetch, notifications, toolpadNotifications, t]);
 
   return {
     t: columnLabels,
@@ -195,22 +255,20 @@ export function useMeetingProvidersViewModel(
     rows,
     columns,
     loading,
-    createOpen,
-    editProvider,
+    createOpen: false,
+    editProvider: null,
     deleteProvider,
     deleting,
     notifications,
-    onCreateOpen: () => setCreateOpen(true),
-    onCreateClose: () => setCreateOpen(false),
-    onCreateSaved: handleCreateSaved,
-    onEditRow: setEditProvider,
-    onEditClose: () => setEditProvider(null),
-    onEditSaved: handleEditSaved,
+    onCreateOpen: handleCreateOpen,
+    onCreateClose: () => {},
+    onCreateSaved: () => {},
+    onEditRow: handleEditRow,
+    onEditClose: () => {},
+    onEditSaved: () => {},
     onDeleteRow: setDeleteProvider,
     onDeleteClose: () => setDeleteProvider(null),
     onDeleteConfirm: handleDeleteConfirm,
-    // NEW FOR PLAN v5: lifted permission boolean consumed by the Container
-    // (which wraps the View in `<RequirePermission>`) and tier views.
     canManageCatalog,
   };
 }

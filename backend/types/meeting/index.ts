@@ -19,6 +19,7 @@ export type {
 } from "@/backend/types/meeting/meeting-config.types";
 export type {
   MeetingProviderFieldSchema,
+  MeetingProviderFieldSchemaInput,
   MeetingProviderInsertType,
   MeetingProviderSelectType,
   MeetingProviderSubmitInput,

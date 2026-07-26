@@ -1,13 +1,11 @@
 "use client";
 
-import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Alert, Box, Chip, IconButton, Stack } from "@mui/material";
+import { AddOutlined, DeleteOutlined, EditOutlined, VideocamOutlined } from "@mui/icons-material";
+import { Alert, Avatar, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { ReactNode } from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import { CreateMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/CreateMeetingProviderDialog";
-import { EditMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/EditMeetingProviderDialog";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import {
   MobileBaseDeleteDialog,
@@ -33,46 +31,84 @@ function MeetingProvidersMobileEmptyState({ title, body }: Readonly<{ title: str
 
 interface MobileProviderRowProps {
   readonly row: MeetingProviderFieldsFragment;
-  readonly activeLabel: string;
-  readonly inactiveLabel: string;
-  readonly editLabel: string;
-  readonly deleteLabel: string;
+  readonly labels: MeetingProvidersViewProps["t"];
   readonly onEdit: (row: MeetingProviderFieldsFragment) => void;
   readonly onDelete: (row: MeetingProviderFieldsFragment) => void;
 }
 
-function MobileProviderRow({
-  row,
-  activeLabel,
-  inactiveLabel,
-  editLabel,
-  deleteLabel,
-  onEdit,
-  onDelete,
-}: MobileProviderRowProps) {
+function MobileProviderRow({ row, labels, onEdit, onDelete }: MobileProviderRowProps) {
   const isActive = Boolean(row.isActive);
   return (
     <MobileCardListItem variant="edge-to-edge">
-      <Box sx={{ paddingBlock: 2, paddingInline: 2, width: "100%", overflow: "hidden" }}>
-        <Stack direction="row" sx={{ alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
-          <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Box sx={{ typography: "titleMd", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              <LocalizedStringDisplay value={row.name} />
-            </Box>
-            <Box sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary, mt: 0.25 }}>{row.slug}</Box>
-          </Box>
-          <Stack direction="row" sx={{ gap: 0.5, alignItems: "center" }}>
-            <Chip
-              size="small"
-              color={isActive ? "success" : "default"}
-              label={isActive ? activeLabel : inactiveLabel}
+      <Box sx={{ p: 2, width: "100%", overflow: "hidden" }}>
+        <Stack spacing={1.5}>
+          {/* Header Row */}
+          <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", minWidth: 0, flex: 1 }}>
+              {row.logoUrl ? (
+                <Avatar
+                  src={row.logoUrl}
+                  alt={row.slug ?? undefined}
+                  variant="rounded"
+                  sx={{ width: 40, height: 40, "& img": { objectFit: "contain" } }}
+                />
+              ) : (
+                <Avatar variant="rounded" sx={{ width: 40, height: 40 }}>
+                  <VideocamOutlined fontSize="small" />
+                </Avatar>
+              )}
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Box sx={{ typography: "titleMd", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <LocalizedStringDisplay value={row.name} />
+                </Box>
+                <Box sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>{row.slug}</Box>
+              </Box>
+            </Stack>
+
+            <Stack direction="row" sx={{ gap: 0.5, alignItems: "center" }}>
+              <Chip
+                size="small"
+                color={isActive ? "success" : "default"}
+                label={isActive ? labels.active : labels.inactive}
+              />
+              <IconButton size="small" aria-label={labels.edit} onClick={() => onEdit(row)}>
+                <EditOutlined fontSize="small" />
+              </IconButton>
+              <IconButton size="small" aria-label={labels.delete} onClick={() => onDelete(row)}>
+                <DeleteOutlined fontSize="small" />
+              </IconButton>
+            </Stack>
+          </Stack>
+
+          {/* Description & Instructions */}
+          {row.description ? (
+            <LocalizedStringDisplay
+              value={row.description}
+              typographyVariant="body2"
+              sx={theme => ({ color: theme.palette.text.secondary })}
             />
-            <IconButton size="small" aria-label={editLabel} onClick={() => onEdit(row)}>
-              <EditOutlined fontSize="small" />
-            </IconButton>
-            <IconButton size="small" aria-label={deleteLabel} onClick={() => onDelete(row)}>
-              <DeleteOutlined fontSize="small" />
-            </IconButton>
+          ) : null}
+
+          {/* Allowed Hosts Chips */}
+          {(row.urlAllowlist ?? []).length > 0 ? (
+            <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
+              {(row.urlAllowlist ?? []).map(host => (
+                <Chip key={host} size="small" variant="outlined" label={host} />
+              ))}
+            </Stack>
+          ) : null}
+
+          {/* Capability Flags */}
+          <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
+            {row.fieldSchema?.supportsUsername ? (
+              <Chip size="small" color="info" variant="outlined" label={labels.supportsUsername} />
+            ) : null}
+            {row.fieldSchema?.supportsPassword ? (
+              <Chip size="small" color="info" variant="outlined" label={labels.supportsPassword} />
+            ) : null}
+            {row.fieldSchema?.supportsTenantId ? (
+              <Chip size="small" color="info" variant="outlined" label={labels.supportsTenantId} />
+            ) : null}
           </Stack>
         </Stack>
       </Box>
@@ -85,31 +121,17 @@ export function MeetingProvidersMobileView({
   locale,
   rows,
   loading,
-  createOpen,
-  editProvider,
   deleteProvider,
   deleting,
   notifications,
   onCreateOpen,
-  onCreateClose,
-  onCreateSaved,
   onEditRow,
-  onEditClose,
-  onEditSaved,
   onDeleteRow,
   onDeleteClose,
   onDeleteConfirm,
 }: Readonly<MeetingProvidersViewProps>) {
   const renderItem = (row: MeetingProviderFieldsFragment): ReactNode => (
-    <MobileProviderRow
-      row={row}
-      activeLabel={t.active}
-      inactiveLabel={t.inactive}
-      editLabel={t.edit}
-      deleteLabel={t.delete}
-      onEdit={onEditRow}
-      onDelete={onDeleteRow}
-    />
+    <MobileProviderRow row={row} labels={t} onEdit={onEditRow} onDelete={onDeleteRow} />
   );
 
   return (
@@ -131,19 +153,6 @@ export function MeetingProvidersMobileView({
         paginationOptions={{ mode: "client" }}
       />
 
-      <CreateMeetingProviderDialog
-        open={createOpen}
-        onClose={onCreateClose}
-        onSaved={onCreateSaved}
-        onError={notifications.showError}
-      />
-      <EditMeetingProviderDialog
-        open={Boolean(editProvider)}
-        provider={editProvider}
-        onClose={onEditClose}
-        onSaved={onEditSaved}
-        onError={notifications.showError}
-      />
       <MobileBaseDeleteDialog
         open={Boolean(deleteProvider)}
         onClose={onDeleteClose}

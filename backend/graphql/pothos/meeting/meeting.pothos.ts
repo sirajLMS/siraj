@@ -1,17 +1,24 @@
-import type { InputFieldBuilder, ObjectFieldBuilder } from "@pothos/core";
+import type { ObjectFieldBuilder } from "@pothos/core";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import type { ClassMeetingConfigReturnType } from "@/backend/types/meeting/class-meeting-config.types";
-import type { MeetingConfigDetails, UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import type {
+  ClassMeetingConfigReturnType,
+  ClassMeetingConfigSubmitInput,
+  MeetingConfigDetails,
   MeetingProviderFieldSchema,
+  MeetingProviderFieldSchemaInput,
   MeetingProviderSelectType,
-} from "@/backend/types/meeting/meeting-provider.types";
+  MeetingProviderSubmitInput,
+  UpdateClassMeetingConfigInput,
+  UpdateMeetingProviderInput,
+  UpdateUserMeetingConfigInput,
+  UserMeetingConfigReturnType,
+  UserMeetingConfigSubmitInput,
+} from "@/backend/types";
 
 // Extract the actual SchemaTypes from the builder instance
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
 type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
-type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
 
 interface MeetingConfigBaseShape {
   providerId: string;
@@ -95,7 +102,11 @@ export const UserMeetingConfigPothosObject = UserMeetingConfigRef.implement({
   }),
 });
 
-export const MeetingProviderFieldSchemaInputPothos = gqlSchemaBuilder.inputType("MeetingProviderFieldSchemaInput", {
+const MeetingProviderFieldSchemaInputRef = gqlSchemaBuilder.inputRef<MeetingProviderFieldSchemaInput>(
+  "MeetingProviderFieldSchemaInput"
+);
+
+export const MeetingProviderFieldSchemaInputPothos = MeetingProviderFieldSchemaInputRef.implement({
   fields: t => ({
     requiresMeetingUrl: t.boolean({ required: true }),
     supportsUsername: t.boolean({ required: false }),
@@ -104,29 +115,43 @@ export const MeetingProviderFieldSchemaInputPothos = gqlSchemaBuilder.inputType(
   }),
 });
 
-function meetingProviderInputFields(t: PothosInputFieldBuilder, requiredFlag: boolean) {
-  return {
-    slug: t.string({ required: requiredFlag }),
-    name: t.field({ type: "LocalizedString", required: requiredFlag }),
+const MeetingProviderCreateInputRef =
+  gqlSchemaBuilder.inputRef<MeetingProviderSubmitInput>("MeetingProviderCreateInput");
+
+export const MeetingProviderCreateInputPothos = MeetingProviderCreateInputRef.implement({
+  fields: t => ({
+    slug: t.string({ required: true }),
+    name: t.field({ type: "LocalizedString", required: true }),
     description: t.field({ type: "LocalizedString", required: false }),
     instructions: t.field({ type: "LocalizedString", required: false }),
-    urlAllowlist: t.stringList({ required: requiredFlag }),
+    urlAllowlist: t.stringList({ required: true }),
     urlExample: t.string({ required: false }),
     logoUrl: t.string({ required: false }),
-    fieldSchema: t.field({ type: MeetingProviderFieldSchemaInputPothos, required: requiredFlag }),
+    fieldSchema: t.field({ type: MeetingProviderFieldSchemaInputPothos, required: true }),
     isActive: t.boolean({ required: false }),
-  };
-}
-
-export const MeetingProviderCreateInputPothos = gqlSchemaBuilder.inputType("MeetingProviderCreateInput", {
-  fields: t => meetingProviderInputFields(t, true),
+  }),
 });
 
-export const MeetingProviderUpdateInputPothos = gqlSchemaBuilder.inputType("MeetingProviderUpdateInput", {
-  fields: t => meetingProviderInputFields(t, false),
+const MeetingProviderUpdateInputRef =
+  gqlSchemaBuilder.inputRef<UpdateMeetingProviderInput>("MeetingProviderUpdateInput");
+
+export const MeetingProviderUpdateInputPothos = MeetingProviderUpdateInputRef.implement({
+  fields: t => ({
+    slug: t.string({ required: false }),
+    name: t.field({ type: "LocalizedString", required: false }),
+    description: t.field({ type: "LocalizedString", required: false }),
+    instructions: t.field({ type: "LocalizedString", required: false }),
+    urlAllowlist: t.stringList({ required: false }),
+    urlExample: t.string({ required: false }),
+    logoUrl: t.string({ required: false }),
+    fieldSchema: t.field({ type: MeetingProviderFieldSchemaInputPothos, required: false }),
+    isActive: t.boolean({ required: false }),
+  }),
 });
 
-export const MeetingConfigDetailsInputPothos = gqlSchemaBuilder.inputType("MeetingConfigDetailsInput", {
+const MeetingConfigDetailsInputRef = gqlSchemaBuilder.inputRef<MeetingConfigDetails>("MeetingConfigDetailsInput");
+
+export const MeetingConfigDetailsInputPothos = MeetingConfigDetailsInputRef.implement({
   fields: t => ({
     meetingUrl: t.string({ required: true }),
     username: t.string({ required: false }),
@@ -134,7 +159,10 @@ export const MeetingConfigDetailsInputPothos = gqlSchemaBuilder.inputType("Meeti
   }),
 });
 
-export const UserMeetingConfigCreateInputPothos = gqlSchemaBuilder.inputType("UserMeetingConfigCreateInput", {
+const UserMeetingConfigCreateInputRef =
+  gqlSchemaBuilder.inputRef<UserMeetingConfigSubmitInput>("UserMeetingConfigCreateInput");
+
+export const UserMeetingConfigCreateInputPothos = UserMeetingConfigCreateInputRef.implement({
   fields: t => ({
     userId: t.string({ required: true }),
     providerId: t.string({ required: true }),
@@ -145,7 +173,10 @@ export const UserMeetingConfigCreateInputPothos = gqlSchemaBuilder.inputType("Us
   }),
 });
 
-export const UserMeetingConfigUpdateInputPothos = gqlSchemaBuilder.inputType("UserMeetingConfigUpdateInput", {
+const UserMeetingConfigUpdateInputRef =
+  gqlSchemaBuilder.inputRef<UpdateUserMeetingConfigInput>("UserMeetingConfigUpdateInput");
+
+export const UserMeetingConfigUpdateInputPothos = UserMeetingConfigUpdateInputRef.implement({
   fields: t => ({
     providerId: t.string({ required: false }),
     label: t.string({ required: false }),
@@ -169,7 +200,11 @@ export const ClassMeetingConfigPothosObject = ClassMeetingConfigRef.implement({
   }),
 });
 
-export const ClassMeetingConfigCreateInputPothos = gqlSchemaBuilder.inputType("ClassMeetingConfigCreateInput", {
+const ClassMeetingConfigCreateInputRef = gqlSchemaBuilder.inputRef<ClassMeetingConfigSubmitInput>(
+  "ClassMeetingConfigCreateInput"
+);
+
+export const ClassMeetingConfigCreateInputPothos = ClassMeetingConfigCreateInputRef.implement({
   fields: t => ({
     classInstanceId: t.string({ required: false }),
     recurringScheduleId: t.string({ required: false }),
@@ -181,7 +216,11 @@ export const ClassMeetingConfigCreateInputPothos = gqlSchemaBuilder.inputType("C
   }),
 });
 
-export const ClassMeetingConfigUpdateInputPothos = gqlSchemaBuilder.inputType("ClassMeetingConfigUpdateInput", {
+const ClassMeetingConfigUpdateInputRef = gqlSchemaBuilder.inputRef<UpdateClassMeetingConfigInput>(
+  "ClassMeetingConfigUpdateInput"
+);
+
+export const ClassMeetingConfigUpdateInputPothos = ClassMeetingConfigUpdateInputRef.implement({
   fields: t => ({
     label: t.string({ required: false }),
     isDefault: t.boolean({ required: false }),

@@ -1,4 +1,4 @@
-import { boolean, index, jsonb, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
 import type { LocalizedString } from "@/shared/types";
 
@@ -11,8 +11,8 @@ export const meetingProviders = pgTable(
     description: jsonb("description").$type<LocalizedString>(),
     instructions: jsonb("instructions").$type<LocalizedString>(),
     urlAllowlist: jsonb("url_allowlist").$type<readonly string[]>().notNull(),
-    urlExample: varchar("url_example", { length: 1024 }),
-    logoUrl: varchar("logo_url", { length: 1024 }),
+    urlExample: text("url_example"),
+    logoUrl: text("logo_url"),
     fieldSchema: jsonb("field_schema").$type<MeetingProviderFieldSchema>().notNull(),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),

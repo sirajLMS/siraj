@@ -1,5 +1,5 @@
 import type { DBTransaction } from "@/backend/db/db.types";
-import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
+import { MeetingProviderRepository } from "@/backend/db/repo/meeting";
 import { AppPermission } from "@/backend/enum";
 import {
   parseMeetingProviderSubmitInput,
@@ -11,7 +11,7 @@ import type {
   MeetingProviderSelectType,
   MeetingProviderSubmitInput,
   UpdateMeetingProviderInput,
-} from "@/backend/types/meeting/meeting-provider.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace MeetingProviderCatalogService {

@@ -12,9 +12,9 @@ export const layoutSettings: MuiThemeLayoutSettings = {
   inputGap: "1rem",
   sectionGap: "1.5rem",
   radius: {
-    card: [1, 2, 3, 4],
-    button: [1, 2, 3, 4],
-    badge: [1, 2, 3, 4],
-    section: [1, 2, 3, 4],
+    card: [1, 1.4, 1.8, 2.4],
+    button: [1, 1.4, 1.8, 2.4],
+    badge: [1, 1.4, 1.8, 2.4],
+    section: [1, 1.4, 1.8, 2.4],
   },
 };

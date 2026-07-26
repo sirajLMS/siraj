@@ -13,13 +13,22 @@ export interface MeetingProvidersNotificationState {
 }
 
 export interface MeetingProvidersColumnLabels {
+  readonly logo?: string;
   readonly slug: string;
   readonly name: string;
+  readonly description?: string;
+  readonly instructions?: string;
+  readonly urlAllowlist?: string;
+  readonly urlExample?: string;
+  readonly capabilities?: string;
   readonly active: string;
   readonly inactive: string;
   readonly actions: string;
   readonly edit: string;
   readonly delete: string;
+  readonly supportsUsername?: string;
+  readonly supportsPassword?: string;
+  readonly supportsTenantId?: string;
 }
 
 export interface MeetingProvidersViewLabels extends MeetingProvidersColumnLabels {
@@ -50,10 +59,10 @@ export interface MeetingProvidersViewProps {
   readonly notifications: MeetingProvidersNotificationState;
   readonly onCreateOpen: () => void;
   readonly onCreateClose: () => void;
-  readonly onCreateSaved: () => Promise<void>;
+  readonly onCreateSaved: () => void;
   readonly onEditRow: (row: MeetingProviderFieldsFragment) => void;
   readonly onEditClose: () => void;
-  readonly onEditSaved: () => Promise<void>;
+  readonly onEditSaved: () => void;
   readonly onDeleteRow: (row: MeetingProviderFieldsFragment) => void;
   readonly onDeleteClose: () => void;
   readonly onDeleteConfirm: () => Promise<void>;

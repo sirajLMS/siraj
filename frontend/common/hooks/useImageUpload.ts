@@ -202,6 +202,15 @@ type FileSelectDeps = {
   readonly setLocalPreview: (file: File) => void;
 };
 
+const readAsDataUrl = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 const applyFileSelectResult = async (result: SelectResult, deps: FileSelectDeps): Promise<void> => {
   switch (result.kind) {
     case "skip": {
@@ -216,6 +225,14 @@ const applyFileSelectResult = async (result: SelectResult, deps: FileSelectDeps)
       deps.setLocalError(null);
       deps.setLocalPreview(result.file);
       if (!deps.onUploadAction) {
+        try {
+          const dataUrl = await readAsDataUrl(result.file);
+          deps.onImageUrlChangeAction?.(dataUrl);
+          deps.setUploadState("ready");
+        } catch {
+          deps.setLocalError(deps.t.uploadFailed);
+          deps.setUploadState("error");
+        }
         return;
       }
       deps.setUploadState("uploading");

@@ -19,24 +19,43 @@ export interface MeetingProvidersLabels {
   readonly createSuccess: string;
   readonly updateSuccess: string;
   readonly deleteSuccess: string;
+  readonly backToProviders: string;
   readonly columns: {
+    readonly logo: string;
     readonly slug: string;
     readonly name: string;
+    readonly description: string;
+    readonly instructions: string;
+    readonly urlAllowlist: string;
+    readonly urlExample: string;
+    readonly capabilities: string;
     readonly active: string;
     readonly actions: string;
   };
   readonly fields: {
+    readonly logoUrl: string;
     readonly slug: string;
     readonly slugRequired: string;
     readonly slugInvalidFormat: string;
     readonly name: string;
+    readonly nameRequired: string;
+    readonly description: string;
+    readonly instructions: string;
     readonly urlAllowlist: string;
     readonly urlAllowlistHelp: string;
     readonly urlAllowlistRequired: string;
     readonly urlExample: string;
+    readonly capabilities: string;
     readonly isActive: string;
     readonly supportsUsername: string;
     readonly supportsPassword: string;
     readonly supportsTenantId: string;
+  };
+  readonly validation: {
+    readonly slugRequired: string;
+    readonly slugInvalidFormat: string;
+    readonly nameRequired: string;
+    readonly urlAllowlistRequired: string;
+    readonly urlAllowlistInvalid: string;
   };
 }

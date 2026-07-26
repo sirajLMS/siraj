@@ -12,11 +12,14 @@ import {
   UserMeetingConfigUpdateInputPothos,
 } from "@/backend/graphql/pothos/meeting/meeting.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ClassMeetingConfigService, MeetingConfigService } from "@/backend/services/meeting";
-import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
-import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
+import {
+  ClassMeetingConfigService,
+  MeetingConfigService,
+  MeetingProviderCatalogService,
+} from "@/backend/services/meeting";
+import type { MeetingConfigDetails, MeetingProviderFieldSchema } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
+import type { LocalizedString } from "@/shared/types";
 
 function withAuthResult<TArgs, TResult>(
   fn: (actorUserId: string, args: TArgs, tErrors: ErrorsLabels, locale: string) => Promise<TResult>
@@ -65,11 +68,35 @@ function normalizeMeetingConfigDetails(input: {
   };
 }
 
+function normalizeLocalizedString(
+  loc?: { readonly ar?: string | null; readonly en?: string | null } | null
+): LocalizedString | null {
+  if (!loc) return null;
+  const ar = (loc.ar ?? "").trim() || undefined;
+  const en = (loc.en ?? "").trim() || undefined;
+  if (!ar && !en) return null;
+  return {
+    ...(en ? { en } : {}),
+    ...(ar ? { ar } : {}),
+  };
+}
+
+function normalizeRequiredLocalizedString(
+  loc?: { readonly ar?: string | null; readonly en?: string | null } | null
+): LocalizedString {
+  const norm = normalizeLocalizedString(loc);
+  if (!norm) return { en: "", ar: "" };
+  return {
+    en: norm.en ?? norm.ar ?? "",
+    ar: norm.ar ?? norm.en ?? "",
+  };
+}
+
 function normalizeProviderUpdateInput(input: {
   readonly slug?: string | null;
-  readonly name?: Partial<Record<"ar" | "en", string>> | null;
-  readonly description?: Partial<Record<"ar" | "en", string>> | null;
-  readonly instructions?: Partial<Record<"ar" | "en", string>> | null;
+  readonly name?: { readonly ar?: string | null; readonly en?: string | null } | null;
+  readonly description?: { readonly ar?: string | null; readonly en?: string | null } | null;
+  readonly instructions?: { readonly ar?: string | null; readonly en?: string | null } | null;
   readonly urlAllowlist?: readonly string[] | null;
   readonly urlExample?: string | null;
   readonly logoUrl?: string | null;
@@ -83,9 +110,9 @@ function normalizeProviderUpdateInput(input: {
 }) {
   return {
     ...(input.slug == null ? {} : { slug: input.slug }),
-    ...(input.name == null ? {} : { name: input.name }),
-    ...(input.description === undefined ? {} : { description: input.description }),
-    ...(input.instructions === undefined ? {} : { instructions: input.instructions }),
+    ...(input.name == null ? {} : { name: normalizeRequiredLocalizedString(input.name) }),
+    ...(input.description === undefined ? {} : { description: normalizeLocalizedString(input.description) }),
+    ...(input.instructions === undefined ? {} : { instructions: normalizeLocalizedString(input.instructions) }),
     ...(input.urlAllowlist == null ? {} : { urlAllowlist: input.urlAllowlist }),
     ...(input.urlExample === undefined ? {} : { urlExample: input.urlExample }),
     ...(input.logoUrl === undefined ? {} : { logoUrl: input.logoUrl }),
@@ -145,14 +172,14 @@ gqlSchemaBuilder.mutationField("createMeetingProvider", t =>
       MeetingProviderCatalogService.createProvider(
         userId,
         {
-          slug: args.input.slug ?? "",
-          name: args.input.name ?? {},
-          description: args.input.description,
-          instructions: args.input.instructions,
-          urlAllowlist: args.input.urlAllowlist ?? [],
+          slug: args.input.slug,
+          name: normalizeRequiredLocalizedString(args.input.name),
+          description: normalizeLocalizedString(args.input.description),
+          instructions: normalizeLocalizedString(args.input.instructions),
+          urlAllowlist: args.input.urlAllowlist,
           urlExample: args.input.urlExample,
           logoUrl: args.input.logoUrl,
-          fieldSchema: normalizeFieldSchema(args.input.fieldSchema ?? { requiresMeetingUrl: false }),
+          fieldSchema: normalizeFieldSchema(args.input.fieldSchema),
           isActive: args.input.isActive ?? undefined,
         },
         tErrors

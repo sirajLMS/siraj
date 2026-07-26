@@ -7,7 +7,7 @@ import type {
   MeetingProviderSelectType,
   MeetingProviderSubmitInput,
   UpdateMeetingProviderInput,
-} from "@/backend/types/meeting/meeting-provider.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace MeetingProviderRepository {

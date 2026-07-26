@@ -1,4 +1,5 @@
-import type { LocalizedString } from "@/shared/types";
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
+import type { meetingProviders } from "@/backend/db/schema/meeting/meeting-providers";
 
 // ============================================================================
 // `meeting_providers` — admin-managed catalog (no provider enums)
@@ -6,40 +7,21 @@ import type { LocalizedString } from "@/shared/types";
 
 export type MeetingProviderFieldSchema = {
   readonly requiresMeetingUrl: boolean;
-  readonly supportsUsername?: boolean;
-  readonly supportsPassword?: boolean;
-  readonly supportsTenantId?: boolean;
+  readonly supportsUsername?: boolean | null;
+  readonly supportsPassword?: boolean | null;
+  readonly supportsTenantId?: boolean | null;
 };
 
-export type MeetingProviderSelectType = {
-  readonly id: string;
-  readonly slug: string;
-  readonly name: LocalizedString;
-  readonly description: LocalizedString | null;
-  readonly instructions: LocalizedString | null;
-  readonly urlAllowlist: readonly string[];
-  readonly urlExample: string | null;
-  readonly logoUrl: string | null;
-  readonly fieldSchema: MeetingProviderFieldSchema;
-  readonly isActive: boolean;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
+export type MeetingProviderFieldSchemaInput = {
+  readonly requiresMeetingUrl: boolean;
+  readonly supportsUsername?: boolean | null;
+  readonly supportsPassword?: boolean | null;
+  readonly supportsTenantId?: boolean | null;
 };
 
-export type MeetingProviderInsertType = {
-  readonly id?: string;
-  readonly slug: string;
-  readonly name: LocalizedString;
-  readonly description?: LocalizedString | null;
-  readonly instructions?: LocalizedString | null;
-  readonly urlAllowlist: readonly string[];
-  readonly urlExample?: string | null;
-  readonly logoUrl?: string | null;
-  readonly fieldSchema: MeetingProviderFieldSchema;
-  readonly isActive?: boolean;
-  readonly createdAt?: Date;
-  readonly updatedAt?: Date;
-};
+export type MeetingProviderSelectType = InferSelectModel<typeof meetingProviders>;
+
+export type MeetingProviderInsertType = InferInsertModel<typeof meetingProviders>;
 
 export type MeetingProviderSubmitInput = Omit<MeetingProviderInsertType, "id" | "createdAt" | "updatedAt">;
 

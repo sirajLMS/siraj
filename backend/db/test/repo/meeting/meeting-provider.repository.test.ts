@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
+import { MeetingProviderRepository } from "@/backend/db/repo/meeting";
 import {
   createTestMeetingConfig,
   createTestMeetingProvider,

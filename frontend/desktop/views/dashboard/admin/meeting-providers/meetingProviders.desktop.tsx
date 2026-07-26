@@ -3,8 +3,6 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import { CreateMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/CreateMeetingProviderDialog";
-import { EditMeetingProviderDialog } from "@/frontend/common/views/dashboard/admin/meeting-providers/EditMeetingProviderDialog";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import {
   DesktopAppDataGrid,
@@ -33,16 +31,10 @@ export function MeetingProvidersDesktopView({
   rows,
   columns,
   loading,
-  createOpen,
-  editProvider,
   deleteProvider,
   deleting,
   notifications,
   onCreateOpen,
-  onCreateClose,
-  onCreateSaved,
-  onEditClose,
-  onEditSaved,
   onDeleteClose,
   onDeleteConfirm,
 }: Readonly<MeetingProvidersViewProps>) {
@@ -62,7 +54,7 @@ export function MeetingProvidersDesktopView({
         <MeetingProvidersDesktopEmptyState title={t.emptyCatalogTitle} body={t.emptyCatalogBody} />
       ) : null}
 
-      <Box sx={{ height: 560 }}>
+      <Box sx={{ height: 600 }}>
         <DesktopAppDataGrid
           rows={rows}
           columns={columns}
@@ -72,19 +64,6 @@ export function MeetingProvidersDesktopView({
         />
       </Box>
 
-      <CreateMeetingProviderDialog
-        open={createOpen}
-        onClose={onCreateClose}
-        onSaved={onCreateSaved}
-        onError={notifications.showError}
-      />
-      <EditMeetingProviderDialog
-        open={Boolean(editProvider)}
-        provider={editProvider}
-        onClose={onEditClose}
-        onSaved={onEditSaved}
-        onError={notifications.showError}
-      />
       <DesktopBaseDeleteDialog
         open={Boolean(deleteProvider)}
         onClose={onDeleteClose}

@@ -3,7 +3,7 @@
 import { Box, Chip, InputBase, Paper, styled, Typography, useTheme } from "@mui/material";
 import type React from "react";
 import { type KeyboardEvent, type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
-import { useTagInputDeletion, useTagInputEditing } from "@/frontend/common/hooks/useTagInputEditing";
+import { useTagInputEditing } from "@/frontend/common/hooks/useTagInputEditing";
 import { useAppTranslation } from "@/shared/locale";
 
 export type TagInputProps = {
@@ -122,16 +122,41 @@ export function TagInput({ label, placeholder, onChange, initialTags = [] }: Tag
   const resolvedLabel = label ?? t.label;
   const resolvedPlaceholder = placeholder ?? t.placeholder;
 
-  const editing = useTagInputEditing((index, value) => {
-    setTags(prevTags => {
-      const newTags = [...prevTags];
-      newTags[index] = value;
-      return newTags;
-    });
-  });
-  const deletion = useTagInputDeletion(setTags);
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   const lastSyncedInitial = useRef<string>(JSON.stringify(initialTags));
+
+  const updateTags = useCallback((newTags: string[]) => {
+    setTags(newTags);
+    lastSyncedInitial.current = JSON.stringify(newTags);
+    if (onChangeRef.current) {
+      onChangeRef.current(newTags);
+    }
+  }, []);
+
+  const handleCommitEdit = useCallback(
+    (index: number, value: string) => {
+      const newTags = [...tags];
+      newTags[index] = value;
+      updateTags(newTags);
+    },
+    [tags, updateTags]
+  );
+
+  const editing = useTagInputEditing(handleCommitEdit);
+
+  const handleDeleteTag = useCallback(
+    (index: number) => (e: MouseEvent) => {
+      e.stopPropagation();
+      const newTags = tags.filter((_, i) => i !== index);
+      updateTags(newTags);
+    },
+    [tags, updateTags]
+  );
+
   useEffect(() => {
     const serializedInitial = JSON.stringify(initialTags);
     if (serializedInitial !== lastSyncedInitial.current) {
@@ -139,12 +164,6 @@ export function TagInput({ label, placeholder, onChange, initialTags = [] }: Tag
       setTags(initialTags);
     }
   }, [initialTags]);
-
-  useEffect(() => {
-    if (onChange) {
-      onChange(tags);
-    }
-  }, [tags, onChange]);
 
   const handleContainerClick = useCallback(() => {
     if (inputRef.current) {
@@ -160,11 +179,11 @@ export function TagInput({ label, placeholder, onChange, initialTags = [] }: Tag
     (tag: string) => {
       const trimmedTag = tag.trim();
       if (trimmedTag && !tags.includes(trimmedTag)) {
-        setTags([...tags, trimmedTag]);
+        updateTags([...tags, trimmedTag]);
         setInputValue("");
       }
     },
-    [tags]
+    [tags, updateTags]
   );
 
   const handleInputKeyDown = useCallback(
@@ -175,11 +194,11 @@ export function TagInput({ label, placeholder, onChange, initialTags = [] }: Tag
       } else if (e.key === "Backspace" && !inputValue && tags.length > 0) {
         e.preventDefault();
         const lastTag = tags.at(-1) ?? "";
-        setTags(tags.slice(0, -1));
+        updateTags(tags.slice(0, -1));
         setInputValue(lastTag);
       }
     },
-    [inputValue, tags, addTag]
+    [inputValue, tags, addTag, updateTags]
   );
 
   const handleBlur = useCallback(
@@ -213,7 +232,7 @@ export function TagInput({ label, placeholder, onChange, initialTags = [] }: Tag
           onEditInputChange={editing.handleEditInputChange}
           onEditKeyDown={(e, index) => editing.handleEditKeyDown(e, index, tags)}
           onEditBlur={index => editing.handleEditBlur(index, tags)}
-          onDelete={deletion.handleDelete}
+          onDelete={handleDeleteTag}
           onChipDoubleClick={index => editing.startEdit(index, tags)}
         />
         <StyledInputBase
@@ -223,10 +242,6 @@ export function TagInput({ label, placeholder, onChange, initialTags = [] }: Tag
           onKeyDown={handleInputKeyDown}
           onBlur={handleBlur}
           placeholder={tags.length === 0 ? resolvedPlaceholder : ""}
-          sx={{
-            margin: 0.5,
-            flexGrow: 1,
-          }}
         />
       </TagContainer>
     </Box>

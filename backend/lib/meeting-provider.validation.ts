@@ -4,7 +4,7 @@ import type {
   MeetingProviderFieldSchema,
   MeetingProviderSubmitInput,
   UpdateMeetingProviderInput,
-} from "@/backend/types/meeting/meeting-provider.types";
+} from "@/backend/types";
 
 export const meetingProviderFieldSchemaSchema = z.object({
   requiresMeetingUrl: z.boolean(),
@@ -19,12 +19,12 @@ export const meetingProviderSubmitInputSchema = z.object({
     .min(1)
     .max(100)
     .regex(/^[a-z0-9_]+$/, "slug must be lowercase alphanumeric with underscores"),
-  name: localizedStringRequiredSchema(),
+  name: localizedStringRequiredSchema([]),
   description: localizedStringSchema.nullable().optional(),
   instructions: localizedStringSchema.nullable().optional(),
   urlAllowlist: z.array(z.string().min(1)).min(1),
-  urlExample: z.url({ message: "Invalid URL" }).nullable().optional(),
-  logoUrl: z.url({ message: "Invalid URL" }).nullable().optional(),
+  urlExample: z.string().nullable().optional(),
+  logoUrl: z.string().nullable().optional(),
   fieldSchema: meetingProviderFieldSchemaSchema,
   isActive: z.boolean().optional(),
 }) satisfies z.ZodType<MeetingProviderSubmitInput>;
@@ -36,12 +36,12 @@ export const updateMeetingProviderInputSchema = z.object({
     .max(100)
     .regex(/^[a-z0-9_]+$/, "slug must be lowercase alphanumeric with underscores")
     .optional(),
-  name: localizedStringRequiredSchema().optional(),
+  name: localizedStringRequiredSchema([]).optional(),
   description: localizedStringSchema.nullable().optional(),
   instructions: localizedStringSchema.nullable().optional(),
   urlAllowlist: z.array(z.string().min(1)).min(1).optional(),
-  urlExample: z.url({ message: "Invalid URL" }).nullable().optional(),
-  logoUrl: z.url({ message: "Invalid URL" }).nullable().optional(),
+  urlExample: z.string().nullable().optional(),
+  logoUrl: z.string().nullable().optional(),
   fieldSchema: meetingProviderFieldSchemaSchema.optional(),
   isActive: z.boolean().optional(),
 }) satisfies z.ZodType<UpdateMeetingProviderInput>;
