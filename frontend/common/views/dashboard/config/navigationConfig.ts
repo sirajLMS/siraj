@@ -292,12 +292,12 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.students,
   },
   {
-    key: "managers",
-    labelKey: "managers",
+    key: "staff",
+    labelKey: "staff",
     icon: BadgeOutlined,
-    href: "/managers",
+    href: "/staff",
     section: "main",
-    permission: PAGE_PERMISSIONS.managers,
+    permission: PAGE_PERMISSIONS.staff,
   },
   {
     key: "resources",

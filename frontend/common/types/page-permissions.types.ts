@@ -29,7 +29,7 @@ export const PAGE_PERMISSIONS = {
   teachers: [AppPermission.StaffViewDirectory] as PagePermissions,
   parents: [AppPermission.ParentViewDirectory] as PagePermissions,
   students: [AppPermission.StudentsList] as PagePermissions,
-  managers: [AppPermission.StaffViewDirectory] as PagePermissions,
+  staff: [AppPermission.StaffViewDirectory] as PagePermissions,
   subjects: [AppPermission.SubjectsList] as PagePermissions,
   resources: [AppPermission.ResourcesList] as PagePermissions,
   booksAndBags: [AppPermission.ResourcesList] as PagePermissions,

@@ -24,7 +24,7 @@ import {
   createTestEntitiesMutationDocument,
   createTestSuperAdminMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/shared/test-helper.documents";
-import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/manager-onboarding.documents";
+import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 

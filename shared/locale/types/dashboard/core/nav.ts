@@ -15,7 +15,7 @@ export interface DashboardNavigationLabels {
   readonly studentHistory: string;
   readonly studentQuota: string;
   readonly studentStatus: string;
-  readonly managers: string;
+  readonly staff: string;
   readonly resources: string;
   readonly subjects: string;
   readonly report: string;
@@ -32,7 +32,7 @@ export interface DashboardNavigationLabels {
   readonly teacherReassignment: string;
   readonly teacherOnboarding: string;
   readonly parentOnboarding: string;
-  readonly managerOnboarding: string;
+  readonly staffOnboarding: string;
   readonly studentOnboarding: string;
   readonly scheduleReschedule: string;
   readonly dstMigration: string;

@@ -4,7 +4,7 @@ import type {
   ManagerOnboardingResult,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { useManagerOnboardingStore } from "@/frontend/common/stores/managerOnboardingStore";
+import { useStaffOnboardingStore } from "@/frontend/common/stores/staffOnboardingStore";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
 
@@ -13,8 +13,8 @@ export function useCreateManagerOnboarding() {
   const { cache } = useApolloClient();
 
   const execute = async (formData: ManagerOnboardingFormData): Promise<ManagerOnboardingResult> => {
-    useManagerOnboardingStore.getState().reset();
-    useManagerOnboardingStore.setState({ isSubmitting: true });
+    useStaffOnboardingStore.getState().reset();
+    useStaffOnboardingStore.setState({ isSubmitting: true });
 
     try {
       const input: ManagerOnboardingInput = {
@@ -31,14 +31,14 @@ export function useCreateManagerOnboarding() {
       if (result.data?.createManager) {
         cache.evict({ id: "ROOT_QUERY", fieldName: "managerDirectory" });
         cache.gc();
-        useManagerOnboardingStore.setState({ result: result.data.createManager, isSubmitting: false });
+        useStaffOnboardingStore.setState({ result: result.data.createManager, isSubmitting: false });
         return result.data.createManager;
       }
 
       throw new Error("Mutation returned no data");
     } catch (err) {
       logger.error("Manager creation failed:", { err });
-      useManagerOnboardingStore.setState({
+      useStaffOnboardingStore.setState({
         error: "operationFailed",
         isSubmitting: false,
       });

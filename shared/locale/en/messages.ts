@@ -27,8 +27,6 @@ import { dashboardLmsCreditEn } from "@/shared/locale/en/dashboard/lms/credit";
 import { dashboardLmsLessonReportsEn } from "@/shared/locale/en/dashboard/lms/lessonReports";
 import { dashboardLmsMonthlyReportsEn } from "@/shared/locale/en/dashboard/lms/monthlyReports";
 import { dashboardLmsTeacherDuesEn } from "@/shared/locale/en/dashboard/lms/teacherDues";
-import { dashboardManagersDirectoryEn } from "@/shared/locale/en/dashboard/managers/directory";
-import { dashboardManagerOnboardingEn } from "@/shared/locale/en/dashboard/managers/onboarding";
 import { dashboardMeetingProvidersEn } from "@/shared/locale/en/dashboard/meeting-providers/main";
 import { dashboardParentsDirectoryEn } from "@/shared/locale/en/dashboard/parents/directory";
 import { dashboardParentLifecycleEn } from "@/shared/locale/en/dashboard/parents/lifecycle";
@@ -42,6 +40,8 @@ import { dashboardPermissionsEn } from "@/shared/locale/en/dashboard/permissions
 import { dashboardReportsEn } from "@/shared/locale/en/dashboard/reports/main";
 import { dashboardBooksAndBagsEn } from "@/shared/locale/en/dashboard/resources/booksAndBags";
 import { dashboardResourcesEn } from "@/shared/locale/en/dashboard/resources/main";
+import { dashboardStaffDirectoryEn } from "@/shared/locale/en/dashboard/staff/directory";
+import { dashboardStaffOnboardingEn } from "@/shared/locale/en/dashboard/staff/onboarding";
 import { dashboardStudentPortalCreditsEn } from "@/shared/locale/en/dashboard/studentPortal/studentCredits";
 import { dashboardStudentPortalDashboardEn } from "@/shared/locale/en/dashboard/studentPortal/studentDashboard";
 import { dashboardStudentPortalHistoryEn } from "@/shared/locale/en/dashboard/studentPortal/studentHistory";
@@ -180,8 +180,8 @@ export const enMessages: Translations = {
     lmsLessonReports: dashboardLmsLessonReportsEn,
     lmsMonthlyReports: dashboardLmsMonthlyReportsEn,
     lmsTeacherDues: dashboardLmsTeacherDuesEn,
-    managersDirectory: dashboardManagersDirectoryEn,
-    managerOnboarding: dashboardManagerOnboardingEn,
+    staffDirectory: dashboardStaffDirectoryEn,
+    staffOnboarding: dashboardStaffOnboardingEn,
     meetingProviders: dashboardMeetingProvidersEn,
     parentsDirectory: dashboardParentsDirectoryEn,
     parentOnboarding: dashboardParentOnboardingEn,

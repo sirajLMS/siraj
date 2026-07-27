@@ -27,8 +27,6 @@ import type { CreditLabels } from "@/shared/locale/types/dashboard/lms/credit";
 import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports";
 import type { MonthlyReportLabels } from "@/shared/locale/types/dashboard/lms/monthlyReports";
 import type { TeacherDueLabels } from "@/shared/locale/types/dashboard/lms/teacherDues";
-import type { ManagersDirectoryLabels } from "@/shared/locale/types/dashboard/managers/directory";
-import type { ManagerOnboardingLabels } from "@/shared/locale/types/dashboard/managers/onboarding";
 import type { MeetingProvidersLabels } from "@/shared/locale/types/dashboard/meeting-providers/main";
 import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents/directory";
 import type { ParentLifecycleLabels } from "@/shared/locale/types/dashboard/parents/lifecycle";
@@ -41,6 +39,8 @@ import type { PaymentCatalogsLabels } from "@/shared/locale/types/dashboard/paym
 import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions/main";
 import type { ReportsLabels } from "@/shared/locale/types/dashboard/reports/main";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
+import type { StaffDirectoryLabels } from "@/shared/locale/types/dashboard/staff/directory";
+import type { StaffOnboardingLabels } from "@/shared/locale/types/dashboard/staff/onboarding";
 import type { StudentPortalCreditsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentCredits";
 import type { StudentPortalDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard";
 import type { StudentPortalHistoryLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory";
@@ -99,8 +99,8 @@ export interface DashboardTranslations {
   lmsLessonReports: LessonReportLabels;
   lmsMonthlyReports: MonthlyReportLabels;
   lmsTeacherDues: TeacherDueLabels;
-  managersDirectory: ManagersDirectoryLabels;
-  managerOnboarding: ManagerOnboardingLabels;
+  staffDirectory: StaffDirectoryLabels;
+  staffOnboarding: StaffOnboardingLabels;
   meetingProviders: MeetingProvidersLabels;
   parentsDirectory: ParentsDirectoryLabels;
   parentOnboarding: ParentOnboardingLabels;
