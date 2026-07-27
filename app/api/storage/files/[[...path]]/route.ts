@@ -92,11 +92,8 @@ async function authenticateRequest(request: NextRequest): Promise<{ userId: stri
   const accessToken = extractTokenFromHeader(authHeader) ?? request.cookies.get("access_token")?.value ?? null;
   const payload = accessToken ? await verifyToken(accessToken) : null;
 
-  if (payload?.type === "access") {
-    const user = await SessionService.getCurrentUserProfile(payload.userId);
-    if (user) {
-      return { userId: payload.userId };
-    }
+  if (payload?.type === "access" && payload.userId) {
+    return { userId: payload.userId };
   }
 
   const sessionId = request.cookies.get("session_id")?.value;
@@ -153,10 +150,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "File path is required" }, { status: 400 });
     }
 
-    // Allow unauthenticated access to files in public/ directory
-    if (relativePath.startsWith("public/")) {
-      const subPath = relativePath.substring("public/".length);
-      const absolutePath = resolvePublicStoragePath(subPath);
+    // Allow unauthenticated access to public files (public/ or avatars/ directories)
+    if (relativePath.startsWith("public/") || relativePath.startsWith("avatars/")) {
+      let absolutePath: string;
+      try {
+        absolutePath = relativePath.startsWith("public/")
+          ? resolvePublicStoragePath(relativePath.substring("public/".length))
+          : resolveLocalStoragePath(relativePath);
+      } catch (error) {
+        logger.warn("Path traversal attempt detected in public file request", { path: relativePath, error });
+        return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
+      }
 
       try {
         await fs.access(absolutePath);
