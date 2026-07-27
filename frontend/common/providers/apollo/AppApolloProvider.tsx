@@ -3,9 +3,8 @@
 import { ApolloClient, ApolloLink, HttpLink } from "@apollo/client";
 import { PersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { ApolloProvider } from "@apollo/client/react";
-import { Box, CircularProgress } from "@mui/material";
 import type React from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { NetworkConnectivityContext } from "@/frontend/common/context/NetworkConnectivityContext";
 import { useApolloConnectivity } from "@/frontend/common/hooks/useApolloConnectivity";
 import { InitializingUI } from "@/frontend/common/providers/apollo/AppApolloProviderHelpers";
@@ -18,6 +17,51 @@ import {
   sha256,
 } from "@/frontend/common/providers/apollo/utils";
 import { useAppTranslation } from "@/shared/locale";
+
+/**
+ * Module-level mutable state object shared between the Apollo links and the
+ * component. The links read from this object at call-time (during a request,
+ * never during render), so we never access a React ref during render — we only
+ * mutate this object in useEffect (after render). This satisfies the React
+ * compiler's "no ref access during render" rule while still allowing synchronous
+ * client creation at module scope.
+ */
+const apolloLinkState = {
+  authToken: null as string | null,
+  isConnected: false,
+  checkConnectivity: (): Promise<boolean> => Promise.resolve(true),
+  notifyIfDisconnected: (): void => undefined,
+  setConnected: (_v: boolean): void => undefined,
+};
+
+/**
+ * Apollo client is created once at module scope — available synchronously on
+ * the very first render of any provider instance, with zero useEffect cycles.
+ */
+const apolloClient = new ApolloClient({
+  link: ApolloLink.from([
+    createErrorLinkHandler(
+      () => apolloLinkState.isConnected,
+      v => apolloLinkState.setConnected(v),
+      () => apolloLinkState.notifyIfDisconnected()
+    ),
+    createConnectivityLink(
+      () => apolloLinkState.isConnected,
+      v => apolloLinkState.setConnected(v),
+      () => apolloLinkState.checkConnectivity(),
+      () => apolloLinkState.notifyIfDisconnected()
+    ),
+    createAuthLink(() => apolloLinkState.authToken),
+    new PersistedQueryLink({ sha256 }),
+    new HttpLink({ uri: "/api/graphql", credentials: "include" }),
+  ]),
+  cache: createApolloCache(),
+  defaultOptions: {
+    watchQuery: { errorPolicy: "none", notifyOnNetworkStatusChange: true },
+    query: { errorPolicy: "none" },
+    mutate: { errorPolicy: "none" },
+  },
+});
 
 export function AppApolloProvider({ children }: { readonly children: React.ReactNode }) {
   const t = useAppTranslation().commonTranslations;
@@ -32,89 +76,35 @@ export function AppApolloProvider({ children }: { readonly children: React.React
   } = useApolloConnectivity();
 
   const [authToken, setAuthToken] = useState<string | null>(null);
-  const authTokenRef = useRef<string | null>(null);
 
-  // Stable callback refs for Apollo Links
-  const getIsConnectedRef = useRef(() => isConnected);
-  const checkConnectivityRef = useRef(checkConnectivity);
-  const notifyIfDisconnectedRef = useRef(notifyIfDisconnected);
-  const setConnectedWithRefRef = useRef((v: boolean) => {
-    setConnected(v);
-  });
-
-  // Update refs when values change
+  // Sync component state into the module-level link state (in effects, not during render)
   useEffect(() => {
-    getIsConnectedRef.current = () => isConnected;
+    apolloLinkState.isConnected = isConnected;
   }, [isConnected]);
 
   useEffect(() => {
-    checkConnectivityRef.current = checkConnectivity;
+    apolloLinkState.checkConnectivity = checkConnectivity;
   }, [checkConnectivity]);
 
   useEffect(() => {
-    notifyIfDisconnectedRef.current = notifyIfDisconnected;
+    apolloLinkState.notifyIfDisconnected = notifyIfDisconnected;
   }, [notifyIfDisconnected]);
 
-  // Auth token management functions
+  useEffect(() => {
+    apolloLinkState.setConnected = setConnected;
+  }, [setConnected]);
+
   const updateAuthToken = useCallback((token: string) => {
     setAuthToken(token);
-    authTokenRef.current = token;
+    apolloLinkState.authToken = token;
   }, []);
 
   const clearAuthData = useCallback(() => {
     setAuthToken(null);
-    authTokenRef.current = null;
+    apolloLinkState.authToken = null;
   }, []);
 
-  // Create Apollo client
-  const [apolloClient, setApolloClient] = useState<ApolloClient | null>(null);
-
   useAuthRecoveryRegistration(apolloClient, updateAuthToken);
-
-  useEffect(() => {
-    if (apolloClient == null) {
-      const httpLink = new HttpLink({
-        uri: "/api/graphql",
-        credentials: "include",
-      });
-
-      const authLink = createAuthLink(() => authTokenRef.current);
-
-      const connectivityCheckLink = createConnectivityLink(
-        () => getIsConnectedRef.current(),
-        setConnectedWithRefRef.current,
-        checkConnectivityRef.current,
-        notifyIfDisconnectedRef.current
-      );
-
-      const errorLink = createErrorLinkHandler(
-        () => getIsConnectedRef.current(),
-        setConnectedWithRefRef.current,
-        notifyIfDisconnectedRef.current
-      );
-
-      const persistedQueryLink = new PersistedQueryLink({ sha256 });
-
-      setApolloClient(
-        new ApolloClient({
-          link: ApolloLink.from([errorLink, connectivityCheckLink, authLink, persistedQueryLink, httpLink]),
-          cache: createApolloCache(),
-          defaultOptions: {
-            watchQuery: {
-              errorPolicy: "none",
-              notifyOnNetworkStatusChange: true,
-            },
-            query: {
-              errorPolicy: "none",
-            },
-            mutate: {
-              errorPolicy: "none",
-            },
-          },
-        })
-      );
-    }
-  }, [apolloClient]);
 
   const contextValue = useMemo(
     () => ({
@@ -141,17 +131,15 @@ export function AppApolloProvider({ children }: { readonly children: React.React
     ]
   );
 
-  if (!apolloClient) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (!initialCheckDone || !isConnected) {
-    const hasError = initialCheckDone && !isConnected;
-    return <InitializingUI error={hasError} onRetry={() => checkConnectivity()} t={t} />;
+  /**
+   * Only block rendering when a disconnection is actually confirmed.
+   * `initialCheckDone` starts as `false` and flips to `true` after the first
+   * HEAD check (which runs in a background useEffect). By gating on
+   * `initialCheckDone && !isConnected` the app renders immediately on startup —
+   * the offline UI appears only when a real disconnection is detected.
+   */
+  if (initialCheckDone && !isConnected) {
+    return <InitializingUI error={true} onRetry={() => checkConnectivity()} t={t} />;
   }
 
   return (

@@ -1,8 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
-
 /* Root color variables are intentionally omitted — MUI's CssBaseline and theme provider handle
    root-level background/text colors via the active palette. If custom overrides are needed,
    add them in the MUI theme configuration (createTheme) rather than here. */
+/* Google Fonts are self-hosted via next/font in app/layout.tsx — no @import needed here, to improve the performance */
 
 html,
 body {

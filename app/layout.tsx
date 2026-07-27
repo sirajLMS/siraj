@@ -1,6 +1,7 @@
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
+import { Hanken_Grotesk, Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
@@ -12,6 +13,30 @@ import { AppApolloProvider } from "@/frontend/common/context";
 import { AuthProvider } from "@/frontend/common/providers/apollo/AuthProvider";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
+
+/**
+ * Self-host Inter via next/font. next/font downloads the font files at build
+ * time, serves them from the same origin as the app (no external request),
+ * and automatically adds a <link rel="preload"> in <head> for zero CLS.
+ * Subsetting to the weights actually used in the MUI theme keeps the download small.
+ */
+const inter = Inter({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+/**
+ * Hanken Grotesk — used for headings in the MUI theme.
+ * Subsetting to latin + used weights significantly reduces payload.
+ */
+const hankenGrotesk = Hanken_Grotesk({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-hanken-grotesk",
+  display: "swap",
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -48,7 +73,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const direction = locale === "ar" ? "rtl" : "ltr";
 
   return (
-    <html lang={locale} dir={direction} suppressHydrationWarning>
+    <html
+      lang={locale}
+      dir={direction}
+      suppressHydrationWarning
+      className={`${inter.variable} ${hankenGrotesk.variable}`}
+    >
       <body style={{ overflow: "hidden" }}>
         {/* Must come before the main content. Sets the initial color-scheme
             attribute on <html> from localStorage/cookie before hydration so the
