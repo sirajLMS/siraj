@@ -12,6 +12,7 @@ import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 import { parseCurrencyCode } from "@/frontend/common/lib/currency";
 import { shouldShowFxStaleBanner } from "@/frontend/common/lib/fx-stale";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import { serializeApolloError } from "@/frontend/common/utils/errorUtils";
 import { logger } from "@/frontend/common/utils/logger";
 import {
   buildExchangeRateColumns,
@@ -167,7 +168,7 @@ export function useExchangeRatesViewModel(_props: Readonly<UseExchangeRatesViewM
       }
     },
     onError: error => {
-      logger.error("FX refresh failed", { error });
+      logger.error("FX refresh failed", serializeApolloError(error));
       showFeedback(labels.refreshFailed, "error");
     },
   });

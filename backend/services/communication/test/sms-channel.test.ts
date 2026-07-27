@@ -91,6 +91,37 @@ describe("SMS Channel", () => {
     });
   });
 
+  describe("send — empty recipient guard", () => {
+    test("returns failure with 'empty recipient address' when `to` is empty string", async () => {
+      // Do NOT spy on the facade `smsChannel.send` — that would bypass the
+      // real adapter and its guard. Let the facade delegate to the real
+      // `TwilioSmsAdapter.send`; the guard short-circuits before the rate-limit
+      // check or the Twilio client is ever touched, so no network call happens.
+      const result = await smsChannel.send({ ...sendParams(), to: "" });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("empty recipient address");
+      // Rate-limit check is skipped (guard runs before it).
+      expect(getSmsCountSpy).not.toHaveBeenCalled();
+      // A FAILED delivery row is still recorded for the audit trail.
+      expect(createDeliverySpy).toHaveBeenCalled();
+      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: NotificationDeliveryStatus.FAILED,
+          failureReason: "empty recipient address",
+        })
+      );
+    });
+
+    test("returns failure when `to` is whitespace-only", async () => {
+      const result = await smsChannel.send({ ...sendParams(), to: "   " });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("empty recipient address");
+      expect(getSmsCountSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe("rate limiting", () => {
     test("returns failure when rate limit exceeded (3/hour)", async () => {
       getSmsCountSpy.mockResolvedValue(3);

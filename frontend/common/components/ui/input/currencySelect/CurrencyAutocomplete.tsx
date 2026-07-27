@@ -161,6 +161,7 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
   onCloseAction,
   autoFocus,
   allowedCodes,
+  excludedCodes,
   matchAnchorWidth = true,
   disablePortal = false,
   listAttached = false,
@@ -177,11 +178,17 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
       const selected = allOptions.find(opt => opt.code === currency.code);
       return selected ? [selected] : [];
     }
-    if (!allowedCodes || allowedCodes.length === 0) {
-      return allOptions;
+    let filtered = allOptions;
+    if (allowedCodes && allowedCodes.length > 0) {
+      filtered = filtered.filter(option => allowedCodes.includes(option.code));
     }
-    return allOptions.filter(option => allowedCodes.includes(option.code));
-  }, [allOptions, allowedCodes, catalogLoaded, currency]);
+    if (excludedCodes && excludedCodes.length > 0) {
+      // Keep the currently-selected currency visible even if it is excluded
+      // (e.g. edit mode for an already-activated currency).
+      filtered = filtered.filter(option => !excludedCodes.includes(option.code) || option.code === currency?.code);
+    }
+    return filtered;
+  }, [allOptions, allowedCodes, excludedCodes, catalogLoaded, currency]);
 
   const getOptionLabel = useCallback((option: CurrencyOption) => getCurrencyOptionRowLabel(option, locale), [locale]);
 

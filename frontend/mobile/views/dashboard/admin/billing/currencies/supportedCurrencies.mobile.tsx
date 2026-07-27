@@ -117,6 +117,10 @@ export function SupportedCurrenciesMobileView({
       setEditRow(null);
     },
     onSaved: handleSaved,
+    // Exclude already-activated currencies so the selector only offers
+    // currencies not yet in the supported_currencies table. The edited row's
+    // own code is kept visible by the autocomplete (edit field is disabled).
+    excludedCodes: rows.filter(row => row.isActive).map(row => row.code),
   };
 
   return (

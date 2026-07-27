@@ -28,6 +28,7 @@ import {
   fxProviderConfigQueryDocument,
   updateFxProviderMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import { serializeApolloError } from "@/frontend/common/utils/errorUtils";
 import { logger } from "@/frontend/common/utils/logger";
 import { type ExchangeRatesLabels, useAppLocale } from "@/shared/locale";
 
@@ -66,7 +67,7 @@ export function ProviderSettingsSection({ labels, onFeedback, actionsDisabled = 
       void refetch();
     },
     onError: error => {
-      logger.error("FX provider update failed", { error });
+      logger.error("FX provider update failed", serializeApolloError(error));
       onFeedback(labels.saveFailed, "error");
     },
   });

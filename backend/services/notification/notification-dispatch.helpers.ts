@@ -1,8 +1,8 @@
 /**
  * `dispatchWithPreferences` — the SOLE entry point through which domain
- * services dispatch notifications (specs.md rule #1).
+ * services dispatch notifications (rule #1).
  *
- * Algorithm (specs.md §5.2):
+ * Algorithm (§5.2):
  *   1. Early-return `[]` if no payloads or no affected users.
  *   2. Apply `EVENT_CHANNEL_ALLOWLIST`: drop payloads whose
  *      `(eventType, channel)` pair is not in the per-event allowlist
@@ -21,7 +21,7 @@
  * failure does NOT poison the dispatch for other users.
  */
 
-import { NotificationPreferencesRepository } from "@/backend/db/repo";
+import { NotificationPreferencesRepository, UserRepository } from "@/backend/db/repo";
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
@@ -34,7 +34,7 @@ import type { ChannelDispatchResult, CommunicationChannelType, CommunicationPayl
  * channels listed are dispatched. Events NOT present here default to all
  * 4 channels (`on_app`, `email`, `sms`, `push`).
  *
- * Enum members are used (not literal `"EMAIL"` strings — specs.md F15).
+ * Enum members are used (not literal `"EMAIL"` strings — F15).
  */
 export const EVENT_CHANNEL_ALLOWLIST: Partial<Record<NotificationEventType, NotificationChannel[]>> = {
   [NotificationEventType.CLASS_SCHEDULED]: [NotificationChannel.ON_APP, NotificationChannel.EMAIL],
@@ -67,7 +67,7 @@ export const EVENT_CHANNEL_ALLOWLIST: Partial<Record<NotificationEventType, Noti
  * Map `NotificationChannel` enum value → `CommunicationChannelType`
  * string literal (`NotificationChannel.EMAIL` is `"EMAIL"` while
  * `CommunicationChannelType` is `"email"` lowercase). Centralized so the
- * allowlist can stay keyed by enum members (specs.md F15) while payload
+ * allowlist can stay keyed by enum members (F15) while payload
  * filtering matches by lowercase payload-channel string.
  */
 const CHANNEL_FROM_ENUM: Readonly<Record<NotificationChannel, CommunicationChannelType>> = Object.freeze({
@@ -134,6 +134,113 @@ async function loadPrefsSafe(userId: string): Promise<PreferencesByChannel> {
   }
 }
 
+/**
+ * Resolve a user's contact info (email/phone) for recipient-address stamping.
+ * Returns `null` on fetch failure or when the user is not found / soft-deleted
+ * — the caller drops all email/sms payloads for that user (per-user isolation,
+ * §5.2) rather than poisoning the dispatch. `findSafeById` is used
+ * (not `findById`) because it RLS-excludes soft-deleted rows, matching the
+ * safe-user resolution pattern in `gqlContext.ts` / `session.service.ts`.
+ */
+async function loadUserSafe(
+  userId: string
+): Promise<{ readonly email: string | null; readonly phone: string | null } | null> {
+  try {
+    return await UserRepository.findSafeById(userId);
+  } catch (error) {
+    logger.warn("dispatchWithPreferences: user fetch failed, dropping contact channels for user", {
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+// ─── Recipient resolution ─────────────────────────────────────────────
+
+/**
+ * Per-channel recipient address for a user. `null` means the channel does
+ * not need a recipient address (on_app, push) — those payloads pass through
+ * unchanged. An empty string means the channel NEEDS an address but the
+ * user has none, so the payload must be dropped.
+ */
+type RecipientAddress = string | null;
+
+/**
+ * Resolve the recipient address for a payload's channel from the user row.
+ *
+ *   - `email` → `user.email` (always non-null in the schema, but defended).
+ *   - `sms`   → `user.phone` (nullable).
+ *   - `on_app` / `push` → `null` (no address needed).
+ *
+ * Returns `null` for channels that don't need an address, and `""` for
+ * channels that do but the user lacks the contact field (caller drops the
+ * payload). Keeping this pure (no I/O) lets the caller batch the user fetch.
+ */
+function recipientAddressForChannel(
+  channel: CommunicationChannelType,
+  user: { readonly email: string | null; readonly phone: string | null } | null
+): RecipientAddress {
+  if (channel === "email") return user?.email ?? "";
+  if (channel === "sms") return user?.phone ?? "";
+  return null; // on_app, push — no address needed
+}
+
+/**
+ * Stamp `metadata.to` onto each email/sms payload for `userId` and drop any
+ * payload whose required contact field is empty. `on_app`/`push` payloads
+ * pass through unchanged (no `to` needed).
+ *
+// The pure builders (§5.1) cannot do DB I/O, so they never populate
+ * `metadata.to`. This is the single place where the recipient address is
+ * resolved for the builder-driven dispatch path — keeping builders pure and
+ * centralizing recipient resolution in the SOLE sanctioned dispatch entry
+ * point (rule #1).
+ *
+ * `CommunicationPayload` fields are `readonly`, so this returns NEW payload
+ * objects (spread + override `metadata`) rather than mutating.
+ *
+ * If `user` is null (deleted between build and dispatch), ALL email/sms
+ * payloads for that user are dropped and a `logger.warn` is emitted — per-user
+// isolation (§5.2): one missing user must not poison the dispatch.
+ */
+function stampRecipientAddress(
+  userId: string,
+  payloads: readonly CommunicationPayload[],
+  user: { readonly email: string | null; readonly phone: string | null } | null
+): CommunicationPayload[] {
+  const stamped: CommunicationPayload[] = [];
+  let droppedContactless = 0;
+
+  for (const payload of payloads) {
+    const address = recipientAddressForChannel(payload.channel, user);
+    if (address === null) {
+      // on_app / push — no recipient address needed.
+      stamped.push(payload);
+      continue;
+    }
+    if (!address) {
+      // email/sms but user has no contact field — drop this payload.
+      droppedContactless++;
+      continue;
+    }
+    stamped.push({
+      ...payload,
+      metadata: { ...(payload.metadata ?? {}), to: address },
+    });
+  }
+
+  if (droppedContactless > 0) {
+    logger.warn("dispatchWithPreferences: dropped contactless payloads for user", {
+      userId,
+      droppedCount: droppedContactless,
+      userFound: user !== null,
+    });
+  }
+
+  return stamped;
+}
+
 // ─── dispatchWithPreferences ──────────────────────────────────────────
 
 /** Outcome of dispatching one user's filtered payload set. */
@@ -150,7 +257,7 @@ interface UserDispatchOutcome {
  * `NotificationPreferencesService.mergeWithDefaults`) then dispatch them via
  * `CommunicationService.dispatchMulti`. Per-user errors are caught and
  * logged so a single user's failure does NOT poison other users'
- * dispatches (specs.md §5.2).
+ * dispatches (§5.2).
  */
 async function dispatchForUser(
   userId: string,
@@ -175,8 +282,20 @@ async function dispatchForUser(
     return { results: [], dispatched: 0, failed: 0, skippedByPref };
   }
 
+  // Resolve the recipient's contact info and stamp `metadata.to` on each
+  // email/sms payload. Pure builders can't do DB I/O (§5.1), so this
+  // is the single place where the recipient address is populated for the
+  // builder-driven dispatch path. Contactless payloads (user has no email or
+  // phone) are dropped here with a warn — per-user isolation (§5.2).
+  const user = await loadUserSafe(userId);
+  const dispatchPayloads = stampRecipientAddress(userId, userPayloads, user);
+
+  if (dispatchPayloads.length === 0) {
+    return { results: [], dispatched: 0, failed: 0, skippedByPref };
+  }
+
   try {
-    const results = await CommunicationService.dispatchMulti(userPayloads, locale);
+    const results = await CommunicationService.dispatchMulti(dispatchPayloads, locale);
     let dispatched = 0;
     let failed = 0;
     for (const r of results) {
@@ -191,12 +310,12 @@ async function dispatchForUser(
       payloadCount: userPayloads.length,
       error: message,
     });
-    const failResults: ChannelDispatchResult[] = userPayloads.map(p => ({
+    const failResults: ChannelDispatchResult[] = dispatchPayloads.map(p => ({
       channel: p.channel,
       success: false,
       error: message,
     }));
-    return { results: failResults, dispatched: 0, failed: userPayloads.length, skippedByPref };
+    return { results: failResults, dispatched: 0, failed: dispatchPayloads.length, skippedByPref };
   }
 }
 

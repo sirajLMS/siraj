@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { ParentRepository, SoftDeleteRepository, SuggestionRepository } from "@/backend/db/repo";
+import { ParentRepository, SoftDeleteRepository, SuggestionRepository, UserRepository } from "@/backend/db/repo";
 import { AccountStatus, AppPermission, SuggestionStatus } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { SuggestionService } from "@/backend/services/communication/suggestion.service";
-import type { SuggestionSelectType } from "@/backend/types";
+import type { SuggestionSelectType, UserSelectType } from "@/backend/types";
 
 const MOCK_ACTOR_ID = "actor-uuid-0001";
 const MOCK_PARENT_ID = "parent-uuid-0001";
@@ -129,6 +129,8 @@ describe("SuggestionService", () => {
   let respondToSuggestionSpy: ReturnType<typeof spyOn>;
   let markAsDuplicateSpy: ReturnType<typeof spyOn>;
   let softDeleteSuggestionSpy: ReturnType<typeof spyOn>;
+  let submitSuggestionRepoSpy: ReturnType<typeof spyOn>;
+  let findSafeByIdSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
     hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
@@ -151,6 +153,14 @@ describe("SuggestionService", () => {
       entity: { ...mockSuggestionSelect, deletedAt: new Date() },
       deletedAt: new Date(),
     });
+    // `submitSuggestion` performs a real DB insert; mock it so the service
+    // tests don't require a live database (and avoid the non-UUID parent id).
+    submitSuggestionRepoSpy = spyOn(SuggestionRepository, "submitSuggestion").mockResolvedValue(mockSuggestionSelect);
+    // Default: submitter user has an email — recipient resolution stamps `to`.
+    findSafeByIdSpy = spyOn(UserRepository, "findSafeById").mockResolvedValue({
+      email: "parent@test.com",
+      phone: null,
+    } as unknown as UserSelectType);
   });
 
   afterEach(() => {
@@ -164,6 +174,8 @@ describe("SuggestionService", () => {
     respondToSuggestionSpy.mockRestore();
     markAsDuplicateSpy.mockRestore();
     softDeleteSuggestionSpy.mockRestore();
+    submitSuggestionRepoSpy.mockRestore();
+    findSafeByIdSpy.mockRestore();
   });
 
   function mockSuggestionLookup(targetResult?: SuggestionRepository.SuggestionDetailRow | null) {
@@ -223,6 +235,8 @@ describe("SuggestionService", () => {
       expect(dispatchedPayloads).toHaveLength(2);
       expect(dispatchedPayloads[0].channel).toBe("on_app");
       expect(dispatchedPayloads[1].channel).toBe("email");
+      // Legacy direct-dispatch path must stamp `metadata.to` on the email payload.
+      expect(dispatchedPayloads[1].metadata?.to).toBe("parent@test.com");
     });
 
     test("throws unauthorized when parent tries to respond", async () => {
@@ -240,6 +254,38 @@ describe("SuggestionService", () => {
         SuggestionService.respondToSuggestion(MOCK_ACTOR_ID, "nonexistent-uuid", "Response"),
         msg => msg.includes("not found")
       );
+    });
+  });
+
+  describe("submitSuggestion", () => {
+    test("dispatches NEW_SUGGESTION email with `metadata.to` set to the submitter's email", async () => {
+      hasPermissionSpy.mockResolvedValue(true);
+      findByUserIdSpy.mockResolvedValue(mockParent);
+      findSafeByIdSpy.mockResolvedValue({ email: "parent@test.com", phone: null } as unknown as UserSelectType);
+      dispatchSpy.mockResolvedValue({ channel: "email", success: true });
+
+      await SuggestionService.submitSuggestion(MOCK_ACTOR_ID, {
+        submitterName: "Test Parent",
+        body: "A new suggestion",
+      });
+
+      expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      const dispatchedPayload = dispatchSpy.mock.calls[0][0];
+      expect(dispatchedPayload.channel).toBe("email");
+      expect(dispatchedPayload.metadata?.to).toBe("parent@test.com");
+    });
+
+    test("skips email dispatch when submitter has no email", async () => {
+      hasPermissionSpy.mockResolvedValue(true);
+      findByUserIdSpy.mockResolvedValue(mockParent);
+      findSafeByIdSpy.mockResolvedValue({ email: null, phone: null } as unknown as UserSelectType);
+
+      await SuggestionService.submitSuggestion(MOCK_ACTOR_ID, {
+        submitterName: "Test Parent",
+        body: "A new suggestion",
+      });
+
+      expect(dispatchSpy).not.toHaveBeenCalled();
     });
   });
 

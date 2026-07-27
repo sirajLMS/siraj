@@ -8,6 +8,7 @@ import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySe
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { upsertManualExchangeRateMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
+import { serializeApolloError } from "@/frontend/common/utils/errorUtils";
 import { logger } from "@/frontend/common/utils/logger";
 import type { ExchangeRatesLabels } from "@/shared/locale";
 
@@ -31,7 +32,7 @@ export function ManualOverrideDialog({ open, labels, onClose, onSuccess, onError
       onClose();
     },
     onError: error => {
-      logger.error("Manual exchange rate upsert failed", { error });
+      logger.error("Manual exchange rate upsert failed", serializeApolloError(error));
       onError(labels.failed);
     },
   });

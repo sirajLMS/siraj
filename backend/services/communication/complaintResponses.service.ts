@@ -1,4 +1,4 @@
-import { ComplaintRepository, ComplaintResponseRepository, ParentRepository } from "@/backend/db/repo";
+import { ComplaintRepository, ComplaintResponseRepository, ParentRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { CommunicationService, PermissionsService } from "@/backend/services";
@@ -33,16 +33,30 @@ async function dispatchResponseNotifications(
   locale?: string
 ): Promise<void> {
   if (response.emailSent) {
-    await CommunicationService.dispatch(
-      {
-        userId: responderUserId,
-        title: "Complaint Response",
-        body: response.body,
-        channel: "email",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-      },
-      locale
-    );
+    // Resolve the responder's email so the email adapter has a valid `to`.
+    // The pure-payload contract is not in play here — this is
+    // a legacy direct-dispatch path (F1 grandfather) — so we populate
+    // `metadata.to` inline at the call site.
+    const responder = await UserRepository.findSafeById(responderUserId);
+    const to = responder?.email ?? "";
+    if (!to) {
+      logger.warn("ComplaintResponse email dispatch skipped: responder has no email", {
+        responderUserId,
+        complaintId: complaint.id,
+      });
+    } else {
+      await CommunicationService.dispatch(
+        {
+          userId: responderUserId,
+          title: "Complaint Response",
+          body: response.body,
+          channel: "email",
+          eventType: NotificationEventType.COMPLAINT_RESPONSE,
+          metadata: { to, entityKind: "complaint", entityId: complaint.id },
+        },
+        locale
+      );
+    }
   }
 
   const parent = await ParentRepository.findByUserId(complaint.parentId);

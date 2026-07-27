@@ -1,3 +1,5 @@
+import { mock } from "bun:test";
+
 const mockPush = mock(() => {});
 
 // Defensive mocks — Bun's mock.module is process-global, so mocks registered by
@@ -36,7 +38,7 @@ mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 
-import { afterEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";

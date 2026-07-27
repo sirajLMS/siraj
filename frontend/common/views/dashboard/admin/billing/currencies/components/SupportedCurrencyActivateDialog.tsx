@@ -48,6 +48,13 @@ export interface SupportedCurrencyActivateDialogProps {
   readonly row: SupportedCurrencyRow | null;
   readonly onClose: () => void;
   readonly onSaved: () => Promise<void>;
+  /**
+   * Currency codes already activated in the supported_currencies table. The
+   * selector filters these out so operators can only pick currencies that are
+   * not yet supported. The currently-edited row's code is always kept visible
+   * (the field is disabled in edit mode anyway).
+   */
+  readonly excludedCodes?: readonly CurrencyCode[];
 }
 
 function resolveCountry(code: string | null | undefined): CountryType | undefined {
@@ -60,6 +67,7 @@ export function SupportedCurrencyActivateDialog({
   row,
   onClose,
   onSaved,
+  excludedCodes,
 }: Readonly<SupportedCurrencyActivateDialogProps>) {
   const t = useAppTranslation().dashboardTranslations.billing.supportedCurrencies;
   const notifications = useNotifications();
@@ -165,6 +173,7 @@ export function SupportedCurrencyActivateDialog({
                 fullWidth
                 required
                 disabled={isEdit}
+                excludedCodes={excludedCodes}
                 error={Boolean(errors.code)}
                 helperText={errors.code?.message}
               />

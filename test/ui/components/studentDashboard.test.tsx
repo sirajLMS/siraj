@@ -1,3 +1,5 @@
+import { mock } from "bun:test";
+
 // Defensive mocks against bleed from earlier test files.
 // Bun's mock.module() is process-global, so mocks registered by alphabetically-earlier
 // test files bleed into this file:
@@ -62,7 +64,7 @@ mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 
-import { afterEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 import { Fragment } from "react";
 
 // CRITICAL: dashboardContainer.test.tsx (runs alphabetically before us) stubs
