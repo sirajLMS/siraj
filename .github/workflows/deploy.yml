@@ -1,0 +1,164 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - prod
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select target deployment environment'
+        required: true
+        type: choice
+        default: 'mishkah'
+        options:
+          - 'mishkah'
+
+concurrency:
+  group: deploy-${{ inputs.environment || 'mishkah' }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy (${{ inputs.environment || 'mishkah' }})
+    environment: ${{ (inputs.environment == 'mishkah' || github.event_name == 'push') && 'Production – mishkah' || inputs.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun Environment
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "latest"
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Create .env.production on GitHub Runner
+        env:
+          ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ vars.ADMIN_PASSWORD }}
+          ALLOWED_ORIGIN: ${{ vars.ALLOWED_ORIGIN }}
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+          BLOB_STORE_ID: ${{ secrets.BLOB_STORE_ID }}
+          CACHE_PROVIDER: ${{ vars.CACHE_PROVIDER }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          DATABASE_ENCRYPTION_KEY: ${{ secrets.DATABASE_ENCRYPTION_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DB_PROVIDER: ${{ vars.DB_PROVIDER }}
+          EMAIL_PROVIDER: ${{ vars.EMAIL_PROVIDER }}
+          ENABLE_LOGGING: ${{ vars.ENABLE_LOGGING }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIXER_API_KEY: ${{ secrets.FIXER_API_KEY }}
+          FX_PROVIDER: ${{ vars.FX_PROVIDER }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          NEXT_PUBLIC_BASE_URL: ${{ vars.NEXT_PUBLIC_BASE_URL }}
+          NEXT_PUBLIC_ENABLE_LOGGING: ${{ vars.NEXT_PUBLIC_ENABLE_LOGGING }}
+          NODE_ENV: production
+          OPENEXCHANGERATES_APP_ID: ${{ secrets.OPENEXCHANGERATES_APP_ID }}
+          PUSH_PROVIDER: ${{ vars.PUSH_PROVIDER }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ vars.RESEND_FROM_EMAIL }}
+          SIGNED_URL_CLEANUP_CRON_SCHEDULE: ${{ vars.SIGNED_URL_CLEANUP_CRON_SCHEDULE }}
+          SIGNED_URL_CLEANUP_STRATEGY: ${{ vars.SIGNED_URL_CLEANUP_STRATEGY }}
+          SMS_PROVIDER: ${{ vars.SMS_PROVIDER }}
+          STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_FROM_NUMBER: ${{ vars.TWILIO_FROM_NUMBER }}
+          VERCEL_BLOB_ACCESS: ${{ vars.VERCEL_BLOB_ACCESS }}
+        run: |
+          cat << 'EOF' > .env.production
+          NODE_ENV=production
+          ADMIN_EMAIL=${ADMIN_EMAIL}
+          ADMIN_PASSWORD=${ADMIN_PASSWORD}
+          ALLOWED_ORIGIN=${ALLOWED_ORIGIN}
+          BLOB_READ_WRITE_TOKEN=${BLOB_READ_WRITE_TOKEN}
+          BLOB_STORE_ID=${BLOB_STORE_ID}
+          CACHE_PROVIDER=${CACHE_PROVIDER}
+          CRON_SECRET=${CRON_SECRET}
+          DATABASE_ENCRYPTION_KEY=${DATABASE_ENCRYPTION_KEY}
+          DATABASE_URL=${DATABASE_URL}
+          DB_PROVIDER=${DB_PROVIDER}
+          EMAIL_PROVIDER=${EMAIL_PROVIDER}
+          ENABLE_LOGGING=${ENABLE_LOGGING}
+          FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+          FIREBASE_PRIVATE_KEY="${FIREBASE_PRIVATE_KEY}"
+          FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+          FIXER_API_KEY=${FIXER_API_KEY}
+          FX_PROVIDER=${FX_PROVIDER}
+          JWT_SECRET=${JWT_SECRET}
+          NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+          NEXT_PUBLIC_ENABLE_LOGGING=${NEXT_PUBLIC_ENABLE_LOGGING}
+          OPENEXCHANGERATES_APP_ID=${OPENEXCHANGERATES_APP_ID}
+          PUSH_PROVIDER=${PUSH_PROVIDER}
+          RESEND_API_KEY=${RESEND_API_KEY}
+          RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}
+          SIGNED_URL_CLEANUP_CRON_SCHEDULE=${SIGNED_URL_CLEANUP_CRON_SCHEDULE}
+          SIGNED_URL_CLEANUP_STRATEGY=${SIGNED_URL_CLEANUP_STRATEGY}
+          SMS_PROVIDER=${SMS_PROVIDER}
+          STORAGE_PROVIDER=${STORAGE_PROVIDER}
+          TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+          TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+          TWILIO_FROM_NUMBER=${TWILIO_FROM_NUMBER}
+          VERCEL_BLOB_ACCESS=${VERCEL_BLOB_ACCESS}
+          EOF
+
+      - name: Install Vercel CLI
+        run: bun add -g vercel@latest
+
+      - name: Pull Vercel Environment Information
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts on GitHub Ubuntu Runner
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ vars.ADMIN_PASSWORD }}
+          ALLOWED_ORIGIN: ${{ vars.ALLOWED_ORIGIN }}
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+          BLOB_STORE_ID: ${{ secrets.BLOB_STORE_ID }}
+          CACHE_PROVIDER: ${{ vars.CACHE_PROVIDER }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          DATABASE_ENCRYPTION_KEY: ${{ secrets.DATABASE_ENCRYPTION_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DB_PROVIDER: ${{ vars.DB_PROVIDER }}
+          EMAIL_PROVIDER: ${{ vars.EMAIL_PROVIDER }}
+          ENABLE_LOGGING: ${{ vars.ENABLE_LOGGING }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIXER_API_KEY: ${{ secrets.FIXER_API_KEY }}
+          FX_PROVIDER: ${{ vars.FX_PROVIDER }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          NEXT_PUBLIC_BASE_URL: ${{ vars.NEXT_PUBLIC_BASE_URL }}
+          NEXT_PUBLIC_ENABLE_LOGGING: ${{ vars.NEXT_PUBLIC_ENABLE_LOGGING }}
+          NODE_ENV: production
+          OPENEXCHANGERATES_APP_ID: ${{ secrets.OPENEXCHANGERATES_APP_ID }}
+          PUSH_PROVIDER: ${{ vars.PUSH_PROVIDER }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ vars.RESEND_FROM_EMAIL }}
+          SIGNED_URL_CLEANUP_CRON_SCHEDULE: ${{ vars.SIGNED_URL_CLEANUP_CRON_SCHEDULE }}
+          SIGNED_URL_CLEANUP_STRATEGY: ${{ vars.SIGNED_URL_CLEANUP_STRATEGY }}
+          SMS_PROVIDER: ${{ vars.SMS_PROVIDER }}
+          STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_FROM_NUMBER: ${{ vars.TWILIO_FROM_NUMBER }}
+          VERCEL_BLOB_ACCESS: ${{ vars.VERCEL_BLOB_ACCESS }}
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Prebuilt Artifacts to Vercel
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
