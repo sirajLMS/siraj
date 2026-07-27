@@ -1,13 +1,11 @@
 "use client";
 
 import { SearchOutlined } from "@mui/icons-material";
-import { Box, InputAdornment, Paper, Stack, TextField } from "@mui/material";
+import { Box, InputAdornment, TextField } from "@mui/material";
 import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
-import {
-  ScheduleOverviewCardSkeleton,
-  ScheduleOverviewEmptyState,
-} from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
+import { ScheduleOverviewEmptyState } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
+import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
@@ -102,38 +100,27 @@ export function AdminDashboardDesktopView({
           </Box>
         ) : null}
 
-        {loading && rows.length === 0 ? (
-          <Stack spacing={2}>
-            <Paper
-              elevation={0}
-              sx={theme => ({
-                borderRadius: 2,
-                border: `1px solid ${theme.palette.border.light}`,
-                backgroundColor: theme.palette.surfaceContainerLowest,
-              })}
-            >
-              <ScheduleOverviewCardSkeleton />
-            </Paper>
-          </Stack>
-        ) : rows.length === 0 ? (
-          <Box sx={{ py: 2 }}>
-            <ScheduleOverviewEmptyState message={t.noClasses} />
-          </Box>
-        ) : (
-          <Stack spacing={2}>
-            {rows.map(row => (
-              <ScheduleOverviewDesktopCard
-                key={row.id ?? ""}
-                row={row}
-                headers={headers}
-                statusLabels={statusLabels}
-                detailsLabel={t.details}
-                showTimezones={showTimezones}
-                locale={locale}
-              />
-            ))}
-          </Stack>
-        )}
+        <ScheduleOverviewListShell
+          rows={rows}
+          getKey={row => row.id ?? ""}
+          loading={loading}
+          emptyMessage={t.noClasses}
+          renderItem={row => (
+            <ScheduleOverviewDesktopCard
+              row={row}
+              headers={headers}
+              statusLabels={statusLabels}
+              detailsLabel={t.details}
+              showTimezones={showTimezones}
+              locale={locale}
+            />
+          )}
+          renderEmptyState={() => (
+            <Box sx={{ py: 2 }}>
+              <ScheduleOverviewEmptyState message={t.noClasses} />
+            </Box>
+          )}
+        />
 
         {totalCount !== undefined ? (
           <Box sx={{ pt: 2, display: "flex", justifyContent: "flex-end" }}>

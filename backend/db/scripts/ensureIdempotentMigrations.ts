@@ -1,8 +1,8 @@
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import logger from "@/backend/lib/logger";
 
-const DRIZZLE_DIR = "./backend/drizzle";
+const DRIZZLE_DIR = join(import.meta.dir, "..", "drizzle");
 
 function transformCreateType(trimmed: string): string | null {
   if (/\bCREATE\s+TYPE\b/i.test(trimmed) && !/DO\s+\$\$/i.test(trimmed) && !/IF\s+NOT\s+EXISTS/i.test(trimmed)) {
@@ -96,7 +96,18 @@ export function ensureIdempotentMigrations(): string[] {
     const idempotentSql = makeMigrationSqlIdempotent(originalSql);
 
     if (originalSql !== idempotentSql) {
-      writeFileSync(sqlPath, idempotentSql);
+      const tmpPath = `${sqlPath}.tmp`;
+      writeFileSync(tmpPath, idempotentSql);
+      try {
+        renameSync(tmpPath, sqlPath);
+      } catch (err) {
+        try {
+          unlinkSync(tmpPath);
+        } catch {
+          // best-effort cleanup of the orphaned temp file; ignore errors
+        }
+        throw err;
+      }
       updatedFiles.push(`${folder}/migration.sql`);
     }
   }
@@ -105,6 +116,8 @@ export function ensureIdempotentMigrations(): string[] {
     logger.log(
       `Ensure Idempotent Migrations: Updated ${updatedFiles.length} migration file(s):\n  ${updatedFiles.join("\n  ")}`
     );
+  } else {
+    logger.log("Ensure Idempotent Migrations: All migration files already idempotent — no changes needed.");
   }
 
   return updatedFiles;

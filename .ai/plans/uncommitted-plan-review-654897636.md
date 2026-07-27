@@ -102,5 +102,17 @@ Action #2 (snapshot.json restore) likely requires editing `backend/drizzle/20260
 ## Fix Status
 
 - Total findings: 8
-- Fixed: 0 / 8
-- Remaining: 8
+- Fixed: 8 / 8
+- Remaining: 0
+
+### Fix Verification Summary (per subagent)
+
+| # | Finding | File(s) Edited | tsgo | biome |
+|---|---|---|---|---|
+| 1 | Super-admin seed removed | `backend/drizzle/20260727152656_custom_23623615/migration.sql` (-46 lines, lines 2395-2440) | clean | n/a (SQL) |
+| 2 | Snapshot prevIds rewired | `backend/drizzle/20260727051702_majestic_sentinel/snapshot.json` (prevIds: `7047d8ee...` → `2740fb90...`) | clean | n/a (JSON) |
+| 3 | Index re-added | `backend/db/migration/3-system_permissions_and_groups.sql:36` (+1 line) | clean | n/a (SQL) |
+| 4 | Atomic + cwd-independent writes | `backend/db/scripts/ensureIdempotentMigrations.ts` (DRIZZLE_DIR via `import.meta.dir`, temp+rename, unlinkSync on failure) | clean | clean |
+| 5 | ScheduleOverviewListShell extracted | NEW `frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell.tsx` (+87) + 2 desktop views refactored | clean | clean |
+| 6 | DELETE DO-block row-count assertions | `backend/drizzle/20260727152656_custom_23623615/migration.sql` (2 DELETEs wrapped with subquery-count + GET DIAGNOSTICS + RAISE EXCEPTION) | clean | n/a (SQL) |
+| 7 | No-op short-circuit log | `backend/db/scripts/ensureIdempotentMigrations.ts` (added else-branch log: "All migration files already idempotent — no changes needed.") | clean | clean |

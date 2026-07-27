@@ -1075,9 +1075,14 @@ SET
     description = EXCLUDED.description,
     is_system = EXCLUDED.is_system,
     updated_at = NOW();--> statement-breakpoint
-DELETE FROM group_permissions
-WHERE group_id IN (SELECT id FROM permission_groups WHERE is_system = true)
-AND permission_id IN (
+DO $$
+DECLARE
+  v_expected INTEGER;
+  v_deleted INTEGER;
+BEGIN
+  SELECT count(*) INTO v_expected FROM group_permissions
+  WHERE group_id IN (SELECT id FROM permission_groups WHERE is_system = true)
+  AND permission_id IN (
     SELECT id FROM permissions WHERE key IN (
         'auth.login',
         'auth.view_own_profile',
@@ -1180,7 +1185,118 @@ AND permission_id IN (
         'suggestions.review',
         'suggestions.delete'
     )
-);--> statement-breakpoint
+  );
+  DELETE FROM group_permissions
+  WHERE group_id IN (SELECT id FROM permission_groups WHERE is_system = true)
+  AND permission_id IN (
+    SELECT id FROM permissions WHERE key IN (
+        'auth.login',
+        'auth.view_own_profile',
+        'dashboard.view',
+        'dashboard.view_metrics',
+        'dashboard.filter_metrics',
+        'dashboard.metrics.view_all',
+        'dashboard.search',
+        'schedule.view_list',
+        'schedule.filter_advanced',
+        'schedule.view_all',
+        'schedule.view_assigned',
+        'schedule.view_family',
+        'schedule.search_availability',
+        'schedule.manage_recurring',
+        'schedule.dst_migrate',
+        'schedule.view_timezones',
+        'schedule.view_weekly',
+        'schedule.view_workload',
+        'schedule.create_class',
+        'schedule.delete_class',
+        'schedule.clear_weekly',
+        'session.view_details',
+        'session.activate_class',
+        'session.activate_override',
+        'session.update_status.start',
+        'session.update_status.absent',
+        'session.update_status.leave',
+        'session.reschedule',
+        'session.reset',
+        'session.override_actions',
+        'history.view_calendar',
+        'history.view_details',
+        'teacher.view_dashboard',
+        'teacher.view_students',
+        'teacher.view_own_profile',
+        'system.enforce_time_window',
+        'system.enforce_leave_limit',
+        'system.bulk_update_dst',
+        'system.sync_notifications',
+        'system.enforce_suspended_lock',
+        'system.process_student_leave',
+        'system.restrict_resource_access',
+        'system.dispatch_email',
+        'teachers.list',
+        'teachers.create',
+        'teachers.edit',
+        'teachers.manage_schedule',
+        'parents.list',
+        'parents.create',
+        'parents.edit',
+        'students.list',
+        'students.create',
+        'students.edit',
+        'students.change_teacher',
+        'students.change_status',
+        'students.override_quota',
+        'invoices.list',
+        'invoices.delete',
+        'invoices.create',
+        'invoices.mark_paid',
+        'invoices.edit',
+        'resources.list',
+        'resources.delete',
+        'resources.upload',
+        'reports.generate',
+        'complaints.list',
+        'complaints.delete',
+        'complaints.respond',
+        'staff.list',
+        'staff.create',
+        'staff.edit',
+        'staff.view_directory',
+        'staff.edit_profile',
+        'permission_groups.manage',
+        'permission_groups.assign',
+        'notification.view_alerts',
+        'billing.view_unpaid_invoices',
+        'billing.view_history',
+        'billing.create_invoice',
+        'billing.update_status_paid',
+        'billing.delete_invoice',
+        'user.view_profile',
+        'parent.view_directory',
+        'parent.view_profile',
+        'parent.view_students',
+        'parent.view_own_profile',
+        'parent.manage_status',
+        'student.view_associated',
+        'student.edit_quota',
+        'student.reassign_teacher',
+        'student.manage_status',
+        'document.manage_parent_docs',
+        'report.generate_custom',
+        'report.view_financials',
+        'support.submit_complaint',
+        'support.view_history',
+        'communication.submit_suggestion',
+        'suggestions.list',
+        'suggestions.review',
+        'suggestions.delete'
+    )
+  );
+  GET DIAGNOSTICS v_deleted = ROW_COUNT;
+  IF v_deleted != v_expected THEN
+    RAISE EXCEPTION 'group_permissions delete scope mismatch: deleted %, expected %', v_deleted, v_expected;
+  END IF;
+END $$;--> statement-breakpoint
 INSERT INTO
     group_permissions (group_id, permission_id)
 SELECT g.id, p.id
@@ -2392,52 +2508,6 @@ VALUES
 ON CONFLICT (iana_id) DO UPDATE SET
   base_offset_minutes = EXCLUDED.base_offset_minutes,
   is_dst_supported = EXCLUDED.is_dst_supported;--> statement-breakpoint
--- Source: 4e-default_super_admin_seed.sql
--- Migration 4e: Seed default Super Admin user account
--- Creates default super admin user (admin@siraj.local / Seed_Pass1!) and links to super_admin permission group.
-
-DO $$
-DECLARE
-  v_user_id UUID;
-  v_group_id UUID;
-BEGIN
-  -- Insert default super admin user if not exists
-  INSERT INTO users (id, name, email, password, is_super_admin, status, timezone, created_at, updated_at)
-  VALUES (
-    gen_random_uuid(),
-    'Super Admin',
-    'admin@siraj.local',
-    -- Seed_Pass1!
-    '$2b$12$nXFLfwUx0pdly5.UbZXA2O7XPh6LYz6bfP3X/MG9K/5VD/WuvUaku',
-    true,
-    'ACTIVATED',
-    'UTC',
-    NOW(),
-    NOW()
-  )
-  ON CONFLICT (email) DO NOTHING
-  RETURNING id INTO v_user_id;
-
-  -- Get user_id if already existed
-  IF v_user_id IS NULL THEN
-    SELECT id INTO v_user_id FROM users WHERE email = 'admin@siraj.local';
-  END IF;
-
-  -- Get super_admin permission group id
-  SELECT id INTO v_group_id FROM permission_groups WHERE slug = 'super_admin';
-
-  IF v_user_id IS NOT NULL AND v_group_id IS NOT NULL THEN
-    -- Assign to super_admin permission group
-    INSERT INTO user_permission_groups (user_id, group_id, assigned_at)
-    VALUES (v_user_id, v_group_id, NOW())
-    ON CONFLICT (user_id, group_id) DO NOTHING;
-
-    -- Ensure staff profile marker exists
-    INSERT INTO staff_profiles (id, user_id, created_at, updated_at)
-    VALUES (gen_random_uuid(), v_user_id, NOW(), NOW())
-    ON CONFLICT (user_id) DO NOTHING;
-  END IF;
-END $$;--> statement-breakpoint
 -- Source: 5-billing_fx_admin_permissions.sql
 -- Migration: Billing FX Admin Permissions (incremental)
 -- Adds billing.manage_fx_provider, billing.override_exchange_rates, billing.manage_currency_hedges
@@ -2749,9 +2819,22 @@ WHERE
   )
 ON CONFLICT DO NOTHING;--> statement-breakpoint
 -- Ensure dashboard.view_metrics is never on supervisor_default (portal routing)
-DELETE FROM group_permissions
-WHERE group_id = (SELECT id FROM permission_groups WHERE slug = 'supervisor_default')
-  AND permission_id = (SELECT id FROM permissions WHERE key = 'dashboard.view_metrics'::app_permission);--> statement-breakpoint
+DO $$
+DECLARE
+  v_expected INTEGER;
+  v_deleted INTEGER;
+BEGIN
+  SELECT count(*) INTO v_expected FROM group_permissions
+  WHERE group_id = (SELECT id FROM permission_groups WHERE slug = 'supervisor_default')
+    AND permission_id = (SELECT id FROM permissions WHERE key = 'dashboard.view_metrics'::app_permission);
+  DELETE FROM group_permissions
+  WHERE group_id = (SELECT id FROM permission_groups WHERE slug = 'supervisor_default')
+    AND permission_id = (SELECT id FROM permissions WHERE key = 'dashboard.view_metrics'::app_permission);
+  GET DIAGNOSTICS v_deleted = ROW_COUNT;
+  IF v_deleted != v_expected THEN
+    RAISE EXCEPTION 'group_permissions delete scope mismatch: deleted %, expected %', v_deleted, v_expected;
+  END IF;
+END $$;--> statement-breakpoint
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p
