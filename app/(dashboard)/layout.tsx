@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import type { ReactNode } from "react";
 import { UserRole } from "@/backend/enum";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
@@ -12,6 +12,7 @@ import {
   type User,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
+import { getSidebarStateFromCookies, SIDEBAR_COOKIE_NAME } from "@/frontend/common/lib/sidebar-detection";
 import { DashboardLayoutContainer } from "@/frontend/common/views/dashboard/components/DashboardLayoutContainer";
 import { redirect } from "@/shared/i18n/routing";
 
@@ -57,6 +58,10 @@ export default async function DashboardLayout({ children }: { readonly children:
     }
   }
 
+  const cookieStore = await cookies();
+  const sidebarCookie = cookieStore.get(SIDEBAR_COOKIE_NAME);
+  const initialSidebarOpen = getSidebarStateFromCookies(sidebarCookie?.value);
+
   const mappedUser: User = {
     id: userProfile.id,
     name: userProfile.name,
@@ -76,7 +81,11 @@ export default async function DashboardLayout({ children }: { readonly children:
   };
 
   return (
-    <DashboardLayoutContainer userProfile={mappedUser} isSuperAdmin={userProfile.isSuperAdmin}>
+    <DashboardLayoutContainer
+      userProfile={mappedUser}
+      isSuperAdmin={userProfile.isSuperAdmin}
+      initialSidebarOpen={initialSidebarOpen}
+    >
       {children}
     </DashboardLayoutContainer>
   );

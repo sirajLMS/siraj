@@ -33,4 +33,5 @@ export interface DashboardLayoutProps {
   readonly notificationCount: number;
   readonly sidebarWidth?: string;
   readonly navbarHeight?: string;
+  readonly initialSidebarOpen?: boolean;
 }

@@ -62,16 +62,13 @@ const getSwitchMainColor = (theme: Theme, color: string | undefined): string => 
 };
 
 const getMuiCssBaseline = ({
-  isLight,
   autofillBackground,
   autofillText,
 }: ComponentProps): Components<Omit<Theme, "components">>["MuiCssBaseline"] => ({
   styleOverrides: {
     body: {
-      backgroundColor: isLight ? "#FFFFFF" : "#1A1A1A",
-      backgroundImage: isLight
-        ? "radial-gradient(circle at top left, rgba(13, 148, 136, 0.04), transparent 32%), radial-gradient(circle at top right, rgba(79, 70, 229, 0.05), transparent 28%)"
-        : "radial-gradient(circle at top left, rgba(45, 212, 191, 0.08), transparent 32%), radial-gradient(circle at top right, rgba(129, 140, 248, 0.1), transparent 28%)",
+      backgroundColor: "var(--mui-palette-background-default)",
+      color: "var(--mui-palette-onBackground)",
     },
     "input:-webkit-autofill": {
       WebkitBoxShadow: `0 0 0 1000px ${autofillBackground} inset !important`,
@@ -121,23 +118,22 @@ const getMuiCssBaseline = ({
       backgroundColor: "transparent",
     },
     "*::-webkit-scrollbar-track": {
-      background: isLight ? "rgba(0, 0, 0, 0.02)" : "rgba(255, 255, 255, 0.02)",
+      background: "color-mix(in srgb, var(--mui-palette-onBackground) 2%, transparent)",
       borderRadius: "6px",
       margin: "4px 0",
     },
     "*::-webkit-scrollbar-thumb": {
-      background: isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.15)",
+      background: "color-mix(in srgb, var(--mui-palette-onBackground) 15%, transparent)",
       borderRadius: "6px",
-      border: isLight ? "2px solid #FFFFFF" : "2px solid #1A1A1A",
+      border: "2px solid var(--mui-palette-background-default)",
     },
     "*::-webkit-scrollbar-thumb:hover": {
-      background: isLight ? "rgba(0, 0, 0, 0.25)" : "rgba(255, 255, 255, 0.25)",
+      background: "color-mix(in srgb, var(--mui-palette-onBackground) 25%, transparent)",
     },
     "*": {
       scrollbarWidth: "thin",
-      scrollbarColor: isLight
-        ? "rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.02)"
-        : "rgba(255, 255, 255, 0.15) rgba(255, 255, 255, 0.02)",
+      scrollbarColor:
+        "color-mix(in srgb, var(--mui-palette-onBackground) 15%, transparent) color-mix(in srgb, var(--mui-palette-onBackground) 2%, transparent)",
     },
   },
 });

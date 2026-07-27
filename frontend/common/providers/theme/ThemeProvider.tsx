@@ -5,6 +5,7 @@ import type { PaletteMode } from "@mui/material/styles";
 import { ThemeProvider, useColorScheme } from "@mui/material/styles";
 import { type ReactNode, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
+import { logger } from "@/frontend/common/lib/logger";
 import { setThemePreference } from "@/frontend/common/lib/theme-detection";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { createAppCssVarsTheme } from "@/frontend/common/providers/theme/theme";
@@ -48,13 +49,20 @@ function ColorSchemeStateBridge({ children }: { readonly children: ReactNode }) 
     const last = lastAppliedRef.current;
     if (last?.mode === mode && last.dir === direction && last.lang === locale) return;
 
+    logger.info({ caller: "AppThemeProvider" }, "[AppThemeProvider] Client syncing theme DOM attributes", {
+      schemeMode,
+      effectiveMode: mode,
+      direction,
+      locale,
+    });
+
     const root = document.documentElement;
     root.dataset.theme = mode;
     root.style.colorScheme = mode;
     root.dir = direction;
     root.lang = locale;
     lastAppliedRef.current = { mode, dir: direction, lang: locale };
-  }, [mode, direction, locale]);
+  }, [mode, schemeMode, direction, locale]);
 
   const toggleTheme = useCallback(() => {
     setIsThemeChanging(true);
@@ -95,7 +103,7 @@ export function AppThemeProvider({ children, initialTheme }: AppThemeProviderPro
   const direction = locale === "ar" ? "rtl" : "ltr";
   const defaultMode: PaletteMode = initialTheme ?? "dark";
 
-  const theme = useMemo(() => createAppCssVarsTheme(direction, locale), [direction, locale]);
+  const theme = useMemo(() => createAppCssVarsTheme(direction, locale, defaultMode), [direction, locale, defaultMode]);
 
   return (
     <ThemeProvider

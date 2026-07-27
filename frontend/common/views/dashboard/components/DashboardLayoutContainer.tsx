@@ -8,9 +8,15 @@ interface DashboardLayoutContainerProps {
   readonly children: ReactNode;
   readonly userProfile: User;
   readonly isSuperAdmin: boolean;
+  readonly initialSidebarOpen?: boolean;
 }
 
-export async function DashboardLayoutContainer({ children, userProfile, isSuperAdmin }: DashboardLayoutContainerProps) {
+export async function DashboardLayoutContainer({
+  children,
+  userProfile,
+  isSuperAdmin,
+  initialSidebarOpen,
+}: DashboardLayoutContainerProps) {
   const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations;
   const adminT = t.admin;
@@ -23,6 +29,7 @@ export async function DashboardLayoutContainer({ children, userProfile, isSuperA
       roleLabel={adminT.roleLabel}
       appTitle={coreLayoutT.appTitle}
       logoAriaLabel={coreLayoutT.appTitle}
+      initialSidebarOpen={initialSidebarOpen}
     >
       {children}
     </DashboardClientBridge>

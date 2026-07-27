@@ -8,9 +8,15 @@ interface SidebarDesktopProps {
   readonly navItems: readonly NavItem[];
   readonly activeKey: string;
   readonly sidebarWidth: string;
+  readonly initialSidebarOpen?: boolean;
 }
 
-export function SidebarDesktop({ navItems, activeKey, sidebarWidth }: Readonly<SidebarDesktopProps>) {
+export function SidebarDesktop({
+  navItems,
+  activeKey,
+  sidebarWidth,
+  initialSidebarOpen,
+}: Readonly<SidebarDesktopProps>) {
   const t = useNavLabels();
 
   const translatedNavItems: TranslatedNavItem[] = navItems.map(item => ({
@@ -18,5 +24,12 @@ export function SidebarDesktop({ navItems, activeKey, sidebarWidth }: Readonly<S
     label: t(item.labelKey),
   }));
 
-  return <SidebarShell navItems={translatedNavItems} activeKey={activeKey} sidebarWidth={sidebarWidth} />;
+  return (
+    <SidebarShell
+      navItems={translatedNavItems}
+      activeKey={activeKey}
+      sidebarWidth={sidebarWidth}
+      initialSidebarOpen={initialSidebarOpen}
+    />
+  );
 }

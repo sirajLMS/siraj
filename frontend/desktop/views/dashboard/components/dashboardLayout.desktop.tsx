@@ -16,7 +16,8 @@ export function DashboardLayoutDesktop({
   avatarUrl,
   notificationCount,
   sidebarWidth = "260px",
-  navbarHeight = "64px",
+  navbarHeight: _navbarHeight = "64px",
+  initialSidebarOpen,
 }: Readonly<DashboardLayoutProps>) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
@@ -31,16 +32,19 @@ export function DashboardLayoutDesktop({
       </NavbarStaticShell>
 
       <Box
-        sx={{
+        sx={theme => ({
           display: "flex",
           flex: 1,
           minHeight: 0,
-          minWidth: 0,
-          pt: navbarHeight,
+          pt: theme.layout.navbarHeight,
           boxSizing: "border-box",
-        }}
+        })}
       >
-        <DashboardLayoutIsland sidebarItems={sidebarItems} sidebarWidth={sidebarWidth}>
+        <DashboardLayoutIsland
+          sidebarItems={sidebarItems}
+          sidebarWidth={sidebarWidth}
+          initialSidebarOpen={initialSidebarOpen}
+        >
           {children}
         </DashboardLayoutIsland>
       </Box>

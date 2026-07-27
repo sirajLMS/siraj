@@ -13,6 +13,7 @@ interface DashboardLayoutIslandProps {
   readonly sidebarItems: readonly NavItem[];
   readonly sidebarWidth: string;
   readonly children: ReactNode;
+  readonly initialSidebarOpen?: boolean;
 }
 
 function DesktopMainScrollArea({ children }: { readonly children: ReactNode }) {
@@ -27,15 +28,15 @@ function DesktopMainScrollArea({ children }: { readonly children: ReactNode }) {
     <Box
       component="main"
       ref={mainRef}
-      sx={theme => ({
+      sx={{
         flexGrow: 1,
         minWidth: 0,
         minHeight: 0,
         overflowY: "auto",
         overscrollBehavior: "contain",
-        backgroundColor: theme.palette.background.default,
+        backgroundColor: "var(--mui-palette-background-default)",
         pb: 0,
-      })}
+      }}
     >
       <Box
         sx={theme => ({
@@ -50,13 +51,23 @@ function DesktopMainScrollArea({ children }: { readonly children: ReactNode }) {
   );
 }
 
-export function DashboardLayoutIsland({ sidebarItems, sidebarWidth, children }: Readonly<DashboardLayoutIslandProps>) {
+export function DashboardLayoutIsland({
+  sidebarItems,
+  sidebarWidth,
+  children,
+  initialSidebarOpen,
+}: Readonly<DashboardLayoutIslandProps>) {
   const pathname = usePathname();
   const activeNavKey = getActiveNavKey(pathname, sidebarItems);
 
   return (
     <>
-      <SidebarDesktop navItems={sidebarItems} activeKey={activeNavKey} sidebarWidth={sidebarWidth} />
+      <SidebarDesktop
+        navItems={sidebarItems}
+        activeKey={activeNavKey}
+        sidebarWidth={sidebarWidth}
+        initialSidebarOpen={initialSidebarOpen}
+      />
       <DesktopMainScrollArea>{children}</DesktopMainScrollArea>
     </>
   );

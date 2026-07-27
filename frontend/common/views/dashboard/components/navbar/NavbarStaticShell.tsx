@@ -1,5 +1,5 @@
 import { SchoolOutlined } from "@mui/icons-material";
-import { AppBar, alpha, Box, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Toolbar, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 
 /**
@@ -13,41 +13,15 @@ import type { ReactNode } from "react";
  * APIs, no `useAppTranslation`). All strings are passed in as props by the
  * server-side `DashboardLayoutContainer`.
  *
- * Interactive client islands (notification badge dropdown, user menu, theme
- * toggle, mobile sidebar toggle, language switcher) are slotted via the
- * `children` prop — the caller renders a `"use client"` island tree as
- * `{children}`. When `children` is empty, only the static chrome is emitted.
- *
- * This component is tier-neutral (no `.mobile`/`.desktop` suffix): it MUST
- * NOT import `useMediaQuery`, `useViewport`, or `ViewportContext`.
- *
- * Mirrors the visual structure of `NavbarChrome` (client) but with no
- * client-side behavior. `NavbarChrome` remains the client fallback for
- * non-server-rendered layouts; this shell is the SSR path.
+ * CSS variable tokens (`var(--mui-palette-headerContainer)`, etc.) are used
+ * directly instead of JS theme callbacks so the server component renders
+ * deterministic HTML without requiring client ThemeProvider context.
  */
 
 interface NavbarStaticShellProps {
-  /**
-   * Application title (e.g. "Siraj LMS") rendered server-side as the LCP
-   * candidate. Already resolved to the active locale's string by the
-   * caller — never a translation key.
-   */
   readonly appTitle: string;
-  /**
-   * Role label (e.g. localized "Administrator") rendered as a secondary
-   * line under the app title. Already localized by the caller.
-   */
   readonly roleLabel: string;
-  /**
-   * Accessibility label for the brand logo icon. Already localized.
-   */
   readonly logoAriaLabel: string;
-  /**
-   * Optional client-island slot rendered on the right side of the navbar
-   * (notification button, user menu, theme toggle, language switcher,
-   * mobile sidebar toggle). May be omitted; the navbar then renders only
-   * static chrome.
-   */
   readonly children?: ReactNode;
 }
 
@@ -56,32 +30,33 @@ export function NavbarStaticShell({ appTitle, roleLabel, logoAriaLabel, children
     <AppBar
       position="fixed"
       elevation={0}
+      color="transparent"
       sx={{
         width: "100%",
-        backgroundColor: theme => theme.palette.headerContainer,
-        color: theme => theme.palette.onHeaderContainer,
-        zIndex: theme => theme.zIndex.drawer + 1,
-        boxShadow: theme => theme.palette.shadow.card,
+        backgroundColor: "var(--mui-palette-headerContainer) !important",
+        color: "var(--mui-palette-onHeaderContainer) !important",
+        zIndex: 1201,
+        boxShadow: "var(--mui-palette-shadow-card)",
       }}
     >
       <Toolbar
         sx={{
           justifyContent: "space-between",
-          minHeight: theme => theme.layout.navbarHeight,
+          minHeight: "64px",
           px: { xs: 2, md: 4 },
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 2 } }}>
           <Box
-            sx={theme => ({
+            sx={{
               width: 40,
               height: 40,
-              backgroundColor: alpha(theme.palette.onHeaderContainer, 0.15),
+              backgroundColor: "color-mix(in srgb, var(--mui-palette-onHeaderContainer) 15%, transparent)",
               borderRadius: 2,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-            })}
+            }}
           >
             <SchoolOutlined sx={{ fontSize: 24 }} aria-label={logoAriaLabel} />
           </Box>
@@ -89,7 +64,7 @@ export function NavbarStaticShell({ appTitle, roleLabel, logoAriaLabel, children
             <Typography
               variant="titleLg"
               sx={{
-                color: theme => theme.palette.onHeaderContainer,
+                color: "var(--mui-palette-onHeaderContainer)",
                 lineHeight: 1.2,
               }}
             >
@@ -98,7 +73,7 @@ export function NavbarStaticShell({ appTitle, roleLabel, logoAriaLabel, children
             <Typography
               variant="labelMd"
               sx={{
-                color: theme => alpha(theme.palette.onHeaderContainer, 0.7),
+                color: "color-mix(in srgb, var(--mui-palette-onHeaderContainer) 70%, transparent)",
                 lineHeight: 1.2,
               }}
             >

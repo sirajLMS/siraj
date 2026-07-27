@@ -4,7 +4,9 @@ import type { Metadata } from "next";
 import { Hanken_Grotesk, Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
+import { logger } from "@/backend/lib/logger";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
+import { buildServerThemeCss } from "@/frontend/common/lib/server-theme-css";
 import { getThemeFromCookies, THEME_COOKIE_NAME } from "@/frontend/common/lib/theme-detection";
 import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import MuiProvider from "@/frontend/common/providers/theme/MuiProvider";
@@ -73,15 +75,28 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const themeCookie = cookieStore.get(THEME_COOKIE_NAME);
   const initialTheme = getThemeFromCookies(themeCookie?.value);
 
+  logger.info("[RootLayout] Server theme detection", {
+    themeCookieRaw: themeCookie?.value ?? null,
+    initialTheme,
+    locale,
+  });
+
   const direction = locale === "ar" ? "rtl" : "ltr";
+  const serverThemeCss = buildServerThemeCss(initialTheme);
 
   return (
     <html
       lang={locale}
       dir={direction}
+      data-mui-color-scheme={initialTheme}
+      data-theme={initialTheme}
       suppressHydrationWarning
       className={`${inter.variable} ${hankenGrotesk.variable}`}
     >
+      <head>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: Safe server-side generated theme CSS variables */}
+        <style id="server-theme-css" dangerouslySetInnerHTML={{ __html: serverThemeCss }} />
+      </head>
       <body style={{ overflow: "hidden" }}>
         {/* Must come before the main content. Sets the initial color-scheme
             attribute on <html> from localStorage/cookie before hydration so the
