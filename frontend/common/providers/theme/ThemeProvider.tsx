@@ -38,11 +38,22 @@ function ColorSchemeStateBridge({ children }: { readonly children: ReactNode }) 
   // a concrete PaletteMode — the prior behavior always returned "light"|"dark".
   const mode: PaletteMode = schemeMode === "light" ? "light" : "dark";
 
-  // Sync `data-theme`, `colorScheme`, `lang` and `dir` attributes for CSS
-  // variable application and layout flow. Use `useLayoutEffect` (not
-  // `useEffect`) and diff against the previously-applied values so we only
-  // touch the DOM when an attribute actually changed — avoids layout
-  // thrashing on every render of this otherwise-pure-bridge component.
+  // Sync `data-theme`, `data-mui-color-scheme`, `colorScheme`, `lang` and `dir`
+  // attributes for CSS variable application and layout flow. Use `useLayoutEffect`
+  // (not `useEffect`) and diff against the previously-applied values so we only
+  // touch the DOM when an attribute actually changed — avoids layout thrashing
+  // on every render of this otherwise-pure-bridge component.
+  //
+  // `data-mui-color-scheme` is synced here (in addition to `data-theme`) because
+  // `server-theme-css.ts` scopes its fallback CSS variables to
+  // `html[data-mui-color-scheme="${mode}"]`. MUI's `useColorScheme().setMode()`
+  // only manages the boolean `data-light`/`data-dark` attributes (per
+  // `colorSchemeSelector: "data"`), so without this sync the
+  // `data-mui-color-scheme` attribute would stay pinned to the initial server
+  // mode after a toggle, leaving the server-rendered shells stuck in the old
+  // palette. Keeping all three attribute conventions (`data-mui-color-scheme`,
+  // `data-theme`, `data-dark`/`data-light`) aligned ensures the shells repaint
+  // in the toggled mode.
   const lastAppliedRef = useRef<{ readonly mode: string; readonly dir: string; readonly lang: string } | null>(null);
   useLayoutEffect(() => {
     if (typeof document === "undefined") return;
@@ -58,6 +69,7 @@ function ColorSchemeStateBridge({ children }: { readonly children: ReactNode }) 
 
     const root = document.documentElement;
     root.dataset.theme = mode;
+    root.dataset.muiColorScheme = mode;
     root.style.colorScheme = mode;
     root.dir = direction;
     root.lang = locale;

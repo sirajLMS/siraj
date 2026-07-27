@@ -90,16 +90,24 @@ function extractTokens(mode: PaletteMode): ServerThemeTokens {
 }
 
 /**
- * Generate critical CSS variables derived from the requested server theme mode.
- * Injected into `<head>` in `app/layout.tsx` so server-rendered HTML shells
- * (NavbarStaticShell, DesktopMainScrollArea, DashboardRoleSkeleton, SidebarShell) paint
- * instantly in the requested palette before client hydration and Emotion cache mount.
+ * Build the scoped CSS rule block for a single color-scheme mode.
+ *
+ * The rule is scoped to three equivalent selector groups so it matches
+ * regardless of which attribute convention the active layer writes:
+ *   - `html[data-mui-color-scheme="${mode}"]` — MUI's `InitColorSchemeScript`
+ *     default attribute (also written server-side by `app/layout.tsx` and
+ *     synced on toggle by `ColorSchemeStateBridge`).
+ *   - `html[data-theme="${mode}"]` — the app's custom attribute, updated on
+ *     toggle by `ColorSchemeStateBridge`.
+ *   - `html[data-${mode}]` — the boolean attribute form written by MUI's
+ *     `useColorScheme().setMode()` when `colorSchemeSelector: "data"` is used
+ *     (e.g. `data-dark` / `data-light`).
  */
-export function buildServerThemeCss(mode: PaletteMode): string {
+function buildModeRule(mode: PaletteMode): string {
   const tokens = extractTokens(mode);
 
   return `
-    :root, html, [data-mui-color-scheme] {
+    html[data-mui-color-scheme="${mode}"], html[data-theme="${mode}"], html[data-${mode}] {
       --mui-palette-background-default: ${tokens.bgDefault};
       --mui-palette-background-paper: ${tokens.bgPaper};
       --mui-palette-headerContainer: ${tokens.headerContainer};
@@ -118,9 +126,32 @@ export function buildServerThemeCss(mode: PaletteMode): string {
       --mui-palette-Skeleton-bg: ${tokens.skeletonBg};
       color-scheme: ${mode};
     }
-    html, body {
-      background-color: ${tokens.bgDefault} !important;
-      color: ${tokens.onBackground} !important;
+    html[data-mui-color-scheme="${mode}"] body, html[data-theme="${mode}"] body, html[data-${mode}] body {
+      background-color: ${tokens.bgDefault};
+      color: ${tokens.onBackground};
     }
   `.replace(/\s+/g, " ");
+}
+
+/**
+ * Generate critical CSS variables for the requested server theme mode.
+ * Injected into `<head>` in `app/layout.tsx` so server-rendered HTML shells
+ * (NavbarStaticShell, DesktopMainScrollArea, DashboardRoleSkeleton, SidebarShell) paint
+ * instantly in the requested palette before client hydration and Emotion cache mount.
+ *
+ * Emits rules for **both** `light` and `dark` modes (the initial server `mode` first,
+ * then the other mode) so that when the user toggles theme mode on the client, the
+ * toggled mode's `html[data-theme="…"]` / `html[data-…]` / `html[data-mui-color-scheme="…"]`
+ * selectors always have a matching rule with the correct variable values. Without both
+ * modes, the server-rendered shells (which read `var(--mui-palette-*)` directly) would
+ * stay stuck in the initial server mode after a client toggle, because no rule would
+ * exist for the new mode's selectors.
+ *
+ * The initial server `mode` is emitted first so it wins the SSR first-paint race before
+ * hydration; the selectors are mutually exclusive by attribute value, so order does not
+ * affect correctness after toggle — only which rule applies during the very first paint.
+ */
+export function buildServerThemeCss(mode: PaletteMode): string {
+  const otherMode: PaletteMode = mode === "dark" ? "light" : "dark";
+  return `${buildModeRule(mode)} ${buildModeRule(otherMode)}`;
 }

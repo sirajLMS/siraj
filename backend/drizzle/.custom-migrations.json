@@ -1,5 +1,5 @@
 {
-  "manifestHash": "23623615b69384011a5ebc7f696a82ad99e682647e7f1bc4eded575c3723e4db",
+  "manifestHash": "992cec90d15e58f98cd4692342e31028c70ab580ada16867915befe9ba8eb1dd",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -7,7 +7,7 @@
     },
     {
       "file": "3-system_permissions_and_groups.sql",
-      "sha256": "81b976b4849ccff630f48493d43f34b1beacba418714b1edddcfecab6ec194c8"
+      "sha256": "66375a575b826d04f72ef6c2e5ad7fdf46d3c3313ed0e7c8672369d3a53148d5"
     },
     {
       "file": "30-a-class_instances_rls_policies.sql",
@@ -142,5 +142,5 @@
       "sha256": "d846dab1b8bd32322114adbfeb34dca648c9f472905ff3299a9f8063f5bb0300"
     }
   ],
-  "appliedFolders": ["20260727152656_custom_23623615"]
+  "appliedFolders": ["20260727152656_custom_23623615", "20260727225423_custom_992cec90"]
 }
