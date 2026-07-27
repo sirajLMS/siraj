@@ -4,6 +4,7 @@ import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { migrate as migratePostgres } from "drizzle-orm/node-postgres/migrator";
 import { db, getDrizzleDbPool } from "@/backend/db/drizzleDb";
 import { applyCustomMigrations } from "@/backend/db/scripts/applyCustomMigrations";
+import { ensureIdempotentMigrations } from "@/backend/db/scripts/ensureIdempotentMigrations";
 import { getEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 
@@ -29,6 +30,11 @@ export async function runMigrations(closePool: boolean) {
     logger.error("Custom migration auto-bundle failed:", err);
     throw err;
   }
+
+  // Ensure all migration SQL files in backend/drizzle/ are fully idempotent for PostgreSQL
+  // before running Drizzle's migration runner. This prevents failures on existing DBs
+  // when type/column/constraint already exists.
+  ensureIdempotentMigrations();
 
   if (provider === "postgres") {
     logger.warn("⚠️  Pool will be closed after migrations complete");

@@ -1,5 +1,5 @@
 {
-  "manifestHash": "c74a902f8aed8a0a8c2dfe01524872c0fa1f32e2a1c7b9516c513d93d4d3c657",
+  "manifestHash": "23623615b69384011a5ebc7f696a82ad99e682647e7f1bc4eded575c3723e4db",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -7,7 +7,7 @@
     },
     {
       "file": "3-system_permissions_and_groups.sql",
-      "sha256": "f87af852de0a70a61d8188b97dd057684f270114f7cb65b21173a87880b30fc9"
+      "sha256": "81b976b4849ccff630f48493d43f34b1beacba418714b1edddcfecab6ec194c8"
     },
     {
       "file": "30-a-class_instances_rls_policies.sql",
@@ -31,7 +31,7 @@
     },
     {
       "file": "4a-class_categories_and_subjects_seed.sql",
-      "sha256": "1692a988be1e7e4d96585d191bd12b79ab6ed6df2ce215ffbdc0d498cc81adee"
+      "sha256": "23a1c3208b5e2375fcf43aba08bf7fedf2e8406e5fd7507748896d3bc6b13d54"
     },
     {
       "file": "4b-teacher_support_contact_setting.sql",
@@ -142,5 +142,5 @@
       "sha256": "d846dab1b8bd32322114adbfeb34dca648c9f472905ff3299a9f8063f5bb0300"
     }
   ],
-  "appliedFolders": ["20260725202529_combined_custom_logic", "20260727040002_custom_c74a902f"]
+  "appliedFolders": ["20260727152656_custom_23623615"]
 }
