@@ -8,17 +8,34 @@ import { SessionService, StorageService } from "@/backend/services";
  */
 async function authenticateAdmin(request: NextRequest): Promise<{ userId: string } | NextResponse> {
   const authHeader = request.headers.get("authorization");
-  const accessToken = extractTokenFromHeader(authHeader);
-  const payload = accessToken ? await verifyToken(accessToken) : null;
+  const accessToken = extractTokenFromHeader(authHeader) ?? request.cookies.get("access_token")?.value ?? null;
+  let userId: string | null = null;
 
-  if (payload?.type !== "access") {
-    logger.warn("Unauthorized cleanup attempt - no valid token");
+  if (accessToken) {
+    const payload = await verifyToken(accessToken);
+    if (payload?.type === "access") {
+      userId = payload.userId;
+    }
+  }
+
+  if (!userId) {
+    const sessionId = request.cookies.get("session_id")?.value;
+    if (sessionId) {
+      const session = await SessionService.validateSession(sessionId);
+      if (session?.userId) {
+        userId = session.userId;
+      }
+    }
+  }
+
+  if (!userId) {
+    logger.warn("Unauthorized cleanup attempt - no valid token or session");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = await SessionService.getCurrentUserProfile(payload.userId);
+  const user = await SessionService.getCurrentUserProfile(userId);
   if (!user) {
-    logger.warn("Unauthorized cleanup attempt - user not found", { userId: payload.userId });
+    logger.warn("Unauthorized cleanup attempt - user not found", { userId });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

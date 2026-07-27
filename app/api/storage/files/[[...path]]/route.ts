@@ -89,19 +89,25 @@ function createRangeResponse(options: RangeResponseOptions): NextResponse {
 
 async function authenticateRequest(request: NextRequest): Promise<{ userId: string } | NextResponse> {
   const authHeader = request.headers.get("authorization");
-  const accessToken = extractTokenFromHeader(authHeader);
+  const accessToken = extractTokenFromHeader(authHeader) ?? request.cookies.get("access_token")?.value ?? null;
   const payload = accessToken ? await verifyToken(accessToken) : null;
 
-  if (payload?.type !== "access") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (payload?.type === "access") {
+    const user = await SessionService.getCurrentUserProfile(payload.userId);
+    if (user) {
+      return { userId: payload.userId };
+    }
   }
 
-  const user = await SessionService.getCurrentUserProfile(payload.userId);
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const sessionId = request.cookies.get("session_id")?.value;
+  if (sessionId) {
+    const session = await SessionService.validateSession(sessionId);
+    if (session?.userId) {
+      return { userId: session.userId };
+    }
   }
 
-  return { userId: payload.userId };
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
 async function checkFileAccess(userId: string, relativePath: string): Promise<NextResponse | null> {
