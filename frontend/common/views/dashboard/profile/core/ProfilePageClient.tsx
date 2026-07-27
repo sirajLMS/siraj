@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { Stack } from "@mui/material";
+import { Alert, Stack } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -30,7 +30,9 @@ export type ProfilePageClientProps = {
 
 export function ProfilePageClient({ scope, mode, audience, targetUserId }: ProfilePageClientProps) {
   const t = useAppTranslation().profileTranslations.base;
+  const teacherT = useAppTranslation().profileTranslations.teacher;
   const searchParams = useSearchParams();
+  const forceComplete = searchParams.get("forceComplete") === "1";
   // Prefer the URL tab; fall back to "profile" only for the initial paint before
   // ProfileTabNav normalizes a missing/invalid ?tab=. Do not feed a default
   // "profile" back into the URL — that raced with hydration and caused redirects.
@@ -149,6 +151,14 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
   return (
     <ProfileShell {...shellProps}>
       {scope === ProfileScope.Own && mode === ProfileMode.View ? <DisplayCurrencyHint /> : null}
+      {forceComplete && audience === ProfileAudience.Teacher ? (
+        <Alert severity="warning">
+          <Stack spacing={0.5}>
+            <span>{teacherT.nationalIdCompletion.banner}</span>
+            <span>{teacherT.nationalIdCompletion.action}</span>
+          </Stack>
+        </Alert>
+      ) : null}
       {renderProfileContainer()}
     </ProfileShell>
   );

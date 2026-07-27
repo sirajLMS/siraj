@@ -26,6 +26,9 @@ export interface UseSubjectFormStateOptions {
     readonly category?: { readonly id?: string | null } | null;
     readonly description?: string | null;
     readonly isActive?: boolean | null;
+    readonly avatarUrl?: string | null;
+    readonly hourlyRate?: string | null;
+    readonly rateCurrency?: string | null;
   } | null;
 }
 
@@ -65,6 +68,9 @@ export function useSubjectFormState(options: Readonly<UseSubjectFormStateOptions
         categoryId: subject.category?.id ?? "",
         description: subject.description ?? "",
         isActive: subject.isActive ?? true,
+        avatarUrl: subject.avatarUrl ?? "",
+        hourlyRate: subject.hourlyRate ?? "",
+        rateCurrency: subject.rateCurrency ?? "",
       });
     } else if (open && !subject) {
       reset(emptySubjectFormValues);

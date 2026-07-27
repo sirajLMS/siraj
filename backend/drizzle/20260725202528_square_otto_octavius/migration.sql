@@ -1,39 +1,183 @@
-CREATE TYPE "invoice_payment_submission_status" AS ENUM('pending', 'approved', 'rejected');--> statement-breakpoint
-CREATE TYPE "account_status" AS ENUM('ACTIVATED', 'DEACTIVATED');--> statement-breakpoint
-CREATE TYPE "app_language" AS ENUM('ar', 'en');--> statement-breakpoint
-CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'auth.edit_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'teacher.view_students', 'teacher.view_own_profile', 'teacher.edit_own_profile', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.create', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile', 'user.edit_profile', 'schedule.delete_class', 'schedule.clear_weekly', 'staff.edit_profile', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_profile', 'parent.view_students', 'parent.view_own_profile', 'parent.edit_own_profile', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.submit_payment_proof', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'suggestions.list', 'suggestions.review', 'suggestions.delete', 'subjects.list', 'subjects.create', 'subjects.update', 'subjects.delete', 'subjects.view_resources', 'subjects.manage_resources', 'categories.list', 'categories.create', 'categories.update', 'categories.delete', 'notes.list', 'notes.create', 'notes.update', 'notes.delete', 'test.system_only', 'test.custom_only', 'test.custom_alt', 'storage.manage', 'billing.view_exchange_rates', 'billing.refresh_exchange_rates', 'billing.manage_fx_provider', 'billing.override_exchange_rates', 'billing.manage_currency_hedges', 'payment_methods.manage_catalogs', 'payment_methods.verify_bank_transfer', 'meeting_providers.manage_catalog', 'meeting_configs.manage_own', 'meeting_configs.manage_other', 'meeting_configs.manage_class', 'teacher.view_profile', 'profile.core_identity.view_own', 'profile.core_identity.view_other', 'profile.core_identity.edit_own', 'profile.core_identity.edit_other', 'profile.core_contact.view_own', 'profile.core_contact.view_other', 'profile.core_contact.edit_own', 'profile.core_contact.edit_other', 'profile.teacher_professional.view_own', 'profile.teacher_professional.view_other', 'profile.teacher_professional.edit_own', 'profile.teacher_professional.edit_other', 'profile.teacher_identity.view_own', 'profile.teacher_identity.view_other', 'profile.teacher_identity.edit_own', 'profile.teacher_identity.edit_other', 'profile.parent_social.view_own', 'profile.parent_social.view_other', 'profile.parent_social.edit_own', 'profile.parent_social.edit_other', 'profile.parent_identity.view_own', 'profile.parent_identity.view_other', 'profile.parent_identity.edit_own', 'profile.parent_identity.edit_other', 'profile.parent_billing.view_own', 'profile.parent_billing.view_other', 'profile.parent_billing.edit_own', 'profile.parent_billing.edit_other', 'profile.parent_account.view_own', 'profile.parent_account.view_other', 'profile.parent_account.edit_own', 'profile.parent_account.edit_other', 'profile.parent_students.view_own', 'profile.parent_students.view_other', 'profile.parent_students.edit_own', 'profile.parent_students.edit_other', 'profile.teacher_students.view_own', 'profile.teacher_students.view_other', 'profile.teacher_students.edit_own', 'profile.teacher_students.edit_other', 'profile.staff_role.view_own', 'profile.staff_role.view_other', 'profile.staff_role.edit_own', 'profile.staff_role.edit_other', 'profile.staff_permissions.view_own', 'profile.staff_permissions.view_other', 'profile.staff_permissions.edit_own', 'profile.staff_permissions.edit_other', 'profile.payment_methods.view_own', 'profile.payment_methods.view_other', 'profile.payment_methods.edit_own', 'profile.payment_methods.edit_other', 'profile.meeting_configs.view_own', 'profile.meeting_configs.view_other', 'profile.meeting_configs.edit_own', 'profile.meeting_configs.edit_other', 'student.student_identity.view_own', 'student.student_identity.view_other', 'student.student_identity.edit_own', 'student.student_identity.edit_other', 'student.student_academic.view_own', 'student.student_academic.view_other', 'student.student_academic.edit_own', 'student.student_academic.edit_other', 'student.student_teacher.view_own', 'student.student_teacher.view_other', 'student.student_teacher.edit_own', 'student.student_teacher.edit_other', 'student.student_parent.view_own', 'student.student_parent.view_other', 'student.student_parent.edit_own', 'student.student_parent.edit_other', 'student.student_schedule.view_own', 'student.student_schedule.view_other', 'student.student_schedule.edit_own', 'student.student_schedule.edit_other', 'student.student_history.view_own', 'student.student_history.view_other', 'student.student_history.edit_own', 'student.student_history.edit_other', 'student.student_quota_edit.view_own', 'student.student_quota_edit.view_other', 'student.student_quota_edit.edit_own', 'student.student_quota_edit.edit_other', 'lesson_reports.submit', 'lesson_reports.review', 'lesson_reports.approve', 'lesson_reports.reject', 'supervisor.view_dashboard', 'student.view_own_dashboard', 'credits.manage', 'teacher_dues.view', 'teacher_dues.mark_paid', 'monthly_reports.view');--> statement-breakpoint
-CREATE TYPE "attendance_evaluation" AS ENUM('PRESENT', 'ABSENT', 'LATE');--> statement-breakpoint
-CREATE TYPE "availability_status" AS ENUM('AVAILABLE', 'OUT_OF_STOCK');--> statement-breakpoint
-CREATE TYPE "class_execution_state" AS ENUM('NOT_ACTIVATED', 'ACTIVATED', 'RUNNING', 'COMPLETED');--> statement-breakpoint
-CREATE TYPE "class_outcome" AS ENUM('PENDING', 'TAKEN', 'ABSENT', 'LEAVE');--> statement-breakpoint
-CREATE TYPE "class_type" AS ENUM('REGULAR', 'TRIAL', 'ADVANCE');--> statement-breakpoint
-CREATE TYPE "complaint_category" AS ENUM('REGARDING_TEACHER', 'REGARDING_SYSTEM', 'OTHER');--> statement-breakpoint
-CREATE TYPE "complaint_status" AS ENUM('UNANSWERED', 'ANSWERED');--> statement-breakpoint
-CREATE TYPE "country_code" AS ENUM('SA', 'PS', 'YE', 'SY', 'EG', 'KW', 'QA', 'OM', 'BH', 'LB', 'JO', 'IQ', 'LY', 'AE', 'TN', 'DZ', 'MA', 'SD', 'ID', 'MR', 'SO', 'KM', 'DJ', 'ER', 'SS', 'EH', 'AD', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DK', 'DM', 'DO', 'EC', 'EE', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'IE', 'IM', 'IN', 'IO', 'IR', 'IS', 'IT', 'JE', 'JM', 'JP', 'KE', 'KG', 'KH', 'KI', 'KN', 'KP', 'KR', 'KY', 'KZ', 'LA', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PT', 'PW', 'PY', 'RE', 'RO', 'RS', 'RU', 'RW', 'SB', 'SC', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SR', 'ST', 'SV', 'SX', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TO', 'TR', 'TV', 'TW', 'TZ', 'UA', 'UG', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'XK', 'YT', 'ZA', 'ZM', 'ZW');--> statement-breakpoint
-CREATE TYPE "credit_reason" AS ENUM('PURCHASE', 'DEDUCTION', 'REFUND', 'ADJUSTMENT');--> statement-breakpoint
-CREATE TYPE "currency_code" AS ENUM('EGP', 'SAR', 'AED', 'KWD', 'QAR', 'BHD', 'OMR', 'JOD', 'IQD', 'YER', 'SYP', 'LBP', 'ILS', 'SDG', 'LYD', 'TND', 'DZD', 'MAD', 'MRU', 'SOS', 'DJF', 'KMF', 'TRY', 'USD', 'EUR', 'GBP', 'CHF', 'CNY', 'JPY', 'INR', 'CAD', 'AUD');--> statement-breakpoint
-CREATE TYPE "day_of_week" AS ENUM('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY');--> statement-breakpoint
-CREATE TYPE "device_platform" AS ENUM('IOS', 'ANDROID', 'WEB');--> statement-breakpoint
-CREATE TYPE "dst_migration_result" AS ENUM('UPDATED', 'CONFLICT', 'UNCHANGED');--> statement-breakpoint
-CREATE TYPE "fx_provider" AS ENUM('openexchangerates', 'fixer');--> statement-breakpoint
-CREATE TYPE "fx_sync_status" AS ENUM('running', 'success', 'partial', 'failed');--> statement-breakpoint
-CREATE TYPE "gender" AS ENUM('MALE', 'FEMALE');--> statement-breakpoint
-CREATE TYPE "identifier_kind" AS ENUM('EMAIL', 'HANDLE', 'EMAIL_OR_HANDLE');--> statement-breakpoint
-CREATE TYPE "invoice_status" AS ENUM('UNPAID', 'PAYMENT_PENDING', 'PAID', 'CANCELLED');--> statement-breakpoint
-CREATE TYPE "invoice_type" AS ENUM('PER_CLASSES', 'MONTHLY', 'MANUAL');--> statement-breakpoint
-CREATE TYPE "leave_request_status" AS ENUM('PENDING', 'APPROVED', 'RESCHEDULED', 'CANCELLED');--> statement-breakpoint
-CREATE TYPE "leave_requester_type" AS ENUM('TEACHER', 'PARENT', 'ADMIN');--> statement-breakpoint
-CREATE TYPE "lesson_report_status" AS ENUM('DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED');--> statement-breakpoint
-CREATE TYPE "notification_channel" AS ENUM('EMAIL', 'SMS', 'PUSH', 'ON_APP');--> statement-breakpoint
-CREATE TYPE "notification_delivery_status" AS ENUM('PENDING', 'SENT', 'DELIVERED', 'OPENED', 'FAILED');--> statement-breakpoint
-CREATE TYPE "notification_event_type" AS ENUM('CLASS_REMINDER', 'INVOICE_GENERATED', 'COMPLAINT_RESPONSE', 'PAYMENT_METHOD_CHANGED', 'NEW_COMPLAINT', 'NEW_SUGGESTION', 'SUGGESTION_ACKNOWLEDGED', 'SUGGESTION_DUPLICATE_MARKED', 'INVOICE_STATUS_CHANGED', 'CLASS_SCHEDULED', 'CLASS_ACTIVATED', 'CLASS_STARTED', 'CLASS_COMPLETED', 'CLASS_MARKED_ABSENT', 'CLASS_MARKED_MISSED', 'CLASS_LEAVE_REQUESTED', 'CLASS_RESCHEDULED', 'CLASS_CANCELLED', 'CLASS_RESET', 'STUDENT_TEACHER_REASSIGNED', 'STUDENT_STATUS_CHANGED', 'STUDENT_QUOTA_OVERRIDDEN', 'LESSON_REPORT_SUBMITTED', 'LESSON_REPORT_REVIEWED');--> statement-breakpoint
-CREATE TYPE "parent_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL');--> statement-breakpoint
-CREATE TYPE "payment_direction" AS ENUM('PAYIN', 'PAYOUT', 'BOTH');--> statement-breakpoint
-CREATE TYPE "payment_method_type" AS ENUM('MOBILE_WALLET', 'PAYMENT_LINK', 'ONLINE_ACCOUNT', 'BANK_TRANSFER', 'CASH', 'PROOF_UPLOAD');--> statement-breakpoint
-CREATE TYPE "student_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL', 'DEACTIVATED');--> statement-breakpoint
-CREATE TYPE "suggestion_status" AS ENUM('PENDING', 'REVIEWED', 'DUPLICATE');--> statement-breakpoint
-CREATE TYPE "teacher_due_status" AS ENUM('PENDING', 'PAID');--> statement-breakpoint
-CREATE TYPE "vacation_request_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_payment_submission_status') THEN
+        CREATE TYPE "invoice_payment_submission_status" AS ENUM('pending', 'approved', 'rejected');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'account_status') THEN
+        CREATE TYPE "account_status" AS ENUM('ACTIVATED', 'DEACTIVATED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_language') THEN
+        CREATE TYPE "app_language" AS ENUM('ar', 'en');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') THEN
+        CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'auth.edit_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'teacher.view_students', 'teacher.view_own_profile', 'teacher.edit_own_profile', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.create', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile', 'user.edit_profile', 'schedule.delete_class', 'schedule.clear_weekly', 'staff.edit_profile', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_profile', 'parent.view_students', 'parent.view_own_profile', 'parent.edit_own_profile', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.submit_payment_proof', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'suggestions.list', 'suggestions.review', 'suggestions.delete', 'subjects.list', 'subjects.create', 'subjects.update', 'subjects.delete', 'subjects.view_resources', 'subjects.manage_resources', 'categories.list', 'categories.create', 'categories.update', 'categories.delete', 'notes.list', 'notes.create', 'notes.update', 'notes.delete', 'test.system_only', 'test.custom_only', 'test.custom_alt', 'storage.manage', 'billing.view_exchange_rates', 'billing.refresh_exchange_rates', 'billing.manage_fx_provider', 'billing.override_exchange_rates', 'billing.manage_currency_hedges', 'payment_methods.manage_catalogs', 'payment_methods.verify_bank_transfer', 'meeting_providers.manage_catalog', 'meeting_configs.manage_own', 'meeting_configs.manage_other', 'meeting_configs.manage_class', 'teacher.view_profile', 'profile.core_identity.view_own', 'profile.core_identity.view_other', 'profile.core_identity.edit_own', 'profile.core_identity.edit_other', 'profile.core_contact.view_own', 'profile.core_contact.view_other', 'profile.core_contact.edit_own', 'profile.core_contact.edit_other', 'profile.teacher_professional.view_own', 'profile.teacher_professional.view_other', 'profile.teacher_professional.edit_own', 'profile.teacher_professional.edit_other', 'profile.teacher_identity.view_own', 'profile.teacher_identity.view_other', 'profile.teacher_identity.edit_own', 'profile.teacher_identity.edit_other', 'profile.parent_social.view_own', 'profile.parent_social.view_other', 'profile.parent_social.edit_own', 'profile.parent_social.edit_other', 'profile.parent_identity.view_own', 'profile.parent_identity.view_other', 'profile.parent_identity.edit_own', 'profile.parent_identity.edit_other', 'profile.parent_billing.view_own', 'profile.parent_billing.view_other', 'profile.parent_billing.edit_own', 'profile.parent_billing.edit_other', 'profile.parent_account.view_own', 'profile.parent_account.view_other', 'profile.parent_account.edit_own', 'profile.parent_account.edit_other', 'profile.parent_students.view_own', 'profile.parent_students.view_other', 'profile.parent_students.edit_own', 'profile.parent_students.edit_other', 'profile.teacher_students.view_own', 'profile.teacher_students.view_other', 'profile.teacher_students.edit_own', 'profile.teacher_students.edit_other', 'profile.staff_role.view_own', 'profile.staff_role.view_other', 'profile.staff_role.edit_own', 'profile.staff_role.edit_other', 'profile.staff_permissions.view_own', 'profile.staff_permissions.view_other', 'profile.staff_permissions.edit_own', 'profile.staff_permissions.edit_other', 'profile.payment_methods.view_own', 'profile.payment_methods.view_other', 'profile.payment_methods.edit_own', 'profile.payment_methods.edit_other', 'profile.meeting_configs.view_own', 'profile.meeting_configs.view_other', 'profile.meeting_configs.edit_own', 'profile.meeting_configs.edit_other', 'student.student_identity.view_own', 'student.student_identity.view_other', 'student.student_identity.edit_own', 'student.student_identity.edit_other', 'student.student_academic.view_own', 'student.student_academic.view_other', 'student.student_academic.edit_own', 'student.student_academic.edit_other', 'student.student_teacher.view_own', 'student.student_teacher.view_other', 'student.student_teacher.edit_own', 'student.student_teacher.edit_other', 'student.student_parent.view_own', 'student.student_parent.view_other', 'student.student_parent.edit_own', 'student.student_parent.edit_other', 'student.student_schedule.view_own', 'student.student_schedule.view_other', 'student.student_schedule.edit_own', 'student.student_schedule.edit_other', 'student.student_history.view_own', 'student.student_history.view_other', 'student.student_history.edit_own', 'student.student_history.edit_other', 'student.student_quota_edit.view_own', 'student.student_quota_edit.view_other', 'student.student_quota_edit.edit_own', 'student.student_quota_edit.edit_other', 'lesson_reports.submit', 'lesson_reports.review', 'lesson_reports.approve', 'lesson_reports.reject', 'supervisor.view_dashboard', 'student.view_own_dashboard', 'credits.manage', 'teacher_dues.view', 'teacher_dues.mark_paid', 'monthly_reports.view');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'attendance_evaluation') THEN
+        CREATE TYPE "attendance_evaluation" AS ENUM('PRESENT', 'ABSENT', 'LATE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'availability_status') THEN
+        CREATE TYPE "availability_status" AS ENUM('AVAILABLE', 'OUT_OF_STOCK');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'class_execution_state') THEN
+        CREATE TYPE "class_execution_state" AS ENUM('NOT_ACTIVATED', 'ACTIVATED', 'RUNNING', 'COMPLETED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'class_outcome') THEN
+        CREATE TYPE "class_outcome" AS ENUM('PENDING', 'TAKEN', 'ABSENT', 'LEAVE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'class_type') THEN
+        CREATE TYPE "class_type" AS ENUM('REGULAR', 'TRIAL', 'ADVANCE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'complaint_category') THEN
+        CREATE TYPE "complaint_category" AS ENUM('REGARDING_TEACHER', 'REGARDING_SYSTEM', 'OTHER');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'complaint_status') THEN
+        CREATE TYPE "complaint_status" AS ENUM('UNANSWERED', 'ANSWERED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'country_code') THEN
+        CREATE TYPE "country_code" AS ENUM('SA', 'PS', 'YE', 'SY', 'EG', 'KW', 'QA', 'OM', 'BH', 'LB', 'JO', 'IQ', 'LY', 'AE', 'TN', 'DZ', 'MA', 'SD', 'ID', 'MR', 'SO', 'KM', 'DJ', 'ER', 'SS', 'EH', 'AD', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DK', 'DM', 'DO', 'EC', 'EE', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'IE', 'IM', 'IN', 'IO', 'IR', 'IS', 'IT', 'JE', 'JM', 'JP', 'KE', 'KG', 'KH', 'KI', 'KN', 'KP', 'KR', 'KY', 'KZ', 'LA', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PT', 'PW', 'PY', 'RE', 'RO', 'RS', 'RU', 'RW', 'SB', 'SC', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SR', 'ST', 'SV', 'SX', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TO', 'TR', 'TV', 'TW', 'TZ', 'UA', 'UG', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'XK', 'YT', 'ZA', 'ZM', 'ZW');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'credit_reason') THEN
+        CREATE TYPE "credit_reason" AS ENUM('PURCHASE', 'DEDUCTION', 'REFUND', 'ADJUSTMENT');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'currency_code') THEN
+        CREATE TYPE "currency_code" AS ENUM('EGP', 'SAR', 'AED', 'KWD', 'QAR', 'BHD', 'OMR', 'JOD', 'IQD', 'YER', 'SYP', 'LBP', 'ILS', 'SDG', 'LYD', 'TND', 'DZD', 'MAD', 'MRU', 'SOS', 'DJF', 'KMF', 'TRY', 'USD', 'EUR', 'GBP', 'CHF', 'CNY', 'JPY', 'INR', 'CAD', 'AUD');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'day_of_week') THEN
+        CREATE TYPE "day_of_week" AS ENUM('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'device_platform') THEN
+        CREATE TYPE "device_platform" AS ENUM('IOS', 'ANDROID', 'WEB');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'dst_migration_result') THEN
+        CREATE TYPE "dst_migration_result" AS ENUM('UPDATED', 'CONFLICT', 'UNCHANGED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'fx_provider') THEN
+        CREATE TYPE "fx_provider" AS ENUM('openexchangerates', 'fixer');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'fx_sync_status') THEN
+        CREATE TYPE "fx_sync_status" AS ENUM('running', 'success', 'partial', 'failed');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'gender') THEN
+        CREATE TYPE "gender" AS ENUM('MALE', 'FEMALE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'identifier_kind') THEN
+        CREATE TYPE "identifier_kind" AS ENUM('EMAIL', 'HANDLE', 'EMAIL_OR_HANDLE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_status') THEN
+        CREATE TYPE "invoice_status" AS ENUM('UNPAID', 'PAYMENT_PENDING', 'PAID', 'CANCELLED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_type') THEN
+        CREATE TYPE "invoice_type" AS ENUM('PER_CLASSES', 'MONTHLY', 'MANUAL');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'leave_request_status') THEN
+        CREATE TYPE "leave_request_status" AS ENUM('PENDING', 'APPROVED', 'RESCHEDULED', 'CANCELLED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'leave_requester_type') THEN
+        CREATE TYPE "leave_requester_type" AS ENUM('TEACHER', 'PARENT', 'ADMIN');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lesson_report_status') THEN
+        CREATE TYPE "lesson_report_status" AS ENUM('DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_channel') THEN
+        CREATE TYPE "notification_channel" AS ENUM('EMAIL', 'SMS', 'PUSH', 'ON_APP');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_delivery_status') THEN
+        CREATE TYPE "notification_delivery_status" AS ENUM('PENDING', 'SENT', 'DELIVERED', 'OPENED', 'FAILED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_event_type') THEN
+        CREATE TYPE "notification_event_type" AS ENUM('CLASS_REMINDER', 'INVOICE_GENERATED', 'COMPLAINT_RESPONSE', 'PAYMENT_METHOD_CHANGED', 'NEW_COMPLAINT', 'NEW_SUGGESTION', 'SUGGESTION_ACKNOWLEDGED', 'SUGGESTION_DUPLICATE_MARKED', 'INVOICE_STATUS_CHANGED', 'CLASS_SCHEDULED', 'CLASS_ACTIVATED', 'CLASS_STARTED', 'CLASS_COMPLETED', 'CLASS_MARKED_ABSENT', 'CLASS_MARKED_MISSED', 'CLASS_LEAVE_REQUESTED', 'CLASS_RESCHEDULED', 'CLASS_CANCELLED', 'CLASS_RESET', 'STUDENT_TEACHER_REASSIGNED', 'STUDENT_STATUS_CHANGED', 'STUDENT_QUOTA_OVERRIDDEN', 'LESSON_REPORT_SUBMITTED', 'LESSON_REPORT_REVIEWED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'parent_status') THEN
+        CREATE TYPE "parent_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_direction') THEN
+        CREATE TYPE "payment_direction" AS ENUM('PAYIN', 'PAYOUT', 'BOTH');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_method_type') THEN
+        CREATE TYPE "payment_method_type" AS ENUM('MOBILE_WALLET', 'PAYMENT_LINK', 'ONLINE_ACCOUNT', 'BANK_TRANSFER', 'CASH', 'PROOF_UPLOAD');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'student_status') THEN
+        CREATE TYPE "student_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL', 'DEACTIVATED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'suggestion_status') THEN
+        CREATE TYPE "suggestion_status" AS ENUM('PENDING', 'REVIEWED', 'DUPLICATE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'teacher_due_status') THEN
+        CREATE TYPE "teacher_due_status" AS ENUM('PENDING', 'PAID');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vacation_request_status') THEN
+        CREATE TYPE "vacation_request_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
+    END IF;
+END $$;--> statement-breakpoint
 CREATE TABLE "admin_audit_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"actor_user_id" uuid NOT NULL,

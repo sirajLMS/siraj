@@ -70,6 +70,8 @@ export function DashboardLayoutMobile({
   userName,
   userEmail,
   roleLabel,
+  appTitle: _appTitle,
+  logoAriaLabel: _logoAriaLabel,
   avatarUrl,
   notificationCount,
   sidebarWidth = "260px",

@@ -12,8 +12,8 @@ import { useAppTranslation } from "@/shared/locale";
 
 const StyledCardActionsBox = styled(Box)(({ theme }) => ({
   position: "absolute",
-  top: 12,
-  right: 12,
+  insetBlockStart: theme.spacing(1.5),
+  insetInlineEnd: theme.spacing(1.5),
   color: theme.palette.text.secondary,
 }));
 
@@ -27,8 +27,8 @@ const StyledStatusIndicator = styled(Box, {
   shouldForwardProp: prop => prop !== "status",
 })<{ status: "active" | "blocked" }>(({ theme, status }) => ({
   position: "absolute",
-  bottom: 0,
-  right: 0,
+  insetBlockEnd: 0,
+  insetInlineEnd: 0,
   width: 14,
   height: 14,
   borderRadius: "50%",
@@ -39,10 +39,12 @@ const StyledStatusIndicator = styled(Box, {
 const StyledRoleChip = styled(Chip, {
   shouldForwardProp: prop => prop !== "role",
 })<{ role: ManagerRole }>(({ theme, role }) => ({
+  minWidth: 84,
   fontWeight: 700,
   textTransform: "uppercase",
   fontSize: theme.typography.labelSm.fontSize,
   height: 20,
+  paddingInline: theme.spacing(0.75),
   backgroundColor:
     role === "admin"
       ? theme.palette.primaryContainer
@@ -60,6 +62,7 @@ const StyledRoleChip = styled(Chip, {
 const StyledContactItemBox = styled(Stack)(({ theme }) => ({
   alignItems: "center",
   color: theme.palette.text.secondary,
+  lineHeight: 1.5,
 }));
 
 // VARIANT JUSTIFICATION: mobile card list uses the shared base shape with no extra fields; aliased as a named type for tier call-site clarity (Class C variant per specs §4.3).
@@ -72,62 +75,60 @@ export function ManagersCardListMobile({ managers, paginationOptions }: Readonly
   const t = useAppTranslation().dashboardTranslations.managersDirectory;
 
   return (
-    <Box sx={{ px: 2 }}>
-      <MobileCardList
-        rows={managers}
-        getKey={manager => manager.userId}
-        paginationOptions={paginationOptions}
-        emptyMessage={t.noEntries}
-        layout="edge-to-edge"
-        renderItem={manager => {
-          const avatarFallback = manager.avatarUrl ? undefined : manager.name.charAt(0).toUpperCase();
-          return (
-            <MobileCardListItem variant="edge-to-edge" sx={{ position: "relative" }}>
-              <StyledCardActionsBox>
-                <ManagerRowActions manager={manager} />
-              </StyledCardActionsBox>
+    <MobileCardList
+      rows={managers}
+      getKey={manager => manager.userId}
+      paginationOptions={paginationOptions}
+      emptyMessage={t.noEntries}
+      layout="edge-to-edge"
+      renderItem={manager => {
+        const avatarFallback = manager.avatarUrl ? undefined : manager.name.charAt(0).toUpperCase();
+        return (
+          <MobileCardListItem variant="edge-to-edge" sx={{ position: "relative" }}>
+            <StyledCardActionsBox>
+              <ManagerRowActions manager={manager} />
+            </StyledCardActionsBox>
 
-              <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", mb: 3 }}>
-                <Box sx={{ position: "relative" }}>
-                  <StyledProfileAvatar src={manager.avatarUrl || undefined} alt={manager.name}>
-                    {avatarFallback}
-                  </StyledProfileAvatar>
-                  <StyledStatusIndicator status={manager.status === "active" ? "active" : "blocked"} />
-                </Box>
+            <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", mb: 3 }}>
+              <Box sx={{ position: "relative" }}>
+                <StyledProfileAvatar src={manager.avatarUrl || undefined} alt={manager.name}>
+                  {avatarFallback}
+                </StyledProfileAvatar>
+                <StyledStatusIndicator status={manager.status === "active" ? "active" : "blocked"} />
+              </Box>
 
-                <Box sx={{ flex: 1 }}>
-                  <Typography
-                    variant="titleLg"
-                    sx={theme => ({ color: theme.palette.text.primary, lineHeight: 1.2, mb: 1 })}
-                  >
-                    {manager.name}
-                  </Typography>
-                  <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }} useFlexGap>
-                    <StyledRoleChip label={t.roles[manager.role]} size="small" role={manager.role} />
-                    <MobileStatusBadge
-                      category="session"
-                      status={manager.status === "active" ? "active" : "blocked"}
-                      label={t.status[manager.status]}
-                      size="small"
-                    />
-                  </Stack>
-                </Box>
-              </Stack>
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="titleLg"
+                  sx={theme => ({ color: theme.palette.text.primary, lineHeight: 1.2, mb: 1 })}
+                >
+                  {manager.name}
+                </Typography>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }} useFlexGap>
+                  <StyledRoleChip label={t.roles[manager.role]} size="small" role={manager.role} />
+                  <MobileStatusBadge
+                    category="session"
+                    status={manager.status === "active" ? "active" : "blocked"}
+                    label={t.status[manager.status]}
+                    size="small"
+                  />
+                </Stack>
+              </Box>
+            </Stack>
 
-              <Stack spacing={1.5}>
-                <StyledContactItemBox direction="row" spacing={1.5}>
-                  <MailOutlined fontSize="small" sx={theme => ({ color: theme.palette.primaryContainer })} />
-                  <Typography variant="bodyMd">{manager.email}</Typography>
-                </StyledContactItemBox>
-                <StyledContactItemBox direction="row" spacing={1.5}>
-                  <PhoneOutlined fontSize="small" sx={theme => ({ color: theme.palette.primaryContainer })} />
-                  <MobilePhoneDisplay phone={manager.phone} typographyVariant="bodyMd" />
-                </StyledContactItemBox>
-              </Stack>
-            </MobileCardListItem>
-          );
-        }}
-      />
-    </Box>
+            <Stack spacing={1.5}>
+              <StyledContactItemBox direction="row" spacing={1.5}>
+                <MailOutlined fontSize="small" sx={theme => ({ color: theme.palette.primaryContainer })} />
+                <Typography variant="bodyMd">{manager.email}</Typography>
+              </StyledContactItemBox>
+              <StyledContactItemBox direction="row" spacing={1.5}>
+                <PhoneOutlined fontSize="small" sx={theme => ({ color: theme.palette.primaryContainer })} />
+                <MobilePhoneDisplay phone={manager.phone} typographyVariant="bodyMd" />
+              </StyledContactItemBox>
+            </Stack>
+          </MobileCardListItem>
+        );
+      }}
+    />
   );
 }

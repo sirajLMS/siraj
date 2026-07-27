@@ -29,6 +29,9 @@ export interface SubjectsLabels {
   readonly selectCategory: string;
   readonly descriptionLabel: string;
   readonly activeLabel: string;
+  readonly avatarLabel: string;
+  readonly hourlyRateLabel: string;
+  readonly currencyLabel: string;
   readonly createSubject: string;
   readonly editSubject: string;
   readonly deleteSubject: string;

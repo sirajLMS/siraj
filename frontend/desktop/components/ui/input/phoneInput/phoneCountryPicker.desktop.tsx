@@ -41,7 +41,6 @@ export const PhoneCountryPickerDesktop: React.FC<PhoneCountryPickerDesktopProps>
         autoFocus
         showPhonePrefix
         matchAnchorWidth
-        disablePortal
         listAttached
       />
     </Box>

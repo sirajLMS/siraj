@@ -20,7 +20,10 @@ import { useState } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { PhoneInput } from "@/frontend/common/components/ui/input";
 import type { UpdateManagerProfileInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { updateManagerProfileMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
+import {
+  managerDirectoryQueryDocument,
+  updateManagerProfileMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
 import { logger } from "@/frontend/common/utils/logger";
 import type { Manager } from "@/frontend/common/views/dashboard/managers/home/types";
 import type { ManagersDirectoryLabels } from "@/shared/locale";
@@ -168,6 +171,7 @@ interface ActionMenuProps {
   readonly anchorEl: HTMLElement | null;
   readonly menuOpen: boolean;
   readonly onMenuClose: () => void;
+  readonly onImpersonateClick: () => void;
   readonly onEditClick: () => void;
   readonly onDeactivateClick: () => void;
   readonly manager: Manager;
@@ -178,6 +182,7 @@ function ActionMenu({
   anchorEl,
   menuOpen,
   onMenuClose,
+  onImpersonateClick,
   onEditClick,
   onDeactivateClick,
   manager,
@@ -192,7 +197,10 @@ function ActionMenu({
         targetUserId={manager.userId}
         targetUserName={manager.name}
         targetIsSuperAdmin={manager.targetIsSuperAdmin}
-        onMenuClose={onMenuClose}
+        onMenuClose={() => {
+          onMenuClose();
+          onImpersonateClick();
+        }}
       />
       <MenuItem onClick={onEditClick}>
         <EditOutlined fontSize="small" sx={theme => ({ mr: 1, color: theme.palette.text.secondary })} />
@@ -215,11 +223,14 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
   const t = useAppTranslation().dashboardTranslations.managersDirectory;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
+  const [impersonateDialogOpen, setImpersonateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [editPhone, setEditPhone] = useState(manager.phone);
 
-  const [updateProfile, { loading: updateLoading }] = useMutation(updateManagerProfileMutationDocument);
+  const [updateProfile, { loading: updateLoading }] = useMutation(updateManagerProfileMutationDocument, {
+    refetchQueries: [managerDirectoryQueryDocument],
+  });
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -244,7 +255,7 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
     executeManagerUpdate(
       updateProfile,
       manager.staffProfileId,
-      { phone: editPhone || null, status: null, hourlyRate: null, rateCurrency: null },
+      { phone: editPhone || null } as unknown as UpdateManagerProfileInput,
       () => setEditDialogOpen(false),
       "Manager profile updated",
       { staffProfileId: manager.staffProfileId }
@@ -274,10 +285,19 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
         anchorEl={anchorEl}
         menuOpen={menuOpen}
         onMenuClose={handleMenuClose}
+        onImpersonateClick={() => setImpersonateDialogOpen(true)}
         onEditClick={handleEditClick}
         onDeactivateClick={handleDeactivateClick}
         manager={manager}
         isDeactivate={isDeactivate}
+      />
+
+      <ViewAsUserButton
+        targetUserId={manager.userId}
+        targetUserName={manager.name}
+        targetIsSuperAdmin={manager.targetIsSuperAdmin}
+        open={impersonateDialogOpen}
+        onClose={() => setImpersonateDialogOpen(false)}
       />
 
       <EditProfileDialog

@@ -126,6 +126,7 @@ export const TeacherOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
       phone: t.string({ required: false }),
       nationality: t.string({ required: false }),
       countryCode: t.string({ required: false }),
+      nationalId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       dateOfBirth: t.string({ required: false }),
       gender: t.field({ type: GenderPothosObject, required: false }),
       address: t.string({ required: false }),

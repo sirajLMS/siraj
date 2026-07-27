@@ -3,6 +3,7 @@
 import { LinearProgress } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { RateSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   TeacherDueRow,
@@ -38,6 +39,25 @@ function StudentNameCell({ row }: Readonly<{ row: TeacherDueRow }>) {
 function StatusCell({ row }: Readonly<{ row: TeacherDueRow }>) {
   const status = row.status ?? "PENDING";
   return <DesktopStatusBadge category="invoice" status={status} label={status} />;
+}
+
+function rateSourceLabel(source: RateSource | null, labels: TeacherDuesColumnLabels): string {
+  switch (source) {
+    case RateSource.Override:
+      return labels.rateSourceOverride;
+    case RateSource.Recurring:
+      return labels.rateSourceRecurring;
+    case RateSource.Subject:
+      return labels.rateSourceSubject;
+    case RateSource.Teacher:
+      return labels.rateSourceTeacher;
+    default:
+      return labels.rateSourceTeacher;
+  }
+}
+
+function RateSourceCell({ row, labels }: Readonly<{ row: TeacherDueRow; labels: TeacherDuesColumnLabels }>) {
+  return <DesktopStatusBadge category="invoice" status="PENDING" label={rateSourceLabel(row.rateSource, labels)} />;
 }
 
 function MarkAsPaidCell({
@@ -111,6 +131,12 @@ function buildColumns({
       headerName: labels.statusColumn,
       width: 130,
       renderCell: params => <StatusCell row={params.row} />,
+    },
+    {
+      field: "rateSource",
+      headerName: labels.rateSourceColumn,
+      width: 130,
+      renderCell: params => <RateSourceCell row={params.row} labels={labels} />,
     },
     {
       field: "approvedAt",

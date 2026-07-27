@@ -1,11 +1,20 @@
 "use client";
 
 import { ExpandMoreOutlined } from "@mui/icons-material";
-import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
-import { type Control, Controller, type FieldErrors, type UseFormSetValue, type UseFormWatch } from "react-hook-form";
+import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import {
+  type Control,
+  Controller,
+  type FieldErrors,
+  type UseFormRegister,
+  type UseFormSetValue,
+  type UseFormWatch,
+  useWatch,
+} from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
+import { getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { SubjectSelectField } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
@@ -15,6 +24,7 @@ import {
   type RecurringClassFormFieldsProps,
 } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import type { RecurringClassFormLabels } from "@/frontend/common/views/dashboard/classes/recurring/utils/buildRecurringClassFormLabels";
+import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
 import { StudentAutocompleteMobile, TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { DaysScheduleSectionMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/daysScheduleSection.mobile";
 import { DurationInputMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/durationInput.mobile";
@@ -289,7 +299,38 @@ export function RecurringClassFormFieldsMobile({
         onClassTypeChange={handleClassTypeChange}
       />
 
+      <RateSectionMobile register={register} control={control} labels={labels} isSubmitting={isSubmitting} />
+
       <DaysScheduleSectionMobileWrapper watch={watch} setValue={setValue} errors={errors} labels={labels} />
+    </Box>
+  );
+}
+
+interface RateSectionMobileProps {
+  readonly register: UseFormRegister<RecurringClassFormData>;
+  readonly control: Control<RecurringClassFormData>;
+  readonly labels: RecurringClassFormLabels;
+  readonly isSubmitting: boolean;
+}
+
+function RateSectionMobile({ register, control, labels, isSubmitting }: RateSectionMobileProps) {
+  const rateCurrency = useWatch({ control, name: "rateCurrency" });
+  const currencySymbol = rateCurrency ? getCurrencySymbol(rateCurrency as string) : "";
+  return (
+    <Box sx={{ display: "flex", gap: 2, flexDirection: "column" }}>
+      <TextField
+        label={labels.hourlyRateLabel}
+        fullWidth
+        size="small"
+        disabled={isSubmitting}
+        {...register("hourlyRate")}
+        slotProps={{
+          input: {
+            startAdornment: <span aria-hidden>{currencySymbol}</span>,
+          },
+        }}
+      />
+      <CurrencyControllerField control={control} name="rateCurrency" label={labels.currencyLabel} />
     </Box>
   );
 }

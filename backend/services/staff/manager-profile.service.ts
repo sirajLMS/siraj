@@ -1,5 +1,5 @@
 import { StaffProfileRepository, UserRepository } from "@/backend/db";
-import { AccountStatus, AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
+import { type AccountStatus, AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { parseAccountStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
@@ -84,13 +84,8 @@ export namespace ManagerProfileService {
       await UserRepository.updateProfileFields(targetRow.id, { phone: input.phone }, locale);
     }
 
-    if (input.status !== undefined) {
-      await UserRepository.updateStatus(
-        targetRow.id,
-        parseAccountStatus(input.status ?? AccountStatus.ACTIVATED),
-        undefined,
-        locale
-      );
+    if (input.status !== undefined && input.status !== null) {
+      await UserRepository.updateStatus(targetRow.id, parseAccountStatus(input.status), undefined, locale);
     }
 
     if (input.hourlyRate !== undefined || input.rateCurrency !== undefined) {

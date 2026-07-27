@@ -183,6 +183,7 @@ export const errorsEn: ErrorsLabels = {
   notFound: "The requested resource was not found.",
   unknownName: "Unknown",
   invalidInput: "Invalid input.",
+  invalidNationalId: "The national ID is invalid for the selected nationality.",
   permissionGroupNotFound: "Permission group not found.",
 
   // ─── FX Display Currency messages (used by buildFxDisplayMessages) ────
@@ -262,4 +263,6 @@ export const errorsEn: ErrorsLabels = {
   teacherUnavailabilityConflict: "Booking blocked by recurring unavailability pattern.",
   teacherOnVacation: "Booking blocked by approved vacation period.",
   resourceNotFound: "Learning resource not found.",
+  currencyInUse:
+    "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles.",
 };

@@ -1,5 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { CurrencyCodePothosObject, TeacherDueStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
+import {
+  CurrencyCodePothosObject,
+  RateSourcePothosEnum,
+  TeacherDueStatusPothosEnum,
+} from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
   TeacherDueReturnType,
   TeacherMonthlyReportReturnType,
@@ -18,6 +22,7 @@ export const TeacherDuePothosObject = TeacherDueRef.implement({
     hours: t.exposeString("hours"),
     amount: t.exposeString("amount"),
     currency: t.expose("currency", { type: CurrencyCodePothosObject }),
+    rateSource: t.expose("rateSource", { type: RateSourcePothosEnum, nullable: true }),
     status: t.expose("status", { type: TeacherDueStatusPothosEnum }),
     approvedByUserId: t.exposeString("approvedByUserId"),
     approvedAt: t.expose("approvedAt", { type: "DateTime" }),

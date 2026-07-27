@@ -18,22 +18,25 @@ import { getLocale } from "@/shared/locale/server-cookies";
  * Self-host Inter via next/font. next/font downloads the font files at build
  * time, serves them from the same origin as the app (no external request),
  * and automatically adds a <link rel="preload"> in <head> for zero CLS.
- * Subsetting to the weights actually used in the MUI theme keeps the download small.
+ *
+ * Variable font: a single @font-face covers the full weight range (100-900)
+ * instead of one @font-face per weight. Next.js recommends variable fonts
+ * "for the best performance and flexibility" — fewer requests, smaller
+ * payload, full weight axis available for runtime weight changes. Keep
+ * `latin-ext` subset for European text coverage used by `shared/locale/`.
  */
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
   variable: "--font-inter",
   display: "swap",
 });
 
 /**
  * Hanken Grotesk — used for headings in the MUI theme.
- * Subsetting to latin + used weights significantly reduces payload.
+ * Variable font: single @font-face over the full weight range.
  */
 const hankenGrotesk = Hanken_Grotesk({
   subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
   variable: "--font-hanken-grotesk",
   display: "swap",
 });

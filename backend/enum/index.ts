@@ -21,6 +21,7 @@ export * from "./parents/suggestions.enum";
 export * from "./permissions/permission.enum";
 export * from "./permissions/permission-group.enum";
 export * from "./permissions/permission-management.enum";
+export * from "./pricing";
 export * from "./profiles/profile.enum";
 export * from "./scheduling/schedule.enum";
 export * from "./scheduling/scheduling.enum";

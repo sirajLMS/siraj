@@ -1,8 +1,6 @@
 "use client";
 
 import { useApolloClient, useMutation } from "@apollo/client/react";
-import { ErrorOutlined as ErrorIcon } from "@mui/icons-material";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "@/frontend/common/context/AuthContext";
@@ -13,53 +11,7 @@ import { dedupedRefreshToken } from "@/frontend/common/lib/dedupedRefreshToken";
 import logger from "@/frontend/common/lib/logger";
 import { isSafeRedirect } from "@/frontend/common/lib/safeRedirect";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
-import { type AuthLoginLabels, useAppTranslation } from "@/shared/locale";
-
-// A simple UI for the initial loading state
-interface LoadingUIProps {
-  readonly onRetry: () => void;
-  readonly error?: string | null;
-  readonly t: AuthLoginLabels;
-}
-
-function LoadingUI({ onRetry, error, t }: LoadingUIProps) {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        gap: 2,
-      }}
-    >
-      {error ? (
-        <>
-          <ErrorIcon
-            sx={{
-              fontSize: 48,
-              color: theme => theme.palette.error.main,
-            }}
-          />
-          <Typography
-            gutterBottom
-            sx={{
-              color: theme => theme.palette.error.main,
-            }}
-          >
-            {error}
-          </Typography>
-          <Button variant="contained" onClick={onRetry} sx={{ mt: 2 }}>
-            {t.tryAgain}
-          </Button>
-        </>
-      ) : (
-        <CircularProgress size={48} />
-      )}
-    </Box>
-  );
-}
+import { useAppTranslation } from "@/shared/locale";
 
 interface AuthProviderProps {
   readonly children: React.ReactNode;
@@ -79,6 +31,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const checkAuth = useCallback(async () => {
     const currentUrl = `${globalThis.location.pathname}${globalThis.location.search}`;
     try {
+      setIsLoading(true);
       const { data } = await dedupedRefreshToken(() =>
         client.mutate({
           mutation: Document.refreshTokenMutationDocument,
@@ -116,6 +69,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         errorName: error instanceof Error ? error.name : "unknown",
         errorMessage: error instanceof Error ? error.message : String(error),
       });
+    } finally {
+      setIsLoading(false);
     }
   }, [client, updateAuthToken, clearAuthData]);
 
@@ -171,13 +126,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   useEffect(() => {
-    const performInitialCheck = async () => {
-      setIsLoading(true);
-      await checkAuth();
-      setIsLoading(false);
-    };
-
-    void performInitialCheck();
+    void checkAuth();
   }, [checkAuth]);
 
   const contextValue = useMemo(
@@ -185,9 +134,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [user, isAuthenticated, isLoading, error, login, logout]
   );
 
-  if (isLoading) {
-    return <LoadingUI onRetry={checkAuth} error={error} t={t} />;
-  }
-
+  /**
+   * Render `children` immediately — the auth check (`refreshToken`) runs in a
+   * background effect. Consumers of `useAuth()` see `isLoading: true` until
+   * the check resolves, but the app shell is not gated on it. The full-viewport
+   * blocking UI is reserved for refresh-failure cases (not a normal load path),
+   * surfaced via the `error` state when applicable.
+   */
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }

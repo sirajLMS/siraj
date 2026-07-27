@@ -44,15 +44,23 @@ export function MobileCardListItem({
   const accentBorderSx = accentBorder
     ? (theme: Theme) => {
         const color = getAccentColor(accentBorder.color, theme);
-        const side = accentBorder.side;
         const width = accentBorder.width ?? 4;
-        return { [side]: `${width}px solid ${color}` };
+        switch (accentBorder.side) {
+          case "inline-start":
+            return { borderInlineStart: `${width}px solid ${color}` };
+          case "inline-end":
+            return { borderInlineEnd: `${width}px solid ${color}` };
+          case "top":
+            return { borderTop: `${width}px solid ${color}` };
+          case "bottom":
+            return { borderBottom: `${width}px solid ${color}` };
+        }
       }
     : undefined;
 
   const baseSx: SxProps<Theme> = (theme: Theme) => ({
     padding: isEdgeToEdge ? theme.spacing(2) : theme.spacing(2.5),
-    borderRadius: 0,
+    borderRadius: isEdgeToEdge ? 0 : theme.layout.radius.card,
     boxShadow: isEdgeToEdge ? "none" : theme.shadows[1],
     backgroundColor: isEdgeToEdge ? theme.palette.surfaceContainerLowest : theme.palette.background.paper,
     border: isEdgeToEdge ? "none" : `1px solid ${theme.palette.divider}`,
@@ -75,7 +83,7 @@ export function MobileCardListItem({
     : () => ({});
 
   return (
-    <Paper elevation={0} sx={{ ...baseSx, ...interactiveSx, ...sx }}>
+    <Paper elevation={0} sx={[baseSx, interactiveSx, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}>
       {children}
     </Paper>
   );

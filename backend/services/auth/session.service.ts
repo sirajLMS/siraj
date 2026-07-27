@@ -1,4 +1,4 @@
-import { SessionRepository } from "@/backend/db/repo";
+import { SessionRepository, TeacherRepository } from "@/backend/db/repo";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { verifyToken } from "@/backend/lib/auth/jwt";
 import { computeSessionHashes, verifyAndMigrateSessionHash } from "@/backend/lib/auth/session-hash";
@@ -72,6 +72,15 @@ export namespace SessionService {
       throw new Error(`User not found: ${userId}`);
     }
 
+    // For teachers, resolve whether the required profile fields (national ID)
+    // are set so the dashboard layout can enforce first-login completion.
+    // Non-teachers are always considered complete (the gate is teacher-only).
+    let nationalIdComplete = true;
+    if (teacherId) {
+      const teacher = await TeacherRepository.findByUserId(userId);
+      nationalIdComplete = Boolean(teacher?.nationalId?.trim());
+    }
+
     return {
       ...AuthUtils.toUserReturnType(safeUser, {
         role: permContext.role,
@@ -81,6 +90,7 @@ export namespace SessionService {
       role: permContext.role,
       teacherId: teacherId ?? null,
       parentId: parentId ?? null,
+      nationalIdComplete,
     };
   }
 

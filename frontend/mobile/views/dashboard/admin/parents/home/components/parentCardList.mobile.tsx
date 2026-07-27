@@ -42,12 +42,15 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
                 typographyVariant="titleLg"
                 fontWeight={600}
               />
-              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, pl: 7 })}>
+              <Typography
+                variant="bodyMd"
+                sx={theme => ({ color: theme.palette.onSurfaceVariant, marginInlineStart: theme.spacing(7) })}
+              >
                 {labels.guardianOf(row.guardianOf)}
               </Typography>
             </Stack>
           </Box>
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5, flexShrink: 0 }}>
             {row.userId ? (
               <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name} />
             ) : null}

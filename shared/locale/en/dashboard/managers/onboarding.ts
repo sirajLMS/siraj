@@ -1,8 +1,8 @@
 import type { ManagerOnboardingLabels } from "@/shared/locale/types/dashboard/managers";
 
 export const dashboardManagerOnboardingEn: ManagerOnboardingLabels = {
-  pageTitle: "Manager Onboarding",
-  pageSubtitle: "Register a new administrative staff member into the Siraj management system.",
+  pageTitle: "Staff Onboarding",
+  pageSubtitle: "Register a new staff member.",
   sections: {
     staffInfo: "Staff Information",
     systemAccess: "System Permissions",
@@ -18,8 +18,8 @@ export const dashboardManagerOnboardingEn: ManagerOnboardingLabels = {
   },
   placeholders: {
     fullName: "e.g. Dr. Salman Al-Farsi",
-    email: "s.alfarsi@siraj-lms.edu",
-    phone: "+966 50 000 0000",
+    email: "example@email.com",
+    phone: "+1 00 000 0000",
     department: "Select Department",
     password: "Enter Password",
   },
@@ -42,7 +42,7 @@ export const dashboardManagerOnboardingEn: ManagerOnboardingLabels = {
     },
   },
   actions: {
-    signup: "Sign Up",
+    signup: "Create Staff",
     processing: "Processing...",
     cancel: "Cancel",
     successMessage: "Account request submitted successfully. Pending approval from the main administrator.",

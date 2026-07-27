@@ -301,15 +301,19 @@ export namespace TeacherRepository {
       .returning({ id: teachers.id });
     return !!updated;
   };
-  export const upsertByUserId = async (userId: string, tx?: DBTransaction): Promise<TeacherEntity> => {
+  export const upsertByUserId = async (
+    userId: string,
+    extraValues?: { hourlyRate?: string | null; rateCurrency?: CurrencyCode | null },
+    tx?: DBTransaction
+  ): Promise<TeacherEntity> => {
     const queryDb = tx ?? db;
     const now = new Date();
     const [row] = await queryDb
       .insert(teachers)
-      .values({ userId, createdAt: now, updatedAt: now })
+      .values({ userId, createdAt: now, updatedAt: now, ...extraValues })
       .onConflictDoUpdate({
         target: teachers.userId,
-        set: { updatedAt: now },
+        set: { updatedAt: now, ...extraValues },
       })
       .returning();
     if (!row) {

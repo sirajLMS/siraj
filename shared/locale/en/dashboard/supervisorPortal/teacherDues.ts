@@ -17,4 +17,9 @@ export const dashboardSupervisorPortalTeacherDuesEn: SupervisorTeacherDuesLabels
   markPaidSuccess: "Selected dues marked as paid",
   markPaidError: "Failed to mark dues as paid",
   markPaidMissingPayment: "Selected dues are missing a payment link",
+  rateSourceColumn: "Rate Source",
+  rateSourceOverride: "Override",
+  rateSourceRecurring: "Recurring",
+  rateSourceSubject: "Subject",
+  rateSourceTeacher: "Teacher",
 };

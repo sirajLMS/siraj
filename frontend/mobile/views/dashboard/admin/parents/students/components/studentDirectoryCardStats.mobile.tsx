@@ -58,7 +58,7 @@ export function StudentDirectoryCardStats({
       </Box>
       <Box>
         <Typography sx={labelSx}>{enrollmentStatusLabel}</Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, marginInlineStart: 0 }}>
           <Box
             sx={theme => ({
               width: 8,

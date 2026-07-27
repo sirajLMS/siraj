@@ -93,6 +93,14 @@ export const profileAr: ProfileLabels = {
       activated: "مفعّل",
       deactivated: "غير مفعّل",
     },
+    nationalIdCompletion: {
+      banner: "يجب إدخال الرقم القومي قبل التمكن من استخدام لوحة التحكم.",
+      action: "أدخل رقمك القومي في قسم الهوية بالأسفل واحفظ.",
+    },
+    validation: {
+      nationalIdRequired: "الرقم القومي مطلوب.",
+      nationalIdInvalid: "الرقم القومي غير صالح للجنسية المحددة.",
+    },
     shell: {
       tabs: {
         profile: "الملف الشخصي",

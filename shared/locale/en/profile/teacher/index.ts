@@ -47,6 +47,14 @@ export const profileTeacherEn: ProfileTeacherLabels = {
     activated: "Activated",
     deactivated: "Deactivated",
   },
+  nationalIdCompletion: {
+    banner: "You must enter your National ID before you can use the dashboard.",
+    action: "Enter your National ID in the Identity section below and save.",
+  },
+  validation: {
+    nationalIdRequired: "National ID is required.",
+    nationalIdInvalid: "National ID is invalid for the selected nationality.",
+  },
   shell: {
     tabs: {
       profile: "Profile",

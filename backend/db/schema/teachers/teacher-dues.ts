@@ -1,11 +1,11 @@
 import { index, numeric, pgTable, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { classInstances } from "@/backend/db/schema/classes/scheduling";
-import { currencyCodeEnum, teacherDueStatusEnum } from "@/backend/db/schema/enums";
+import { currencyCodeEnum, rateSourceEnum, teacherDueStatusEnum } from "@/backend/db/schema/enums";
 import { students } from "@/backend/db/schema/students/students";
 import { teacherPayments } from "@/backend/db/schema/teachers/teacher-payments";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
-import { type CurrencyCode, TeacherDueStatus } from "@/backend/enum";
+import { type CurrencyCode, type RateSource, TeacherDueStatus } from "@/backend/enum";
 
 /**
  * Teacher Dues table.
@@ -28,6 +28,10 @@ export const teacherDues = pgTable(
     hours: numeric("hours", { precision: 8, scale: 2 }).notNull(),
     amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
     currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
+    // Denormalized from `class_instances.rate_source` at due-creation time so the
+    // high-traffic dues list can show which precedence tier the rate came from
+    // without joining back to `class_instances`. See `rate-resolver.service.ts`.
+    rateSource: rateSourceEnum("rate_source").$type<RateSource>(),
     status: teacherDueStatusEnum("status").notNull().default(TeacherDueStatus.PENDING).$type<TeacherDueStatus>(),
     approvedByUserId: uuid("approved_by_user_id")
       .notNull()

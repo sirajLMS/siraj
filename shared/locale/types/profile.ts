@@ -94,6 +94,14 @@ export interface ProfileTeacherLabels {
     readonly activated: string;
     readonly deactivated: string;
   };
+  readonly nationalIdCompletion: {
+    readonly banner: string;
+    readonly action: string;
+  };
+  readonly validation: {
+    readonly nationalIdRequired: string;
+    readonly nationalIdInvalid: string;
+  };
   readonly shell: ProfileShellLabels;
   readonly actions: ProfileActionsLabels;
   readonly errors: ProfileErrorsLabels;

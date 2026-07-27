@@ -224,6 +224,7 @@ function getStatusColors(theme: Theme, category: MobileStatusBadgeCategory, stat
  */
 export function MobileStatusBadge({ category, status, label, size = "small", icon }: Readonly<MobileStatusBadgeProps>) {
   const chipHeight = size === "small" ? 20 : 24;
+  const chipMinWidth = size === "small" ? 72 : 84;
 
   if (icon) {
     return (
@@ -244,6 +245,8 @@ export function MobileStatusBadge({ category, status, label, size = "small", ico
             letterSpacing: theme.typography.labelUppercase.letterSpacing,
             borderRadius: theme.layout.radius.badge,
             height: chipHeight,
+            minWidth: chipMinWidth,
+            paddingInline: theme.spacing(0.5),
             "& .MuiChip-icon": { color },
           };
         }}
@@ -259,7 +262,8 @@ export function MobileStatusBadge({ category, status, label, size = "small", ico
         return {
           display: "inline-flex",
           alignItems: "center",
-          px: 1,
+          minWidth: chipMinWidth,
+          paddingInline: theme.spacing(1),
           py: 0.25,
           borderRadius: theme.layout.radius.badge,
           backgroundColor,

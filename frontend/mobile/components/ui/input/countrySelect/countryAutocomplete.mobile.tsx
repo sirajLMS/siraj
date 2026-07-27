@@ -67,6 +67,14 @@ const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {
   const resolvedLabel = listAttached ? undefined : (label ?? selectCountryLabel);
   const resolvedPlaceholder = listAttached ? (label ?? selectCountryLabel) : undefined;
 
+  const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    const inputProps = (
+      params as unknown as { inputProps?: { onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void } }
+    ).inputProps;
+    inputProps?.onBlur?.(event);
+    onBlur?.();
+  };
+
   return (
     <TextField
       {...params}
@@ -75,7 +83,7 @@ const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {
       required={required}
       error={showError}
       helperText={helperText}
-      onBlur={onBlur}
+      onBlur={handleBlur}
       autoFocus={autoFocus}
       slotProps={{
         ...params.slotProps,
@@ -137,23 +145,24 @@ export const CountryAutocompleteMobile: React.FC<CountryAutocompleteProps> = ({
   const showError = Boolean(error) || showRequiredError;
   const resolvedHelperText = helperText ?? (showRequiredError ? t.required : undefined);
 
+  const autocompleteProps: Record<string, unknown> = {};
+  if (openProp !== undefined) {
+    autocompleteProps.open = openProp;
+  }
+
   return (
     <Autocomplete
+      {...autocompleteProps}
       fullWidth={fullWidth}
       options={countries}
       autoHighlight
       disabled={disabled}
-      open={isOpen}
       onOpen={() => {
-        if (openProp === undefined) {
-          setInternalOpen(true);
-        }
+        setInternalOpen(true);
         onOpenAction?.();
       }}
       onClose={() => {
-        if (openProp === undefined) {
-          setInternalOpen(false);
-        }
+        setInternalOpen(false);
         onCloseAction?.();
       }}
       value={country ?? null}
@@ -165,13 +174,12 @@ export const CountryAutocompleteMobile: React.FC<CountryAutocompleteProps> = ({
           onClearAction();
         }
       }}
-      onBlur={onBlur}
       isOptionEqualToValue={(option, value) => option.code === value.code}
       getOptionLabel={getOptionLabel}
       slotProps={{
         popper: getCountryAutocompletePopperSlotProps({
           matchAnchorWidth,
-          disablePortal: disablePortal || listAttached,
+          disablePortal,
           listAttached,
         }),
         paper: getCountryAutocompletePaperSlotProps(listAttached),

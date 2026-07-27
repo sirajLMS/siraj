@@ -1,11 +1,12 @@
 "use client";
 
 import { ExpandMoreOutlined } from "@mui/icons-material";
-import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
-import { Controller } from "react-hook-form";
+import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Controller, type UseFormRegister, useWatch } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
+import { getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { SubjectSelectField } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
@@ -14,6 +15,7 @@ import {
   CLASS_TYPE_OPTIONS,
   type RecurringClassFormFieldsProps,
 } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
 import {
   StudentAutocompleteDesktop,
   TeacherAutocompleteDesktop,
@@ -243,6 +245,39 @@ function DurationAndClassTypeSectionDesktop({
   );
 }
 
+interface RateSectionDesktopProps {
+  readonly register: UseFormRegister<RecurringClassFormData>;
+  readonly control: RecurringClassFormFieldsProps["control"];
+  readonly labels: RecurringClassFormFieldsProps["labels"];
+  readonly isSubmitting: boolean;
+}
+
+function RateSectionDesktop({ register, control, labels, isSubmitting }: RateSectionDesktopProps) {
+  const rateCurrency = useWatch({ control, name: "rateCurrency" });
+  const currencySymbol = rateCurrency ? getCurrencySymbol(rateCurrency as string) : "";
+  return (
+    <Box sx={{ display: "flex", gap: 3, flexDirection: "row", alignItems: "flex-start" }}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <TextField
+          label={labels.hourlyRateLabel}
+          fullWidth
+          size="small"
+          disabled={isSubmitting}
+          {...register("hourlyRate")}
+          slotProps={{
+            input: {
+              startAdornment: <span aria-hidden>{currencySymbol}</span>,
+            },
+          }}
+        />
+      </Box>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <CurrencyControllerField control={control} name="rateCurrency" label={labels.currencyLabel} />
+      </Box>
+    </Box>
+  );
+}
+
 export function RecurringClassFormFieldsDesktop({
   register,
   errors,
@@ -289,6 +324,8 @@ export function RecurringClassFormFieldsDesktop({
           setValue("classType", val as RecurringClassFormData["classType"], { shouldValidate: true });
         }}
       />
+
+      <RateSectionDesktop register={register} control={control} labels={labels} isSubmitting={isSubmitting} />
 
       <DaysScheduleSectionDesktop
         watch={watch}

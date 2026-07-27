@@ -77,6 +77,7 @@ export function useTeacherDuesViewModel(_props: Readonly<UseTeacherDuesViewModel
       status: r?.status ?? null,
       approvedAt: r?.approvedAt ?? "",
       teacherPaymentId: r?.teacherPaymentId ?? "",
+      rateSource: r?.rateSource ?? null,
     }));
   }, [data]);
 

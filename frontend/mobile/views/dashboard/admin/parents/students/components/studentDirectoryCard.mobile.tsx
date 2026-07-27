@@ -18,7 +18,7 @@ export interface StudentDirectoryMobileCardProps {
 export function StudentDirectoryMobileCard({ row, labels, onViewProfile }: Readonly<StudentDirectoryMobileCardProps>) {
   return (
     <MobileCardListItem
-      variant="rounded"
+      variant="edge-to-edge"
       interactive
       dimmed={row.isDeactivated ?? false}
       accentBorder={row.isDeactivated ? { color: "error", side: "inline-start" } : undefined}

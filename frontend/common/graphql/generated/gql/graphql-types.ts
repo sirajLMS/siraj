@@ -90,6 +90,7 @@ export enum AppPermission {
   AuthViewOwnProfile = 'AUTH_VIEW_OWN_PROFILE',
   BillingCreateInvoice = 'BILLING_CREATE_INVOICE',
   BillingDeleteInvoice = 'BILLING_DELETE_INVOICE',
+  BillingManageCurrencies = 'BILLING_MANAGE_CURRENCIES',
   BillingManageCurrencyHedges = 'BILLING_MANAGE_CURRENCY_HEDGES',
   BillingManageFxProvider = 'BILLING_MANAGE_FX_PROVIDER',
   BillingOverrideExchangeRates = 'BILLING_OVERRIDE_EXCHANGE_RATES',
@@ -555,12 +556,16 @@ export type ClassInstanceDetail = {
   id: Maybe<Scalars['String']['output']>;
   instanceId: Maybe<Scalars['String']['output']>;
   isFrozen: Maybe<Scalars['Boolean']['output']>;
+  isRateOverridden: Maybe<Scalars['Boolean']['output']>;
   isRescheduled: Maybe<Scalars['Boolean']['output']>;
   /** @deprecated Use effectiveMeeting.joinUrl */
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
   payrollCredited: Maybe<Scalars['Boolean']['output']>;
   performance: Maybe<ClassInstancePerformance>;
+  rateAmount: Maybe<Scalars['String']['output']>;
+  rateCurrency: Maybe<CurrencyCode>;
+  rateSource: Maybe<RateSource>;
   recurringScheduleId: Maybe<Scalars['String']['output']>;
   remarks: Maybe<Scalars['String']['output']>;
   scheduledDate: Maybe<Scalars['String']['output']>;
@@ -662,9 +667,11 @@ export type ClassSubject = {
   category: Maybe<ClassCategory>;
   categoryId: Maybe<Scalars['String']['output']>;
   description: Maybe<Scalars['String']['output']>;
+  hourlyRate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   isActive: Maybe<Scalars['Boolean']['output']>;
   name: Maybe<Scalars['String']['output']>;
+  rateCurrency: Maybe<CurrencyCode>;
   resources: Maybe<Array<SubjectResource>>;
   slug: Maybe<Scalars['String']['output']>;
   sortOrder: Maybe<Scalars['Int']['output']>;
@@ -674,8 +681,10 @@ export type ClassSubjectCreateInput = {
   avatarUrl: InputMaybe<Scalars['String']['input']>;
   categoryId: Scalars['String']['input'];
   description: InputMaybe<Scalars['String']['input']>;
+  hourlyRate: InputMaybe<Scalars['String']['input']>;
   isActive: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
+  rateCurrency: InputMaybe<CurrencyCode>;
   slug: Scalars['String']['input'];
   sortOrder: InputMaybe<Scalars['Int']['input']>;
 };
@@ -684,8 +693,10 @@ export type ClassSubjectUpdateInput = {
   avatarUrl: InputMaybe<Scalars['String']['input']>;
   categoryId: InputMaybe<Scalars['String']['input']>;
   description: InputMaybe<Scalars['String']['input']>;
+  hourlyRate: InputMaybe<Scalars['String']['input']>;
   isActive: InputMaybe<Scalars['Boolean']['input']>;
   name: InputMaybe<Scalars['String']['input']>;
+  rateCurrency: InputMaybe<CurrencyCode>;
   slug: InputMaybe<Scalars['String']['input']>;
   sortOrder: InputMaybe<Scalars['Int']['input']>;
 };
@@ -1090,6 +1101,8 @@ export type CreateRecurringClassInput = {
   effectiveFrom: InputMaybe<Scalars['String']['input']>;
   effectiveUntil: InputMaybe<Scalars['String']['input']>;
   generateInstancesForWeeks: InputMaybe<Scalars['Int']['input']>;
+  hourlyRate: InputMaybe<Scalars['String']['input']>;
+  rateCurrency: InputMaybe<CurrencyCode>;
   studentId: Scalars['String']['input'];
   subjectId: Scalars['String']['input'];
   teacherId: Scalars['String']['input'];
@@ -2445,6 +2458,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   activateClass: Maybe<ClassInstanceDetail>;
   activateOverrideClass: Maybe<ClassInstanceDetail>;
+  activateSupportedCurrency: Maybe<SupportedCurrency>;
   /** Approve a pending lesson report (supervisor/manager action) */
   approveLessonReport: Maybe<LessonReport>;
   approvePaymentProof: Maybe<MarkInvoicePaidResult>;
@@ -2492,6 +2506,7 @@ export type Mutation = {
   createUserMeetingConfig: Maybe<UserMeetingConfig>;
   createUserPaymentMethod: Maybe<UserPaymentMethod>;
   deactivateParent: Maybe<DeactivateParentResult>;
+  deactivateSupportedCurrency: Maybe<Scalars['Boolean']['output']>;
   deactivateSupportedMobileWallet: Maybe<SupportedMobileWallet>;
   deactivateSupportedOnlineAccount: Maybe<SupportedOnlineAccount>;
   deactivateSupportedPaymentLink: Maybe<SupportedPaymentLink>;
@@ -2538,6 +2553,7 @@ export type Mutation = {
   /** Mark pending teacher dues as paid (batch operation) */
   markTeacherDuesPaid: Maybe<Array<TeacherDue>>;
   moveStorageItems: Maybe<BulkOperationResult>;
+  overrideClassInstanceRate: Maybe<ClassInstanceDetail>;
   partiallyUpdateStudent: Maybe<Student>;
   prepareUpload: Maybe<UploadPreparation>;
   reactivateParent: Maybe<ReactivateParentResult>;
@@ -2590,6 +2606,7 @@ export type Mutation = {
   updateNotificationPreferences: Maybe<Array<NotificationPreference>>;
   updateOwnProfile: Maybe<UnifiedProfile>;
   updatePermissionGroup: Maybe<PermissionGroup>;
+  updateRecurringClassRate: Maybe<RecurringScheduleDetail>;
   updateSessionStatusAbsent: Maybe<ClassInstanceDetail>;
   updateSessionStatusLeave: Maybe<LeaveProcessResult>;
   updateSessionStatusStart: Maybe<ClassInstanceDetail>;
@@ -2617,6 +2634,11 @@ export type MutationActivateClassArgs = {
 
 export type MutationActivateOverrideClassArgs = {
   classInstanceId: Scalars['ID']['input'];
+};
+
+
+export type MutationActivateSupportedCurrencyArgs = {
+  input: SupportedCurrencyUpsertInput;
 };
 
 
@@ -2856,6 +2878,11 @@ export type MutationDeactivateParentArgs = {
 };
 
 
+export type MutationDeactivateSupportedCurrencyArgs = {
+  code: CurrencyCode;
+};
+
+
 export type MutationDeactivateSupportedMobileWalletArgs = {
   id: Scalars['ID']['input'];
 };
@@ -3030,6 +3057,13 @@ export type MutationMarkTeacherDuesPaidArgs = {
 
 export type MutationMoveStorageItemsArgs = {
   input: StorageItemsMoveInput;
+};
+
+
+export type MutationOverrideClassInstanceRateArgs = {
+  classInstanceId: Scalars['ID']['input'];
+  rateAmount: InputMaybe<Scalars['String']['input']>;
+  rateCurrency: InputMaybe<CurrencyCode>;
 };
 
 
@@ -3267,6 +3301,11 @@ export type MutationUpdateOwnProfileArgs = {
 
 export type MutationUpdatePermissionGroupArgs = {
   input: UpdatePermissionGroupInput;
+};
+
+
+export type MutationUpdateRecurringClassRateArgs = {
+  input: UpdateRecurringClassRateInput;
 };
 
 
@@ -4597,6 +4636,13 @@ export type QueryUsersArgs = {
   search: InputMaybe<Scalars['String']['input']>;
 };
 
+export enum RateSource {
+  Override = 'OVERRIDE',
+  Recurring = 'RECURRING',
+  Subject = 'SUBJECT',
+  Teacher = 'TEACHER'
+}
+
 export type ReactivateParentResult = {
   __typename?: 'ReactivateParentResult';
   accountStatus: Maybe<AccountStatus>;
@@ -4638,7 +4684,9 @@ export type RecurringScheduleDetail = {
   days: Maybe<Array<RecurringScheduleDayDetail>>;
   defaultStartTime: Maybe<Scalars['String']['output']>;
   durationMinutes: Maybe<Scalars['Int']['output']>;
+  hourlyRate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
+  rateCurrency: Maybe<CurrencyCode>;
   studentId: Maybe<Scalars['String']['output']>;
   studentName: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
@@ -5323,6 +5371,14 @@ export type SupportedCurrency = {
   symbol: Maybe<Scalars['String']['output']>;
 };
 
+export type SupportedCurrencyUpsertInput = {
+  code: CurrencyCode;
+  countryCode: InputMaybe<CountryCode>;
+  decimals: InputMaybe<Scalars['Int']['input']>;
+  sortOrder: InputMaybe<Scalars['Int']['input']>;
+  symbol: Scalars['String']['input'];
+};
+
 export type SupportedMobileWallet = {
   __typename?: 'SupportedMobileWallet';
   countryCode: Maybe<Scalars['String']['output']>;
@@ -5600,6 +5656,7 @@ export type TeacherDue = {
   currency: Maybe<CurrencyCode>;
   hours: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
+  rateSource: Maybe<RateSource>;
   status: Maybe<TeacherDueStatus>;
   studentAvatarUrl: Maybe<Scalars['String']['output']>;
   studentId: Maybe<Scalars['String']['output']>;
@@ -5727,6 +5784,7 @@ export type TeacherOwnProfile = {
   hourlyRate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
+  nationalId: Maybe<Scalars['String']['output']>;
   nationality: Maybe<Scalars['String']['output']>;
   phone: Maybe<Scalars['String']['output']>;
   qualifications: Maybe<Scalars['String']['output']>;
@@ -5740,6 +5798,7 @@ export type TeacherOwnProfileUpdateInput = {
   countryCode: InputMaybe<Scalars['String']['input']>;
   dateOfBirth: InputMaybe<Scalars['String']['input']>;
   gender: InputMaybe<Gender>;
+  nationalId: InputMaybe<Scalars['String']['input']>;
   nationality: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
   qualifications: InputMaybe<Scalars['String']['input']>;
@@ -5931,6 +5990,12 @@ export type UpdatePermissionGroupInput = {
   groupId: Scalars['String']['input'];
   name: InputMaybe<Scalars['LocalizedString']['input']>;
   permissionIds: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+export type UpdateRecurringClassRateInput = {
+  hourlyRate: InputMaybe<Scalars['String']['input']>;
+  rateCurrency: InputMaybe<CurrencyCode>;
+  recurringScheduleId: Scalars['String']['input'];
 };
 
 export type UpdateTeacherNoteInput = {

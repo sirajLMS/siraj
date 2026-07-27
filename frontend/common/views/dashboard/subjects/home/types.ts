@@ -37,9 +37,12 @@ export interface SubjectsDialogLabels {
   readonly selectCategory: string;
   readonly descriptionLabel: string;
   readonly activeLabel: string;
+  readonly avatarLabel: string;
   readonly nameRequired: string;
   readonly slugRequired: string;
   readonly categoryRequired: string;
+  readonly hourlyRateLabel: string;
+  readonly currencyLabel: string;
   readonly cancel: string;
   readonly saveChanges: string;
 }
@@ -96,6 +99,12 @@ export interface SubjectsViewProps {
   readonly onDeleteCategory: (id: string) => void;
   readonly canManageSubjects: boolean;
   readonly canManageCategories: boolean;
+  readonly createSubjectDialog: CreateSubjectDialogProps;
+  readonly editSubjectDialog: EditSubjectDialogProps;
+  readonly deleteSubjectDialog: DeleteSubjectDialogProps;
+  readonly createCategoryDialog: CreateCategoryDialogProps;
+  readonly editCategoryDialog: EditCategoryDialogProps;
+  readonly deleteCategoryDialog: DeleteCategoryDialogProps;
 }
 
 export interface SubjectCardProps {
@@ -122,6 +131,7 @@ export interface CreateSubjectDialogProps {
   readonly onSubmit: (input: ClassSubjectCreateInput) => void;
   readonly categories: readonly CategoryItem[];
   readonly isLoading: boolean;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
   // NEW FOR PLAN v5: lifted form state + labels per specs.md §6.2 + §6.3.
   // The tier dialog no longer calls `useForm`/`useWatch`/`useEffect`/`zodResolver`;
   // the ViewModel owns the form instance and hands it down as props.
@@ -136,6 +146,7 @@ export interface EditSubjectDialogProps {
   readonly subject: SubjectItem | null;
   readonly categories: readonly CategoryItem[];
   readonly isLoading: boolean;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
   // NEW FOR PLAN v5: lifted form state + labels per specs.md §6.2 + §6.3.
   readonly form: SubjectFormStateProps;
   readonly labels: SubjectsDialogLabels;

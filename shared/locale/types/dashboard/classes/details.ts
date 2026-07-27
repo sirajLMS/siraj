@@ -75,6 +75,26 @@ export interface ClassDetailsLabels {
     readonly duration: string;
     readonly status: string;
     readonly viewSubject: string;
+    readonly rateSectionTitle: string;
+    readonly effectiveRateLabel: string;
+    readonly rateCurrencyLabel: string;
+    readonly rateSourceLabel: string;
+    readonly rateSourceOverride: string;
+    readonly rateSourceRecurring: string;
+    readonly rateSourceSubject: string;
+    readonly rateSourceTeacher: string;
+    readonly overrideRateButton: string;
+    readonly clearOverrideButton: string;
+    readonly overrideRateDialogTitle: string;
+    readonly overrideRateDialogDescription: string;
+    readonly hourlyRateLabel: string;
+    readonly currencyLabel: string;
+    readonly saveButton: string;
+    readonly cancelButton: string;
+    readonly overrideSuccess: string;
+    readonly overrideError: string;
+    readonly clearSuccess: string;
+    readonly clearError: string;
   };
   readonly remarks: {
     readonly remarksTitle: string;

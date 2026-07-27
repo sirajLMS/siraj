@@ -1,6 +1,7 @@
 import { ClassCategoryRepository } from "@/backend/db/repo/classes/class-category.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ClassCategoryPothosObject } from "@/backend/graphql/pothos/classes/class-category.pothos";
+import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { ClassSubjectService } from "@/backend/services/subject/class-subject.service";
 import type { ClassSubjectReturnType, SubjectResourceReturnType } from "@/backend/types";
 
@@ -30,22 +31,27 @@ export const ClassSubjectPothosObject = ClassSubjectRef.implement({
     isActive: t.exposeBoolean("isActive"),
     sortOrder: t.exposeInt("sortOrder"),
     categoryId: t.exposeString("categoryId"),
+    hourlyRate: t.exposeString("hourlyRate", { nullable: true }),
+    rateCurrency: t.expose("rateCurrency", { type: CurrencyCodePothosObject, nullable: true }),
     category: t.loadable({
       type: ClassCategoryPothosObject,
       nullable: true,
-      load: async (ids: string[], ctx) => {
+      load: async (ids: string[]) => {
         const categories = await ClassCategoryRepository.loadByIds(ids);
         const map = new Map(categories.map(c => [c.id, c]));
-        const tErrors = ctx.t().errorsTranslations;
-        return ids.map(id => map.get(id) ?? new Error(tErrors.categoryNotFound(id)));
+        return ids.map(id => map.get(id) ?? null);
       },
       resolve: parent => parent.categoryId,
     }),
     resources: t.field({
       type: [SubjectResourcePothosObject],
       resolve: async (parent, _args, ctx) => {
-        const tErrors = ctx.t().errorsTranslations;
-        return ClassSubjectService.getSubjectResources(ctx.user?.id ?? "", parent.id, tErrors);
+        try {
+          const tErrors = ctx.t().errorsTranslations;
+          return await ClassSubjectService.getSubjectResources(ctx.user?.id ?? "", parent.id, tErrors);
+        } catch {
+          return [];
+        }
       },
     }),
   }),
@@ -60,6 +66,8 @@ export const ClassSubjectCreateInputPothos = gqlSchemaBuilder.inputType("ClassSu
     avatarUrl: t.string({ required: false }),
     isActive: t.boolean({ required: false }),
     sortOrder: t.int({ required: false }),
+    hourlyRate: t.string({ required: false }),
+    rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
   }),
 });
 
@@ -72,6 +80,8 @@ export const ClassSubjectUpdateInputPothos = gqlSchemaBuilder.inputType("ClassSu
     avatarUrl: t.string({ required: false }),
     isActive: t.boolean({ required: false }),
     sortOrder: t.int({ required: false }),
+    hourlyRate: t.string({ required: false }),
+    rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
   }),
 });
 

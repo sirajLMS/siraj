@@ -27,6 +27,10 @@ interface ClassInstanceDetailsCardProps {
   readonly endTime: string;
   readonly durationMinutes: number;
   readonly status: ClassInstanceStatus;
+  readonly rateAmount: string | null;
+  readonly rateCurrency: string | null;
+  readonly rateSource: string | null;
+  readonly isRateOverridden: boolean;
   readonly labels: {
     readonly classInstanceDetails: string;
     readonly studentName: string;
@@ -38,6 +42,14 @@ interface ClassInstanceDetailsCardProps {
     readonly viewSubject: string;
     readonly minutes: string;
     readonly statusLabels: Record<ClassInstanceStatus, string>;
+    readonly rateSectionTitle: string;
+    readonly effectiveRateLabel: string;
+    readonly rateCurrencyLabel: string;
+    readonly rateSourceLabel: string;
+    readonly rateSourceOverride: string;
+    readonly rateSourceRecurring: string;
+    readonly rateSourceSubject: string;
+    readonly rateSourceTeacher: string;
   };
 }
 
@@ -84,11 +96,22 @@ export function ClassInstanceDetailsCard({
   endTime,
   durationMinutes,
   status,
+  rateAmount,
+  rateCurrency,
+  rateSource,
+  isRateOverridden,
   labels,
 }: ClassInstanceDetailsCardProps) {
   const statusKey = STATUS_COLOR_MAP[status];
   const statusLabel = labels.statusLabels[status];
   const displaySubjectName = subjectName || courseModule;
+  const rateSourceLabel = isRateOverridden
+    ? labels.rateSourceOverride
+    : rateSource === "RECURRING"
+      ? labels.rateSourceRecurring
+      : rateSource === "SUBJECT"
+        ? labels.rateSourceSubject
+        : labels.rateSourceTeacher;
 
   return (
     <BaseCard edgeToEdge>
@@ -172,6 +195,32 @@ export function ClassInstanceDetailsCard({
           />
         </Grid>
       </Grid>
+
+      {rateAmount != null && (
+        <Stack sx={{ mt: 3, pt: 3, borderTop: 1, borderColor: theme => theme.palette.border.light }}>
+          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.header, mb: 2 })}>
+            {labels.rateSectionTitle}
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <DetailField
+                label={labels.effectiveRateLabel}
+                value={
+                  <Typography variant="bodyLg" sx={theme => ({ fontWeight: theme.typography.fontWeightBold })}>
+                    {rateCurrency ?? ""} {rateAmount}
+                  </Typography>
+                }
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <DetailField
+                label={labels.rateSourceLabel}
+                value={<Typography variant="bodyLg">{rateSourceLabel}</Typography>}
+              />
+            </Grid>
+          </Grid>
+        </Stack>
+      )}
     </BaseCard>
   );
 }

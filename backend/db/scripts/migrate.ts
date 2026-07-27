@@ -3,6 +3,7 @@ import { migrate as migrateNeon } from "drizzle-orm/neon-serverless/migrator";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { migrate as migratePostgres } from "drizzle-orm/node-postgres/migrator";
 import { db, getDrizzleDbPool } from "@/backend/db/drizzleDb";
+import { applyCustomMigrations } from "@/backend/db/scripts/applyCustomMigrations";
 import { getEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 
@@ -14,6 +15,20 @@ export async function runMigrations(closePool: boolean) {
   const provider = getEnv("DB_PROVIDER", "postgres");
 
   logger.log(`Running migrations with provider: ${provider}`);
+
+  // Auto-bundle any new/changed custom SQL files from backend/db/migration/ into
+  // incremental drizzle migration folders before invoking the drizzle migrator.
+  // This makes `bun db migrate` apply custom SQL automatically without requiring
+  // the (policy-disabled) `cleanGenerate`.
+  try {
+    const newFolders = applyCustomMigrations();
+    if (newFolders.length > 0) {
+      logger.log(`Auto-bundled ${newFolders.length} custom migration folder(s): ${newFolders.join(", ")}`);
+    }
+  } catch (err) {
+    logger.error("Custom migration auto-bundle failed:", err);
+    throw err;
+  }
 
   if (provider === "postgres") {
     logger.warn("⚠️  Pool will be closed after migrations complete");

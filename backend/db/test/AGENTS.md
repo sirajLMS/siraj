@@ -112,9 +112,9 @@ This directory contains database integration tests. Follow these guidelines to e
     - **NEVER assume** a table has columns like `mimeType`, `size`, `bucket`, `createdAt`, `updatedAt` — many tables (e.g., `storageFiles`) only have minimal columns (`id`, `path`, `isProtected`).
     - This applies to both direct `tx.insert()` calls and when passing `overrides` to entity-setup helpers.
 
-19. **Do Not Call `getBackendTranslations` Directly in Tests**
-    - Repository methods internally call `getBackendTranslations` to produce localized error messages. Tests should **NOT** call this function directly to construct expected error strings.
+19. **Do Not Call `getServerTranslations` Directly in Tests**
+    - Repository methods internally call `getServerTranslations(locale, "<namespace>")` (from `@/shared/locale/server-graphql`) to produce localized error messages. Tests should **NOT** call this function directly to construct expected error strings.
     - Instead, use the `expectRepoError` try/catch pattern (see Rule 3) and assert on substrings of the translated message (e.g., `expect(error.message).toContain("not found")`).
-    - This avoids potential hangs from the next-intl translation loader in the test environment and keeps tests decoupled from the translation system's internal state.
+    - This avoids potential hangs from the translation loader in the test environment and keeps tests decoupled from the translation system's internal state. The legacy `getBackendTranslations` helper is deprecated and must not be used.
 
 20. **Type Definition Pattern**: Use types defined in `backend/types/` (e.g., `{Entity}SelectType`, `{Entity}InsertType`) for testing purposes rather than creating test-specific type definitions or directly referencing schema types. Import these types from `@/backend/types` and use them in test assertions and helper functions to maintain consistency with the backend architecture.

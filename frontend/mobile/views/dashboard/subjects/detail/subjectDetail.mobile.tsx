@@ -10,6 +10,7 @@ import {
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
+import { MobileClassAvatar } from "@/frontend/mobile/components/ui/avatar/MobileClassAvatar";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 
 function ResourceItemMobile({
@@ -93,11 +94,16 @@ export function SubjectDetailMobileView({
 
   return (
     <MobilePageContainer>
-      <MobilePageHeader
-        title={subject.name ?? ""}
-        subtitle={subject.description ?? undefined}
-        breadcrumbs={breadcrumbs}
-      />
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+        <MobileClassAvatar src={subject.avatarUrl ?? undefined} label={subject.name ?? ""} size={48} />
+        <Box sx={{ flex: 1 }}>
+          <MobilePageHeader
+            title={subject.name ?? ""}
+            subtitle={subject.description ?? undefined}
+            breadcrumbs={breadcrumbs}
+          />
+        </Box>
+      </Box>
 
       {subject.category && (
         <Box sx={{ mt: 1 }}>

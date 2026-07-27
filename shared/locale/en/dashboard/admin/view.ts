@@ -17,6 +17,7 @@ export const dashboardAdminViewEn: AdminViewLabels = {
     forceActivate: "Force Activate",
     stopPause: "Stop / Pause",
     deleteInstance: "Delete Instance",
+    overrideRateButton: "Override Rate",
     disabledTooltips: {
       forceActivate: {
         activated: "Already activated",
@@ -61,5 +62,28 @@ export const dashboardAdminViewEn: AdminViewLabels = {
     studentInput: "Student Input",
     teacherResponse: "Teacher Response",
     noData: "No Data",
+  },
+  rate: {
+    rateSectionTitle: "Effective Rate",
+    effectiveRateLabel: "Hourly Rate",
+    rateCurrencyLabel: "Currency",
+    rateSourceLabel: "Rate Source",
+    rateSourceOverride: "Override",
+    rateSourceRecurring: "Recurring",
+    rateSourceSubject: "Subject",
+    rateSourceTeacher: "Teacher",
+    overrideRateButton: "Override Rate",
+    clearOverrideButton: "Clear Override",
+    overrideRateDialogTitle: "Override Class Instance Rate",
+    overrideRateDialogDescription:
+      "Set a custom hourly rate for this specific class instance. Leave empty to clear override.",
+    hourlyRateLabel: "Hourly Rate",
+    currencyLabel: "Currency",
+    saveButton: "Save",
+    cancelButton: "Cancel",
+    overrideSuccess: "Rate override applied successfully",
+    overrideError: "Failed to apply rate override",
+    clearSuccess: "Rate override cleared successfully",
+    clearError: "Failed to clear rate override",
   },
 };

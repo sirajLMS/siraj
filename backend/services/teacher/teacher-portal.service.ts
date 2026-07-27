@@ -8,6 +8,7 @@ import type {
   TeacherOwnProfileReturnType,
   TeacherOwnProfileUpdateInput,
 } from "@/backend/types";
+import { isValidNationalIdForCountry } from "@/shared/lib/national-id";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace TeacherPortalService {
@@ -50,6 +51,9 @@ export namespace TeacherPortalService {
       phone: profile.phone,
       nationality: profile.nationality,
       countryCode: profile.countryCode,
+      // Returned UNMASKED to the owner (the teacher editing their own profile).
+      // Admin/other-scope views go through StaffProfileService which masks it.
+      nationalId: profile.nationalId,
       dateOfBirth: profile.dateOfBirth,
       gender: profile.gender,
       address: profile.address,
@@ -115,10 +119,22 @@ export namespace TeacherPortalService {
       await UserRepository.updateTimezone(userId, input.timezone);
     }
 
+    // Validate national ID format against the (possibly updated) nationality.
+    // When nationalId is provided we use the incoming nationality if present,
+    // otherwise fall back to the teacher's existing nationality so a teacher
+    // can fix their national ID without first re-selecting their country.
+    if (input.nationalId != null && input.nationalId.trim() !== "") {
+      const effectiveNationality = (input.nationality ?? teacher.nationality) as string | null | undefined;
+      if (!isValidNationalIdForCountry(input.nationalId, effectiveNationality)) {
+        throw new Error(tErrors.invalidNationalId);
+      }
+    }
+
     const success = await TeacherRepository.updateTeacherProfile(teacherId, {
       phone: input.phone ?? undefined,
       nationality: (input.nationality as CountryCode) ?? undefined,
       countryCode: (input.countryCode as CountryCode) ?? undefined,
+      nationalId: input.nationalId ?? undefined,
       dateOfBirth: input.dateOfBirth ?? undefined,
       gender: input.gender ?? undefined,
       address: input.address ?? undefined,

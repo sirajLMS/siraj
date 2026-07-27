@@ -69,6 +69,15 @@ export function MobileCardList<T>({
   sx,
 }: MobileCardListProps<T>) {
   const isEdgeToEdge = layout === "edge-to-edge";
+  const listSx: SxProps<Theme> = [
+    {
+      display: "flex",
+      flexDirection: "column",
+      gap,
+      ...(isEdgeToEdge ? {} : { px: { xs: 2 } }),
+    },
+    ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+  ];
   const clientPageSize =
     paginationOptions !== false && paginationOptions.mode === "client"
       ? (paginationOptions.pageSize ?? DEFAULT_CLIENT_PAGE_SIZE)
@@ -104,7 +113,7 @@ export function MobileCardList<T>({
 
   if (loading && rows.length === 0) {
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap, ...(isEdgeToEdge ? { px: { xs: 2 } } : {}), ...sx }}>
+      <Box sx={listSx}>
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
           <CircularProgress />
         </Box>
@@ -115,7 +124,7 @@ export function MobileCardList<T>({
 
   if (rows.length === 0) {
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap, ...(isEdgeToEdge ? { px: { xs: 2 } } : {}), ...sx }}>
+      <Box sx={listSx}>
         <Box sx={{ py: 4, px: 2, textAlign: "center" }}>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
             {emptyMessage}
@@ -127,15 +136,7 @@ export function MobileCardList<T>({
   }
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap,
-        ...(isEdgeToEdge ? { px: { xs: 2 } } : {}),
-        ...sx,
-      }}
-    >
+    <Box sx={listSx}>
       {visibleRows.map((row, index) => (
         <Box key={getKey(row)}>{renderItem(row, index)}</Box>
       ))}

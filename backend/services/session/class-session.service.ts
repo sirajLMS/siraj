@@ -8,7 +8,7 @@ import {
 } from "@/backend/db/repo/scheduling";
 import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-status-events.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
-import { AppPermission, NotificationEventType } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, NotificationEventType } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -486,6 +486,36 @@ export namespace ClassSessionService {
     tx?: DBTransaction
   ): Promise<Map<string, ClassStatusEventSelectType>> {
     return ClassStatusEventsRepository.findFirstByClassInstanceIds(classInstanceIds, tx);
+  }
+
+  /**
+   * Admin manual override of a single class instance's hourly rate. Sets
+   * `is_rate_overridden = true` and stores the override amount + currency +
+   * `rate_source = OVERRIDE`. The override takes top precedence in the
+   * rate-resolver cascade. Send `rateAmount = null` to clear the override
+   * (revert to the recurring/subject/teacher cascade).
+   */
+  export async function overrideRate(
+    userId: string,
+    classInstanceId: string,
+    rateAmount: string | null,
+    rateCurrency: CurrencyCode | null,
+    tErrors: ErrorsLabels
+  ): Promise<void> {
+    await assertPermission(userId, AppPermission.SESSION_RESET, tErrors);
+    await getOrThrow(classInstanceId, tErrors);
+
+    await db.transaction(async tx => {
+      const result = await SchedulingRepository.overrideClassInstanceRate(
+        classInstanceId,
+        rateAmount,
+        rateCurrency,
+        tx
+      );
+      if (!result) {
+        throw new Error(tErrors.notFound);
+      }
+    });
   }
 }
 

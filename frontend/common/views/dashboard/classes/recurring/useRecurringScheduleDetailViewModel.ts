@@ -1,9 +1,13 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { useParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
-import { recurringScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
+import { useCallback, useMemo, useState } from "react";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  recurringScheduleQueryDocument,
+  updateRecurringClassRateMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -15,6 +19,12 @@ export interface RecurringScheduleDetailViewModel {
   readonly error: string | null;
   readonly invalidId: string;
   readonly recurringScheduleId: string;
+  readonly hourlyRate: string | null;
+  readonly rateCurrency: CurrencyCode | null;
+  readonly rateSaving: boolean;
+  readonly rateError: string | null;
+  readonly rateSuccess: boolean;
+  readonly onUpdateRate: (hourlyRate: string | null, rateCurrency: CurrencyCode | null) => Promise<void>;
   readonly onRetry: () => void;
 }
 
@@ -38,9 +48,37 @@ export function useRecurringScheduleDetailViewModel(
     skip: !id,
   });
 
+  const [updateRateMut, { loading: rateSaving }] = useMutation(updateRecurringClassRateMutationDocument, {
+    refetchQueries: [{ query: recurringScheduleQueryDocument, variables: { id } }],
+  });
+  const [rateError, setRateError] = useState<string | null>(null);
+  const [rateSuccess, setRateSuccess] = useState(false);
+
   useDocumentTitle(data?.recurringSchedule?.studentName, "common", "title");
 
   const schedule = data?.recurringSchedule;
+
+  const handleUpdateRate = useCallback(
+    async (hourlyRate: string | null, rateCurrency: CurrencyCode | null) => {
+      setRateError(null);
+      setRateSuccess(false);
+      try {
+        await updateRateMut({
+          variables: {
+            input: {
+              recurringScheduleId: id,
+              hourlyRate: hourlyRate || null,
+              rateCurrency: rateCurrency ?? null,
+            },
+          },
+        });
+        setRateSuccess(true);
+      } catch (err) {
+        setRateError(err instanceof Error ? err.message : "Failed to update rate");
+      }
+    },
+    [id, updateRateMut]
+  );
 
   const summary = useMemo(
     () =>
@@ -80,6 +118,12 @@ export function useRecurringScheduleDetailViewModel(
     error: error ? tManager.loadError : null,
     invalidId: t.invalidId,
     recurringScheduleId: schedule?.id ?? id,
+    hourlyRate: schedule?.hourlyRate ?? null,
+    rateCurrency: schedule?.rateCurrency ?? null,
+    rateSaving,
+    rateError,
+    rateSuccess,
+    onUpdateRate: handleUpdateRate,
     onRetry: handleRetry,
   };
 }

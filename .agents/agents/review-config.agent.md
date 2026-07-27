@@ -76,8 +76,8 @@ Scan all changed files in scope and check for each of the following violations. 
 ### i18n Routing
 
 - Routes not following `/[locale]/...` pattern under `app/`.
-- Server Components not using `getTranslations()` from `next-intl/server` for translations.
-- Server Components not using `getMessages()` from `next-intl/server` when passing messages to client providers.
+- Server Components not using `getTranslations` from `@/shared/locale/server` for translations (synchronous: `const t = getTranslations(locale).<namespace>`).
+- Client Components not using `useAppTranslation` from `@/shared/locale/client` for user-facing text.
 - Locale not used in redirects (e.g., `redirect("/login")` instead of `redirect(`/${locale}/login`)`).
 
 ### Build & Quality Commands

@@ -87,6 +87,10 @@ export function ClassDetailsTeacherView(props: Readonly<ClassDetailsTeacherViewP
             endTime={formattedEndTime}
             durationMinutes={instance.durationMinutes ?? 0}
             status={status}
+            rateAmount={instance.rateAmount ?? null}
+            rateCurrency={instance.rateCurrency ?? null}
+            rateSource={instance.rateSource ?? null}
+            isRateOverridden={instance.isRateOverridden ?? false}
             labels={labels.instanceDetails}
           />
         </Grid>

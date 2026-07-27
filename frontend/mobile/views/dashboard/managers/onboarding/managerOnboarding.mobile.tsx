@@ -8,7 +8,7 @@ import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboa
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar";
-import { OnboardingMetricsOverviewMobile } from "@/frontend/mobile/views/dashboard/managers/onboarding/components/onboardingMetricsOverview.mobile";
+
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledFormWrapper = styled(Box)(({ theme }) => ({
@@ -38,7 +38,6 @@ export function ManagerOnboardingMobileView({
   onSubmit,
   onCancel,
   onDismissSuccess,
-  metricsModel,
 }: Readonly<ManagerOnboardingViewProps>) {
   const t = useAppTranslation().dashboardTranslations.managerOnboarding;
 
@@ -82,10 +81,6 @@ export function ManagerOnboardingMobileView({
             </MobilePrimaryPageAction>
           </StyledFormActions>
         </StyledFormWrapper>
-      </Box>
-
-      <Box sx={{ px: { xs: 2, md: 3 }, pb: 4 }}>
-        <OnboardingMetricsOverviewMobile model={metricsModel} />
       </Box>
 
       <MobileFormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />

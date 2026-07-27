@@ -201,7 +201,7 @@ Group findings by severity (CRITICAL first), then by group. **Count findings** b
 
 **i18n Routing:**
 - Routes not following `/[locale]/...` pattern
-- Server Components not using `getTranslations()` from `next-intl/server`
+- Server Components not using `getTranslations` from `@/shared/locale/server` (synchronous: `const t = getTranslations(locale).<namespace>`)
 - Locale not used in redirects
 
 **Build & Quality Commands:**

@@ -10,7 +10,7 @@ export interface EntityLinkTargets {
   readonly teacherId: string;
 }
 
-import type { ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassInstanceDetail, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { ClassDetailsLabels } from "@/shared/locale";
 
@@ -53,6 +53,7 @@ export interface ClassActionHandlers {
   readonly handleDeleteConfirm: () => Promise<void>;
   readonly handleReschedule: () => void;
   readonly handleInfoEdit: () => void;
+  readonly handleOverrideRate: (rateAmount: string | null, rateCurrency: CurrencyCode | null) => Promise<void>;
 }
 
 export interface CommonViewProps {
@@ -79,6 +80,7 @@ export interface AdminViewProps extends CommonViewProps {
   readonly onForceActivate: () => void;
   readonly onGenerateLog: () => void;
   readonly onReschedule: () => void;
+  readonly handlers: ClassActionHandlers;
 }
 
 export interface TeacherViewProps extends CommonViewProps {

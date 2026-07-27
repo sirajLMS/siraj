@@ -236,6 +236,8 @@ export function StatusBadge({ category, status, label, size = "small", icon }: R
             letterSpacing: theme.typography.labelUppercase.letterSpacing,
             borderRadius: theme.layout.radius.badge,
             height: size === "small" ? 24 : 28,
+            minWidth: 72,
+            paddingInline: theme.spacing(0.5),
             "& .MuiChip-icon": { color },
           };
         }}
@@ -251,7 +253,7 @@ export function StatusBadge({ category, status, label, size = "small", icon }: R
         return {
           display: "inline-flex",
           alignItems: "center",
-          px: 1.5,
+          paddingInline: theme.spacing(1.5),
           py: 0.5,
           borderRadius: theme.layout.radius.badge,
           backgroundColor,

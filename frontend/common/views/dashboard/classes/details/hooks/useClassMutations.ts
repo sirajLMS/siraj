@@ -1,11 +1,13 @@
 "use client";
 
 import { useApolloClient, useMutation } from "@apollo/client/react";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   activateClassMutationDocument,
   activateOverrideClassMutationDocument,
   classInstanceQueryDocument,
   deleteClassInstanceMutationDocument,
+  overrideClassInstanceRateMutationDocument,
   resetClassMutationDocument,
   stopClassMutationDocument,
   updateSessionStatusAbsentMutationDocument,
@@ -30,10 +32,12 @@ interface UseClassMutationsReturn {
   markAbsent: () => Promise<void>;
   processLeave: (reason: string) => Promise<void>;
   resetSession: () => Promise<void>;
+  overrideRate: (rateAmount: string | null, rateCurrency: CurrencyCode | null) => Promise<void>;
   isStarting: boolean;
   isMarkingAbsent: boolean;
   isProcessingLeave: boolean;
   isResetting: boolean;
+  isOverridingRate: boolean;
 }
 
 export function useClassMutations({ id, onError }: UseClassMutationsOptions): UseClassMutationsReturn {
@@ -114,6 +118,15 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
     },
   });
 
+  const [overrideRateMutation, { loading: isOverridingRate }] = useMutation(overrideClassInstanceRateMutationDocument, {
+    onCompleted: () => {
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => {
+      reportMutationError("Override rate failed:", err, t.instanceDetails.overrideError);
+    },
+  });
+
   const forceActivate = async () => {
     await activateOverrideClass({ variables: { classInstanceId: id } });
     logger.info("Admin force-activated session:", id);
@@ -150,6 +163,10 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
     await resetSessionMutation({ variables: { classInstanceId: id } });
   };
 
+  const overrideRate = async (rateAmount: string | null, rateCurrency: CurrencyCode | null) => {
+    await overrideRateMutation({ variables: { classInstanceId: id, rateAmount, rateCurrency } });
+  };
+
   return {
     forceActivate,
     activate,
@@ -159,9 +176,11 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
     markAbsent,
     processLeave,
     resetSession,
+    overrideRate,
     isStarting,
     isMarkingAbsent,
     isProcessingLeave,
     isResetting,
+    isOverridingRate,
   };
 }

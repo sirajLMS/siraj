@@ -38,6 +38,10 @@ export const classInstanceQueryDocument: TypedDocumentNode<
       subjectId
       subjectName
       subjectAvatarUrl
+      rateAmount
+      rateCurrency
+      isRateOverridden
+      rateSource
       student {
         id
         name
@@ -212,5 +216,20 @@ export const deleteClassInstanceMutationDocument: TypedDocumentNode<
 > = gql`
   mutation deleteClassInstance($classInstanceId: ID!) {
     deleteClassInstance(classInstanceId: $classInstanceId)
+  }
+`;
+
+export const overrideClassInstanceRateMutationDocument: TypedDocumentNode<
+  Operations.OverrideClassInstanceRateMutation,
+  Types.MutationOverrideClassInstanceRateArgs
+> = gql`
+  mutation overrideClassInstanceRate($classInstanceId: ID!, $rateAmount: String, $rateCurrency: CurrencyCode) {
+    overrideClassInstanceRate(classInstanceId: $classInstanceId, rateAmount: $rateAmount, rateCurrency: $rateCurrency) {
+      id
+      rateAmount
+      rateCurrency
+      isRateOverridden
+      rateSource
+    }
   }
 `;

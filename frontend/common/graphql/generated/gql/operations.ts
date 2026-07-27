@@ -26,6 +26,7 @@ export type AppPermission =
   | 'AUTH_VIEW_OWN_PROFILE'
   | 'BILLING_CREATE_INVOICE'
   | 'BILLING_DELETE_INVOICE'
+  | 'BILLING_MANAGE_CURRENCIES'
   | 'BILLING_MANAGE_CURRENCY_HEDGES'
   | 'BILLING_MANAGE_FX_PROVIDER'
   | 'BILLING_OVERRIDE_EXCHANGE_RATES'
@@ -365,8 +366,10 @@ export type ClassSubjectCreateInput = {
   avatarUrl: string | null | undefined;
   categoryId: string;
   description: string | null | undefined;
+  hourlyRate: string | null | undefined;
   isActive: boolean | null | undefined;
   name: string;
+  rateCurrency: CurrencyCode | null | undefined;
   slug: string;
   sortOrder: number | null | undefined;
 };
@@ -375,8 +378,10 @@ export type ClassSubjectUpdateInput = {
   avatarUrl: string | null | undefined;
   categoryId: string | null | undefined;
   description: string | null | undefined;
+  hourlyRate: string | null | undefined;
   isActive: boolean | null | undefined;
   name: string | null | undefined;
+  rateCurrency: CurrencyCode | null | undefined;
   slug: string | null | undefined;
   sortOrder: number | null | undefined;
 };
@@ -699,6 +704,8 @@ export type CreateRecurringClassInput = {
   effectiveFrom: string | null | undefined;
   effectiveUntil: string | null | undefined;
   generateInstancesForWeeks: number | null | undefined;
+  hourlyRate: string | null | undefined;
+  rateCurrency: CurrencyCode | null | undefined;
   studentId: string;
   subjectId: string;
   teacherId: string;
@@ -1498,6 +1505,12 @@ export type ProfileScope =
   | 'OTHER'
   | 'OWN';
 
+export type RateSource =
+  | 'OVERRIDE'
+  | 'RECURRING'
+  | 'SUBJECT'
+  | 'TEACHER';
+
 export type RecurringClassDayInput = {
   dayOfWeek: string;
   isActive: boolean;
@@ -1663,6 +1676,14 @@ export type SuggestionStatus =
   | 'PENDING'
   | 'REVIEWED';
 
+export type SupportedCurrencyUpsertInput = {
+  code: CurrencyCode;
+  countryCode: CountryCode | null | undefined;
+  decimals: number | null | undefined;
+  sortOrder: number | null | undefined;
+  symbol: string;
+};
+
 export type SupportedMobileWalletCreateInput = {
   countryCode: CountryCode | null | undefined;
   currencyCode: CurrencyCode | null | undefined;
@@ -1781,6 +1802,7 @@ export type TeacherOwnProfileUpdateInput = {
   countryCode: string | null | undefined;
   dateOfBirth: string | null | undefined;
   gender: Gender | null | undefined;
+  nationalId: string | null | undefined;
   nationality: string | null | undefined;
   phone: string | null | undefined;
   qualifications: string | null | undefined;
@@ -1830,6 +1852,12 @@ export type UpdatePermissionGroupInput = {
   groupId: string;
   name: Partial<Record<'ar' | 'en', string>> | null | undefined;
   permissionIds: Array<string> | null | undefined;
+};
+
+export type UpdateRecurringClassRateInput = {
+  hourlyRate: string | null | undefined;
+  rateCurrency: CurrencyCode | null | undefined;
+  recurringScheduleId: string;
 };
 
 export type UpdateTeacherNoteInput = {
@@ -2326,6 +2354,28 @@ export type SupportedCurrenciesQueryVariables = Exact<{
 
 
 export type SupportedCurrenciesQuery = SupportedCurrenciesQuery_Query;
+
+export type ActivateSupportedCurrencyMutation_activateSupportedCurrency_SupportedCurrency = { code: Types.CurrencyCode | null, symbol: string | null, countryCode: Types.CountryCode | null, decimals: number | null, sortOrder: number | null, isActive: boolean | null };
+
+export type ActivateSupportedCurrencyMutation_Mutation = { activateSupportedCurrency: ActivateSupportedCurrencyMutation_activateSupportedCurrency_SupportedCurrency | null };
+
+
+export type ActivateSupportedCurrencyMutationVariables = Exact<{
+  input: Types.SupportedCurrencyUpsertInput;
+}>;
+
+
+export type ActivateSupportedCurrencyMutation = ActivateSupportedCurrencyMutation_Mutation;
+
+export type DeactivateSupportedCurrencyMutation_Mutation = { deactivateSupportedCurrency: boolean | null };
+
+
+export type DeactivateSupportedCurrencyMutationVariables = Exact<{
+  code: Types.CurrencyCode;
+}>;
+
+
+export type DeactivateSupportedCurrencyMutation = DeactivateSupportedCurrencyMutation_Mutation;
 
 export type LatestExchangeRatesQuery_latestExchangeRates_ExchangeRate = { id: string | null, fromCurrency: string | null, toCurrency: string | null, rate: string | null, source: string | null, effectiveDate: string | null };
 
@@ -2828,13 +2878,13 @@ export type DeleteClassCategoryMutation = DeleteClassCategoryMutation_Mutation;
 
 export type ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory = { id: string | null, name: string | null, slug: string | null };
 
-export type ClassSubjectFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+export type ClassSubjectFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
 
 export type SubjectResourceFieldsFragment = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
 
 export type ClassSubjectsQuery_classSubjects_ClassSubject_resources_SubjectResource = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
 
-export type ClassSubjectsQuery_classSubjects_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, resources: Array<ClassSubjectsQuery_classSubjects_ClassSubject_resources_SubjectResource> | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+export type ClassSubjectsQuery_classSubjects_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, resources: Array<ClassSubjectsQuery_classSubjects_ClassSubject_resources_SubjectResource> | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
 
 export type ClassSubjectsQuery_Query = { classSubjects: Array<ClassSubjectsQuery_classSubjects_ClassSubject> | null };
 
@@ -2848,7 +2898,7 @@ export type ClassSubjectsQuery = ClassSubjectsQuery_Query;
 
 export type ClassSubjectByIdQuery_classSubject_ClassSubject_resources_SubjectResource = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
 
-export type ClassSubjectByIdQuery_classSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, resources: Array<ClassSubjectByIdQuery_classSubject_ClassSubject_resources_SubjectResource> | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+export type ClassSubjectByIdQuery_classSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, resources: Array<ClassSubjectByIdQuery_classSubject_ClassSubject_resources_SubjectResource> | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
 
 export type ClassSubjectByIdQuery_Query = { classSubject: ClassSubjectByIdQuery_classSubject_ClassSubject | null };
 
@@ -2860,7 +2910,7 @@ export type ClassSubjectByIdQueryVariables = Exact<{
 
 export type ClassSubjectByIdQuery = ClassSubjectByIdQuery_Query;
 
-export type CreateClassSubjectMutation_createClassSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+export type CreateClassSubjectMutation_createClassSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
 
 export type CreateClassSubjectMutation_Mutation = { createClassSubject: CreateClassSubjectMutation_createClassSubject_ClassSubject | null };
 
@@ -2872,7 +2922,7 @@ export type CreateClassSubjectMutationVariables = Exact<{
 
 export type CreateClassSubjectMutation = CreateClassSubjectMutation_Mutation;
 
-export type UpdateClassSubjectMutation_updateClassSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+export type UpdateClassSubjectMutation_updateClassSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
 
 export type UpdateClassSubjectMutation_Mutation = { updateClassSubject: UpdateClassSubjectMutation_updateClassSubject_ClassSubject | null };
 
@@ -3917,7 +3967,7 @@ export type UpdateUserOverridesMutation = UpdateUserOverridesMutation_Mutation;
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile_displayAmount_DisplayAmount | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, countryCode: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile_displayAmount_DisplayAmount | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
@@ -3967,7 +4017,7 @@ export type ProfileByUserIdQueryVariables = Exact<{
 
 export type ProfileByUserIdQuery = ProfileByUserIdQuery_Query;
 
-export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null };
+export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, countryCode: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null };
 
 export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
 
@@ -4130,7 +4180,7 @@ export type ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassIn
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance = { id: string | null, engagementScore: number | null, assessmentProgress: number | null, assessmentTotal: number | null, focusLevel: string | null, sessionHealth: string | null, heatmapData: Array<unknown> | null, latencyMs: number | null, authorizationLabel: string | null, attendanceRate: number | null, avgGrade: string | null, lastClassDaysAgo: number | null };
 
-export type ClassInstanceQuery_classInstance_ClassInstanceDetail = { id: string | null, courseName: string | null, classType: Types.ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: Types.ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: Types.IanaTimezone | null, teacherTimezone: Types.IanaTimezone | null, meetingJoinUrl: string | null, recurringScheduleId: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, isFrozen: boolean | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, avatarUrl: string | null, subjectId: string | null, subjectName: string | null, subjectAvatarUrl: string | null, effectiveMeeting: ClassInstanceQuery_classInstance_ClassInstanceDetail_effectiveMeeting_EffectiveMeeting | null, student: ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo | null, teacher: ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo | null, performance: ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance | null };
+export type ClassInstanceQuery_classInstance_ClassInstanceDetail = { id: string | null, courseName: string | null, classType: Types.ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: Types.ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: Types.IanaTimezone | null, teacherTimezone: Types.IanaTimezone | null, meetingJoinUrl: string | null, recurringScheduleId: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, isFrozen: boolean | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, avatarUrl: string | null, subjectId: string | null, subjectName: string | null, subjectAvatarUrl: string | null, rateAmount: string | null, rateCurrency: Types.CurrencyCode | null, isRateOverridden: boolean | null, rateSource: Types.RateSource | null, effectiveMeeting: ClassInstanceQuery_classInstance_ClassInstanceDetail_effectiveMeeting_EffectiveMeeting | null, student: ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo | null, teacher: ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo | null, performance: ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance | null };
 
 export type ClassInstanceQuery_Query = { classInstance: ClassInstanceQuery_classInstance_ClassInstanceDetail | null };
 
@@ -4264,6 +4314,20 @@ export type DeleteClassInstanceMutationVariables = Exact<{
 
 export type DeleteClassInstanceMutation = DeleteClassInstanceMutation_Mutation;
 
+export type OverrideClassInstanceRateMutation_overrideClassInstanceRate_ClassInstanceDetail = { id: string | null, rateAmount: string | null, rateCurrency: Types.CurrencyCode | null, isRateOverridden: boolean | null, rateSource: Types.RateSource | null };
+
+export type OverrideClassInstanceRateMutation_Mutation = { overrideClassInstanceRate: OverrideClassInstanceRateMutation_overrideClassInstanceRate_ClassInstanceDetail | null };
+
+
+export type OverrideClassInstanceRateMutationVariables = Exact<{
+  classInstanceId: string | number;
+  rateAmount: string | null | undefined;
+  rateCurrency: Types.CurrencyCode | null | undefined;
+}>;
+
+
+export type OverrideClassInstanceRateMutation = OverrideClassInstanceRateMutation_Mutation;
+
 export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_updatedSessions_DstUpdatedSession = { id: string | null, studentId: string | null, teacherId: string | null, studentName: string | null, teacherName: string | null, fromTime: string | null, toTime: string | null };
 
 export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_conflictGroups_DstConflictGroup_conflicts_DstConflictItem = { id: string | null, studentName: string | null, message: string | null };
@@ -4299,7 +4363,7 @@ export type CreateRecurringClassMutation = CreateRecurringClassMutation_Mutation
 
 export type RecurringScheduleQuery_recurringSchedule_RecurringScheduleDetail_days_RecurringScheduleDayDetail = { id: string | null, dayOfWeek: string | null, startTime: string | null, isActive: boolean | null };
 
-export type RecurringScheduleQuery_recurringSchedule_RecurringScheduleDetail = { id: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, durationMinutes: number | null, defaultStartTime: string | null, timezone: Types.IanaTimezone | null, days: Array<RecurringScheduleQuery_recurringSchedule_RecurringScheduleDetail_days_RecurringScheduleDayDetail> | null };
+export type RecurringScheduleQuery_recurringSchedule_RecurringScheduleDetail = { id: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, durationMinutes: number | null, defaultStartTime: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, days: Array<RecurringScheduleQuery_recurringSchedule_RecurringScheduleDetail_days_RecurringScheduleDayDetail> | null };
 
 export type RecurringScheduleQuery_Query = { recurringSchedule: RecurringScheduleQuery_recurringSchedule_RecurringScheduleDetail | null };
 
@@ -4310,6 +4374,18 @@ export type RecurringScheduleQueryVariables = Exact<{
 
 
 export type RecurringScheduleQuery = RecurringScheduleQuery_Query;
+
+export type UpdateRecurringClassRateMutation_updateRecurringClassRate_RecurringScheduleDetail = { id: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null };
+
+export type UpdateRecurringClassRateMutation_Mutation = { updateRecurringClassRate: UpdateRecurringClassRateMutation_updateRecurringClassRate_RecurringScheduleDetail | null };
+
+
+export type UpdateRecurringClassRateMutationVariables = Exact<{
+  input: Types.UpdateRecurringClassRateInput;
+}>;
+
+
+export type UpdateRecurringClassRateMutation = UpdateRecurringClassRateMutation_Mutation;
 
 export type DeleteRecurringClassMutation_Mutation = { deleteRecurringClass: boolean | null };
 
@@ -5075,7 +5151,7 @@ export type TeacherHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TeacherHandbookUrlQuery = TeacherHandbookUrlQuery_Query;
 
-export type TeacherPendingDuesQuery_teacherPendingDues_TeacherDue = { id: string | null, teacherId: string | null, teacherName: string | null, teacherUserId: string | null, teacherAvatarUrl: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, studentAvatarUrl: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
+export type TeacherPendingDuesQuery_teacherPendingDues_TeacherDue = { id: string | null, teacherId: string | null, teacherName: string | null, teacherUserId: string | null, teacherAvatarUrl: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, studentAvatarUrl: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null, rateSource: Types.RateSource | null };
 
 export type TeacherPendingDuesQuery_Query = { teacherPendingDues: Array<TeacherPendingDuesQuery_teacherPendingDues_TeacherDue> | null };
 

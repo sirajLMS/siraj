@@ -100,8 +100,8 @@ Scan all changed files in scope and check for each of the following violations. 
 
 ### i18n & User-Facing Strings
 
-- Hardcoded error strings, alert messages, or user-facing text not using `next-intl`.
-- Missing `useTranslations` from `next-intl` for user-facing text in components.
+- Hardcoded error strings, alert messages, or user-facing text not using the compile-time TypeScript i18n system in `shared/locale/`.
+- Missing `useAppTranslation` from `@/shared/locale/client` for user-facing text in Client Components.
 
 ### Theme & Styling
 

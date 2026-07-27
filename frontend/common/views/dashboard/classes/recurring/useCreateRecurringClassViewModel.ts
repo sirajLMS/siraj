@@ -254,6 +254,8 @@ export function useCreateRecurringClassViewModel(
       effectiveFrom: undefined,
       effectiveUntil: undefined,
       generateInstancesForWeeks: 4,
+      hourlyRate: "",
+      rateCurrency: "",
       days: DEFAULT_DAY_SCHEDULE.map(day => ({ ...day })),
     },
   });

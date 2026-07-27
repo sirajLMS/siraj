@@ -32,6 +32,8 @@ export const dashboardCreateRecurringClassAr: CreateRecurringClassLabels = {
   timezonePlaceholder: "اختر المنطقة الزمنية",
   classType: "نوع الفصل",
   classTypePlaceholder: "اختر نوع الفصل",
+  hourlyRateLabel: "السعر بالساعة",
+  currencyLabel: "العملة",
   days: {
     monday: "الاثنين",
     tuesday: "الثلاثاء",

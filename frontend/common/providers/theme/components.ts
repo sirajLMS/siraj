@@ -257,7 +257,7 @@ const getMuiDataGrid = (): Components<Omit<Theme, "components">>["MuiDataGrid"] 
         backgroundColor: theme.palette.surfaceContainerLow,
       },
       "& .MuiDataGrid-columnHeaderTitle": {
-        fontFamily: '"Inter", sans-serif',
+        fontFamily: "var(--font-inter), sans-serif",
         fontSize: "11px",
         fontWeight: 700,
         letterSpacing: "0.08em",

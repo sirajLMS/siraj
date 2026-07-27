@@ -8,7 +8,7 @@ import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboa
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/form/snackbar";
-import { OnboardingMetricsOverviewDesktop } from "@/frontend/desktop/views/dashboard/managers/onboarding/components/onboardingMetricsOverview.desktop";
+
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledFormWrapper = styled(Box)(({ theme }) => ({
@@ -38,7 +38,6 @@ export function ManagerOnboardingDesktopView({
   onSubmit,
   onCancel,
   onDismissSuccess,
-  metricsModel,
 }: Readonly<ManagerOnboardingViewProps>) {
   const t = useAppTranslation().dashboardTranslations.managerOnboarding;
 
@@ -83,8 +82,6 @@ export function ManagerOnboardingDesktopView({
           </StyledFormActions>
         </StyledFormWrapper>
       </Box>
-
-      <OnboardingMetricsOverviewDesktop model={metricsModel} />
 
       <DesktopFormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
     </DesktopPageContainer>

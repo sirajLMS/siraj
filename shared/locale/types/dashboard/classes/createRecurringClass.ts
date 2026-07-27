@@ -30,6 +30,8 @@ export interface CreateRecurringClassLabels {
   readonly timezonePlaceholder: string;
   readonly classType: string;
   readonly classTypePlaceholder: string;
+  readonly hourlyRateLabel: string;
+  readonly currencyLabel: string;
   readonly days: {
     readonly monday: string;
     readonly tuesday: string;

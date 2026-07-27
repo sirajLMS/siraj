@@ -45,5 +45,7 @@ export function buildCreateRecurringClassInput(
     generateInstancesForWeeks: 4,
     effectiveFrom: null,
     effectiveUntil: null,
+    hourlyRate: null,
+    rateCurrency: null,
   };
 }

@@ -101,8 +101,9 @@ const userProfile = await getCurrentUser(userId);
 
 ## Translations in Server Components
 
-- Use `getTranslations()` from `next-intl/server` for server-side translations.
-- Use `getMessages()` from `next-intl/server` when passing messages to client providers.
+- Use `getTranslations(locale)` from `@/shared/locale/server` for server-side translations (synchronous — returns a `<namespace>` property-chain, NOT a promise).
+- Pass already-translated strings as props to client components; do NOT use `getMessages()`.
+- Example: `const t = getTranslations(locale).commonTranslations;` then use `t.fieldName`.
 
 ## Locale Handling
 

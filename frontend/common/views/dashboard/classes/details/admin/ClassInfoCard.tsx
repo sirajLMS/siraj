@@ -18,6 +18,7 @@ import {
   TeacherEntityLink,
 } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
 import { Link } from "@/shared/i18n/routing";
+import type { AdminViewLabels } from "@/shared/locale";
 
 interface ClassInfoCardProps {
   readonly courseName: string;
@@ -27,12 +28,13 @@ interface ClassInfoCardProps {
   readonly student: ClassInstanceStudentInfo;
   readonly teacher: ClassInstanceTeacherInfo;
   readonly isActive: boolean;
+  readonly rateAmount: string | null;
+  readonly rateCurrency: string | null;
+  readonly rateSource: string | null;
+  readonly isRateOverridden: boolean;
   readonly labels: {
-    readonly liveInstance: string;
-    readonly activeConnection: string;
-    readonly student: string;
-    readonly moduleInstructor: string;
-    readonly viewSubject: string;
+    readonly classInfo: AdminViewLabels["classInfo"];
+    readonly rate: AdminViewLabels["rate"];
   };
 }
 
@@ -171,7 +173,7 @@ function SubjectHeaderBlock({
   readonly subjectName: string;
   readonly subjectAvatarUrl: string | undefined;
   readonly courseName: string;
-  readonly labels: ClassInfoCardProps["labels"];
+  readonly labels: ClassInfoCardProps["labels"]["classInfo"];
 }) {
   return (
     <Stack
@@ -271,7 +273,7 @@ function PersonRow({
   readonly teacherProfileHref: string | undefined;
   readonly student: ClassInfoCardProps["student"];
   readonly teacher: ClassInfoCardProps["teacher"];
-  readonly labels: ClassInfoCardProps["labels"];
+  readonly labels: ClassInfoCardProps["labels"]["classInfo"];
 }) {
   return (
     <Stack
@@ -334,11 +336,22 @@ export function ClassInfoCard({
   student,
   teacher,
   isActive,
+  rateAmount,
+  rateCurrency,
+  rateSource,
+  isRateOverridden,
   labels,
 }: ClassInfoCardProps) {
   const studentProfileHref = student.id ? studentHref(student.id) : undefined;
   const teacherProfileHref = profileHrefForTeacher({ teacherId: teacher.id });
   const subjectHref = subjectId ? `/subjects/${subjectId}` : undefined;
+  const rateSourceLabel = isRateOverridden
+    ? labels.rate.rateSourceOverride
+    : rateSource === "RECURRING"
+      ? labels.rate.rateSourceRecurring
+      : rateSource === "SUBJECT"
+        ? labels.rate.rateSourceSubject
+        : labels.rate.rateSourceTeacher;
 
   return (
     <BaseCard edgeToEdge sx={{ position: "relative", overflow: "hidden", height: "100%" }}>
@@ -358,9 +371,9 @@ export function ClassInfoCard({
           subjectName={subjectName}
           subjectAvatarUrl={subjectAvatarUrl ?? undefined}
           courseName={courseName}
-          labels={labels}
+          labels={labels.classInfo}
         />
-        {isActive ? <ActiveConnectionIndicator activeConnection={labels.activeConnection} /> : null}
+        {isActive ? <ActiveConnectionIndicator activeConnection={labels.classInfo.activeConnection} /> : null}
       </Stack>
 
       <PersonRow
@@ -368,8 +381,32 @@ export function ClassInfoCard({
         teacherProfileHref={teacherProfileHref}
         student={student}
         teacher={teacher}
-        labels={labels}
+        labels={labels.classInfo}
       />
+
+      {rateAmount != null ? (
+        <Stack sx={{ mt: 3, pt: 3, borderTop: 1, borderColor: theme => theme.palette.border.light }}>
+          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.header, mb: 2 })}>
+            {labels.rate.rateSectionTitle}
+          </Typography>
+          <Stack direction="row" sx={{ flexWrap: "wrap", gap: 3 }}>
+            <Box sx={{ flex: "1 1 200px" }}>
+              <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.header, mb: 0.5 })}>
+                {labels.rate.effectiveRateLabel}
+              </Typography>
+              <Typography variant="bodyLg" sx={theme => ({ fontWeight: theme.typography.fontWeightBold })}>
+                {rateCurrency ?? ""} {rateAmount}
+              </Typography>
+            </Box>
+            <Box sx={{ flex: "1 1 200px" }}>
+              <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.header, mb: 0.5 })}>
+                {labels.rate.rateSourceLabel}
+              </Typography>
+              <Typography variant="bodyLg">{rateSourceLabel}</Typography>
+            </Box>
+          </Stack>
+        </Stack>
+      ) : null}
 
       <StyledDecorativeIconWrapper sx={theme => ({ color: theme.palette.primary.main })}>
         <LanguageIcon sx={{ fontSize: 200 }} />

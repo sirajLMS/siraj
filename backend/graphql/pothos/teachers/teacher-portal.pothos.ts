@@ -62,6 +62,9 @@ export const TeacherOwnProfilePothosObject = TeacherOwnProfileRef.implement({
     phone: t.exposeString("phone", { nullable: true }),
     nationality: t.exposeString("nationality", { nullable: true }),
     countryCode: t.exposeString("countryCode", { nullable: true }),
+    // Unmasked for the owner (the teacher editing their own profile). Admin /
+    // other-scope views go through StaffProfileService which masks the value.
+    nationalId: t.exposeString("nationalId", { nullable: true }),
     dateOfBirth: t.exposeString("dateOfBirth", { nullable: true }),
     gender: t.expose("gender", { type: GenderPothosObject, nullable: true }),
     address: t.exposeString("address", { nullable: true }),

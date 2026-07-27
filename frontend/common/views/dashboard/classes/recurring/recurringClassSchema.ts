@@ -45,6 +45,10 @@ export const createRecurringClassSchema = (messages: {
       effectiveFrom: z.string().optional(),
       effectiveUntil: z.string().optional(),
       generateInstancesForWeeks: z.number().min(1).max(12).optional(),
+      // Recurring-class-level hourly rate (highest non-override tier). Optional;
+      // when omitted the rate falls back to subject then teacher rate.
+      hourlyRate: z.string().optional(),
+      rateCurrency: z.string().optional(),
       days: z.array(dayScheduleSchema),
     })
     .refine(data => data.days.some(day => day.enabled), {

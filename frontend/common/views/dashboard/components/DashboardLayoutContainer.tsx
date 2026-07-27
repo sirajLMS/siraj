@@ -12,10 +12,18 @@ interface DashboardLayoutContainerProps {
 
 export async function DashboardLayoutContainer({ children, userProfile, isSuperAdmin }: DashboardLayoutContainerProps) {
   const locale = await getLocale();
-  const t = getTranslations(locale).dashboardTranslations.admin;
+  const t = getTranslations(locale).dashboardTranslations;
+  const adminT = t.admin;
+  const coreLayoutT = t.coreLayout;
 
   return (
-    <DashboardClientBridge userProfile={userProfile} isSuperAdmin={isSuperAdmin} roleLabel={t.roleLabel}>
+    <DashboardClientBridge
+      userProfile={userProfile}
+      isSuperAdmin={isSuperAdmin}
+      roleLabel={adminT.roleLabel}
+      appTitle={coreLayoutT.appTitle}
+      logoAriaLabel={coreLayoutT.appTitle}
+    >
       {children}
     </DashboardClientBridge>
   );

@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { CurrencyCodePothosObject, IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
   RecurringScheduleDayDetailReturnType,
   RecurringScheduleDetailReturnType,
@@ -31,5 +31,15 @@ export const RecurringScheduleDetailPothosObject = RecurringScheduleDetailRef.im
     defaultStartTime: t.exposeString("defaultStartTime"),
     timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
     days: t.expose("days", { type: [RecurringScheduleDayDetailPothosObject] }),
+    hourlyRate: t.exposeString("hourlyRate", { nullable: true }),
+    rateCurrency: t.expose("rateCurrency", { type: CurrencyCodePothosObject, nullable: true }),
+  }),
+});
+
+export const UpdateRecurringClassRateInputPothos = gqlSchemaBuilder.inputType("UpdateRecurringClassRateInput", {
+  fields: t => ({
+    recurringScheduleId: t.string({ required: true }),
+    hourlyRate: t.string({ required: false }),
+    rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
   }),
 });

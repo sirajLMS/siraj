@@ -3,6 +3,7 @@
 import ArticleIcon from "@mui/icons-material/Article";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import PauseIcon from "@mui/icons-material/Pause";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
@@ -27,6 +28,7 @@ interface AdminActionsBarProps {
   readonly onGenerateLog: () => void;
   readonly onReschedule: () => void;
   readonly onDelete: () => void;
+  readonly onOverrideRate: () => void;
   readonly labels: AdminActionLabels;
 }
 
@@ -189,11 +191,18 @@ function SecondaryAdminActions({
   onReschedule,
   onGenerateLog,
   onDelete,
+  onOverrideRate,
 }: {
-  readonly labels: { readonly reschedule: string; readonly generateLog: string; readonly deleteInstance: string };
+  readonly labels: {
+    readonly reschedule: string;
+    readonly generateLog: string;
+    readonly deleteInstance: string;
+    readonly overrideRateButton: string;
+  };
   readonly onReschedule: () => void;
   readonly onGenerateLog: () => void;
   readonly onDelete: () => void;
+  readonly onOverrideRate: () => void;
 }) {
   return (
     <>
@@ -222,6 +231,19 @@ function SecondaryAdminActions({
           <ArticleIcon sx={{ fontSize: 16 }} />
           <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
             {labels.generateLog}
+          </Box>
+        </Box>
+      </Tooltip>
+      <Tooltip title={labels.overrideRateButton}>
+        <Box
+          component="button"
+          aria-label={labels.overrideRateButton}
+          onClick={onOverrideRate}
+          sx={theme => textActionButtonSx(theme)}
+        >
+          <EditIcon sx={{ fontSize: 16 }} />
+          <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+            {labels.overrideRateButton}
           </Box>
         </Box>
       </Tooltip>
@@ -254,6 +276,7 @@ export function AdminActionsBar({
   onGenerateLog,
   onReschedule,
   onDelete,
+  onOverrideRate,
   labels,
 }: AdminActionsBarProps) {
   return (
@@ -305,6 +328,7 @@ export function AdminActionsBar({
           onReschedule={onReschedule}
           onGenerateLog={onGenerateLog}
           onDelete={onDelete}
+          onOverrideRate={onOverrideRate}
         />
       </Stack>
     </StyledAdminActionsBar>

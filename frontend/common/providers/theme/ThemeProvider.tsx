@@ -3,7 +3,7 @@
 import { CssBaseline } from "@mui/material";
 import type { PaletteMode } from "@mui/material/styles";
 import { ThemeProvider, useColorScheme } from "@mui/material/styles";
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
 import { setThemePreference } from "@/frontend/common/lib/theme-detection";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -38,13 +38,22 @@ function ColorSchemeStateBridge({ children }: { readonly children: ReactNode }) 
   const mode: PaletteMode = schemeMode === "light" ? "light" : "dark";
 
   // Sync `data-theme`, `colorScheme`, `lang` and `dir` attributes for CSS
-  // variable application and layout flow (preserved from legacy provider).
-  useEffect(() => {
+  // variable application and layout flow. Use `useLayoutEffect` (not
+  // `useEffect`) and diff against the previously-applied values so we only
+  // touch the DOM when an attribute actually changed — avoids layout
+  // thrashing on every render of this otherwise-pure-bridge component.
+  const lastAppliedRef = useRef<{ readonly mode: string; readonly dir: string; readonly lang: string } | null>(null);
+  useLayoutEffect(() => {
     if (typeof document === "undefined") return;
-    document.documentElement.dataset.theme = mode;
-    document.documentElement.style.colorScheme = mode;
-    document.documentElement.dir = direction;
-    document.documentElement.lang = locale;
+    const last = lastAppliedRef.current;
+    if (last?.mode === mode && last.dir === direction && last.lang === locale) return;
+
+    const root = document.documentElement;
+    root.dataset.theme = mode;
+    root.style.colorScheme = mode;
+    root.dir = direction;
+    root.lang = locale;
+    lastAppliedRef.current = { mode, dir: direction, lang: locale };
   }, [mode, direction, locale]);
 
   const toggleTheme = useCallback(() => {

@@ -12,6 +12,8 @@ const CLASS_SUBJECT_FIELDS = gql`
     isActive
     sortOrder
     categoryId
+    hourlyRate
+    rateCurrency
     category {
       id
       name
@@ -37,6 +39,7 @@ export const classSubjectsQueryDocument: TypedDocumentNode<
   Types.QueryClassSubjectsArgs
 > = gql`
   ${CLASS_SUBJECT_FIELDS}
+  ${SUBJECT_RESOURCE_FIELDS}
   query classSubjects($categoryId: String) {
     classSubjects(categoryId: $categoryId) {
       ...ClassSubjectFields

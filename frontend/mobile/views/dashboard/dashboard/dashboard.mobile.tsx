@@ -6,13 +6,8 @@ import { ParentDashboardContainer } from "@/frontend/common/views/dashboard/pare
 import { StudentDashboardContainer } from "@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer";
 import { SupervisorDashboardContainer } from "@/frontend/common/views/dashboard/supervisor/dashboard/SupervisorDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
-import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/page/MobilePageContainer";
 
-export function DashboardMobileView({ role, loading }: Readonly<DashboardContainerViewModel>) {
-  if (loading) {
-    return <MobilePageContainer>Loading...</MobilePageContainer>;
-  }
-
+export function DashboardMobileView({ role }: Readonly<Pick<DashboardContainerViewModel, "role">>) {
   switch (role) {
     case "parent":
       return <ParentDashboardContainer />;

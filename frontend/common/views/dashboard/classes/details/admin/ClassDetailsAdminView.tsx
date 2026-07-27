@@ -7,7 +7,20 @@
 // Tier-specific styling glue (PageHeader variant, padding, section gaps) is the responsibility of
 // the tier-side consumer; here we render the tier-neutral composition with MUI Grid/Stack only.
 
-import { Grid, Stack } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ActivityHeatmap } from "@/frontend/common/views/dashboard/classes/details/admin/ActivityHeatmap";
 import { AdminActionsBar } from "@/frontend/common/views/dashboard/classes/details/admin/AdminActionsBar";
 import { ClassInfoCard } from "@/frontend/common/views/dashboard/classes/details/admin/ClassInfoCard";
@@ -55,6 +68,7 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
   const {
     instance,
     labels,
+    handlers,
     isWarningDismissed,
     onDismissWarning,
     onForceActivate,
@@ -65,6 +79,10 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
     formattedScheduledDate,
   } = props;
 
+  const [isOverrideDialogOpen, setIsOverrideDialogOpen] = useState(false);
+  const [overrideRateAmount, setOverrideRateAmount] = useState(instance.rateAmount ?? "");
+  const [overrideRateCurrency, setOverrideRateCurrency] = useState<CurrencyCode | null>(instance.rateCurrency ?? null);
+
   const executionState = instance.executionState ?? "";
   const student = instance.student;
   const teacher = instance.teacher;
@@ -72,6 +90,25 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
   const showLiveMetadata = executionState === "ACTIVATED" || executionState === "RUNNING";
   const { metrics, hasData } = buildLivePerformanceMetrics(instance);
   const heatmapData = coerceHeatmapData(performance?.heatmapData);
+  const currencyOptions = Object.values(CurrencyCode);
+
+  const handleOpenOverrideDialog = () => {
+    setOverrideRateAmount(instance.rateAmount ?? "");
+    setOverrideRateCurrency(instance.rateCurrency ?? null);
+    setIsOverrideDialogOpen(true);
+  };
+
+  const handleCloseOverrideDialog = () => {
+    setIsOverrideDialogOpen(false);
+  };
+
+  const handleSubmitOverride = async (clearOverride: boolean) => {
+    const normalizedAmount = overrideRateAmount.trim();
+    const rateAmount = clearOverride || normalizedAmount.length === 0 ? null : normalizedAmount;
+    const rateCurrency = rateAmount ? overrideRateCurrency : null;
+    await handlers.handleOverrideRate(rateAmount, rateCurrency);
+    setIsOverrideDialogOpen(false);
+  };
 
   return (
     <Stack sx={{ gap: { xs: 2, lg: 3 } }}>
@@ -91,6 +128,7 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
         onGenerateLog={onGenerateLog}
         onReschedule={onReschedule}
         onDelete={onDelete}
+        onOverrideRate={handleOpenOverrideDialog}
         labels={labels.adminActions}
       />
 
@@ -112,7 +150,11 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
             }
             teacher={teacher ?? { id: null, name: null, avatarUrl: null, title: null }}
             isActive={executionState === "ACTIVATED" || executionState === "RUNNING"}
-            labels={labels.classInfo}
+            rateAmount={instance.rateAmount ?? null}
+            rateCurrency={instance.rateCurrency ?? null}
+            rateSource={instance.rateSource ?? null}
+            isRateOverridden={instance.isRateOverridden ?? false}
+            labels={labels}
           />
         </Grid>
         <Grid size={{ xs: 12, lg: 5 }}>
@@ -135,6 +177,43 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
           <LivePerformanceGrid metrics={metrics} hasData={hasData} labels={labels.performance} />
         </Grid>
       </Grid>
+
+      <Dialog open={isOverrideDialogOpen} onClose={handleCloseOverrideDialog} fullWidth maxWidth="sm">
+        <DialogTitle>{labels.rate.overrideRateDialogTitle}</DialogTitle>
+        <DialogContent sx={{ display: "grid", gap: 2, pt: 1 }}>
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {labels.rate.overrideRateDialogDescription}
+          </Typography>
+          <TextField
+            label={labels.rate.hourlyRateLabel}
+            value={overrideRateAmount}
+            onChange={event => setOverrideRateAmount(event.target.value)}
+            type="text"
+            fullWidth
+          />
+          <TextField
+            select
+            label={labels.rate.currencyLabel}
+            value={overrideRateCurrency ?? ""}
+            onChange={event => setOverrideRateCurrency((event.target.value as CurrencyCode) || null)}
+            fullWidth
+          >
+            <MenuItem value="">{labels.rate.currencyLabel}</MenuItem>
+            {currencyOptions.map(currency => (
+              <MenuItem key={currency} value={currency}>
+                {currency}
+              </MenuItem>
+            ))}
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseOverrideDialog}>{labels.rate.cancelButton}</Button>
+          <Button onClick={() => void handleSubmitOverride(true)}>{labels.rate.clearOverrideButton}</Button>
+          <Button variant="contained" onClick={() => void handleSubmitOverride(false)}>
+            {labels.rate.saveButton}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 }

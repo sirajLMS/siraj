@@ -32,6 +32,8 @@ export const dashboardCreateRecurringClassEn: CreateRecurringClassLabels = {
   timezonePlaceholder: "Select timezone",
   classType: "Class Type",
   classTypePlaceholder: "Select class type",
+  hourlyRateLabel: "Hourly Rate",
+  currencyLabel: "Currency",
   days: {
     monday: "Monday",
     tuesday: "Tuesday",

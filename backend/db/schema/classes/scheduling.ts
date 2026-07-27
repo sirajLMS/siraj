@@ -27,6 +27,7 @@ import {
   dstMigrationResultEnum,
   leaveRequesterTypeEnum,
   leaveRequestStatusEnum,
+  rateSourceEnum,
 } from "@/backend/db/schema/enums";
 import { meetingProviders } from "@/backend/db/schema/meeting/meeting-providers";
 import { userMeetingConfigs } from "@/backend/db/schema/meeting/user-meeting-configs";
@@ -34,7 +35,7 @@ import { timezones } from "@/backend/db/schema/shared/timezones";
 import { students } from "@/backend/db/schema/students/students";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode, RateSource } from "@/backend/enum";
 import type { MeetingConfigSnapshot } from "@/backend/types/meeting/meeting-config.types";
 
 /**
@@ -66,6 +67,11 @@ export const recurringSchedules = pgTable(
     timezoneId: integer("timezone_id").references(() => timezones.id),
     timezone: varchar("timezone", { length: 100 }).notNull(),
     utcOffsetSnapshot: integer("utc_offset_snapshot"), // Offset in minutes at time of schedule creation/update
+    // Recurring-class-level hourly rate (highest non-override precedence tier).
+    // Nullable: when NULL, the rate falls back to `class_subjects.hourly_rate`
+    // then `teachers.hourly_rate`. See `rate-resolver.service.ts`.
+    hourlyRate: numeric("hourly_rate", { precision: 12, scale: 2 }),
+    rateCurrency: currencyCodeEnum("rate_currency").$type<CurrencyCode>(),
     effectiveFrom: date("effective_from"),
     effectiveUntil: date("effective_until"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
@@ -167,6 +173,10 @@ export const classInstances = pgTable(
     rateAmount: numeric("rate_amount", { precision: 12, scale: 2 }),
     rateCurrency: currencyCodeEnum("rate_currency").$type<CurrencyCode>(),
     isRateOverridden: boolean("is_rate_overridden").notNull().default(false),
+    // Which precedence tier the snapshot was resolved from (TEACHER | SUBJECT |
+    // RECURRING | OVERRIDE). Set when the snapshot is captured at booking time
+    // and again at approval. See `rate-resolver.service.ts`.
+    rateSource: rateSourceEnum("rate_source").$type<RateSource>(),
     remarks: text("remarks"),
     adminNotes: text("admin_notes"),
     idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),

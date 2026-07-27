@@ -73,6 +73,8 @@ export namespace ClassSubjectRepository {
           avatarUrl: input.avatarUrl ?? null,
           isActive: input.isActive ?? true,
           sortOrder: input.sortOrder ?? 0,
+          hourlyRate: input.hourlyRate ?? null,
+          rateCurrency: input.rateCurrency ?? null,
         })
         .returning();
 
@@ -124,6 +126,8 @@ export namespace ClassSubjectRepository {
           avatarUrl: input.avatarUrl === undefined ? existing.avatarUrl : input.avatarUrl,
           isActive: input.isActive ?? existing.isActive,
           sortOrder: input.sortOrder ?? existing.sortOrder,
+          hourlyRate: input.hourlyRate === undefined ? existing.hourlyRate : input.hourlyRate,
+          rateCurrency: input.rateCurrency === undefined ? existing.rateCurrency : input.rateCurrency,
           updatedAt: now,
         })
         .where(eq(classSubjects.id, id))

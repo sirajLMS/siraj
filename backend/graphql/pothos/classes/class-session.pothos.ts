@@ -7,7 +7,9 @@ import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
   ClassTypePothosObject,
+  CurrencyCodePothosObject,
   IanaTimezonePothosObject,
+  RateSourcePothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import {
   SupportContactPothosObject,
@@ -117,6 +119,11 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     isFrozen: t.exposeBoolean("isFrozen"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
+    // Rate snapshot (captured at booking time; admin can override per instance).
+    rateAmount: t.exposeString("rateAmount", { nullable: true }),
+    rateCurrency: t.expose("rateCurrency", { type: CurrencyCodePothosObject, nullable: true }),
+    isRateOverridden: t.exposeBoolean("isRateOverridden"),
+    rateSource: t.expose("rateSource", { type: RateSourcePothosEnum, nullable: true }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     subjectId: t.exposeString("subjectId"),
     subjectName: t.exposeString("subjectName"),

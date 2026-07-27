@@ -13,6 +13,7 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
+import { ClassAvatar } from "@/frontend/common/components/ui/avatar/ClassAvatar";
 import type { SubjectResourceItem } from "@/frontend/common/views/dashboard/subjects/detail/types";
 import type { SubjectDetailViewModel } from "@/frontend/common/views/dashboard/subjects/detail/useSubjectDetailViewModel";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
@@ -89,14 +90,19 @@ export function SubjectDetailDesktopView({
 
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader
-        title={subject.name ?? ""}
-        subtitle={subject.description ?? undefined}
-        breadcrumbs={breadcrumbs}
-      />
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+        <ClassAvatar src={subject.avatarUrl ?? undefined} label={subject.name ?? ""} size={56} />
+        <Box sx={{ flex: 1 }}>
+          <DesktopPageHeader
+            title={subject.name ?? ""}
+            subtitle={subject.description ?? undefined}
+            breadcrumbs={breadcrumbs}
+          />
+        </Box>
+      </Box>
 
       {subject.category && (
-        <Box sx={{ mt: 2, mb: 1 }}>
+        <Box sx={{ mt: 1, mb: 1 }}>
           <Chip label={subject.category.name ?? ""} size="small" variant="outlined" />
         </Box>
       )}

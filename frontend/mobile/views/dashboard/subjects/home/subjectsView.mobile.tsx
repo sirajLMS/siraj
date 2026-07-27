@@ -1,11 +1,17 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Box, Button, Tab, Tabs } from "@mui/material";
+import { Box, Tab, Tabs } from "@mui/material";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobileCardList, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { CategoriesSectionMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/categoriesSection.mobile";
+import { CreateCategoryDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/createCategoryDialog.mobile";
+import { CreateSubjectDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/createSubjectDialog.mobile";
+import { DeleteCategoryDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/deleteCategoryDialog.mobile";
+import { DeleteSubjectDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/deleteSubjectDialog.mobile";
+import { EditCategoryDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/editCategoryDialog.mobile";
+import { EditSubjectDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/editSubjectDialog.mobile";
 import { SubjectCardMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/subjectCard.mobile";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -26,6 +32,12 @@ export function SubjectsViewMobile({
   onDeleteCategory,
   canManageSubjects,
   canManageCategories,
+  createSubjectDialog,
+  editSubjectDialog,
+  deleteSubjectDialog,
+  createCategoryDialog,
+  editCategoryDialog,
+  deleteCategoryDialog,
 }: Readonly<SubjectsViewProps>) {
   const t = useAppTranslation().dashboardTranslations.subjects;
 
@@ -47,19 +59,22 @@ export function SubjectsViewMobile({
         title={t.pageTitle}
         subtitle={t.pageSubtitle}
         actions={
-          canManageSubjects ? (
-            <MobilePrimaryPageAction onClick={onAddSubject} startIcon={<AddOutlined />}>
-              {t.addSubject}
-            </MobilePrimaryPageAction>
+          canManageSubjects || canManageCategories ? (
+            <>
+              {canManageSubjects ? (
+                <MobilePrimaryPageAction onClick={onAddSubject} startIcon={<AddOutlined />}>
+                  {t.addSubject}
+                </MobilePrimaryPageAction>
+              ) : null}
+              {canManageCategories ? (
+                <MobilePrimaryPageAction variant="outlined" onClick={onToggleCategoriesSection}>
+                  {categoriesSectionOpen ? t.hideCategories : t.manageCategories}
+                </MobilePrimaryPageAction>
+              ) : null}
+            </>
           ) : undefined
         }
       />
-
-      {canManageCategories ? (
-        <Button variant="outlined" onClick={onToggleCategoriesSection} sx={{ alignSelf: "flex-start" }}>
-          {categoriesSectionOpen ? t.hideCategories : t.manageCategories}
-        </Button>
-      ) : null}
 
       {categoriesSectionOpen && canManageCategories ? categoriesSection : null}
 
@@ -94,6 +109,13 @@ export function SubjectsViewMobile({
           />
         )}
       />
+
+      <CreateSubjectDialogMobile {...createSubjectDialog} />
+      <EditSubjectDialogMobile {...editSubjectDialog} />
+      <DeleteSubjectDialogMobile {...deleteSubjectDialog} />
+      <CreateCategoryDialogMobile {...createCategoryDialog} />
+      <EditCategoryDialogMobile {...editCategoryDialog} />
+      <DeleteCategoryDialogMobile {...deleteCategoryDialog} />
     </MobilePageContainer>
   );
 }

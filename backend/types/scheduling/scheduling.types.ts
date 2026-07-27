@@ -8,6 +8,7 @@ import type {
 import type {
   ClassExecutionState,
   ClassOutcome,
+  CurrencyCode,
   LeaveRequestStatus,
   RescheduleDateLabel,
   StudentStatus,
@@ -133,6 +134,10 @@ export type CreateRecurringClassInput = {
   days: RecurringClassDayInput[];
   classType?: string | null;
   generateInstancesForWeeks?: number | null;
+  /** Recurring-class-level hourly rate (highest non-override tier). Nullable. */
+  hourlyRate?: string | null;
+  /** Currency for `hourlyRate`. Required when `hourlyRate` is set. */
+  rateCurrency?: CurrencyCode | null;
 };
 
 export type CreateRecurringClassReturnType = {
