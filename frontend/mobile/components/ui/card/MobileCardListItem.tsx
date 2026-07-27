@@ -59,11 +59,14 @@ export function MobileCardListItem({
     : undefined;
 
   const baseSx: SxProps<Theme> = (theme: Theme) => ({
-    padding: isEdgeToEdge ? theme.spacing(2) : theme.spacing(2.5),
+    padding: isEdgeToEdge ? 0 : theme.spacing(2.5),
     borderRadius: isEdgeToEdge ? 0 : theme.layout.radius.card,
     boxShadow: isEdgeToEdge ? "none" : theme.shadows[1],
     backgroundColor: isEdgeToEdge ? theme.palette.surfaceContainerLowest : theme.palette.background.paper,
-    border: isEdgeToEdge ? "none" : `1px solid ${theme.palette.divider}`,
+    borderTop: `1px solid ${theme.palette.border.light}`,
+    borderBottom: `1px solid ${theme.palette.border.light}`,
+    borderLeft: isEdgeToEdge ? "none" : `1px solid ${theme.palette.border.light}`,
+    borderRight: isEdgeToEdge ? "none" : `1px solid ${theme.palette.border.light}`,
     opacity: dimmed ? (dimmedOpacity ?? 0.85) : 1,
     transition: interactive ? "transform 0.15s ease, box-shadow 0.15s ease" : "none",
     ...(interactive ? { cursor: "pointer" } : {}),

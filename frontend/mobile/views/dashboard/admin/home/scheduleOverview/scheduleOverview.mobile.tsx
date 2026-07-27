@@ -6,6 +6,10 @@ import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
+import {
+  ScheduleOverviewCardSkeleton,
+  ScheduleOverviewEmptyState,
+} from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
@@ -63,8 +67,6 @@ export function ScheduleOverviewMobileView({
   loading,
   showTimezones,
   locale,
-  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
-  // instead of the previous `RequirePermission` wrappers.
   canDashboardSearch,
   canScheduleFilterAdvanced,
 }: Readonly<ScheduleOverviewViewModel>) {
@@ -144,6 +146,16 @@ export function ScheduleOverviewMobileView({
           rows={rows}
           loading={loading}
           emptyMessage={emptyMessage}
+          renderSkeleton={() => (
+            <MobileCardListItem variant="edge-to-edge">
+              <ScheduleOverviewCardSkeleton />
+            </MobileCardListItem>
+          )}
+          renderEmptyState={msg => (
+            <MobileCardListItem variant="edge-to-edge">
+              <ScheduleOverviewEmptyState message={msg} />
+            </MobileCardListItem>
+          )}
           gap={2}
           layout="edge-to-edge"
           getKey={row => row.id ?? ""}

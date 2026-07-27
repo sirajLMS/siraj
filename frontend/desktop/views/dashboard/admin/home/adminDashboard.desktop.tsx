@@ -1,14 +1,19 @@
 "use client";
 
 import { SearchOutlined } from "@mui/icons-material";
-import { Box, InputAdornment, TextField } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui";
+import { Box, InputAdornment, Paper, Stack, TextField } from "@mui/material";
+import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
-import { ScheduleOverviewDataGrid } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
+import {
+  ScheduleOverviewCardSkeleton,
+  ScheduleOverviewEmptyState,
+} from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
+import { ScheduleOverviewDesktopCard } from "@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.desktop";
+import { useAppLocale } from "@/shared/locale";
 
 export function AdminDashboardDesktopView({
   t,
@@ -31,11 +36,14 @@ export function AdminDashboardDesktopView({
   onDateChange,
   onTeacherChange,
   pageSize,
-  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
-  // instead of the previous `RequirePermission` wrappers.
   canDashboardSearch,
   canScheduleFilterAdvanced,
+  canScheduleViewTimezones,
 }: Readonly<AdminDashboardViewModel>) {
+  const locale = useAppLocale();
+  const showTimezones = canScheduleViewTimezones;
+  const pageCount = Math.max(1, Math.ceil((totalCount ?? 0) / pageSize));
+
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
@@ -93,18 +101,51 @@ export function AdminDashboardDesktopView({
             <StatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
           </Box>
         ) : null}
-        <ScheduleOverviewDataGrid
-          rows={rows}
-          page={page}
-          pageSize={pageSize}
-          totalCount={totalCount}
-          onPageChange={onPageChange}
-          headers={headers}
-          statusLabels={statusLabels}
-          detailsLabel={t.details}
-          emptyMessage={t.noClasses}
-          loading={loading}
-        />
+
+        {loading && rows.length === 0 ? (
+          <Stack spacing={2}>
+            <Paper
+              elevation={0}
+              sx={theme => ({
+                borderRadius: 2,
+                border: `1px solid ${theme.palette.border.light}`,
+                backgroundColor: theme.palette.surfaceContainerLowest,
+              })}
+            >
+              <ScheduleOverviewCardSkeleton />
+            </Paper>
+          </Stack>
+        ) : rows.length === 0 ? (
+          <Box sx={{ py: 2 }}>
+            <ScheduleOverviewEmptyState message={t.noClasses} />
+          </Box>
+        ) : (
+          <Stack spacing={2}>
+            {rows.map(row => (
+              <ScheduleOverviewDesktopCard
+                key={row.id ?? ""}
+                row={row}
+                headers={headers}
+                statusLabels={statusLabels}
+                detailsLabel={t.details}
+                showTimezones={showTimezones}
+                locale={locale}
+              />
+            ))}
+          </Stack>
+        )}
+
+        {totalCount !== undefined ? (
+          <Box sx={{ pt: 2, display: "flex", justifyContent: "flex-end" }}>
+            <PaginationControls
+              page={page}
+              pageCount={pageCount}
+              rowCount={totalCount}
+              pageSize={pageSize}
+              onPageChange={onPageChange}
+            />
+          </Box>
+        ) : null}
       </DesktopSectionPanel>
     </DesktopPageContainer>
   );

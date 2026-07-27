@@ -13,6 +13,8 @@ export interface MobileCardListProps<T> {
   readonly getKey: (row: T) => string;
   readonly loading?: boolean;
   readonly emptyMessage?: string;
+  readonly renderSkeleton?: () => ReactNode;
+  readonly renderEmptyState?: (emptyMessage: string) => ReactNode;
   readonly gap?: number;
   readonly layout?: "edge-to-edge" | "rounded";
   readonly paginationOptions: ListPaginationOptions;
@@ -63,6 +65,8 @@ export function MobileCardList<T>({
   getKey,
   loading,
   emptyMessage = "No entries found",
+  renderSkeleton,
+  renderEmptyState,
   gap = 2,
   layout = "edge-to-edge",
   paginationOptions,
@@ -114,9 +118,13 @@ export function MobileCardList<T>({
   if (loading && rows.length === 0) {
     return (
       <Box sx={listSx}>
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
-          <CircularProgress />
-        </Box>
+        {renderSkeleton ? (
+          renderSkeleton()
+        ) : (
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
+            <CircularProgress />
+          </Box>
+        )}
         {paginationControls}
       </Box>
     );
@@ -125,11 +133,15 @@ export function MobileCardList<T>({
   if (rows.length === 0) {
     return (
       <Box sx={listSx}>
-        <Box sx={{ py: 4, px: 2, textAlign: "center" }}>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {emptyMessage}
-          </Typography>
-        </Box>
+        {renderEmptyState ? (
+          renderEmptyState(emptyMessage)
+        ) : (
+          <Box sx={{ py: 4, px: 2, textAlign: "center" }}>
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {emptyMessage}
+            </Typography>
+          </Box>
+        )}
         {paginationControls}
       </Box>
     );

@@ -7,6 +7,10 @@ import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
+import {
+  ScheduleOverviewCardSkeleton,
+  ScheduleOverviewEmptyState,
+} from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import {
@@ -62,8 +66,6 @@ export function AdminDashboardMobileView({
   onDateChange,
   onTeacherChange,
   pageSize,
-  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
-  // instead of the previous `RequirePermission` wrappers + `useUserStore()`.
   canDashboardSearch,
   canScheduleFilterAdvanced,
   canScheduleViewTimezones,
@@ -144,6 +146,16 @@ export function AdminDashboardMobileView({
           rows={rows as readonly DailyScheduleRow[]}
           loading={loading}
           emptyMessage={t.noClasses}
+          renderSkeleton={() => (
+            <MobileCardListItem variant="edge-to-edge">
+              <ScheduleOverviewCardSkeleton />
+            </MobileCardListItem>
+          )}
+          renderEmptyState={msg => (
+            <MobileCardListItem variant="edge-to-edge">
+              <ScheduleOverviewEmptyState message={msg} />
+            </MobileCardListItem>
+          )}
           gap={2}
           layout="edge-to-edge"
           getKey={row => row.id ?? ""}
