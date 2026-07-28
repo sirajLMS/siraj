@@ -1,5 +1,6 @@
 import type { ManagerDirectoryMetrics as GeneratedManagerDirectoryMetrics } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/types/shared.types";
+import type { StaffDirectoryLabels } from "@/shared/locale";
 
 export type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/types/shared.types";
 
@@ -25,6 +26,7 @@ export interface Manager {
 
 // NEW FOR PLAN v5: unified ManagersViewProps (was duplicated as `ManagersViewMobileProps`/`ManagersViewDesktopProps` paired interfaces in tier — Class B unified original per specs §4.1).
 export interface ManagersViewProps {
+  readonly labels: StaffDirectoryLabels;
   readonly managers: readonly Manager[];
   readonly metrics: NonNullableManagerDirectoryMetrics;
   readonly totalManagers?: number;
@@ -42,6 +44,7 @@ export interface ManagersViewProps {
 
 // NEW FOR PLAN v5: shared base for the card-list (mobile) / data-grid (desktop) twins (Class C per specs §4.3).
 export interface BaseManagersListProps {
+  readonly labels: StaffDirectoryLabels;
   readonly managers: readonly Manager[];
   readonly page?: number;
   readonly pageSize?: number;

@@ -1,16 +1,18 @@
 "use client";
 
 import { Button } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale";
 
 export interface RowRescheduleActionProps {
+  readonly rescheduleLabel: string;
   readonly classInstanceId: string;
   readonly onReschedule: (classInstanceId: string) => void;
 }
 
-export function RowRescheduleAction({ classInstanceId, onReschedule }: Readonly<RowRescheduleActionProps>) {
-  const rescheduleLabel = useAppTranslation().notificationsTranslations.reschedule;
-
+export function RowRescheduleAction({
+  rescheduleLabel,
+  classInstanceId,
+  onReschedule,
+}: Readonly<RowRescheduleActionProps>) {
   return (
     <Button
       size="small"
@@ -19,7 +21,7 @@ export function RowRescheduleAction({ classInstanceId, onReschedule }: Readonly<
         event.stopPropagation();
         onReschedule(classInstanceId);
       }}
-      sx={{ alignSelf: "flex-start", minWidth: 0, px: 0.5 }}
+      sx={{ minWidth: 0, px: 0.5, alignSelf: "flex-start" }}
     >
       {rescheduleLabel}
     </Button>

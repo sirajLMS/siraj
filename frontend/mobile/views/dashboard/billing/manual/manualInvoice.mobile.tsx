@@ -27,6 +27,7 @@ const StyledFormFieldset = styled("fieldset")(({ theme }) => ({
 
 export function ManualInvoiceMobileView({
   labels,
+  profileLabels,
   selectedParentId,
   control,
   errors,
@@ -53,6 +54,7 @@ export function ManualInvoiceMobileView({
             control={control}
             errors={errors}
             labels={labels}
+            profileLabels={profileLabels}
             selectedParentId={selectedParentId}
             draftCurrency={draftCurrency}
           />

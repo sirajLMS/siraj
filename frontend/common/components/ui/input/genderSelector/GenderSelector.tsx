@@ -3,7 +3,7 @@
 import { Box, Button, ButtonGroup, Typography } from "@mui/material";
 import type * as React from "react";
 import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { type GenderSelectorLabels, useAppTranslation } from "@/shared/locale";
+import { type GenderSelectorLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export type GenderSelectorProps = {
   readonly gender: Gender | null;
@@ -24,7 +24,7 @@ export const GenderSelector: React.FC<GenderSelectorProps> = ({
   labels,
   allowEmpty = false,
 }): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.genderSelector;
+  const t = useAppTranslation(Translation.Ui.GenderSelector);
   const title = labels?.title ?? t.title;
   const maleLabel = labels?.male ?? t.male;
   const femaleLabel = labels?.female ?? t.female;

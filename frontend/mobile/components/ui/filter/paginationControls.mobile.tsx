@@ -13,7 +13,7 @@ import {
 } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { rtlFlipIconSx } from "@/frontend/common/utils/rtlFlipIconSx";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface MobilePaginationControlsProps {
   readonly page: number;
@@ -86,7 +86,7 @@ export function MobilePaginationControls({
   embedded = false,
   onPageChange,
 }: MobilePaginationControlsProps) {
-  const t = useAppTranslation().dashboardTranslations.admin;
+  const t = useAppTranslation(Translation.Dashboard.Admin);
   const [pageInput, setPageInput] = useState(String(page + 1));
 
   useEffect(() => {

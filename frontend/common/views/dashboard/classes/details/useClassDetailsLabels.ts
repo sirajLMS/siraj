@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import type { ClassInstanceStatus } from "@/frontend/common/views/dashboard/types/dashboard";
-import { type AdminViewLabels, useAppTranslation } from "@/shared/locale";
+import { type AdminViewLabels, Translation, useAppTranslation } from "@/shared/locale";
+import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details";
 
-type ClassDetailsTranslations = ReturnType<typeof useAppTranslation>["dashboardTranslations"]["classDetails"];
+type ClassDetailsTranslations = ClassDetailsLabels;
 
 export interface TeacherViewLabels {
   readonly timezone: {
@@ -244,13 +245,13 @@ function buildTeacherViewLabels(t: ClassDetailsTranslations): TeacherViewLabels 
 }
 
 export const useAdminViewLabels = (_timezone: string): AdminViewLabels => {
-  const t = useAppTranslation().dashboardTranslations.classDetails;
+  const t = useAppTranslation(Translation.Dashboard.ClassDetails);
 
   return useMemo(() => buildAdminViewLabels(t), [t]);
 };
 
 export const useTeacherViewLabels = (_timezone: string): TeacherViewLabels => {
-  const t = useAppTranslation().dashboardTranslations.classDetails;
+  const t = useAppTranslation(Translation.Dashboard.ClassDetails);
 
   return useMemo(() => buildTeacherViewLabels(t), [t]);
 };

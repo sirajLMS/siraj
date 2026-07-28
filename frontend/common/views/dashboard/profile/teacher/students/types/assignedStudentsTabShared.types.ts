@@ -17,6 +17,7 @@ export interface AssignedStudentsTabSlotProps {
     readonly rows: AssignedStudentsTabViewModel["rows"];
     readonly loading: AssignedStudentsTabViewModel["loading"];
     readonly pagination: AssignedStudentsTabViewModel["pagination"];
+    readonly labelsBySection: AssignedStudentsTabViewModel["labelsBySection"];
   }>;
   readonly ClassFilterWrapper?: React.ComponentType<{
     readonly children: ReactNode;

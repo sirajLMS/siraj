@@ -11,9 +11,10 @@ import { useClassDetailsPermissions } from "@/frontend/common/views/dashboard/cl
 import { useClassDetailsData } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsQuery";
 import { useClassMutations } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassMutations";
 import { useEventLogDownload } from "@/frontend/common/views/dashboard/classes/details/hooks/useEventLogDownload";
+import type { ClassDetailsHeaderLabels } from "@/frontend/common/views/dashboard/classes/details/types";
 import { formatClassDetailDate } from "@/frontend/common/views/dashboard/classes/details/types";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type ClassDetailsLabels, useAppTranslation } from "@/shared/locale";
+import { type ClassDetailsLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 const noopAsync = () => Promise.resolve();
 
@@ -32,6 +33,41 @@ const noopSessionActionProps = {
 type Translations = ClassDetailsLabels;
 type Handlers = ReturnType<typeof useClassActionHandlers>;
 type FeedbackState = { readonly message: string; readonly severity: "success" | "error" } | null;
+
+function buildClassDetailsHeaderLabels(
+  t: ClassDetailsLabels,
+  classTypes: ClassDetailsHeaderLabels["classTypes"]
+): ClassDetailsHeaderLabels {
+  return {
+    pageSubtitleAdmin: t.pageSubtitleAdmin,
+    pageSubtitleTeacher: t.pageSubtitleTeacher,
+    classTypes,
+    breadcrumbs: {
+      dashboard: t.breadcrumbs.dashboard,
+      classes: t.breadcrumbs.classes,
+    },
+  };
+}
+
+function useClassDetailsTranslations() {
+  const t = useAppTranslation(Translation.Dashboard.ClassDetails);
+  const session = useAppTranslation(Translation.Session);
+  return { t, headerLabels: buildClassDetailsHeaderLabels(t, session.classTypes) };
+}
+
+function useClassInstanceId(): string {
+  const params = useParams();
+  const rawId = params?.id;
+  return typeof rawId === "string" ? rawId : "";
+}
+
+function formatClassInstanceSchedule(instance: ClassInstanceDetail, locale: string) {
+  return {
+    formattedScheduledDate: formatClassDetailDate(instance.scheduledDate, locale),
+    formattedStartTime: formatScheduleTimeOnly(instance.startTime, locale),
+    formattedEndTime: formatScheduleTimeOnly(instance.endTime, locale),
+  };
+}
 
 type CommonViewModelFields = {
   readonly canOverride: boolean;
@@ -55,6 +91,7 @@ type CommonViewModelFields = {
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
   readonly t: Translations;
+  readonly headerLabels: ClassDetailsHeaderLabels;
   readonly formattedScheduledDate: string;
   readonly formattedStartTime: string;
   readonly formattedEndTime: string;
@@ -70,6 +107,7 @@ type EarlyReturnSharedFields = {
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
   readonly t: Translations;
+  readonly headerLabels: ClassDetailsHeaderLabels;
   readonly canViewSessionDetails: boolean;
 };
 
@@ -88,6 +126,7 @@ function buildEarlyReturnViewModel(status: EarlyReturnStatus, shared: EarlyRetur
     deleteDialogOpen: shared.deleteDialogOpen,
     setDeleteDialogOpen: shared.setDeleteDialogOpen,
     t: shared.t,
+    headerLabels: shared.headerLabels,
     formattedScheduledDate: "",
     formattedStartTime: "",
     formattedEndTime: "",
@@ -132,6 +171,7 @@ type ReadyInputs = {
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
   readonly t: Translations;
+  readonly headerLabels: ClassDetailsHeaderLabels;
   readonly formattedScheduledDate: string;
   readonly formattedStartTime: string;
   readonly formattedEndTime: string;
@@ -152,6 +192,7 @@ function buildReadyViewModel(inputs: ReadyInputs): ClassDetailsViewModel {
     deleteDialogOpen: inputs.deleteDialogOpen,
     setDeleteDialogOpen: inputs.setDeleteDialogOpen,
     t: inputs.t,
+    headerLabels: inputs.headerLabels,
     formattedScheduledDate: inputs.formattedScheduledDate,
     formattedStartTime: inputs.formattedStartTime,
     formattedEndTime: inputs.formattedEndTime,
@@ -182,6 +223,7 @@ export interface ClassDetailsViewModel {
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
   readonly t: ClassDetailsLabels;
+  readonly headerLabels: ClassDetailsHeaderLabels;
   readonly formattedScheduledDate: string;
   readonly formattedStartTime: string;
   readonly formattedEndTime: string;
@@ -190,11 +232,8 @@ export interface ClassDetailsViewModel {
 export function useClassDetailsViewModel(): ClassDetailsViewModel {
   const router = useRouter();
   const locale = useAppLocale();
-  const t = useAppTranslation().dashboardTranslations.classDetails;
-
-  const params = useParams();
-  const rawId = params?.id;
-  const id = typeof rawId === "string" ? rawId : "";
+  const { t, headerLabels } = useClassDetailsTranslations();
+  const id = useClassInstanceId();
   const hasPermission = useUserStore(state => state.hasPermission);
 
   const {
@@ -227,6 +266,7 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
     deleteDialogOpen,
     setDeleteDialogOpen,
     t,
+    headerLabels,
     canViewSessionDetails,
   };
 
@@ -243,9 +283,10 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
   }
 
   const instance = data.classInstance as ClassInstanceDetail;
-  const formattedScheduledDate = formatClassDetailDate(instance.scheduledDate, locale);
-  const formattedStartTime = formatScheduleTimeOnly(instance.startTime, locale);
-  const formattedEndTime = formatScheduleTimeOnly(instance.endTime, locale);
+  const { formattedScheduledDate, formattedStartTime, formattedEndTime } = formatClassInstanceSchedule(
+    instance,
+    locale
+  );
 
   return buildReadyViewModel({
     instance,
@@ -260,6 +301,7 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
     deleteDialogOpen,
     setDeleteDialogOpen,
     t,
+    headerLabels,
     formattedScheduledDate,
     formattedStartTime,
     formattedEndTime,

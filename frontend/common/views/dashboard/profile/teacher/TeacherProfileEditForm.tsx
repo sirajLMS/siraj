@@ -12,28 +12,32 @@ import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
+import { toTeacherSectionLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
+import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import {
   type TeacherEditData,
   type TeacherOwnEditFormData,
   teacherOwnEditSchemaFactory,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
-import { useAppTranslation } from "@/shared/locale";
 
 export type { TeacherEditData, TeacherOwnEditFormData };
 
 export function TeacherProfileEditForm({
+  labels,
   teacherData,
   targetUserId,
   isSaving,
   onSubmit,
 }: {
+  readonly labels: TeacherProfileViewLabels;
   readonly teacherData: TeacherEditData;
   readonly targetUserId: string;
   readonly isSaving: boolean;
   readonly onSubmit: (values: TeacherOwnEditFormData) => Promise<void>;
 }) {
-  const t = useAppTranslation().profileTranslations.teacher;
-  const base = useAppTranslation().profileTranslations.base;
+  const t = labels.teacher;
+  const base = labels.base;
+  const sectionLabels = toTeacherSectionLabels(labels);
   const scope = ProfileScope.Own;
   const { canEdit } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
@@ -104,6 +108,7 @@ export function TeacherProfileEditForm({
           >
             {canEdit("core_identity") ? (
               <AccountSection
+                labels={sectionLabels}
                 mode="edit"
                 scope={scope}
                 teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
@@ -112,7 +117,13 @@ export function TeacherProfileEditForm({
               />
             ) : null}
             {canEdit("core_contact") || canEdit("teacher_identity") ? (
-              <ContactSection scope={scope} isAdminScope={false} register={form.register} control={form.control} />
+              <ContactSection
+                labels={sectionLabels}
+                scope={scope}
+                isAdminScope={false}
+                register={form.register}
+                control={form.control}
+              />
             ) : null}
             <TextField
               {...form.register("nationalId")}

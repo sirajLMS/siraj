@@ -7,9 +7,9 @@ import { AddPermissionsTabMobile } from "@/frontend/mobile/views/dashboard/permi
 import { AssignedUsersTabMobile } from "@/frontend/mobile/views/dashboard/permissions/components/assignedUsersTab.mobile";
 import { CurrentPermissionsTabMobile } from "@/frontend/mobile/views/dashboard/permissions/components/currentPermissionsTab.mobile";
 import { SingleGroupHeaderMobile } from "@/frontend/mobile/views/dashboard/permissions/components/singleGroupHeader.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 export function SingleGroupViewMobile({
+  labels,
   group,
   permissions,
   isLoading,
@@ -18,7 +18,7 @@ export function SingleGroupViewMobile({
   onAssignGroup,
   singleGroupState,
 }: Readonly<SingleGroupViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
   const {
     activeSubTab,
     setActiveSubTab,
@@ -45,7 +45,7 @@ export function SingleGroupViewMobile({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <SingleGroupHeaderMobile group={group} onBack={onBack} onEditGroup={onEditGroup} />
+      <SingleGroupHeaderMobile labels={labels} group={group} onBack={onBack} onEditGroup={onEditGroup} />
 
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
@@ -82,6 +82,7 @@ export function SingleGroupViewMobile({
         <Box sx={{ mt: 1 }}>
           {activeSubTab === "current" && (
             <CurrentPermissionsTabMobile
+              labels={labels}
               group={group}
               groupPermissions={groupPermissions}
               permissionsCount={permissionsCount}
@@ -93,6 +94,7 @@ export function SingleGroupViewMobile({
 
           {activeSubTab === "add" && !group.isSystem && (
             <AddPermissionsTabMobile
+              labels={labels}
               filteredAvailablePermissions={filteredAvailablePermissions}
               selectedAddPermissionIds={selectedAddPermissionIds}
               searchQuery={searchQuery}
@@ -108,6 +110,7 @@ export function SingleGroupViewMobile({
 
           {activeSubTab === "users" && (
             <AssignedUsersTabMobile
+              labels={labels}
               group={group}
               filteredAssignedUsers={filteredAssignedUsers}
               selectedAssignedUserIds={selectedAssignedUserIds}

@@ -9,8 +9,6 @@ import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/butto
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/form/snackbar";
 
-import { useAppTranslation } from "@/shared/locale";
-
 const StyledFormWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -28,6 +26,7 @@ const StyledFormActions = styled(Box)(({ theme }) => ({
 }));
 
 export function ManagerOnboardingDesktopView({
+  labels,
   register,
   onUploadAvatar,
   control,
@@ -39,7 +38,7 @@ export function ManagerOnboardingDesktopView({
   onCancel,
   onDismissSuccess,
 }: Readonly<ManagerOnboardingViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffOnboarding;
+  const t = labels;
 
   return (
     <DesktopPageContainer>
@@ -52,8 +51,14 @@ export function ManagerOnboardingDesktopView({
         }}
       >
         <StyledFormWrapper>
-          <StaffInfoSection register={register} control={control} errors={errors} onUploadAvatar={onUploadAvatar} />
-          <SystemAccessSection control={control} />
+          <StaffInfoSection
+            labels={labels}
+            register={register}
+            control={control}
+            errors={errors}
+            onUploadAvatar={onUploadAvatar}
+          />
+          <SystemAccessSection labels={labels} control={control} />
 
           <StyledFormActions>
             <DesktopPrimaryPageAction

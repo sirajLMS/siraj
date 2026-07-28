@@ -1,10 +1,10 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function SettingsComingSoonTab() {
-  const t = useAppTranslation().dashboardTranslations.settings;
+  const t = useAppTranslation(Translation.Dashboard.Settings);
 
   return (
     <Box sx={{ py: 4 }}>

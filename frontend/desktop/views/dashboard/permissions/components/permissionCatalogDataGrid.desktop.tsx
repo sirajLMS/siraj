@@ -7,7 +7,6 @@ import type { Permission, PermissionGroup } from "@/frontend/common/graphql/gene
 import type { BasePermissionCatalogListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display/localizedStringDisplay";
-import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionCatalogDataGridDesktopProps extends BasePermissionCatalogListProps {
   // VARIANT JUSTIFICATION: extra field loading — desktop data-grid renders an async-loaded table; mobile card list is always synchronous
@@ -80,11 +79,12 @@ function UsedInCell({ permission, groups }: Readonly<UsedInCellProps>) {
 }
 
 export function PermissionCatalogDataGridDesktop({
+  labels,
   permissions,
   groups,
   loading = false,
 }: Readonly<PermissionCatalogDataGridDesktopProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
   const columns = useMemo<GridColDef<Permission>[]>(() => {

@@ -17,7 +17,6 @@ import {
 } from "@/frontend/mobile/components/ui";
 import { AvailabilitySearchFormMobile } from "@/frontend/mobile/views/dashboard/teachers/availability/components/availabilitySearchForm.mobile";
 import { WeeklyAvailabilityGridMobile } from "@/frontend/mobile/views/dashboard/teachers/availability/components/weeklyAvailabilityGrid.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 interface TeacherAvailabilityMobileViewProps extends Omit<TeacherAvailabilityViewModel, "insights"> {
   readonly insights?: TeacherAvailabilityInsights;
@@ -32,15 +31,15 @@ function resolveDefaultFilters(
 }
 
 export function TeacherAvailabilityMobileView({
+  labelsBySection,
   availability,
   defaultFilters,
   loading,
   onExportPdf,
   onSearch,
   onBlockClick,
-  tableLabels,
 }: Readonly<TeacherAvailabilityMobileViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherAvailability;
+  const { shell: labels, table: tableLabels } = labelsBySection;
   const storeFilters = useTeacherAvailabilityStore(
     (state: { readonly filters: AvailabilitySearchFormData }) => state.filters
   );
@@ -53,19 +52,31 @@ export function TeacherAvailabilityMobileView({
   return (
     <MobilePageContainer>
       <MobilePageHeader
-        title={t.mobile.pageTitle}
-        subtitle={t.mobile.pageSubtitle}
+        title={labels.mobile.pageTitle}
+        subtitle={labels.mobile.pageSubtitle}
         breadcrumbs={[
-          { label: t.breadcrumbs.teachers, href: "/teachers" },
-          { label: t.breadcrumbs.availability, current: true },
+          { label: labels.breadcrumbs.teachers, href: "/teachers" },
+          { label: labels.breadcrumbs.availability, current: true },
         ]}
-        actions={<MobileExportButton onClick={onExportPdf}>{t.exportPdf}</MobileExportButton>}
+        actions={<MobileExportButton onClick={onExportPdf}>{labels.exportPdf}</MobileExportButton>}
       />
 
       <Box sx={{ mb: 2 }}>
-        <MobileSectionPanel title={t.searchTitle} edgeToEdge>
+        <MobileSectionPanel title={labels.searchTitle} edgeToEdge>
           <FormProvider {...methods}>
-            <AvailabilitySearchFormMobile onSearch={onSearch} />
+            <AvailabilitySearchFormMobile
+              onSearch={onSearch}
+              labels={{
+                searchTitle: labels.searchTitle,
+                from: labels.from,
+                to: labels.to,
+                gender: labels.gender,
+                any: labels.any,
+                male: labels.male,
+                female: labels.female,
+                submit: labels.submit,
+              }}
+            />
           </FormProvider>
         </MobileSectionPanel>
       </Box>

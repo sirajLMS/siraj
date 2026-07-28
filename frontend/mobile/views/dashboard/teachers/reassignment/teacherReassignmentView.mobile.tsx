@@ -8,9 +8,9 @@ import { CurrentTeacherCardMobile } from "@/frontend/mobile/views/dashboard/teac
 import { ManagementControlsCardMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/components/managementControlsCard.mobile";
 import { ReassignmentBentoGridMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/components/reassignmentBentoGrid.mobile";
 import { StudentContextCardMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/components/studentContextCard.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherReassignmentViewMobile({
+  labels,
   student,
   currentTeacherName,
   isSubmitting,
@@ -20,18 +20,17 @@ export function TeacherReassignmentViewMobile({
   controls,
   bento,
 }: Readonly<TeacherReassignmentViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment;
-
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
+      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
       <MobileContentStack>
         <Stack spacing={3}>
-          <StudentContextCardMobile student={student} />
+          <StudentContextCardMobile student={student} labels={labels.studentContext} />
           <CurrentTeacherCardMobile
             currentTeacherName={currentTeacherName}
             teacherId={student.primaryTeacherId ?? undefined}
+            labels={labels.currentTeacher}
           />
         </Stack>
 
@@ -49,7 +48,7 @@ export function TeacherReassignmentViewMobile({
               fontWeight: 700,
             })}
           >
-            {t.warning}
+            {labels.warning}
           </Alert>
 
           <ManagementControlsCardMobile
@@ -66,6 +65,7 @@ export function TeacherReassignmentViewMobile({
             onSelectedTeacherIdChange={controls.onSelectedTeacherIdChange}
             onSelectedNewStatusChange={controls.onSelectedNewStatusChange}
             onSubmitForm={controls.onSubmitForm}
+            labels={{ controls: labels.controls, actions: labels.actions }}
           />
 
           <ReassignmentBentoGridMobile
@@ -74,6 +74,7 @@ export function TeacherReassignmentViewMobile({
             pendingNotificationCount={0}
             onOpenChangeHistory={bento.onOpenChangeHistory}
             onOpenParentContact={bento.onOpenParentContact}
+            labels={labels.historyAndContact}
           />
         </Box>
       </MobileContentStack>

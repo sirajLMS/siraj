@@ -11,6 +11,7 @@ import {
 } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
+import type { ScheduleOverviewLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/scheduleOverview.types";
 import { DesktopSectionPanel, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { ScheduleOverviewDesktopCard } from "@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.desktop";
@@ -54,10 +55,9 @@ function ScheduleOverviewTitle({
   );
 }
 
-type ScheduleOverviewSearchFieldProps = Pick<
-  ScheduleOverviewViewModel,
-  "searchPlaceholder" | "searchValue" | "onSearchChange"
->;
+type ScheduleOverviewSearchFieldProps = Pick<ScheduleOverviewViewModel, "searchValue" | "onSearchChange"> & {
+  readonly searchPlaceholder: string;
+};
 
 function ScheduleOverviewSearchField({
   searchPlaceholder,
@@ -93,24 +93,14 @@ function ScheduleOverviewSearchField({
 
 type ScheduleOverviewFilterSectionProps = Pick<
   ScheduleOverviewViewModel,
-  | "dateLabel"
-  | "dateValue"
-  | "todayLabel"
-  | "previousDayLabel"
-  | "nextDayLabel"
-  | "teacherPlaceholder"
-  | "selectedTeacher"
-  | "onDateChange"
-  | "onTeacherChange"
->;
+  "dateValue" | "selectedTeacher" | "onDateChange" | "onTeacherChange"
+> & {
+  readonly filters: ScheduleOverviewLabelsBySection["filters"];
+};
 
 function ScheduleOverviewFilterSection({
-  dateLabel,
+  filters,
   dateValue,
-  todayLabel,
-  previousDayLabel,
-  nextDayLabel,
-  teacherPlaceholder,
   selectedTeacher,
   onDateChange,
   onTeacherChange,
@@ -118,14 +108,18 @@ function ScheduleOverviewFilterSection({
   return (
     <StyledFilterContainer>
       <ScheduleFilters
-        dateLabel={dateLabel}
+        dateLabel={filters.dateLabel}
         dateValue={dateValue}
-        todayLabel={todayLabel}
-        previousDayLabel={previousDayLabel}
-        nextDayLabel={nextDayLabel}
+        todayLabel={filters.todayLabel}
+        previousDayLabel={filters.previousDayLabel}
+        nextDayLabel={filters.nextDayLabel}
         onDateChange={onDateChange}
         teacherSelect={
-          <TeacherAutocompleteDesktop value={selectedTeacher} onChange={onTeacherChange} label={teacherPlaceholder} />
+          <TeacherAutocompleteDesktop
+            value={selectedTeacher}
+            onChange={onTeacherChange}
+            label={filters.teacherPlaceholder}
+          />
         }
       />
     </StyledFilterContainer>
@@ -134,38 +128,39 @@ function ScheduleOverviewFilterSection({
 
 type ScheduleOverviewListSectionProps = Pick<
   ScheduleOverviewViewModel,
-  "rows" | "headers" | "statusLabels" | "detailsLabel" | "emptyMessage" | "loading" | "showTimezones" | "locale"
->;
+  "rows" | "loading" | "showTimezones" | "locale"
+> & {
+  readonly labelsBySection: ScheduleOverviewLabelsBySection;
+};
 
 function ScheduleOverviewListSection({
   rows,
-  headers,
-  statusLabels,
-  detailsLabel,
-  emptyMessage,
+  labelsBySection,
   loading,
   showTimezones,
   locale,
 }: Readonly<ScheduleOverviewListSectionProps>) {
+  const { shell, columns, status, actions } = labelsBySection;
+
   return (
     <ScheduleOverviewListShell
       rows={rows}
       getKey={row => row.id ?? ""}
       loading={loading}
-      emptyMessage={emptyMessage}
+      emptyMessage={shell.emptyMessage}
       renderItem={row => (
         <ScheduleOverviewDesktopCard
           row={row}
-          headers={headers}
-          statusLabels={statusLabels}
-          detailsLabel={detailsLabel}
+          headers={columns}
+          statusLabels={status}
+          detailsLabel={actions.detailsLabel}
           showTimezones={showTimezones}
           locale={locale}
         />
       )}
       renderEmptyState={() => (
         <Box sx={{ p: 2 }}>
-          <ScheduleOverviewEmptyState message={emptyMessage} />
+          <ScheduleOverviewEmptyState message={shell.emptyMessage} />
         </Box>
       )}
       renderSkeleton={() => (
@@ -218,26 +213,16 @@ function ScheduleOverviewPaginationSection({
 }
 
 export function ScheduleOverviewDesktopView({
-  title,
+  labelsBySection,
   selectedMetricLabel,
-  searchPlaceholder,
   searchValue,
   rows,
-  headers,
-  statusLabels,
-  detailsLabel,
-  emptyMessage,
   page,
   pageSize,
   totalCount,
   onPageChange,
   onSearchChange,
-  dateLabel,
   dateValue,
-  todayLabel,
-  previousDayLabel,
-  nextDayLabel,
-  teacherPlaceholder,
   selectedTeacher,
   onDateChange,
   onTeacherChange,
@@ -247,14 +232,16 @@ export function ScheduleOverviewDesktopView({
   canDashboardSearch,
   canScheduleFilterAdvanced,
 }: Readonly<ScheduleOverviewViewModel>) {
+  const { shell, filters } = labelsBySection;
+
   return (
     <StyledDesktopPanel elevation={0}>
       <DesktopSectionPanel
-        title={<ScheduleOverviewTitle title={title} selectedMetricLabel={selectedMetricLabel} />}
+        title={<ScheduleOverviewTitle title={shell.title} selectedMetricLabel={selectedMetricLabel} />}
         actions={
           canDashboardSearch ? (
             <ScheduleOverviewSearchField
-              searchPlaceholder={searchPlaceholder}
+              searchPlaceholder={filters.searchPlaceholder}
               searchValue={searchValue}
               onSearchChange={onSearchChange}
             />
@@ -263,12 +250,8 @@ export function ScheduleOverviewDesktopView({
       >
         {canScheduleFilterAdvanced ? (
           <ScheduleOverviewFilterSection
-            dateLabel={dateLabel}
+            filters={filters}
             dateValue={dateValue}
-            todayLabel={todayLabel}
-            previousDayLabel={previousDayLabel}
-            nextDayLabel={nextDayLabel}
-            teacherPlaceholder={teacherPlaceholder}
             selectedTeacher={selectedTeacher}
             onDateChange={onDateChange}
             onTeacherChange={onTeacherChange}
@@ -277,10 +260,7 @@ export function ScheduleOverviewDesktopView({
 
         <ScheduleOverviewListSection
           rows={rows}
-          headers={headers}
-          statusLabels={statusLabels}
-          detailsLabel={detailsLabel}
-          emptyMessage={emptyMessage}
+          labelsBySection={labelsBySection}
           loading={loading}
           showTimezones={showTimezones}
           locale={locale}

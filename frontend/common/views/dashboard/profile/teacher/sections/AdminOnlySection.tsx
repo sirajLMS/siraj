@@ -6,15 +6,18 @@ import { SectionPanel } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { AccountStatus, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
 import {
   type TeacherAdminData,
+  type TeacherProfileViewLabels,
   toDisplayValue,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import type { TeacherAdminEditFormData } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
-import { useAppTranslation } from "@/shared/locale";
 
-type AdminOnlySectionProps =
+type AdminOnlySectionProps = {
+  readonly labels: Pick<TeacherProfileViewLabels, "teacher"> & { readonly baseLabels: ProfileSharedBaseLabels };
+} & (
   | {
       readonly mode: "view";
       readonly adminData: TeacherAdminData;
@@ -23,7 +26,8 @@ type AdminOnlySectionProps =
       readonly mode: "edit";
       readonly register: UseFormRegister<TeacherAdminEditFormData>;
       readonly control: Control<TeacherAdminEditFormData>;
-    };
+    }
+);
 
 function formatGender(
   gender: string | null | undefined,
@@ -39,8 +43,8 @@ function formatGender(
 }
 
 export function AdminOnlySection(props: AdminOnlySectionProps) {
-  const t = useAppTranslation().profileTranslations.teacher;
-  const tc = useAppTranslation().profileTranslations.base;
+  const t = props.labels.teacher;
+  const tc = props.labels.baseLabels;
 
   if (props.mode === "edit") {
     return (

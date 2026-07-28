@@ -8,7 +8,7 @@ import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMess
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type FxStoryProps = {
   readonly lockedAmount: string;
@@ -23,8 +23,8 @@ type FxStoryProps = {
 
 function FxDisplayStory({ lockedAmount, lockedCurrency, displayAmount }: FxStoryProps) {
   const locale = useAppLocale();
-  const t = useAppTranslation().profileTranslations.base;
-  const tErrors = useAppTranslation().errorsTranslations;
+  const t = useAppTranslation(Translation.Profile.Base);
+  const tErrors = useAppTranslation(Translation.Errors);
   const displayCurrency = useUserStore(state => state.displayCurrency);
 
   const formatted = formatCurrencyForDisplay(

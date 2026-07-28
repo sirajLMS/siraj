@@ -4,11 +4,8 @@ import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { ImportantNotesProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
-import { useAppTranslation } from "@/shared/locale";
 
-export function ImportantNotesMobile({ notes }: Readonly<ImportantNotesProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
-
+export function ImportantNotesMobile({ notes, labels }: Readonly<ImportantNotesProps>) {
   return (
     <BaseCard
       sx={theme => ({
@@ -34,7 +31,7 @@ export function ImportantNotesMobile({ notes }: Readonly<ImportantNotesProps>) {
         >
           <InfoOutlined sx={theme => ({ fontSize: 18, color: theme.palette.primary.main })} />
           <Typography variant="titleLg" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-            {t.importantNotes}
+            {labels.importantNotes}
           </Typography>
         </Stack>
 

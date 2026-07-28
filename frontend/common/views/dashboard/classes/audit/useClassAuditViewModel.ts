@@ -14,7 +14,8 @@ import type {
   ClassAuditViewProps,
 } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { ClassAuditLabels as ClassAuditLocaleLabels } from "@/shared/locale/types/dashboard/classes/audit";
 
 export interface ClassAuditViewModel extends ClassAuditViewProps {
   readonly status: "loading" | "invalidId" | "error" | "ready";
@@ -22,12 +23,12 @@ export interface ClassAuditViewModel extends ClassAuditViewProps {
 
 export type UseClassAuditViewModelProps = Record<string, never>;
 
-type ClassAuditT = ReturnType<typeof useAppTranslation>["dashboardTranslations"]["classAudit"];
+type ClassAuditT = ClassAuditLocaleLabels;
 type Audit = NonNullable<ClassAuditViewProps["audit"]>;
 type MaybeAudit = Audit | null | undefined;
 
 export function useClassAuditViewModel(): ClassAuditViewModel {
-  const t = useAppTranslation().dashboardTranslations.classAudit;
+  const t = useAppTranslation(Translation.Dashboard.ClassAudit);
   const router = useRouter();
   const params = useParams();
   const id = typeof params?.id === "string" ? params.id : "";

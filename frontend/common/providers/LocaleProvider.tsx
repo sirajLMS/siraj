@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useMemo } from "react";
-import { type AppLocale, LocaleContext, messagesByLocale } from "@/shared/locale";
+import { type AppLocale, LocaleContext, TranslationProvider } from "@/shared/locale";
 
 export interface LocaleProviderProps {
   readonly children: ReactNode;
@@ -9,9 +9,10 @@ export interface LocaleProviderProps {
 }
 
 export function LocaleProvider({ children, locale }: Readonly<LocaleProviderProps>): ReactNode {
-  const value = useMemo(() => {
-    const translations = messagesByLocale[locale];
-    return { translations, locale };
-  }, [locale]);
-  return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
+  const value = useMemo(() => ({ locale }), [locale]);
+  return (
+    <LocaleContext.Provider value={value}>
+      <TranslationProvider>{children}</TranslationProvider>
+    </LocaleContext.Provider>
+  );
 }

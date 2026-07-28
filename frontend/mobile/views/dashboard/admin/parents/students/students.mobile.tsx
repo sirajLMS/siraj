@@ -16,7 +16,7 @@ import {
 import { StudentDirectoryMobileCard } from "@/frontend/mobile/views/dashboard/admin/parents/students/components/studentDirectoryCard.mobile";
 
 export function StudentsMobileView({
-  labels,
+  labelsBySection,
   metrics,
   rows,
   totalStudents,
@@ -33,22 +33,15 @@ export function StudentsMobileView({
   // instead of a `RequirePermission` wrapper.
   canStudentsCreate,
 }: Readonly<StudentsViewModel>) {
-  const cardListLabels = {
-    weeklyHours: labels.weeklyHours,
-    enrollmentStatus: labels.enrollmentStatus,
-    classesLeft: labels.classesLeft,
-    viewProfile: labels.viewProfile,
-    statusLabels: labels.statusLabels,
-    enrollmentLabels: labels.enrollmentLabels,
-  };
+  const { shell, filters, actions, cards } = labelsBySection;
 
   const renderItem = (row: (typeof rows)[number]): ReactNode => (
-    <StudentDirectoryMobileCard row={row} labels={cardListLabels} onViewProfile={onViewProfile} />
+    <StudentDirectoryMobileCard row={row} labels={cards} onViewProfile={onViewProfile} />
   );
 
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
+      <MobilePageHeader title={shell.pageTitle} subtitle={shell.pageSubtitle} edgeToEdge={false} />
 
       <MobileContentStack gap={3} paddingBottom={10}>
         <MobileMetricCardGrid metrics={metrics} />
@@ -61,7 +54,7 @@ export function StudentsMobileView({
             onChange={e => {
               onSearchChange(e.target.value);
             }}
-            placeholder={labels.searchPlaceholder}
+            placeholder={filters.searchPlaceholder}
             slotProps={{
               input: {
                 startAdornment: (
@@ -79,7 +72,7 @@ export function StudentsMobileView({
           />
           <IconButton
             id="students-filter-mobile-btn"
-            aria-label={labels.filters}
+            aria-label={filters.filters}
             onClick={onFilterClick}
             sx={theme => ({
               backgroundColor: theme.palette.surfaceContainerHigh,
@@ -94,7 +87,7 @@ export function StudentsMobileView({
           {canStudentsCreate ? (
             <IconButton
               id="students-add-mobile-btn"
-              aria-label={labels.addStudent}
+              aria-label={actions.addStudent}
               onClick={onAddStudent}
               sx={theme => ({
                 backgroundColor: theme.palette.primary.main,
@@ -114,7 +107,7 @@ export function StudentsMobileView({
           renderItem={renderItem}
           getKey={row => row.id ?? ""}
           loading={loading}
-          emptyMessage={labels.noEntries}
+          emptyMessage={shell.noEntries}
           gap={2}
           layout="edge-to-edge"
           paginationOptions={
@@ -130,7 +123,7 @@ export function StudentsMobileView({
         />
 
         {canStudentsCreate ? (
-          <MobileFab icon={<AddOutlined />} label={labels.addStudent} onClick={onAddStudent} />
+          <MobileFab icon={<AddOutlined />} label={actions.addStudent} onClick={onAddStudent} />
         ) : null}
       </MobileContentStack>
     </MobilePageContainer>

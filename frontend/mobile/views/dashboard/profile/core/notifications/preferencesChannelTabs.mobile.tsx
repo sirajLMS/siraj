@@ -16,11 +16,12 @@ import {
   NOTIFICATION_EVENT_TYPES,
   type NotificationPrefRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
-import { useAppTranslation } from "@/shared/locale";
+import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
 type ChannelId = (typeof NOTIFICATION_CHANNELS)[number];
 
 interface PreferencesChannelTabsMobileViewProps {
+  readonly labels: ProfileNotificationsLabels;
   readonly preferences: readonly NotificationPrefRow[];
   // NEW FOR PLAN v5: pre-computed preference lookup map passed from the
   // container so the tier view stays render-only (no `buildPreferenceMap`
@@ -55,6 +56,7 @@ function ChannelTabsSkeleton() {
 }
 
 export function PreferencesChannelTabsMobileView({
+  labels,
   preferences,
   preferenceMap,
   eventTypes = NOTIFICATION_EVENT_TYPES,
@@ -65,8 +67,7 @@ export function PreferencesChannelTabsMobileView({
   slideDirection,
   onChannelChange,
 }: Readonly<PreferencesChannelTabsMobileViewProps>) {
-  const t = useAppTranslation().profileTranslations.notifications;
-  const eventLabels = t.events as Record<string, string>;
+  const eventLabels = labels.events as Record<string, string>;
   const getEventLabel = (eventType: NotificationEventType): string => eventLabels[eventType] ?? eventType;
 
   const handleChannelChange = (_: SyntheticEvent, value: ChannelId) => {
@@ -122,7 +123,7 @@ export function PreferencesChannelTabsMobileView({
               value={channel}
               icon={<Icon fontSize="small" />}
               iconPosition="start"
-              label={t.channels[channel]}
+              label={labels.channels[channel]}
               sx={theme => ({
                 color: isActive ? theme.palette[accent].main : theme.palette[accent].light,
                 opacity: isActive ? 1 : 0.7,

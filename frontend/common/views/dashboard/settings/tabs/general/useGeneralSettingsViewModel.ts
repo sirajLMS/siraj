@@ -14,7 +14,7 @@ import type {
   SystemSettingRow,
   UseGeneralSettingsViewModelProps,
 } from "@/frontend/common/views/dashboard/settings/types/generalSettings.types";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 function toSystemSettingRow(
   setting: {
@@ -48,7 +48,7 @@ function toSystemSettingRow(
 export function useGeneralSettingsViewModel(
   _props: Readonly<UseGeneralSettingsViewModelProps>
 ): GeneralSettingsViewModel {
-  const labels = useAppTranslation().dashboardTranslations.settings.general;
+  const labels = useAppTranslation(Translation.Dashboard.SettingsGeneral);
   const notifications = useNotifications();
   const hasPermission = useUserStore(state => state.hasPermission);
   const canManage = hasPermission(AppPermission.SettingsEditGeneral);

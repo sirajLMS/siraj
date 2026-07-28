@@ -14,29 +14,29 @@ import {
 } from "@/frontend/mobile/components/ui";
 
 export function TeacherLessonReportsMobileView({
-  title,
   rows,
   loading,
   error,
-  noReportsMessage,
   statusFilter,
   statusOptions,
-  labels,
+  labelsBySection,
   locale,
   onStatusFilterChange,
   resolveStatusLabel,
 }: Readonly<TeacherLessonReportsViewModel>) {
+  const { shell, filters, cards: labels } = labelsBySection;
+
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={title} />
+      <MobilePageHeader title={shell.title} />
 
       <MobileContentStack gap={2}>
         <FormControl size="small" sx={{ minWidth: 220, maxWidth: { sm: 280 } }}>
-          <InputLabel id="lesson-report-status-filter-label">{labels.filterAll}</InputLabel>
+          <InputLabel id="lesson-report-status-filter-label">{filters.filterAll}</InputLabel>
           <Select
             labelId="lesson-report-status-filter-label"
             value={statusFilter}
-            label={labels.filterAll}
+            label={filters.filterAll}
             onChange={e => onStatusFilterChange(e.target.value)}
           >
             {statusOptions.map(option => (
@@ -47,13 +47,13 @@ export function TeacherLessonReportsMobileView({
           </Select>
         </FormControl>
 
-        {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{noReportsMessage}</Typography> : null}
+        {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{shell.emptyMessage}</Typography> : null}
 
         {!error && (
           <MobileCardList
             rows={rows}
             loading={loading}
-            emptyMessage={noReportsMessage}
+            emptyMessage={shell.emptyMessage}
             getKey={row => row.id ?? row.classInstanceId ?? `${row.lessonDate}-${row.submittedAt}`}
             paginationOptions={{ mode: "client" }}
             layout="edge-to-edge"

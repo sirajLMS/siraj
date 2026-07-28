@@ -23,7 +23,8 @@ import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { logger } from "@/frontend/common/utils/logger";
 import type { SupportedCurrencyRow } from "@/frontend/common/views/dashboard/admin/billing/currencies/useSupportedCurrenciesViewModel";
 import { EntityFormDialogActions } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { SupportedCurrenciesLabels } from "@/shared/locale/types";
 
 const FORM_ID = "supported-currency-activate-form";
 
@@ -34,10 +35,6 @@ type ActivateFormValues = {
   decimals: string;
   sortOrder: string;
 };
-
-type SupportedCurrenciesTranslations = ReturnType<
-  typeof useAppTranslation
->["dashboardTranslations"]["billing"]["supportedCurrencies"];
 
 const defaultValues = (): ActivateFormValues => ({
   code: "",
@@ -71,7 +68,7 @@ type ActivateCurrencyFormFieldsProps = {
   readonly errors: FieldErrors<ActivateFormValues>;
   readonly isEdit: boolean;
   readonly excludedCodes?: readonly CurrencyCode[];
-  readonly t: SupportedCurrenciesTranslations;
+  readonly t: SupportedCurrenciesLabels;
 };
 
 function ActivateCurrencyFormFields({ control, errors, isEdit, excludedCodes, t }: ActivateCurrencyFormFieldsProps) {
@@ -163,7 +160,7 @@ function ActivateCurrencyFormFields({ control, errors, isEdit, excludedCodes, t 
 }
 
 function useActivateCurrencyDialog({ open, row, onClose, onSaved }: SupportedCurrencyActivateDialogProps) {
-  const t = useAppTranslation().dashboardTranslations.billing.supportedCurrencies;
+  const t = useAppTranslation(Translation.Dashboard.BillingSupportedCurrencies);
   const notifications = useNotifications();
   const isEdit = Boolean(row?.code);
 

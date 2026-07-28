@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Alert } from "@mui/material";
 import { userQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type FxConversionNoteMode = "viewer" | "subject";
 
@@ -15,7 +15,7 @@ interface FxConversionNoteProps {
 
 export function FxConversionNote({ mode = "viewer", subjectUserId }: Readonly<FxConversionNoteProps>): React.ReactNode {
   const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
-  const tBilling = useAppTranslation().dashboardTranslations.billing;
+  const tBilling = useAppTranslation(Translation.Dashboard.Billing);
 
   const { data: subjectData, loading: subjectLoading } = useQuery(userQueryDocument, {
     variables: { id: subjectUserId ?? "" },

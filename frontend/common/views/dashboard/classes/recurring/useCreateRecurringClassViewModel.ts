@@ -17,10 +17,8 @@ import {
   type CreatedRecurringClassResult,
   DEFAULT_DAY_SCHEDULE,
 } from "@/frontend/common/views/dashboard/classes/recurring/types";
-import {
-  buildRecurringClassFormLabels,
-  type RecurringClassFormLabels,
-} from "@/frontend/common/views/dashboard/classes/recurring/utils/buildRecurringClassFormLabels";
+import type { CreateRecurringClassLabelsBySection } from "@/frontend/common/views/dashboard/classes/recurring/types/createRecurringClassViewModel.types";
+import { buildRecurringClassFormLabels } from "@/frontend/common/views/dashboard/classes/recurring/utils/buildRecurringClassFormLabels";
 import { mapFormDataToInput } from "@/frontend/common/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";
 import {
   emptyRecurringMeetingConfigState,
@@ -36,9 +34,8 @@ import type {
   CreateRecurringClassLabels,
   MeetingConfigClassScopeLabels,
   MeetingConfigManagerLabels,
-  MeetingConfigRecurringScheduleLabels,
 } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 // Form-instance bag returned by `react-hook-form`. Decoupling the type keeps the
 // ViewModel interface stable while letting both tiers reference the same shared
@@ -50,11 +47,8 @@ export interface CreateRecurringClassViewModel {
   readonly showSuccess: boolean;
   readonly errorMessage: string | null;
   readonly meetingConfigWarning: boolean;
-  readonly meetingConfigWarningMessage: string;
-  readonly goToClassLabel: string;
+  readonly labelsBySection: CreateRecurringClassLabelsBySection;
   readonly onGoToCreatedClass: () => void;
-  readonly labels: CreateRecurringClassLabels;
-  readonly formLabels: RecurringClassFormLabels;
   readonly onClose: () => void;
   readonly onSubmit: (data: RecurringClassFormData, meetingConfig: RecurringMeetingConfigFormState) => void;
   readonly onDismissSuccess: () => void;
@@ -208,12 +202,10 @@ function useRecurringClassSubmit(params: SubmitHookParams) {
 export function useCreateRecurringClassViewModel(
   _props: Readonly<UseCreateRecurringClassViewModelProps> = {}
 ): CreateRecurringClassViewModel {
-  const translations = useAppTranslation();
-  const labels = translations.dashboardTranslations.createRecurringClass;
-  const tMeeting = translations.uiTranslations.meetingConfigManager;
-  const tClassScope = translations.uiTranslations.meetingConfigClassScope;
-  const tRecurringSchedule: MeetingConfigRecurringScheduleLabels =
-    translations.uiTranslations.meetingConfigRecurringSchedule;
+  const labels = useAppTranslation(Translation.Dashboard.CreateRecurringClass);
+  const tMeeting = useAppTranslation(Translation.Ui.MeetingConfig).manager;
+  const tClassScope = useAppTranslation(Translation.Ui.MeetingConfig).classScope;
+  const tRecurringSchedule = useAppTranslation(Translation.Ui.MeetingConfigRecurringSchedule);
 
   const router = useRouter();
   const client = useApolloClient();
@@ -321,17 +313,32 @@ export function useCreateRecurringClassViewModel(
   }, [errorMessage, clearError]);
 
   const goToClassLabel = tRecurringSchedule.goToClass;
+  const labelsBySection = useMemo<CreateRecurringClassLabelsBySection>(
+    () => ({
+      shell: {
+        title: labels.title,
+        subtitle: labels.subtitle,
+        breadcrumbs: labels.breadcrumbs,
+        close: labels.close,
+        addedSuccessfully: labels.addedSuccessfully,
+      },
+      form: formLabels,
+      page: labels,
+      notifications: {
+        meetingConfigWarningMessage: tMeeting.postCreateFailure,
+        goToClassLabel,
+      },
+    }),
+    [labels, tMeeting.postCreateFailure, goToClassLabel, formLabels]
+  );
 
   return {
     isSubmitting,
     showSuccess,
     errorMessage,
     meetingConfigWarning,
-    meetingConfigWarningMessage: tMeeting.postCreateFailure,
-    goToClassLabel,
+    labelsBySection,
     onGoToCreatedClass: handleGoToCreatedClass,
-    labels,
-    formLabels,
     onClose: handleClose,
     onSubmit,
     onDismissSuccess: resetSuccess,

@@ -9,7 +9,6 @@ import type {
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
-import { useAppTranslation } from "@/shared/locale";
 
 function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardProps>) {
   return (
@@ -52,9 +51,8 @@ export function ReassignmentBentoGridMobile({
   pendingNotificationCount,
   onOpenChangeHistory,
   onOpenParentContact,
+  labels,
 }: Readonly<ReassignmentBentoGridProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment.historyAndContact;
-
   const formattedDate = lastUpdated
     ? new Date(lastUpdated).toLocaleDateString("en-US", { month: "short", year: "2-digit" })
     : "N/A";
@@ -63,14 +61,14 @@ export function ReassignmentBentoGridMobile({
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       <BentoCard
         icon={HistoryOutlined}
-        title={t.changeHistory}
-        subtitle={t.lastUpdated(formattedDate)}
+        title={labels.changeHistory}
+        subtitle={labels.lastUpdated(formattedDate)}
         onClick={onOpenChangeHistory}
       />
       <BentoCard
         icon={MailOutlined}
-        title={t.parentContact}
-        subtitle={t.pendingNotifications(pendingNotificationCount)}
+        title={labels.parentContact}
+        subtitle={labels.pendingNotifications(pendingNotificationCount)}
         onClick={onOpenParentContact}
       />
     </Box>

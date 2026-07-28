@@ -5,17 +5,16 @@ import { alpha, Box, Typography } from "@mui/material";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { UpdatedSessionsDataGridDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/updatedSessionsDataGrid.desktop";
-import { useAppTranslation } from "@/shared/locale";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 interface Props {
+  readonly labels: DstMigrationLabels;
   readonly sessions: readonly UpdatedSession[];
   readonly successfulCount: number;
   readonly loading?: boolean;
 }
 
-export function UpdatedSessionsSectionDesktop({ sessions, successfulCount, loading }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
-
+export function UpdatedSessionsSectionDesktop({ labels, sessions, successfulCount, loading }: Readonly<Props>) {
   return (
     <Box
       sx={theme => ({
@@ -53,13 +52,13 @@ export function UpdatedSessionsSectionDesktop({ sessions, successfulCount, loadi
             <CheckCircleOutlined sx={{ fontSize: 18 }} />
           </Box>
           <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-            {t.sections.updated}
+            {labels.sections.updated}
           </Typography>
         </Box>
-        <DesktopStatusBadge category="session" status="completed" label={t.table.sessionsCount(successfulCount)} />
+        <DesktopStatusBadge category="session" status="completed" label={labels.table.sessionsCount(successfulCount)} />
       </Box>
       <Box sx={{ p: { xs: 2, lg: 0 } }}>
-        <UpdatedSessionsDataGridDesktop sessions={sessions} loading={loading} />
+        <UpdatedSessionsDataGridDesktop labels={labels} sessions={sessions} loading={loading} />
       </Box>
     </Box>
   );

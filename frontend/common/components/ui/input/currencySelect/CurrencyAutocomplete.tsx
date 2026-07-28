@@ -19,7 +19,7 @@ import type { CurrencyAutocompleteProps } from "@/frontend/common/components/ui/
 import { useCurrencyCatalog } from "@/frontend/common/hooks/useCurrencyCatalog";
 import { type CurrencyOption, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const filterOptions = createFilterOptions<CurrencyOption>({
   matchFrom: "any",
@@ -167,7 +167,7 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
   listAttached = false,
   showSymbol = true,
 }: CurrencyAutocompleteProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.currencySelect;
+  const t = useAppTranslation(Translation.Ui.CurrencySelect);
   const locale = useAppLocale();
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;

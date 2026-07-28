@@ -6,6 +6,7 @@ import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import { ScheduleOverviewEmptyState } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
+import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
@@ -17,7 +18,7 @@ type AdminDashboardHeaderActionsProps = Pick<
   AdminDashboardViewModel,
   "metrics" | "onMetricClick" | "selectedMetricKey" | "canDashboardSearch" | "searchValue" | "onSearchChange"
 > & {
-  searchPlaceholder: string;
+  readonly searchPlaceholder: string;
 };
 
 function AdminDashboardHeaderActions({
@@ -60,35 +61,31 @@ type AdminDashboardScheduleFiltersProps = Pick<
   AdminDashboardViewModel,
   "dateValue" | "onDateChange" | "selectedTeacher" | "onTeacherChange"
 > & {
-  dateLabel: string;
-  todayLabel: string;
-  previousDayLabel: string;
-  nextDayLabel: string;
-  selectTeacherLabel: string;
+  readonly filters: AdminDashboardLabelsBySection["filters"];
 };
 
 function AdminDashboardScheduleFilters({
-  dateLabel,
+  filters,
   dateValue,
-  todayLabel,
-  previousDayLabel,
-  nextDayLabel,
   onDateChange,
   selectedTeacher,
   onTeacherChange,
-  selectTeacherLabel,
 }: Readonly<AdminDashboardScheduleFiltersProps>) {
   return (
     <Box sx={{ mb: 2.5 }}>
       <ScheduleFilters
-        dateLabel={dateLabel}
+        dateLabel={filters.listOfClassesOn}
         dateValue={dateValue}
-        todayLabel={todayLabel}
-        previousDayLabel={previousDayLabel}
-        nextDayLabel={nextDayLabel}
+        todayLabel={filters.today}
+        previousDayLabel={filters.previousDay}
+        nextDayLabel={filters.nextDay}
         onDateChange={onDateChange}
         teacherSelect={
-          <TeacherAutocompleteDesktop value={selectedTeacher} onChange={onTeacherChange} label={selectTeacherLabel} />
+          <TeacherAutocompleteDesktop
+            value={selectedTeacher}
+            onChange={onTeacherChange}
+            label={filters.selectTeacher}
+          />
         }
       />
     </Box>
@@ -97,22 +94,18 @@ function AdminDashboardScheduleFilters({
 
 type AdminDashboardScheduleOverviewProps = Pick<
   AdminDashboardViewModel,
-  "rows" | "headers" | "statusLabels" | "loading" | "page" | "totalCount" | "pageSize" | "onPageChange"
+  "rows" | "loading" | "page" | "totalCount" | "pageSize" | "onPageChange"
 > & {
-  noClassesMessage: string;
-  detailsLabel: string;
-  showTimezones: boolean;
-  locale: ReturnType<typeof useAppLocale>;
-  pageCount: number;
+  readonly labelsBySection: AdminDashboardLabelsBySection;
+  readonly showTimezones: boolean;
+  readonly locale: ReturnType<typeof useAppLocale>;
+  readonly pageCount: number;
 };
 
 function AdminDashboardScheduleOverview({
   rows,
-  headers,
-  statusLabels,
+  labelsBySection,
   loading,
-  noClassesMessage,
-  detailsLabel,
   showTimezones,
   locale,
   page,
@@ -121,26 +114,33 @@ function AdminDashboardScheduleOverview({
   pageCount,
   onPageChange,
 }: Readonly<AdminDashboardScheduleOverviewProps>) {
+  const { shell, columns, status, actions } = {
+    shell: labelsBySection.shell,
+    columns: labelsBySection.columns,
+    status: labelsBySection.status,
+    actions: { detailsLabel: labelsBySection.shell.details },
+  };
+
   return (
     <>
       <ScheduleOverviewListShell
         rows={rows}
         getKey={row => row.id ?? ""}
         loading={loading}
-        emptyMessage={noClassesMessage}
+        emptyMessage={shell.noClasses}
         renderItem={row => (
           <ScheduleOverviewDesktopCard
             row={row}
-            headers={headers}
-            statusLabels={statusLabels}
-            detailsLabel={detailsLabel}
+            headers={columns}
+            statusLabels={status}
+            detailsLabel={actions.detailsLabel}
             showTimezones={showTimezones}
             locale={locale}
           />
         )}
         renderEmptyState={() => (
           <Box sx={{ py: 2 }}>
-            <ScheduleOverviewEmptyState message={noClassesMessage} />
+            <ScheduleOverviewEmptyState message={shell.noClasses} />
           </Box>
         )}
       />
@@ -161,7 +161,7 @@ function AdminDashboardScheduleOverview({
 }
 
 export function AdminDashboardDesktopView({
-  t,
+  labelsBySection,
   loading,
   lastUpdated,
   metrics,
@@ -172,8 +172,6 @@ export function AdminDashboardDesktopView({
   dateValue,
   selectedTeacher,
   rows,
-  headers,
-  statusLabels,
   page,
   totalCount,
   onPageChange,
@@ -181,18 +179,19 @@ export function AdminDashboardDesktopView({
   onDateChange,
   onTeacherChange,
   pageSize,
+  pageCount,
   canDashboardSearch,
   canScheduleFilterAdvanced,
   canScheduleViewTimezones,
 }: Readonly<AdminDashboardViewModel>) {
   const locale = useAppLocale();
   const showTimezones = canScheduleViewTimezones;
-  const pageCount = Math.max(1, Math.ceil((totalCount ?? 0) / pageSize));
+  const { shell, filters } = labelsBySection;
 
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
-        title={t.todayClasses}
+        title={shell.todayClasses}
         subtitle={lastUpdated}
         actions={
           <AdminDashboardHeaderActions
@@ -202,23 +201,19 @@ export function AdminDashboardDesktopView({
             canDashboardSearch={canDashboardSearch}
             searchValue={searchValue}
             onSearchChange={onSearchChange}
-            searchPlaceholder={t.searchPlaceholder}
+            searchPlaceholder={shell.searchPlaceholder}
           />
         }
       />
 
-      <DesktopSectionPanel title={t.scheduleOverview}>
+      <DesktopSectionPanel title={shell.scheduleOverview}>
         {canScheduleFilterAdvanced ? (
           <AdminDashboardScheduleFilters
-            dateLabel={t.listOfClassesOn}
+            filters={filters}
             dateValue={dateValue}
-            todayLabel={t.today}
-            previousDayLabel={t.previousDay}
-            nextDayLabel={t.nextDay}
             onDateChange={onDateChange}
             selectedTeacher={selectedTeacher}
             onTeacherChange={onTeacherChange}
-            selectTeacherLabel={t.selectTeacher}
           />
         ) : null}
         {selectedMetricLabel ? (
@@ -229,11 +224,8 @@ export function AdminDashboardDesktopView({
 
         <AdminDashboardScheduleOverview
           rows={rows}
-          headers={headers}
-          statusLabels={statusLabels}
+          labelsBySection={labelsBySection}
           loading={loading}
-          noClassesMessage={t.noClasses}
-          detailsLabel={t.details}
           showTimezones={showTimezones}
           locale={locale}
           page={page}

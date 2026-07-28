@@ -9,9 +9,9 @@ import {
 } from "@/frontend/common/views/dashboard/shared/CalendarGridShared";
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
 import type { CalendarGridProps, ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
+import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
 const calendarCellBase = ({ theme }: { theme: import("@mui/material/styles").Theme }) => ({
   borderRight: `1px solid ${theme.palette.border.light}`,
@@ -114,7 +114,7 @@ function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: Cla
 }
 
 export function CalendarGridDesktop({ currentMonth, classes }: Readonly<CalendarGridProps>) {
-  const t = useAppTranslation().dashboardTranslations.studentHistory;
+  const t = useStudentHistoryLabels();
   const { daysInMonth, emptyStartDays, emptyEndDays } = computeCalendarGridLayout(currentMonth);
 
   return (

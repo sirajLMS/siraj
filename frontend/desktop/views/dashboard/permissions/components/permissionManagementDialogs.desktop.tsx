@@ -8,6 +8,7 @@ import { ManageOverridesDialogDesktop } from "@/frontend/desktop/views/dashboard
 import { PermissionGroupFormDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionGroupForm.desktop";
 
 export function PermissionManagementDialogsDesktop({
+  labels,
   isLoading,
   activeGroup,
   selectedGroupId,
@@ -32,6 +33,7 @@ export function PermissionManagementDialogsDesktop({
   return (
     <>
       <PermissionGroupFormDesktop
+        labels={labels}
         open={isCreateDialogOpen}
         group={null}
         permissions={[]}
@@ -55,6 +57,7 @@ export function PermissionManagementDialogsDesktop({
       />
 
       <PermissionGroupFormDesktop
+        labels={labels}
         open={isEditDialogOpen}
         group={activeGroup}
         permissions={[]}
@@ -78,6 +81,7 @@ export function PermissionManagementDialogsDesktop({
       />
 
       <DeleteGroupDialogDesktop
+        labels={labels}
         open={isDeleteDialogOpen}
         groupName={activeGroup?.name ? resolveLocalizedString(activeGroup.name) : ""}
         isLoading={isLoading}
@@ -90,6 +94,7 @@ export function PermissionManagementDialogsDesktop({
       />
 
       <AssignGroupDialogDesktop
+        labels={labels}
         open={isAssignDialogOpen}
         group={activeGroup}
         isLoading={isLoading}
@@ -105,6 +110,7 @@ export function PermissionManagementDialogsDesktop({
       />
 
       <ManageOverridesDialogDesktop
+        labels={labels}
         open={isManageOverridesOpen}
         onClose={() => {
           setSelectedUserIdForOverrides(null);

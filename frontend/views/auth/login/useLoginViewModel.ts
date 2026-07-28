@@ -9,7 +9,7 @@ import { useAuthToken } from "@/frontend/common/hooks/useAuthToken";
 import logger from "@/frontend/common/lib/logger";
 import { isSafeRedirect, LOGIN_REDIRECT_PARAM } from "@/frontend/common/lib/safeRedirect";
 import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
-import { TranslationBeta, useAppTranslationBeta } from "@/shared/locale/beta";
+import { Translation, useAppTranslation } from "@/shared/locale";
 import type { AuthLoginLabels } from "@/shared/locale/types/auth";
 
 export interface UseLoginViewModelOptions {
@@ -26,7 +26,7 @@ export interface LoginViewModel {
 }
 
 export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions = {}): LoginViewModel {
-  const labels = useAppTranslationBeta(TranslationBeta.Auth.Login);
+  const labels = useAppTranslation(Translation.Auth.Login);
   const searchParams = useSearchParams();
   const { login, error: authError, isAuthenticated } = useAuth();
   const { updateAuthToken } = useAuthToken();

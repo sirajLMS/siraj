@@ -12,8 +12,11 @@ import { useTeacherDirectoryStore } from "@/frontend/common/stores/teacherDirect
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/navigation";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
 
 export interface TeachersViewModel {
+  readonly labels: TeachersDirectoryLabels;
   readonly metrics: TeacherDirectoryMetrics | null | undefined;
   readonly rows: readonly TeacherDirectoryRow[];
   readonly totalTeachers: number;
@@ -38,6 +41,7 @@ export interface TeachersViewModel {
 export type UseTeachersViewModelProps = Record<string, never>;
 
 export function useTeachersViewModel(_props: Readonly<UseTeachersViewModelProps> = {}): TeachersViewModel {
+  const labels = useAppTranslation(Translation.Dashboard.TeachersDirectory);
   const { searchQuery, setSearchQuery, page, pageSize, setPage } = useTeacherDirectoryStore();
   const { hasPermission } = useUserStore();
   const router = useRouter();
@@ -82,6 +86,7 @@ export function useTeachersViewModel(_props: Readonly<UseTeachersViewModelProps>
   const canCreateTeacher = hasPermission(AppPermission.TeachersCreate);
 
   return {
+    labels,
     metrics: directory?.metrics ?? null,
     rows: directory?.rows ?? [],
     totalTeachers: directory?.totalTeachers ?? 0,

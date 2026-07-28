@@ -12,7 +12,7 @@ import { useCallback, useMemo } from "react";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { userPaymentMethodToOptionLabel } from "@/frontend/common/lib/user-payment-method";
-import { type PaymentMethodLabels, useAppTranslation } from "@/shared/locale";
+import { type PaymentMethodLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export type UserPaymentMethodAutocompleteProps = {
   readonly value?: UserPaymentMethodFieldsFragment | null;
@@ -97,7 +97,7 @@ export function UserPaymentMethodAutocomplete({
   onBlurAction,
   style,
 }: UserPaymentMethodAutocompleteProps): React.ReactNode {
-  const t = useAppTranslation().uiTranslations.paymentMethod;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod);
 
   const resolveLabel = useMemo(
     () => createPaymentMethodResolver(t.type, t.direction, t.identifier, t.select, t.display),

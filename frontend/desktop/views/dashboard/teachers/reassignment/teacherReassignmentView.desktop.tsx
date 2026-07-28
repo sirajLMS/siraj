@@ -8,9 +8,9 @@ import { CurrentTeacherCardDesktop } from "@/frontend/desktop/views/dashboard/te
 import { ManagementControlsCardDesktop } from "@/frontend/desktop/views/dashboard/teachers/reassignment/components/managementControlsCard.desktop";
 import { ReassignmentBentoGridDesktop } from "@/frontend/desktop/views/dashboard/teachers/reassignment/components/reassignmentBentoGrid.desktop";
 import { StudentContextCardDesktop } from "@/frontend/desktop/views/dashboard/teachers/reassignment/components/studentContextCard.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherReassignmentViewDesktop({
+  labels,
   student,
   currentTeacherName,
   isSubmitting,
@@ -20,25 +20,24 @@ export function TeacherReassignmentViewDesktop({
   controls,
   bento,
 }: Readonly<TeacherReassignmentViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment;
-
   const breadcrumbs = [
-    { label: t.breadcrumbs.dashboard, href: "/dashboard" },
-    { label: t.breadcrumbs.parentManagement, href: "/teachers" },
-    { label: t.breadcrumbs.teacherReassignment, active: true },
+    { label: labels.breadcrumbs.dashboard, href: "/dashboard" },
+    { label: labels.breadcrumbs.parentManagement, href: "/teachers" },
+    { label: labels.breadcrumbs.teacherReassignment, active: true },
   ];
 
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader title={t.pageTitle} subtitle={t.pageSubtitle} breadcrumbs={breadcrumbs} />
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} breadcrumbs={breadcrumbs} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 4 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <StudentContextCardDesktop student={student} />
+            <StudentContextCardDesktop student={student} labels={labels.studentContext} />
             <CurrentTeacherCardDesktop
               currentTeacherName={currentTeacherName}
               teacherId={student.primaryTeacherId ?? undefined}
+              labels={labels.currentTeacher}
             />
           </Box>
         </Grid>
@@ -58,7 +57,7 @@ export function TeacherReassignmentViewDesktop({
                 fontWeight: 700,
               })}
             >
-              {t.warning}
+              {labels.warning}
             </Alert>
 
             <ManagementControlsCardDesktop
@@ -75,6 +74,7 @@ export function TeacherReassignmentViewDesktop({
               onSelectedTeacherIdChange={controls.onSelectedTeacherIdChange}
               onSelectedNewStatusChange={controls.onSelectedNewStatusChange}
               onSubmitForm={controls.onSubmitForm}
+              labels={{ controls: labels.controls, actions: labels.actions }}
             />
 
             <ReassignmentBentoGridDesktop
@@ -83,6 +83,7 @@ export function TeacherReassignmentViewDesktop({
               pendingNotificationCount={0}
               onOpenChangeHistory={bento.onOpenChangeHistory}
               onOpenParentContact={bento.onOpenParentContact}
+              labels={labels.historyAndContact}
             />
           </Box>
         </Grid>

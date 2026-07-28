@@ -20,9 +20,9 @@ import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/das
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import WeeklyScheduleGrid from "@/frontend/desktop/views/dashboard/teachers/schedule/weekly/components/weeklyScheduleGrid.desktop";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
 
-type ScheduleLabels = ReturnType<typeof useAppTranslation>["dashboardTranslations"]["teacherWeeklySchedule"];
+type ScheduleLabels = TeacherWeeklyScheduleLabels;
 type Schedule = NonNullable<TeacherWeeklyScheduleViewProps["schedule"]>;
 
 function ScheduleHeaderActions({
@@ -163,8 +163,10 @@ export function TeacherWeeklyScheduleViewDesktop({
   hasScheduleClearWeekly,
   hasScheduleViewWorkload,
   hasScheduleDeleteClass,
+  labels,
+  meetingJoinLabels,
 }: Readonly<TeacherWeeklyScheduleViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
+  const t = labels;
   const clearDialogOpen = useWeeklyScheduleStore(state => state.clearDialogOpen);
   const setClearDialogOpen = useWeeklyScheduleStore(state => state.setClearDialogOpen);
 
@@ -204,6 +206,8 @@ export function TeacherWeeklyScheduleViewDesktop({
           classes={schedule.classes}
           onRemoveClass={onRemoveClass}
           hasScheduleDeleteClass={hasScheduleDeleteClass}
+          labels={labels}
+          meetingJoinLabels={meetingJoinLabels}
         />
       </SectionPanel>
 

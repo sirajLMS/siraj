@@ -4,7 +4,6 @@ import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
 import type { PermissionCatalogToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileContentInset, MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
-import { useAppTranslation } from "@/shared/locale";
 
 interface CategoryChipProps {
   label: string;
@@ -37,13 +36,14 @@ function CategoryChip({ label, active, onClick }: Readonly<CategoryChipProps>) {
 }
 
 export function PermissionCatalogToolbarMobile({
+  labels,
   searchQuery,
   selectedCategory,
   categories,
   onSearchChange,
   onCategoryChange,
 }: Readonly<PermissionCatalogToolbarProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   return (
     <Box

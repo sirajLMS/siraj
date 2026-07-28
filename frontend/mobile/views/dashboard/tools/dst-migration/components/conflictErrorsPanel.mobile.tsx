@@ -4,9 +4,10 @@ import { CancelOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Stack, Typography } from "@mui/material";
 import type { ConflictGroup } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
-import { useAppTranslation } from "@/shared/locale";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 interface Props {
+  readonly labels: DstMigrationLabels;
   readonly conflictGroups: readonly ConflictGroup[];
 }
 
@@ -32,8 +33,7 @@ function flattenConflicts(groups: readonly ConflictGroup[]): ConflictRow[] {
   );
 }
 
-export function ConflictErrorsPanelMobile({ conflictGroups }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
+export function ConflictErrorsPanelMobile({ labels, conflictGroups }: Readonly<Props>) {
   const rows = flattenConflicts(conflictGroups);
 
   return (
@@ -71,7 +71,7 @@ export function ConflictErrorsPanelMobile({ conflictGroups }: Readonly<Props>) {
           <CancelOutlined sx={{ fontSize: 16 }} />
         </Box>
         <Typography sx={theme => ({ typography: "titleMd", color: theme.palette.error.main })}>
-          {t.sections.errors}
+          {labels.sections.errors}
         </Typography>
       </Box>
       <Box sx={{ p: 2 }}>
@@ -91,7 +91,7 @@ export function ConflictErrorsPanelMobile({ conflictGroups }: Readonly<Props>) {
                   <MobileStatusBadge
                     category="session"
                     status="pending"
-                    label={t.conflicts.teacherLabel(row.teacherName)}
+                    label={labels.conflicts.teacherLabel(row.teacherName)}
                   />
                 </Box>
               ) : null}

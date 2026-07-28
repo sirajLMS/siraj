@@ -2,20 +2,59 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useMemo, useState } from "react";
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
-import { useAdminDashboardLabels } from "@/frontend/common/views/dashboard/admin/home/utils";
+import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import {
   matchesDailyScheduleMetricFilter,
   resolveDailyScheduleMetricFilter,
 } from "@/frontend/common/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
+import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
 import { AdminDashboardDesktopView } from "@/frontend/desktop/views/dashboard/admin/home/adminDashboard.desktop";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import { useAppTranslation } from "@/shared/locale";
+import type { AdminDashboardLabels } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 import { MOCK_SCHEDULE, MOCK_TEACHERS } from "@/test/ui/components/fixtures/adminDashboardFixtures";
 
+function buildLabelsBySection(labels: AdminDashboardLabels): AdminDashboardLabelsBySection {
+  return {
+    shell: {
+      todayClasses: labels.todayClasses,
+      scheduleOverview: labels.scheduleOverview,
+      searchPlaceholder: labels.searchPlaceholder,
+      noClasses: labels.noClasses,
+      details: labels.details,
+      loading: labels.loading,
+    },
+    filters: {
+      listOfClassesOn: labels.listOfClassesOn,
+      today: labels.today,
+      previousDay: labels.previousDay,
+      nextDay: labels.nextDay,
+      selectTeacher: labels.selectTeacher,
+      submit: labels.submit,
+    },
+    columns: {
+      className: labels.className,
+      student: labels.student,
+      teacher: labels.teacher,
+      time: labels.time,
+      yourTime: labels.yourTime,
+      teacherTime: labels.teacherTime,
+      studentTime: labels.studentTime,
+      duration: labels.duration,
+      status: labels.status,
+      actions: labels.actions,
+      history: labels.history,
+      joinVideo: labels.joinVideo,
+    },
+    status: buildClassInstanceStatusLabels(labels.statusLabels),
+    metrics: labels.metrics,
+  };
+}
+
 export function MockAdminDashboardContainer() {
-  const t = useAppTranslation().dashboardTranslations.admin;
-  const { headers, statusLabels } = useAdminDashboardLabels();
+  const labels = useAppTranslation(Translation.Dashboard.Admin);
+  const labelsBySection = useMemo(() => buildLabelsBySection(labels), [labels]);
 
   const lastUpdatedKey = useDashboardStore(state => state.lastUpdated);
   const filters = useDashboardStore(state => state.filters);
@@ -32,7 +71,7 @@ export function MockAdminDashboardContainer() {
   const cleanedLastUpdatedKey = lastUpdatedKey.startsWith("dashboard.")
     ? lastUpdatedKey.replace("dashboard.", "")
     : lastUpdatedKey;
-  const translatedLastUpdated = t.updatedMinutesAgo(Number(cleanedLastUpdatedKey));
+  const translatedLastUpdated = labels.updatedMinutesAgo(Number(cleanedLastUpdatedKey));
 
   const metricFilter = resolveDailyScheduleMetricFilter(filters.selectedStatus);
 
@@ -75,7 +114,9 @@ export function MockAdminDashboardContainer() {
   const filteredRows = baseRows.filter(row => matchesDailyScheduleMetricFilter(row, metricFilter));
   const paginatedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
 
-  const selectedMetricLabel = filters.selectedStatus ? t.metrics[filters.selectedStatus] : null;
+  const selectedMetricLabel = filters.selectedStatus
+    ? labelsBySection.metrics[filters.selectedStatus as keyof AdminDashboardLabels["metrics"]]
+    : null;
 
   const handleMetricClick = (key: string) => {
     setPage(0);
@@ -90,7 +131,7 @@ export function MockAdminDashboardContainer() {
 
   return (
     <AdminDashboardDesktopView
-      t={t}
+      labelsBySection={labelsBySection}
       loading={false}
       lastUpdated={translatedLastUpdated}
       metrics={metrics}
@@ -101,8 +142,6 @@ export function MockAdminDashboardContainer() {
       dateValue={filters.date}
       selectedTeacher={filters.selectedTeacher}
       rows={paginatedRows}
-      headers={headers}
-      statusLabels={statusLabels}
       page={page}
       totalCount={filteredRows.length}
       onPageChange={setPage}

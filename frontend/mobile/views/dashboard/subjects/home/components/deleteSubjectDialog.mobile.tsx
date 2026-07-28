@@ -4,7 +4,6 @@ import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import type { DeleteSubjectDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobileFilterButton, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
-import { useAppTranslation } from "@/shared/locale";
 
 /**
  * DeleteSubjectDialogMobile — full-screen confirmation dialog.
@@ -13,13 +12,14 @@ import { useAppTranslation } from "@/shared/locale";
  * row is reachable above the keyboard on small viewports.
  */
 export function DeleteSubjectDialogMobile({
+  labels,
   open,
   onClose,
   onConfirm,
   subjectName,
   isLoading,
 }: Readonly<DeleteSubjectDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
+  const t = labels;
 
   return (
     <Dialog

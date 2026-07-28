@@ -17,7 +17,7 @@ import type {
   SiteContentSettingsViewModel,
   UseSiteContentSettingsViewModelProps,
 } from "@/frontend/common/views/dashboard/settings/types/siteContentSettings.types";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 function toSiteContentRow(
   entry: {
@@ -47,7 +47,7 @@ function toSiteContentRow(
 export function useSiteContentSettingsViewModel(
   _props: Readonly<UseSiteContentSettingsViewModelProps>
 ): SiteContentSettingsViewModel {
-  const labels = useAppTranslation().dashboardTranslations.settings.siteContent;
+  const labels = useAppTranslation(Translation.Dashboard.SettingsSiteContent);
   const notifications = useNotifications();
   const hasPermission = useUserStore(state => state.hasPermission);
   const canManage = hasPermission(AppPermission.SettingsSiteContentManage);

@@ -12,6 +12,7 @@ import type {
 } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { MeetingConfigFormDialogContent } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialogContent";
 import { useMeetingConfigFormState } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
+import type { MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
 
 export type ClassMeetingConfigFormDialogProps = {
   readonly open: boolean;
@@ -19,6 +20,7 @@ export type ClassMeetingConfigFormDialogProps = {
   readonly recurringScheduleId?: string;
   readonly editConfig: ClassMeetingConfigFieldsFragment | null;
   readonly existingCount: number;
+  readonly labels: MeetingConfigManagerLabels;
   readonly createMutation: TypedDocumentNode<
     CreateClassMeetingConfigMutation,
     CreateClassMeetingConfigMutationVariables
@@ -37,6 +39,7 @@ export function ClassMeetingConfigFormDialog({
   recurringScheduleId,
   editConfig,
   existingCount,
+  labels,
   createMutation,
   updateMutation,
   onClose,
@@ -46,6 +49,7 @@ export function ClassMeetingConfigFormDialog({
     open,
     editConfig,
     existingCount,
+    labels,
   });
   const { isEdit, label, isDefault, details, provider, providerChanged, validateUrl, setSaveError, t } = state;
 

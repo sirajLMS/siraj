@@ -8,7 +8,7 @@ import { getLanguageDisplayName, getLanguageEmoji, languages } from "@/frontend/
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
 import type { AppLocale } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type MobileLocaleListProps = {
   readonly activeLocale: AppLocale;
@@ -34,7 +34,7 @@ const MobileLanguageOption = styled(Box, {
 }));
 
 function MobileLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<MobileLocaleListProps>) {
-  const t = useAppTranslation().uiTranslations.localizedString;
+  const t = useAppTranslation(Translation.Ui.LocalizedString);
   const uiLocale = useAppLocale();
 
   return (
@@ -82,7 +82,7 @@ export function LocaleAdornmentSwitchMobile({
   successSwitch = false,
   ariaLabel,
 }: LocaleAdornmentSwitchProps) {
-  const t = useAppTranslation().uiTranslations.localizedString;
+  const t = useAppTranslation(Translation.Ui.LocalizedString);
   const uiLocale = useAppLocale();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 

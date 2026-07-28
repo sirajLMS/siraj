@@ -15,7 +15,7 @@ import type {
   PendingReviewsViewModel,
   UsePendingReviewsViewModelProps,
 } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type { PendingReviewsViewModel, UsePendingReviewsViewModelProps };
 
@@ -28,7 +28,7 @@ const EMPTY_SNACKBAR: PendingReviewsSnackbarState = {
 export function usePendingReviewsViewModel(
   _props: Readonly<UsePendingReviewsViewModelProps> = {}
 ): PendingReviewsViewModel {
-  const t = useAppTranslation().dashboardTranslations.supervisorPortalPendingReviews;
+  const t = useAppTranslation(Translation.Dashboard.SupervisorPortalPendingReviews);
 
   const [snackbar, setSnackbar] = useState<PendingReviewsSnackbarState>(EMPTY_SNACKBAR);
 

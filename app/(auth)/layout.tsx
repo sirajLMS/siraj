@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import { AuthBetaTranslationProvider } from "@/app/(auth)/AuthBetaTranslationProvider";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
 import { getAuthenticatedAuthBounceHref } from "@/frontend/common/lib/redirectToLogin";
@@ -22,5 +21,5 @@ export default async function AuthLayout({ children }: { readonly children: Reac
     return;
   }
 
-  return <AuthBetaTranslationProvider>{children}</AuthBetaTranslationProvider>;
+  return children;
 }

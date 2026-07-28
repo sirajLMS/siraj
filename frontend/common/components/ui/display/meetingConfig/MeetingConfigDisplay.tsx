@@ -10,7 +10,7 @@ import type {
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
-import { type MeetingConfigDisplayLabels, useAppTranslation } from "@/shared/locale";
+import { type MeetingConfigDisplayLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 function DetailRow({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
   return (
@@ -101,7 +101,7 @@ export function MeetingConfigDisplay({
   showSource = false,
   compact = false,
 }: MeetingConfigDisplayProps): React.ReactNode {
-  const t = useAppTranslation().uiTranslations.meetingConfig;
+  const t = useAppTranslation(Translation.Ui.MeetingConfig);
   const locale = useAppLocale();
   const tDisplay = t.display;
   const details = config.details ?? {};

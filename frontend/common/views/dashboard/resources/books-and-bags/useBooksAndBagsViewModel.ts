@@ -12,7 +12,7 @@ import type {
   BooksAndBagsClientProps,
   BooksAndBagsLabels,
 } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type UseBooksAndBagsViewModelProps = BooksAndBagsClientProps;
 
@@ -33,8 +33,7 @@ export interface BooksAndBagsViewModel {
 }
 
 export function useBooksAndBagsViewModel(props: Readonly<UseBooksAndBagsViewModelProps>): BooksAndBagsViewModel {
-  const t = useAppTranslation();
-  const tBooks = t.dashboardTranslations.booksAndBags;
+  const tBooks = useAppTranslation(Translation.Dashboard.BooksAndBags);
 
   // NEW FOR PLAN v5: read the user's permissions ONCE in the ViewModel.
   const hasPermission = useUserStore(state => state.hasPermission);

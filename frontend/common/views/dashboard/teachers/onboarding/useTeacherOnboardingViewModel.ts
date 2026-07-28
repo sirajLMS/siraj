@@ -20,7 +20,8 @@ import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboar
 import { teacherOnboardingSchema } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import { useRouter } from "@/shared/i18n/navigation";
 import type { TeacherOnboardingLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { MeetingConfigJoinLabels, MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
 
 /**
  * TeacherOnboarding ViewModel.
@@ -51,8 +52,8 @@ export interface TeacherOnboardingViewModel {
   readonly meetingConfigWarning: boolean;
   readonly clearMeetingConfigWarning: () => void;
   readonly meetingSetupHref: string | undefined;
-  readonly tMeeting: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigManager"];
-  readonly tJoin: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigJoin"];
+  readonly tMeeting: MeetingConfigManagerLabels;
+  readonly tJoin: MeetingConfigJoinLabels;
   readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
@@ -60,16 +61,15 @@ export type UseTeacherOnboardingViewModelProps = Record<string, never>;
 
 interface OnboardingTranslations {
   readonly labels: TeacherOnboardingLabels;
-  readonly tMeeting: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigManager"];
-  readonly tJoin: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigJoin"];
+  readonly tMeeting: MeetingConfigManagerLabels;
+  readonly tJoin: MeetingConfigJoinLabels;
 }
 
 function useOnboardingTranslations(): OnboardingTranslations {
-  const app = useAppTranslation();
   return {
-    labels: app.dashboardTranslations.teacherOnboarding,
-    tMeeting: app.uiTranslations.meetingConfigManager,
-    tJoin: app.uiTranslations.meetingConfigJoin,
+    labels: useAppTranslation(Translation.Dashboard.TeacherOnboarding),
+    tMeeting: useAppTranslation(Translation.Ui.MeetingConfig).manager,
+    tJoin: useAppTranslation(Translation.Ui.MeetingConfig).join,
   };
 }
 

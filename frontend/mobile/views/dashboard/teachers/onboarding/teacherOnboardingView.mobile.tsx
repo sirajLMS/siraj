@@ -99,7 +99,7 @@ export function TeacherOnboardingMobileView({
             <SalaryDetailsSection register={register} control={control} errors={errors} labels={labels} />
           </MobileSectionPanel>
           <MobileSectionPanel title={labels.sections.paymentMethod}>
-            <PaymentMethodSection control={control} errors={errors} />
+            <PaymentMethodSection control={control} errors={errors} labels={labels} />
           </MobileSectionPanel>
           <MobileSectionPanel title={labels.sections.meetingConfig}>
             <MeetingConfigOnboardingSection

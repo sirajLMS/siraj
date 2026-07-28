@@ -11,7 +11,7 @@ import {
   buildSettingsTabHref,
   resolveSettingsTab,
 } from "@/frontend/common/views/dashboard/settings/utils/settingsTabUrl";
-import { type SettingsLabels, useAppTranslation } from "@/shared/locale";
+import { type SettingsLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export type SettingsViewModel = {
   readonly labels: SettingsLabels;
@@ -23,7 +23,7 @@ export function useSettingsViewModel(): SettingsViewModel {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const labels = useAppTranslation().dashboardTranslations.settings;
+  const labels = useAppTranslation(Translation.Dashboard.Settings);
   const hasPermission = useUserStore(state => state.hasPermission);
   const markTabVisited = useSettingsStore(state => state.markTabVisited);
 

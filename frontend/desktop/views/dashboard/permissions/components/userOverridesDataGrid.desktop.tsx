@@ -11,7 +11,6 @@ import type { UserOverridesDataGridProps } from "@/frontend/common/views/dashboa
 import { getUserGroupsForUser } from "@/frontend/common/views/dashboard/permissions/utils";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
-import { useAppTranslation } from "@/shared/locale";
 
 interface UserGroupsCellProps {
   readonly userGroups: readonly PermissionGroup[];
@@ -54,12 +53,13 @@ function UserGroupsCell({ userGroups }: Readonly<UserGroupsCellProps>) {
 }
 
 export function UserOverridesDataGridDesktop({
+  labels,
   users,
   groups,
   onManageOverrides,
   loading = false,
 }: Readonly<UserOverridesDataGridProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing `columns` keeps
   // the MUI DataGrid column-identity stable across re-renders so the grid does

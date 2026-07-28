@@ -16,7 +16,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
 import { logger } from "@/frontend/common/utils/logger";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface UseClassMutationsOptions {
   id: string;
@@ -41,7 +41,7 @@ interface UseClassMutationsReturn {
 }
 
 export function useClassMutations({ id, onError }: UseClassMutationsOptions): UseClassMutationsReturn {
-  const t = useAppTranslation().dashboardTranslations.classDetails;
+  const t = useAppTranslation(Translation.Dashboard.ClassDetails);
   const client = useApolloClient();
 
   const reportMutationError = (context: string, err: unknown, fallbackMessage: string) => {

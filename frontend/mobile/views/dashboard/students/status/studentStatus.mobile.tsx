@@ -4,6 +4,8 @@ import { Box, Paper, Typography } from "@mui/material";
 import { FormProvider } from "react-hook-form";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { StudentStatusLabelsProvider } from "@/frontend/common/views/dashboard/students/status/studentStatusLabelsContext";
+import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 import type { StudentStatusViewModel } from "@/frontend/common/views/dashboard/students/status/useStudentStatusViewModel";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/page/MobilePageContainer";
@@ -14,7 +16,6 @@ import {
   SuspensionWarningBannerMobile,
 } from "@/frontend/mobile/views/dashboard/students/status/components/policyOverviewCard.mobile";
 import { StudentStatusHeaderMobile } from "@/frontend/mobile/views/dashboard/students/status/components/studentStatusHeader.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 const STATUS_BADGE_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "regular",
@@ -29,7 +30,7 @@ function getBadgeStatusKey(status: StudentStatus): string {
 }
 
 function ReadOnlyStatusCardMobile({ status }: Readonly<{ status: StudentStatus }>) {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
 
   return (
     <Paper
@@ -126,8 +127,12 @@ export function StudentStatusMobileView({
   );
 
   if (embedded) {
-    return body;
+    return <StudentStatusLabelsProvider labels={t}>{body}</StudentStatusLabelsProvider>;
   }
 
-  return <MobilePageContainer>{body}</MobilePageContainer>;
+  return (
+    <StudentStatusLabelsProvider labels={t}>
+      <MobilePageContainer>{body}</MobilePageContainer>
+    </StudentStatusLabelsProvider>
+  );
 }

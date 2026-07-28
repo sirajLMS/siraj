@@ -12,24 +12,26 @@ import {
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/utils/paymentCatalogLabels.utils";
 import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display";
-import { useAppTranslation } from "@/shared/locale";
+import type { PaymentCatalogsLabels } from "@/shared/locale";
 
 // VARIANT JUSTIFICATION: extra field rows + loading — the mobile catalog has
 // no paired data-grid (it renders `PaymentCatalogCardMobile` inside a plain
 // `Box`); the typed row fragment differs from the other two grids. Local
 // controller of the data-grid column shape stays in this tier file.
 export interface OnlineAccountCatalogGridDesktopProps extends CatalogGridActionHandlers {
+  readonly labels: PaymentCatalogsLabels;
   readonly rows: readonly SupportedOnlineAccountFieldsFragment[];
   readonly loading?: boolean;
 }
 
 export function OnlineAccountCatalogGridDesktop({
+  labels,
   rows,
   loading = false,
   onEdit,
   onDelete,
 }: Readonly<OnlineAccountCatalogGridDesktopProps>) {
-  const pc = useAppTranslation().dashboardTranslations.paymentCatalogs;
+  const pc = labels;
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — `renderCell` closures
   // capture labels; without memo every render produces a new column array
   // identity and re-mounts virtualized rows. Memo only caches JSX identity;

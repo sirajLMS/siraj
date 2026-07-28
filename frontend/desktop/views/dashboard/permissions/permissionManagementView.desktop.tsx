@@ -8,7 +8,6 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 import { PermissionManagementDialogsDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionManagementDialogs.desktop";
 import { PermissionTabContentDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionTabContent.desktop";
 import { SingleGroupViewDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/singleGroupView.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 function PermissionErrorAlert({
   error,
@@ -26,6 +25,7 @@ function PermissionErrorAlert({
 }
 
 export function PermissionManagementDesktopView({
+  labels,
   permissions,
   groups,
   users,
@@ -62,7 +62,7 @@ export function PermissionManagementDesktopView({
   manageOverridesState,
   groupRowMenuAnchor,
 }: Readonly<PermissionManagementViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   const tabs = [
     { key: "groups" as const, label: t.groupsTab },
@@ -81,6 +81,7 @@ export function PermissionManagementDesktopView({
     <DesktopPageContainer>
       {activeGroup ? (
         <SingleGroupViewDesktop
+          labels={labels}
           group={activeGroup}
           permissions={permissions}
           isLoading={isLoading}
@@ -99,6 +100,7 @@ export function PermissionManagementDesktopView({
             <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={setActiveTab} />
 
             <PermissionTabContentDesktop
+              labels={labels}
               activeTab={activeTab}
               isLoading={isLoading}
               permissions={permissions}
@@ -118,6 +120,7 @@ export function PermissionManagementDesktopView({
       )}
 
       <PermissionManagementDialogsDesktop
+        labels={labels}
         isLoading={isLoading}
         activeGroup={activeGroup}
         selectedGroupId={selectedGroupId}

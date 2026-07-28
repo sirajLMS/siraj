@@ -8,7 +8,7 @@ import type {
   SearchScheduleResultItem,
   SearchScheduleResultSummary,
 } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
-import type { useAppTranslation } from "@/shared/locale";
+import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule";
 
 // Shared tier-agnostic gap row shape used by day-pill, calendar-grid, and month-drawer.
 export interface TeacherAvailabilityGapItem {
@@ -20,6 +20,7 @@ export interface TeacherAvailabilityGapItem {
 
 // Class-B unified: byte-identical mobile/desktop interfaces — per specs.md §4.1.
 export interface SearchScheduleFormProps {
+  readonly labels: SearchScheduleLabels;
   readonly draft: SearchScheduleDraftFilters;
   readonly isSearching: boolean;
   readonly onDraftChange: (draft: Partial<SearchScheduleDraftFilters>) => void;
@@ -37,6 +38,7 @@ export interface SearchScheduleFormProps {
 
 // Class-B unified: byte-identical mobile/desktop interfaces — per specs.md §4.1.
 export interface SearchScheduleSortMenuProps {
+  readonly labels: SearchScheduleLabels;
   readonly sortBy: SearchScheduleDraftFilters["sortBy"];
   readonly sortMenuAnchorEl: HTMLElement | null;
   readonly onSortMenuOpen: (event: { currentTarget: HTMLElement }) => void;
@@ -52,6 +54,7 @@ export interface TeacherAvailabilityCalendarDay {
 
 // Class-B unified: byte-identical mobile/desktop interfaces — per specs.md §4.1.
 export interface TeacherAvailabilityCalendarGridProps {
+  readonly labels: SearchScheduleLabels;
   readonly currentMonth: Date;
   readonly daysByDate: Readonly<Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>>;
 }
@@ -80,6 +83,7 @@ export interface TeacherAvailabilityDayPillProps {
 // Both tiers receive the same VM-passed grid props (dateColumns + gapsByDate precomputed by the VM)
 // and the same month-drawer open callback that routes through the unified VM month-drawer state.
 export interface TeacherAvailabilityGridProps {
+  readonly labels: SearchScheduleLabels;
   readonly teacher: SearchScheduleResultItem;
   readonly fromDate: string;
   readonly dateColumns: readonly string[];
@@ -91,6 +95,7 @@ export interface TeacherAvailabilityGridProps {
 // Both tiers receive the month-drawer VM state + navigation callbacks as plain props; the only
 // tier divergence is Drawer anchor/width styling, which lives in the tier .tsx body, not the type.
 export interface TeacherAvailabilityMonthDrawerProps {
+  readonly labels: SearchScheduleLabels;
   readonly open: boolean;
   readonly teacher: SearchScheduleResultItem | null;
   readonly currentMonth: Date;
@@ -108,7 +113,7 @@ export interface SearchScheduleMobileBodyProps {
   readonly columnCount: number;
   readonly fromDate: string;
   readonly toDate: string;
-  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreSearchSchedule"];
+  readonly labels: SearchScheduleLabels;
   readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
   readonly pageInfo: SearchSchedulePageInfo | null | undefined;
   readonly teacherCount: number;
@@ -121,7 +126,7 @@ export interface SearchScheduleMobileResultsProps {
   readonly searchResult: SearchScheduleResultSummary | null | undefined;
   readonly fromDate: string;
   readonly toDate: string;
-  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreSearchSchedule"];
+  readonly labels: SearchScheduleLabels;
   readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
   readonly pageInfo: SearchSchedulePageInfo | null | undefined;
   readonly teacherCount: number;

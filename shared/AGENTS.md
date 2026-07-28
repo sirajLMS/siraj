@@ -228,6 +228,16 @@ export const auth: AuthLabels = {
 4. Add path mapping in `shared/locale/serverLegacy.ts` (`namespacePaths` map)
 5. If used in layout SSR, add to `LocaleProvider` translations in `app/[locale]/layout.tsx`
 
+### Public import contract
+
+- **Product code** (`app/`, `frontend/`, `backend/` outside `shared/locale/`) imports **`@/shared/locale`** and **`@/shared/locale/types`** only — never deep paths such as `@/shared/locale/old/**` or `@/shared/locale/beta/**`.
+- **`shared/locale/index.ts`** and **`shared/locale/types/index.ts`** are the public barrel — add new canonical exports there when modules land; run `bun tsgo` after barrel changes.
+- **Inside `shared/locale/`** implementation files may use relative or deep paths.
+
+### View-layer label types
+
+Canonical `*Labels` interfaces live in `shared/locale/types/**`. View-layer code in `frontend/common/views/**/types/` may **`Pick`**, **`Omit`**, or compose those canonical types (e.g. `*ShellLabels`, column/filter slices) — do not duplicate string keys. See `frontend/common/views/AGENTS.md` Rule 7 for placement and grouping thresholds.
+
 ### Migration Status
 - **Complete**: all translation namespaces now live in `shared/locale/`; the legacy `next-intl` package has been fully removed from `package.json`.
 - **Legacy intact**: nothing — `shared/messages/` directory no longer exists; `next-intl` is no longer installed; `NextIntlClientProvider` is not used anywhere. Do not reintroduce them.

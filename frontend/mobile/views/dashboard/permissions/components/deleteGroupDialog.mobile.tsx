@@ -2,19 +2,19 @@
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import type { DeleteGroupDialogProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { useAppTranslation } from "@/shared/locale";
 
 /**
  * DeleteGroupDialogMobile — mobile tier-paired confirmation dialog.
  */
 export function DeleteGroupDialogMobile({
+  labels,
   open,
   groupName,
   isLoading,
   onClose,
   onConfirm,
 }: Readonly<DeleteGroupDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   return (
     <Dialog

@@ -31,7 +31,7 @@ import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/commo
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 import { usePaymentMethodCatalogs } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface SectionProps {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
@@ -46,7 +46,7 @@ interface InvoiceFieldsProps {
 }
 
 function InvoiceFields({ register, control, errors }: InvoiceFieldsProps) {
-  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
+  const t = useAppTranslation(Translation.Dashboard.ParentOnboarding);
   const currency = useWatch({ control, name: "currency" });
   const currencySymbol = getCurrencySymbol(currency ?? CurrencyCode.Usd);
   const invoiceTypeLabelId = "parent-onboarding-invoice-type-label";
@@ -111,7 +111,7 @@ function InvoiceFields({ register, control, errors }: InvoiceFieldsProps) {
 }
 
 function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "errors">) {
-  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
+  const t = useAppTranslation(Translation.Dashboard.ParentOnboarding);
   const { setValue } = useFormContext<ParentOnboardingFormData>();
   const methodType = useWatch({ control, name: "payinMethod.type" }) ?? PaymentMethodType.BankTransfer;
   const { walletOptions, paymentLinkOptions, onlineAccountOptions } = usePaymentMethodCatalogs(PaymentDirection.Payin);
@@ -218,7 +218,7 @@ function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "erro
 }
 
 export function FeesContractSection({ register, control, errors }: SectionProps) {
-  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
+  const t = useAppTranslation(Translation.Dashboard.ParentOnboarding);
 
   return (
     <SectionPanel title={t.sections.feesContract}>

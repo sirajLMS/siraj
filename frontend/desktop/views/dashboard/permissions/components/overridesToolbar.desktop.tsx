@@ -4,7 +4,6 @@ import { SearchOutlined } from "@mui/icons-material";
 import { Box, Button, InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { OverridesToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledToolbarContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -38,12 +37,13 @@ const StyledModeToggleButton = styled(Button, {
 }));
 
 export function OverridesToolbarDesktop({
+  labels,
   mode,
   onModeChange,
   searchQuery,
   onSearchChange,
 }: Readonly<OverridesToolbarProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   return (
     <StyledToolbarContainer>

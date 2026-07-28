@@ -5,27 +5,28 @@ import { useMemo } from "react";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { DstMigrationMetrics } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
-import { useAppTranslation } from "@/shared/locale";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 interface Props {
+  readonly labels: DstMigrationLabels;
   readonly metrics: DstMigrationMetrics;
 }
 
-export function DstMigrationMetricsRowMobile({ metrics }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.dstMigration.metrics;
+export function DstMigrationMetricsRowMobile({ labels, metrics }: Readonly<Props>) {
+  const metricLabels = labels.metrics;
 
   const metricItems: readonly MetricItem[] = useMemo(
     () => [
       {
         key: "totalAudited",
-        label: t.totalAudited,
+        label: metricLabels.totalAudited,
         count: metrics.totalAudited,
         icon: AnalyticsOutlined,
         labelKey: "totalAudited",
       },
       {
         key: "successful",
-        label: t.successful,
+        label: metricLabels.successful,
         count: metrics.successful,
         icon: VerifiedOutlined,
         labelKey: "successful",
@@ -33,7 +34,7 @@ export function DstMigrationMetricsRowMobile({ metrics }: Readonly<Props>) {
       },
       {
         key: "conflicts",
-        label: t.conflicts,
+        label: metricLabels.conflicts,
         count: metrics.conflicts,
         icon: ErrorOutlined,
         labelKey: "conflicts",
@@ -41,13 +42,13 @@ export function DstMigrationMetricsRowMobile({ metrics }: Readonly<Props>) {
       },
       {
         key: "unchanged",
-        label: t.unchanged,
+        label: metricLabels.unchanged,
         count: metrics.unchanged,
         icon: HistoryOutlined,
         labelKey: "unchanged",
       },
     ],
-    [metrics, t]
+    [metrics, metricLabels]
   );
 
   return <MobileMetricCardGrid metrics={metricItems} sx={{ width: "100%" }} />;

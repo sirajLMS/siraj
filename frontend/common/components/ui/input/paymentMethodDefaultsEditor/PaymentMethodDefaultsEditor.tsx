@@ -12,7 +12,7 @@ import { LocalizedStringDrawer } from "@/frontend/common/components/ui/input/loc
 import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
 import { filterMethodsForDirection } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/utils";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type { PaymentMethodDefaultsEditorProps } from "./types";
 
@@ -33,7 +33,7 @@ export function PaymentMethodDefaultsEditor({
   instructionsOpen: instructionsOpenProp,
   onInstructionsOpenChangeAction,
 }: Readonly<PaymentMethodDefaultsEditorProps>) {
-  const t = useAppTranslation().uiTranslations.paymentMethod;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod);
   const tDefaults = t.defaultsEditor;
   // EXCEPTION: documented in frontend/common/components/ui/AGENTS.md (purely ephemeral instructions drawer open state — viewport-agnostic primitives may use local useState with controlled-prop fallback)
   const [internalInstructionsOpen, setInternalInstructionsOpen] = useState(false);

@@ -7,7 +7,7 @@ import { useCallback, useRef } from "react";
 import type { Control, FieldPath, FieldValues } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { ACCEPTED_TYPES, DEFAULT_MAX_SIZE_MB, useImageUpload } from "@/frontend/common/hooks/useImageUpload";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type AvatarImageFieldBaseProps = {
   readonly label: string;
@@ -306,7 +306,7 @@ function AvatarEditorBody({
   title,
   disabled,
 }: Readonly<AvatarEditorBodyProps>): React.ReactNode {
-  const tUpload = useAppTranslation().uiTranslations.catalogImageUpload;
+  const tUpload = useAppTranslation(Translation.Ui.CatalogImageUpload);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const upload = useImageUpload({
     onImageUrlChangeAction: onImageUrlChange,

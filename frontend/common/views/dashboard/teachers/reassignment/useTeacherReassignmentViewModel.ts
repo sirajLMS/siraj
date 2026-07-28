@@ -11,11 +11,26 @@ import type {
   TeacherReassignmentViewProps,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
+import { type CommonLabels, Translation, useAppTranslation } from "@/shared/locale";
+import type { TeacherReassignmentLabels } from "@/shared/locale/types/dashboard/teachers/reassignment";
 
 export type UseTeacherReassignmentViewModelProps = TeacherReassignmentViewProps;
 
+export interface TeacherReassignmentCoordinatorLabels {
+  readonly labels: TeacherReassignmentLabels;
+  readonly common: Pick<CommonLabels, "loadFailed" | "operationFailed">;
+}
+
+/** Coordinator-only labels for `TeacherReassignmentContainer` mutations and error UI. */
+export function useTeacherReassignmentCoordinatorLabels(): TeacherReassignmentCoordinatorLabels {
+  return {
+    labels: useAppTranslation(Translation.Dashboard.TeacherReassignment),
+    common: useAppTranslation(Translation.Common),
+  };
+}
+
 export interface TeacherReassignmentViewModel {
+  readonly labels: TeacherReassignmentLabels;
   readonly student: ReassignmentStudentData;
   readonly currentTeacherName: string;
   readonly isSubmitting: boolean;
@@ -43,7 +58,7 @@ export function useTeacherReassignmentViewModel(
 ): TeacherReassignmentViewModel {
   const { student, currentTeacherName, isSubmitting, onReassign, onStatusChange, onCancel } = props;
 
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment;
+  const t = useAppTranslation(Translation.Dashboard.TeacherReassignment);
   const notifications = useNotifications();
   const router = useRouter();
 
@@ -110,6 +125,7 @@ export function useTeacherReassignmentViewModel(
   };
 
   return {
+    labels: t,
     student,
     currentTeacherName,
     isSubmitting,

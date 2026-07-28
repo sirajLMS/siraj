@@ -25,11 +25,12 @@ import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ClassMeetingConfigFormDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigFormDialog";
 import { ClassMeetingContextBanner } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingContextBanner";
 import { MeetingConfigDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigDeleteDialog";
-import {
-  type MeetingConfigClassScopeLabels,
-  type MeetingConfigManagerLabels,
-  useAppTranslation,
-} from "@/shared/locale";
+import { useMeetingConfigProfileLabels } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigProfileLabels";
+import type {
+  MeetingConfigClassScopeLabels,
+  MeetingConfigDisplayLabels,
+  MeetingConfigManagerLabels,
+} from "@/shared/locale/types/ui";
 
 export type ClassMeetingConfigsSectionProps = {
   readonly classInstanceId?: string;
@@ -47,6 +48,7 @@ function configLabel(config: ClassMeetingConfigFieldsFragment, locale: string): 
 function ConfigsContent({
   t,
   tManager,
+  tDisplay,
   resolvedCanManage,
   configs,
   busy,
@@ -58,6 +60,7 @@ function ConfigsContent({
 }: {
   readonly t: MeetingConfigClassScopeLabels;
   readonly tManager: MeetingConfigManagerLabels;
+  readonly tDisplay: MeetingConfigDisplayLabels;
   readonly resolvedCanManage: boolean;
   readonly configs: readonly ClassMeetingConfigFieldsFragment[];
   readonly busy: boolean;
@@ -69,7 +72,11 @@ function ConfigsContent({
 }) {
   return (
     <Stack spacing={2}>
-      <ClassMeetingContextBanner effectiveMeeting={effectiveMeeting} hasScopeConfigs={configs.length > 0} />
+      <ClassMeetingContextBanner
+        effectiveMeeting={effectiveMeeting}
+        hasScopeConfigs={configs.length > 0}
+        labels={{ classScope: t, display: tDisplay }}
+      />
 
       {resolvedCanManage ? (
         <Stack sx={{ flexDirection: "row", justifyContent: "flex-end" }}>
@@ -234,6 +241,7 @@ function ClassMeetingConfigDialogs({
           recurringScheduleId={recurringScheduleId}
           editConfig={editConfig}
           existingCount={configsCount}
+          labels={tManager}
           createMutation={createClassMeetingConfigMutationDocument}
           updateMutation={updateClassMeetingConfigMutationDocument}
           onClose={() => {
@@ -251,6 +259,7 @@ function ClassMeetingConfigDialogs({
         open={deleteId != null}
         configLabel={deleteLabel}
         isLoading={deleting}
+        labels={tManager}
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
       />
@@ -271,8 +280,9 @@ export function ClassMeetingConfigsSection({
   canManage,
   effectiveMeeting,
 }: ClassMeetingConfigsSectionProps) {
-  const t = useAppTranslation().uiTranslations.meetingConfigClassScope;
-  const tManager = useAppTranslation().uiTranslations.meetingConfigManager;
+  const labels = useMeetingConfigProfileLabels();
+  const t = labels.classScope;
+  const tManager = labels.manager;
   const locale = useAppLocale();
   const { hasPermission } = useUserStore();
   const resolvedCanManage = canManage ?? hasPermission(AppPermission.MeetingConfigsManageClass);
@@ -335,6 +345,7 @@ export function ClassMeetingConfigsSection({
       <ConfigsContent
         t={t}
         tManager={tManager}
+        tDisplay={labels.display}
         resolvedCanManage={resolvedCanManage}
         configs={configs}
         busy={busy}

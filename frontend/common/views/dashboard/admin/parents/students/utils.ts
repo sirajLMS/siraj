@@ -13,12 +13,12 @@ import type {
   StudentAccountStatus,
   StudentDirectoryRowExtended,
   StudentEnrollmentStatus,
-  StudentsViewLabels,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import {
   StudentEnrollmentStatus as EnrollmentEnum,
   STUDENT_STATUS_TO_ACCOUNT_STATUS,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
+import type { StudentsLabelsBySection } from "@/frontend/common/views/dashboard/admin/parents/students/types/studentsDirectory.types";
 import type { StudentDirectoryLabels } from "@/shared/locale";
 
 const METRIC_DEFINITIONS = [
@@ -109,41 +109,63 @@ export function buildViewMetrics(
   return METRIC_DEFINITIONS.map(({ key, icon }) => toMetricItem(key, counts[key], icon, t));
 }
 
-export function buildLabels(t: StudentDirectoryLabels): StudentsViewLabels {
+export function buildLabelsBySection(t: StudentDirectoryLabels): StudentsLabelsBySection {
   return {
-    pageTitle: t.pageTitle,
-    pageSubtitle: t.pageSubtitle,
-    mobileTitle: t.mobileTitle,
-    searchPlaceholder: t.searchPlaceholder,
-    addStudent: t.addStudent,
-    filters: t.filters,
-    globalRecord: t.globalRecord,
-    index: t.table.index,
-    student: t.table.student,
-    email: t.table.email,
-    status: t.table.status,
-    hoursPerWeek: t.table.hoursPerWeek,
-    classesLeft: t.table.classesLeft,
-    actions: t.table.actions,
-    showingOf: t.showingOf,
-    previous: t.previous,
-    next: t.next,
-    viewProfile: t.actions.viewProfile,
-    viewHistory: t.actions.viewHistory,
-    noEntries: t.noEntries,
-    weeklyHours: t.card.weeklyHours,
-    enrollmentStatus: t.card.enrollmentStatus,
-    statusLabels: {
-      deactivated: t.status.deactivated,
-      regular: t.status.regular,
-      on_leave: t.status.onLeave,
-      suspended: t.status.suspended,
-      on_trial: t.status.onTrial,
+    shell: {
+      pageTitle: t.pageTitle,
+      pageSubtitle: t.pageSubtitle,
+      mobileTitle: t.mobileTitle,
+      globalRecord: t.globalRecord,
+      noEntries: t.noEntries,
     },
-    enrollmentLabels: {
-      [EnrollmentEnum.REGULAR]: t.enrollment.regular,
-      [EnrollmentEnum.PROSPECT]: t.enrollment.prospect,
-      [EnrollmentEnum.WITHDRAWN]: t.enrollment.withdrawn,
+    filters: {
+      searchPlaceholder: t.searchPlaceholder,
+      filters: t.filters,
+    },
+    actions: {
+      addStudent: t.addStudent,
+      viewProfile: t.actions.viewProfile,
+      viewHistory: t.actions.viewHistory,
+    },
+    columns: {
+      index: t.table.index,
+      student: t.table.student,
+      email: t.table.email,
+      status: t.table.status,
+      hoursPerWeek: t.table.hoursPerWeek,
+      classesLeft: t.table.classesLeft,
+      actions: t.table.actions,
+      showingOf: t.showingOf,
+      previous: t.previous,
+      next: t.next,
+      viewProfile: t.actions.viewProfile,
+      viewHistory: t.actions.viewHistory,
+      noEntries: t.noEntries,
+      statusLabels: {
+        deactivated: t.status.deactivated,
+        regular: t.status.regular,
+        on_leave: t.status.onLeave,
+        suspended: t.status.suspended,
+        on_trial: t.status.onTrial,
+      },
+    },
+    cards: {
+      weeklyHours: t.card.weeklyHours,
+      enrollmentStatus: t.card.enrollmentStatus,
+      classesLeft: t.table.classesLeft,
+      viewProfile: t.actions.viewProfile,
+      statusLabels: {
+        deactivated: t.status.deactivated,
+        regular: t.status.regular,
+        on_leave: t.status.onLeave,
+        suspended: t.status.suspended,
+        on_trial: t.status.onTrial,
+      },
+      enrollmentLabels: {
+        [EnrollmentEnum.REGULAR]: t.enrollment.regular,
+        [EnrollmentEnum.PROSPECT]: t.enrollment.prospect,
+        [EnrollmentEnum.WITHDRAWN]: t.enrollment.withdrawn,
+      },
     },
   };
 }

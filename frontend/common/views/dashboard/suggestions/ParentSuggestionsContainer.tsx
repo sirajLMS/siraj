@@ -14,7 +14,7 @@ import {
   useParentSuggestionsViewModel,
 } from "@/frontend/common/views/dashboard/suggestions/useParentSuggestionsViewModel";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const lazyViews = createLazyView<ParentSuggestionsViewModel>(
   () =>
@@ -28,8 +28,7 @@ const lazyViews = createLazyView<ParentSuggestionsViewModel>(
 );
 
 export function ParentSuggestionsContainer() {
-  const t = useAppTranslation();
-  const labels = buildSuggestionsLabels(t.dashboardTranslations.suggestions);
+  const labels = buildSuggestionsLabels(useAppTranslation(Translation.Dashboard.Suggestions));
   const notifications = useNotifications();
 
   const isSubmitting = useParentSuggestionsStore(state => state.isSubmitting);

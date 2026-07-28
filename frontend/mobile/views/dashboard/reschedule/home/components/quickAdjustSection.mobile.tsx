@@ -13,9 +13,10 @@ import {
   toTimeString,
 } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
 import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
-import { useAppTranslation } from "@/shared/locale";
+import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm";
 
 interface Props {
+  readonly labels: RescheduleFormLabels;
   readonly setValue: UseFormSetValue<RescheduleFormData>;
   readonly getValues: UseFormGetValues<RescheduleFormData>;
 }
@@ -39,8 +40,8 @@ function applyQuickAdjust(
   setValue("newTime", toTimeString(adjusted), { shouldValidate: true });
 }
 
-export function QuickAdjustSectionMobile({ setValue, getValues }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.rescheduleForm.quickAdjust;
+export function QuickAdjustSectionMobile({ labels, setValue, getValues }: Readonly<Props>) {
+  const quickAdjustLabels = labels.quickAdjust;
 
   return (
     <Box
@@ -52,7 +53,7 @@ export function QuickAdjustSectionMobile({ setValue, getValues }: Readonly<Props
       })}
     >
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mb: 1.5, display: "block" })}>
-        {t.label}:
+        {quickAdjustLabels.label}:
       </Typography>
       <MobileHorizontalScrollRow sx={{ paddingInlineStart: 0, paddingInlineEnd: 0 }}>
         {QUICK_OPTIONS.map(option => (
@@ -78,7 +79,7 @@ export function QuickAdjustSectionMobile({ setValue, getValues }: Readonly<Props
               },
             })}
           >
-            {t[option.key]}
+            {quickAdjustLabels[option.key]}
           </Button>
         ))}
       </MobileHorizontalScrollRow>

@@ -21,7 +21,7 @@ import type {
 import type { SuggestionsAdminLabels } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 import { filterSuggestionsByTab } from "@/frontend/common/views/dashboard/suggestions/utils/suggestionFilters";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface AdminSuggestionsViewModel {
   readonly labels: SuggestionsAdminLabels;
@@ -60,8 +60,7 @@ export interface AdminSuggestionsDialogHandlers {
 }
 
 export function useAdminSuggestionsViewModel(): AdminSuggestionsViewModel & AdminSuggestionsDialogHandlers {
-  const t = useAppTranslation();
-  const labels = buildSuggestionsLabels(t.dashboardTranslations.suggestions);
+  const labels = buildSuggestionsLabels(useAppTranslation(Translation.Dashboard.Suggestions));
   const notifications = useNotifications();
   const hasPermission = useUserStore(state => state.hasPermission);
 

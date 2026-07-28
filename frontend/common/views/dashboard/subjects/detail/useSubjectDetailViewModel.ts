@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import type { PageHeaderBreadcrumb } from "@/frontend/common/components/ui/container/page";
 import { classSubjectByIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
 import type { SubjectDetailData, SubjectResourceItem } from "@/frontend/common/views/dashboard/subjects/detail/types";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 /**
  * View-model labels for the subject detail page used by both tiers.
@@ -46,7 +46,7 @@ export interface SubjectDetailViewModel {
  */
 export function useSubjectDetailViewModel(props: Readonly<UseSubjectDetailViewModelProps>): SubjectDetailViewModel {
   const { subjectId } = props;
-  const { subjects } = useAppTranslation().dashboardTranslations;
+  const subjects = useAppTranslation(Translation.Dashboard.Subjects);
 
   const labels: SubjectDetailViewModelLabels = useMemo(
     () => ({

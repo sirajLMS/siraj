@@ -6,11 +6,11 @@ import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/pr
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { StaffProfileEditForm } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileEditForm";
 import { PermissionsSection } from "@/frontend/common/views/dashboard/profile/staff/sections/PermissionsSection";
+import type { StaffProfileViewLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffProfileViewModel } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileViewModel";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
-import { useAppTranslation } from "@/shared/locale";
 
-type StaffProfileTranslations = ReturnType<typeof useAppTranslation>["profileTranslations"];
+type StaffProfileTranslations = StaffProfileViewLabels;
 
 interface StaffProfileDesktopGuardProps {
   readonly activeTab: string;
@@ -87,6 +87,7 @@ function StaffProfileDesktopGuard(props: Readonly<StaffProfileDesktopGuardProps>
 }
 
 export function StaffProfileDesktopView({
+  labels,
   scope,
   mode,
   isAdminScope,
@@ -104,8 +105,8 @@ export function StaffProfileDesktopView({
   activeTab,
   canView,
 }: Readonly<StaffProfileViewModel>) {
-  const translations = useAppTranslation().profileTranslations;
-  const st = translations.staff;
+  const translations = labels;
+  const st = labels.staff;
 
   // Call as a function (not JSX) so the success path can return null and continue to the form.
   const guard = StaffProfileDesktopGuard({

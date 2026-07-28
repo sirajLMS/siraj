@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
-import { type SupervisorPortalProfileLabels, useAppTranslation } from "@/shared/locale";
+import { type SupervisorPortalProfileLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface SupervisorProfileData {
   readonly name: string;
@@ -29,10 +29,10 @@ export interface UseSupervisorProfileViewModelProps {
 export function useSupervisorProfileViewModel(
   props: Readonly<UseSupervisorProfileViewModelProps>
 ): SupervisorProfileViewModel {
-  const labels = useAppTranslation().dashboardTranslations.supervisorPortalProfile;
+  const labels = useAppTranslation(Translation.Dashboard.SupervisorPortalProfile);
   const { targetUserId } = props;
 
-  useDocumentTitle("", "dashboard.supervisorPortalProfile", "pageTitle");
+  useDocumentTitle("", Translation.Dashboard.SupervisorPortalProfile, "pageTitle");
 
   const { data, loading, error } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },

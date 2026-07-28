@@ -7,14 +7,14 @@ import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocum
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { Link } from "@/shared/i18n";
 import { usePathname } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function FxStaleBanner(): React.ReactNode {
   const pathname = usePathname();
   const displayCurrency = useUserStore(state => state.displayCurrency);
   const hasPermission = useUserStore(state => state.hasPermission);
   const isAdmin = hasPermission(AppPermission.BillingViewExchangeRates);
-  const t = useAppTranslation().dashboardTranslations.billing.fxStaleBanner;
+  const t = useAppTranslation(Translation.Dashboard.Billing).fxStaleBanner;
 
   const { data } = useQuery(fxSyncHealthQueryDocument, {
     fetchPolicy: "cache-and-network",

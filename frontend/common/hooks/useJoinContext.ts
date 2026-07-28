@@ -5,10 +5,10 @@
 import type { MeetingJoinActionProps } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { type JoinContext, resolveJoinUrl, resolveTooltip } from "@/frontend/common/lib/meetingJoinAction";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function useJoinContext(props: MeetingJoinActionProps): JoinContext {
-  const meetingConfig = useAppTranslation().uiTranslations.meetingConfig;
+  const meetingConfig = useAppTranslation(Translation.Ui.MeetingConfig);
   const t = meetingConfig.join;
   const tDisplay = meetingConfig.display;
   const locale = useAppLocale();

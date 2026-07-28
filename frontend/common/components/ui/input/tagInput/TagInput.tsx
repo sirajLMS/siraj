@@ -4,7 +4,7 @@ import { Box, Chip, InputBase, Paper, styled, type Theme, Typography, useTheme }
 import type React from "react";
 import { type KeyboardEvent, type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useTagInputEditing } from "@/frontend/common/hooks/useTagInputEditing";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type TagInputProps = {
   readonly label?: string;
@@ -182,7 +182,7 @@ function TagInputView({
 }
 
 function useTagInput({ label, placeholder, onChange, initialTags = [] }: TagInputProps) {
-  const t = useAppTranslation().uiTranslations.tagInput;
+  const t = useAppTranslation(Translation.Ui.TagInput);
   const [tags, setTags] = useState<string[]>(initialTags);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);

@@ -1,19 +1,25 @@
 "use client";
 
 import { NotificationsOutlined } from "@mui/icons-material";
+
 import { Badge, type IconButtonProps } from "@mui/material";
+
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+
 import { useNotificationsDrawerStore } from "@/frontend/common/stores/notificationsDrawerStore";
+
 import { NavbarIcon } from "@/frontend/common/views/dashboard/components/navbar/NavbarIcon";
-import { useAppTranslation } from "@/shared/locale";
+
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface NotificationButtonProps extends Omit<IconButtonProps, "children" | "title"> {
   notificationCount: number;
 }
 
 export function NotificationButton({ notificationCount, ...props }: Readonly<NotificationButtonProps>) {
-  const t = useAppTranslation().commonTranslations;
+  const t = useAppTranslation(Translation.Common);
 
   const handleClick = () => {
     useNotificationsDrawerStore.getState().openDrawer();
@@ -28,6 +34,7 @@ export function NotificationButton({ notificationCount, ...props }: Readonly<Not
           sx={theme => ({
             "& .MuiBadge-badge": {
               backgroundColor: theme.palette.error.main,
+
               color: theme.palette.onError,
             },
           })}

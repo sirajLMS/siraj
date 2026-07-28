@@ -17,13 +17,13 @@ import { SearchSchedulePaginationFooterDesktop } from "@/frontend/desktop/views/
 import { SearchScheduleResultsSkeletonDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/searchScheduleResultsSkeleton.desktop";
 import { TeacherAvailabilityGridDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/teacherAvailabilityGrid.desktop";
 import { TeacherAvailabilityMonthDrawerDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.desktop";
-import { useAppTranslation } from "@/shared/locale";
+import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule";
 
 interface SearchScheduleDesktopResultsProps {
   readonly searchResult: SearchScheduleResultSummary | null | undefined;
   readonly fromDate: string;
   readonly toDate: string;
-  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreSearchSchedule"];
+  readonly labels: SearchScheduleLabels;
   readonly onOpenMonthDrawer: (teacher: SearchScheduleResultItem, anchorFromDate: string) => void;
 }
 
@@ -31,7 +31,7 @@ function SearchScheduleDesktopResults({
   searchResult,
   fromDate,
   toDate,
-  t,
+  labels,
   onOpenMonthDrawer,
 }: Readonly<SearchScheduleDesktopResultsProps>) {
   if (!searchResult) {
@@ -48,7 +48,7 @@ function SearchScheduleDesktopResults({
     return (
       <Box sx={{ textAlign: "center", py: 6 }}>
         <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t.noResults}
+          {labels.noResults}
         </Typography>
       </Box>
     );
@@ -59,7 +59,7 @@ function SearchScheduleDesktopResults({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       <Typography variant="titleLg" sx={theme => ({ color: theme.palette.text.secondary })}>
-        {t.resultsCount(searchResult.totalCount ?? activeTeachers.length, totalGaps)}
+        {labels.resultsCount(searchResult.totalCount ?? activeTeachers.length, totalGaps)}
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -68,6 +68,7 @@ function SearchScheduleDesktopResults({
           return (
             <TeacherAvailabilityGridDesktop
               key={teacher.id ?? ""}
+              labels={labels}
               teacher={teacher}
               fromDate={fromDate}
               dateColumns={dateColumns}
@@ -82,6 +83,7 @@ function SearchScheduleDesktopResults({
 }
 
 export function SearchScheduleDesktopView({
+  labels,
   searchResult,
   fromDate,
   toDate,
@@ -113,7 +115,6 @@ export function SearchScheduleDesktopView({
   onCloseMonthDrawer,
   onMonthDrawerChangeMonth,
 }: Readonly<SearchScheduleViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const columnCount = getColumnCount(fromDate, toDate);
 
   return (
@@ -125,7 +126,7 @@ export function SearchScheduleDesktopView({
         minHeight: `calc(100dvh - ${theme.layout.navbarHeight} - ${theme.layout.pageMargin} * 2)`,
       })}
     >
-      <DesktopPageHeader title={t.pageTitle} titleVariant="headlineLg" />
+      <DesktopPageHeader title={labels.pageTitle} titleVariant="headlineLg" />
 
       <Box
         sx={{
@@ -138,6 +139,7 @@ export function SearchScheduleDesktopView({
         }}
       >
         <SearchScheduleFormDesktop
+          labels={labels}
           draft={draft}
           isSearching={isInitialLoading}
           onDraftChange={onDraftChange}
@@ -153,7 +155,7 @@ export function SearchScheduleDesktopView({
           onSelectTeacher={onSelectTeacher}
         />
 
-        {error ? <Typography color="error">{t.errorLoading}</Typography> : null}
+        {error ? <Typography color="error">{labels.errorLoading}</Typography> : null}
 
         {(() => {
           if (isInitialLoading) {
@@ -165,7 +167,7 @@ export function SearchScheduleDesktopView({
                 searchResult={searchResult}
                 fromDate={fromDate}
                 toDate={toDate}
-                t={t}
+                labels={labels}
                 onOpenMonthDrawer={onOpenMonthDrawer}
               />
             );
@@ -183,6 +185,7 @@ export function SearchScheduleDesktopView({
       </Box>
 
       <TeacherAvailabilityMonthDrawerDesktop
+        labels={labels}
         open={monthDrawerOpen}
         teacher={monthDrawerTeacher}
         currentMonth={monthDrawerCurrentMonth}

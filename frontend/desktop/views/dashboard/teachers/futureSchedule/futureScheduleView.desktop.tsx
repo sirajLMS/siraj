@@ -8,7 +8,6 @@ import { ImportantNotesDesktop } from "@/frontend/desktop/views/dashboard/teache
 import { JumpToDateHeaderDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.desktop";
 import { MiniCalendarDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/miniCalendar.desktop";
 import { SupportContactDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/supportContact.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 export function FutureScheduleViewDesktop({
   classes,
@@ -22,13 +21,13 @@ export function FutureScheduleViewDesktop({
   contact,
   classDates,
   onSupportContact,
-  supportContactLabels,
+  labelsBySection,
 }: Readonly<FutureScheduleViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
+  const { schedule: labels, supportContact } = labelsBySection;
 
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader title={t.pageTitle} />
+      <DesktopPageHeader title={labels.pageTitle} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
@@ -38,6 +37,7 @@ export function FutureScheduleViewDesktop({
             totalClasses={totalClasses}
             selectedDate={selectedDate}
             onDateChange={onDateChange}
+            labels={labels}
           />
         </Grid>
 
@@ -45,7 +45,7 @@ export function FutureScheduleViewDesktop({
           <Stack spacing={2}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
               <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
-                {t.futureClasses}
+                {labels.futureClasses}
               </Typography>
               <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -58,7 +58,7 @@ export function FutureScheduleViewDesktop({
                     })}
                   />
                   <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {t.available}
+                    {labels.available}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -71,7 +71,7 @@ export function FutureScheduleViewDesktop({
                     })}
                   />
                   <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {t.regular}
+                    {labels.regular}
                   </Typography>
                 </Box>
               </Stack>
@@ -81,6 +81,7 @@ export function FutureScheduleViewDesktop({
               <FutureClassCardDesktop
                 key={item.id ?? ""}
                 item={item}
+                labels={labels}
                 onRequestLeave={() => {
                   if (item.id) onRequestLeave(item.id);
                 }}
@@ -91,13 +92,18 @@ export function FutureScheduleViewDesktop({
 
         <Grid size={{ xs: 12, lg: 4 }}>
           <Stack spacing={3}>
-            <MiniCalendarDesktop selectedDate={selectedDate} onSelectDate={onDateChange} classDates={classDates} />
-            <ImportantNotesDesktop notes={notes} />
+            <MiniCalendarDesktop
+              selectedDate={selectedDate}
+              onSelectDate={onDateChange}
+              classDates={classDates}
+              labels={labels}
+            />
+            <ImportantNotesDesktop notes={notes} labels={labels} />
             <SupportContactDesktop
               contact={contact}
               onContactAdmin={onSupportContact}
-              supportContactLabel={supportContactLabels.supportContact}
-              contactAdminLabel={supportContactLabels.contactAdmin}
+              supportContactLabel={supportContact.supportContact}
+              contactAdminLabel={supportContact.contactAdmin}
             />
           </Stack>
         </Grid>

@@ -1,12 +1,20 @@
 "use client";
 
+import { useMemo } from "react";
 import type {
   MissedClassAlert,
   StudentProgressFeedItem,
   TeacherScheduleRow,
 } from "@/frontend/common/stores/teacherDashboardTypes";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
-import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import type { LessonReportFormLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
+import type {
+  TeacherDashboardLastUpdatedLabels,
+  TeacherDashboardViewLabels,
+} from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import { buildLessonReportLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildLessonReportLabels";
+import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 /**
  * TeacherDashboard ViewModel.
@@ -132,4 +140,33 @@ function buildTeacherDashboardResult(props: UseTeacherDashboardViewModelProps): 
 
 export function useTeacherDashboardViewModel(props: UseTeacherDashboardViewModelProps): TeacherDashboardViewModel {
   return buildTeacherDashboardResult(props);
+}
+
+export interface TeacherDashboardTranslations {
+  readonly labels: TeacherDashboardViewLabels;
+  readonly lessonReportLabels: LessonReportFormLabels;
+  readonly lastUpdatedLabels: TeacherDashboardLastUpdatedLabels;
+}
+
+/** Loads all teacher-dashboard translation namespaces once for the coordinator container and islands. */
+export function useTeacherDashboardTranslations(): TeacherDashboardTranslations {
+  const t = useAppTranslation(Translation.Dashboard.TeacherDashboard);
+  const dashboardT = useAppTranslation(Translation.Dashboard.Admin);
+  const tJoin = useAppTranslation(Translation.Ui.MeetingConfig).join;
+  const lessonReportI18n = useAppTranslation(Translation.Dashboard.LmsLessonReports);
+
+  const labels = useMemo(
+    () => buildTeacherDashboardLabels(t, dashboardT, tJoin.emptyTeacher),
+    [t, dashboardT, tJoin.emptyTeacher]
+  );
+  const lessonReportLabels = useMemo(() => buildLessonReportLabels(lessonReportI18n), [lessonReportI18n]);
+  const lastUpdatedLabels = useMemo<TeacherDashboardLastUpdatedLabels>(
+    () => ({
+      updatedJustNow: t.updatedJustNow as string,
+      updatedMinutesAgo: t.updatedMinutesAgo as (minutes: number) => string,
+    }),
+    [t]
+  );
+
+  return { labels, lessonReportLabels, lastUpdatedLabels };
 }

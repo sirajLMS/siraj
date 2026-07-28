@@ -1,80 +1,46 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import { Alert, Stack } from "@mui/material";
-import { useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
 import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
-import { ownProfileHref, profileHrefForUser } from "@/frontend/common/utils/profileHref";
-import { useRefetchOnWindowFocus } from "@/frontend/common/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { ProfileActionBar } from "@/frontend/common/views/dashboard/profile/core/components/ProfileActionBar";
 import { ProfileShell } from "@/frontend/common/views/dashboard/profile/core/ProfileShell";
+import type { ProfilePageClientProps } from "@/frontend/common/views/dashboard/profile/core/types/profilePageClient.types";
+import {
+  PROFILE_AUDIENCE_STUDENT,
+  useProfilePageClientViewModel,
+} from "@/frontend/common/views/dashboard/profile/core/useProfilePageClientViewModel";
 import { ParentAccountActions } from "@/frontend/common/views/dashboard/profile/parent/ParentAccountActions";
 import { ParentProfileContainer } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileContainer";
 import { StaffProfileContainer } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileContainer";
 import { TeacherProfileContainer } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileContainer";
 import { StudentProfileContainer } from "@/frontend/common/views/dashboard/student/profile/StudentProfileContainer";
-import { useAppTranslation } from "@/shared/locale";
 
-const PROFILE_AUDIENCE_STUDENT = "STUDENT" as ProfileAudience;
+export type { ProfilePageClientProps };
 
-export type ProfilePageClientProps = {
-  readonly scope: ProfileScope;
-  readonly mode: ProfileMode;
-  readonly audience: ProfileAudience;
-  readonly targetUserId: string;
-};
+export function ProfilePageClient(props: Readonly<ProfilePageClientProps>) {
+  const viewModel = useProfilePageClientViewModel(props);
+  const {
+    labels,
+    scope,
+    mode,
+    audience,
+    targetUserId,
+    forceComplete,
+    loading,
+    error,
+    profile,
+    editHref,
+    cancelHref,
+    handleRetry,
+    roleLabel,
+    showParentAccountActions,
+    isViewMode,
+    activeTab,
+    setCurrentTab,
+  } = viewModel;
+  const { base: t, teacher: teacherT } = labels;
 
-export function ProfilePageClient({ scope, mode, audience, targetUserId }: ProfilePageClientProps) {
-  const t = useAppTranslation().profileTranslations.base;
-  const teacherT = useAppTranslation().profileTranslations.teacher;
-  const searchParams = useSearchParams();
-  const forceComplete = searchParams.get("forceComplete") === "1";
-  // Prefer the URL tab; fall back to "profile" only for the initial paint before
-  // ProfileTabNav normalizes a missing/invalid ?tab=. Do not feed a default
-  // "profile" back into the URL — that raced with hydration and caused redirects.
-  const [currentTab, setCurrentTab] = useState(() => searchParams.get("tab") ?? "profile");
-
-  const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
-    variables: { userId: targetUserId },
-  });
-
-  const profile = data?.profileByUserId;
-
-  useDocumentTitle(profile?.name, "profile", mode === ProfileMode.Edit ? "editTitle" : "pageTitle");
-
-  const editHref = scope === ProfileScope.Own ? `${ownProfileHref()}/edit` : `${profileHrefForUser(targetUserId)}/edit`;
-  const cancelHref = scope === ProfileScope.Own ? ownProfileHref() : profileHrefForUser(targetUserId);
-
-  const handleRetry = useCallback(() => {
-    void refetch();
-  }, [refetch]);
-
-  const refetchProfileOnFocus = useCallback(() => {
-    if (mode === ProfileMode.View) {
-      void refetch();
-    }
-  }, [mode, refetch]);
-
-  useRefetchOnWindowFocus(refetchProfileOnFocus);
-
-  const activeTab = currentTab;
-
-  // Dynamic i18n lookup: `audience` is a bounded union (ProfileAudience) whose
-  // string values map onto keys of `t.role`, so we cast into the typed role
-  // label map. The staff cohort is handled separately (no role label).
-  const roleLabel =
-    audience === ProfileAudience.Staff
-      ? (profile?.staffProfile?.roleName ?? profile?.staffProfile?.roleSlug ?? undefined)
-      : t.role[audience.toLowerCase() as keyof typeof t.role];
-
-  const showParentAccountActions =
-    audience === ProfileAudience.Parent && scope === ProfileScope.Other && mode === ProfileMode.View;
-
-  const isViewMode = mode === ProfileMode.View;
   const shellProps = {
     audience,
     scope,
@@ -91,7 +57,7 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
 
   function renderActions() {
     if (!isViewMode) {
-      return <ProfileActionBar mode={ProfileMode.Edit} cancelHref={cancelHref} />;
+      return <ProfileActionBar mode={ProfileMode.Edit} cancelHref={cancelHref} labels={t.actions} />;
     }
 
     const parentActions =
@@ -105,13 +71,13 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
 
     return (
       <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-        <ProfileActionBar mode={ProfileMode.View} editHref={editHref} />
+        <ProfileActionBar mode={ProfileMode.View} editHref={editHref} labels={t.actions} />
         {parentActions}
       </Stack>
     );
   }
 
-  if (loading && !data) {
+  if (loading && !profile) {
     return (
       <ProfileShell {...shellProps} loading>
         {null}

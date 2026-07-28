@@ -7,7 +7,7 @@ import { Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
-import { useAppTranslation } from "@/shared/locale";
+import type { StaffOnboardingLabels } from "@/shared/locale";
 
 const ACCOUNT_TYPES: readonly ManagerAccountType[] = [
   ManagerAccountType.Manager,
@@ -38,8 +38,14 @@ const StyledAccountTypeButton = styled(Button, {
   },
 }));
 
-function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboardingFormData> }) {
-  const t = useAppTranslation().dashboardTranslations.staffOnboarding;
+function AccountTypeToggle({
+  labels,
+  control,
+}: {
+  readonly labels: StaffOnboardingLabels;
+  readonly control: Control<ManagerOnboardingFormData>;
+}) {
+  const t = labels;
 
   return (
     <Controller
@@ -71,11 +77,12 @@ function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboa
 }
 
 interface Props {
+  readonly labels: StaffOnboardingLabels;
   readonly control: Control<ManagerOnboardingFormData>;
 }
 
-export function SystemAccessSection({ control }: Props) {
-  const t = useAppTranslation().dashboardTranslations.staffOnboarding;
+export function SystemAccessSection({ labels, control }: Props) {
+  const t = labels;
   const accountType = useWatch({ control, name: "accountType" });
 
   const getDescription = (): string => {
@@ -96,7 +103,7 @@ export function SystemAccessSection({ control }: Props) {
             <FormLabel sx={theme => ({ mb: 1, color: theme.palette.onSurfaceVariant })}>
               {t.fields.accountType}
             </FormLabel>
-            <AccountTypeToggle control={control} />
+            <AccountTypeToggle labels={labels} control={control} />
             <Typography variant="bodyMd" sx={theme => ({ mt: 1.5, color: theme.palette.text.secondary })}>
               {getDescription()}
             </Typography>

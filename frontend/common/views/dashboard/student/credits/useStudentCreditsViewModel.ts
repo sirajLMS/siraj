@@ -13,7 +13,13 @@ import type {
   StudentCreditTransactionRow,
 } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type AppLocale, type StudentPortalCreditsLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
+import {
+  type AppLocale,
+  type StudentPortalCreditsLabels,
+  Translation,
+  useAppLocale,
+  useAppTranslation,
+} from "@/shared/locale";
 
 export type CreditReasonFilter = "ALL" | CreditReason;
 
@@ -239,7 +245,7 @@ function useReasonOptions(labels: StudentPortalCreditsLabels): UseReasonOptionsS
 }
 
 export function useStudentCreditsViewModel(): StudentCreditsViewModel {
-  const t = useAppTranslation().dashboardTranslations.studentPortalCredits;
+  const t = useAppTranslation(Translation.Dashboard.StudentPortalCredits);
   const locale = useAppLocale();
   const router = useRouter();
   const labels = useStudentCreditsLabels(t);

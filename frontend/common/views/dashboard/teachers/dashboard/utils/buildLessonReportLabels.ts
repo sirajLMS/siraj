@@ -1,7 +1,7 @@
 import type { LessonReportFormLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
-import type { useAppTranslation } from "@/shared/locale";
+import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports";
 
-type LessonReportI18n = ReturnType<typeof useAppTranslation>["dashboardTranslations"]["lmsLessonReports"];
+type LessonReportI18n = LessonReportLabels;
 
 /**
  * Forwards the lmsLessonReports translation namespace into the

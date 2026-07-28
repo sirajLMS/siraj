@@ -5,17 +5,18 @@ import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { OnboardingIdentityFields } from "@/frontend/common/views/dashboard/components/onboarding/OnboardingIdentityFields";
-import { useAppTranslation } from "@/shared/locale";
+import type { StaffOnboardingLabels } from "@/shared/locale";
 
 interface Props {
+  readonly labels: StaffOnboardingLabels;
   readonly register: UseFormRegister<ManagerOnboardingFormData>;
   readonly control: Control<ManagerOnboardingFormData>;
   readonly errors: FieldErrors<ManagerOnboardingFormData>;
   readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
-export function StaffInfoSection({ register, control, errors, onUploadAvatar }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.staffOnboarding;
+export function StaffInfoSection({ labels, register, control, errors, onUploadAvatar }: Readonly<Props>) {
+  const t = labels;
 
   const translate = {
     fields: {

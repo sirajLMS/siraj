@@ -16,7 +16,6 @@ import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/pe
 import type { AssignedUsersListSlotProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTabShared.types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledAssignUsersButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -243,7 +242,7 @@ function AssignedUsersMobileList({ props, labels }: Readonly<AssignedUsersListSl
 }
 
 export function AssignedUsersTabMobile(props: Readonly<AssignedUsersTabProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = props.labels;
 
   return (
     <AssignedUsersTabShared

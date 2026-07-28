@@ -16,6 +16,9 @@ import {
   type RescheduleFormData,
   rescheduleSchema,
 } from "@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm";
+import type { MeetingConfigLabels } from "@/shared/locale/types/ui";
 
 export interface UseRescheduleViewModelProps {
   readonly session: RescheduleSession;
@@ -27,6 +30,8 @@ export interface UseRescheduleViewModelProps {
 }
 
 export interface RescheduleViewModel {
+  readonly labels: RescheduleFormLabels;
+  readonly meetingConfigLabels: MeetingConfigLabels;
   readonly session: RescheduleSession;
   readonly control: Control<RescheduleFormData>;
   readonly errors: FieldErrors<RescheduleFormData>;
@@ -42,6 +47,8 @@ export interface RescheduleViewModel {
 
 export function useRescheduleViewModel(props: Readonly<UseRescheduleViewModelProps>): RescheduleViewModel {
   const { session, defaultDate, defaultTime, isSubmitting, onSubmit, onCancel } = props;
+  const labels = useAppTranslation(Translation.Dashboard.RescheduleForm);
+  const meetingConfigLabels = useAppTranslation(Translation.Ui.MeetingConfig);
 
   const showSuccess = useRescheduleStore(state => state.showSuccess);
   const setShowSuccess = useRescheduleStore(state => state.setShowSuccess);
@@ -70,6 +77,8 @@ export function useRescheduleViewModel(props: Readonly<UseRescheduleViewModelPro
   };
 
   return {
+    labels,
+    meetingConfigLabels,
     session,
     control,
     errors,

@@ -12,7 +12,7 @@ import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/form/snackbar";
 import { CurrencySelectDesktop } from "@/frontend/desktop/components/ui/input/currencySelect";
 import { LocalizedStringDrawerDesktop } from "@/frontend/desktop/components/ui/input/localizedString";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function PaymentMethodDefaultsEditorDesktop({
   methods,
@@ -31,7 +31,7 @@ export function PaymentMethodDefaultsEditorDesktop({
   instructionsOpen = false,
   onInstructionsOpenChangeAction,
 }: Readonly<PaymentMethodDefaultsEditorProps>) {
-  const t = useAppTranslation().uiTranslations.paymentMethod;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod);
   const tDefaults = t.defaultsEditor;
 
   const payinMethods = filterMethodsForDirection(methods, "payin");

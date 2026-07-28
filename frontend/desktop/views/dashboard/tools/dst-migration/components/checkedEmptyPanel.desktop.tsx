@@ -3,15 +3,14 @@
 import { CheckOutlined, ReportProblemOutlined } from "@mui/icons-material";
 import { alpha, Box, Typography } from "@mui/material";
 import type { CheckedEmptyItem } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { useAppTranslation } from "@/shared/locale";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 interface Props {
+  readonly labels: DstMigrationLabels;
   readonly items: readonly CheckedEmptyItem[];
 }
 
-export function CheckedEmptyPanelDesktop({ items }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
-
+export function CheckedEmptyPanelDesktop({ labels, items }: Readonly<Props>) {
   return (
     <Box
       sx={theme => ({
@@ -48,7 +47,7 @@ export function CheckedEmptyPanelDesktop({ items }: Readonly<Props>) {
           <ReportProblemOutlined sx={{ fontSize: 18 }} />
         </Box>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.warning.dark })}>
-          {t.sections.checkedEmpty}
+          {labels.sections.checkedEmpty}
         </Typography>
       </Box>
       <Box component="ul" sx={{ p: 3, m: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 2 }}>

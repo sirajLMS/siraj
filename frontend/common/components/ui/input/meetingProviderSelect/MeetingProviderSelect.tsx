@@ -11,7 +11,7 @@ import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type MeetingProviderSelectProps = {
   readonly value: MeetingProviderFieldsFragment | null;
@@ -31,7 +31,7 @@ export function MeetingProviderSelect({
   helperText,
 }: MeetingProviderSelectProps) {
   const locale = useAppLocale();
-  const t = useAppTranslation().uiTranslations.meetingConfig.providerSelect;
+  const t = useAppTranslation(Translation.Ui.MeetingConfig).providerSelect;
   const { hasPermission } = useUserStore();
   const canManageCatalog = hasPermission(AppPermission.MeetingProvidersManageCatalog);
   const { data, loading } = useQuery(meetingProvidersQueryDocument, {

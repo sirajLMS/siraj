@@ -7,7 +7,7 @@ import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface TeacherOwnProfileContact {
   readonly name: string | null;
@@ -27,9 +27,9 @@ export interface TeacherOwnProfileViewModel {
 export type UseTeacherOwnProfileViewModelProps = Record<string, never>;
 
 function useTeacherOwnProfileLabels() {
-  const t = useAppTranslation().dashboardTranslations.teacherOwnProfile;
-  const tProfile = useAppTranslation().profileTranslations.base;
-  const tErrors = useAppTranslation().errorsTranslations;
+  const t = useAppTranslation(Translation.Dashboard.TeacherOwnProfile);
+  const tProfile = useAppTranslation(Translation.Profile.Base);
+  const tErrors = useAppTranslation(Translation.Errors);
   return { t, tProfile, tErrors };
 }
 
@@ -39,7 +39,7 @@ export function useTeacherOwnProfileViewModel(
   const { t, tProfile, tErrors } = useTeacherOwnProfileLabels();
   const locale = useAppLocale();
 
-  useDocumentTitle("", "dashboard.teacherOwnProfile", "pageTitle");
+  useDocumentTitle("", Translation.Dashboard.TeacherOwnProfile, "pageTitle");
 
   const { data, loading, error } = useQuery(teacherOwnProfileQueryDocument);
   const profile = data?.teacherOwnProfile ?? null;

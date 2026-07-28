@@ -9,28 +9,26 @@ import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button"
 import { MobileContentInset, MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { ManagersCardListMobile } from "@/frontend/mobile/views/dashboard/staff/home/components/managersCardList.mobile";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
-export function ManagersViewMobile(props: Readonly<ManagersViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffDirectory;
-
+export function ManagersViewMobile({ labels, ...props }: Readonly<ManagersViewProps>) {
   const actions = props.canCreateManager ? (
     <Link href="/staff/create" style={{ textDecoration: "none" }}>
-      <MobilePrimaryPageAction>{t.actions.addManager}</MobilePrimaryPageAction>
+      <MobilePrimaryPageAction>{labels.actions.addManager}</MobilePrimaryPageAction>
     </Link>
   ) : undefined;
 
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={t.mobileTitle} subtitle={t.pageSubtitle} actions={actions} />
+      <MobilePageHeader title={labels.mobileTitle} subtitle={labels.pageSubtitle} actions={actions} />
 
       <MobileContentInset>
-        <ManagersMetrics metrics={props.metrics} />
+        <ManagersMetrics labels={labels.metrics} metrics={props.metrics} />
       </MobileContentInset>
 
       <MobileSectionPanel contentInset={false}>
         <MobileContentInset>
           <ManagersFilterBar
+            labels={labels.filters}
             roleFilter={props.roleFilter}
             statusFilter={props.statusFilter}
             onRoleFilterChange={props.onRoleFilterChange}
@@ -39,6 +37,7 @@ export function ManagersViewMobile(props: Readonly<ManagersViewProps>) {
         </MobileContentInset>
 
         <ManagersCardListMobile
+          labels={labels}
           managers={[...props.managers]}
           paginationOptions={
             props.totalManagers !== undefined && props.onPageChange !== undefined

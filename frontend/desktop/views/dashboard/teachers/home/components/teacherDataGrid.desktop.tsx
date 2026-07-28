@@ -6,10 +6,11 @@ import { buildServerPaginationOptions } from "@/frontend/common/components/ui/fi
 import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
 
 interface TeacherDataGridProps {
   readonly rows: readonly TeacherDirectoryRow[];
+  readonly labels: TeachersDirectoryLabels;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -44,6 +45,7 @@ function TeacherActionButton({ icon, variant, onClick }: TeacherActionButtonProp
 
 export function TeacherDataGrid({
   rows,
+  labels,
   page = 0,
   pageSize = 10,
   totalCount,
@@ -51,7 +53,7 @@ export function TeacherDataGrid({
   onNavigateToSchedule,
   onNavigateToProfile,
 }: Readonly<TeacherDataGridProps>) {
-  const t = useAppTranslation().dashboardTranslations.teachersDirectory;
+  const t = labels;
 
   const columns: GridColDef<TeacherDirectoryRow>[] = [
     {

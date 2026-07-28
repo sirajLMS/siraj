@@ -14,7 +14,7 @@ import type {
   SessionConfigTabViewModel,
   UseSessionConfigTabViewModelProps,
 } from "@/frontend/common/views/dashboard/settings/types/sessionConfig.types";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 function toSessionConfigRow(
   config: {
@@ -40,7 +40,7 @@ function toSessionConfigRow(
 export function useSessionConfigTabViewModel(
   _props: Readonly<UseSessionConfigTabViewModelProps>
 ): SessionConfigTabViewModel {
-  const labels = useAppTranslation().dashboardTranslations.settings.session;
+  const labels = useAppTranslation(Translation.Dashboard.SettingsSession);
   const notifications = useNotifications();
   const hasPermission = useUserStore(state => state.hasPermission);
   const canManage = hasPermission(AppPermission.SettingsEditSession);

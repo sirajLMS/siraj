@@ -9,8 +9,6 @@ import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/compone
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar";
 
-import { useAppTranslation } from "@/shared/locale";
-
 const StyledFormWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -28,6 +26,7 @@ const StyledFormActions = styled(Box)(({ theme }) => ({
 }));
 
 export function ManagerOnboardingMobileView({
+  labels,
   register,
   onUploadAvatar,
   control,
@@ -39,7 +38,7 @@ export function ManagerOnboardingMobileView({
   onCancel,
   onDismissSuccess,
 }: Readonly<ManagerOnboardingViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffOnboarding;
+  const t = labels;
 
   return (
     <MobilePageContainer>
@@ -53,8 +52,14 @@ export function ManagerOnboardingMobileView({
         sx={{ display: "flex", flexDirection: "column", gap: 2, px: { xs: 2, md: 3 }, pb: 4 }}
       >
         <StyledFormWrapper>
-          <StaffInfoSection register={register} control={control} errors={errors} onUploadAvatar={onUploadAvatar} />
-          <SystemAccessSection control={control} />
+          <StaffInfoSection
+            labels={labels}
+            register={register}
+            control={control}
+            errors={errors}
+            onUploadAvatar={onUploadAvatar}
+          />
+          <SystemAccessSection labels={labels} control={control} />
 
           <StyledFormActions>
             <MobilePrimaryPageAction

@@ -20,7 +20,7 @@ import {
   type PaymentMethodCatalogOption,
 } from "@/frontend/common/lib/payment-method";
 import { PaymentMethodOptionRowDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.desktop";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type { PaymentMethodCatalogOption };
 
@@ -379,7 +379,7 @@ export const PaymentMethodAutocompleteDesktop: React.FC<PaymentMethodAutocomplet
   listAttached = false,
   showSlug = true,
 }: PaymentMethodAutocompleteProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.paymentMethod.select;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod).select;
 
   const options = useFilteredOptions(allOptionsProp, allowedSlugs);
 

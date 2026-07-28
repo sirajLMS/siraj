@@ -9,15 +9,13 @@ import {
   updateRecurringClassRateMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
-import { useAppTranslation } from "@/shared/locale";
+import type { RecurringScheduleDetailLabelsBySection } from "@/frontend/common/views/dashboard/classes/recurring/types/recurringScheduleDetail.types";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface RecurringScheduleDetailViewModel {
-  readonly pageTitle: string;
-  readonly subtitle: string;
-  readonly breadcrumbs: readonly { readonly label: string; readonly href?: string }[];
+  readonly labelsBySection: RecurringScheduleDetailLabelsBySection;
   readonly loading: boolean;
   readonly error: string | null;
-  readonly invalidId: string;
   readonly recurringScheduleId: string;
   readonly hourlyRate: string | null;
   readonly rateCurrency: CurrencyCode | null;
@@ -50,6 +48,13 @@ type RecurringScheduleTranslations = {
   readonly breadcrumbClasses: string;
   readonly pageTitle: string;
   readonly invalidId: string;
+  readonly rateSectionTitle: string;
+  readonly hourlyRateLabel: string;
+  readonly currencyLabel: string;
+  readonly rateSaveLabel: string;
+  readonly rateClearLabel: string;
+  readonly rateSuccessMessage: string;
+  readonly rateErrorMessage: string;
 };
 
 type ManagerTranslations = {
@@ -71,6 +76,34 @@ function buildBreadcrumbs(t: RecurringScheduleTranslations) {
     { label: t.breadcrumbClasses, href: "/classes" },
     { label: t.pageTitle },
   ];
+}
+
+function buildLabelsBySection(
+  t: RecurringScheduleTranslations,
+  tManager: ManagerTranslations,
+  summary: string,
+  breadcrumbs: ReturnType<typeof buildBreadcrumbs>
+): RecurringScheduleDetailLabelsBySection {
+  return {
+    shell: {
+      pageTitle: t.pageTitle,
+      subtitle: summary,
+      breadcrumbs,
+      invalidId: t.invalidId,
+      loadError: tManager.loadError,
+    },
+    form: {
+      rate: {
+        title: t.rateSectionTitle,
+        hourlyRateLabel: t.hourlyRateLabel,
+        currencyLabel: t.currencyLabel,
+        saveLabel: t.rateSaveLabel,
+        clearLabel: t.rateClearLabel,
+        successMessage: t.rateSuccessMessage,
+        errorMessage: t.rateErrorMessage,
+      },
+    },
+  };
 }
 
 async function updateRecurringScheduleRate(
@@ -108,46 +141,11 @@ async function handleRateUpdate(
   }
 }
 
-function buildRecurringScheduleDetailViewModel(params: {
-  readonly t: RecurringScheduleTranslations;
-  readonly tManager: ManagerTranslations;
-  readonly summary: string;
-  readonly breadcrumbs: ReturnType<typeof buildBreadcrumbs>;
-  readonly loading: boolean;
-  readonly error: Error | undefined;
-  readonly scheduleId: string | null | undefined;
-  readonly id: string;
-  readonly hourlyRate: string | null | undefined;
-  readonly rateCurrency: CurrencyCode | null | undefined;
-  readonly rateSaving: boolean;
-  readonly rateError: string | null;
-  readonly rateSuccess: boolean;
-  readonly onUpdateRate: RecurringScheduleDetailViewModel["onUpdateRate"];
-  readonly onRetry: () => void;
-}): RecurringScheduleDetailViewModel {
-  return {
-    pageTitle: params.t.pageTitle,
-    subtitle: params.summary,
-    breadcrumbs: params.breadcrumbs,
-    loading: params.loading,
-    error: params.error ? params.tManager.loadError : null,
-    invalidId: params.t.invalidId,
-    recurringScheduleId: params.scheduleId ?? params.id,
-    hourlyRate: params.hourlyRate ?? null,
-    rateCurrency: params.rateCurrency ?? null,
-    rateSaving: params.rateSaving,
-    rateError: params.rateError,
-    rateSuccess: params.rateSuccess,
-    onUpdateRate: params.onUpdateRate,
-    onRetry: params.onRetry,
-  };
-}
-
 export function useRecurringScheduleDetailViewModel(
   props: Readonly<UseRecurringScheduleDetailViewModelProps>
 ): RecurringScheduleDetailViewModel {
-  const t = useAppTranslation().uiTranslations.meetingConfigRecurringSchedule;
-  const tManager = useAppTranslation().uiTranslations.meetingConfigManager;
+  const t = useAppTranslation(Translation.Ui.MeetingConfigRecurringSchedule);
+  const tManager = useAppTranslation(Translation.Ui.MeetingConfig).manager;
   const { onRetry } = props;
 
   const params = useParams();
@@ -165,7 +163,7 @@ export function useRecurringScheduleDetailViewModel(
   const [rateError, setRateError] = useState<string | null>(null);
   const [rateSuccess, setRateSuccess] = useState(false);
 
-  useDocumentTitle(data?.recurringSchedule?.studentName, "common", "title");
+  useDocumentTitle(data?.recurringSchedule?.studentName, Translation.Common, "title");
 
   const schedule = data?.recurringSchedule;
 
@@ -188,21 +186,22 @@ export function useRecurringScheduleDetailViewModel(
     }
   }, [onRetry, refetch]);
 
-  return buildRecurringScheduleDetailViewModel({
-    t,
-    tManager,
-    summary,
-    breadcrumbs,
+  const labelsBySection = useMemo(
+    () => buildLabelsBySection(t, tManager, summary, breadcrumbs),
+    [t, tManager, summary, breadcrumbs]
+  );
+
+  return {
+    labelsBySection,
     loading,
-    error,
-    scheduleId: schedule?.id,
-    id,
-    hourlyRate: schedule?.hourlyRate,
-    rateCurrency: schedule?.rateCurrency,
+    error: error ? tManager.loadError : null,
+    recurringScheduleId: schedule?.id ?? id,
+    hourlyRate: schedule?.hourlyRate ?? null,
+    rateCurrency: schedule?.rateCurrency ?? null,
     rateSaving,
     rateError,
     rateSuccess,
     onUpdateRate: handleUpdateRate,
     onRetry: handleRetry,
-  });
+  };
 }

@@ -25,9 +25,7 @@ export function StatusTrackingMobileView({
   rows,
   totalSessions,
   suspendedCount,
-  labels,
-  cardListLabels,
-  analyticsLabels,
+  labelsBySection,
   dateValue,
   onDateChange,
   onActivate,
@@ -36,17 +34,19 @@ export function StatusTrackingMobileView({
   onNewReport,
   onOpenAuditLogs,
 }: Readonly<MobileLayoutProps>) {
+  const { shell, filters, cardList, analytics } = labelsBySection;
+
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+      <MobilePageHeader title={shell.pageTitle} subtitle={shell.pageSubtitle} />
 
       <MobileContentStack gap={3} paddingBottom={12}>
         <DateNavigatorMobile
           dateValue={dateValue}
-          todayLabel={labels.dateFilter.today}
-          previousDayLabel={labels.dateFilter.previousDay}
-          nextDayLabel={labels.dateFilter.nextDay}
-          dateLabel={labels.dateFilter.dateLabel}
+          todayLabel={filters.dateFilter.today}
+          previousDayLabel={filters.dateFilter.previousDay}
+          nextDayLabel={filters.dateFilter.nextDay}
+          dateLabel={filters.dateFilter.dateLabel}
           onDateChange={onDateChange}
         />
 
@@ -55,20 +55,20 @@ export function StatusTrackingMobileView({
         <StatusTrackingCardList
           rows={rows}
           totalSessions={totalSessions}
-          labels={cardListLabels}
+          labels={cardList}
           onActivate={onActivate}
           onReschedule={onReschedule}
           onVerify={onVerify}
         />
 
         <SuspensionAnalyticsMobile
-          labels={analyticsLabels}
+          labels={analytics}
           suspendedCount={suspendedCount}
           onOpenAuditLogs={onOpenAuditLogs}
         />
       </MobileContentStack>
 
-      <MobileFab icon={<AddOutlined />} label={labels.newReport} onClick={onNewReport} />
+      <MobileFab icon={<AddOutlined />} label={shell.newReport} onClick={onNewReport} />
     </MobilePageContainer>
   );
 }

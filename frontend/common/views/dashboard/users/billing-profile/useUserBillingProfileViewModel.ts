@@ -39,7 +39,7 @@ import {
 } from "@/frontend/common/views/dashboard/billing/utils/formatBillingDate";
 import { deriveParentInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 import type { UserBillingProfileViewProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
-import { type BillingLabels, type ErrorsLabels, useAppTranslation } from "@/shared/locale";
+import { type BillingLabels, type ErrorsLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export type UserBillingProfileViewModel = UserBillingProfileViewProps;
 
@@ -108,11 +108,11 @@ function buildSummary(
 
 /** Translations, locale, and labels shared by both tiers. */
 function useBillingProfileTranslations() {
-  const t = useAppTranslation().dashboardTranslations.billing;
-  const tProfile = useAppTranslation().profileTranslations.teacher;
-  const tProfileRoot = useAppTranslation().profileTranslations.base;
-  const tErrors = useAppTranslation().errorsTranslations;
-  const tc = useAppTranslation().commonTranslations;
+  const t = useAppTranslation(Translation.Dashboard.Billing);
+  const tProfile = useAppTranslation(Translation.Profile.Teacher);
+  const tProfileRoot = useAppTranslation(Translation.Profile.Base);
+  const tErrors = useAppTranslation(Translation.Errors);
+  const tc = useAppTranslation(Translation.Common);
   const locale = useAppLocale();
   const labels = buildBillingLabels(t);
   const isImpersonating = useImpersonation().isImpersonating;
@@ -503,7 +503,7 @@ export function useUserBillingProfileViewModel(
 
   const { tProfile, tProfileRoot, tErrors, tc, locale, labels, billingActionsDisabled } =
     useBillingProfileTranslations();
-  useDocumentTitle(null, "dashboard.billing", "billingProfileTitle");
+  useDocumentTitle(null, Translation.Dashboard.Billing, "billingProfileTitle");
 
   const { searchQuery, debouncedSearch, isSearchPending, handleSearchChange } = useBillingProfileSearch();
   const dialogs = useBillingProfileDialogs();

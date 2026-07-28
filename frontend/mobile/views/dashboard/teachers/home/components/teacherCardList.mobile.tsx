@@ -9,14 +9,14 @@ import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
-import type { TeachersDirectoryLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
 
 interface TeacherCardListProps {
   readonly rows: readonly TeacherDirectoryRow[];
   readonly searchQuery: string;
   readonly onSearchChange: (query: string) => void;
   readonly paginationOptions: ListPaginationOptions;
+  readonly labels: TeachersDirectoryLabels;
   readonly onNavigateToSchedule: (teacherId: string) => void;
   readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
@@ -144,11 +144,10 @@ export function TeacherCardList({
   searchQuery,
   onSearchChange,
   paginationOptions,
+  labels,
   onNavigateToSchedule,
   onNavigateToProfile,
 }: Readonly<TeacherCardListProps>) {
-  const t = useAppTranslation().dashboardTranslations.teachersDirectory;
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <TeacherSearchField
@@ -165,7 +164,7 @@ export function TeacherCardList({
         renderItem={row => (
           <TeacherCard
             row={row}
-            t={t}
+            t={labels}
             onNavigateToSchedule={onNavigateToSchedule}
             onNavigateToProfile={onNavigateToProfile}
           />

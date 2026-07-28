@@ -4,9 +4,10 @@ import { CancelOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Stack, Typography } from "@mui/material";
 import type { ConflictGroup } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
-import { useAppTranslation } from "@/shared/locale";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 interface Props {
+  readonly labels: DstMigrationLabels;
   readonly conflictGroups: readonly ConflictGroup[];
 }
 
@@ -40,9 +41,7 @@ function ConflictCard({
   );
 }
 
-export function ConflictErrorsPanelDesktop({ conflictGroups }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
-
+export function ConflictErrorsPanelDesktop({ labels, conflictGroups }: Readonly<Props>) {
   return (
     <Box
       sx={theme => ({
@@ -79,7 +78,7 @@ export function ConflictErrorsPanelDesktop({ conflictGroups }: Readonly<Props>) 
           <CancelOutlined sx={{ fontSize: 18 }} />
         </Box>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.error.main })}>
-          {t.sections.errors}
+          {labels.sections.errors}
         </Typography>
       </Box>
       <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3, maxHeight: 500, overflowY: "auto" }}>
@@ -88,7 +87,7 @@ export function ConflictErrorsPanelDesktop({ conflictGroups }: Readonly<Props>) 
             <DesktopStatusBadge
               category="session"
               status="pending"
-              label={t.conflicts.teacherLabel(group.teacherName)}
+              label={labels.conflicts.teacherLabel(group.teacherName)}
             />
             {group.conflicts.map(conflict => (
               <ConflictCard key={conflict.id} studentName={conflict.studentName} message={conflict.message} />

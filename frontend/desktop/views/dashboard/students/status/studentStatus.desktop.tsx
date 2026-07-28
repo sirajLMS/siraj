@@ -5,7 +5,9 @@ import { FormProvider } from "react-hook-form";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { StudentStatusLabelsProvider } from "@/frontend/common/views/dashboard/students/status/studentStatusLabelsContext";
 import type { StudentStatusPageData } from "@/frontend/common/views/dashboard/students/status/types";
+import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 import type { StudentStatusViewModel } from "@/frontend/common/views/dashboard/students/status/useStudentStatusViewModel";
 import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page/DesktopPageContainer";
 import { DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page/DesktopPageHeader";
@@ -15,7 +17,6 @@ import {
   SuspensionWarningBannerDesktop,
 } from "@/frontend/desktop/views/dashboard/students/status/components/policyOverviewCard.desktop";
 import { StudentStatusHeaderDesktop } from "@/frontend/desktop/views/dashboard/students/status/components/studentStatusHeader.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 const STATUS_BADGE_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "regular",
@@ -30,7 +31,7 @@ function getBadgeStatusKey(status: StudentStatus): string {
 }
 
 function ReadOnlyStatusCardDesktop({ status }: Readonly<{ status: StudentStatus }>) {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
 
   return (
     <Paper
@@ -149,16 +150,18 @@ export function StudentStatusDesktopView({
   }
 
   const body = (
-    <StudentStatusBodyDesktop
-      t={t}
-      student={student}
-      embedded={embedded}
-      isUpdating={isUpdating}
-      canEditStatus={canEditStatus}
-      selectedStatus={selectedStatus}
-      methods={methods}
-      handleSubmit={handleSubmit}
-    />
+    <StudentStatusLabelsProvider labels={t}>
+      <StudentStatusBodyDesktop
+        t={t}
+        student={student}
+        embedded={embedded}
+        isUpdating={isUpdating}
+        canEditStatus={canEditStatus}
+        selectedStatus={selectedStatus}
+        methods={methods}
+        handleSubmit={handleSubmit}
+      />
+    </StudentStatusLabelsProvider>
   );
 
   if (embedded) {

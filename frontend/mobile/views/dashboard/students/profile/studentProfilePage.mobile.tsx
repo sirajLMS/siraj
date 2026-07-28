@@ -17,13 +17,11 @@ export function StudentProfilePageMobileView({
   statusBadge,
   visibleTabs,
   activeTab,
-  fallbackTitle,
-  loadingLabel,
-  notFoundTitle,
-  notFoundDescription,
-  tabLabels,
+  labelsBySection,
   onTabChange,
 }: Readonly<StudentProfilePageViewModel>) {
+  const { shell, tabs } = labelsBySection;
+
   if (loadingState === "loading") {
     return (
       <MobilePageContainer>
@@ -39,7 +37,7 @@ export function StudentProfilePageMobileView({
         >
           <CircularProgress size={28} />
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {loadingLabel}
+            {shell.loading}
           </Typography>
         </Stack>
       </MobilePageContainer>
@@ -49,7 +47,7 @@ export function StudentProfilePageMobileView({
   if (loadingState === "notFound") {
     return (
       <MobilePageContainer>
-        <ProfileRestrictedSection title={notFoundTitle} description={notFoundDescription} />
+        <ProfileRestrictedSection title={shell.notFoundTitle} description={shell.notFoundDescription} />
       </MobilePageContainer>
     );
   }
@@ -59,7 +57,7 @@ export function StudentProfilePageMobileView({
       <MobilePageContainer>
         <MobilePageHeader title={header.title} subtitle={header.subtitle} edgeToEdge={false} />
         <Box sx={{ px: 2 }}>
-          <ProfileRestrictedSection title={fallbackTitle} />
+          <ProfileRestrictedSection title={shell.title} />
         </Box>
       </MobilePageContainer>
     );
@@ -89,10 +87,10 @@ export function StudentProfilePageMobileView({
           allowScrollButtonsMobile
           sx={{ mb: 1, minHeight: 40 }}
         >
-          {visibleTabs.includes("status") ? <Tab value="status" label={tabLabels.status} /> : null}
-          {visibleTabs.includes("classes") ? <Tab value="classes" label={tabLabels.classes} /> : null}
-          {visibleTabs.includes("quota") ? <Tab value="quota" label={tabLabels.quota} /> : null}
-          {visibleTabs.includes("history") ? <Tab value="history" label={tabLabels.history} /> : null}
+          {visibleTabs.includes("status") ? <Tab value="status" label={tabs.status} /> : null}
+          {visibleTabs.includes("classes") ? <Tab value="classes" label={tabs.classes} /> : null}
+          {visibleTabs.includes("quota") ? <Tab value="quota" label={tabs.quota} /> : null}
+          {visibleTabs.includes("history") ? <Tab value="history" label={tabs.history} /> : null}
         </Tabs>
 
         <Stack sx={{ gap: 2 }}>

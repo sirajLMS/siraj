@@ -23,22 +23,9 @@ import {
 import { useAppLocale } from "@/shared/locale";
 
 export function SupportedCurrenciesDesktopView({
+  labelsBySection,
   rows,
   loading,
-  emptyMessage,
-  footerNote,
-  pageTitle,
-  pageSubtitle,
-  flagColumnLabel,
-  codeColumnLabel,
-  symbolColumnLabel,
-  nameColumnLabel,
-  countryColumnLabel,
-  activeColumnLabel,
-  actionsColumnLabel,
-  activateLabel,
-  editLabel,
-  deactivateLabel,
   canManage,
   onActivate,
   onEdit,
@@ -54,41 +41,17 @@ export function SupportedCurrenciesDesktopView({
   handleConfirmDeactivate,
 }: Readonly<SupportedCurrenciesViewModel>) {
   const locale = useAppLocale();
+  const { shell, columns, actions } = labelsBySection;
 
-  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid
-  const columns = useMemo<GridColDef<SupportedCurrencyRow>[]>(
+  const columnsWithActions = useMemo<GridColDef<SupportedCurrencyRow>[]>(
     () =>
       buildSupportedCurrencyColumns(
-        {
-          flagColumnLabel,
-          codeColumnLabel,
-          symbolColumnLabel,
-          nameColumnLabel,
-          countryColumnLabel,
-          activeColumnLabel,
-          actionsColumnLabel,
-          editLabel,
-          deactivateLabel,
-        },
+        { ...columns, editLabel: actions.editLabel, deactivateLabel: actions.deactivateLabel },
         { onEdit, onDeactivate },
         canManage,
         locale
       ),
-    [
-      flagColumnLabel,
-      codeColumnLabel,
-      symbolColumnLabel,
-      nameColumnLabel,
-      countryColumnLabel,
-      activeColumnLabel,
-      actionsColumnLabel,
-      editLabel,
-      deactivateLabel,
-      locale,
-      onEdit,
-      onDeactivate,
-      canManage,
-    ]
+    [actions.deactivateLabel, actions.editLabel, canManage, columns, locale, onDeactivate, onEdit]
   );
 
   const activateDialogProps: SupportedCurrencyActivateDialogProps = {
@@ -99,36 +62,33 @@ export function SupportedCurrenciesDesktopView({
       setEditRow(null);
     },
     onSaved: handleSaved,
-    // Exclude already-activated currencies so the selector only offers
-    // currencies not yet in the supported_currencies table. The edited row's
-    // own code is kept visible by the autocomplete (edit field is disabled).
     excludedCodes: rows.filter(row => row.isActive).map(row => row.code),
   };
 
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
-        title={pageTitle}
-        subtitle={pageSubtitle}
+        title={shell.pageTitle}
+        subtitle={shell.pageSubtitle}
         actions={
           canManage ? (
             <DesktopPrimaryPageAction onClick={onActivate} startIcon={<AddOutlined />}>
-              {activateLabel}
+              {actions.activateLabel}
             </DesktopPrimaryPageAction>
           ) : null
         }
       />
       <DesktopAppDataGrid
         rows={rows}
-        columns={columns}
+        columns={columnsWithActions}
         loading={loading}
-        emptyMessage={emptyMessage}
+        emptyMessage={shell.empty}
         getRowId={row => row.id}
         autoHeight
         paginationOptions={{ mode: "client" }}
       />
       <Alert severity="info" sx={{ mt: 2 }}>
-        {footerNote}
+        {shell.footerNote}
       </Alert>
 
       {canManage ? (

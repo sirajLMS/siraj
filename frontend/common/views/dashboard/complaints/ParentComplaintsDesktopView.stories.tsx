@@ -15,7 +15,7 @@ import { complaintFormSchema } from "@/frontend/common/views/dashboard/complaint
 import type { ParentComplaintRecord } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { ParentComplaintsDesktopView } from "@/frontend/desktop/views/dashboard/complaints/parentComplaints.desktop";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const MOCK_PARENT_COMPLAINTS: readonly ParentComplaintRecord[] = [
   {
@@ -75,8 +75,7 @@ function ParentComplaintsDesktopStoryRenderer({
   showSuccess,
   canSubmit,
 }: Readonly<ParentComplaintsDesktopStoryProps>) {
-  const t = useAppTranslation();
-  const labels = buildComplaintsLabels(t.dashboardTranslations.complaints).parent;
+  const labels = buildComplaintsLabels(useAppTranslation(Translation.Dashboard.Complaints)).parent;
   const {
     control,
     formState: { errors },

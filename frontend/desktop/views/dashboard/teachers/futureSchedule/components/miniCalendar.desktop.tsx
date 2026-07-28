@@ -2,7 +2,7 @@
 
 import { ChevronLeftOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import { alpha, Box, Grid, IconButton, Stack, Typography } from "@mui/material";
-import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
+import { BaseCard } from "@/frontend/common/components/ui";
 import {
   getCalendarGrid,
   MINI_CALENDAR_WEEKDAYS,
@@ -12,21 +12,8 @@ import type {
   MiniCalendarDate,
   MiniCalendarProps,
 } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
-import { useAppTranslation } from "@/shared/locale";
 
-/**
- * Desktop variant of the mini-calendar.
- *
- * Plan v5: per specs.md §3 N7 (state), N9 (pure-data helpers), N25
- * (`function useX` declarations), and §5 (custom hooks live in common), the
- * previously inline `useState`/`useViewingMonth`/`getCalendarGrid`/`DAYS`
- * constant were lifted to
- * `frontend/common/views/dashboard/teachers/futureSchedule/hooks/useMiniCalendar.hooks.ts`.
- * Per specs.md §3 N15 + §4.1 Class B, the byte-identical inline
- * `MiniCalendarProps` interface was lifted to
- * `frontend/common/views/dashboard/teachers/futureSchedule/types.ts`.
- */
-export function MiniCalendarDesktop({ selectedDate, onSelectDate, classDates }: Readonly<MiniCalendarProps>) {
+export function MiniCalendarDesktop({ selectedDate, onSelectDate, classDates, labels }: Readonly<MiniCalendarProps>) {
   const [{ year, month }, shiftMonth] = useViewingMonth(selectedDate);
   const dates = getCalendarGrid(year, month, classDates, selectedDate);
   const monthName = new Date(year, month).toLocaleString("en-US", { month: "long" });
@@ -38,12 +25,13 @@ export function MiniCalendarDesktop({ selectedDate, onSelectDate, classDates }: 
   };
 
   return (
-    <BaseCard sx={{ p: 3 }}>
+    <BaseCard sx={{ p: 2 }}>
       <MiniCalendarHeader
         monthName={monthName}
         year={year}
         onPrev={() => shiftMonth(-1)}
         onNext={() => shiftMonth(1)}
+        labels={labels}
       />
       <Grid container columns={7} sx={{ textAlign: "center" }}>
         {MINI_CALENDAR_WEEKDAYS.map(day => (
@@ -53,7 +41,7 @@ export function MiniCalendarDesktop({ selectedDate, onSelectDate, classDates }: 
               sx={theme => ({
                 fontWeight: 700,
                 color: theme.palette.onSurfaceVariant,
-                fontSize: 10,
+                fontSize: 9,
               })}
             >
               {day.label}
@@ -73,31 +61,32 @@ function MiniCalendarHeader({
   year,
   onPrev,
   onNext,
+  labels,
 }: {
   readonly monthName: string;
   readonly year: number;
   readonly onPrev: () => void;
   readonly onNext: () => void;
+  readonly labels: MiniCalendarProps["labels"];
 }) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
   return (
     <Stack
       direction="row"
-      spacing={2}
+      spacing={1.5}
       sx={{
         justifyContent: "space-between",
         alignItems: "center",
-        mb: 2,
+        mb: 1.5,
       }}
     >
-      <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-        {t.monthDisplay(monthName, String(year))}
+      <Typography variant="labelMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
+        {labels.monthDisplay(monthName, String(year))}
       </Typography>
       <Stack direction="row" spacing={0.5}>
-        <IconButton size="small" onClick={onPrev}>
+        <IconButton size="small" onClick={onPrev} sx={{ p: 0.5 }}>
           <ChevronLeftOutlined sx={{ fontSize: 16 }} />
         </IconButton>
-        <IconButton size="small" onClick={onNext}>
+        <IconButton size="small" onClick={onNext} sx={{ p: 0.5 }}>
           <ChevronRightOutlined sx={{ fontSize: 16 }} />
         </IconButton>
       </Stack>
@@ -113,12 +102,12 @@ function MiniCalendarDayCell({
   readonly onClick: (num: number, muted?: boolean) => void;
 }) {
   return (
-    <Grid size={{ xs: 1 }} key={`date-${date.num}-${date.muted}`} sx={{ p: 0.5 }}>
+    <Grid size={{ xs: 1 }} key={`date-${date.num}-${date.muted}`} sx={{ p: 0.25 }}>
       <Box
         onClick={() => onClick(date.num, date.muted)}
         sx={theme => ({
-          width: 28,
-          height: 28,
+          width: 24,
+          height: 24,
           mx: "auto",
           display: "flex",
           alignItems: "center",
@@ -141,7 +130,7 @@ function MiniCalendarDayCell({
         <Typography
           variant="labelMd"
           sx={theme => ({
-            fontSize: 11,
+            fontSize: 10,
             position: "relative",
             zIndex: 1,
             ...(date.selected && {
@@ -155,12 +144,12 @@ function MiniCalendarDayCell({
         {date.dot && (
           <Box
             sx={theme => ({
-              width: 4,
-              height: 4,
+              width: 3,
+              height: 3,
               backgroundColor: theme.palette.status.blocked,
               borderRadius: "50%",
               position: "absolute",
-              bottom: 2,
+              bottom: 1,
               left: "50%",
               transform: "translateX(-50%)",
             })}

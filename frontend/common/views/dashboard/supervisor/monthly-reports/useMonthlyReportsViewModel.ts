@@ -27,14 +27,14 @@ import type {
   TeacherMonthlyReportData,
   UseMonthlyReportsViewModelProps,
 } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/types/monthlyReportsTypes";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type { MonthlyReportsViewModel, UseMonthlyReportsViewModelProps };
 
 export function useMonthlyReportsViewModel(
   _props: Readonly<UseMonthlyReportsViewModelProps> = {}
 ): MonthlyReportsViewModel {
-  const t = useAppTranslation().dashboardTranslations.supervisorPortalMonthlyReports;
+  const t = useAppTranslation(Translation.Dashboard.SupervisorPortalMonthlyReports);
 
   const reportType = useSupervisorMonthlyReportsStore(s => s.reportType);
   const year = useSupervisorMonthlyReportsStore(s => s.year);

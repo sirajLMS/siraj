@@ -20,7 +20,7 @@ import {
   type PaymentMethodCatalogOption,
 } from "@/frontend/common/lib/payment-method";
 import { PaymentMethodOptionRowMobile } from "@/frontend/mobile/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.mobile";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const filterOptions = createFilterOptions<PaymentMethodCatalogOption>({
   matchFrom: "any",
@@ -333,7 +333,7 @@ export const PaymentMethodAutocompleteMobile: React.FC<PaymentMethodAutocomplete
   listAttached = false,
   showSlug = true,
 }: PaymentMethodAutocompleteProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.paymentMethod.select;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod).select;
   const options = useFilteredOptions(allOptionsProp, allowedSlugs);
   const [isOpen, handleOpen, handleClose] = useAutocompleteOpenState(openProp, onOpenAction, onCloseAction);
   const handleChange = useChangeHandler(onChangeAction);

@@ -72,17 +72,18 @@ mock.module("@/frontend/common/components/auth/RequirePermission", () => ({
 mock.module("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/scheduleOverview.desktop", () => ({
   ScheduleOverviewDesktopView: (props: UseScheduleOverviewViewModelProps) => {
     const hasSearchPermission = useUserStore.getState().hasPermission?.(AppPermission.DashboardSearch) ?? false;
+    const { shell, filters } = props.labelsBySection;
     return (
       <div data-testid="desktop-view">
-        <div data-testid="section-title">{props.title}</div>
-        {hasSearchPermission && props.searchPlaceholder && (
+        <div data-testid="section-title">{shell.title}</div>
+        {hasSearchPermission && filters.searchPlaceholder && (
           <input
-            placeholder={props.searchPlaceholder}
+            placeholder={filters.searchPlaceholder}
             value={props.searchValue}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => props.onSearchChange?.(event.target.value)}
           />
         )}
-        {props.rows.length === 0 && <div data-testid="empty-message">{props.emptyMessage}</div>}
+        {props.rows.length === 0 && <div data-testid="empty-message">{shell.emptyMessage}</div>}
       </div>
     );
   },
@@ -134,33 +135,39 @@ const createMockProps = (overrides: Partial<UseScheduleOverviewViewModelProps> =
   // stub consumes matter, but we still surface a type-complete view model here
   // so `React.createElement(ScheduleOverviewView, props)` passes type-check.
   const base: UseScheduleOverviewViewModelProps = {
-    title: "Schedule Overview",
-    searchPlaceholder: "Search by student name",
+    labelsBySection: {
+      shell: {
+        title: "Schedule Overview",
+        emptyMessage: "No classes scheduled",
+      },
+      filters: {
+        searchPlaceholder: "Search by student name",
+        dateLabel: "Date",
+        teacherPlaceholder: "Filter by teacher",
+        todayLabel: "Today",
+        previousDayLabel: "Previous day",
+        nextDayLabel: "Next day",
+      },
+      columns: {
+        className: "Class",
+        student: "Student",
+        teacher: "Teacher",
+        time: "Time",
+        yourTime: "Your Time",
+        teacherTime: "Teacher Time",
+        studentTime: "Student Time",
+        duration: "Duration",
+        status: "Status",
+        actions: "Actions",
+        history: "History",
+        joinVideo: "Join Video",
+      },
+      status: statusLabels,
+      actions: { detailsLabel: "View Details" },
+    },
     searchValue: "",
     rows: [],
-    headers: {
-      className: "Class",
-      student: "Student",
-      teacher: "Teacher",
-      time: "Time",
-      yourTime: "Your Time",
-      teacherTime: "Teacher Time",
-      studentTime: "Student Time",
-      duration: "Duration",
-      status: "Status",
-      actions: "Actions",
-      history: "History",
-      joinVideo: "Join Video",
-    },
-    statusLabels,
-    detailsLabel: "View Details",
-    emptyMessage: "No classes scheduled",
-    todayLabel: "Today",
-    previousDayLabel: "Previous day",
-    nextDayLabel: "Next day",
-    dateLabel: "Date",
     dateValue: "2026-06-20",
-    teacherPlaceholder: "Filter by teacher",
     selectedTeacher: null,
     page: 0,
     pageSize: 10,
@@ -196,14 +203,30 @@ describe("ScheduleOverviewSection", () => {
   });
 
   test("search input hidden without DashboardSearch permission", () => {
-    const props = createMockProps({ searchPlaceholder: "Search by student name" });
+    const props = createMockProps({
+      labelsBySection: {
+        ...createMockProps().labelsBySection,
+        filters: {
+          ...createMockProps().labelsBySection.filters,
+          searchPlaceholder: "Search by student name",
+        },
+      },
+    });
     renderWithWrapper(React.createElement(ScheduleOverviewView, props), { permissions: [], viewport: "desktop" });
 
     expect(screen.queryByPlaceholderText("Search by student name")).toBeNull();
   });
 
   test("search input has correct placeholder", () => {
-    const props = createMockProps({ searchPlaceholder: "Search by student name" });
+    const props = createMockProps({
+      labelsBySection: {
+        ...createMockProps().labelsBySection,
+        filters: {
+          ...createMockProps().labelsBySection.filters,
+          searchPlaceholder: "Search by student name",
+        },
+      },
+    });
     renderWithWrapper(React.createElement(ScheduleOverviewView, props), {
       permissions: [AppPermission.DashboardSearch],
       viewport: "desktop",
@@ -214,7 +237,12 @@ describe("ScheduleOverviewSection", () => {
   });
 
   test("section title renders correctly", () => {
-    const props = createMockProps({ title: "Schedule Overview" });
+    const props = createMockProps({
+      labelsBySection: {
+        ...createMockProps().labelsBySection,
+        shell: { ...createMockProps().labelsBySection.shell, title: "Schedule Overview" },
+      },
+    });
     renderWithWrapper(React.createElement(ScheduleOverviewView, props), { permissions: [], viewport: "desktop" });
 
     const titles = screen.getAllByText("Schedule Overview");
@@ -223,7 +251,13 @@ describe("ScheduleOverviewSection", () => {
   });
 
   test("empty message shown when no rows", () => {
-    const props = createMockProps({ rows: [], emptyMessage: "No classes scheduled" });
+    const props = createMockProps({
+      rows: [],
+      labelsBySection: {
+        ...createMockProps().labelsBySection,
+        shell: { ...createMockProps().labelsBySection.shell, emptyMessage: "No classes scheduled" },
+      },
+    });
     renderWithWrapper(React.createElement(ScheduleOverviewView, props), { permissions: [], viewport: "desktop" });
 
     const messages = screen.getAllByText("No classes scheduled");

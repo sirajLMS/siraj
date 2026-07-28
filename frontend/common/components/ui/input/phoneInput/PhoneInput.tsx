@@ -11,7 +11,7 @@ import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import { PhoneCountryPicker } from "@/frontend/common/components/ui/input/phoneInput/PhoneCountryPicker";
 import { usePhoneInput } from "@/frontend/common/hooks/usePhoneInput";
 import { LtrScope } from "@/frontend/common/providers/theme/LtrScope";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type PhoneInputProps = {
   readonly value: string | null;
@@ -207,7 +207,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   helperText,
   hideLabel,
 }: PhoneInputProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.phoneInput;
+  const t = useAppTranslation(Translation.Ui.PhoneInput);
 
   const {
     country,

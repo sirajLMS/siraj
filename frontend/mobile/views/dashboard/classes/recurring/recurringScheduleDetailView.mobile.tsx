@@ -6,15 +6,11 @@ import type { RecurringScheduleDetailViewModel } from "@/frontend/common/views/d
 import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
 import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/page/MobilePageContainer";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui/container/page/MobilePageHeader";
-import { useAppTranslation } from "@/shared/locale";
 
 export function RecurringScheduleDetailMobileView({
-  pageTitle,
-  subtitle,
-  breadcrumbs,
+  labelsBySection,
   loading,
   error,
-  invalidId,
   recurringScheduleId,
   hourlyRate,
   rateCurrency,
@@ -24,13 +20,13 @@ export function RecurringScheduleDetailMobileView({
   onUpdateRate,
   onRetry,
 }: Readonly<RecurringScheduleDetailViewModel>) {
-  const t = useAppTranslation().uiTranslations.meetingConfigRecurringSchedule;
+  const { shell, form } = labelsBySection;
 
   if (!recurringScheduleId) {
     return (
       <MobilePageContainer>
-        <MobilePageHeader title={pageTitle} edgeToEdge={false} />
-        <ErrorState embedded message={invalidId} retryLabel="" onRetry={onRetry} />
+        <MobilePageHeader title={shell.pageTitle} edgeToEdge={false} />
+        <ErrorState embedded message={shell.invalidId} retryLabel="" onRetry={onRetry} />
       </MobilePageContainer>
     );
   }
@@ -42,7 +38,7 @@ export function RecurringScheduleDetailMobileView({
   if (error) {
     return (
       <MobilePageContainer>
-        <MobilePageHeader title={pageTitle} edgeToEdge={false} />
+        <MobilePageHeader title={shell.pageTitle} edgeToEdge={false} />
         <ErrorState embedded message={error} retryLabel="Retry" onRetry={onRetry} />
       </MobilePageContainer>
     );
@@ -50,22 +46,19 @@ export function RecurringScheduleDetailMobileView({
 
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={pageTitle} subtitle={subtitle} breadcrumbs={breadcrumbs} edgeToEdge={false} />
+      <MobilePageHeader
+        title={shell.pageTitle}
+        subtitle={shell.subtitle}
+        breadcrumbs={shell.breadcrumbs}
+        edgeToEdge={false}
+      />
       <RecurringRateSection
         hourlyRate={hourlyRate}
         rateCurrency={rateCurrency}
         saving={rateSaving}
         error={rateError}
         success={rateSuccess}
-        labels={{
-          title: t.rateSectionTitle,
-          hourlyRateLabel: t.hourlyRateLabel,
-          currencyLabel: t.currencyLabel,
-          saveLabel: t.rateSaveLabel,
-          clearLabel: t.rateClearLabel,
-          successMessage: t.rateSuccessMessage,
-          errorMessage: t.rateErrorMessage,
-        }}
+        labels={form.rate}
         onSave={onUpdateRate}
       />
       <ClassMeetingConfigsSection recurringScheduleId={recurringScheduleId} />

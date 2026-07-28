@@ -32,7 +32,7 @@ import { type FormatCurrencyMessages, formatCurrencyForDisplay } from "@/fronten
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/common/views/dashboard/components/FxConversionNote";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 export type InvoicePaymentDetailsDialogProps = {
@@ -676,7 +676,7 @@ type DialogLabels = {
 };
 
 function useDialogLabels(): DialogLabels {
-  const t = useAppTranslation().dashboardTranslations.billing.paymentDetailsDialog;
+  const t = useAppTranslation(Translation.Dashboard.Billing).paymentDetailsDialog;
   return {
     submissionLabels: {
       pending: t.pending,
@@ -837,8 +837,8 @@ export function InvoicePaymentDetailsDialog({
   billingActionsDisabled = false,
   onSuccess,
 }: InvoicePaymentDetailsDialogProps): React.ReactNode {
-  const tProfile = useAppTranslation().profileTranslations.base;
-  const tErrors = useAppTranslation().errorsTranslations;
+  const tProfile = useAppTranslation(Translation.Profile.Base);
+  const tErrors = useAppTranslation(Translation.Errors);
   const locale = useAppLocale();
   const displayCurrency = useUserStore(state => state.displayCurrency);
   const fxMessages = buildFxDisplayMessages(

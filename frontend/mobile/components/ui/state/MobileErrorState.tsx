@@ -2,7 +2,7 @@
 
 import { Alert, Box, Button } from "@mui/material";
 import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/page";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface MobileErrorStateProps {
   readonly message?: string;
@@ -18,7 +18,7 @@ export interface MobileErrorStateProps {
  * padding tuned for mobile screen widths.
  */
 export function MobileErrorState({ message, onRetry, retryLabel, embedded = false }: MobileErrorStateProps) {
-  const tDefault = useAppTranslation().commonTranslations;
+  const tDefault = useAppTranslation(Translation.Common);
   const displayMessage = message ?? tDefault.loadFailed ?? "";
 
   const alert = (

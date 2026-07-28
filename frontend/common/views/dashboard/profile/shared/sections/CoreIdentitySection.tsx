@@ -12,8 +12,9 @@ import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/gener
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
-import { useAppTranslation } from "@/shared/locale";
+import { useProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/useProfileSharedBaseLabels";
 
 type CoreIdentityFormFields = {
   name: string;
@@ -33,6 +34,7 @@ type CoreIdentityViewProps = {
   readonly nameLabel: string;
   readonly emailLabel: string;
   readonly currencyLabel: string;
+  readonly baseLabels?: ProfileSharedBaseLabels;
   readonly additionalViewContent?: React.ReactNode;
 };
 
@@ -44,6 +46,7 @@ type CoreIdentityEditProps = {
   readonly nameLabel: string;
   readonly emailLabel: string;
   readonly currencyLabel: string;
+  readonly baseLabels?: ProfileSharedBaseLabels;
   readonly register: UseFormRegister<CoreIdentityFormFields>;
   readonly control: Control<CoreIdentityFormFields>;
 };
@@ -51,7 +54,8 @@ type CoreIdentityEditProps = {
 type CoreIdentitySectionProps = CoreIdentityViewProps | CoreIdentityEditProps;
 
 export function CoreIdentitySection(props: CoreIdentitySectionProps) {
-  const t = useAppTranslation().profileTranslations.base;
+  const fallbackBaseLabels = useProfileSharedBaseLabels();
+  const t = props.baseLabels ?? fallbackBaseLabels;
   const { canView, showField } = useProfileFieldAccess({ scope: props.scope });
 
   if (!canView("core_identity")) {
@@ -95,7 +99,7 @@ export function CoreIdentitySection(props: CoreIdentitySectionProps) {
     showField(props.displayCurrency, "core_identity");
 
   if (!hasIdentityFields && !props.additionalViewContent) {
-    return <ProfileRestrictedSection title={props.sectionTitle} />;
+    return <ProfileRestrictedSection title={props.sectionTitle} labels={t.fieldAccess} />;
   }
 
   return (

@@ -13,11 +13,11 @@ import {
   mapSettingsAuditRows,
 } from "@/frontend/common/views/dashboard/settings/utils/settingsAudit.utils";
 import { buildSettingsAuditColumns } from "@/frontend/common/views/dashboard/settings/utils/settingsAuditColumns";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 export function useSettingsAuditViewModel(): SettingsAuditViewModel {
   const locale = useAppLocale();
-  const t = useAppTranslation().dashboardTranslations.settings.audit;
+  const t = useAppTranslation(Translation.Dashboard.Settings).audit;
 
   const entityType = useSettingsAuditStore(state => state.entityType);
   const action = useSettingsAuditStore(state => state.action);

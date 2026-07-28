@@ -5,13 +5,14 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
 import { formatStatusLabel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsStatusFormatters";
+import type { AssignedStudentsListLabels } from "@/frontend/common/views/dashboard/profile/teacher/students/types/assignedStudentsList.types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
-import { useAppTranslation } from "@/shared/locale";
 
 type AssignedStudentsDataGridProps = {
   readonly rows: readonly AssignedStudentsRow[];
+  readonly labels: AssignedStudentsListLabels;
   readonly loading: boolean;
   readonly page: number;
   readonly pageSize: number;
@@ -20,17 +21,18 @@ type AssignedStudentsDataGridProps = {
 
 export function AssignedStudentsDataGrid({
   rows,
+  labels,
   loading,
   page: _page,
   pageSize,
   onPaginationModelChange: _onPaginationModelChange,
 }: Readonly<AssignedStudentsDataGridProps>) {
-  const t = useAppTranslation().profileTranslations.base.students;
+  const { columns } = labels;
 
-  const columns: GridColDef<AssignedStudentsRow>[] = [
+  const gridColumns: GridColDef<AssignedStudentsRow>[] = [
     {
       field: "studentName",
-      headerName: t.columns.studentName,
+      headerName: columns.studentName,
       flex: 1.5,
       minWidth: 260,
       renderCell: params => (
@@ -44,7 +46,7 @@ export function AssignedStudentsDataGrid({
     },
     {
       field: "parentName",
-      headerName: t.columns.parent,
+      headerName: columns.parent,
       flex: 1.5,
       minWidth: 260,
       renderCell: params => (
@@ -61,13 +63,13 @@ export function AssignedStudentsDataGrid({
     },
     {
       field: "className",
-      headerName: t.columns.class,
+      headerName: columns.class,
       flex: 1,
       minWidth: 160,
     },
     {
       field: "status",
-      headerName: t.columns.status,
+      headerName: columns.status,
       flex: 1,
       minWidth: 130,
       renderCell: params => (
@@ -80,7 +82,7 @@ export function AssignedStudentsDataGrid({
     },
     {
       field: "hoursPerWeek",
-      headerName: t.columns.hoursPerWeek,
+      headerName: columns.hoursPerWeek,
       flex: 1,
       minWidth: 160,
       renderCell: params => (
@@ -91,7 +93,7 @@ export function AssignedStudentsDataGrid({
     },
     {
       field: "classesRemaining",
-      headerName: t.columns.classes,
+      headerName: columns.classes,
       flex: 1,
       minWidth: 140,
       renderCell: params => (
@@ -105,9 +107,9 @@ export function AssignedStudentsDataGrid({
   return (
     <DesktopAppDataGrid
       rows={rows}
-      columns={columns}
+      columns={gridColumns}
       loading={loading}
-      emptyMessage={t.noRows}
+      emptyMessage={labels.emptyMessage}
       paginationOptions={{ mode: "client", pageSize, pageSizeOptions: [5, 10, 25] }}
       sx={{ border: "none" }}
     />

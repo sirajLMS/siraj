@@ -31,6 +31,7 @@ const StyledFormFieldset = styled("fieldset")(({ theme }) => ({
 
 export function ManualInvoiceDesktopView({
   labels,
+  profileLabels,
   selectedParentId,
   control,
   errors,
@@ -69,6 +70,7 @@ export function ManualInvoiceDesktopView({
                 control={control}
                 errors={errors}
                 labels={labels}
+                profileLabels={profileLabels}
                 selectedParentId={selectedParentId}
               />
               <BillingMonthSelectorDesktop control={control} errors={errors} labels={labels} />

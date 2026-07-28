@@ -23,7 +23,7 @@ import {
   groupEnvConfigEntriesByCategory,
   isEnvConfigSecretEntry,
 } from "@/frontend/common/views/dashboard/settings/utils/environmentConfig.utils";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import { type SettingsEnvironmentLabels, Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 function buildInitialDraftValues(entries: readonly EnvConfigEntryFieldsFragment[]): Record<string, string> {
   const drafts: Record<string, string> = {};
@@ -37,30 +37,12 @@ function buildInitialDraftValues(entries: readonly EnvConfigEntryFieldsFragment[
   return drafts;
 }
 
-export function useEnvironmentConfigViewModel(): EnvironmentConfigViewModel {
-  const labels = useAppTranslation().dashboardTranslations.settings.environment;
-  const locale = useAppLocale();
-  const notifications = useNotifications();
-  const hasPermission = useUserStore(state => state.hasPermission);
-  const userId = useUserStore(state => state.user?.id);
-  const canEdit = hasPermission(AppPermission.SettingsEditEnv);
-  const canView = hasPermission(AppPermission.SettingsView) || hasPermission(AppPermission.SettingsEditEnv);
-
-  const draftValues = useEnvironmentConfigSettingsStore(state => state.draftValues);
-  const savingKeys = useEnvironmentConfigSettingsStore(state => state.savingKeys);
-  const expandedCategories = useEnvironmentConfigSettingsStore(state => state.expandedCategories);
+function useEnvironmentConfigEntries(canView: boolean, userId: string | undefined) {
   const mergeDraftValues = useEnvironmentConfigSettingsStore(state => state.mergeDraftValues);
-  const setDraftValue = useEnvironmentConfigSettingsStore(state => state.setDraftValue);
-  const removeDraftValue = useEnvironmentConfigSettingsStore(state => state.removeDraftValue);
-  const setSaving = useEnvironmentConfigSettingsStore(state => state.setSaving);
-  const setCategoryExpanded = useEnvironmentConfigSettingsStore(state => state.setCategoryExpanded);
 
   const { data, loading, error, refetch } = useEnvConfigEntriesQuery({
     skip: !userId || !canView,
   });
-
-  const [upsertEntry] = useMutation(upsertEnvConfigEntryMutationDocument);
-  const [deleteEntry] = useMutation(deleteEnvConfigEntryMutationDocument);
 
   const entries = useMemo(
     () => (data?.envConfigEntries ?? []).filter((entry): entry is EnvConfigEntryFieldsFragment => entry != null),
@@ -77,12 +59,20 @@ export function useEnvironmentConfigViewModel(): EnvironmentConfigViewModel {
     mergeDraftValues(buildInitialDraftValues(entries));
   }, [entries, mergeDraftValues]);
 
-  const onDraftChange = useCallback(
-    (key: string, value: string) => {
-      setDraftValue(key, value);
-    },
-    [setDraftValue]
-  );
+  return { entries, groupedEntries, loading, error, refetch };
+}
+
+function useEnvironmentConfigMutations(
+  labels: SettingsEnvironmentLabels,
+  draftValues: Readonly<Record<string, string>>,
+  refetch: () => Promise<unknown>
+) {
+  const notifications = useNotifications();
+  const setSaving = useEnvironmentConfigSettingsStore(state => state.setSaving);
+  const removeDraftValue = useEnvironmentConfigSettingsStore(state => state.removeDraftValue);
+
+  const [upsertEntry] = useMutation(upsertEnvConfigEntryMutationDocument);
+  const [deleteEntry] = useMutation(deleteEnvConfigEntryMutationDocument);
 
   const onSave = useCallback(
     async (key: string) => {
@@ -136,6 +126,33 @@ export function useEnvironmentConfigViewModel(): EnvironmentConfigViewModel {
       removeDraftValue,
       setSaving,
     ]
+  );
+
+  return { onSave, onRevert };
+}
+
+export function useEnvironmentConfigViewModel(): EnvironmentConfigViewModel {
+  const labels = useAppTranslation(Translation.Dashboard.SettingsEnvironment);
+  const locale = useAppLocale();
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const userId = useUserStore(state => state.user?.id);
+  const canEdit = hasPermission(AppPermission.SettingsEditEnv);
+  const canView = hasPermission(AppPermission.SettingsView) || hasPermission(AppPermission.SettingsEditEnv);
+
+  const draftValues = useEnvironmentConfigSettingsStore(state => state.draftValues);
+  const savingKeys = useEnvironmentConfigSettingsStore(state => state.savingKeys);
+  const expandedCategories = useEnvironmentConfigSettingsStore(state => state.expandedCategories);
+  const setDraftValue = useEnvironmentConfigSettingsStore(state => state.setDraftValue);
+  const setCategoryExpanded = useEnvironmentConfigSettingsStore(state => state.setCategoryExpanded);
+
+  const { groupedEntries, loading, error, refetch } = useEnvironmentConfigEntries(canView, userId ?? undefined);
+  const { onSave, onRevert } = useEnvironmentConfigMutations(labels, draftValues, refetch);
+
+  const onDraftChange = useCallback(
+    (key: string, value: string) => {
+      setDraftValue(key, value);
+    },
+    [setDraftValue]
   );
 
   const getDisplayValue = useCallback(

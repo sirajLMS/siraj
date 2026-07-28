@@ -12,6 +12,7 @@ import {
 } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
+import type { ScheduleOverviewLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/scheduleOverview.types";
 import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { ScheduleOverviewMobileCard } from "@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.mobile";
@@ -44,19 +45,19 @@ type ScheduleOverviewMobileViewProps = Readonly<ScheduleOverviewViewModel>;
 
 function renderScheduleOverviewItem(
   row: DailyScheduleRow,
-  headers: ScheduleOverviewMobileViewProps["headers"],
-  statusLabels: ScheduleOverviewMobileViewProps["statusLabels"],
-  detailsLabel: ScheduleOverviewMobileViewProps["detailsLabel"],
+  labelsBySection: ScheduleOverviewLabelsBySection,
   showTimezones: ScheduleOverviewMobileViewProps["showTimezones"],
   locale: ScheduleOverviewMobileViewProps["locale"]
 ): ReactNode {
+  const { columns, status, actions } = labelsBySection;
+
   return (
     <MobileCardListItem variant="edge-to-edge">
       <ScheduleOverviewMobileCard
         row={row}
-        headers={headers}
-        statusLabels={statusLabels}
-        detailsLabel={detailsLabel}
+        headers={columns}
+        statusLabels={status}
+        detailsLabel={actions.detailsLabel}
         showTimezones={showTimezones}
         locale={locale}
       />
@@ -67,7 +68,7 @@ function renderScheduleOverviewItem(
 function ScheduleOverviewMobileHeader({
   title,
   selectedMetricLabel,
-}: Pick<ScheduleOverviewMobileViewProps, "title" | "selectedMetricLabel">) {
+}: Pick<ScheduleOverviewMobileViewProps, "selectedMetricLabel"> & { readonly title: string }) {
   return (
     <StyledSectionTitleRow>
       <StyledSectionTitle variant="titleLg">{title}</StyledSectionTitle>
@@ -80,57 +81,52 @@ function ScheduleOverviewMobileHeader({
 
 function ScheduleOverviewMobileToolbar({
   canScheduleFilterAdvanced,
-  dateLabel,
+  filters,
   dateValue,
-  todayLabel,
-  previousDayLabel,
-  nextDayLabel,
   onDateChange,
   selectedTeacher,
   onTeacherChange,
-  teacherPlaceholder,
   canDashboardSearch,
-  searchPlaceholder,
   searchValue,
   onSearchChange,
 }: Pick<
   ScheduleOverviewMobileViewProps,
   | "canScheduleFilterAdvanced"
-  | "dateLabel"
   | "dateValue"
-  | "todayLabel"
-  | "previousDayLabel"
-  | "nextDayLabel"
   | "onDateChange"
   | "selectedTeacher"
   | "onTeacherChange"
-  | "teacherPlaceholder"
   | "canDashboardSearch"
-  | "searchPlaceholder"
   | "searchValue"
   | "onSearchChange"
->) {
+> & {
+  readonly filters: ScheduleOverviewLabelsBySection["filters"];
+}) {
   const theme = useTheme();
 
   return (
     <StyledMobileSectionBody>
       {canScheduleFilterAdvanced ? (
         <ScheduleFilters
-          dateLabel={dateLabel}
+          dateLabel={filters.dateLabel}
           dateValue={dateValue}
-          todayLabel={todayLabel}
-          previousDayLabel={previousDayLabel}
-          nextDayLabel={nextDayLabel}
+          todayLabel={filters.todayLabel}
+          previousDayLabel={filters.previousDayLabel}
+          nextDayLabel={filters.nextDayLabel}
           onDateChange={onDateChange}
           teacherSelect={
-            <TeacherAutocompleteMobile value={selectedTeacher} onChange={onTeacherChange} label={teacherPlaceholder} />
+            <TeacherAutocompleteMobile
+              value={selectedTeacher}
+              onChange={onTeacherChange}
+              label={filters.teacherPlaceholder}
+            />
           }
         />
       ) : null}
 
       {canDashboardSearch ? (
         <TextField
-          placeholder={searchPlaceholder}
+          placeholder={filters.searchPlaceholder}
           value={searchValue}
           onChange={event => {
             onSearchChange(event.target.value);
@@ -161,10 +157,7 @@ function ScheduleOverviewMobileToolbar({
 function ScheduleOverviewMobileList({
   rows,
   loading,
-  emptyMessage,
-  headers,
-  statusLabels,
-  detailsLabel,
+  labelsBySection,
   showTimezones,
   locale,
   page,
@@ -173,24 +166,17 @@ function ScheduleOverviewMobileList({
   onPageChange,
 }: Pick<
   ScheduleOverviewMobileViewProps,
-  | "rows"
-  | "loading"
-  | "emptyMessage"
-  | "headers"
-  | "statusLabels"
-  | "detailsLabel"
-  | "showTimezones"
-  | "locale"
-  | "page"
-  | "pageSize"
-  | "totalCount"
-  | "onPageChange"
->) {
+  "rows" | "loading" | "showTimezones" | "locale" | "page" | "pageSize" | "totalCount" | "onPageChange"
+> & {
+  readonly labelsBySection: ScheduleOverviewLabelsBySection;
+}) {
+  const { shell } = labelsBySection;
+
   return (
     <MobileCardList<DailyScheduleRow>
       rows={rows}
       loading={loading}
-      emptyMessage={emptyMessage}
+      emptyMessage={shell.emptyMessage}
       renderSkeleton={() => (
         <MobileCardListItem variant="edge-to-edge">
           <ScheduleOverviewCardSkeleton />
@@ -204,7 +190,7 @@ function ScheduleOverviewMobileList({
       gap={2}
       layout="edge-to-edge"
       getKey={row => row.id ?? ""}
-      renderItem={row => renderScheduleOverviewItem(row, headers, statusLabels, detailsLabel, showTimezones, locale)}
+      renderItem={row => renderScheduleOverviewItem(row, labelsBySection, showTimezones, locale)}
       paginationOptions={buildServerPaginationOptions({
         page,
         pageSize,
@@ -216,33 +202,27 @@ function ScheduleOverviewMobileList({
 }
 
 export function ScheduleOverviewMobileView(props: ScheduleOverviewMobileViewProps) {
+  const { shell, filters } = props.labelsBySection;
+
   return (
     <Stack direction="column" sx={{ gap: { xs: 0, md: 2 } }}>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <ScheduleOverviewMobileHeader title={props.title} selectedMetricLabel={props.selectedMetricLabel} />
+        <ScheduleOverviewMobileHeader title={shell.title} selectedMetricLabel={props.selectedMetricLabel} />
         <ScheduleOverviewMobileToolbar
           canScheduleFilterAdvanced={props.canScheduleFilterAdvanced}
-          dateLabel={props.dateLabel}
+          filters={filters}
           dateValue={props.dateValue}
-          todayLabel={props.todayLabel}
-          previousDayLabel={props.previousDayLabel}
-          nextDayLabel={props.nextDayLabel}
           onDateChange={props.onDateChange}
           selectedTeacher={props.selectedTeacher}
           onTeacherChange={props.onTeacherChange}
-          teacherPlaceholder={props.teacherPlaceholder}
           canDashboardSearch={props.canDashboardSearch}
-          searchPlaceholder={props.searchPlaceholder}
           searchValue={props.searchValue}
           onSearchChange={props.onSearchChange}
         />
         <ScheduleOverviewMobileList
           rows={props.rows}
           loading={props.loading}
-          emptyMessage={props.emptyMessage}
-          headers={props.headers}
-          statusLabels={props.statusLabels}
-          detailsLabel={props.detailsLabel}
+          labelsBySection={props.labelsBySection}
           showTimezones={props.showTimezones}
           locale={props.locale}
           page={props.page}

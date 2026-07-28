@@ -20,7 +20,7 @@ import {
   getPaymentMethodCatalogOptionLabel,
   type PaymentMethodCatalogOption,
 } from "@/frontend/common/lib/payment-method";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type { PaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
 export type { PaymentMethodCatalogOption };
@@ -304,7 +304,7 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
   listAttached = false,
   showSlug = true,
 }: PaymentMethodAutocompleteProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.paymentMethod.select;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod).select;
   // EXCEPTION: documented in frontend/common/components/ui/AGENTS.md (purely ephemeral autocomplete open state — allowed in viewport-agnostic primitives)
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;

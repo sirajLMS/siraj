@@ -5,13 +5,19 @@ import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 import type { SubjectCardProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobileClassAvatar } from "@/frontend/mobile/components/ui/avatar/MobileClassAvatar";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
-import { useAppTranslation } from "@/shared/locale";
 
 /**
  * SubjectCardMobile — edge-to-edge list item for MobileCardList.
  */
-export function SubjectCardMobile({ subject, onEdit, onDelete, onClick, canManage }: Readonly<SubjectCardProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
+export function SubjectCardMobile({
+  labels,
+  subject,
+  onEdit,
+  onDelete,
+  onClick,
+  canManage,
+}: Readonly<SubjectCardProps>) {
+  const t = labels;
 
   return (
     <MobileCardListItem variant="edge-to-edge" interactive>

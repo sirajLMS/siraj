@@ -3,16 +3,16 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, FormControl, InputAdornment, MenuItem, Select, TextField } from "@mui/material";
 import type { PermissionCatalogToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { useAppTranslation } from "@/shared/locale";
 
 export function PermissionCatalogToolbarDesktop({
+  labels,
   searchQuery,
   selectedCategory,
   categories,
   onSearchChange,
   onCategoryChange,
 }: Readonly<PermissionCatalogToolbarProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   return (
     <Box

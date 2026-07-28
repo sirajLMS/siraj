@@ -18,7 +18,6 @@ import {
 } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
 import { combineDateTime } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
 
 const lazyViews = createLazyView<RescheduleViewModel>(
   () =>
@@ -34,7 +33,6 @@ const lazyViews = createLazyView<RescheduleViewModel>(
 export function RescheduleContainer() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const t = useAppTranslation().dashboardTranslations.rescheduleForm;
   const storeSession = useRescheduleStore(state => state.session);
   const setShowSuccess = useRescheduleStore(state => state.setShowSuccess);
   const classInstanceId = searchParams.get("classInstanceId") || storeSession.sessionId || "";
@@ -144,7 +142,7 @@ export function RescheduleContainer() {
 
   if (!classInstanceId || !classInstance) {
     logger.error("Error fetching class details for rescheduling:", error);
-    return <Box sx={{ p: 3, textAlign: "center" }}>{t.classInstanceNotFound}</Box>;
+    return <Box sx={{ p: 3, textAlign: "center" }}>{viewModel.labels.classInstanceNotFound}</Box>;
   }
 
   return (

@@ -5,7 +5,7 @@ import { AudienceAutocomplete } from "@/frontend/common/components/ui/input/user
 import type { StudentAutocompleteProps } from "@/frontend/common/components/ui/input/userSelect/types";
 import { USER_SELECT_LIMIT } from "@/frontend/common/components/ui/input/userSelect/userSelect.constants";
 import { useStudentAutocomplete } from "@/frontend/common/hooks/userAutocomplete";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function StudentAutocomplete({
   value,
@@ -23,7 +23,7 @@ export function StudentAutocomplete({
   scope,
   skip,
 }: StudentAutocompleteProps) {
-  const t = useAppTranslation().uiTranslations.userSelect;
+  const t = useAppTranslation(Translation.Ui.UserSelect);
   const { options, loading, inputValue, onInputChange } = useStudentAutocomplete({ value, scope, skip });
 
   const usesServerSearch = !scope?.parentId && !scope?.viewerAssigned && !scope?.primaryTeacherId;

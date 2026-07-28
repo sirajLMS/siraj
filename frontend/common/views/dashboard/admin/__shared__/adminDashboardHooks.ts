@@ -8,17 +8,15 @@ import { adminDashboardScheduleQueryDocument } from "@/frontend/common/graphql/s
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
+import type { AdminDashboardLastUpdatedLabels } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import { resolveDailyScheduleMetricFilter } from "@/frontend/common/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
-import { useAppTranslation } from "@/shared/locale";
 
 export const ADMIN_DASHBOARD_PAGE_SIZE = 10;
 
 /** Tracks when dashboard data first arrives and computes an elapsed-time label that updates every minute. */
-export function useLastUpdatedLabel(data: unknown) {
-  const admin = useAppTranslation().dashboardTranslations.admin;
-
+export function useLastUpdatedLabel(data: unknown, labels: AdminDashboardLastUpdatedLabels) {
   const [dataArrivedAt, setDataArrivedAt] = useState<number | null>(null);
-  const [lastUpdated, setLastUpdated] = useState(admin.updatedJustNow);
+  const [lastUpdated, setLastUpdated] = useState(labels.updatedJustNow);
 
   useEffect(() => {
     if (data && dataArrivedAt === null) {
@@ -28,20 +26,20 @@ export function useLastUpdatedLabel(data: unknown) {
 
   useEffect(() => {
     if (dataArrivedAt === null) {
-      setLastUpdated(admin.updatedJustNow);
+      setLastUpdated(labels.updatedJustNow);
       return;
     }
     const computeLabel = () => {
       const elapsedMin = Math.floor((Date.now() - dataArrivedAt) / 60000);
-      if (elapsedMin < 1) return admin.updatedJustNow;
-      return admin.updatedMinutesAgo(elapsedMin);
+      if (elapsedMin < 1) return labels.updatedJustNow;
+      return labels.updatedMinutesAgo(elapsedMin);
     };
     setLastUpdated(computeLabel());
     const interval = setInterval(() => {
       setLastUpdated(computeLabel());
     }, 60000);
     return () => clearInterval(interval);
-  }, [dataArrivedAt, admin]);
+  }, [dataArrivedAt, labels]);
 
   return lastUpdated;
 }

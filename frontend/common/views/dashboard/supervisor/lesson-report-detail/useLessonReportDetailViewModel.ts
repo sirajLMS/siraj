@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { lessonReportByIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
-import { type PendingReviewsLabels, useAppTranslation } from "@/shared/locale";
+import { type PendingReviewsLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface LessonReportDetailViewModel {
   readonly report: PendingReviewRow | null;
@@ -22,13 +22,13 @@ export type UseLessonReportDetailViewModelProps = Record<string, never>;
 export function useLessonReportDetailViewModel(
   _props: UseLessonReportDetailViewModelProps
 ): LessonReportDetailViewModel {
-  const pendingLabels = useAppTranslation().dashboardTranslations.supervisorPortalPendingReviews;
-  const lessonReportLabels = useAppTranslation().dashboardTranslations.lmsLessonReports;
+  const pendingLabels = useAppTranslation(Translation.Dashboard.SupervisorPortalPendingReviews);
+  const lessonReportLabels = useAppTranslation(Translation.Dashboard.LmsLessonReports);
 
   const params = useParams();
   const reportId = typeof params?.id === "string" ? params.id : "";
 
-  useDocumentTitle(null, "dashboard.lmsLessonReports", "title");
+  useDocumentTitle(null, Translation.Dashboard.LmsLessonReports, "title");
 
   const { data, loading, error } = useQuery(lessonReportByIdQueryDocument, {
     variables: { reportId },

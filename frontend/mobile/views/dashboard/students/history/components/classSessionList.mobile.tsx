@@ -6,10 +6,10 @@ import { alpha } from "@mui/material/styles";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ClassSession, ClassSessionListProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { isJoinableClassSession } from "@/frontend/common/views/dashboard/students/history/types";
+import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
 function formatDuration(mins: number): string {
   if (mins < 60) return `${mins}m`;
@@ -71,7 +71,7 @@ function ClassSessionCard({
   statusLabel: string;
   durationLabel: string;
 }>) {
-  const t = useAppTranslation().dashboardTranslations.studentHistory.classDetails;
+  const t = useStudentHistoryLabels().classDetails;
   const [timeValue, timePeriod] = session.time.split(" ");
   const showJoin = isJoinableClassSession(session.executionState, session.outcome, { isFrozen: session.isFrozen });
 
@@ -164,7 +164,7 @@ function ClassSessionCard({
 }
 
 export function ClassSessionListMobile({ dateStr, sessions }: Readonly<ClassSessionListProps>) {
-  const t = useAppTranslation().dashboardTranslations.studentHistory.classDetails;
+  const t = useStudentHistoryLabels().classDetails;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

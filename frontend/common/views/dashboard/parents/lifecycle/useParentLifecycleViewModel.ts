@@ -1,8 +1,10 @@
 "use client";
 
 import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
+import { type ParentLifecycleLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface ParentLifecycleViewModel {
+  readonly labels: ParentLifecycleLabels;
   readonly parent: ParentLifecycleViewProps["parent"];
   readonly isUpdating: boolean;
   readonly onUpdateLifecycle: (
@@ -11,10 +13,15 @@ export interface ParentLifecycleViewModel {
   ) => Promise<void>;
 }
 
-export type UseParentLifecycleViewModelProps = ParentLifecycleViewModel;
+export type UseParentLifecycleViewModelProps = Omit<ParentLifecycleViewModel, "labels">;
 
 export function useParentLifecycleViewModel(
   props: Readonly<UseParentLifecycleViewModelProps>
 ): ParentLifecycleViewModel {
-  return props;
+  const labels = useAppTranslation(Translation.Dashboard.ParentLifecycle);
+
+  return {
+    labels,
+    ...props,
+  };
 }

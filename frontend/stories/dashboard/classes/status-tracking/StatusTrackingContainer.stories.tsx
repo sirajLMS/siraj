@@ -15,14 +15,11 @@ import {
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
 import { StatusTrackingView } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusTrackingView";
-import type {
-  CardListLabels,
-  RawMetric,
-  StatusTrackingLabels,
-  StatusTrackingRow,
-  SuspensionAnalyticsLabels,
-} from "@/frontend/common/views/dashboard/classes/status/tracking/types";
-import { useStatusTrackingLabels } from "@/frontend/common/views/dashboard/classes/status/tracking/useStatusTrackingLabels";
+import type { RawMetric, StatusTrackingRow } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
+import {
+  buildStatusTrackingLabelsBySection,
+  useStatusTrackingLabels,
+} from "@/frontend/common/views/dashboard/classes/status/tracking/useStatusTrackingLabels";
 
 interface StoryStatusTrackingState {
   readonly metrics: readonly RawMetric[];
@@ -199,36 +196,6 @@ const useStoryStatusTrackingStore = create<StoryStatusTrackingState>(set => ({
   },
 }));
 
-function buildCardListLabels(labels: StatusTrackingLabels): CardListLabels {
-  return {
-    joinSession: labels.joinSession,
-    activate: labels.activate,
-    reschedule: labels.reschedule,
-    verifyDocuments: labels.verifyDocuments,
-    sessionLocked: labels.sessionLocked,
-    sessionEnded: labels.sessionEnded,
-    todaysSchedule: labels.todaysSchedule,
-    regular: labels.regular,
-    suspendedPending: labels.suspendedPending,
-    onLeave: labels.onLeave,
-    pendingVerification: labels.pendingVerification,
-    noEntries: labels.noEntries,
-  };
-}
-
-function buildAnalyticsLabels(labels: StatusTrackingLabels): SuspensionAnalyticsLabels {
-  return {
-    suspensionAnalytics: labels.suspensionAnalytics,
-    analyticsNote: labels.analyticsNote,
-    urgentTask: labels.urgentTask,
-    accountsLocked: labels.accountsLocked,
-    auditDescription: labels.auditDescription,
-    openAuditLogs: labels.openAuditLogs,
-    suspended: labels.suspendedPending,
-    days: labels.days,
-  };
-}
-
 function StoryStatusTrackingContainer() {
   const labels = useStatusTrackingLabels();
   const router = useRouter();
@@ -242,8 +209,7 @@ function StoryStatusTrackingContainer() {
 
   const suspendedCount = Number(metrics.find(m => m.key === "suspended")?.count ?? 0);
 
-  const cardListLabels = buildCardListLabels(labels);
-  const analyticsLabels = buildAnalyticsLabels(labels);
+  const labelsBySection = buildStatusTrackingLabelsBySection(labels);
 
   const handleNewReport = () => {
     router.push("/classes/new");
@@ -270,7 +236,7 @@ function StoryStatusTrackingContainer() {
       rows={rows}
       totalSessions={totalSessions}
       suspendedCount={suspendedCount}
-      labels={labels}
+      labelsBySection={labelsBySection}
       dateValue={getTodayScheduleFilterDate()}
       onDateChange={() => {}}
       onActivate={activateSession}
@@ -278,8 +244,6 @@ function StoryStatusTrackingContainer() {
       onVerify={verifySession}
       onNewReport={handleNewReport}
       onOpenAuditLogs={handleOpenAuditLogs}
-      cardListLabels={cardListLabels}
-      analyticsLabels={analyticsLabels}
     />
   );
 }

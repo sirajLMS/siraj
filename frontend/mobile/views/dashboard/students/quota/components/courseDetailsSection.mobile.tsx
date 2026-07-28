@@ -20,12 +20,11 @@ import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/c
 import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/quotaFormAccessContext";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import { SectionHeaderMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/sectionHeader.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 const teacherLabelId = "student-quota-teacher-label-mobile";
 
 function TeacherField() {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const { labels: t } = useQuotaFormAccess();
   const { canViewTeacher } = useQuotaFormAccess();
   const {
     control,
@@ -84,7 +83,7 @@ function TeacherField() {
 }
 
 function TotalClassesField() {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const { labels: t } = useQuotaFormAccess();
   const { canViewTeacher } = useQuotaFormAccess();
   const {
     control,
@@ -117,7 +116,7 @@ function TotalClassesField() {
 }
 
 function ClassesLeftField() {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const { labels: t } = useQuotaFormAccess();
   const { readOnly, canEditQuota, canViewQuota } = useQuotaFormAccess();
   const {
     control,
@@ -203,7 +202,7 @@ function ClassesLeftField() {
 }
 
 export function CourseDetailsSectionMobile() {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const { labels: t } = useQuotaFormAccess();
   const { canViewTeacher, canViewQuota } = useQuotaFormAccess();
 
   if (!canViewQuota && !canViewTeacher) {

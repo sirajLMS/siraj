@@ -8,8 +8,9 @@ import { PhoneDisplay } from "@/frontend/common/components/ui/display/phoneDispl
 import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
-import { useAppTranslation } from "@/shared/locale";
+import { useProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/useProfileSharedBaseLabels";
 
 type CoreContactFormFields = {
   phone?: string;
@@ -21,6 +22,7 @@ type CoreContactViewProps = {
   readonly phone: string | null | undefined;
   readonly sectionTitle: string;
   readonly phoneLabel: string;
+  readonly baseLabels?: ProfileSharedBaseLabels;
 };
 
 type CoreContactEditWithRegisterProps = {
@@ -28,6 +30,7 @@ type CoreContactEditWithRegisterProps = {
   readonly scope?: ProfileScope;
   readonly sectionTitle: string;
   readonly phoneLabel: string;
+  readonly baseLabels?: ProfileSharedBaseLabels;
   readonly register: UseFormRegister<CoreContactFormFields>;
 };
 
@@ -36,6 +39,7 @@ type CoreContactEditWithControlProps<T extends CoreContactFormFields = CoreConta
   readonly scope?: ProfileScope;
   readonly sectionTitle: string;
   readonly phoneLabel: string;
+  readonly baseLabels?: ProfileSharedBaseLabels;
   readonly control: Control<T>;
 };
 
@@ -47,7 +51,8 @@ type CoreContactSectionProps<T extends CoreContactFormFields = CoreContactFormFi
 export function CoreContactSection<T extends CoreContactFormFields = CoreContactFormFields>(
   props: CoreContactSectionProps<T>
 ) {
-  const t = useAppTranslation().profileTranslations.base;
+  const fallbackBaseLabels = useProfileSharedBaseLabels();
+  const t = props.baseLabels ?? fallbackBaseLabels;
   const { canView, showField } = useProfileFieldAccess({ scope: props.scope });
 
   if (!canView("core_contact")) {
@@ -67,7 +72,7 @@ export function CoreContactSection<T extends CoreContactFormFields = CoreContact
   }
 
   if (!showField(props.phone, "core_contact")) {
-    return <ProfileRestrictedSection title={props.sectionTitle} />;
+    return <ProfileRestrictedSection title={props.sectionTitle} labels={t.fieldAccess} />;
   }
 
   return (

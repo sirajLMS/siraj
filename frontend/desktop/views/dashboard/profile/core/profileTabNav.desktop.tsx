@@ -2,17 +2,15 @@
 
 import { Box, Tab, Tabs } from "@mui/material";
 import type { ProfileTabNavVariantProps } from "@/frontend/common/views/dashboard/profile/core/profileTabNavTypes";
-import { useAppTranslation } from "@/shared/locale";
 
 export type ProfileTabNavDesktopViewProps = ProfileTabNavVariantProps;
 
 export function ProfileTabNavDesktopView({
+  labels,
   availableTabs,
   currentTab,
   onTabChange,
 }: Readonly<ProfileTabNavDesktopViewProps>) {
-  const t = useAppTranslation().profileTranslations.base;
-
   if (availableTabs.length === 0) {
     return null;
   }
@@ -29,7 +27,7 @@ export function ProfileTabNavDesktopView({
           <Tab
             key={tab.id}
             value={tab.id}
-            label={t.shell.tabs[tab.id]}
+            label={labels.shell.tabs[tab.id]}
             sx={theme => ({
               fontSize: theme.typography.bodyMd.fontSize,
               ...(currentTab === tab.id

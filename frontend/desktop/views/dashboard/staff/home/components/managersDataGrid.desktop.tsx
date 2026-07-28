@@ -12,7 +12,6 @@ import type { BaseManagersListProps, Manager, ManagerRole } from "@/frontend/com
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopPersonProfileLinkCell, DesktopPhoneDisplay } from "@/frontend/desktop/components/ui/display";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledRoleChip = styled(Chip, {
   shouldForwardProp: prop => prop !== "role",
@@ -43,6 +42,7 @@ interface ManagersDataGridDesktopProps extends BaseManagersListProps {
 }
 
 export function ManagersDataGridDesktop({
+  labels,
   managers,
   page = 0,
   pageSize = 10,
@@ -50,7 +50,7 @@ export function ManagersDataGridDesktop({
   onPageChange,
   loading = false,
 }: Readonly<ManagersDataGridDesktopProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffDirectory;
+  const t = labels;
 
   // RENDER OPT JUSTIFICATION: AppDataGrid re-renders excessively when its `columns` prop identity changes between renders; this useMemo preserves a stable column-array reference keyed on the translated labels so cells don't recompute unnecessarily.
   const columns = useMemo<GridColDef<Manager>[]>(
@@ -122,10 +122,10 @@ export function ManagersDataGridDesktop({
         width: 140,
         align: "center",
         headerAlign: "center",
-        renderCell: params => <ManagerRowActions manager={params.row} />,
+        renderCell: params => <ManagerRowActions labels={labels} manager={params.row} />,
       },
     ],
-    [t]
+    [labels, t]
   );
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;

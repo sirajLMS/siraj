@@ -26,10 +26,10 @@ import type {
 import {
   type TeacherReassignmentViewModel,
   type UseTeacherReassignmentViewModelProps,
+  useTeacherReassignmentCoordinatorLabels,
   useTeacherReassignmentViewModel,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
 
 // NEW FOR PLAN v5: Container invokes the ViewModel unconditionally (Rules of
 // Hooks — biome's `useHookAtTopLevel` enforces that). Below the data-load
@@ -98,8 +98,7 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
   // The `_props` param is retained only for callers that previously passed
   // view-props (no current caller does); it's intentionally ignored via the
   // named-unused binding below.
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment;
-  const tc = useAppTranslation().commonTranslations;
+  const { labels: reassignmentLabels, common: commonLabels } = useTeacherReassignmentCoordinatorLabels();
   const params = useParams();
   const studentId = typeof params?.id === "string" ? params.id : "";
   const notifications = useNotifications();
@@ -116,22 +115,25 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
 
   const [reassignTeacher, { loading: isReassigning }] = useMutation(reassignStudentTeacherMutationDocument, {
     onCompleted: () => {
-      notifications.show(t.actions.reassignSuccess, { severity: "success", autoHideDuration: 4000 });
+      notifications.show(reassignmentLabels.actions.reassignSuccess, { severity: "success", autoHideDuration: 4000 });
     },
     onError: mutationError => {
       logger.error("Teacher reassignment failed:", { mutationError });
-      notifications.show(tc.operationFailed, { severity: "error", autoHideDuration: 5000 });
+      notifications.show(commonLabels.operationFailed, { severity: "error", autoHideDuration: 5000 });
     },
     refetchQueries: [{ query: studentByIdQueryDocument, variables: { studentId } }],
   });
 
   const [changeStatus, { loading: isChangingStatus }] = useMutation(changeStudentStatusMutationDocument, {
     onCompleted: () => {
-      notifications.show(t.actions.statusChangeSuccess, { severity: "success", autoHideDuration: 4000 });
+      notifications.show(reassignmentLabels.actions.statusChangeSuccess, {
+        severity: "success",
+        autoHideDuration: 4000,
+      });
     },
     onError: mutationError => {
       logger.error("Student status change failed:", { mutationError });
-      notifications.show(tc.operationFailed, { severity: "error", autoHideDuration: 5000 });
+      notifications.show(commonLabels.operationFailed, { severity: "error", autoHideDuration: 5000 });
     },
     refetchQueries: [{ query: studentByIdQueryDocument, variables: { studentId } }],
   });
@@ -190,7 +192,7 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
   const viewModel = useTeacherReassignmentViewModel(viewModelProps);
 
   if (!studentId) {
-    return <ReassignmentErrorState message={t.errors.invalidId} />;
+    return <ReassignmentErrorState message={reassignmentLabels.errors.invalidId} />;
   }
 
   if (studentLoading) {
@@ -199,11 +201,11 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
 
   if (studentError) {
     logger.error("Error loading teacher reassignment data:", { studentError });
-    return <ReassignmentErrorState message={tc.loadFailed} />;
+    return <ReassignmentErrorState message={commonLabels.loadFailed} />;
   }
 
   if (!student) {
-    return <ReassignmentErrorState message={t.errors.invalidId} />;
+    return <ReassignmentErrorState message={reassignmentLabels.errors.invalidId} />;
   }
 
   return (

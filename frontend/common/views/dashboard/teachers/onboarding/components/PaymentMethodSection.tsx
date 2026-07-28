@@ -10,16 +10,16 @@ import { PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/g
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import { usePaymentMethodCatalogs } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeacherOnboardingLabels } from "@/shared/locale";
 
 interface PaymentMethodSectionProps {
   readonly control: Control<TeacherOnboardingFormData>;
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
+  readonly labels: Pick<TeacherOnboardingLabels, "sections">;
 }
 
-export function PaymentMethodSection({ control, errors }: Readonly<PaymentMethodSectionProps>) {
+export function PaymentMethodSection({ control, errors, labels }: Readonly<PaymentMethodSectionProps>) {
   const { setValue } = useFormContext<TeacherOnboardingFormData>();
-  const labels = useAppTranslation().dashboardTranslations.teacherOnboarding;
 
   const payoutMethod = useWatch({ control, name: "payoutMethod" });
   const hasMethod = Boolean(payoutMethod);

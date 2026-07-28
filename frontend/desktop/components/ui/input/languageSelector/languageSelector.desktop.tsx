@@ -10,7 +10,7 @@ import { getLanguageDisplayName, languages } from "@/frontend/common/lib/locale"
 import type { LanguageType } from "@/frontend/common/lib/locale/language/types";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type LanguageSelectorProps = {
   readonly language?: LanguageType | null;
@@ -37,7 +37,7 @@ export const LanguageSelectorDesktop: React.FC<LanguageSelectorProps> = ({
   onBlurAction: onBlur,
   style,
 }: LanguageSelectorProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.languageSelector;
+  const t = useAppTranslation(Translation.Ui.LanguageSelector);
   const locale = useAppLocale();
 
   const getLanguageName = useCallback((code: string) => getLanguageDisplayName(code, locale), [locale]);

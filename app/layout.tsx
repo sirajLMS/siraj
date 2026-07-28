@@ -108,10 +108,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           defaultMode={initialTheme}
           modeStorageKey="theme" // match the existing localStorage key from `theme-detection.ts`
         />
-        {/* Compile-time locale provider — client-side loads `messagesByLocale`
-            from the barrel directly; only the serializable `locale` enum
-            value crosses the Server→Client boundary (per RSC protocol,
-            function-valued translation keys cannot be serialized). */}
+        {/* LocaleProvider supplies locale + TranslationProvider (Suspense cache).
+            Handle-based useAppTranslation lazy-loads namespaces per route. */}
         <LocaleProvider locale={locale}>
           <MuiProvider initialTheme={initialTheme}>
             <AppApolloProvider>

@@ -75,6 +75,7 @@ export function ClassAuditViewMobile({
         <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 2, lg: 2 } }}>
           <OnlineMeetingCardMobile
             meetingInfo={audit.meetingInfo}
+            labels={labels.meetingInfo}
             showJoin={isJoinableClassInstance(audit.status, audit.outcome, { isFrozen: audit.isFrozen ?? false })}
           />
         </Grid>

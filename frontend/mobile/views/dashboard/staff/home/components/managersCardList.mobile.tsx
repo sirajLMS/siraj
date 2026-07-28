@@ -8,7 +8,7 @@ import { ManagerRowActions } from "@/frontend/common/views/dashboard/staff/home/
 import type { Manager, ManagerRole } from "@/frontend/common/views/dashboard/staff/home/types";
 import { MobileCardListItem, MobilePhoneDisplay, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
-import { useAppTranslation } from "@/shared/locale";
+import type { StaffDirectoryLabels } from "@/shared/locale";
 
 const StyledCardActionsBox = styled(Box)(({ theme }) => ({
   position: "absolute",
@@ -67,12 +67,13 @@ const StyledContactItemBox = styled(Stack)(({ theme }) => ({
 
 // VARIANT JUSTIFICATION: mobile card list uses the shared base shape with no extra fields; aliased as a named type for tier call-site clarity (Class C variant per specs §4.3).
 export interface ManagersCardListMobileProps {
+  readonly labels: StaffDirectoryLabels;
   readonly managers: readonly Manager[];
   readonly paginationOptions: ListPaginationOptions;
 }
 
-export function ManagersCardListMobile({ managers, paginationOptions }: Readonly<ManagersCardListMobileProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffDirectory;
+export function ManagersCardListMobile({ labels, managers, paginationOptions }: Readonly<ManagersCardListMobileProps>) {
+  const t = labels;
 
   return (
     <MobileCardList
@@ -92,7 +93,7 @@ export function ManagersCardListMobile({ managers, paginationOptions }: Readonly
             })}
           >
             <StyledCardActionsBox>
-              <ManagerRowActions manager={manager} />
+              <ManagerRowActions labels={labels} manager={manager} />
             </StyledCardActionsBox>
 
             <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", mb: 2, pe: 14 }}>

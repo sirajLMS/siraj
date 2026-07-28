@@ -3,7 +3,8 @@
 import { useNotifications } from "@toolpad/core/useNotifications";
 import type * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { CatalogImageUploadLabels } from "@/shared/locale/types/ui";
 
 // NEW FOR PLAN v5: migrated hook from
 //   frontend/{mobile,desktop}/components/ui/input/catalogImageUpload/*.{m,d}.tsx
@@ -37,7 +38,7 @@ export type UseImageUploadResult = {
   readonly handleUrlChange: (value: string) => void;
 };
 
-type TranslationBundle = ReturnType<typeof useAppTranslation>["uiTranslations"]["catalogImageUpload"];
+type TranslationBundle = CatalogImageUploadLabels;
 
 type NotifyFn = (message: string, options: { severity: "error" | "warning" | "info" | "success" }) => void;
 
@@ -270,7 +271,7 @@ const applyUploadOutcome = (
 
 export function useImageUpload(params: ImageUploadHookParams): UseImageUploadResult {
   const { onImageUrlChangeAction, onUploadAction, onFilePathChangeAction, maxSizeMb = DEFAULT_MAX_SIZE_MB } = params;
-  const t = useAppTranslation().uiTranslations.catalogImageUpload;
+  const t = useAppTranslation(Translation.Ui.CatalogImageUpload);
   const notifications = useNotifications();
   const notify = notifications.show.bind(notifications);
 

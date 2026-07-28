@@ -13,7 +13,7 @@ import {
   mapSettingsTimezoneRows,
   matchesSearchQuery,
 } from "@/frontend/common/views/dashboard/settings/utils/settingsTimezones.utils";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 function useSettingsTimezonesSearchState() {
   const searchQuery = useSettingsTimezonesStore(state => state.searchQuery);
@@ -42,7 +42,7 @@ function useSettingsTimezonesSearchState() {
 }
 
 export function useSettingsTimezonesViewModel(): SettingsTimezonesViewModel {
-  const labels = useAppTranslation().dashboardTranslations.settings.timezones;
+  const labels = useAppTranslation(Translation.Dashboard.SettingsTimezones);
   const page = useSettingsTimezonesStore(state => state.page);
   const setPage = useSettingsTimezonesStore(state => state.setPage);
   const { searchQuery, debouncedSearch, isSearchActive, isSearchPending, onSearchChange } =

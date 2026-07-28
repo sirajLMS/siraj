@@ -12,7 +12,7 @@ import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGri
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type PaymentMethodListProps = {
   readonly methods: readonly PaymentMethodRow[];
@@ -33,7 +33,7 @@ export function PaymentMethodList({
   onDeleteAction,
   onSetDefaultAction,
 }: PaymentMethodListProps) {
-  const t = useAppTranslation().uiTranslations.paymentMethod;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod);
   const tList = t.list;
 
   const columns = useMemo<GridColDef<PaymentMethodRow>[]>(() => {

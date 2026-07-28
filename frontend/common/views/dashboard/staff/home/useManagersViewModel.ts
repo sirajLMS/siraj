@@ -6,8 +6,10 @@ import type {
   ManagerStatusFilter,
   NonNullableManagerDirectoryMetrics,
 } from "@/frontend/common/views/dashboard/staff/home/types";
+import type { StaffDirectoryLabels } from "@/shared/locale";
 
 export interface ManagersViewModel {
+  readonly labels: StaffDirectoryLabels;
   readonly managers: readonly Manager[];
   readonly metrics: NonNullableManagerDirectoryMetrics;
   readonly totalManagers: number | undefined;

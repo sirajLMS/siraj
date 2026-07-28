@@ -4,7 +4,7 @@ import { Box, Tooltip, Typography } from "@mui/material";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { StyledMonospaceLabel } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
 import { buildScheduleTimezoneOffsetDetail } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 export interface ScheduleTimezoneOffsetCellProps {
   readonly timeValue: string | null | undefined;
@@ -60,7 +60,7 @@ function ScheduleTimezoneOffsetTooltipBody({
  */
 export function ScheduleTimezoneOffsetCell({ timeValue, timezone, at }: ScheduleTimezoneOffsetCellProps) {
   const locale = useAppLocale();
-  const labels = useAppTranslation().dashboardTranslations.admin.timezoneOffsetDetail;
+  const labels = useAppTranslation(Translation.Dashboard.Admin).timezoneOffsetDetail;
   const viewerTimezone = resolveBrowserIanaTimezoneId();
   const detail = buildScheduleTimezoneOffsetDetail({
     timeValue,

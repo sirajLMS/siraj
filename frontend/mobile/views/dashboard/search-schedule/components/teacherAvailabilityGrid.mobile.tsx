@@ -7,17 +7,15 @@ import { edgeToEdgeCardShellSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import type { TeacherAvailabilityGridProps } from "@/frontend/common/views/dashboard/search-schedule/types";
 import { TeacherAvailabilityDayPillMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityDayPill.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherAvailabilityGridMobile({
+  labels,
   teacher,
   fromDate,
   dateColumns,
   gapsByDate,
   onOpenMonthDrawer,
 }: Readonly<TeacherAvailabilityGridProps>) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
-
   return (
     <Paper
       elevation={0}
@@ -39,19 +37,19 @@ export function TeacherAvailabilityGridMobile({
           {teacher.name ?? ""}
         </Typography>
         {teacher.gender ? (
-          <Chip label={teacher.gender === "MALE" ? t.male : t.female} size="small" variant="outlined" />
+          <Chip label={teacher.gender === "MALE" ? labels.male : labels.female} size="small" variant="outlined" />
         ) : null}
         <Chip
-          label={t.availableDaysCount(teacher.availableDaysCount ?? 0)}
+          label={labels.availableDaysCount(teacher.availableDaysCount ?? 0)}
           size="small"
           color="primary"
           variant="outlined"
         />
         {teacher.timezone ? <TimezoneDisplay timezone={teacher.timezone} typographyVariant="bodyMd" /> : null}
         <Box sx={{ flexGrow: 1 }} />
-        <Tooltip title={t.viewMonthSchedule}>
+        <Tooltip title={labels.viewMonthSchedule}>
           <IconButton
-            aria-label={t.viewMonthSchedule}
+            aria-label={labels.viewMonthSchedule}
             size="small"
             onClick={() => onOpenMonthDrawer(teacher, fromDate)}
             sx={theme => ({ color: theme.palette.primary.main })}

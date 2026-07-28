@@ -19,7 +19,6 @@ import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/pe
 import type { AssignedUsersListSlotProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTabShared.types";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledDesktopToolbar = styled(StyledUserToolbar)({
   flexDirection: "row",
@@ -258,7 +257,7 @@ function AssignedUsersDataGrid({ props, labels }: Readonly<AssignedUsersListSlot
 }
 
 export function AssignedUsersTabDesktop(props: Readonly<AssignedUsersTabProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = props.labels;
 
   return (
     <AssignedUsersTabShared

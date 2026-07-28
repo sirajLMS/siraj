@@ -14,7 +14,7 @@ import {
   SessionStatus,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const METRIC_DEFINITIONS: readonly (Omit<RawMetric, "count"> & { readonly key: keyof MetricCounts })[] = [
   { key: "regular", labelKey: "metrics.regular", icon: CheckCircleOutlineOutlined },
@@ -49,7 +49,7 @@ function buildMetrics(counts: MetricCounts, subLabelMap: Record<string, string>)
 }
 
 export function useStatusTrackingMetrics(rows: readonly StatusTrackingRow[]) {
-  const t = useAppTranslation().dashboardTranslations.coreStatusTracking;
+  const t = useAppTranslation(Translation.Dashboard.CoreStatusTracking);
 
   const suspendedCount = useMemo(
     () =>

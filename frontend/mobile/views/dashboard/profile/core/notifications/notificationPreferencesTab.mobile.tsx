@@ -4,9 +4,9 @@ import { Alert, Box, Snackbar, Typography } from "@mui/material";
 import { NotificationChannel } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { PreferencesChannelTabsMobileView } from "@/frontend/mobile/views/dashboard/profile/core/notifications/preferencesChannelTabs.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 export function NotificationPreferencesTabMobile({
+  labels,
   preferences,
   preferenceMap,
   eventTypes,
@@ -22,24 +22,25 @@ export function NotificationPreferencesTabMobile({
   slideDirection,
   onChannelChange,
 }: Readonly<NotificationPreferencesTabVariantProps>) {
-  const t = useAppTranslation().profileTranslations.notifications;
-
   if (errorLoading) {
     return (
-      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>{t.errorLoading}</Typography>
+      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>
+        {labels.errorLoading}
+      </Typography>
     );
   }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box>
-        <Typography sx={{ typography: "titleLg", mb: 1 }}>{t.title}</Typography>
+        <Typography sx={{ typography: "titleLg", mb: 1 }}>{labels.title}</Typography>
         <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-          {t.description}
+          {labels.description}
         </Typography>
       </Box>
 
       <PreferencesChannelTabsMobileView
+        labels={labels}
         preferences={preferences}
         preferenceMap={preferenceMap ?? new Map()}
         eventTypes={eventTypes}

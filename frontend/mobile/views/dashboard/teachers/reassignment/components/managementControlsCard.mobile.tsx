@@ -25,16 +25,19 @@ import type { ManagementControlsCardProps } from "@/frontend/common/views/dashbo
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeacherReassignmentLabels } from "@/shared/locale/types/dashboard/teachers/reassignment";
+
+type ManagementLabels = Pick<TeacherReassignmentLabels, "controls" | "actions">;
 
 function TeacherSelection({
   selectedTeacherId,
   onTeacherChange,
+  labels,
 }: Readonly<{
   selectedTeacherId: string;
   onTeacherChange: (id: string) => void;
+  labels: ManagementLabels["controls"];
 }>) {
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment.controls;
   const [selectedTeacher, setSelectedTeacher] = useState<PersonOption | null>(null);
   const value = selectedTeacher ?? resolvePersonOption(selectedTeacherId, [], selectedTeacher);
 
@@ -46,10 +49,10 @@ function TeacherSelection({
           setSelectedTeacher(next);
           onTeacherChange(next?.id ?? "");
         }}
-        label={t.assignTeacher}
-        placeholder={t.assignTeacherPlaceholder}
+        label={labels.assignTeacher}
+        placeholder={labels.assignTeacherPlaceholder}
       />
-      <FormHelperText sx={{ fontStyle: "italic", mt: 1 }}>{t.teacherAvailabilityNotice}</FormHelperText>
+      <FormHelperText sx={{ fontStyle: "italic", mt: 1 }}>{labels.teacherAvailabilityNotice}</FormHelperText>
     </Box>
   );
 }
@@ -58,13 +61,13 @@ function StatusUpdate({
   currentStatus,
   selectedStatus,
   onStatusChange,
+  labels,
 }: Readonly<{
   currentStatus: StudentStatus;
   selectedStatus: StudentStatus | "";
   onStatusChange: (status: StudentStatus | "") => void;
+  labels: ManagementLabels["controls"];
 }>) {
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment.controls;
-
   const statusKey = STUDENT_STATUS_TO_ACCOUNT_STATUS[currentStatus] ?? currentStatus;
 
   const allowedTargets = ALLOWED_TARGET_STATUSES[currentStatus] ?? [];
@@ -73,12 +76,12 @@ function StatusUpdate({
     <Box>
       <FormControl fullWidth size="small" sx={outlinedInputSx}>
         <InputLabel id="teacher-reassignment-status-label-mobile" shrink>
-          {t.statusUpdate}
+          {labels.statusUpdate}
         </InputLabel>
         <Select
           value={selectedStatus}
           labelId="teacher-reassignment-status-label-mobile"
-          label={t.statusUpdate}
+          label={labels.statusUpdate}
           onChange={e => {
             const val = e.target.value;
             if (typeof val === "string") onStatusChange(val);
@@ -93,7 +96,7 @@ function StatusUpdate({
       </FormControl>
       <Box sx={{ mt: 1.5, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
         <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t.currentStatus("").replace(":", "").trim()}:
+          {labels.currentStatus("").replace(":", "").trim()}:
         </Typography>
         <MobileStatusBadge category="studentAccount" status={statusKey} label={currentStatus} />
       </Box>
@@ -105,24 +108,24 @@ function ActionButtons({
   loading,
   saved,
   onCancel,
+  labels,
 }: Readonly<{
   loading: boolean;
   saved: boolean;
   onCancel: () => void;
+  labels: ManagementLabels["actions"];
 }>) {
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment.actions;
-
   const getButtonContent = (): React.ReactNode => {
     if (loading) return <CircularProgress size={18} color="inherit" />;
     if (saved) {
       return (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "center" }}>
           <CheckCircleOutlined sx={{ fontSize: 16 }} />
-          <Typography variant="labelSm">{t.saved}</Typography>
+          <Typography variant="labelSm">{labels.saved}</Typography>
         </Stack>
       );
     }
-    return <Typography variant="labelSm">{t.submit}</Typography>;
+    return <Typography variant="labelSm">{labels.submit}</Typography>;
   };
 
   return (
@@ -141,7 +144,7 @@ function ActionButtons({
         sx={theme => ({ alignItems: "center", color: theme.palette.onSurfaceVariant })}
       >
         <InfoOutlined fontSize="small" sx={theme => ({ color: theme.palette.primary.main })} />
-        <Typography variant="labelSm">{t.info}</Typography>
+        <Typography variant="labelSm">{labels.info}</Typography>
       </Stack>
 
       <Stack direction="row" spacing={1.5} sx={{ width: "100%" }}>
@@ -162,7 +165,7 @@ function ActionButtons({
             },
           })}
         >
-          {t.cancel}
+          {labels.cancel}
         </Button>
         <Button
           type="submit"
@@ -206,28 +209,32 @@ export function ManagementControlsCardMobile({
   onSelectedTeacherIdChange,
   onSelectedNewStatusChange,
   onSubmitForm,
+  labels,
 }: Readonly<ManagementControlsCardProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment;
-
   return (
     <MobileBaseCard sx={{ p: 3, boxShadow: theme => theme.palette.shadow.card }}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700, mb: 0.5 })}>
-          {t.controls.title}
+          {labels.controls.title}
         </Typography>
         <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t.controls.subtitle}
+          {labels.controls.subtitle}
         </Typography>
       </Box>
 
       <Stack component="form" spacing={3} onSubmit={onSubmitForm}>
-        <TeacherSelection selectedTeacherId={selectedTeacherId} onTeacherChange={onSelectedTeacherIdChange} />
+        <TeacherSelection
+          selectedTeacherId={selectedTeacherId}
+          onTeacherChange={onSelectedTeacherIdChange}
+          labels={labels.controls}
+        />
         <StatusUpdate
           currentStatus={currentStatus}
           selectedStatus={selectedNewStatus}
           onStatusChange={onSelectedNewStatusChange}
+          labels={labels.controls}
         />
-        <ActionButtons loading={isSubmitting} saved={saved} onCancel={onCancel} />
+        <ActionButtons loading={isSubmitting} saved={saved} onCancel={onCancel} labels={labels.actions} />
       </Stack>
     </MobileBaseCard>
   );

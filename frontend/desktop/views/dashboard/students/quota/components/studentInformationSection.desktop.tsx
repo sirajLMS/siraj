@@ -24,10 +24,11 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/components/quotaFieldStyles";
+import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/quotaFormAccessContext";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import { GENDER_OPTIONS } from "@/frontend/common/views/dashboard/students/quota/types";
 import { SectionHeaderDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/sectionHeader.desktop";
-import { type StudentQuotaLabels, useAppTranslation } from "@/shared/locale";
+import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 const DATE_FORMAT = "yyyy-MM-dd";
 
@@ -38,7 +39,7 @@ function parseDateValue(dateStr: string): Date | null {
 }
 
 function StudentNameField() {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const { labels: t } = useQuotaFormAccess();
   const {
     control,
     formState: { errors },
@@ -65,7 +66,7 @@ function StudentNameField() {
 }
 
 function DateOfBirthField() {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const { labels: t } = useQuotaFormAccess();
   const {
     control,
     formState: { errors },
@@ -99,7 +100,7 @@ function DateOfBirthField() {
 }
 
 function LanguageField() {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const { labels: t } = useQuotaFormAccess();
   const locale = useAppLocale();
   const {
     control,
@@ -132,7 +133,7 @@ function LanguageField() {
 }
 
 function GenderField() {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const { labels: t } = useQuotaFormAccess();
   const {
     control,
     formState: { errors },
@@ -185,7 +186,7 @@ function GenderField() {
 }
 
 export function StudentInformationSectionDesktop() {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
+  const { labels: t } = useQuotaFormAccess();
   const { canView } = useStudentFieldAccess();
 
   if (!canView("student_identity")) {

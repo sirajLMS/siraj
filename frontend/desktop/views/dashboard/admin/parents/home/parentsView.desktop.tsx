@@ -58,7 +58,7 @@ function ParentSearchField({
 export function ParentsViewDesktop({
   metrics,
   rows,
-  labels,
+  labelsBySection,
   loading,
   page,
   pageSize,
@@ -73,21 +73,21 @@ export function ParentsViewDesktop({
   onExport,
   onLifecycleStatusFilterChange,
   onResetFilters,
-  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
-  // instead of `RequirePermission` wrappers (specs.md §3 N3).
   canParentsCreate,
   canParentManageStatus,
 }: Readonly<ParentsViewDesktopProps>) {
+  const { shell, filters, columns, actions } = labelsBySection;
+
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
-        title={labels.pageTitle}
-        subtitle={labels.pageSubtitle}
+        title={shell.pageTitle}
+        subtitle={shell.pageSubtitle}
         actions={
           <>
-            <ParentSearchField placeholder={labels.searchPlaceholder} onSearch={onSearch} />
+            <ParentSearchField placeholder={filters.searchPlaceholder} onSearch={onSearch} />
             {canParentsCreate ? (
-              <DesktopPrimaryPageAction onClick={onAddParent}>{labels.addParent}</DesktopPrimaryPageAction>
+              <DesktopPrimaryPageAction onClick={onAddParent}>{actions.addParent}</DesktopPrimaryPageAction>
             ) : null}
           </>
         }
@@ -96,11 +96,11 @@ export function ParentsViewDesktop({
       <ParentsMetricGrid metrics={metrics} />
 
       <DesktopSectionPanel
-        title={labels.records}
+        title={shell.records}
         actions={
           <Box sx={{ display: "flex", gap: 1 }}>
             <DesktopFilterButton startIcon={<FilterListOutlined />} onClick={onFilter}>
-              {labels.filterLabel}
+              {filters.filterLabel}
             </DesktopFilterButton>
             <DesktopExportButton onClick={onExport} />
           </Box>
@@ -109,29 +109,21 @@ export function ParentsViewDesktop({
         <ParentFilterPanel
           open={filterPanelOpen}
           lifecycleStatusFilter={lifecycleStatusFilter}
-          filterLabel={labels.filterLabel}
-          clearFiltersLabel={labels.clearFilters}
-          statusLabels={labels.statusLabels}
+          filterLabel={filters.filterLabel}
+          clearFiltersLabel={filters.clearFilters}
+          statusLabels={filters.statusLabels}
           onLifecycleStatusFilterChange={onLifecycleStatusFilterChange}
           onResetFilters={onResetFilters}
         />
         <ParentsDataGridDesktop
           rows={rows}
-          labels={{
-            ...labels.table,
-            noEntries: labels.noEntries,
-            statusLabels: labels.statusLabels,
-            accountStatusLabels: labels.accountStatusLabels,
-            manageLifecycle: labels.manageLifecycle,
-          }}
+          labels={columns}
           onOpenSettings={onOpenSettings}
           page={page}
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
           loading={loading}
-          // NEW FOR PLAN v5: lifted permission boolean consumed by the data-grid
-          // child instead of an inline `RequirePermission` wrapper.
           canParentManageStatus={canParentManageStatus}
         />
       </DesktopSectionPanel>

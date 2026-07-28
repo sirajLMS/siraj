@@ -8,69 +8,79 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
 import type {
-  SupportedCurrenciesViewModel,
-  SupportedCurrencyRow,
-} from "@/frontend/common/views/dashboard/admin/billing/currencies/useSupportedCurrenciesViewModel";
+  SupportedCurrenciesActionLabels,
+  SupportedCurrenciesColumnLabels,
+} from "@/frontend/common/views/dashboard/admin/billing/currencies/types/supportedCurrencies.types";
+import type { SupportedCurrencyRow } from "@/frontend/common/views/dashboard/admin/billing/currencies/useSupportedCurrenciesViewModel";
 
 type DesktopCurrencyRow = SupportedCurrencyRow;
 
 export function buildSupportedCurrencyColumns(
-  labels: Pick<
-    SupportedCurrenciesViewModel,
-    | "flagColumnLabel"
-    | "codeColumnLabel"
-    | "symbolColumnLabel"
-    | "nameColumnLabel"
-    | "countryColumnLabel"
-    | "activeColumnLabel"
-    | "actionsColumnLabel"
-    | "editLabel"
-    | "deactivateLabel"
-  >,
+  labels: SupportedCurrenciesColumnLabels & Pick<SupportedCurrenciesActionLabels, "editLabel" | "deactivateLabel">,
   handlers: {
-    readonly onEdit: (row: DesktopCurrencyRow) => void;
-    readonly onDeactivate: (row: DesktopCurrencyRow) => void;
+    readonly onEdit: (row: SupportedCurrencyRow) => void;
+    readonly onDeactivate: (row: SupportedCurrencyRow) => void;
   },
   canManage: boolean,
   locale: string
 ): GridColDef<DesktopCurrencyRow>[] {
-  const columns: GridColDef<DesktopCurrencyRow>[] = [
+  const baseColumns: GridColDef<DesktopCurrencyRow>[] = [
     {
       field: "flagEmoji",
-      headerName: labels.flagColumnLabel,
-      width: 80,
+      headerName: labels.flag,
+      width: 60,
       sortable: false,
-      renderCell: ({ row }) => <span aria-hidden>{row.flagEmoji}</span>,
+      renderCell: ({ row }) => (
+        <span aria-hidden style={{ fontSize: 24 }}>
+          {row.flagEmoji}
+        </span>
+      ),
     },
-    { field: "code", headerName: labels.codeColumnLabel, flex: 1, minWidth: 100 },
-    { field: "symbol", headerName: labels.symbolColumnLabel, width: 120 },
+    {
+      field: "code",
+      headerName: labels.code,
+      flex: 0.8,
+      minWidth: 80,
+    },
+    {
+      field: "symbol",
+      headerName: labels.symbol,
+      flex: 0.6,
+      minWidth: 70,
+    },
     {
       field: "name",
-      headerName: labels.nameColumnLabel,
-      flex: 1.5,
-      minWidth: 180,
+      headerName: labels.name,
+      flex: 1.2,
+      minWidth: 120,
       valueGetter: (_value, row) => getCurrencyDisplayName(row.code, locale),
     },
     {
       field: "countryCode",
-      headerName: labels.countryColumnLabel,
+      headerName: labels.country,
       flex: 1,
-      minWidth: 140,
+      minWidth: 100,
       valueGetter: (_value, row) => getCountryDisplayName(row.countryCode, locale),
     },
     {
       field: "isActive",
-      headerName: labels.activeColumnLabel,
-      width: 100,
+      headerName: labels.active,
+      flex: 0.6,
+      minWidth: 80,
       type: "boolean",
     },
   ];
 
-  if (canManage) {
-    columns.push({
+  if (!canManage) {
+    return baseColumns;
+  }
+
+  return [
+    ...baseColumns,
+    {
       field: "actions",
-      headerName: labels.actionsColumnLabel,
-      width: 120,
+      headerName: labels.actions,
+      width: 100,
       sortable: false,
       renderCell: ({ row }) => (
         <Stack direction="row" spacing={0.5}>
@@ -84,8 +94,6 @@ export function buildSupportedCurrencyColumns(
           ) : null}
         </Stack>
       ),
-    });
-  }
-
-  return columns;
+    },
+  ];
 }

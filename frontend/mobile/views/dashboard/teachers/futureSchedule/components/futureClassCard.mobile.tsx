@@ -10,7 +10,7 @@ import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers/futureSchedule";
 
 function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isRescheduled: boolean }>) {
   const dateObj = new Date(date);
@@ -55,8 +55,7 @@ function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isReschedu
   );
 }
 
-function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
+function ClassInfo({ item, labels }: Readonly<{ item: FutureClass; labels: TeacherFutureScheduleLabels }>) {
   const isRescheduled = item.isRescheduled === true;
 
   return (
@@ -69,7 +68,9 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
           typographyVariant="titleLg"
           fontWeight={700}
         />
-        {isRescheduled && <MobileStatusBadge category="trackingStatus" status="rescheduled" label={t.reScheduled} />}
+        {isRescheduled ? (
+          <MobileStatusBadge category="trackingStatus" status="rescheduled" label={labels.reScheduled} />
+        ) : null}
       </Box>
 
       <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap", gap: 1 }}>
@@ -85,7 +86,7 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
               variant="icon"
               meeting={item.effectiveMeeting}
               emptyRole="teacher"
-              label={t.actions.joinVideo}
+              label={labels.actions.joinVideo}
               setupHref="/profile?tab=meeting"
             />
           ) : null}
@@ -96,7 +97,7 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
         <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.onSurfaceVariant })}>
           <PersonOutlined sx={{ fontSize: 16 }} />
           <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
-            {item.studentCount} {t.students}
+            {item.studentCount} {labels.students}
           </Typography>
         </Box>
       </Stack>
@@ -104,9 +105,11 @@ function ClassInfo({ item }: Readonly<{ item: FutureClass }>) {
   );
 }
 
-function ActionButtons({ item, onRequestLeave }: Readonly<{ item: FutureClass; onRequestLeave?: () => void }>) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
-
+function ActionButtons({
+  item,
+  onRequestLeave,
+  labels,
+}: Readonly<{ item: FutureClass; onRequestLeave?: () => void; labels: TeacherFutureScheduleLabels }>) {
   return (
     <Stack
       direction="row"
@@ -133,7 +136,7 @@ function ActionButtons({ item, onRequestLeave }: Readonly<{ item: FutureClass; o
             flex: 1,
           })}
         >
-          {item.leaveRequestDisabledReason === "quota" ? t.quotaReached : t.requestLeave}
+          {item.leaveRequestDisabledReason === "quota" ? labels.quotaReached : labels.requestLeave}
         </Button>
       ) : (
         <Button
@@ -154,10 +157,10 @@ function ActionButtons({ item, onRequestLeave }: Readonly<{ item: FutureClass; o
             },
           })}
         >
-          {t.requestLeave}
+          {labels.requestLeave}
         </Button>
       )}
-      <Tooltip title={t.notifications.noSubjectAssigned}>
+      <Tooltip title={labels.notifications.noSubjectAssigned}>
         <span>
           <Button
             variant="contained"
@@ -173,7 +176,7 @@ function ActionButtons({ item, onRequestLeave }: Readonly<{ item: FutureClass; o
               flex: 1,
             })}
           >
-            {t.viewMaterials}
+            {labels.viewMaterials}
           </Button>
         </span>
       </Tooltip>
@@ -181,7 +184,7 @@ function ActionButtons({ item, onRequestLeave }: Readonly<{ item: FutureClass; o
   );
 }
 
-export function FutureClassCardMobile({ item, onRequestLeave }: Readonly<FutureClassCardProps>) {
+export function FutureClassCardMobile({ item, onRequestLeave, labels }: Readonly<FutureClassCardProps>) {
   const isRescheduled = item.isRescheduled === true;
 
   return (
@@ -189,9 +192,9 @@ export function FutureClassCardMobile({ item, onRequestLeave }: Readonly<FutureC
       <Stack direction="column" spacing={2} sx={{ justifyContent: "space-between" }}>
         <Stack direction="row" spacing={2} sx={{ flex: 1 }}>
           <DateSquare date={item.scheduledDate ?? ""} isRescheduled={isRescheduled} />
-          <ClassInfo item={item} />
+          <ClassInfo item={item} labels={labels} />
         </Stack>
-        <ActionButtons item={item} onRequestLeave={onRequestLeave} />
+        <ActionButtons item={item} onRequestLeave={onRequestLeave} labels={labels} />
       </Stack>
     </MobileCardListItem>
   );

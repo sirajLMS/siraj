@@ -104,7 +104,7 @@ export function TeacherOnboardingDesktopView({
             <SalaryDetailsSection register={register} control={control} errors={errors} labels={labels} />
           </DesktopSectionPanel>
           <DesktopSectionPanel title={labels.sections.paymentMethod}>
-            <PaymentMethodSection control={control} errors={errors} />
+            <PaymentMethodSection control={control} errors={errors} labels={labels} />
           </DesktopSectionPanel>
           <DesktopSectionPanel title={labels.sections.meetingConfig}>
             <MeetingConfigOnboardingSection

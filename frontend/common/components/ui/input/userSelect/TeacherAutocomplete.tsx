@@ -3,7 +3,7 @@
 import { AudienceAutocomplete } from "@/frontend/common/components/ui/input/userSelect/AudienceAutocomplete";
 import type { TeacherAutocompleteProps } from "@/frontend/common/components/ui/input/userSelect/types";
 import { useTeacherAutocomplete } from "@/frontend/common/hooks/userAutocomplete";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function TeacherAutocomplete({
   value,
@@ -20,7 +20,7 @@ export function TeacherAutocomplete({
   fullWidth,
   skip,
 }: TeacherAutocompleteProps & { readonly skip?: boolean }) {
-  const t = useAppTranslation().uiTranslations.userSelect;
+  const t = useAppTranslation(Translation.Ui.UserSelect);
   const { options, loading, inputValue, onInputChange } = useTeacherAutocomplete({ value, skip });
 
   return (

@@ -23,6 +23,8 @@ import {
   groupGapsByDayOfMonth,
   parseIsoDate,
 } from "@/frontend/common/views/dashboard/search-schedule/utils";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule";
 
 export interface SearchScheduleResultItem {
   readonly id?: string | null;
@@ -67,6 +69,7 @@ export interface UseSearchScheduleViewModelProps {
 }
 
 export interface SearchScheduleViewModel {
+  readonly labels: SearchScheduleLabels;
   // Existing search-result state (viewport-agnostic).
   readonly searchResult: SearchScheduleResultSummary | null | undefined;
   readonly fromDate: string;
@@ -390,6 +393,7 @@ function useSearchScheduleMonthDrawer(params: UseSearchScheduleMonthDrawerParams
 
 export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleViewModelProps>): SearchScheduleViewModel {
   const requiredPermission = props?.requiredPermission ?? AppPermission.ScheduleSearchAvailability;
+  const labels = useAppTranslation(Translation.Dashboard.CoreSearchSchedule);
 
   const store = useSearchScheduleStoreSlice();
 
@@ -437,6 +441,7 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
   });
 
   return buildSearchScheduleViewModel({
+    labels,
     requiredPermission,
     store,
     handlers,
@@ -448,6 +453,7 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
 }
 
 interface SearchScheduleViewModelParts {
+  readonly labels: SearchScheduleLabels;
   readonly requiredPermission: AppPermission;
   readonly store: SearchScheduleStoreSlice;
   readonly handlers: SearchScheduleHandlers;
@@ -458,6 +464,7 @@ interface SearchScheduleViewModelParts {
 }
 
 function buildSearchScheduleViewModel({
+  labels,
   requiredPermission,
   store,
   handlers,
@@ -467,6 +474,7 @@ function buildSearchScheduleViewModel({
   monthDrawer,
 }: SearchScheduleViewModelParts): SearchScheduleViewModel {
   return {
+    labels,
     searchResult: mainQuery.searchResult,
     fromDate: activeFromDate,
     toDate: activeToDate,

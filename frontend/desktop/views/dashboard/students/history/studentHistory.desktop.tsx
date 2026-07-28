@@ -14,13 +14,13 @@ import { Box, IconButton, Typography } from "@mui/material";
 import { ExportButton } from "@/frontend/common/components/ui/button";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { StudentHistoryLabelsProvider } from "@/frontend/common/views/dashboard/students/history/studentHistoryLabelsContext";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryViewModel";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { CalendarGridDesktop } from "@/frontend/desktop/views/dashboard/students/history/components/calendarGrid.desktop";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
-import { useAppTranslation } from "@/shared/locale";
 
 export function StudentHistoryDesktopView({
   studentName,
@@ -34,8 +34,9 @@ export function StudentHistoryDesktopView({
   enrollmentMonth,
   nowMonth,
   locale,
+  labels,
 }: Readonly<StudentHistoryViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.studentHistory;
+  const t = labels;
   const { canView } = useStudentFieldAccess();
   const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
   const yearStr = currentMonth.getFullYear();
@@ -138,8 +139,12 @@ export function StudentHistoryDesktopView({
   );
 
   if (embedded) {
-    return body;
+    return <StudentHistoryLabelsProvider labels={labels}>{body}</StudentHistoryLabelsProvider>;
   }
 
-  return <DesktopPageContainer>{body}</DesktopPageContainer>;
+  return (
+    <StudentHistoryLabelsProvider labels={labels}>
+      <DesktopPageContainer>{body}</DesktopPageContainer>
+    </StudentHistoryLabelsProvider>
+  );
 }

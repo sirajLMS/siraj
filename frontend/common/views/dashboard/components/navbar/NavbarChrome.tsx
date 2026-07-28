@@ -3,7 +3,7 @@
 import { SchoolOutlined } from "@mui/icons-material";
 import { AppBar, alpha, Box, Toolbar, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface NavbarChromeProps {
   readonly roleLabel: string;
@@ -12,7 +12,7 @@ interface NavbarChromeProps {
 }
 
 export function NavbarChrome({ roleLabel, rightSlot, leftSlot }: Readonly<NavbarChromeProps>) {
-  const t = useAppTranslation().dashboardTranslations.coreLayout;
+  const t = useAppTranslation(Translation.Dashboard.CoreLayout);
 
   return (
     <AppBar

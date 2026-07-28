@@ -16,7 +16,7 @@ import {
   createErrorLinkHandler,
   sha256,
 } from "@/frontend/common/providers/apollo/utils";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 /**
  * Module-level mutable state object shared between the Apollo links and the
@@ -64,7 +64,7 @@ const apolloClient = new ApolloClient({
 });
 
 export function AppApolloProvider({ children }: { readonly children: React.ReactNode }) {
-  const t = useAppTranslation().commonTranslations;
+  const t = useAppTranslation(Translation.Common);
   const {
     isConnected,
     isChecking,

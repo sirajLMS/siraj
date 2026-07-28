@@ -7,25 +7,23 @@ import { DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/deskto
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { ManagersDataGridDesktop } from "@/frontend/desktop/views/dashboard/staff/home/components/managersDataGrid.desktop";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
-export function ManagersViewDesktop(props: Readonly<ManagersViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffDirectory;
-
+export function ManagersViewDesktop({ labels, ...props }: Readonly<ManagersViewProps>) {
   const actions = props.canCreateManager ? (
     <Link href="/staff/create" style={{ textDecoration: "none" }}>
-      <DesktopPrimaryPageAction>{t.actions.addManager}</DesktopPrimaryPageAction>
+      <DesktopPrimaryPageAction>{labels.actions.addManager}</DesktopPrimaryPageAction>
     </Link>
   ) : undefined;
 
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader title={t.pageTitle} subtitle={t.pageSubtitle} actions={actions} />
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} actions={actions} />
 
-      <ManagersMetrics metrics={props.metrics} />
+      <ManagersMetrics labels={labels.metrics} metrics={props.metrics} />
 
       <DesktopSectionPanel>
         <ManagersFilterBar
+          labels={labels.filters}
           roleFilter={props.roleFilter}
           statusFilter={props.statusFilter}
           onRoleFilterChange={props.onRoleFilterChange}
@@ -33,6 +31,7 @@ export function ManagersViewDesktop(props: Readonly<ManagersViewProps>) {
         />
 
         <ManagersDataGridDesktop
+          labels={labels}
           managers={[...props.managers]}
           page={props.page}
           pageSize={props.pageSize}

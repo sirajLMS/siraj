@@ -10,7 +10,7 @@ import { getLanguageDisplayName, languages } from "@/frontend/common/lib/locale"
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
 import type { LanguageSelectorProps } from "@/frontend/mobile/components/ui/input/languageSelector/LanguageSelector";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export const LanguageSelectorMobile: React.FC<LanguageSelectorProps> = ({
   language,
@@ -24,7 +24,7 @@ export const LanguageSelectorMobile: React.FC<LanguageSelectorProps> = ({
   onBlurAction: onBlur,
   style,
 }: LanguageSelectorProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.languageSelector;
+  const t = useAppTranslation(Translation.Ui.LanguageSelector);
   const locale = useAppLocale();
 
   const getLanguageName = useCallback((code: string) => getLanguageDisplayName(code, locale), [locale]);

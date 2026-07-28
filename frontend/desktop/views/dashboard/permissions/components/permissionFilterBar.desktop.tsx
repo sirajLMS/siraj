@@ -5,7 +5,6 @@ import { Box, Input, InputAdornment, MenuItem, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { standardInputSx } from "@/frontend/common/components/ui/form";
 import type { PermissionFilterBarProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledFilterContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -35,6 +34,7 @@ const StyledSelectedCountBadge = styled(Box)(({ theme }) => ({
 }));
 
 export function PermissionFilterBarDesktop({
+  labels,
   searchTerm,
   onSearchChange,
   selectedCategory,
@@ -43,7 +43,7 @@ export function PermissionFilterBarDesktop({
   selectedCount,
   isLoading,
 }: Readonly<PermissionFilterBarProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   return (
     <StyledFilterContainer>

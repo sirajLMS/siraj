@@ -14,7 +14,14 @@ import type {
   ParentOwnData,
   ParentViewData,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { profileEn } from "@/shared/locale/en/profile";
+import { profileParentEn } from "@/shared/locale/en/profile/parent";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const mockParentProfileLabels = {
+  base: profileEn,
+  parent: profileParentEn,
+} as const;
 
 const parentOwnProfile = {
   id: "parent-own-1",
@@ -98,6 +105,7 @@ describe("ParentProfileView admin sections", () => {
   test("hides identity and billing sections for own scope", () => {
     renderWithWrapper(
       <ParentProfileView
+        labels={mockParentProfileLabels}
         scope={ProfileScope.Own}
         mode={ProfileMode.View}
         targetUserId="user-self-1"
@@ -128,6 +136,7 @@ describe("ParentProfileView admin sections", () => {
   test("shows identity and billing sections for admin scope", () => {
     renderWithWrapper(
       <ParentProfileView
+        labels={mockParentProfileLabels}
         scope={ProfileScope.Other}
         mode={ProfileMode.View}
         targetUserId="user-parent-1"

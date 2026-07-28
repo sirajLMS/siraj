@@ -6,39 +6,43 @@ import {
   LifecycleParentSummaryCard,
 } from "@/frontend/common/views/dashboard/parents/lifecycle/components/sharedViewContent";
 import { useParentLifecycleProfileHref } from "@/frontend/common/views/dashboard/parents/lifecycle/components/useParentLifecycleForm";
-import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
+import type { ParentLifecycleViewModel } from "@/frontend/common/views/dashboard/parents/lifecycle/useParentLifecycleViewModel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
 export function ParentLifecycleDesktopView({
+  labels,
   parent,
   isUpdating,
   onUpdateLifecycle,
-}: Readonly<ParentLifecycleViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.parentLifecycle;
+}: Readonly<ParentLifecycleViewModel>) {
   const profileHref = useParentLifecycleProfileHref(parent);
 
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
-        title={t.pageTitle}
+        title={labels.pageTitle}
         breadcrumbs={[
-          { label: t.breadcrumbs.parents, href: "/parents" },
-          { label: t.breadcrumbs.lifecycle, current: true },
+          { label: labels.breadcrumbs.parents, href: "/parents" },
+          { label: labels.breadcrumbs.lifecycle, current: true },
         ]}
         actions={
           profileHref ? (
             <Button component={Link} href={profileHref} variant="outlined">
-              {t.actions.viewProfile}
+              {labels.actions.viewProfile}
             </Button>
           ) : undefined
         }
       />
 
-      <LifecycleParentSummaryCard parent={parent} size="lg" />
+      <LifecycleParentSummaryCard parent={parent} labels={labels} size="lg" />
 
-      <LifecycleFormBody parent={parent} isUpdating={isUpdating} onUpdateLifecycle={onUpdateLifecycle} />
+      <LifecycleFormBody
+        parent={parent}
+        labels={labels}
+        isUpdating={isUpdating}
+        onUpdateLifecycle={onUpdateLifecycle}
+      />
     </DesktopPageContainer>
   );
 }

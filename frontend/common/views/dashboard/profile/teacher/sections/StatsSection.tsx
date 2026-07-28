@@ -5,26 +5,27 @@ import { SectionPanel } from "@/frontend/common/components/ui";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
 import {
   isTeacherAdminData,
+  type TeacherProfileViewLabels,
   type TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
-import { useAppTranslation } from "@/shared/locale";
 
 type StatsSectionProps = {
+  readonly labels: Pick<TeacherProfileViewLabels, "dashboard">;
   readonly teacherData: TeacherViewData;
   readonly isAdminScope: boolean;
 };
 
-export function StatsSection({ teacherData, isAdminScope }: StatsSectionProps) {
-  const t = useAppTranslation().dashboardTranslations.teacherProfile;
+export function StatsSection({ labels, teacherData, isAdminScope }: StatsSectionProps) {
+  const t = labels.dashboard.stats;
 
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
 
   return (
-    <SectionPanel title={t.stats.totalClasses}>
+    <SectionPanel title={t.totalClasses}>
       <Stack spacing={2}>
-        <InfoField label={t.stats.totalClasses} value={String(teacherData.totalClasses ?? 0)} />
+        <InfoField label={t.totalClasses} value={String(teacherData.totalClasses ?? 0)} />
         {isAdminScope && adminData ? (
-          <InfoField label={t.stats.avgEngagement} value={(adminData.avgEngagementScore ?? 0).toFixed(1)} />
+          <InfoField label={t.avgEngagement} value={(adminData.avgEngagementScore ?? 0).toFixed(1)} />
         ) : null}
       </Stack>
     </SectionPanel>

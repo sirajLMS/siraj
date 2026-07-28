@@ -40,7 +40,7 @@ import { buildBillingLabels } from "@/frontend/common/views/dashboard/billing/ut
 import { formatBillingDate } from "@/frontend/common/views/dashboard/billing/utils/formatBillingDate";
 import { deriveAdminInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 function formatDate(dateStr: string | null, locale: string): string {
   return formatBillingDate(dateStr, locale);
@@ -112,11 +112,11 @@ export interface AdminBillingViewModel {
 }
 
 export function useAdminBillingViewModel(_props: Readonly<UseAdminBillingViewModelProps>): AdminBillingViewModel {
-  const t = useAppTranslation().dashboardTranslations.billing;
-  const tProfile = useAppTranslation().profileTranslations.teacher;
-  const tProfileRoot = useAppTranslation().profileTranslations.base;
-  const tErrors = useAppTranslation().errorsTranslations;
-  const tc = useAppTranslation().commonTranslations;
+  const t = useAppTranslation(Translation.Dashboard.Billing);
+  const tProfile = useAppTranslation(Translation.Profile.Teacher);
+  const tProfileRoot = useAppTranslation(Translation.Profile.Base);
+  const tErrors = useAppTranslation(Translation.Errors);
+  const tc = useAppTranslation(Translation.Common);
   const locale = useAppLocale();
   const router = useRouter();
   const labels = buildBillingLabels(t);

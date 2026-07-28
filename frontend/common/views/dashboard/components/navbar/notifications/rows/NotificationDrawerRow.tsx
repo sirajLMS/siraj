@@ -23,16 +23,25 @@ export interface NotificationDrawerRowProps {
 
 function buildSecondaryActions(alert: NotificationDrawerAlert, vm: NotificationsDrawerViewModel): ReactNode {
   const { metadata, eventType, deliveryId } = alert;
+  const { labels } = vm;
 
   if (eventType === NotificationEventType.ClassRescheduled && isClassMetadata(metadata)) {
     const classInstanceId = metadata.classInstanceId ?? metadata.entityId;
-    return <RowRescheduleAction classInstanceId={classInstanceId} onReschedule={vm.handleReschedule} />;
+    return (
+      <RowRescheduleAction
+        rescheduleLabel={labels.reschedule}
+        classInstanceId={classInstanceId}
+        onReschedule={vm.handleReschedule}
+      />
+    );
   }
 
   if (eventType === NotificationEventType.InvoiceStatusChanged && isInvoiceMetadata(metadata)) {
     if (metadata.proofPending && deliveryId) {
       return (
         <RowInvoiceApproveRejectAction
+          approveLabel={labels.approveInvoice}
+          rejectLabel={labels.rejectInvoice}
           deliveryId={deliveryId}
           invoiceId={metadata.entityId}
           onApprove={vm.handleApproveInvoice}
@@ -41,7 +50,7 @@ function buildSecondaryActions(alert: NotificationDrawerAlert, vm: Notifications
       );
     }
 
-    return <RowViewEntityAction metadata={metadata} onViewEntity={vm.handleViewEntity} />;
+    return <RowViewEntityAction viewLabel={labels.viewEntity} metadata={metadata} onViewEntity={vm.handleViewEntity} />;
   }
 
   return null;
@@ -54,6 +63,7 @@ export function NotificationDrawerRow({ alert, vm }: Readonly<NotificationDrawer
   return (
     <NotificationRowBase
       alert={alert}
+      markReadLabel={vm.labels.markAsRead}
       icon={variant.icon}
       iconColor={variant.iconColor}
       accentColor={variant.accentColor}

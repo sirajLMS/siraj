@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { parentOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-portal.documents";
 import type { ParentSocialLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface ParentSocialProfileShape {
   readonly phone?: string | null;
@@ -22,7 +22,7 @@ export interface ParentSocialViewModel {
 export type UseParentSocialViewModelProps = Record<string, never>;
 
 export function useParentSocialViewModel(_props: Readonly<UseParentSocialViewModelProps>): ParentSocialViewModel {
-  const labels = useAppTranslation().dashboardTranslations.parentSocial;
+  const labels = useAppTranslation(Translation.Dashboard.ParentSocial);
   const { data, loading, error } = useQuery(parentOwnProfileQueryDocument, {
     fetchPolicy: "cache-and-network",
   });

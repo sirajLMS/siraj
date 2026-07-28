@@ -84,15 +84,9 @@ function SupportedCurrencyCard({
 }
 
 export function SupportedCurrenciesMobileView({
+  labelsBySection,
   rows,
   loading,
-  emptyMessage,
-  footerNote,
-  pageTitle,
-  pageSubtitle,
-  activateLabel,
-  editLabel,
-  deactivateLabel,
   canManage,
   onActivate,
   onEdit,
@@ -108,6 +102,7 @@ export function SupportedCurrenciesMobileView({
   handleConfirmDeactivate,
 }: Readonly<SupportedCurrenciesViewModel>) {
   const locale = useAppLocale();
+  const { shell, actions } = labelsBySection;
 
   const activateDialogProps: SupportedCurrencyActivateDialogProps = {
     open: activateOpen,
@@ -117,22 +112,19 @@ export function SupportedCurrenciesMobileView({
       setEditRow(null);
     },
     onSaved: handleSaved,
-    // Exclude already-activated currencies so the selector only offers
-    // currencies not yet in the supported_currencies table. The edited row's
-    // own code is kept visible by the autocomplete (edit field is disabled).
     excludedCodes: rows.filter(row => row.isActive).map(row => row.code),
   };
 
   return (
     <MobilePageContainer>
       <MobilePageHeader
-        title={pageTitle}
-        subtitle={pageSubtitle}
+        title={shell.pageTitle}
+        subtitle={shell.pageSubtitle}
         edgeToEdge={false}
         actions={
           canManage ? (
             <MobilePrimaryPageAction onClick={onActivate} startIcon={<AddOutlined />}>
-              {activateLabel}
+              {actions.activateLabel}
             </MobilePrimaryPageAction>
           ) : null
         }
@@ -141,7 +133,7 @@ export function SupportedCurrenciesMobileView({
         <MobileCardList
           rows={rows}
           loading={loading}
-          emptyMessage={emptyMessage}
+          emptyMessage={shell.empty}
           getKey={row => row.id}
           paginationOptions={{ mode: "client" }}
           layout="edge-to-edge"
@@ -150,15 +142,15 @@ export function SupportedCurrenciesMobileView({
               row={row}
               locale={locale}
               canManage={canManage}
-              editLabel={editLabel}
-              deactivateLabel={deactivateLabel}
+              editLabel={actions.editLabel}
+              deactivateLabel={actions.deactivateLabel}
               onEdit={onEdit}
               onDeactivate={onDeactivate}
             />
           )}
         />
         <Alert severity="info" sx={{ mt: 2 }}>
-          {footerNote}
+          {shell.footerNote}
         </Alert>
       </Box>
 

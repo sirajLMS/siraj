@@ -1,7 +1,7 @@
 "use client";
 
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type DeleteInvoiceDialogProps = {
   readonly open: boolean;
@@ -12,8 +12,8 @@ export type DeleteInvoiceDialogProps = {
 };
 
 export function DeleteInvoiceDialog({ open, invoiceId, isLoading, onClose, onConfirm }: DeleteInvoiceDialogProps) {
-  const t = useAppTranslation().dashboardTranslations.billing;
-  const tc = useAppTranslation().commonTranslations;
+  const t = useAppTranslation(Translation.Dashboard.Billing);
+  const tc = useAppTranslation(Translation.Common);
 
   const displayId = invoiceId ? invoiceId.replace("inv-", "INV-").toUpperCase() : "";
 

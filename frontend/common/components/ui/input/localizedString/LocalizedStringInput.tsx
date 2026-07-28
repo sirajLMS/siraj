@@ -8,7 +8,7 @@ import { LocaleAdornmentSwitch } from "@/frontend/common/components/ui/input/loc
 import { LocalizedStringDrawer } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringDrawer";
 import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/input/localizedString/types";
 import { useLocalizedStringInputState } from "@/frontend/common/hooks/useLocalizedStringInputState";
-import { type LocalizedStringLabels, useAppTranslation } from "@/shared/locale";
+import { type LocalizedStringLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 /**
  * Inline single-locale editor for a JSONB `LocalizedString` map.
@@ -82,7 +82,7 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
   drawerDismissAction = "save",
   sx,
 }) => {
-  const t = useAppTranslation().uiTranslations.localizedString;
+  const t = useAppTranslation(Translation.Ui.LocalizedString);
   const containerRef = useRef<HTMLDivElement>(null);
   const {
     isCompact,

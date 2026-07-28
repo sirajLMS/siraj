@@ -36,10 +36,11 @@ export function ParentOnboardingMobileView({
   meetingSetupHref,
   showSuccess,
   onDismissSuccess,
-  t,
-  tMeeting,
-  tJoin,
+  labelsBySection,
 }: Readonly<ParentOnboardingViewModel>) {
+  const t = labelsBySection.form;
+  const tMeeting = labelsBySection.meeting.manager;
+  const tJoin = labelsBySection.meeting.join;
   const router = useRouter();
 
   return (

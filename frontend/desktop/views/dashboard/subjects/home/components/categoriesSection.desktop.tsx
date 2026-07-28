@@ -5,7 +5,6 @@ import { Chip, IconButton, Stack } from "@mui/material";
 import { CategoryChip } from "@/frontend/common/views/dashboard/subjects/home/components/categoryChip";
 import type { CategoriesSectionProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
-import { useAppTranslation } from "@/shared/locale";
 
 /**
  * CategoriesSectionDesktop — desktop-tier category management panel.
@@ -15,6 +14,7 @@ import { useAppTranslation } from "@/shared/locale";
  * full-bleed horizontal stretch).
  */
 export function CategoriesSectionDesktop({
+  labels,
   categories,
   activeCategoryId,
   onCategoryChange,
@@ -23,7 +23,7 @@ export function CategoriesSectionDesktop({
   onDeleteCategory,
   canManage,
 }: Readonly<CategoriesSectionProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
+  const t = labels;
 
   return (
     <DesktopSectionPanel

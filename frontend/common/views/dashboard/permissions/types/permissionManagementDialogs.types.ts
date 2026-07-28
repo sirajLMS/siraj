@@ -3,8 +3,10 @@ import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/gr
 import type { AssignGroupFormBindings } from "@/frontend/common/views/dashboard/permissions/components/useAssignGroupForm";
 import type { ManageOverridesState } from "@/frontend/common/views/dashboard/permissions/components/useManageOverridesState";
 import type { PermissionGroupFormState } from "@/frontend/common/views/dashboard/permissions/components/usePermissionGroupForm";
+import type { PermissionsLabels } from "@/shared/locale";
 
 export interface PermissionManagementDialogsProps {
+  readonly labels: PermissionsLabels;
   readonly isLoading: boolean;
   readonly activeGroup: PermissionGroup | null;
   readonly selectedGroupId: string | null;

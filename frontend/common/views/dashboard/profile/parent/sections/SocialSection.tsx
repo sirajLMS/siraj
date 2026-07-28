@@ -10,15 +10,17 @@ import type { ParentViewData } from "@/frontend/common/views/dashboard/profile/p
 import { toDisplayValue } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import { buildSocialLink } from "@/shared/lib/social/social-links";
-import { useAppTranslation } from "@/shared/locale";
+import type { ProfileParentLabels } from "@/shared/locale/types/profile";
 
 type SocialSectionProps =
   | {
       readonly mode: "view";
+      readonly labels: ProfileParentLabels;
       readonly parentData: ParentViewData;
     }
   | {
       readonly mode: "edit";
+      readonly labels: ProfileParentLabels;
       readonly register: UseFormRegister<ParentAdminEditFormData>;
       readonly control: Control<ParentAdminEditFormData>;
     };
@@ -35,7 +37,7 @@ const VIEW_FIELDS = [
 ] as const;
 
 export function SocialSection(props: SocialSectionProps) {
-  const t = useAppTranslation().profileTranslations.parent;
+  const t = props.labels;
 
   if (props.mode === "edit") {
     return (

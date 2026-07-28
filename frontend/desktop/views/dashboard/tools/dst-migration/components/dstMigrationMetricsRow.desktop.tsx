@@ -5,28 +5,29 @@ import { Box } from "@mui/material";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { DstMigrationMetrics } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
-import { useAppTranslation } from "@/shared/locale";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 interface Props {
+  readonly labels: DstMigrationLabels;
   readonly metrics: DstMigrationMetrics;
 }
 
-export function DstMigrationMetricsRowDesktop({ metrics }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.dstMigration.metrics;
+export function DstMigrationMetricsRowDesktop({ labels, metrics }: Readonly<Props>) {
+  const metricLabels = labels.metrics;
 
   const metricItems: MetricItem[] = [
     {
       key: "total-audited",
       count: metrics.totalAudited,
       labelKey: "total-audited",
-      label: t.totalAudited,
+      label: metricLabels.totalAudited,
       icon: AnalyticsOutlined,
     },
     {
       key: "successful",
       count: metrics.successful,
       labelKey: "successful",
-      label: t.successful,
+      label: metricLabels.successful,
       icon: VerifiedOutlined,
       variant: "highlight",
     },
@@ -34,7 +35,7 @@ export function DstMigrationMetricsRowDesktop({ metrics }: Readonly<Props>) {
       key: "conflicts",
       count: metrics.conflicts,
       labelKey: "conflicts",
-      label: t.conflicts,
+      label: metricLabels.conflicts,
       icon: ErrorOutlined,
       variant: "error",
     },
@@ -42,7 +43,7 @@ export function DstMigrationMetricsRowDesktop({ metrics }: Readonly<Props>) {
       key: "unchanged",
       count: metrics.unchanged,
       labelKey: "unchanged",
-      label: t.unchanged,
+      label: metricLabels.unchanged,
       icon: HistoryOutlined,
     },
   ];

@@ -35,7 +35,10 @@ import {
   formatBillingMonth,
 } from "@/frontend/common/views/dashboard/billing/utils/formatBillingDate";
 import { deriveParentInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
+import type { CommonLabels } from "@/shared/locale/types/common";
+import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 // NEW FOR PLAN v5 (parent-billing wave): ViewModel now owns all state for the
 // §6.1+§6.2 contract — the Server Component Page renders the Container with
@@ -50,20 +53,20 @@ export type UseParentBillingViewModelProps = Record<string, never>;
 export type ParentBillingViewModel = ParentBillingViewProps;
 
 interface BillingTranslations {
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["billing"];
-  tErrors: ReturnType<typeof useAppTranslation>["errorsTranslations"];
-  tc: ReturnType<typeof useAppTranslation>["commonTranslations"];
+  t: BillingLabels;
+  tErrors: ErrorsLabels;
+  tc: CommonLabels;
   locale: ReturnType<typeof useAppLocale>;
   labels: ReturnType<typeof buildBillingLabels>;
   fxMessages: ReturnType<typeof buildFxDisplayMessages>;
 }
 
 function useBillingTranslations(): BillingTranslations {
-  const t = useAppTranslation().dashboardTranslations.billing;
-  const tProfile = useAppTranslation().profileTranslations.teacher;
-  const tProfileRoot = useAppTranslation().profileTranslations.base;
-  const tErrors = useAppTranslation().errorsTranslations;
-  const tc = useAppTranslation().commonTranslations;
+  const t = useAppTranslation(Translation.Dashboard.Billing);
+  const tProfile = useAppTranslation(Translation.Profile.Teacher);
+  const tProfileRoot = useAppTranslation(Translation.Profile.Base);
+  const tErrors = useAppTranslation(Translation.Errors);
+  const tc = useAppTranslation(Translation.Common);
   const locale = useAppLocale();
   const labels = buildBillingLabels(t);
   const fxMessages = useMemo(

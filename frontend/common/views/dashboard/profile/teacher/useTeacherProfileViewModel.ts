@@ -20,8 +20,10 @@ import { logger } from "@/frontend/common/utils/logger";
 import type {
   TeacherAdminData,
   TeacherOwnData,
+  TeacherProfileViewLabels,
   TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 
@@ -57,6 +59,7 @@ export type TeacherAdminSubmitData = {
 };
 
 export interface TeacherProfileViewModel {
+  readonly labels: TeacherProfileViewLabels;
   readonly teacherData: TeacherViewData;
   readonly avatarUrl: string | null | undefined;
   readonly displayCurrency: CurrencyCode | null | undefined;
@@ -83,6 +86,12 @@ export interface UseTeacherProfileViewModelProps {
 }
 
 export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileViewModelProps>): TeacherProfileViewModel {
+  const base = useAppTranslation(Translation.Profile.Base);
+  const teacher = useAppTranslation(Translation.Profile.Teacher);
+  const dashboard = useAppTranslation(Translation.Dashboard.TeacherProfile);
+  const errors = useAppTranslation(Translation.Errors);
+  const labels: TeacherProfileViewLabels = { base, teacher, dashboard, errors };
+
   const { scope, mode, targetUserId, activeTab: _activeTab = "profile" } = props;
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
@@ -172,6 +181,7 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
   };
 
   return {
+    labels,
     teacherData: teacherData as TeacherViewData,
     avatarUrl,
     displayCurrency,

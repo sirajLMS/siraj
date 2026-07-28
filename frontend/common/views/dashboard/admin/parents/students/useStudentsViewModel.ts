@@ -10,18 +10,16 @@ import { useStudentDirectoryStore } from "@/frontend/common/stores/studentDirect
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
-import type {
-  StudentDirectoryRowExtended,
-  StudentsViewLabels,
-} from "@/frontend/common/views/dashboard/admin/parents/students/types";
+import type { StudentDirectoryRowExtended } from "@/frontend/common/views/dashboard/admin/parents/students/types";
+import type { StudentsLabelsBySection } from "@/frontend/common/views/dashboard/admin/parents/students/types/studentsDirectory.types";
 import {
-  buildLabels,
+  buildLabelsBySection,
   buildStatusCounts,
   buildStudentRows,
   buildViewMetrics,
 } from "@/frontend/common/views/dashboard/admin/parents/students/utils";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type StudentDirectoryLabels, useAppTranslation } from "@/shared/locale";
+import { type StudentDirectoryLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 const EMPTY_FILTER_ARGS: StudentFilterArgs = {
   birthDate: null,
@@ -70,7 +68,7 @@ const DEFAULT_PAGINATION_ARGS = {
 };
 
 export interface StudentsViewModel {
-  readonly labels: StudentsViewLabels;
+  readonly labelsBySection: StudentsLabelsBySection;
   readonly metrics: readonly MetricItem[];
   readonly rows: readonly StudentDirectoryRowExtended[];
   readonly totalStudents: number | undefined;
@@ -124,8 +122,8 @@ function useDerivedStudentData(data: StudentDirectoryQuery | undefined, t: Stude
   const totalStudents = data ? (data.studentDirectory?.totalCount ?? 0) : undefined;
   const counts = useMemo(() => buildStatusCounts(rows), [rows]);
   const viewMetrics = useMemo(() => buildViewMetrics(counts, t), [counts, t]);
-  const labels = useMemo(() => buildLabels(t), [t]);
-  return { rows, totalStudents, viewMetrics, labels };
+  const labelsBySection = useMemo(() => buildLabelsBySection(t), [t]);
+  return { rows, totalStudents, viewMetrics, labelsBySection };
 }
 
 function createStudentHandlers(
@@ -153,7 +151,7 @@ function createStudentHandlers(
 }
 
 export function useStudentsViewModel(): StudentsViewModel {
-  const t = useAppTranslation().dashboardTranslations.studentDirectory;
+  const t = useAppTranslation(Translation.Dashboard.StudentDirectory);
   const router = useRouter();
   const notifications = useNotifications();
 
@@ -184,7 +182,7 @@ export function useStudentsViewModel(): StudentsViewModel {
     }
   }, [error, notifications, t]);
 
-  const { rows, totalStudents, viewMetrics, labels } = useDerivedStudentData(data, t);
+  const { rows, totalStudents, viewMetrics, labelsBySection } = useDerivedStudentData(data, t);
   const { handleViewProfile, handleViewHistory, handleAddStudent, handleFilterClick } = createStudentHandlers(
     router,
     setFilterPanelOpen,
@@ -192,7 +190,7 @@ export function useStudentsViewModel(): StudentsViewModel {
   );
 
   return {
-    labels,
+    labelsBySection,
     metrics: viewMetrics,
     rows,
     totalStudents,

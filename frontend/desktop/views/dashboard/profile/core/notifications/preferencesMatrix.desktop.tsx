@@ -9,9 +9,10 @@ import {
   type PreferenceMatrixRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
-import { useAppTranslation } from "@/shared/locale";
+import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
 interface PreferencesMatrixDesktopViewProps {
+  readonly labels: ProfileNotificationsLabels;
   // NEW FOR PLAN v5: pre-shaped matrix rows lifted out of the desktop tier
   // (data-shaping belongs in the ViewModel — specs.md §6.1). The tier view
   // only consumes them.
@@ -59,21 +60,20 @@ function EventTypeCell({ label }: Readonly<EventTypeCellProps>) {
 }
 
 export function PreferencesMatrixDesktopView({
+  labels,
   matrixRows,
   onToggle,
   disabled = false,
   loading = false,
 }: Readonly<PreferencesMatrixDesktopViewProps>) {
-  const t = useAppTranslation().profileTranslations.notifications;
-
-  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoize the columns array so the DataGrid keeps stable column identity across prop-driven row updates; MUI X DataGrid re-runs row-height calc and virtualization when the columns reference changes, so an inline array would force re-layout on every parent re-render. Memo keys (`t`, `disabled`, `onToggle`) all come from container props; inline cells would rebuild the render tree each render.
+  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoize the columns array so the DataGrid keeps stable column identity across prop-driven row updates; MUI X DataGrid re-runs row-height calc and virtualization when the columns reference changes, so an inline array would force re-layout on every parent re-render. Memo keys (`labels`, `disabled`, `onToggle`) all come from container props; inline cells would rebuild the render tree each render.
   const columns = useMemo<GridColDef<PreferenceMatrixRow>[]>(() => {
-    const eventLabels = t.events as Record<string, string>;
+    const eventLabels = labels.events as Record<string, string>;
     const getEventLabel = (eventType: NotificationEventType): string => eventLabels[eventType] ?? eventType;
 
     const channelColumns: GridColDef<PreferenceMatrixRow>[] = NOTIFICATION_CHANNELS.map(channel => ({
       field: channel,
-      headerName: t.channels[channel],
+      headerName: labels.channels[channel],
       width: 120,
       align: "center",
       headerAlign: "center",
@@ -85,7 +85,7 @@ export function PreferencesMatrixDesktopView({
             row={row}
             channel={channel}
             disabled={disabled}
-            channelLabel={t.channels[channel]}
+            channelLabel={labels.channels[channel]}
             eventLabel={getEventLabel(row.eventType)}
             onToggle={onToggle}
           />
@@ -107,7 +107,7 @@ export function PreferencesMatrixDesktopView({
       },
       ...channelColumns,
     ];
-  }, [t, disabled, onToggle]);
+  }, [labels, disabled, onToggle]);
 
   return (
     <DesktopAppDataGrid<PreferenceMatrixRow>
@@ -117,7 +117,7 @@ export function PreferencesMatrixDesktopView({
       loading={loading && matrixRows.length === 0}
       paginationOptions={false}
       autoHeight
-      ariaLabel={t.title}
+      ariaLabel={labels.title}
     />
   );
 }

@@ -1,7 +1,22 @@
 export { type AppLocale, defaultLocale, locales } from "./AppLocale";
-export { LocaleContext, type LocaleContextValue, useLocaleContext } from "./localeContext";
-export * from "./old/clientLegacy.ts";
-export * from "./old/messagesLegacy.ts";
-export { getServerTranslations } from "./old/server-graphql-legacy.ts";
-export { getTranslations, loadAllTranslations } from "./old/serverLegacy.ts";
+export {
+  getNamespaceConfig,
+  preloadNamespaces,
+  readTranslation,
+  registerNamespace,
+  TranslationProvider,
+  type TranslationProviderProps,
+  useTranslation,
+} from "./client";
+export { useAppTranslation } from "./client/use-app-translation";
+export { LocaleContext, type LocaleContextValue, useAppLocale, useLocaleContext } from "./localeContext";
+export {
+  AuthLogin,
+  defineNamespace,
+  type NamespaceHandle,
+  type NamespaceLoaderConfig,
+  Translation,
+} from "./namespaces";
+export { getTranslations, loadAllTranslations } from "./server";
+export { getServerTranslations } from "./server-graphql";
 export * from "./types";

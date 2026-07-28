@@ -38,7 +38,6 @@ import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/Met
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopAppDatePicker } from "@/frontend/desktop/components/ui/form/date/DesktopAppDatePicker";
-import { useAppTranslation } from "@/shared/locale";
 
 type ProfileLabels = StudentProfileViewModel["labels"];
 type DraftPatch = (patch: Partial<StudentPortalProfileEditDraft>) => void;
@@ -405,7 +404,7 @@ export function StudentProfileDesktopView({
   onSnackbarClose,
   onUploadAvatar,
 }: Readonly<StudentProfileViewModel>) {
-  const editAvatarTitle = useAppTranslation().profileTranslations.base.editAvatarTitle;
+  const editAvatarTitle = labels.editAvatarTitle;
 
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;

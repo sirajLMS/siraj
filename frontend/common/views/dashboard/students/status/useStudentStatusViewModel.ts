@@ -29,7 +29,7 @@ import type {
   StudentStatusPageData,
   UpcomingClassDisplay,
 } from "@/frontend/common/views/dashboard/students/status/types";
-import { type CommonLabels, type StudentStatusLabels, useAppTranslation } from "@/shared/locale";
+import { type CommonLabels, type StudentStatusLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 type UpcomingClassInput = {
   readonly id?: string | null;
@@ -351,8 +351,8 @@ function useStudentStatusLayout(canEditStatus: boolean, canViewStatus: boolean, 
 }
 
 export function useStudentStatusViewModel(props: Readonly<UseStudentStatusViewModelProps>): StudentStatusViewModel {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
-  const tc = useAppTranslation().commonTranslations;
+  const t = useAppTranslation(Translation.Dashboard.StudentStatus);
+  const tc = useAppTranslation(Translation.Common);
   const params = useParams();
   const profileContext = useStudentProfileContext();
   const studentId = props.studentId ?? profileContext?.studentId ?? (typeof params?.id === "string" ? params.id : "");

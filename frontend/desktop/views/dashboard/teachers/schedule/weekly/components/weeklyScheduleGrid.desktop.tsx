@@ -22,18 +22,20 @@ import type {
   WeeklyScheduleGridProps,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
+import type { MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
 
 interface SlotItemProps {
   readonly classItem: ScheduledClass;
   readonly onRemove: (id: string) => void;
   readonly hasScheduleDeleteClass: boolean;
+  readonly labels: TeacherWeeklyScheduleLabels;
+  readonly meetingJoinLabels: MeetingConfigJoinLabels;
 }
 
-function SlotItem({ classItem, onRemove, hasScheduleDeleteClass }: Readonly<SlotItemProps>) {
+function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meetingJoinLabels }: Readonly<SlotItemProps>) {
   const { open, openDialog, closeDialog } = useDeleteConfirmDialog();
-  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
-  const tMeeting = useAppTranslation().uiTranslations.meetingConfig.join;
+  const t = labels;
 
   const handleConfirm = () => {
     closeDialog();
@@ -52,7 +54,7 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass }: Readonly<Slot
       joinUrl={classItem.meetingJoinUrl}
       meeting={classItem.effectiveMeeting}
       emptyRole="teacher"
-      label={tMeeting.joinMeeting}
+      label={meetingJoinLabels.joinMeeting}
       setupHref="/profile?tab=meeting"
     />
   ) : isTerminal ? (
@@ -116,9 +118,8 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass }: Readonly<Slot
   );
 }
 
-function GridHeader() {
-  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
-
+function GridHeader({ labels }: Readonly<{ labels: TeacherWeeklyScheduleLabels }>) {
+  const t = labels;
   return (
     <Box
       sx={theme => ({
@@ -164,11 +165,19 @@ interface GridRowProps {
   readonly classes: readonly ScheduledClass[];
   readonly onRemoveClass: (id: string) => void;
   readonly hasScheduleDeleteClass: boolean;
+  readonly labels: TeacherWeeklyScheduleLabels;
+  readonly meetingJoinLabels: MeetingConfigJoinLabels;
 }
 
-function GridRow({ time, classes, onRemoveClass, hasScheduleDeleteClass }: Readonly<GridRowProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
-
+function GridRow({
+  time,
+  classes,
+  onRemoveClass,
+  hasScheduleDeleteClass,
+  labels,
+  meetingJoinLabels,
+}: Readonly<GridRowProps>) {
+  const t = labels;
   const getClassesForSlot = (day: string) => {
     return classes.filter(c => c.day?.toLowerCase() === day && c.startTime === time);
   };
@@ -234,6 +243,8 @@ function GridRow({ time, classes, onRemoveClass, hasScheduleDeleteClass }: Reado
                   classItem={c}
                   onRemove={onRemoveClass}
                   hasScheduleDeleteClass={hasScheduleDeleteClass}
+                  labels={labels}
+                  meetingJoinLabels={meetingJoinLabels}
                 />
               ))
             )}
@@ -248,6 +259,8 @@ export default function WeeklyScheduleGrid({
   classes,
   onRemoveClass,
   hasScheduleDeleteClass,
+  labels,
+  meetingJoinLabels,
 }: Readonly<WeeklyScheduleGridProps>) {
   return (
     <Box
@@ -260,7 +273,7 @@ export default function WeeklyScheduleGrid({
         backgroundColor: theme.palette.background.paper,
       })}
     >
-      <GridHeader />
+      <GridHeader labels={labels} />
       {WEEKLY_SCHEDULE_TIMES.map(time => (
         <GridRow
           key={time}
@@ -268,6 +281,8 @@ export default function WeeklyScheduleGrid({
           classes={classes}
           onRemoveClass={onRemoveClass}
           hasScheduleDeleteClass={hasScheduleDeleteClass}
+          labels={labels}
+          meetingJoinLabels={meetingJoinLabels}
         />
       ))}
     </Box>

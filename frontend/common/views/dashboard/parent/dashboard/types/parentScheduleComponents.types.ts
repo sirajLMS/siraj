@@ -6,7 +6,10 @@
 import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import type { SchedulePagination } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
-import type { AssociatedStudentRow } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import type {
+  AssociatedStudentRow,
+  AssociatedStudentsSectionLabels,
+} from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 
 export interface BaseParentScheduleListProps {
   readonly rows: readonly ParentScheduleRow[];
@@ -32,6 +35,7 @@ export interface ParentScheduleDataGridDesktopProps extends BaseParentScheduleLi
 
 export interface BaseAssociatedStudentsListProps {
   readonly rows: readonly AssociatedStudentRow[];
+  readonly labels: AssociatedStudentsSectionLabels;
 }
 
 // VARIANT JUSTIFICATION: extra field loading — the desktop data-grid renders a

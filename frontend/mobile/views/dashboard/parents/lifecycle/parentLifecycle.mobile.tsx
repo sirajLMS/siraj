@@ -6,40 +6,44 @@ import {
   LifecycleParentSummaryCard,
 } from "@/frontend/common/views/dashboard/parents/lifecycle/components/sharedViewContent";
 import { useParentLifecycleProfileHref } from "@/frontend/common/views/dashboard/parents/lifecycle/components/useParentLifecycleForm";
-import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
+import type { ParentLifecycleViewModel } from "@/frontend/common/views/dashboard/parents/lifecycle/useParentLifecycleViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
 export function ParentLifecycleMobileView({
+  labels,
   parent,
   isUpdating,
   onUpdateLifecycle,
-}: Readonly<ParentLifecycleViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.parentLifecycle;
+}: Readonly<ParentLifecycleViewModel>) {
   const profileHref = useParentLifecycleProfileHref(parent);
 
   return (
     <MobilePageContainer>
       <MobilePageHeader
-        title={t.pageTitle}
+        title={labels.pageTitle}
         edgeToEdge={false}
         breadcrumbs={[
-          { label: t.breadcrumbs.parents, href: "/parents" },
-          { label: t.breadcrumbs.lifecycle, current: true },
+          { label: labels.breadcrumbs.parents, href: "/parents" },
+          { label: labels.breadcrumbs.lifecycle, current: true },
         ]}
         actions={
           profileHref ? (
             <Button component={Link} href={profileHref} variant="outlined" size="small">
-              {t.actions.viewProfile}
+              {labels.actions.viewProfile}
             </Button>
           ) : undefined
         }
       />
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2, px: { xs: 2, md: 3 }, pb: 4 }}>
-        <LifecycleParentSummaryCard parent={parent} size="sm" />
-        <LifecycleFormBody parent={parent} isUpdating={isUpdating} onUpdateLifecycle={onUpdateLifecycle} />
+        <LifecycleParentSummaryCard parent={parent} labels={labels} size="sm" />
+        <LifecycleFormBody
+          parent={parent}
+          labels={labels}
+          isUpdating={isUpdating}
+          onUpdateLifecycle={onUpdateLifecycle}
+        />
       </Box>
     </MobilePageContainer>
   );

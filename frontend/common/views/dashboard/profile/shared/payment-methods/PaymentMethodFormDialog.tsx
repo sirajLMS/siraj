@@ -39,7 +39,8 @@ import {
   paymentMethodFormSchema,
 } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 import { usePaymentMethodCatalogs } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
-import { useAppTranslation } from "@/shared/locale";
+import type { PaymentMethodProfileLabels } from "@/frontend/common/views/dashboard/profile/shared/types/paymentMethodProfile.types";
+import type { PaymentMethodManagerLabels } from "@/shared/locale/types/ui";
 
 export type PaymentMethodFormDialogProps = {
   readonly open: boolean;
@@ -47,6 +48,7 @@ export type PaymentMethodFormDialogProps = {
   readonly slotDirection: PaymentDirection.Payin | PaymentDirection.Payout;
   readonly allowedDirections: readonly PaymentDirection[];
   readonly editMethod: UserPaymentMethodFieldsFragment | null;
+  readonly labels: PaymentMethodProfileLabels;
   readonly onClose: () => void;
   readonly onSaved: () => void;
 };
@@ -107,6 +109,7 @@ type PaymentMethodFormFieldsProps = {
   readonly setSelectedWallet: (option: PaymentMethodCatalogOption | null) => void;
   readonly setSelectedPaymentLink: (option: PaymentMethodCatalogOption | null) => void;
   readonly setSelectedOnlineAccount: (option: PaymentMethodCatalogOption | null) => void;
+  readonly managerLabels: PaymentMethodManagerLabels;
 };
 
 function PaymentMethodFormFields({
@@ -124,8 +127,9 @@ function PaymentMethodFormFields({
   setSelectedWallet,
   setSelectedPaymentLink,
   setSelectedOnlineAccount,
+  managerLabels,
 }: PaymentMethodFormFieldsProps) {
-  const t = useAppTranslation().uiTranslations.paymentMethodManager;
+  const t = managerLabels;
 
   return (
     <Stack spacing={2.5} sx={{ pt: 1 }}>
@@ -307,11 +311,12 @@ export function PaymentMethodFormDialog({
   slotDirection,
   allowedDirections,
   editMethod,
+  labels,
   onClose,
   onSaved,
 }: PaymentMethodFormDialogProps) {
-  const t = useAppTranslation().uiTranslations.paymentMethodManager;
-  const tDir = useAppTranslation().uiTranslations.paymentMethod;
+  const t = labels.manager;
+  const tDir = labels.type;
   const isEdit = editMethod?.id != null;
 
   const defaultDirection = slotDirection;
@@ -380,6 +385,7 @@ export function PaymentMethodFormDialog({
           setSelectedWallet={setSelectedWallet}
           setSelectedPaymentLink={setSelectedPaymentLink}
           setSelectedOnlineAccount={setSelectedOnlineAccount}
+          managerLabels={t}
         />
       </DialogContent>
       <DialogActions>

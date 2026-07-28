@@ -16,9 +16,11 @@ import {
   resolveStudentProfileTab,
   type StudentProfileTab,
 } from "@/frontend/common/views/dashboard/students/profile/studentProfileTabs";
+import type { StudentProfilePageLabelsBySection } from "@/frontend/common/views/dashboard/students/profile/types/studentProfilePage.types";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type StudentStatusLabels, useAppTranslation } from "@/shared/locale";
+import { type StudentStatusLabels, Translation, useAppTranslation } from "@/shared/locale";
+import type { StudentProfileLabels } from "@/shared/locale/types/dashboard/students/profile";
 
 const STATUS_BADGE_KEY: Record<StudentStatus, string> = {
   [StudentStatus.Regular]: "regular",
@@ -60,16 +62,7 @@ export interface StudentProfilePageViewModel {
   readonly statusBadge: StudentProfileStatusBadge | undefined;
   readonly visibleTabs: readonly StudentProfileTab[];
   readonly activeTab: StudentProfileTab | null;
-  readonly fallbackTitle: string;
-  readonly loadingLabel: string;
-  readonly notFoundTitle: string;
-  readonly notFoundDescription: string;
-  readonly tabLabels: {
-    readonly status: string;
-    readonly classes: string;
-    readonly quota: string;
-    readonly history: string;
-  };
+  readonly labelsBySection: StudentProfilePageLabelsBySection;
   readonly onTabChange: (event: React.SyntheticEvent, nextTab: StudentProfileTab) => void;
 }
 
@@ -97,7 +90,7 @@ interface StudentProfilePresentationState {
 }
 
 type StudentFieldAccess = ReturnType<typeof useStudentFieldAccess>;
-type StudentProfileTranslations = ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentProfile"];
+type StudentProfileTranslations = StudentProfileLabels;
 
 function useStudentProfileTabState(
   studentId: string,
@@ -206,8 +199,8 @@ export function useStudentProfilePageViewModel(
 ): StudentProfilePageViewModel {
   const { studentId } = props;
 
-  const t = useAppTranslation().dashboardTranslations.studentProfile;
-  const tStatus = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useAppTranslation(Translation.Dashboard.StudentProfile);
+  const tStatus = useAppTranslation(Translation.Dashboard.StudentStatus);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { currentMonth } = useStudentHistoryStore();
@@ -227,7 +220,7 @@ export function useStudentProfilePageViewModel(
     currentMonth
   );
 
-  useDocumentTitle(profile?.name, "dashboard.studentProfile", "title");
+  useDocumentTitle(profile?.name, Translation.Dashboard.StudentProfile, "title");
 
   const contextValue = useMemo<StudentProfileContextValue>(
     () => ({
@@ -241,6 +234,19 @@ export function useStudentProfilePageViewModel(
 
   const { header, statusBadge } = useStudentProfilePresentation(profile, access, tStatus, t);
 
+  const labelsBySection = useMemo<StudentProfilePageLabelsBySection>(
+    () => ({
+      shell: {
+        title: t.title,
+        loading: t.loading,
+        notFoundTitle: t.notFoundTitle,
+        notFoundDescription: t.notFoundDescription,
+      },
+      tabs: t.tabs,
+    }),
+    [t]
+  );
+
   return {
     studentId,
     loadingState,
@@ -250,11 +256,7 @@ export function useStudentProfilePageViewModel(
     statusBadge,
     visibleTabs,
     activeTab,
-    fallbackTitle: t.title,
-    loadingLabel: t.loading,
-    notFoundTitle: t.notFoundTitle,
-    notFoundDescription: t.notFoundDescription,
-    tabLabels: t.tabs,
+    labelsBySection,
     onTabChange,
   };
 }

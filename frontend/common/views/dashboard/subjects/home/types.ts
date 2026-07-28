@@ -12,6 +12,7 @@ import type {
   EditCategoryFormValues,
 } from "@/frontend/common/views/dashboard/subjects/home/schemas/category.schema";
 import type { SubjectFormValues } from "@/frontend/common/views/dashboard/subjects/home/schemas/subject.schema";
+import type { SubjectsLabels } from "@/shared/locale";
 
 export type CategoryItem = NonNullable<ClassCategory>;
 
@@ -25,7 +26,7 @@ export type SubjectResourceItem = NonNullable<ClassSubject["resources"]>[number]
 // NEW FOR PLAN v5: subjects-related translation labels carried by the
 // ViewModel to the lifted dialogs so the tier files don't call useAppTranslation
 // directly for form/field labels (avoids duplicating the
-// `t.dashboardTranslations.subjects` property walk across all four dialogs).
+// `tuseAppTranslation(Translation.Dashboard.Subjects)` property walk across all four dialogs).
 export interface SubjectsDialogLabels {
   readonly createSubject: string;
   readonly editSubject: string;
@@ -82,6 +83,7 @@ export type EditCategoryFormStateProps = CategoryFormStateProps & {
 };
 
 export interface SubjectsViewProps {
+  readonly labels: SubjectsLabels;
   readonly categories: readonly CategoryItem[];
   readonly subjects: readonly SubjectItem[];
   readonly filteredSubjects: readonly SubjectItem[];
@@ -108,6 +110,7 @@ export interface SubjectsViewProps {
 }
 
 export interface SubjectCardProps {
+  readonly labels: SubjectsLabels;
   readonly subject: SubjectItem;
   readonly onEdit: () => void;
   readonly onDelete: () => void;
@@ -116,6 +119,7 @@ export interface SubjectCardProps {
 }
 
 export interface CategoriesSectionProps {
+  readonly labels: SubjectsLabels;
   readonly categories: readonly CategoryItem[];
   readonly activeCategoryId: string | null;
   readonly onCategoryChange: (categoryId: string | null) => void;
@@ -153,6 +157,7 @@ export interface EditSubjectDialogProps {
 }
 
 export interface DeleteSubjectDialogProps {
+  readonly labels: Pick<SubjectsLabels, "deleteSubject" | "deleteSubjectConfirm" | "cancel">;
   readonly open: boolean;
   readonly onClose: () => void;
   readonly onConfirm: () => void;
@@ -182,6 +187,7 @@ export interface EditCategoryDialogProps {
 }
 
 export interface DeleteCategoryDialogProps {
+  readonly labels: Pick<SubjectsLabels, "deleteCategory" | "deleteCategoryConfirm" | "cancel">;
   readonly open: boolean;
   readonly onClose: () => void;
   readonly onConfirm: () => void;

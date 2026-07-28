@@ -15,9 +15,10 @@ import {
 import { TeacherCardList } from "@/frontend/mobile/views/dashboard/teachers/home/components/teacherCardList.mobile";
 import { TeacherMetricsRow } from "@/frontend/mobile/views/dashboard/teachers/home/components/teacherMetricsRow.mobile";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
 
 export interface TeachersMobileViewProps {
+  readonly labels: TeachersDirectoryLabels;
   // VARIANT JUSTIFICATION: extra fields searchQuery / onSearchChange (mobile-only search-input lives on the card list header; the desktop twin surfaces search via the data-grid toolbar).
   readonly metrics: TeacherDirectoryMetrics | null | undefined;
   readonly rows: readonly TeacherDirectoryRow[];
@@ -41,6 +42,7 @@ export interface TeachersMobileViewProps {
  * is decided by the parent switcher `TeachersView.tsx`).
  */
 export function TeachersMobileView({
+  labels,
   metrics,
   rows,
   searchQuery,
@@ -53,7 +55,7 @@ export function TeachersMobileView({
   onNavigateToSchedule,
   onNavigateToProfile,
 }: Readonly<TeachersMobileViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.teachersDirectory;
+  const t = labels;
 
   return (
     <MobilePageContainer>
@@ -78,12 +80,13 @@ export function TeachersMobileView({
       />
 
       <MobileContentStack gap={3} paddingBottom={4}>
-        <TeacherMetricsRow metrics={metrics} />
+        <TeacherMetricsRow metrics={metrics} labels={labels.metrics} />
 
         <TeacherCardList
           rows={rows}
           searchQuery={searchQuery}
           onSearchChange={onSearchChange}
+          labels={labels}
           paginationOptions={buildServerPaginationOptions({
             page,
             pageSize,

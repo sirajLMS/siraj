@@ -7,8 +7,7 @@ import type {
   InsightCardProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
 import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
-import { DesktopTimezoneDisplay } from "@/frontend/desktop/components/ui/display";
-import { useAppTranslation } from "@/shared/locale";
+import { DesktopTimezoneDisplay } from "@/frontend/desktop/components/ui/display/timezoneDisplay/timezoneDisplay.desktop";
 
 function InsightCard({ title, value, description, icon }: Readonly<InsightCardProps>) {
   return (
@@ -111,8 +110,8 @@ function TimezoneInsight({
   );
 }
 
-export function AvailabilityInsightsDesktop({ insights }: Readonly<AvailabilityInsightsProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherAvailability.insights;
+export function AvailabilityInsightsDesktop({ insights, labels }: Readonly<AvailabilityInsightsProps>) {
+  const t = labels;
 
   return (
     <AvailabilityInsightsLayout

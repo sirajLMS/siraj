@@ -1,7 +1,9 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
 import type { GroupUser, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionsLabels } from "@/shared/locale";
 
 export interface AssignedUsersTabProps {
+  readonly labels: PermissionsLabels;
   readonly group: PermissionGroup;
   readonly filteredAssignedUsers: readonly GroupUser[];
   readonly selectedAssignedUserIds: readonly string[];

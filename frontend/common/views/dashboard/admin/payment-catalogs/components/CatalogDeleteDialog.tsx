@@ -2,16 +2,16 @@
 
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { CatalogDeleteDialogProps } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
-import { useAppTranslation } from "@/shared/locale";
 
 export function CatalogDeleteDialog({
+  labels,
   open,
   entryName,
   isLoading,
   onClose,
   onConfirm,
 }: Readonly<CatalogDeleteDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
+  const t = labels;
 
   return (
     <BaseDeleteDialog

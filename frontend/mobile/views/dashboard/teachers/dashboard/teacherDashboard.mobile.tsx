@@ -273,7 +273,14 @@ export function TeacherDashboardMobileView({
         onClose={onManualEntryClose}
         onSubmit={onManualEntrySubmit}
         defaultActive={manualEntryDefaultActive}
-        studentSelect={<ManualClassEntryStudentSelectMobile teacherId={teacherId} open={manualEntryOpen} />}
+        labels={labels.manualClassEntry}
+        studentSelect={
+          <ManualClassEntryStudentSelectMobile
+            teacherId={teacherId}
+            open={manualEntryOpen}
+            studentLabel={labels.manualClassEntry.studentLabel}
+          />
+        }
       />
     </>
   );

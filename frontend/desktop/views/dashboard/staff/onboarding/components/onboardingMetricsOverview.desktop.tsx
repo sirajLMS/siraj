@@ -7,7 +7,6 @@ import type { OnboardingMetricsOverviewProps } from "@/frontend/common/views/das
 import type { OnboardingMetricKey } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
 import { resolveMetricValue } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
-import { useAppTranslation } from "@/shared/locale";
 
 const METRIC_ITEMS = [
   { key: "activeStaff", icon: GroupsOutlined },
@@ -15,15 +14,14 @@ const METRIC_ITEMS = [
   { key: "avgOnboarding", icon: SpeedOutlined },
 ] as const satisfies ReadonlyArray<{ readonly key: OnboardingMetricKey; readonly icon: typeof GroupsOutlined }>;
 
-export function OnboardingMetricsOverviewDesktop({ model }: Readonly<OnboardingMetricsOverviewProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffOnboarding.metrics;
+export function OnboardingMetricsOverviewDesktop({ labels, model }: Readonly<OnboardingMetricsOverviewProps>) {
   const { metrics, loading } = model;
 
   const metricItems: MetricItem[] = METRIC_ITEMS.map(item => ({
     key: item.key,
     count: resolveMetricValue(metrics, item.key, loading),
     labelKey: item.key,
-    label: t[item.key],
+    label: labels[item.key],
     icon: item.icon,
   }));
 

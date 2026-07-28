@@ -6,11 +6,10 @@ import { Controller } from "react-hook-form";
 import { type PersonOption, resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { AssignGroupDialogSharedProps } from "@/frontend/common/views/dashboard/permissions/types/assignGroupDialogShared.types";
-import { useAppTranslation } from "@/shared/locale";
 
-export function AssignGroupDialogShared({ props, slots }: Readonly<AssignGroupDialogSharedProps>) {
+export function AssignGroupDialogShared({ labels, props, slots }: Readonly<AssignGroupDialogSharedProps>) {
   const { open, group, isLoading, onClose, onAssign, control, errors, handleSubmit } = props;
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
   const { UserAutocomplete, dialogVariant, formIdSuffix } = slots;
 
   const assignedUserIds = useMemo(

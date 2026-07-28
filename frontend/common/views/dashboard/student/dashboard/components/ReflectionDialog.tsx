@@ -7,17 +7,16 @@ import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui
 import { submitStudentReflectionMutationDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
 import { useStudentDashboardStore } from "@/frontend/common/stores/studentDashboardStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { useAppTranslation } from "@/shared/locale";
+import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
+
+type ReflectionDialogProps = Pick<StudentDashboardViewModel, "labels" | "commonLabels">;
 
 /**
  * Self-contained dialog for submitting a student lesson reflection.
  * Reads `reflectionDialogOpen` / `selectedReportId` from the dashboard store.
  * `selectedReportId` holds the `classInstanceId` required by the mutation.
  */
-export function ReflectionDialog() {
-  const t = useAppTranslation().dashboardTranslations.studentPortalDashboard;
-  const common = useAppTranslation().commonTranslations;
-
+export function ReflectionDialog({ labels, commonLabels }: Readonly<ReflectionDialogProps>) {
   const open = useStudentDashboardStore(state => state.reflectionDialogOpen);
   const classInstanceId = useStudentDashboardStore(state => state.selectedReportId);
   const setReflectionDialogOpen = useStudentDashboardStore(state => state.setReflectionDialogOpen);
@@ -64,13 +63,13 @@ export function ReflectionDialog() {
       setNotes("");
     } catch (err) {
       logger.error("Submit student reflection mutation failed:", { err });
-      setError(t.reflectionSaveError);
+      setError(labels.reflectionSaveError);
     }
   };
 
   return (
     <Dialog open={open} onClose={loading ? undefined : handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ typography: "titleLg" }}>{t.reflectionDialogTitle}</DialogTitle>
+      <DialogTitle sx={{ typography: "titleLg" }}>{labels.reflectionDialogTitle}</DialogTitle>
       <DialogContent>
         {error ? (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -82,8 +81,8 @@ export function ReflectionDialog() {
           fullWidth
           multiline
           minRows={4}
-          label={t.reflectionNotesLabel}
-          placeholder={t.reflectionNotesPlaceholder}
+          label={labels.reflectionNotesLabel}
+          placeholder={labels.reflectionNotesPlaceholder}
           value={notes}
           onChange={event => {
             setNotes(event.target.value);
@@ -95,7 +94,7 @@ export function ReflectionDialog() {
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
         <FilterButton onClick={handleClose} disabled={loading}>
-          {common.cancel}
+          {commonLabels.cancel}
         </FilterButton>
         <PrimaryPageAction
           onClick={() => {
@@ -104,7 +103,7 @@ export function ReflectionDialog() {
           disabled={loading || notes.trim().length === 0 || !classInstanceId}
           startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
         >
-          {common.save}
+          {commonLabels.save}
         </PrimaryPageAction>
       </DialogActions>
     </Dialog>

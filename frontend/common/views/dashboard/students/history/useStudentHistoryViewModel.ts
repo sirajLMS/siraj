@@ -6,9 +6,9 @@ import { studentClassHistoryQueryDocument } from "@/frontend/common/graphql/shar
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import type { ClassSession, StudentHistoryMetrics } from "@/frontend/common/views/dashboard/students/history/types";
 import { mapStudentHistoryMetrics } from "@/frontend/common/views/dashboard/students/history/utils/studentHistoryMappers";
-import { type StudentHistoryLabels, useAppTranslation } from "@/shared/locale";
+import { type StudentHistoryLabels, Translation, useAppTranslation } from "@/shared/locale";
 
-function useStudentHistoryLabels(t: StudentHistoryLabels): StudentHistoryLabels {
+function resolveStudentHistoryLabels(t: StudentHistoryLabels): StudentHistoryLabels {
   return t;
 }
 
@@ -38,8 +38,8 @@ export interface StudentHistoryViewModel {
 
 export function useStudentHistoryViewModel(props: Readonly<UseStudentHistoryViewModelProps>): StudentHistoryViewModel {
   const { studentId } = props;
-  const t = useAppTranslation().dashboardTranslations.studentHistory;
-  const labels = useStudentHistoryLabels(t);
+  const t = useAppTranslation(Translation.Dashboard.StudentHistory);
+  const labels = resolveStudentHistoryLabels(t);
 
   const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
     variables: { studentId, year: null, month: null },

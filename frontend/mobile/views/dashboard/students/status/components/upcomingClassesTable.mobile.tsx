@@ -7,6 +7,7 @@ import type {
   UpcomingClassDisplay,
   UpcomingClassesTableProps,
 } from "@/frontend/common/views/dashboard/students/status/types";
+import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
@@ -14,7 +15,7 @@ import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display
 import { useRouter } from "@/shared/i18n/navigation";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppTranslation } from "@/shared/locale";
+import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
 
 function formatDateTime(locale: string, dateStr: string): string {
   try {
@@ -41,7 +42,7 @@ function UpcomingClassCard({
 }: Readonly<{
   cls: UpcomingClassDisplay;
   locale: string;
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentStatus"];
+  t: StudentStatusLabels;
 }>) {
   return (
     <MobileCardListItem
@@ -118,7 +119,7 @@ function UpcomingClassCard({
 }
 
 export function UpcomingClassesTableMobile({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
   const locale = useAppLocale();
   const router = useRouter();
 

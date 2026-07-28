@@ -7,15 +7,14 @@ import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profile
 import type { AssociatedStudentsDataGridDesktopProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentScheduleComponents.types";
 import type { AssociatedStudentRow } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
-import { useAppTranslation } from "@/shared/locale";
 
 export function AssociatedStudentsDataGridDesktop({
   rows,
+  labels,
   loading = false,
   emptyMessage,
 }: Readonly<AssociatedStudentsDataGridDesktopProps>) {
-  const t = useAppTranslation().profileTranslations.parent;
-  const tProfile = useAppTranslation().profileTranslations.base;
+  const { parent: t, base: tProfile } = labels;
 
   const columns = useMemo<GridColDef<AssociatedStudentRow>[]>(
     () => [

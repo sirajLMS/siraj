@@ -16,7 +16,8 @@ import type {
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import { useRouter } from "@/shared/i18n/navigation";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core/scheduleAlerts";
 
 function getTodayString() {
   const today = new Date();
@@ -95,7 +96,7 @@ function mapScheduleRowsToClasses(rows: ScheduleRow[] | null | undefined): Acade
   });
 }
 
-function buildScheduleLabels(t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreScheduleAlerts"]) {
+function buildScheduleLabels(t: ScheduleAlertsLabels) {
   return {
     pageTitle: t.pageTitle,
     pageSubtitle: t.pageSubtitle,
@@ -132,10 +133,7 @@ function buildScheduleLabels(t: ReturnType<typeof useAppTranslation>["dashboardT
   };
 }
 
-function buildMetricLabels(
-  metrics: readonly AlertsMetric[],
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreScheduleAlerts"]
-) {
+function buildMetricLabels(metrics: readonly AlertsMetric[], t: ScheduleAlertsLabels) {
   return Object.fromEntries(
     metrics.map(metric => [
       metric.key,
@@ -263,7 +261,7 @@ export interface UseScheduleAlertsViewModelProps {
 }
 
 export function useScheduleAlertsViewModel(): ScheduleAlertsViewModel {
-  const t = useAppTranslation().dashboardTranslations.coreScheduleAlerts;
+  const t = useAppTranslation(Translation.Dashboard.CoreScheduleAlerts);
   const router = useRouter();
 
   const page = useScheduleAlertsStore(state => state.page);

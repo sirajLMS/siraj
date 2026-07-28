@@ -1,24 +1,17 @@
-import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { LoginView, type LoginViewProps } from "@/frontend/views/auth/login/LoginView";
 import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
-import { BetaTranslationProvider, TranslationBeta, useAppTranslationBeta } from "@/shared/locale/beta";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
-function LoginViewWithBetaLabels(props: Omit<LoginViewProps, "labels">) {
-  const labels = useAppTranslationBeta(TranslationBeta.Auth.Login);
+function LoginViewWithLabels(props: Omit<LoginViewProps, "labels">) {
+  const labels = useAppTranslation(Translation.Auth.Login);
   return <LoginView labels={labels} {...props} />;
 }
 
-const withBetaTranslationProvider: Decorator = Story => (
-  <BetaTranslationProvider>
-    <Story />
-  </BetaTranslationProvider>
-);
-
-const meta: Meta<typeof LoginViewWithBetaLabels> = {
+const meta: Meta<typeof LoginViewWithLabels> = {
   title: "Views /login/LoginView",
-  component: LoginViewWithBetaLabels,
+  component: LoginViewWithLabels,
   tags: ["autodocs"],
-  decorators: [withBetaTranslationProvider],
   parameters: {
     layout: "fullscreen",
   },
@@ -41,7 +34,7 @@ const meta: Meta<typeof LoginViewWithBetaLabels> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof LoginViewWithBetaLabels>;
+type Story = StoryObj<typeof LoginViewWithLabels>;
 
 export const Default: Story = {
   args: {

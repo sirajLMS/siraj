@@ -19,7 +19,8 @@ import {
 } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.helpers";
 import type { RescheduleTrackingViewLabels } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { RescheduleTrackingLabels } from "@/shared/locale/types/dashboard/classes/rescheduleTracking";
 
 interface RescheduleTrackingViewModel {
   readonly metrics: readonly ReturnType<typeof buildTrackingMetrics>[number][];
@@ -44,7 +45,7 @@ interface UseRescheduleTrackingViewModelProps {
 }
 
 export function useRescheduleTrackingViewModel(): RescheduleTrackingViewModel {
-  const t = useAppTranslation().dashboardTranslations.rescheduleTracking;
+  const t = useAppTranslation(Translation.Dashboard.RescheduleTracking);
   const locale = useAppLocale();
   const router = useRouter();
   const notifications = useNotifications();
@@ -154,7 +155,7 @@ function useTrackingQueries(statusFilter: LeaveRequestStatus | null, pageSize: n
 
 function useTrackingHandlers(
   rows: readonly ReturnType<typeof buildTrackingRows>[number][],
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["rescheduleTracking"],
+  t: RescheduleTrackingLabels,
   router: ReturnType<typeof useRouter>,
   notifications: ReturnType<typeof useNotifications>,
   refetchRows: () => unknown,
@@ -214,9 +215,7 @@ function useTrackingHandlers(
   return { handleApprove, handleReject, handleView, handleExport };
 }
 
-function buildViewLabels(
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["rescheduleTracking"]
-): RescheduleTrackingViewLabels {
+function buildViewLabels(t: RescheduleTrackingLabels): RescheduleTrackingViewLabels {
   return {
     pageTitle: t.pageTitle,
     sectionTitle: t.sectionTitle,
@@ -244,7 +243,7 @@ function buildViewLabels(
   };
 }
 
-function buildExportLabels(t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["rescheduleTracking"]) {
+function buildExportLabels(t: RescheduleTrackingLabels) {
   return {
     pageTitle: t.pageTitle,
     table: {

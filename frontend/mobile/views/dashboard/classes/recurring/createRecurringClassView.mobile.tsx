@@ -108,15 +108,12 @@ export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurri
     showSuccess,
     errorMessage,
     meetingConfigWarning,
-    meetingConfigWarningMessage,
-    goToClassLabel,
+    labelsBySection,
     onGoToCreatedClass,
-    labels,
     onClose,
     onSubmit,
     onDismissSuccess,
     onDismissError,
-    formLabels,
     register,
     handleSubmit,
     watch,
@@ -127,13 +124,15 @@ export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurri
     onMeetingConfigChange,
   } = viewModel;
 
+  const { shell, form, notifications } = labelsBySection;
+
   return (
     <MobilePageContainer>
       <MobilePageHeader
-        title={labels.title}
+        title={shell.title}
         titleVariant="headlineMd"
         actions={
-          <StyledHeaderCloseButton onClick={onClose} aria-label={labels.close}>
+          <StyledHeaderCloseButton onClick={onClose} aria-label={shell.close}>
             <CloseOutlined />
           </StyledHeaderCloseButton>
         }
@@ -153,17 +152,17 @@ export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurri
           handleSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           meetingConfigWarning={meetingConfigWarning}
-          meetingConfigWarningMessage={meetingConfigWarningMessage}
-          goToClassLabel={goToClassLabel}
+          meetingConfigWarningMessage={notifications.meetingConfigWarningMessage}
+          goToClassLabel={notifications.goToClassLabel}
           onGoToCreatedClass={onGoToCreatedClass}
-          formLabels={formLabels}
+          formLabels={form}
           meetingConfig={meetingConfig}
           onMeetingConfigChangeAction={onMeetingConfigChange}
           onSubmit={data => onSubmit(data, meetingConfig)}
         />
       </MobileSectionPanel>
 
-      <SuccessSnackbar open={showSuccess} onClose={onDismissSuccess} labels={labels.addedSuccessfully} />
+      <SuccessSnackbar open={showSuccess} onClose={onDismissSuccess} labels={shell.addedSuccessfully} />
       <ErrorSnackbar open={!!errorMessage} onClose={onDismissError} message={errorMessage ?? ""} />
     </MobilePageContainer>
   );

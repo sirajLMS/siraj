@@ -34,13 +34,10 @@ export * from "./dashboard/supervisorPortal";
 export * from "./dashboard/teachers";
 export * from "./emails";
 export * from "./errors";
-export * from "./notifications";
 // ─── Top-level files ───────────────────────────────────────────────
-export * from "./old/dashboard.ts";
-export * from "./old/message.ts";
-export * from "./old/profile.ts";
-export * from "./old/profile-translations.ts";
-export * from "./old/ui-translations.ts";
+export * from "./message";
+export * from "./notifications";
+export * from "./profile";
 export * from "./session";
 export * from "./sms";
 export * from "./ui";

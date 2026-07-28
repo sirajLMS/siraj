@@ -1,30 +1,19 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Button, Stack } from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
 import { ErrorState } from "@/frontend/common/components/ui";
 import { PaymentMethodList } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodList";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
-import {
-  AppPermission,
-  PaymentDirection,
-  PaymentMethodType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import {
-  deleteUserPaymentMethodMutationDocument,
-  setDefaultUserPaymentMethodMutationDocument,
-  userPaymentMethodsQueryDocument,
-  verifyBankTransferPaymentMethodMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
 import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
-import { useUserStore } from "@/frontend/common/stores/userStore";
 import { PaymentMethodDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodDeleteDialog";
 import { PaymentMethodFormDialog } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodFormDialog";
-import { type PaymentMethodLabels, type PaymentMethodManagerLabels, useAppTranslation } from "@/shared/locale";
+import { usePaymentMethodsManagerViewModel } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodsManagerViewModel";
+import type { PaymentMethodLabels, PaymentMethodManagerLabels } from "@/shared/locale/types/ui";
 
 export type PaymentMethodsSlot = "payin" | "payout";
 
@@ -33,26 +22,6 @@ export type PaymentMethodsManagerProps = {
   readonly slot: PaymentMethodsSlot;
   readonly canManage: boolean;
 };
-
-function toRow(method: UserPaymentMethodFieldsFragment): PaymentMethodRow | null {
-  if (!method.id || !method.type || !method.direction) return null;
-  return {
-    id: method.id,
-    type: method.type,
-    direction: method.direction,
-    label: method.label,
-    details: method.details,
-    verifiedAt: method.verifiedAt,
-    isDefault: method.isDefault ?? false,
-  };
-}
-
-function matchesSlot(direction: PaymentDirection, slot: PaymentMethodsSlot): boolean {
-  if (slot === "payin") {
-    return direction === PaymentDirection.Payin || direction === PaymentDirection.Both;
-  }
-  return direction === PaymentDirection.Payout || direction === PaymentDirection.Both;
-}
 
 type VerifyButtonProps = {
   readonly methods: readonly PaymentMethodRow[];
@@ -91,6 +60,7 @@ type PaymentMethodFormDialogWrappedProps = {
   readonly slotDirection: PaymentDirection.Payin | PaymentDirection.Payout;
   readonly allowedDirections: readonly PaymentDirection[];
   readonly editMethod: UserPaymentMethodFieldsFragment | null;
+  readonly labels: ReturnType<typeof usePaymentMethodsManagerViewModel>["labels"];
   readonly setFormOpen: (open: boolean) => void;
   readonly setEditMethod: (method: UserPaymentMethodFieldsFragment | null) => void;
   readonly onSaved: () => Promise<void>;
@@ -102,6 +72,7 @@ function PaymentMethodFormDialogWrapped({
   slotDirection,
   allowedDirections,
   editMethod,
+  labels,
   setFormOpen,
   setEditMethod,
   onSaved,
@@ -113,6 +84,7 @@ function PaymentMethodFormDialogWrapped({
       slotDirection={slotDirection}
       allowedDirections={allowedDirections}
       editMethod={editMethod}
+      labels={labels}
       onClose={() => {
         setFormOpen(false);
         setEditMethod(null);
@@ -120,93 +92,6 @@ function PaymentMethodFormDialogWrapped({
       onSaved={onSaved}
     />
   );
-}
-
-type PaymentMethodsManagerData = {
-  readonly userPaymentMethods?: readonly UserPaymentMethodFieldsFragment[] | null;
-};
-
-function usePaymentMethods(data: PaymentMethodsManagerData | undefined, slot: PaymentMethodsSlot): PaymentMethodRow[] {
-  return useMemo(() => {
-    const rows = (data?.userPaymentMethods ?? [])
-      .map(toRow)
-      .filter((row): row is PaymentMethodRow => row != null)
-      .filter(row => matchesSlot(row.direction, slot));
-    return rows;
-  }, [data?.userPaymentMethods, slot]);
-}
-
-function useMethodById(data: PaymentMethodsManagerData | undefined) {
-  return useMemo(() => {
-    const map = new Map<string, UserPaymentMethodFieldsFragment>();
-    for (const method of data?.userPaymentMethods ?? []) {
-      if (method.id) map.set(method.id, method);
-    }
-    return map;
-  }, [data?.userPaymentMethods]);
-}
-
-function useDeleteLabel(
-  deleteId: string | null,
-  methods: readonly PaymentMethodRow[],
-  tType: PaymentMethodLabels
-): string {
-  return useMemo(() => {
-    if (!deleteId) return "";
-    const row = methods.find(m => m.id === deleteId);
-    if (!row) return "";
-    return (
-      row.label?.trim() || getPaymentMethodTypeLabel(row.type, key => tType.type[key as keyof typeof tType.type] ?? "")
-    );
-  }, [deleteId, methods, tType]);
-}
-
-type PaymentMethodMutations = {
-  readonly deleting: boolean;
-  readonly settingDefault: boolean;
-  readonly verifying: boolean;
-  readonly confirmDelete: (id: string) => Promise<void>;
-  readonly setDefault: (id: string) => Promise<void>;
-  readonly verify: (id: string) => Promise<void>;
-};
-
-function useMethodMutations(refetch: () => Promise<unknown>): PaymentMethodMutations {
-  const [deleteMethod, { loading: deleting }] = useMutation(deleteUserPaymentMethodMutationDocument);
-  const [setDefaultMut, { loading: settingDefault }] = useMutation(setDefaultUserPaymentMethodMutationDocument);
-  const [verifyMethod, { loading: verifying }] = useMutation(verifyBankTransferPaymentMethodMutationDocument);
-
-  const confirmDelete = useCallback(
-    async (id: string) => {
-      await deleteMethod({ variables: { id } });
-      await refetch();
-    },
-    [deleteMethod, refetch]
-  );
-
-  const setDefault = useCallback(
-    async (id: string) => {
-      await setDefaultMut({ variables: { id } });
-      await refetch();
-    },
-    [setDefaultMut, refetch]
-  );
-
-  const verify = useCallback(
-    async (id: string) => {
-      await verifyMethod({ variables: { id } });
-      await refetch();
-    },
-    [verifyMethod, refetch]
-  );
-
-  return {
-    deleting,
-    settingDefault,
-    verifying,
-    confirmDelete,
-    setDefault,
-    verify,
-  };
 }
 
 function renderEmptyState(t: PaymentMethodManagerLabels, refetch: () => Promise<unknown>) {
@@ -233,51 +118,8 @@ function renderAddButton(t: PaymentMethodManagerLabels, onClick: () => void) {
 }
 
 export function PaymentMethodsManager({ targetUserId, slot, canManage }: PaymentMethodsManagerProps) {
-  const t = useAppTranslation().uiTranslations.paymentMethodManager;
-  const tType = useAppTranslation().uiTranslations.paymentMethod;
-  const { hasPermission } = useUserStore();
-  const canVerify = hasPermission(AppPermission.PaymentMethodsVerifyBankTransfer);
-
-  const slotDirection: PaymentDirection.Payin | PaymentDirection.Payout =
-    slot === "payin" ? PaymentDirection.Payin : PaymentDirection.Payout;
-  const allowedDirections =
-    slot === "payin"
-      ? ([PaymentDirection.Payin, PaymentDirection.Both] as const)
-      : ([PaymentDirection.Payout, PaymentDirection.Both] as const);
-
-  const { data, loading, error, refetch } = useQuery(userPaymentMethodsQueryDocument, {
-    variables: { userId: targetUserId, direction: null },
-  });
-
-  const [formOpen, setFormOpen] = useState(false);
-  const [editMethod, setEditMethod] = useState<UserPaymentMethodFieldsFragment | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  const methods = usePaymentMethods(data, slot);
-  const methodById = useMethodById(data);
-  const refetchData = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
-  const mutations = useMethodMutations(refetchData);
-  const deleteLabel = useDeleteLabel(deleteId, methods, tType);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deleteId) return;
-    await mutations.confirmDelete(deleteId);
-    setDeleteId(null);
-  }, [deleteId, mutations]);
-
-  const handleEdit = useCallback(
-    (id: string) => {
-      if (!canManage) return;
-      const method = methodById.get(id) ?? null;
-      setEditMethod(method);
-      setFormOpen(true);
-    },
-    [canManage, methodById]
-  );
-
-  const busy = loading || mutations.deleting || mutations.settingDefault || mutations.verifying;
+  const state = usePaymentMethodsManagerViewModel({ targetUserId, slot, canManage });
+  const { t, methods, error, refetchData, busy } = state;
 
   if (error && methods.length === 0) {
     return renderEmptyState(t, refetchData);
@@ -287,8 +129,8 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
     <Stack spacing={2}>
       {canManage
         ? renderAddButton(t, () => {
-            setEditMethod(null);
-            setFormOpen(true);
+            state.setEditMethod(null);
+            state.setFormOpen(true);
           })
         : null}
 
@@ -297,38 +139,40 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
         loading={busy}
         title={t.listTitle}
         emptyMessage={t.empty}
-        onEditAction={handleEdit}
-        onDeleteAction={canManage ? id => setDeleteId(id) : undefined}
-        onSetDefaultAction={canManage ? mutations.setDefault : undefined}
+        onEditAction={state.handleEdit}
+        onDeleteAction={canManage ? id => state.setDeleteId(id) : undefined}
+        onSetDefaultAction={canManage ? state.setDefault : undefined}
       />
 
-      {canVerify ? (
+      {state.canVerify ? (
         <VerifyBankTransferButtons
           methods={methods}
-          verifying={mutations.verifying}
-          onVerify={mutations.verify}
+          verifying={state.verifying}
+          onVerify={state.verify}
           t={t}
-          tType={tType}
+          tType={state.tType}
         />
       ) : null}
 
       <PaymentMethodFormDialogWrapped
-        formOpen={formOpen}
+        formOpen={state.formOpen}
         targetUserId={targetUserId}
-        slotDirection={slotDirection}
-        allowedDirections={allowedDirections}
-        editMethod={editMethod}
-        setFormOpen={setFormOpen}
-        setEditMethod={setEditMethod}
+        slotDirection={state.slotDirection}
+        allowedDirections={state.allowedDirections}
+        editMethod={state.editMethod}
+        labels={state.labels}
+        setFormOpen={state.setFormOpen}
+        setEditMethod={state.setEditMethod}
         onSaved={refetchData}
       />
 
       <PaymentMethodDeleteDialog
-        open={deleteId != null}
-        methodLabel={deleteLabel}
-        isLoading={mutations.deleting}
-        onClose={() => setDeleteId(null)}
-        onConfirm={handleConfirmDelete}
+        open={state.deleteId != null}
+        methodLabel={state.deleteLabel}
+        isLoading={state.deleting}
+        labels={state.labels.manager}
+        onClose={() => state.setDeleteId(null)}
+        onConfirm={state.handleConfirmDelete}
       />
     </Stack>
   );

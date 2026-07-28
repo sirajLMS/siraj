@@ -15,9 +15,9 @@ import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/sha
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { MeetingConfigsTab } from "@/frontend/common/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
-import { useAppTranslation } from "@/shared/locale";
 
 export function ParentProfileDesktopView({
+  labels,
   scope,
   mode,
   targetUserId,
@@ -35,8 +35,7 @@ export function ParentProfileDesktopView({
   associatedStudents: _associatedStudents,
   canView,
 }: Readonly<ParentProfileViewModel>) {
-  const t = useAppTranslation().profileTranslations.base;
-  const pt = useAppTranslation().profileTranslations.parent;
+  const { base: t, parent: pt } = labels;
 
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;

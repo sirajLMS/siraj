@@ -11,12 +11,16 @@ const ClassFilterWrapper: Required<AssignedStudentsTabSlotProps>["ClassFilterWra
   <MobileHorizontalScrollRow>{children}</MobileHorizontalScrollRow>
 );
 
-const ListView: AssignedStudentsTabSlotProps["ListView"] = ({ rows, pagination }) => {
+const ListView: AssignedStudentsTabSlotProps["ListView"] = ({ rows, pagination, labelsBySection }) => {
   const pagedRows = rows.slice(pagination.page * pagination.pageSize, (pagination.page + 1) * pagination.pageSize);
 
   return (
     <AssignedStudentsCardList
       rows={pagedRows}
+      labels={{
+        columns: labelsBySection.columns,
+        emptyMessage: labelsBySection.list.mobileEmptyMessage,
+      }}
       paginationOptions={buildServerPaginationOptions({
         page: pagination.page,
         pageSize: pagination.pageSize,

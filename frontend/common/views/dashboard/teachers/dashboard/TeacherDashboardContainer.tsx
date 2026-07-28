@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
@@ -13,10 +13,8 @@ import { TeacherScheduleActionsIsland } from "@/frontend/common/views/dashboard/
 import { TeacherSupportIsland } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherSupportIsland";
 import { TeacherDashboardView } from "@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardView";
 import type { UseTeacherDashboardViewModelProps } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
-import { buildLessonReportLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildLessonReportLabels";
-import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
+import { useTeacherDashboardTranslations } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
 
 const noop = (): void => {};
 const noopManualEntrySubmit: UseTeacherDashboardViewModelProps["onManualEntrySubmit"] = async () => {};
@@ -31,19 +29,10 @@ const noopLessonReportSubmit: UseTeacherDashboardViewModelProps["onLessonReportS
  * registrations persist.
  */
 export function TeacherDashboardContainer() {
-  const t = useAppTranslation().dashboardTranslations.teacherDashboard;
-  const dashboardT = useAppTranslation().dashboardTranslations.admin;
-  const tJoin = useAppTranslation().uiTranslations.meetingConfigJoin;
-  const lessonReportI18n = useAppTranslation().dashboardTranslations.lmsLessonReports;
+  const { labels, lessonReportLabels, lastUpdatedLabels } = useTeacherDashboardTranslations();
   const router = useRouter();
   const permissions = useUserStore(state => state.permissions);
   const userName = useUserStore(state => state.name);
-
-  const labels = useMemo(
-    () => buildTeacherDashboardLabels(t, dashboardT, tJoin.emptyTeacher),
-    [t, dashboardT, tJoin.emptyTeacher]
-  );
-  const lessonReportLabels = useMemo(() => buildLessonReportLabels(lessonReportI18n), [lessonReportI18n]);
 
   const hasSessionUpdateStatusStart = permissions.includes(AppPermission.SessionUpdateStatusStart);
   const hasSessionUpdateStatusAbsent = permissions.includes(AppPermission.SessionUpdateStatusAbsent);
@@ -137,11 +126,11 @@ export function TeacherDashboardContainer() {
 
   return (
     <RequirePermission permissions={[AppPermission.TeacherViewDashboard]}>
-      <TeacherDashboardDataIsland labels={labels} />
+      <TeacherDashboardDataIsland labels={labels} lastUpdatedLabels={lastUpdatedLabels} />
       <TeacherScheduleActionsIsland />
-      <TeacherManualEntryIsland />
-      <TeacherHandbookIsland />
-      <TeacherSupportIsland />
+      <TeacherManualEntryIsland labels={labels} />
+      <TeacherHandbookIsland labels={labels} />
+      <TeacherSupportIsland labels={labels} />
       <TeacherDashboardView {...props} />
       <TeacherDashboardSnackbarIsland />
     </RequirePermission>

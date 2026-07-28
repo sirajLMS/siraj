@@ -52,8 +52,7 @@ export function StatusTrackingDesktopView({
   rows,
   totalSessions,
   suspendedCount,
-  labels,
-  analyticsLabels,
+  labelsBySection,
   dateValue,
   onDateChange,
   onActivate,
@@ -62,14 +61,16 @@ export function StatusTrackingDesktopView({
   onNewReport,
   onOpenAuditLogs,
 }: Readonly<DesktopLayoutProps>) {
+  const { shell, filters, columns, analytics } = labelsBySection;
+
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
-        title={labels.pageTitle}
-        subtitle={labels.pageSubtitle}
+        title={shell.pageTitle}
+        subtitle={shell.pageSubtitle}
         actions={
           <DesktopPrimaryPageAction id="status-new-report-btn" startIcon={<AddOutlined />} onClick={onNewReport}>
-            {labels.newReport}
+            {shell.newReport}
           </DesktopPrimaryPageAction>
         }
       />
@@ -77,10 +78,10 @@ export function StatusTrackingDesktopView({
       <Box sx={{ mb: 3 }}>
         <DateNavigatorDesktop
           dateValue={dateValue}
-          todayLabel={labels.dateFilter.today}
-          previousDayLabel={labels.dateFilter.previousDay}
-          nextDayLabel={labels.dateFilter.nextDay}
-          dateLabel={labels.dateFilter.dateLabel}
+          todayLabel={filters.dateFilter.today}
+          previousDayLabel={filters.dateFilter.previousDay}
+          nextDayLabel={filters.dateFilter.nextDay}
+          dateLabel={filters.dateFilter.dateLabel}
           onDateChange={onDateChange}
         />
       </Box>
@@ -88,42 +89,21 @@ export function StatusTrackingDesktopView({
       <DesktopMetricCardGrid metrics={metrics} size={{ md: 6, lg: "grow" }} />
 
       <DesktopSectionPanel
-        title={labels.todaysClassSchedule}
-        actions={<StyledTotalSessionsBadge>{labels.totalSessions(totalSessions)}</StyledTotalSessionsBadge>}
+        title={shell.todaysClassSchedule}
+        actions={<StyledTotalSessionsBadge>{shell.totalSessions(totalSessions)}</StyledTotalSessionsBadge>}
       >
         <StatusTrackingDataGridDesktop
           rows={rows}
-          labels={{
-            studentClass: labels.studentClass,
-            teacher: labels.teacher,
-            schedule: labels.schedule,
-            status: labels.status,
-            actions: labels.actions,
-            joinSession: labels.joinSession,
-            activate: labels.activate,
-            reschedule: labels.reschedule,
-            verifyDocuments: labels.verifyDocuments,
-            administrativeHold: labels.administrativeHold,
-            holdDescription: labels.holdDescription,
-            regular: labels.regular,
-            suspendedPending: labels.suspendedPending,
-            onLeave: labels.onLeave,
-            pendingVerification: labels.pendingVerification,
-            sessionEnded: labels.sessionEnded,
-            noEntries: labels.noEntries,
-            showingOf: labels.showingOf,
-            previous: labels.previous,
-            next: labels.next,
-          }}
+          labels={columns}
           onActivate={onActivate}
           onReschedule={onReschedule}
           onVerify={onVerify}
         />
       </DesktopSectionPanel>
 
-      <SuspensionAnalytics labels={analyticsLabels} suspendedCount={suspendedCount} onOpenAuditLogs={onOpenAuditLogs} />
+      <SuspensionAnalytics labels={analytics} suspendedCount={suspendedCount} onOpenAuditLogs={onOpenAuditLogs} />
 
-      <StyledDesktopFab id="status-desktop-fab-btn" aria-label={labels.newReport} onClick={onNewReport}>
+      <StyledDesktopFab id="status-desktop-fab-btn" aria-label={shell.newReport} onClick={onNewReport}>
         <AddOutlined />
       </StyledDesktopFab>
     </DesktopPageContainer>

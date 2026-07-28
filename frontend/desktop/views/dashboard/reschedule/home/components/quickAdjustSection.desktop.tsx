@@ -12,9 +12,10 @@ import {
   toDateString,
   toTimeString,
 } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
-import { useAppTranslation } from "@/shared/locale";
+import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm";
 
 interface Props {
+  readonly labels: RescheduleFormLabels;
   readonly setValue: UseFormSetValue<RescheduleFormData>;
   readonly getValues: UseFormGetValues<RescheduleFormData>;
 }
@@ -38,8 +39,8 @@ function applyQuickAdjust(
   setValue("newTime", toTimeString(adjusted), { shouldValidate: true });
 }
 
-export function QuickAdjustSectionDesktop({ setValue, getValues }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.rescheduleForm.quickAdjust;
+export function QuickAdjustSectionDesktop({ labels, setValue, getValues }: Readonly<Props>) {
+  const quickAdjustLabels = labels.quickAdjust;
 
   return (
     <Box
@@ -51,7 +52,7 @@ export function QuickAdjustSectionDesktop({ setValue, getValues }: Readonly<Prop
       })}
     >
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mb: 1.5, display: "block" })}>
-        {t.label}:
+        {quickAdjustLabels.label}:
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
         {QUICK_OPTIONS.map(option => (
@@ -76,7 +77,7 @@ export function QuickAdjustSectionDesktop({ setValue, getValues }: Readonly<Prop
               },
             })}
           >
-            {t[option.key]}
+            {quickAdjustLabels[option.key]}
           </Button>
         ))}
       </Box>

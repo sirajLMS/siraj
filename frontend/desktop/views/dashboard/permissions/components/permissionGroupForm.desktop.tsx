@@ -20,7 +20,7 @@ import type {
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { PermissionCategoryListDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCategoryList.desktop";
 import { PermissionFilterBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionFilterBar.desktop";
-import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
+import type { PermissionsLabels } from "@/shared/locale";
 
 function PermissionGroupFormActionsDesktop({
   isLoading,
@@ -118,6 +118,7 @@ function PermissionGroupFormContentDesktop({
         <DesktopSectionPanel title={t.addPermissions}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <PermissionFilterBarDesktop
+              labels={t}
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
               selectedCategory={selectedCategory}
@@ -144,6 +145,7 @@ function PermissionGroupFormContentDesktop({
 }
 
 export function PermissionGroupFormDesktop({
+  labels,
   open,
   group,
   isLoading,
@@ -163,7 +165,7 @@ export function PermissionGroupFormDesktop({
   isGroupSelected,
   isGroupIndeterminate,
 }: Readonly<PermissionGroupFormProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   return (
     <Dialog

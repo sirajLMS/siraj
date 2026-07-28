@@ -12,7 +12,6 @@ import type {
   AvailabilitySearchFormProps,
   TimeFieldProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
-import { useAppTranslation } from "@/shared/locale";
 
 function TimeField({ label, name }: Readonly<TimeFieldProps>) {
   const { control } = useFormContext<AvailabilitySearchFormData>();
@@ -39,8 +38,7 @@ function TimeField({ label, name }: Readonly<TimeFieldProps>) {
   );
 }
 
-export function AvailabilitySearchFormDesktop({ onSearch }: Readonly<AvailabilitySearchFormProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherAvailability;
+export function AvailabilitySearchFormDesktop({ onSearch, labels }: Readonly<AvailabilitySearchFormProps>) {
   const { control, handleSubmit } = useFormContext<AvailabilitySearchFormData>();
 
   const onSubmit = (data: AvailabilitySearchFormData) => {
@@ -61,21 +59,21 @@ export function AvailabilitySearchFormDesktop({ onSearch }: Readonly<Availabilit
         p: 3,
       }}
     >
-      <TimeField label={t.from} name="fromTime" />
-      <TimeField label={t.to} name="toTime" />
+      <TimeField label={labels.from} name="fromTime" />
+      <TimeField label={labels.to} name="toTime" />
 
       <FormControl fullWidth sx={outlinedInputSx}>
         <InputLabel id="availability-gender-label-desktop" shrink>
-          {t.gender}
+          {labels.gender}
         </InputLabel>
         <Controller
           name="gender"
           control={control}
           render={({ field }) => (
-            <Select {...field} labelId="availability-gender-label-desktop" label={t.gender}>
-              <MenuItem value="">{t.any}</MenuItem>
-              <MenuItem value={Gender.Male}>{t.male}</MenuItem>
-              <MenuItem value={Gender.Female}>{t.female}</MenuItem>
+            <Select {...field} labelId="availability-gender-label-desktop" label={labels.gender}>
+              <MenuItem value="">{labels.any}</MenuItem>
+              <MenuItem value={Gender.Male}>{labels.male}</MenuItem>
+              <MenuItem value={Gender.Female}>{labels.female}</MenuItem>
             </Select>
           )}
         />
@@ -97,7 +95,7 @@ export function AvailabilitySearchFormDesktop({ onSearch }: Readonly<Availabilit
           },
         })}
       >
-        {t.submit}
+        {labels.submit}
       </Button>
     </Box>
   );

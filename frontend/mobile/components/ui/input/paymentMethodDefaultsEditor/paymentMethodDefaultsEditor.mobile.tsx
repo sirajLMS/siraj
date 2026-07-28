@@ -12,7 +12,7 @@ import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge/MobileS
 import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar/MobileFormSuccessSnackbar";
 import { CurrencySelectMobile } from "@/frontend/mobile/components/ui/input/currencySelect";
 import { LocalizedStringDrawerMobile } from "@/frontend/mobile/components/ui/input/localizedString";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function PaymentMethodDefaultsEditorMobile({
   methods,
@@ -31,7 +31,7 @@ export function PaymentMethodDefaultsEditorMobile({
   instructionsOpen = false,
   onInstructionsOpenChangeAction,
 }: Readonly<PaymentMethodDefaultsEditorProps>) {
-  const t = useAppTranslation().uiTranslations.paymentMethod;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod);
   const tDefaults = t.defaultsEditor;
 
   const payinMethods = filterMethodsForDirection(methods, "payin");

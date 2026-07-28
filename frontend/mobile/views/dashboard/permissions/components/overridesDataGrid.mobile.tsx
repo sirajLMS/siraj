@@ -9,7 +9,7 @@ import type { OverridesDataGridProps } from "@/frontend/common/views/dashboard/p
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { OverrideEditControlsMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEditControls.mobile";
 import { OverrideEffectiveDisplayMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEffectiveDisplay.mobile";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import { useAppLocale } from "@/shared/locale";
 
 const StyledPermissionKeyText = styled(Typography)(({ theme }) => ({
   fontFamily: "JetBrains Mono, monospace",
@@ -30,6 +30,7 @@ const StyledBaselineText = styled(Typography, {
 }));
 
 export function OverridesDataGridMobile({
+  labels,
   filteredPermissions,
   userGroups,
   localOverrides,
@@ -37,7 +38,7 @@ export function OverridesDataGridMobile({
   isDialogLoading,
   handleOverrideChange,
 }: Readonly<OverridesDataGridProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
   const locale = useAppLocale();
 
   return (
@@ -77,9 +78,14 @@ export function OverridesDataGridMobile({
           if (permission.id) {
             overrideControls =
               mode === "effective" ? (
-                <OverrideEffectiveDisplayMobile effectiveState={effectiveState} overrideState={overrideState} />
+                <OverrideEffectiveDisplayMobile
+                  labels={labels}
+                  effectiveState={effectiveState}
+                  overrideState={overrideState}
+                />
               ) : (
                 <OverrideEditControlsMobile
+                  labels={labels}
                   permissionId={permission.id}
                   overrideState={overrideState}
                   isDialogLoading={isDialogLoading}

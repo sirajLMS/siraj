@@ -12,9 +12,9 @@ import { DeleteSubjectDialogDesktop } from "@/frontend/desktop/views/dashboard/s
 import { EditCategoryDialogDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/editCategoryDialog.desktop";
 import { EditSubjectDialogDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/editSubjectDialog.desktop";
 import { SubjectCardDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/subjectCard.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 export function SubjectsViewDesktop({
+  labels,
   categories,
   filteredSubjects,
   isLoading,
@@ -38,10 +38,11 @@ export function SubjectsViewDesktop({
   editCategoryDialog,
   deleteCategoryDialog,
 }: Readonly<SubjectsViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
+  const t = labels;
 
   const categoriesSection = (
     <CategoriesSectionDesktop
+      labels={labels}
       categories={categories}
       activeCategoryId={activeCategoryId}
       onCategoryChange={onCategoryChange}
@@ -106,6 +107,7 @@ export function SubjectsViewDesktop({
             {filteredSubjects.map(subject => (
               <Grid key={subject.id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <SubjectCardDesktop
+                  labels={labels}
                   subject={subject}
                   onEdit={() => onEditSubject(subject.id ?? "")}
                   onDelete={() => onDeleteSubject(subject.id ?? "")}

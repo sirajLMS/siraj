@@ -3,8 +3,11 @@
 import type { Control, UseFormRegister } from "react-hook-form";
 import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
-import type { TeacherViewData } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
-import { useAppTranslation } from "@/shared/locale";
+import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
+import type {
+  TeacherProfileViewLabels,
+  TeacherViewData,
+} from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 
 type TeacherAccountFormFields = {
   name: string;
@@ -13,7 +16,9 @@ type TeacherAccountFormFields = {
   displayCurrency?: CurrencyCode | null;
 };
 
-type AccountSectionProps =
+type AccountSectionProps = {
+  readonly labels: Pick<TeacherProfileViewLabels, "teacher"> & { readonly baseLabels: ProfileSharedBaseLabels };
+} & (
   | {
       readonly mode: "view";
       readonly teacherData: Pick<TeacherViewData, "name" | "email">;
@@ -27,10 +32,12 @@ type AccountSectionProps =
       readonly register: UseFormRegister<TeacherAccountFormFields>;
       readonly control: Control<TeacherAccountFormFields>;
       readonly scope?: ProfileScope;
-    };
+    }
+);
 
 export function AccountSection(props: AccountSectionProps) {
-  const t = useAppTranslation().profileTranslations.teacher;
+  const { labels } = props;
+  const t = labels.teacher;
 
   if (props.mode === "edit") {
     return (
@@ -42,6 +49,7 @@ export function AccountSection(props: AccountSectionProps) {
         nameLabel={t.fields.fullName}
         emailLabel={t.fields.primaryEmail}
         currencyLabel={t.fields.displayCurrency}
+        baseLabels={labels.baseLabels}
         register={props.register}
         control={props.control}
       />
@@ -60,6 +68,7 @@ export function AccountSection(props: AccountSectionProps) {
       nameLabel={t.fields.fullName}
       emailLabel={t.fields.primaryEmail}
       currencyLabel={t.fields.displayCurrency}
+      baseLabels={labels.baseLabels}
     />
   );
 }

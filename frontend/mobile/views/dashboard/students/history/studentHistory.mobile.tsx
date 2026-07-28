@@ -13,8 +13,11 @@ import {
 import { Box, IconButton, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { StudentHistoryLabelsProvider } from "@/frontend/common/views/dashboard/students/history/studentHistoryLabelsContext";
 import type { ClassSession, MobileMetricProps } from "@/frontend/common/views/dashboard/students/history/types";
+import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryViewModel";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/page";
@@ -22,7 +25,6 @@ import { ClassSessionListMobile } from "@/frontend/mobile/views/dashboard/studen
 import { MobileWeeklyScroller } from "@/frontend/mobile/views/dashboard/students/history/components/mobileWeeklyScroller.mobile";
 import { PerformanceStreakMobile } from "@/frontend/mobile/views/dashboard/students/history/components/performanceStreak.mobile";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 function deriveStreakDays(
   classes: Readonly<Partial<Record<number, ClassSession>>>,
@@ -55,7 +57,7 @@ function deriveStreakDays(
 }
 
 function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: string; monthStr: string }>) {
-  const t = useAppTranslation().dashboardTranslations.studentHistory;
+  const t = useStudentHistoryLabels();
   return (
     <Box sx={{ mb: 3 }}>
       <Box
@@ -103,7 +105,7 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
 function HistoryMobileMetricsGrid({
   metrics,
 }: Readonly<{ metrics: { totalClasses: number; attendanceRate: number; hoursStudied: number; performance: number } }>) {
-  const t = useAppTranslation().dashboardTranslations.studentHistory;
+  const t = useStudentHistoryLabels();
   return (
     <Box
       sx={{
@@ -156,7 +158,7 @@ function HistoryMobileActions({
   canGoPrev: boolean;
   canGoNext: boolean;
 }>) {
-  const t = useAppTranslation().dashboardTranslations.studentHistory;
+  const t = useStudentHistoryLabels();
   const locale = useAppLocale();
   const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" }).toUpperCase();
   const yearStr = currentMonth.getFullYear();
@@ -305,8 +307,8 @@ export function StudentHistoryMobileView({
   enrollmentMonth,
   nowMonth,
   locale,
+  labels,
 }: Readonly<StudentHistoryViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.studentHistory;
   const { canView } = useStudentFieldAccess();
   const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
 
@@ -316,7 +318,7 @@ export function StudentHistoryMobileView({
     return session ? [session] : [];
   }, [selectedDay, classes]);
 
-  const dateStr = selectedDay === null ? monthStr : t.classDetails.dayOfMonth(selectedDay, monthStr);
+  const dateStr = selectedDay === null ? monthStr : labels.classDetails.dayOfMonth(selectedDay, monthStr);
 
   const streakDays = useMemo(
     () => deriveStreakDays(classes, currentMonth, selectedWeek),
@@ -327,7 +329,7 @@ export function StudentHistoryMobileView({
   const canGoNext = !nowMonth || currentMonth < nowMonth;
 
   if (!canView("student_history")) {
-    const restricted = <ProfileRestrictedSection title={t.pageTitle("{name}")} />;
+    const restricted = <ProfileRestrictedSection title={labels.pageTitle("{name}")} />;
     return embedded ? restricted : <MobilePageContainer>{restricted}</MobilePageContainer>;
   }
 
@@ -357,8 +359,12 @@ export function StudentHistoryMobileView({
   );
 
   if (embedded) {
-    return body;
+    return <StudentHistoryLabelsProvider labels={labels}>{body}</StudentHistoryLabelsProvider>;
   }
 
-  return <MobilePageContainer>{body}</MobilePageContainer>;
+  return (
+    <StudentHistoryLabelsProvider labels={labels}>
+      <MobilePageContainer>{body}</MobilePageContainer>
+    </StudentHistoryLabelsProvider>
+  );
 }

@@ -8,7 +8,7 @@ import type { SuggestionFormData } from "@/frontend/common/views/dashboard/sugge
 import { suggestionFormSchema } from "@/frontend/common/views/dashboard/suggestions/schemas/suggestionFormSchema";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 import { ParentSuggestionsDesktopView } from "@/frontend/desktop/views/dashboard/suggestions/parentSuggestions.desktop";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const PARENT_PERMISSIONS = [AppPermission.CommunicationSubmitSuggestion];
 
@@ -27,8 +27,7 @@ function ParentSuggestionsDesktopStoryRenderer({
   isSubmitting,
   canSubmit,
 }: Readonly<ParentSuggestionsDesktopStoryProps>) {
-  const t = useAppTranslation();
-  const labels = buildSuggestionsLabels(t.dashboardTranslations.suggestions).parent;
+  const labels = buildSuggestionsLabels(useAppTranslation(Translation.Dashboard.Suggestions)).parent;
   const {
     control,
     formState: { errors },

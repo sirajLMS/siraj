@@ -10,6 +10,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { MeetingConfigFormDialogContent } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialogContent";
 import { useMeetingConfigFormState } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
+import type { MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
 
 export type MeetingConfigDetailsForm = {
   meetingUrl: string;
@@ -23,6 +24,7 @@ export type MeetingConfigFormDialogProps = {
   readonly userId: string;
   readonly editConfig: UserMeetingConfigFieldsFragment | null;
   readonly existingCount: number;
+  readonly labels: MeetingConfigManagerLabels;
   readonly onClose: () => void;
   readonly onSaved: () => void;
 };
@@ -32,6 +34,7 @@ export function MeetingConfigFormDialog({
   userId,
   editConfig,
   existingCount,
+  labels,
   onClose,
   onSaved,
 }: MeetingConfigFormDialogProps) {
@@ -39,6 +42,7 @@ export function MeetingConfigFormDialog({
     open,
     editConfig,
     existingCount,
+    labels,
   });
   const { isEdit, label, isDefault, details, provider, providerChanged, validateUrl, setSaveError, t } = state;
 

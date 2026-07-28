@@ -17,7 +17,6 @@ import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/p
 import { ContextualHelperCardsMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/contextualHelperCards.mobile";
 import { CourseDetailsSectionMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/courseDetailsSection.mobile";
 import { StudentInformationSectionMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/studentInformationSection.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Readonly<MobileProfileHeaderProps>) {
   return (
@@ -58,22 +57,21 @@ function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Read
 }
 
 function FormActionsMobile({
+  labels,
   isSaving,
   isSaved,
   studentData,
   onCancel,
   readOnly = false,
   showCancel = true,
-}: Readonly<FormActionsProps>) {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
-
+}: Readonly<FormActionsProps & { readonly labels: StudentQuotaViewModel["t"] }>) {
   let saveIcon = <Save />;
   if (isSaving) saveIcon = <SyncOutlined sx={{ animation: "spin 1s linear infinite" }} />;
   else if (isSaved) saveIcon = <CheckCircleOutlined />;
 
-  let saveText = t.actions.save;
-  if (isSaving) saveText = t.actions.saving;
-  else if (isSaved) saveText = t.actions.saved;
+  let saveText = labels.actions.save;
+  if (isSaving) saveText = labels.actions.saving;
+  else if (isSaved) saveText = labels.actions.saved;
 
   return (
     <Box
@@ -133,7 +131,7 @@ function FormActionsMobile({
               width: "100%",
             })}
           >
-            {t.actions.cancel}
+            {labels.actions.cancel}
           </MobilePrimaryPageAction>
         ) : null}
       </Box>
@@ -148,7 +146,7 @@ function FormActionsMobile({
           })}
         >
           <ScheduleOutlined sx={{ fontSize: 14 }} />
-          <Typography variant="labelMd">{t.actions.lastEditedAt(studentData.lastEditedTime)}</Typography>
+          <Typography variant="labelMd">{labels.actions.lastEditedAt(studentData.lastEditedTime)}</Typography>
         </Box>
       ) : null}
     </Box>
@@ -156,6 +154,8 @@ function FormActionsMobile({
 }
 
 function QuotaFormCardMobile({
+  t,
+  tc,
   methods,
   onSubmit,
   studentData,
@@ -171,6 +171,8 @@ function QuotaFormCardMobile({
 }: Readonly<
   Pick<
     StudentQuotaViewModel,
+    | "t"
+    | "tc"
     | "methods"
     | "onSubmit"
     | "isSaving"
@@ -211,6 +213,8 @@ function QuotaFormCardMobile({
               canEditQuota,
               canViewQuota,
               canViewTeacher,
+              labels: t,
+              commonLabels: tc,
             }}
           >
             <Box
@@ -231,6 +235,7 @@ function QuotaFormCardMobile({
               <StudentInformationSectionMobile />
               <CourseDetailsSectionMobile />
               <FormActionsMobile
+                labels={t}
                 isSaving={isSaving}
                 isSaved={isSaved}
                 studentData={studentData}
@@ -253,6 +258,8 @@ function QuotaFormCardMobile({
 }
 
 export function StudentQuotaMobileView({
+  t,
+  tc,
   studentData,
   embedded,
   readOnly,
@@ -277,6 +284,8 @@ export function StudentQuotaMobileView({
 
   const formContent = (
     <QuotaFormCardMobile
+      t={t}
+      tc={tc}
       methods={methods}
       onSubmit={onSubmit}
       studentData={studentData}

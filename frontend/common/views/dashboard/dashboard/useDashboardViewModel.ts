@@ -7,7 +7,7 @@ import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { ScheduleOverviewData } from "@/frontend/common/views/dashboard/types/dashboard";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
   return (
@@ -87,7 +87,7 @@ export interface UseDashboardViewModelProps {
 
 export function useDashboardViewModel(_: Readonly<UseDashboardViewModelProps>): DashboardViewModel {
   const { user, setUser } = useUserStore();
-  const adminT = useAppTranslation().dashboardTranslations.admin;
+  const adminT = useAppTranslation(Translation.Dashboard.Admin);
 
   const { data, loading } = useQuery(meQueryDocument, {
     skip: !!user?.role,

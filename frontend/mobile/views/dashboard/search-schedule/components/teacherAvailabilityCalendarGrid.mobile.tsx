@@ -12,7 +12,6 @@ import {
   CalendarWeekdayHeader,
 } from "@/frontend/common/views/dashboard/shared/CalendarGridShared";
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
-import { useAppTranslation } from "@/shared/locale";
 
 function CalendarDayCell({ day, gaps }: Readonly<{ day: number; gaps: readonly TeacherAvailabilityGapItem[] }>) {
   const hasGaps = gaps.length > 0;
@@ -65,15 +64,15 @@ function EmptyCell({ day }: Readonly<{ day: number }>) {
 }
 
 export function TeacherAvailabilityCalendarGridMobile({
+  labels,
   currentMonth,
   daysByDate,
 }: Readonly<TeacherAvailabilityCalendarGridProps>) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const { daysInMonth, emptyStartDays, emptyEndDays } = computeCalendarGridLayout(currentMonth);
 
   return (
     <CalendarGridContainer>
-      <CalendarWeekdayHeader translateDay={day => t.calendar.days[day as keyof typeof t.calendar.days]} />
+      <CalendarWeekdayHeader translateDay={day => labels.calendar.days[day as keyof typeof labels.calendar.days]} />
 
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
         {emptyStartDays.map(day => (

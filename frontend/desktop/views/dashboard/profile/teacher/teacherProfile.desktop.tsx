@@ -6,6 +6,7 @@ import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/teac
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/CompensationSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
 import { StatsSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/StatsSection";
+import { toTeacherSectionLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
 import {
   hasTeacherCompensationData,
   hasTeacherIdentityData,
@@ -17,6 +18,7 @@ import { TeacherProfileEditBody } from "@/frontend/common/views/dashboard/profil
 import type { TeacherProfileViewModel } from "@/frontend/common/views/dashboard/profile/teacher/useTeacherProfileViewModel";
 
 export function TeacherProfileDesktopView({
+  labels,
   teacherData,
   avatarUrl,
   displayCurrency,
@@ -29,6 +31,8 @@ export function TeacherProfileDesktopView({
   onSubmitOwn,
   onSubmitAdmin,
 }: Readonly<TeacherProfileViewModel>) {
+  const sectionLabels = toTeacherSectionLabels(labels);
+
   if (activeTab !== "profile") {
     return <TeacherNonProfileTabContent activeTab={activeTab} scope={scope} targetUserId={targetUserId} />;
   }
@@ -40,6 +44,7 @@ export function TeacherProfileDesktopView({
   if (mode === ProfileMode.Edit) {
     return (
       <TeacherProfileEditBody
+        labels={labels}
         teacherData={teacherData}
         avatarUrl={avatarUrl}
         displayCurrency={displayCurrency}
@@ -61,15 +66,17 @@ export function TeacherProfileDesktopView({
     <Box data-testid="teacher-profile-view">
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <ContactSection scope={scope} teacherData={teacherData} isAdminScope={isAdminScope} />
+          <ContactSection labels={sectionLabels} scope={scope} teacherData={teacherData} isAdminScope={isAdminScope} />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <Stack spacing={3}>
             {showCompensation ? (
-              <CompensationSection mode="view" teacherData={teacherData} subjectUserId={targetUserId} />
+              <CompensationSection labels={labels} mode="view" teacherData={teacherData} subjectUserId={targetUserId} />
             ) : null}
-            {showAdminOnly && adminData ? <AdminOnlySection mode="view" adminData={adminData} /> : null}
-            {showStats ? <StatsSection teacherData={teacherData} isAdminScope={isAdminScope} /> : null}
+            {showAdminOnly && adminData ? (
+              <AdminOnlySection labels={sectionLabels} mode="view" adminData={adminData} />
+            ) : null}
+            {showStats ? <StatsSection labels={labels} teacherData={teacherData} isAdminScope={isAdminScope} /> : null}
           </Stack>
         </Grid>
       </Grid>

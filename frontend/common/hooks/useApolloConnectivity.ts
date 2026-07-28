@@ -3,7 +3,7 @@
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useEffect, useRef, useState } from "react";
 import logger from "@/frontend/common/lib/logger";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 // Configuration
 const CONNECTIVITY_CHECK_URL = "/api/graphql";
@@ -38,7 +38,7 @@ const fetchConnectivityStatus = async (): Promise<boolean> => {
 
 export const useApolloConnectivity = () => {
   const notifications = useNotifications();
-  const t = useAppTranslation().commonTranslations;
+  const t = useAppTranslation(Translation.Common);
 
   const [isConnected, setIsConnected] = useState(false);
   const [isChecking, setIsChecking] = useState(false);

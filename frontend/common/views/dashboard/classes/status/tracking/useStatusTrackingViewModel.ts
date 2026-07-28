@@ -11,14 +11,14 @@ import { useStatusTrackingStore } from "@/frontend/common/stores/statusTrackingS
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
-  CardListLabels,
   DesktopLayoutProps,
   MobileLayoutProps,
-  StatusTrackingLabels,
   StatusTrackingRow,
-  SuspensionAnalyticsLabels,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
-import { useStatusTrackingLabels } from "@/frontend/common/views/dashboard/classes/status/tracking/useStatusTrackingLabels";
+import {
+  buildStatusTrackingLabelsBySection,
+  useStatusTrackingLabels,
+} from "@/frontend/common/views/dashboard/classes/status/tracking/useStatusTrackingLabels";
 import { useStatusTrackingMetrics } from "@/frontend/common/views/dashboard/classes/status/tracking/useStatusTrackingMetrics";
 import { useRouter } from "@/shared/i18n/navigation";
 
@@ -40,36 +40,6 @@ export interface UseStatusTrackingViewModelProps {
   readonly onVerify?: (id: string) => void;
   readonly onNewReport?: () => void;
   readonly onOpenAuditLogs?: () => void;
-}
-
-function buildCardListLabels(labels: StatusTrackingLabels): CardListLabels {
-  return {
-    joinSession: labels.joinSession,
-    activate: labels.activate,
-    reschedule: labels.reschedule,
-    verifyDocuments: labels.verifyDocuments,
-    sessionLocked: labels.sessionLocked,
-    sessionEnded: labels.sessionEnded,
-    todaysSchedule: labels.todaysSchedule,
-    regular: labels.regular,
-    suspendedPending: labels.suspendedPending,
-    onLeave: labels.onLeave,
-    pendingVerification: labels.pendingVerification,
-    noEntries: labels.noEntries,
-  };
-}
-
-function buildAnalyticsLabels(labels: StatusTrackingLabels): SuspensionAnalyticsLabels {
-  return {
-    suspensionAnalytics: labels.suspensionAnalytics,
-    analyticsNote: labels.analyticsNote,
-    urgentTask: labels.urgentTask,
-    accountsLocked: labels.accountsLocked,
-    auditDescription: labels.auditDescription,
-    openAuditLogs: labels.openAuditLogs,
-    suspended: labels.suspendedPending,
-    days: labels.days,
-  };
 }
 
 function buildRescheduleHandler(
@@ -128,7 +98,8 @@ export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingView
   const hasPermission = useUserStore(state => state.hasPermission);
   const selectedDate = useStatusTrackingStore(state => state.selectedDate);
   const setSelectedDate = useStatusTrackingStore(state => state.setSelectedDate);
-  const labels = useStatusTrackingLabels();
+  const rawLabels = useStatusTrackingLabels();
+  const labelsBySection = useMemo(() => buildStatusTrackingLabelsBySection(rawLabels), [rawLabels]);
   const notifications = useNotifications();
 
   const viewerTimezone = useMemo(() => toGraphqlIanaTimezone(resolveBrowserIanaTimezoneId()), []);
@@ -156,8 +127,8 @@ export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingView
   );
 
   const handleVerify = useCallback(
-    () => buildVerifyHandler(rows, router, notifications, labels.errorNoStudentId),
-    [rows, router, notifications, labels]
+    () => buildVerifyHandler(rows, router, notifications, labelsBySection.notifications.errorNoStudentId),
+    [rows, router, notifications, labelsBySection.notifications.errorNoStudentId]
   );
 
   const handleNewReport = useCallback(() => {
@@ -165,18 +136,18 @@ export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingView
   }, [router]);
 
   const handleOpenAuditLogs = useCallback(() => {
-    notifications.show(labels.errorAuditLogsComingSoon, { severity: "info", autoHideDuration: 4000 });
-  }, [notifications, labels]);
-
-  const cardListLabels = useMemo(() => buildCardListLabels(labels), [labels]);
-  const analyticsLabels = useMemo(() => buildAnalyticsLabels(labels), [labels]);
+    notifications.show(labelsBySection.notifications.errorAuditLogsComingSoon, {
+      severity: "info",
+      autoHideDuration: 4000,
+    });
+  }, [notifications, labelsBySection.notifications.errorAuditLogsComingSoon]);
 
   return {
     metrics,
     rows,
     totalSessions: rows.length,
     suspendedCount,
-    labels,
+    labelsBySection,
     dateValue: selectedDate,
     onDateChange: setSelectedDate,
     onActivate: onActivate ?? handleActivate,
@@ -184,7 +155,5 @@ export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingView
     onVerify: onVerify ?? handleVerify,
     onNewReport: onNewReport ?? handleNewReport,
     onOpenAuditLogs: onOpenAuditLogs ?? handleOpenAuditLogs,
-    cardListLabels,
-    analyticsLabels,
   };
 }

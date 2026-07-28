@@ -2,10 +2,12 @@
 import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PermissionCatalogFilterResult } from "@/frontend/common/views/dashboard/permissions/components/usePermissionCatalogFilter";
 import type { RowMenuAnchor } from "@/frontend/common/views/dashboard/permissions/components/useRowMenuAnchor";
+import type { PermissionsLabels } from "@/shared/locale";
 
 export type PermissionTabKey = "groups" | "catalog" | "overrides";
 
 export interface PermissionTabContentProps {
+  readonly labels: PermissionsLabels;
   readonly activeTab: PermissionTabKey;
   readonly isLoading: boolean;
   readonly permissions: readonly Permission[];

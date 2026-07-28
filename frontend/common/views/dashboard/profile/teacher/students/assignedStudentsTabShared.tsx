@@ -123,7 +123,7 @@ export function AssignedStudentsTabShared({ viewModel, slots }: Readonly<Assigne
 
       <ClassFilterRow classFilter={classFilter} ClassFilterWrapper={ClassFilterWrapper} />
 
-      <ListView rows={rows} loading={loading} pagination={pagination} />
+      <ListView rows={rows} loading={loading} pagination={pagination} labelsBySection={viewModel.labelsBySection} />
     </Stack>
   );
 }

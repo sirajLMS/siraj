@@ -11,6 +11,7 @@ import type { PermissionsLabels } from "@/shared/locale";
 // supplied to the hook by the ViewModel; the tier dialog invokes
 // `handleSubmit(onSubmit)` (both lifted from the hook).
 export interface PermissionGroupFormProps extends PermissionGroupFormState {
+  readonly labels: PermissionsLabels;
   readonly open: boolean;
   readonly group: PermissionGroup | null;
   readonly permissions: readonly Permission[];

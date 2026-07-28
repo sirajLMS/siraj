@@ -18,7 +18,7 @@ import type {
   ResourceUploadFormData,
 } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
 import type { ResourcesLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type {
   LearningResourceRow,
@@ -382,7 +382,7 @@ function buildResourcesViewModel(params: {
 }
 
 export function useResourcesViewModel(_props: Readonly<UseResourcesViewModelProps>): ResourcesViewModel {
-  const t = useAppTranslation().dashboardTranslations.resources;
+  const t = useAppTranslation(Translation.Dashboard.Resources);
   const { canResourcesList, canResourcesDelete } = useResourcePermissions();
   const store = useLearningResourcesStoreSlice();
 

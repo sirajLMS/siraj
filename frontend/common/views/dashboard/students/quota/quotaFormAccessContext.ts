@@ -5,5 +5,9 @@ import type { QuotaFormAccessContextValue } from "@/frontend/common/views/dashbo
 export const QuotaFormAccessContext = createContext<QuotaFormAccessContextValue>(QuotaFormAccessContextDefaultValue);
 
 export function useQuotaFormAccess(): QuotaFormAccessContextValue {
-  return useContext(QuotaFormAccessContext);
+  const value = useContext(QuotaFormAccessContext);
+  if (value.labels == null || value.commonLabels == null) {
+    throw new Error("useQuotaFormAccess must be used within QuotaFormAccessProvider");
+  }
+  return value;
 }

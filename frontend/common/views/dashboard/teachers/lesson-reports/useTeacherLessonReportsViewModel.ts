@@ -5,7 +5,8 @@ import { useMemo, useState } from "react";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PendingLessonReportsQuery } from "@/frontend/common/graphql/generated/gql/operations";
 import { pendingLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
-import { type LessonReportLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
+import type { TeacherLessonReportsLabelsBySection } from "@/frontend/common/views/dashboard/teachers/lesson-reports/types/teacherLessonReports.types";
+import { type LessonReportLabels, Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 type LessonReportStatusValue = `${LessonReportStatus}`;
 export type StatusFilterValue = "ALL" | LessonReportStatusValue;
@@ -28,15 +29,13 @@ export interface TeacherLessonReportStatusOption {
 }
 
 export interface TeacherLessonReportsViewModel {
-  readonly title: string;
   readonly rows: readonly TeacherLessonReportRow[];
   readonly loading: boolean;
   readonly error: boolean;
-  readonly noReportsMessage: string;
   readonly statusFilter: StatusFilterValue;
   readonly statusOptions: readonly TeacherLessonReportStatusOption[];
   readonly locale: ReturnType<typeof useAppLocale>;
-  readonly labels: LessonReportLabels;
+  readonly labelsBySection: TeacherLessonReportsLabelsBySection;
   readonly onStatusFilterChange: (value: StatusFilterValue) => void;
   readonly resolveStatusLabel: (status: LessonReportStatus) => string;
 }
@@ -60,7 +59,7 @@ const STATUS_OPTION_KEYS: readonly StatusFilterValue[] = [
 export function useTeacherLessonReportsViewModel({
   teacherId,
 }: Readonly<UseTeacherLessonReportsViewModelProps>): TeacherLessonReportsViewModel {
-  const t = useAppTranslation().dashboardTranslations.lmsLessonReports;
+  const t = useAppTranslation(Translation.Dashboard.LmsLessonReports);
   const locale = useAppLocale();
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>("ALL");
 
@@ -88,15 +87,22 @@ export function useTeacherLessonReportsViewModel({
   }, [data, statusFilter]);
 
   return {
-    title: t.historyTitle,
     rows,
     loading,
     error: Boolean(error),
-    noReportsMessage: t.noReports,
     statusFilter,
     statusOptions,
     locale,
-    labels: t,
+    labelsBySection: {
+      shell: {
+        title: t.historyTitle,
+        emptyMessage: t.noReports,
+      },
+      filters: {
+        filterAll: t.filterAll,
+      },
+      cards: t,
+    },
     onStatusFilterChange: setStatusFilter,
     resolveStatusLabel: status => resolveStatusLabel(status, t),
   };
