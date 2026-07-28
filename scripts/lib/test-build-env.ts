@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { config } from "dotenv";
+import { isTestCi } from "@/backend/lib/test-ci-env";
 
 export const TEST_BUILD_DIST_DIR = ".next-test-prod";
 export const TEST_ENV_FILE = ".env.test";
@@ -32,19 +33,22 @@ function getSystemEnv(): Record<string, string> {
 }
 
 export function loadTestEnvFile(rootDir = process.cwd()): Record<string, string> {
-  const parsed = config({ path: join(rootDir, TEST_ENV_FILE), processEnv: {} }).parsed;
-  if (!parsed) {
-    throw new Error(`Could not load ${TEST_ENV_FILE}. Ensure the file exists in the project root.`);
-  }
-  return parsed;
-}
-
-function loadTestEnvFileOptional(rootDir = process.cwd()): Record<string, string> {
   const envPath = join(rootDir, TEST_ENV_FILE);
   if (!existsSync(envPath)) {
-    return {};
+    if (isTestCi()) {
+      return {};
+    }
+    throw new Error(`Could not load ${TEST_ENV_FILE}. Create it from the "Test environment" section in .env.example.`);
   }
-  return config({ path: envPath, processEnv: {} }).parsed ?? {};
+
+  const parsed = config({ path: envPath, processEnv: {} }).parsed;
+  if (!parsed) {
+    if (isTestCi()) {
+      return {};
+    }
+    throw new Error(`Could not parse ${TEST_ENV_FILE}. Check the file format in the project root.`);
+  }
+  return parsed;
 }
 
 function getParentProcessEnv(): Record<string, string> {
@@ -63,18 +67,18 @@ function getParentProcessEnv(): Record<string, string> {
  * Local: uses `.env.test` only (plus system vars and test overrides) so `.env` /
  * `.env.local` cannot override test config.
  *
- * CI: `.env.test` is gitignored — merges the GitHub Actions job env when `CI=true`
- * so workflow-provided secrets and fallbacks reach `next build` / `next start`.
+ * CI: when `TEST_CI=true`, merges the GitHub Actions job env so workflow-provided
+ * values reach `next build` / `next start` (see `.github/workflows/ci.yml`).
  */
 export function getTestProductionEnv(
   overrides: Record<string, string> = {},
   rootDir = process.cwd()
 ): Record<string, string> {
-  const ciEnv = process.env.CI === "true" ? getParentProcessEnv() : {};
+  const ciEnv = isTestCi() ? getParentProcessEnv() : {};
 
   return {
     ...getSystemEnv(),
-    ...loadTestEnvFileOptional(rootDir),
+    ...loadTestEnvFile(rootDir),
     ...ciEnv,
     ...overrides,
     NODE_ENV: "production",

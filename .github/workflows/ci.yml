@@ -8,9 +8,10 @@
 # Tests: ONLY `bun run test:db` and `bun run test:graphql` — never `bun test`
 # or UI test scripts. UI tests run locally via `bun run test:ui`.
 #
-# `.env.test` is gitignored — all required env vars MUST be set here (job-level
-# or step-level). `bun run build:test` and the GraphQL test server read them
-# from the process environment when `.env.test` is absent.
+# `.env.test` is gitignored — CI has no file on disk. Job-level env below supplies
+# all required vars. Set TEST_CI=true so test runners keep workflow DATABASE_URL
+# (Postgres service) instead of clearing it before spawning workers. Locally,
+# developers create `.env.test` from the "Test environment" section in .env.example.
 #
 # GraphQL tests in CI use `TEST_SERVER_MODE=production` (pre-built `next start`
 # against `.next-test-prod`, same as UI E2E). Local `bun run test:graphql`
@@ -75,6 +76,8 @@ jobs:
       NODE_ENV: test
       SEED_PROFILE: minimal
       SEED_SKIP_ASSET_CHECK: "true"
+      # Test harness: keep job DATABASE_URL when spawning bun test workers (see backend/lib/test-ci-env.ts)
+      TEST_CI: "true"
 
     steps:
       - name: Checkout

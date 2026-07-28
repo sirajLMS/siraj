@@ -1,5 +1,7 @@
 import { availableParallelism } from "node:os";
 import { Glob } from "bun";
+import { isTestCi } from "@/backend/lib/test-ci-env";
+import { TEST_ENV_FILE } from "@/scripts/lib/test-build-env";
 import { getErrorMessage } from "@/shared/utils/error";
 
 // ANSI escape codes for styling
@@ -133,11 +135,22 @@ async function runSingleTestFile(file: string): Promise<void> {
   const start = performance.now();
 
   try {
-    const proc = Bun.spawn(["bun", "--env-file=.env.test", "test", file, "--timeout=60000"], {
+    const workerEnv: Record<string, string | undefined> = {
+      ...process.env,
+      FORCE_COLOR: "1",
+      NODE_ENV: "test",
+    };
+
+    // Local: drop parent DATABASE_URL so `--env-file=.env.test` is authoritative.
+    // CI (TEST_CI=true): keep workflow DATABASE_URL (Postgres service) over .env.test.
+    if (!isTestCi()) {
+      workerEnv.DATABASE_URL = undefined;
+    }
+
+    const proc = Bun.spawn(["bun", `--env-file=${TEST_ENV_FILE}`, "test", file, "--timeout=60000"], {
       stdout: "pipe",
       stderr: "pipe",
-      // Clear parent DATABASE_URL so --env-file=.env.test always wins (CI sets Neon URL globally).
-      env: { ...process.env, DATABASE_URL: undefined, FORCE_COLOR: "1", NODE_ENV: "test" },
+      env: workerEnv,
     });
 
     const stdoutText = await new Response(proc.stdout).text();

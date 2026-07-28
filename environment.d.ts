@@ -69,6 +69,14 @@ declare global {
       // Environment
       NODE_ENV: "development" | "production" | "test";
 
+      /**
+       * Set to "true" in GitHub Actions CI test jobs (see `.github/workflows/ci.yml`).
+       * Signals that test/build harnesses should keep workflow job env (e.g. DATABASE_URL
+       * for the Postgres service) instead of clearing parent vars before `bun --env-file=.env.test`.
+       * Leave unset or "false" locally — `.env.test` is then the sole source of test config.
+       */
+      TEST_CI?: string;
+
       // CORS Configuration
       ALLOWED_ORIGIN?: string;
 
