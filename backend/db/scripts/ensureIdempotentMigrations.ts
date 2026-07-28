@@ -154,19 +154,83 @@ export function ensureIdempotentMigrations(): string[] {
   return updatedFiles;
 }
 
+const ENUM_ADD_VALUE_PATTERN = /\bALTER\s+TYPE\s+("?\w+"?)\s+ADD\s+VALUE\s+(?:IF\s+NOT\s+EXISTS\s+)?('[^']+')/gi;
+
 /**
- * Scans all migration SQL files in `backend/drizzle/` and pre-executes any `ALTER TYPE ... ADD VALUE`
- * statements individually outside Drizzle's transaction block.
+ * Extracts `ALTER TYPE ... ADD VALUE` statements from a migration SQL file.
+ */
+export function extractEnumAddValueStatementsFromSql(content: string): string[] {
+  const statements: string[] = [];
+  for (const match of content.matchAll(ENUM_ADD_VALUE_PATTERN)) {
+    const fullType = match[1];
+    const enumVal = match[2];
+    if (!fullType || !enumVal) continue;
+    statements.push(`ALTER TYPE ${fullType} ADD VALUE IF NOT EXISTS ${enumVal};`);
+  }
+  return statements;
+}
+
+async function enumTypeExists(typeName: string): Promise<boolean> {
+  const { db } = await import("@/backend/db/drizzleDb");
+  const { sql } = await import("drizzle-orm");
+  const result = await db.execute(sql`SELECT 1 FROM pg_type WHERE typname = ${typeName} LIMIT 1`);
+  return result.rows.length > 0;
+}
+
+/**
+ * Pre-executes enum `ADD VALUE` statements outside any migration transaction.
  *
- * Required because PostgreSQL forbids using newly added enum values within the same transaction
- * block that created them (error 55P04: `unsafe use of new value ... of enum type`).
- * Pre-executing and committing enum values before Drizzle's transaction guarantees that
- * subsequent `INSERT` queries can cast/coerce to those enum values without error.
+ * Skips statements whose enum type does not exist yet (fresh databases where the type is
+ * created in an earlier migration folder).
+ */
+export async function preCommitEnumStatements(statements: string[]): Promise<void> {
+  if (statements.length === 0) return;
+
+  const { db } = await import("@/backend/db/drizzleDb");
+  const { sql } = await import("drizzle-orm");
+
+  for (const stmt of statements) {
+    const typeMatch = /\bALTER\s+TYPE\s+("?(\w+)"?)\s+ADD\s+VALUE/i.exec(stmt);
+    const typeName = typeMatch?.[2];
+    if (!typeName) continue;
+
+    if (!(await enumTypeExists(typeName))) {
+      continue;
+    }
+
+    try {
+      await db.execute(sql.raw(stmt));
+    } catch (err) {
+      logger.warn(`Failed to pre-commit enum statement "${stmt}":`, err);
+    }
+  }
+}
+
+/**
+ * Pre-commits enum additions declared in a single migration file before that folder runs.
+ */
+export async function preCommitEnumStatementsForMigrationFile(migrationPath: string): Promise<void> {
+  if (!existsSync(migrationPath)) return;
+
+  const content = readFileSync(migrationPath, "utf8");
+  const statements = extractEnumAddValueStatementsFromSql(content);
+  if (statements.length === 0) return;
+
+  logger.log(
+    `Ensure Enum Values Committed: Pre-executing ${statements.length} enum addition(s) from ${migrationPath}...`
+  );
+  await preCommitEnumStatements(statements);
+}
+
+/**
+ * Scans all migration SQL files and pre-commits enum additions (legacy bulk entry point).
+ *
+ * Prefer {@link preCommitEnumStatementsForMigrationFile} per migration folder via
+ * {@link runDrizzleMigrations}, which handles fresh databases correctly.
  */
 export async function ensureEnumValuesCommitted(): Promise<void> {
   if (!existsSync(DRIZZLE_DIR)) return;
 
-  const enumStatements: string[] = [];
   const folders = readdirSync(DRIZZLE_DIR).filter(f => {
     try {
       return statSync(join(DRIZZLE_DIR, f)).isDirectory();
@@ -177,28 +241,6 @@ export async function ensureEnumValuesCommitted(): Promise<void> {
 
   for (const folder of folders) {
     const sqlPath = join(DRIZZLE_DIR, folder, "migration.sql");
-    if (!existsSync(sqlPath)) continue;
-
-    const content = readFileSync(sqlPath, "utf8");
-    const matches = content.matchAll(/\bALTER\s+TYPE\s+("?\w+"?)\s+ADD\s+VALUE\s+(?:IF\s+NOT\s+EXISTS\s+)?('[^']+')/gi);
-    for (const match of matches) {
-      const fullType = match[1];
-      const enumVal = match[2];
-      enumStatements.push(`ALTER TYPE ${fullType} ADD VALUE IF NOT EXISTS ${enumVal};`);
-    }
-  }
-
-  if (enumStatements.length === 0) return;
-
-  const { db } = await import("@/backend/db/drizzleDb");
-  const { sql } = await import("drizzle-orm");
-
-  logger.log(`Ensure Enum Values Committed: Pre-executing ${enumStatements.length} enum addition(s)...`);
-  for (const stmt of enumStatements) {
-    try {
-      await db.execute(sql.raw(stmt));
-    } catch (err) {
-      logger.warn(`Failed to pre-commit enum statement "${stmt}":`, err);
-    }
+    await preCommitEnumStatementsForMigrationFile(sqlPath);
   }
 }
