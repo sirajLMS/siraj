@@ -16,6 +16,12 @@
 # GraphQL tests in CI use `TEST_SERVER_MODE=production` (pre-built `next start`
 # against `.next-test-prod`, same as UI E2E). Local `bun run test:graphql`
 # keeps the default dev server unless TEST_SERVER_MODE is set explicitly.
+#
+# Test-helper GraphQL mutations (ensureDemoUsers, createTestEntities, etc.) are
+# gated by `backend/lib/test-helper-gate.ts`. They register only when TEST_SERVER=1
+# (set by the test harness on the spawned `next start` process), TEST_CI=true
+# (job env below), or NODE_ENV is not production. They are hard-disabled when
+# VERCEL_ENV=production — real production deploys must never set TEST_SERVER or TEST_CI.
 # TODO(team): pin Bun version for reproducibility (currently unpinned).
 
 #
@@ -78,7 +84,8 @@ jobs:
       AUTH_COOKIE_SECURE: "false"
       # Test runner (migrate-only DB — no seeds; tests provision their own data)
       NODE_ENV: test
-      # Test harness: keep job DATABASE_URL when spawning bun test workers (see backend/lib/test-ci-env.ts)
+      # Test harness: keep job DATABASE_URL when spawning bun test workers (see backend/lib/test-ci-env.ts).
+      # Also enables test-helper GraphQL mutations as a secondary gate signal (see test-helper-gate.ts).
       TEST_CI: "true"
 
     steps:
@@ -127,4 +134,6 @@ jobs:
       - name: GraphQL integration tests
         env:
           TEST_SERVER_MODE: production
+          # Harness sets TEST_SERVER=1 on the spawned `next start` process; explicit here documents CI intent.
+          TEST_SERVER: "1"
         run: bun run test:graphql

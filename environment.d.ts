@@ -77,6 +77,19 @@ declare global {
        */
       TEST_CI?: string;
 
+      /**
+       * Set to "1" by GraphQL/UI test harnesses (`frontend/common/graphql/test/testServer.ts`)
+       * when spawning `next start` against `.next-test-prod`. Required for test-helper GraphQL
+       * mutations when NODE_ENV=production. Never set on real production deployments.
+       */
+      TEST_SERVER?: string;
+
+      /**
+       * Vercel deployment target (`production`, `preview`, `development`).
+       * Test helpers are hard-disabled when this is `production` (see `test-helper-gate.ts`).
+       */
+      VERCEL_ENV?: "production" | "preview" | "development";
+
       // CORS Configuration
       ALLOWED_ORIGIN?: string;
 
