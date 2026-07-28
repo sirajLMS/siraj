@@ -8,7 +8,7 @@ import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/compone
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileContentInset, MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { ManagersCardListMobile } from "@/frontend/mobile/views/dashboard/staff/home/components/managersCardList.mobile";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale";
 
 export function ManagersViewMobile(props: Readonly<ManagersViewProps>) {

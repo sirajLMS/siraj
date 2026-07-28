@@ -1,7 +1,9 @@
 import { cookies, headers } from "next/headers";
+import { forbidden } from "next/navigation";
 import type { ReactNode } from "react";
 import { UserRole } from "@/backend/enum";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
+import { isPrefetchRequest } from "@/backend/lib/auth/is-prefetch";
 import { mapBackendPermissionsToGraphql } from "@/backend/lib/auth/map-graphql-permissions";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
@@ -31,6 +33,15 @@ export default async function DashboardLayout({ children }: { readonly children:
       isImpersonating,
       isSimulatingGroup,
     });
+    // Prefetches must not receive a 307 to /login — the App Router honours
+    // redirects on prefetches and re-navigates, which on the dashboard shell
+    // re-mounts the nav chrome and re-prefetches every sidebar href, producing
+    // an infinite /dashboard → /login → /dashboard loop (reproduced via
+    // `vercel logs --follow`). 403 short-circuits the prefetch cleanly.
+    if (await isPrefetchRequest()) {
+      forbidden();
+      return;
+    }
     await redirectToLogin();
     return;
   }
@@ -49,6 +60,13 @@ export default async function DashboardLayout({ children }: { readonly children:
     // Only redirect if x-pathname is explicitly provided AND is not an allowed path.
     // If x-pathname is missing (e.g. internal RSC requests), do NOT redirect to avoid infinite loops.
     if (rawPathname && !PROFILE_COMPLETION_ALLOWED_PATHS.has(rawPathname)) {
+      // Same prefetch short-circuit as the unauthenticated branch above —
+      // prevents the prefetch→redirect→reprefetch loop on every dashboard
+      // page for teachers with an incomplete national ID.
+      if (await isPrefetchRequest()) {
+        forbidden();
+        return;
+      }
       logger.info("[ProfileCompletion] Redirecting teacher to complete national ID", {
         userId,
         rawPathname,

@@ -18,7 +18,7 @@ import {
 import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTab.types";
 import type { AssignedUsersListSlotProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTabShared.types";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledDesktopToolbar = styled(StyledUserToolbar)({

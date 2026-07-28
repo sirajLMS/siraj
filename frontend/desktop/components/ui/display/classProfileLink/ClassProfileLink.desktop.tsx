@@ -5,7 +5,7 @@ import type { Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import { avatarInitials } from "@/frontend/common/utils/avatar";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 export type DesktopClassProfileLinkProps = {
   readonly href?: string | null;

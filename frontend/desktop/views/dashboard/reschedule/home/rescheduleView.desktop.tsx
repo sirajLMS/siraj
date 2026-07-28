@@ -14,7 +14,7 @@ import { ClassParticipantsSectionDesktop } from "@/frontend/desktop/views/dashbo
 import { QuickAdjustSectionDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/quickAdjustSection.desktop";
 import { RescheduleDateTimeSectionDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/rescheduleDateTimeSection.desktop";
 import { TimezoneWarningBannerDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/timezoneWarningBanner.desktop";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale";
 
 const ActionContainer = styled(Box)<BoxProps>(({ theme }) => ({

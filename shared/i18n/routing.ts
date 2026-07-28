@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { redirect as nextRedirect } from "next/navigation";
-import type { ComponentProps } from "react";
 import { type AppLocale, defaultLocale, locales } from "@/shared/locale/AppLocale";
 
 export { type AppLocale, defaultLocale, locales };
@@ -16,9 +14,6 @@ export const routing: RoutingConfig = {
   defaultLocale,
   localePrefix: "never",
 };
-
-export type LinkProps = ComponentProps<typeof Link>;
-export { Link };
 
 export interface RedirectOptions {
   href: string;

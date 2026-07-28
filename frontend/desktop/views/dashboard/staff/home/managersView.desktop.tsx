@@ -6,7 +6,7 @@ import type { ManagersViewProps } from "@/frontend/common/views/dashboard/staff/
 import { DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { ManagersDataGridDesktop } from "@/frontend/desktop/views/dashboard/staff/home/components/managersDataGrid.desktop";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale";
 
 export function ManagersViewDesktop(props: Readonly<ManagersViewProps>) {

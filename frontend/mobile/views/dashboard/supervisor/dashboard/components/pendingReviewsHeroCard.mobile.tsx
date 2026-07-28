@@ -20,12 +20,15 @@ export function PendingReviewsHeroCardMobile({
     <Box
       sx={theme => ({
         backgroundColor: theme.palette.surfaceContainerHigh,
-        borderRadius: theme.layout.radius.section,
+        borderRadius: 0,
         p: 2.5,
         display: "flex",
         flexDirection: "column",
         gap: 2,
-        border: `1px solid ${theme.palette.outlineVariant}`,
+        borderTop: `1px solid ${theme.palette.outlineVariant}`,
+        borderBottom: `1px solid ${theme.palette.outlineVariant}`,
+        borderLeft: "none",
+        borderRight: "none",
       })}
     >
       <Stack sx={{ flexDirection: "row", alignItems: "flex-start", gap: 1.5 }}>

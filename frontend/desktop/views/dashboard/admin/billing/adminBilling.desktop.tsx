@@ -19,7 +19,7 @@ import {
 import { AdminInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/admin/billing/components/adminInvoicesDataGrid.desktop";
 import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
 import { StudentCreditDataGridDesktop } from "@/frontend/desktop/views/dashboard/billing/components/studentCreditDataGrid.desktop";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 const StyledAttentionChip = styled(Chip)(({ theme }) => ({
   backgroundColor: theme.palette.error.main,

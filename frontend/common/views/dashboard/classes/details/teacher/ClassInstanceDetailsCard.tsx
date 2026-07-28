@@ -6,7 +6,7 @@ import { BaseCard } from "@/frontend/common/components/ui";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import { StudentEntityLink } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
 import type { ClassInstanceStatus } from "@/frontend/common/views/dashboard/types/dashboard";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 const STATUS_COLOR_MAP: Record<ClassInstanceStatus, "active" | "confirmed" | "pending" | "completed" | "cancelled"> = {
   active: "active",

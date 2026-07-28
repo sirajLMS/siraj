@@ -17,7 +17,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
 import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 export interface TranslatedNavItem extends NavItem {
   readonly label: string;

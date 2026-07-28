@@ -10,7 +10,7 @@ import { OverridesCell } from "@/frontend/common/views/dashboard/permissions/com
 import type { UserOverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { getUserGroupsForUser } from "@/frontend/common/views/dashboard/permissions/utils";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale";
 
 const StyledUserAvatar = styled(Avatar)(({ theme }) => ({

@@ -17,7 +17,7 @@ import {
   StudentEntityLink,
   TeacherEntityLink,
 } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import type { AdminViewLabels } from "@/shared/locale";
 
 interface ClassInfoCardProps {

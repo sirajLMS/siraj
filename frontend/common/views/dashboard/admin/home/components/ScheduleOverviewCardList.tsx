@@ -25,7 +25,7 @@ import type {
   ScheduleOverviewDataHeaders,
   ScheduleOverviewDataStatusLabels,
 } from "@/frontend/common/views/dashboard/types/dashboard";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export interface ScheduleOverviewCardProps {

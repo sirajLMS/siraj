@@ -18,7 +18,7 @@ import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display
 import { SessionActivateButtonMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/sessionActivateButton.mobile";
 import { TeacherActiveSessionControlsMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherActiveSessionControls.mobile";
 import { TeacherScheduleStatusContentMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherScheduleStatusContent.mobile";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/schedule/teacher-schedule-session-actions";
 
 const StyledScheduleCard = styled(Paper, {

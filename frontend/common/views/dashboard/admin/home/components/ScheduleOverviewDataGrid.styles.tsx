@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 export const StyledMonospaceLabel = styled(Typography)(({ theme }) => ({
   fontFamily: "monospace",

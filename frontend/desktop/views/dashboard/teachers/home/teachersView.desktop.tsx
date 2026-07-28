@@ -10,7 +10,7 @@ import { DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/deskto
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { TeacherDataGrid } from "@/frontend/desktop/views/dashboard/teachers/home/components/teacherDataGrid.desktop";
 import { TeacherMetricsRow } from "@/frontend/desktop/views/dashboard/teachers/home/components/teacherMetricsRow.desktop";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale";
 
 export interface TeachersDesktopViewProps {

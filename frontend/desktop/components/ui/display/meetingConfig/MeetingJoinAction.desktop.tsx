@@ -12,7 +12,7 @@ import type {
 import { useJoinContext } from "@/frontend/common/hooks/useJoinContext";
 import { type JoinContext, makeHandleJoin, resolveEmptyMessage } from "@/frontend/common/lib/meetingJoinAction";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button/DesktopActionButtons";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 export type {
   MeetingJoinActionProps as DesktopMeetingJoinActionProps,
