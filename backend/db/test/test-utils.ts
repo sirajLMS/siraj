@@ -173,6 +173,7 @@ export async function teardownRlsRole(roleName: string = "test_rls_user"): Promi
 }
 
 const installedPolicies = new Set<string>();
+const rlsEnabledTables = new Map<string, Promise<void>>();
 
 export type RlsPolicyDef = {
   table: string;
@@ -209,9 +210,22 @@ async function installPolicy(policy: RlsPolicyDef): Promise<void> {
 }
 
 async function enableRowLevelSecurity(table: string): Promise<void> {
-  const tbl = quoteIdent(table);
-  await db.execute(sql.raw(`ALTER TABLE ${tbl} ENABLE ROW LEVEL SECURITY`));
-  await db.execute(sql.raw(`ALTER TABLE ${tbl} FORCE ROW LEVEL SECURITY`));
+  const existing = rlsEnabledTables.get(table);
+  if (existing) {
+    await existing;
+    return;
+  }
+
+  const enablePromise = (async () => {
+    const tbl = quoteIdent(table);
+    await retryOnConcurrentConflict(async () => {
+      await db.execute(sql.raw(`ALTER TABLE ${tbl} ENABLE ROW LEVEL SECURITY`));
+      await db.execute(sql.raw(`ALTER TABLE ${tbl} FORCE ROW LEVEL SECURITY`));
+    }, 5);
+  })();
+
+  rlsEnabledTables.set(table, enablePromise);
+  await enablePromise;
 }
 
 export async function setupRlsPolicies(policies: RlsPolicyDef[]): Promise<void> {
