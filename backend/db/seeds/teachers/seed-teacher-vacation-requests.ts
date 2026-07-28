@@ -2,7 +2,7 @@ import { addMonths, findAdminUser, loadSeedConfig, type SeedConfig, startOfDay }
 import { VacationRequestStatus } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
-import { TeacherAvailabilityService } from "@/backend/services/teacher/teacher-availability.service";
+import { TeacherAvailabilitySeedService } from "@/backend/services/seed/teacher-availability-seed.service";
 import type { TeacherEntity, TimezoneEntity, UserSelectType } from "@/backend/types";
 
 function buildVacationSpecs(teachersList: TeacherEntity[], profile: string) {
@@ -72,7 +72,7 @@ export async function seedOrGet(
     const tz = timezones.find(t => t.ianaId === teacherTimezone) ?? timezones[0];
     const isPending = spec.status === VacationRequestStatus.PENDING;
 
-    const inserted = await TeacherAvailabilityService.createVacationRequestIfMissing({
+    const inserted = await TeacherAvailabilitySeedService.seedVacationRequestIfMissing({
       teacherId: teacher.id,
       requestedByUserId,
       startAt,

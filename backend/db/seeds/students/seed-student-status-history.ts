@@ -2,7 +2,7 @@ import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/see
 import { StudentStatus } from "@/backend/enum";
 import { parseStudentStatus } from "@/backend/lib/enum";
 import logger from "@/backend/lib/logger";
-import { StudentBootstrapService } from "@/backend/services/student/student-bootstrap.service";
+import { StudentSeedService } from "@/backend/services/seed/student-seed.service";
 import type { StudentEntity, UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(studentsList: StudentEntity[], usersList: UserSelectType[], config?: SeedConfig) {
@@ -21,7 +21,7 @@ export async function seedOrGet(studentsList: StudentEntity[], usersList: UserSe
     createdAt: student.createdAt,
   }));
 
-  const results = await StudentBootstrapService.createManyInitialStatusHistory(inputs);
+  const results = await StudentSeedService.seedManyInitialStatusHistory(inputs);
   logger.info(`Student status history seeded (${results.length} rows).`);
   return results;
 }

@@ -20,11 +20,14 @@ import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { hashPassword } from "@/backend/lib/auth/password";
 import { logger } from "@/backend/lib/logger";
 import { assertTestHelperAllowed } from "@/backend/lib/test-helper-gate";
-import { StudentBootstrapService } from "@/backend/services/student/student-bootstrap.service";
-import { PersonaBootstrapService } from "@/backend/services/system/persona-bootstrap.service";
+import {
+  PersonaSeedService,
+  type SeedDemoUserInput,
+  StudentSeedService,
+  UserSeedService,
+} from "@/backend/services/seed";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
-import { type DemoUserUpsertInput, UserBootstrapService } from "@/backend/services/system/user-bootstrap.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { DEFAULT_SEED_ADMIN_PASSWORD, INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 import { getServerTranslations } from "@/shared/locale";
@@ -47,7 +50,7 @@ export interface TestEntitiesResult {
 export namespace TestHelperService {
   type TxType = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
-  function toDemoUserInput(spec: (typeof INTERNAL_DEMO_USERS)[number]): DemoUserUpsertInput {
+  function toDemoUserInput(spec: (typeof INTERNAL_DEMO_USERS)[number]): SeedDemoUserInput {
     return {
       name: spec.name,
       email: spec.email,
@@ -88,12 +91,12 @@ export namespace TestHelperService {
 
     const groups = await ReferenceDataService.listPermissionGroups();
     const groupMap = new Map(groups.map(group => [group.slug, group.id]));
-    const users = await UserBootstrapService.upsertManyDemoUsers(INTERNAL_DEMO_USERS.map(toDemoUserInput), groupMap);
+    const users = await UserSeedService.upsertManyDemoUsers(INTERNAL_DEMO_USERS.map(toDemoUserInput), groupMap);
     const userByEmail = new Map(users.map(user => [user.email, user]));
 
     const teacherUser = userByEmail.get("teacher@siraj.local");
     if (teacherUser) {
-      await PersonaBootstrapService.upsertTeacherProfile({
+      await PersonaSeedService.seedTeacherProfile({
         userId: teacherUser.id,
         timezone: IanaTimezone.UTC,
         status: AccountStatus.ACTIVATED,
@@ -104,7 +107,7 @@ export namespace TestHelperService {
 
     const parentUser = userByEmail.get("parent@siraj.local");
     if (parentUser) {
-      await PersonaBootstrapService.upsertParentProfile({
+      await PersonaSeedService.seedParentProfile({
         userId: parentUser.id,
         timezone: IanaTimezone.UTC,
         status: ParentStatus.REGULAR,
@@ -113,10 +116,10 @@ export namespace TestHelperService {
 
     const studentUser = userByEmail.get("student@siraj.local");
     if (studentUser && parentUser && teacherUser) {
-      const [parent] = await PersonaBootstrapService.listParentsByUserIds([parentUser.id]);
-      const [teacher] = await PersonaBootstrapService.listTeachersByUserIds([teacherUser.id]);
+      const [parent] = await PersonaSeedService.listParentsByUserIds([parentUser.id]);
+      const [teacher] = await PersonaSeedService.listTeachersByUserIds([teacherUser.id]);
       if (parent && teacher) {
-        const student = await StudentBootstrapService.upsertByIdempotencyKey({
+        const student = await StudentSeedService.seedStudentByKey({
           parentId: parent.id,
           userId: studentUser.id,
           primaryTeacherId: teacher.id,
@@ -128,7 +131,7 @@ export namespace TestHelperService {
           timezoneOverride: null,
           idempotencyKey: "demo_student_1",
         });
-        await StudentBootstrapService.ensureTeacherAssignment(student.id, teacher.id, new Date());
+        await StudentSeedService.seedTeacherAssignment(student.id, teacher.id, new Date());
       }
     }
 

@@ -1,16 +1,22 @@
+/**
+ * Seed-only teacher payment demo data.
+ *
+ * Creates sample teacher payout records during `bun db seed`.
+ * Production teacher payments are handled by billing/payroll domain services.
+ *
+ * Writes blocked on real production via {@link assertSeedWriteAllowed}.
+ *
+ * @see backend/db/seeds/teachers/seed-teacher-payments.ts
+ */
 import type { DBTransaction } from "@/backend/db/db.types";
 import { UserPaymentMethodRepository } from "@/backend/db/repo/billing/user-payment-method.repository";
 import { TeacherPaymentRepository } from "@/backend/db/repo/teachers/teacher-payment.repository";
+import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type { TeacherPaymentInsertInput, TeacherPaymentSelectType, UserPaymentMethodSelectType } from "@/backend/types";
 
-function assertNonProduction(): void {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Teacher payment bootstrap operations are not allowed in production.");
-  }
-}
-
-export namespace TeacherPaymentService {
+export namespace TeacherPaymentSeedService {
+  /** Read helper for seed scripts — resolve default payout method for a demo teacher. */
   export async function findDefaultPayoutMethod(
     userId: string,
     tx?: DBTransaction
@@ -18,11 +24,12 @@ export namespace TeacherPaymentService {
     return UserPaymentMethodRepository.findDefaultForSlot(userId, "PAYOUT", tx);
   }
 
-  export async function createManyIfMissing(
+  /** Idempotently create teacher payment rows for demo payroll history. */
+  export async function seedTeacherPaymentsIfMissing(
     inputs: readonly TeacherPaymentInsertInput[],
     tx?: DBTransaction
   ): Promise<TeacherPaymentSelectType[]> {
-    assertNonProduction();
+    assertSeedWriteAllowed("Teacher payment seed writes");
     try {
       return await TeacherPaymentRepository.createManyIfMissing(inputs, tx);
     } catch (error) {

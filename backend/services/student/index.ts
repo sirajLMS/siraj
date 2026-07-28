@@ -1,4 +1,3 @@
-export * from "@/backend/services/student/student-bootstrap.service";
 export * from "@/backend/services/student/student-directory.service";
 export * from "@/backend/services/student/student-lifecycle.service";
 export * from "@/backend/services/student/student-management.service";

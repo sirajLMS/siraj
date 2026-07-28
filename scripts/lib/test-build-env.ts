@@ -84,6 +84,7 @@ export function getTestProductionEnv(
     NODE_ENV: "production",
     NEXT_DIST_DIR: TEST_BUILD_DIST_DIR,
     IS_DEMO: "true",
+    TEST_SERVER: "1",
     AUTH_COOKIE_SECURE: "false",
   };
 }

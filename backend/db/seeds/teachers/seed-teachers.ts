@@ -11,7 +11,7 @@ import {
 import { CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
-import { PersonaBootstrapService } from "@/backend/services/system/persona-bootstrap.service";
+import { PersonaSeedService } from "@/backend/services/seed/persona-seed.service";
 import type { TimezoneEntity, UserSelectType } from "@/backend/types";
 
 function resolveTimezone(timezones: TimezoneEntity[], ianaId: string): TimezoneEntity {
@@ -48,7 +48,7 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneEnti
 
     // Pass the hourlyRate and rateCurrency cleanly via service bootstrap
     const rate = (50 + i * 15).toString();
-    const teacher = await PersonaBootstrapService.upsertTeacherProfile({
+    const teacher = await PersonaSeedService.seedTeacherProfile({
       userId: user.id,
       timezone: tzIana,
       status,

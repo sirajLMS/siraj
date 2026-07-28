@@ -9,7 +9,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { ClassOutcome, LeaveRequesterType, LeaveRequestStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
-import { LeaveRequestService } from "@/backend/services/schedule/leave-request.service";
+import { LeaveRequestSeedService } from "@/backend/services/seed/leave-request-seed.service";
 import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 
 function resolveRequesterUserId(
@@ -148,7 +148,7 @@ export async function seedOrGet(
 
   const approvedInputs = buildApprovedLeaveInputs(leaveInstances, maxLeaves, ctx);
   const supplementalInputs = buildSupplementalLeaveInputs(pendingFutureInstances, supplementalCount, maxLeaves, ctx);
-  const results = await LeaveRequestService.createManyIfMissing([...approvedInputs, ...supplementalInputs]);
+  const results = await LeaveRequestSeedService.seedLeaveRequestsIfMissing([...approvedInputs, ...supplementalInputs]);
 
   logger.info(`Leave requests seeded (${results.length} rows).`);
   return results;

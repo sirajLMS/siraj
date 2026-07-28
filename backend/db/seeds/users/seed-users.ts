@@ -10,8 +10,8 @@ import {
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
+import { type SeedDemoUserInput, UserSeedService } from "@/backend/services/seed/user-seed.service";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
-import { type DemoUserUpsertInput, UserBootstrapService } from "@/backend/services/system/user-bootstrap.service";
 import type { GroupWithPermissionIds, UserSelectType } from "@/backend/types";
 import { DEFAULT_SEED_ADMIN_PASSWORD, INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 
@@ -30,7 +30,7 @@ function toDemoUserInput(
   spec:
     | Pick<SeedUserSpec, "name" | "email" | "plainPassword" | "isSuperAdmin" | "groupSlug">
     | (typeof INTERNAL_DEMO_USERS)[number]
-): DemoUserUpsertInput {
+): SeedDemoUserInput {
   return {
     name: spec.name,
     email: spec.email,
@@ -50,7 +50,7 @@ export async function seedOrGet(
   const groups = permissionGroups ?? (await ReferenceDataService.listPermissionGroups());
   const groupMap = new Map(groups.map(g => [g.slug, g.id]));
 
-  const demoInputs: DemoUserUpsertInput[] = [
+  const demoInputs: SeedDemoUserInput[] = [
     ...INTERNAL_DEMO_USERS.map(toDemoUserInput),
     ...[
       ...buildExtraTeacherUserSpecs(seedConfig),
@@ -59,11 +59,11 @@ export async function seedOrGet(
     ].map(toDemoUserInput),
   ];
 
-  const results = await UserBootstrapService.upsertManyDemoUsers(demoInputs, groupMap);
+  const results = await UserSeedService.upsertManyDemoUsers(demoInputs, groupMap);
 
   if (shouldSeedExtendedFiles(seedConfig)) {
     await seedUserAvatars(results);
-    const staffProfiles = await UserBootstrapService.findStaffProfilesByUserIds(results.map(user => user.id));
+    const staffProfiles = await UserSeedService.findStaffProfilesByUserIds(results.map(user => user.id));
     await seedStaffProfileAvatars(staffProfiles);
   }
 
@@ -86,7 +86,7 @@ async function seedUserAvatars(users: UserSelectType[]): Promise<void> {
         ensureParentDirs: ["public/avatars/users"],
       });
       if (url) {
-        await UserBootstrapService.updateAvatarUrl(user.id, url);
+        await UserSeedService.seedAvatarUrl(user.id, url);
       }
     } catch (error) {
       logger.error(`Failed to seed user avatar for ${user.id}:`, error);
@@ -95,7 +95,7 @@ async function seedUserAvatars(users: UserSelectType[]): Promise<void> {
 }
 
 async function seedStaffProfileAvatars(
-  staffProfiles: Awaited<ReturnType<typeof UserBootstrapService.findStaffProfilesByUserIds>>
+  staffProfiles: Awaited<ReturnType<typeof UserSeedService.findStaffProfilesByUserIds>>
 ): Promise<void> {
   for (let i = 0; i < staffProfiles.length; i++) {
     const profile = staffProfiles[i];
@@ -112,7 +112,7 @@ async function seedStaffProfileAvatars(
         ensureParentDirs: ["public/avatars/staff"],
       });
       if (url) {
-        await UserBootstrapService.updateAvatarUrl(profile.id, url);
+        await UserSeedService.seedAvatarUrl(profile.id, url);
       }
     } catch (error) {
       logger.error(`Failed to seed staff profile avatar for ${profile.staffProfileId}:`, error);

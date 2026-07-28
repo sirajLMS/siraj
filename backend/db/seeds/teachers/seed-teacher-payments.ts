@@ -7,7 +7,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import logger from "@/backend/lib/logger";
-import { TeacherPaymentService } from "@/backend/services/teacher/teacher-payment.service";
+import { TeacherPaymentSeedService } from "@/backend/services/seed/teacher-payment-seed.service";
 import type { PaymentMethodTransactionSnapshot, TeacherEntity, UserSelectType } from "@/backend/types";
 
 function buildBankTransferSnapshot(
@@ -30,7 +30,7 @@ function buildBankTransferSnapshot(
 }
 
 function buildSnapshotFromPayoutMethod(
-  payoutMethod: NonNullable<Awaited<ReturnType<typeof TeacherPaymentService.findDefaultPayoutMethod>>>,
+  payoutMethod: NonNullable<Awaited<ReturnType<typeof TeacherPaymentSeedService.findDefaultPayoutMethod>>>,
   snapshottedAt: string
 ): PaymentMethodTransactionSnapshot {
   return {
@@ -59,7 +59,7 @@ export async function seedOrGet(teachersList: TeacherEntity[], _usersList: UserS
   const inputs = [];
 
   for (const teacher of teachersList) {
-    const payoutMethod = await TeacherPaymentService.findDefaultPayoutMethod(teacher.userId);
+    const payoutMethod = await TeacherPaymentSeedService.findDefaultPayoutMethod(teacher.userId);
     const snapshot = payoutMethod
       ? buildSnapshotFromPayoutMethod(payoutMethod, snapshottedAt)
       : buildBankTransferSnapshot(null, snapshottedAt);
@@ -82,7 +82,7 @@ export async function seedOrGet(teachersList: TeacherEntity[], _usersList: UserS
     }
   }
 
-  const results = await TeacherPaymentService.createManyIfMissing(inputs);
+  const results = await TeacherPaymentSeedService.seedTeacherPaymentsIfMissing(inputs);
   logger.info(`Teacher payments seeded (${results.length} rows).`);
   return results;
 }

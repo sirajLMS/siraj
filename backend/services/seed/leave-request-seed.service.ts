@@ -1,3 +1,14 @@
+/**
+ * Seed-only leave request and quota demo data.
+ *
+ * Creates sample leave requests and student leave quotas for scheduling seeds.
+ * Production leave workflows use scheduling domain services — **not this module**.
+ *
+ * Writes blocked on real production via {@link assertSeedWriteAllowed}.
+ *
+ * @see backend/db/seeds/teachers/seed-leave-requests.ts
+ * @see backend/db/seeds/teachers/seed-leave-quota-usage.ts
+ */
 import type { DBTransaction } from "@/backend/db/db.types";
 import {
   LeaveQuotaUsageRepository,
@@ -9,27 +20,16 @@ import {
   LeaveRequestRepository,
   type LeaveRequestRow,
 } from "@/backend/db/repo/scheduling/leave-request.repository";
+import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 
-function assertNonProduction(): void {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Leave request bootstrap operations are not allowed in production.");
-  }
-}
-
-export namespace LeaveRequestService {
-  export async function findByClassInstanceIds(
-    classInstanceIds: string[],
-    tx?: DBTransaction
-  ): Promise<LeaveRequestRow[]> {
-    return LeaveRequestRepository.findByClassInstanceIds(classInstanceIds, tx);
-  }
-
-  export async function createManyIfMissing(
+export namespace LeaveRequestSeedService {
+  /** Idempotently create leave request rows for demo class instances. */
+  export async function seedLeaveRequestsIfMissing(
     inputs: readonly CreateLeaveRequestInput[],
     tx?: DBTransaction
   ): Promise<LeaveRequestRow[]> {
-    assertNonProduction();
+    assertSeedWriteAllowed("Leave request seed writes");
     try {
       return await LeaveRequestRepository.createManyIfMissing(inputs, tx);
     } catch (error) {
@@ -39,11 +39,12 @@ export namespace LeaveRequestService {
     }
   }
 
-  export async function upsertStudentLeaveQuota(
+  /** Idempotently upsert a student's leave quota for a billing period. */
+  export async function seedStudentLeaveQuota(
     input: UpsertStudentLeaveQuotaInput,
     tx?: DBTransaction
   ): Promise<LeaveQuotaUsageRow> {
-    assertNonProduction();
+    assertSeedWriteAllowed("Leave request seed writes");
     try {
       return await LeaveQuotaUsageRepository.upsertStudentPeriodQuota(input, tx);
     } catch (error) {

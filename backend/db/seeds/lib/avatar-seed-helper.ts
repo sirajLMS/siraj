@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import { type FileReferenceTable, resolveAssetPath, seedEntityFile } from "@/backend/db/seeds/lib/file-seed-helper";
 import logger from "@/backend/lib/logger";
-import { UserBootstrapService } from "@/backend/services/system/user-bootstrap.service";
+import { UserSeedService } from "@/backend/services/seed/user-seed.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
 
@@ -91,7 +91,7 @@ async function syncUserAvatarUrl(userId: string, avatarUrl: string | null): Prom
   }
 
   try {
-    await UserBootstrapService.updateAvatarUrl(userId, avatarUrl);
+    await UserSeedService.seedAvatarUrl(userId, avatarUrl);
   } catch (error) {
     logger.error(`Failed to sync users.avatarUrl for ${userId}:`, error);
   }

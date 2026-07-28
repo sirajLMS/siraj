@@ -1,7 +1,7 @@
 import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
-import { StudentBootstrapService } from "@/backend/services/student/student-bootstrap.service";
+import { StudentSeedService } from "@/backend/services/seed/student-seed.service";
 import type { ClassInstanceEntity } from "@/backend/types";
 
 export async function seedOrGet(classInstancesList: ClassInstanceEntity[], config?: SeedConfig) {
@@ -36,7 +36,7 @@ export async function seedOrGet(classInstancesList: ClassInstanceEntity[], confi
     });
   }
 
-  const results = await StudentBootstrapService.upsertManyStudentProgress(inputs);
+  const results = await StudentSeedService.seedManyStudentProgress(inputs);
   logger.info(`Student progress seeded (${results.length} rows).`);
   return results;
 }

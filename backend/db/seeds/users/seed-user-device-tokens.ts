@@ -6,7 +6,7 @@ import {
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
-import { NotificationDeviceService } from "@/backend/services/communication/notification-device.service";
+import { NotificationDeviceSeedService } from "@/backend/services/seed/notification-device-seed.service";
 import type { UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
@@ -38,7 +38,7 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
     });
   }
 
-  const results = await NotificationDeviceService.registerManyDeviceTokens(entries);
+  const results = await NotificationDeviceSeedService.seedManyDeviceTokens(entries);
 
   logger.info(`User device tokens seeded (${results.length} rows).`);
   return results;

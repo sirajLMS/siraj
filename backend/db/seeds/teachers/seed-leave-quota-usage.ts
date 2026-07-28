@@ -1,6 +1,6 @@
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
-import { LeaveRequestService } from "@/backend/services/schedule/leave-request.service";
+import { LeaveRequestSeedService } from "@/backend/services/seed/leave-request-seed.service";
 import type { StudentEntity } from "@/backend/types";
 
 type LeaveRequestRow = {
@@ -35,7 +35,7 @@ export async function seedOrGet(
     const year = Number(yearStr);
     const month = Number(monthStr);
 
-    const row = await LeaveRequestService.upsertStudentLeaveQuota({
+    const row = await LeaveRequestSeedService.seedStudentLeaveQuota({
       studentId: student.id,
       periodYear: year,
       periodMonth: month,

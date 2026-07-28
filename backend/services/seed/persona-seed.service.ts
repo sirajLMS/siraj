@@ -1,10 +1,23 @@
+/**
+ * Seed-only teacher/parent persona provisioning.
+ *
+ * Creates or updates teacher and parent profile rows linked to demo users.
+ * Used by `bun db seed` and `ensureDemoUsers` test helper.
+ *
+ * **Not a production domain service.** Writes blocked on real production via
+ * {@link assertSeedWriteAllowed}.
+ *
+ * @see backend/db/seeds/teachers/seed-teachers.ts
+ * @see backend/db/seeds/parents/seed-parents.ts
+ */
 import type { DBTransaction } from "@/backend/db/db.types";
 import { ParentRepository, TeacherRepository, UserRepository } from "@/backend/db/repo";
 import type { AccountStatus, CurrencyCode } from "@/backend/enum";
 import type { ParentStatus } from "@/backend/enum/parents/parent.enum";
+import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import type { ParentEntity, TeacherEntity } from "@/backend/types";
 
-export type PersonaProfileUpsertInput = {
+export type SeedTeacherProfileInput = {
   userId: string;
   timezone: string;
   status?: AccountStatus;
@@ -12,24 +25,16 @@ export type PersonaProfileUpsertInput = {
   rateCurrency?: CurrencyCode;
 };
 
-export type ParentProfileUpsertInput = {
+export type SeedParentProfileInput = {
   userId: string;
   timezone: string;
   status: ParentStatus;
 };
 
-function assertNonProduction(): void {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Persona bootstrap operations are not allowed in production.");
-  }
-}
-
-export namespace PersonaBootstrapService {
-  export async function upsertTeacherProfile(
-    input: PersonaProfileUpsertInput,
-    tx?: DBTransaction
-  ): Promise<TeacherEntity> {
-    assertNonProduction();
+export namespace PersonaSeedService {
+  /** Idempotently upsert a teacher profile for a demo user. */
+  export async function seedTeacherProfile(input: SeedTeacherProfileInput, tx?: DBTransaction): Promise<TeacherEntity> {
+    assertSeedWriteAllowed("Persona seed writes");
     if (input.status) {
       await UserRepository.updateStatus(input.userId, input.status, tx);
     }
@@ -43,15 +48,14 @@ export namespace PersonaBootstrapService {
     );
   }
 
-  export async function upsertParentProfile(
-    input: ParentProfileUpsertInput,
-    tx?: DBTransaction
-  ): Promise<ParentEntity> {
-    assertNonProduction();
+  /** Idempotently upsert a parent profile for a demo user. */
+  export async function seedParentProfile(input: SeedParentProfileInput, tx?: DBTransaction): Promise<ParentEntity> {
+    assertSeedWriteAllowed("Persona seed writes");
     await UserRepository.updateTimezone(input.userId, input.timezone, tx);
     return ParentRepository.upsertByUserId(input.userId, input.status, tx);
   }
 
+  /** Read helper for seed / test-helper scripts. */
   export async function listTeachersByUserIds(userIds: string[], tx?: DBTransaction): Promise<TeacherEntity[]> {
     const results: TeacherEntity[] = [];
     for (const userId of userIds) {
@@ -61,6 +65,7 @@ export namespace PersonaBootstrapService {
     return results;
   }
 
+  /** Read helper for seed / test-helper scripts. */
   export async function listParentsByUserIds(userIds: string[], tx?: DBTransaction): Promise<ParentEntity[]> {
     const results: ParentEntity[] = [];
     for (const userId of userIds) {
