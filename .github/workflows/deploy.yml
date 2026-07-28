@@ -1,3 +1,7 @@
+# DATABASE_URL policy: do not use secrets.DATABASE_URL here. Production
+# DATABASE_URL is supplied by Vercel project environment (vercel pull / dashboard).
+# The only workflow that may use secrets.DATABASE_URL is migrate-production.yml and deploy.yml.
+
 name: Deploy to Vercel
 
 on:
@@ -47,7 +51,6 @@ jobs:
           CACHE_PROVIDER: ${{ vars.CACHE_PROVIDER }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           DATABASE_ENCRYPTION_KEY: ${{ secrets.DATABASE_ENCRYPTION_KEY }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DB_PROVIDER: ${{ vars.DB_PROVIDER }}
           EMAIL_PROVIDER: ${{ vars.EMAIL_PROVIDER }}
           ENABLE_LOGGING: ${{ vars.ENABLE_LOGGING }}
@@ -83,7 +86,6 @@ jobs:
           CACHE_PROVIDER=${CACHE_PROVIDER}
           CRON_SECRET=${CRON_SECRET}
           DATABASE_ENCRYPTION_KEY=${DATABASE_ENCRYPTION_KEY}
-          DATABASE_URL=${DATABASE_URL}
           DB_PROVIDER=${DB_PROVIDER}
           EMAIL_PROVIDER=${EMAIL_PROVIDER}
           ENABLE_LOGGING=${ENABLE_LOGGING}
