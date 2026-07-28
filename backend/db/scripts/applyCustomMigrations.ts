@@ -163,24 +163,26 @@ function computeDelta(current: ManifestEntry[], previous: ManifestEntry[]): Mani
   });
 }
 
-/** Builds the SQL content for a delta by concatenating the changed files. */
-function buildDeltaSql(delta: ManifestEntry[]): string {
-  let out = "";
-  for (const entry of delta) {
-    const content = readFileSync(join(MIGRATIONS_SRC_DIR, entry.file), "utf8");
-    out += `-- Source: ${entry.file}\n${content}\n\n`;
-  }
-  return withStatementBreakpoints(out.trimEnd());
-}
-
-/** Generates a new drizzle migration folder and writes the delta SQL into it. */
-function generateDeltaFolder(deltaSql: string, manifestHash: string): string {
-  const ts = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
-  const shortHash = manifestHash.slice(0, 8);
-  const folderName = `${ts}_custom_${shortHash}`;
+/**
+ * Generates an individual Drizzle migration folder for a single custom SQL file in the delta.
+ * Generating separate folders per file preserves transaction boundaries between individual
+ * custom SQL files (e.g. enum additions vs data insertions).
+ *
+ * @param entry The manifest entry for the custom SQL file.
+ * @param index The ordinal index within the delta sequence.
+ * @param baseMs The base timestamp millisecond value used to generate sequential folder names.
+ * @returns The created migration folder name.
+ */
+function generateFolderForFile(entry: ManifestEntry, index: number, baseMs: number): string {
+  const ts = new Date(baseMs + index * 1000).toISOString().replace(/[-:T]/g, "").slice(0, 14);
+  const fileSlug = entry.file.replace(/\.sql$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
+  const folderName = `${ts}_custom_${fileSlug}`;
   const folderPath = join(DRIZZLE_DIR, folderName);
   mkdirSync(folderPath, { recursive: true });
-  writeFileSync(join(folderPath, "migration.sql"), `${deltaSql}\n`);
+
+  const rawContent = readFileSync(join(MIGRATIONS_SRC_DIR, entry.file), "utf8");
+  const sql = withStatementBreakpoints(`-- Source: ${entry.file}\n${rawContent.trimEnd()}`);
+  writeFileSync(join(folderPath, "migration.sql"), `${sql}\n`);
   return folderName;
 }
 
@@ -220,10 +222,7 @@ export function applyCustomMigrations(): string[] {
       logger.log(
         `Custom migrations: initialized sidecar from ${combined} baseline (${baselineManifest.length} files bundled, ${unbundledCount} new file(s) will be applied as delta).`
       );
-      // Fall through: the delta logic below will detect the new files and bundle them.
     } else {
-      // Fresh setup with no combined baseline — fall through to delta logic with an
-      // empty previous manifest so everything becomes the delta.
       sidecar = { manifestHash: "", manifest: [], appliedFolders: [] };
     }
   }
@@ -235,24 +234,24 @@ export function applyCustomMigrations(): string[] {
 
   const delta = computeDelta(currentManifest, sidecar.manifest);
   if (delta.length === 0) {
-    // A file was removed but no content changed — just refresh the sidecar hash.
     writeSidecar({ manifestHash: currentHash, manifest: currentManifest, appliedFolders: sidecar.appliedFolders });
     logger.log("Custom migrations: manifest changed (file removed) but no delta to apply.");
     return [];
   }
 
-  const deltaSql = buildDeltaSql(delta);
-  if (!deltaSql.trim()) {
-    writeSidecar({ manifestHash: currentHash, manifest: currentManifest, appliedFolders: sidecar.appliedFolders });
-    return [];
+  const baseMs = Date.now();
+  const newFolders: string[] = [];
+  for (let index = 0; index < delta.length; index++) {
+    const entry = delta[index];
+    if (entry) {
+      const folderName = generateFolderForFile(entry, index, baseMs);
+      newFolders.push(folderName);
+    }
   }
 
-  const newFolder = generateDeltaFolder(deltaSql, currentHash);
-  const appliedFolders = [...sidecar.appliedFolders, newFolder];
+  const appliedFolders = [...sidecar.appliedFolders, ...newFolders];
   writeSidecar({ manifestHash: currentHash, manifest: currentManifest, appliedFolders });
 
-  logger.log(
-    `Custom migrations: generated ${newFolder} with ${delta.length} file(s): ${delta.map(d => d.file).join(", ")}`
-  );
-  return [newFolder];
+  logger.log(`Custom migrations: generated ${newFolders.length} migration folder(s): ${newFolders.join(", ")}`);
+  return newFolders;
 }

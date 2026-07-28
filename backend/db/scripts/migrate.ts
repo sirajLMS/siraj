@@ -4,7 +4,7 @@ import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { migrate as migratePostgres } from "drizzle-orm/node-postgres/migrator";
 import { db, getDrizzleDbPool } from "@/backend/db/drizzleDb";
 import { applyCustomMigrations } from "@/backend/db/scripts/applyCustomMigrations";
-import { ensureIdempotentMigrations } from "@/backend/db/scripts/ensureIdempotentMigrations";
+import { ensureEnumValuesCommitted, ensureIdempotentMigrations } from "@/backend/db/scripts/ensureIdempotentMigrations";
 import { getEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 
@@ -35,6 +35,10 @@ export async function runMigrations(closePool: boolean) {
   // before running Drizzle's migration runner. This prevents failures on existing DBs
   // when type/column/constraint already exists.
   ensureIdempotentMigrations();
+
+  // Pre-commit enum values outside Drizzle's transaction to prevent PG 55P04 error
+  // (New enum values must be committed before they can be used in queries/casts).
+  await ensureEnumValuesCommitted();
 
   if (provider === "postgres") {
     logger.warn("⚠️  Pool will be closed after migrations complete");

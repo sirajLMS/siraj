@@ -6,6 +6,15 @@ import {
   isPermanentlyDisabled,
   PERMANENTLY_DISABLED_SUFFIX,
 } from "@/scripts/dbActions/destructive";
+import {
+  applyEnvFile,
+  DEFAULT_ENV_FILE,
+  formatEnvFileLabel,
+  type ParsedDbCliArgs,
+  parseDbCliArgs,
+  readDatabaseUrlFromEnvFile,
+  selectEnvFileInteractive,
+} from "@/scripts/dbActions/envFile";
 
 /**
  * Displays the interactive menu.
@@ -28,7 +37,10 @@ export function displayMenu(): void {
  * Displays help information.
  */
 export function showHelp(): void {
-  globalThis.console.log("Usage: bun scripts/dbActions [arg|flag] [--help]");
+  globalThis.console.log("Usage: bun scripts/dbActions [action] [--env-file <file>] [--help]");
+  globalThis.console.log("\nOptions:");
+  globalThis.console.log(`  --env-file <file>  Env file to use (non-interactive default: ${DEFAULT_ENV_FILE})`);
+  globalThis.console.log("  --help, -h         Show this help message");
   globalThis.console.log("\nArguments / Flags (Non-interactive mode):");
   for (const action of Object.values(ACTIONS)) {
     const arg = action.name.padEnd(12);
@@ -36,7 +48,17 @@ export function showHelp(): void {
     globalThis.console.log(`  ${arg} or ${flag} -> Run ${action.label} and exit`);
   }
   globalThis.console.log("\nInteractive Mode:");
-  globalThis.console.log("  Run without arguments to start the interactive numeric menu.");
+  globalThis.console.log("  Run without arguments to choose an env file, then use the numeric action menu.");
+}
+
+function printSelectedEnv(fileName: string): void {
+  const databaseUrl = readDatabaseUrlFromEnvFile(fileName);
+  if (!databaseUrl) {
+    globalThis.console.log(`\nUsing env file: ${fileName}`);
+    return;
+  }
+
+  globalThis.console.log(`\nUsing env file: ${formatEnvFileLabel({ fileName, databaseUrl })}`);
 }
 
 /**
@@ -48,20 +70,33 @@ export async function interactiveLoop(): Promise<void> {
     output: process.stdout,
   });
 
-  let active = true;
-  while (active) {
-    displayMenu();
-    const choice = (await askQuestion(rl, "\nChoice: ")).trim();
-    if (choice === "0") {
-      active = false;
-    } else if (ACTIONS[choice]) {
-      await executeAction(choice, rl);
-    } else {
-      globalThis.console.error(`Invalid choice: ${choice}`);
+  try {
+    const envFile = await selectEnvFileInteractive(rl);
+    applyEnvFile(envFile);
+    printSelectedEnv(envFile);
+
+    let active = true;
+    while (active) {
+      displayMenu();
+      const choice = (await askQuestion(rl, "\nChoice: ")).trim();
+      if (choice === "0") {
+        active = false;
+      } else if (ACTIONS[choice]) {
+        await executeAction(choice, rl);
+      } else {
+        globalThis.console.error(`Invalid choice: ${choice}`);
+      }
     }
+  } catch (error) {
+    if (error instanceof Error && error.message === "Cancelled.") {
+      globalThis.console.log("Exiting.");
+      return;
+    }
+    throw error;
+  } finally {
+    rl.close();
   }
 
-  rl.close();
   globalThis.console.log("Exiting.");
 }
 
@@ -69,20 +104,43 @@ export async function interactiveLoop(): Promise<void> {
  * Entry point
  */
 export async function main(): Promise<void> {
-  const args = process.argv.slice(2);
+  let parsed: ParsedDbCliArgs;
+  try {
+    parsed = parseDbCliArgs(process.argv.slice(2));
+  } catch (error) {
+    globalThis.console.error(error instanceof Error ? error.message : String(error));
+    showHelp();
+    process.exit(1);
+    return;
+  }
 
-  if (args.includes("--help") || args.includes("-h")) {
+  if (parsed.showHelp) {
     showHelp();
     return;
   }
 
-  if (args.length > 0) {
-    const key = findActionKey(args[0]);
+  if (parsed.actionArg) {
+    const envFile = parsed.envFile ?? DEFAULT_ENV_FILE;
+    try {
+      applyEnvFile(envFile);
+    } catch (error) {
+      globalThis.console.error(error instanceof Error ? error.message : String(error));
+      process.exit(1);
+      return;
+    }
+
+    printSelectedEnv(envFile);
+
+    const key = findActionKey(parsed.actionArg);
     if (key) {
-      await executeAction(key);
+      const exitCode = await executeAction(key);
+      if (exitCode !== 0) {
+        process.exit(exitCode);
+      }
     } else {
-      globalThis.console.error(`Invalid argument: ${args[0]}`);
+      globalThis.console.error(`Invalid argument: ${parsed.actionArg}`);
       showHelp();
+      process.exit(1);
     }
     return;
   }

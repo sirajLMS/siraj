@@ -7,52 +7,68 @@ DO $$ BEGIN
   CREATE TYPE suggestion_status AS ENUM ('PENDING', 'REVIEWED', 'DUPLICATE');
 EXCEPTION
   WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-
--- FX Rate Ingestion: Add new app_permission enum values
-ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'billing.view_exchange_rates';
---> statement-breakpoint
-ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'billing.refresh_exchange_rates';
---> statement-breakpoint
-
--- Story 15: Add ON_APP notification channel
-ALTER TYPE notification_channel ADD VALUE IF NOT EXISTS 'ON_APP';
---> statement-breakpoint
-
--- Story 15: Add new notification event types for suggestions and complaints
-ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'NEW_COMPLAINT';
---> statement-breakpoint
-ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'NEW_SUGGESTION';
---> statement-breakpoint
-ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'SUGGESTION_ACKNOWLEDGED';
---> statement-breakpoint
-ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'SUGGESTION_DUPLICATE_MARKED';
---> statement-breakpoint
-
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'billing.view_exchange_rates'
+    ) THEN
+        ALTER TYPE app_permission ADD VALUE 'billing.view_exchange_rates';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'billing.refresh_exchange_rates'
+    ) THEN
+        ALTER TYPE app_permission ADD VALUE 'billing.refresh_exchange_rates';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_channel' AND e.enumlabel = 'ON_APP'
+    ) THEN
+        ALTER TYPE notification_channel ADD VALUE 'ON_APP';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'NEW_COMPLAINT'
+    ) THEN
+        ALTER TYPE notification_event_type ADD VALUE 'NEW_COMPLAINT';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'NEW_SUGGESTION'
+    ) THEN
+        ALTER TYPE notification_event_type ADD VALUE 'NEW_SUGGESTION';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'SUGGESTION_ACKNOWLEDGED'
+    ) THEN
+        ALTER TYPE notification_event_type ADD VALUE 'SUGGESTION_ACKNOWLEDGED';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'SUGGESTION_DUPLICATE_MARKED'
+    ) THEN
+        ALTER TYPE notification_event_type ADD VALUE 'SUGGESTION_DUPLICATE_MARKED';
+    END IF;
+END $$;--> statement-breakpoint
 -- Story 15: Add new columns to suggestions table
-ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS status suggestion_status NOT NULL DEFAULT 'PENDING';
---> statement-breakpoint
-ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS duplicate_of_id uuid REFERENCES suggestions(id) ON DELETE SET NULL;
---> statement-breakpoint
-ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS admin_response text;
---> statement-breakpoint
-ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS reviewed_by_user_id uuid REFERENCES users(id) ON DELETE SET NULL;
---> statement-breakpoint
-ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS reviewed_at timestamptz;
---> statement-breakpoint
-ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
---> statement-breakpoint
-
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS status suggestion_status NOT NULL DEFAULT 'PENDING';--> statement-breakpoint
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS duplicate_of_id uuid REFERENCES suggestions(id) ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS admin_response text;--> statement-breakpoint
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS reviewed_by_user_id uuid REFERENCES users(id) ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS reviewed_at timestamptz;--> statement-breakpoint
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS deleted_at timestamptz;--> statement-breakpoint
 -- Story 15: Add indexes for new suggestions columns
-CREATE INDEX IF NOT EXISTS suggestions_status_idx ON suggestions (status);
---> statement-breakpoint
-CREATE INDEX IF NOT EXISTS suggestions_duplicate_of_id_idx ON suggestions (duplicate_of_id);
---> statement-breakpoint
-CREATE INDEX IF NOT EXISTS suggestions_reviewed_by_user_id_idx ON suggestions (reviewed_by_user_id);
---> statement-breakpoint
-CREATE INDEX IF NOT EXISTS suggestions_deleted_at_idx ON suggestions (deleted_at);
---> statement-breakpoint
+CREATE INDEX IF NOT EXISTS suggestions_status_idx ON suggestions (status);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS suggestions_duplicate_of_id_idx ON suggestions (duplicate_of_id);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS suggestions_reviewed_by_user_id_idx ON suggestions (reviewed_by_user_id);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS suggestions_deleted_at_idx ON suggestions (deleted_at);--> statement-breakpoint
 DO $$
 BEGIN
   BEGIN
@@ -1018,9 +1034,7 @@ SET
     ALTER TABLE permissions ENABLE TRIGGER trg_protect_system_permissions;
   EXCEPTION WHEN OTHERS THEN NULL;
   END;
-END $$;
---> statement-breakpoint
-
+END $$;--> statement-breakpoint
 INSERT INTO
     permission_groups (
         id,
@@ -1090,9 +1104,7 @@ SET
     name = EXCLUDED.name,
     description = EXCLUDED.description,
     is_system = EXCLUDED.is_system,
-    updated_at = NOW();
---> statement-breakpoint
-
+    updated_at = NOW();--> statement-breakpoint
 DELETE FROM group_permissions
 WHERE group_id IN (SELECT id FROM permission_groups WHERE is_system = true)
 AND permission_id IN (
@@ -1198,9 +1210,7 @@ AND permission_id IN (
         'suggestions.review',
         'suggestions.delete'
     )
-);
---> statement-breakpoint
-
+);--> statement-breakpoint
 INSERT INTO
     group_permissions (group_id, permission_id)
 SELECT g.id, p.id
@@ -1309,9 +1319,7 @@ WHERE
         'suggestions.delete',
         'billing.view_exchange_rates',
         'billing.refresh_exchange_rates'
-    ) ON CONFLICT DO NOTHING;
---> statement-breakpoint
-
+    ) ON CONFLICT DO NOTHING;--> statement-breakpoint
 INSERT INTO
     group_permissions (group_id, permission_id)
 SELECT g.id, p.id
@@ -1378,9 +1386,7 @@ WHERE
         'suggestions.review',
         'billing.view_exchange_rates',
         'billing.refresh_exchange_rates'
-    ) ON CONFLICT DO NOTHING;
---> statement-breakpoint
-
+    ) ON CONFLICT DO NOTHING;--> statement-breakpoint
 INSERT INTO
     group_permissions (group_id, permission_id)
 SELECT g.id, p.id
@@ -1403,9 +1409,7 @@ WHERE
         'resources.list',
         'schedule.view_weekly',
         'schedule.view_workload'
-    ) ON CONFLICT DO NOTHING;
---> statement-breakpoint
-
+    ) ON CONFLICT DO NOTHING;--> statement-breakpoint
 INSERT INTO
     group_permissions (group_id, permission_id)
 SELECT g.id, p.id
@@ -1426,9 +1430,7 @@ WHERE
         'billing.submit_payment_proof',
         'parent.view_students',
         'parent.view_own_profile'
-    ) ON CONFLICT DO NOTHING;
---> statement-breakpoint
-
+    ) ON CONFLICT DO NOTHING;--> statement-breakpoint
 INSERT INTO
     group_permissions (group_id, permission_id)
 SELECT g.id, p.id
@@ -1446,9 +1448,7 @@ WHERE
         'parents.list',
         'students.list',
         'complaints.list'
-    ) ON CONFLICT DO NOTHING;
---> statement-breakpoint
-
+    ) ON CONFLICT DO NOTHING;--> statement-breakpoint
 INSERT INTO
     group_permissions (group_id, permission_id)
 SELECT g.id, p.id
@@ -1465,9 +1465,7 @@ WHERE
         'system.process_student_leave',
         'system.restrict_resource_access',
         'system.dispatch_email'
-    ) ON CONFLICT DO NOTHING;
---> statement-breakpoint
-
+    ) ON CONFLICT DO NOTHING;--> statement-breakpoint
 -- Triggers to protect system permissions and groups from deletion or mutation of is_system
 CREATE OR REPLACE FUNCTION protect_system_permissions()
 RETURNS TRIGGER AS $$
@@ -1508,22 +1506,13 @@ BEGIN
     END IF;
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql;
---> statement-breakpoint
-
-DROP TRIGGER IF EXISTS trg_protect_system_permissions ON permissions;
---> statement-breakpoint
-
+$$ LANGUAGE plpgsql;--> statement-breakpoint
+DROP TRIGGER IF EXISTS trg_protect_system_permissions ON permissions;--> statement-breakpoint
 CREATE TRIGGER trg_protect_system_permissions
 BEFORE INSERT OR UPDATE OR DELETE ON permissions
-FOR EACH ROW EXECUTE FUNCTION protect_system_permissions();
---> statement-breakpoint
-
-DROP TRIGGER IF EXISTS trg_protect_system_permission_groups ON permission_groups;
---> statement-breakpoint
-
+FOR EACH ROW EXECUTE FUNCTION protect_system_permissions();--> statement-breakpoint
+DROP TRIGGER IF EXISTS trg_protect_system_permission_groups ON permission_groups;--> statement-breakpoint
 CREATE TRIGGER trg_protect_system_permission_groups
 BEFORE UPDATE OR DELETE ON permission_groups
-FOR EACH ROW EXECUTE FUNCTION protect_system_permissions();
---> statement-breakpoint
+FOR EACH ROW EXECUTE FUNCTION protect_system_permissions();--> statement-breakpoint
 

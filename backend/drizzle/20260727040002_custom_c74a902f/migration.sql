@@ -1,8 +1,10 @@
--- Source: 5a-billing_manage_currencies_permission.sql
--- Migration: Billing Manage Currencies Permission (incremental)
--- Adds billing.manage_currencies — activate/deactivate supported currencies in the catalog.
-
-ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'billing.manage_currencies';--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'billing.manage_currencies'
+    ) THEN
+        ALTER TYPE app_permission ADD VALUE 'billing.manage_currencies';
+    END IF;
+END $$;--> statement-breakpoint
 DO $$
 BEGIN
   ALTER TABLE permissions DISABLE TRIGGER trg_protect_system_permissions;
@@ -13,7 +15,7 @@ INSERT INTO permissions (id, key, resource, action, description, category, is_sy
 VALUES
   (
     gen_random_uuid(),
-    'billing.manage_currencies'::app_permission,
+    'billing.manage_currencies',
     'billing',
     'manage_currencies',
     '{"ar": "تفعيل وإلغاء تفعيل العملات المدعومة في الكتالوج", "en": "Activate and deactivate supported currencies in the catalog"}'::jsonb,

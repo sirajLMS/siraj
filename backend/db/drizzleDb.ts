@@ -55,7 +55,15 @@ export async function closeDrizzleDbPool(): Promise<void> {
   }
 }
 
-export function resetDbSingleton(): void {
+/**
+ * Clears the in-memory JavaScript global singleton instances for the Drizzle ORM client (`db`)
+ * and connection pool (`dbPool`).
+ *
+ * IMPORTANT NOTE: This function ONLY resets module/process-level connection handles in Node/Bun memory
+ * (for example when switching environment files like `.env.vercel` or `.env.mishkah` in DB CLI sessions).
+ * It DOES NOT perform any database drops, schema truncations, data deletion, or destructive database operations.
+ */
+export function clearDbConnectionSingleton(): void {
   clearGlobalSingleton(DB_KEY);
   clearGlobalSingleton(DB_POOL_KEY);
 }

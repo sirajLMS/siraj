@@ -18,7 +18,7 @@ INSERT INTO permissions (id, key, resource, action, description, category, is_sy
 VALUES
   (
     gen_random_uuid(),
-    'settings.view'::app_permission,
+    'settings.view',
     'settings',
     'view',
     '{"ar": "عرض صفحة الإعدادات", "en": "View the settings page"}'::jsonb,
@@ -27,7 +27,7 @@ VALUES
   ),
   (
     gen_random_uuid(),
-    'settings.edit_general'::app_permission,
+    'settings.edit_general',
     'settings',
     'edit_general',
     '{"ar": "تعديل إعدادات النظام العامة", "en": "Edit general system settings"}'::jsonb,
@@ -36,7 +36,7 @@ VALUES
   ),
   (
     gen_random_uuid(),
-    'settings.edit_env'::app_permission,
+    'settings.edit_env',
     'settings',
     'edit_env',
     '{"ar": "تعديل تجاوزات متغيرات البيئة", "en": "Edit environment variable overrides"}'::jsonb,
@@ -45,7 +45,7 @@ VALUES
   ),
   (
     gen_random_uuid(),
-    'settings.edit_session'::app_permission,
+    'settings.edit_session',
     'settings',
     'edit_session',
     '{"ar": "تعديل إعدادات الجلسة لكل دور", "en": "Edit per-role session configuration"}'::jsonb,
@@ -54,7 +54,7 @@ VALUES
   ),
   (
     gen_random_uuid(),
-    'settings.audit_view'::app_permission,
+    'settings.audit_view',
     'settings',
     'audit_view',
     '{"ar": "عرض سجلات المراجعة", "en": "View audit logs"}'::jsonb,
@@ -63,7 +63,7 @@ VALUES
   ),
   (
     gen_random_uuid(),
-    'settings.site_content_manage'::app_permission,
+    'settings.site_content_manage',
     'settings',
     'site_content_manage',
     '{"ar": "إدارة محتوى الموقع", "en": "Manage site content"}'::jsonb,
@@ -72,7 +72,7 @@ VALUES
   ),
   (
     gen_random_uuid(),
-    'settings.timezones_view'::app_permission,
+    'settings.timezones_view',
     'settings',
     'timezones_view',
     '{"ar": "عرض كتالوج المناطق الزمنية", "en": "View timezone catalog"}'::jsonb,

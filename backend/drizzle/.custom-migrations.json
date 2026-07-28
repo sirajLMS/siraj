@@ -1,5 +1,5 @@
 {
-  "manifestHash": "21a8ae87c1bda4c6082248621c30d9c4b40519730d2484c03c7402f0a153ca5f",
+  "manifestHash": "b8f7c4cef54655420652313bfb6b4381d37a6e4ee8b4b3b3e2b7bea51367e128",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -79,7 +79,7 @@
     },
     {
       "file": "7b-settings-permissions-data.sql",
-      "sha256": "fdf4aa957cc69cb8f4e8224939a50e077bead5f6bac657b3ea6ca376502ed062"
+      "sha256": "ecbf57d7aa5dc681ca3151e6dc5926232ad3501d812b5efe73484d9a23c0a08d"
     },
     {
       "file": "add_test_custom_alt_permission.sql",
@@ -151,8 +151,42 @@
     }
   ],
   "appliedFolders": [
-    "20260727152656_custom_23623615",
-    "20260727225423_custom_992cec90",
-    "20260728005436_custom_21a8ae87"
+    "20260728171730_custom_2-functions",
+    "20260728171731_custom_3-system_permissions_and_groups",
+    "20260728171732_custom_30-a-class_instances_rls_policies",
+    "20260728171733_custom_30-b-class_instances_state_transition_trigger",
+    "20260728171734_custom_30-c-class_instances_auto_miss_transition",
+    "20260728171735_custom_4-class_categories_and_subjects",
+    "20260728171736_custom_4-fx_exchange_rate_permissions",
+    "20260728171737_custom_4a-class_categories_and_subjects_seed",
+    "20260728171738_custom_4b-teacher_support_contact_setting",
+    "20260728171739_custom_4c-system_settings_seed",
+    "20260728171740_custom_4d-timezones_seed",
+    "20260728171741_custom_4e-default_super_admin_seed",
+    "20260728171742_custom_5-billing_fx_admin_permissions",
+    "20260728171743_custom_5a-billing_manage_currencies_permission",
+    "20260728171744_custom_6-lms-permissions-and-groups",
+    "20260728171745_custom_6a-profile-field-permissions",
+    "20260728171746_custom_6b-meeting-permissions",
+    "20260728171747_custom_6c-payment-method-permissions",
+    "20260728171748_custom_7a-settings-permissions-enum",
+    "20260728171749_custom_7b-settings-permissions-data",
+    "20260728171750_custom_add_test_custom_alt_permission",
+    "20260728171751_custom_audit_log_immutability_trigger",
+    "20260728171752_custom_auth_rate_limiting",
+    "20260728171753_custom_books_rls_policies",
+    "20260728171754_custom_cache_split",
+    "20260728171755_custom_exclude_jerusalem_timezone",
+    "20260728171756_custom_hours_per_week_recalculation",
+    "20260728171757_custom_impersonation_sessions",
+    "20260728171758_custom_leave_quota_limits_trigger",
+    "20260728171759_custom_permissions_rls_policies",
+    "20260728171800_custom_profile_permissions",
+    "20260728171801_custom_soft_delete_rls_policies",
+    "20260728171802_custom_student_created_at_immutability",
+    "20260728171803_custom_student_progress_rls",
+    "20260728171804_custom_student_status_transition_trigger",
+    "20260728171805_custom_timezone_dst_logic",
+    "20260728171806_custom_user_notification_preferences"
   ]
 }

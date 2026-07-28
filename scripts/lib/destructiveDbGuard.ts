@@ -1,4 +1,20 @@
 /**
+ * Env vars read by {@link assessDestructiveDbCommandSafety}.
+ * Cleared before applying a selected db CLI env file so stale values cannot leak across files.
+ */
+export const DESTRUCTIVE_GUARD_ENV_KEYS = [
+  "NODE_ENV",
+  "DB_PROVIDER",
+  "STORAGE_PROVIDER",
+  "REDIS_PROVIDER",
+  "DATABASE_URL",
+  "UPSTASH_REDIS_REST_URL",
+  "GCP_PROJECT_ID",
+  "GCP_BUCKET_NAME",
+  "BLOB_READ_WRITE_TOKEN",
+] as const;
+
+/**
  * Assessment of whether destructive DB commands are safe to run in the current environment.
  */
 export interface DestructiveDbSafetyAssessment {
