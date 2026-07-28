@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { config } from "dotenv";
 
@@ -38,22 +39,43 @@ export function loadTestEnvFile(rootDir = process.cwd()): Record<string, string>
   return parsed;
 }
 
+function loadTestEnvFileOptional(rootDir = process.cwd()): Record<string, string> {
+  const envPath = join(rootDir, TEST_ENV_FILE);
+  if (!existsSync(envPath)) {
+    return {};
+  }
+  return config({ path: envPath, processEnv: {} }).parsed ?? {};
+}
+
+function getParentProcessEnv(): Record<string, string> {
+  const env: Record<string, string> = {};
+  for (const [key, value] of Object.entries(process.env)) {
+    if (value !== undefined) {
+      env[key] = value;
+    }
+  }
+  return env;
+}
+
 /**
  * Env for `next build` / `next start` in the UI test production harness.
  *
- * Uses only `.env.test` (plus system vars and test overrides). Does not inherit the
- * parent shell env, so local `.env` / `.env.local` values cannot override test config.
+ * Local: uses `.env.test` only (plus system vars and test overrides) so `.env` /
+ * `.env.local` cannot override test config.
  *
- * Next.js may still read env files from disk, but @next/env only fills keys that are
- * not already set in `process.env` — see Next.js "Test Environment Variables".
+ * CI: `.env.test` is gitignored — merges the GitHub Actions job env when `CI=true`
+ * so workflow-provided secrets and fallbacks reach `next build` / `next start`.
  */
 export function getTestProductionEnv(
   overrides: Record<string, string> = {},
   rootDir = process.cwd()
 ): Record<string, string> {
+  const ciEnv = process.env.CI === "true" ? getParentProcessEnv() : {};
+
   return {
     ...getSystemEnv(),
-    ...loadTestEnvFile(rootDir),
+    ...loadTestEnvFileOptional(rootDir),
+    ...ciEnv,
     ...overrides,
     NODE_ENV: "production",
     NEXT_DIST_DIR: TEST_BUILD_DIST_DIR,
