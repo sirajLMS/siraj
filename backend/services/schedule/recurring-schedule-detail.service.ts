@@ -52,6 +52,8 @@ export namespace RecurringScheduleDetailService {
         startTime: String(day.startTime).slice(0, 5),
         isActive: day.isActive,
       })),
+      hourlyRate: row.schedule.hourlyRate,
+      rateCurrency: row.schedule.rateCurrency,
     };
   }
 }

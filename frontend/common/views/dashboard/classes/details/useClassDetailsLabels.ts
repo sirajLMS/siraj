@@ -18,6 +18,26 @@ export interface TeacherViewLabels {
     readonly viewSubject: string;
     readonly minutes: string;
     readonly statusLabels: Record<ClassInstanceStatus, string>;
+    readonly rateSectionTitle: string;
+    readonly effectiveRateLabel: string;
+    readonly rateCurrencyLabel: string;
+    readonly rateSourceLabel: string;
+    readonly rateSourceOverride: string;
+    readonly rateSourceRecurring: string;
+    readonly rateSourceSubject: string;
+    readonly rateSourceTeacher: string;
+    readonly overrideRateButton: string;
+    readonly clearOverrideButton: string;
+    readonly overrideRateDialogTitle: string;
+    readonly overrideRateDialogDescription: string;
+    readonly hourlyRateLabel: string;
+    readonly currencyLabel: string;
+    readonly saveButton: string;
+    readonly cancelButton: string;
+    readonly overrideSuccess: string;
+    readonly overrideError: string;
+    readonly clearSuccess: string;
+    readonly clearError: string;
   };
   readonly remarks: {
     readonly remarksTitle: string;
@@ -63,6 +83,7 @@ export const useAdminViewLabels = (_timezone: string): AdminViewLabels => {
         forceActivate: t.adminActions.forceActivate,
         stopPause: t.adminActions.stopPause,
         deleteInstance: t.adminActions.deleteInstance,
+        overrideRateButton: t.instanceDetails.overrideRateButton,
         disabledTooltips: {
           forceActivate: {
             activated: t.adminActions.disabledTooltips.forceActivate.activated,
@@ -108,6 +129,28 @@ export const useAdminViewLabels = (_timezone: string): AdminViewLabels => {
         teacherResponse: t.heatmap.teacherResponse,
         noData: t.heatmap.noData,
       },
+      rate: {
+        rateSectionTitle: t.instanceDetails.rateSectionTitle,
+        effectiveRateLabel: t.instanceDetails.effectiveRateLabel,
+        rateCurrencyLabel: t.instanceDetails.rateCurrencyLabel,
+        rateSourceLabel: t.instanceDetails.rateSourceLabel,
+        rateSourceOverride: t.instanceDetails.rateSourceOverride,
+        rateSourceRecurring: t.instanceDetails.rateSourceRecurring,
+        rateSourceSubject: t.instanceDetails.rateSourceSubject,
+        rateSourceTeacher: t.instanceDetails.rateSourceTeacher,
+        overrideRateButton: t.instanceDetails.overrideRateButton,
+        clearOverrideButton: t.instanceDetails.clearOverrideButton,
+        overrideRateDialogTitle: t.instanceDetails.overrideRateDialogTitle,
+        overrideRateDialogDescription: t.instanceDetails.overrideRateDialogDescription,
+        hourlyRateLabel: t.instanceDetails.hourlyRateLabel,
+        currencyLabel: t.instanceDetails.currencyLabel,
+        saveButton: t.instanceDetails.saveButton,
+        cancelButton: t.instanceDetails.cancelButton,
+        overrideSuccess: t.instanceDetails.overrideSuccess,
+        overrideError: t.instanceDetails.overrideError,
+        clearSuccess: t.instanceDetails.clearSuccess,
+        clearError: t.instanceDetails.clearError,
+      },
     }),
     [t]
   );
@@ -141,6 +184,26 @@ export const useTeacherViewLabels = (_timezone: string): TeacherViewLabels => {
         viewSubject: t.instanceDetails.viewSubject,
         minutes: t.metadata.minutes,
         statusLabels,
+        rateSectionTitle: t.instanceDetails.rateSectionTitle,
+        effectiveRateLabel: t.instanceDetails.effectiveRateLabel,
+        rateCurrencyLabel: t.instanceDetails.rateCurrencyLabel,
+        rateSourceLabel: t.instanceDetails.rateSourceLabel,
+        rateSourceOverride: t.instanceDetails.rateSourceOverride,
+        rateSourceRecurring: t.instanceDetails.rateSourceRecurring,
+        rateSourceSubject: t.instanceDetails.rateSourceSubject,
+        rateSourceTeacher: t.instanceDetails.rateSourceTeacher,
+        overrideRateButton: t.instanceDetails.overrideRateButton,
+        clearOverrideButton: t.instanceDetails.clearOverrideButton,
+        overrideRateDialogTitle: t.instanceDetails.overrideRateDialogTitle,
+        overrideRateDialogDescription: t.instanceDetails.overrideRateDialogDescription,
+        hourlyRateLabel: t.instanceDetails.hourlyRateLabel,
+        currencyLabel: t.instanceDetails.currencyLabel,
+        saveButton: t.instanceDetails.saveButton,
+        cancelButton: t.instanceDetails.cancelButton,
+        overrideSuccess: t.instanceDetails.overrideSuccess,
+        overrideError: t.instanceDetails.overrideError,
+        clearSuccess: t.instanceDetails.clearSuccess,
+        clearError: t.instanceDetails.clearError,
       },
       remarks: {
         remarksTitle: t.remarks.remarksTitle,

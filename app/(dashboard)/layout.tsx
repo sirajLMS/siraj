@@ -1,5 +1,9 @@
+import { cookies, headers } from "next/headers";
+import { forbidden } from "next/navigation";
 import type { ReactNode } from "react";
+import { UserRole } from "@/backend/enum";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
+import { isPrefetchRequest } from "@/backend/lib/auth/is-prefetch";
 import { mapBackendPermissionsToGraphql } from "@/backend/lib/auth/map-graphql-permissions";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
@@ -10,7 +14,12 @@ import {
   type User,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
+import { getSidebarStateFromCookies, SIDEBAR_COOKIE_NAME } from "@/frontend/common/lib/sidebar-detection";
 import { DashboardLayoutContainer } from "@/frontend/common/views/dashboard/components/DashboardLayoutContainer";
+import { redirect } from "@/shared/i18n/routing";
+
+/** Paths a teacher with an incomplete profile may still reach (to complete it). */
+const PROFILE_COMPLETION_ALLOWED_PATHS = new Set(["/profile", "/profile/edit"]);
 
 export default async function DashboardLayout({ children }: { readonly children: ReactNode }) {
   const { userId, context, isImpersonating, isSimulatingGroup } = await getServerUserContext();
@@ -24,11 +33,52 @@ export default async function DashboardLayout({ children }: { readonly children:
       isImpersonating,
       isSimulatingGroup,
     });
+    // Prefetches must not receive a 307 to /login — the App Router honours
+    // redirects on prefetches and re-navigates, which on the dashboard shell
+    // re-mounts the nav chrome and re-prefetches every sidebar href, producing
+    // an infinite /dashboard → /login → /dashboard loop (reproduced via
+    // `vercel logs --follow`). 403 short-circuits the prefetch cleanly.
+    if (await isPrefetchRequest()) {
+      forbidden();
+      return;
+    }
     await redirectToLogin();
     return;
   }
 
   const userProfile = await getCurrentUser(userId, context);
+
+  // First-login profile-completion guard: teachers must set their national ID
+  // before they can operate on the system. Admins may leave nationalId unset at
+  // creation time, so we force the teacher to enter it on first login by
+  // hard-redirecting every dashboard route to the profile edit page until it
+  // is filled. The profile edit page itself is allowed through so the teacher
+  // can actually complete the form.
+  if (userProfile.role === UserRole.TEACHER && !userProfile.nationalIdComplete) {
+    const headersList = await headers();
+    const rawPathname = headersList.get("x-pathname");
+    // Only redirect if x-pathname is explicitly provided AND is not an allowed path.
+    // If x-pathname is missing (e.g. internal RSC requests), do NOT redirect to avoid infinite loops.
+    if (rawPathname && !PROFILE_COMPLETION_ALLOWED_PATHS.has(rawPathname)) {
+      // Same prefetch short-circuit as the unauthenticated branch above —
+      // prevents the prefetch→redirect→reprefetch loop on every dashboard
+      // page for teachers with an incomplete national ID.
+      if (await isPrefetchRequest()) {
+        forbidden();
+        return;
+      }
+      logger.info("[ProfileCompletion] Redirecting teacher to complete national ID", {
+        userId,
+        rawPathname,
+      });
+      redirect("/profile/edit?forceComplete=1");
+      return;
+    }
+  }
+
+  const cookieStore = await cookies();
+  const sidebarCookie = cookieStore.get(SIDEBAR_COOKIE_NAME);
+  const initialSidebarOpen = getSidebarStateFromCookies(sidebarCookie?.value);
 
   const mappedUser: User = {
     id: userProfile.id,
@@ -49,7 +99,11 @@ export default async function DashboardLayout({ children }: { readonly children:
   };
 
   return (
-    <DashboardLayoutContainer userProfile={mappedUser} isSuperAdmin={userProfile.isSuperAdmin}>
+    <DashboardLayoutContainer
+      userProfile={mappedUser}
+      isSuperAdmin={userProfile.isSuperAdmin}
+      initialSidebarOpen={initialSidebarOpen}
+    >
       {children}
     </DashboardLayoutContainer>
   );

@@ -3,8 +3,9 @@
 import { CssBaseline } from "@mui/material";
 import type { PaletteMode } from "@mui/material/styles";
 import { ThemeProvider, useColorScheme } from "@mui/material/styles";
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
+import { logger } from "@/frontend/common/lib/logger";
 import { setThemePreference } from "@/frontend/common/lib/theme-detection";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { createAppCssVarsTheme } from "@/frontend/common/providers/theme/theme";
@@ -37,15 +38,43 @@ function ColorSchemeStateBridge({ children }: { readonly children: ReactNode }) 
   // a concrete PaletteMode — the prior behavior always returned "light"|"dark".
   const mode: PaletteMode = schemeMode === "light" ? "light" : "dark";
 
-  // Sync `data-theme`, `colorScheme`, `lang` and `dir` attributes for CSS
-  // variable application and layout flow (preserved from legacy provider).
-  useEffect(() => {
+  // Sync `data-theme`, `data-mui-color-scheme`, `colorScheme`, `lang` and `dir`
+  // attributes for CSS variable application and layout flow. Use `useLayoutEffect`
+  // (not `useEffect`) and diff against the previously-applied values so we only
+  // touch the DOM when an attribute actually changed — avoids layout thrashing
+  // on every render of this otherwise-pure-bridge component.
+  //
+  // `data-mui-color-scheme` is synced here (in addition to `data-theme`) because
+  // `server-theme-css.ts` scopes its fallback CSS variables to
+  // `html[data-mui-color-scheme="${mode}"]`. MUI's `useColorScheme().setMode()`
+  // only manages the boolean `data-light`/`data-dark` attributes (per
+  // `colorSchemeSelector: "data"`), so without this sync the
+  // `data-mui-color-scheme` attribute would stay pinned to the initial server
+  // mode after a toggle, leaving the server-rendered shells stuck in the old
+  // palette. Keeping all three attribute conventions (`data-mui-color-scheme`,
+  // `data-theme`, `data-dark`/`data-light`) aligned ensures the shells repaint
+  // in the toggled mode.
+  const lastAppliedRef = useRef<{ readonly mode: string; readonly dir: string; readonly lang: string } | null>(null);
+  useLayoutEffect(() => {
     if (typeof document === "undefined") return;
-    document.documentElement.dataset.theme = mode;
-    document.documentElement.style.colorScheme = mode;
-    document.documentElement.dir = direction;
-    document.documentElement.lang = locale;
-  }, [mode, direction, locale]);
+    const last = lastAppliedRef.current;
+    if (last?.mode === mode && last.dir === direction && last.lang === locale) return;
+
+    logger.info({ caller: "AppThemeProvider" }, "[AppThemeProvider] Client syncing theme DOM attributes", {
+      schemeMode,
+      effectiveMode: mode,
+      direction,
+      locale,
+    });
+
+    const root = document.documentElement;
+    root.dataset.theme = mode;
+    root.dataset.muiColorScheme = mode;
+    root.style.colorScheme = mode;
+    root.dir = direction;
+    root.lang = locale;
+    lastAppliedRef.current = { mode, dir: direction, lang: locale };
+  }, [mode, schemeMode, direction, locale]);
 
   const toggleTheme = useCallback(() => {
     setIsThemeChanging(true);
@@ -86,7 +115,7 @@ export function AppThemeProvider({ children, initialTheme }: AppThemeProviderPro
   const direction = locale === "ar" ? "rtl" : "ltr";
   const defaultMode: PaletteMode = initialTheme ?? "dark";
 
-  const theme = useMemo(() => createAppCssVarsTheme(direction, locale), [direction, locale]);
+  const theme = useMemo(() => createAppCssVarsTheme(direction, locale, defaultMode), [direction, locale, defaultMode]);
 
   return (
     <ThemeProvider

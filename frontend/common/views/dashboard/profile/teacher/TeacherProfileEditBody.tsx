@@ -22,11 +22,14 @@ function toTeacherEditData(
     avatarUrl,
     phone: teacherData.phone,
     displayCurrency,
-    nationalId: adminData?.nationalId ?? null,
-    dateOfBirth: adminData?.dateOfBirth ?? null,
-    gender: adminData?.gender ?? null,
-    address: adminData?.address ?? null,
-    qualifications: adminData?.qualifications ?? null,
+    // nationalId/nationality are present on both own and admin profiles now;
+    // prefer the admin-scoped value when available, else fall back to own.
+    nationalId: adminData?.nationalId ?? teacherData.nationalId ?? null,
+    nationality: adminData?.nationality ?? teacherData.nationality ?? null,
+    dateOfBirth: adminData?.dateOfBirth ?? teacherData.dateOfBirth ?? null,
+    gender: adminData?.gender ?? teacherData.gender ?? null,
+    address: adminData?.address ?? teacherData.address ?? null,
+    qualifications: adminData?.qualifications ?? teacherData.qualifications ?? null,
     timezone: teacherData.timezone,
     hourlyRate: teacherData.hourlyRate,
     rateCurrency: teacherData.rateCurrency,
@@ -66,6 +69,8 @@ export function TeacherProfileEditBody({
             name: values.name,
             email: values.email,
             phone: values.phone ?? "",
+            nationalId: values.nationalId ?? "",
+            nationality: values.nationality ?? "",
             avatarUrl: values.avatarUrl,
             displayCurrency: values.displayCurrency ?? null,
           });

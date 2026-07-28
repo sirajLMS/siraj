@@ -1,5 +1,5 @@
 import { Button, Typography } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 
 const meta: Meta<typeof DesktopSectionPanel> = {

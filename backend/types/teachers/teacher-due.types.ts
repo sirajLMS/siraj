@@ -1,5 +1,5 @@
 import type { teacherDues } from "@/backend/db/schema";
-import type { CurrencyCode, TeacherDueStatus } from "@/backend/enum";
+import type { CurrencyCode, RateSource, TeacherDueStatus } from "@/backend/enum";
 
 export type TeacherDueSelectType = typeof teacherDues.$inferSelect;
 export type TeacherDueInsertType = typeof teacherDues.$inferInsert;
@@ -7,6 +7,7 @@ export type TeacherDueInsertType = typeof teacherDues.$inferInsert;
 export type TeacherDueReturnType = Omit<TeacherDueSelectType, "status" | "currency"> & {
   status: TeacherDueStatus;
   currency: CurrencyCode;
+  rateSource: RateSource | null;
   teacherName?: string | null;
   teacherUserId?: string | null;
   teacherAvatarUrl?: string | null;

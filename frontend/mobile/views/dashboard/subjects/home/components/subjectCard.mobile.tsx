@@ -3,6 +3,7 @@
 import { BookOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 import type { SubjectCardProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { MobileClassAvatar } from "@/frontend/mobile/components/ui/avatar/MobileClassAvatar";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -16,13 +17,17 @@ export function SubjectCardMobile({ subject, onEdit, onDelete, onClick, canManag
     <MobileCardListItem variant="edge-to-edge" interactive>
       <Box onClick={onClick} sx={{ cursor: "pointer" }}>
         <Stack sx={{ gap: 1 }}>
-          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
-            {subject.name}
-          </Typography>
-
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {subject.slug}
-          </Typography>
+          <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.5 }}>
+            <MobileClassAvatar src={subject.avatarUrl ?? undefined} label={subject.name ?? ""} size={40} />
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
+                {subject.name}
+              </Typography>
+              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+                {subject.slug}
+              </Typography>
+            </Box>
+          </Stack>
 
           {subject.category ? (
             <Chip

@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BaseCard } from "@/frontend/common/components/ui";
 
 const meta: Meta<typeof BaseCard> = {

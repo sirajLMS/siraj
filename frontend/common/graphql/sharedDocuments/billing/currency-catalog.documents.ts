@@ -20,3 +20,24 @@ export const supportedCurrenciesQueryDocument: TypedDocumentNode<Operations.Supp
     }
   }
 `;
+
+export const activateSupportedCurrencyMutationDocument: TypedDocumentNode<
+  Operations.ActivateSupportedCurrencyMutation,
+  Operations.ActivateSupportedCurrencyMutationVariables
+> = gql`
+  ${SUPPORTED_CURRENCY_FIELDS}
+  mutation ActivateSupportedCurrency($input: SupportedCurrencyUpsertInput!) {
+    activateSupportedCurrency(input: $input) {
+      ...SupportedCurrencyFields
+    }
+  }
+`;
+
+export const deactivateSupportedCurrencyMutationDocument: TypedDocumentNode<
+  Operations.DeactivateSupportedCurrencyMutation,
+  Operations.DeactivateSupportedCurrencyMutationVariables
+> = gql`
+  mutation DeactivateSupportedCurrency($code: CurrencyCode!) {
+    deactivateSupportedCurrency(code: $code)
+  }
+`;

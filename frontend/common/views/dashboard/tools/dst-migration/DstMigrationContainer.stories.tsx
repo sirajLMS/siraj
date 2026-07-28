@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DstMigrationContainer } from "@/frontend/common/views/dashboard/tools/dst-migration/DstMigrationContainer";
 
 const meta: Meta<typeof DstMigrationContainer> = {

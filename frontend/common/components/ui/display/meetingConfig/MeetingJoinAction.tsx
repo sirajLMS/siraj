@@ -14,7 +14,7 @@ import {
   makeHandleJoin,
   resolveEmptyMessage,
 } from "@/frontend/common/lib/meetingJoinAction";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 // Re-export the type so existing importers that imported MeetingJoinEmptyRole / MeetingJoinActionProps
 // from this file continue to compile. The canonical type now lives in

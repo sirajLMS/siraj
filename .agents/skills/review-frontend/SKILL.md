@@ -213,8 +213,8 @@ Group findings by severity (CRITICAL first), then by group. **Count findings** b
 - Manual type redefinition when types exist in schema
 
 **i18n:**
-- Hardcoded error strings, alert messages → must use `next-intl`
-- Missing `useTranslations` from `next-intl`
+- Hardcoded error strings, alert messages → must use the compile-time TypeScript i18n system in `shared/locale/`
+- Missing `useAppTranslation` from `@/shared/locale/client` (Client Components)
 
 **Theme & Styling:**
 - Hardcoded colors: hex (`#fff`), `rgb()`/`rgba()`, CSS names (`red`, `blue`)

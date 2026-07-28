@@ -17,7 +17,7 @@ export interface TeacherOnboardingLabels {
     readonly nationality: string;
     readonly nationalId: string;
     readonly phone: string;
-    readonly age: string;
+    readonly dateOfBirth: string;
     readonly gender: string;
     readonly male: string;
     readonly female: string;
@@ -39,7 +39,7 @@ export interface TeacherOnboardingLabels {
     readonly nationality: string;
     readonly nationalId: string;
     readonly phone: string;
-    readonly age: string;
+    readonly dateOfBirth: string;
     readonly address: string;
     readonly qualifications: string;
     readonly salaryAmount: string;

@@ -5,6 +5,12 @@ import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { DesktopPageContainer, DesktopPageHeader, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
 import { CategoriesSectionDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/categoriesSection.desktop";
+import { CreateCategoryDialogDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/createCategoryDialog.desktop";
+import { CreateSubjectDialogDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/createSubjectDialog.desktop";
+import { DeleteCategoryDialogDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/deleteCategoryDialog.desktop";
+import { DeleteSubjectDialogDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/deleteSubjectDialog.desktop";
+import { EditCategoryDialogDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/editCategoryDialog.desktop";
+import { EditSubjectDialogDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/editSubjectDialog.desktop";
 import { SubjectCardDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/subjectCard.desktop";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -25,6 +31,12 @@ export function SubjectsViewDesktop({
   onDeleteCategory,
   canManageSubjects,
   canManageCategories,
+  createSubjectDialog,
+  editSubjectDialog,
+  deleteSubjectDialog,
+  createCategoryDialog,
+  editCategoryDialog,
+  deleteCategoryDialog,
 }: Readonly<SubjectsViewProps>) {
   const t = useAppTranslation().dashboardTranslations.subjects;
 
@@ -105,6 +117,13 @@ export function SubjectsViewDesktop({
           </Grid>
         );
       })()}
+
+      <CreateSubjectDialogDesktop {...createSubjectDialog} />
+      <EditSubjectDialogDesktop {...editSubjectDialog} />
+      <DeleteSubjectDialogDesktop {...deleteSubjectDialog} />
+      <CreateCategoryDialogDesktop {...createCategoryDialog} />
+      <EditCategoryDialogDesktop {...editCategoryDialog} />
+      <DeleteCategoryDialogDesktop {...deleteCategoryDialog} />
     </DesktopPageContainer>
   );
 }

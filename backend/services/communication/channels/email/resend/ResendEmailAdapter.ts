@@ -32,6 +32,37 @@ export class ResendEmailAdapter implements IEmailChannel {
   }
 
   async send(payload: EmailPayload, _locale?: string): Promise<EmailSendResult> {
+    // Defensive guard: a non-empty `to` is required before we touch the
+    // provider. This turns a future dispatch path that forgets `metadata.to`
+    // into an actionable local failure instead of a cryptic provider error
+    // (`Invalid \`to\` field`). We still record a `FAILED` delivery row so the
+    // audit trail shows why the payload was dropped.
+    if (!payload.to?.trim()) {
+      logger.error("ResendEmailAdapter: empty recipient `to` — dropping payload", {
+        userId: payload.userId,
+        eventType: payload.eventType,
+      });
+
+      const delivery = await NotificationRepository.createDelivery({
+        userId: payload.userId,
+        channel: NotificationChannel.EMAIL,
+        eventType: payload.eventType,
+        title: payload.subject,
+        body: payload.to,
+        metadata: payload.metadata ?? null,
+      });
+      await NotificationRepository.updateDeliveryStatus({
+        deliveryId: delivery.id,
+        status: NotificationDeliveryStatus.FAILED,
+        failureReason: "empty recipient address",
+      });
+
+      return {
+        success: false,
+        error: "empty recipient address",
+      };
+    }
+
     const delivery = await NotificationRepository.createDelivery({
       userId: payload.userId,
       channel: NotificationChannel.EMAIL,

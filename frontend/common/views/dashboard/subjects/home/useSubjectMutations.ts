@@ -7,6 +7,7 @@ import type {
   ClassSubjectUpdateInput,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
+  classCategoriesQueryDocument,
   createClassCategoryMutationDocument,
   deleteClassCategoryMutationDocument,
   updateClassCategoryMutationDocument,
@@ -41,9 +42,15 @@ export function useSubjectMutations(opts: UseSubjectMutationsOptions) {
   const [createSubjectMut, { loading: isCreatingSubject }] = useMutation(createClassSubjectMutationDocument);
   const [updateSubjectMut, { loading: isUpdatingSubject }] = useMutation(updateClassSubjectMutationDocument);
   const [deleteSubjectMut, { loading: isDeletingSubject }] = useMutation(deleteClassSubjectMutationDocument);
-  const [createCategoryMut, { loading: isCreatingCategory }] = useMutation(createClassCategoryMutationDocument);
-  const [updateCategoryMut, { loading: isUpdatingCategory }] = useMutation(updateClassCategoryMutationDocument);
-  const [deleteCategoryMut, { loading: isDeletingCategory }] = useMutation(deleteClassCategoryMutationDocument);
+  const [createCategoryMut, { loading: isCreatingCategory }] = useMutation(createClassCategoryMutationDocument, {
+    refetchQueries: [classCategoriesQueryDocument],
+  });
+  const [updateCategoryMut, { loading: isUpdatingCategory }] = useMutation(updateClassCategoryMutationDocument, {
+    refetchQueries: [classCategoriesQueryDocument],
+  });
+  const [deleteCategoryMut, { loading: isDeletingCategory }] = useMutation(deleteClassCategoryMutationDocument, {
+    refetchQueries: [classCategoriesQueryDocument],
+  });
 
   const runMutation = async <V>(
     mutationFn: (opts: { variables: V }) => Promise<unknown>,

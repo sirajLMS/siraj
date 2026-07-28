@@ -9,6 +9,7 @@ import {
   getCachedResult,
   getFileMtime,
   loadCache,
+  removeCachedResult,
   saveCache,
   saveResult,
   updateCachedMtime,
@@ -164,6 +165,9 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
 
   const filesToCheck = files.filter(file => {
     if (forceFull) return true;
+    const cachedResult = getCachedResult(file);
+    // Automatically re-scan files that previously failed (error status or missing from cache)
+    if (!cachedResult || cachedResult.status === "error") return true;
     const currentMtime = getFileMtime(join(PROJECT_ROOT, file));
     const cachedMtime = getCachedMtime(file);
     return currentMtime !== cachedMtime;
@@ -185,7 +189,9 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
     errorFiles: [],
   };
 
-  const concurrency = Math.max(1, os.cpus().length - 1);
+  const envConcurrency = Number.parseInt(process.env.CS_CONCURRENCY || "", 10);
+  const maxThreads = Number.isNaN(envConcurrency) ? 4 : envConcurrency;
+  const concurrency = Math.max(1, Math.min(maxThreads, os.cpus().length - 1));
   logInfo(`🚀 Using ${concurrency} threads`);
 
   await pool(files, concurrency, async file => {
@@ -206,7 +212,12 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
   }
 }
 
-async function executeCodeScene(
+function isLicenseOrNetworkError(output: string, errorMsg: string): boolean {
+  const combined = `${output} ${errorMsg}`;
+  return /GOAWAY|License check failed|java\.io\.IOException|socket closed|ECONNRESET|ETIMEDOUT/i.test(combined);
+}
+
+async function runSingleCodeSceneExecution(
   csBin: string,
   file: string
 ): Promise<{ output: string; exitCode: number; errorMsg: string }> {
@@ -257,6 +268,22 @@ async function executeCodeScene(
   return { output, exitCode, errorMsg };
 }
 
+async function executeCodeScene(
+  csBin: string,
+  file: string,
+  maxRetries = 3
+): Promise<{ output: string; exitCode: number; errorMsg: string }> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const result = await runSingleCodeSceneExecution(csBin, file);
+    if (isLicenseOrNetworkError(result.output, result.errorMsg) && attempt < maxRetries) {
+      await new Promise(res => setTimeout(res, attempt * 400));
+      continue;
+    }
+    return result;
+  }
+  return runSingleCodeSceneExecution(csBin, file);
+}
+
 function parseCodeSceneIssues(output: string): string[] {
   const lines = output
     .split("\n")
@@ -272,6 +299,45 @@ function parseCodeSceneIssues(output: string): string[] {
       line.includes("unauthorized")
     );
   });
+}
+
+function handleFileErrorResult(
+  file: string,
+  results: CheckResults,
+  issues: string[],
+  exitCode: number,
+  output: string,
+  _isLicenseError: boolean
+): void {
+  results.errorCount++;
+  results.errorFiles.push(file);
+  globalThis.console.log(`${COLORS.RED}❌ ${file}${COLORS.NC}`);
+
+  if (issues.length > 0) {
+    issues.forEach(i => {
+      globalThis.console.log(`    ${i}`);
+    });
+  } else if (exitCode !== 0) {
+    globalThis.console.log(`    Command failed with exit code ${exitCode}`);
+    globalThis.console.log(`    Output: ${output.slice(0, 200)}${output.length > 200 ? "..." : ""}`);
+  }
+  removeCachedResult(file);
+}
+
+function handleFileWarningResult(file: string, results: CheckResults, issues: string[]): void {
+  results.warningCount++;
+  results.warningFiles.push(file);
+  globalThis.console.log(`${COLORS.YELLOW}⚠️  ${file}${COLORS.NC}`);
+  issues.forEach(i => {
+    globalThis.console.log(`    ${i}`);
+  });
+  saveResult(file, "warning", issues.join("\n"));
+}
+
+function handleFilePerfectResult(file: string, results: CheckResults): void {
+  results.perfectCount++;
+  globalThis.console.log(`${COLORS.GREEN}✅ ${file}${COLORS.NC}`);
+  saveResult(file, "perfect", "");
 }
 
 async function processChangedFile(file: string, results: CheckResults): Promise<void> {
@@ -292,35 +358,19 @@ async function processChangedFile(file: string, results: CheckResults): Promise<
   const issues = parseCodeSceneIssues(output);
   const hasError = exitCode !== 0 || issues.some(i => /^(error|err|license|unauthorized)/i.test(i));
   const hasWarning = issues.some(i => /^(warn|arn|info|nfo)/i.test(i));
+  const isLicenseError = isLicenseOrNetworkError(output, errorMsg);
 
   if (hasError) {
-    results.errorCount++;
-    results.errorFiles.push(file);
-    globalThis.console.log(`${COLORS.RED}❌ ${file}${COLORS.NC}`);
-    if (issues.length > 0) {
-      issues.forEach(i => {
-        globalThis.console.log(`    ${i}`);
-      });
-      saveResult(file, "error", issues.join("\n"));
-    } else if (exitCode !== 0) {
-      globalThis.console.log(`    Command failed with exit code ${exitCode}`);
-      globalThis.console.log(`    Output: ${output.slice(0, 200)}${output.length > 200 ? "..." : ""}`);
-      saveResult(file, "error", output);
-    }
+    handleFileErrorResult(file, results, issues, exitCode, output, isLicenseError);
   } else if (hasWarning) {
-    results.warningCount++;
-    results.warningFiles.push(file);
-    globalThis.console.log(`${COLORS.YELLOW}⚠️  ${file}${COLORS.NC}`);
-    issues.forEach(i => {
-      globalThis.console.log(`    ${i}`);
-    });
-    saveResult(file, "warning", issues.join("\n"));
+    handleFileWarningResult(file, results, issues);
   } else {
-    results.perfectCount++;
-    globalThis.console.log(`${COLORS.GREEN}✅ ${file}${COLORS.NC}`);
-    saveResult(file, "perfect", "");
+    handleFilePerfectResult(file, results);
   }
-  updateCachedMtime(file, getFileMtime(filePath));
+
+  if (!isLicenseError) {
+    updateCachedMtime(file, getFileMtime(filePath));
+  }
 }
 
 function processCachedFile(file: string, results: CheckResults): void {

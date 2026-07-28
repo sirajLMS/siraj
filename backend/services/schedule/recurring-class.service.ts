@@ -11,7 +11,7 @@ import {
   type ScheduleDayKey,
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { students } from "@/backend/db/schema";
-import { AppPermission, type IanaTimezone, NotificationEventType } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, type IanaTimezone, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -36,6 +36,10 @@ export interface CreateRecurringClassInput {
   }[];
   classType?: "REGULAR" | "TRIAL" | "ADVANCE";
   generateInstancesForWeeks?: number;
+  /** Recurring-class-level hourly rate (highest non-override tier). Nullable. */
+  hourlyRate?: string | null;
+  /** Currency for `hourlyRate`. Required when `hourlyRate` is set. */
+  rateCurrency?: CurrencyCode | null;
   /** Optional locale forwarded to `dispatchWithPreferences` for i18n. */
   locale?: string;
 }
@@ -185,6 +189,8 @@ export namespace RecurringClassService {
           classType: input.classType,
           generateInstancesForWeeks: input.generateInstancesForWeeks,
           quotaDeducted: true,
+          hourlyRate: input.hourlyRate ?? null,
+          rateCurrency: input.rateCurrency ?? null,
         },
         tx
       );
@@ -244,5 +250,36 @@ export namespace RecurringClassService {
     tx?: DBTransaction
   ): Promise<RecurringScheduleDayEntity[]> {
     return RecurringScheduleRepository.upsertManyDays(inputs, tx);
+  }
+
+  /**
+   * Update the recurring-class-level hourly rate on an existing recurring
+   * schedule. Only affects the `recurring_schedules` row — already-generated
+   * `class_instances` keep their booking-time snapshot (frozen). New instances
+   * generated after this call will pick up the new rate.
+   */
+  export async function updateRecurringClassRate(
+    userId: string,
+    input: { recurringScheduleId: string; hourlyRate: string | null; rateCurrency: CurrencyCode | null },
+    tErrors: ErrorsLabels
+  ): Promise<{ recurringScheduleId: string; hourlyRate: string | null; rateCurrency: CurrencyCode | null }> {
+    const hasManageAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
+    if (!hasManageAccess) {
+      throw new Error(tErrors.unauthorizedAction);
+    }
+
+    const updated = await RecurringScheduleRepository.updateRate(
+      input.recurringScheduleId,
+      input.hourlyRate,
+      input.rateCurrency
+    );
+    if (!updated) {
+      throw new Error(tErrors.notFound);
+    }
+    return {
+      recurringScheduleId: updated.id,
+      hourlyRate: updated.hourlyRate,
+      rateCurrency: updated.rateCurrency,
+    };
   }
 }

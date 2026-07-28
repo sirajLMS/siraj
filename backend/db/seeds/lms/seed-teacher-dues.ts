@@ -1,5 +1,5 @@
 import { findAdminUserOrFallback, type SeedConfig } from "@/backend/db/seeds/lib";
-import { ClassExecutionState, CurrencyCode, LessonReportStatus, TeacherDueStatus } from "@/backend/enum";
+import { ClassExecutionState, CurrencyCode, LessonReportStatus, RateSource, TeacherDueStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 import type {
@@ -17,6 +17,7 @@ type SeededDueSpec = {
   hours: number;
   amount: number;
   currency: CurrencyCode;
+  rateSource: RateSource;
   status: TeacherDueStatus;
   approvedAt: Date;
 };
@@ -44,6 +45,9 @@ function buildSpecs(
     const durationMinutes = instance.durationMinutes;
     const hours = +(durationMinutes / 60).toFixed(2);
     const amount = +(Number.parseFloat(hourlyRateStr) * hours).toFixed(2);
+    // Seed uses the class instance's captured rate source when available
+    // (mirrors the production `createDueEntry` cascade), defaulting to TEACHER.
+    const rateSource: RateSource = instance.rateSource ?? RateSource.TEACHER;
 
     // Alternate between PENDING and PAID for a more realistic ledger.
     const status = i % 2 === 0 ? TeacherDueStatus.PAID : TeacherDueStatus.PENDING;
@@ -56,6 +60,7 @@ function buildSpecs(
       hours,
       amount,
       currency: rateCurrency,
+      rateSource,
       status,
       approvedAt,
     });
@@ -104,6 +109,7 @@ export async function seedOrGet(
       hours: spec.hours,
       amount: spec.amount,
       currency: spec.currency,
+      rateSource: spec.rateSource,
       approvedByUserId: adminUser.id,
       status: spec.status,
       approvedAt: spec.approvedAt,

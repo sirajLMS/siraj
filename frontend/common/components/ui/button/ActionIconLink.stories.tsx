@@ -1,6 +1,6 @@
 import { SettingsOutlined } from "@mui/icons-material";
 import { Stack, Typography } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ActionIconLink } from "@/frontend/common/components/ui/button/ActionIconLink";
 
 const meta: Meta<typeof ActionIconLink> = {

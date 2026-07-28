@@ -8,6 +8,7 @@ import {
   shouldSeedExtendedFiles,
   TEACHER_AVATAR_FILES,
 } from "@/backend/db/seeds/lib";
+import { CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
 import { PersonaBootstrapService } from "@/backend/services/system/persona-bootstrap.service";
@@ -44,11 +45,17 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneEnti
     const tzIana = i === 0 ? IanaTimezone.UTC : pickTimezoneForIndex(i);
     resolveTimezone(timezones, tzIana);
     const status = i === 0 ? ALL_ACCOUNT_STATUSES[0] : cycleAtIndex(ALL_ACCOUNT_STATUSES, i);
+
+    // Pass the hourlyRate and rateCurrency cleanly via service bootstrap
+    const rate = (50 + i * 15).toString();
     const teacher = await PersonaBootstrapService.upsertTeacherProfile({
       userId: user.id,
       timezone: tzIana,
       status,
+      hourlyRate: rate,
+      rateCurrency: CurrencyCode.SAR,
     });
+
     results.push(teacher);
   }
 

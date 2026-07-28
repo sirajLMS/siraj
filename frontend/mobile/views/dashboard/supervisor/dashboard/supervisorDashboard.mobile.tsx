@@ -1,8 +1,12 @@
 "use client";
 
-import { CalendarMonthOutlined, CheckCircleOutlined } from "@mui/icons-material";
+import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
-import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
+import type { RecentApprovalCardLabels } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/RecentApprovalCardList";
+import {
+  RecentApprovalCardSkeleton,
+  RecentApprovalEmptyState,
+} from "@/frontend/common/views/dashboard/supervisor/dashboard/components/RecentApprovalCardList";
 import type { SupervisorDashboardViewModel } from "@/frontend/common/views/dashboard/supervisor/dashboard/useSupervisorDashboardViewModel";
 import {
   MobileCardList,
@@ -12,9 +16,24 @@ import {
   MobilePageHeader,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
-import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 import { DuesSummaryCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/duesSummaryCard.mobile";
 import { PendingReviewsHeroCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/pendingReviewsHeroCard.mobile";
+import { RecentApprovalCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/recentApprovalCard.mobile";
+
+function buildRecentApprovalCardLabels(labels: SupervisorDashboardViewModel["labels"]): RecentApprovalCardLabels {
+  return {
+    approvedTime: labels.approvedTime,
+    lessonDate: labels.lessonDate,
+    duration: labels.duration,
+    completion: labels.completion,
+    teacher: labels.teacher,
+    student: labels.student,
+    viewReport: labels.viewReport,
+    viewClass: labels.viewClass,
+    history: labels.history,
+    approvedStatus: labels.approvedStatus,
+  };
+}
 
 export function SupervisorDashboardMobileView({
   userName,
@@ -27,15 +46,16 @@ export function SupervisorDashboardMobileView({
   onGoToReviews,
   onGoToDues,
   onGoToMonthlyReports,
-  onViewRecentApproval,
 }: Readonly<SupervisorDashboardViewModel>) {
+  const cardLabels = buildRecentApprovalCardLabels(labels);
+
   return (
     <MobilePageContainer>
-      <MobileContentStack>
+      <MobileContentStack gap={0}>
         <MobilePageHeader title={labels.pageTitle} subtitle={labels.welcomeMessage(userName ?? "")} />
 
         {loading ? (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, px: 2, py: 1 })}>
             {labels.loadingMessage}
           </Typography>
         ) : null}
@@ -72,7 +92,7 @@ export function SupervisorDashboardMobileView({
           </Stack>
         </MobileSectionPanel>
 
-        <MobileSectionPanel title={labels.recentApprovals}>
+        <MobileSectionPanel title={labels.recentApprovals} contentInset={false}>
           <MobileCardList
             rows={recentApprovals}
             loading={loading}
@@ -80,50 +100,20 @@ export function SupervisorDashboardMobileView({
             getKey={item => item.id}
             paginationOptions={false}
             layout="edge-to-edge"
+            gap={0}
+            renderSkeleton={() => (
+              <MobileCardListItem variant="edge-to-edge">
+                <RecentApprovalCardSkeleton />
+              </MobileCardListItem>
+            )}
+            renderEmptyState={msg => (
+              <MobileCardListItem variant="edge-to-edge">
+                <RecentApprovalEmptyState message={msg} />
+              </MobileCardListItem>
+            )}
             renderItem={item => (
               <MobileCardListItem variant="edge-to-edge">
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <Box
-                    component="button"
-                    type="button"
-                    onClick={() => onViewRecentApproval(item.id)}
-                    sx={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      background: "none",
-                      border: "none",
-                      padding: 0,
-                      cursor: "pointer",
-                      color: "inherit",
-                    }}
-                    aria-label={labels.recentApprovals}
-                  >
-                    <CheckCircleOutlined
-                      fontSize="small"
-                      sx={theme => ({ color: theme.palette.status.activeContainer })}
-                    />
-                  </Box>
-                  <MobilePersonProfileLink
-                    href={item.studentId ? studentHref(item.studentId) : undefined}
-                    name={item.studentName || item.studentId || "—"}
-                    avatarUrl={item.studentAvatarUrl}
-                  />
-                  <MobilePersonProfileLink
-                    href={profileHrefForTeacher({ userId: item.teacherUserId, teacherId: item.teacherId })}
-                    name={item.teacherName || item.teacherId || "—"}
-                    avatarUrl={item.teacherAvatarUrl}
-                  />
-                  <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {item.lessonDate}
-                  </Typography>
-                </Box>
+                <RecentApprovalCardMobile item={item} labels={cardLabels} />
               </MobileCardListItem>
             )}
           />

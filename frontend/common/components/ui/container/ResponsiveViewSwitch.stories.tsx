@@ -1,6 +1,6 @@
 import { Box, Card, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { ComponentType } from "react";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 

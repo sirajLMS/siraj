@@ -6,4 +6,11 @@ export const uiMeetingConfigRecurringScheduleEn = {
   breadcrumbDashboard: "Dashboard",
   breadcrumbClasses: "Classes",
   goToClass: "Go to class",
+  rateSectionTitle: "Recurring Class Rate",
+  hourlyRateLabel: "Hourly Rate",
+  currencyLabel: "Currency",
+  rateSaveLabel: "Save Rate",
+  rateClearLabel: "Clear Rate",
+  rateSuccessMessage: "Rate updated successfully",
+  rateErrorMessage: "Failed to update rate",
 };

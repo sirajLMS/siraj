@@ -28,6 +28,7 @@ import {
   NotificationDeliveryStatus,
   NotificationEventType,
   ParentStatus,
+  RateSource,
   StudentStatus,
   SuggestionStatus,
   TeacherDueStatus,
@@ -110,3 +111,5 @@ export const lessonReportStatusEnum = createPgEnumFromEnum("lesson_report_status
 export const attendanceEvaluationEnum = createPgEnumFromEnum("attendance_evaluation", AttendanceEvaluation);
 
 export const creditReasonEnum = createPgEnumFromEnum("credit_reason", CreditReason);
+
+export const rateSourceEnum = createPgEnumFromEnum("rate_source", RateSource);

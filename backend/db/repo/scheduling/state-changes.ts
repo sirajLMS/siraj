@@ -8,7 +8,7 @@ import {
 } from "@/backend/db/repo/scheduling/shared";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { classInstances, classStatusEvents, leaveRequests, parents, students, teachers } from "@/backend/db/schema";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, RateSource } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type * as Types from "@/backend/types";
@@ -600,6 +600,7 @@ export function buildRescheduledClassInput(
     rateAmount: input.rateAmount ?? original.rateAmount,
     rateCurrency: input.rateCurrency ?? original.rateCurrency,
     isRateOverridden: input.isRateOverridden ?? original.isRateOverridden,
+    rateSource: input.rateSource ?? original.rateSource,
   };
 }
 
@@ -612,6 +613,38 @@ export async function markOriginalAsRescheduled(t: DBTransaction, originalClassI
       updatedAt: new Date(),
     })
     .where(eq(classInstances.id, originalClassId));
+}
+
+/**
+ * Admin manual override of a single class instance's hourly rate. Sets
+ * `is_rate_overridden = true`, stores the override amount + currency, and
+ * marks `rate_source = OVERRIDE`. Send `rateAmount = null` to clear the
+ * override (revert to the recurring/subject/teacher cascade) — in that case
+ * `is_rate_overridden` is set back to `false` and the snapshot columns are
+ * cleared so the resolver recomputes from the cascade at approval time.
+ *
+ * Returns the updated row, or null if the instance was not found.
+ */
+export async function overrideClassInstanceRate(
+  classInstanceId: string,
+  rateAmount: string | null,
+  rateCurrency: CurrencyCode | null,
+  tx?: DBTransaction
+): Promise<Types.ClassInstanceEntity | null> {
+  const executor = tx ?? db;
+  const isOverridden = rateAmount != null && rateAmount !== "";
+  const [updated] = await executor
+    .update(classInstances)
+    .set({
+      rateAmount: isOverridden ? rateAmount : null,
+      rateCurrency: isOverridden ? rateCurrency : null,
+      isRateOverridden: isOverridden,
+      rateSource: isOverridden ? RateSource.OVERRIDE : null,
+      updatedAt: new Date(),
+    })
+    .where(eq(classInstances.id, classInstanceId))
+    .returning();
+  return updated ?? null;
 }
 
 export const rescheduleClassInstance = async (

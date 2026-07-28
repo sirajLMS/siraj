@@ -1,7 +1,18 @@
 "use client";
 
 import { BookOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Card, CardActionArea, CardActions, CardContent, Chip, IconButton, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardActionArea,
+  CardActions,
+  CardContent,
+  Chip,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { ClassAvatar } from "@/frontend/common/components/ui/avatar/ClassAvatar";
 import type { SubjectCardProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -29,13 +40,17 @@ export function SubjectCardDesktop({ subject, onEdit, onDelete, onClick, canMana
       <CardActionArea onClick={onClick} sx={{ flex: 1 }}>
         <CardContent>
           <Stack sx={{ gap: 1 }}>
-            <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
-              {subject.name}
-            </Typography>
-
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {subject.slug}
-            </Typography>
+            <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.5 }}>
+              <ClassAvatar src={subject.avatarUrl ?? undefined} label={subject.name ?? ""} size={44} />
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
+                  {subject.name}
+                </Typography>
+                <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+                  {subject.slug}
+                </Typography>
+              </Box>
+            </Stack>
 
             {subject.category && (
               <Chip

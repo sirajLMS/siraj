@@ -1,39 +1,183 @@
-CREATE TYPE "invoice_payment_submission_status" AS ENUM('pending', 'approved', 'rejected');--> statement-breakpoint
-CREATE TYPE "account_status" AS ENUM('ACTIVATED', 'DEACTIVATED');--> statement-breakpoint
-CREATE TYPE "app_language" AS ENUM('ar', 'en');--> statement-breakpoint
-CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'auth.edit_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'teacher.view_students', 'teacher.view_own_profile', 'teacher.edit_own_profile', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.create', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile', 'user.edit_profile', 'schedule.delete_class', 'schedule.clear_weekly', 'staff.edit_profile', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_profile', 'parent.view_students', 'parent.view_own_profile', 'parent.edit_own_profile', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.submit_payment_proof', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'suggestions.list', 'suggestions.review', 'suggestions.delete', 'subjects.list', 'subjects.create', 'subjects.update', 'subjects.delete', 'subjects.view_resources', 'subjects.manage_resources', 'categories.list', 'categories.create', 'categories.update', 'categories.delete', 'notes.list', 'notes.create', 'notes.update', 'notes.delete', 'test.system_only', 'test.custom_only', 'test.custom_alt', 'storage.manage', 'billing.view_exchange_rates', 'billing.refresh_exchange_rates', 'billing.manage_fx_provider', 'billing.override_exchange_rates', 'billing.manage_currency_hedges', 'payment_methods.manage_catalogs', 'payment_methods.verify_bank_transfer', 'meeting_providers.manage_catalog', 'meeting_configs.manage_own', 'meeting_configs.manage_other', 'meeting_configs.manage_class', 'teacher.view_profile', 'profile.core_identity.view_own', 'profile.core_identity.view_other', 'profile.core_identity.edit_own', 'profile.core_identity.edit_other', 'profile.core_contact.view_own', 'profile.core_contact.view_other', 'profile.core_contact.edit_own', 'profile.core_contact.edit_other', 'profile.teacher_professional.view_own', 'profile.teacher_professional.view_other', 'profile.teacher_professional.edit_own', 'profile.teacher_professional.edit_other', 'profile.teacher_identity.view_own', 'profile.teacher_identity.view_other', 'profile.teacher_identity.edit_own', 'profile.teacher_identity.edit_other', 'profile.parent_social.view_own', 'profile.parent_social.view_other', 'profile.parent_social.edit_own', 'profile.parent_social.edit_other', 'profile.parent_identity.view_own', 'profile.parent_identity.view_other', 'profile.parent_identity.edit_own', 'profile.parent_identity.edit_other', 'profile.parent_billing.view_own', 'profile.parent_billing.view_other', 'profile.parent_billing.edit_own', 'profile.parent_billing.edit_other', 'profile.parent_account.view_own', 'profile.parent_account.view_other', 'profile.parent_account.edit_own', 'profile.parent_account.edit_other', 'profile.parent_students.view_own', 'profile.parent_students.view_other', 'profile.parent_students.edit_own', 'profile.parent_students.edit_other', 'profile.teacher_students.view_own', 'profile.teacher_students.view_other', 'profile.teacher_students.edit_own', 'profile.teacher_students.edit_other', 'profile.staff_role.view_own', 'profile.staff_role.view_other', 'profile.staff_role.edit_own', 'profile.staff_role.edit_other', 'profile.staff_permissions.view_own', 'profile.staff_permissions.view_other', 'profile.staff_permissions.edit_own', 'profile.staff_permissions.edit_other', 'profile.payment_methods.view_own', 'profile.payment_methods.view_other', 'profile.payment_methods.edit_own', 'profile.payment_methods.edit_other', 'profile.meeting_configs.view_own', 'profile.meeting_configs.view_other', 'profile.meeting_configs.edit_own', 'profile.meeting_configs.edit_other', 'student.student_identity.view_own', 'student.student_identity.view_other', 'student.student_identity.edit_own', 'student.student_identity.edit_other', 'student.student_academic.view_own', 'student.student_academic.view_other', 'student.student_academic.edit_own', 'student.student_academic.edit_other', 'student.student_teacher.view_own', 'student.student_teacher.view_other', 'student.student_teacher.edit_own', 'student.student_teacher.edit_other', 'student.student_parent.view_own', 'student.student_parent.view_other', 'student.student_parent.edit_own', 'student.student_parent.edit_other', 'student.student_schedule.view_own', 'student.student_schedule.view_other', 'student.student_schedule.edit_own', 'student.student_schedule.edit_other', 'student.student_history.view_own', 'student.student_history.view_other', 'student.student_history.edit_own', 'student.student_history.edit_other', 'student.student_quota_edit.view_own', 'student.student_quota_edit.view_other', 'student.student_quota_edit.edit_own', 'student.student_quota_edit.edit_other', 'lesson_reports.submit', 'lesson_reports.review', 'lesson_reports.approve', 'lesson_reports.reject', 'supervisor.view_dashboard', 'student.view_own_dashboard', 'credits.manage', 'teacher_dues.view', 'teacher_dues.mark_paid', 'monthly_reports.view');--> statement-breakpoint
-CREATE TYPE "attendance_evaluation" AS ENUM('PRESENT', 'ABSENT', 'LATE');--> statement-breakpoint
-CREATE TYPE "availability_status" AS ENUM('AVAILABLE', 'OUT_OF_STOCK');--> statement-breakpoint
-CREATE TYPE "class_execution_state" AS ENUM('NOT_ACTIVATED', 'ACTIVATED', 'RUNNING', 'COMPLETED');--> statement-breakpoint
-CREATE TYPE "class_outcome" AS ENUM('PENDING', 'TAKEN', 'ABSENT', 'LEAVE');--> statement-breakpoint
-CREATE TYPE "class_type" AS ENUM('REGULAR', 'TRIAL', 'ADVANCE');--> statement-breakpoint
-CREATE TYPE "complaint_category" AS ENUM('REGARDING_TEACHER', 'REGARDING_SYSTEM', 'OTHER');--> statement-breakpoint
-CREATE TYPE "complaint_status" AS ENUM('UNANSWERED', 'ANSWERED');--> statement-breakpoint
-CREATE TYPE "country_code" AS ENUM('SA', 'PS', 'YE', 'SY', 'EG', 'KW', 'QA', 'OM', 'BH', 'LB', 'JO', 'IQ', 'LY', 'AE', 'TN', 'DZ', 'MA', 'SD', 'ID', 'MR', 'SO', 'KM', 'DJ', 'ER', 'SS', 'EH', 'AD', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DK', 'DM', 'DO', 'EC', 'EE', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'IE', 'IM', 'IN', 'IO', 'IR', 'IS', 'IT', 'JE', 'JM', 'JP', 'KE', 'KG', 'KH', 'KI', 'KN', 'KP', 'KR', 'KY', 'KZ', 'LA', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PT', 'PW', 'PY', 'RE', 'RO', 'RS', 'RU', 'RW', 'SB', 'SC', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SR', 'ST', 'SV', 'SX', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TO', 'TR', 'TV', 'TW', 'TZ', 'UA', 'UG', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'XK', 'YT', 'ZA', 'ZM', 'ZW');--> statement-breakpoint
-CREATE TYPE "credit_reason" AS ENUM('PURCHASE', 'DEDUCTION', 'REFUND', 'ADJUSTMENT');--> statement-breakpoint
-CREATE TYPE "currency_code" AS ENUM('EGP', 'SAR', 'AED', 'KWD', 'QAR', 'BHD', 'OMR', 'JOD', 'IQD', 'YER', 'SYP', 'LBP', 'ILS', 'SDG', 'LYD', 'TND', 'DZD', 'MAD', 'MRU', 'SOS', 'DJF', 'KMF', 'TRY', 'USD', 'EUR', 'GBP', 'CHF', 'CNY', 'JPY', 'INR', 'CAD', 'AUD');--> statement-breakpoint
-CREATE TYPE "day_of_week" AS ENUM('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY');--> statement-breakpoint
-CREATE TYPE "device_platform" AS ENUM('IOS', 'ANDROID', 'WEB');--> statement-breakpoint
-CREATE TYPE "dst_migration_result" AS ENUM('UPDATED', 'CONFLICT', 'UNCHANGED');--> statement-breakpoint
-CREATE TYPE "fx_provider" AS ENUM('openexchangerates', 'fixer');--> statement-breakpoint
-CREATE TYPE "fx_sync_status" AS ENUM('running', 'success', 'partial', 'failed');--> statement-breakpoint
-CREATE TYPE "gender" AS ENUM('MALE', 'FEMALE');--> statement-breakpoint
-CREATE TYPE "identifier_kind" AS ENUM('EMAIL', 'HANDLE', 'EMAIL_OR_HANDLE');--> statement-breakpoint
-CREATE TYPE "invoice_status" AS ENUM('UNPAID', 'PAYMENT_PENDING', 'PAID', 'CANCELLED');--> statement-breakpoint
-CREATE TYPE "invoice_type" AS ENUM('PER_CLASSES', 'MONTHLY', 'MANUAL');--> statement-breakpoint
-CREATE TYPE "leave_request_status" AS ENUM('PENDING', 'APPROVED', 'RESCHEDULED', 'CANCELLED');--> statement-breakpoint
-CREATE TYPE "leave_requester_type" AS ENUM('TEACHER', 'PARENT', 'ADMIN');--> statement-breakpoint
-CREATE TYPE "lesson_report_status" AS ENUM('DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED');--> statement-breakpoint
-CREATE TYPE "notification_channel" AS ENUM('EMAIL', 'SMS', 'PUSH', 'ON_APP');--> statement-breakpoint
-CREATE TYPE "notification_delivery_status" AS ENUM('PENDING', 'SENT', 'DELIVERED', 'OPENED', 'FAILED');--> statement-breakpoint
-CREATE TYPE "notification_event_type" AS ENUM('CLASS_REMINDER', 'INVOICE_GENERATED', 'COMPLAINT_RESPONSE', 'PAYMENT_METHOD_CHANGED', 'NEW_COMPLAINT', 'NEW_SUGGESTION', 'SUGGESTION_ACKNOWLEDGED', 'SUGGESTION_DUPLICATE_MARKED', 'INVOICE_STATUS_CHANGED', 'CLASS_SCHEDULED', 'CLASS_ACTIVATED', 'CLASS_STARTED', 'CLASS_COMPLETED', 'CLASS_MARKED_ABSENT', 'CLASS_MARKED_MISSED', 'CLASS_LEAVE_REQUESTED', 'CLASS_RESCHEDULED', 'CLASS_CANCELLED', 'CLASS_RESET', 'STUDENT_TEACHER_REASSIGNED', 'STUDENT_STATUS_CHANGED', 'STUDENT_QUOTA_OVERRIDDEN', 'LESSON_REPORT_SUBMITTED', 'LESSON_REPORT_REVIEWED');--> statement-breakpoint
-CREATE TYPE "parent_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL');--> statement-breakpoint
-CREATE TYPE "payment_direction" AS ENUM('PAYIN', 'PAYOUT', 'BOTH');--> statement-breakpoint
-CREATE TYPE "payment_method_type" AS ENUM('MOBILE_WALLET', 'PAYMENT_LINK', 'ONLINE_ACCOUNT', 'BANK_TRANSFER', 'CASH', 'PROOF_UPLOAD');--> statement-breakpoint
-CREATE TYPE "student_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL', 'DEACTIVATED');--> statement-breakpoint
-CREATE TYPE "suggestion_status" AS ENUM('PENDING', 'REVIEWED', 'DUPLICATE');--> statement-breakpoint
-CREATE TYPE "teacher_due_status" AS ENUM('PENDING', 'PAID');--> statement-breakpoint
-CREATE TYPE "vacation_request_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_payment_submission_status') THEN
+        CREATE TYPE "invoice_payment_submission_status" AS ENUM('pending', 'approved', 'rejected');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'account_status') THEN
+        CREATE TYPE "account_status" AS ENUM('ACTIVATED', 'DEACTIVATED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_language') THEN
+        CREATE TYPE "app_language" AS ENUM('ar', 'en');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') THEN
+        CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'auth.edit_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'teacher.view_students', 'teacher.view_own_profile', 'teacher.edit_own_profile', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.create', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile', 'user.edit_profile', 'schedule.delete_class', 'schedule.clear_weekly', 'staff.edit_profile', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_profile', 'parent.view_students', 'parent.view_own_profile', 'parent.edit_own_profile', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.submit_payment_proof', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'suggestions.list', 'suggestions.review', 'suggestions.delete', 'subjects.list', 'subjects.create', 'subjects.update', 'subjects.delete', 'subjects.view_resources', 'subjects.manage_resources', 'categories.list', 'categories.create', 'categories.update', 'categories.delete', 'notes.list', 'notes.create', 'notes.update', 'notes.delete', 'test.system_only', 'test.custom_only', 'test.custom_alt', 'storage.manage', 'billing.view_exchange_rates', 'billing.refresh_exchange_rates', 'billing.manage_fx_provider', 'billing.override_exchange_rates', 'billing.manage_currency_hedges', 'payment_methods.manage_catalogs', 'payment_methods.verify_bank_transfer', 'meeting_providers.manage_catalog', 'meeting_configs.manage_own', 'meeting_configs.manage_other', 'meeting_configs.manage_class', 'teacher.view_profile', 'profile.core_identity.view_own', 'profile.core_identity.view_other', 'profile.core_identity.edit_own', 'profile.core_identity.edit_other', 'profile.core_contact.view_own', 'profile.core_contact.view_other', 'profile.core_contact.edit_own', 'profile.core_contact.edit_other', 'profile.teacher_professional.view_own', 'profile.teacher_professional.view_other', 'profile.teacher_professional.edit_own', 'profile.teacher_professional.edit_other', 'profile.teacher_identity.view_own', 'profile.teacher_identity.view_other', 'profile.teacher_identity.edit_own', 'profile.teacher_identity.edit_other', 'profile.parent_social.view_own', 'profile.parent_social.view_other', 'profile.parent_social.edit_own', 'profile.parent_social.edit_other', 'profile.parent_identity.view_own', 'profile.parent_identity.view_other', 'profile.parent_identity.edit_own', 'profile.parent_identity.edit_other', 'profile.parent_billing.view_own', 'profile.parent_billing.view_other', 'profile.parent_billing.edit_own', 'profile.parent_billing.edit_other', 'profile.parent_account.view_own', 'profile.parent_account.view_other', 'profile.parent_account.edit_own', 'profile.parent_account.edit_other', 'profile.parent_students.view_own', 'profile.parent_students.view_other', 'profile.parent_students.edit_own', 'profile.parent_students.edit_other', 'profile.teacher_students.view_own', 'profile.teacher_students.view_other', 'profile.teacher_students.edit_own', 'profile.teacher_students.edit_other', 'profile.staff_role.view_own', 'profile.staff_role.view_other', 'profile.staff_role.edit_own', 'profile.staff_role.edit_other', 'profile.staff_permissions.view_own', 'profile.staff_permissions.view_other', 'profile.staff_permissions.edit_own', 'profile.staff_permissions.edit_other', 'profile.payment_methods.view_own', 'profile.payment_methods.view_other', 'profile.payment_methods.edit_own', 'profile.payment_methods.edit_other', 'profile.meeting_configs.view_own', 'profile.meeting_configs.view_other', 'profile.meeting_configs.edit_own', 'profile.meeting_configs.edit_other', 'student.student_identity.view_own', 'student.student_identity.view_other', 'student.student_identity.edit_own', 'student.student_identity.edit_other', 'student.student_academic.view_own', 'student.student_academic.view_other', 'student.student_academic.edit_own', 'student.student_academic.edit_other', 'student.student_teacher.view_own', 'student.student_teacher.view_other', 'student.student_teacher.edit_own', 'student.student_teacher.edit_other', 'student.student_parent.view_own', 'student.student_parent.view_other', 'student.student_parent.edit_own', 'student.student_parent.edit_other', 'student.student_schedule.view_own', 'student.student_schedule.view_other', 'student.student_schedule.edit_own', 'student.student_schedule.edit_other', 'student.student_history.view_own', 'student.student_history.view_other', 'student.student_history.edit_own', 'student.student_history.edit_other', 'student.student_quota_edit.view_own', 'student.student_quota_edit.view_other', 'student.student_quota_edit.edit_own', 'student.student_quota_edit.edit_other', 'lesson_reports.submit', 'lesson_reports.review', 'lesson_reports.approve', 'lesson_reports.reject', 'supervisor.view_dashboard', 'student.view_own_dashboard', 'credits.manage', 'teacher_dues.view', 'teacher_dues.mark_paid', 'monthly_reports.view');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'attendance_evaluation') THEN
+        CREATE TYPE "attendance_evaluation" AS ENUM('PRESENT', 'ABSENT', 'LATE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'availability_status') THEN
+        CREATE TYPE "availability_status" AS ENUM('AVAILABLE', 'OUT_OF_STOCK');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'class_execution_state') THEN
+        CREATE TYPE "class_execution_state" AS ENUM('NOT_ACTIVATED', 'ACTIVATED', 'RUNNING', 'COMPLETED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'class_outcome') THEN
+        CREATE TYPE "class_outcome" AS ENUM('PENDING', 'TAKEN', 'ABSENT', 'LEAVE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'class_type') THEN
+        CREATE TYPE "class_type" AS ENUM('REGULAR', 'TRIAL', 'ADVANCE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'complaint_category') THEN
+        CREATE TYPE "complaint_category" AS ENUM('REGARDING_TEACHER', 'REGARDING_SYSTEM', 'OTHER');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'complaint_status') THEN
+        CREATE TYPE "complaint_status" AS ENUM('UNANSWERED', 'ANSWERED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'country_code') THEN
+        CREATE TYPE "country_code" AS ENUM('SA', 'PS', 'YE', 'SY', 'EG', 'KW', 'QA', 'OM', 'BH', 'LB', 'JO', 'IQ', 'LY', 'AE', 'TN', 'DZ', 'MA', 'SD', 'ID', 'MR', 'SO', 'KM', 'DJ', 'ER', 'SS', 'EH', 'AD', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DK', 'DM', 'DO', 'EC', 'EE', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'IE', 'IM', 'IN', 'IO', 'IR', 'IS', 'IT', 'JE', 'JM', 'JP', 'KE', 'KG', 'KH', 'KI', 'KN', 'KP', 'KR', 'KY', 'KZ', 'LA', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PT', 'PW', 'PY', 'RE', 'RO', 'RS', 'RU', 'RW', 'SB', 'SC', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SR', 'ST', 'SV', 'SX', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TO', 'TR', 'TV', 'TW', 'TZ', 'UA', 'UG', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'XK', 'YT', 'ZA', 'ZM', 'ZW');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'credit_reason') THEN
+        CREATE TYPE "credit_reason" AS ENUM('PURCHASE', 'DEDUCTION', 'REFUND', 'ADJUSTMENT');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'currency_code') THEN
+        CREATE TYPE "currency_code" AS ENUM('EGP', 'SAR', 'AED', 'KWD', 'QAR', 'BHD', 'OMR', 'JOD', 'IQD', 'YER', 'SYP', 'LBP', 'ILS', 'SDG', 'LYD', 'TND', 'DZD', 'MAD', 'MRU', 'SOS', 'DJF', 'KMF', 'TRY', 'USD', 'EUR', 'GBP', 'CHF', 'CNY', 'JPY', 'INR', 'CAD', 'AUD');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'day_of_week') THEN
+        CREATE TYPE "day_of_week" AS ENUM('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'device_platform') THEN
+        CREATE TYPE "device_platform" AS ENUM('IOS', 'ANDROID', 'WEB');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'dst_migration_result') THEN
+        CREATE TYPE "dst_migration_result" AS ENUM('UPDATED', 'CONFLICT', 'UNCHANGED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'fx_provider') THEN
+        CREATE TYPE "fx_provider" AS ENUM('openexchangerates', 'fixer');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'fx_sync_status') THEN
+        CREATE TYPE "fx_sync_status" AS ENUM('running', 'success', 'partial', 'failed');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'gender') THEN
+        CREATE TYPE "gender" AS ENUM('MALE', 'FEMALE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'identifier_kind') THEN
+        CREATE TYPE "identifier_kind" AS ENUM('EMAIL', 'HANDLE', 'EMAIL_OR_HANDLE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_status') THEN
+        CREATE TYPE "invoice_status" AS ENUM('UNPAID', 'PAYMENT_PENDING', 'PAID', 'CANCELLED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_type') THEN
+        CREATE TYPE "invoice_type" AS ENUM('PER_CLASSES', 'MONTHLY', 'MANUAL');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'leave_request_status') THEN
+        CREATE TYPE "leave_request_status" AS ENUM('PENDING', 'APPROVED', 'RESCHEDULED', 'CANCELLED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'leave_requester_type') THEN
+        CREATE TYPE "leave_requester_type" AS ENUM('TEACHER', 'PARENT', 'ADMIN');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lesson_report_status') THEN
+        CREATE TYPE "lesson_report_status" AS ENUM('DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_channel') THEN
+        CREATE TYPE "notification_channel" AS ENUM('EMAIL', 'SMS', 'PUSH', 'ON_APP');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_delivery_status') THEN
+        CREATE TYPE "notification_delivery_status" AS ENUM('PENDING', 'SENT', 'DELIVERED', 'OPENED', 'FAILED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_event_type') THEN
+        CREATE TYPE "notification_event_type" AS ENUM('CLASS_REMINDER', 'INVOICE_GENERATED', 'COMPLAINT_RESPONSE', 'PAYMENT_METHOD_CHANGED', 'NEW_COMPLAINT', 'NEW_SUGGESTION', 'SUGGESTION_ACKNOWLEDGED', 'SUGGESTION_DUPLICATE_MARKED', 'INVOICE_STATUS_CHANGED', 'CLASS_SCHEDULED', 'CLASS_ACTIVATED', 'CLASS_STARTED', 'CLASS_COMPLETED', 'CLASS_MARKED_ABSENT', 'CLASS_MARKED_MISSED', 'CLASS_LEAVE_REQUESTED', 'CLASS_RESCHEDULED', 'CLASS_CANCELLED', 'CLASS_RESET', 'STUDENT_TEACHER_REASSIGNED', 'STUDENT_STATUS_CHANGED', 'STUDENT_QUOTA_OVERRIDDEN', 'LESSON_REPORT_SUBMITTED', 'LESSON_REPORT_REVIEWED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'parent_status') THEN
+        CREATE TYPE "parent_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_direction') THEN
+        CREATE TYPE "payment_direction" AS ENUM('PAYIN', 'PAYOUT', 'BOTH');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_method_type') THEN
+        CREATE TYPE "payment_method_type" AS ENUM('MOBILE_WALLET', 'PAYMENT_LINK', 'ONLINE_ACCOUNT', 'BANK_TRANSFER', 'CASH', 'PROOF_UPLOAD');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'student_status') THEN
+        CREATE TYPE "student_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL', 'DEACTIVATED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'suggestion_status') THEN
+        CREATE TYPE "suggestion_status" AS ENUM('PENDING', 'REVIEWED', 'DUPLICATE');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'teacher_due_status') THEN
+        CREATE TYPE "teacher_due_status" AS ENUM('PENDING', 'PAID');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vacation_request_status') THEN
+        CREATE TYPE "vacation_request_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
+    END IF;
+END $$;--> statement-breakpoint
 CREATE TABLE "admin_audit_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"actor_user_id" uuid NOT NULL,
@@ -44,8 +188,7 @@ CREATE TABLE "admin_audit_logs" (
 	"new_state" jsonb,
 	"ip_address" inet,
 	"created_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "audit_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"actor_user_id" uuid,
@@ -61,8 +204,7 @@ CREATE TABLE "audit_logs" (
 	"user_agent" text,
 	"metadata" jsonb,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "impersonation_sessions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"actor_user_id" uuid NOT NULL,
@@ -74,8 +216,7 @@ CREATE TABLE "impersonation_sessions" (
 	"ip_address" inet,
 	"user_agent" text,
 	"is_active" boolean DEFAULT true NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "currency_exchange_audit_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"from_currency" "currency_code" NOT NULL,
@@ -85,8 +226,7 @@ CREATE TABLE "currency_exchange_audit_logs" (
 	"source" varchar(50) NOT NULL,
 	"changed_by_user_id" uuid,
 	"created_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "currency_exchange_rates" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"from_currency" "currency_code" NOT NULL,
@@ -97,8 +237,7 @@ CREATE TABLE "currency_exchange_rates" (
 	"effective_date" timestamp(3) with time zone NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "currency_hedges" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"currency" "currency_code" NOT NULL,
@@ -107,15 +246,13 @@ CREATE TABLE "currency_hedges" (
 	"notes" text,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "invoice_coverage_months" (
 	"invoice_id" uuid,
 	"year" smallint,
 	"month" smallint,
 	CONSTRAINT "invoice_coverage_months_pkey" PRIMARY KEY("invoice_id","year","month")
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "invoices" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"parent_id" uuid NOT NULL,
@@ -136,8 +273,7 @@ CREATE TABLE "invoices" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "payments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"invoice_id" uuid NOT NULL,
@@ -155,8 +291,7 @@ CREATE TABLE "payments" (
 	"idempotency_key" varchar(255) NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "credit_transactions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
@@ -169,8 +304,7 @@ CREATE TABLE "credit_transactions" (
 	"idempotency_key" varchar(255) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "supported_currencies" (
 	"code" "currency_code" PRIMARY KEY,
 	"symbol" varchar(16) NOT NULL,
@@ -180,8 +314,7 @@ CREATE TABLE "supported_currencies" (
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "fx_sync_runs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"provider" "fx_provider" NOT NULL,
@@ -196,8 +329,7 @@ CREATE TABLE "fx_sync_runs" (
 	"finished_at" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "invoice_payment_submissions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"invoice_id" uuid NOT NULL,
@@ -210,8 +342,7 @@ CREATE TABLE "invoice_payment_submissions" (
 	"rejection_reason" text,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "supported_mobile_wallets" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"slug" varchar(100) NOT NULL UNIQUE,
@@ -226,8 +357,7 @@ CREATE TABLE "supported_mobile_wallets" (
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "supported_online_accounts" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"slug" varchar(100) NOT NULL UNIQUE,
@@ -241,8 +371,7 @@ CREATE TABLE "supported_online_accounts" (
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "supported_payment_links" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"slug" varchar(100) NOT NULL UNIQUE,
@@ -256,8 +385,7 @@ CREATE TABLE "supported_payment_links" (
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "user_payment_methods" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL,
@@ -270,16 +398,14 @@ CREATE TABLE "user_payment_methods" (
 	"verified_by_user_id" uuid,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "books" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name" varchar(255) NOT NULL,
 	"availability_status" "availability_status" NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "class_categories" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name" varchar(200) NOT NULL,
@@ -290,8 +416,7 @@ CREATE TABLE "class_categories" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp(3) with time zone
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "class_subjects" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"category_id" uuid NOT NULL,
@@ -304,8 +429,7 @@ CREATE TABLE "class_subjects" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp(3) with time zone
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "class_communications" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"group_class_id" uuid NOT NULL,
@@ -318,8 +442,7 @@ CREATE TABLE "class_communications" (
 	"class_status_event_id" uuid,
 	"timestamp" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "group_class_enrollments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"group_class_id" uuid NOT NULL,
@@ -328,8 +451,7 @@ CREATE TABLE "group_class_enrollments" (
 	"attendance_status" varchar(20) DEFAULT 'pending' NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "group_classes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid NOT NULL,
@@ -344,8 +466,7 @@ CREATE TABLE "group_classes" (
 	"audit_logged_at" timestamp(3) with time zone NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "lesson_reports" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid NOT NULL,
@@ -368,8 +489,7 @@ CREATE TABLE "lesson_reports" (
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "lesson_reports_completion_percentage_chk" CHECK ("completion_percentage" >= 0 AND "completion_percentage" <= 100),
 	CONSTRAINT "lesson_reports_review_consistency_chk" CHECK (("status" != 'REJECTED' OR "rejection_reason" IS NOT NULL) AND ("status" != 'APPROVED' OR "rejection_reason" IS NULL))
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "class_instance_performance" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid NOT NULL UNIQUE,
@@ -386,8 +506,7 @@ CREATE TABLE "class_instance_performance" (
 	"last_class_days_ago" integer,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "class_instances" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
@@ -437,8 +556,7 @@ CREATE TABLE "class_instances" (
 	CONSTRAINT "class_instances_reschedule_not_self_chk" CHECK ("original_class_id" IS NULL OR "original_class_id" != "id"),
 	CONSTRAINT "class_instances_rescheduled_no_quota_chk" CHECK ("is_rescheduled" = false OR "quota_deducted" = false),
 	CONSTRAINT "class_instances_rescheduled_no_complete_chk" CHECK ("is_rescheduled" = false OR ("execution_state" != 'COMPLETED' OR "outcome" != 'TAKEN'))
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "class_status_events" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid NOT NULL,
@@ -448,24 +566,21 @@ CREATE TABLE "class_status_events" (
 	"description" text,
 	"actor_user_id" uuid,
 	"created_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "dst_migration_entries" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"run_id" uuid NOT NULL,
 	"recurring_schedule_id" uuid NOT NULL,
 	"result" "dst_migration_result" NOT NULL,
 	"conflict_detail" text
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "dst_migration_runs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"run_by_user_id" uuid NOT NULL,
 	"offset_minutes" integer NOT NULL,
 	"description" varchar(255),
 	"created_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "leave_quota_usage" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid,
@@ -474,8 +589,7 @@ CREATE TABLE "leave_quota_usage" (
 	"period_month" smallint NOT NULL,
 	"used_count" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "leave_quota_usage_teacher_student_xor_chk" CHECK (("teacher_id" IS NOT NULL AND "student_id" IS NULL) OR ("teacher_id" IS NULL AND "student_id" IS NOT NULL))
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "leave_requests" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid NOT NULL,
@@ -486,16 +600,14 @@ CREATE TABLE "leave_requests" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"processed_at" timestamp(3) with time zone,
 	"processed_by_user_id" uuid
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "recurring_schedule_days" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"recurring_schedule_id" uuid NOT NULL,
 	"day_of_week" "day_of_week" NOT NULL,
 	"start_time" time NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "recurring_schedules" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
@@ -513,8 +625,7 @@ CREATE TABLE "recurring_schedules" (
 	"updated_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone,
 	CONSTRAINT "recurring_schedules_timezone_chk" CHECK (is_valid_timezone("timezone"))
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "subject_resources" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"subject_id" uuid NOT NULL,
@@ -522,8 +633,7 @@ CREATE TABLE "subject_resources" (
 	"resource_type" varchar(50),
 	"sort_order" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "complaint_responses" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"complaint_id" uuid NOT NULL,
@@ -531,8 +641,7 @@ CREATE TABLE "complaint_responses" (
 	"body" text NOT NULL,
 	"email_sent" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "complaints" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"parent_id" uuid NOT NULL,
@@ -544,8 +653,7 @@ CREATE TABLE "complaints" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "learning_resources" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"display_name" varchar(255) NOT NULL,
@@ -553,8 +661,7 @@ CREATE TABLE "learning_resources" (
 	"uploaded_by_user_id" uuid NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "notification_deliveries" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL,
@@ -574,8 +681,7 @@ CREATE TABLE "notification_deliveries" (
 	"failed_at" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "suggestions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"parent_id" uuid NOT NULL,
@@ -589,8 +695,7 @@ CREATE TABLE "suggestions" (
 	"email_sent_at" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "user_device_tokens" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL,
@@ -601,8 +706,7 @@ CREATE TABLE "user_device_tokens" (
 	"last_used_at" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "user_notification_preferences" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL,
@@ -611,8 +715,7 @@ CREATE TABLE "user_notification_preferences" (
 	"enabled" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "class_meeting_configs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid,
@@ -628,8 +731,7 @@ CREATE TABLE "class_meeting_configs" (
         ("class_instance_id" IS NOT NULL AND "recurring_schedule_id" IS NULL)
         OR ("class_instance_id" IS NULL AND "recurring_schedule_id" IS NOT NULL)
       ))
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "meeting_providers" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"slug" varchar(100) NOT NULL UNIQUE,
@@ -643,8 +745,7 @@ CREATE TABLE "meeting_providers" (
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "user_meeting_configs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL,
@@ -655,8 +756,7 @@ CREATE TABLE "user_meeting_configs" (
 	"encrypted_secret" text,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "parents" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL UNIQUE,
@@ -671,14 +771,12 @@ CREATE TABLE "parents" (
 	"currency" "currency_code",
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "group_permissions" (
 	"group_id" uuid,
 	"permission_id" uuid,
 	CONSTRAINT "group_permissions_pkey" PRIMARY KEY("group_id","permission_id")
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "permission_groups" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name" jsonb NOT NULL,
@@ -688,8 +786,7 @@ CREATE TABLE "permission_groups" (
 	"created_by_user_id" uuid,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "permissions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"key" "app_permission" NOT NULL UNIQUE,
@@ -698,16 +795,14 @@ CREATE TABLE "permissions" (
 	"description" jsonb NOT NULL,
 	"category" jsonb NOT NULL,
 	"is_system" boolean DEFAULT false NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "user_permission_groups" (
 	"user_id" uuid,
 	"group_id" uuid,
 	"assigned_at" timestamp(3) with time zone NOT NULL,
 	"assigned_by_user_id" uuid,
 	CONSTRAINT "user_permission_groups_pkey" PRIMARY KEY("user_id","group_id")
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "user_permission_overrides" (
 	"user_id" uuid,
 	"permission_id" uuid,
@@ -715,20 +810,17 @@ CREATE TABLE "user_permission_overrides" (
 	"assigned_by_user_id" uuid,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "user_permission_overrides_pkey" PRIMARY KEY("user_id","permission_id")
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "rate_limit_cache" (
 	"key" text PRIMARY KEY,
 	"value" text NOT NULL,
 	"expires_at" timestamp with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "session_cache" (
 	"key" text PRIMARY KEY,
 	"value" text NOT NULL,
 	"expires_at" timestamp with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "system_settings" (
 	"key" varchar(100) PRIMARY KEY,
 	"value" text NOT NULL,
@@ -737,15 +829,13 @@ CREATE TABLE "system_settings" (
 	"category" varchar(100) NOT NULL,
 	"updated_by_user_id" uuid,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "timezones" (
 	"id" serial PRIMARY KEY,
 	"iana_id" varchar(100) NOT NULL UNIQUE,
 	"base_offset_minutes" integer NOT NULL,
 	"is_dst_supported" boolean DEFAULT true NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "site_content" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"slug" varchar(100) NOT NULL UNIQUE,
@@ -756,56 +846,49 @@ CREATE TABLE "site_content" (
 	"updated_by_user_id" uuid,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "class_instance_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"class_instance_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "complaint_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"complaint_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "invoice_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"invoice_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "learning_resource_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"learning_resource_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "parent_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"parent_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "recurring_schedule_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"recurring_schedule_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "signed_url" (
 	"id" varchar(64) PRIMARY KEY,
 	"file_path" varchar(1024) NOT NULL,
@@ -815,16 +898,14 @@ CREATE TABLE "signed_url" (
 	"expires_at" timestamp(3) with time zone NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"used" boolean DEFAULT false NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "staff_profile_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"staff_profile_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "storage_directory" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"path" varchar(1024) NOT NULL UNIQUE,
@@ -836,38 +917,33 @@ CREATE TABLE "storage_directory" (
 	"allow_move_files" boolean DEFAULT true NOT NULL,
 	"is_protected" boolean DEFAULT false NOT NULL,
 	"protect_children" boolean DEFAULT false NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "storage_file" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"path" text NOT NULL UNIQUE,
 	"is_protected" boolean DEFAULT false NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "student_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"student_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "teacher_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"teacher_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "user_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "student_progress" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
@@ -879,8 +955,7 @@ CREATE TABLE "student_progress" (
 	"parent_visible" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "student_status_history" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
@@ -888,8 +963,7 @@ CREATE TABLE "student_status_history" (
 	"new_status" "student_status" NOT NULL,
 	"changed_by_user_id" uuid,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "students" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"parent_id" uuid,
@@ -912,8 +986,7 @@ CREATE TABLE "students" (
 	CONSTRAINT "students_classes_remaining_chk" CHECK ("classes_remaining" >= 0),
 	CONSTRAINT "students_classes_total_chk" CHECK ("classes_total" >= 0),
 	CONSTRAINT "students_timezone_override_chk" CHECK ("timezone_override" IS NULL OR is_valid_timezone("timezone_override"))
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "teacher_assignments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
@@ -921,8 +994,7 @@ CREATE TABLE "teacher_assignments" (
 	"assigned_at" timestamp(3) with time zone NOT NULL,
 	"assigned_by_user_id" uuid,
 	"ended_at" timestamp(3) with time zone
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "staff_profiles" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL UNIQUE,
@@ -930,8 +1002,7 @@ CREATE TABLE "staff_profiles" (
 	"rate_currency" "currency_code",
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "teacher_availability_windows" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid NOT NULL,
@@ -945,8 +1016,7 @@ CREATE TABLE "teacher_availability_windows" (
 	"effective_until" date,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "teacher_recurring_unavailability" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid NOT NULL,
@@ -961,8 +1031,7 @@ CREATE TABLE "teacher_recurring_unavailability" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL,
 	"reason" text
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "teacher_vacation_requests" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid NOT NULL,
@@ -978,8 +1047,7 @@ CREATE TABLE "teacher_vacation_requests" (
 	"processed_by_user_id" uuid,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "teacher_dues" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid NOT NULL,
@@ -994,8 +1062,7 @@ CREATE TABLE "teacher_dues" (
 	"teacher_payment_id" uuid,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "teacher_important_notes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid,
@@ -1009,8 +1076,7 @@ CREATE TABLE "teacher_important_notes" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp(3) with time zone
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "teacher_payments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid NOT NULL,
@@ -1023,8 +1089,7 @@ CREATE TABLE "teacher_payments" (
 	"is_test_payment" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "teachers" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL UNIQUE,
@@ -1040,8 +1105,7 @@ CREATE TABLE "teachers" (
 	"rate_currency" "currency_code",
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "auth_rate_limits" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"ip_address" inet,
@@ -1050,16 +1114,14 @@ CREATE TABLE "auth_rate_limits" (
 	"locked_until" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "password_reset_tokens" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"email" varchar(255) NOT NULL,
 	"hashed_token" varchar(255) NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"expires_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "session_config" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"role_name" varchar(100) NOT NULL UNIQUE,
@@ -1067,8 +1129,7 @@ CREATE TABLE "session_config" (
 	"max_concurrent_sessions" integer DEFAULT 5 NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "session_metadata" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"session_id" varchar(255) NOT NULL UNIQUE,
@@ -1080,8 +1141,7 @@ CREATE TABLE "session_metadata" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"last_activity_at" timestamp(3) with time zone NOT NULL,
 	"expires_at" timestamp(3) with time zone NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "sessions" (
 	"hashed_id" varchar(255) PRIMARY KEY,
 	"user_id" uuid,
@@ -1089,8 +1149,7 @@ CREATE TABLE "sessions" (
 	"user_agent" text,
 	"payload" text NOT NULL,
 	"last_activity" bigint NOT NULL
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name" varchar(255) NOT NULL,
@@ -1110,8 +1169,7 @@ CREATE TABLE "users" (
 	"updated_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone,
 	CONSTRAINT "users_timezone_chk" CHECK (is_valid_timezone("timezone"))
-);
---> statement-breakpoint
+);--> statement-breakpoint
 CREATE INDEX "admin_audit_logs_actor_idx" ON "admin_audit_logs" ("actor_user_id");--> statement-breakpoint
 CREATE INDEX "admin_audit_logs_target_idx" ON "admin_audit_logs" ("target_user_id");--> statement-breakpoint
 CREATE INDEX "admin_audit_logs_action_idx" ON "admin_audit_logs" ("action");--> statement-breakpoint
@@ -1308,147 +1366,579 @@ CREATE INDEX "session_metadata_session_id_idx" ON "session_metadata" ("session_i
 CREATE INDEX "sessions_user_id_index" ON "sessions" ("user_id");--> statement-breakpoint
 CREATE INDEX "sessions_last_activity_index" ON "sessions" ("last_activity");--> statement-breakpoint
 CREATE INDEX "users_status_idx" ON "users" ("status");--> statement-breakpoint
-ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_target_user_id_users_id_fkey" FOREIGN KEY ("target_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "impersonation_sessions" ADD CONSTRAINT "impersonation_sessions_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "impersonation_sessions" ADD CONSTRAINT "impersonation_sessions_target_user_id_users_id_fkey" FOREIGN KEY ("target_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "currency_exchange_audit_logs" ADD CONSTRAINT "currency_exchange_audit_logs_changed_by_user_id_users_id_fkey" FOREIGN KEY ("changed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "invoice_coverage_months" ADD CONSTRAINT "invoice_coverage_months_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "invoices" ADD CONSTRAINT "invoices_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "invoices" ADD CONSTRAINT "invoices_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "invoices" ADD CONSTRAINT "invoices_created_by_user_id_users_id_fkey" FOREIGN KEY ("created_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "payments" ADD CONSTRAINT "payments_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "payments" ADD CONSTRAINT "payments_user_payment_method_id_user_payment_methods_id_fkey" FOREIGN KEY ("user_payment_method_id") REFERENCES "user_payment_methods"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "credit_transactions" ADD CONSTRAINT "credit_transactions_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "credit_transactions" ADD CONSTRAINT "credit_transactions_source_payment_id_payments_id_fkey" FOREIGN KEY ("source_payment_id") REFERENCES "payments"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "credit_transactions" ADD CONSTRAINT "credit_transactions_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "credit_transactions" ADD CONSTRAINT "credit_transactions_credited_by_user_id_users_id_fkey" FOREIGN KEY ("credited_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "fx_sync_runs" ADD CONSTRAINT "fx_sync_runs_triggered_by_user_id_users_id_fkey" FOREIGN KEY ("triggered_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "invoice_payment_submissions" ADD CONSTRAINT "invoice_payment_submissions_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "invoice_payment_submissions" ADD CONSTRAINT "invoice_payment_submissions_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "invoice_payment_submissions" ADD CONSTRAINT "invoice_payment_submissions_submitted_by_user_id_users_id_fkey" FOREIGN KEY ("submitted_by_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "invoice_payment_submissions" ADD CONSTRAINT "invoice_payment_submissions_reviewed_by_user_id_users_id_fkey" FOREIGN KEY ("reviewed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "user_payment_methods" ADD CONSTRAINT "user_payment_methods_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "user_payment_methods" ADD CONSTRAINT "user_payment_methods_verified_by_user_id_users_id_fkey" FOREIGN KEY ("verified_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "class_subjects" ADD CONSTRAINT "class_subjects_category_id_class_categories_id_fkey" FOREIGN KEY ("category_id") REFERENCES "class_categories"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "class_communications" ADD CONSTRAINT "class_communications_group_class_id_group_classes_id_fkey" FOREIGN KEY ("group_class_id") REFERENCES "group_classes"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "class_communications" ADD CONSTRAINT "class_communications_PiBewH0pYIt0_fkey" FOREIGN KEY ("notification_delivery_id") REFERENCES "notification_deliveries"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "class_communications" ADD CONSTRAINT "class_communications_NjLYHZgCUCzr_fkey" FOREIGN KEY ("class_status_event_id") REFERENCES "class_status_events"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "group_class_enrollments" ADD CONSTRAINT "group_class_enrollments_group_class_id_group_classes_id_fkey" FOREIGN KEY ("group_class_id") REFERENCES "group_classes"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "group_class_enrollments" ADD CONSTRAINT "group_class_enrollments_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "group_classes" ADD CONSTRAINT "group_classes_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "lesson_reports" ADD CONSTRAINT "lesson_reports_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "lesson_reports" ADD CONSTRAINT "lesson_reports_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "lesson_reports" ADD CONSTRAINT "lesson_reports_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "lesson_reports" ADD CONSTRAINT "lesson_reports_submitted_by_user_id_users_id_fkey" FOREIGN KEY ("submitted_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "lesson_reports" ADD CONSTRAINT "lesson_reports_reviewed_by_user_id_users_id_fkey" FOREIGN KEY ("reviewed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "class_instance_performance" ADD CONSTRAINT "class_instance_performance_aA1hiAMGrLBk_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_subject_id_class_subjects_id_fkey" FOREIGN KEY ("subject_id") REFERENCES "class_subjects"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_PylSk1pBxELI_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_original_class_id_class_instances_id_fkey" FOREIGN KEY ("original_class_id") REFERENCES "class_instances"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_booking_timezone_id_timezones_id_fkey" FOREIGN KEY ("booking_timezone_id") REFERENCES "timezones"("id");--> statement-breakpoint
-ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_kwC68yPlcvSg_fkey" FOREIGN KEY ("user_meeting_config_id") REFERENCES "user_meeting_configs"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_meeting_provider_id_meeting_providers_id_fkey" FOREIGN KEY ("meeting_provider_id") REFERENCES "meeting_providers"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_activated_by_user_id_users_id_fkey" FOREIGN KEY ("activated_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_force_activated_by_user_id_users_id_fkey" FOREIGN KEY ("force_activated_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "class_status_events" ADD CONSTRAINT "class_status_events_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "class_status_events" ADD CONSTRAINT "class_status_events_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "dst_migration_entries" ADD CONSTRAINT "dst_migration_entries_run_id_dst_migration_runs_id_fkey" FOREIGN KEY ("run_id") REFERENCES "dst_migration_runs"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "dst_migration_entries" ADD CONSTRAINT "dst_migration_entries_dPOpe6uBtrd8_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "dst_migration_runs" ADD CONSTRAINT "dst_migration_runs_run_by_user_id_users_id_fkey" FOREIGN KEY ("run_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "leave_quota_usage" ADD CONSTRAINT "leave_quota_usage_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "leave_quota_usage" ADD CONSTRAINT "leave_quota_usage_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "leave_requests" ADD CONSTRAINT "leave_requests_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "leave_requests" ADD CONSTRAINT "leave_requests_requested_by_user_id_users_id_fkey" FOREIGN KEY ("requested_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "leave_requests" ADD CONSTRAINT "leave_requests_processed_by_user_id_users_id_fkey" FOREIGN KEY ("processed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "recurring_schedule_days" ADD CONSTRAINT "recurring_schedule_days_ok4vhL3oaFBE_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_subject_id_class_subjects_id_fkey" FOREIGN KEY ("subject_id") REFERENCES "class_subjects"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");--> statement-breakpoint
-ALTER TABLE "subject_resources" ADD CONSTRAINT "subject_resources_subject_id_class_subjects_id_fkey" FOREIGN KEY ("subject_id") REFERENCES "class_subjects"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "subject_resources" ADD CONSTRAINT "subject_resources_5NKkB933Dpb5_fkey" FOREIGN KEY ("learning_resource_id") REFERENCES "learning_resources"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "complaint_responses" ADD CONSTRAINT "complaint_responses_complaint_id_complaints_id_fkey" FOREIGN KEY ("complaint_id") REFERENCES "complaints"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "complaint_responses" ADD CONSTRAINT "complaint_responses_responder_user_id_users_id_fkey" FOREIGN KEY ("responder_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "complaints" ADD CONSTRAINT "complaints_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "complaints" ADD CONSTRAINT "complaints_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "learning_resources" ADD CONSTRAINT "learning_resources_uploaded_by_user_id_users_id_fkey" FOREIGN KEY ("uploaded_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "notification_deliveries" ADD CONSTRAINT "notification_deliveries_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "notification_deliveries" ADD CONSTRAINT "notification_deliveries_wsuupd9kUEsX_fkey" FOREIGN KEY ("device_token_id") REFERENCES "user_device_tokens"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_reviewed_by_user_id_users_id_fkey" FOREIGN KEY ("reviewed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_duplicate_of_id_fkey" FOREIGN KEY ("duplicate_of_id") REFERENCES "suggestions"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "user_device_tokens" ADD CONSTRAINT "user_device_tokens_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "user_notification_preferences" ADD CONSTRAINT "user_notification_preferences_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "class_meeting_configs" ADD CONSTRAINT "class_meeting_configs_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "class_meeting_configs" ADD CONSTRAINT "class_meeting_configs_hyosSBhez29d_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "class_meeting_configs" ADD CONSTRAINT "class_meeting_configs_provider_id_meeting_providers_id_fkey" FOREIGN KEY ("provider_id") REFERENCES "meeting_providers"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "user_meeting_configs" ADD CONSTRAINT "user_meeting_configs_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "user_meeting_configs" ADD CONSTRAINT "user_meeting_configs_provider_id_meeting_providers_id_fkey" FOREIGN KEY ("provider_id") REFERENCES "meeting_providers"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "parents" ADD CONSTRAINT "parents_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "group_permissions" ADD CONSTRAINT "group_permissions_group_id_permission_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "permission_groups"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "group_permissions" ADD CONSTRAINT "group_permissions_permission_id_permissions_id_fkey" FOREIGN KEY ("permission_id") REFERENCES "permissions"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "permission_groups" ADD CONSTRAINT "permission_groups_created_by_user_id_users_id_fkey" FOREIGN KEY ("created_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_group_id_permission_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "permission_groups"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_assigned_by_user_id_users_id_fkey" FOREIGN KEY ("assigned_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "user_permission_overrides" ADD CONSTRAINT "user_permission_overrides_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "user_permission_overrides" ADD CONSTRAINT "user_permission_overrides_permission_id_permissions_id_fkey" FOREIGN KEY ("permission_id") REFERENCES "permissions"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "user_permission_overrides" ADD CONSTRAINT "user_permission_overrides_assigned_by_user_id_users_id_fkey" FOREIGN KEY ("assigned_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "system_settings" ADD CONSTRAINT "system_settings_updated_by_user_id_users_id_fkey" FOREIGN KEY ("updated_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "site_content" ADD CONSTRAINT "site_content_updated_by_user_id_users_id_fkey" FOREIGN KEY ("updated_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "class_instance_files" ADD CONSTRAINT "class_instance_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "class_instance_files" ADD CONSTRAINT "class_instance_files_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "complaint_files" ADD CONSTRAINT "complaint_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "complaint_files" ADD CONSTRAINT "complaint_files_complaint_id_complaints_id_fkey" FOREIGN KEY ("complaint_id") REFERENCES "complaints"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "invoice_files" ADD CONSTRAINT "invoice_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "invoice_files" ADD CONSTRAINT "invoice_files_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "learning_resource_files" ADD CONSTRAINT "learning_resource_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "learning_resource_files" ADD CONSTRAINT "learning_resource_files_i6h6QhQDvKDk_fkey" FOREIGN KEY ("learning_resource_id") REFERENCES "learning_resources"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "parent_files" ADD CONSTRAINT "parent_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "parent_files" ADD CONSTRAINT "parent_files_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "recurring_schedule_files" ADD CONSTRAINT "recurring_schedule_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "recurring_schedule_files" ADD CONSTRAINT "recurring_schedule_files_oFa8bm7nPzJm_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "staff_profile_files" ADD CONSTRAINT "staff_profile_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "staff_profile_files" ADD CONSTRAINT "staff_profile_files_staff_profile_id_staff_profiles_id_fkey" FOREIGN KEY ("staff_profile_id") REFERENCES "staff_profiles"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "student_files" ADD CONSTRAINT "student_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "student_files" ADD CONSTRAINT "student_files_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "teacher_files" ADD CONSTRAINT "teacher_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "teacher_files" ADD CONSTRAINT "teacher_files_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "user_files" ADD CONSTRAINT "user_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "user_files" ADD CONSTRAINT "user_files_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "student_progress" ADD CONSTRAINT "student_progress_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "student_progress" ADD CONSTRAINT "student_progress_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "student_progress" ADD CONSTRAINT "student_progress_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "student_status_history" ADD CONSTRAINT "student_status_history_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "student_status_history" ADD CONSTRAINT "student_status_history_changed_by_user_id_users_id_fkey" FOREIGN KEY ("changed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "students" ADD CONSTRAINT "students_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "students" ADD CONSTRAINT "students_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "students" ADD CONSTRAINT "students_primary_teacher_id_teachers_id_fkey" FOREIGN KEY ("primary_teacher_id") REFERENCES "teachers"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_assigned_by_user_id_users_id_fkey" FOREIGN KEY ("assigned_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "teacher_availability_windows" ADD CONSTRAINT "teacher_availability_windows_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "teacher_availability_windows" ADD CONSTRAINT "teacher_availability_windows_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");--> statement-breakpoint
-ALTER TABLE "teacher_recurring_unavailability" ADD CONSTRAINT "teacher_recurring_unavailability_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "teacher_recurring_unavailability" ADD CONSTRAINT "teacher_recurring_unavailability_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");--> statement-breakpoint
-ALTER TABLE "teacher_vacation_requests" ADD CONSTRAINT "teacher_vacation_requests_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "teacher_vacation_requests" ADD CONSTRAINT "teacher_vacation_requests_requested_by_user_id_users_id_fkey" FOREIGN KEY ("requested_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "teacher_vacation_requests" ADD CONSTRAINT "teacher_vacation_requests_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");--> statement-breakpoint
-ALTER TABLE "teacher_vacation_requests" ADD CONSTRAINT "teacher_vacation_requests_processed_by_user_id_users_id_fkey" FOREIGN KEY ("processed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "teacher_dues" ADD CONSTRAINT "teacher_dues_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "teacher_dues" ADD CONSTRAINT "teacher_dues_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "teacher_dues" ADD CONSTRAINT "teacher_dues_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "teacher_dues" ADD CONSTRAINT "teacher_dues_approved_by_user_id_users_id_fkey" FOREIGN KEY ("approved_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "teacher_dues" ADD CONSTRAINT "teacher_dues_teacher_payment_id_teacher_payments_id_fkey" FOREIGN KEY ("teacher_payment_id") REFERENCES "teacher_payments"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "teacher_important_notes" ADD CONSTRAINT "teacher_important_notes_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "teacher_important_notes" ADD CONSTRAINT "teacher_important_notes_created_by_user_id_users_id_fkey" FOREIGN KEY ("created_by_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "teacher_payments" ADD CONSTRAINT "teacher_payments_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "teacher_payments" ADD CONSTRAINT "teacher_payments_NFkhbkb5U5kT_fkey" FOREIGN KEY ("user_payment_method_id") REFERENCES "user_payment_methods"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "teachers" ADD CONSTRAINT "teachers_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "session_metadata" ADD CONSTRAINT "session_metadata_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+DO $$ BEGIN
+    ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_target_user_id_users_id_fkey" FOREIGN KEY ("target_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "impersonation_sessions" ADD CONSTRAINT "impersonation_sessions_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "impersonation_sessions" ADD CONSTRAINT "impersonation_sessions_target_user_id_users_id_fkey" FOREIGN KEY ("target_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "currency_exchange_audit_logs" ADD CONSTRAINT "currency_exchange_audit_logs_changed_by_user_id_users_id_fkey" FOREIGN KEY ("changed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "invoice_coverage_months" ADD CONSTRAINT "invoice_coverage_months_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "invoices" ADD CONSTRAINT "invoices_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "invoices" ADD CONSTRAINT "invoices_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "invoices" ADD CONSTRAINT "invoices_created_by_user_id_users_id_fkey" FOREIGN KEY ("created_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "payments" ADD CONSTRAINT "payments_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "payments" ADD CONSTRAINT "payments_user_payment_method_id_user_payment_methods_id_fkey" FOREIGN KEY ("user_payment_method_id") REFERENCES "user_payment_methods"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "credit_transactions" ADD CONSTRAINT "credit_transactions_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "credit_transactions" ADD CONSTRAINT "credit_transactions_source_payment_id_payments_id_fkey" FOREIGN KEY ("source_payment_id") REFERENCES "payments"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "credit_transactions" ADD CONSTRAINT "credit_transactions_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "credit_transactions" ADD CONSTRAINT "credit_transactions_credited_by_user_id_users_id_fkey" FOREIGN KEY ("credited_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "fx_sync_runs" ADD CONSTRAINT "fx_sync_runs_triggered_by_user_id_users_id_fkey" FOREIGN KEY ("triggered_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "invoice_payment_submissions" ADD CONSTRAINT "invoice_payment_submissions_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "invoice_payment_submissions" ADD CONSTRAINT "invoice_payment_submissions_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "invoice_payment_submissions" ADD CONSTRAINT "invoice_payment_submissions_submitted_by_user_id_users_id_fkey" FOREIGN KEY ("submitted_by_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "invoice_payment_submissions" ADD CONSTRAINT "invoice_payment_submissions_reviewed_by_user_id_users_id_fkey" FOREIGN KEY ("reviewed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_payment_methods" ADD CONSTRAINT "user_payment_methods_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_payment_methods" ADD CONSTRAINT "user_payment_methods_verified_by_user_id_users_id_fkey" FOREIGN KEY ("verified_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_subjects" ADD CONSTRAINT "class_subjects_category_id_class_categories_id_fkey" FOREIGN KEY ("category_id") REFERENCES "class_categories"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_communications" ADD CONSTRAINT "class_communications_group_class_id_group_classes_id_fkey" FOREIGN KEY ("group_class_id") REFERENCES "group_classes"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_communications" ADD CONSTRAINT "class_communications_PiBewH0pYIt0_fkey" FOREIGN KEY ("notification_delivery_id") REFERENCES "notification_deliveries"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_communications" ADD CONSTRAINT "class_communications_NjLYHZgCUCzr_fkey" FOREIGN KEY ("class_status_event_id") REFERENCES "class_status_events"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "group_class_enrollments" ADD CONSTRAINT "group_class_enrollments_group_class_id_group_classes_id_fkey" FOREIGN KEY ("group_class_id") REFERENCES "group_classes"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "group_class_enrollments" ADD CONSTRAINT "group_class_enrollments_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "group_classes" ADD CONSTRAINT "group_classes_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "lesson_reports" ADD CONSTRAINT "lesson_reports_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "lesson_reports" ADD CONSTRAINT "lesson_reports_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "lesson_reports" ADD CONSTRAINT "lesson_reports_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "lesson_reports" ADD CONSTRAINT "lesson_reports_submitted_by_user_id_users_id_fkey" FOREIGN KEY ("submitted_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "lesson_reports" ADD CONSTRAINT "lesson_reports_reviewed_by_user_id_users_id_fkey" FOREIGN KEY ("reviewed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instance_performance" ADD CONSTRAINT "class_instance_performance_aA1hiAMGrLBk_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_subject_id_class_subjects_id_fkey" FOREIGN KEY ("subject_id") REFERENCES "class_subjects"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_PylSk1pBxELI_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_original_class_id_class_instances_id_fkey" FOREIGN KEY ("original_class_id") REFERENCES "class_instances"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_booking_timezone_id_timezones_id_fkey" FOREIGN KEY ("booking_timezone_id") REFERENCES "timezones"("id");
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_kwC68yPlcvSg_fkey" FOREIGN KEY ("user_meeting_config_id") REFERENCES "user_meeting_configs"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_meeting_provider_id_meeting_providers_id_fkey" FOREIGN KEY ("meeting_provider_id") REFERENCES "meeting_providers"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_activated_by_user_id_users_id_fkey" FOREIGN KEY ("activated_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_force_activated_by_user_id_users_id_fkey" FOREIGN KEY ("force_activated_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_status_events" ADD CONSTRAINT "class_status_events_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_status_events" ADD CONSTRAINT "class_status_events_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "dst_migration_entries" ADD CONSTRAINT "dst_migration_entries_run_id_dst_migration_runs_id_fkey" FOREIGN KEY ("run_id") REFERENCES "dst_migration_runs"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "dst_migration_entries" ADD CONSTRAINT "dst_migration_entries_dPOpe6uBtrd8_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "dst_migration_runs" ADD CONSTRAINT "dst_migration_runs_run_by_user_id_users_id_fkey" FOREIGN KEY ("run_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "leave_quota_usage" ADD CONSTRAINT "leave_quota_usage_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "leave_quota_usage" ADD CONSTRAINT "leave_quota_usage_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "leave_requests" ADD CONSTRAINT "leave_requests_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "leave_requests" ADD CONSTRAINT "leave_requests_requested_by_user_id_users_id_fkey" FOREIGN KEY ("requested_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "leave_requests" ADD CONSTRAINT "leave_requests_processed_by_user_id_users_id_fkey" FOREIGN KEY ("processed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "recurring_schedule_days" ADD CONSTRAINT "recurring_schedule_days_ok4vhL3oaFBE_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_subject_id_class_subjects_id_fkey" FOREIGN KEY ("subject_id") REFERENCES "class_subjects"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "subject_resources" ADD CONSTRAINT "subject_resources_subject_id_class_subjects_id_fkey" FOREIGN KEY ("subject_id") REFERENCES "class_subjects"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "subject_resources" ADD CONSTRAINT "subject_resources_5NKkB933Dpb5_fkey" FOREIGN KEY ("learning_resource_id") REFERENCES "learning_resources"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "complaint_responses" ADD CONSTRAINT "complaint_responses_complaint_id_complaints_id_fkey" FOREIGN KEY ("complaint_id") REFERENCES "complaints"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "complaint_responses" ADD CONSTRAINT "complaint_responses_responder_user_id_users_id_fkey" FOREIGN KEY ("responder_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "complaints" ADD CONSTRAINT "complaints_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "complaints" ADD CONSTRAINT "complaints_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "learning_resources" ADD CONSTRAINT "learning_resources_uploaded_by_user_id_users_id_fkey" FOREIGN KEY ("uploaded_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "notification_deliveries" ADD CONSTRAINT "notification_deliveries_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "notification_deliveries" ADD CONSTRAINT "notification_deliveries_wsuupd9kUEsX_fkey" FOREIGN KEY ("device_token_id") REFERENCES "user_device_tokens"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_reviewed_by_user_id_users_id_fkey" FOREIGN KEY ("reviewed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_duplicate_of_id_fkey" FOREIGN KEY ("duplicate_of_id") REFERENCES "suggestions"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_device_tokens" ADD CONSTRAINT "user_device_tokens_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_notification_preferences" ADD CONSTRAINT "user_notification_preferences_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_meeting_configs" ADD CONSTRAINT "class_meeting_configs_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_meeting_configs" ADD CONSTRAINT "class_meeting_configs_hyosSBhez29d_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_meeting_configs" ADD CONSTRAINT "class_meeting_configs_provider_id_meeting_providers_id_fkey" FOREIGN KEY ("provider_id") REFERENCES "meeting_providers"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_meeting_configs" ADD CONSTRAINT "user_meeting_configs_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_meeting_configs" ADD CONSTRAINT "user_meeting_configs_provider_id_meeting_providers_id_fkey" FOREIGN KEY ("provider_id") REFERENCES "meeting_providers"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "parents" ADD CONSTRAINT "parents_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "group_permissions" ADD CONSTRAINT "group_permissions_group_id_permission_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "permission_groups"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "group_permissions" ADD CONSTRAINT "group_permissions_permission_id_permissions_id_fkey" FOREIGN KEY ("permission_id") REFERENCES "permissions"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "permission_groups" ADD CONSTRAINT "permission_groups_created_by_user_id_users_id_fkey" FOREIGN KEY ("created_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_group_id_permission_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "permission_groups"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_assigned_by_user_id_users_id_fkey" FOREIGN KEY ("assigned_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_permission_overrides" ADD CONSTRAINT "user_permission_overrides_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_permission_overrides" ADD CONSTRAINT "user_permission_overrides_permission_id_permissions_id_fkey" FOREIGN KEY ("permission_id") REFERENCES "permissions"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_permission_overrides" ADD CONSTRAINT "user_permission_overrides_assigned_by_user_id_users_id_fkey" FOREIGN KEY ("assigned_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "system_settings" ADD CONSTRAINT "system_settings_updated_by_user_id_users_id_fkey" FOREIGN KEY ("updated_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "site_content" ADD CONSTRAINT "site_content_updated_by_user_id_users_id_fkey" FOREIGN KEY ("updated_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instance_files" ADD CONSTRAINT "class_instance_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instance_files" ADD CONSTRAINT "class_instance_files_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "complaint_files" ADD CONSTRAINT "complaint_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "complaint_files" ADD CONSTRAINT "complaint_files_complaint_id_complaints_id_fkey" FOREIGN KEY ("complaint_id") REFERENCES "complaints"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "invoice_files" ADD CONSTRAINT "invoice_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "invoice_files" ADD CONSTRAINT "invoice_files_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "learning_resource_files" ADD CONSTRAINT "learning_resource_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "learning_resource_files" ADD CONSTRAINT "learning_resource_files_i6h6QhQDvKDk_fkey" FOREIGN KEY ("learning_resource_id") REFERENCES "learning_resources"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "parent_files" ADD CONSTRAINT "parent_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "parent_files" ADD CONSTRAINT "parent_files_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "recurring_schedule_files" ADD CONSTRAINT "recurring_schedule_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "recurring_schedule_files" ADD CONSTRAINT "recurring_schedule_files_oFa8bm7nPzJm_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "staff_profile_files" ADD CONSTRAINT "staff_profile_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "staff_profile_files" ADD CONSTRAINT "staff_profile_files_staff_profile_id_staff_profiles_id_fkey" FOREIGN KEY ("staff_profile_id") REFERENCES "staff_profiles"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "student_files" ADD CONSTRAINT "student_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "student_files" ADD CONSTRAINT "student_files_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_files" ADD CONSTRAINT "teacher_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_files" ADD CONSTRAINT "teacher_files_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_files" ADD CONSTRAINT "user_files_file_id_storage_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "storage_file"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "user_files" ADD CONSTRAINT "user_files_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "student_progress" ADD CONSTRAINT "student_progress_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "student_progress" ADD CONSTRAINT "student_progress_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "student_progress" ADD CONSTRAINT "student_progress_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "student_status_history" ADD CONSTRAINT "student_status_history_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "student_status_history" ADD CONSTRAINT "student_status_history_changed_by_user_id_users_id_fkey" FOREIGN KEY ("changed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "students" ADD CONSTRAINT "students_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "students" ADD CONSTRAINT "students_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "students" ADD CONSTRAINT "students_primary_teacher_id_teachers_id_fkey" FOREIGN KEY ("primary_teacher_id") REFERENCES "teachers"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_assigned_by_user_id_users_id_fkey" FOREIGN KEY ("assigned_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_availability_windows" ADD CONSTRAINT "teacher_availability_windows_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_availability_windows" ADD CONSTRAINT "teacher_availability_windows_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_recurring_unavailability" ADD CONSTRAINT "teacher_recurring_unavailability_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_recurring_unavailability" ADD CONSTRAINT "teacher_recurring_unavailability_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_vacation_requests" ADD CONSTRAINT "teacher_vacation_requests_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_vacation_requests" ADD CONSTRAINT "teacher_vacation_requests_requested_by_user_id_users_id_fkey" FOREIGN KEY ("requested_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_vacation_requests" ADD CONSTRAINT "teacher_vacation_requests_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_vacation_requests" ADD CONSTRAINT "teacher_vacation_requests_processed_by_user_id_users_id_fkey" FOREIGN KEY ("processed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_dues" ADD CONSTRAINT "teacher_dues_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_dues" ADD CONSTRAINT "teacher_dues_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_dues" ADD CONSTRAINT "teacher_dues_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_dues" ADD CONSTRAINT "teacher_dues_approved_by_user_id_users_id_fkey" FOREIGN KEY ("approved_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_dues" ADD CONSTRAINT "teacher_dues_teacher_payment_id_teacher_payments_id_fkey" FOREIGN KEY ("teacher_payment_id") REFERENCES "teacher_payments"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_important_notes" ADD CONSTRAINT "teacher_important_notes_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_important_notes" ADD CONSTRAINT "teacher_important_notes_created_by_user_id_users_id_fkey" FOREIGN KEY ("created_by_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_payments" ADD CONSTRAINT "teacher_payments_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teacher_payments" ADD CONSTRAINT "teacher_payments_NFkhbkb5U5kT_fkey" FOREIGN KEY ("user_payment_method_id") REFERENCES "user_payment_methods"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "teachers" ADD CONSTRAINT "teachers_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "session_metadata" ADD CONSTRAINT "session_metadata_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;

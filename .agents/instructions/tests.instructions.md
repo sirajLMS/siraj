@@ -26,7 +26,7 @@ applyTo: "**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx,scripts/run-test
     return errorCaught as Error;
   }
   ```
-- NEVER call `getBackendTranslations` directly in tests - causes next-intl loader hangs. Use `expectRepoError` pattern
+- NEVER call `getServerTranslations` from `@/shared/locale/server-graphql` directly in tests - causes the i18n loader to hang. Use `expectRepoError` pattern
 - `DBTransaction` type from `./test-utils` for tx params - NEVER type as `any`
 
 ### Database Tests - tx Parameter Position

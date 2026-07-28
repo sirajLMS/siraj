@@ -1,4 +1,4 @@
-import { appendFile, writeFile } from "node:fs/promises";
+import { appendFile, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { spawn, spawnSync } from "bun";
 import {
@@ -103,12 +103,31 @@ async function waitForServerReady(timeoutMs: number): Promise<boolean> {
       if (res.status === 204) {
         return true;
       }
-    } catch {
-      testLogger.debug("Dev server not ready yet");
+      testLogger.debug(`Dev server responded with status ${res.status} (not ready yet)`);
+    } catch (err) {
+      testLogger.debug(`Dev server not ready yet: ${err instanceof Error ? err.message : String(err)}`);
     }
     await new Promise(resolve => setTimeout(resolve, 500));
   }
   return false;
+}
+
+async function dumpDevServerLog(port: number): Promise<void> {
+  const path = getTestServerLogPath(port);
+  try {
+    const content = await readFile(join(process.cwd(), path), "utf8");
+    if (content.trim()) {
+      testLogger.warn(`===== BEGIN Next.js dev server log (port ${port}) =====`);
+      for (const line of content.split("\n")) {
+        if (line.trim()) testLogger.warn(line);
+      }
+      testLogger.warn(`===== END Next.js dev server log (port ${port}) =====`);
+    } else {
+      testLogger.warn(`Next.js dev server log file is empty (port ${port}): ${path}`);
+    }
+  } catch (err) {
+    testLogger.warn(`Could not read dev server log ${path}: ${err instanceof Error ? err.message : String(err)}`);
+  }
 }
 
 async function spawnServerOnPort(port: number): Promise<ReturnType<typeof spawn>> {
@@ -159,6 +178,7 @@ async function startServerWithRetry(): Promise<void> {
     }
 
     testLogger.warn(`Next.js dev server failed to become ready on port ${port}.`);
+    await dumpDevServerLog(port);
     if (serverRootPid !== undefined) {
       killProcessTree(serverRootPid);
     }

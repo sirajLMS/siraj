@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Stack } from "@mui/material";
+import { Box, Stack, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
@@ -15,7 +15,7 @@ import { ContactSection } from "@/frontend/common/views/dashboard/profile/teache
 import {
   type TeacherEditData,
   type TeacherOwnEditFormData,
-  teacherOwnEditSchema,
+  teacherOwnEditSchemaFactory,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
 import { useAppTranslation } from "@/shared/locale";
 
@@ -39,13 +39,19 @@ export function TeacherProfileEditForm({
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
   const [successOpen, setSuccessOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
+  const schema = teacherOwnEditSchemaFactory({
+    nationalIdRequired: t.validation.nationalIdRequired,
+    nationalIdInvalid: t.validation.nationalIdInvalid,
+  });
   const form = useForm<TeacherOwnEditFormData>({
-    resolver: zodResolver(teacherOwnEditSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       name: "",
       email: "",
       avatarUrl: null,
       phone: "",
+      nationalId: "",
+      nationality: "",
       displayCurrency: null,
     },
   });
@@ -56,6 +62,8 @@ export function TeacherProfileEditForm({
       email: teacherData.email ?? "",
       avatarUrl: teacherData.avatarUrl ?? null,
       phone: teacherData.phone ?? "",
+      nationalId: teacherData.nationalId ?? "",
+      nationality: teacherData.nationality ?? "",
       displayCurrency: teacherData.displayCurrency ?? null,
     });
   }, [form, teacherData]);
@@ -106,6 +114,15 @@ export function TeacherProfileEditForm({
             {canEdit("core_contact") || canEdit("teacher_identity") ? (
               <ContactSection scope={scope} isAdminScope={false} register={form.register} control={form.control} />
             ) : null}
+            <TextField
+              {...form.register("nationalId")}
+              label={t.fields.nationalId}
+              required
+              error={Boolean(form.formState.errors.nationalId)}
+              helperText={form.formState.errors.nationalId?.message}
+              fullWidth
+              size="small"
+            />
           </Box>
           <PrimaryPageAction type="submit" disabled={isSaving}>
             {isSaving ? t.shell.loading : t.actions.save}

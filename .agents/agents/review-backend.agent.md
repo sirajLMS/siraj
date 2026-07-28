@@ -87,9 +87,9 @@ Scan all changed files in scope and check for each of the following violations. 
 
 ### i18n & Localized Errors
 
-- Hardcoded error strings, messages, or warnings in services. Must use `getBackendTranslations` from `next-intl`.
-- Hardcoded error strings in repositories. Must use `getBackendTranslations`.
-- Hardcoded error strings in GraphQL resolvers. Must use `getBackendTranslations`.
+- Hardcoded error strings, messages, or warnings in services. Must use `getServerTranslations(locale, "<namespace>")` from `@/shared/locale/server-graphql`.
+- Hardcoded error strings in repositories. Must use `getServerTranslations(locale, "<namespace>")` from `@/shared/locale/server-graphql`.
+- Hardcoded error strings in GraphQL resolvers. Must use `ctx.t("<namespace>")` (bound to `ctx.locale`).
 - Service or repository missing optional `locale?: string` parameter for i18n propagation.
 - GraphQL resolvers not propagating `ctx.locale` to service or repository calls.
 

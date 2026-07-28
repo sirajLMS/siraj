@@ -6,7 +6,7 @@ import { BaseCard } from "@/frontend/common/components/ui";
 import type { ClassInstanceStudentInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import { StudentEntityLink } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 interface StudentProfileCardProps {
   readonly student: ClassInstanceStudentInfo;

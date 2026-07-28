@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { AssignedStudentsTab } from "@/frontend/common/views/dashboard/profile/teacher/students/AssignedStudentsTab";

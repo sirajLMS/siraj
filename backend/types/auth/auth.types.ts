@@ -24,6 +24,13 @@ export type CurrentUserProfile = UserReturnType & {
   role: UserRole;
   teacherId: string | null;
   parentId: string | null;
+  /**
+   * Whether the current teacher has completed the profile fields required to
+   * operate on the system. Today this is driven by `nationalId` being set.
+   * Always `true` for non-teacher users (the gate only applies to teachers).
+   * Consumed by the dashboard layout guard to force first-login completion.
+   */
+  nationalIdComplete: boolean;
 };
 
 export type GroupPermissionSelectType = typeof groupPermissions.$inferSelect;

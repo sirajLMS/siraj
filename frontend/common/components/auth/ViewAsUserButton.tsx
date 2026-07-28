@@ -28,6 +28,8 @@ interface ViewAsUserButtonProps {
   readonly size?: "small" | "medium";
   readonly variant?: ViewAsUserVariant;
   readonly onMenuClose?: () => void;
+  readonly open?: boolean;
+  readonly onClose?: () => void;
 }
 
 export function ViewAsUserButton({
@@ -37,15 +39,29 @@ export function ViewAsUserButton({
   size = "small",
   variant = "icon",
   onMenuClose,
+  open: externalOpen,
+  onClose: externalOnClose,
 }: ViewAsUserButtonProps) {
   const t = useAppTranslation().authTranslations.impersonation;
   const currentUser = useUserStore(state => state.user);
+  const actorIsSuperAdmin = useUserStore(state => state.actorIsSuperAdmin);
   const { isImpersonating, startImpersonation, loading } = useImpersonation();
   const { isSimulatingGroup } = usePermissionGroupSimulation();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [reason, setReason] = useState("");
 
-  const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
+  const isControlled = typeof externalOpen === "boolean";
+  const isDialogOpen = isControlled ? externalOpen : internalOpen;
+
+  const handleClose = () => {
+    if (isControlled) {
+      externalOnClose?.();
+    } else {
+      setInternalOpen(false);
+    }
+  };
+
+  const isSuperAdmin = actorIsSuperAdmin || currentUser?.role === "SUPER_ADMIN" || currentUser?.role === "super_admin";
   const isSelf = currentUser?.id === targetUserId;
 
   if (!isSuperAdmin || isSelf || targetIsSuperAdmin || isImpersonating || isSimulatingGroup) {
@@ -54,13 +70,15 @@ export function ViewAsUserButton({
 
   const openDialog = () => {
     onMenuClose?.();
-    setOpen(true);
+    if (!isControlled) {
+      setInternalOpen(true);
+    }
   };
 
   const handleConfirm = async () => {
     const success = await startImpersonation(targetUserId, reason.trim() || undefined);
     if (success) {
-      setOpen(false);
+      handleClose();
       setReason("");
     }
   };
@@ -68,6 +86,9 @@ export function ViewAsUserButton({
   const loginLabel = t.loginAs;
 
   function renderTrigger() {
+    if (isControlled && !variant) {
+      return null;
+    }
     if (variant === "menuItem") {
       return (
         <MenuItem onClick={openDialog}>
@@ -97,13 +118,16 @@ export function ViewAsUserButton({
         </Button>
       );
     }
-    return (
-      <Tooltip title={loginLabel}>
-        <IconButton size={size} onClick={openDialog} aria-label={loginLabel}>
-          <VisibilityOutlined fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    );
+    if (variant === "icon") {
+      return (
+        <Tooltip title={loginLabel}>
+          <IconButton size={size} onClick={openDialog} aria-label={loginLabel}>
+            <VisibilityOutlined fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      );
+    }
+    return null;
   }
 
   const trigger = renderTrigger();
@@ -112,7 +136,7 @@ export function ViewAsUserButton({
     <>
       {trigger}
 
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="xs">
+      <Dialog open={isDialogOpen} onClose={handleClose} fullWidth maxWidth="xs">
         <DialogTitle>{t.confirmTitle(targetUserName)}</DialogTitle>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
           {t.confirmMessage}
@@ -127,7 +151,7 @@ export function ViewAsUserButton({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)} disabled={loading}>
+          <Button onClick={handleClose} disabled={loading}>
             {t.cancel}
           </Button>
           <Button variant="contained" onClick={() => void handleConfirm()} disabled={loading}>

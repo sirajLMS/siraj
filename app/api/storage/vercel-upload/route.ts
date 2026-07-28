@@ -2,7 +2,7 @@ import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { SignedUrlRepository } from "@/backend/db";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
-import { StorageService } from "@/backend/services";
+import { SessionService, StorageService } from "@/backend/services";
 
 export type VercelUploadUrlClientPlayload = {
   sessionId: string;
@@ -12,7 +12,7 @@ export type VercelUploadUrlClientPlayload = {
 
 async function getUserIdFromRequest(request: NextRequest): Promise<string | null> {
   const authHeader = request.headers.get("authorization");
-  const accessToken = extractTokenFromHeader(authHeader);
+  const accessToken = extractTokenFromHeader(authHeader) ?? request.cookies.get("access_token")?.value ?? null;
 
   if (accessToken) {
     const payload = await verifyToken(accessToken);
@@ -20,6 +20,15 @@ async function getUserIdFromRequest(request: NextRequest): Promise<string | null
       return payload.userId;
     }
   }
+
+  const sessionId = request.cookies.get("session_id")?.value;
+  if (sessionId) {
+    const session = await SessionService.validateSession(sessionId);
+    if (session?.userId) {
+      return session.userId;
+    }
+  }
+
   return null;
 }
 

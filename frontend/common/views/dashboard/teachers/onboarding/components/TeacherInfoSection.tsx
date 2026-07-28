@@ -3,7 +3,7 @@
 import { FormControl, FormHelperText, Grid, TextField } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { AppDatePicker, outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
@@ -22,7 +22,7 @@ interface BaseSectionProps {
       readonly nationality: string;
       readonly nationalId: string;
       readonly phone: string;
-      readonly age: string;
+      readonly dateOfBirth: string;
       readonly gender: string;
       readonly male: string;
       readonly female: string;
@@ -37,7 +37,7 @@ interface BaseSectionProps {
       readonly nationality: string;
       readonly nationalId: string;
       readonly phone: string;
-      readonly age: string;
+      readonly dateOfBirth: string;
       readonly address: string;
       readonly qualifications: string;
     };
@@ -160,13 +160,40 @@ export function IdentityFields({ register, control, errors, labels }: Readonly<S
       <Grid size={{ xs: 12, md: 4 }}>
         <Grid container spacing={2}>
           <Grid size={{ xs: 6 }}>
-            <TextField
-              {...register("dateOfBirth")}
-              label={labels.fields.age}
-              placeholder={labels.placeholders.age}
-              type="number"
-              fullWidth
-              sx={outlinedInputSx}
+            <Controller
+              name="dateOfBirth"
+              control={control}
+              render={({ field }) => {
+                const dateValue = field.value ? new Date(field.value) : null;
+                const validDate = dateValue && !Number.isNaN(dateValue.getTime()) ? dateValue : null;
+
+                return (
+                  <AppDatePicker
+                    value={validDate}
+                    onChange={(date: Date | null) => {
+                      if (date && !Number.isNaN(date.getTime())) {
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, "0");
+                        const day = String(date.getDate()).padStart(2, "0");
+                        field.onChange(`${year}-${month}-${day}`);
+                      } else {
+                        field.onChange("");
+                      }
+                    }}
+                    slotProps={{
+                      textField: {
+                        label: labels.fields.dateOfBirth,
+                        variant: "outlined",
+                        fullWidth: true,
+                        error: Boolean(errors.dateOfBirth),
+                        helperText: errors.dateOfBirth?.message,
+                        sx: outlinedInputSx,
+                        slotProps: { htmlInput: { autoComplete: "off" } },
+                      },
+                    }}
+                  />
+                );
+              }}
             />
           </Grid>
           <Grid size={{ xs: 6 }}>

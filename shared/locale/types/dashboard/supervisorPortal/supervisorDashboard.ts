@@ -12,4 +12,14 @@ export interface SupervisorDashboardLabels {
   readonly recentApprovals: string;
   readonly noRecentApprovals: string;
   readonly loadingMessage: string;
+  readonly approvedTime: string;
+  readonly lessonDate: string;
+  readonly duration: string;
+  readonly completion: string;
+  readonly teacher: string;
+  readonly student: string;
+  readonly viewReport: string;
+  readonly viewClass: string;
+  readonly history: string;
+  readonly approvedStatus: string;
 }

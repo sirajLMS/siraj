@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DesktopTimezoneDisplay } from "@/frontend/desktop/components/ui/display/timezoneDisplay/timezoneDisplay.desktop";
 
 const meta: Meta<typeof DesktopTimezoneDisplay> = {

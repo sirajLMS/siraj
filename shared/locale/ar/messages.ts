@@ -27,8 +27,6 @@ import { dashboardLmsCreditAr } from "@/shared/locale/ar/dashboard/lms/credit";
 import { dashboardLmsLessonReportsAr } from "@/shared/locale/ar/dashboard/lms/lessonReports";
 import { dashboardLmsMonthlyReportsAr } from "@/shared/locale/ar/dashboard/lms/monthlyReports";
 import { dashboardLmsTeacherDuesAr } from "@/shared/locale/ar/dashboard/lms/teacherDues";
-import { dashboardManagersDirectoryAr } from "@/shared/locale/ar/dashboard/managers/directory";
-import { dashboardManagerOnboardingAr } from "@/shared/locale/ar/dashboard/managers/onboarding";
 import { dashboardMeetingProvidersAr } from "@/shared/locale/ar/dashboard/meeting-providers/main";
 import { dashboardParentsDirectoryAr } from "@/shared/locale/ar/dashboard/parents/directory";
 import { dashboardParentLifecycleAr } from "@/shared/locale/ar/dashboard/parents/lifecycle";
@@ -42,6 +40,8 @@ import { dashboardPermissionsAr } from "@/shared/locale/ar/dashboard/permissions
 import { dashboardReportsAr } from "@/shared/locale/ar/dashboard/reports/main";
 import { dashboardBooksAndBagsAr } from "@/shared/locale/ar/dashboard/resources/booksAndBags";
 import { dashboardResourcesAr } from "@/shared/locale/ar/dashboard/resources/main";
+import { dashboardStaffDirectoryAr } from "@/shared/locale/ar/dashboard/staff/directory";
+import { dashboardStaffOnboardingAr } from "@/shared/locale/ar/dashboard/staff/onboarding";
 import { dashboardStudentPortalCreditsAr } from "@/shared/locale/ar/dashboard/studentPortal/studentCredits";
 import { dashboardStudentPortalDashboardAr } from "@/shared/locale/ar/dashboard/studentPortal/studentDashboard";
 import { dashboardStudentPortalHistoryAr } from "@/shared/locale/ar/dashboard/studentPortal/studentHistory";
@@ -180,8 +180,8 @@ export const arMessages: Translations = {
     lmsLessonReports: dashboardLmsLessonReportsAr,
     lmsMonthlyReports: dashboardLmsMonthlyReportsAr,
     lmsTeacherDues: dashboardLmsTeacherDuesAr,
-    managersDirectory: dashboardManagersDirectoryAr,
-    managerOnboarding: dashboardManagerOnboardingAr,
+    staffDirectory: dashboardStaffDirectoryAr,
+    staffOnboarding: dashboardStaffOnboardingAr,
     meetingProviders: dashboardMeetingProvidersAr,
     parentsDirectory: dashboardParentsDirectoryAr,
     parentOnboarding: dashboardParentOnboardingAr,

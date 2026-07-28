@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DesktopLanguageDisplay } from "@/frontend/desktop/components/ui/display/language/languageDisplay.desktop";
 
 const meta: Meta<typeof DesktopLanguageDisplay> = {

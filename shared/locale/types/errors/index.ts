@@ -232,6 +232,7 @@ export interface ErrorsLabels {
   readonly notFound: string;
   readonly unknownName: string;
   readonly invalidInput: string;
+  readonly invalidNationalId: string;
   readonly permissionGroupNotFound: string;
 
   // ─── FX Display Currency messages (used by buildFxDisplayMessages) ────
@@ -288,4 +289,5 @@ export interface ErrorsLabels {
   readonly teacherUnavailabilityConflict: string;
   readonly teacherOnVacation: string;
   readonly resourceNotFound: string;
+  readonly currencyInUse: string;
 }

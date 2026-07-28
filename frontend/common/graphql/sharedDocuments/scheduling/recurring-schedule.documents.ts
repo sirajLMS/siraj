@@ -16,12 +16,27 @@ export const recurringScheduleQueryDocument: TypedDocumentNode<
       durationMinutes
       defaultStartTime
       timezone
+      hourlyRate
+      rateCurrency
       days {
         id
         dayOfWeek
         startTime
         isActive
       }
+    }
+  }
+`;
+
+export const updateRecurringClassRateMutationDocument: TypedDocumentNode<
+  Operations.UpdateRecurringClassRateMutation,
+  Types.MutationUpdateRecurringClassRateArgs
+> = gql`
+  mutation updateRecurringClassRate($input: UpdateRecurringClassRateInput!) {
+    updateRecurringClassRate(input: $input) {
+      id
+      hourlyRate
+      rateCurrency
     }
   }
 `;

@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/input/localizedString/types";
 import { LocalizedStringInputDesktop } from "@/frontend/desktop/components/ui/input/localizedString/localizedStringInput.desktop";

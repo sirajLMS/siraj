@@ -61,12 +61,12 @@ applyTo: "backend/**/*.ts"
 - Exception: input types and collection wrapper types (paginated results) allowed as separate definitions
 - Complex computed/derived types that don't map to a single table may need custom definitions - but still import base types from `backend/types/`
 - `id` field on all GraphQL objects (Apollo cache normalization)
-- Error translation: direct errors in resolvers must use `getBackendTranslations`
+- Error translation: direct errors in resolvers must use `ctx.t("<namespace>")` (already bound to `ctx.locale`)
 - Resolvers must propagate `ctx.locale` to service and repository calls
 
 ### i18n / Localized Errors
 
-- All error messages via `getBackendTranslations` from `next-intl`
+- All error messages via `getServerTranslations(locale, "<namespace>")` from `@/shared/locale/server-graphql` (scripts/services/standalone contexts); GraphQL resolvers use `ctx.t("<namespace>")` (already bound to `ctx.locale`). The legacy `getBackendTranslations` from `@/backend/lib/intl` and `next-intl` are DEPRECATED - do not use
 - Accept `locale?: string` parameter in services and repositories
 - GraphQL resolvers propagate `ctx.locale` to service/repo calls
 - Never hardcode error strings, messages, or warnings - in any layer
@@ -85,7 +85,7 @@ applyTo: "backend/**/*.ts"
   ```ts
   sql<number>`CASE WHEN ${table.status} = 'ACTIVE' THEN 1 ELSE 0 END`.mapWith(Number)
   ```
-- No hardcoded error strings - use `getBackendTranslations` with `locale?: string`
+- No hardcoded error strings - use `getServerTranslations(locale, "<namespace>")` from `@/shared/locale/server-graphql` with `locale?: string` (standalone contexts); repositories accessed from GraphQL resolvers receive translated messages via `ctx.t("<namespace>")` propagated from the resolver
 - Repos use `{Entity}SelectType` / `{Entity}InsertType` from `backend/types/`, not raw schema references
 - Repos must NOT contain business logic, permission checks, or complex orchestration (service layer only)
 

@@ -1,5 +1,5 @@
 import { MockedProvider } from "@apollo/client/testing/react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { ReactNode } from "react";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {

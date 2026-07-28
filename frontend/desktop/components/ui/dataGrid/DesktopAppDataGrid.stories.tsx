@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { createDesktopStoryMeta, SAMPLE_GRID_COLUMNS, SAMPLE_GRID_ROWS } from "@/frontend/common/stories";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 

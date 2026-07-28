@@ -46,6 +46,36 @@ export class TwilioSmsAdapter implements ISmsChannel {
   }
 
   async send(payload: SmsPayload, _locale?: string): Promise<SmsSendResult> {
+    // Defensive guard: a non-empty `to` is required before we touch the
+    // provider. This turns a future dispatch path that forgets `metadata.to`
+    // into an actionable local failure instead of a cryptic provider error.
+    // We still record a `FAILED` delivery row so the audit trail shows why.
+    if (!payload.to?.trim()) {
+      logger.error("TwilioSmsAdapter: empty recipient `to` — dropping payload", {
+        userId: payload.userId,
+        eventType: payload.eventType,
+      });
+
+      const delivery = await NotificationRepository.createDelivery({
+        userId: payload.userId,
+        channel: NotificationChannel.SMS,
+        eventType: payload.eventType,
+        title: "SMS",
+        body: payload.to,
+        metadata: payload.metadata ?? null,
+      });
+      await NotificationRepository.updateDeliveryStatus({
+        deliveryId: delivery.id,
+        status: NotificationDeliveryStatus.FAILED,
+        failureReason: "empty recipient address",
+      });
+
+      return {
+        success: false,
+        error: "empty recipient address",
+      };
+    }
+
     const rateLimitResult = await this.checkRateLimit(payload.userId);
     if (rateLimitResult) return rateLimitResult;
 

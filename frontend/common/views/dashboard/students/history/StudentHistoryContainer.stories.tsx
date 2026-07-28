@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { create } from "zustand";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";

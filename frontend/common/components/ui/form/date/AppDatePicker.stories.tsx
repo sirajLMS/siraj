@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
 
 const meta: Meta<typeof AppDatePicker> = {

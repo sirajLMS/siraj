@@ -1,9 +1,6 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { useEffect } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 
 function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
@@ -48,20 +45,15 @@ export interface UseDashboardContainerViewModelProps {
 export function useDashboardContainerViewModel(
   _props: Readonly<UseDashboardContainerViewModelProps>
 ): DashboardContainerViewModel {
-  const { user, setUser } = useUserStore();
+  /**
+   * The user store is seeded by UserStoreInitializer (rendered in
+   * DashboardClientBridge) before this component mounts, so `user` is already
+   * populated on first render — no Apollo query needed here.
+   */
+  const { user } = useUserStore();
 
-  const { data, loading } = useQuery(meQueryDocument, {
-    skip: !!user?.role,
-  });
-
-  useEffect(() => {
-    if (data?.me) {
-      setUser(data.me);
-    }
-  }, [data, setUser]);
-
-  const permissions = user?.permissions || [];
-  const userName = user?.name || "";
+  const permissions = user?.permissions ?? [];
+  const userName = user?.name ?? "";
 
   let role: DashboardRole = "admin";
 
@@ -78,6 +70,7 @@ export function useDashboardContainerViewModel(
   return {
     role,
     userName,
-    loading: loading && !user,
+    // No async loading — role is derived synchronously from the user store
+    loading: false,
   };
 }

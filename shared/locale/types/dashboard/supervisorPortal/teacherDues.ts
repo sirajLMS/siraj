@@ -15,4 +15,9 @@ export interface SupervisorTeacherDuesLabels {
   readonly markPaidSuccess: string;
   readonly markPaidError: string;
   readonly markPaidMissingPayment: string;
+  readonly rateSourceColumn: string;
+  readonly rateSourceOverride: string;
+  readonly rateSourceRecurring: string;
+  readonly rateSourceSubject: string;
+  readonly rateSourceTeacher: string;
 }

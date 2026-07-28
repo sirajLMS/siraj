@@ -13,6 +13,8 @@ export interface MobileCardListProps<T> {
   readonly getKey: (row: T) => string;
   readonly loading?: boolean;
   readonly emptyMessage?: string;
+  readonly renderSkeleton?: () => ReactNode;
+  readonly renderEmptyState?: (emptyMessage: string) => ReactNode;
   readonly gap?: number;
   readonly layout?: "edge-to-edge" | "rounded";
   readonly paginationOptions: ListPaginationOptions;
@@ -63,12 +65,23 @@ export function MobileCardList<T>({
   getKey,
   loading,
   emptyMessage = "No entries found",
+  renderSkeleton,
+  renderEmptyState,
   gap = 2,
   layout = "edge-to-edge",
   paginationOptions,
   sx,
 }: MobileCardListProps<T>) {
   const isEdgeToEdge = layout === "edge-to-edge";
+  const listSx: SxProps<Theme> = [
+    {
+      display: "flex",
+      flexDirection: "column",
+      gap,
+      ...(isEdgeToEdge ? {} : { px: { xs: 2 } }),
+    },
+    ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+  ];
   const clientPageSize =
     paginationOptions !== false && paginationOptions.mode === "client"
       ? (paginationOptions.pageSize ?? DEFAULT_CLIENT_PAGE_SIZE)
@@ -104,10 +117,14 @@ export function MobileCardList<T>({
 
   if (loading && rows.length === 0) {
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap, ...(isEdgeToEdge ? { px: { xs: 2 } } : {}), ...sx }}>
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
-          <CircularProgress />
-        </Box>
+      <Box sx={listSx}>
+        {renderSkeleton ? (
+          renderSkeleton()
+        ) : (
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
+            <CircularProgress />
+          </Box>
+        )}
         {paginationControls}
       </Box>
     );
@@ -115,27 +132,23 @@ export function MobileCardList<T>({
 
   if (rows.length === 0) {
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap, ...(isEdgeToEdge ? { px: { xs: 2 } } : {}), ...sx }}>
-        <Box sx={{ py: 4, px: 2, textAlign: "center" }}>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {emptyMessage}
-          </Typography>
-        </Box>
+      <Box sx={listSx}>
+        {renderEmptyState ? (
+          renderEmptyState(emptyMessage)
+        ) : (
+          <Box sx={{ py: 4, px: 2, textAlign: "center" }}>
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {emptyMessage}
+            </Typography>
+          </Box>
+        )}
         {paginationControls}
       </Box>
     );
   }
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap,
-        ...(isEdgeToEdge ? { px: { xs: 2 } } : {}),
-        ...sx,
-      }}
-    >
+    <Box sx={listSx}>
       {visibleRows.map((row, index) => (
         <Box key={getKey(row)}>{renderItem(row, index)}</Box>
       ))}

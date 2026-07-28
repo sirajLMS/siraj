@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";

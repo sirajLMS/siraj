@@ -7,7 +7,7 @@ import { userQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDisplayCurrencyHintDismissed } from "@/frontend/common/hooks/useDisplayCurrencyHintDismissed";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale/client";
 
 type DisplayCurrencyHintMode = "viewer" | "subject";

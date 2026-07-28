@@ -14,6 +14,8 @@ export const supervisorDashboardQueryDocument: TypedDocumentNode<Operations.Supe
       recentApprovals {
         id
         classInstanceId
+        subjectName
+        classAvatarUrl
         studentId
         studentName
         teacherId

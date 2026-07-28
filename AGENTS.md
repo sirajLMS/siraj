@@ -9,7 +9,7 @@ Siraj is a Next.js 16 (App Router) full-stack application using:
 - **Frontend**: React 19, MUI v9, Apollo Client v4, Zustand
 - **Backend**: Pothos GraphQL, Drizzle ORM, PostgreSQL
 - **Testing**: Bun test runner, Vitest for Storybook, Playwright for E2E
-- **i18n**: **Custom compile-time TypeScript system** in `shared/locale/` (migrating from `next-intl` — see `shared/AGENTS.md` for rules). Next.js native `[locale]` routing preserved.
+- **i18n**: **Custom compile-time TypeScript system** in `shared/locale/` (replaces legacy `next-intl`; see `shared/AGENTS.md` for rules). Next.js native `[locale]` routing preserved.
 
 ## Essential Commands
 
@@ -145,7 +145,7 @@ All layers use types from `backend/types/{entity}.types.ts`:
 - **Pluralization**: define as `(count: number) => string` in type schema, implement in each locale file
 - **Interpolation**: define as `(param: string, ...) => string` in type schema, implement with template literals
 - **Never hardcode error strings** — always use typed translation functions
-- Legacy: `next-intl` remains in `package.json` until migration complete; `shared/messages/` still used by non-migrated namespaces
+- The legacy `next-intl` package has been removed; all translation namespaces now live in `shared/locale/`. Never import `next-intl`, `getBackendTranslations`, or from `shared/messages/` (the directory no longer exists).
 
 ### Theme & Styling
 - **NO hardcoded colors** - all colors from theme palette

@@ -1,3 +1,5 @@
+import { uiMeetingConfigRecurringScheduleAr } from "@/shared/locale/ar/ui/meetingConfig/recurringSchedule";
+
 export const uiMeetingConfigAr = {
   sectionTitle: "إعدادات الاجتماعات",
   addConfig: "إضافة إعداد اجتماع",
@@ -98,13 +100,5 @@ export const uiMeetingConfigAr = {
     empty: "لم يتم تكوين اجتماع افتراضي",
     manageLink: "إدارة إعدادات الاجتماع",
   },
-  recurringSchedule: {
-    pageTitle: "اجتماع السلسلة المتكررة",
-    scheduleSummary: (student: string, teacher: string, duration: number | string, timezone: string) =>
-      `${student} مع ${teacher} · ${duration} دقيقة · ${timezone}`,
-    invalidId: "معرّف الجدول غير صالح",
-    breadcrumbDashboard: "لوحة التحكم",
-    breadcrumbClasses: "الحصص",
-    goToClass: "الانتقال إلى الحصة",
-  },
+  recurringSchedule: uiMeetingConfigRecurringScheduleAr,
 };

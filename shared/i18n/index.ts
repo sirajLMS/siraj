@@ -1,8 +1,7 @@
+export { Link, type LinkProps } from "./link";
 export {
   type AppLocale,
   defaultLocale,
-  Link,
-  type LinkProps,
   locales,
   type RedirectOptions,
   type RoutingConfig,

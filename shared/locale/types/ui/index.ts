@@ -153,6 +153,13 @@ export interface MeetingConfigRecurringScheduleLabels {
   readonly breadcrumbDashboard: string;
   readonly breadcrumbClasses: string;
   readonly goToClass: string;
+  readonly rateSectionTitle: string;
+  readonly hourlyRateLabel: string;
+  readonly currencyLabel: string;
+  readonly rateSaveLabel: string;
+  readonly rateClearLabel: string;
+  readonly rateSuccessMessage: string;
+  readonly rateErrorMessage: string;
 }
 
 export type MeetingConfigLabels = {

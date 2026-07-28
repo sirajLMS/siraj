@@ -1,18 +1,13 @@
 "use client";
 
-import { AccessTimeOutlined, HistoryOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Avatar, Box, CircularProgress, Paper, Stack, type Theme, Tooltip, Typography } from "@mui/material";
+import { AccessTimeOutlined, CalendarTodayOutlined, HistoryOutlined, VisibilityOutlined } from "@mui/icons-material";
+import { Avatar, Box, Skeleton, type Theme, Tooltip, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import type * as React from "react";
 import { ActionIconLink } from "@/frontend/common/components/ui";
 import { ClassProfileLink } from "@/frontend/common/components/ui/display/classProfileLink/ClassProfileLink";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import {
-  AppPermission,
-  type ClassExecutionState,
-  ClassOutcome,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/common/stores/userStore";
+import { ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   classHref,
   profileHrefForTeacher,
@@ -26,28 +21,20 @@ import {
   formatDurationMinutes,
   formatScheduleYourTime,
 } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
-import { Link } from "@/shared/i18n/routing";
+import type {
+  ScheduleOverviewDataHeaders,
+  ScheduleOverviewDataStatusLabels,
+} from "@/frontend/common/views/dashboard/types/dashboard";
+import { Link } from "@/shared/i18n";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppLocale } from "@/shared/locale";
 
-interface ScheduleOverviewCardListProps {
-  readonly rows: readonly DailyScheduleRow[];
-  readonly headers: {
-    readonly className: string;
-    readonly student: string;
-    readonly teacher: string;
-    readonly yourTime: string;
-    readonly teacherTime: string;
-    readonly studentTime: string;
-    readonly duration: string;
-    readonly status: string;
-    readonly history: string;
-    readonly joinVideo: string;
-  };
-  readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
+export interface ScheduleOverviewCardProps {
+  readonly row: DailyScheduleRow;
+  readonly headers: ScheduleOverviewDataHeaders;
+  readonly statusLabels: ScheduleOverviewDataStatusLabels;
   readonly detailsLabel: string;
-  readonly emptyMessage: string;
-  readonly loading?: boolean;
+  readonly showTimezones: boolean;
+  readonly locale: string;
 }
 
 function getNameInitials(name: string): string {
@@ -73,31 +60,6 @@ function getPersonAccentColor(tone: PersonAccentTone, theme: Theme): string {
       return theme.palette.onSurface;
   }
 }
-
-const StyledEmptyStateBox = styled(Box)(({ theme }) => ({
-  paddingTop: theme.spacing(4),
-  paddingBottom: theme.spacing(4),
-  paddingInline: theme.spacing(2),
-  textAlign: "center",
-}));
-
-const StyledScheduleCard = styled(Paper, {
-  shouldForwardProp: prop => prop !== "isAbsent",
-})<{ isAbsent: boolean }>(({ theme, isAbsent }) => ({
-  paddingBlock: theme.spacing(2),
-  paddingInline: theme.spacing(2),
-  borderRadius: 0,
-  opacity: isAbsent ? 0.85 : 1,
-  backgroundColor: theme.palette.surfaceContainerLowest,
-  boxShadow: "none",
-  overflow: "hidden",
-  width: "100%",
-}));
-
-const StyledCardList = styled(Stack)(({ theme }) => ({
-  gap: theme.spacing(2),
-  backgroundColor: theme.palette.surfaceContainerHighest,
-}));
 
 const StyledCardHeader = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -339,35 +301,28 @@ function PersonCell({ name, label, tone, href, avatarUrl }: PersonCellProps) {
   );
 }
 
-interface ScheduleOverviewMobileCardProps {
-  readonly row: DailyScheduleRow;
-  readonly headers: ScheduleOverviewCardListProps["headers"];
-  readonly statusLabels: ScheduleOverviewCardListProps["statusLabels"];
-  readonly detailsLabel: string;
-  readonly showTimezones: boolean;
-  readonly locale: string;
-}
-
 interface ScheduleCardActionsProps {
   readonly row: DailyScheduleRow;
-  readonly headers: ScheduleOverviewCardListProps["headers"];
+  readonly headers: ScheduleOverviewDataHeaders;
   readonly detailsLabel: string;
   readonly studentId: string | undefined;
   readonly classId: string;
 }
 
 function ScheduleCardActions({ row, headers, detailsLabel, studentId, classId }: ScheduleCardActionsProps) {
+  const isJoinable = isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false });
+  const joinUrl = isJoinable ? row.meetingJoinUrl : undefined;
+  const meeting = isJoinable ? row.effectiveMeeting : undefined;
+
   return (
     <StyledCardActions>
-      {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false }) ? (
-        <MeetingJoinAction
-          variant="icon"
-          joinUrl={row.meetingJoinUrl}
-          meeting={row.effectiveMeeting}
-          label={headers.joinVideo}
-          emptyRole="class"
-        />
-      ) : null}
+      <MeetingJoinAction
+        variant="icon"
+        joinUrl={joinUrl}
+        meeting={meeting}
+        label={headers.joinVideo}
+        emptyRole="class"
+      />
       {studentId ? (
         <Tooltip title={headers.history}>
           <ActionIconLink href={studentProfileTabHref(studentId, "history")} aria-label={headers.history}>
@@ -387,7 +342,7 @@ function ScheduleCardActions({ row, headers, detailsLabel, studentId, classId }:
 }
 
 function buildScheduleMetaItems(
-  headers: ScheduleOverviewCardListProps["headers"],
+  headers: ScheduleOverviewDataHeaders,
   row: DailyScheduleRow,
   duration: string,
   showTimezones: boolean
@@ -423,14 +378,14 @@ function buildScheduleMetaItems(
   ];
 }
 
-function ScheduleOverviewMobileCard({
+export function ScheduleOverviewCard({
   row,
   headers,
   statusLabels,
   detailsLabel,
   showTimezones,
   locale,
-}: ScheduleOverviewMobileCardProps) {
+}: ScheduleOverviewCardProps) {
   const isAbsent = row.outcome === ClassOutcome.Absent;
   const studentId = row.student?.id;
   const studentName = row.student?.name ?? "Unknown Student";
@@ -442,7 +397,17 @@ function ScheduleOverviewMobileCard({
   const duration = formatDurationMinutes(row.duration);
 
   return (
-    <StyledScheduleCard elevation={0} isAbsent={isAbsent}>
+    <Box
+      sx={{
+        paddingBlock: 2,
+        paddingInline: 2,
+        opacity: isAbsent ? 0.85 : 1,
+        width: "100%",
+        minHeight: 220,
+        boxSizing: "border-box",
+        overflow: "hidden",
+      }}
+    >
       <StyledCardHeader>
         <StyledCardHeaderMain>
           <ClassProfileLink
@@ -502,52 +467,86 @@ function ScheduleOverviewMobileCard({
           avatarUrl={row.student?.avatarUrl}
         />
       </StyledPeopleRow>
-    </StyledScheduleCard>
+    </Box>
   );
 }
 
-export function ScheduleOverviewCardList({
-  rows,
-  headers,
-  statusLabels,
-  detailsLabel,
-  emptyMessage,
-  loading = false,
-}: ScheduleOverviewCardListProps) {
-  const locale = useAppLocale();
-  const { hasPermission } = useUserStore();
-  const showTimezones = hasPermission(AppPermission.ScheduleViewTimezones);
-
-  if (rows.length === 0) {
-    if (loading) {
-      return (
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
-          <CircularProgress />
-        </Box>
-      );
-    }
-    return (
-      <StyledEmptyStateBox>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {emptyMessage}
-        </Typography>
-      </StyledEmptyStateBox>
-    );
-  }
-
+export function ScheduleOverviewCardSkeleton() {
   return (
-    <StyledCardList>
-      {rows.map(row => (
-        <ScheduleOverviewMobileCard
-          key={row.id ?? undefined}
-          row={row}
-          headers={headers}
-          statusLabels={statusLabels}
-          detailsLabel={detailsLabel}
-          showTimezones={showTimezones}
-          locale={locale}
-        />
-      ))}
-    </StyledCardList>
+    <Box
+      sx={{
+        paddingBlock: 2,
+        paddingInline: 2,
+        width: "100%",
+        minHeight: 220,
+        boxSizing: "border-box",
+        overflow: "hidden",
+      }}
+    >
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flex: 1 }}>
+          <Skeleton variant="circular" width={40} height={40} />
+          <Box sx={{ flex: 1 }}>
+            <Skeleton variant="text" width="60%" height={24} />
+            <Skeleton variant="rectangular" width={80} height={20} sx={{ borderRadius: 1, mt: 0.5 }} />
+          </Box>
+        </Box>
+        <Box sx={{ display: "flex", gap: 0.5 }}>
+          <Skeleton variant="circular" width={28} height={28} />
+          <Skeleton variant="circular" width={28} height={28} />
+        </Box>
+      </Box>
+      <Skeleton variant="rectangular" height={42} sx={{ borderRadius: 1, mb: 1.5 }} />
+      <Skeleton variant="rectangular" height={52} sx={{ borderRadius: 1, mb: 1.5 }} />
+      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, pt: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Skeleton variant="circular" width={32} height={32} />
+          <Skeleton variant="text" width={70} />
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Skeleton variant="circular" width={32} height={32} />
+          <Skeleton variant="text" width={70} />
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+export function ScheduleOverviewEmptyState({ message }: { readonly message: string }) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingBlock: 2,
+        paddingInline: 2,
+        minHeight: 220,
+        width: "100%",
+        boxSizing: "border-box",
+        textAlign: "center",
+        gap: 1.5,
+        overflow: "hidden",
+      }}
+    >
+      <Box
+        sx={theme => ({
+          width: 48,
+          height: 48,
+          borderRadius: "50%",
+          backgroundColor: alpha(theme.palette.primary.main, 0.08),
+          color: theme.palette.primary.main,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        })}
+      >
+        <CalendarTodayOutlined sx={{ fontSize: 24 }} />
+      </Box>
+      <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
+        {message}
+      </Typography>
+    </Box>
   );
 }

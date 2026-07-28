@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MobileErrorState } from "@/frontend/mobile/components/ui/state/MobileErrorState";
 
 const meta: Meta<typeof MobileErrorState> = {

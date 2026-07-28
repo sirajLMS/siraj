@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import type { CountrySelectProps } from "@/frontend/common/components/ui/input/countrySelect/types";
 import { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql-types";

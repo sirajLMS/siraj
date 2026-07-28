@@ -8,7 +8,7 @@ import {
 import { useParentLifecycleProfileHref } from "@/frontend/common/views/dashboard/parents/lifecycle/components/useParentLifecycleForm";
 import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale";
 
 export function ParentLifecycleMobileView({

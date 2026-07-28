@@ -16,6 +16,9 @@ interface DashboardClientBridgeProps {
   readonly userProfile: User;
   readonly isSuperAdmin: boolean;
   readonly roleLabel: string;
+  readonly appTitle: string;
+  readonly logoAriaLabel: string;
+  readonly initialSidebarOpen?: boolean;
 }
 
 /**
@@ -48,6 +51,9 @@ export function DashboardClientBridge({
   userProfile,
   isSuperAdmin,
   roleLabel,
+  appTitle,
+  logoAriaLabel,
+  initialSidebarOpen,
 }: Readonly<DashboardClientBridgeProps>) {
   const notificationCount = useLiveNotificationCount(userProfile.notificationCount || 0);
   const notificationsDrawerVm = useNotificationsDrawerViewModel();
@@ -65,8 +71,11 @@ export function DashboardClientBridge({
         userEmail={userProfile.email || ""}
         userRole={userProfile.role || ""}
         roleLabel={roleLabel}
+        appTitle={appTitle}
+        logoAriaLabel={logoAriaLabel}
         avatarUrl={userProfile.avatarUrl || ""}
         notificationCount={notificationCount}
+        initialSidebarOpen={initialSidebarOpen}
       >
         {children}
       </DashboardLayout>

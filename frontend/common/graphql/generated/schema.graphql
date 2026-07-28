@@ -62,6 +62,7 @@ enum AppPermission {
   AUTH_VIEW_OWN_PROFILE
   BILLING_CREATE_INVOICE
   BILLING_DELETE_INVOICE
+  BILLING_MANAGE_CURRENCIES
   BILLING_MANAGE_CURRENCY_HEDGES
   BILLING_MANAGE_FX_PROVIDER
   BILLING_OVERRIDE_EXCHANGE_RATES
@@ -518,11 +519,15 @@ type ClassInstanceDetail {
   id: String
   instanceId: String
   isFrozen: Boolean
+  isRateOverridden: Boolean
   isRescheduled: Boolean
   meetingJoinUrl: String @deprecated(reason: "Use effectiveMeeting.joinUrl")
   outcome: ClassOutcome
   payrollCredited: Boolean
   performance: ClassInstancePerformance
+  rateAmount: String
+  rateCurrency: CurrencyCode
+  rateSource: RateSource
   recurringScheduleId: String
   remarks: String
   scheduledDate: String
@@ -618,9 +623,11 @@ type ClassSubject {
   category: ClassCategory
   categoryId: String
   description: String
+  hourlyRate: String
   id: String
   isActive: Boolean
   name: String
+  rateCurrency: CurrencyCode
   resources: [SubjectResource!]
   slug: String
   sortOrder: Int
@@ -630,8 +637,10 @@ input ClassSubjectCreateInput {
   avatarUrl: String
   categoryId: String!
   description: String
+  hourlyRate: String
   isActive: Boolean
   name: String!
+  rateCurrency: CurrencyCode
   slug: String!
   sortOrder: Int
 }
@@ -640,8 +649,10 @@ input ClassSubjectUpdateInput {
   avatarUrl: String
   categoryId: String
   description: String
+  hourlyRate: String
   isActive: Boolean
   name: String
+  rateCurrency: CurrencyCode
   slug: String
   sortOrder: Int
 }
@@ -1039,6 +1050,8 @@ input CreateRecurringClassInput {
   effectiveFrom: String
   effectiveUntil: String
   generateInstancesForWeeks: Int
+  hourlyRate: String
+  rateCurrency: CurrencyCode
   studentId: String!
   subjectId: String!
   teacherId: String!
@@ -2366,6 +2379,7 @@ input MeetingProviderUpdateInput {
 type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
+  activateSupportedCurrency(input: SupportedCurrencyUpsertInput!): SupportedCurrency
 
   """Approve a pending lesson report (supervisor/manager action)"""
   approveLessonReport(reportId: ID!): LessonReport
@@ -2421,6 +2435,7 @@ type Mutation {
   createUserMeetingConfig(input: UserMeetingConfigCreateInput!): UserMeetingConfig
   createUserPaymentMethod(input: UserPaymentMethodCreateInput!): UserPaymentMethod
   deactivateParent(parentId: String!): DeactivateParentResult
+  deactivateSupportedCurrency(code: CurrencyCode!): Boolean
   deactivateSupportedMobileWallet(id: ID!): SupportedMobileWallet
   deactivateSupportedOnlineAccount(id: ID!): SupportedOnlineAccount
   deactivateSupportedPaymentLink(id: ID!): SupportedPaymentLink
@@ -2485,6 +2500,7 @@ type Mutation {
   """Mark pending teacher dues as paid (batch operation)"""
   markTeacherDuesPaid(dueIds: [ID!]!, teacherPaymentId: ID!): [TeacherDue!]
   moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult
+  overrideClassInstanceRate(classInstanceId: ID!, rateAmount: String, rateCurrency: CurrencyCode): ClassInstanceDetail
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
   reactivateParent(parentId: String!): ReactivateParentResult
@@ -2548,6 +2564,7 @@ type Mutation {
   updateNotificationPreferences(input: [NotificationPreferenceInput!]!): [NotificationPreference!]
   updateOwnProfile(input: UpdateOwnProfileInput!): UnifiedProfile
   updatePermissionGroup(input: UpdatePermissionGroupInput!): PermissionGroup
+  updateRecurringClassRate(input: UpdateRecurringClassRateInput!): RecurringScheduleDetail
   updateSessionStatusAbsent(classInstanceId: ID!): ClassInstanceDetail
   updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
   updateSessionStatusStart(classInstanceId: ID!): ClassInstanceDetail
@@ -3344,6 +3361,13 @@ type Query {
   welcomeMessage: String
 }
 
+enum RateSource {
+  OVERRIDE
+  RECURRING
+  SUBJECT
+  TEACHER
+}
+
 type ReactivateParentResult {
   accountStatus: AccountStatus
   id: String
@@ -3381,7 +3405,9 @@ type RecurringScheduleDetail {
   days: [RecurringScheduleDayDetail!]
   defaultStartTime: String
   durationMinutes: Int
+  hourlyRate: String
   id: String
+  rateCurrency: CurrencyCode
   studentId: String
   studentName: String
   teacherId: String
@@ -4037,6 +4063,14 @@ type SupportedCurrency {
   symbol: String
 }
 
+input SupportedCurrencyUpsertInput {
+  code: CurrencyCode!
+  countryCode: CountryCode
+  decimals: Int
+  sortOrder: Int
+  symbol: String!
+}
+
 type SupportedMobileWallet {
   countryCode: String
   createdAt: DateTime
@@ -4299,6 +4333,7 @@ type TeacherDue {
   currency: CurrencyCode
   hours: String
   id: String
+  rateSource: RateSource
   status: TeacherDueStatus
   studentAvatarUrl: String
   studentId: String
@@ -4440,6 +4475,7 @@ type TeacherOwnProfile {
   hourlyRate: String
   id: String
   name: String
+  nationalId: String
   nationality: String
   phone: String
   qualifications: String
@@ -4453,6 +4489,7 @@ input TeacherOwnProfileUpdateInput {
   countryCode: String
   dateOfBirth: String
   gender: Gender
+  nationalId: String
   nationality: String
   phone: String
   qualifications: String
@@ -4633,6 +4670,12 @@ input UpdatePermissionGroupInput {
   groupId: String!
   name: LocalizedString
   permissionIds: [String!]
+}
+
+input UpdateRecurringClassRateInput {
+  hourlyRate: String
+  rateCurrency: CurrencyCode
+  recurringScheduleId: String!
 }
 
 input UpdateTeacherNoteInput {

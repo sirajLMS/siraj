@@ -99,6 +99,8 @@ export namespace RecurringScheduleRepository {
               timezone: input.timezone,
               effectiveFrom: input.effectiveFrom,
               effectiveUntil: input.effectiveUntil,
+              hourlyRate: input.hourlyRate === undefined ? existing.hourlyRate : input.hourlyRate,
+              rateCurrency: input.rateCurrency === undefined ? existing.rateCurrency : input.rateCurrency,
               updatedAt: now,
             })
             .where(eq(recurringSchedules.id, existing.id))
@@ -119,6 +121,22 @@ export namespace RecurringScheduleRepository {
       }
       return results;
     });
+  }
+
+  export async function updateRate(
+    recurringScheduleId: string,
+    hourlyRate: string | null,
+    rateCurrency: RecurringScheduleEntity["rateCurrency"],
+    tx?: DBTransaction
+  ): Promise<RecurringScheduleEntity | null> {
+    const queryDb = tx ?? db;
+    const now = new Date();
+    const [updated] = await queryDb
+      .update(recurringSchedules)
+      .set({ hourlyRate, rateCurrency, updatedAt: now })
+      .where(eq(recurringSchedules.id, recurringScheduleId))
+      .returning();
+    return updated ?? null;
   }
 
   export async function findDaysByKeys(

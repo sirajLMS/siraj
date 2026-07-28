@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter/dateNavigator.mobile";
 

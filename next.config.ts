@@ -35,6 +35,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ["pg", "@neondatabase/serverless", "drizzle-orm", "ws", "@vercel/functions"],
   turbopack: {},
+  experimental: {
+    optimizePackageImports: ["@mui/x-data-grid", "@mui/x-date-pickers"],
+  },
   allowedDevOrigins: buildDevOrigins(), // NoSonar
   async headers() {
     return [

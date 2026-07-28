@@ -1,6 +1,6 @@
 import { CheckCircleOutlined, ErrorOutlined, InboxOutlined, InfoOutlined, SearchOutlined } from "@mui/icons-material";
 import type { Theme } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MobileEmptyState } from "@/frontend/mobile/components/ui/state/MobileEmptyState";
 
 const meta: Meta<typeof MobileEmptyState> = {

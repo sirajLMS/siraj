@@ -91,6 +91,40 @@ describe("Email Channel", () => {
     });
   });
 
+  describe("send — empty recipient guard", () => {
+    test("returns failure with 'empty recipient address' when `to` is empty string", async () => {
+      // Do NOT spy on the facade `emailChannel.send` — that would bypass the
+      // real adapter and its guard. Let the facade delegate to the real
+      // `ResendEmailAdapter.send`; the guard short-circuits before the Resend
+      // client is ever touched, so no network call happens.
+      const result = await emailChannel.send({ ...SEND_PAYLOAD, to: "" });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("empty recipient address");
+      // A FAILED delivery row is still recorded for the audit trail.
+      expect(createDeliverySpy).toHaveBeenCalled();
+      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: NotificationDeliveryStatus.FAILED,
+          failureReason: "empty recipient address",
+        })
+      );
+    });
+
+    test("returns failure when `to` is whitespace-only", async () => {
+      const result = await emailChannel.send({ ...SEND_PAYLOAD, to: "   " });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("empty recipient address");
+      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: NotificationDeliveryStatus.FAILED,
+          failureReason: "empty recipient address",
+        })
+      );
+    });
+  });
+
   describe("config validation", () => {
     test("validateConfig returns true when env vars are present", async () => {
       const result = await emailChannel.validateConfig();

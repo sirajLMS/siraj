@@ -64,11 +64,13 @@ const sharedFoundation = (direction: "rtl" | "ltr") => ({
  * in `components.ts`) continue to reflect the active mode, matching prior
  * behavior.
  */
-export function createAppCssVarsTheme(direction: "rtl" | "ltr" = "ltr", locale: string = "en") {
-  // Dark tokens are used because the app's default scheme is "dark"
-  // (see `getThemeFromCookies` in `frontend/lib/theme-detection.ts`).
-  const isLight = false;
-  const autofillTokensForDefault = autofillTokens.dark;
+export function createAppCssVarsTheme(
+  direction: "rtl" | "ltr" = "ltr",
+  locale: string = "en",
+  defaultColorScheme: PaletteMode = "dark"
+) {
+  const isLight = defaultColorScheme === "light";
+  const autofillTokensForDefault = isLight ? autofillTokens.light : autofillTokens.dark;
 
   const themeWithLocale = createTheme(
     {
@@ -79,10 +81,19 @@ export function createAppCssVarsTheme(direction: "rtl" | "ltr" = "ltr", locale: 
         // root layout keeps SSR and client in sync without flicker.
         colorSchemeSelector: "data",
       },
-      colorSchemes: {
-        light: { palette: { mode: "light", ...lightPalette } },
-        dark: { palette: { mode: "dark", ...darkPalette } },
+      palette: {
+        mode: defaultColorScheme,
+        ...(isLight ? lightPalette : darkPalette),
       },
+      colorSchemes: isLight
+        ? {
+            light: { palette: { mode: "light", ...lightPalette } },
+            dark: { palette: { mode: "dark", ...darkPalette } },
+          }
+        : {
+            dark: { palette: { mode: "dark", ...darkPalette } },
+            light: { palette: { mode: "light", ...lightPalette } },
+          },
 
       ...sharedFoundation(direction),
 

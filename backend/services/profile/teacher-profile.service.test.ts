@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
-import { TeacherRepository } from "@/backend/db/repo";
+import { TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AccountStatus, AppPermission, CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -57,5 +57,83 @@ describe("TeacherPortalService own profile", () => {
 
     const profile = await TeacherPortalService.getOwnProfile("user-1", tErrors);
     expect(profile.totalClasses).toBe(10);
+  });
+
+  test("returns nationalId unmasked for the owner", async () => {
+    const tErrors = getServerTranslations("en").errorsTranslations;
+    spyOn(PermissionsService, "hasPermission").mockImplementation(
+      async (_userId, permission) => permission === AppPermission.TEACHER_VIEW_OWN_PROFILE
+    );
+    spyOn(TeacherRepository, "findByUserId").mockResolvedValue({ id: "teacher-1", userId: "user-1" } as never);
+    spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
+
+    const profile = await TeacherPortalService.getOwnProfile("user-1", tErrors);
+    // Owner sees the full value — NOT the masked "******7890" admin view.
+    expect(profile.nationalId).toBe("1234567890");
+  });
+});
+
+describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
+  const tErrors = getServerTranslations("en").errorsTranslations;
+
+  afterEach(() => {
+    spyOn(PermissionsService, "hasPermission").mockRestore();
+    spyOn(TeacherRepository, "findByUserId").mockRestore();
+    spyOn(TeacherRepository, "getTeacherProfileForEdit").mockRestore();
+    spyOn(TeacherRepository, "updateTeacherProfile").mockRestore();
+    spyOn(UserRepository, "updateTimezone").mockRestore();
+  });
+
+  test("accepts a valid Egyptian national ID with EG nationality", async () => {
+    // 2960123 → century 2 (1996), month 01, day 23; check digit computed by Luhn.
+    const validEgId = "29601234567818";
+    spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
+    spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
+      id: "teacher-1",
+      userId: "user-1",
+      nationality: "EG",
+    } as never);
+    spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
+    spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
+
+    await expect(
+      TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: validEgId }, tErrors)
+    ).resolves.toBeDefined();
+    expect(TeacherRepository.updateTeacherProfile).toHaveBeenCalledWith(
+      "teacher-1",
+      expect.objectContaining({ nationalId: validEgId })
+    );
+  });
+
+  test("rejects an invalid national ID format", async () => {
+    spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
+    spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
+      id: "teacher-1",
+      userId: "user-1",
+      nationality: "EG",
+    } as never);
+    spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
+
+    await expect(
+      TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: "not-a-valid-id" }, tErrors)
+    ).rejects.toThrow(tErrors.invalidNationalId);
+    expect(TeacherRepository.updateTeacherProfile).not.toHaveBeenCalled();
+  });
+
+  test("falls back to the teacher's existing nationality when input omits it", async () => {
+    const validEgId = "29601234567818";
+    spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
+    // Existing teacher nationality is EG; input does not pass nationality.
+    spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
+      id: "teacher-1",
+      userId: "user-1",
+      nationality: "EG",
+    } as never);
+    spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
+    spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
+
+    await expect(
+      TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: validEgId }, tErrors)
+    ).resolves.toBeDefined();
   });
 });

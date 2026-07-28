@@ -7,16 +7,13 @@ import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 const incrMock = mock(async (): Promise<number> => 1);
 const expireMock = mock(async (): Promise<void> => {});
 
-const redisInstance = {
+const cacheInstance = {
   incr: incrMock,
   expire: expireMock,
 };
 
-mock.module("@/backend/services", () => ({
-  getRedisService: () => redisInstance,
-  PermissionsService: {
-    hasPermission: mock(async () => true),
-  },
+mock.module("@/backend/services/cache", () => ({
+  cacheService: cacheInstance,
 }));
 
 mock.module("@/backend/lib", () => ({

@@ -39,7 +39,7 @@ Verify compliance on these cross-cutting dimensions:
 - **Type imports**: All types must come from `@/backend/types/{entity}.types.ts` — no local type definitions in Pothos or other layers
 - **Service boundaries**: Server Components call services directly; Client Components use Apollo hooks
 - **MUI v9**: Style props are NOT valid on MUI components — must use `sx` prop
-- **i18n**: All user-facing strings must use `next-intl`, no hardcoded text
+- **i18n**: All user-facing strings must use the compile-time TypeScript i18n system in `shared/locale/`, no hardcoded text
 - **Logging**: Never `console.*` — must use `logger` from `@/frontend/utils/logger` or `@/backend/lib/logger`
 - **Test conventions**: Database tests must use `runInRollback`, pass `tx`, no `expect().rejects.toThrow()`
 - **GraphQL documents**: Named `{Entity}QueryDocument`/`{Entity}MutationDocument`, must include `id` field, import from `@apollo/client/react`

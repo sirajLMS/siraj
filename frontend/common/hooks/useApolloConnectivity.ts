@@ -43,7 +43,7 @@ export const useApolloConnectivity = () => {
     lastCheckTimeRef.current = now;
 
     isCheckingRef.current = true;
-    setIsChecking(true);
+    queueMicrotask(() => setIsChecking(true));
 
     try {
       const controller = new AbortController();
@@ -66,27 +66,33 @@ export const useApolloConnectivity = () => {
         reconnectAttemptRef.current = 0;
       }
 
-      setIsConnected(connected);
       isConnectedRef.current = connected;
-      setLastChecked(new Date());
+      queueMicrotask(() => {
+        setIsConnected(connected);
+        setLastChecked(new Date());
+      });
 
       return connected;
     } catch {
-      setIsConnected(false);
       isConnectedRef.current = false;
-      setLastChecked(new Date());
+      queueMicrotask(() => {
+        setIsConnected(false);
+        setLastChecked(new Date());
+      });
       return false;
     } finally {
       isCheckingRef.current = false;
-      setIsChecking(false);
-      setInitialCheckDone(true);
+      queueMicrotask(() => {
+        setIsChecking(false);
+        setInitialCheckDone(true);
+      });
       logger.debug({ caller: "useApolloConnectivity" }, "[Connectivity] Check completed");
     }
   }, []);
 
   const setConnected = useCallback((connected: boolean) => {
-    setIsConnected(connected);
     isConnectedRef.current = connected;
+    queueMicrotask(() => setIsConnected(connected));
   }, []);
 
   const notifyIfDisconnected = useCallback(() => {

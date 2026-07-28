@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ScheduleAlertsContainer } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsContainer";
 
 const meta: Meta<typeof ScheduleAlertsContainer> = {

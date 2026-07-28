@@ -24,7 +24,7 @@ import {
   createTestEntitiesMutationDocument,
   createTestSuperAdminMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/shared/test-helper.documents";
-import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/manager-onboarding.documents";
+import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 
@@ -70,6 +70,8 @@ export async function ensureTestSubjectId(token: string): Promise<string> {
       avatarUrl: null,
       isActive: true,
       sortOrder: 0,
+      hourlyRate: null,
+      rateCurrency: null,
     },
   });
   const subjectId = subjectResult.createClassSubject?.id;
@@ -299,6 +301,8 @@ export async function fetchFirstClassInstanceId(token: string, date: string): Pr
     generateInstancesForWeeks: 2,
     effectiveFrom: date,
     effectiveUntil: null,
+    hourlyRate: null,
+    rateCurrency: null,
   });
 
   const gridResult = await testClient.query({
@@ -561,6 +565,8 @@ export async function assertRecurringClassDenied(
     generateInstancesForWeeks: 4,
     effectiveFrom: null,
     effectiveUntil: null,
+    hourlyRate: null,
+    rateCurrency: null,
   });
   expect(result.error).toBeDefined();
 }

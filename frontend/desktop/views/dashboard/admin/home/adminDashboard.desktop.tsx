@@ -2,13 +2,16 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui";
+import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
-import { ScheduleOverviewDataGrid } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
+import { ScheduleOverviewEmptyState } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
+import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
+import { ScheduleOverviewDesktopCard } from "@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.desktop";
+import { useAppLocale } from "@/shared/locale";
 
 export function AdminDashboardDesktopView({
   t,
@@ -31,11 +34,14 @@ export function AdminDashboardDesktopView({
   onDateChange,
   onTeacherChange,
   pageSize,
-  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier view
-  // instead of the previous `RequirePermission` wrappers.
   canDashboardSearch,
   canScheduleFilterAdvanced,
+  canScheduleViewTimezones,
 }: Readonly<AdminDashboardViewModel>) {
+  const locale = useAppLocale();
+  const showTimezones = canScheduleViewTimezones;
+  const pageCount = Math.max(1, Math.ceil((totalCount ?? 0) / pageSize));
+
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
@@ -93,18 +99,40 @@ export function AdminDashboardDesktopView({
             <StatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
           </Box>
         ) : null}
-        <ScheduleOverviewDataGrid
+
+        <ScheduleOverviewListShell
           rows={rows}
-          page={page}
-          pageSize={pageSize}
-          totalCount={totalCount}
-          onPageChange={onPageChange}
-          headers={headers}
-          statusLabels={statusLabels}
-          detailsLabel={t.details}
-          emptyMessage={t.noClasses}
+          getKey={row => row.id ?? ""}
           loading={loading}
+          emptyMessage={t.noClasses}
+          renderItem={row => (
+            <ScheduleOverviewDesktopCard
+              row={row}
+              headers={headers}
+              statusLabels={statusLabels}
+              detailsLabel={t.details}
+              showTimezones={showTimezones}
+              locale={locale}
+            />
+          )}
+          renderEmptyState={() => (
+            <Box sx={{ py: 2 }}>
+              <ScheduleOverviewEmptyState message={t.noClasses} />
+            </Box>
+          )}
         />
+
+        {totalCount !== undefined ? (
+          <Box sx={{ pt: 2, display: "flex", justifyContent: "flex-end" }}>
+            <PaginationControls
+              page={page}
+              pageCount={pageCount}
+              rowCount={totalCount}
+              pageSize={pageSize}
+              onPageChange={onPageChange}
+            />
+          </Box>
+        ) : null}
       </DesktopSectionPanel>
     </DesktopPageContainer>
   );

@@ -73,7 +73,7 @@ export async function uploadAvatarFile(params: {
   readonly prepareUpload: PrepareUploadFn;
 }): Promise<{ url: string }> {
   const sanitizedName = sanitizeFileName(params.file.name);
-  const filePath = `avatars/${params.storageOwnerKey}/${sanitizedName}`;
+  const filePath = `public/avatars/${params.storageOwnerKey}/${sanitizedName}`;
   const contentType = params.file.type || "application/octet-stream";
   const contentHash = await computeContentHash(params.file);
 

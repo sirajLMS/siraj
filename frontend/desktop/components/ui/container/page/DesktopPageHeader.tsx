@@ -1,5 +1,3 @@
-"use client";
-
 import { ChevronRightOutlined } from "@mui/icons-material";
 import { Box, Breadcrumbs, Link, Typography } from "@mui/material";
 import type { TypographyProps } from "@mui/material/Typography";
@@ -20,8 +18,9 @@ export interface DesktopPageHeaderProps {
 }
 
 /**
- * Desktop page header. Renders title/subtitle/breadcrumbs/actions using
- * the desktop-default `headlineLg` title variant.
+ * Desktop page header (Server Component). Renders title/subtitle/breadcrumbs/actions using
+ * the desktop-default `headlineLg` title variant. Callers inject already-translated
+ * `title`/`subtitle` strings — this component does not fetch translations itself.
  */
 export function DesktopPageHeader({
   title,

@@ -33,6 +33,8 @@ export type TeacherOwnSubmitData = {
   name: string;
   email: string;
   phone: string;
+  nationalId: string;
+  nationality: string;
   avatarUrl?: string | null;
   displayCurrency: CurrencyCode | null;
 };
@@ -113,6 +115,8 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
             },
             teacher: {
               phone: formData.phone || null,
+              nationalId: formData.nationalId || null,
+              nationality: formData.nationality || null,
             },
           },
         },

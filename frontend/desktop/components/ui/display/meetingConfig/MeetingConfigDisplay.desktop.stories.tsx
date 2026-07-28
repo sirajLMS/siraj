@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import type { DesktopMeetingConfigDisplayData } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { DesktopMeetingConfigDisplay } from "@/frontend/desktop/components/ui/display/meetingConfig/MeetingConfigDisplay.desktop";

@@ -11,5 +11,6 @@
     "siraj/.mcp.json: next-devtools": {
       "allowedModels": []
     }
-  }
+  },
+  "chat.utilitySmallModel": "customendpoint/nvidia/z-ai/glm-5.2"
 }

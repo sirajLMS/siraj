@@ -1,3 +1,5 @@
+import { mock } from "bun:test";
+
 // Defensive mocks against bleed from earlier test files (e.g. ScheduleOverviewSection.test.tsx).
 // mock.module registrations are process-global in Bun, so a mock registered in a test file that
 // runs earlier alphabetically may bleed into this file if we don't re-register our own versions.
@@ -171,7 +173,7 @@ mock.module("@/frontend/desktop/views/dashboard/users/billing-profile/userBillin
   },
 }));
 
-import { afterEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 
@@ -538,8 +540,33 @@ const mockLabels: BillingLabels = {
     name: "Name",
     country: "Country",
     flag: "Flag",
+    active: "Active",
+    actions: "Actions",
     empty: "Empty",
     footerNote: "Footer note",
+    activateLabel: "Activate",
+    editLabel: "Edit",
+    deactivateLabel: "Deactivate",
+    activateTitle: "Activate Currency",
+    editTitle: "Edit Currency",
+    deactivateConfirmTitle: "Deactivate Currency",
+    deactivateConfirmBody: (code: string) => `Deactivate ${code}?`,
+    deactivateConfirmCancel: "Cancel",
+    deactivateConfirmConfirm: "Deactivate",
+    save: "Save",
+    cancel: "Cancel",
+    saveSuccess: "Saved",
+    saveError: "Save failed",
+    deactivateSuccess: "Deactivated",
+    deactivateError: "Deactivate failed",
+    currencyInUse: "Currency in use",
+    currencyField: "Currency",
+    symbolField: "Symbol",
+    countryField: "Country",
+    decimalsField: "Decimals",
+    sortOrderField: "Sort Order",
+    codeRequired: "Code is required",
+    symbolRequired: "Symbol is required",
   },
   paymentMethodSelector: {
     label: "Payment Method",

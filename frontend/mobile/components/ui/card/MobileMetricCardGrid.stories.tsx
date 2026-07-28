@@ -1,7 +1,7 @@
 import CheckCircleOutlined from "@mui/icons-material/CheckCircleOutlined";
 import PeopleIcon from "@mui/icons-material/People";
 import WarningIcon from "@mui/icons-material/Warning";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card/MobileMetricCardGrid";

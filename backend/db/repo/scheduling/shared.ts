@@ -196,6 +196,7 @@ export async function createRescheduledSuccessor(
     rateAmount: existing.rateAmount,
     rateCurrency: existing.rateCurrency,
     isRateOverridden: existing.isRateOverridden,
+    rateSource: existing.rateSource,
     remarks,
     idempotencyKey: successorIdempotencyKey,
   };

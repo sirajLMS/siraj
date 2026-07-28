@@ -1,0 +1,146 @@
+{
+  "manifestHash": "992cec90d15e58f98cd4692342e31028c70ab580ada16867915befe9ba8eb1dd",
+  "manifest": [
+    {
+      "file": "2-functions.sql",
+      "sha256": "4aa3869c64856ad4e8b7e996fc67360bf3d3f440abc182bb6b0f5f422b546aef"
+    },
+    {
+      "file": "3-system_permissions_and_groups.sql",
+      "sha256": "66375a575b826d04f72ef6c2e5ad7fdf46d3c3313ed0e7c8672369d3a53148d5"
+    },
+    {
+      "file": "30-a-class_instances_rls_policies.sql",
+      "sha256": "3abe3d55f104c5e6985c1258463e50976e691a45b6d4212660b42b7bbacfaf90"
+    },
+    {
+      "file": "30-b-class_instances_state_transition_trigger.sql",
+      "sha256": "c3de9da5f06d8d5474c4cdc1b8b1226c48fc8bf8a47bd6d10e3ac5ed22757840"
+    },
+    {
+      "file": "30-c-class_instances_auto_miss_transition.sql",
+      "sha256": "4972068d5b636e42725250c66587753cce79170d27bbfc32eac4b00d30a35c96"
+    },
+    {
+      "file": "4-class_categories_and_subjects.sql",
+      "sha256": "73f959964398edbef0c52db6c1d0ad1ddb3608ade213cb82767cfc54ca8d5677"
+    },
+    {
+      "file": "4-fx_exchange_rate_permissions.sql",
+      "sha256": "e2a13ea9d13bb946af8e8cc4d70daf3de42d558e6130f204bc28c8e2b95c4bc3"
+    },
+    {
+      "file": "4a-class_categories_and_subjects_seed.sql",
+      "sha256": "23a1c3208b5e2375fcf43aba08bf7fedf2e8406e5fd7507748896d3bc6b13d54"
+    },
+    {
+      "file": "4b-teacher_support_contact_setting.sql",
+      "sha256": "b19e35018be43c4e47fa9b558e6bb20be18d1750759c8ac64419e41e21adf729"
+    },
+    {
+      "file": "4c-system_settings_seed.sql",
+      "sha256": "f1bc2f7901144fc931aa60f2bb7f6be47bdce81c6509329071c80e07410f4e2b"
+    },
+    {
+      "file": "4d-timezones_seed.sql",
+      "sha256": "977dd4e08852726f9a61af6ad1fcd64d9a021ff3451ee682d141c87bf3c6a599"
+    },
+    {
+      "file": "4e-default_super_admin_seed.sql",
+      "sha256": "fc61fc06f19e4e97844c20e347579c54696e6f98d1dee109ed84aba9fe027290"
+    },
+    {
+      "file": "5-billing_fx_admin_permissions.sql",
+      "sha256": "1248e234618ba59611715a49f2c9f7b863267b92d096aedf7bde412b9d5c5a01"
+    },
+    {
+      "file": "5a-billing_manage_currencies_permission.sql",
+      "sha256": "3d010cf5a8a5c60aad69bee18682107057dac9f6423d9b99deb8c42bd05dfdab"
+    },
+    {
+      "file": "6-lms-permissions-and-groups.sql",
+      "sha256": "fccea4bba658097d6517e566f9a683aab4fb35175070acb36fb7e357f496788e"
+    },
+    {
+      "file": "6a-profile-field-permissions.sql",
+      "sha256": "1ac0053c2af1d15f55d109b28241532007d05f60a21c63b5e2d978de547de6ba"
+    },
+    {
+      "file": "6b-meeting-permissions.sql",
+      "sha256": "f9c06576d6e787dfe8cf8635eccc6908affa85afa6113620024adc5c2643c68a"
+    },
+    {
+      "file": "6c-payment-method-permissions.sql",
+      "sha256": "1f6cee0c26f97440b46c21978ad34bb3237c5db0f80f559e7d80d7f00c9024ee"
+    },
+    {
+      "file": "add_test_custom_alt_permission.sql",
+      "sha256": "2fa1cbb1418b69eea1b39d3aa4a65cf2066a6f5223c543691e064c214dc8e847"
+    },
+    {
+      "file": "audit_log_immutability_trigger.sql",
+      "sha256": "31bcba9e6b49f059a287fd1f1526e7e6ef4924f4f105764daa51ae09466970a4"
+    },
+    {
+      "file": "auth_rate_limiting.sql",
+      "sha256": "16cc20d606643db5c29e7e56f74c261f8fa60c4b37641a7c3293fc0f4e78bc6f"
+    },
+    {
+      "file": "books_rls_policies.sql",
+      "sha256": "905426889ecaec3957d80d4debf7c53e5b20dfae9cf6c949427467cff203f585"
+    },
+    {
+      "file": "cache_split.sql",
+      "sha256": "5ffa218128c799c4d15b15abb64ab3c306f4d643c3553010d7426878c5791903"
+    },
+    {
+      "file": "exclude_jerusalem_timezone.sql",
+      "sha256": "df08892369cd8d47e8a894a5d6eaaeea1f3a90dd8c983d0a183df074e56dc4af"
+    },
+    {
+      "file": "hours_per_week_recalculation.sql",
+      "sha256": "d8cea49df8d8d187f59a7ccf57672450503fac371a070899b563d7084adfb159"
+    },
+    {
+      "file": "impersonation_sessions.sql",
+      "sha256": "195a84b6dba13fae129e0ac246eeab3f04655658d3fe2a6c2f5f2de069a32bac"
+    },
+    {
+      "file": "leave_quota_limits_trigger.sql",
+      "sha256": "05afd09f7aae890bd32386c4619f0c6108f9f0e5d4c14914f55ebaeb4a83c239"
+    },
+    {
+      "file": "permissions_rls_policies.sql",
+      "sha256": "ac3ef8fc4d503e5ae5f3d69404bd65b94dab47474384b552ffed98c65fb83f3b"
+    },
+    {
+      "file": "profile_permissions.sql",
+      "sha256": "d1330e98b8ec8f864b96566570e31af1c6a0e2677f85d1bf882ee7ba9adad16b"
+    },
+    {
+      "file": "soft_delete_rls_policies.sql",
+      "sha256": "ffd01a95eb0750463433c8c6e434ab6bf8128b19a51ecbae25d64857cf978678"
+    },
+    {
+      "file": "student_created_at_immutability.sql",
+      "sha256": "5b42254de1c50debd58d0e7563a71f04eade0f545b3ac0240f54f877023b2578"
+    },
+    {
+      "file": "student_progress_rls.sql",
+      "sha256": "8965dd029a74706a393d0e66a085d90952fd1e0f14bd4acaa667d4b4efaa80c7"
+    },
+    {
+      "file": "student_status_transition_trigger.sql",
+      "sha256": "51c3b6727fd9219937b40b683ba427ebfd1f2c00c51160924e520bd9ae8efb16"
+    },
+    {
+      "file": "timezone_dst_logic.sql",
+      "sha256": "b31ae20acecfa6ba7ff0386f2201884fdb390394ef4678a0a0c5d5b84fb6a539"
+    },
+    {
+      "file": "user_notification_preferences.sql",
+      "sha256": "d846dab1b8bd32322114adbfeb34dca648c9f472905ff3299a9f8063f5bb0300"
+    }
+  ],
+  "appliedFolders": ["20260727152656_custom_23623615", "20260727225423_custom_992cec90"]
+}

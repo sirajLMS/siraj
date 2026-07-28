@@ -2,7 +2,7 @@
 
 import type { SvgIconComponent } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 export const BOTTOM_NAV_SCROLL_THRESHOLD = 5;
 export const BOTTOM_NAV_ITEM_MIN_WIDTH = 88;

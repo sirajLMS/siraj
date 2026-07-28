@@ -1,7 +1,22 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { supportedCurrencies } from "@/backend/db/schema";
+import {
+  classInstances,
+  currencyExchangeAuditLogs,
+  currencyExchangeRates,
+  currencyHedges,
+  invoices,
+  parents,
+  payments,
+  staffProfiles,
+  supportedCurrencies,
+  supportedMobileWallets,
+  teacherDues,
+  teacherPayments,
+  teachers,
+  users,
+} from "@/backend/db/schema";
 import type { CurrencyCode } from "@/backend/enum";
 import type {
   SupportedCurrencyReturnType,
@@ -86,5 +101,69 @@ export namespace SupportedCurrencyRepository {
     const client = tx ?? db;
     const [row] = await client.select().from(supportedCurrencies).where(eq(supportedCurrencies.code, code)).limit(1);
     return row ? toReturnType(row) : null;
+  }
+
+  /**
+   * Soft-deactivate a supported currency by setting `isActive = false`.
+   * Caller must guard with {@link isCurrencyInUse} before invoking.
+   */
+  export async function deactivateByCode(
+    code: CurrencyCode,
+    tx?: DBTransaction
+  ): Promise<SupportedCurrencyReturnType | null> {
+    const client = tx ?? db;
+    const now = new Date();
+    const [row] = await client
+      .update(supportedCurrencies)
+      .set({ isActive: false, updatedAt: now })
+      .where(eq(supportedCurrencies.code, code))
+      .returning();
+    return row ? toReturnType(row) : null;
+  }
+
+  /**
+   * Check whether a currency code is referenced by any table that stores
+   * currency values. All references use the `currency_code` Postgres enum
+   * directly (no FK to `supported_currencies`), so the DB won't block a
+   * soft-deactivate — this guard is service-layer only.
+   *
+   * Returns `true` if **any** of the referencing tables contain the code.
+   */
+  export async function isCurrencyInUse(code: CurrencyCode, tx?: DBTransaction): Promise<boolean> {
+    const client = tx ?? db;
+    const [row] = await client
+      .select({ exists: sql<boolean>`1` })
+      .from(
+        sql`(
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${invoices} WHERE ${invoices.currency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${payments} WHERE ${payments.currency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${currencyExchangeRates} WHERE ${currencyExchangeRates.fromCurrency} = ${code} OR ${currencyExchangeRates.toCurrency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${currencyExchangeAuditLogs} WHERE ${currencyExchangeAuditLogs.fromCurrency} = ${code} OR ${currencyExchangeAuditLogs.toCurrency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${currencyHedges} WHERE ${currencyHedges.currency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${parents} WHERE ${parents.currency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${teachers} WHERE ${teachers.rateCurrency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${staffProfiles} WHERE ${staffProfiles.rateCurrency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${classInstances} WHERE ${classInstances.rateCurrency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${teacherDues} WHERE ${teacherDues.currency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${teacherPayments} WHERE ${teacherPayments.currency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${users} WHERE ${users.displayCurrency} = ${code})
+          UNION ALL
+          SELECT 1 WHERE EXISTS (SELECT 1 FROM ${supportedMobileWallets} WHERE ${supportedMobileWallets.currencyCode} = ${code})
+          LIMIT 1
+        ) AS in_use`
+      )
+      .limit(1);
+    return Boolean(row?.exists);
   }
 }

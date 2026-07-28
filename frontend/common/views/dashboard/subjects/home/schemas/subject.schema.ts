@@ -17,11 +17,16 @@ export const entityFormBaseSchema = {
 
 /**
  * Subject create/edit form schema. Adds the required `categoryId` selector on
- * top of the shared base fields.
+ * top of the shared base fields, plus optional subject-level hourly rate
+ * fields (the second tier in the rate cascade: OVERRIDE > RECURRING > SUBJECT >
+ * TEACHER). When omitted the rate falls back to the teacher's rate.
  */
 export const subjectFormSchema = z.object({
   ...entityFormBaseSchema,
   categoryId: z.string().min(1, "categoryRequired"),
+  avatarUrl: z.string().optional(),
+  hourlyRate: z.string().optional(),
+  rateCurrency: z.string().optional(),
 });
 
 export type SubjectFormValues = z.infer<typeof subjectFormSchema>;
@@ -32,4 +37,7 @@ export const emptySubjectFormValues: SubjectFormValues = {
   categoryId: "",
   description: "",
   isActive: true,
+  avatarUrl: "",
+  hourlyRate: "",
+  rateCurrency: "",
 };

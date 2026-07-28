@@ -2,6 +2,7 @@
 
 import { Box, Checkbox, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { RateSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   TeacherDueRow,
@@ -83,6 +84,20 @@ function DueCard({
             </Typography>
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
               {row.approvedAt || "-"}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {labels.rateSourceColumn}
+            </Typography>
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
+              {row.rateSource === RateSource.Override
+                ? labels.rateSourceOverride
+                : row.rateSource === RateSource.Recurring
+                  ? labels.rateSourceRecurring
+                  : row.rateSource === RateSource.Subject
+                    ? labels.rateSourceSubject
+                    : labels.rateSourceTeacher}
             </Typography>
           </Box>
         </Stack>

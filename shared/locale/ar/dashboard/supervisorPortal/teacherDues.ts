@@ -17,4 +17,9 @@ export const dashboardSupervisorPortalTeacherDuesAr: SupervisorTeacherDuesLabels
   markPaidSuccess: "تم تحديد المستحقات المختارة كمدفوعة",
   markPaidError: "فشل تحديد المستحقات كمدفوعة",
   markPaidMissingPayment: "المستحقات المختارة غير مرتبطة بدفعة",
+  rateSourceColumn: "مصدر السعر",
+  rateSourceOverride: "تجاوز",
+  rateSourceRecurring: "متكرر",
+  rateSourceSubject: "المادة",
+  rateSourceTeacher: "المعلم",
 };

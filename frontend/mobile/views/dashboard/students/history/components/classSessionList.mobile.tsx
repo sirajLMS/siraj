@@ -8,7 +8,7 @@ import type { ClassSession, ClassSessionListProps } from "@/frontend/common/view
 import { isJoinableClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale";
 
 function formatDuration(mins: number): string {

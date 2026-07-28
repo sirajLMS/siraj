@@ -1,4 +1,4 @@
-import type { CurrencyCode, TeacherDueStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode, RateSource, TeacherDueStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SupervisorTeacherDuesLabels } from "@/shared/locale";
 
 export interface TeacherDueRow {
@@ -18,6 +18,7 @@ export interface TeacherDueRow {
   readonly status: TeacherDueStatus | null;
   readonly approvedAt: string;
   readonly teacherPaymentId: string;
+  readonly rateSource: RateSource | null;
 }
 
 export interface TeacherDuesSnackbarState {
@@ -55,6 +56,11 @@ export type TeacherDuesColumnLabels = Pick<
   | "statusColumn"
   | "approvedDateColumn"
   | "markAsPaidButton"
+  | "rateSourceColumn"
+  | "rateSourceOverride"
+  | "rateSourceRecurring"
+  | "rateSourceSubject"
+  | "rateSourceTeacher"
 >;
 
 export interface TeacherDuesColumnParams {

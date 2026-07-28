@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import type { MobileMeetingConfigDisplayData } from "@/frontend/mobile/components/ui/display/meetingConfig";

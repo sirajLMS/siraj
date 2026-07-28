@@ -1,5 +1,5 @@
 import { MockedProvider } from "@apollo/client/testing/react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classSubjectByIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -46,6 +46,8 @@ const mockSubject: SubjectDetailData = {
   sortOrder: 0,
   category: { id: "cat-1", name: "Quran", slug: "quran" },
   avatarUrl: null,
+  hourlyRate: null,
+  rateCurrency: null,
   resources: mockResources,
 };
 

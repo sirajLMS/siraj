@@ -21,6 +21,7 @@ export type CurrencyAutocompleteProps = {
   readonly onCloseAction?: () => void;
   readonly autoFocus?: boolean;
   readonly allowedCodes?: readonly CurrencyCode[];
+  readonly excludedCodes?: readonly CurrencyCode[];
   readonly matchAnchorWidth?: boolean;
   readonly disablePortal?: boolean;
   readonly listAttached?: boolean;

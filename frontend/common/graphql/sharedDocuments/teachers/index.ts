@@ -1,5 +1,5 @@
-export * from "./manager-onboarding.documents";
 export * from "./staff-directory.documents";
+export * from "./staff-onboarding.documents";
 export * from "./staff-profile.documents";
 export * from "./teacher.documents";
 export * from "./teacher-dashboard.documents";

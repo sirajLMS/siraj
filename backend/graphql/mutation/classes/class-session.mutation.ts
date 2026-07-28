@@ -5,6 +5,7 @@ import {
   LeaveProcessResultPothosObject,
   RescheduleClassInputPothosObject,
 } from "@/backend/graphql/pothos/classes/class-session.pothos";
+import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { type ClassActionFn, ClassSessionService } from "@/backend/services/session/class-session.service";
 
@@ -142,6 +143,36 @@ gqlSchemaBuilder.mutationField("deleteClassInstance", t =>
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
       return ClassSessionService.deleteInstance(userId, args.classInstanceId, tErrors);
+    },
+  })
+);
+
+// Admin manual override of a single class instance's hourly rate. Sets
+// `class_instances.is_rate_overridden = true` and stores the override amount +
+// currency + source = OVERRIDE. The override takes top precedence in the
+// rate-resolver cascade. Send `rateAmount = null` to clear the override
+// (revert to the recurring/subject/teacher cascade).
+gqlSchemaBuilder.mutationField("overrideClassInstanceRate", t =>
+  t.field({
+    type: ClassInstanceDetailPothosObject,
+    args: {
+      classInstanceId: t.arg.id({ required: true }),
+      rateAmount: t.arg.string({ required: false }),
+      rateCurrency: t.arg({ type: CurrencyCodePothosObject, required: false }),
+    },
+    authScopes: { superAdmin: true },
+    resolve: async (_parent, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      const tErrors = ctx.t().errorsTranslations;
+      const tSession = ctx.t().sessionTranslations;
+      await ClassSessionService.overrideRate(
+        userId,
+        args.classInstanceId,
+        args.rateAmount ?? null,
+        args.rateCurrency ?? null,
+        tErrors
+      );
+      return ClassSessionService.getClassInstanceDetail(userId, args.classInstanceId, tSession, tErrors);
     },
   })
 );

@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TagInput, type TagInputProps } from "@/frontend/common/components/ui/input/tagInput/TagInput";
 
 function TagInputStory(props: Readonly<Partial<TagInputProps>>) {

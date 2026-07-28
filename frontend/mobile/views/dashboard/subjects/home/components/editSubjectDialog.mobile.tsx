@@ -1,7 +1,9 @@
 "use client";
 
 import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
-import type { ClassSubjectUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField/AvatarImageField";
+import type { ClassSubjectUpdateInput, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
 import {
   ActiveToggleField,
   CategorySelectField,
@@ -25,6 +27,7 @@ export function EditSubjectDialogMobile({
   subject,
   categories,
   isLoading,
+  onUploadAvatar,
   form,
   labels,
 }: Readonly<EditSubjectDialogProps>) {
@@ -39,7 +42,9 @@ export function EditSubjectDialogMobile({
       description: data.description || null,
       isActive: data.isActive ?? null,
       sortOrder: null,
-      avatarUrl: null,
+      avatarUrl: data.avatarUrl || null,
+      hourlyRate: data.hourlyRate || null,
+      rateCurrency: data.rateCurrency ? (data.rateCurrency as CurrencyCode) : null,
     };
     onSubmit(subject.id, input);
   };
@@ -61,6 +66,13 @@ export function EditSubjectDialogMobile({
           onSubmit={handleSubmit(handleFormSubmit)}
           sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 3 }}
         >
+          <AvatarImageField
+            control={control}
+            name="avatarUrl"
+            label={labels.avatarLabel}
+            onUploadAvatar={onUploadAvatar}
+            disabled={isLoading}
+          />
           <LabeledTextField
             name="name"
             control={control}
@@ -95,6 +107,8 @@ export function EditSubjectDialogMobile({
             rows={3}
           />
           <ActiveToggleField name="isActive" control={control} label={labels.activeLabel} disabled={isLoading} />
+          <LabeledTextField name="hourlyRate" control={control} label={labels.hourlyRateLabel} disabled={isLoading} />
+          <CurrencyControllerField control={control} name="rateCurrency" label={labels.currencyLabel} />
         </Box>
       </DialogContent>
       <EntityFormDialogActions

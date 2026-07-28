@@ -1,12 +1,15 @@
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
+import { RecurringScheduleRepository } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { TeacherDueRepository } from "@/backend/db/repo/teachers/teacher-due.repository";
 import { classInstances } from "@/backend/db/schema";
-import { AppPermission, type CurrencyCode, TeacherDueStatus } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, RateSource, TeacherDueStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { resolveClassRate } from "@/backend/services/pricing/rate-resolver.service";
 import type {
   TeacherDueInsertType,
   TeacherDueReturnType,
@@ -56,8 +59,31 @@ export namespace TeacherDueService {
       throw new Error(t.teacher.teacherNotFound(teacherId));
     }
 
-    const hourlyRateStr = teacher.hourlyRate ?? "0";
-    const rateCurrency = (teacher.rateCurrency ?? "SAR") as CurrencyCode;
+    // Resolve the effective hourly rate using the 4-tier precedence cascade:
+    //   instance override > recurring schedule > subject > teacher.
+    // The recurring schedule and subject are loaded within the same executor
+    // (tx) so the resolution is consistent with the surrounding transaction.
+    const recurringScheduleRow = classInstance.recurringScheduleId
+      ? await RecurringScheduleRepository.findById(classInstance.recurringScheduleId, tx)
+      : null;
+
+    let subject: Awaited<ReturnType<typeof ClassSubjectRepository.getSubjectById>> | null = null;
+    try {
+      subject = await ClassSubjectRepository.getSubjectById(classInstance.subjectId, undefined, tx);
+    } catch {
+      // Subject may have been soft-deleted; fall back to teacher rate.
+    }
+
+    const resolved = resolveClassRate({
+      classInstance,
+      recurringSchedule: recurringScheduleRow?.schedule ?? null,
+      subject,
+      teacher,
+    });
+
+    const hourlyRateStr = resolved.hourlyRate;
+    const rateCurrency = resolved.currency;
+    const rateSource: RateSource = resolved.source;
     const durationMinutes = classInstance.durationMinutes;
     const hours = +(durationMinutes / 60).toFixed(2);
     const amount = +(Number.parseFloat(hourlyRateStr) * hours).toFixed(2);
@@ -69,6 +95,7 @@ export namespace TeacherDueService {
       hours: String(hours),
       amount: String(amount),
       currency: rateCurrency,
+      rateSource,
       status: TeacherDueStatus.PENDING,
       approvedByUserId,
       teacherPaymentId: null,
@@ -94,6 +121,7 @@ export namespace TeacherDueService {
     hours: number;
     amount: number;
     currency: CurrencyCode;
+    rateSource?: RateSource;
     approvedByUserId: string;
     status?: TeacherDueStatus;
     teacherPaymentId?: string | null;
@@ -115,6 +143,7 @@ export namespace TeacherDueService {
       hours: input.hours.toFixed(2),
       amount: input.amount.toFixed(2),
       currency: input.currency,
+      rateSource: input.rateSource ?? RateSource.TEACHER,
       status: input.status ?? TeacherDueStatus.PENDING,
       approvedByUserId: input.approvedByUserId,
       teacherPaymentId: input.teacherPaymentId ?? null,

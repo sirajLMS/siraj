@@ -223,6 +223,7 @@ export namespace TeacherDueRepository {
         hours: teacherDues.hours,
         amount: teacherDues.amount,
         currency: teacherDues.currency,
+        rateSource: teacherDues.rateSource,
         status: teacherDues.status,
         approvedByUserId: teacherDues.approvedByUserId,
         approvedAt: teacherDues.approvedAt,

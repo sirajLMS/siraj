@@ -162,6 +162,12 @@ export type TeacherOwnProfileReturnType = {
   phone: string | null;
   nationality: string | null;
   countryCode: string | null;
+  /**
+   * National ID, returned UNMASKED to the owner (the teacher editing their own
+   * profile). Admin/other-scope views go through `StaffProfileService` which
+   * masks the value via `maskNationalId`.
+   */
+  nationalId: string | null;
   dateOfBirth: string | null;
   gender: Gender | null;
   address: string | null;
@@ -176,6 +182,13 @@ export type TeacherOwnProfileUpdateInput = {
   readonly phone?: string | null;
   readonly nationality?: string | null;
   readonly countryCode?: string | null;
+  /**
+   * Teacher's own national ID. Required for a teacher to operate on the system
+   * (enforced on first login via the dashboard guard), but admins may leave it
+   * unset at creation time. Format is validated against `nationality` via
+   * `isValidNationalIdForCountry` in `TeacherPortalService.updateOwnProfile`.
+   */
+  readonly nationalId?: string | null;
   readonly dateOfBirth?: string | null;
   readonly gender?: Gender | null;
   readonly address?: string | null;

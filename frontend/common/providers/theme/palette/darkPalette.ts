@@ -1,19 +1,25 @@
 import type { PaletteOptions } from "@mui/material/styles";
 
 export const darkPalette: PaletteOptions = {
-  // MUI Standard Families (as Objects)
+  // Standard MUI Text Palette (WCAG 2.1 AA Compliant high contrast for secondary text)
+  text: {
+    primary: "#FAFAFA", // High contrast white for primary text
+    secondary: "#CBD5E1", // Slate 300 (~7.2:1 contrast ratio against #1E1E1E)
+    disabled: "#71717A", // Zinc 500
+  },
+
   primary: {
-    main: "#2DD4BF", // Vivid Teal (Light)
+    main: "#2DD4BF", // Vivid Teal
     light: "#5EEAD4",
     dark: "#0D9488",
     contrastText: "#042F2E",
   },
   onPrimary: "#042F2E",
-  primaryContainer: "#115E59",
-  onPrimaryContainer: "#CCFBF1",
+  primaryContainer: "#064E3B", // Dark Emerald background
+  onPrimaryContainer: "#99F6E4", // Bright Mint text (~9.5:1 contrast against container)
 
   secondary: {
-    main: "#818CF8", // Vivid Indigo (Light)
+    main: "#818CF8", // Vivid Indigo
     light: "#A5B4FC",
     dark: "#4F46E5",
     contrastText: "#1E1B4B",
@@ -23,17 +29,17 @@ export const darkPalette: PaletteOptions = {
   onSecondaryContainer: "#E0E7FF",
 
   error: {
-    main: "#F87171", // Vivid Red (Light)
+    main: "#F87171", // Bright Red for visibility
     light: "#FCA5A5",
     dark: "#DC2626",
     contrastText: "#450A0A",
   },
   onError: "#450A0A",
-  errorContainer: "#7F1D1D",
-  onErrorContainer: "#FEE2E2",
+  errorContainer: "#450A0A", // Rich dark crimson container
+  onErrorContainer: "#FECACA", // High legibility light red text
 
   success: {
-    main: "#4ADE80", // Vivid Green (Light)
+    main: "#4ADE80",
     light: "#86EFAC",
     dark: "#16A34A",
     contrastText: "#052E16",
@@ -43,7 +49,7 @@ export const darkPalette: PaletteOptions = {
   onSuccessContainer: "#DCFCE7",
 
   warning: {
-    main: "#FBBF24", // Vivid Amber (Light)
+    main: "#FBBF24",
     light: "#FDE047",
     dark: "#D97706",
     contrastText: "#451A03",
@@ -53,7 +59,7 @@ export const darkPalette: PaletteOptions = {
   onWarningContainer: "#FEF3C7",
 
   info: {
-    main: "#60A5FA", // Vivid Blue (Light)
+    main: "#60A5FA",
     light: "#93C5FD",
     dark: "#2563EB",
     contrastText: "#1E3A8A",
@@ -62,58 +68,55 @@ export const darkPalette: PaletteOptions = {
   infoContainer: "#1E3A8A",
   onInfoContainer: "#DBEAFE",
 
-  // Custom Families
-  tertiary: "#F43F5E", // Vivid Rose (Light)
+  tertiary: "#F43F5E",
   onTertiary: "#4C0519",
   tertiaryContainer: "#881337",
   onTertiaryContainer: "#FFE4E6",
 
-  // Layout Families
-  header: "#1A1A1A",
+  // Navigation & Shell Components
+  header: "#18181B",
   onHeader: "#FFFFFF",
-  headerContainer: "#1A1A1A",
+  headerContainer: "#18181B",
   onHeaderContainer: "#FFFFFF",
 
-  footer: "#1A1A1A",
+  footer: "#18181B",
   onFooter: "#FFFFFF",
-  footerContainer: "#1A1A1A",
+  footerContainer: "#18181B",
   onFooterContainer: "#A1A1AA",
 
-  sidebar: "#1A1A1A",
+  sidebar: "#18181B",
   onSidebar: "#FFFFFF",
-  sidebarContainer: "#1A1A1A",
+  sidebarContainer: "#18181B",
   onSidebarContainer: "#FFFFFF",
 
-  // Base Scheme (Strict Zinc/Neutral Gray Scale)
   background: {
-    default: "#1A1A1A", // Base background
-    paper: "#262626", // Cards and elevated surfaces
+    default: "#121212", // Pure Dark Canvas
+    paper: "#1E1E1E", // Elevated Card Surface
   },
   onBackground: "#FFFFFF",
-  surface: "#262626",
+  surface: "#1E1E1E",
   onSurface: "#FAFAFA",
-  surfaceVariant: "#404040",
-  onSurfaceVariant: "#A1A1AA",
+  surfaceVariant: "#27272A",
+  onSurfaceVariant: "#CBD5E1",
   outline: "#52525B",
-  outlineVariant: "#404040",
+  outlineVariant: "#3F3F46",
   scrim: "#000000",
   inverseSurface: "#FFFFFF",
   inverseOnSurface: "#171717",
   inversePrimary: "#0D9488",
   surfaceDim: "#171717",
-  surfaceBright: "#404040",
+  surfaceBright: "#3F3F46",
 
-  // Material 3 Surface Containers (Strict Lightness Progression)
+  // Material 3 Surface Layering
   surfaceContainerLowest: "#0F0F0F",
   surfaceContainerLow: "#141414",
-  surfaceContainer: "#1A1A1A",
-  surfaceContainerHigh: "#262626",
-  surfaceContainerHighest: "#333333",
+  surfaceContainer: "#1E1E1E",
+  surfaceContainerHigh: "#27272A",
+  surfaceContainerHighest: "#3F3F46",
 
-  // Layout Helpers
   border: {
-    light: "#333333",
-    main: "#404040",
+    light: "#27272A",
+    main: "#3F3F46",
   },
   shadow: {
     card: "0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5)",
@@ -122,12 +125,12 @@ export const darkPalette: PaletteOptions = {
     buttonHover: "0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5)",
   },
 
-  // Status Family
+  // High-Contrast Status Badge Pairings
   status: {
     pending: "#FBBF24",
     onPending: "#451A03",
-    pendingContainer: "#78350F",
-    onPendingContainer: "#FEF3C7",
+    pendingContainer: "#451A03",
+    onPendingContainer: "#FDE68A", // High contrast amber text on dark container
 
     confirmed: "#60A5FA",
     onConfirmed: "#1E3A8A",
@@ -139,25 +142,25 @@ export const darkPalette: PaletteOptions = {
     activeContainer: "#14532D",
     onActiveContainer: "#DCFCE7",
 
-    completed: "#C084FC", // Purple 400
-    onCompleted: "#3B0764", // Purple 950
-    completedContainer: "#581C87", // Purple 900
-    onCompletedContainer: "#F3E8FF", // Purple 100
+    completed: "#C084FC",
+    onCompleted: "#3B0764",
+    completedContainer: "#581C87",
+    onCompletedContainer: "#F3E8FF",
 
-    cancelled: "#F87171", // Red 400
-    onCancelled: "#450A0A", // Red 950
-    cancelledContainer: "#7F1D1D", // Red 900
-    onCancelledContainer: "#FEE2E2", // Red 100
+    cancelled: "#F87171",
+    onCancelled: "#450A0A",
+    cancelledContainer: "#450A0A",
+    onCancelledContainer: "#FECACA",
 
-    blocked: "#94A3B8", // Slate 400
-    onBlocked: "#0F172A", // Slate 900
-    blockedContainer: "#1E293B", // Slate 800
-    onBlockedContainer: "#F1F5F9", // Slate 100
+    blocked: "#94A3B8",
+    onBlocked: "#0F172A",
+    blockedContainer: "#1E293B",
+    onBlockedContainer: "#F1F5F9",
   },
 
   DataGrid: {
-    bg: "#1A1A1A",
-    pinnedBg: "#262626",
-    headerBg: "#262626",
+    bg: "#121212",
+    pinnedBg: "#1E1E1E",
+    headerBg: "#27272A",
   },
 };

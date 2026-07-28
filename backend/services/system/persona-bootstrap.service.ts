@@ -1,6 +1,6 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { ParentRepository, TeacherRepository, UserRepository } from "@/backend/db/repo";
-import type { AccountStatus } from "@/backend/enum";
+import type { AccountStatus, CurrencyCode } from "@/backend/enum";
 import type { ParentStatus } from "@/backend/enum/parents/parent.enum";
 import type { ParentEntity, TeacherEntity } from "@/backend/types";
 
@@ -8,6 +8,8 @@ export type PersonaProfileUpsertInput = {
   userId: string;
   timezone: string;
   status?: AccountStatus;
+  hourlyRate?: string;
+  rateCurrency?: CurrencyCode;
 };
 
 export type ParentProfileUpsertInput = {
@@ -32,7 +34,13 @@ export namespace PersonaBootstrapService {
       await UserRepository.updateStatus(input.userId, input.status, tx);
     }
     await UserRepository.updateTimezone(input.userId, input.timezone, tx);
-    return TeacherRepository.upsertByUserId(input.userId, tx);
+    return TeacherRepository.upsertByUserId(
+      input.userId,
+      input.hourlyRate || input.rateCurrency
+        ? { hourlyRate: input.hourlyRate, rateCurrency: input.rateCurrency }
+        : undefined,
+      tx
+    );
   }
 
   export async function upsertParentProfile(

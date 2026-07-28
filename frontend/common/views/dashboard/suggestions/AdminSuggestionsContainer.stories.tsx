@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AdminSuggestionsContainer } from "@/frontend/common/views/dashboard/suggestions/AdminSuggestionsContainer";
 
 const meta: Meta<typeof AdminSuggestionsContainer> = {

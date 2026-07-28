@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { createMobileStoryMeta, mobileBaseCardCorePreview } from "@/frontend/common/stories";
 import { BaseCard } from "@/frontend/mobile/components/ui/card/BaseCard";
 

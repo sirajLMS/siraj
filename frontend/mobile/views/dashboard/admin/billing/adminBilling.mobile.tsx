@@ -21,7 +21,7 @@ import { AdminInvoiceMobileCard } from "@/frontend/mobile/views/dashboard/admin/
 import { BillingMetricsRowMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMetricsRow.mobile";
 import { BillingMobileSearchBarMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMobileSearchBar.mobile";
 import { StudentCreditCardListMobile } from "@/frontend/mobile/views/dashboard/billing/components/studentCreditCardList.mobile";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 const StyledCreditFooterBox = styled(Box)(({ theme }) => ({
   display: "flex",

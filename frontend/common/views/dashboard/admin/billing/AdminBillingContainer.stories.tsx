@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { StoryBookPageContainer } from "@/frontend/common/components/ui/story/StoryBookPageContainer";
 import { AdminBillingContainer } from "@/frontend/common/views/dashboard/admin/billing/AdminBillingContainer";
 

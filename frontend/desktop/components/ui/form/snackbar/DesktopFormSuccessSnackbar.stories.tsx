@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/form/snackbar/DesktopFormSuccessSnackbar";
 
 const meta: Meta<typeof DesktopFormSuccessSnackbar> = {

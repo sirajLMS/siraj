@@ -3,7 +3,7 @@
 import { Button, Stack } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale";
 
 export type RecurringSeriesMeetingPanelProps = {

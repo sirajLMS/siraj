@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { CountryDisplay } from "@/frontend/common/components/ui/display/countryDisplay/CountryDisplay";
 
 const meta: Meta<typeof CountryDisplay> = {

@@ -27,6 +27,7 @@ export const teacherPendingDuesQueryDocument: TypedDocumentNode<
       teacherPaymentId
       createdAt
       updatedAt
+      rateSource
     }
   }
 `;

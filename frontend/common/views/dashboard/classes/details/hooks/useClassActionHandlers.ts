@@ -1,4 +1,5 @@
 "use client";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { useClassMutations } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassMutations";
 import type { ActionFeedbackState, ClassActionHandlers } from "@/frontend/common/views/dashboard/classes/details/types";
 import type { useRouter } from "@/shared/i18n/navigation";
@@ -49,6 +50,20 @@ export function useClassActionHandlers(
     },
     handleInfoEdit: () => {
       router.push(`/classes/${id}/audit`);
+    },
+    handleOverrideRate: async (rateAmount: string | null, rateCurrency: CurrencyCode | null) => {
+      try {
+        await mutations.overrideRate(rateAmount, rateCurrency);
+        setFeedbackState({
+          message: rateAmount ? t.instanceDetails.overrideSuccess : t.instanceDetails.clearSuccess,
+          severity: "success",
+        });
+      } catch {
+        setFeedbackState({
+          message: rateAmount ? t.instanceDetails.overrideError : t.instanceDetails.clearError,
+          severity: "error",
+        });
+      }
     },
   };
 }

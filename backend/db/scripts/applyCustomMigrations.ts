@@ -1,0 +1,258 @@
+/**
+ * Auto-bundles custom SQL migrations from `backend/db/migration/` into incremental
+ * drizzle migration folders under `backend/drizzle/` so that `bun db migrate`
+ * picks them up automatically — without requiring the (policy-disabled) `cleanGenerate`.
+ *
+ * Strategy (incremental, idempotent):
+ *
+ *   1. Build a manifest of every `backend/db/migration/*.sql` file (excluding
+ *      `1-extensions.sql`, temp files, and `*.sql_ignore`), sorted alphabetically:
+ *        [{ file, sha256 }]
+ *      The manifest hash = SHA-256 of the JSON-serialized manifest.
+ *
+ *   2. Compare against the last-applied manifest hash stored in the sidecar file
+ *      `backend/drizzle/.custom-migrations.json`. The sidecar records:
+ *        { manifestHash, manifest, appliedFolders: string[] }
+ *
+ *   3. Bootstrap: if the sidecar is missing but a `*_combined_custom_logic` drizzle
+ *      folder already exists (the historical baseline produced by `cleanGenerate`),
+ *      seed the sidecar with the current manifest hash so the already-applied
+ *      combined folder is treated as the baseline. No new folder is generated.
+ *
+ *   4. If the manifest hash is unchanged → nothing to bundle.
+ *
+ *   5. If the manifest hash changed → compute the delta (files whose sha256 differs
+ *      from the sidecar's recorded manifest — i.e. new or modified files), concatenate
+ *      their content with `-- Source: <file>` headers, run `withStatementBreakpoints`,
+ *      and write a new drizzle migration folder `<timestamp>_custom_<shorthash>`
+ *      containing only the delta SQL. Then update the sidecar.
+ *
+ *   6. The subsequent `drizzle-orm` migrate call scans `backend/drizzle/`, finds the
+ *      new folder (its hash is not yet in `__drizzle_migrations`), and applies it.
+ *
+ * Why incremental and not regenerate-in-place:
+ *   - Regenerating the `combined_custom_logic` folder in place would change its hash
+ *     and cause Drizzle to re-run the entire ~5,500-line combined blob. While the
+ *     blob is idempotent, re-running it is wasteful and fragile (relies on every
+ *     future custom file being idempotent).
+ *   - Incremental folders only apply the new/changed SQL, leaving the frozen baseline
+ *     untouched.
+ *
+ * Custom SQL files MUST be idempotent (use `IF NOT EXISTS`, `ON CONFLICT`,
+ * `DO $$ ... EXCEPTION WHEN duplicate_object`). The delta folder is applied exactly
+ * once by Drizzle, but a file may appear in a later delta if it is modified after
+ * being applied — so idempotency is still required for modified files.
+ */
+
+import crypto from "node:crypto";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import logger from "@/backend/lib/logger";
+import { withStatementBreakpoints } from "@/scripts/dbActions/sqlBreakpoints";
+
+const MIGRATIONS_SRC_DIR = resolve("backend/db/migration");
+const DRIZZLE_DIR = resolve("backend/drizzle");
+const SIDECAR_PATH = join(DRIZZLE_DIR, ".custom-migrations.json");
+
+/** Files in backend/db/migration/ that are NOT bundled by this auto-bundler. */
+const EXCLUDED_FILES = new Set<string>([
+  // 1-extensions.sql is bundled into its own dedicated `extensions` drizzle folder
+  // by cleanGenerate and is applied via ensureExtensions() during `db push`.
+  "1-extensions.sql",
+]);
+
+interface ManifestEntry {
+  file: string;
+  sha256: string;
+}
+
+interface Sidecar {
+  manifestHash: string;
+  manifest: ManifestEntry[];
+  appliedFolders: string[];
+}
+
+/** Returns true for files that should be excluded from custom-migration bundling. */
+function isExcluded(filename: string): boolean {
+  if (EXCLUDED_FILES.has(filename)) return true;
+  // Temp files produced by cleanGenerate and other scratch files.
+  if (filename.startsWith("temp_")) return true;
+  if (filename.endsWith(".sql_ignore")) return true;
+  return false;
+}
+
+/** Lists the custom SQL files to bundle, sorted alphabetically. */
+function listCustomSqlFiles(): string[] {
+  if (!existsSync(MIGRATIONS_SRC_DIR)) return [];
+  return readdirSync(MIGRATIONS_SRC_DIR)
+    .filter(f => f.endsWith(".sql") && !isExcluded(f))
+    .sort((a, b) => a.localeCompare(b));
+}
+
+/** Builds the manifest: one entry per custom SQL file with its SHA-256. */
+function buildManifest(): ManifestEntry[] {
+  return listCustomSqlFiles().map(file => ({
+    file,
+    sha256: crypto
+      .createHash("sha256")
+      .update(readFileSync(join(MIGRATIONS_SRC_DIR, file), "utf8"))
+      .digest("hex"),
+  }));
+}
+
+/** Computes the manifest hash: SHA-256 of the JSON-serialized manifest. */
+function computeManifestHash(manifest: ManifestEntry[]): string {
+  return crypto.createHash("sha256").update(JSON.stringify(manifest)).digest("hex");
+}
+
+/** Reads the sidecar file, or null if it does not exist. */
+function readSidecar(): Sidecar | null {
+  if (!existsSync(SIDECAR_PATH)) return null;
+  try {
+    return JSON.parse(readFileSync(SIDECAR_PATH, "utf8")) as Sidecar;
+  } catch {
+    logger.warn("⚠️  Could not parse .custom-migrations.json sidecar; ignoring it.");
+    return null;
+  }
+}
+
+/** Writes the sidecar file. */
+function writeSidecar(sidecar: Sidecar): void {
+  writeFileSync(SIDECAR_PATH, `${JSON.stringify(sidecar, null, 2)}\n`);
+}
+
+/** Returns the existing `*_combined_custom_logic` drizzle folder name, or null. */
+function findCombinedFolder(): string | null {
+  if (!existsSync(DRIZZLE_DIR)) return null;
+  const folders = readdirSync(DRIZZLE_DIR).filter(f => statSync(join(DRIZZLE_DIR, f)).isDirectory());
+  return folders.find(f => f.endsWith("_combined_custom_logic")) ?? null;
+}
+
+/**
+ * Parses the `-- Source: <file>` headers from a combined migration's `migration.sql`
+ * and returns the set of source filenames that were bundled into it. Used during
+ * bootstrap to determine which custom files were already applied via the historical
+ * combined folder (so files added AFTER the combined folder was generated are
+ * correctly treated as a delta rather than silently absorbed into the baseline).
+ */
+function parseBundledSources(combinedFolder: string): Set<string> {
+  const sqlPath = join(DRIZZLE_DIR, combinedFolder, "migration.sql");
+  if (!existsSync(sqlPath)) return new Set();
+  const content = readFileSync(sqlPath, "utf8");
+  const sources = new Set<string>();
+  for (const line of content.split("\n")) {
+    // Strip the `-- Source:` prefix in JS to avoid a regex with a capture group,
+    if (line.startsWith("-- Source:")) {
+      sources.add(line.slice("-- Source:".length).trim());
+    }
+  }
+  return sources;
+}
+
+/** Returns the manifest entries from the sidecar keyed by filename. */
+function indexByFile(manifest: ManifestEntry[]): Map<string, ManifestEntry> {
+  return new Map(manifest.map(e => [e.file, e]));
+}
+
+/** Computes the delta: files that are new or whose sha256 changed vs the sidecar. */
+function computeDelta(current: ManifestEntry[], previous: ManifestEntry[]): ManifestEntry[] {
+  const prev = indexByFile(previous);
+  return current.filter(entry => {
+    const old = prev.get(entry.file);
+    return !old || old.sha256 !== entry.sha256;
+  });
+}
+
+/** Builds the SQL content for a delta by concatenating the changed files. */
+function buildDeltaSql(delta: ManifestEntry[]): string {
+  let out = "";
+  for (const entry of delta) {
+    const content = readFileSync(join(MIGRATIONS_SRC_DIR, entry.file), "utf8");
+    out += `-- Source: ${entry.file}\n${content}\n\n`;
+  }
+  return withStatementBreakpoints(out.trimEnd());
+}
+
+/** Generates a new drizzle migration folder and writes the delta SQL into it. */
+function generateDeltaFolder(deltaSql: string, manifestHash: string): string {
+  const ts = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
+  const shortHash = manifestHash.slice(0, 8);
+  const folderName = `${ts}_custom_${shortHash}`;
+  const folderPath = join(DRIZZLE_DIR, folderName);
+  mkdirSync(folderPath, { recursive: true });
+  writeFileSync(join(folderPath, "migration.sql"), `${deltaSql}\n`);
+  return folderName;
+}
+
+/**
+ * Auto-bundles pending custom SQL migrations into incremental drizzle migration folders.
+ * Safe to call before every `bun db migrate`. Returns the list of newly generated
+ * folder names (empty if nothing was bundled).
+ */
+export function applyCustomMigrations(): string[] {
+  if (!existsSync(DRIZZLE_DIR)) {
+    logger.log("Custom migrations: backend/drizzle/ does not exist yet; skipping auto-bundle.");
+    return [];
+  }
+
+  const currentManifest = buildManifest();
+  const currentHash = computeManifestHash(currentManifest);
+  let sidecar = readSidecar();
+
+  // Bootstrap: no sidecar yet. If the historical combined folder already exists,
+  // build the baseline manifest from the files actually bundled into it (parsed
+  // from its `-- Source:` headers) so that files added AFTER the combined folder
+  // was generated are correctly treated as a delta. Files not in the combined
+  // folder become the first delta and get their own incremental folder.
+  if (!sidecar) {
+    const combined = findCombinedFolder();
+    if (combined) {
+      const bundledSources = parseBundledSources(combined);
+      const baselineManifest = currentManifest.filter(e => bundledSources.has(e.file));
+      const baselineHash = computeManifestHash(baselineManifest);
+      sidecar = {
+        manifestHash: baselineHash,
+        manifest: baselineManifest,
+        appliedFolders: [combined],
+      };
+      writeSidecar(sidecar);
+      const unbundledCount = currentManifest.length - baselineManifest.length;
+      logger.log(
+        `Custom migrations: initialized sidecar from ${combined} baseline (${baselineManifest.length} files bundled, ${unbundledCount} new file(s) will be applied as delta).`
+      );
+      // Fall through: the delta logic below will detect the new files and bundle them.
+    } else {
+      // Fresh setup with no combined baseline — fall through to delta logic with an
+      // empty previous manifest so everything becomes the delta.
+      sidecar = { manifestHash: "", manifest: [], appliedFolders: [] };
+    }
+  }
+
+  if (sidecar.manifestHash === currentHash) {
+    logger.log("Custom migrations: no new or changed custom SQL files detected.");
+    return [];
+  }
+
+  const delta = computeDelta(currentManifest, sidecar.manifest);
+  if (delta.length === 0) {
+    // A file was removed but no content changed — just refresh the sidecar hash.
+    writeSidecar({ manifestHash: currentHash, manifest: currentManifest, appliedFolders: sidecar.appliedFolders });
+    logger.log("Custom migrations: manifest changed (file removed) but no delta to apply.");
+    return [];
+  }
+
+  const deltaSql = buildDeltaSql(delta);
+  if (!deltaSql.trim()) {
+    writeSidecar({ manifestHash: currentHash, manifest: currentManifest, appliedFolders: sidecar.appliedFolders });
+    return [];
+  }
+
+  const newFolder = generateDeltaFolder(deltaSql, currentHash);
+  const appliedFolders = [...sidecar.appliedFolders, newFolder];
+  writeSidecar({ manifestHash: currentHash, manifest: currentManifest, appliedFolders });
+
+  logger.log(
+    `Custom migrations: generated ${newFolder} with ${delta.length} file(s): ${delta.map(d => d.file).join(", ")}`
+  );
+  return [newFolder];
+}

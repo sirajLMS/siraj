@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { CurrencyCodePothosObject, IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
   CreateRecurringClassInput,
   CreateRecurringClassReturnType,
@@ -35,6 +35,8 @@ export const CreateRecurringClassInputPothosObject = gqlSchemaBuilder
       }),
       classType: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       generateInstancesForWeeks: t.int({ required: false }),
+      hourlyRate: t.string({ required: false }),
+      rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
     }),
   });
 

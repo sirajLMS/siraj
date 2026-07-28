@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card/MobileCardListItem";
 import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";

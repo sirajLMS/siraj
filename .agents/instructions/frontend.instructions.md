@@ -62,8 +62,8 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
   const { userId, context } = await getServerUserContext();
   if (!userId || !context) redirect(`/${locale}/login`);
   ```
-- Server translations: `getTranslations()` / `getMessages()` from `next-intl/server`
-- Client translations: `useTranslations()` from `next-intl`
+- Server translations: `getTranslations(locale)` from `@/shared/locale/server` (synchronous, single string arg, returns property-chain — NOT awaited)
+- Client translations: `useAppTranslation("<namespace>")` from `@/shared/locale/client`
 - Locale in redirects: `redirect(`/${locale}/login`)` - never `redirect("/login")`
 
 ### New Page Workflow
@@ -145,10 +145,10 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 
 ### i18n
 
-- All user-facing strings via `next-intl` - never hardcode error messages or UI text
-- Client components: `useTranslations` hook from `next-intl`
-- Server components: `getTranslations()` from `next-intl/server`
-- Server components passing messages to client: `getMessages()` from `next-intl/server`
+- All user-facing strings via the compile-time TypeScript i18n system in `@/shared/locale` - never hardcode error messages or UI text
+- Client components: `useAppTranslation("<namespace>")` from `@/shared/locale/client`
+- Server components: `getTranslations(locale)` from `@/shared/locale/server` (synchronous, returns property-chain — NOT awaited)
+- Client components are wrapped in `LocaleProvider` from `@/frontend/common/providers/LocaleProvider` (NOT `NextIntlClientProvider`)
 
 ### Logging
 
@@ -160,7 +160,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 ### Storybook
 
 - `<RequirePermission>` defaults to admin - use `useUserStore.setState()` for specific perms (e.g., Parent vs Teacher)
-- Auto-wrapped in `NextIntlClientProvider` - component must use `useTranslations` for compatibility
+- Auto-wrapped in `LocaleProvider` from `@/frontend/common/providers/LocaleProvider` - component must use `useAppTranslation` from `@/shared/locale/client` for compatibility
 - Real `userStore` aliased to `mockUserStore` - prefer mock stores for predictable initial state
 - Decorators in metadata `decorators` array, not wrapping component directly in story function
 

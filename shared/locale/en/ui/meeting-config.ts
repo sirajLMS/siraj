@@ -1,3 +1,5 @@
+import { uiMeetingConfigRecurringScheduleEn } from "@/shared/locale/en/ui/meetingConfig/recurringSchedule";
+
 export const uiMeetingConfigEn = {
   sectionTitle: "Meeting Settings",
   addConfig: "Add Meeting Config",
@@ -98,13 +100,5 @@ export const uiMeetingConfigEn = {
     empty: "No default meeting configured",
     manageLink: "Manage meeting configs",
   },
-  recurringSchedule: {
-    pageTitle: "Recurring Series Meeting",
-    scheduleSummary: (student: string, teacher: string, duration: number | string, timezone: string) =>
-      `${student} with ${teacher} · ${duration} min · ${timezone}`,
-    invalidId: "Invalid schedule ID",
-    breadcrumbDashboard: "Dashboard",
-    breadcrumbClasses: "Classes",
-    goToClass: "Go to class",
-  },
+  recurringSchedule: uiMeetingConfigRecurringScheduleEn,
 };

@@ -72,13 +72,13 @@ When moving logic from `frontend/` or `backend/` into `shared/`:
 ## Translation System (Compile-Time i18n)
 
 ### Overview
-Siraj is migrating from `next-intl` (runtime `t("x.y")`) to a custom **compile-time TypeScript i18n system** in `shared/locale/` that provides:
+Siraj replaces the legacy `next-intl` package (now fully removed) with a custom **compile-time TypeScript i18n system** in `shared/locale/` that provides:
 - **Compile-time safety**: `t.x.y` instead of `t("x.y")` — IDE autocomplete + TypeScript errors on missing keys
 - **Native TypeScript pluralization**: `(count: number) => string` functions instead of ICU strings
 - **Lazy loading**: standard dynamic `import()` per namespace — only loads needed translations
 - **SSR & API support**: `getTranslations(locale, namespace)` for server components / API routes
 - **GraphQL context integration**: `ctx.t("namespace")` bound to `ctx.locale`
-- **SEO routing preserved**: Next.js native `[locale]` segments + middleware (no `next-intl` routing dependency)
+- **SEO routing preserved**: Next.js native `[locale]` segments + middleware (Native Next.js routing, no third-party i18n routing library.)
 
 ### File Structure
 ```
@@ -229,6 +229,5 @@ export const auth: AuthLabels = {
 5. If used in layout SSR, add to `LocaleProvider` translations in `app/[locale]/layout.tsx`
 
 ### Migration Status
-- **Pilot complete**: `auth` namespace fully migrated (login page + 4 components + GraphQL auth mutation)
-- **In progress**: 16-wave plan with 8 parallel subagents per wave (see `.ai/plans/i18n/migration-plan-v2.md`)
-- **Legacy intact**: `next-intl` still in `package.json`, `NextIntlClientProvider` in layout, `shared/messages/` untouched for non-migrated namespaces
+- **Complete**: all translation namespaces now live in `shared/locale/`; the legacy `next-intl` package has been fully removed from `package.json`.
+- **Legacy intact**: nothing — `shared/messages/` directory no longer exists; `next-intl` is no longer installed; `NextIntlClientProvider` is not used anywhere. Do not reintroduce them.

@@ -1,9 +1,10 @@
 // cspell:disable
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
-import { Box, CssBaseline, GlobalStyles, type PaletteMode, ThemeProvider } from "@mui/material";
-import type { StoryContext, StoryFn } from "@storybook/react";
-import { useEffect, useMemo } from "react";
+import { Box, CssBaseline, GlobalStyles, type PaletteMode } from "@mui/material";
+import { ThemeProvider, useColorScheme } from "@mui/material/styles";
+import type { StoryContext, StoryFn } from "@storybook/nextjs-vite";
+import { type ReactNode, useEffect, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
@@ -14,7 +15,7 @@ import {
   CurrencyCode as CurrencyCodeEnum,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
-import { createAppTheme } from "@/frontend/common/providers/theme/theme";
+import { createAppCssVarsTheme } from "@/frontend/common/providers/theme/theme";
 import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 
@@ -30,14 +31,48 @@ const cacheRtl = createCache({
   stylisPlugins: [prefixer, rtlPlugin],
 });
 
+/**
+ * Syncs Storybook's `theme` global to MUI's `useColorScheme()` and the DOM
+ * attributes that scope CSS variable palettes (`data-theme`, `data-mui-color-scheme`).
+ */
+function StorybookColorSchemeBridge({
+  mode,
+  direction,
+  locale,
+  children,
+}: Readonly<{
+  mode: PaletteMode;
+  direction: "rtl" | "ltr";
+  locale: "ar" | "en";
+  children: ReactNode;
+}>) {
+  const { setMode } = useColorScheme();
+
+  useEffect(() => {
+    setMode(mode);
+  }, [mode, setMode]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.theme = mode;
+    root.dataset.muiColorScheme = mode;
+    root.style.colorScheme = mode;
+    root.dir = direction;
+    root.lang = locale;
+  }, [mode, direction, locale]);
+
+  return children;
+}
+
 export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: StoryContext }) => {
   const locale = ((context.globals.locale as string | undefined) ?? "ar") as "ar" | "en";
-  const themeMode = (context.globals.theme as PaletteMode | undefined) ?? "dark";
+  const rawTheme = context.globals.theme;
+  const themeMode: PaletteMode = rawTheme === "light" || rawTheme === "dark" ? rawTheme : "dark";
   const _viewport = (context.globals.viewport as "mobile" | "tablet" | "desktop" | undefined) ?? "desktop";
   const direction: "rtl" | "ltr" = locale === "ar" ? "rtl" : "ltr";
 
-  // Build the theme object directly to avoid Next.js-specific provider issues
-  const theme = useMemo(() => createAppTheme(themeMode, direction, locale), [themeMode, direction, locale]);
+  // CSS-variables theme matches the App Router provider; mode toggles via useColorScheme.
+  const theme = useMemo(() => createAppCssVarsTheme(direction, locale, themeMode), [direction, locale, themeMode]);
   const cache = direction === "rtl" ? cacheRtl : cacheLtr;
 
   const themeContextValue = useMemo(
@@ -49,13 +84,6 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
     }),
     [themeMode]
   );
-
-  // Sync document attributes for global CSS and directionality
-  useEffect(() => {
-    document.documentElement.dir = direction;
-    document.documentElement.lang = locale;
-    document.documentElement.dataset.theme = themeMode;
-  }, [direction, locale, themeMode]);
 
   // Seed the user store with admin permissions by default for Storybook
   useEffect(() => {
@@ -158,56 +186,66 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
     <LocaleProvider locale={locale}>
       <ThemeContext.Provider value={themeContextValue}>
         <CacheProvider value={cache}>
-          <ThemeProvider theme={theme}>
+          <ThemeProvider
+            theme={theme}
+            defaultMode={themeMode}
+            forceThemeRerender
+            // Isolate from the app's `theme` localStorage key so Storybook toolbar
+            // controls the active palette instead of a persisted app preference.
+            modeStorageKey="sb-theme"
+          >
             <CssBaseline />
-            <GlobalStyles
-              styles={theme => ({
-                ".sbdocs-wrapper": {
-                  maxWidth: "100% !important",
-                  padding: "2rem !important",
-                  backgroundColor: `${theme.palette.background.default} !important`,
-                },
-                ".sbdocs-preview, .docs-story, .innerZoomElementWrapper, .docs-story > div, .sbdocs [role='toolbar']": {
-                  backgroundColor: `${theme.palette.background.default} !important`,
-                  borderColor: `${theme.palette.divider} !important`,
-                  color: `${theme.palette.text.primary} !important`,
-                },
-                ".sbdocs-content": {
-                  maxWidth: "100% !important",
-                  width: "100% !important",
-                },
-                ".sbdocs-title, .sbdocs-h1, .sbdocs-h2, .sbdocs-h3": {
-                  color: `${theme.palette.text.primary} !important`,
-                },
-                ".sbdocs-p, .sbdocs-li, .sbdocs-a": {
-                  color: `${theme.palette.text.secondary} !important`,
-                },
-                ".sbdocs button, .sbdocs a, .sbdocs [role='toolbar'] button": {
-                  color: `${theme.palette.text.primary} !important`,
-                },
-              })}
-            />
-            <ViewportProvider>
-              {isUiComponent ? (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    minHeight: "100vh",
-                    width: "100%",
-                    padding: 4,
-                    boxSizing: "border-box",
-                    maxWidth: maxWidth === "none" ? "100%" : maxWidth,
-                    mx: "auto",
-                  }}
-                >
-                  {content}
-                </Box>
-              ) : (
-                content
-              )}
-            </ViewportProvider>
+            <StorybookColorSchemeBridge mode={themeMode} direction={direction} locale={locale}>
+              <GlobalStyles
+                styles={theme => ({
+                  ".sbdocs-wrapper": {
+                    maxWidth: "100% !important",
+                    padding: "2rem !important",
+                    backgroundColor: `${theme.palette.background.default} !important`,
+                  },
+                  ".sbdocs-preview, .docs-story, .innerZoomElementWrapper, .docs-story > div, .sbdocs [role='toolbar']":
+                    {
+                      backgroundColor: `${theme.palette.background.default} !important`,
+                      borderColor: `${theme.palette.divider} !important`,
+                      color: `${theme.palette.text.primary} !important`,
+                    },
+                  ".sbdocs-content": {
+                    maxWidth: "100% !important",
+                    width: "100% !important",
+                  },
+                  ".sbdocs-title, .sbdocs-h1, .sbdocs-h2, .sbdocs-h3": {
+                    color: `${theme.palette.text.primary} !important`,
+                  },
+                  ".sbdocs-p, .sbdocs-li, .sbdocs-a": {
+                    color: `${theme.palette.text.secondary} !important`,
+                  },
+                  ".sbdocs button, .sbdocs a, .sbdocs [role='toolbar'] button": {
+                    color: `${theme.palette.text.primary} !important`,
+                  },
+                })}
+              />
+              <ViewportProvider>
+                {isUiComponent ? (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      minHeight: "100vh",
+                      width: "100%",
+                      padding: 4,
+                      boxSizing: "border-box",
+                      maxWidth: maxWidth === "none" ? "100%" : maxWidth,
+                      mx: "auto",
+                    }}
+                  >
+                    {content}
+                  </Box>
+                ) : (
+                  content
+                )}
+              </ViewportProvider>
+            </StorybookColorSchemeBridge>
           </ThemeProvider>
         </CacheProvider>
       </ThemeContext.Provider>

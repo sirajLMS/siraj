@@ -1,4 +1,4 @@
-import { ParentRepository, SoftDeleteRepository, SuggestionRepository } from "@/backend/db/repo";
+import { ParentRepository, SoftDeleteRepository, SuggestionRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, NotificationEventType, SuggestionStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { CommunicationService, PermissionsService } from "@/backend/services";
@@ -46,16 +46,30 @@ export namespace SuggestionService {
         locale
       );
 
-      await CommunicationService.dispatch(
-        {
-          userId: actorUserId,
-          title: "New Suggestion Submitted",
-          body: created.body,
-          channel: "email",
-          eventType: NotificationEventType.NEW_SUGGESTION,
-        },
-        locale
-      );
+      // Resolve the submitter's email so the email adapter has a valid `to`.
+      // `parent` (from `findByUserId`) is the `parents` row — email lives on
+      // `users`, so fetch via `UserRepository.findSafeById`. Legacy direct-
+      // dispatch path (F1 grandfather): `metadata.to` populated inline.
+      const submitter = await UserRepository.findSafeById(actorUserId);
+      const to = submitter?.email ?? "";
+      if (!to) {
+        logger.warn("Suggestion email dispatch skipped: submitter has no email", {
+          actorUserId,
+          suggestionId: created.id,
+        });
+      } else {
+        await CommunicationService.dispatch(
+          {
+            userId: actorUserId,
+            title: "New Suggestion Submitted",
+            body: created.body,
+            channel: "email",
+            eventType: NotificationEventType.NEW_SUGGESTION,
+            metadata: { to, entityKind: "suggestion", entityId: created.id },
+          },
+          locale
+        );
+      }
 
       logger.info("Suggestion submitted", {
         actorUserId,
@@ -251,6 +265,10 @@ export namespace SuggestionService {
 
       const parentProfile = await ParentRepository.getParentProfile(suggestion.parentId);
       if (parentProfile) {
+        // `parentProfile.email` is the parent's `users.email` (non-null in
+        // `ParentProfileResult`). Stamp it on the email payload's `metadata.to`
+        // so the email adapter has a valid recipient. Legacy direct-dispatch
+        // path (F1 grandfather): `metadata.to` populated inline.
         await CommunicationService.dispatchMulti(
           [
             {
@@ -266,6 +284,7 @@ export namespace SuggestionService {
               body: adminResponse,
               channel: "email",
               eventType: NotificationEventType.SUGGESTION_ACKNOWLEDGED,
+              metadata: { to: parentProfile.email, entityKind: "suggestion", entityId: suggestionId },
             },
           ],
           locale

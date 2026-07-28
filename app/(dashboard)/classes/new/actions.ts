@@ -1,5 +1,6 @@
 "use server";
 
+import type { CurrencyCode } from "@/backend/enum";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { parseIanaTimezone } from "@/backend/lib/enum";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
@@ -37,7 +38,11 @@ export async function createRecurringClass(
     const tErrors = translations.errorsTranslations;
     const result = await RecurringClassService.createRecurringClass(
       userId,
-      { ...input, timezone: parseIanaTimezone(toGraphqlIanaTimezone(input.timezone)) },
+      {
+        ...input,
+        rateCurrency: (input.rateCurrency as CurrencyCode | null) ?? undefined,
+        timezone: parseIanaTimezone(toGraphqlIanaTimezone(input.timezone)),
+      },
       tErrors
     );
 

@@ -10,7 +10,7 @@ import { meetingProvidersQueryDocument } from "@/frontend/common/graphql/sharedD
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale";
 
 export type MeetingProviderSelectProps = {

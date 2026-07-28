@@ -1,7 +1,7 @@
 "use client";
 
 import { alpha, styled } from "@mui/material/styles";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 export const DesktopActionIconLink = styled(Link)(({ theme }) => ({
   display: "inline-flex",

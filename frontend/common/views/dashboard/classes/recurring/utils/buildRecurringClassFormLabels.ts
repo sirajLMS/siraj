@@ -29,6 +29,8 @@ export type RecurringClassFormLabels = Pick<
   | "timezonePlaceholder"
   | "classType"
   | "classTypePlaceholder"
+  | "hourlyRateLabel"
+  | "currencyLabel"
   | "days"
 >;
 
@@ -57,6 +59,8 @@ export function buildRecurringClassFormLabels(labels: CreateRecurringClassLabels
     timezonePlaceholder: labels.timezonePlaceholder,
     classType: labels.classType,
     classTypePlaceholder: labels.classTypePlaceholder,
+    hourlyRateLabel: labels.hourlyRateLabel,
+    currencyLabel: labels.currencyLabel,
     days: labels.days,
   };
 }

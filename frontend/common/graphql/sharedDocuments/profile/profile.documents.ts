@@ -28,6 +28,7 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         phone
         nationality
         countryCode
+        nationalId
         dateOfBirth
         gender
         address
@@ -224,6 +225,7 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
         phone
         nationality
         countryCode
+        nationalId
         dateOfBirth
         gender
         address

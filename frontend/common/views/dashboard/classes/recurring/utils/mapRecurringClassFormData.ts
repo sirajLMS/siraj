@@ -1,4 +1,4 @@
-import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CreateRecurringClassInput, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 
@@ -31,6 +31,8 @@ export function mapFormDataToInput(data: RecurringClassFormData): CreateRecurrin
     generateInstancesForWeeks: data.generateInstancesForWeeks ?? 4,
     effectiveFrom: data.effectiveFrom ?? null,
     effectiveUntil: data.effectiveUntil ?? null,
+    hourlyRate: data.hourlyRate ?? null,
+    rateCurrency: (data.rateCurrency as CurrencyCode | null) ?? null,
   };
 }
 
@@ -49,5 +51,7 @@ export function mapFormDataToServiceInput(data: RecurringClassFormData) {
     effectiveFrom: data.effectiveFrom || undefined,
     effectiveUntil: data.effectiveUntil || undefined,
     generateInstancesForWeeks: data.generateInstancesForWeeks,
+    hourlyRate: data.hourlyRate ?? null,
+    rateCurrency: (data.rateCurrency as CurrencyCode | null) ?? null,
   };
 }

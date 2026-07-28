@@ -137,6 +137,7 @@ export enum AppPermission {
   BILLING_MANAGE_FX_PROVIDER = "billing.manage_fx_provider",
   BILLING_OVERRIDE_EXCHANGE_RATES = "billing.override_exchange_rates",
   BILLING_MANAGE_CURRENCY_HEDGES = "billing.manage_currency_hedges",
+  BILLING_MANAGE_CURRENCIES = "billing.manage_currencies",
   // Payment Method Catalog Admin
   PAYMENT_METHODS_MANAGE_CATALOGS = "payment_methods.manage_catalogs",
   PAYMENT_METHODS_VERIFY_BANK_TRANSFER = "payment_methods.verify_bank_transfer",

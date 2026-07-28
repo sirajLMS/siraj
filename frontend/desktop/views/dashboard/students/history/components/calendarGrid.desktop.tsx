@@ -10,7 +10,7 @@ import {
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
 import type { CalendarGridProps, ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 import { useAppTranslation } from "@/shared/locale";
 
 const calendarCellBase = ({ theme }: { theme: import("@mui/material/styles").Theme }) => ({

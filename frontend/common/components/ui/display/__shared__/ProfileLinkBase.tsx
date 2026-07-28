@@ -1,7 +1,7 @@
 import { Stack, Typography } from "@mui/material";
 import type { TypographyProps } from "@mui/material/Typography";
 import type { ReactNode } from "react";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 export type ProfileLinkBaseProps = {
   readonly href?: string | null;

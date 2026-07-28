@@ -57,6 +57,7 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
           onGenerateLog={() => {}}
           onReschedule={handlers.handleReschedule}
           onDelete={() => {}}
+          handlers={handlers}
           formattedScheduledDate={formattedScheduledDate}
           formattedStartTime={formattedStartTime}
           formattedEndTime={formattedEndTime}

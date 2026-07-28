@@ -5,6 +5,7 @@ import nextTs from "eslint-config-next/typescript";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import sonarjs from "eslint-plugin-sonarjs";
+import storybook from "eslint-plugin-storybook";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -17,7 +18,9 @@ const eslintConfig = defineConfig([
     // Ignore ALL dot-directories anywhere in the tree (e.g. .next, .git, .cursor,
     // .vscode, .scannerwork, .husky, .ai, .agents, .playwright-mcp, .kiro, ...).
     // One pattern replaces the previous hand-maintained list that missed new dot dirs.
+    // Dot-directories (except `.storybook`, which is linted explicitly).
     "**/.*/**",
+    "!.storybook/**",
     // Build output / dependency dirs that don't start with a dot.
     "node_modules/**",
     "out/**",
@@ -47,6 +50,8 @@ const eslintConfig = defineConfig([
   eslint.configs.recommended,
   sonarjs.configs.recommended,
   // cspellESLintPluginRecommended, // Disabled for performance
+
+  ...storybook.configs["flat/recommended"],
 
   // TypeScript and React-specific configuration
   ...tseslint.configs.recommended.map(config => ({
@@ -191,6 +196,7 @@ const eslintConfig = defineConfig([
       "shared/**/*.{ts,tsx}",
       "test/**/*.{ts,tsx}",
       "scripts/**/*.{ts,tsx}",
+      ".storybook/**/*.{ts,tsx}",
     ],
     rules: {
       "no-restricted-syntax": [
@@ -292,6 +298,22 @@ const eslintConfig = defineConfig([
   // **/index.ts barrel files keep relative ./sibling re-exports by design.
   {
     files: ["**/index.ts"],
+    rules: {
+      "no-restricted-syntax": "off",
+    },
+  },
+
+  // Disable react-refresh rule for Storybook config (exports helpers alongside components)
+  {
+    files: [".storybook/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+
+  // Storybook config files use sibling relative imports within `.storybook/`.
+  {
+    files: [".storybook/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-syntax": "off",
     },

@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { NotificationPreferencesRepository } from "@/backend/db/repo";
+import { NotificationPreferencesRepository, UserRepository } from "@/backend/db/repo";
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import {
   dispatchWithPreferences,
   EVENT_CHANNEL_ALLOWLIST,
 } from "@/backend/services/notification/notification-dispatch.helpers";
-import type { ChannelDispatchResult, CommunicationPayload } from "@/backend/types";
+import type { ChannelDispatchResult, CommunicationPayload, UserSelectType } from "@/backend/types";
 import type { UserNotificationPreferenceSelectType } from "@/backend/types/users/userNotificationPreferences.types";
 
 // ─── Test fixtures ─────────────────────────────────────────────────────
@@ -65,6 +65,16 @@ function successResult(channel: CommunicationPayload["channel"]): ChannelDispatc
 
 let getByUserIdSpy: ReturnType<typeof spyOn>;
 let dispatchMultiSpy: ReturnType<typeof spyOn>;
+let findSafeByIdSpy: ReturnType<typeof spyOn>;
+
+/** Minimal user row shape consumed by `stampRecipientAddress` (email/phone). */
+function mockUser(overrides?: Partial<Pick<UserSelectType, "email" | "phone">>): UserSelectType {
+  return {
+    email: "parent@test.com",
+    phone: "+15555550100",
+    ...overrides,
+  } as unknown as UserSelectType;
+}
 
 beforeEach(() => {
   // Default: user has NO stored prefs → helper treats them as "all enabled".
@@ -75,11 +85,14 @@ beforeEach(() => {
     async (payloads: CommunicationPayload[]): Promise<ChannelDispatchResult[]> =>
       payloads.map(p => successResult(p.channel))
   );
+  // Default: user has both email and phone — recipient resolution stamps `to`.
+  findSafeByIdSpy = spyOn(UserRepository, "findSafeById").mockResolvedValue(mockUser());
 });
 
 afterEach(() => {
   getByUserIdSpy.mockRestore();
   dispatchMultiSpy.mockRestore();
+  findSafeByIdSpy.mockRestore();
 });
 
 // ─── Tests ─────────────────────────────────────────────────────────────
@@ -154,7 +167,7 @@ describe("dispatchWithPreferences — preferences filtering", () => {
 
   test("prefs fetch error falls back to all-enabled — dispatchMulti still receives all 4 channels", async () => {
     // Simulate `NotificationPreferencesRepository.getByUserId` rejecting for
-    // the user. Per specs.md §5.2 the helper must NOT poison the dispatch —
+    // the user. Per §5.2 the helper must NOT poison the dispatch —
     // it logs a warn and treats the user as all-enabled (safe over-notify).
     getByUserIdSpy.mockRejectedValue(new Error("prefs DB unreachable"));
 
@@ -198,5 +211,79 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     expect(firstCallPayloads).toHaveLength(4);
     expect(secondCallPayloads).toHaveLength(3);
     expect(secondCallPayloads.map(p => p.channel)).not.toContain("email");
+  });
+});
+
+// ─── Recipient resolution (`metadata.to` stamping) ────────────────────
+
+describe("dispatchWithPreferences — recipient resolution", () => {
+  test("stamps `metadata.to` with user.email on email payloads before dispatchMulti", async () => {
+    findSafeByIdSpy.mockResolvedValue(mockUser({ email: "parent@test.com" }));
+
+    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
+    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
+
+    expect(findSafeByIdSpy).toHaveBeenCalledWith(PARENT_USER_ID);
+    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
+    const emailPayload = dispatched.find(p => p.channel === "email");
+    expect(emailPayload?.metadata?.to).toBe("parent@test.com");
+  });
+
+  test("stamps `metadata.to` with user.phone on sms payloads before dispatchMulti", async () => {
+    findSafeByIdSpy.mockResolvedValue(mockUser({ phone: "+15555550100" }));
+
+    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
+    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
+
+    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
+    const smsPayload = dispatched.find(p => p.channel === "sms");
+    expect(smsPayload?.metadata?.to).toBe("+15555550100");
+  });
+
+  test("drops email payload when user.email is null (no email payload reaches dispatchMulti)", async () => {
+    findSafeByIdSpy.mockResolvedValue(mockUser({ email: null as unknown as string }));
+
+    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
+    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
+
+    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
+    expect(dispatched.map(p => p.channel)).not.toContain("email");
+    // on_app, push, sms still dispatch.
+    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual(["on_app", "push", "sms"]);
+  });
+
+  test("drops sms payload when user.phone is null", async () => {
+    findSafeByIdSpy.mockResolvedValue(mockUser({ phone: null }));
+
+    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
+    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
+
+    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
+    expect(dispatched.map(p => p.channel)).not.toContain("sms");
+    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual(["email", "on_app", "push"]);
+  });
+
+  test("drops all email+sms payloads when user not found, still dispatches on_app+push", async () => {
+    findSafeByIdSpy.mockResolvedValue(null);
+
+    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
+    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
+
+    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
+    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual(["on_app", "push"]);
+    expect(dispatched).toHaveLength(2);
+  });
+
+  test("does NOT stamp `to` on on_app or push payloads", async () => {
+    findSafeByIdSpy.mockResolvedValue(mockUser({ email: "parent@test.com", phone: "+15555550100" }));
+
+    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
+    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
+
+    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
+    const onAppPayload = dispatched.find(p => p.channel === "on_app");
+    const pushPayload = dispatched.find(p => p.channel === "push");
+    expect(onAppPayload?.metadata?.to).toBeUndefined();
+    expect(pushPayload?.metadata?.to).toBeUndefined();
   });
 });

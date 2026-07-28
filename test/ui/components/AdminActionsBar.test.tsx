@@ -22,6 +22,7 @@ const mockLabels = {
   forceActivate: "Force Activate",
   stopPause: "Stop/Pause",
   deleteInstance: "Delete Instance",
+  overrideRateButton: "Override Rate",
   disabledTooltips: {
     forceActivate: {
       activated: "You cannot force activate because this class is already activated.",
@@ -42,6 +43,7 @@ const createMockHandlers = () => ({
   onGenerateLog: mock(() => {}),
   onReschedule: mock(() => {}),
   onDelete: mock(() => {}),
+  onOverrideRate: mock(() => {}),
 });
 
 type ExecutionState = "NOT_ACTIVATED" | "ACTIVATED" | "RUNNING" | "COMPLETED";

@@ -53,7 +53,7 @@ export function StudentsMobileView({
       <MobileContentStack gap={3} paddingBottom={10}>
         <MobileMetricCardGrid metrics={metrics} />
 
-        <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
+        <Box sx={{ display: "flex", gap: 1, mb: 1, px: 2 }}>
           <TextField
             fullWidth
             size="small"
@@ -116,7 +116,7 @@ export function StudentsMobileView({
           loading={loading}
           emptyMessage={labels.noEntries}
           gap={2}
-          layout="rounded"
+          layout="edge-to-edge"
           paginationOptions={
             totalStudents === undefined
               ? { mode: "client" }

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DesktopClassAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopClassAvatar";
 
 const meta: Meta<typeof DesktopClassAvatar> = {

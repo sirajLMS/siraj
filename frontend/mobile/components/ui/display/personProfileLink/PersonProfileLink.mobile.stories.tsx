@@ -1,5 +1,5 @@
 import { Stack } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { buildProfileLinkStories } from "@/frontend/common/components/ui/display/__shared__/profileLinkStories";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink/PersonProfileLink.mobile";
 

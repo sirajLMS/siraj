@@ -18,6 +18,12 @@ export function ensureCacheDir(): void {
   }
 }
 
+export function removeCachedResult(filePath: string): void {
+  loadCache();
+  mtimeCache.delete(filePath);
+  resultCache.delete(filePath);
+}
+
 export function loadCache(): void {
   if (isLoaded) return;
   ensureCacheDir();
@@ -37,6 +43,11 @@ export function loadCache(): void {
     content.split("\n").forEach(line => {
       const parts = line.split("§§§");
       if (parts.length >= 2) {
+        // Never load error results into memory cache — error files must always be rescanned
+        if (parts[1] === "error") {
+          mtimeCache.delete(parts[0]);
+          return;
+        }
         resultCache.set(parts[0], {
           status: parts[1],
           details: (parts[2] || "").replaceAll("|||NEWLINE|||", "\n"),
@@ -85,6 +96,10 @@ export function updateCachedMtime(filePath: string, mtime: number): void {
 
 export function saveResult(filePath: string, status: string, details: string): void {
   loadCache();
+  if (status === "error") {
+    removeCachedResult(filePath);
+    return;
+  }
   resultCache.set(filePath, { status, details });
 }
 

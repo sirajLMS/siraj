@@ -30,6 +30,7 @@ import {
   ProfileAudience,
   ProfileMode,
   ProfileScope,
+  RateSource,
   RescheduleDateLabel,
   StudentStatus,
   TeacherDueStatus,
@@ -193,4 +194,8 @@ export const AttendanceEvaluationPothosEnum = gqlSchemaBuilder.enumType(Attendan
 
 export const TeacherDueStatusPothosEnum = gqlSchemaBuilder.enumType(TeacherDueStatus, {
   name: "TeacherDueStatus",
+});
+
+export const RateSourcePothosEnum = gqlSchemaBuilder.enumType(RateSource, {
+  name: "RateSource",
 });

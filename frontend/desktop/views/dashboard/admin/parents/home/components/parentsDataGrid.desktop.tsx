@@ -20,7 +20,7 @@ import type {
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n";
 
 export type { ParentsDataGridLabels };
 

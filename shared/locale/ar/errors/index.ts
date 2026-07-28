@@ -183,6 +183,7 @@ export const errorsAr: ErrorsLabels = {
   notFound: "المورد المطلوب غير موجود.",
   unknownName: "غير معروف",
   invalidInput: "إدخال غير صالح.",
+  invalidNationalId: "الرقم القومي غير صالح للجنسية المحددة.",
   permissionGroupNotFound: "مجموعة الأذونات غير موجودة.",
 
   // ─── FX Display Currency messages (used by buildFxDisplayMessages) ────
@@ -262,4 +263,6 @@ export const errorsAr: ErrorsLabels = {
   teacherUnavailabilityConflict: "الحجز محظور بسبب نمط عدم التفرغ المتكرر.",
   teacherOnVacation: "الحجز محظور بسبب إجازة معتمدة.",
   resourceNotFound: "مورد التعلم غير موجود.",
+  currencyInUse:
+    "لا يمكن إلغاء تفعيل هذه العملة لأنها مستخدمة حالياً في الفواتير أو المدفوعات أو أسعار الصرف أو ملفات المستخدمين.",
 };

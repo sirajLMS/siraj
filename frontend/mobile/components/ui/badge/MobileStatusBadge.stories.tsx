@@ -1,5 +1,5 @@
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge/MobileStatusBadge";
 
 const meta: Meta<typeof MobileStatusBadge> = {

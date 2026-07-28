@@ -63,3 +63,37 @@ export function isNetworkError(error: unknown): boolean {
       error.message.includes("ERR_CONNECTION_REFUSED"))
   );
 }
+
+/**
+ * Serializes an Apollo/GraphQL error into a plain, devtools-friendly object.
+ *
+ * Apollo Client v4 surfaces operation failures as `CombinedGraphQLErrors` (an
+ * `Error` subclass). When logged inside a wrapper object (e.g.
+ * `logger.error("...", { error })`), browser devtools render the nested
+ * `Error` instance as `{}` because `Error` properties (`message`, `name`) are
+ * non-enumerable. This helper extracts the useful fields (`message`, `name`,
+ * GraphQL error messages, extensions, partial data) into a plain object so the
+ * log output is actually readable.
+ *
+ * @param error - The error from an Apollo `onError` callback or `try/catch`.
+ * @returns A plain object safe to pass to `logger.*`.
+ */
+export function serializeApolloError(error: unknown): Record<string, unknown> {
+  if (CombinedGraphQLErrors.is(error)) {
+    return {
+      name: error.name,
+      message: error.message,
+      graphQLErrors: error.errors.map(e => ({
+        message: e.message,
+        path: e.path,
+        extensions: e.extensions,
+      })),
+      extensions: error.extensions,
+      data: error.data,
+    };
+  }
+  if (error instanceof Error) {
+    return { name: error.name, message: error.message };
+  }
+  return { error: String(error) };
+}

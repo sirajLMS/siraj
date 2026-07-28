@@ -24,6 +24,7 @@ export interface AdminViewLabels {
     readonly forceActivate: string;
     readonly stopPause: string;
     readonly deleteInstance: string;
+    readonly overrideRateButton: string;
     readonly disabledTooltips: {
       readonly forceActivate: {
         readonly activated: string;
@@ -60,5 +61,27 @@ export interface AdminViewLabels {
     readonly studentInput: string;
     readonly teacherResponse: string;
     readonly noData: string;
+  };
+  readonly rate: {
+    readonly rateSectionTitle: string;
+    readonly effectiveRateLabel: string;
+    readonly rateCurrencyLabel: string;
+    readonly rateSourceLabel: string;
+    readonly rateSourceOverride: string;
+    readonly rateSourceRecurring: string;
+    readonly rateSourceSubject: string;
+    readonly rateSourceTeacher: string;
+    readonly overrideRateButton: string;
+    readonly clearOverrideButton: string;
+    readonly overrideRateDialogTitle: string;
+    readonly overrideRateDialogDescription: string;
+    readonly hourlyRateLabel: string;
+    readonly currencyLabel: string;
+    readonly saveButton: string;
+    readonly cancelButton: string;
+    readonly overrideSuccess: string;
+    readonly overrideError: string;
+    readonly clearSuccess: string;
+    readonly clearError: string;
   };
 }

@@ -44,7 +44,7 @@ function TeacherSearchField({
             <SearchOutlined
               sx={theme => ({
                 color: theme.palette.text.disabled,
-                mr: 1,
+                marginInlineEnd: theme.spacing(1),
               })}
             />
           ),
@@ -81,7 +81,7 @@ function TeacherCard({
             typographyVariant="titleLg"
             fontWeight={600}
           />
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, lineHeight: 1.6 })}>
             {row.email}
           </Typography>
         </Box>
@@ -99,6 +99,7 @@ function TeacherCard({
           justifyContent: "space-between",
           pt: 2,
           borderTop: `1px solid ${theme.palette.border.main}`,
+          gap: theme.spacing(2),
         })}
       >
         <Button
@@ -112,7 +113,7 @@ function TeacherCard({
         >
           {t.actions.joinRoom}
         </Button>
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center", marginInlineStart: "auto" }}>
           {row.userId ? (
             <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name ?? row.email ?? ""} />
           ) : null}

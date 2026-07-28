@@ -120,7 +120,7 @@ export const StyledSubLabel = styled(Typography)(({ theme }) => ({
 }));
 
 export const StyledDefaultContentRoot = styled(Box)(({ theme }) => ({
-  marginLeft: theme.spacing(0.5),
+  marginInlineStart: theme.spacing(0.5),
   flex: 1,
   minWidth: 0,
   display: "flex",
