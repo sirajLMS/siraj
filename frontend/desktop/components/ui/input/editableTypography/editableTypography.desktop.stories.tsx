@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import type { TypographyProps } from "@mui/material/Typography";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { EditableTypographyDesktop } from "@/frontend/desktop/components/ui/input/editableTypography/editableTypography.desktop";
 

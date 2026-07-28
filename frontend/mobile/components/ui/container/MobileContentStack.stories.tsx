@@ -1,5 +1,5 @@
 import { Box, Button, Card, CardContent, Stack, TextField, Typography } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MobileContentStack } from "@/frontend/mobile/components/ui/container/MobileContentStack";
 
 const meta: Meta<typeof MobileContentStack> = {

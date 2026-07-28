@@ -1,5 +1,6 @@
 import type { PaletteColor, PaletteColorOptions, TypeBackground } from "@mui/material/styles";
 import type { Property } from "csstype";
+
 export type TonalPalette = {
   0: string;
   5: string;
@@ -111,12 +112,6 @@ export type MuiThemeLayoutSettings = {
 };
 
 // Enable MUI v9 CSS theme variables type narrowing.
-//
-// `cssVariables: true` produces a `CssVarsTheme` (with `colorSchemes`, `vars`,
-// `applyStyles`, ...) and unlocks the `defaultMode` / `forceThemeRerender` /
-// `disableTransitionOnChange` props on `<ThemeProvider>`. The TypeScript types
-// only expose these when the `CssThemeVariables` interface is augmented with
-// `{ enabled: true; }` (see `createThemeNoVars.d.ts` and `ThemeProvider.d.ts`).
 declare module "@mui/material/styles" {
   interface CssThemeVariables {
     enabled: true;
@@ -142,7 +137,7 @@ declare module "@mui/material/styles" {
       ColorFamily<"footer">,
       ColorFamily<"sidebar">,
       Omit<M3BaseScheme, "background"> {
-    // MUI Standard families remain objects
+    // Standard MUI Families
     primary: PaletteColor;
     secondary: PaletteColor;
     error: PaletteColor;
@@ -150,10 +145,17 @@ declare module "@mui/material/styles" {
     info: PaletteColor;
     success: PaletteColor;
 
+    // Standard MUI Text overrides
+    text: {
+      primary: string;
+      secondary: string;
+      disabled: string;
+    };
+
     // MUI Background override
     background: TypeBackground;
 
-    // Layout Helpers (Restored)
+    // Layout Helpers
     border: {
       light: string;
       main: string;
@@ -171,6 +173,12 @@ declare module "@mui/material/styles" {
       ColorFamily<"completed"> &
       ColorFamily<"cancelled"> &
       ColorFamily<"blocked">;
+
+    DataGrid: {
+      bg: string;
+      pinnedBg: string;
+      headerBg: string;
+    };
   }
 
   interface PaletteOptions
@@ -185,7 +193,7 @@ declare module "@mui/material/styles" {
       ColorFamilyOptions<"footer">,
       ColorFamilyOptions<"sidebar">,
       M3BaseSchemeOptions {
-    // Force standard families to be objects in PaletteOptions
+    // Standard Families as objects in PaletteOptions
     primary?: PaletteColorOptions;
     secondary?: PaletteColorOptions;
     error?: PaletteColorOptions;
@@ -193,10 +201,17 @@ declare module "@mui/material/styles" {
     info?: PaletteColorOptions;
     success?: PaletteColorOptions;
 
+    // Standard MUI Text
+    text?: {
+      primary?: string;
+      secondary?: string;
+      disabled?: string;
+    };
+
     // MUI Background override
     background?: Partial<TypeBackground>;
 
-    // Layout Helpers (Restored)
+    // Layout Helpers
     border?: {
       light?: string;
       main?: string;
@@ -214,9 +229,14 @@ declare module "@mui/material/styles" {
       ColorFamilyOptions<"completed"> &
       ColorFamilyOptions<"cancelled"> &
       ColorFamilyOptions<"blocked">;
+
+    DataGrid?: {
+      bg?: string;
+      pinnedBg?: string;
+      headerBg?: string;
+    };
   }
 
-  // Extend Typography configurations to natively handle Design System variants
   interface TypographyVariants {
     display: React.CSSProperties;
     headlineLg: React.CSSProperties;
@@ -244,7 +264,6 @@ declare module "@mui/material/styles" {
   }
 }
 
-// Add Custom variants to typography component options
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     display: true;

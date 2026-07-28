@@ -2,6 +2,7 @@
 
 import { Paper, type SxProps, type Theme } from "@mui/material";
 import type { ReactNode } from "react";
+import { MOBILE_CONTENT_GUTTER } from "@/frontend/common/utils/sx/mobileContentGutterSx";
 
 export interface MobileCardListItemProps {
   readonly children: ReactNode;
@@ -59,12 +60,14 @@ export function MobileCardListItem({
     : undefined;
 
   const baseSx: SxProps<Theme> = (theme: Theme) => ({
-    padding: isEdgeToEdge ? 0 : theme.spacing(2.5),
+    ...(isEdgeToEdge
+      ? { paddingInline: theme.spacing(MOBILE_CONTENT_GUTTER), paddingBlock: theme.spacing(2) }
+      : { padding: theme.spacing(2.5) }),
     borderRadius: isEdgeToEdge ? 0 : theme.layout.radius.card,
     boxShadow: isEdgeToEdge ? "none" : theme.shadows[1],
     backgroundColor: isEdgeToEdge ? theme.palette.surfaceContainerLowest : theme.palette.background.paper,
-    borderTop: `1px solid ${theme.palette.border.light}`,
-    borderBottom: `1px solid ${theme.palette.border.light}`,
+    borderTop: isEdgeToEdge ? "none" : `1px solid ${theme.palette.border.light}`,
+    borderBottom: `1px solid ${theme.palette.outlineVariant}`,
     borderLeft: isEdgeToEdge ? "none" : `1px solid ${theme.palette.border.light}`,
     borderRight: isEdgeToEdge ? "none" : `1px solid ${theme.palette.border.light}`,
     opacity: dimmed ? (dimmedOpacity ?? 0.85) : 1,

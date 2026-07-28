@@ -1,6 +1,6 @@
 import { SettingsOutlined } from "@mui/icons-material";
 import { Button, Stack, TextField, Typography } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DesktopAdminControlPanel } from "@/frontend/desktop/components/ui/container/DesktopAdminControlPanel";
 
 const meta: Meta<typeof DesktopAdminControlPanel> = {

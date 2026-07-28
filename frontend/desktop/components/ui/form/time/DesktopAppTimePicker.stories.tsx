@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DesktopAppTimePicker } from "@/frontend/desktop/components/ui/form/time/DesktopAppTimePicker";
 
 const meta: Meta<typeof DesktopAppTimePicker> = {

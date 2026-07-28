@@ -1,5 +1,5 @@
 import { MockedProvider } from "@apollo/client/testing/react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { addDays, format } from "date-fns";
 import { StoryBookPageContainer } from "@/frontend/common/components/ui/story/StoryBookPageContainer";
 import { DayOfWeek, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";

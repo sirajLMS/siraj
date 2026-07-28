@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DesktopLoadingState } from "@/frontend/desktop/components/ui/state/DesktopLoadingState";
 
 const meta: Meta<typeof DesktopLoadingState> = {

@@ -1,6 +1,6 @@
 import { SecurityOutlined } from "@mui/icons-material";
 import { Button, Stack, TextField, Typography } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { MobileAdminControlPanel } from "@/frontend/mobile/components/ui/container/MobileAdminControlPanel";
 

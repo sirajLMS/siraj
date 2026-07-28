@@ -1,3 +1,4 @@
+import type { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 export interface PendingDuesSummary {
@@ -14,7 +15,14 @@ export interface MonthlySnapshot {
 
 export interface RecentApproval {
   readonly id: string;
+  readonly classInstanceId: string;
+  readonly subjectName: string;
+  readonly classAvatarUrl: string | null;
   readonly lessonDate: string;
+  readonly lessonDateRaw: string | null;
+  readonly durationMinutes: number | null;
+  readonly completionPercentage: number | null;
+  readonly status: LessonReportStatus | null;
   readonly studentId: string;
   readonly studentName: string;
   readonly studentAvatarUrl: string | null;
@@ -24,6 +32,7 @@ export interface RecentApproval {
   readonly teacherAvatarUrl: string | null;
   readonly teacherUserId: string | null;
   readonly reviewedAt: string;
+  readonly reviewedAtRaw: string | null;
 }
 
 export interface SupervisorDashboardViewModel {

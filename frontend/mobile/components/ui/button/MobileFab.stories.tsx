@@ -1,5 +1,5 @@
 import { AddOutlined } from "@mui/icons-material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { MobileFab } from "@/frontend/mobile/components/ui/button/MobileFab";
 

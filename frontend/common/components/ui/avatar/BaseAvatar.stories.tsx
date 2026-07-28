@@ -1,5 +1,5 @@
 import { Stack } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BaseAvatar } from "@/frontend/common/components/ui/avatar/BaseAvatar";
 
 const meta: Meta<typeof BaseAvatar> = {

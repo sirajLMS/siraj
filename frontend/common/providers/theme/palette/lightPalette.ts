@@ -1,16 +1,22 @@
 import type { PaletteOptions } from "@mui/material/styles";
 
 export const lightPalette: PaletteOptions = {
-  // MUI Standard Families (as Objects)
+  // Standard MUI Text Palette
+  text: {
+    primary: "#0F172A", // Slate 900 (High contrast crisp text on white/light gray)
+    secondary: "#475569", // Slate 600 (~7.1:1 contrast ratio)
+    disabled: "#94A3B8", // Slate 400
+  },
+
   primary: {
-    main: "#0D9488", // Vivid Teal
+    main: "#0D9488", // Deep Teal (Vivid and legible on light background)
     light: "#2DD4BF",
     dark: "#0F766E",
     contrastText: "#FFFFFF",
   },
   onPrimary: "#FFFFFF",
-  primaryContainer: "#CCFBF1",
-  onPrimaryContainer: "#115E59",
+  primaryContainer: "#CCFBF1", // Light Teal tint container
+  onPrimaryContainer: "#0F766E", // Dark Emerald text (~7.8:1 contrast on #CCFBF1)
 
   secondary: {
     main: "#4F46E5", // Vivid Indigo
@@ -23,17 +29,17 @@ export const lightPalette: PaletteOptions = {
   onSecondaryContainer: "#312E81",
 
   error: {
-    main: "#DC2626", // Vivid Red
+    main: "#DC2626", // Crisp Dark Red
     light: "#F87171",
     dark: "#991B1B",
     contrastText: "#FFFFFF",
   },
   onError: "#FFFFFF",
-  errorContainer: "#FEE2E2",
-  onErrorContainer: "#7F1D1D",
+  errorContainer: "#FEE2E2", // Soft red pill
+  onErrorContainer: "#991B1B", // Dark red text
 
   success: {
-    main: "#16A34A", // Vivid Green
+    main: "#16A34A",
     light: "#4ADE80",
     dark: "#166534",
     contrastText: "#FFFFFF",
@@ -43,7 +49,7 @@ export const lightPalette: PaletteOptions = {
   onSuccessContainer: "#14532D",
 
   warning: {
-    main: "#D97706", // Vivid Amber
+    main: "#D97706",
     light: "#FBBF24",
     dark: "#92400E",
     contrastText: "#FFFFFF",
@@ -53,7 +59,7 @@ export const lightPalette: PaletteOptions = {
   onWarningContainer: "#78350F",
 
   info: {
-    main: "#2563EB", // Vivid Blue
+    main: "#2563EB",
     light: "#60A5FA",
     dark: "#1E40AF",
     contrastText: "#FFFFFF",
@@ -62,72 +68,69 @@ export const lightPalette: PaletteOptions = {
   infoContainer: "#DBEAFE",
   onInfoContainer: "#1E3A8A",
 
-  // Custom Families
-  tertiary: "#E11D48", // Vivid Rose
+  tertiary: "#E11D48",
   onTertiary: "#FFFFFF",
   tertiaryContainer: "#FFE4E6",
   onTertiaryContainer: "#881337",
 
-  // Layout Families
+  // Navigation & Shell Components
   header: "#FFFFFF",
-  onHeader: "#171717",
+  onHeader: "#0F172A",
   headerContainer: "#FFFFFF",
-  onHeaderContainer: "#171717",
+  onHeaderContainer: "#0F172A",
 
   footer: "#FFFFFF",
-  onFooter: "#171717",
-  footerContainer: "#FAFAFA",
-  onFooterContainer: "#52525B",
+  onFooter: "#0F172A",
+  footerContainer: "#F8FAFC",
+  onFooterContainer: "#475569",
 
   sidebar: "#FFFFFF",
-  onSidebar: "#171717",
-  sidebarContainer: "#FAFAFA",
-  onSidebarContainer: "#52525B",
+  onSidebar: "#0F172A",
+  sidebarContainer: "#F8FAFC",
+  onSidebarContainer: "#475569",
 
-  // Base Scheme (Strict Zinc/Neutral Gray Scale)
   background: {
-    default: "#FFFFFF",
-    paper: "#FFFFFF",
+    default: "#F8FAFC", // Slate 50 Canvas
+    paper: "#FFFFFF", // Pure white card surfaces
   },
-  onBackground: "#171717",
+  onBackground: "#0F172A",
   surface: "#FFFFFF",
-  onSurface: "#171717",
-  surfaceVariant: "#F4F4F5",
-  onSurfaceVariant: "#52525B",
-  outline: "#A1A1AA",
-  outlineVariant: "#E4E4E7",
+  onSurface: "#0F172A",
+  surfaceVariant: "#F1F5F9",
+  onSurfaceVariant: "#475569",
+  outline: "#CBD5E1", // Distinct outline
+  outlineVariant: "#E2E8F0",
   scrim: "#000000",
-  inverseSurface: "#171717",
-  inverseOnSurface: "#F4F4F5",
+  inverseSurface: "#0F172A",
+  inverseOnSurface: "#F8FAFC",
   inversePrimary: "#2DD4BF",
-  surfaceDim: "#E4E4E7",
+  surfaceDim: "#E2E8F0",
   surfaceBright: "#FFFFFF",
 
-  // Material 3 Surface Containers (Strict Lightness Progression)
+  // Material 3 Surface Containers
   surfaceContainerLowest: "#FFFFFF",
-  surfaceContainerLow: "#FAFAFA",
-  surfaceContainer: "#F4F4F5",
-  surfaceContainerHigh: "#E4E4E7",
-  surfaceContainerHighest: "#D4D4D8",
+  surfaceContainerLow: "#F8FAFC",
+  surfaceContainer: "#F1F5F9",
+  surfaceContainerHigh: "#E2E8F0",
+  surfaceContainerHighest: "#CBD5E1",
 
-  // Layout Helpers
   border: {
-    light: "#E4E4E7",
-    main: "#D4D4D8",
+    light: "#E2E8F0",
+    main: "#CBD5E1", // Adds clear visual definition
   },
   shadow: {
-    card: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)",
-    cardHover: "0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04)",
-    button: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-    buttonHover: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
+    card: "0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04)",
+    cardHover: "0 10px 15px -3px rgba(15, 23, 42, 0.12), 0 4px 6px -2px rgba(15, 23, 42, 0.06)",
+    button: "0 1px 3px 0 rgba(15, 23, 42, 0.1), 0 1px 2px 0 rgba(15, 23, 42, 0.06)",
+    buttonHover: "0 4px 6px -1px rgba(15, 23, 42, 0.12), 0 2px 4px -2px rgba(15, 23, 42, 0.08)",
   },
 
-  // Status Family
+  // High-Contrast
   status: {
     pending: "#D97706",
     onPending: "#FFFFFF",
-    pendingContainer: "#FEF3C7",
-    onPendingContainer: "#78350F",
+    pendingContainer: "#FEF3C7", // Soft warm amber background
+    onPendingContainer: "#78350F", // Dark warm amber text (~8.2:1 contrast)
 
     confirmed: "#2563EB",
     onConfirmed: "#FFFFFF",
@@ -139,25 +142,25 @@ export const lightPalette: PaletteOptions = {
     activeContainer: "#DCFCE7",
     onActiveContainer: "#14532D",
 
-    completed: "#9333EA", // Purple 600
+    completed: "#9333EA",
     onCompleted: "#FFFFFF",
-    completedContainer: "#F3E8FF", // Purple 100
-    onCompletedContainer: "#581C87", // Purple 900
+    completedContainer: "#F3E8FF",
+    onCompletedContainer: "#581C87",
 
-    cancelled: "#DC2626", // Red 600
+    cancelled: "#DC2626",
     onCancelled: "#FFFFFF",
-    cancelledContainer: "#FEE2E2", // Red 100
-    onCancelledContainer: "#7F1D1D", // Red 900
+    cancelledContainer: "#FEE2E2",
+    onCancelledContainer: "#7F1D1D",
 
-    blocked: "#475569", // Slate 600
+    blocked: "#475569",
     onBlocked: "#FFFFFF",
-    blockedContainer: "#F1F5F9", // Slate 100
-    onBlockedContainer: "#0F172A", // Slate 900
+    blockedContainer: "#F1F5F9",
+    onBlockedContainer: "#0F172A",
   },
 
   DataGrid: {
     bg: "#FFFFFF",
-    pinnedBg: "#FAFAFA",
-    headerBg: "#F4F4F5",
+    pinnedBg: "#F8FAFC",
+    headerBg: "#F1F5F9",
   },
 };

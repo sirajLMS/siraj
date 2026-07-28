@@ -59,7 +59,14 @@ export function useSupervisorDashboardViewModel(
     const rows = dashboard?.recentApprovals ?? [];
     return rows.map(r => ({
       id: r?.id ?? "",
+      classInstanceId: r?.classInstanceId ?? "",
+      subjectName: r?.subjectName?.trim() || "",
+      classAvatarUrl: r?.classAvatarUrl ?? null,
       lessonDate: r?.lessonDate ? formatDate(r.lessonDate, locale) : "",
+      lessonDateRaw: r?.lessonDate ?? null,
+      durationMinutes: r?.durationMinutes ?? null,
+      completionPercentage: r?.completionPercentage ?? null,
+      status: r?.status ?? null,
       studentId: r?.studentId ?? "",
       studentName: r?.studentName?.trim() || "",
       studentAvatarUrl: r?.studentAvatarUrl ?? null,
@@ -69,6 +76,7 @@ export function useSupervisorDashboardViewModel(
       teacherAvatarUrl: r?.teacherAvatarUrl ?? null,
       teacherUserId: r?.teacherUserId ?? null,
       reviewedAt: r?.reviewedAt ? formatDateTime(r.reviewedAt, locale) : "",
+      reviewedAtRaw: r?.reviewedAt ?? null,
     }));
   }, [dashboard?.recentApprovals, locale]);
 

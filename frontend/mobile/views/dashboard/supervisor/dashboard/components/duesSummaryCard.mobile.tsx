@@ -2,6 +2,8 @@
 
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { mobileContentGutterSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import type { SupervisorDashboardLabels } from "@/shared/locale";
 
@@ -20,10 +22,11 @@ export function DuesSummaryCardMobile({ summary, labels, onGoToDues }: Readonly<
 
   return (
     <Box
-      sx={theme => ({
+      sx={mergeSx(mobileContentGutterSx, theme => ({
+        width: "100%",
         backgroundColor: theme.palette.surfaceContainerHigh,
         borderRadius: 0,
-        p: 2.5,
+        py: 2.5,
         display: "flex",
         flexDirection: "column",
         gap: 2,
@@ -31,7 +34,8 @@ export function DuesSummaryCardMobile({ summary, labels, onGoToDues }: Readonly<
         borderBottom: `1px solid ${theme.palette.outlineVariant}`,
         borderLeft: "none",
         borderRight: "none",
-      })}
+        boxShadow: "none",
+      }))}
     >
       <Stack sx={{ flexDirection: "row", alignItems: "flex-start", gap: 1.5 }}>
         <Box

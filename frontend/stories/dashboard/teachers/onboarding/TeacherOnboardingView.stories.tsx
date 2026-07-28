@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { seedPermissions } from "@/frontend/common/stories";
 import { TeacherOnboardingContainer } from "@/frontend/common/views/dashboard/teachers/onboarding/TeacherOnboardingContainer";

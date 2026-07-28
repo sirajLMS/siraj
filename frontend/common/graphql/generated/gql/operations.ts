@@ -4945,7 +4945,7 @@ export type SuggestionContributorStatsQuery = SuggestionContributorStatsQuery_Qu
 
 export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_pendingDuesSummary_TeacherPendingDuesSummary = { totalCount: number | null, totalAmount: number | null, currency: Types.CurrencyCode | null };
 
-export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_recentApprovals_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, studentAvatarUrl: string | null, teacherAvatarUrl: string | null, studentUserId: string | null, teacherUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedAt: string | null, reviewedAt: string | null, createdAt: string | null, updatedAt: string | null };
+export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_recentApprovals_LessonReport = { id: string | null, classInstanceId: string | null, subjectName: string | null, classAvatarUrl: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, studentAvatarUrl: string | null, teacherAvatarUrl: string | null, studentUserId: string | null, teacherUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedAt: string | null, reviewedAt: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_monthlySnapshot_SupervisorMonthlySnapshot = { year: number | null, month: number | null, label: string | null };
 
@@ -4958,18 +4958,6 @@ export type SupervisorDashboardQueryVariables = Exact<{ [key: string]: never; }>
 
 
 export type SupervisorDashboardQuery = SupervisorDashboardQuery_Query;
-
-export type CreateManagerMutation_createManager_ManagerOnboardingResult = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, status: string | null, assignedGroupSlug: string | null };
-
-export type CreateManagerMutation_Mutation = { createManager: CreateManagerMutation_createManager_ManagerOnboardingResult | null };
-
-
-export type CreateManagerMutationVariables = Exact<{
-  input: Types.ManagerOnboardingInput;
-}>;
-
-
-export type CreateManagerMutation = CreateManagerMutation_Mutation;
 
 export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_metrics_TeacherDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null };
 
@@ -5048,6 +5036,18 @@ export type StaffDirectoryQueryVariables = Exact<{
 
 
 export type StaffDirectoryQuery = StaffDirectoryQuery_Query;
+
+export type CreateManagerMutation_createManager_ManagerOnboardingResult = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, status: string | null, assignedGroupSlug: string | null };
+
+export type CreateManagerMutation_Mutation = { createManager: CreateManagerMutation_createManager_ManagerOnboardingResult | null };
+
+
+export type CreateManagerMutationVariables = Exact<{
+  input: Types.ManagerOnboardingInput;
+}>;
+
+
+export type CreateManagerMutation = CreateManagerMutation_Mutation;
 
 export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 

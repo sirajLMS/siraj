@@ -55,6 +55,8 @@ export function MobileSectionPanel({
               borderInlineEnd: "none",
               borderLeft: "none",
               borderRight: "none",
+              borderTop: theme => `1px solid ${theme.palette.outlineVariant}`,
+              borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
             }
           : undefined,
         sx

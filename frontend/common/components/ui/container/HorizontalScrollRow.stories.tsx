@@ -1,5 +1,5 @@
 import { Box, Card, Typography } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 
 const meta: Meta<typeof HorizontalScrollRow> = {

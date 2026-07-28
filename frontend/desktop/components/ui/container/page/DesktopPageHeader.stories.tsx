@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page/DesktopPageHeader";
 
 const meta: Meta<typeof DesktopPageHeader> = {

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { buildProfileLinkStories } from "@/frontend/common/components/ui/display/__shared__/profileLinkStories";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";

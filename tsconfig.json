@@ -32,8 +32,6 @@
   "include": [
     ".storybook/**/*.ts",
     ".storybook/**/*.tsx",
-    ".storybook/*.ts",
-    ".storybook/*.tsx",
     "next-env.d.ts",
     "**/*.d.ts",
     "**/*.ts",
@@ -50,13 +48,20 @@
     ".next-test-*/types/**/*.ts"
   ],
   "exclude": [
-    // Ignore ALL dot-directories anywhere in the tree (e.g. .ai, .git, .cursor,
-    // .vscode, .scannerwork, .husky, .agents, ...). Does NOT affect Next.js's
-    // generated types in .next/ and .next-test*/ — those are pulled in explicitly
-    // via the `include` block above (TS applies `exclude` only to files reached via
-    // ambient/walked discovery, not to explicit `include` entries — so .next types
-    // stay included).
-    "**/.*/**",
+    // Dot-directories (except `.storybook`, which is explicitly included above).
+    "**/.ai/**",
+    "**/.agents/**",
+    "**/.codescene/**",
+    "**/.cursor/**",
+    "**/.git/**",
+    "**/.github/**",
+    "**/.husky/**",
+    "**/.kiro/**",
+    "**/.playwright-mcp/**",
+    "**/.scannerwork/**",
+    "**/.stakpak/**",
+    "**/.vercel/**",
+    "**/.vscode/**",
     // Build output / dependency dirs that don't start with a dot.
     "node_modules",
     "dist",

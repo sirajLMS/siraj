@@ -4,7 +4,7 @@ import ErrorIcon from "@mui/icons-material/ErrorOutlined";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
 import WarningIcon from "@mui/icons-material/WarningOutlined";
 import { Box, Button, Chip, IconButton, Stack, Typography } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card/MobileCardListItem";
 

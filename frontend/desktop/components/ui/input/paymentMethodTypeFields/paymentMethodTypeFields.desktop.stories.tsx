@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
