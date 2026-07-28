@@ -2,32 +2,51 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { Interface } from "node:readline";
 import { config } from "dotenv";
-import { clearDbConnectionSingleton } from "@/backend/db/drizzleDb";
-import { resetEnvironmentCache } from "@/backend/lib/env";
 import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
-import { DESTRUCTIVE_GUARD_ENV_KEYS } from "@/scripts/lib/destructiveDbGuard";
+import { clearDestructiveGuardEnvVars } from "@/scripts/lib/destructiveDbGuard";
 
+/** Default env file for non-interactive `bun db` commands when `--env-file` is omitted. */
 export const DEFAULT_ENV_FILE = ".env";
 
 const ENV_FILE_PREFIX = ".env";
 const EXCLUDED_ENV_FILES = new Set([".env.example"]);
 
+/** A discoverable root-level env file and its validated `DATABASE_URL`. */
 export interface EnvFileOption {
   fileName: string;
   databaseUrl: string;
 }
 
+/** In-memory env file path used for the current `bun db` CLI session. */
 let selectedEnvFile: string | null = null;
 
 /**
- * Returns the env file selected for this db CLI session (used by child bun processes).
+ * Clears the in-memory selected env file for the db CLI session.
+ *
+ * This does **not** reset, drop, or modify the database. It only resets which
+ * `.env*` file path is tracked for child `bun` processes during tests.
+ *
+ * @internal For unit tests only.
+ */
+export function clearSelectedEnvFileForTests(): void {
+  selectedEnvFile = null;
+}
+
+/**
+ * Returns the env file selected for the current db CLI session.
+ *
+ * Used when spawning child `bun` commands so they load the same env file
+ * the user chose (or the non-interactive default).
  */
 export function getSelectedEnvFile(): string | null {
   return selectedEnvFile;
 }
 
 /**
- * Whether a DATABASE_URL value is usable for db commands.
+ * Whether a `DATABASE_URL` value is usable for db CLI commands.
+ *
+ * Accepts `postgresql://` and `postgres://` URLs with a hostname and rejects
+ * placeholders (e.g. `<user>`) and non-Postgres protocols.
  */
 export function isValidDatabaseUrl(databaseUrl: string | undefined): databaseUrl is string {
   if (!databaseUrl?.trim()) {
@@ -51,7 +70,10 @@ export function isValidDatabaseUrl(databaseUrl: string | undefined): databaseUrl
 }
 
 /**
- * Reads DATABASE_URL from an env file without mutating process.env.
+ * Reads `DATABASE_URL` from an env file without mutating `process.env`.
+ *
+ * @param fileName Env file name relative to `rootDir` (e.g. `.env`, `.env.test`).
+ * @param rootDir Directory to resolve the env file from. Defaults to `process.cwd()`.
  */
 export function readDatabaseUrlFromEnvFile(fileName: string, rootDir = process.cwd()): string | undefined {
   const filePath = join(rootDir, fileName);
@@ -80,7 +102,12 @@ function compareEnvFileNames(a: string, b: string): number {
 }
 
 /**
- * Finds root-level .env* files that contain a valid DATABASE_URL.
+ * Finds root-level `.env*` files that contain a valid `DATABASE_URL`.
+ *
+ * Excludes `.env.example` and other files without a usable Postgres URL.
+ * Results are sorted with `.env` first, then remaining files alphabetically.
+ *
+ * @param rootDir Directory to scan. Defaults to `process.cwd()`.
  */
 export function discoverEnvFilesWithDatabaseUrl(rootDir = process.cwd()): EnvFileOption[] {
   const entries = readdirSync(rootDir);
@@ -108,11 +135,18 @@ export function discoverEnvFilesWithDatabaseUrl(rootDir = process.cwd()): EnvFil
 }
 
 /**
- * Loads the selected env file into process.env, invalidates in-memory environment
- * and database connection singletons, and records the active env file for child processes.
+ * Loads an env file into `process.env` for the db CLI session.
  *
- * @param fileName The environment file to load (e.g. `.env`, `.env.vercel`, `.env.mishkah`).
- * @param rootDir The root directory containing the env files (defaults to current working directory).
+ * Clears stale destructive-guard env vars, applies all vars from the file,
+ * records the active env file for child processes, and invalidates cached
+ * environment/database singletons so later actions use the new config.
+ *
+ * This does **not** run any database commands. Destructive actions (reset,
+ * drop, clean generate) remain gated separately by repo policy and env checks.
+ *
+ * @param fileName Env file name relative to `rootDir` (e.g. `.env`, `.env.vercel`).
+ * @param rootDir Directory containing the env file. Defaults to `process.cwd()`.
+ * @throws When the file is missing, unparseable, or lacks a valid `DATABASE_URL`.
  */
 export function applyEnvFile(fileName: string, rootDir = process.cwd()): void {
   const filePath = join(rootDir, fileName);
@@ -131,26 +165,50 @@ export function applyEnvFile(fileName: string, rootDir = process.cwd()): void {
     throw new Error(`Could not parse env file: ${fileName}`);
   }
 
-  for (const key of DESTRUCTIVE_GUARD_ENV_KEYS) {
-    delete process.env[key];
-  }
+  clearDestructiveGuardEnvVars();
 
   for (const [key, value] of Object.entries(parsed)) {
     process.env[key] = value;
   }
 
-  resetEnvironmentCache();
-  clearDbConnectionSingleton();
-
   selectedEnvFile = fileName;
+
+  void invalidateRuntimeCaches();
 }
 
+/**
+ * Refreshes in-memory environment and Drizzle connection caches after an env switch.
+ *
+ * Loaded dynamically so backend modules are not imported before env vars exist.
+ */
+async function invalidateRuntimeCaches(): Promise<void> {
+  const [{ resetEnvironmentCache }, { clearDbConnectionSingleton }] = await Promise.all([
+    import("@/backend/lib/env"),
+    import("@/backend/db/drizzleDb"),
+  ]);
+
+  resetEnvironmentCache();
+  clearDbConnectionSingleton();
+}
+
+/**
+ * Formats an env file option for display in the interactive picker.
+ *
+ * Passwords in the database URL are redacted.
+ */
 export function formatEnvFileLabel(option: EnvFileOption): string {
   return `${option.fileName} (${sanitizeUrlCredentials(option.databaseUrl)})`;
 }
 
 /**
- * Displays env file choices and returns the selected file name.
+ * Prompts the user to pick an env file before the db actions menu.
+ *
+ * Only files with a valid `DATABASE_URL` are offered. Enter `0` to cancel.
+ *
+ * @param rl Readline interface for user input.
+ * @param rootDir Directory to scan for env files. Defaults to `process.cwd()`.
+ * @returns The selected env file name (e.g. `.env`, `.env.test`).
+ * @throws When no valid env files exist or the user cancels.
  */
 export async function selectEnvFileInteractive(rl: Interface, rootDir = process.cwd()): Promise<string> {
   const options = discoverEnvFilesWithDatabaseUrl(rootDir);
@@ -196,14 +254,24 @@ export async function selectEnvFileInteractive(rl: Interface, rootDir = process.
   }
 }
 
+/** Parsed arguments for the `bun db` CLI entrypoint. */
 export interface ParsedDbCliArgs {
+  /** Whether `--help` / `-h` was passed. */
   showHelp: boolean;
+  /** Env file from `--env-file`; omitted when not specified. */
   envFile?: string;
+  /** Non-interactive action name (e.g. `migrate`, `push`). */
   actionArg?: string;
 }
 
 /**
- * Parses db CLI args, extracting --env-file before action dispatch.
+ * Parses `bun db` CLI arguments.
+ *
+ * Extracts `--env-file` / `--env-file=<path>` before action dispatch so env
+ * selection does not interfere with action names.
+ *
+ * @param args Raw argv slice (typically `process.argv.slice(2)`).
+ * @throws When `--env-file` is passed without a path.
  */
 export function parseDbCliArgs(args: string[]): ParsedDbCliArgs {
   const parsed: ParsedDbCliArgs = { showHelp: false };

@@ -15,6 +15,20 @@ export const DESTRUCTIVE_GUARD_ENV_KEYS = [
 ] as const;
 
 /**
+ * Removes destructive-guard env vars from `process.env`.
+ *
+ * Used when switching db CLI env files so stale cloud/production signals
+ * from a previously loaded file cannot leak into safety checks.
+ *
+ * This does **not** reset the database or change repo policy blocks.
+ */
+export function clearDestructiveGuardEnvVars(): void {
+  for (const key of DESTRUCTIVE_GUARD_ENV_KEYS) {
+    delete process.env[key];
+  }
+}
+
+/**
  * Assessment of whether destructive DB commands are safe to run in the current environment.
  */
 export interface DestructiveDbSafetyAssessment {

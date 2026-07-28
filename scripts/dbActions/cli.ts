@@ -100,17 +100,58 @@ export async function interactiveLoop(): Promise<void> {
   globalThis.console.log("Exiting.");
 }
 
+function printCliError(error: unknown): void {
+  globalThis.console.error(error instanceof Error ? error.message : String(error));
+}
+
+function parseCliArgsOrExit(argv: string[]): ParsedDbCliArgs | null {
+  try {
+    return parseDbCliArgs(argv);
+  } catch (error) {
+    printCliError(error);
+    showHelp();
+    process.exit(1);
+    return null;
+  }
+}
+
+async function runNonInteractiveAction(parsed: ParsedDbCliArgs): Promise<void> {
+  const envFile = parsed.envFile ?? DEFAULT_ENV_FILE;
+  try {
+    applyEnvFile(envFile);
+  } catch (error) {
+    printCliError(error);
+    process.exit(1);
+    return;
+  }
+
+  printSelectedEnv(envFile);
+
+  const actionArg = parsed.actionArg;
+  if (!actionArg) {
+    return;
+  }
+
+  const key = findActionKey(actionArg);
+  if (!key) {
+    globalThis.console.error(`Invalid argument: ${actionArg}`);
+    showHelp();
+    process.exit(1);
+    return;
+  }
+
+  const exitCode = await executeAction(key);
+  if (exitCode !== 0) {
+    process.exit(exitCode);
+  }
+}
+
 /**
  * Entry point
  */
 export async function main(): Promise<void> {
-  let parsed: ParsedDbCliArgs;
-  try {
-    parsed = parseDbCliArgs(process.argv.slice(2));
-  } catch (error) {
-    globalThis.console.error(error instanceof Error ? error.message : String(error));
-    showHelp();
-    process.exit(1);
+  const parsed = parseCliArgsOrExit(process.argv.slice(2));
+  if (!parsed) {
     return;
   }
 
@@ -120,28 +161,7 @@ export async function main(): Promise<void> {
   }
 
   if (parsed.actionArg) {
-    const envFile = parsed.envFile ?? DEFAULT_ENV_FILE;
-    try {
-      applyEnvFile(envFile);
-    } catch (error) {
-      globalThis.console.error(error instanceof Error ? error.message : String(error));
-      process.exit(1);
-      return;
-    }
-
-    printSelectedEnv(envFile);
-
-    const key = findActionKey(parsed.actionArg);
-    if (key) {
-      const exitCode = await executeAction(key);
-      if (exitCode !== 0) {
-        process.exit(exitCode);
-      }
-    } else {
-      globalThis.console.error(`Invalid argument: ${parsed.actionArg}`);
-      showHelp();
-      process.exit(1);
-    }
+    await runNonInteractiveAction(parsed);
     return;
   }
 

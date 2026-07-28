@@ -2,8 +2,14 @@ import { spawn } from "node:child_process";
 import { getSelectedEnvFile } from "@/scripts/dbActions/envFile";
 
 /**
- * Builds bun CLI args with an isolated env file load for child processes.
- * Uses `--env-file=<path>` (equals form) because `bun --env-file <path> run …` is parsed incorrectly.
+ * Builds `bun` CLI arguments with an isolated env file for child processes.
+ *
+ * Uses `--env-file=<path>` (equals form) because `bun --env-file <path> run …`
+ * is parsed incorrectly. Also passes `--no-env-file` so Bun does not auto-merge
+ * every `.env*` file in the repo.
+ *
+ * @param args Bun subcommand arguments (e.g. `["run", "backend/db/scripts/migrate.ts"]`).
+ * @param envFile Selected env file path, or `null` to omit env flags.
  */
 export function buildBunCommandArgs(args: string[], envFile: string | null): string[] {
   if (!envFile) {
@@ -14,7 +20,10 @@ export function buildBunCommandArgs(args: string[], envFile: string | null): str
 }
 
 /**
- * Runs a bun command with the selected env file applied.
+ * Spawns a child `bun` process using the env file selected for this CLI session.
+ *
+ * @param args Bun subcommand arguments to run.
+ * @returns Child process exit code (`0` on success).
  */
 export async function runBunCommand(args: string[]): Promise<number> {
   const bunArgs = buildBunCommandArgs(args, getSelectedEnvFile());

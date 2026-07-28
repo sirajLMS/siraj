@@ -1,8 +1,14 @@
 /**
- * DB Actions Script
- * Converted from dbActions.sh
+ * DB Actions CLI entrypoint.
+ *
+ * Bootstraps env for non-interactive commands, then loads the interactive CLI.
+ * Database destructive-action guards are enforced later in `actions.ts`.
  */
-import { main } from "./cli";
+import { bootstrapDbCliEnv } from "@/scripts/dbActions/bootstrapEnv";
+
+bootstrapDbCliEnv();
+
+const { main } = await import("@/scripts/dbActions/cli");
 
 main().catch((err: unknown) => {
   globalThis.console.error("Fatal:", err);
