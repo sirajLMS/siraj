@@ -5,8 +5,8 @@ import { LoginFooter } from "@/frontend/views/auth/login/components/LoginFooter"
 import { LoginForm, type LoginFormProps } from "@/frontend/views/auth/login/components/LoginForm";
 import { LoginHeader } from "@/frontend/views/auth/login/components/LoginHeader";
 import { ThemeLanguageControls } from "@/frontend/views/auth/login/components/ThemeLanguageControls";
+import type { AuthLoginLabels } from "@/shared/locale/types/auth";
 
-// Full viewport container with centered content and default background
 const StyledPageContainer = styled(Box)(({ theme }) => ({
   minHeight: "100vh",
   display: "flex",
@@ -16,13 +16,21 @@ const StyledPageContainer = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
 }));
 
-export interface LoginViewProps extends LoginFormProps {
-  isDemo?: boolean;
-  demoGroups?: { slug: string; name: string; description: string | null }[];
-  onFastLogin?: (groupSlug: string) => void;
+export interface LoginViewProps extends Omit<LoginFormProps, "labels"> {
+  readonly labels: AuthLoginLabels;
+  readonly isDemo?: boolean;
+  readonly demoGroups?: { slug: string; name: string; description: string | null }[];
+  readonly onFastLogin?: (groupSlug: string) => void;
 }
 
-export function LoginView({ isDemo, demoGroups, onFastLogin, ...formProps }: Readonly<LoginViewProps>) {
+export function LoginView({
+  labels,
+  isDemo,
+  demoGroups,
+  onFastLogin,
+  onSubmitAction,
+  externalLoginResult,
+}: Readonly<LoginViewProps>) {
   return (
     <StyledPageContainer sx={{ px: 2 }}>
       <ThemeLanguageControls />
@@ -39,9 +47,11 @@ export function LoginView({ isDemo, demoGroups, onFastLogin, ...formProps }: Rea
             p: theme.layout?.cardPadding || 4,
           })}
         >
-          <LoginHeader />
-          <LoginForm {...formProps} />
-          {isDemo && onFastLogin && <DemoFastLogin onFastLogin={onFastLogin} groups={demoGroups || []} />}
+          <LoginHeader labels={labels} />
+          <LoginForm labels={labels} onSubmitAction={onSubmitAction} externalLoginResult={externalLoginResult} />
+          {isDemo && onFastLogin && (
+            <DemoFastLogin labels={labels} onFastLogin={onFastLogin} groups={demoGroups || []} />
+          )}
           <LoginFooter />
         </CardContent>
       </Card>

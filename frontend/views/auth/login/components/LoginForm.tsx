@@ -8,53 +8,48 @@ import { useState } from "react";
 import { type Control, Controller, type FieldErrors, useForm } from "react-hook-form";
 import { mockLogin } from "@/frontend/views/auth/login/actions/mockLogin";
 import { createLoginSchema, type LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
-import { useAppTranslation } from "@/shared/locale";
+import type { AuthLoginLabels } from "@/shared/locale/types/auth";
 
-// Person icon for email field with secondary color
 const StyledPersonIcon = styled(Person)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-// Lock icon for password field with secondary color
 const StyledLockIcon = styled(Lock)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-// Form actions container with flex layout for forgot password
 const StyledFormActionsContainer = styled(Box)({
   display: "flex",
   justifyContent: "flex-end",
   alignItems: "center",
 });
 
-// Forgot password link with primary color
 const StyledForgotPasswordLink = styled(Link)(({ theme }) => ({
   color: theme.palette.primary.main,
   fontSize: theme.typography.bodyMd.fontSize,
   fontWeight: 500,
 }));
 
-// Submit button with custom padding and margin
 const StyledSubmitButton = styled(Button)({
   paddingTop: 12,
   paddingBottom: 12,
 });
 
 const FormFields = ({
+  labels,
   control,
   errors,
   isSubmitting,
   showPassword,
   setShowPassword,
 }: {
+  labels: AuthLoginLabels;
   control: Control<LoginFormData>;
   errors: FieldErrors<LoginFormData>;
   isSubmitting: boolean;
   showPassword: boolean;
   setShowPassword: (show: boolean) => void;
 }) => {
-  const t = useAppTranslation().authTranslations.login;
-
   return (
     <>
       <Controller
@@ -63,7 +58,7 @@ const FormFields = ({
         render={({ field }) => (
           <TextField
             {...field}
-            label={t.email}
+            label={labels.email}
             type="email"
             error={!!errors.email}
             helperText={errors.email?.message}
@@ -88,7 +83,7 @@ const FormFields = ({
         render={({ field }) => (
           <TextField
             {...field}
-            label={t.password}
+            label={labels.password}
             type={showPassword ? "text" : "password"}
             error={!!errors.password}
             helperText={errors.password?.message}
@@ -124,25 +119,23 @@ const FormFields = ({
   );
 };
 
-const FormActions = ({ isSubmitting: _isSubmitting }: { isSubmitting: boolean }) => {
-  const t = useAppTranslation().authTranslations.login;
-
+const FormActions = ({ labels }: { labels: AuthLoginLabels }) => {
   return (
     <StyledFormActionsContainer>
       <StyledForgotPasswordLink href="#" underline="hover">
-        {t.forgotPassword}
+        {labels.forgotPassword}
       </StyledForgotPasswordLink>
     </StyledFormActionsContainer>
   );
 };
 
 export interface LoginFormProps {
-  onSubmitAction?: (data: LoginFormData) => Promise<void>;
-  externalLoginResult?: { type: "success" | "error"; message: string } | null;
+  readonly labels: AuthLoginLabels;
+  readonly onSubmitAction?: (data: LoginFormData) => Promise<void>;
+  readonly externalLoginResult?: { type: "success" | "error"; message: string } | null;
 }
 
-export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProps = {}) {
-  const t = useAppTranslation().authTranslations.login;
+export function LoginForm({ labels, onSubmitAction, externalLoginResult }: Readonly<LoginFormProps>) {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginResult, setLoginResult] = useState<{
@@ -151,10 +144,10 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
   } | null>(null);
 
   const loginSchema = createLoginSchema({
-    emailRequired: t.emailRequired,
-    emailInvalid: t.emailInvalid,
-    passwordRequired: t.passwordRequired,
-    passwordMinLength: t.passwordMinLength,
+    emailRequired: labels.emailRequired,
+    emailInvalid: labels.emailInvalid,
+    passwordRequired: labels.passwordRequired,
+    passwordMinLength: labels.passwordMinLength,
   });
 
   const {
@@ -178,7 +171,7 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
         .catch(() => {
           setLoginResult({
             type: "error",
-            message: t.loginError,
+            message: labels.loginError,
           });
         })
         .finally(() => {
@@ -190,19 +183,19 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
           if (response.success) {
             setLoginResult({
               type: "success",
-              message: t.loginSuccess,
+              message: labels.loginSuccess,
             });
           } else {
             setLoginResult({
               type: "error",
-              message: t.invalidCredentials,
+              message: labels.invalidCredentials,
             });
           }
         })
         .catch(() => {
           setLoginResult({
             type: "error",
-            message: t.loginError,
+            message: labels.loginError,
           });
         })
         .finally(() => {
@@ -233,6 +226,7 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
       )}
 
       <FormFields
+        labels={labels}
         control={control}
         errors={errors}
         isSubmitting={isSubmitting}
@@ -240,7 +234,7 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
         setShowPassword={setShowPassword}
       />
 
-      <FormActions isSubmitting={isSubmitting} />
+      <FormActions labels={labels} />
 
       <StyledSubmitButton
         type="submit"
@@ -250,7 +244,7 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
         fullWidth
         sx={{ mt: 1 }}
       >
-        {isSubmitting ? <CircularProgress size={24} color="inherit" /> : t.signIn}
+        {isSubmitting ? <CircularProgress size={24} color="inherit" /> : labels.signIn}
       </StyledSubmitButton>
     </Box>
   );
