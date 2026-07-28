@@ -110,7 +110,8 @@ describe("Soft Delete Security (Issue #2)", () => {
 
     try {
       await db.transaction(async tx => {
-        await tx.execute(sql`SET LOCAL ROLE ${sql.raw(`"${SOFT_DELETE_RLS_ROLE}"`)}`);
+        const quotedRole = `"${SOFT_DELETE_RLS_ROLE}"`;
+        await tx.execute(sql`SET LOCAL ROLE ${sql.raw(quotedRole)}`);
 
         const hardDeleteResult = await tx.delete(users).where(eq(users.id, user.id)).returning();
         expect(hardDeleteResult).toHaveLength(0);

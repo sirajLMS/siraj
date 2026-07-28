@@ -4810,6 +4810,14 @@ export type SettingsTimezonesQueryVariables = Exact<{
 
 export type SettingsTimezonesQuery = SettingsTimezonesQuery_Query;
 
+export type EnsureDemoUsersMutation_Mutation = { ensureDemoUsers: boolean | null };
+
+
+export type EnsureDemoUsersMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EnsureDemoUsersMutation = EnsureDemoUsersMutation_Mutation;
+
 export type CreateTestEntitiesMutation_createTestEntities_TestEntities = { studentUserEmail: string | null, studentUserId: string | null, studentId: string | null, studentName: string | null, parentUserEmail: string | null, parentUserId: string | null, parentId: string | null, parentName: string | null, teacherUserEmail: string | null, teacherUserId: string | null, teacherId: string | null, teacherName: string | null };
 
 export type CreateTestEntitiesMutation_Mutation = { createTestEntities: CreateTestEntitiesMutation_createTestEntities_TestEntities | null };

@@ -1,4 +1,5 @@
 import { afterAll, beforeAll } from "bun:test";
+import { ensureDemoUsersForTests } from "@/frontend/common/graphql/test/helpers";
 import { getTestPort, getTestServerMode } from "@/frontend/common/graphql/test/testPort";
 import { isTestServerRunning, startTestServer, stopTestServer } from "@/frontend/common/graphql/test/testServer";
 import { testLogger } from "@/shared/lib/logger/testlogger";
@@ -19,6 +20,7 @@ export function setupTestServerLifecycle() {
       serverStartPromise = startTestServer();
     }
     await serverStartPromise;
+    await ensureDemoUsersForTests();
     testLogger.info(`GraphQL test server ready on port ${getTestPort()} (${getTestServerMode()} mode)`);
   });
 

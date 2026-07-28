@@ -2,6 +2,15 @@ import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
+export const ensureDemoUsersMutationDocument: TypedDocumentNode<
+  Operations.EnsureDemoUsersMutation,
+  Record<string, never>
+> = gql`
+  mutation ensureDemoUsers {
+    ensureDemoUsers
+  }
+`;
+
 export const createTestEntitiesMutationDocument: TypedDocumentNode<
   Operations.CreateTestEntitiesMutation,
   Types.MutationCreateTestEntitiesArgs

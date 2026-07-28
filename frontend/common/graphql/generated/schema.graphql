@@ -2549,6 +2549,7 @@ type Mutation {
   detachSubjectResource(learningResourceId: ID!, subjectId: ID!): Boolean
   endImpersonation: EndImpersonationResponse
   endPermissionGroupSimulation: EndPermissionGroupSimulationResponse
+  ensureDemoUsers: Boolean
   executeDstBulkUpdate(description: String!, offsetMinutes: Int!): DstMigrationReport
   linkDocumentToParent(fileId: String!, parentId: String!, usageType: String!): ParentDocument
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult

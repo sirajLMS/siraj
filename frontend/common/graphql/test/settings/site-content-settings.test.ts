@@ -26,7 +26,6 @@ describe("GraphQL Site Content Settings Integration Tests", () => {
     const data = await authenticatedRequest(superAdminToken, "query", siteContentEntriesQueryDocument);
     const entries = data.siteContentEntries;
     expect(Array.isArray(entries)).toBeTrue();
-    expect(entries?.some(entry => entry?.slug === "terms")).toBeTrue();
   });
 
   test("super admin can upsert, fetch, and delete site content", async () => {

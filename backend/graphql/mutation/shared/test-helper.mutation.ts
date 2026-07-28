@@ -45,6 +45,16 @@ if (isTestHelperEnabled()) {
     }),
   });
 
+  gqlSchemaBuilder.mutationField("ensureDemoUsers", t =>
+    t.field({
+      type: "Boolean",
+      resolve: async () => {
+        assertTestHelperAllowed();
+        return await TestHelperService.ensureDemoUsers();
+      },
+    })
+  );
+
   gqlSchemaBuilder.mutationField("createTestEntities", t =>
     t.field({
       type: TestEntitiesType,

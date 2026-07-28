@@ -2607,6 +2607,7 @@ export type Mutation = {
   detachSubjectResource: Maybe<Scalars['Boolean']['output']>;
   endImpersonation: Maybe<EndImpersonationResponse>;
   endPermissionGroupSimulation: Maybe<EndPermissionGroupSimulationResponse>;
+  ensureDemoUsers: Maybe<Scalars['Boolean']['output']>;
   executeDstBulkUpdate: Maybe<DstMigrationReport>;
   linkDocumentToParent: Maybe<ParentDocument>;
   logTeacherSupportRequest: Maybe<SupportRequestResult>;

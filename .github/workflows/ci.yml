@@ -22,6 +22,10 @@
 # DATABASE_URL policy: never use secrets.DATABASE_URL in this workflow (or any
 # test/build CI). Always use the job Postgres service below (siraj_test).
 # The only workflow that may use secrets.DATABASE_URL is migrate-production.yml and deploy.yml.
+#
+# Seed policy: CI must NEVER run database seeds (drizzleSeed.ts, `bun db seed`, SEED_PROFILE,
+# or equivalent). Migrations supply schema + migration-bundled reference data only; tests
+# create their own fixtures. Do not add seed steps to this workflow without team approval.
 
 name: CI
 
@@ -53,7 +57,7 @@ jobs:
           --health-retries 5
 
     env:
-      # Core database / auth (required for build, migrate, seed, and tests)
+      # Core database / auth (required for build, migrate, and tests)
       # Local Postgres service only — never secrets.DATABASE_URL (see policy above).
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/siraj_test?sslmode=disable
       DATABASE_ENCRYPTION_KEY: ${{ secrets.DATABASE_ENCRYPTION_KEY || 'development-database-encryption-key-must-be-changed-in-production' }}
@@ -72,10 +76,8 @@ jobs:
       IS_DEMO: "true"
       NEXT_PUBLIC_IS_DEMO: "true"
       AUTH_COOKIE_SECURE: "false"
-      # Test runner / seed
+      # Test runner (migrate-only DB — no seeds; tests provision their own data)
       NODE_ENV: test
-      SEED_PROFILE: minimal
-      SEED_SKIP_ASSET_CHECK: "true"
       # Test harness: keep job DATABASE_URL when spawning bun test workers (see backend/lib/test-ci-env.ts)
       TEST_CI: "true"
 
@@ -113,10 +115,11 @@ jobs:
           NEXT_DEBUG_PRERENDER: "1"
         run: bun run build:test
 
+      # Migrate-only: do NOT run drizzleSeed.ts or any seed step here.
+      # DB and GraphQL tests provision required data via test helpers (ensureDemoUsers,
+      # createTestEntities, etc.) — they must not depend on bun db seed / SEED_PROFILE.
       - name: Prepare database
-        run: |
-          bun run backend/db/scripts/migrate.ts
-          bun run backend/db/scripts/drizzleSeed.ts
+        run: bun run backend/db/scripts/migrate.ts
 
       - name: Database tests
         run: bun run test:db
