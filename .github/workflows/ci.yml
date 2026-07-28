@@ -48,7 +48,7 @@ jobs:
 
     env:
       # Core database / auth (required for build, migrate, seed, and tests)
-      DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/siraj_test' }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/siraj_test?sslmode=disable' }}
       DATABASE_ENCRYPTION_KEY: ${{ secrets.DATABASE_ENCRYPTION_KEY || 'development-database-encryption-key-must-be-changed-in-production' }}
       JWT_SECRET: ${{ secrets.JWT_SECRET || 'test-jwt-secret-not-used-in-ci-but-must-be-non-empty-32-chars' }}
       DB_PROVIDER: postgres

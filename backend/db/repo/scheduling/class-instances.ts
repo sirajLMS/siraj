@@ -1,6 +1,12 @@
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
+  type ClassInstanceUpsertManyOptions,
+  runClassInstanceUpsertMany,
+  upsertProductionClassInstance,
+  upsertSeedClassInstance,
+} from "@/backend/db/repo/scheduling/class-instance-upsert";
+import {
   acquireLocks,
   checkOverlaps,
   type DBTransaction,
@@ -246,39 +252,14 @@ export async function listByIdempotencyKeys(
 
 export async function upsertMany(
   instances: Types.ClassInstanceInsertInput[],
-  options?: { chunkSize?: number; updatedAt?: Date; tx?: DBTransaction }
+  options?: ClassInstanceUpsertManyOptions
 ): Promise<Types.ClassInstanceEntity[]> {
-  if (instances.length === 0) return [];
+  return runClassInstanceUpsertMany(instances, upsertProductionClassInstance, options);
+}
 
-  const chunkSize = options?.chunkSize ?? 100;
-  const updatedAt = options?.updatedAt ?? new Date();
-
-  const runner = async (t: DBTransaction): Promise<Types.ClassInstanceEntity[]> => {
-    const results: Types.ClassInstanceEntity[] = [];
-    for (let i = 0; i < instances.length; i += chunkSize) {
-      const chunk = instances.slice(i, i + chunkSize);
-      for (const instance of chunk) {
-        const [inserted] = await t
-          .insert(classInstances)
-          .values(instance)
-          .onConflictDoUpdate({
-            target: classInstances.idempotencyKey,
-            set: {
-              scheduledStartAt: instance.scheduledStartAt,
-              scheduledEndAt: instance.scheduledEndAt,
-              executionState: instance.executionState,
-              outcome: instance.outcome,
-              actualStartAt: instance.actualStartAt,
-              actualEndAt: instance.actualEndAt,
-              updatedAt,
-            },
-          })
-          .returning();
-        results.push(inserted);
-      }
-    }
-    return results;
-  };
-
-  return options?.tx ? runner(options.tx) : db.transaction(runner);
+export async function upsertManyForSeed(
+  instances: Types.ClassInstanceInsertInput[],
+  options?: ClassInstanceUpsertManyOptions
+): Promise<Types.ClassInstanceEntity[]> {
+  return runClassInstanceUpsertMany(instances, upsertSeedClassInstance, options);
 }

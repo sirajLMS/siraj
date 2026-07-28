@@ -142,6 +142,7 @@ Use these service bootstrap entry points from seeders. Domain seed data (constan
 | `books/seed-books` | `BookService` | `findBooksByNames`, `upsertManyBooks` |
 | `classes/seed-class-categories` | `ClassCatalogService` | `findCategoriesBySlugs`, `upsertManyCategories` |
 | `classes/seed-class-subjects` | `ClassCatalogService` | `findSubjectsBySlugs`, `upsertManySubjects` |
+| `classes/seed-class-instances` | `ClassSessionService` | `upsertManyClassInstancesForSeed` |
 | `classes/seed-subject-resources` | `ClassCatalogService` | `createManySubjectResources` |
 | `meeting/seed-user-meeting-configs` | `MeetingConfigService` | `upsertManyUserMeetingConfigs` |
 | `meeting/seed-class-meeting-configs` | `MeetingConfigService` | `upsertManyClassMeetingConfigs` |

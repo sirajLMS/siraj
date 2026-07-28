@@ -1,4 +1,4 @@
-import { createInterface } from "node:readline";
+import { createInterface, type Interface } from "node:readline";
 import { ACTIONS, askQuestion, executeAction, findActionKey } from "@/scripts/dbActions/actions";
 import {
   DISABLED_ACTION_SUFFIX,
@@ -16,6 +16,9 @@ import {
   selectEnvFileInteractive,
 } from "@/scripts/dbActions/envFile";
 
+/** Interactive menu key to return to the env file picker. */
+const RESELECT_ENV_CHOICE = "9";
+
 /**
  * Displays the interactive menu.
  */
@@ -30,6 +33,7 @@ export function displayMenu(): void {
     }
     globalThis.console.log(`${key}. ${action.label}${suffix}`);
   }
+  globalThis.console.log(`${RESELECT_ENV_CHOICE}. Change Environment`);
   globalThis.console.log("0. Exit");
 }
 
@@ -49,6 +53,7 @@ export function showHelp(): void {
   }
   globalThis.console.log("\nInteractive Mode:");
   globalThis.console.log("  Run without arguments to choose an env file, then use the numeric action menu.");
+  globalThis.console.log("  Choose 9 in the menu to switch env files without exiting.");
 }
 
 function printSelectedEnv(fileName: string): void {
@@ -61,6 +66,12 @@ function printSelectedEnv(fileName: string): void {
   globalThis.console.log(`\nUsing env file: ${formatEnvFileLabel({ fileName, databaseUrl })}`);
 }
 
+async function selectAndApplyEnv(rl: Interface): Promise<void> {
+  const envFile = await selectEnvFileInteractive(rl);
+  applyEnvFile(envFile);
+  printSelectedEnv(envFile);
+}
+
 /**
  * Main loop for interactive mode.
  */
@@ -71,9 +82,7 @@ export async function interactiveLoop(): Promise<void> {
   });
 
   try {
-    const envFile = await selectEnvFileInteractive(rl);
-    applyEnvFile(envFile);
-    printSelectedEnv(envFile);
+    await selectAndApplyEnv(rl);
 
     let active = true;
     while (active) {
@@ -81,6 +90,8 @@ export async function interactiveLoop(): Promise<void> {
       const choice = (await askQuestion(rl, "\nChoice: ")).trim();
       if (choice === "0") {
         active = false;
+      } else if (choice === RESELECT_ENV_CHOICE) {
+        await selectAndApplyEnv(rl);
       } else if (ACTIONS[choice]) {
         await executeAction(choice, rl);
       } else {

@@ -2,6 +2,7 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { Interface } from "node:readline";
 import { config } from "dotenv";
+import { resetEnvironmentCache } from "@/backend/lib/env";
 import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
 import { clearDestructiveGuardEnvVars } from "@/scripts/lib/destructiveDbGuard";
 
@@ -10,6 +11,7 @@ export const DEFAULT_ENV_FILE = ".env";
 
 const ENV_FILE_PREFIX = ".env";
 const EXCLUDED_ENV_FILES = new Set([".env.example"]);
+const DOTENV_QUIET = { quiet: true } as const;
 
 /** A discoverable root-level env file and its validated `DATABASE_URL`. */
 export interface EnvFileOption {
@@ -81,7 +83,7 @@ export function readDatabaseUrlFromEnvFile(fileName: string, rootDir = process.c
     return undefined;
   }
 
-  const parsed = config({ path: filePath, processEnv: {} }).parsed;
+  const parsed = config({ path: filePath, processEnv: {}, ...DOTENV_QUIET }).parsed;
   return parsed?.DATABASE_URL;
 }
 
@@ -138,8 +140,11 @@ export function discoverEnvFilesWithDatabaseUrl(rootDir = process.cwd()): EnvFil
  * Loads an env file into `process.env` for the db CLI session.
  *
  * Clears stale destructive-guard env vars, applies all vars from the file,
- * records the active env file for child processes, and invalidates cached
- * environment/database singletons so later actions use the new config.
+ * records the active env file for child processes, and clears the cached env
+ * singleton so later parent-side reads pick up the new `process.env`.
+ *
+ * Does not import Drizzle or open DB connections in the CLI parent — child
+ * `bun` processes load the selected env file independently via `--env-file`.
  *
  * This does **not** run any database commands. Destructive actions (reset,
  * drop, clean generate) remain gated separately by repo policy and env checks.
@@ -159,7 +164,7 @@ export function applyEnvFile(fileName: string, rootDir = process.cwd()): void {
     throw new Error(`Env file "${fileName}" does not contain a valid DATABASE_URL.`);
   }
 
-  const result = config({ path: filePath, processEnv: {} });
+  const result = config({ path: filePath, processEnv: {}, ...DOTENV_QUIET });
   const parsed = result.parsed;
   if (!parsed) {
     throw new Error(`Could not parse env file: ${fileName}`);
@@ -172,24 +177,42 @@ export function applyEnvFile(fileName: string, rootDir = process.cwd()): void {
   }
 
   selectedEnvFile = fileName;
-
-  void invalidateRuntimeCaches();
-}
-
-/**
- * Refreshes in-memory environment and Drizzle connection caches after an env switch.
- *
- * Loaded dynamically so backend modules are not imported before env vars exist.
- */
-async function invalidateRuntimeCaches(): Promise<void> {
-  const [{ resetEnvironmentCache }, { clearDbConnectionSingleton }] = await Promise.all([
-    import("@/backend/lib/env"),
-    import("@/backend/db/drizzleDb"),
-  ]);
-
   resetEnvironmentCache();
-  clearDbConnectionSingleton();
+
+  // Intentionally not calling `invalidateRuntimeCaches()` — see commented block below.
 }
+
+/*
+ * DISABLED: Drizzle + env cache invalidation in the db CLI parent process.
+ *
+ * Refreshes in-memory environment and Drizzle connection caches after an env switch.
+ * Loaded dynamically so backend modules are not imported before env vars exist.
+ *
+ * async function invalidateRuntimeCaches(): Promise<void> {
+ *   const [{ resetEnvironmentCache }, { clearDbConnectionSingleton }] = await Promise.all([
+ *     import("@/backend/lib/env"),
+ *     import("@/backend/db/drizzleDb"),
+ *   ]);
+ *
+ *   resetEnvironmentCache();
+ *   clearDbConnectionSingleton();
+ * }
+ *
+ * Why disabled for `bun db`:
+ * 1. UI — it was fired with `void invalidateRuntimeCaches()` (non-blocking). Importing
+ *    `drizzleDb` initializes a connection and logs while readline is waiting at
+ *    `Choice:`, interleaving output into the interactive prompt.
+ * 2. Architecture — db actions run in child `bun` processes (`runBunCommand`) with
+ *    `--no-env-file --env-file=<selected>`, so the parent does not need a live
+ *    Drizzle pool. Each action gets a fresh process + env load.
+ * 3. Partial replacement — `resetEnvironmentCache()` is still called synchronously
+ *    above so parent-side `getEnvironmentConfig()` reads the new `process.env`.
+ *    `clearDbConnectionSingleton()` is only needed if the parent reuses Drizzle
+ *    in the same process after switching env files (not the case for this CLI).
+ *
+ * If this CLI ever runs Drizzle in-process after env reselection, restore this
+ * function and await it before showing the menu (never fire-and-forget).
+ */
 
 /**
  * Formats an env file option for display in the interactive picker.
