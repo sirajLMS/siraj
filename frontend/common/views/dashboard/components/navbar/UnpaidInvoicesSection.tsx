@@ -14,8 +14,7 @@ import {
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useRouter } from "@/shared/i18n/navigation";
 import type { ErrorsLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ProfileLabels } from "@/shared/locale/types/profile";
+import { useAppTranslation, type ProfileLabels} from "@/shared/locale";
 
 function buildUnpaidInvoicesFxMessages(
   tProfile: Pick<ProfileLabels, "convertedAmount" | "convertedTotalApprox">,

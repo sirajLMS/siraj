@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface RowRescheduleActionProps {
   readonly classInstanceId: string;

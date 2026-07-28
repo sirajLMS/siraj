@@ -8,7 +8,7 @@ import { useLanguageSwitch } from "@/frontend/common/hooks/useLanguageSwitch";
 import { languages } from "@/frontend/common/lib/locale";
 import { NavbarIcon } from "@/frontend/common/views/dashboard/components/navbar/NavbarIcon";
 import type { AppLocale } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 // --- Styled Components ---
 

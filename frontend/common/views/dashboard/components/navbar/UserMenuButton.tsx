@@ -15,9 +15,7 @@ import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermiss
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { AuthImpersonationLabels } from "@/shared/locale/types/auth";
-import type { CommonLabels } from "@/shared/locale/types/common";
+import { useAppTranslation, type CommonLabels, type AuthImpersonationLabels } from "@/shared/locale";
 
 export interface UserInfoSlotProps {
   readonly name: string;

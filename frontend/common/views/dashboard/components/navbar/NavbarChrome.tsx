@@ -3,7 +3,7 @@
 import { SchoolOutlined } from "@mui/icons-material";
 import { AppBar, alpha, Box, Toolbar, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface NavbarChromeProps {
   readonly roleLabel: string;

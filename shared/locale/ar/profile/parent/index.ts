@@ -1,4 +1,4 @@
-import type { ProfileParentLabels } from "@/shared/locale/types/profile";
+import type { ProfileParentLabels } from "@/shared/locale/types/old/profile.ts";
 
 export const profileParentAr: ProfileParentLabels = {
   ownSubtitle: "عرض وتحديث بيانات الاتصال والتواصل الخاصة بك.",

@@ -6,7 +6,7 @@ import type {
   ProfileParentLabels,
   ProfileStaffLabels,
   ProfileTeacherLabels,
-} from "@/shared/locale/types/profile";
+} from "@/shared/locale/types/old/profile.ts";
 
 export interface ProfileTranslations {
   base: ProfileLabels;

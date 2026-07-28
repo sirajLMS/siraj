@@ -7,7 +7,7 @@ import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocum
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { Link } from "@/shared/i18n";
 import { usePathname } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function FxStaleBanner(): React.ReactNode {
   const pathname = usePathname();

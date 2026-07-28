@@ -84,9 +84,9 @@ Siraj replaces the legacy `next-intl` package (now fully removed) with a custom 
 ```
 shared/locale/
 ├── AppLocale.ts              ← locale enum & type
-├── server.ts                 ← getTranslations<K>(locale, namespace) for SSR/API
-├── server-graphql.ts         ← getServerTranslations<K>(locale, namespace) for GraphQL/scripts
-├── client.ts                 ← useAppTranslation<K>(namespace) hook for client components
+├── serverLegacy.ts                 ← getTranslations<K>(locale, namespace) for SSR/API
+├── server-graphql-legacy.ts         ← getServerTranslations<K>(locale, namespace) for GraphQL/scripts
+├── clientLegacy.ts                 ← useAppTranslation<K>(namespace) hook for client components
 ├── index.ts                  ← re-exports
 │
 ├── types/                    ← TypeScript interfaces (the "schema")
@@ -225,7 +225,7 @@ export const auth: AuthLabels = {
 1. Add interface to `shared/locale/types/<namespace>/index.ts`
 2. Add implementations to `shared/locale/ar/<namespace>/index.ts` and `shared/locale/en/<namespace>/index.ts`
 3. Export in `shared/locale/types/message.ts` (add to `MessageSchema`)
-4. Add path mapping in `shared/locale/server.ts` (`namespacePaths` map)
+4. Add path mapping in `shared/locale/serverLegacy.ts` (`namespacePaths` map)
 5. If used in layout SSR, add to `LocaleProvider` translations in `app/[locale]/layout.tsx`
 
 ### Migration Status

@@ -24,7 +24,7 @@ import logger from "@/backend/lib/logger";
 import { checkRateLimit, getClientIdentifier, graphqlRateLimiter } from "@/backend/lib/ratelimit";
 import { ApolloCacheAdapter } from "@/backend/services/cache";
 import { IdempotencyService } from "@/backend/services/idempotency.service";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { getServerTranslations } from "@/shared/locale";
 
 ensureEnvironmentValidated();
 

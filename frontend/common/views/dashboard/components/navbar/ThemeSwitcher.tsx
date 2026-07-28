@@ -3,7 +3,7 @@
 import { DarkMode, LightMode } from "@mui/icons-material";
 import { useThemeMode } from "@/frontend/common/hooks/useThemeMode";
 import { NavbarIcon } from "@/frontend/common/views/dashboard/components/navbar/NavbarIcon";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export function ThemeSwitcher() {
   const t = useAppTranslation().commonTranslations;

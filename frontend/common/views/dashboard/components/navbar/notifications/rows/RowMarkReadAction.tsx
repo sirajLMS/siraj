@@ -2,7 +2,7 @@
 
 import { CheckCircleOutlined } from "@mui/icons-material";
 import { IconButton, Tooltip } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface RowMarkReadActionProps {
   readonly deliveryId: string | null | undefined;

@@ -1,4 +1,4 @@
-import type { ProfileStaffLabels } from "@/shared/locale/types/profile";
+import type { ProfileStaffLabels } from "@/shared/locale/types/old/profile.ts";
 
 export const profileStaffEn: ProfileStaffLabels = {
   ownSubtitle: "View and update your account and contact details.",

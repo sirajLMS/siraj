@@ -1,4 +1,4 @@
-import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
+import type { ProfileNotificationsLabels } from "@/shared/locale/types/old/profile.ts";
 
 export const profileNotificationsAr: ProfileNotificationsLabels = {
   title: "تفضيلات الإشعارات",

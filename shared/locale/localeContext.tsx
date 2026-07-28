@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 import type { AppLocale } from "@/shared/locale/AppLocale";
-import type { Translations } from "@/shared/locale/types/message";
+import type { Translations } from "@/shared/locale/types/old/message.ts";
 
 export interface LocaleContextValue {
   translations: Translations;

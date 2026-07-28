@@ -6,7 +6,7 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useNotificationsDrawerStore } from "@/frontend/common/stores/notificationsDrawerStore";
 import { NavbarIcon } from "@/frontend/common/views/dashboard/components/navbar/NavbarIcon";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 interface NotificationButtonProps extends Omit<IconButtonProps, "children" | "title"> {
   notificationCount: number;

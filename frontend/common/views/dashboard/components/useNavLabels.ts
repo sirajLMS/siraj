@@ -1,7 +1,6 @@
 "use client";
 
-import { useAppTranslation } from "@/shared/locale/client";
-import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/core/nav";
+import { useAppTranslation, type DashboardNavigationLabels } from "@/shared/locale";
 
 /**
  * Resolves a nav `labelKey` (a `keyof DashboardNavigationLabels`) to its

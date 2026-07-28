@@ -1,4 +1,4 @@
-import type { ProfileLabels } from "@/shared/locale/types/profile";
+import type { ProfileLabels } from "@/shared/locale/types/old/profile.ts";
 
 export const profileAr: ProfileLabels = {
   shell: {

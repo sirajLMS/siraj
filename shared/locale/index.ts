@@ -1,7 +1,7 @@
 export { type AppLocale, defaultLocale, locales } from "./AppLocale";
-export * from "./client";
 export { LocaleContext, type LocaleContextValue, useLocaleContext } from "./localeContext";
-export * from "./messages";
-export { getTranslations, loadAllTranslations } from "./server";
-export { getServerTranslations } from "./server-graphql";
+export * from "./old/clientLegacy.ts";
+export * from "./old/messagesLegacy.ts";
+export { getServerTranslations } from "./old/server-graphql-legacy.ts";
+export { getTranslations, loadAllTranslations } from "./old/serverLegacy.ts";
 export * from "./types";

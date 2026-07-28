@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Alert } from "@mui/material";
 import { userQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type FxConversionNoteMode = "viewer" | "subject";
 

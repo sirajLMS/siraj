@@ -6,7 +6,7 @@ import type { Theme } from "@mui/material/styles";
 import { NotificationDrawerEmptyState } from "@/frontend/common/views/dashboard/components/navbar/notifications/emptyState";
 import { NotificationDrawerRow } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows";
 import type { NotificationDrawerProps } from "@/frontend/common/views/dashboard/components/navbar/notifications/types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 const DRAWER_WIDTH_PX = 420;
 

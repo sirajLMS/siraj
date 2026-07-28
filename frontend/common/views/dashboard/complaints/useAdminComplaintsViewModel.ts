@@ -19,7 +19,7 @@ import type {
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { mapAdminComplaintRows } from "@/frontend/common/views/dashboard/complaints/utils/mapAdminComplaintRows";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface AdminComplaintsViewModel {
   readonly labels: ComplaintsAdminLabels;

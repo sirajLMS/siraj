@@ -8,7 +8,7 @@ import { useDisplayCurrencyHintDismissed } from "@/frontend/common/hooks/useDisp
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 type DisplayCurrencyHintMode = "viewer" | "subject";
 type DisplayCurrencyHintVariant = "full" | "compact";

@@ -2,7 +2,7 @@
 
 import { Button } from "@mui/material";
 import type { NotificationMetadata } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface RowViewEntityActionProps {
   readonly metadata: NotificationMetadata;

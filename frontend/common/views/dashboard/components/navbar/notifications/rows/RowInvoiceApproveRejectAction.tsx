@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Stack } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale";
 
 export interface RowInvoiceApproveRejectActionProps {
   readonly deliveryId: string;
