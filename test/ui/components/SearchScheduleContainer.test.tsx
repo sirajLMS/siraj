@@ -62,7 +62,10 @@ import { addDays, format } from "date-fns";
 
 expect.extend(matchers);
 
-import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import {
+  searchTeacherAvailabilityQueryDocument,
+  teachersQueryDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
 import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { SearchScheduleContainer } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleContainer";
@@ -160,17 +163,30 @@ const mockEmptyResult = {
   },
 };
 
+function createTeachersMock(): MockLink.MockedResponse {
+  return {
+    request: {
+      query: teachersQueryDocument,
+      variables: { search: "", limit: 20 },
+    },
+    result: { data: { teachers: [] } },
+    maxUsageCount: Number.POSITIVE_INFINITY,
+  };
+}
+
 function createSearchMock(
   data = mockSearchResult,
   variables?: { input: typeof defaultInput }
 ): MockLink.MockedResponse[] {
   return [
+    createTeachersMock(),
     {
       request: {
         query: searchTeacherAvailabilityQueryDocument,
         variables: variables ?? { input: defaultInput },
       },
       result: { data },
+      maxUsageCount: Number.POSITIVE_INFINITY,
     },
   ];
 }
@@ -235,12 +251,14 @@ describe("SearchScheduleContainer", () => {
 
   test("shows error message when query fails", async () => {
     const mocks: MockLink.MockedResponse[] = [
+      createTeachersMock(),
       {
         request: {
           query: searchTeacherAvailabilityQueryDocument,
           variables: { input: defaultInput },
         },
         error: new Error("Server error"),
+        maxUsageCount: Number.POSITIVE_INFINITY,
       },
     ];
 

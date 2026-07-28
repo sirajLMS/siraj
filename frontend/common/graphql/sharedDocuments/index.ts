@@ -10,6 +10,7 @@ export * from "./profile";
 export * from "./reports";
 export * from "./resources";
 export * from "./scheduling";
+export * from "./settings";
 export * from "./shared";
 export * from "./students";
 export * from "./suggestions";

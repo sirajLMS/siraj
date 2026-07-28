@@ -1,0 +1,51 @@
+import type { SettingsEnvironmentLabels } from "@/shared/locale/types/dashboard/settings/environment";
+
+export const dashboardSettingsEnvironmentAr: SettingsEnvironmentLabels = {
+  description:
+    "راجع متغيرات البيئة وعدّل القيم في قاعدة البيانات. تُخفى الأسرار حتى يتم إظهارها. الإرجاع يزيل التجاوز في قاعدة البيانات ويعود إلى قيمة البيئة.",
+  loading: "جارٍ تحميل إعدادات البيئة…",
+  loadError: "تعذّر تحميل إعدادات البيئة.",
+  emptyValue: "غير مضبوط",
+  readOnlyHint: "يُدار من بيئة النشر فقط.",
+  columns: {
+    key: "المفتاح",
+    description: "الوصف",
+    value: "القيمة",
+    source: "المصدر",
+  },
+  source: {
+    db: "قاعدة البيانات",
+    env: "البيئة",
+    unset: "غير مضبوط",
+  },
+  badges: {
+    dbOverride: "تجاوز DB",
+    envOnly: "بيئة فقط",
+  },
+  actions: {
+    save: "حفظ التجاوز",
+    revert: "الرجوع للبيئة",
+    showValue: "إظهار القيمة",
+    hideValue: "إخفاء القيمة",
+  },
+  notifications: {
+    saveSuccess: "تم حفظ تجاوز البيئة.",
+    saveError: "فشل حفظ تجاوز البيئة.",
+    revertSuccess: "تم الرجوع إلى قيمة البيئة.",
+    revertError: "فشل إرجاع تجاوز البيئة.",
+  },
+  categories: {
+    email: "البريد الإلكتروني",
+    sms: "الرسائل النصية",
+    push: "الإشعارات الفورية",
+    fx: "أسعار الصرف",
+    cache: "ذاكرة التخزين المؤقت",
+    redis: "Redis",
+    storage: "التخزين",
+    auth: "المصادقة",
+    app: "التطبيق",
+    meeting: "الاجتماعات",
+    billing: "الفوترة",
+    general: "عام",
+  },
+};

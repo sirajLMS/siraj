@@ -1,12 +1,12 @@
-import { getStringEnv } from "@/backend/lib/env";
+import { invalidateEnvConfigCache, resolveEnvConfig, resolveEnvConfigMany } from "@/backend/lib/env-config-resolver";
 import { logger } from "@/backend/lib/logger";
 import type { ISmsChannel, SmsProvider } from "@/backend/services/communication/channels/sms/ISmsChannel";
 
 let instance: ISmsChannel | null = null;
 let initializationPromise: Promise<ISmsChannel> | null = null;
 
-function getSmsProvider(): SmsProvider {
-  const rawProvider = getStringEnv("SMS_PROVIDER");
+async function getSmsProvider(): Promise<SmsProvider> {
+  const rawProvider = await resolveEnvConfig("SMS_PROVIDER");
   const provider = (rawProvider || "twilio").toLowerCase();
 
   if (provider !== "twilio") {
@@ -20,11 +20,27 @@ function getSmsProvider(): SmsProvider {
 async function createTwilioAdapter(): Promise<ISmsChannel> {
   logger.info("Initializing SMS channel with Twilio provider");
   const { TwilioSmsAdapter } = await import("@/backend/services/communication/channels/sms/twilio/TwilioSmsAdapter");
-  return new TwilioSmsAdapter();
+
+  const config = await resolveEnvConfigMany(["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER"]);
+  const accountSid = config.TWILIO_ACCOUNT_SID;
+  const authToken = config.TWILIO_AUTH_TOKEN;
+  const fromNumber = config.TWILIO_FROM_NUMBER;
+
+  if (!accountSid) {
+    throw new Error("TWILIO_ACCOUNT_SID environment variable is required for TwilioSmsAdapter");
+  }
+  if (!authToken) {
+    throw new Error("TWILIO_AUTH_TOKEN environment variable is required for TwilioSmsAdapter");
+  }
+  if (!fromNumber) {
+    throw new Error("TWILIO_FROM_NUMBER environment variable is required for TwilioSmsAdapter");
+  }
+
+  return new TwilioSmsAdapter({ accountSid, authToken, fromNumber });
 }
 
 async function createSmsChannel(): Promise<ISmsChannel> {
-  const provider = getSmsProvider();
+  const provider = await getSmsProvider();
 
   logger.info(`Initializing SMS channel with provider: ${provider}`);
 
@@ -61,6 +77,13 @@ export const resetSmsChannel = (): void => {
     instance = null;
   }
   initializationPromise = null;
+  // An env-config override update must force a fresh init on the next
+  // getSmsChannel() call, so drop the cached resolver entries for the SMS
+  // provider selection and the Twilio credential triple.
+  invalidateEnvConfigCache("SMS_PROVIDER");
+  invalidateEnvConfigCache("TWILIO_ACCOUNT_SID");
+  invalidateEnvConfigCache("TWILIO_AUTH_TOKEN");
+  invalidateEnvConfigCache("TWILIO_FROM_NUMBER");
 };
 
 export const smsChannel = {

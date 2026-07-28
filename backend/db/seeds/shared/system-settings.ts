@@ -1,10 +1,16 @@
 import * as fs from "node:fs/promises";
 import { resolveAssetPath } from "@/backend/db/seeds/lib/file-seed-helper";
+import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { ENV_CONFIG_KEYS } from "@/backend/lib/env-config-keys";
 import logger from "@/backend/lib/logger";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
+import type { SystemSettingSelectType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
+
+/** Matches `env-config-resolver.ts` / `environment-config.service.ts` DB key prefix. */
+const ENV_SETTING_KEY_PREFIX = "env::";
 
 const createSetting = (
   key: string,
@@ -78,6 +84,32 @@ const SYSTEM_SETTINGS_DATA = [
   createSetting("sms_rate_limit_per_hour", "3", "Maximum SMS messages per parent per hour", "communication"),
 ] as const;
 
+type EnvConfigPlaceholderSetting = SystemSettingsService.SystemSettingUpsertInput;
+
+/**
+ * Placeholder rows for Settings → Environment Config. Empty `value` is treated as
+ * "no override" by the resolver (env fallback remains intact).
+ */
+const ENV_CONFIG_PLACEHOLDER_SETTINGS: EnvConfigPlaceholderSetting[] = ENV_CONFIG_KEYS.filter(
+  descriptor => !descriptor.excludeFromDb
+).map(descriptor => ({
+  key: `${ENV_SETTING_KEY_PREFIX}${descriptor.key}`,
+  value: "",
+  dataType: "string" as const,
+  description: descriptor.description.en,
+  category: "system" as const,
+}));
+
+async function findSettingsByKeys(keys: string[]): Promise<Map<string, SystemSettingSelectType>> {
+  const entries = await Promise.all(
+    keys.map(async key => {
+      const row = await SystemSettingsService.getSettingByKey(key);
+      return row ? ([key, row] as const) : null;
+    })
+  );
+  return new Map(entries.filter((entry): entry is [string, SystemSettingSelectType] => entry !== null));
+}
+
 const SEED_STORAGE_DIRECTORIES = [
   "public",
   "public/docs",
@@ -129,5 +161,18 @@ export async function seedOrGet() {
   logger.info("Seeding system settings...");
   const results = await SystemSettingsService.upsertManySettings([...SYSTEM_SETTINGS_DATA]);
   logger.info("System settings seeded.");
+
+  logger.info(
+    `Seeding env config placeholder settings (${ENV_CONFIG_PLACEHOLDER_SETTINGS.length} keys, ${ENV_CONFIG_KEYS.length - ENV_CONFIG_PLACEHOLDER_SETTINGS.length} excluded)...`
+  );
+  await orchestrateSeedMany({
+    specs: ENV_CONFIG_PLACEHOLDER_SETTINGS,
+    toKey: spec => spec.key,
+    findExisting: findSettingsByKeys,
+    createMany: toCreate => SystemSettingsService.upsertManySettings(toCreate),
+    refetchOnRace: findSettingsByKeys,
+  });
+  logger.info("Env config placeholder settings seeded.");
+
   return results;
 }

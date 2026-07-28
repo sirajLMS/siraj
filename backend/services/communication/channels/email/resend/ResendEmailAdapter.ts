@@ -11,11 +11,28 @@ import type {
 import type { ResendEmailContext } from "@/backend/services/communication/channels/email/resend/resend.types";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 
+/**
+ * Optional explicit overrides for the Resend adapter credentials.
+ *
+ * When omitted, the adapter falls back to `getEnvironmentConfig()` so that
+ * existing tests (`new ResendEmailAdapter()`) keep working unchanged. When
+ * provided (e.g. by `EmailChannelFactory.createResendAdapter()`), the
+ * DB-resolved values are used directly, bypassing the cached env config.
+ */
+export interface ResendEmailAdapterOptions {
+  apiKey?: string;
+  fromEmail?: string;
+}
+
 export class ResendEmailAdapter implements IEmailChannel {
   private readonly context: ResendEmailContext;
 
-  constructor() {
-    const { resendApiKey: apiKey, resendFromEmail: fromEmail } = getEnvironmentConfig();
+  constructor(opts?: ResendEmailAdapterOptions) {
+    // Resolve from the cached env config only when the caller did not provide an override.
+    // Keeping a single `getEnvironmentConfig()` call (vs. two) avoids a duplicate singleton lookup on the no-arg path used by tests.
+    const envConfig = opts?.apiKey !== undefined && opts?.fromEmail !== undefined ? null : getEnvironmentConfig();
+    const apiKey = opts?.apiKey ?? envConfig?.resendApiKey;
+    const fromEmail = opts?.fromEmail ?? envConfig?.resendFromEmail;
 
     if (!apiKey) {
       throw new Error("RESEND_API_KEY environment variable is required for ResendEmailAdapter");
@@ -38,32 +55,34 @@ export class ResendEmailAdapter implements IEmailChannel {
     // (`Invalid \`to\` field`). We still record a `FAILED` delivery row so the
     // audit trail shows why the payload was dropped.
     if (!payload.to?.trim()) {
-      logger.error("ResendEmailAdapter: empty recipient `to` — dropping payload", {
-        userId: payload.userId,
-        eventType: payload.eventType,
-      });
-
-      const delivery = await NotificationRepository.createDelivery({
-        userId: payload.userId,
-        channel: NotificationChannel.EMAIL,
-        eventType: payload.eventType,
-        title: payload.subject,
-        body: payload.to,
-        metadata: payload.metadata ?? null,
-      });
-      await NotificationRepository.updateDeliveryStatus({
-        deliveryId: delivery.id,
-        status: NotificationDeliveryStatus.FAILED,
-        failureReason: "empty recipient address",
-      });
-
-      return {
-        success: false,
-        error: "empty recipient address",
-      };
+      return this.handleEmptyRecipient(payload);
     }
 
-    const delivery = await NotificationRepository.createDelivery({
+    const delivery = await this.createEmailDelivery(payload);
+    return this.executeSend(delivery, payload);
+  }
+
+  private async handleEmptyRecipient(payload: EmailPayload): Promise<EmailSendResult> {
+    logger.error("ResendEmailAdapter: empty recipient `to` — dropping payload", {
+      userId: payload.userId,
+      eventType: payload.eventType,
+    });
+
+    const delivery = await this.createEmailDelivery(payload);
+    await NotificationRepository.updateDeliveryStatus({
+      deliveryId: delivery.id,
+      status: NotificationDeliveryStatus.FAILED,
+      failureReason: "empty recipient address",
+    });
+
+    return {
+      success: false,
+      error: "empty recipient address",
+    };
+  }
+
+  private createEmailDelivery(payload: EmailPayload) {
+    return NotificationRepository.createDelivery({
       userId: payload.userId,
       channel: NotificationChannel.EMAIL,
       eventType: payload.eventType,
@@ -71,7 +90,12 @@ export class ResendEmailAdapter implements IEmailChannel {
       body: payload.to,
       metadata: payload.metadata ?? null,
     });
+  }
 
+  private async executeSend(
+    delivery: Awaited<ReturnType<typeof NotificationRepository.createDelivery>>,
+    payload: EmailPayload
+  ): Promise<EmailSendResult> {
     try {
       const response = await this.context.client.emails.send({
         from: this.context.fromEmail,
@@ -81,57 +105,72 @@ export class ResendEmailAdapter implements IEmailChannel {
       });
 
       if (response.error) {
-        logger.error("Resend API returned an error", {
-          errorName: response.error.name,
-          errorMessage: response.error.message,
-        });
-
-        await NotificationRepository.updateDeliveryStatus({
-          deliveryId: delivery.id,
-          status: NotificationDeliveryStatus.FAILED,
-          failureReason: response.error.message,
-        });
-
-        return {
-          success: false,
-          error: deliveryFailedMessage("email"),
-        };
+        return this.handleResendApiError(delivery.id, response.error);
       }
 
-      await NotificationRepository.updateDeliveryStatus({
-        deliveryId: delivery.id,
-        status: NotificationDeliveryStatus.SENT,
-        providerMessageId: response.data?.id ?? null,
-      });
-
-      logger.info("Email sent successfully via Resend", {
-        deliveryId: delivery.id,
-        providerMessageId: response.data?.id,
-      });
-
-      return {
-        success: true,
-        providerMessageId: response.data?.id,
-      };
+      return this.handleSendSuccess(delivery.id, response.data?.id);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-
-      logger.error("Failed to send email via Resend", {
-        deliveryId: delivery.id,
-        error: errorMessage,
-      });
-
-      await NotificationRepository.updateDeliveryStatus({
-        deliveryId: delivery.id,
-        status: NotificationDeliveryStatus.FAILED,
-        failureReason: errorMessage,
-      });
-
-      return {
-        success: false,
-        error: deliveryFailedMessage("email"),
-      };
+      return this.handleSendException(delivery.id, error);
     }
+  }
+
+  private async handleResendApiError(
+    deliveryId: string,
+    error: { name: string; message: string }
+  ): Promise<EmailSendResult> {
+    logger.error("Resend API returned an error", {
+      errorName: error.name,
+      errorMessage: error.message,
+    });
+
+    await NotificationRepository.updateDeliveryStatus({
+      deliveryId,
+      status: NotificationDeliveryStatus.FAILED,
+      failureReason: error.message,
+    });
+
+    return {
+      success: false,
+      error: deliveryFailedMessage("email"),
+    };
+  }
+
+  private async handleSendSuccess(deliveryId: string, providerMessageId: string | undefined): Promise<EmailSendResult> {
+    await NotificationRepository.updateDeliveryStatus({
+      deliveryId,
+      status: NotificationDeliveryStatus.SENT,
+      providerMessageId: providerMessageId ?? null,
+    });
+
+    logger.info("Email sent successfully via Resend", {
+      deliveryId,
+      providerMessageId,
+    });
+
+    return {
+      success: true,
+      providerMessageId,
+    };
+  }
+
+  private async handleSendException(deliveryId: string, error: unknown): Promise<EmailSendResult> {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    logger.error("Failed to send email via Resend", {
+      deliveryId,
+      error: errorMessage,
+    });
+
+    await NotificationRepository.updateDeliveryStatus({
+      deliveryId,
+      status: NotificationDeliveryStatus.FAILED,
+      failureReason: errorMessage,
+    });
+
+    return {
+      success: false,
+      error: deliveryFailedMessage("email"),
+    };
   }
 
   async validateConfig(): Promise<boolean> {

@@ -36,7 +36,155 @@ interface StudentInfoSectionProps {
   };
 }
 
+type StudentInfoLabels = StudentInfoSectionProps["labels"];
+
+interface StudentInfoFieldsProps {
+  readonly register: UseFormRegister<StudentOnboardingFormData>;
+  readonly errors: FieldErrors<StudentOnboardingFormData>;
+  readonly control: Control<StudentOnboardingFormData>;
+  readonly labels: StudentInfoLabels;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
+}
+
 const statusLabelId = "student-onboarding-status-label-mobile";
+
+function StudentInfoAvatarField({
+  control,
+  labels,
+  onUploadAvatar,
+}: Readonly<Pick<StudentInfoFieldsProps, "control" | "labels" | "onUploadAvatar">>) {
+  return (
+    <Grid size={{ xs: 12 }}>
+      <AvatarImageField control={control} name="avatarUrl" label={labels.avatar} onUploadAvatar={onUploadAvatar} />
+    </Grid>
+  );
+}
+
+function StudentInfoAccountFields({
+  register,
+  errors,
+  labels,
+}: Readonly<Pick<StudentInfoFieldsProps, "register" | "errors" | "labels">>) {
+  return (
+    <>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          {...register("name")}
+          label={labels.name}
+          placeholder={labels.namePlaceholder}
+          required
+          error={Boolean(errors.name)}
+          helperText={errors.name ? labels.nameMinLength : undefined}
+          fullWidth
+          sx={outlinedInputSx}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          {...register("email")}
+          label="Email"
+          placeholder="Enter student email"
+          type="email"
+          required
+          error={Boolean(errors.email)}
+          helperText={errors.email?.message}
+          fullWidth
+          sx={outlinedInputSx}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          {...register("password")}
+          label="Password"
+          placeholder="Enter student password"
+          type="password"
+          required
+          error={Boolean(errors.password)}
+          helperText={errors.password?.message}
+          fullWidth
+          sx={outlinedInputSx}
+        />
+      </Grid>
+    </>
+  );
+}
+
+function StudentInfoPersonalFields({
+  register,
+  errors,
+  control,
+  labels,
+}: Readonly<Pick<StudentInfoFieldsProps, "register" | "errors" | "control" | "labels">>) {
+  return (
+    <>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <TextField
+          {...register("dateOfBirth")}
+          label={labels.dateOfBirth}
+          type="date"
+          placeholder={labels.dateOfBirthPlaceholder}
+          fullWidth
+          sx={outlinedInputSx}
+          slotProps={{
+            inputLabel: { shrink: true },
+          }}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <Controller
+          control={control}
+          name="gender"
+          render={({ field }) => (
+            <GenderSelectorMobile
+              gender={field.value ?? null}
+              setGenderAction={field.onChange}
+              fullWidth
+              labels={{
+                title: labels.gender,
+                male: labels.male,
+                female: labels.female,
+              }}
+            />
+          )}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <Controller
+          control={control}
+          name="language"
+          render={({ field }) => (
+            <LanguageSelectorMobile
+              fullWidth
+              label={labels.language}
+              language={field.value ? getLanguageByCode(field.value) : undefined}
+              setLanguageAction={option => {
+                field.onChange(option.code);
+              }}
+              error={!!errors.language}
+              helperText={errors.language?.message}
+              onBlurAction={field.onBlur}
+            />
+          )}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <Controller
+          control={control}
+          name="status"
+          render={({ field }) => (
+            <FormControl fullWidth sx={outlinedInputSx}>
+              <InputLabel id={statusLabelId}>{labels.status}</InputLabel>
+              <Select {...field} labelId={statusLabelId} label={labels.status} fullWidth>
+                <MenuItem value={StudentStatus.OnTrial}>{labels.statusOnTrial}</MenuItem>
+                <MenuItem value={StudentStatus.Regular}>{labels.statusRegular}</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+        />
+      </Grid>
+    </>
+  );
+}
 
 export function StudentInfoSection({
   register,
@@ -48,112 +196,9 @@ export function StudentInfoSection({
   return (
     <MobileSectionPanel title={labels.sectionTitle} contentInset={false}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
-        <Grid size={{ xs: 12 }}>
-          <AvatarImageField control={control} name="avatarUrl" label={labels.avatar} onUploadAvatar={onUploadAvatar} />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TextField
-            {...register("name")}
-            label={labels.name}
-            placeholder={labels.namePlaceholder}
-            required
-            error={Boolean(errors.name)}
-            helperText={errors.name ? labels.nameMinLength : undefined}
-            fullWidth
-            sx={outlinedInputSx}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TextField
-            {...register("email")}
-            label="Email"
-            placeholder="Enter student email"
-            type="email"
-            required
-            error={Boolean(errors.email)}
-            helperText={errors.email?.message}
-            fullWidth
-            sx={outlinedInputSx}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TextField
-            {...register("password")}
-            label="Password"
-            placeholder="Enter student password"
-            type="password"
-            required
-            error={Boolean(errors.password)}
-            helperText={errors.password?.message}
-            fullWidth
-            sx={outlinedInputSx}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TextField
-            {...register("dateOfBirth")}
-            label={labels.dateOfBirth}
-            type="date"
-            placeholder={labels.dateOfBirthPlaceholder}
-            fullWidth
-            sx={outlinedInputSx}
-            slotProps={{
-              inputLabel: { shrink: true },
-            }}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Controller
-            control={control}
-            name="gender"
-            render={({ field }) => (
-              <GenderSelectorMobile
-                gender={field.value ?? null}
-                setGenderAction={field.onChange}
-                fullWidth
-                labels={{
-                  title: labels.gender,
-                  male: labels.male,
-                  female: labels.female,
-                }}
-              />
-            )}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Controller
-            control={control}
-            name="language"
-            render={({ field }) => (
-              <LanguageSelectorMobile
-                fullWidth
-                label={labels.language}
-                language={field.value ? getLanguageByCode(field.value) : undefined}
-                setLanguageAction={option => {
-                  field.onChange(option.code);
-                }}
-                error={!!errors.language}
-                helperText={errors.language?.message}
-                onBlurAction={field.onBlur}
-              />
-            )}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Controller
-            control={control}
-            name="status"
-            render={({ field }) => (
-              <FormControl fullWidth sx={outlinedInputSx}>
-                <InputLabel id={statusLabelId}>{labels.status}</InputLabel>
-                <Select {...field} labelId={statusLabelId} label={labels.status} fullWidth>
-                  <MenuItem value={StudentStatus.OnTrial}>{labels.statusOnTrial}</MenuItem>
-                  <MenuItem value={StudentStatus.Regular}>{labels.statusRegular}</MenuItem>
-                </Select>
-              </FormControl>
-            )}
-          />
-        </Grid>
+        <StudentInfoAvatarField control={control} labels={labels} onUploadAvatar={onUploadAvatar} />
+        <StudentInfoAccountFields register={register} errors={errors} labels={labels} />
+        <StudentInfoPersonalFields register={register} errors={errors} control={control} labels={labels} />
       </Grid>
     </MobileSectionPanel>
   );

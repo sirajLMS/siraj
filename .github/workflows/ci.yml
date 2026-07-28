@@ -4,6 +4,17 @@
 # (a local-only dev process). Lint runs in pre-commit hooks and the local
 # `bun quality-gate` orchestration. Biome (which is concurrency-safe) IS
 # run here as the CI-safe format/lint gate.
+#
+# Tests: ONLY `bun run test:db` and `bun run test:graphql` — never `bun test`
+# or UI test scripts. UI tests run locally via `bun run test:ui`.
+#
+# `.env.test` is gitignored — all required env vars MUST be set here (job-level
+# or step-level). `bun run build:test` and the GraphQL test server read them
+# from the process environment when `.env.test` is absent.
+#
+# GraphQL tests in CI use `TEST_SERVER_MODE=production` (pre-built `next start`
+# against `.next-test-prod`, same as UI E2E). Local `bun run test:graphql`
+# keeps the default dev server unless TEST_SERVER_MODE is set explicitly.
 # TODO(team): pin Bun version for reproducibility (currently unpinned).
 
 name: CI
@@ -18,7 +29,7 @@ jobs:
   build-and-test:
     name: Build & test
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     services:
       postgres:
@@ -35,6 +46,30 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      # Core database / auth (required for build, migrate, seed, and tests)
+      DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/siraj_test' }}
+      DATABASE_ENCRYPTION_KEY: ${{ secrets.DATABASE_ENCRYPTION_KEY || 'development-database-encryption-key-must-be-changed-in-production' }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET || 'test-jwt-secret-not-used-in-ci-but-must-be-non-empty-32-chars' }}
+      DB_PROVIDER: postgres
+      # App config required at build/runtime validation
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL || 'admin@siraj.com' }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD || '12345678' }}
+      STORAGE_PROVIDER: ${{ secrets.STORAGE_PROVIDER || 'local' }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET || 'your-secret-key-here-must-be-some-secret-key-32-chars' }}
+      CACHE_PROVIDER: ${{ secrets.CACHE_PROVIDER || 'postgres' }}
+      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      ALLOWED_ORIGIN: http://localhost:3000
+      LOCAL_STORAGE_PATH: ./storage/
+      # Demo / test-server flags (GraphQL + production test server harness)
+      IS_DEMO: "true"
+      NEXT_PUBLIC_IS_DEMO: "true"
+      AUTH_COOKIE_SECURE: "false"
+      # Test runner / seed
+      NODE_ENV: test
+      SEED_PROFILE: minimal
+      SEED_SKIP_ASSET_CHECK: "true"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,6 +85,7 @@ jobs:
           path: |
             ~/.bun/install/cache
             .next/cache
+            .next-test-prod/cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: |
             bun-${{ runner.os }}-
@@ -63,46 +99,20 @@ jobs:
       - name: Biome lint + format
         run: bun run biome:check
 
-      # NEXT_PUBLIC_BASE_URL is safe to hardcode for the build step.
-      # DATABASE_URL/JWT_SECRET come from repo secrets; if absent they resolve
-      # empty and the build still passes under NODE_ENV=test (non-strict env
-      # validation). TODO(team): add DATABASE_URL and JWT_SECRET repo secrets.
-      - name: Next.js build
+      - name: Next.js test production build
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/siraj_test' }}
-          DATABASE_ENCRYPTION_KEY: ${{ secrets.DATABASE_ENCRYPTION_KEY || 'development-database-encryption-key-must-be-changed-in-production' }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET || 'test-jwt-secret-not-used-in-ci-but-must-be-non-empty-32-chars' }}
-          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL || 'admin@siraj.com' }}
-          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD || '12345678' }}
-          STORAGE_PROVIDER: ${{ secrets.STORAGE_PROVIDER || 'local' }}
-          CRON_SECRET: ${{ secrets.CRON_SECRET || 'your-secret-key-here-must-be-some-secret-key-32-chars' }}
-          CACHE_PROVIDER: ${{ secrets.CACHE_PROVIDER || 'postgres' }}
-          NEXT_PUBLIC_BASE_URL: http://localhost:3000
-          NODE_ENV: test
           NEXT_DEBUG_PRERENDER: "1"
-        run: bun run build
+        run: bun run build:test
 
-      - name: UI component tests
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/siraj_test
-          JWT_SECRET: test-jwt-secret-not-used-in-ci-but-must-be-non-empty
-          NODE_ENV: test
-        run: bun run test:ui:components
+      - name: Prepare database
+        run: |
+          bun run backend/db/scripts/migrate.ts
+          bun run backend/db/scripts/drizzleSeed.ts
+
+      - name: Database tests
+        run: bun run test:db
 
       - name: GraphQL integration tests
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/siraj_test
-          JWT_SECRET: test-jwt-secret-not-used-in-ci-but-must-be-non-empty
-          NODE_ENV: test
+          TEST_SERVER_MODE: production
         run: bun run test:graphql
-
-      # TODO(team): enable once a Postgres service container and DB setup is
-      # wired here. The Postgres service above is provisioned, but the DB tests
-      # need migrations/schema pushed first — add a migration step before
-      # running them.
-      #- name: Database tests
-      #  env:
-      #    DATABASE_URL: postgresql://postgres:postgres@localhost:5432/siraj_test
-      #    JWT_SECRET: test-jwt-secret-not-used-in-ci-but-must-be-non-empty
-      #    NODE_ENV: test
-      #  run: bun run test:db

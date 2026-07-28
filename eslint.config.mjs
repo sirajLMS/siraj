@@ -18,6 +18,10 @@ const eslintConfig = defineConfig([
     // Ignore ALL dot-directories anywhere in the tree (e.g. .next, .git, .cursor,
     // .vscode, .scannerwork, .husky, .ai, .agents, .playwright-mcp, .kiro, ...).
     // One pattern replaces the previous hand-maintained list that missed new dot dirs.
+    // Next.js build output (dev, default, and per-port test dist dirs).
+    "**/.next/**",
+    "**/.next-dev/**",
+    "**/.next-test*/**",
     // Dot-directories (except `.storybook`, which is linted explicitly).
     "**/.*/**",
     "!.storybook/**",

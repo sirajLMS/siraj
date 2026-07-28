@@ -1,4 +1,4 @@
-import { Button, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 
@@ -33,5 +33,24 @@ export const ContentOnly: Story = {
   args: {
     title: undefined,
     subTitle: undefined,
+  },
+};
+
+export const FlushContent: Story = {
+  args: {
+    title: undefined,
+    subTitle: undefined,
+    contentPadding: false,
+    children: (
+      <Box
+        sx={theme => ({
+          borderTop: `1px solid ${theme.palette.outlineVariant}`,
+          p: 2,
+          typography: "bodyMd",
+        })}
+      >
+        Edge-to-edge content (e.g. data grids) with no inner panel padding.
+      </Box>
+    ),
   },
 };

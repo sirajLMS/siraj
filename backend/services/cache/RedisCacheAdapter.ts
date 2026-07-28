@@ -7,70 +7,75 @@ import { getRedisService } from "@/backend/services/redis";
  * Simply delegates to redisService singleton
  */
 export class RedisCacheAdapter implements ICacheService {
-  private get redisService() {
-    return getRedisService();
-  }
-
   /**
    * Get a value from cache
    */
   async get(key: string): Promise<string | null> {
-    return await this.redisService.get(key);
+    const redis = await getRedisService();
+    return await redis.get(key);
   }
 
   /**
    * Set a value in cache
    */
   async set(key: string, value: string, options?: { ex?: number; px?: number }): Promise<void> {
-    await this.redisService.set(key, value, options);
+    const redis = await getRedisService();
+    await redis.set(key, value, options);
   }
 
   /**
    * Increment a value in cache
    */
   async incr(key: string): Promise<number> {
-    return await this.redisService.incr(key);
+    const redis = await getRedisService();
+    return await redis.incr(key);
   }
 
   /**
    * Set expiration time on a key
    */
   async expire(key: string, seconds: number): Promise<void> {
-    await this.redisService.expire(key, seconds);
+    const redis = await getRedisService();
+    await redis.expire(key, seconds);
   }
 
   /**
    * Get time to live for a key
    */
   async ttl(key: string): Promise<number> {
-    return await this.redisService.ttl(key);
+    const redis = await getRedisService();
+    return await redis.ttl(key);
   }
 
   /**
    * Delete a key
    */
   async del(key: string): Promise<void> {
-    await this.redisService.del(key);
+    const redis = await getRedisService();
+    await redis.del(key);
   }
 
   /**
    * Execute a pipeline of commands (for atomic operations)
    */
   async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
-    return await this.redisService.pipeline(commands);
+    const redis = await getRedisService();
+    return await redis.pipeline(commands);
   }
 
   /**
    * Check if cache connection is healthy
    */
   async ping(): Promise<boolean> {
-    return await this.redisService.ping();
+    const redis = await getRedisService();
+    return await redis.ping();
   }
 
   /**
    * Close the connection
    */
   async disconnect(): Promise<void> {
-    await this.redisService.disconnect();
+    const redis = await getRedisService();
+    await redis.disconnect();
   }
 }

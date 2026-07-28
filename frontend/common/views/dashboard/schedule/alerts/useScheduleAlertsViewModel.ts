@@ -147,6 +147,98 @@ function buildMetricLabels(
   );
 }
 
+type ScheduleResultMetrics = {
+  total?: number | null;
+  regular?: number | null;
+};
+
+function buildScheduleAlertMetrics(m: ScheduleResultMetrics | null | undefined): AlertsMetric[] {
+  if (!m) return [];
+  return [
+    {
+      key: "totalStudents",
+      value: m.total ?? 0,
+      labelKey: "totalStudents",
+      subLabelKey: "totalStudentsTrend",
+      icon: PeopleOutlined,
+      trend: undefined,
+    },
+    {
+      key: "activeCourses",
+      value: m.regular ?? 0,
+      labelKey: "activeCourses",
+      subLabelKey: "activeCoursesSub",
+      icon: SchoolOutlined,
+      trend: undefined,
+    },
+  ];
+}
+
+function resolveScheduleTotalCount(
+  scheduleResult: { pageInfo?: { total?: number | null } | null; totalCount?: number | null } | null | undefined
+): number | undefined {
+  return scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
+}
+
+function useScheduleAlertsHandlers(setPage: (page: number) => void, router: ReturnType<typeof useRouter>) {
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      setPage(newPage);
+    },
+    [setPage]
+  );
+
+  const handleLeave = useCallback(
+    (id: string) => {
+      router.push(`/reschedule?classInstanceId=${id}`);
+    },
+    [router]
+  );
+
+  const handleViewClassAudit = useCallback(
+    (id: string) => {
+      router.push(`/classes/${id}/audit`);
+    },
+    [router]
+  );
+
+  return { handlePageChange, handleLeave, handleViewClassAudit };
+}
+
+interface ScheduleAlertsViewModelParams {
+  readonly alerts: ScheduleAlert[];
+  readonly metrics: AlertsMetric[];
+  readonly metricLabels: Record<string, { label: string; subLabel: string }>;
+  readonly classes: AcademicClassRow[];
+  readonly totalCount: number | undefined;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly labels: ReturnType<typeof buildScheduleLabels>;
+  readonly loading: boolean;
+  readonly handlers: ReturnType<typeof useScheduleAlertsHandlers>;
+}
+
+function buildScheduleAlertsViewModelResult(params: ScheduleAlertsViewModelParams): ScheduleAlertsViewModel {
+  const { handlers, alerts, metrics, metricLabels, classes, totalCount, page, pageSize, labels, loading } = params;
+  return {
+    alerts,
+    metrics,
+    metricLabels,
+    classes,
+    totalClasses: totalCount,
+    currentPage: page,
+    pageSize,
+    labels,
+    loading,
+    onLeave: handlers.handleLeave,
+    onViewClassAudit: handlers.handleViewClassAudit,
+    onPageChange: handlers.handlePageChange,
+    onDownloadReport: () => {},
+    onFilter: () => {},
+    onExport: () => {},
+  };
+}
+
 export interface ScheduleAlertsViewModel {
   readonly alerts: readonly ScheduleAlert[];
   readonly metrics: readonly AlertsMetric[];
@@ -185,72 +277,27 @@ export function useScheduleAlertsViewModel(): ScheduleAlertsViewModel {
 
   const scheduleResult = data?.adminDashboardSchedule;
   const classes = mapScheduleRowsToClasses(scheduleResult?.rows);
-  const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
+  const totalCount = resolveScheduleTotalCount(scheduleResult);
 
   const alerts: ScheduleAlert[] = [];
 
-  const metrics = useMemo(() => {
-    const m = scheduleResult?.metrics;
-    if (!m) return [];
-    return [
-      {
-        key: "totalStudents",
-        value: m.total ?? 0,
-        labelKey: "totalStudents",
-        subLabelKey: "totalStudentsTrend",
-        icon: PeopleOutlined,
-        trend: undefined, // trend not available in metrics yet
-      },
-      {
-        key: "activeCourses",
-        value: m.regular ?? 0,
-        labelKey: "activeCourses",
-        subLabelKey: "activeCoursesSub",
-        icon: SchoolOutlined,
-        trend: undefined,
-      },
-    ];
-  }, [scheduleResult?.metrics]);
+  const metrics = useMemo(() => buildScheduleAlertMetrics(scheduleResult?.metrics), [scheduleResult?.metrics]);
 
   const labels = buildScheduleLabels(t);
   const metricLabels = buildMetricLabels(metrics, t);
 
-  const handlePageChange = useCallback(
-    (newPage: number) => {
-      setPage(newPage);
-    },
-    [setPage]
-  );
+  const handlers = useScheduleAlertsHandlers(setPage, router);
 
-  const handleLeave = useCallback(
-    (id: string) => {
-      router.push(`/reschedule?classInstanceId=${id}`);
-    },
-    [router]
-  );
-
-  const handleViewClassAudit = useCallback(
-    (id: string) => {
-      router.push(`/classes/${id}/audit`);
-    },
-    [router]
-  );
-
-  return {
+  return buildScheduleAlertsViewModelResult({
     alerts,
     metrics,
     metricLabels,
     classes,
-    totalClasses: totalCount,
-    currentPage: page,
+    totalCount,
+    page,
     pageSize,
     labels,
     loading,
-    onLeave: handleLeave,
-    onViewClassAudit: handleViewClassAudit,
-    onPageChange: handlePageChange,
-    onDownloadReport: () => {},
-    onFilter: () => {},
-    onExport: () => {},
-  };
+    handlers,
+  });
 }

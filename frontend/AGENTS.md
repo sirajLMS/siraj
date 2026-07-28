@@ -35,11 +35,15 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Prefer Bun's built-in commands over npm equivalents
 - Use `~/.bun/bin/bun create` for scaffolding new projects
 - Use layer-specific test scripts (see `package.json`):
-  - `bun run test:graphql` — GraphQL integration tests (`frontend/common/graphql/test/`)
-  - `bun run test:ui:components` — UI component tests (`test/ui/components/`)
-  - `bun run test:ui:e2e` — UI end-to-end tests (`test/ui/e2e/`)
-  - `bun run test:ui` — all UI tests (components + e2e)
+  - `bun run build:test` — production build for UI/E2E (`.next-test-prod`; **required before** `test:ui:e2e`)
+  - `bun run test:graphql` — GraphQL integration tests (`frontend/common/graphql/test/`; dev server)
+  - `bun run test:ui:components` — UI component tests (`test/ui/components/`; Happy DOM, no server)
+  - `bun run test:ui:e2e` — UI end-to-end tests (`test/ui/e2e/`; production `next start`)
+  - `bun run test:ui:static` — mobile/desktop import isolation (`test/ui/mobile-desktop-isolation.test.ts`)
+  - `bun run test:ui` — all UI tests (components + e2e + static)
+  - `bun run test:ui:kill` — kill test servers on ports 3001/3020–3199 only (never dev:3000 or start:4000)
   - `bun run test` — all tests across all layers
+- UI test details: `test/ui/AGENTS.md`
 - Use `~/.bun/bin/bun build` for building projects
 - Use `bun quality-gate` for automated iterative code quality verification
 

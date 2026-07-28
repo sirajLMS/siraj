@@ -206,6 +206,13 @@ enum AppPermission {
   SESSION_UPDATE_STATUS_LEAVE
   SESSION_UPDATE_STATUS_START
   SESSION_VIEW_DETAILS
+  SETTINGS_AUDIT_VIEW
+  SETTINGS_EDIT_ENV
+  SETTINGS_EDIT_GENERAL
+  SETTINGS_EDIT_SESSION
+  SETTINGS_SITE_CONTENT_MANAGE
+  SETTINGS_TIMEZONES_VIEW
+  SETTINGS_VIEW
   STAFF_CREATE
   STAFF_EDIT
   STAFF_EDIT_PROFILE
@@ -374,6 +381,24 @@ enum AttendanceStatus {
   ABSENT
   LATE
   PRESENT
+}
+
+"""An immutable audit log entry recording a system change."""
+type AuditLog {
+  action: String
+  actorType: String
+  actorUserId: String
+  changes: JSON
+  createdAt: DateTime
+  description: String
+  entityId: String
+  entityType: String
+  id: String
+  ipAddress: String
+  metadata: JSON
+  newState: JSON
+  previousState: JSON
+  userAgent: String
 }
 
 input AvailabilitySearchInput {
@@ -1369,6 +1394,40 @@ type EndImpersonationResponse {
 
 type EndPermissionGroupSimulationResponse {
   token: String
+}
+
+type EnvConfigDeleteResult {
+  deleted: Boolean
+  id: String
+  key: String
+  source: String
+}
+
+type EnvConfigEntry {
+  category: String
+  description: LocalizedString
+  displayStrategy: String
+  editable: Boolean
+  excludeFromDb: Boolean
+  hasDbOverride: Boolean
+  id: String
+  isSecret: Boolean
+  key: String
+  source: String
+  value: String
+}
+
+input EnvConfigUpsertInput {
+  key: String!
+  value: String!
+}
+
+type EnvConfigUpsertResult {
+  hasDbOverride: Boolean
+  id: String
+  key: String
+  source: String
+  updatedAt: DateTime
 }
 
 type ExchangeRate {
@@ -2453,6 +2512,7 @@ type Mutation {
   """Soft-deletes a complaint (admin only). Returns true on success."""
   deleteComplaint(complaintId: String!): Boolean
   deleteCurrencyHedge(id: String!): Boolean
+  deleteEnvConfigEntry(key: String!): EnvConfigDeleteResult
   deleteFile(path: String!): FileOperationResult
   deleteInvoice(invoiceId: String!): DeleteInvoiceResult
 
@@ -2466,11 +2526,18 @@ type Mutation {
   deleteMeetingProvider(id: ID!): Boolean
   deletePermissionGroup(groupId: String!): Boolean
   deleteRecurringClass(classInstanceId: ID!): Boolean
+
+  """Deletes a per-role session configuration."""
+  deleteSessionConfig(roleName: String!): Boolean
+
+  """Permanently deletes a site content entry."""
+  deleteSiteContent(id: ID!): Boolean
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
   deleteStudent(id: String!): Student
 
   """Soft-deletes a suggestion (super admin only). Returns true on success."""
   deleteSuggestion(suggestionId: String!): Boolean
+  deleteSystemSetting(key: String!): Boolean
   deleteTeacherImportantNote(id: ID!): Boolean
   deleteUserMeetingConfig(id: ID!): Boolean
   deleteUserPaymentMethod(id: ID!): Boolean
@@ -2568,6 +2635,9 @@ type Mutation {
   updateSessionStatusAbsent(classInstanceId: ID!): ClassInstanceDetail
   updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
   updateSessionStatusStart(classInstanceId: ID!): ClassInstanceDetail
+
+  """Updates the published state of a site content entry."""
+  updateSiteContentPublishState(id: ID!, isPublished: Boolean!): SiteContentEntry
   updateStudentQuota(expectedVersion: Int, newClassesRemaining: Int!, studentId: String!): EditQuotaResult
   updateSupportedMobileWallet(id: ID!, input: SupportedMobileWalletUpdateInput!): SupportedMobileWallet
   updateSupportedOnlineAccount(id: ID!, input: SupportedOnlineAccountUpdateInput!): SupportedOnlineAccount
@@ -2581,7 +2651,15 @@ type Mutation {
 
   """Uploads a new learning resource to the academy library."""
   uploadLearningResource(input: ResourceUploadInput!): LearningResourceRow
+  upsertEnvConfigEntry(input: EnvConfigUpsertInput!): EnvConfigUpsertResult
   upsertManualExchangeRate(effectiveDate: DateTime, fromCurrency: CurrencyCode!, rate: String!, toCurrency: CurrencyCode!): UpsertManualExchangeRateResult
+
+  """Creates or updates a per-role session configuration."""
+  upsertSessionConfig(input: SessionConfigUpsertInput!): SessionConfig
+
+  """Creates or updates a site content entry by slug."""
+  upsertSiteContent(input: SiteContentUpsertInput!): SiteContentEntry
+  upsertSystemSetting(input: SystemSettingUpsertInput!): SystemSetting
   verifyBankTransferPaymentMethod(id: ID!): UserPaymentMethod
 }
 
@@ -3153,6 +3231,7 @@ type Query {
   Return effective permissions for a user, combining groups and overrides.
   """
   effectiveUserPermissions(userId: String!): [String!]
+  envConfigEntries: [EnvConfigEntry!]
   exchangeRateHistory(from: CurrencyCode!, maxDays: Int = 90, paginationArgs: PaginationArgs, to: CurrencyCode!): ExchangeRateHistoryResult
   fileInfo(path: String!): FileInfo
   fileUsage(input: FileUsageCheckInput!): FileUsageResult
@@ -3262,7 +3341,23 @@ type Query {
   """
   searchSuggestions(excludeId: String!, query: String!): [SuggestionSearchResult!]
   searchTeacherAvailability(input: AvailabilitySearchInput!): AvailabilitySearchResult
+
+  """Fetches the session configuration for a single role."""
+  sessionConfig(roleName: String!): SessionConfig
+
+  """Lists all per-role session configurations."""
+  sessionConfigs: [SessionConfig!]
+
+  """Returns paginated audit logs for the settings audit tab."""
+  settingsAuditLogs(filter: SettingsAuditLogFilter): SettingsAuditLogsResult
+  settingsTimezones(paginationArgs: PaginationArgs): SettingsTimezonesResult
   simulatablePermissionGroups: [SimulatablePermissionGroup!]
+
+  """Lists all site content entries for the Settings CMS tab."""
+  siteContentEntries: [SiteContentEntry!]
+
+  """Fetches a single site content entry by ID."""
+  siteContentEntry(id: ID!): SiteContentEntry
 
   """Lightweight staff list for autocomplete (id, name, avatarUrl, email)."""
   staffDirectory(limit: Int, permissionGroupFilter: String, search: String): [StaffDirectoryAutocompleteRow!]!
@@ -3315,6 +3410,8 @@ type Query {
   supportedMobileWallets(activeOnly: Boolean = true, countryCode: CountryCode, direction: PaymentDirection): [SupportedMobileWallet!]
   supportedOnlineAccounts(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedOnlineAccount!]
   supportedPaymentLinks(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedPaymentLink!]
+  systemSetting(key: String!): SystemSetting
+  systemSettings: [SystemSetting!]
   teacherAssignedClasses: TeacherAssignedClassesResult
   teacherAssignedStudents: TeacherAssignedStudentsResult
   teacherDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
@@ -3511,10 +3608,86 @@ type SendPaymentReminderResult {
   success: Boolean
 }
 
+"""
+Per-role session TTL and concurrent-session limits for the Settings Session & Security tab.
+"""
+type SessionConfig {
+  createdAt: DateTime
+  id: String
+  maxConcurrentSessions: Int
+  roleName: String
+  ttlSeconds: Int
+  updatedAt: DateTime
+}
+
+"""Input for creating or updating a per-role session configuration."""
+input SessionConfigUpsertInput {
+  maxConcurrentSessions: Int!
+  roleName: String!
+  ttlSeconds: Int!
+}
+
+"""Filter and pagination options for the settings audit log query."""
+input SettingsAuditLogFilter {
+  action: String
+  actorUserId: String
+  endDate: DateTime
+  entityType: String
+  limit: Int = 50
+  offset: Int = 0
+  startDate: DateTime
+}
+
+"""Paginated audit log entries for the settings audit tab."""
+type SettingsAuditLogsResult {
+  hasMore: Boolean
+
+  """Synthetic identifier for Apollo cache normalization."""
+  id: String
+  logs: [AuditLog!]
+  total: Int
+}
+
+type SettingsTimezone {
+  baseOffsetMinutes: Int
+  ianaId: String
+  id: String
+  isDstSupported: Boolean
+  name: String
+  offsetMinutes: Int
+}
+
+type SettingsTimezonesResult {
+  id: String
+  pageInfo: PageInfo
+  rows: [SettingsTimezone!]
+  totalCount: Int
+}
+
 type SimulatablePermissionGroup {
   description: String
   name: String
   slug: String
+}
+
+type SiteContentEntry {
+  body: String
+  contentType: String
+  createdAt: DateTime
+  id: String
+  isPublished: Boolean
+  slug: String
+  title: String
+  updatedAt: DateTime
+  updatedByUserId: String
+}
+
+input SiteContentUpsertInput {
+  body: String!
+  contentType: String!
+  isPublished: Boolean!
+  slug: String!
+  title: String!
 }
 
 input StaffAdminProfileUpdateInput {
@@ -4203,6 +4376,25 @@ type SystemAlert {
   severity: String
   title: String
   type: String
+}
+
+type SystemSetting {
+  category: String
+  dataType: String
+  description: String
+  id: String
+  key: String
+  updatedAt: DateTime
+  updatedByUserId: String
+  value: String
+}
+
+input SystemSettingUpsertInput {
+  category: String
+  dataType: String
+  description: String
+  key: String!
+  value: String!
 }
 
 type TeacherAssignedClass {

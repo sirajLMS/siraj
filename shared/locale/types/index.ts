@@ -26,6 +26,7 @@ export * from "./dashboard/payment-catalogs/main";
 export * from "./dashboard/permissions";
 export * from "./dashboard/reports";
 export * from "./dashboard/resources";
+export * from "./dashboard/settings";
 export * from "./dashboard/staff";
 export * from "./dashboard/studentPortal";
 export * from "./dashboard/students";

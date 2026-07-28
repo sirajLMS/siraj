@@ -40,39 +40,17 @@ const StyledSectionTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurface,
 }));
 
-export function ScheduleOverviewMobileView({
-  title,
-  selectedMetricLabel,
-  searchPlaceholder,
-  searchValue,
-  rows,
-  headers,
-  statusLabels,
-  detailsLabel,
-  emptyMessage,
-  page,
-  pageSize,
-  totalCount,
-  onPageChange,
-  onSearchChange,
-  dateLabel,
-  dateValue,
-  todayLabel,
-  previousDayLabel,
-  nextDayLabel,
-  teacherPlaceholder,
-  selectedTeacher,
-  onDateChange,
-  onTeacherChange,
-  loading,
-  showTimezones,
-  locale,
-  canDashboardSearch,
-  canScheduleFilterAdvanced,
-}: Readonly<ScheduleOverviewViewModel>) {
-  const theme = useTheme();
+type ScheduleOverviewMobileViewProps = Readonly<ScheduleOverviewViewModel>;
 
-  const renderItem = (row: DailyScheduleRow): ReactNode => (
+function renderScheduleOverviewItem(
+  row: DailyScheduleRow,
+  headers: ScheduleOverviewMobileViewProps["headers"],
+  statusLabels: ScheduleOverviewMobileViewProps["statusLabels"],
+  detailsLabel: ScheduleOverviewMobileViewProps["detailsLabel"],
+  showTimezones: ScheduleOverviewMobileViewProps["showTimezones"],
+  locale: ScheduleOverviewMobileViewProps["locale"]
+): ReactNode {
+  return (
     <MobileCardListItem variant="edge-to-edge">
       <ScheduleOverviewMobileCard
         row={row}
@@ -84,88 +62,193 @@ export function ScheduleOverviewMobileView({
       />
     </MobileCardListItem>
   );
+}
 
+function ScheduleOverviewMobileHeader({
+  title,
+  selectedMetricLabel,
+}: Pick<ScheduleOverviewMobileViewProps, "title" | "selectedMetricLabel">) {
+  return (
+    <StyledSectionTitleRow>
+      <StyledSectionTitle variant="titleLg">{title}</StyledSectionTitle>
+      {selectedMetricLabel ? (
+        <MobileStatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
+      ) : null}
+    </StyledSectionTitleRow>
+  );
+}
+
+function ScheduleOverviewMobileToolbar({
+  canScheduleFilterAdvanced,
+  dateLabel,
+  dateValue,
+  todayLabel,
+  previousDayLabel,
+  nextDayLabel,
+  onDateChange,
+  selectedTeacher,
+  onTeacherChange,
+  teacherPlaceholder,
+  canDashboardSearch,
+  searchPlaceholder,
+  searchValue,
+  onSearchChange,
+}: Pick<
+  ScheduleOverviewMobileViewProps,
+  | "canScheduleFilterAdvanced"
+  | "dateLabel"
+  | "dateValue"
+  | "todayLabel"
+  | "previousDayLabel"
+  | "nextDayLabel"
+  | "onDateChange"
+  | "selectedTeacher"
+  | "onTeacherChange"
+  | "teacherPlaceholder"
+  | "canDashboardSearch"
+  | "searchPlaceholder"
+  | "searchValue"
+  | "onSearchChange"
+>) {
+  const theme = useTheme();
+
+  return (
+    <StyledMobileSectionBody>
+      {canScheduleFilterAdvanced ? (
+        <ScheduleFilters
+          dateLabel={dateLabel}
+          dateValue={dateValue}
+          todayLabel={todayLabel}
+          previousDayLabel={previousDayLabel}
+          nextDayLabel={nextDayLabel}
+          onDateChange={onDateChange}
+          teacherSelect={
+            <TeacherAutocompleteMobile value={selectedTeacher} onChange={onTeacherChange} label={teacherPlaceholder} />
+          }
+        />
+      ) : null}
+
+      {canDashboardSearch ? (
+        <TextField
+          placeholder={searchPlaceholder}
+          value={searchValue}
+          onChange={event => {
+            onSearchChange(event.target.value);
+          }}
+          fullWidth
+          size="small"
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <StyledSearchIcon />
+                </InputAdornment>
+              ),
+            },
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              backgroundColor: theme.palette.surfaceContainerLowest,
+            },
+          }}
+        />
+      ) : null}
+    </StyledMobileSectionBody>
+  );
+}
+
+function ScheduleOverviewMobileList({
+  rows,
+  loading,
+  emptyMessage,
+  headers,
+  statusLabels,
+  detailsLabel,
+  showTimezones,
+  locale,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
+}: Pick<
+  ScheduleOverviewMobileViewProps,
+  | "rows"
+  | "loading"
+  | "emptyMessage"
+  | "headers"
+  | "statusLabels"
+  | "detailsLabel"
+  | "showTimezones"
+  | "locale"
+  | "page"
+  | "pageSize"
+  | "totalCount"
+  | "onPageChange"
+>) {
+  return (
+    <MobileCardList<DailyScheduleRow>
+      rows={rows}
+      loading={loading}
+      emptyMessage={emptyMessage}
+      renderSkeleton={() => (
+        <MobileCardListItem variant="edge-to-edge">
+          <ScheduleOverviewCardSkeleton />
+        </MobileCardListItem>
+      )}
+      renderEmptyState={msg => (
+        <MobileCardListItem variant="edge-to-edge">
+          <ScheduleOverviewEmptyState message={msg} />
+        </MobileCardListItem>
+      )}
+      gap={2}
+      layout="edge-to-edge"
+      getKey={row => row.id ?? ""}
+      renderItem={row => renderScheduleOverviewItem(row, headers, statusLabels, detailsLabel, showTimezones, locale)}
+      paginationOptions={buildServerPaginationOptions({
+        page,
+        pageSize,
+        totalCount: totalCount ?? 0,
+        onPageChange,
+      })}
+    />
+  );
+}
+
+export function ScheduleOverviewMobileView(props: ScheduleOverviewMobileViewProps) {
   return (
     <Stack direction="column" sx={{ gap: { xs: 0, md: 2 } }}>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <StyledSectionTitleRow>
-          <StyledSectionTitle variant="titleLg">{title}</StyledSectionTitle>
-          {selectedMetricLabel ? (
-            <MobileStatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
-          ) : null}
-        </StyledSectionTitleRow>
-
-        <StyledMobileSectionBody>
-          {canScheduleFilterAdvanced ? (
-            <ScheduleFilters
-              dateLabel={dateLabel}
-              dateValue={dateValue}
-              todayLabel={todayLabel}
-              previousDayLabel={previousDayLabel}
-              nextDayLabel={nextDayLabel}
-              onDateChange={onDateChange}
-              teacherSelect={
-                <TeacherAutocompleteMobile
-                  value={selectedTeacher}
-                  onChange={onTeacherChange}
-                  label={teacherPlaceholder}
-                />
-              }
-            />
-          ) : null}
-
-          {canDashboardSearch ? (
-            <TextField
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={event => {
-                onSearchChange(event.target.value);
-              }}
-              fullWidth
-              size="small"
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <StyledSearchIcon />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  backgroundColor: theme.palette.surfaceContainerLowest,
-                },
-              }}
-            />
-          ) : null}
-        </StyledMobileSectionBody>
-
-        <MobileCardList<DailyScheduleRow>
-          rows={rows}
-          loading={loading}
-          emptyMessage={emptyMessage}
-          renderSkeleton={() => (
-            <MobileCardListItem variant="edge-to-edge">
-              <ScheduleOverviewCardSkeleton />
-            </MobileCardListItem>
-          )}
-          renderEmptyState={msg => (
-            <MobileCardListItem variant="edge-to-edge">
-              <ScheduleOverviewEmptyState message={msg} />
-            </MobileCardListItem>
-          )}
-          gap={2}
-          layout="edge-to-edge"
-          getKey={row => row.id ?? ""}
-          renderItem={renderItem}
-          paginationOptions={buildServerPaginationOptions({
-            page,
-            pageSize,
-            totalCount: totalCount ?? 0,
-            onPageChange,
-          })}
+        <ScheduleOverviewMobileHeader title={props.title} selectedMetricLabel={props.selectedMetricLabel} />
+        <ScheduleOverviewMobileToolbar
+          canScheduleFilterAdvanced={props.canScheduleFilterAdvanced}
+          dateLabel={props.dateLabel}
+          dateValue={props.dateValue}
+          todayLabel={props.todayLabel}
+          previousDayLabel={props.previousDayLabel}
+          nextDayLabel={props.nextDayLabel}
+          onDateChange={props.onDateChange}
+          selectedTeacher={props.selectedTeacher}
+          onTeacherChange={props.onTeacherChange}
+          teacherPlaceholder={props.teacherPlaceholder}
+          canDashboardSearch={props.canDashboardSearch}
+          searchPlaceholder={props.searchPlaceholder}
+          searchValue={props.searchValue}
+          onSearchChange={props.onSearchChange}
+        />
+        <ScheduleOverviewMobileList
+          rows={props.rows}
+          loading={props.loading}
+          emptyMessage={props.emptyMessage}
+          headers={props.headers}
+          statusLabels={props.statusLabels}
+          detailsLabel={props.detailsLabel}
+          showTimezones={props.showTimezones}
+          locale={props.locale}
+          page={props.page}
+          pageSize={props.pageSize}
+          totalCount={props.totalCount}
+          onPageChange={props.onPageChange}
         />
       </Box>
     </Stack>

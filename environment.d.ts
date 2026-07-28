@@ -102,6 +102,15 @@ declare global {
       NEXT_PUBLIC_IS_DEMO?: string;
       IS_DEMO?: string;
 
+      /**
+       * When "false", auth cookies (session_id, refresh_token, access_token) are
+       * written without the Secure flag even when NODE_ENV=production.
+       * Production deployments over HTTPS should omit this (defaults to secure).
+       * Set to "false" for local production-mode servers over HTTP (e.g. E2E tests
+       * via `next start` on http://localhost).
+       */
+      AUTH_COOKIE_SECURE?: string;
+
       // Logging
       // ENABLE_LOGGING gates the server-side BaseLogger (shared/lib/logger/base-logger.ts)
       // AND the client-log ingestion route (app/api/logs/route.ts). When "true", the

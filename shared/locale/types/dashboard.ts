@@ -39,6 +39,7 @@ import type { PaymentCatalogsLabels } from "@/shared/locale/types/dashboard/paym
 import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions/main";
 import type { ReportsLabels } from "@/shared/locale/types/dashboard/reports/main";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
+import type { SettingsLabels } from "@/shared/locale/types/dashboard/settings/main";
 import type { StaffDirectoryLabels } from "@/shared/locale/types/dashboard/staff/directory";
 import type { StaffOnboardingLabels } from "@/shared/locale/types/dashboard/staff/onboarding";
 import type { StudentPortalCreditsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentCredits";
@@ -111,6 +112,7 @@ export interface DashboardTranslations {
   parentSocial: ParentSocialLabels;
   paymentCatalogs: PaymentCatalogsLabels;
   permissions: PermissionsLabels;
+  settings: SettingsLabels;
   reports: ReportsLabels;
   resources: ResourcesLabels;
   booksAndBags: BooksAndBagsLabels;

@@ -207,8 +207,11 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - GraphQL: `bun run generate:gqlSchema` then `bun codegen`
 - Database: `bun run db` (via scripts/dbActions.ts — generate, push, migrate, seed, studio — reset & cleanGenerate disabled by repo policy)
 - Layer-specific test scripts:
-  - `bun run test:graphql` - GraphQL integration tests
-  - `bun run test:ui:components` - UI component tests
-  - `bun run test:ui:e2e` - E2E tests
-  - `bun run test:ui` - all UI tests (components + e2e)
+  - `bun run build:test` - production build for UI/E2E (`.next-test-prod`; required before `test:ui:e2e`)
+  - `bun run test:graphql` - GraphQL integration tests (dev server)
+  - `bun run test:ui:components` - UI component tests (Happy DOM; no server)
+  - `bun run test:ui:e2e` - E2E tests (production server; run `build:test` first)
+  - `bun run test:ui:static` - mobile/desktop import isolation checks
+  - `bun run test:ui` - all UI tests
+  - `bun run test:ui:kill` - kill test servers on ports 3001/3020–3199 only (never dev:3000 or start:4000)
   - `bun run test` - all tests

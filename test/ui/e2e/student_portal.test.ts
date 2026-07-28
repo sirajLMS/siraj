@@ -28,8 +28,6 @@ describe("Student Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
     await page.waitForURL("**/dashboard**");
-    await page.waitForLoadState("networkidle");
-
     // Hero: Next Class label, or empty-state copy when no upcoming lesson
     const nextClass = page.getByText(/Next Class|الحصة القادمة/i);
     const noUpcoming = page.getByText(/No upcoming classes|لا توجد حصص قادمة/i);
@@ -62,8 +60,6 @@ describe("Student Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
     await page.waitForURL("**/dashboard**");
-    await page.waitForLoadState("networkidle");
-
     await expectVisible(page.getByText(/Classes Remaining|الحصص المتبقية/i));
     await expectVisible(page.getByText(/Total Classes|إجمالي الحصص/i));
   });
@@ -74,8 +70,6 @@ describe("Student Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
     await page.waitForURL("**/dashboard**");
-    await page.waitForLoadState("networkidle");
-
     await expectVisible(page.getByText(/Recent Lesson Reports|تقارير الحصص الأخيرة/i));
     await expectVisible(page.getByRole("button", { name: /View All History|عرض كل السجل/i }));
   });
@@ -86,12 +80,8 @@ describe("Student Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
     await page.waitForURL("**/dashboard**");
-    await page.waitForLoadState("networkidle");
-
     await page.getByRole("link", { name: /My Credits|رصيدي/i }).click();
     await page.waitForURL("**/students/me/credits**");
-    await page.waitForLoadState("networkidle");
-
     await expectVisible(page.getByRole("heading", { name: /My Credits|رصيدي/i }));
   });
 
@@ -102,8 +92,6 @@ describe("Student Portal E2E", () => {
 
     await page.goto("/students/me/credits");
     await page.waitForURL("**/students/me/credits**");
-    await page.waitForLoadState("networkidle");
-
     await expectVisible(page.getByRole("heading", { name: /Transaction History|سجل المعاملات/i }));
     await expectVisible(page.getByRole("columnheader", { name: /Date|التاريخ/i }));
     await expectVisible(page.getByRole("columnheader", { name: /Type|النوع/i }));
@@ -117,8 +105,6 @@ describe("Student Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
     await page.waitForURL("**/dashboard**");
-    await page.waitForLoadState("networkidle");
-
     const hero = page
       .locator('[class*="MuiPaper-root"], [class*="MuiBox-root"]')
       .filter({ hasText: /Next Class|الحصة القادمة|No upcoming classes|لا توجد حصص قادمة/i });
@@ -131,8 +117,6 @@ describe("Student Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
     await page.waitForURL("**/dashboard**");
-    await page.waitForLoadState("networkidle");
-
     await expectVisible(page.getByRole("link", { name: /Today's Classes|حصص اليوم/i }));
     await expectVisible(page.getByRole("link", { name: /My Schedule|جدولي/i }));
     await expectVisible(page.getByRole("link", { name: /My Credits|رصيدي/i }));

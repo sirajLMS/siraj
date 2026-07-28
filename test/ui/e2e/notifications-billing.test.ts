@@ -20,9 +20,7 @@ afterEach(async () => {
 async function setupLoggedInPage(groupSlug: string, contextFactory = createContext) {
   context = await contextFactory();
   page = await context.newPage();
-  page.setDefaultNavigationTimeout(100000);
   await loginAsDemoUser(page, context, groupSlug);
-  await page.waitForLoadState("networkidle").catch(() => {});
   return page;
 }
 
@@ -44,7 +42,7 @@ describe("Notifications & Billing E2E", () => {
     await getBellButton(p).click();
     // Drawer title: "Notifications" (en) / "الإشعارات" (ar)
     const drawerTitle = p.getByText(/Notifications|الإشعارات/).first();
-    await drawerTitle.waitFor({ state: "visible", timeout: 15000 });
+    await drawerTitle.waitFor({ state: "visible" });
     expect(await drawerTitle.isVisible()).toBe(true);
   });
 
@@ -55,7 +53,7 @@ describe("Notifications & Billing E2E", () => {
     await getBellButton(p).click();
     // Section title: "Unpaid Invoices" (en) / "الفواتير غير المدفوعة" (ar)
     const billingTitle = p.getByText(/Unpaid Invoices|الفواتير غير المدفوعة/).first();
-    await billingTitle.waitFor({ state: "visible", timeout: 15000 });
+    await billingTitle.waitFor({ state: "visible" });
     expect(await billingTitle.isVisible()).toBe(true);
   });
 
@@ -65,7 +63,7 @@ describe("Notifications & Billing E2E", () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     await getBellButton(p).click();
     const billingTitle = p.getByText(/Unpaid Invoices|الفواتير غير المدفوعة/).first();
-    await billingTitle.waitFor({ state: "visible", timeout: 15000 });
+    await billingTitle.waitFor({ state: "visible" });
 
     const userRow = p.locator('[role="button"]').filter({ hasText: /\w+/ }).last();
     if (await userRow.isVisible()) {
@@ -86,7 +84,7 @@ describe("Notifications & Billing E2E", () => {
     expect(await getBellButton(p).isVisible()).toBe(true);
     await getBellButton(p).click();
     const drawerTitle = p.getByText(/Notifications|الإشعارات/).first();
-    await drawerTitle.waitFor({ state: "visible", timeout: 15000 });
+    await drawerTitle.waitFor({ state: "visible" });
     expect(await drawerTitle.isVisible()).toBe(true);
   });
 });

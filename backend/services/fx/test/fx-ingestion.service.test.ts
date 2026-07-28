@@ -79,7 +79,7 @@ mock.module("@/backend/services", () => ({
   PermissionsService: {
     hasPermission: hasPermissionMock,
   },
-  getRedisService: () => ({}),
+  getRedisService: async () => ({}),
 }));
 
 mock.module("@/backend/lib", () => ({

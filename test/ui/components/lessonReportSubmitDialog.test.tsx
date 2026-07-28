@@ -1,4 +1,17 @@
-import { afterEach, describe, expect, mock, test } from "bun:test";
+import { mock } from "bun:test";
+
+const loggerError = mock(() => {});
+
+mock.module("@/frontend/common/utils/logger", () => ({
+  logger: {
+    info: () => {},
+    warn: () => {},
+    debug: () => {},
+    error: loggerError,
+  },
+}));
+
+import { afterEach, mock as bunMock, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 
@@ -30,6 +43,7 @@ const MOCK_LABELS: LessonReportFormLabels = {
 };
 
 afterEach(() => {
+  loggerError.mockClear();
   cleanup();
 });
 
@@ -54,8 +68,8 @@ describe("LessonReportSubmitDialog", () => {
   });
 
   test("calls onSubmit with form data when submitted", async () => {
-    const onSubmit = mock(() => Promise.resolve());
-    const onClose = mock(() => {});
+    const onSubmit = bunMock(() => Promise.resolve());
+    const onClose = bunMock(() => {});
 
     renderWithWrapper(
       <LessonReportSubmitDialog
@@ -89,8 +103,8 @@ describe("LessonReportSubmitDialog", () => {
   });
 
   test("shows error alert when onSubmit fails", async () => {
-    const onSubmit = mock(() => Promise.reject(new Error("Network error")));
-    const onClose = mock(() => {});
+    const onSubmit = bunMock(() => Promise.reject(new Error("Network error")));
+    const onClose = bunMock(() => {});
 
     renderWithWrapper(
       <LessonReportSubmitDialog
@@ -108,6 +122,7 @@ describe("LessonReportSubmitDialog", () => {
       expect(screen.getByText("Submission failed")).toBeVisible();
     });
 
+    expect(loggerError).toHaveBeenCalledTimes(1);
     expect(onClose).not.toHaveBeenCalled();
   });
 });

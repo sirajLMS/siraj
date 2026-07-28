@@ -1,5 +1,5 @@
 {
-  "manifestHash": "992cec90d15e58f98cd4692342e31028c70ab580ada16867915befe9ba8eb1dd",
+  "manifestHash": "21a8ae87c1bda4c6082248621c30d9c4b40519730d2484c03c7402f0a153ca5f",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -74,6 +74,14 @@
       "sha256": "1f6cee0c26f97440b46c21978ad34bb3237c5db0f80f559e7d80d7f00c9024ee"
     },
     {
+      "file": "7a-settings-permissions-enum.sql",
+      "sha256": "aea3d9dbb34c0c219741023e825c06c6dbe2cac433b48871785bcaf3d43fbef1"
+    },
+    {
+      "file": "7b-settings-permissions-data.sql",
+      "sha256": "fdf4aa957cc69cb8f4e8224939a50e077bead5f6bac657b3ea6ca376502ed062"
+    },
+    {
       "file": "add_test_custom_alt_permission.sql",
       "sha256": "2fa1cbb1418b69eea1b39d3aa4a65cf2066a6f5223c543691e064c214dc8e847"
     },
@@ -142,5 +150,9 @@
       "sha256": "d846dab1b8bd32322114adbfeb34dca648c9f472905ff3299a9f8063f5bb0300"
     }
   ],
-  "appliedFolders": ["20260727152656_custom_23623615", "20260727225423_custom_992cec90"]
+  "appliedFolders": [
+    "20260727152656_custom_23623615",
+    "20260727225423_custom_992cec90",
+    "20260728005436_custom_21a8ae87"
+  ]
 }

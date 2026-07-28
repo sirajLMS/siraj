@@ -11,6 +11,7 @@ export interface DesktopSectionPanelProps {
   readonly subTitle?: string;
   readonly actions?: ReactNode;
   readonly children?: ReactNode;
+  readonly contentPadding?: boolean;
   readonly sx?: SxProps<Theme>;
 }
 
@@ -19,7 +20,15 @@ export interface DesktopSectionPanelProps {
  * Title bar uses 3-unit horizontal / 2.5-unit vertical padding and supports
  * `flexWrap` so multiple action buttons stack gracefully on wider screens.
  */
-export function DesktopSectionPanel({ id, title, subTitle, actions, children, sx }: DesktopSectionPanelProps) {
+export function DesktopSectionPanel({
+  id,
+  title,
+  subTitle,
+  actions,
+  children,
+  contentPadding = true,
+  sx,
+}: DesktopSectionPanelProps) {
   return (
     <Paper
       id={id}
@@ -79,6 +88,11 @@ export function DesktopSectionPanel({ id, title, subTitle, actions, children, sx
     if (!children) {
       return null;
     }
+
+    if (!contentPadding) {
+      return children;
+    }
+
     return (
       <Box
         sx={{

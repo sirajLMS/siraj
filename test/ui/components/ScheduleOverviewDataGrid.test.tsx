@@ -28,7 +28,20 @@ mock.module("@/shared/i18n/navigation", () => ({
 }));
 
 mock.module("next/link", () => ({
-  default: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
+  default: ({
+    children,
+    href,
+    prefetch: _prefetch,
+    replace: _replace,
+    scroll: _scroll,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    prefetch?: boolean;
+    replace?: boolean;
+    scroll?: boolean;
+  }) => (
     <a href={href} {...props}>
       {children}
     </a>

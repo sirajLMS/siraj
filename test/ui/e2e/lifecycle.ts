@@ -10,7 +10,7 @@ export function setupBrowserLifecycle() {
 
   beforeAll(async () => {
     browser = await chromium.launch({ headless: true });
-  }, 70000);
+  });
 
   afterAll(async () => {
     if (browser) {
@@ -26,20 +26,26 @@ export async function createContext(viewport = DEFAULT_VIEWPORT): Promise<Browse
   if (!browser) {
     throw new Error("Browser not initialized. Call setupBrowserLifecycle() first.");
   }
-  return browser.newContext({
+  const context = await browser.newContext({
     baseURL: getTestBaseUrl(),
     viewport,
   });
+  context.setDefaultTimeout(30_000);
+  context.setDefaultNavigationTimeout(60_000);
+  return context;
 }
 
 export async function createMobileContext(): Promise<BrowserContext> {
   if (!browser) {
     throw new Error("Browser not initialized. Call setupBrowserLifecycle() first.");
   }
-  return browser.newContext({
+  const context = await browser.newContext({
     baseURL: getTestBaseUrl(),
     viewport: { width: 375, height: 812 },
     isMobile: true,
     hasTouch: true,
   });
+  context.setDefaultTimeout(30_000);
+  context.setDefaultNavigationTimeout(60_000);
+  return context;
 }

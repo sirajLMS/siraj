@@ -37,12 +37,15 @@ bun run generate:gqlSchema     # Generate GraphQL schema from Pothos
 bun codegen                    # Generate TypeScript types from schema
 
 # Testing (layer-specific)
+bun run build:test             # Build production bundle for UI/E2E tests (.next-test-prod) — REQUIRED before test:ui:e2e
 bun run test                   # All tests
 bun run test:db                # Database repository tests (parallel)
 bun run test:db:sequential     # Database tests (sequential, for debugging)
-bun run test:graphql           # GraphQL integration tests
-bun run test:ui:components     # UI component tests
-bun run test:ui:e2e            # End-to-end tests
+bun run test:graphql           # GraphQL integration tests (dev server)
+bun run test:ui:components     # UI component tests (Happy DOM, no server)
+bun run test:ui:e2e            # End-to-end tests (production server — run build:test first)
+bun run test:ui                # All UI tests (components + e2e + static)
+bun run test:ui:kill           # Kill test servers on ports 3001/3020–3199 only (never dev:3000 or start:4000)
 
 # Run database tests with log capture (AI agents MUST use this instead of raw `bun test`)
 bun run scripts/run-test/run-test.ts <test-path>        # Run with log capture
@@ -388,9 +391,10 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 ### Testing
 - `backend/db/test/repo/` - Repository unit tests (100% coverage required)
 - `backend/db/test/logic/` - Business logic integration tests
-- `frontend/common/graphql/test/` - GraphQL integration tests (use testClient, not raw fetch)
-- `test/ui/components/` - Component tests
-- `test/ui/e2e/` - End-to-end tests
+- `frontend/common/graphql/test/` - GraphQL integration tests (dev server; use testClient, not raw fetch)
+- `test/ui/` - UI tests — see `test/ui/AGENTS.md`
+- `test/ui/components/` - Component tests (Happy DOM + mocked Apollo; no server)
+- `test/ui/e2e/` - End-to-end tests (production server; requires `bun run build:test` first)
 
 ## Important References
 

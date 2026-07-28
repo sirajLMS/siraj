@@ -1,6 +1,6 @@
 import { afterAll, beforeAll } from "bun:test";
-import { getTestPort } from "@/frontend/common/graphql/test/testPort";
-import { startTestServer, stopTestServer } from "@/frontend/common/graphql/test/testServer";
+import { getTestPort, getTestServerMode } from "@/frontend/common/graphql/test/testPort";
+import { isTestServerRunning, startTestServer, stopTestServer } from "@/frontend/common/graphql/test/testServer";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 let startedSuitesCount = 0;
@@ -15,10 +15,12 @@ export function setupTestServerLifecycle() {
       clearTimeout(stopTimeout);
       stopTimeout = null;
     }
-    serverStartPromise ??= startTestServer();
+    if (!serverStartPromise || !(await isTestServerRunning())) {
+      serverStartPromise = startTestServer();
+    }
     await serverStartPromise;
-    testLogger.info(`GraphQL test server ready on port ${getTestPort()}`);
-  }, 240000);
+    testLogger.info(`GraphQL test server ready on port ${getTestPort()} (${getTestServerMode()} mode)`);
+  });
 
   afterAll(() => {
     startedSuitesCount--;

@@ -61,6 +61,7 @@ export interface DashboardNavigationLabels {
   readonly parentRules: string;
   readonly socialMedia: string;
   readonly permissions: string;
+  readonly settings: string;
   readonly booksAndBags: string;
   readonly studentTodayClasses: string;
   readonly studentSchedule: string;

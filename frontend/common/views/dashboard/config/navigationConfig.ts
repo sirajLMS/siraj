@@ -24,6 +24,7 @@ import {
   SchoolOutlined,
   SearchOutlined,
   SecurityOutlined,
+  SettingsOutlined,
   ShareOutlined,
   ShieldOutlined,
   TimelineOutlined,
@@ -445,6 +446,14 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/permissions",
     section: "main",
     permission: PAGE_PERMISSIONS.permissions,
+  },
+  {
+    key: "settings",
+    labelKey: "settings",
+    icon: SettingsOutlined,
+    href: "/settings",
+    section: "main",
+    permission: PAGE_PERMISSIONS.settings,
   },
   {
     key: "own-profile",
@@ -913,6 +922,7 @@ export function applySupervisorNavOverrides(
     "complaints-manage",
     "dst-migration",
     "permissions",
+    "settings",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }

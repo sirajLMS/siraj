@@ -226,7 +226,7 @@ export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
 gqlSchemaBuilder.mutationField("updateManagerProfile", t =>
   t.field({
     type: ManagerDirectoryRowPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { superAdmin: true },
     args: {
       staffProfileId: t.arg.id({ required: true }),
       input: t.arg({ type: UpdateManagerProfileInputPothosObject, required: true }),

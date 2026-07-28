@@ -234,6 +234,13 @@ export enum AppPermission {
   SessionUpdateStatusLeave = 'SESSION_UPDATE_STATUS_LEAVE',
   SessionUpdateStatusStart = 'SESSION_UPDATE_STATUS_START',
   SessionViewDetails = 'SESSION_VIEW_DETAILS',
+  SettingsAuditView = 'SETTINGS_AUDIT_VIEW',
+  SettingsEditEnv = 'SETTINGS_EDIT_ENV',
+  SettingsEditGeneral = 'SETTINGS_EDIT_GENERAL',
+  SettingsEditSession = 'SETTINGS_EDIT_SESSION',
+  SettingsSiteContentManage = 'SETTINGS_SITE_CONTENT_MANAGE',
+  SettingsTimezonesView = 'SETTINGS_TIMEZONES_VIEW',
+  SettingsView = 'SETTINGS_VIEW',
   StaffCreate = 'STAFF_CREATE',
   StaffEdit = 'STAFF_EDIT',
   StaffEditProfile = 'STAFF_EDIT_PROFILE',
@@ -402,6 +409,25 @@ export enum AttendanceStatus {
   Late = 'LATE',
   Present = 'PRESENT'
 }
+
+/** An immutable audit log entry recording a system change. */
+export type AuditLog = {
+  __typename?: 'AuditLog';
+  action: Maybe<Scalars['String']['output']>;
+  actorType: Maybe<Scalars['String']['output']>;
+  actorUserId: Maybe<Scalars['String']['output']>;
+  changes: Maybe<Scalars['JSON']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  description: Maybe<Scalars['String']['output']>;
+  entityId: Maybe<Scalars['String']['output']>;
+  entityType: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  ipAddress: Maybe<Scalars['String']['output']>;
+  metadata: Maybe<Scalars['JSON']['output']>;
+  newState: Maybe<Scalars['JSON']['output']>;
+  previousState: Maybe<Scalars['JSON']['output']>;
+  userAgent: Maybe<Scalars['String']['output']>;
+};
 
 export type AvailabilitySearchInput = {
   daysOfWeek: InputMaybe<Array<DayOfWeek>>;
@@ -1425,6 +1451,43 @@ export type EndImpersonationResponse = {
 export type EndPermissionGroupSimulationResponse = {
   __typename?: 'EndPermissionGroupSimulationResponse';
   token: Maybe<Scalars['String']['output']>;
+};
+
+export type EnvConfigDeleteResult = {
+  __typename?: 'EnvConfigDeleteResult';
+  deleted: Maybe<Scalars['Boolean']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  key: Maybe<Scalars['String']['output']>;
+  source: Maybe<Scalars['String']['output']>;
+};
+
+export type EnvConfigEntry = {
+  __typename?: 'EnvConfigEntry';
+  category: Maybe<Scalars['String']['output']>;
+  description: Maybe<Scalars['LocalizedString']['output']>;
+  displayStrategy: Maybe<Scalars['String']['output']>;
+  editable: Maybe<Scalars['Boolean']['output']>;
+  excludeFromDb: Maybe<Scalars['Boolean']['output']>;
+  hasDbOverride: Maybe<Scalars['Boolean']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isSecret: Maybe<Scalars['Boolean']['output']>;
+  key: Maybe<Scalars['String']['output']>;
+  source: Maybe<Scalars['String']['output']>;
+  value: Maybe<Scalars['String']['output']>;
+};
+
+export type EnvConfigUpsertInput = {
+  key: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
+export type EnvConfigUpsertResult = {
+  __typename?: 'EnvConfigUpsertResult';
+  hasDbOverride: Maybe<Scalars['Boolean']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  key: Maybe<Scalars['String']['output']>;
+  source: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type ExchangeRate = {
@@ -2519,6 +2582,7 @@ export type Mutation = {
   /** Soft-deletes a complaint (admin only). Returns true on success. */
   deleteComplaint: Maybe<Scalars['Boolean']['output']>;
   deleteCurrencyHedge: Maybe<Scalars['Boolean']['output']>;
+  deleteEnvConfigEntry: Maybe<EnvConfigDeleteResult>;
   deleteFile: Maybe<FileOperationResult>;
   deleteInvoice: Maybe<DeleteInvoiceResult>;
   /** Permanently deletes a learning resource from physical storage and the database. */
@@ -2526,10 +2590,15 @@ export type Mutation = {
   deleteMeetingProvider: Maybe<Scalars['Boolean']['output']>;
   deletePermissionGroup: Maybe<Scalars['Boolean']['output']>;
   deleteRecurringClass: Maybe<Scalars['Boolean']['output']>;
+  /** Deletes a per-role session configuration. */
+  deleteSessionConfig: Maybe<Scalars['Boolean']['output']>;
+  /** Permanently deletes a site content entry. */
+  deleteSiteContent: Maybe<Scalars['Boolean']['output']>;
   deleteStorageItems: Maybe<BulkOperationResult>;
   deleteStudent: Maybe<Student>;
   /** Soft-deletes a suggestion (super admin only). Returns true on success. */
   deleteSuggestion: Maybe<Scalars['Boolean']['output']>;
+  deleteSystemSetting: Maybe<Scalars['Boolean']['output']>;
   deleteTeacherImportantNote: Maybe<Scalars['Boolean']['output']>;
   deleteUserMeetingConfig: Maybe<Scalars['Boolean']['output']>;
   deleteUserPaymentMethod: Maybe<Scalars['Boolean']['output']>;
@@ -2610,6 +2679,8 @@ export type Mutation = {
   updateSessionStatusAbsent: Maybe<ClassInstanceDetail>;
   updateSessionStatusLeave: Maybe<LeaveProcessResult>;
   updateSessionStatusStart: Maybe<ClassInstanceDetail>;
+  /** Updates the published state of a site content entry. */
+  updateSiteContentPublishState: Maybe<SiteContentEntry>;
   updateStudentQuota: Maybe<EditQuotaResult>;
   updateSupportedMobileWallet: Maybe<SupportedMobileWallet>;
   updateSupportedOnlineAccount: Maybe<SupportedOnlineAccount>;
@@ -2622,7 +2693,13 @@ export type Mutation = {
   updateUserProfile: Maybe<UnifiedProfile>;
   /** Uploads a new learning resource to the academy library. */
   uploadLearningResource: Maybe<LearningResourceRow>;
+  upsertEnvConfigEntry: Maybe<EnvConfigUpsertResult>;
   upsertManualExchangeRate: Maybe<UpsertManualExchangeRateResult>;
+  /** Creates or updates a per-role session configuration. */
+  upsertSessionConfig: Maybe<SessionConfig>;
+  /** Creates or updates a site content entry by slug. */
+  upsertSiteContent: Maybe<SiteContentEntry>;
+  upsertSystemSetting: Maybe<SystemSetting>;
   verifyBankTransferPaymentMethod: Maybe<UserPaymentMethod>;
 };
 
@@ -2933,6 +3010,11 @@ export type MutationDeleteCurrencyHedgeArgs = {
 };
 
 
+export type MutationDeleteEnvConfigEntryArgs = {
+  key: Scalars['String']['input'];
+};
+
+
 export type MutationDeleteFileArgs = {
   path: Scalars['String']['input'];
 };
@@ -2963,6 +3045,16 @@ export type MutationDeleteRecurringClassArgs = {
 };
 
 
+export type MutationDeleteSessionConfigArgs = {
+  roleName: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteSiteContentArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteStorageItemsArgs = {
   input: StorageItemsDeleteInput;
 };
@@ -2975,6 +3067,11 @@ export type MutationDeleteStudentArgs = {
 
 export type MutationDeleteSuggestionArgs = {
   suggestionId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteSystemSettingArgs = {
+  key: Scalars['String']['input'];
 };
 
 
@@ -3325,6 +3422,12 @@ export type MutationUpdateSessionStatusStartArgs = {
 };
 
 
+export type MutationUpdateSiteContentPublishStateArgs = {
+  id: Scalars['ID']['input'];
+  isPublished: Scalars['Boolean']['input'];
+};
+
+
 export type MutationUpdateStudentQuotaArgs = {
   expectedVersion: InputMaybe<Scalars['Int']['input']>;
   newClassesRemaining: Scalars['Int']['input'];
@@ -3391,11 +3494,31 @@ export type MutationUploadLearningResourceArgs = {
 };
 
 
+export type MutationUpsertEnvConfigEntryArgs = {
+  input: EnvConfigUpsertInput;
+};
+
+
 export type MutationUpsertManualExchangeRateArgs = {
   effectiveDate: InputMaybe<Scalars['DateTime']['input']>;
   fromCurrency: CurrencyCode;
   rate: Scalars['String']['input'];
   toCurrency: CurrencyCode;
+};
+
+
+export type MutationUpsertSessionConfigArgs = {
+  input: SessionConfigUpsertInput;
+};
+
+
+export type MutationUpsertSiteContentArgs = {
+  input: SiteContentUpsertInput;
+};
+
+
+export type MutationUpsertSystemSettingArgs = {
+  input: SystemSettingUpsertInput;
 };
 
 
@@ -3993,6 +4116,7 @@ export type Query = {
   directoryChildren: Maybe<Array<DirectoryInfo>>;
   /** Return effective permissions for a user, combining groups and overrides. */
   effectiveUserPermissions: Maybe<Array<Scalars['String']['output']>>;
+  envConfigEntries: Maybe<Array<EnvConfigEntry>>;
   exchangeRateHistory: Maybe<ExchangeRateHistoryResult>;
   fileInfo: Maybe<FileInfo>;
   fileUsage: Maybe<FileUsageResult>;
@@ -4062,7 +4186,18 @@ export type Query = {
   /** Search suggestions for duplicate marking autocomplete. Requires suggestions.review permission. */
   searchSuggestions: Maybe<Array<SuggestionSearchResult>>;
   searchTeacherAvailability: Maybe<AvailabilitySearchResult>;
+  /** Fetches the session configuration for a single role. */
+  sessionConfig: Maybe<SessionConfig>;
+  /** Lists all per-role session configurations. */
+  sessionConfigs: Maybe<Array<SessionConfig>>;
+  /** Returns paginated audit logs for the settings audit tab. */
+  settingsAuditLogs: Maybe<SettingsAuditLogsResult>;
+  settingsTimezones: Maybe<SettingsTimezonesResult>;
   simulatablePermissionGroups: Maybe<Array<SimulatablePermissionGroup>>;
+  /** Lists all site content entries for the Settings CMS tab. */
+  siteContentEntries: Maybe<Array<SiteContentEntry>>;
+  /** Fetches a single site content entry by ID. */
+  siteContentEntry: Maybe<SiteContentEntry>;
   /** Lightweight staff list for autocomplete (id, name, avatarUrl, email). */
   staffDirectory: Array<StaffDirectoryAutocompleteRow>;
   statusTrackingSchedule: Maybe<Array<StatusTrackingScheduleRow>>;
@@ -4094,6 +4229,8 @@ export type Query = {
   supportedMobileWallets: Maybe<Array<SupportedMobileWallet>>;
   supportedOnlineAccounts: Maybe<Array<SupportedOnlineAccount>>;
   supportedPaymentLinks: Maybe<Array<SupportedPaymentLink>>;
+  systemSetting: Maybe<SystemSetting>;
+  systemSettings: Maybe<Array<SystemSetting>>;
   teacherAssignedClasses: Maybe<TeacherAssignedClassesResult>;
   teacherAssignedStudents: Maybe<TeacherAssignedStudentsResult>;
   teacherDashboard: Maybe<TeacherDashboard>;
@@ -4411,6 +4548,26 @@ export type QuerySearchTeacherAvailabilityArgs = {
 };
 
 
+export type QuerySessionConfigArgs = {
+  roleName: Scalars['String']['input'];
+};
+
+
+export type QuerySettingsAuditLogsArgs = {
+  filter: InputMaybe<SettingsAuditLogFilter>;
+};
+
+
+export type QuerySettingsTimezonesArgs = {
+  paginationArgs: InputMaybe<PaginationArgs>;
+};
+
+
+export type QuerySiteContentEntryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type QueryStaffDirectoryArgs = {
   limit: InputMaybe<Scalars['Int']['input']>;
   permissionGroupFilter: InputMaybe<Scalars['String']['input']>;
@@ -4533,6 +4690,11 @@ export type QuerySupportedOnlineAccountsArgs = {
 export type QuerySupportedPaymentLinksArgs = {
   activeOnly?: InputMaybe<Scalars['Boolean']['input']>;
   direction: InputMaybe<PaymentDirection>;
+};
+
+
+export type QuerySystemSettingArgs = {
+  key: Scalars['String']['input'];
 };
 
 
@@ -4796,11 +4958,89 @@ export type SendPaymentReminderResult = {
   success: Maybe<Scalars['Boolean']['output']>;
 };
 
+/** Per-role session TTL and concurrent-session limits for the Settings Session & Security tab. */
+export type SessionConfig = {
+  __typename?: 'SessionConfig';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  maxConcurrentSessions: Maybe<Scalars['Int']['output']>;
+  roleName: Maybe<Scalars['String']['output']>;
+  ttlSeconds: Maybe<Scalars['Int']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** Input for creating or updating a per-role session configuration. */
+export type SessionConfigUpsertInput = {
+  maxConcurrentSessions: Scalars['Int']['input'];
+  roleName: Scalars['String']['input'];
+  ttlSeconds: Scalars['Int']['input'];
+};
+
+/** Filter and pagination options for the settings audit log query. */
+export type SettingsAuditLogFilter = {
+  action: InputMaybe<Scalars['String']['input']>;
+  actorUserId: InputMaybe<Scalars['String']['input']>;
+  endDate: InputMaybe<Scalars['DateTime']['input']>;
+  entityType: InputMaybe<Scalars['String']['input']>;
+  limit: InputMaybe<Scalars['Int']['input']>;
+  offset: InputMaybe<Scalars['Int']['input']>;
+  startDate: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+/** Paginated audit log entries for the settings audit tab. */
+export type SettingsAuditLogsResult = {
+  __typename?: 'SettingsAuditLogsResult';
+  hasMore: Maybe<Scalars['Boolean']['output']>;
+  /** Synthetic identifier for Apollo cache normalization. */
+  id: Maybe<Scalars['String']['output']>;
+  logs: Maybe<Array<AuditLog>>;
+  total: Maybe<Scalars['Int']['output']>;
+};
+
+export type SettingsTimezone = {
+  __typename?: 'SettingsTimezone';
+  baseOffsetMinutes: Maybe<Scalars['Int']['output']>;
+  ianaId: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isDstSupported: Maybe<Scalars['Boolean']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  offsetMinutes: Maybe<Scalars['Int']['output']>;
+};
+
+export type SettingsTimezonesResult = {
+  __typename?: 'SettingsTimezonesResult';
+  id: Maybe<Scalars['String']['output']>;
+  pageInfo: Maybe<PageInfo>;
+  rows: Maybe<Array<SettingsTimezone>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
 export type SimulatablePermissionGroup = {
   __typename?: 'SimulatablePermissionGroup';
   description: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   slug: Maybe<Scalars['String']['output']>;
+};
+
+export type SiteContentEntry = {
+  __typename?: 'SiteContentEntry';
+  body: Maybe<Scalars['String']['output']>;
+  contentType: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isPublished: Maybe<Scalars['Boolean']['output']>;
+  slug: Maybe<Scalars['String']['output']>;
+  title: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  updatedByUserId: Maybe<Scalars['String']['output']>;
+};
+
+export type SiteContentUpsertInput = {
+  body: Scalars['String']['input'];
+  contentType: Scalars['String']['input'];
+  isPublished: Scalars['Boolean']['input'];
+  slug: Scalars['String']['input'];
+  title: Scalars['String']['input'];
 };
 
 export type StaffAdminProfileUpdateInput = {
@@ -5515,6 +5755,26 @@ export type SystemAlert = {
   severity: Maybe<Scalars['String']['output']>;
   title: Maybe<Scalars['String']['output']>;
   type: Maybe<Scalars['String']['output']>;
+};
+
+export type SystemSetting = {
+  __typename?: 'SystemSetting';
+  category: Maybe<Scalars['String']['output']>;
+  dataType: Maybe<Scalars['String']['output']>;
+  description: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  key: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  updatedByUserId: Maybe<Scalars['String']['output']>;
+  value: Maybe<Scalars['String']['output']>;
+};
+
+export type SystemSettingUpsertInput = {
+  category: InputMaybe<Scalars['String']['input']>;
+  dataType: InputMaybe<Scalars['String']['input']>;
+  description: InputMaybe<Scalars['String']['input']>;
+  key: Scalars['String']['input'];
+  value: Scalars['String']['input'];
 };
 
 export type TeacherAssignedClass = {

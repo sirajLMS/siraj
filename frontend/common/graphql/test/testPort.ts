@@ -8,6 +8,19 @@ const PORT_RANGE_START = 3020;
 const PORT_RANGE_END = 3199;
 const LOCK_DIR = join(process.cwd(), ".graphql-test-ports");
 
+/** Ports used by GraphQL/UI test servers — never kill dev (3000) or prod start (4000). */
+export const TEST_SERVER_PREFERRED_PORT = PREFERRED_PORT;
+export const TEST_SERVER_PORT_RANGE = { start: PORT_RANGE_START, end: PORT_RANGE_END } as const;
+export const PROTECTED_APP_PORTS = [3000, 4000] as const;
+
+export function getTestServerPortCandidates(): number[] {
+  const ports: number[] = [PREFERRED_PORT];
+  for (let port = PORT_RANGE_START; port <= PORT_RANGE_END; port++) {
+    ports.push(port);
+  }
+  return ports;
+}
+
 let allocatedPort: number | undefined;
 let portReservationServer: Server | undefined;
 let heldPortLock: number | undefined;
@@ -143,12 +156,31 @@ export function getTestApiUrl(path: string): string {
   return `${getTestBaseUrl()}${normalizedPath}`;
 }
 
+function isUiTestRun(): boolean {
+  return process.argv.some(arg => arg.replace(/\\/g, "/").includes("test/ui"));
+}
+
 export function getTestDistDir(port: number): string {
+  if (getTestServerMode() === "production") {
+    return getProductionBuildDistDir();
+  }
   return `.next-test-${port}`;
 }
 
+export function getProductionBuildDistDir(): string {
+  return process.env.TEST_SERVER_DIST_DIR ?? ".next-test-prod";
+}
+
+export function getTestServerMode(): "dev" | "production" {
+  if (process.env.TEST_SERVER_MODE === "production") return "production";
+  if (process.env.TEST_SERVER_MODE === "dev") return "dev";
+  if (isUiTestRun()) return "production";
+  return "dev";
+}
+
 export function getTestServerLogPath(port: number): string {
-  return `logs/next-dev-server-${port}.log`;
+  const mode = getTestServerMode();
+  return `logs/next-${mode}-server-${port}.log`;
 }
 
 function getPidSkewedCandidates(excluded: Set<number>): number[] {

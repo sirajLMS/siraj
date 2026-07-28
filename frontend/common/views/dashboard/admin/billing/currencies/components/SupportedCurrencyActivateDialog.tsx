@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
 import { CountryAutocomplete } from "@/frontend/common/components/ui/input/countrySelect/CountryAutocomplete";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import type { CountryCode, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -34,6 +34,10 @@ type ActivateFormValues = {
   decimals: string;
   sortOrder: string;
 };
+
+type SupportedCurrenciesTranslations = ReturnType<
+  typeof useAppTranslation
+>["dashboardTranslations"]["billing"]["supportedCurrencies"];
 
 const defaultValues = (): ActivateFormValues => ({
   code: "",
@@ -62,13 +66,103 @@ function resolveCountry(code: string | null | undefined): CountryType | undefine
   return countries.find(country => country.code === code);
 }
 
-export function SupportedCurrencyActivateDialog({
-  open,
-  row,
-  onClose,
-  onSaved,
-  excludedCodes,
-}: Readonly<SupportedCurrencyActivateDialogProps>) {
+type ActivateCurrencyFormFieldsProps = {
+  readonly control: Control<ActivateFormValues>;
+  readonly errors: FieldErrors<ActivateFormValues>;
+  readonly isEdit: boolean;
+  readonly excludedCodes?: readonly CurrencyCode[];
+  readonly t: SupportedCurrenciesTranslations;
+};
+
+function ActivateCurrencyFormFields({ control, errors, isEdit, excludedCodes, t }: ActivateCurrencyFormFieldsProps) {
+  return (
+    <>
+      <Controller
+        name="code"
+        control={control}
+        rules={{ required: t.codeRequired }}
+        render={({ field }) => (
+          <CurrencySelect
+            currency={field.value ? (getCurrencyByCode(field.value) ?? null) : null}
+            setCurrencyAction={(currency: CurrencyOption) => field.onChange(currency.code)}
+            onClearAction={() => field.onChange("")}
+            label={t.currencyField}
+            fullWidth
+            required
+            disabled={isEdit}
+            excludedCodes={excludedCodes}
+            error={Boolean(errors.code)}
+            helperText={errors.code?.message}
+          />
+        )}
+      />
+
+      <Controller
+        name="symbol"
+        control={control}
+        rules={{ required: t.symbolRequired }}
+        render={({ field, fieldState }) => (
+          <TextField
+            {...field}
+            label={t.symbolField}
+            fullWidth
+            required
+            error={Boolean(fieldState.error)}
+            helperText={fieldState.error?.message}
+          />
+        )}
+      />
+
+      <Controller
+        name="countryCode"
+        control={control}
+        render={({ field }) => (
+          <CountryAutocomplete
+            country={resolveCountry(field.value)}
+            onChangeAction={country => field.onChange(country.code as CountryCode)}
+            onClearAction={() => field.onChange("")}
+            label={t.countryField}
+            fullWidth
+          />
+        )}
+      />
+
+      <Controller
+        name="decimals"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label={t.decimalsField}
+            type="number"
+            fullWidth
+            slotProps={{ htmlInput: { min: 0, max: 4 } }}
+          />
+        )}
+      />
+
+      <Controller
+        name="sortOrder"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label={t.sortOrderField}
+            type="number"
+            fullWidth
+            slotProps={{ htmlInput: { min: 0 } }}
+          />
+        )}
+      />
+
+      <FormControl fullWidth>
+        <FormControlLabel control={<Checkbox checked readOnly />} label={t.active} />
+      </FormControl>
+    </>
+  );
+}
+
+function useActivateCurrencyDialog({ open, row, onClose, onSaved }: SupportedCurrencyActivateDialogProps) {
   const t = useAppTranslation().dashboardTranslations.billing.supportedCurrencies;
   const notifications = useNotifications();
   const isEdit = Boolean(row?.code);
@@ -85,8 +179,6 @@ export function SupportedCurrencyActivateDialog({
     defaultValues: defaultValues(),
   });
 
-  // Subscribe to the `code` and `symbol` fields reactively without calling
-  // `watch()` inside an effect (React Compiler flags that pattern).
   const selectedCode = useWatch({ control, name: "code" }) ?? "";
   const currentSymbol = useWatch({ control, name: "symbol" }) ?? "";
 
@@ -107,8 +199,6 @@ export function SupportedCurrencyActivateDialog({
 
   const title = useMemo(() => (isEdit ? t.editTitle : t.activateTitle), [isEdit, t]);
 
-  // Auto-fill symbol from the frontend currency catalog when a new currency is picked
-  // (only when the symbol field is empty, so we don't clobber admin edits).
   useEffect(() => {
     if (!selectedCode) return;
     const catalogEntry: CurrencyOption | undefined = getCurrencyByCode(selectedCode);
@@ -146,8 +236,29 @@ export function SupportedCurrencyActivateDialog({
     }
   });
 
+  return { t, saving, isEdit, control, errors, title, onSubmit, onClose };
+}
+
+export function SupportedCurrencyActivateDialog({
+  open,
+  row,
+  onClose,
+  onSaved,
+  excludedCodes,
+}: Readonly<SupportedCurrencyActivateDialogProps>) {
+  const {
+    t,
+    saving,
+    isEdit,
+    control,
+    errors,
+    title,
+    onSubmit,
+    onClose: handleClose,
+  } = useActivateCurrencyDialog({ open, row, onClose, onSaved, excludedCodes });
+
   return (
-    <Dialog open={open} onClose={saving ? undefined : onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={saving ? undefined : handleClose} fullWidth maxWidth="sm">
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Stack
@@ -160,94 +271,20 @@ export function SupportedCurrencyActivateDialog({
             void onSubmit();
           }}
         >
-          <Controller
-            name="code"
+          <ActivateCurrencyFormFields
             control={control}
-            rules={{ required: t.codeRequired }}
-            render={({ field }) => (
-              <CurrencySelect
-                currency={field.value ? (getCurrencyByCode(field.value) ?? null) : null}
-                setCurrencyAction={(currency: CurrencyOption) => field.onChange(currency.code)}
-                onClearAction={() => field.onChange("")}
-                label={t.currencyField}
-                fullWidth
-                required
-                disabled={isEdit}
-                excludedCodes={excludedCodes}
-                error={Boolean(errors.code)}
-                helperText={errors.code?.message}
-              />
-            )}
+            errors={errors}
+            isEdit={isEdit}
+            excludedCodes={excludedCodes}
+            t={t}
           />
-
-          <Controller
-            name="symbol"
-            control={control}
-            rules={{ required: t.symbolRequired }}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                label={t.symbolField}
-                fullWidth
-                required
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="countryCode"
-            control={control}
-            render={({ field }) => (
-              <CountryAutocomplete
-                country={resolveCountry(field.value)}
-                onChangeAction={country => field.onChange(country.code as CountryCode)}
-                onClearAction={() => field.onChange("")}
-                label={t.countryField}
-                fullWidth
-              />
-            )}
-          />
-
-          <Controller
-            name="decimals"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label={t.decimalsField}
-                type="number"
-                fullWidth
-                slotProps={{ htmlInput: { min: 0, max: 4 } }}
-              />
-            )}
-          />
-
-          <Controller
-            name="sortOrder"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label={t.sortOrderField}
-                type="number"
-                fullWidth
-                slotProps={{ htmlInput: { min: 0 } }}
-              />
-            )}
-          />
-
-          <FormControl fullWidth>
-            <FormControlLabel control={<Checkbox checked readOnly />} label={t.active} />
-          </FormControl>
         </Stack>
       </DialogContent>
       <EntityFormDialogActions
         formId={FORM_ID}
         cancelLabel={t.cancel}
         saveLabel={t.save}
-        onClose={onClose}
+        onClose={handleClose}
         isLoading={saving}
       />
     </Dialog>

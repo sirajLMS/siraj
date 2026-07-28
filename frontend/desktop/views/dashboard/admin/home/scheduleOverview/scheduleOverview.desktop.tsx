@@ -54,6 +54,169 @@ function ScheduleOverviewTitle({
   );
 }
 
+type ScheduleOverviewSearchFieldProps = Pick<
+  ScheduleOverviewViewModel,
+  "searchPlaceholder" | "searchValue" | "onSearchChange"
+>;
+
+function ScheduleOverviewSearchField({
+  searchPlaceholder,
+  searchValue,
+  onSearchChange,
+}: Readonly<ScheduleOverviewSearchFieldProps>) {
+  return (
+    <TextField
+      placeholder={searchPlaceholder}
+      value={searchValue}
+      onChange={event => {
+        onSearchChange(event.target.value);
+      }}
+      size="small"
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <StyledSearchIcon />
+            </InputAdornment>
+          ),
+        },
+      }}
+      sx={{
+        maxWidth: { md: 280 },
+        "& .MuiOutlinedInput-root": {
+          borderRadius: 2,
+        },
+      }}
+    />
+  );
+}
+
+type ScheduleOverviewFilterSectionProps = Pick<
+  ScheduleOverviewViewModel,
+  | "dateLabel"
+  | "dateValue"
+  | "todayLabel"
+  | "previousDayLabel"
+  | "nextDayLabel"
+  | "teacherPlaceholder"
+  | "selectedTeacher"
+  | "onDateChange"
+  | "onTeacherChange"
+>;
+
+function ScheduleOverviewFilterSection({
+  dateLabel,
+  dateValue,
+  todayLabel,
+  previousDayLabel,
+  nextDayLabel,
+  teacherPlaceholder,
+  selectedTeacher,
+  onDateChange,
+  onTeacherChange,
+}: Readonly<ScheduleOverviewFilterSectionProps>) {
+  return (
+    <StyledFilterContainer>
+      <ScheduleFilters
+        dateLabel={dateLabel}
+        dateValue={dateValue}
+        todayLabel={todayLabel}
+        previousDayLabel={previousDayLabel}
+        nextDayLabel={nextDayLabel}
+        onDateChange={onDateChange}
+        teacherSelect={
+          <TeacherAutocompleteDesktop value={selectedTeacher} onChange={onTeacherChange} label={teacherPlaceholder} />
+        }
+      />
+    </StyledFilterContainer>
+  );
+}
+
+type ScheduleOverviewListSectionProps = Pick<
+  ScheduleOverviewViewModel,
+  "rows" | "headers" | "statusLabels" | "detailsLabel" | "emptyMessage" | "loading" | "showTimezones" | "locale"
+>;
+
+function ScheduleOverviewListSection({
+  rows,
+  headers,
+  statusLabels,
+  detailsLabel,
+  emptyMessage,
+  loading,
+  showTimezones,
+  locale,
+}: Readonly<ScheduleOverviewListSectionProps>) {
+  return (
+    <ScheduleOverviewListShell
+      rows={rows}
+      getKey={row => row.id ?? ""}
+      loading={loading}
+      emptyMessage={emptyMessage}
+      renderItem={row => (
+        <ScheduleOverviewDesktopCard
+          row={row}
+          headers={headers}
+          statusLabels={statusLabels}
+          detailsLabel={detailsLabel}
+          showTimezones={showTimezones}
+          locale={locale}
+        />
+      )}
+      renderEmptyState={() => (
+        <Box sx={{ p: 2 }}>
+          <ScheduleOverviewEmptyState message={emptyMessage} />
+        </Box>
+      )}
+      renderSkeleton={() => (
+        <Stack spacing={2} sx={{ p: 2 }}>
+          <Paper
+            elevation={0}
+            sx={theme => ({
+              borderRadius: 2,
+              border: `1px solid ${theme.palette.border.light}`,
+              backgroundColor: theme.palette.surfaceContainerLowest,
+            })}
+          >
+            <ScheduleOverviewCardSkeleton />
+          </Paper>
+        </Stack>
+      )}
+      sx={{ p: 2 }}
+    />
+  );
+}
+
+type ScheduleOverviewPaginationSectionProps = Pick<
+  ScheduleOverviewViewModel,
+  "totalCount" | "page" | "pageSize" | "onPageChange"
+>;
+
+function ScheduleOverviewPaginationSection({
+  totalCount,
+  page,
+  pageSize,
+  onPageChange,
+}: Readonly<ScheduleOverviewPaginationSectionProps>) {
+  if (totalCount === undefined) {
+    return null;
+  }
+
+  const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  return (
+    <Box sx={{ p: 2, pt: 1, display: "flex", justifyContent: "flex-end" }}>
+      <PaginationControls
+        page={page}
+        pageCount={pageCount}
+        rowCount={totalCount}
+        pageSize={pageSize}
+        onPageChange={onPageChange}
+      />
+    </Box>
+  );
+}
+
 export function ScheduleOverviewDesktopView({
   title,
   selectedMetricLabel,
@@ -84,108 +247,51 @@ export function ScheduleOverviewDesktopView({
   canDashboardSearch,
   canScheduleFilterAdvanced,
 }: Readonly<ScheduleOverviewViewModel>) {
-  const pageCount = Math.max(1, Math.ceil((totalCount ?? 0) / pageSize));
-
   return (
     <StyledDesktopPanel elevation={0}>
       <DesktopSectionPanel
         title={<ScheduleOverviewTitle title={title} selectedMetricLabel={selectedMetricLabel} />}
         actions={
           canDashboardSearch ? (
-            <TextField
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={event => {
-                onSearchChange(event.target.value);
-              }}
-              size="small"
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <StyledSearchIcon />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{
-                maxWidth: { md: 280 },
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                },
-              }}
+            <ScheduleOverviewSearchField
+              searchPlaceholder={searchPlaceholder}
+              searchValue={searchValue}
+              onSearchChange={onSearchChange}
             />
           ) : null
         }
       >
         {canScheduleFilterAdvanced ? (
-          <StyledFilterContainer>
-            <ScheduleFilters
-              dateLabel={dateLabel}
-              dateValue={dateValue}
-              todayLabel={todayLabel}
-              previousDayLabel={previousDayLabel}
-              nextDayLabel={nextDayLabel}
-              onDateChange={onDateChange}
-              teacherSelect={
-                <TeacherAutocompleteDesktop
-                  value={selectedTeacher}
-                  onChange={onTeacherChange}
-                  label={teacherPlaceholder}
-                />
-              }
-            />
-          </StyledFilterContainer>
+          <ScheduleOverviewFilterSection
+            dateLabel={dateLabel}
+            dateValue={dateValue}
+            todayLabel={todayLabel}
+            previousDayLabel={previousDayLabel}
+            nextDayLabel={nextDayLabel}
+            teacherPlaceholder={teacherPlaceholder}
+            selectedTeacher={selectedTeacher}
+            onDateChange={onDateChange}
+            onTeacherChange={onTeacherChange}
+          />
         ) : null}
 
-        <ScheduleOverviewListShell
+        <ScheduleOverviewListSection
           rows={rows}
-          getKey={row => row.id ?? ""}
-          loading={loading}
+          headers={headers}
+          statusLabels={statusLabels}
+          detailsLabel={detailsLabel}
           emptyMessage={emptyMessage}
-          renderItem={row => (
-            <ScheduleOverviewDesktopCard
-              row={row}
-              headers={headers}
-              statusLabels={statusLabels}
-              detailsLabel={detailsLabel}
-              showTimezones={showTimezones}
-              locale={locale}
-            />
-          )}
-          renderEmptyState={() => (
-            <Box sx={{ p: 2 }}>
-              <ScheduleOverviewEmptyState message={emptyMessage} />
-            </Box>
-          )}
-          renderSkeleton={() => (
-            <Stack spacing={2} sx={{ p: 2 }}>
-              <Paper
-                elevation={0}
-                sx={theme => ({
-                  borderRadius: 2,
-                  border: `1px solid ${theme.palette.border.light}`,
-                  backgroundColor: theme.palette.surfaceContainerLowest,
-                })}
-              >
-                <ScheduleOverviewCardSkeleton />
-              </Paper>
-            </Stack>
-          )}
-          sx={{ p: 2 }}
+          loading={loading}
+          showTimezones={showTimezones}
+          locale={locale}
         />
 
-        {totalCount !== undefined ? (
-          <Box sx={{ p: 2, pt: 1, display: "flex", justifyContent: "flex-end" }}>
-            <PaginationControls
-              page={page}
-              pageCount={pageCount}
-              rowCount={totalCount}
-              pageSize={pageSize}
-              onPageChange={onPageChange}
-            />
-          </Box>
-        ) : null}
+        <ScheduleOverviewPaginationSection
+          totalCount={totalCount}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+        />
       </DesktopSectionPanel>
     </StyledDesktopPanel>
   );

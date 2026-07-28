@@ -32,6 +32,117 @@ export interface UseRecurringScheduleDetailViewModelProps {
   readonly onRetry?: () => void;
 }
 
+type RecurringScheduleSummarySource = {
+  readonly studentName?: string | null;
+  readonly teacherName?: string | null;
+  readonly durationMinutes?: number | null;
+  readonly timezone?: string | null;
+};
+
+type RecurringScheduleTranslations = {
+  readonly scheduleSummary: (
+    studentName: string,
+    teacherName: string,
+    durationMinutes: string,
+    timezone: string
+  ) => string;
+  readonly breadcrumbDashboard: string;
+  readonly breadcrumbClasses: string;
+  readonly pageTitle: string;
+  readonly invalidId: string;
+};
+
+type ManagerTranslations = {
+  readonly loadError: string;
+};
+
+function buildScheduleSummary(schedule: RecurringScheduleSummarySource, t: RecurringScheduleTranslations): string {
+  return t.scheduleSummary(
+    schedule.studentName ?? "",
+    schedule.teacherName ?? "",
+    String(schedule.durationMinutes ?? 0),
+    schedule.timezone ?? ""
+  );
+}
+
+function buildBreadcrumbs(t: RecurringScheduleTranslations) {
+  return [
+    { label: t.breadcrumbDashboard, href: "/dashboard" },
+    { label: t.breadcrumbClasses, href: "/classes" },
+    { label: t.pageTitle },
+  ];
+}
+
+async function updateRecurringScheduleRate(
+  updateRateMut: ReturnType<typeof useMutation>[0],
+  recurringScheduleId: string,
+  hourlyRate: string | null,
+  rateCurrency: CurrencyCode | null
+): Promise<void> {
+  await updateRateMut({
+    variables: {
+      input: {
+        recurringScheduleId,
+        hourlyRate: hourlyRate || null,
+        rateCurrency: rateCurrency ?? null,
+      },
+    },
+  });
+}
+
+async function handleRateUpdate(
+  updateRateMut: ReturnType<typeof useMutation>[0],
+  recurringScheduleId: string,
+  hourlyRate: string | null,
+  rateCurrency: CurrencyCode | null,
+  setRateError: (error: string | null) => void,
+  setRateSuccess: (success: boolean) => void
+): Promise<void> {
+  setRateError(null);
+  setRateSuccess(false);
+  try {
+    await updateRecurringScheduleRate(updateRateMut, recurringScheduleId, hourlyRate, rateCurrency);
+    setRateSuccess(true);
+  } catch (err) {
+    setRateError(err instanceof Error ? err.message : "Failed to update rate");
+  }
+}
+
+function buildRecurringScheduleDetailViewModel(params: {
+  readonly t: RecurringScheduleTranslations;
+  readonly tManager: ManagerTranslations;
+  readonly summary: string;
+  readonly breadcrumbs: ReturnType<typeof buildBreadcrumbs>;
+  readonly loading: boolean;
+  readonly error: Error | undefined;
+  readonly scheduleId: string | null | undefined;
+  readonly id: string;
+  readonly hourlyRate: string | null | undefined;
+  readonly rateCurrency: CurrencyCode | null | undefined;
+  readonly rateSaving: boolean;
+  readonly rateError: string | null;
+  readonly rateSuccess: boolean;
+  readonly onUpdateRate: RecurringScheduleDetailViewModel["onUpdateRate"];
+  readonly onRetry: () => void;
+}): RecurringScheduleDetailViewModel {
+  return {
+    pageTitle: params.t.pageTitle,
+    subtitle: params.summary,
+    breadcrumbs: params.breadcrumbs,
+    loading: params.loading,
+    error: params.error ? params.tManager.loadError : null,
+    invalidId: params.t.invalidId,
+    recurringScheduleId: params.scheduleId ?? params.id,
+    hourlyRate: params.hourlyRate ?? null,
+    rateCurrency: params.rateCurrency ?? null,
+    rateSaving: params.rateSaving,
+    rateError: params.rateError,
+    rateSuccess: params.rateSuccess,
+    onUpdateRate: params.onUpdateRate,
+    onRetry: params.onRetry,
+  };
+}
+
 export function useRecurringScheduleDetailViewModel(
   props: Readonly<UseRecurringScheduleDetailViewModelProps>
 ): RecurringScheduleDetailViewModel {
@@ -60,47 +171,14 @@ export function useRecurringScheduleDetailViewModel(
 
   const handleUpdateRate = useCallback(
     async (hourlyRate: string | null, rateCurrency: CurrencyCode | null) => {
-      setRateError(null);
-      setRateSuccess(false);
-      try {
-        await updateRateMut({
-          variables: {
-            input: {
-              recurringScheduleId: id,
-              hourlyRate: hourlyRate || null,
-              rateCurrency: rateCurrency ?? null,
-            },
-          },
-        });
-        setRateSuccess(true);
-      } catch (err) {
-        setRateError(err instanceof Error ? err.message : "Failed to update rate");
-      }
+      await handleRateUpdate(updateRateMut, id, hourlyRate, rateCurrency, setRateError, setRateSuccess);
     },
     [id, updateRateMut]
   );
 
-  const summary = useMemo(
-    () =>
-      schedule
-        ? t.scheduleSummary(
-            schedule.studentName ?? "",
-            schedule.teacherName ?? "",
-            String(schedule.durationMinutes ?? 0),
-            schedule.timezone ?? ""
-          )
-        : "",
-    [schedule, t]
-  );
+  const summary = useMemo(() => (schedule ? buildScheduleSummary(schedule, t) : ""), [schedule, t]);
 
-  const breadcrumbs = useMemo(
-    () => [
-      { label: t.breadcrumbDashboard, href: "/dashboard" },
-      { label: t.breadcrumbClasses, href: "/classes" },
-      { label: t.pageTitle },
-    ],
-    [t]
-  );
+  const breadcrumbs = useMemo(() => buildBreadcrumbs(t), [t]);
 
   const handleRetry = useCallback(() => {
     if (onRetry) {
@@ -110,20 +188,21 @@ export function useRecurringScheduleDetailViewModel(
     }
   }, [onRetry, refetch]);
 
-  return {
-    pageTitle: t.pageTitle,
-    subtitle: summary,
+  return buildRecurringScheduleDetailViewModel({
+    t,
+    tManager,
+    summary,
     breadcrumbs,
     loading,
-    error: error ? tManager.loadError : null,
-    invalidId: t.invalidId,
-    recurringScheduleId: schedule?.id ?? id,
-    hourlyRate: schedule?.hourlyRate ?? null,
-    rateCurrency: schedule?.rateCurrency ?? null,
+    error,
+    scheduleId: schedule?.id,
+    id,
+    hourlyRate: schedule?.hourlyRate,
+    rateCurrency: schedule?.rateCurrency,
     rateSaving,
     rateError,
     rateSuccess,
     onUpdateRate: handleUpdateRate,
     onRetry: handleRetry,
-  };
+  });
 }

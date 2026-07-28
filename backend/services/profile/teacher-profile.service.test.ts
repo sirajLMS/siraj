@@ -47,25 +47,25 @@ describe("StaffProfileService teacher profile masking", () => {
 });
 
 describe("TeacherPortalService own profile", () => {
-  test("includes totalClasses from teacher profile", async () => {
+  const ownProfileSetup = () => {
     const tErrors = getServerTranslations("en").errorsTranslations;
     spyOn(PermissionsService, "hasPermission").mockImplementation(
       async (_userId, permission) => permission === AppPermission.TEACHER_VIEW_OWN_PROFILE
     );
     spyOn(TeacherRepository, "findByUserId").mockResolvedValue({ id: "teacher-1", userId: "user-1" } as never);
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
+    return tErrors;
+  };
+
+  test("includes totalClasses from teacher profile", async () => {
+    const tErrors = ownProfileSetup();
 
     const profile = await TeacherPortalService.getOwnProfile("user-1", tErrors);
     expect(profile.totalClasses).toBe(10);
   });
 
   test("returns nationalId unmasked for the owner", async () => {
-    const tErrors = getServerTranslations("en").errorsTranslations;
-    spyOn(PermissionsService, "hasPermission").mockImplementation(
-      async (_userId, permission) => permission === AppPermission.TEACHER_VIEW_OWN_PROFILE
-    );
-    spyOn(TeacherRepository, "findByUserId").mockResolvedValue({ id: "teacher-1", userId: "user-1" } as never);
-    spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
+    const tErrors = ownProfileSetup();
 
     const profile = await TeacherPortalService.getOwnProfile("user-1", tErrors);
     // Owner sees the full value — NOT the masked "******7890" admin view.

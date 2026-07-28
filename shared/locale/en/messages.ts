@@ -40,6 +40,7 @@ import { dashboardPermissionsEn } from "@/shared/locale/en/dashboard/permissions
 import { dashboardReportsEn } from "@/shared/locale/en/dashboard/reports/main";
 import { dashboardBooksAndBagsEn } from "@/shared/locale/en/dashboard/resources/booksAndBags";
 import { dashboardResourcesEn } from "@/shared/locale/en/dashboard/resources/main";
+import { dashboardSettingsEn } from "@/shared/locale/en/dashboard/settings/main";
 import { dashboardStaffDirectoryEn } from "@/shared/locale/en/dashboard/staff/directory";
 import { dashboardStaffOnboardingEn } from "@/shared/locale/en/dashboard/staff/onboarding";
 import { dashboardStudentPortalCreditsEn } from "@/shared/locale/en/dashboard/studentPortal/studentCredits";
@@ -192,6 +193,7 @@ export const enMessages: Translations = {
     parentSocial: dashboardParentSocialEn,
     paymentCatalogs: dashboardPaymentCatalogsEn,
     permissions: dashboardPermissionsEn,
+    settings: dashboardSettingsEn,
     reports: dashboardReportsEn,
     resources: dashboardResourcesEn,
     booksAndBags: dashboardBooksAndBagsEn,

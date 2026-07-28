@@ -1,0 +1,51 @@
+import type { SettingsEnvironmentLabels } from "@/shared/locale/types/dashboard/settings/environment";
+
+export const dashboardSettingsEnvironmentEn: SettingsEnvironmentLabels = {
+  description:
+    "Review environment variables and override values in the database. Secrets are masked until revealed. Revert removes the database override and falls back to the environment value.",
+  loading: "Loading environment configuration…",
+  loadError: "Unable to load environment configuration.",
+  emptyValue: "Not set",
+  readOnlyHint: "Managed from the deployment environment only.",
+  columns: {
+    key: "Key",
+    description: "Description",
+    value: "Value",
+    source: "Source",
+  },
+  source: {
+    db: "Database",
+    env: "Environment",
+    unset: "Unset",
+  },
+  badges: {
+    dbOverride: "DB override",
+    envOnly: "Env only",
+  },
+  actions: {
+    save: "Save override",
+    revert: "Revert to env",
+    showValue: "Show value",
+    hideValue: "Hide value",
+  },
+  notifications: {
+    saveSuccess: "Environment override saved.",
+    saveError: "Failed to save environment override.",
+    revertSuccess: "Reverted to environment value.",
+    revertError: "Failed to revert environment override.",
+  },
+  categories: {
+    email: "Email",
+    sms: "SMS",
+    push: "Push notifications",
+    fx: "Foreign exchange",
+    cache: "Cache",
+    redis: "Redis",
+    storage: "Storage",
+    auth: "Authentication",
+    app: "Application",
+    meeting: "Meetings",
+    billing: "Billing",
+    general: "General",
+  },
+};

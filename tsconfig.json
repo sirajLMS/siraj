@@ -36,16 +36,7 @@
     "**/*.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "dist/types/**/*.ts",
-    "dist/dev/types/**/*.ts",
-    ".next-test/dev/types/**/*.ts",
-    ".next-test/dev/dev/types/**/*.ts",
-    ".next-test/types/**/*.ts",
-    ".next-test-*/dev/types/**/*.ts",
-    ".next-test-*/dev/dev/types/**/*.ts",
-    ".next-test-*/types/**/*.ts"
+    ".next-dev/types/**/*.ts"
   ],
   "exclude": [
     // Dot-directories (except `.storybook`, which is explicitly included above).
@@ -57,6 +48,9 @@
     "**/.github/**",
     "**/.husky/**",
     "**/.kiro/**",
+    "**/.next/**",
+    "**/.next-dev/**",
+    "**/.next-test*/**",
     "**/.playwright-mcp/**",
     "**/.scannerwork/**",
     "**/.stakpak/**",

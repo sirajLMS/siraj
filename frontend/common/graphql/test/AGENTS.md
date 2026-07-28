@@ -12,8 +12,8 @@ frontend/common/graphql/test/
 ├── helpers.ts            ← shared test helpers (loginAndProvision, authenticatedRequest, etc.)
 ├── lifecycle.ts          ← setupTestServerLifecycle
 ├── testClient.ts         ← Apollo test client + clearCookies
-├── testPort.ts           ← dynamic port allocation + URL helpers
-├── testServer.ts         ← Next.js dev server spawn/kill (used by lifecycle.ts)
+├── testPort.ts           ← dynamic port allocation + URL helpers + server mode (dev vs production)
+├── testServer.ts         ← Next.js server spawn/kill (dev or production; mode from getTestServerMode())
 │
 ├── auth/                 auth, impersonation
 ├── billing/              billing-management, payment-method

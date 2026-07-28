@@ -17,6 +17,7 @@ import {
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { hashPassword } from "@/backend/lib/auth/password";
 import { logger } from "@/backend/lib/logger";
+import { assertTestHelperAllowed } from "@/backend/lib/test-helper-gate";
 
 export interface TestEntitiesResult {
   studentUserEmail: string;
@@ -35,12 +36,6 @@ export interface TestEntitiesResult {
 
 export namespace TestHelperService {
   type TxType = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-  function assertNotProduction(): void {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Test helper service is not allowed in production environment.");
-    }
-  }
 
   async function cleanupStaffUser(userId: string, label: string): Promise<boolean> {
     try {
@@ -199,7 +194,7 @@ export namespace TestHelperService {
   }
 
   export async function createTestEntities(prefix: string, classesRemaining: number = 10): Promise<TestEntitiesResult> {
-    assertNotProduction();
+    assertTestHelperAllowed();
 
     const now = new Date();
     // eslint-disable-next-line sonarjs/no-hardcoded-passwords
@@ -249,7 +244,7 @@ export namespace TestHelperService {
     teacherId: string;
     parentId: string;
   }): Promise<boolean> {
-    assertNotProduction();
+    assertTestHelperAllowed();
     const { studentUserId, teacherUserId, parentUserId, studentId, teacherId, parentId } = args;
 
     try {
@@ -293,7 +288,7 @@ export namespace TestHelperService {
     classInstanceId: string,
     teacherName: string
   ): Promise<{ groupClassId: string }> {
-    assertNotProduction();
+    assertTestHelperAllowed();
 
     const now = new Date();
     const [classInstance] = await db
@@ -331,7 +326,7 @@ export namespace TestHelperService {
   }
 
   export async function cleanupTestGroupClass(groupClassId: string): Promise<boolean> {
-    assertNotProduction();
+    assertTestHelperAllowed();
 
     try {
       await db.delete(groupClassEnrollments).where(eq(groupClassEnrollments.groupClassId, groupClassId));
@@ -345,7 +340,7 @@ export namespace TestHelperService {
   }
 
   export async function createTestSuperAdmin(prefix: string): Promise<{ userId: string; email: string }> {
-    assertNotProduction();
+    assertTestHelperAllowed();
 
     const now = new Date();
     const email = `${prefix}-sa-${randomUUID().slice(0, 8)}@example.com`;
@@ -399,12 +394,12 @@ export namespace TestHelperService {
   }
 
   export async function cleanupTestSuperAdmin(userId: string): Promise<boolean> {
-    assertNotProduction();
+    assertTestHelperAllowed();
     return cleanupStaffUser(userId, "super admin");
   }
 
   export async function cleanupTestManager(userId: string): Promise<boolean> {
-    assertNotProduction();
+    assertTestHelperAllowed();
     return cleanupStaffUser(userId, "manager");
   }
 }

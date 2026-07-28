@@ -29,8 +29,8 @@ function redisSessionsEnabled(): boolean {
   return getEnvironmentConfig().cacheProvider !== "postgres";
 }
 
-function getSessionRedisService(): SessionRedisService {
-  sessionRedisService ??= new SessionRedisService(getRedisService());
+async function getSessionRedisService(): Promise<SessionRedisService> {
+  sessionRedisService ??= new SessionRedisService(await getRedisService());
   return sessionRedisService;
 }
 
@@ -110,7 +110,7 @@ export namespace SessionRepository {
     const hashedId = hashSessionId(rawSessionId);
     try {
       if (redisSessionsEnabled()) {
-        const redisService = getSessionRedisService();
+        const redisService = await getSessionRedisService();
         const redisSession = await redisService.getSession(hashedId);
 
         if (redisSession) {
@@ -140,7 +140,7 @@ export namespace SessionRepository {
     try {
       if (!redisSessionsEnabled()) return [];
 
-      const redisService = getSessionRedisService();
+      const redisService = await getSessionRedisService();
       const sessionIds = await redisService.getUserSessions(userId);
       const sessionPromises = sessionIds.map(id => redisService.getSession(id));
       const found = await Promise.all(sessionPromises);
@@ -233,7 +233,7 @@ export namespace SessionRepository {
       await acquireUserLock(t, input.userId);
       const config = await getSessionConfig(input.roleName || "default", t);
 
-      const redisService = getSessionRedisService();
+      const redisService = await getSessionRedisService();
       await redisService.enforceConcurrentLimit(input.userId, config.maxConcurrentSessions);
 
       const now = new Date();
@@ -321,7 +321,7 @@ export namespace SessionRepository {
       }
 
       const config = await getSessionConfig(input.roleName || "default", t);
-      const redisService = getSessionRedisService();
+      const redisService = await getSessionRedisService();
       const success = await redisService.touchSession(hashedId, config.ttlSeconds);
 
       if (!success) {
@@ -357,7 +357,7 @@ export namespace SessionRepository {
       const existingSession = await findSessionById(rawSessionId);
       if (existingSession) {
         if (redisSessionsEnabled()) {
-          const redisService = getSessionRedisService();
+          const redisService = await getSessionRedisService();
           await redisService.deleteSession(hashedId);
           await t.delete(sessionMetadata).where(eq(sessionMetadata.sessionId, hashedId));
         } else {
@@ -381,7 +381,7 @@ export namespace SessionRepository {
       }
 
       await acquireUserLock(t, userId);
-      const redisService = getSessionRedisService();
+      const redisService = await getSessionRedisService();
       const deletedCount = await redisService.deleteUserSessions(userId);
 
       await t.delete(sessionMetadata).where(eq(sessionMetadata.userId, userId));
@@ -420,7 +420,7 @@ export namespace SessionRepository {
       return { ...session, lastActivity: now };
     }
 
-    const redisService = getSessionRedisService();
+    const redisService = await getSessionRedisService();
     const session = await redisService.getSession(hashedId);
     if (!session) return null;
 
@@ -452,7 +452,7 @@ export namespace SessionRepository {
   export const findByHmacHash = async (hmacHash: string): Promise<SessionSelectType | null> => {
     try {
       if (redisSessionsEnabled()) {
-        const redisService = getSessionRedisService();
+        const redisService = await getSessionRedisService();
         const redisSession = await redisService.getSession(hmacHash);
         if (redisSession) {
           return {
@@ -510,7 +510,7 @@ export namespace SessionRepository {
       await t.update(sessions).set({ hashedId: hmacHash }).where(eq(sessions.hashedId, legacyHash));
 
       if (redisSessionsEnabled()) {
-        const redisService = getSessionRedisService();
+        const redisService = await getSessionRedisService();
         // Migrate Redis session to new HMAC key
         const redisSession = await redisService.getSession(legacyHash);
         if (redisSession) {
@@ -552,13 +552,13 @@ export namespace SessionRepository {
   };
 
   export const countUserSessions = async (userId: string): Promise<number> => {
-    const redisService = getSessionRedisService();
+    const redisService = await getSessionRedisService();
     return await redisService.countUserSessions(userId);
   };
 
   export const getSessionTTL = async (rawSessionId: string): Promise<number> => {
     const hashedId = hashSessionId(rawSessionId);
-    const redisService = getSessionRedisService();
+    const redisService = await getSessionRedisService();
     return await redisService.getSessionTTL(hashedId);
   };
 
@@ -568,7 +568,7 @@ export namespace SessionRepository {
   export const getRedisSessionData = async (rawSessionId: string): Promise<RedisSessionData | null> => {
     if (!redisSessionsEnabled()) return null;
     const hashedId = hashSessionId(rawSessionId);
-    const redisService = getSessionRedisService();
+    const redisService = await getSessionRedisService();
     return await redisService.getSession(hashedId);
   };
 
@@ -583,7 +583,7 @@ export namespace SessionRepository {
     if (!redisSessionsEnabled()) return null;
 
     const hashedId = hashSessionId(rawSessionId);
-    const redisService = getSessionRedisService();
+    const redisService = await getSessionRedisService();
     const existing = await redisService.getSession(hashedId);
     if (!existing) return null;
 

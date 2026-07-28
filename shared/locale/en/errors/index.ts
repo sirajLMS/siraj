@@ -170,6 +170,11 @@ export const errorsEn: ErrorsLabels = {
   permissionGroup: {
     permissionGroupNotFound: "Permission group not found.",
   },
+  sessionConfig: {
+    roleNameRequired: "Role name is required.",
+    ttlOutOfRange: "TTL must be between 60 and 2,419,200 seconds.",
+    maxConcurrentOutOfRange: "Max concurrent sessions must be between 1 and 50.",
+  },
   // ─── Top-level API-facing strings ──────────────────────────────────
   rateLimitExceeded: "Too many requests. Please try again later.",
   duplicateRequest: "Duplicate request detected. This operation has already been processed.",

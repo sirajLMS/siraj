@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Chip, InputBase, Paper, styled, Typography, useTheme } from "@mui/material";
+import { Box, Chip, InputBase, Paper, styled, type Theme, Typography, useTheme } from "@mui/material";
 import type React from "react";
 import { type KeyboardEvent, type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useTagInputEditing } from "@/frontend/common/hooks/useTagInputEditing";
@@ -112,7 +112,76 @@ function TagInputChipList({
   );
 }
 
-export function TagInput({ label, placeholder, onChange, initialTags = [] }: TagInputProps) {
+type TagInputViewProps = {
+  readonly theme: Theme;
+  readonly resolvedLabel: string;
+  readonly resolvedPlaceholder: string;
+  readonly tags: string[];
+  readonly inputValue: string;
+  readonly inputRef: React.RefObject<HTMLInputElement | null>;
+  readonly containerRef: React.RefObject<HTMLDivElement | null>;
+  readonly editing: ReturnType<typeof useTagInputEditing>;
+  readonly handleContainerClick: () => void;
+  readonly handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  readonly handleInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
+  readonly handleBlur: (e: React.FocusEvent) => void;
+  readonly handleDeleteTag: (index: number) => (e: MouseEvent) => void;
+};
+
+function TagInputView({
+  theme,
+  resolvedLabel,
+  resolvedPlaceholder,
+  tags,
+  inputValue,
+  inputRef,
+  containerRef,
+  editing,
+  handleContainerClick,
+  handleInputChange,
+  handleInputKeyDown,
+  handleBlur,
+  handleDeleteTag,
+}: TagInputViewProps) {
+  return (
+    <Box sx={{ width: "100%" }}>
+      <Typography
+        variant="body2"
+        sx={{
+          mb: 1,
+          fontWeight: 500,
+          color: theme.palette.text.primary,
+        }}
+      >
+        {resolvedLabel}
+      </Typography>
+
+      <TagContainer ref={containerRef} onClick={handleContainerClick} elevation={0}>
+        <TagInputChipList
+          tags={tags}
+          editingIndex={editing.editingIndex}
+          editingValue={editing.editingValue}
+          editInputRef={editing.editInputRef}
+          onEditInputChange={editing.handleEditInputChange}
+          onEditKeyDown={(e, index) => editing.handleEditKeyDown(e, index, tags)}
+          onEditBlur={index => editing.handleEditBlur(index, tags)}
+          onDelete={handleDeleteTag}
+          onChipDoubleClick={index => editing.startEdit(index, tags)}
+        />
+        <StyledInputBase
+          inputRef={inputRef}
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleInputKeyDown}
+          onBlur={handleBlur}
+          placeholder={tags.length === 0 ? resolvedPlaceholder : ""}
+        />
+      </TagContainer>
+    </Box>
+  );
+}
+
+function useTagInput({ label, placeholder, onChange, initialTags = [] }: TagInputProps) {
   const t = useAppTranslation().uiTranslations.tagInput;
   const [tags, setTags] = useState<string[]>(initialTags);
   const [inputValue, setInputValue] = useState("");
@@ -210,40 +279,24 @@ export function TagInput({ label, placeholder, onChange, initialTags = [] }: Tag
     [inputValue, addTag]
   );
 
-  return (
-    <Box sx={{ width: "100%" }}>
-      <Typography
-        variant="body2"
-        sx={{
-          mb: 1,
-          fontWeight: 500,
-          color: theme.palette.text.primary,
-        }}
-      >
-        {resolvedLabel}
-      </Typography>
+  return {
+    theme,
+    resolvedLabel,
+    resolvedPlaceholder,
+    tags,
+    inputValue,
+    inputRef,
+    containerRef,
+    editing,
+    handleContainerClick,
+    handleInputChange,
+    handleInputKeyDown,
+    handleBlur,
+    handleDeleteTag,
+  };
+}
 
-      <TagContainer ref={containerRef} onClick={handleContainerClick} elevation={0}>
-        <TagInputChipList
-          tags={tags}
-          editingIndex={editing.editingIndex}
-          editingValue={editing.editingValue}
-          editInputRef={editing.editInputRef}
-          onEditInputChange={editing.handleEditInputChange}
-          onEditKeyDown={(e, index) => editing.handleEditKeyDown(e, index, tags)}
-          onEditBlur={index => editing.handleEditBlur(index, tags)}
-          onDelete={handleDeleteTag}
-          onChipDoubleClick={index => editing.startEdit(index, tags)}
-        />
-        <StyledInputBase
-          inputRef={inputRef}
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleInputKeyDown}
-          onBlur={handleBlur}
-          placeholder={tags.length === 0 ? resolvedPlaceholder : ""}
-        />
-      </TagContainer>
-    </Box>
-  );
+export function TagInput(props: TagInputProps) {
+  const viewProps = useTagInput(props);
+  return <TagInputView {...viewProps} />;
 }
