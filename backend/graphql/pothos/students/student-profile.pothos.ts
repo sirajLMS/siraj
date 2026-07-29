@@ -32,6 +32,7 @@ export const StudentProfilePothosObject = StudentProfileRef.implement({
     parentEmail: t.exposeString("parentEmail", { nullable: true }),
     parentPhone: t.exposeString("parentPhone", { nullable: true }),
     isAssociatedViewer: t.exposeBoolean("isAssociatedViewer"),
+    isOwnStudentProfile: t.exposeBoolean("isOwnStudentProfile"),
     primaryTeacherId: t.exposeString("primaryTeacherId", { nullable: true }),
     teacherUserId: t.exposeString("teacherUserId", { nullable: true }),
     teacherName: t.exposeString("teacherName", { nullable: true }),

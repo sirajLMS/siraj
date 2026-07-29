@@ -9,33 +9,34 @@ import { studentFieldGroupGraphqlPermission } from "@/shared/lib/field-group-per
 
 export type UseStudentFieldAccessOptions = {
   /**
-   * Optional override to force the viewer-scope verdict used by the hook.
-   * Defaults to the server-driven `isAssociatedViewer` flag from
+   * Optional override for whether the actor is viewing their own student profile.
+   * Defaults to the server-driven `isOwnStudentProfile` flag from
    * `StudentProfileContext`.
    */
-  readonly isAssociatedViewerOverride?: boolean;
+  readonly isOwnStudentProfileOverride?: boolean;
 };
 
 export function useStudentFieldAccess(options: UseStudentFieldAccessOptions = {}) {
   const hasPermission = useUserStore(state => state.hasPermission);
   const profileContext = useStudentProfileContext();
 
-  const isAssociatedViewer = options.isAssociatedViewerOverride ?? profileContext?.profile?.isAssociatedViewer ?? false;
+  const isOwnStudentProfile =
+    options.isOwnStudentProfileOverride ?? profileContext?.profile?.isOwnStudentProfile ?? false;
 
   const canView = useCallback(
     (groupKey: StudentFieldGroupKey): boolean => {
-      const action = isAssociatedViewer ? "view_own" : "view_other";
+      const action = isOwnStudentProfile ? "view_own" : "view_other";
       return hasPermission(studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission);
     },
-    [hasPermission, isAssociatedViewer]
+    [hasPermission, isOwnStudentProfile]
   );
 
   const canEdit = useCallback(
     (groupKey: StudentFieldGroupKey): boolean => {
-      const action = isAssociatedViewer ? "edit_own" : "edit_other";
+      const action = isOwnStudentProfile ? "edit_own" : "edit_other";
       return hasPermission(studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission);
     },
-    [hasPermission, isAssociatedViewer]
+    [hasPermission, isOwnStudentProfile]
   );
 
   const canViewField = useCallback((groupKey: StudentFieldGroupKey): boolean => canView(groupKey), [canView]);

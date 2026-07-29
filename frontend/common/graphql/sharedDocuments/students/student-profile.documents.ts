@@ -100,6 +100,7 @@ export const studentProfileQueryDocument: TypedDocumentNode<
       parentEmail
       parentPhone
       isAssociatedViewer
+      isOwnStudentProfile
       primaryTeacherId
       teacherUserId
       teacherName

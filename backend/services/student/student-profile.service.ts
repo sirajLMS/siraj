@@ -136,11 +136,12 @@ export namespace StudentProfileService {
     }
 
     const isAssociatedViewer = await resolveIsAssociatedViewer(actorUserId, studentId);
+    const isOwnStudentProfile = row.userId === actorUserId;
     const permissionContext = await PermissionsService.getUserContext(actorUserId);
     const filterCtx: StudentFieldFilterContext = {
       actorUserId,
       studentId,
-      isAssociatedViewer,
+      studentUserId: row.userId,
       permissions: new Set(permissionContext.permissions),
     };
 
@@ -172,6 +173,7 @@ export namespace StudentProfileService {
       {
         ...mapProfileRow(row),
         isAssociatedViewer,
+        isOwnStudentProfile,
         upcomingClasses,
         classHistory,
       },
@@ -199,7 +201,6 @@ export namespace StudentProfileService {
     }
 
     const isOwnProfile = profile.userId === actorUserId;
-    const isAssociatedViewer = await resolveIsAssociatedViewer(actorUserId, targetStudentId);
 
     if (!isOwnProfile && !input.studentId?.trim()) {
       throw new Error(tErrors.insufficientPermissions);
@@ -210,7 +211,7 @@ export namespace StudentProfileService {
       throw new Error(tErrors.invalidInput);
     }
 
-    await assertCanEditSubmittedGroups(actorUserId, targetStudentId, isAssociatedViewer, submittedGroups, tErrors);
+    await assertCanEditSubmittedGroups(actorUserId, targetStudentId, profile.userId, submittedGroups, tErrors);
     await applyStudentProfileEdit(profile.userId, targetStudentId, profile, input, tErrors, locale);
 
     return getProfile(actorUserId, targetStudentId, tErrors, {});
@@ -228,7 +229,7 @@ async function resolveOwnStudentId(actorUserId: string, tErrors: ErrorsLabels): 
 async function assertCanEditSubmittedGroups(
   actorUserId: string,
   studentId: string,
-  isAssociatedViewer: boolean,
+  studentUserId: string,
   submittedGroups: readonly string[],
   tErrors: ErrorsLabels
 ): Promise<void> {
@@ -236,7 +237,7 @@ async function assertCanEditSubmittedGroups(
   const filterCtx: StudentFieldFilterContext = {
     actorUserId,
     studentId,
-    isAssociatedViewer,
+    studentUserId,
     permissions: new Set(permissionContext.permissions),
   };
 

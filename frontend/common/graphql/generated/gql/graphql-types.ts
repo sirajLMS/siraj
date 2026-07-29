@@ -5365,6 +5365,7 @@ export type StudentProfile = {
   hoursPerWeek: Maybe<Scalars['Float']['output']>;
   id: Maybe<Scalars['String']['output']>;
   isAssociatedViewer: Maybe<Scalars['Boolean']['output']>;
+  isOwnStudentProfile: Maybe<Scalars['Boolean']['output']>;
   language: Maybe<AppLanguage>;
   name: Maybe<Scalars['String']['output']>;
   parentEmail: Maybe<Scalars['String']['output']>;

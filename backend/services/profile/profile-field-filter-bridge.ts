@@ -31,5 +31,5 @@ export function hasStudentGroupEditPermission(
 }
 
 function getStudentScope(ctx: StudentFieldFilterContext): ProfileScope {
-  return ctx.isAssociatedViewer ? ProfileScope.OWN : ProfileScope.OTHER;
+  return ctx.actorUserId === ctx.studentUserId ? ProfileScope.OWN : ProfileScope.OTHER;
 }

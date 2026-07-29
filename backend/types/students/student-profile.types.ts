@@ -22,6 +22,7 @@ export type StudentProfileReturnType = {
   readonly parentEmail: string | null;
   readonly parentPhone: string | null;
   readonly isAssociatedViewer: boolean;
+  readonly isOwnStudentProfile: boolean;
   readonly primaryTeacherId: string | null;
   readonly teacherUserId: string | null;
   readonly teacherName: string | null;

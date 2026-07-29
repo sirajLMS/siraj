@@ -218,7 +218,7 @@ export function useStudentProfilePageViewModel(
   const { profile, loading, loadingState, refetch } = useStudentProfileQueryState(studentId, null, currentMonth);
 
   const access = useStudentFieldAccess({
-    isAssociatedViewerOverride: profile?.isAssociatedViewer === true ? true : undefined,
+    isOwnStudentProfileOverride: profile?.isOwnStudentProfile ?? undefined,
   });
   const visibleTabs = useMemo(() => getVisibleStudentProfileTabs(access.canView), [access.canView]);
 

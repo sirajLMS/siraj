@@ -176,7 +176,7 @@ describe("filterProfileByFieldGroups", () => {
     const baseStudentCtx = {
       actorUserId: "admin-1",
       studentId: "student-1",
-      isAssociatedViewer: false,
+      studentUserId: "student-user-1",
     };
 
     const academicCtx = {
@@ -191,5 +191,30 @@ describe("filterProfileByFieldGroups", () => {
     expect(canEditStudentFieldGroup(academicCtx, "student_academic")).toBe(true);
     expect(canEditStudentFieldGroup(academicCtx, "student_quota_edit")).toBe(false);
     expect(canEditStudentFieldGroup(quotaCtx, "student_quota_edit")).toBe(true);
+  });
+
+  test("parent actor uses edit_other when studentUserId differs from actorUserId", () => {
+    const parentCtx = {
+      actorUserId: "parent-user-1",
+      studentId: "student-1",
+      studentUserId: "student-user-1",
+      permissions: new Set<AppPermission>([AppPermission.STUDENT_IDENTITY_EDIT_OTHER]),
+    };
+
+    expect(canEditStudentFieldGroup(parentCtx, "student_identity")).toBe(true);
+
+    const parentWithOnlyOwn = {
+      ...parentCtx,
+      permissions: new Set<AppPermission>([AppPermission.STUDENT_IDENTITY_EDIT_OWN]),
+    };
+    expect(canEditStudentFieldGroup(parentWithOnlyOwn, "student_identity")).toBe(false);
+
+    const studentCtx = {
+      actorUserId: "student-user-1",
+      studentId: "student-1",
+      studentUserId: "student-user-1",
+      permissions: new Set<AppPermission>([AppPermission.STUDENT_IDENTITY_EDIT_OWN]),
+    };
+    expect(canEditStudentFieldGroup(studentCtx, "student_identity")).toBe(true);
   });
 });
