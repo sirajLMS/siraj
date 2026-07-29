@@ -49,6 +49,7 @@ jobs:
 
     env:
       NEXT_TELEMETRY_DISABLED: "1"
+      HUSKY: "0"
 
     steps:
       - name: Checkout
@@ -58,7 +59,14 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.2.20"
-          cache: true
+
+      - name: Cache Bun packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-pkgs-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-pkgs-${{ runner.os }}-
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -91,6 +99,7 @@ jobs:
 
     env:
       NEXT_TELEMETRY_DISABLED: "1"
+      HUSKY: "0"
       # Core database / auth (required for build, migrate, and tests)
       # Local Postgres service only — never secrets.DATABASE_URL (see policy above).
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/siraj_test?sslmode=disable
@@ -124,7 +133,14 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.2.20"
-          cache: true
+
+      - name: Cache Bun packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-pkgs-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-pkgs-${{ runner.os }}-
 
       - name: Cache Next.js build
         uses: actions/cache@v4

@@ -40,7 +40,14 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: "latest"
-          cache: true
+
+      - name: Cache Bun packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-pkgs-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-pkgs-${{ runner.os }}-
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile
