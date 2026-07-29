@@ -29,6 +29,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -37,6 +40,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: "latest"
+          cache: true
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile

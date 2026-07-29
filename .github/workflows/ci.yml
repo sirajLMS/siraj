@@ -42,6 +42,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  quality-checks:
+    name: Type check & Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.2.20"
+          cache: true
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Type check (tsgo)
+        run: bun run tsgo
+
+      - name: Biome lint + format
+        run: bun run biome:check
+
   build-and-test:
     name: Build & test
     runs-on: ubuntu-latest
@@ -58,11 +85,12 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 10
 
     env:
+      NEXT_TELEMETRY_DISABLED: "1"
       # Core database / auth (required for build, migrate, and tests)
       # Local Postgres service only — never secrets.DATABASE_URL (see policy above).
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/siraj_test?sslmode=disable
@@ -96,26 +124,20 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.2.20"
+          cache: true
 
-      - name: Cache Bun & Next.js
+      - name: Cache Next.js build
         uses: actions/cache@v4
         with:
           path: |
-            ~/.bun/install/cache
             .next/cache
             .next-test-prod/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          key: nextjs-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
           restore-keys: |
-            bun-${{ runner.os }}-
+            nextjs-${{ runner.os }}-${{ hashFiles('bun.lock') }}-
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
-
-      - name: Type check (tsgo)
-        run: bun run tsgo
-
-      - name: Biome lint + format
-        run: bun run biome:check
 
       - name: Next.js test production build
         env:
