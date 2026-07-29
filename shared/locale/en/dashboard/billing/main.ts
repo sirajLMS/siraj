@@ -196,4 +196,14 @@ export const dashboardBillingEn: BillingLabels = {
   displayCurrencyStale: values => `${values.lockedAmount} ${values.lockedCurrency} (rates may be stale)`,
   currencyHedges,
   supportedCurrencies,
+  tabsPageTitle: "Billing",
+  tabsPageSubtitle: "Track invoices, currency exposure, exchange rates, and create manual invoices.",
+  billingTabs: {
+    overview: "Overview",
+    invoices: "Invoices",
+    exchangeRates: "Exchange Rates",
+    currencies: "Supported Currencies",
+    hedges: "Currency Hedges",
+    manual: "Manual Invoice",
+  },
 };

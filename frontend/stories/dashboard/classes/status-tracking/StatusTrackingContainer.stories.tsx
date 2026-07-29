@@ -225,7 +225,7 @@ function StoryStatusTrackingContainer() {
         teacherTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
     }
-    router.push("/reschedule");
+    router.push("/schedule/tracking/reschedule");
   };
 
   const handleOpenAuditLogs = () => {};

@@ -7,6 +7,7 @@ export interface DashboardNavigationLabels {
   readonly home: string;
   readonly scheduleSearch: string;
   readonly scheduleTracking: string;
+  readonly scheduleTrackingParent: string;
   readonly statusTracking: string;
   readonly scheduleAlerts: string;
   readonly teachers: string;
@@ -41,6 +42,8 @@ export interface DashboardNavigationLabels {
   readonly supportedCurrencies: string;
   readonly currencyHedges: string;
   readonly paymentCatalogs: string;
+  readonly feedbackManage: string;
+  readonly peopleDirectory: string;
   readonly meetingProviders: string;
   readonly billingParent: string;
   readonly billingManual: string;
@@ -73,6 +76,23 @@ export interface DashboardNavigationLabels {
   readonly teacherDues: string;
   readonly monthlyReports: string;
   readonly supervisorProfile: string;
+  /**
+   * Sidebar group labels. Each maps to a `NavGroup.labelKey` in
+   * `frontend/common/views/dashboard/config/navigationConfig.ts`. Portal
+   * users generally have few nav items so they don't see group headers —
+   * the labels are admin/supervisor-facing.
+   */
+  readonly navGroupHome: string;
+  readonly navGroupPeople: string;
+  readonly navGroupSchedule: string;
+  readonly navGroupBilling: string;
+  readonly navGroupCatalogs: string;
+  readonly navGroupFeedback: string;
+  readonly navGroupReports: string;
+  readonly navGroupAdmin: string;
+  readonly navGroupResources: string;
+  readonly navGroupClasses: string;
+  readonly navGroupAccount: string;
   readonly nav: {
     readonly logout: string;
     readonly impersonation: {

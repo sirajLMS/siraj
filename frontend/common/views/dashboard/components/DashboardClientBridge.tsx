@@ -59,12 +59,13 @@ export function DashboardClientBridge({
   const notificationsDrawerVm = useNotificationsDrawerViewModel();
 
   const permissions = (userProfile.permissions || []).filter(isValidPermission);
-  const { sidebarItems, bottomNavItems } = getDashboardLayoutData(permissions);
+  const { sidebarGroups, sidebarItems, bottomNavItems } = getDashboardLayoutData(permissions);
 
   return (
     <NotificationsProvider>
       <UserStoreInitializer userProfile={userProfile} isSuperAdmin={isSuperAdmin} />
       <DashboardLayout
+        sidebarGroups={sidebarGroups}
         sidebarItems={sidebarItems}
         bottomNavItems={bottomNavItems}
         userName={userProfile.name || ""}

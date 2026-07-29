@@ -1,24 +1,16 @@
 "use client";
 
-import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
-import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import { GenericTabNav } from "@/frontend/common/views/dashboard/components/GenericTabNav";
 import type { SettingsTabNavVariantProps } from "@/frontend/common/views/dashboard/settings/types/settingsTabNav.types";
 
-const lazyViews = createLazyView<SettingsTabNavVariantProps>(
-  () =>
-    import("@/frontend/mobile/views/dashboard/settings/settingsTabNav.mobile").then(m => ({
-      default: m.SettingsTabNavMobileView,
-    })),
-  () =>
-    import("@/frontend/desktop/views/dashboard/settings/settingsTabNav.desktop").then(m => ({
-      default: m.SettingsTabNavDesktopView,
-    }))
-);
-
+/**
+ * Backwards-compat shim used by the Settings page. Now that the tab nav is
+ * generic over any `string` tab id (see
+ * `@/frontend/common/views/dashboard/components/GenericTabNav`), new parents
+ * reuse the same component directly; Settings keeps this named export for
+ * clarity. The per-tier Settings-specific tab nav files were removed — the
+ * generic tiers already mirror their markup verbatim.
+ */
 export function SettingsTabNav({ activeTab, tabs }: Readonly<SettingsTabNavVariantProps>) {
-  if (tabs.length === 0) {
-    return null;
-  }
-
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={{ activeTab, tabs }} />;
+  return <GenericTabNav activeTab={activeTab} tabs={tabs} ariaLabel="Settings sections" />;
 }

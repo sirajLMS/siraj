@@ -1,8 +1,9 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { ChevronLeft, ChevronRight, KeyboardArrowDownOutlined, KeyboardArrowUpOutlined } from "@mui/icons-material";
 import {
   Box,
+  Collapse,
   Divider,
   Drawer,
   IconButton,
@@ -16,16 +17,21 @@ import {
 import type { SxProps, Theme } from "@mui/material/styles";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
-import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { Link } from "@/shared/i18n";
 
 export interface TranslatedNavItem extends NavItem {
   readonly label: string;
 }
 
+export interface TranslatedNavGroup extends NavGroup {
+  readonly label: string;
+}
+
 interface SidebarShellProps {
+  readonly navGroups: readonly TranslatedNavGroup[];
   readonly navItems: readonly TranslatedNavItem[];
-  readonly activeKey: string;
+  readonly activeKey: string | null;
   readonly sidebarWidth: string;
   readonly initialSidebarOpen?: boolean;
 }
@@ -119,19 +125,213 @@ function SidebarNavItem({ item, isActive = false, isCollapsed, isFooter = false 
   );
 }
 
+interface SidebarGroupHeaderProps {
+  readonly group: TranslatedNavGroup;
+  readonly isCollapsed: boolean;
+  readonly collapsed: boolean;
+  readonly onToggle: () => void;
+}
+
+function SidebarGroupHeader({ group, isCollapsed, collapsed, onToggle }: SidebarGroupHeaderProps) {
+  const IconComponent = group.icon;
+  const Chevron = collapsed ? KeyboardArrowDownOutlined : KeyboardArrowUpOutlined;
+
+  if (isCollapsed) {
+    // Icon-only mode (desktop sidebar collapsed to 80px): no group headers,
+    // just a thin separator so users see the grouping visually.
+    return <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", my: 1, mx: 1.5 }} />;
+  }
+
+  return (
+    <ListItemButton
+      onClick={onToggle}
+      aria-expanded={!collapsed}
+      aria-label={`Toggle ${group.label} group`}
+      sx={{
+        borderRadius: 2,
+        px: 2,
+        py: 0.75,
+        alignItems: "center",
+        gap: 1.5,
+        color: "var(--mui-palette-onSurfaceVariant)",
+        "&:hover": {
+          backgroundColor: "color-mix(in srgb, var(--mui-palette-primary-main) 6%, transparent)",
+        },
+      }}
+    >
+      {IconComponent ? (
+        <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+          <IconComponent fontSize="small" />
+        </ListItemIcon>
+      ) : null}
+      <ListItemText
+        primary={group.label}
+        slotProps={{
+          primary: {
+            sx: {
+              typography: "labelSm",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            },
+          },
+        }}
+      />
+      <Chevron fontSize="small" sx={{ color: "inherit" }} />
+    </ListItemButton>
+  );
+}
+
+interface RenderedGroup {
+  readonly group: TranslatedNavGroup;
+  readonly items: readonly TranslatedNavItem[];
+}
+
+/**
+ * Splits the (filtered, translated) items into per-group buckets AND a
+ * `noGroup` bucket for items that have no `groupId`. The `noGroup` items
+ * render as a flat list before any groups — this is how portal-audience
+ * items (teacher/parent/student) appear, since they intentionally carry no
+ * `groupId`.
+ */
+function bucketItemsByGroup(
+  groups: readonly TranslatedNavGroup[],
+  items: readonly TranslatedNavItem[]
+): { readonly grouped: readonly RenderedGroup[]; readonly noGroup: readonly TranslatedNavItem[] } {
+  const itemsByGroupId = new Map<string, TranslatedNavItem[]>();
+  const noGroup: TranslatedNavItem[] = [];
+  for (const item of items) {
+    if (item.groupId) {
+      const arr = itemsByGroupId.get(item.groupId);
+      if (arr) {
+        arr.push(item);
+      } else {
+        itemsByGroupId.set(item.groupId, [item]);
+      }
+    } else {
+      noGroup.push(item);
+    }
+  }
+  const grouped: RenderedGroup[] = [];
+  for (const group of groups) {
+    const groupItems = itemsByGroupId.get(group.id);
+    if (groupItems && groupItems.length > 0) {
+      grouped.push({ group, items: groupItems });
+    }
+  }
+  return { grouped, noGroup };
+}
+
+function useCollapsedGroupState(groups: readonly TranslatedNavGroup[]): void {
+  // Initialize persisted collapse state for any group whose id we haven't
+  // seen before. The first paint writes `group.defaultCollapsed ?? false`
+  // into the Zustand persisted store; thereafter the user's choice wins.
+  const initGroupCollapsed = useLayoutStore(state => state.initGroupCollapsed);
+  useEffect(() => {
+    for (const group of groups) {
+      initGroupCollapsed(group.id, group.defaultCollapsed ?? false);
+    }
+  }, [groups, initGroupCollapsed]);
+}
+
+function GroupedNavList({
+  groups,
+  items,
+  activeKey,
+  isCollapsed,
+  navListRef,
+}: {
+  readonly groups: readonly TranslatedNavGroup[];
+  readonly items: readonly TranslatedNavItem[];
+  readonly activeKey: string | null;
+  readonly isCollapsed: boolean;
+  readonly navListRef?: RefObject<HTMLElement | null>;
+}) {
+  const { grouped, noGroup } = bucketItemsByGroup(groups, items);
+  useCollapsedGroupState(groups);
+  const toggleGroupCollapsed = useLayoutStore(state => state.toggleGroupCollapsed);
+  const collapsedGroups = useLayoutStore(state => state.collapsedGroups);
+
+  return (
+    <Box
+      ref={navListRef}
+      sx={{
+        flex: 1,
+        minHeight: 0,
+        flexBasis: 0,
+        overflow: "auto",
+        overscrollBehavior: "contain",
+        py: 2,
+        px: 1.5,
+        "&::-webkit-scrollbar": { width: 4 },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "var(--mui-palette-outlineVariant)",
+          borderRadius: 10,
+        },
+      }}
+    >
+      <List component="nav" sx={{ p: 0 }}>
+        {noGroup.length > 0
+          ? noGroup.map(item => (
+              <SidebarNavItem key={item.key} item={item} isActive={item.key === activeKey} isCollapsed={isCollapsed} />
+            ))
+          : null}
+
+        {noGroup.length > 0 && grouped.length > 0 ? (
+          <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", my: 1, mx: 0.5 }} />
+        ) : null}
+
+        {grouped.map(({ group, items: groupItems }, index) => {
+          const collapsed = collapsedGroups[group.id] ?? group.defaultCollapsed ?? false;
+          const showSeparator = index > 0 || noGroup.length > 0;
+          return (
+            <Box key={group.id}>
+              {group.separator && showSeparator ? (
+                <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", my: 1, mx: 0.5 }} />
+              ) : null}
+              <SidebarGroupHeader
+                group={group}
+                isCollapsed={isCollapsed}
+                collapsed={collapsed}
+                onToggle={() => toggleGroupCollapsed(group.id)}
+              />
+              <Collapse in={!collapsed} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding sx={{ px: 0, pb: 0.5 }}>
+                  {groupItems.map(item => (
+                    <SidebarNavItem
+                      key={item.key}
+                      item={item}
+                      isActive={item.key === activeKey}
+                      isCollapsed={isCollapsed}
+                    />
+                  ))}
+                </List>
+              </Collapse>
+            </Box>
+          );
+        })}
+      </List>
+    </Box>
+  );
+}
+
 function SidebarContent({
+  navGroups,
   navItems,
   activeKey,
   isCollapsed,
   navListRef,
 }: {
+  readonly navGroups: readonly TranslatedNavGroup[];
   readonly navItems: readonly TranslatedNavItem[];
-  readonly activeKey: string;
+  readonly activeKey: string | null;
   readonly isCollapsed: boolean;
   readonly navListRef?: RefObject<HTMLElement | null>;
 }) {
   const mainItems = navItems.filter(item => item.section === "main");
   const footerItems = navItems.filter(item => item.section === "footer");
+  const mainGroups = navGroups.filter(group => group.section === "main");
+  const footerGroups = navGroups.filter(group => group.section === "footer");
 
   return (
     <Box
@@ -143,84 +343,77 @@ function SidebarContent({
         overflow: "hidden",
       }}
     >
-      <Box
-        ref={navListRef}
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          flexBasis: 0,
-          overflow: "auto",
-          overscrollBehavior: "contain",
-          py: 2,
-          px: 1.5,
-          "&::-webkit-scrollbar": { width: 4 },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "var(--mui-palette-outlineVariant)",
-            borderRadius: 10,
-          },
-        }}
-      >
-        <List component="nav" sx={{ p: 0 }}>
-          {mainItems.map(item => (
-            <SidebarNavItem key={item.key} item={item} isActive={item.key === activeKey} isCollapsed={isCollapsed} />
-          ))}
-        </List>
-      </Box>
+      <GroupedNavList
+        groups={mainGroups}
+        items={mainItems}
+        activeKey={activeKey}
+        isCollapsed={isCollapsed}
+        navListRef={navListRef}
+      />
 
-      {footerItems.length > 0 && (
+      {footerItems.length > 0 || footerGroups.length > 0 ? (
         <>
           <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", mx: 1.5 }} />
-          <List sx={{ px: 1.5, pt: 1, pb: 2, flexShrink: 0 }} component="nav">
-            {footerItems.map(item => (
-              <SidebarNavItem key={item.key} item={item} isCollapsed={isCollapsed} isFooter />
-            ))}
-          </List>
+          <Box sx={{ overflow: "auto", overscrollBehavior: "contain" }}>
+            <GroupedNavList groups={footerGroups} items={footerItems} activeKey={activeKey} isCollapsed={isCollapsed} />
+          </Box>
         </>
-      )}
+      ) : null}
     </Box>
   );
 }
 
 function SidebarMobileNav({
+  navGroups,
   navItems,
   activeKey,
 }: {
+  readonly navGroups: readonly TranslatedNavGroup[];
   readonly navItems: readonly TranslatedNavItem[];
-  readonly activeKey: string;
+  readonly activeKey: string | null;
 }) {
-  const mainItems = navItems.filter(item => item.section === "main");
-  const footerItems = navItems.filter(item => item.section === "footer");
+  return (
+    <GroupedNavList
+      groups={navGroups.filter(group => group.section === "main")}
+      items={navItems.filter(item => item.section === "main")}
+      activeKey={activeKey}
+      isCollapsed={false}
+    />
+  );
+}
 
+function MobileFooterItems({
+  navGroups,
+  navItems,
+  activeKey,
+}: {
+  readonly navGroups: readonly TranslatedNavGroup[];
+  readonly navItems: readonly TranslatedNavItem[];
+  readonly activeKey: string | null;
+}) {
+  const footerItems = navItems.filter(item => item.section === "footer");
+  const footerGroups = navGroups.filter(group => group.section === "footer");
+  if (footerItems.length === 0 && footerGroups.length === 0) {
+    return null;
+  }
   return (
     <>
-      <List sx={{ px: 1.5 }} component="nav">
-        {mainItems.map(item => (
-          <SidebarNavItem key={item.key} item={item} isActive={item.key === activeKey} isCollapsed={false} />
-        ))}
-      </List>
-
-      {footerItems.length > 0 && (
-        <>
-          <Divider sx={theme => ({ borderColor: theme.palette.outlineVariant, mx: 1.5 })} />
-          <List sx={{ px: 1.5, pt: 1 }} component="nav">
-            {footerItems.map(item => (
-              <SidebarNavItem key={item.key} item={item} isCollapsed={false} isFooter />
-            ))}
-          </List>
-        </>
-      )}
+      <Divider sx={theme => ({ borderColor: theme.palette.outlineVariant, mx: 1.5 })} />
+      <GroupedNavList groups={footerGroups} items={footerItems} activeKey={activeKey} isCollapsed={false} />
     </>
   );
 }
 
 function SidebarMobileDrawer({
   sidebarWidth,
+  navGroups,
   navItems,
   activeKey,
 }: {
   readonly sidebarWidth: string;
+  readonly navGroups: readonly TranslatedNavGroup[];
   readonly navItems: readonly TranslatedNavItem[];
-  readonly activeKey: string;
+  readonly activeKey: string | null;
 }) {
   const mobileDrawerOpen = useLayoutStore(state => state.mobileDrawerOpen);
   const closeMobileDrawer = useLayoutStore(state => state.closeMobileDrawer);
@@ -275,7 +468,8 @@ function SidebarMobileDrawer({
           },
         }}
       >
-        <SidebarMobileNav navItems={navItems} activeKey={activeKey} />
+        <SidebarMobileNav navGroups={navGroups} navItems={navItems} activeKey={activeKey} />
+        <MobileFooterItems navGroups={navGroups} navItems={navItems} activeKey={activeKey} />
       </Box>
     </Drawer>
   );
@@ -283,13 +477,15 @@ function SidebarMobileDrawer({
 
 function SidebarDesktop({
   sidebarWidth,
+  navGroups,
   navItems,
   activeKey,
   initialSidebarOpen = true,
 }: {
   readonly sidebarWidth: string;
+  readonly navGroups: readonly TranslatedNavGroup[];
   readonly navItems: readonly TranslatedNavItem[];
-  readonly activeKey: string;
+  readonly activeKey: string | null;
   readonly initialSidebarOpen?: boolean;
 }) {
   const collapsedWidth = "80px";
@@ -321,7 +517,7 @@ function SidebarDesktop({
         transition: "width 0.3s ease",
       }}
     >
-      <SidebarContent navItems={navItems} activeKey={activeKey} isCollapsed={isCollapsed} />
+      <SidebarContent navGroups={navGroups} navItems={navItems} activeKey={activeKey} isCollapsed={isCollapsed} />
 
       <Box
         onClick={toggleSidebar}
@@ -384,12 +580,18 @@ function SidebarDesktop({
   );
 }
 
-export function SidebarShell({ navItems, activeKey, sidebarWidth, initialSidebarOpen }: SidebarShellProps) {
+export function SidebarShell({ navGroups, navItems, activeKey, sidebarWidth, initialSidebarOpen }: SidebarShellProps) {
   return (
     <>
-      <SidebarMobileDrawer sidebarWidth={sidebarWidth} navItems={navItems} activeKey={activeKey} />
+      <SidebarMobileDrawer
+        sidebarWidth={sidebarWidth}
+        navGroups={navGroups}
+        navItems={navItems}
+        activeKey={activeKey}
+      />
       <SidebarDesktop
         sidebarWidth={sidebarWidth}
+        navGroups={navGroups}
         navItems={navItems}
         activeKey={activeKey}
         initialSidebarOpen={initialSidebarOpen}

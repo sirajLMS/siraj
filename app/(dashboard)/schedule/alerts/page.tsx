@@ -1,25 +1,10 @@
 import type { Metadata } from "next";
-import { AppPermission } from "@/backend/enum";
-import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
-import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { ScheduleAlertsContainer } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsContainer";
-import { getTranslations } from "@/shared/locale";
-import { getLocale } from "@/shared/locale/server-cookies";
+import { redirect } from "next/navigation";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale();
-  const t = getTranslations(locale).dashboardTranslations.coreScheduleAlerts;
-  return { title: t.pageTitle };
+  return { title: "Redirecting..." };
 }
 
-export default async function ScheduleAlertsPage() {
-  const locale = await getLocale();
-  const { userId, context } = await getServerUserContext();
-  if (!userId) {
-    await redirectToLogin();
-    return;
-  }
-  await requirePermissionForPage(userId, [AppPermission.SCHEDULE_VIEW_LIST], locale, context);
-  return <ScheduleAlertsContainer />;
+export default async function ScheduleAlertsRedirectPage() {
+  redirect("/schedule/tracking?tab=alerts");
 }

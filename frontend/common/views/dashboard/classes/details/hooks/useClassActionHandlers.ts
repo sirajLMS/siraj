@@ -46,7 +46,7 @@ export function useClassActionHandlers(
       }
     },
     handleReschedule: () => {
-      router.push(`/reschedule?classInstanceId=${id}`);
+      router.push(`/schedule/tracking/reschedule?classInstanceId=${id}`);
     },
     handleInfoEdit: () => {
       router.push(`/classes/${id}/audit`);

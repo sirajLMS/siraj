@@ -23,6 +23,31 @@ export interface NavItem {
   readonly section: "main" | "footer";
   readonly permission?: AppPermission | readonly AppPermission[];
   readonly audience?: NavAudience;
+  /**
+   * Group this item belongs to in the sidebar. When omitted the item renders
+   * un-grouped (still respects `section`). Must match a `NavGroup.id` from
+   * `SIDEBAR_NAV_GROUPS`. Mobile bottom nav ignores grouping entirely.
+   */
+  readonly groupId?: string;
+}
+
+/**
+ * Sidebar navigation group: a labelled, optionally-collapsible cluster of
+ * `NavItem`s rendered together with a header row (icon + label + chevron).
+ * Groups can declare their own `permission`/`audience` gate so the entire
+ * cluster hides for users who lack access. A `separator: true` group renders
+ * a `<Divider>` before its header. `main`-section groups render above the
+ * footer divider; `footer`-section groups render below it.
+ */
+export interface NavGroup {
+  readonly id: string;
+  readonly labelKey: keyof DashboardNavigationLabels;
+  readonly icon?: SvgIconComponent;
+  readonly section: "main" | "footer";
+  readonly permission?: AppPermission | readonly AppPermission[];
+  readonly audience?: NavAudience;
+  readonly defaultCollapsed?: boolean;
+  readonly separator?: boolean;
 }
 
 export type ClassInstanceStatus = "active" | "scheduled" | "pending" | "completed" | "cancelled";

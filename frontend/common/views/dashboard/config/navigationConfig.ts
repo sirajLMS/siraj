@@ -4,7 +4,7 @@ import {
   BadgeOutlined,
   CalendarTodayOutlined,
   CategoryOutlined,
-  CurrencyExchangeOutlined,
+  ClassOutlined,
   DashboardOutlined,
   DescriptionOutlined,
   Diversity1Outlined,
@@ -14,8 +14,6 @@ import {
   LightbulbOutlined,
   LogoutOutlined,
   MenuBookOutlined,
-  NoteAddOutlined,
-  NotificationsActiveOutlined,
   PaymentsOutlined,
   PersonOutlineOutlined,
   RateReviewOutlined,
@@ -26,14 +24,145 @@ import {
   SecurityOutlined,
   SettingsOutlined,
   ShareOutlined,
-  ShieldOutlined,
-  TimelineOutlined,
   UpdateOutlined,
-  VideocamOutlined,
 } from "@mui/icons-material";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
-import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import { ENABLE_PEOPLE_DIRECTORY } from "@/shared/constants/features/sidebarFeatures.constants";
+
+/**
+ * Sidebar navigation GROUPS — labelled, optionally-collapsible clusters of
+ * nav items. Each item in {@link SIDEBAR_NAV_ITEMS} can reference a group
+ * via its `groupId` field; the renderer groups items under their matching
+ * header (with optional `<Divider>` separator + `Collapse` animation).
+ *
+ * Portals (teacher/parent/student/supervisor) attach audience to specific
+ * items rather than relying on groups — so for portals the groups array is
+ * effectively decorative: empty groups are dropped by
+ * `getNavItemsForPermissions` so portal users won't see empty headers.
+ *
+ * Group                     | Items (key)                          | Permission gate (any-of)
+ * --------------------------|--------------------------------------|------------------------------
+ * grp_home                  | home, search-schedule, schedule-tracking, status-tracking, schedule-alerts | per-item (admin)
+ * grp_people                | teachers, parents, students, staff  | StaffViewDirectory / ParentsList / TeacherViewStudents / StudentsList
+ * grp_schedule              | schedule-tracking* (after Phase 3), schedule-alerts | per-item
+ * grp_billing               | (Phase 3 merged billing parent)       | BillingViewHistory / BillingManageCurrencyHedges / BillingCreateInvoice
+ * grp_catalogs              | payment-catalogs, meeting-providers   | PaymentMethodsManageCatalogs / MeetingProvidersManageCatalog
+ * grp_feedback              | complaints-manage, suggestions-manage | ComplaintsRespond|ComplaintsList / SuggestionsList
+ * grp_reports               | reports, monthly-reports, teacher-dues, lesson-reports | per-item
+ * grp_admin                 | permissions, settings, dst-migration, user-profile | PermissionGroupsManage / SettingsView* / SystemBulkUpdateDst
+ * grp_resources             | resources, books-and-bags, subjects   | ResourcesList / SubjectsList
+ * grp_classes               | (Phase 2) new teacher-class-details   | ClassViewDetails
+ * footer_account            | own-profile, logout                   | AuthViewOwnProfile / —
+ *
+ * Portal-audience items (teacher/parent/student/supervisor) intentionally
+ * have NO `groupId` — they stay flat because portal nav is too short to
+ * benefit from grouping, and audience overrides can vary per item.
+ */
+export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
+  {
+    id: "grp_home",
+    labelKey: "navGroupHome",
+    icon: DashboardOutlined,
+    section: "main",
+    permission: PAGE_PERMISSIONS.dashboard,
+  },
+  {
+    id: "grp_people",
+    labelKey: "navGroupPeople",
+    icon: GroupOutlined,
+    section: "main",
+    permission: [
+      AppPermission.StaffViewDirectory,
+      AppPermission.ParentsList,
+      AppPermission.TeacherViewStudents,
+      AppPermission.StudentsList,
+    ],
+  },
+  {
+    id: "grp_schedule",
+    labelKey: "navGroupSchedule",
+    icon: EventRepeatOutlined,
+    section: "main",
+    permission: [
+      AppPermission.ScheduleSearchAvailability,
+      AppPermission.SessionReschedule,
+      AppPermission.ScheduleViewAll,
+      AppPermission.ScheduleViewList,
+      AppPermission.ScheduleManageRecurring,
+    ],
+    separator: true,
+  },
+  {
+    id: "grp_classes",
+    labelKey: "navGroupClasses",
+    icon: ClassOutlined,
+    section: "main",
+    permission: [AppPermission.SessionViewDetails, AppPermission.ScheduleManageRecurring],
+  },
+  {
+    id: "grp_billing",
+    labelKey: "navGroupBilling",
+    icon: PaymentsOutlined,
+    section: "main",
+    permission: [
+      AppPermission.BillingViewHistory,
+      AppPermission.BillingViewExchangeRates,
+      AppPermission.BillingManageCurrencyHedges,
+      AppPermission.BillingCreateInvoice,
+    ],
+    separator: true,
+  },
+  {
+    id: "grp_catalogs",
+    labelKey: "navGroupCatalogs",
+    icon: CategoryOutlined,
+    section: "main",
+    permission: [AppPermission.PaymentMethodsManageCatalogs, AppPermission.MeetingProvidersManageCatalog],
+  },
+  {
+    id: "grp_reports",
+    labelKey: "navGroupReports",
+    icon: AssessmentOutlined,
+    section: "main",
+    permission: [
+      AppPermission.ReportGenerateCustom,
+      AppPermission.MonthlyReportsView,
+      AppPermission.TeacherDuesView,
+      AppPermission.LessonReportsReview,
+      AppPermission.LessonReportsApprove,
+    ],
+    separator: true,
+  },
+  {
+    id: "grp_resources",
+    labelKey: "navGroupResources",
+    icon: FolderOpenOutlined,
+    section: "main",
+    permission: [AppPermission.ResourcesList, AppPermission.SubjectsList],
+  },
+  {
+    id: "grp_feedback",
+    labelKey: "navGroupFeedback",
+    icon: ReportProblemOutlined,
+    section: "main",
+    permission: [AppPermission.ComplaintsRespond, AppPermission.ComplaintsList, AppPermission.SuggestionsList],
+    separator: true,
+  },
+  {
+    id: "grp_admin",
+    labelKey: "navGroupAdmin",
+    icon: SecurityOutlined,
+    section: "main",
+    permission: [AppPermission.PermissionGroupsManage, AppPermission.SettingsView, AppPermission.SystemBulkUpdateDst],
+  },
+  {
+    id: "footer_account",
+    labelKey: "navGroupAccount",
+    section: "footer",
+  },
+] as const;
 
 /**
  * Full navigation items for the dashboard sidebar.
@@ -47,6 +176,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.dashboard,
+    groupId: "grp_home",
   },
   {
     key: "today-classes",
@@ -61,7 +191,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     key: "regular-schedule",
     labelKey: "regularSchedule",
     icon: EventRepeatOutlined,
-    href: "/schedule",
+    href: "/teachers/me/schedule/weekly",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
     audience: "teacher",
@@ -84,14 +214,16 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.teacherOwnProfile,
     audience: "teacher",
   },
-  // {
-  //   key: "teacher-class-details",
-  //   labelKey: "dashboard.nav.classDetails",
-  //   icon: ClassOutlined,
-  //   href: "/classes",
-  //   section: "main",
-  //   permission: PAGE_PERMISSIONS.teacherClassDetails,
-  // },
+  {
+    key: "teacher-class-details",
+    labelKey: "classDetails",
+    icon: ClassOutlined,
+    href: "/classes",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherClassDetails,
+    audience: "teacher",
+    groupId: "grp_classes",
+  },
   {
     key: "teacher-rules",
     labelKey: "teacherRules",
@@ -150,7 +282,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     key: "parent-social",
     labelKey: "socialMedia",
     icon: ShareOutlined,
-    href: "/social",
+    href: "/parents/me/social",
     section: "footer",
     permission: PAGE_PERMISSIONS.parentOwnProfile,
     audience: "parent",
@@ -243,30 +375,34 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/search-schedule",
     section: "main",
     permission: PAGE_PERMISSIONS.searchSchedule,
+    groupId: "grp_home",
   },
   {
     key: "schedule-tracking",
-    labelKey: "scheduleTracking",
+    labelKey: "scheduleTrackingParent",
     icon: EventRepeatOutlined,
-    href: "/schedule/tracking/reschedule",
+    href: "/schedule/tracking",
     section: "main",
-    permission: PAGE_PERMISSIONS.scheduleTracking,
+    permission: PAGE_PERMISSIONS.scheduleTrackingParent,
+    groupId: "grp_schedule",
   },
   {
-    key: "status-tracking",
-    labelKey: "statusTracking",
-    icon: TimelineOutlined,
-    href: "/schedule/tracking/status",
+    key: "recurring-schedules",
+    labelKey: "createClass",
+    icon: EventRepeatOutlined,
+    href: "/recurring-schedules",
     section: "main",
-    permission: PAGE_PERMISSIONS.statusTracking,
+    permission: PAGE_PERMISSIONS.recurringSchedules,
+    groupId: "grp_schedule",
   },
   {
-    key: "schedule-alerts",
-    labelKey: "scheduleAlerts",
-    icon: NotificationsActiveOutlined,
-    href: "/schedule/alerts",
+    key: "people-directory",
+    labelKey: "peopleDirectory",
+    icon: GroupOutlined,
+    href: "/people",
     section: "main",
-    permission: PAGE_PERMISSIONS.scheduleAlerts,
+    permission: PAGE_PERMISSIONS.peopleDirectoryParent,
+    groupId: "grp_people",
   },
   {
     key: "teachers",
@@ -275,6 +411,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/teachers",
     section: "main",
     permission: PAGE_PERMISSIONS.teachers,
+    groupId: "grp_people",
   },
   {
     key: "parents",
@@ -283,6 +420,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/parents",
     section: "main",
     permission: PAGE_PERMISSIONS.parents,
+    groupId: "grp_people",
   },
   {
     key: "students",
@@ -291,6 +429,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.students,
+    groupId: "grp_people",
   },
   {
     key: "staff",
@@ -299,6 +438,16 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/staff",
     section: "main",
     permission: PAGE_PERMISSIONS.staff,
+    groupId: "grp_people",
+  },
+  {
+    key: "classes",
+    labelKey: "classDetails",
+    icon: ClassOutlined,
+    href: "/classes",
+    section: "main",
+    permission: PAGE_PERMISSIONS.classesPage,
+    groupId: "grp_classes",
   },
   {
     key: "resources",
@@ -307,6 +456,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/resources",
     section: "main",
     permission: PAGE_PERMISSIONS.resources,
+    groupId: "grp_resources",
   },
   {
     key: "subjects",
@@ -315,6 +465,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/subjects",
     section: "main",
     permission: PAGE_PERMISSIONS.subjects,
+    groupId: "grp_resources",
   },
   {
     key: "books-and-bags",
@@ -323,6 +474,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/resources/books-and-bags",
     section: "main",
     permission: PAGE_PERMISSIONS.booksAndBags,
+    groupId: "grp_resources",
   },
   {
     key: "reports",
@@ -331,6 +483,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/reports",
     section: "main",
     permission: PAGE_PERMISSIONS.reports,
+    groupId: "grp_reports",
   },
   {
     key: "billing-admin",
@@ -339,38 +492,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/billing",
     section: "main",
     permission: PAGE_PERMISSIONS.billingAdmin,
-  },
-  {
-    key: "exchange-rates",
-    labelKey: "exchangeRates",
-    icon: TimelineOutlined,
-    href: "/billing/exchange-rates",
-    section: "main",
-    permission: PAGE_PERMISSIONS.exchangeRates,
-  },
-  {
-    key: "supported-currencies",
-    labelKey: "supportedCurrencies",
-    icon: CurrencyExchangeOutlined,
-    href: "/billing/currencies",
-    section: "main",
-    permission: PAGE_PERMISSIONS.supportedCurrencies,
-  },
-  {
-    key: "currency-hedges",
-    labelKey: "currencyHedges",
-    icon: ShieldOutlined,
-    href: "/billing/currency-hedges",
-    section: "main",
-    permission: PAGE_PERMISSIONS.currencyHedges,
-  },
-  {
-    key: "billing-manual",
-    labelKey: "billingManual",
-    icon: NoteAddOutlined,
-    href: "/billing/manual",
-    section: "main",
-    permission: PAGE_PERMISSIONS.billingManual,
+    groupId: "grp_billing",
   },
   {
     key: "payment-catalogs",
@@ -378,32 +500,17 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: AccountBalanceWalletOutlined,
     href: "/payment-catalogs",
     section: "main",
-    permission: PAGE_PERMISSIONS.paymentCatalogs,
+    permission: PAGE_PERMISSIONS.paymentCatalogsParent,
+    groupId: "grp_catalogs",
   },
   {
-    key: "meeting-providers",
-    labelKey: "meetingProviders",
-    icon: VideocamOutlined,
-    href: "/meeting-providers",
+    key: "feedback-manage",
+    labelKey: "feedbackManage",
+    icon: ReportProblemOutlined,
+    href: "/feedback/manage",
     section: "main",
-    permission: PAGE_PERMISSIONS.meetingProviders,
-  },
-  {
-    key: "billing-parent",
-    labelKey: "invoices",
-    icon: ReceiptLongOutlined,
-    href: "/billing/invoices",
-    section: "main",
-    permission: PAGE_PERMISSIONS.billingParent,
-    audience: "parent",
-  },
-  {
-    key: "suggestions-manage",
-    labelKey: "suggestionsManage",
-    icon: LightbulbOutlined,
-    href: "/suggestions/manage",
-    section: "main",
-    permission: PAGE_PERMISSIONS.suggestionsManage,
+    permission: PAGE_PERMISSIONS.feedbackManageParent,
+    groupId: "grp_feedback",
   },
   {
     key: "suggestions-submit",
@@ -413,14 +520,6 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.suggestionsSubmit,
     audience: "parent",
-  },
-  {
-    key: "complaints-manage",
-    labelKey: "complaintsManage",
-    icon: ReportProblemOutlined,
-    href: "/complaints/manage",
-    section: "main",
-    permission: PAGE_PERMISSIONS.complaintsManage,
   },
   {
     key: "complaints-submit",
@@ -438,6 +537,16 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/tools/dst-migration",
     section: "main",
     permission: PAGE_PERMISSIONS.dstMigration,
+    groupId: "grp_admin",
+  },
+  {
+    key: "user-profile",
+    labelKey: "yourProfile",
+    icon: PersonOutlineOutlined,
+    href: "/users",
+    section: "main",
+    permission: PAGE_PERMISSIONS.userProfile,
+    groupId: "grp_admin",
   },
   {
     key: "permissions",
@@ -446,6 +555,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/permissions",
     section: "main",
     permission: PAGE_PERMISSIONS.permissions,
+    groupId: "grp_admin",
   },
   {
     key: "settings",
@@ -454,6 +564,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/settings",
     section: "main",
     permission: PAGE_PERMISSIONS.settings,
+    groupId: "grp_admin",
   },
   {
     key: "own-profile",
@@ -462,6 +573,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/profile",
     section: "footer",
     permission: PAGE_PERMISSIONS.profile,
+    groupId: "footer_account",
   },
   {
     key: "logout",
@@ -469,11 +581,17 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: LogoutOutlined,
     href: "/logout",
     section: "footer",
+    groupId: "footer_account",
   },
 ] as const;
 
 /**
  * Bottom navigation items for mobile, condensed.
+ *
+ * Bottom nav stays FLAT — it intentionally ignores `groupId` because the
+ * bottom bar is space-constrained and groups don't translate to a
+ * horizontal scrollrail. The `key` matches the sidebar counterpart for each
+ * entry so callers can use the same `getActiveNavKey` against this list.
  */
 export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
@@ -489,7 +607,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     key: "regular-schedule",
     labelKey: "regularSchedule",
     icon: EventRepeatOutlined,
-    href: "/schedule",
+    href: "/teachers/me/schedule/weekly",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
     audience: "teacher",
@@ -585,52 +703,12 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.billingAdmin,
   },
   {
-    key: "exchange-rates",
-    labelKey: "exchangeRates",
-    icon: TimelineOutlined,
-    href: "/billing/exchange-rates",
-    section: "main",
-    permission: PAGE_PERMISSIONS.exchangeRates,
-  },
-  {
-    key: "supported-currencies",
-    labelKey: "supportedCurrencies",
-    icon: CurrencyExchangeOutlined,
-    href: "/billing/currencies",
-    section: "main",
-    permission: PAGE_PERMISSIONS.supportedCurrencies,
-  },
-  {
-    key: "currency-hedges",
-    labelKey: "currencyHedges",
-    icon: ShieldOutlined,
-    href: "/billing/currency-hedges",
-    section: "main",
-    permission: PAGE_PERMISSIONS.currencyHedges,
-  },
-  {
-    key: "billing-manual",
-    labelKey: "billingManual",
-    icon: NoteAddOutlined,
-    href: "/billing/manual",
-    section: "main",
-    permission: PAGE_PERMISSIONS.billingManual,
-  },
-  {
     key: "payment-catalogs",
     labelKey: "paymentCatalogs",
     icon: AccountBalanceWalletOutlined,
     href: "/payment-catalogs",
     section: "main",
-    permission: PAGE_PERMISSIONS.paymentCatalogs,
-  },
-  {
-    key: "meeting-providers",
-    labelKey: "meetingProviders",
-    icon: VideocamOutlined,
-    href: "/meeting-providers",
-    section: "main",
-    permission: PAGE_PERMISSIONS.meetingProviders,
+    permission: PAGE_PERMISSIONS.paymentCatalogsParent,
   },
   {
     key: "billing-parent",
@@ -767,49 +845,155 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.profile,
   },
   {
-    key: "suggestions-manage",
-    labelKey: "suggestionsManage",
-    icon: LightbulbOutlined,
-    href: "/suggestions/manage",
-    section: "main",
-    permission: PAGE_PERMISSIONS.suggestionsManage,
-  },
-  {
-    key: "complaints-manage",
-    labelKey: "complaintsManage",
+    key: "feedback-manage",
+    labelKey: "feedbackManage",
     icon: ReportProblemOutlined,
-    href: "/complaints/manage",
+    href: "/feedback/manage",
     section: "main",
-    permission: PAGE_PERMISSIONS.complaintsManage,
+    permission: PAGE_PERMISSIONS.feedbackManageParent,
   },
 ] as const;
 
-/**
- * Filter navigation items based on real user permissions array.
- */
-export function getNavItemsForPermissions(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
-  const filtered = items.filter(item => {
-    if (item.audience === "teacher" && !isTeacherPortalUser(permissions)) return false;
-    if (item.audience === "parent" && !isParentPortalUser(permissions)) return false;
-    if (item.audience === "student" && !isStudentPortalUser(permissions)) return false;
-    if (item.audience === "supervisor" && !isSupervisorPortalUser(permissions)) return false;
-    if (!item.permission) return true;
-    if (typeof item.permission === "string") {
-      return permissions.includes(item.permission);
-    }
-    return item.permission.some(p => permissions.includes(p));
-  });
+function hasItemPermission(item: NavItem, permissions: readonly AppPermission[]): boolean {
+  if (!item.permission) {
+    return true;
+  }
+  if (typeof item.permission === "string") {
+    return permissions.includes(item.permission);
+  }
+  return item.permission.some(p => permissions.includes(p));
+}
 
-  return applyProfileNavOverrides(
-    applySupervisorNavOverrides(
-      applyStudentNavOverrides(
-        applyParentNavOverrides(applyTeacherNavOverrides(filtered, permissions), permissions),
+/**
+ * Detects whether the current user is a SUPERADMIN (the `super_admin`
+ * permission group). SUPERADMIN holds `PermissionGroupsManage`, granted only
+ * to that group by the seed migration, so this is a stable discriminator.
+ * Used to relax the supervisor audience gate so SUPERADMIN inherits every
+ * supervisor-only nav item (`pending-reviews`, `teacher-dues`,
+ * `monthly-reports`, `supervisor-profile`) — `supervisor-home` is excluded
+ * by [`skipSuperAdminKeysForSupervisorItems`] below because the admin `home`
+ * item already serves `/dashboard` for them (user decision: consolidate).
+ */
+export function isSuperAdminNavUser(permissions: readonly AppPermission[]): boolean {
+  return permissions.includes(AppPermission.PermissionGroupsManage);
+}
+
+/** Supervisor-audience keys that should remain hidden for SUPERADMIN. */
+const SUPERADMIN_HIDDEN_SUPERVISOR_KEYS = new Set<string>(["supervisor-home"]);
+
+/**
+ * Returns the subset of NAV ITEMS that survive the user's permission + audience
+ * gate + per-portal overrides. The same predicate is reused for both the
+ * sidebar and the mobile bottom nav (which administers its own flat list).
+ *
+ * Group filtering (the second overload below) is a separate concern: a group
+ * is dropped when it has no surviving children OR when the group itself is
+ * gated against the user. Empty groups never surface — portals don't see
+ * empty headers in the sidebar.
+ */
+export function getNavItemsForPermissions(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[];
+export function getNavItemsForPermissions(
+  groups: readonly NavGroup[],
+  items: readonly NavItem[],
+  permissions: readonly AppPermission[]
+): NavGroup[];
+export function getNavItemsForPermissions(
+  groupsOrItems: readonly NavGroup[] | readonly NavItem[],
+  itemsOrPermissions: readonly NavItem[] | readonly AppPermission[],
+  maybePermissions?: readonly AppPermission[]
+): NavItem[] | NavGroup[] {
+  // Overload 1: (items, permissions) => NavItem[]
+  if (maybePermissions === undefined) {
+    const items = groupsOrItems as readonly NavItem[];
+    const permissions = itemsOrPermissions as readonly AppPermission[];
+    const filtered = items.filter(item => {
+      if (item.audience === "teacher" && !isTeacherPortalUser(permissions)) return false;
+      if (item.audience === "parent" && !isParentPortalUser(permissions)) return false;
+      if (item.audience === "student" && !isStudentPortalUser(permissions)) return false;
+      // SUPERADMIN sees the supervisor-only items (the user's Phase 5 ask),
+      // EXCEPT `supervisor-home` because the admin `home` item already serves
+      // `/dashboard`. A non-SUPERADMIN without SupervisorViewDashboard never
+      // sees supervisor items at all.
+      if (item.audience === "supervisor") {
+        if (!isSupervisorPortalUser(permissions) && !isSuperAdminNavUser(permissions)) {
+          return false;
+        }
+        if (isSuperAdminNavUser(permissions) && !isSupervisorPortalUser(permissions)) {
+          return !SUPERADMIN_HIDDEN_SUPERVISOR_KEYS.has(item.key);
+        }
+      }
+      if (!hasItemPermission(item, permissions)) {
+        return false;
+      }
+      return true;
+    });
+
+    return applyProfileNavOverrides(
+      applySupervisorNavOverrides(
+        applyStudentNavOverrides(
+          applyParentNavOverrides(
+            applyTeacherNavOverrides(applyPeopleDirectoryNavOverrides(filtered), permissions),
+            permissions
+          ),
+          permissions
+        ),
         permissions
       ),
       permissions
-    ),
-    permissions
-  );
+    );
+  }
+
+  // Overload 2: (groups, items, permissions) => NavGroup[]
+  const groups = groupsOrItems as readonly NavGroup[];
+  const items = itemsOrPermissions as readonly NavItem[];
+  const permissions = maybePermissions;
+
+  // 1) Filter items (single pass, exactly the same logic as overload 1).
+  const filteredItems = getNavItemsForPermissions(items, permissions);
+
+  // 2) Keep a group when (a) it passes its own audience+permission gate AND
+  //    (b) it has at least one surviving child item.
+  const itemKeysByGroup = new Map<string, string[]>();
+  for (const item of filteredItems) {
+    if (!item.groupId) {
+      continue;
+    }
+    const arr = itemKeysByGroup.get(item.groupId);
+    if (arr) {
+      arr.push(item.key);
+    } else {
+      itemKeysByGroup.set(item.groupId, [item.key]);
+    }
+  }
+
+  const survivingGroups = groups.filter(group => {
+    if (group.audience === "teacher" && !isTeacherPortalUser(permissions)) return false;
+    if (group.audience === "parent" && !isParentPortalUser(permissions)) return false;
+    if (group.audience === "student" && !isStudentPortalUser(permissions)) return false;
+    if (group.audience === "supervisor" && !isSupervisorPortalUser(permissions) && !isSuperAdminNavUser(permissions))
+      return false;
+    if (group.permission) {
+      const hasGroupPermission =
+        typeof group.permission === "string"
+          ? permissions.includes(group.permission)
+          : group.permission.some(p => permissions.includes(p));
+      if (!hasGroupPermission) {
+        return false;
+      }
+    }
+    const children = itemKeysByGroup.get(group.id);
+    return children !== undefined && children.length > 0;
+  });
+
+  return survivingGroups;
+}
+
+function applyPeopleDirectoryNavOverrides(items: readonly NavItem[]): NavItem[] {
+  const peopleKeys = new Set(["teachers", "parents", "students", "staff"]);
+  if (ENABLE_PEOPLE_DIRECTORY) {
+    return items.filter(item => !peopleKeys.has(item.key));
+  }
+  return items.filter(item => item.key !== "people-directory");
 }
 
 function applyProfileNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
@@ -868,14 +1052,7 @@ export function applyStudentNavOverrides(items: readonly NavItem[], permissions:
     return [...items];
   }
   // Student portal: hide admin-focused items
-  const hiddenKeys = new Set([
-    "home",
-    "search-schedule",
-    "schedule-tracking",
-    "status-tracking",
-    "schedule-alerts",
-    "own-profile",
-  ]);
+  const hiddenKeys = new Set(["home", "search-schedule", "schedule-tracking", "own-profile"]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }
 
@@ -900,8 +1077,6 @@ export function applySupervisorNavOverrides(
     "own-profile",
     "search-schedule",
     "schedule-tracking",
-    "status-tracking",
-    "schedule-alerts",
     "schedule",
     "teachers",
     "students",
@@ -912,14 +1087,8 @@ export function applySupervisorNavOverrides(
     "books-and-bags",
     "reports",
     "billing-admin",
-    "exchange-rates",
-    "supported-currencies",
-    "currency-hedges",
-    "billing-manual",
     "payment-catalogs",
-    "meeting-providers",
-    "suggestions-manage",
-    "complaints-manage",
+    "feedback-manage",
     "dst-migration",
     "permissions",
     "settings",

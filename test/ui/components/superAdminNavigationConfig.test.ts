@@ -109,8 +109,9 @@ describe("super admin sidebar navigation", () => {
     expect(keys).toContain("teachers");
     expect(keys).toContain("parents");
     expect(keys).toContain("students");
-    expect(keys).toContain("suggestions-manage");
-    expect(keys).toContain("complaints-manage");
+    expect(keys).toContain("feedback-manage");
+    expect(keys).not.toContain("suggestions-manage");
+    expect(keys).not.toContain("complaints-manage");
     expect(keys).toContain("permissions");
     expect(keys).toContain("dst-migration");
     expect(keys).toContain("reports");

@@ -63,7 +63,7 @@ declare global {
 
       // GraphQL Configuration
       GRAPHQL_ENCRYPTION_KEY: string;
-      NEXT_PUBLIC_ENABLE_BINARY_GRAPHQL?: string;
+      NEXT_PUBLIC_ENABLE_PEOPLE_DIRECTORY?: string;
       GRAPHQL_PATH?: string;
 
       // Environment

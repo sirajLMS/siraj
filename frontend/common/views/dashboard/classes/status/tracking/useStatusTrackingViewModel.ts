@@ -57,7 +57,7 @@ function buildRescheduleHandler(
         teacherTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
     }
-    router.push(`/reschedule?classInstanceId=${id}`);
+    router.push(`/schedule/tracking/reschedule?classInstanceId=${id}`);
   };
 }
 

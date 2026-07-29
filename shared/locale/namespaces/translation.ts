@@ -24,6 +24,7 @@ import { DashboardCoreParentDashboard } from "@/shared/locale/namespaces/dashboa
 import { DashboardCoreScheduleAlerts } from "@/shared/locale/namespaces/dashboard/core/scheduleAlerts.namespace";
 import { DashboardCoreSearchSchedule } from "@/shared/locale/namespaces/dashboard/core/searchSchedule.namespace";
 import { DashboardCoreStatusTracking } from "@/shared/locale/namespaces/dashboard/core/statusTracking.namespace";
+import { DashboardFeedbackManageParent } from "@/shared/locale/namespaces/dashboard/feedback/main.namespace";
 import { DashboardLmsCredit } from "@/shared/locale/namespaces/dashboard/lms/credit.namespace";
 import { DashboardLmsLessonReports } from "@/shared/locale/namespaces/dashboard/lms/lessonReports.namespace";
 import { DashboardLmsMonthlyReports } from "@/shared/locale/namespaces/dashboard/lms/monthlyReports.namespace";
@@ -37,10 +38,13 @@ import { DashboardParentRules } from "@/shared/locale/namespaces/dashboard/paren
 import { DashboardParentSocial } from "@/shared/locale/namespaces/dashboard/parents/social.namespace";
 import { DashboardParentStudents } from "@/shared/locale/namespaces/dashboard/parents/students.namespace";
 import { DashboardPaymentCatalogs } from "@/shared/locale/namespaces/dashboard/payment-catalogs/main.namespace";
+import { DashboardPaymentCatalogsParent } from "@/shared/locale/namespaces/dashboard/payment-catalogs/parent.namespace";
+import { DashboardPeopleDirectoryParent } from "@/shared/locale/namespaces/dashboard/people/main.namespace";
 import { DashboardPermissions } from "@/shared/locale/namespaces/dashboard/permissions/main.namespace";
 import { DashboardReports } from "@/shared/locale/namespaces/dashboard/reports/main.namespace";
 import { DashboardBooksAndBags } from "@/shared/locale/namespaces/dashboard/resources/booksAndBags.namespace";
 import { DashboardResources } from "@/shared/locale/namespaces/dashboard/resources/main.namespace";
+import { DashboardScheduleTrackingParent } from "@/shared/locale/namespaces/dashboard/schedule-tracking/main.namespace";
 import { DashboardSettingsEnvironment } from "@/shared/locale/namespaces/dashboard/settings/environment.namespace";
 import { DashboardSettingsGeneral } from "@/shared/locale/namespaces/dashboard/settings/general.namespace";
 import { DashboardSettings } from "@/shared/locale/namespaces/dashboard/settings/main.namespace";
@@ -142,6 +146,7 @@ export const Translation = {
     CoreScheduleAlerts: DashboardCoreScheduleAlerts,
     CoreParentDashboard: DashboardCoreParentDashboard,
     CreateRecurringClass: DashboardCreateRecurringClass,
+    FeedbackManageParent: DashboardFeedbackManageParent,
     LmsCredit: DashboardLmsCredit,
     LmsLessonReports: DashboardLmsLessonReports,
     LmsMonthlyReports: DashboardLmsMonthlyReports,
@@ -154,12 +159,15 @@ export const Translation = {
     ParentSocial: DashboardParentSocial,
     ParentStudents: DashboardParentStudents,
     ParentsDirectory: DashboardParentsDirectory,
+    PeopleDirectoryParent: DashboardPeopleDirectoryParent,
     PaymentCatalogs: DashboardPaymentCatalogs,
+    PaymentCatalogsParent: DashboardPaymentCatalogsParent,
     Permissions: DashboardPermissions,
     Reports: DashboardReports,
     RescheduleForm: DashboardRescheduleForm,
     RescheduleTracking: DashboardRescheduleTracking,
     Resources: DashboardResources,
+    ScheduleTrackingParent: DashboardScheduleTrackingParent,
     Settings: DashboardSettings,
     SettingsEnvironment: DashboardSettingsEnvironment,
     SettingsGeneral: DashboardSettingsGeneral,
