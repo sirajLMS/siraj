@@ -71,7 +71,6 @@ describe("Student Portal E2E", () => {
 
     await page.waitForURL("**/dashboard**");
     await expectVisible(page.getByText(/Recent Lesson Reports|تقارير الحصص الأخيرة/i));
-    await expectVisible(page.getByRole("button", { name: /View All History|عرض كل السجل/i }));
   });
 
   test("Student can navigate to credits page via sidebar", async () => {

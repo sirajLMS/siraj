@@ -41,6 +41,7 @@ export function useProfileTabNavViewModel(props: Readonly<ProfileTabNavProps>): 
   );
 
   const tabParam = searchParams.get("tab");
+  const searchParamsString = searchParams.toString();
   const resolvedTab = resolveProfileTab(tabParam, availableTabs);
 
   useEffect(() => {
@@ -53,8 +54,10 @@ export function useProfileTabNavViewModel(props: Readonly<ProfileTabNavProps>): 
     if (!resolvedTab || tabParam === resolvedTab) {
       return;
     }
-    router.replace(buildTabHref(pathname, searchParams, resolvedTab), { scroll: false });
-  }, [resolvedTab, tabParam, pathname, router, searchParams]);
+    const params = new URLSearchParams(searchParamsString);
+    params.set("tab", resolvedTab);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [resolvedTab, tabParam, pathname, router, searchParamsString]);
 
   const handleTabChange = (tab: string) => {
     onTabChange(tab);

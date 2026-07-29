@@ -13,6 +13,7 @@ import type {
   StudentCreditBalanceRow,
   UpcomingLessonRow,
 } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
+import type { LessonReportStatusLabelSlice } from "@/frontend/common/views/dashboard/student/dashboard/utils/recentLessonReportPresentation";
 import {
   isToday,
   isWithinNextDays,
@@ -78,6 +79,7 @@ export interface StudentDashboardViewModel {
   readonly recentLessonReports: readonly RecentLessonReportRow[];
   readonly reportsPagination: ReportsPagination;
   readonly labels: StudentDashboardLabels;
+  readonly lessonReportStatusLabels: LessonReportStatusLabelSlice;
   readonly commonLabels: CommonLabels;
   readonly loading: boolean;
   readonly onJoinLesson: (id: string) => void;
@@ -92,6 +94,7 @@ export type UseStudentDashboardViewModelProps = Record<string, never>;
 
 export function useStudentDashboardViewModel(_props: UseStudentDashboardViewModelProps): StudentDashboardViewModel {
   const t = useAppTranslation(Translation.Dashboard.StudentPortalDashboard);
+  const lessonReportLabels = useAppTranslation(Translation.Dashboard.LmsLessonReports);
   const commonLabels = useAppTranslation(Translation.Common);
   const locale = useAppLocale();
   const router = useRouter();
@@ -104,6 +107,16 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
   const setReportsTotalCount = useStudentDashboardStore(state => state.setReportsTotalCount);
 
   const labels = useStudentDashboardLabels(t);
+
+  const lessonReportStatusLabels = useMemo<LessonReportStatusLabelSlice>(
+    () => ({
+      approved: lessonReportLabels.approved,
+      pendingReview: lessonReportLabels.pendingReview,
+      rejected: lessonReportLabels.rejected,
+      draft: lessonReportLabels.draft,
+    }),
+    [lessonReportLabels]
+  );
 
   const paginationArgs = useMemo(
     () => ({
@@ -119,7 +132,7 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
   );
 
   const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
-    variables: { studentId: null, year: null, month: null },
+    variables: { studentId: null, year: null, month: null, includeUpcomingClasses: true },
     fetchPolicy: "cache-and-network",
   });
 
@@ -226,6 +239,7 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
     recentLessonReports,
     reportsPagination,
     labels,
+    lessonReportStatusLabels,
     commonLabels,
     loading,
     onJoinLesson: handlers.handleJoinLesson,

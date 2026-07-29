@@ -142,7 +142,7 @@ function createMocks(): MockLink.MockedResponse[] {
     {
       request: {
         query: studentProfileQueryDocument,
-        variables: { studentId: null, year: null, month: null },
+        variables: { studentId: null, year: null, month: null, includeUpcomingClasses: true },
       },
       result: { data: profileMockData },
       maxUsageCount: Number.POSITIVE_INFINITY,

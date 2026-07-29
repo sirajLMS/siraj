@@ -6,17 +6,19 @@ import { useCallback, useMemo, useState } from "react";
 import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { useRefetchOnWindowFocus } from "@/frontend/common/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
+import {
+  isStudentProfileAudience,
+  PROFILE_AUDIENCE_STUDENT,
+} from "@/frontend/common/views/dashboard/profile/core/isStudentProfileAudience";
 import type {
   ProfilePageClientLabels,
   ProfilePageClientProps,
 } from "@/frontend/common/views/dashboard/profile/core/types/profilePageClient.types";
 import { Translation, useAppTranslation } from "@/shared/locale";
-
-const PROFILE_AUDIENCE_STUDENT = "STUDENT" as ProfileAudience;
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 
@@ -39,7 +41,10 @@ export interface ProfilePageClientViewModel extends ProfilePageClientProps {
 
 export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientProps>): ProfilePageClientViewModel {
   const { scope, mode, audience, targetUserId } = props;
-  const isStudentAudience = audience === PROFILE_AUDIENCE_STUDENT;
+  const isStudentAudience = isStudentProfileAudience(audience);
+  const user = useUserStore(state => state.user);
+  const userName = useUserStore(state => state.name);
+  const userAvatarUrl = useUserStore(state => state.avatarUrl);
   const base = useAppTranslation(Translation.Profile.Base);
   const teacher = useAppTranslation(Translation.Profile.Teacher);
   const labels: ProfilePageClientLabels = { base, teacher };
@@ -58,37 +63,32 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
     skip: isStudentAudience,
   });
 
-  const {
-    data: studentProfileData,
-    loading: studentLoading,
-    error: studentError,
-    refetch: refetchStudentProfile,
-  } = useQuery(studentProfileQueryDocument, {
-    variables: { studentId: null, year: null, month: null },
-    skip: !isStudentAudience,
-  });
-
   const profile = useMemo((): ProfileData | null | undefined => {
     if (isStudentAudience) {
-      const studentProfile = studentProfileData?.studentProfile;
-      if (!studentProfile) {
-        return studentProfileData === undefined ? undefined : null;
-      }
       return {
-        id: studentProfile.id ?? targetUserId,
+        id: targetUserId,
         userId: targetUserId,
         audience,
         scope,
-        name: studentProfile.name ?? "",
-        email: studentProfile.email ?? "",
-        avatarUrl: studentProfile.avatarUrl ?? null,
+        name: userName || user?.name || "",
+        email: user?.email ?? "",
+        avatarUrl: userAvatarUrl || user?.avatarUrl || null,
       } as ProfileData;
     }
     return unifiedProfileData?.profileByUserId;
-  }, [audience, isStudentAudience, scope, studentProfileData, targetUserId, unifiedProfileData?.profileByUserId]);
+  }, [
+    audience,
+    isStudentAudience,
+    scope,
+    targetUserId,
+    unifiedProfileData?.profileByUserId,
+    user,
+    userAvatarUrl,
+    userName,
+  ]);
 
-  const loading = isStudentAudience ? studentLoading : unifiedLoading;
-  const error = isStudentAudience ? studentError : unifiedError;
+  const loading = isStudentAudience ? false : unifiedLoading;
+  const error = isStudentAudience ? undefined : unifiedError;
 
   useDocumentTitle(profile?.name, Translation.Profile.Base, mode === ProfileMode.Edit ? "editTitle" : "pageTitle");
 
@@ -96,12 +96,8 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
   const cancelHref = scope === ProfileScope.Own ? ownProfileHref() : profileHrefForUser(targetUserId);
 
   const handleRetry = useCallback(() => {
-    if (isStudentAudience) {
-      void refetchStudentProfile();
-      return;
-    }
     void refetchUnifiedProfile();
-  }, [isStudentAudience, refetchStudentProfile, refetchUnifiedProfile]);
+  }, [refetchUnifiedProfile]);
 
   const refetchProfileOnFocus = useCallback(() => {
     if (mode === ProfileMode.View) {
@@ -144,4 +140,4 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
   };
 }
 
-export { PROFILE_AUDIENCE_STUDENT };
+export { isStudentProfileAudience, PROFILE_AUDIENCE_STUDENT };

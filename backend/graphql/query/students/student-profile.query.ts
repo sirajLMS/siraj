@@ -10,6 +10,7 @@ gqlSchemaBuilder.queryField("studentProfile", t =>
       studentId: t.arg.string({ required: false }),
       year: t.arg.int({ required: false }),
       month: t.arg.int({ required: false }),
+      includeUpcomingClasses: t.arg.boolean({ required: false }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
@@ -24,7 +25,11 @@ gqlSchemaBuilder.queryField("studentProfile", t =>
           throw new Error(tErrors.studentNotFound(ctx.user.id));
         }
       }
-      return StudentProfileService.getProfile(ctx.user.id, studentId, tErrors, { year: args.year, month: args.month });
+      return StudentProfileService.getProfile(ctx.user.id, studentId, tErrors, {
+        year: args.year,
+        month: args.month,
+        includeUpcomingClasses: args.includeUpcomingClasses ?? true,
+      });
     },
   })
 );

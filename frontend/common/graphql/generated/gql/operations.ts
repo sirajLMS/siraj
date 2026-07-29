@@ -5083,6 +5083,7 @@ export type StudentProfileQueryVariables = Exact<{
   studentId: string | null | undefined;
   year: number | null | undefined;
   month: number | null | undefined;
+  includeUpcomingClasses: boolean | null | undefined;
 }>;
 
 

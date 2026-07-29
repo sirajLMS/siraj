@@ -51,6 +51,7 @@ function renderMetricCard({
       variant={selectedKey === metric.key ? "highlight" : metric.variant}
       animationIndex={index}
       density={density}
+      sx={{ width: "100%" }}
       onClick={
         onMetricClick
           ? () => {
@@ -93,10 +94,12 @@ export function DesktopMetricCardGrid({
   }
 
   return (
-    <Grid container spacing={2} sx={{ alignItems: "flex-start" }}>
+    <Grid container spacing={2} sx={{ alignItems: "stretch" }}>
       {metrics.map((metric, index) => (
-        <Grid key={metric.key} size={size ?? defaultSize} sx={{ minWidth: 0 }}>
-          {renderMetricCard({ metric, index, selectedKey, onMetricClick, labelSources, density })}
+        <Grid key={metric.key} size={size ?? defaultSize} sx={{ minWidth: 0, display: "flex" }}>
+          <Box sx={{ display: "flex", width: "100%" }}>
+            {renderMetricCard({ metric, index, selectedKey, onMetricClick, labelSources, density })}
+          </Box>
         </Grid>
       ))}
     </Grid>

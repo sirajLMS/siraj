@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
@@ -21,24 +22,28 @@ export function useStudentFieldAccess(options: UseStudentFieldAccessOptions = {}
 
   const isAssociatedViewer = options.isAssociatedViewerOverride ?? profileContext?.profile?.isAssociatedViewer ?? false;
 
-  const resolvePermission = (
-    groupKey: StudentFieldGroupKey,
-    action: "view_own" | "view_other" | "edit_own" | "edit_other"
-  ): AppPermission => studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission;
+  const canView = useCallback(
+    (groupKey: StudentFieldGroupKey): boolean => {
+      const action = isAssociatedViewer ? "view_own" : "view_other";
+      return hasPermission(studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission);
+    },
+    [hasPermission, isAssociatedViewer]
+  );
 
-  const canView = (groupKey: StudentFieldGroupKey): boolean => {
-    const action = isAssociatedViewer ? "view_own" : "view_other";
-    return hasPermission(resolvePermission(groupKey, action));
-  };
+  const canEdit = useCallback(
+    (groupKey: StudentFieldGroupKey): boolean => {
+      const action = isAssociatedViewer ? "edit_own" : "edit_other";
+      return hasPermission(studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission);
+    },
+    [hasPermission, isAssociatedViewer]
+  );
 
-  const canEdit = (groupKey: StudentFieldGroupKey): boolean => {
-    const action = isAssociatedViewer ? "edit_own" : "edit_other";
-    return hasPermission(resolvePermission(groupKey, action));
-  };
+  const canViewField = useCallback((groupKey: StudentFieldGroupKey): boolean => canView(groupKey), [canView]);
 
-  const canViewField = (groupKey: StudentFieldGroupKey): boolean => canView(groupKey);
-
-  const showField = (_value: unknown, groupKey: StudentFieldGroupKey): boolean => canViewField(groupKey);
+  const showField = useCallback(
+    (_value: unknown, groupKey: StudentFieldGroupKey): boolean => canViewField(groupKey),
+    [canViewField]
+  );
 
   return { canView, canEdit, canViewField, showField };
 }

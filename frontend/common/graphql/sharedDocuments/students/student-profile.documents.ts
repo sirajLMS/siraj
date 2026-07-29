@@ -75,8 +75,13 @@ export const studentProfileQueryDocument: TypedDocumentNode<
   ${STUDENT_UPCOMING_CLASS_FIELDS}
   ${STUDENT_HISTORY_METRICS_FIELDS}
   ${STUDENT_HISTORY_SESSION_FIELDS}
-  query StudentProfile($studentId: String, $year: Int, $month: Int) {
-    studentProfile(studentId: $studentId, year: $year, month: $month) {
+  query StudentProfile($studentId: String, $year: Int, $month: Int, $includeUpcomingClasses: Boolean) {
+    studentProfile(
+      studentId: $studentId
+      year: $year
+      month: $month
+      includeUpcomingClasses: $includeUpcomingClasses
+    ) {
       id
       name
       status

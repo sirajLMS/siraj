@@ -252,7 +252,12 @@ function useChangeStudentStatusMutation(env: {
   );
 
   const refetchQueries = useUnifiedProfile
-    ? [{ query: studentProfileQueryDocument, variables: { studentId } }]
+    ? [
+        {
+          query: studentProfileQueryDocument,
+          variables: { studentId, year: null, month: null, includeUpcomingClasses: true },
+        },
+      ]
     : [{ query: studentByIdQueryDocument, variables: { studentId } }];
 
   const [changeStatus, { loading: isUpdating }] = useMutation(changeStudentStatusMutationDocument, {

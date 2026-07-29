@@ -135,6 +135,40 @@ describe("ProfileService.resolvePageContext", () => {
     expect(context.scope).toBe(ProfileScope.OWN);
     expect(context.studentId).toBe("student-row-1");
   });
+
+  test("allows student own profile edit without infinite permission checks", async () => {
+    spyOn(TeacherRepository, "findByUserId").mockResolvedValue(null as never);
+    spyOn(ParentRepository, "findByUserId").mockResolvedValue(null as never);
+    spyOn(StaffProfileRepository, "findByUserId").mockResolvedValue(null as never);
+    spyOn(StudentRepository, "getStudentIdByUserId").mockResolvedValue("student-row-1");
+    let permissionChecks = 0;
+    spyOn(PermissionsService, "hasAnyPermission").mockImplementation(async (_userId, keys) => {
+      permissionChecks += 1;
+      const list = keys as AppPermission[];
+      return (
+        list.includes(AppPermission.STUDENT_IDENTITY_EDIT_OWN) || list.includes(AppPermission.STUDENT_IDENTITY_VIEW_OWN)
+      );
+    });
+    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
+      permissions: [AppPermission.STUDENT_IDENTITY_EDIT_OWN, AppPermission.STUDENT_IDENTITY_VIEW_OWN],
+      permissionGroups: [],
+      isSuperAdmin: false,
+      role: UserRole.STUDENT,
+    });
+
+    const result = await ProfileService.resolvePageContext("student-user", { mode: ProfileMode.EDIT });
+
+    expect(permissionChecks).toBeLessThan(10);
+    expect(isRedirect(result)).toBe(false);
+    if (isRedirect(result)) {
+      throw new Error(`expected student profile edit context, got redirect to ${result.redirect}`);
+    }
+    const context = result as ProfilePageContext;
+    expect(context.audience).toBe(ProfileAudience.STUDENT);
+    expect(context.scope).toBe(ProfileScope.OWN);
+    expect(context.mode).toBe(ProfileMode.EDIT);
+    expect(context.studentId).toBe("student-row-1");
+  });
 });
 
 describe("ProfileService helpers", () => {

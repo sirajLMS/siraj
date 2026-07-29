@@ -4627,6 +4627,7 @@ export type QueryStudentMonthlyReportArgs = {
 
 
 export type QueryStudentProfileArgs = {
+  includeUpcomingClasses: InputMaybe<Scalars['Boolean']['input']>;
   month: InputMaybe<Scalars['Int']['input']>;
   studentId: InputMaybe<Scalars['String']['input']>;
   year: InputMaybe<Scalars['Int']['input']>;

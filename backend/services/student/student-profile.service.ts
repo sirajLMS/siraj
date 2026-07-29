@@ -17,6 +17,7 @@ import type { ErrorsLabels } from "@/shared/locale";
 type GetProfileOptions = {
   readonly year?: number | null;
   readonly month?: number | null;
+  readonly includeUpcomingClasses?: boolean;
 };
 
 async function hasAnyStudentViewPermission(actorUserId: string): Promise<boolean> {
@@ -143,11 +144,13 @@ export namespace StudentProfileService {
       permissions: new Set(permissionContext.permissions),
     };
 
-    let upcomingClasses: Awaited<ReturnType<typeof StudentStatusService.getUpcomingClasses>> | null;
-    try {
-      upcomingClasses = await StudentStatusService.getUpcomingClasses(actorUserId, studentId, tErrors);
-    } catch {
-      upcomingClasses = null;
+    let upcomingClasses: Awaited<ReturnType<typeof StudentStatusService.getUpcomingClasses>> | null = null;
+    if (options.includeUpcomingClasses !== false) {
+      try {
+        upcomingClasses = await StudentStatusService.getUpcomingClasses(actorUserId, studentId, tErrors);
+      } catch {
+        upcomingClasses = null;
+      }
     }
 
     let classHistory = null;
@@ -196,7 +199,9 @@ export namespace StudentProfileService {
     }
 
     const isOwnProfile = profile.userId === actorUserId;
-    if (!input.studentId && !isOwnProfile) {
+    const isAssociatedViewer = await resolveIsAssociatedViewer(actorUserId, targetStudentId);
+
+    if (!isOwnProfile && !input.studentId?.trim()) {
       throw new Error(tErrors.insufficientPermissions);
     }
 
@@ -204,8 +209,6 @@ export namespace StudentProfileService {
     if (submittedGroups.length === 0) {
       throw new Error(tErrors.invalidInput);
     }
-
-    const isAssociatedViewer = isOwnProfile || (await resolveIsAssociatedViewer(actorUserId, targetStudentId));
 
     await assertCanEditSubmittedGroups(actorUserId, targetStudentId, isAssociatedViewer, submittedGroups, tErrors);
     await applyStudentProfileEdit(profile.userId, targetStudentId, profile, input, tErrors, locale);

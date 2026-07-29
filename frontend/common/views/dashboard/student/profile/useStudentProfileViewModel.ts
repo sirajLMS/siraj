@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import type { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -172,9 +172,14 @@ export function useStudentProfileViewModel({
     loading: profileLoading,
     refetch,
   } = useQuery(studentProfileQueryDocument, {
-    variables: { studentId: isOtherScope ? (studentId ?? null) : null, year: null, month: null },
+    variables: {
+      studentId: isOtherScope ? (studentId ?? null) : null,
+      year: null,
+      month: null,
+      includeUpcomingClasses: false,
+    },
     skip: isOtherScope && !studentId,
-    fetchPolicy: "cache-and-network",
+    fetchPolicy: "cache-first",
   });
 
   const [recordEdit, { loading: saving }] = useMutation(recordStudentProfileEditMutationDocument);
@@ -193,12 +198,20 @@ export function useStudentProfileViewModel({
     }
   }, [profile?.dateOfBirth, locale]);
 
+  const profileSyncKey = profile ? `${profile.id}:${profile.updatedAt ?? ""}:${profile.version}` : null;
+  const syncedProfileKeyRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (mode === ProfileMode.Edit && profile && !isOtherScope) {
-      setDraft(profileToDraft(profile));
-      setIsEditing(true);
+    if (mode !== ProfileMode.Edit || isOtherScope || !profileSyncKey || !profile) {
+      return;
     }
-  }, [mode, profile, isOtherScope, setDraft, setIsEditing]);
+    if (syncedProfileKeyRef.current === profileSyncKey) {
+      return;
+    }
+    syncedProfileKeyRef.current = profileSyncKey;
+    setDraft(profileToDraft(profile));
+    setIsEditing(true);
+  }, [mode, profileSyncKey, isOtherScope, profile, setDraft, setIsEditing]);
 
   const onStartEdit = () => {
     if (!profile) return;

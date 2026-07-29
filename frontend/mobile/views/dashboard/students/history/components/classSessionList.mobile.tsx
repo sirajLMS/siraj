@@ -3,7 +3,9 @@
 import type { Theme } from "@mui/material";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import { formatTime } from "@/frontend/common/components/intl/dateFormat";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { ClassSession, ClassSessionListProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { isJoinableClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
@@ -62,6 +64,23 @@ function getStatusColors(status: AttendanceStatus, theme: Theme): { backgroundCo
   };
 }
 
+function splitSessionTimeDisplay(time: string, locale: string): { timeValue: string; timePeriod: string } {
+  if (!time.trim()) {
+    return { timeValue: "—", timePeriod: "" };
+  }
+
+  const formatted = formatTime(time, locale);
+  const spaceIndex = formatted.indexOf(" ");
+  if (spaceIndex === -1) {
+    return { timeValue: formatted, timePeriod: "" };
+  }
+
+  return {
+    timeValue: formatted.slice(0, spaceIndex),
+    timePeriod: formatted.slice(spaceIndex + 1).trim(),
+  };
+}
+
 function ClassSessionCard({
   session,
   statusLabel,
@@ -72,7 +91,8 @@ function ClassSessionCard({
   durationLabel: string;
 }>) {
   const t = useStudentHistoryLabels().classDetails;
-  const [timeValue, timePeriod] = session.time.split(" ");
+  const locale = useAppLocale();
+  const { timeValue, timePeriod } = splitSessionTimeDisplay(session.time, locale);
   const showJoin = isJoinableClassSession(session.executionState, session.outcome, { isFrozen: session.isFrozen });
 
   return (

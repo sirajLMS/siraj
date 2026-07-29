@@ -70,7 +70,7 @@ export function useStudentPortalHistoryNavigation() {
 
 export function useStudentPortalProfile() {
   const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
-    variables: { studentId: null, year: null, month: null },
+    variables: { studentId: null, year: null, month: null, includeUpcomingClasses: true },
     fetchPolicy: "cache-and-network",
   });
   return { studentId: profileData?.studentProfile?.id ?? null, profileLoading };

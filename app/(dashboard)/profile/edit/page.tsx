@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { toGqlProfileAudience, toGqlProfileMode, toGqlProfileScope } from "@/app/(dashboard)/lib/profile-enum-bridge";
 import { ProfileAudience as BackendProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
 import { resolveProfilePageContext } from "@/backend/lib/auth/cached-profile";
@@ -49,7 +50,11 @@ export default async function ProfileEditPage({ searchParams }: ProfileEditPageP
   if (resolution.scope === ProfileScope.OWN && resolution.audience === BackendProfileAudience.TEACHER) {
     const userProfile = await getCurrentUser(userId, context);
     nationalIdComplete = userProfile.nationalIdComplete;
-    const forceComplete = hasForceCompleteSearchParam(resolvedSearchParams);
+    const headersList = await headers();
+    const searchFromHeader = headersList.get("x-search") ?? "";
+    const forceComplete =
+      hasForceCompleteSearchParam(resolvedSearchParams) ||
+      hasForceCompleteSearchParam(new URLSearchParams(searchFromHeader.replace(/^\?/, "")));
 
     if (!nationalIdComplete && !forceComplete) {
       redirect({ href: TEACHER_PROFILE_COMPLETION_EDIT_HREF });
