@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import { useSettingsStore } from "@/frontend/common/stores/settingsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { getVisibleSettingsTabs } from "@/frontend/common/views/dashboard/settings/config/settingsTabs.config";
 import type { SettingsTabId } from "@/frontend/common/views/dashboard/settings/types/settings.types";
@@ -25,15 +24,10 @@ export function useSettingsViewModel(): SettingsViewModel {
   const searchParams = useSearchParams();
   const labels = useAppTranslation(Translation.Dashboard.Settings);
   const hasPermission = useUserStore(state => state.hasPermission);
-  const markTabVisited = useSettingsStore(state => state.markTabVisited);
 
   const visibleTabs = useMemo(() => getVisibleSettingsTabs(hasPermission), [hasPermission]);
   const tabParam = searchParams.get("tab");
   const resolvedActiveTab = resolveSettingsTab(tabParam, visibleTabs) ?? "general";
-
-  useEffect(() => {
-    markTabVisited(resolvedActiveTab);
-  }, [markTabVisited, resolvedActiveTab]);
 
   useEffect(() => {
     if (!resolvedActiveTab || tabParam === resolvedActiveTab) {

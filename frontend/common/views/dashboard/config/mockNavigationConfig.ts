@@ -1,31 +1,3 @@
-import {
-  AnalyticsOutlined,
-  AssessmentOutlined,
-  BadgeOutlined,
-  CalendarTodayOutlined,
-  ClassOutlined,
-  DashboardOutlined,
-  Diversity1Outlined,
-  EditOutlined,
-  EventRepeatOutlined,
-  FolderOpenOutlined,
-  GroupOutlined,
-  HistoryOutlined,
-  LightbulbOutlined,
-  LogoutOutlined,
-  MenuBookOutlined,
-  NoteAddOutlined,
-  NotificationsActiveOutlined,
-  PaymentsOutlined,
-  PersonAddAltOutlined,
-  PersonOutlineOutlined,
-  ReceiptLongOutlined,
-  ReportProblemOutlined,
-  SchoolOutlined,
-  SearchOutlined,
-  TimelineOutlined,
-  UpdateOutlined,
-} from "@mui/icons-material";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
@@ -38,7 +10,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   home: {
     key: "home",
     labelKey: "home",
-    icon: DashboardOutlined,
+    iconKey: "dashboard",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.dashboard,
@@ -46,7 +18,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   teacherDashboard: {
     key: "teacher-dashboard",
     labelKey: "teacherDashboard",
-    icon: DashboardOutlined,
+    iconKey: "dashboard",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherDashboard,
@@ -54,7 +26,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   teachers: {
     key: "teachers",
     labelKey: "teachers",
-    icon: SchoolOutlined,
+    iconKey: "school",
     href: "/teachers",
     section: "main",
     permission: PAGE_PERMISSIONS.teachers,
@@ -62,7 +34,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   teacherWeeklySchedule: {
     key: "teacher-weekly-schedule",
     labelKey: "teacherWeeklySchedule",
-    icon: CalendarTodayOutlined,
+    iconKey: "calendarToday",
     href: "/teachers/tea-1/schedule/weekly",
     section: "main",
     permission: AppPermission.TeachersManageSchedule,
@@ -70,7 +42,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   teacherFutureSchedule: {
     key: "teacher-future-schedule",
     labelKey: "teacherFutureSchedule",
-    icon: CalendarTodayOutlined,
+    iconKey: "calendarToday",
     href: "/teachers/tea-1/schedule/future",
     section: "main",
     permission: AppPermission.TeachersManageSchedule,
@@ -78,7 +50,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   teacherReassignment: {
     key: "teacher-reassignment",
     labelKey: "teacherReassignment",
-    icon: PersonAddAltOutlined,
+    iconKey: "personAddAlt",
     href: "/teachers/tea-1/reassignment",
     section: "main",
     permission: AppPermission.StudentsChangeTeacher,
@@ -86,7 +58,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   dstMigration: {
     key: "dst-migration",
     labelKey: "dstMigration",
-    icon: UpdateOutlined,
+    iconKey: "update",
     href: "/tools/dst-migration",
     section: "main",
     permission: PAGE_PERMISSIONS.dstMigration,
@@ -94,7 +66,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   teacherAvailability: {
     key: "teacher-availability",
     labelKey: "teacherAvailability",
-    icon: EventRepeatOutlined,
+    iconKey: "eventRepeat",
     href: "/teachers/tea-1/availability",
     section: "main",
     permission: AppPermission.ScheduleSearchAvailability,
@@ -102,7 +74,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   parents: {
     key: "parents",
     labelKey: "parents",
-    icon: Diversity1Outlined,
+    iconKey: "diversity1",
     href: "/parents",
     section: "main",
     permission: PAGE_PERMISSIONS.parents,
@@ -110,7 +82,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   students: {
     key: "students",
     labelKey: "students",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.students,
@@ -118,7 +90,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   reports: {
     key: "reports",
     labelKey: "reports",
-    icon: AssessmentOutlined,
+    iconKey: "assessment",
     href: "/reports",
     section: "main",
     permission: PAGE_PERMISSIONS.reports,
@@ -126,7 +98,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   billingAdmin: {
     key: "billing-admin",
     labelKey: "billingAdmin",
-    icon: PaymentsOutlined,
+    iconKey: "payments",
     href: "/billing",
     section: "main",
     permission: PAGE_PERMISSIONS.billingAdmin,
@@ -134,7 +106,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   paymentCatalogs: {
     key: "payment-catalogs",
     labelKey: "paymentCatalogs",
-    icon: PaymentsOutlined,
+    iconKey: "payments",
     href: "/payment-catalogs",
     section: "main",
     permission: PAGE_PERMISSIONS.paymentCatalogs,
@@ -142,7 +114,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   billingParent: {
     key: "billing-parent",
     labelKey: "billingParent",
-    icon: ReceiptLongOutlined,
+    iconKey: "receiptLong",
     href: "/billing/invoices",
     section: "main",
     permission: PAGE_PERMISSIONS.billingParent,
@@ -150,7 +122,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   billingManual: {
     key: "billing-manual",
     labelKey: "billingManual",
-    icon: NoteAddOutlined,
+    iconKey: "noteAdd",
     href: "/billing/manual",
     section: "main",
     permission: AppPermission.InvoicesCreate,
@@ -158,7 +130,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   suggestionsManage: {
     key: "suggestions-manage",
     labelKey: "suggestionsManage",
-    icon: LightbulbOutlined,
+    iconKey: "lightbulb",
     href: "/suggestions/manage",
     section: "main",
     permission: PAGE_PERMISSIONS.suggestionsManage,
@@ -166,7 +138,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   suggestionsSubmit: {
     key: "suggestions-submit",
     labelKey: "suggestionsSubmit",
-    icon: LightbulbOutlined,
+    iconKey: "lightbulb",
     href: "/suggestions",
     section: "main",
     permission: PAGE_PERMISSIONS.suggestionsSubmit,
@@ -174,7 +146,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   complaintsManage: {
     key: "complaints-manage",
     labelKey: "complaintsManage",
-    icon: ReportProblemOutlined,
+    iconKey: "reportProblem",
     href: "/complaints/manage",
     section: "main",
     permission: PAGE_PERMISSIONS.complaintsManage,
@@ -182,7 +154,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
   complaintsSubmit: {
     key: "complaints-submit",
     labelKey: "complaintsSubmit",
-    icon: ReportProblemOutlined,
+    iconKey: "reportProblem",
     href: "/complaints",
     section: "main",
     permission: PAGE_PERMISSIONS.complaintsSubmit,
@@ -200,7 +172,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "schedule-search",
     labelKey: "scheduleSearch",
-    icon: SearchOutlined,
+    iconKey: "search",
     href: "/schedule-search",
     section: "main",
     permission: AppPermission.ScheduleSearchAvailability,
@@ -208,7 +180,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "schedule-tracking",
     labelKey: "scheduleTracking",
-    icon: EventRepeatOutlined,
+    iconKey: "eventRepeat",
     href: "/schedule/tracking/reschedule",
     section: "main",
     permission: PAGE_PERMISSIONS.scheduleTracking,
@@ -216,7 +188,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "status-tracking",
     labelKey: "statusTracking",
-    icon: TimelineOutlined,
+    iconKey: "timeline",
     href: "/schedule/tracking/status",
     section: "main",
     permission: PAGE_PERMISSIONS.statusTracking,
@@ -224,7 +196,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "schedule-alerts",
     labelKey: "scheduleAlerts",
-    icon: NotificationsActiveOutlined,
+    iconKey: "notificationsActive",
     href: "/schedule/alerts",
     section: "main",
     permission: PAGE_PERMISSIONS.scheduleAlerts,
@@ -232,7 +204,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "class-details",
     labelKey: "classDetails",
-    icon: ClassOutlined,
+    iconKey: "class",
     href: "/classes/cls-9921",
     section: "main",
     permission: [AppPermission.SessionViewDetails, AppPermission.SessionReschedule],
@@ -240,7 +212,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "class-audit",
     labelKey: "classAudit",
-    icon: HistoryOutlined,
+    iconKey: "history",
     href: "/classes/cls-9921/audit",
     section: "main",
     permission: AppPermission.SessionViewDetails,
@@ -257,7 +229,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parent-profile",
     labelKey: "parents",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: profileHrefForParent({ parentId: "par-001" }) ?? "/parents",
     section: "main",
     permission: AppPermission.ParentsEdit,
@@ -266,7 +238,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "student-history",
     labelKey: "studentHistory",
-    icon: HistoryOutlined,
+    iconKey: "history",
     href: "/students/SRJ-9921/profile?tab=history",
     section: "main",
     permission: AppPermission.SessionViewDetails,
@@ -274,7 +246,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "student-quota",
     labelKey: "studentQuota",
-    icon: EditOutlined,
+    iconKey: "edit",
     href: "/students/SRJ-9921/profile?tab=quota",
     section: "main",
     permission: AppPermission.StudentsOverrideQuota,
@@ -282,7 +254,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "student-status",
     labelKey: "studentStatus",
-    icon: ClassOutlined,
+    iconKey: "class",
     href: "/students/SRJ-9921/profile?tab=status",
     section: "main",
     permission: AppPermission.StudentsChangeStatus,
@@ -290,7 +262,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "staff",
     labelKey: "staff",
-    icon: BadgeOutlined,
+    iconKey: "badge",
     href: "/staff",
     section: "main",
     permission: PAGE_PERMISSIONS.staff,
@@ -298,7 +270,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "resources",
     labelKey: "resources",
-    icon: FolderOpenOutlined,
+    iconKey: "folderOpen",
     href: "/resources",
     section: "main",
     permission: PAGE_PERMISSIONS.resources,
@@ -306,7 +278,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "books-and-bags",
     labelKey: "booksAndBags",
-    icon: MenuBookOutlined,
+    iconKey: "menuBook",
     href: "/resources/books-and-bags",
     section: "main",
     permission: PAGE_PERMISSIONS.booksAndBags,
@@ -323,12 +295,12 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "add-account",
     labelKey: "addAccount",
-    icon: PersonAddAltOutlined,
+    iconKey: "personAddAlt",
     href: "/add-account",
     section: "footer",
     permission: AppPermission.PermissionGroupsAssign,
   },
-  { key: "logout", labelKey: "logout", icon: LogoutOutlined, href: "/logout", section: "footer" },
+  { key: "logout", labelKey: "logout", iconKey: "logout", href: "/logout", section: "footer" },
 ];
 
 /**
@@ -339,7 +311,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "schedule",
     labelKey: "schedule",
-    icon: CalendarTodayOutlined,
+    iconKey: "calendarToday",
     href: "/dashboard",
     section: "main",
     permission: AppPermission.DashboardView,
@@ -355,7 +327,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "students",
     labelKey: "students",
-    icon: GroupOutlined,
+    iconKey: "group",
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.students,
@@ -363,7 +335,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "reports",
     labelKey: "reports",
-    icon: AnalyticsOutlined,
+    iconKey: "analytics",
     href: "/reports",
     section: "main",
     permission: PAGE_PERMISSIONS.reports,

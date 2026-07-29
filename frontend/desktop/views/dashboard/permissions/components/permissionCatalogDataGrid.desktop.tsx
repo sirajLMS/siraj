@@ -22,7 +22,7 @@ function PermissionKeyCell({ value }: Readonly<PermissionKeyCellProps>) {
   return (
     <Box
       sx={theme => ({
-        fontFamily: "JetBrains Mono, monospace",
+        fontFamily: "var(--font-jetbrains-mono), monospace",
         typography: "labelMd",
         backgroundColor: theme.palette.surfaceVariant,
         color: theme.palette.onSurfaceVariant,

@@ -17,7 +17,8 @@ const StyledTabContainer = styled(Box)({
 });
 
 const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
-  fontFamily: "JetBrains Mono, monospace",
+  fontFamily: "var(--font-jetbrains-mono), monospace",
+
   typography: "labelMd",
   backgroundColor: theme.palette.surfaceVariant,
   color: theme.palette.onSurfaceVariant,
