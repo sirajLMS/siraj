@@ -327,7 +327,7 @@ export function UserMenuButton({
   const tImpersonation = useAppTranslation(Translation.Auth.Impersonation);
   const tGroupSimulation = useAppTranslation(Translation.Auth.GroupSimulation);
   const actorIsSuperAdmin = useUserStore(state => state.actorIsSuperAdmin);
-  const canViewOwnProfile = useUserStore(state => state.hasPermission(AppPermission.AuthViewOwnProfile));
+  const canViewOwnProfile = useUserStore(state => state.hasPermission(AppPermission.ProfileCoreIdentityViewOwn));
   const {
     isImpersonating,
     status: impersonationStatus,

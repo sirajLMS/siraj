@@ -6,6 +6,7 @@ import {
   UserRepository,
 } from "@/backend/db";
 import { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import {
   ManagerProfileService,
   ParentPortalService,
@@ -13,6 +14,7 @@ import {
   PermissionsService,
   StaffProfileService,
   TeacherPortalService,
+  type UserPermissionContext,
 } from "@/backend/services";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
@@ -34,6 +36,7 @@ import type {
 import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
 import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
+import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
 import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -69,6 +72,40 @@ async function resolveRoleIdsForUser(userId: string): Promise<ResolvedRoleIds | 
   return null;
 }
 
+/** Users without teacher/parent/staff/student rows (e.g. pure admins) still have core profile when permitted. */
+async function resolveRoleIdsWithFallback(
+  targetUserId: string,
+  actorUserId: string,
+  scope: ProfileScope,
+  permissionContext?: ProfilePermissionContext
+): Promise<ResolvedRoleIds | null> {
+  const roleIds = await resolveRoleIdsForUser(targetUserId);
+  if (roleIds) {
+    return roleIds;
+  }
+
+  const canViewCoreProfile = async (): Promise<boolean> => {
+    if (scope === ProfileScope.OWN) {
+      const viewOwn = getProfilePermissionsForAudience(ProfileAudience.STAFF, ProfileScope.OWN, "view");
+      if (await hasAnyPermissionForProfile(actorUserId, viewOwn, permissionContext)) {
+        return true;
+      }
+      return await hasAnyProfileViewOtherPermission(actorUserId, permissionContext);
+    }
+    if (await hasAnyProfileViewOtherPermission(actorUserId, permissionContext)) {
+      return true;
+    }
+    const viewOther = getProfilePermissionsForAudience(ProfileAudience.STAFF, ProfileScope.OTHER, "view");
+    return hasAnyPermissionForProfile(actorUserId, viewOther, permissionContext);
+  };
+
+  if (!(await canViewCoreProfile())) {
+    return null;
+  }
+
+  return { audience: ProfileAudience.STAFF };
+}
+
 export function isRedirect(result: ProfilePageResolution): result is { redirect: string } {
   return "redirect" in result;
 }
@@ -88,89 +125,49 @@ export function toParentRepoInput(
   };
 }
 
-type OwnScopePermissionSet = {
-  readonly authPermission: AppPermission;
-  readonly audiencePermissions: Partial<Record<ProfileAudience, AppPermission>>;
-  readonly audienceBypass: ProfileAudience[];
-};
-
-type OtherScopePermissionSet = {
-  readonly genericPermission: AppPermission;
-  readonly audiencePermissions: Partial<Record<ProfileAudience, AppPermission>>;
-};
-
-const VIEW_OWN_PERMISSIONS: OwnScopePermissionSet = {
-  authPermission: AppPermission.AUTH_VIEW_OWN_PROFILE,
-  audiencePermissions: {
-    [ProfileAudience.TEACHER]: AppPermission.TEACHER_VIEW_OWN_PROFILE,
-    [ProfileAudience.PARENT]: AppPermission.PARENT_VIEW_OWN_PROFILE,
-  },
-  audienceBypass: [ProfileAudience.STAFF, ProfileAudience.STUDENT],
-};
-
-const VIEW_OTHER_PERMISSIONS: OtherScopePermissionSet = {
-  genericPermission: AppPermission.USER_VIEW_PROFILE,
-  audiencePermissions: {
-    [ProfileAudience.PARENT]: AppPermission.PARENT_VIEW_PROFILE,
-    [ProfileAudience.TEACHER]: AppPermission.TEACHER_VIEW_PROFILE,
-  },
-};
-
-const EDIT_OWN_PERMISSIONS: OwnScopePermissionSet = {
-  authPermission: AppPermission.AUTH_EDIT_OWN_PROFILE,
-  audiencePermissions: {
-    [ProfileAudience.TEACHER]: AppPermission.TEACHER_EDIT_OWN_PROFILE,
-    [ProfileAudience.PARENT]: AppPermission.PARENT_EDIT_OWN_PROFILE,
-  },
-  audienceBypass: [ProfileAudience.STAFF, ProfileAudience.STUDENT],
-};
-
-const EDIT_OTHER_PERMISSIONS: OtherScopePermissionSet = {
-  genericPermission: AppPermission.USER_EDIT_PROFILE,
-  audiencePermissions: {
-    [ProfileAudience.PARENT]: AppPermission.PARENTS_EDIT,
-    [ProfileAudience.TEACHER]: AppPermission.STAFF_EDIT_PROFILE,
-    [ProfileAudience.STAFF]: AppPermission.STAFF_EDIT_PROFILE,
-  },
-};
-
-async function hasAudiencePermission(
-  actorUserId: string,
+function getProfilePermissionsForAudience(
   audience: ProfileAudience,
-  audiencePermissions: Partial<Record<ProfileAudience, AppPermission>>
-): Promise<boolean> {
-  const audiencePerm = audiencePermissions[audience];
-  if (audiencePerm === undefined) {
-    return false;
-  }
-  return PermissionsService.hasPermission(actorUserId, audiencePerm);
+  scope: ProfileScope,
+  action: "view" | "edit"
+): AppPermission[] {
+  return PROFILE_FIELD_GROUPS.filter(group => group.audiences.includes(audience)).map(group => {
+    if (action === "view") {
+      return scope === ProfileScope.OWN ? group.viewOwn : group.viewOther;
+    }
+    return scope === ProfileScope.OWN ? group.editOwn : group.editOther;
+  });
 }
 
-async function checkOwnScopePermission(
-  actorUserId: string,
-  audience: ProfileAudience,
-  permissionSet: OwnScopePermissionSet
-): Promise<boolean> {
-  const hasAuth = await PermissionsService.hasPermission(actorUserId, permissionSet.authPermission);
-  if (!hasAuth) {
-    return false;
-  }
-  if (permissionSet.audienceBypass.includes(audience)) {
-    return true;
-  }
-  return hasAudiencePermission(actorUserId, audience, permissionSet.audiencePermissions);
+function getStudentProfilePermissions(scope: ProfileScope, action: "view" | "edit"): AppPermission[] {
+  return STUDENT_FIELD_GROUPS.map(group => {
+    if (action === "view") {
+      return scope === ProfileScope.OWN ? group.viewOwn : group.viewOther;
+    }
+    return scope === ProfileScope.OWN ? group.editOwn : group.editOther;
+  });
 }
 
-async function checkOtherScopePermission(
+export type ProfilePermissionContext = Pick<UserPermissionContext, "permissions" | "isSuperAdmin">;
+
+export type ProfileAccessOptions = {
+  readonly permissionContext?: ProfilePermissionContext;
+};
+
+async function hasAnyPermissionForProfile(
   actorUserId: string,
-  audience: ProfileAudience,
-  permissionSet: OtherScopePermissionSet
+  permissionKeys: AppPermission[],
+  permissionContext?: ProfilePermissionContext
 ): Promise<boolean> {
-  const hasGeneric = await PermissionsService.hasPermission(actorUserId, permissionSet.genericPermission);
-  if (hasGeneric) {
-    return true;
+  if (permissionKeys.length === 0) {
+    return false;
   }
-  return hasAudiencePermission(actorUserId, audience, permissionSet.audiencePermissions);
+  if (permissionContext) {
+    if (permissionContext.isSuperAdmin) {
+      return true;
+    }
+    return permissionKeys.some(key => permissionContext.permissions.includes(key));
+  }
+  return PermissionsService.hasAnyPermission(actorUserId, permissionKeys);
 }
 
 async function throwInsufficientPermissions(locale?: string): Promise<never> {
@@ -178,41 +175,110 @@ async function throwInsufficientPermissions(locale?: string): Promise<never> {
   throw new Error(errorsTranslations.insufficientPermissions);
 }
 
-async function assertOwnScopeOrThrow(
+async function hasAnyProfileViewOtherPermission(
   actorUserId: string,
-  audience: ProfileAudience,
-  permissionSet: OwnScopePermissionSet,
-  locale?: string
+  permissionContext?: ProfilePermissionContext
 ): Promise<boolean> {
-  const hasOwnPermission = await checkOwnScopePermission(actorUserId, audience, permissionSet);
-  if (!hasOwnPermission) {
-    await throwInsufficientPermissions(locale);
-  }
-  return true;
+  const viewOtherKeys = PROFILE_FIELD_GROUPS.map(group => group.viewOther);
+  return hasAnyPermissionForProfile(actorUserId, viewOtherKeys, permissionContext);
 }
 
-async function assertProfilePermission(
+async function resolveEffectiveProfileScope(
   actorUserId: string,
+  targetUserId: string,
   scope: ProfileScope,
   audience: ProfileAudience,
-  ownPermissionSet: OwnScopePermissionSet,
-  otherPermissionSet: OtherScopePermissionSet,
-  locale?: string
-): Promise<void> {
-  if (scope === ProfileScope.OWN) {
-    await assertOwnScopeOrThrow(actorUserId, audience, ownPermissionSet, locale);
-    return;
+  permissionContext?: ProfilePermissionContext
+): Promise<ProfileScope> {
+  if (scope !== ProfileScope.OWN || actorUserId !== targetUserId) {
+    return scope;
   }
 
-  const canAccessOther = await checkOtherScopePermission(actorUserId, audience, otherPermissionSet);
-  if (!canAccessOther) {
-    await throwInsufficientPermissions(locale);
+  if (audience === ProfileAudience.STUDENT) {
+    const viewOwn = getStudentProfilePermissions(ProfileScope.OWN, "view");
+    if (await hasAnyPermissionForProfile(actorUserId, viewOwn, permissionContext)) {
+      return ProfileScope.OWN;
+    }
+    const viewOther = getStudentProfilePermissions(ProfileScope.OTHER, "view");
+    if (await hasAnyPermissionForProfile(actorUserId, viewOther, permissionContext)) {
+      return ProfileScope.OTHER;
+    }
+    return scope;
   }
+
+  const viewOwn = getProfilePermissionsForAudience(audience, ProfileScope.OWN, "view");
+  if (await hasAnyPermissionForProfile(actorUserId, viewOwn, permissionContext)) {
+    return ProfileScope.OWN;
+  }
+
+  const viewOther = getProfilePermissionsForAudience(audience, ProfileScope.OTHER, "view");
+  if (await hasAnyPermissionForProfile(actorUserId, viewOther, permissionContext)) {
+    return ProfileScope.OTHER;
+  }
+
+  if (await hasAnyProfileViewOtherPermission(actorUserId, permissionContext)) {
+    return ProfileScope.OTHER;
+  }
+
+  return scope;
 }
 
-async function hasAnyProfileViewOtherPermission(actorUserId: string): Promise<boolean> {
-  const viewOtherKeys = PROFILE_FIELD_GROUPS.map(group => group.viewOther);
-  return PermissionsService.hasAnyPermission(actorUserId, viewOtherKeys);
+async function assertStudentProfileViewAccess(
+  actorUserId: string,
+  targetUserId: string,
+  scope: ProfileScope,
+  permissionContext?: ProfilePermissionContext
+): Promise<boolean> {
+  const viewPermissions = getStudentProfilePermissions(scope, "view");
+  if (await hasAnyPermissionForProfile(actorUserId, viewPermissions, permissionContext)) {
+    return true;
+  }
+  if (actorUserId !== targetUserId) {
+    return false;
+  }
+  const alternateScope = scope === ProfileScope.OWN ? ProfileScope.OTHER : ProfileScope.OWN;
+  const alternatePermissions = getStudentProfilePermissions(alternateScope, "view");
+  return hasAnyPermissionForProfile(actorUserId, alternatePermissions, permissionContext);
+}
+
+async function assertOtherScopeProfileViewAccess(
+  actorUserId: string,
+  targetUserId: string,
+  audience: ProfileAudience,
+  permissionContext?: ProfilePermissionContext
+): Promise<boolean> {
+  const audienceViewOther = getProfilePermissionsForAudience(audience, ProfileScope.OTHER, "view");
+  if (await hasAnyPermissionForProfile(actorUserId, audienceViewOther, permissionContext)) {
+    return true;
+  }
+  if (await hasAnyProfileViewOtherPermission(actorUserId, permissionContext)) {
+    return true;
+  }
+  if (actorUserId !== targetUserId) {
+    return false;
+  }
+  const viewOwnPermissions = getProfilePermissionsForAudience(audience, ProfileScope.OWN, "view");
+  return hasAnyPermissionForProfile(actorUserId, viewOwnPermissions, permissionContext);
+}
+
+async function assertOwnScopeProfileViewAccess(
+  actorUserId: string,
+  targetUserId: string,
+  audience: ProfileAudience,
+  permissionContext?: ProfilePermissionContext
+): Promise<boolean> {
+  const viewOwnPermissions = getProfilePermissionsForAudience(audience, ProfileScope.OWN, "view");
+  if (await hasAnyPermissionForProfile(actorUserId, viewOwnPermissions, permissionContext)) {
+    return true;
+  }
+  if (actorUserId !== targetUserId) {
+    return false;
+  }
+  const audienceViewOther = getProfilePermissionsForAudience(audience, ProfileScope.OTHER, "view");
+  if (await hasAnyPermissionForProfile(actorUserId, audienceViewOther, permissionContext)) {
+    return true;
+  }
+  return hasAnyProfileViewOtherPermission(actorUserId, permissionContext);
 }
 
 async function assertCanViewProfile(
@@ -220,34 +286,111 @@ async function assertCanViewProfile(
   targetUserId: string,
   scope: ProfileScope,
   audience: ProfileAudience,
-  locale?: string
+  locale?: string,
+  permissionContext?: ProfilePermissionContext
 ): Promise<void> {
-  if (scope === ProfileScope.OTHER) {
-    const canViewOther = await checkOtherScopePermission(actorUserId, audience, VIEW_OTHER_PERMISSIONS);
-    if (canViewOther) {
+  if (audience === ProfileAudience.STUDENT) {
+    if (await assertStudentProfileViewAccess(actorUserId, targetUserId, scope, permissionContext)) {
       return;
-    }
-    if (await hasAnyProfileViewOtherPermission(actorUserId)) {
-      return;
-    }
-    if (actorUserId === targetUserId) {
-      return assertCanViewProfile(actorUserId, targetUserId, ProfileScope.OWN, audience, locale);
     }
     await throwInsufficientPermissions(locale);
     return;
   }
 
-  await assertProfilePermission(actorUserId, scope, audience, VIEW_OWN_PERMISSIONS, VIEW_OTHER_PERMISSIONS, locale);
+  if (scope === ProfileScope.OTHER) {
+    if (await assertOtherScopeProfileViewAccess(actorUserId, targetUserId, audience, permissionContext)) {
+      return;
+    }
+    await throwInsufficientPermissions(locale);
+    return;
+  }
+
+  if (await assertOwnScopeProfileViewAccess(actorUserId, targetUserId, audience, permissionContext)) {
+    return;
+  }
+  await throwInsufficientPermissions(locale);
+}
+
+async function assertStudentProfileEditAccess(
+  actorUserId: string,
+  targetUserId: string,
+  scope: ProfileScope,
+  permissionContext?: ProfilePermissionContext
+): Promise<boolean> {
+  const editPermissions = getStudentProfilePermissions(scope, "edit");
+  if (await hasAnyPermissionForProfile(actorUserId, editPermissions, permissionContext)) {
+    return true;
+  }
+  if (actorUserId !== targetUserId) {
+    return false;
+  }
+  const alternateScope = scope === ProfileScope.OWN ? ProfileScope.OTHER : ProfileScope.OWN;
+  const alternatePermissions = getStudentProfilePermissions(alternateScope, "edit");
+  return hasAnyPermissionForProfile(actorUserId, alternatePermissions, permissionContext);
+}
+
+async function assertOtherScopeProfileEditAccess(
+  actorUserId: string,
+  targetUserId: string,
+  audience: ProfileAudience,
+  permissionContext?: ProfilePermissionContext
+): Promise<boolean> {
+  const audienceEditOther = getProfilePermissionsForAudience(audience, ProfileScope.OTHER, "edit");
+  if (await hasAnyPermissionForProfile(actorUserId, audienceEditOther, permissionContext)) {
+    return true;
+  }
+  if (actorUserId !== targetUserId) {
+    return false;
+  }
+  const editOwnPermissions = getProfilePermissionsForAudience(audience, ProfileScope.OWN, "edit");
+  return hasAnyPermissionForProfile(actorUserId, editOwnPermissions, permissionContext);
+}
+
+async function assertOwnScopeProfileEditAccess(
+  actorUserId: string,
+  targetUserId: string,
+  audience: ProfileAudience,
+  permissionContext?: ProfilePermissionContext
+): Promise<boolean> {
+  const editOwnPermissions = getProfilePermissionsForAudience(audience, ProfileScope.OWN, "edit");
+  if (await hasAnyPermissionForProfile(actorUserId, editOwnPermissions, permissionContext)) {
+    return true;
+  }
+  if (actorUserId !== targetUserId) {
+    return false;
+  }
+  const audienceEditOther = getProfilePermissionsForAudience(audience, ProfileScope.OTHER, "edit");
+  return hasAnyPermissionForProfile(actorUserId, audienceEditOther, permissionContext);
 }
 
 async function assertCanEditProfile(
   actorUserId: string,
-  _targetUserId: string,
+  targetUserId: string,
   scope: ProfileScope,
   audience: ProfileAudience,
-  locale?: string
+  locale?: string,
+  permissionContext?: ProfilePermissionContext
 ): Promise<void> {
-  await assertProfilePermission(actorUserId, scope, audience, EDIT_OWN_PERMISSIONS, EDIT_OTHER_PERMISSIONS, locale);
+  if (audience === ProfileAudience.STUDENT) {
+    if (await assertStudentProfileEditAccess(actorUserId, targetUserId, scope, permissionContext)) {
+      return;
+    }
+    await throwInsufficientPermissions(locale);
+    return;
+  }
+
+  if (scope === ProfileScope.OTHER) {
+    if (await assertOtherScopeProfileEditAccess(actorUserId, targetUserId, audience, permissionContext)) {
+      return;
+    }
+    await throwInsufficientPermissions(locale);
+    return;
+  }
+
+  if (await assertOwnScopeProfileEditAccess(actorUserId, targetUserId, audience, permissionContext)) {
+    return;
+  }
+  await throwInsufficientPermissions(locale);
 }
 
 export namespace ProfileService {
@@ -273,7 +416,7 @@ export namespace ProfileService {
 
     return {
       teacherOwnProfile: null,
-      teacherAdminProfile: await StaffProfileService.getTeacherProfileForEdit(actorUserId, roleIds.teacherId, locale),
+      teacherAdminProfile: await StaffProfileService.getTeacherProfileForView(actorUserId, roleIds.teacherId, locale),
       assignedStudents: await StudentRepository.getAssignedToTeacher(roleIds.teacherId),
     };
   }
@@ -370,34 +513,58 @@ export namespace ProfileService {
 
   export async function resolvePageContext(
     actorUserId: string,
-    options: { readonly targetUserId?: string; readonly mode: ProfileMode },
+    options: { readonly targetUserId?: string; readonly mode: ProfileMode } & ProfileAccessOptions,
     locale?: string
   ): Promise<ProfilePageResolution> {
+    const permissionContext = options.permissionContext;
     const targetUserId = options.targetUserId ?? actorUserId;
     const scope: ProfileScope = targetUserId === actorUserId ? ProfileScope.OWN : ProfileScope.OTHER;
-    const roleIds = await resolveRoleIdsForUser(targetUserId);
+    const roleIds = await resolveRoleIdsWithFallback(targetUserId, actorUserId, scope, permissionContext);
 
     if (!roleIds) {
       return { redirect: "/dashboard" };
     }
 
+    const effectiveScope = await resolveEffectiveProfileScope(
+      actorUserId,
+      targetUserId,
+      scope,
+      roleIds.audience,
+      permissionContext
+    );
+
     try {
       if (options.mode === ProfileMode.VIEW) {
-        await assertCanViewProfile(actorUserId, targetUserId, scope, roleIds.audience, locale);
+        await assertCanViewProfile(
+          actorUserId,
+          targetUserId,
+          effectiveScope,
+          roleIds.audience,
+          locale,
+          permissionContext
+        );
       } else {
-        await assertCanEditProfile(actorUserId, targetUserId, scope, roleIds.audience, locale);
+        await assertCanEditProfile(
+          actorUserId,
+          targetUserId,
+          effectiveScope,
+          roleIds.audience,
+          locale,
+          permissionContext
+        );
       }
     } catch {
-      if (options.mode === ProfileMode.EDIT && scope === ProfileScope.OWN) {
+      if (options.mode === ProfileMode.EDIT && effectiveScope === ProfileScope.OWN) {
         return { redirect: "/profile" };
       }
       return { redirect: "/dashboard" };
     }
 
-    const actorPermissions = (await PermissionsService.getUserContext(actorUserId)).permissions;
+    const actorPermissions =
+      permissionContext?.permissions ?? (await PermissionsService.getUserContext(actorUserId)).permissions;
 
     const context: ProfilePageContext = {
-      scope,
+      scope: effectiveScope,
       mode: options.mode,
       audience: roleIds.audience,
       actorUserId,
@@ -429,15 +596,17 @@ export namespace ProfileService {
     actorUserId: string,
     targetUserId: string,
     scope: ProfileScope,
-    audience: ProfileAudience
+    audience: ProfileAudience,
+    permissionContext?: ProfilePermissionContext
   ): Promise<FieldFilterContext> {
-    const permissionContext = await PermissionsService.getUserContext(actorUserId);
+    const permissions =
+      permissionContext?.permissions ?? (await PermissionsService.getUserContext(actorUserId)).permissions;
     return {
       actorUserId,
       targetUserId,
       scope,
       audience,
-      permissions: new Set(permissionContext.permissions),
+      permissions: new Set(permissions),
     };
   }
 
@@ -453,19 +622,69 @@ export namespace ProfileService {
   export async function getProfileByUserId(
     actorUserId: string,
     targetUserId: string,
-    locale?: string
+    locale?: string,
+    accessOptions?: ProfileAccessOptions
   ): Promise<UnifiedProfileReturnType> {
+    const permissionContext = accessOptions?.permissionContext;
     const scope: ProfileScope = actorUserId === targetUserId ? ProfileScope.OWN : ProfileScope.OTHER;
-    const roleIds = await resolveRoleIdsForUser(targetUserId);
+    const roleIds = await resolveRoleIdsWithFallback(targetUserId, actorUserId, scope, permissionContext);
 
     if (!roleIds) {
       const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
       throw new Error(errorsTranslations.notFound);
     }
 
-    await assertCanViewProfile(actorUserId, targetUserId, scope, roleIds.audience, locale);
+    await assertCanViewProfile(actorUserId, targetUserId, scope, roleIds.audience, locale, permissionContext);
+
+    const effectiveScope = await resolveEffectiveProfileScope(
+      actorUserId,
+      targetUserId,
+      scope,
+      roleIds.audience,
+      permissionContext
+    );
 
     const user = await resolveUserOrThrow(targetUserId, locale);
+
+    if (roleIds.audience === ProfileAudience.STUDENT) {
+      const filterCtx = await buildProfileFilterContext(
+        actorUserId,
+        targetUserId,
+        effectiveScope,
+        roleIds.audience,
+        permissionContext
+      );
+      return filterProfileByFieldGroups(
+        {
+          id: targetUserId,
+          userId: targetUserId,
+          audience: ProfileAudience.STUDENT,
+          scope: effectiveScope,
+          name: user.name,
+          email: user.email,
+          avatarUrl: user.avatarUrl,
+          teacherId: null,
+          parentId: null,
+          staffProfileId: null,
+          teacherOwnProfile: null,
+          teacherAdminProfile: null,
+          parentOwnProfile: null,
+          parentAdminProfile: null,
+          associatedStudents: null,
+          staffProfile: null,
+          staffPermissionGroups: null,
+          staffPermissionOverrides: null,
+          meetingConfigs: null,
+          paymentMethods: null,
+          paymentMethodDefaults: null,
+          assignedStudents: null,
+          displayCurrency: user.displayCurrency,
+          timezone: user.timezone as IanaTimezone,
+          phone: user.phone,
+        },
+        filterCtx
+      );
+    }
 
     const {
       teacherOwnProfile,
@@ -477,18 +696,18 @@ export namespace ProfileService {
       staffPermissionGroups,
       staffPermissionOverrides,
       assignedStudents,
-    } = await loadRoleProfiles(actorUserId, targetUserId, scope, roleIds, locale);
+    } = await loadRoleProfiles(actorUserId, targetUserId, effectiveScope, roleIds, locale);
 
     const meetingConfigs = await safeLoadMeetingConfigs(actorUserId, targetUserId, locale);
 
     const [paymentMethods, filterCtx] = await Promise.all([
-      PaymentMethodService.listForProfile(actorUserId, targetUserId, scope, locale),
-      buildProfileFilterContext(actorUserId, targetUserId, scope, roleIds.audience),
+      PaymentMethodService.listForProfile(actorUserId, targetUserId, effectiveScope, locale),
+      buildProfileFilterContext(actorUserId, targetUserId, effectiveScope, roleIds.audience, permissionContext),
     ]);
     const paymentMethodDefaults = await PaymentMethodService.getDefaultsForProfile(
       actorUserId,
       targetUserId,
-      scope,
+      effectiveScope,
       locale
     );
 
@@ -497,7 +716,7 @@ export namespace ProfileService {
         id: targetUserId,
         userId: targetUserId,
         audience: roleIds.audience,
-        scope,
+        scope: effectiveScope,
         name: user.name,
         email: user.email,
         avatarUrl: user.avatarUrl,
@@ -517,6 +736,8 @@ export namespace ProfileService {
         paymentMethodDefaults,
         assignedStudents,
         displayCurrency: user.displayCurrency,
+        timezone: user.timezone as IanaTimezone,
+        phone: user.phone,
       },
       filterCtx
     );
@@ -533,12 +754,31 @@ export namespace ProfileService {
       return;
     }
 
-    const requiredPermission =
-      scope === ProfileScope.OWN ? AppPermission.AUTH_EDIT_OWN_PROFILE : AppPermission.USER_EDIT_PROFILE;
-    const canEdit = await PermissionsService.hasPermission(actorUserId, requiredPermission);
-    if (!canEdit) {
-      const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(errorsTranslations.insufficientPermissions);
+    const identityKeys = ["name", "email", "avatarUrl", "displayCurrency"] as const;
+    const contactKeys = ["phone", "timezone"] as const;
+    const touchesIdentity = identityKeys.some(key => core[key] !== undefined);
+    const touchesContact = contactKeys.some(key => core[key] !== undefined);
+
+    if (touchesIdentity) {
+      const identityPermission =
+        scope === ProfileScope.OWN
+          ? AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN
+          : AppPermission.PROFILE_CORE_IDENTITY_EDIT_OTHER;
+      if (!(await PermissionsService.hasPermission(actorUserId, identityPermission))) {
+        const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
+        throw new Error(errorsTranslations.insufficientPermissions);
+      }
+    }
+
+    if (touchesContact) {
+      const contactPermission =
+        scope === ProfileScope.OWN
+          ? AppPermission.PROFILE_CORE_CONTACT_EDIT_OWN
+          : AppPermission.PROFILE_CORE_CONTACT_EDIT_OTHER;
+      if (!(await PermissionsService.hasPermission(actorUserId, contactPermission))) {
+        const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
+        throw new Error(errorsTranslations.insufficientPermissions);
+      }
     }
 
     await UserRepository.updateProfileFields(targetUserId, core, locale);
@@ -666,8 +906,13 @@ export namespace ProfileService {
     }
   }
 
-  async function resolveRoleIdsOrThrow(userId: string, locale?: string): Promise<ResolvedRoleIds> {
-    const roleIds = await resolveRoleIdsForUser(userId);
+  async function resolveRoleIdsOrThrow(
+    targetUserId: string,
+    actorUserId: string,
+    scope: ProfileScope,
+    locale?: string
+  ): Promise<ResolvedRoleIds> {
+    const roleIds = await resolveRoleIdsWithFallback(targetUserId, actorUserId, scope);
     if (!roleIds) {
       const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
       throw new Error(errorsTranslations.notFound);
@@ -682,7 +927,7 @@ export namespace ProfileService {
     input: UpdateOwnProfileInput | UpdateUserProfileInput,
     locale?: string
   ): Promise<UnifiedProfileReturnType> {
-    const roleIds = await resolveRoleIdsOrThrow(targetUserId, locale);
+    const roleIds = await resolveRoleIdsOrThrow(targetUserId, actorUserId, scope, locale);
     await assertCanEditProfile(actorUserId, targetUserId, scope, roleIds.audience, locale);
 
     const permissionContext = await PermissionsService.getUserContext(actorUserId);

@@ -2,11 +2,15 @@
 
 import { Box, Typography } from "@mui/material";
 import { FormProvider } from "react-hook-form";
+import {
+  OnboardingPaymentMethodSection,
+  UserEntityFieldsSection,
+} from "@/frontend/common/components/onboarding/sections";
+import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { MeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
-import { PaymentMethodSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/PaymentMethodSection";
 import { SalaryDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/SalaryDetailsSection";
-import { TeacherInfoSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/TeacherInfoSection";
+import { TeacherExtensionSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/TeacherExtensionSection";
 import type { TeacherOnboardingViewModel } from "@/frontend/common/views/dashboard/teachers/onboarding/useTeacherOnboardingViewModel";
 import {
   DesktopFormErrorSnackbar,
@@ -15,6 +19,7 @@ import {
   DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 function FormActions({
   isSubmitting,
@@ -66,6 +71,8 @@ export function TeacherOnboardingDesktopView({
   onDismissSuccess,
   onDismissError,
 }: Readonly<TeacherOnboardingViewModel>) {
+  const userEntityLabels = useAppTranslation(Translation.Onboarding.UserEntity);
+
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
@@ -88,14 +95,18 @@ export function TeacherOnboardingDesktopView({
           }}
           sx={{ display: "flex", flexDirection: "column", gap: 4, pb: 12 }}
         >
-          <DesktopSectionPanel title={labels.sections.teacherInfo}>
-            <TeacherInfoSection
+          <DesktopSectionPanel title={userEntityLabels.sectionTitle}>
+            <UserEntityFieldsSection
               register={register}
               control={control}
               errors={errors}
-              labels={labels}
+              labels={userEntityLabels}
               onUploadAvatar={onUploadAvatar}
+              phoneRequired
             />
+          </DesktopSectionPanel>
+          <DesktopSectionPanel title={labels.sections.teacherInfo}>
+            <TeacherExtensionSection register={register} control={control} errors={errors} labels={labels} />
           </DesktopSectionPanel>
           <DesktopSectionPanel title={labels.sections.officialDetails}>
             <OfficialDetailsSection register={register} control={control} errors={errors} labels={labels} />
@@ -104,7 +115,13 @@ export function TeacherOnboardingDesktopView({
             <SalaryDetailsSection register={register} control={control} errors={errors} labels={labels} />
           </DesktopSectionPanel>
           <DesktopSectionPanel title={labels.sections.paymentMethod}>
-            <PaymentMethodSection control={control} errors={errors} labels={labels} />
+            <OnboardingPaymentMethodSection
+              control={control}
+              errors={errors}
+              direction={PaymentDirection.Payout}
+              methodFieldName="payoutMethod"
+              addPaymentMethodLabel={labels.sections.addPaymentMethod}
+            />
           </DesktopSectionPanel>
           <DesktopSectionPanel title={labels.sections.meetingConfig}>
             <MeetingConfigOnboardingSection

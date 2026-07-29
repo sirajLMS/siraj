@@ -1,14 +1,10 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
-import type {
-  AppLanguage,
-  Gender,
-  ProfileMode,
-  ProfileScope,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   recordStudentProfileEditMutationDocument,
   studentProfileQueryDocument,
@@ -34,6 +30,8 @@ function toDateInputValue(value: string | null | undefined): string {
 function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDraft {
   return {
     phone: profile.phone ?? "",
+    timezone: profile.timezone ?? "",
+    displayCurrency: (profile.displayCurrency as CurrencyCode | null) ?? "",
     dateOfBirth: toDateInputValue(profile.dateOfBirth),
     gender: (profile.gender as Gender | null) ?? "",
     language: (profile.language as AppLanguage | null) ?? "",
@@ -63,11 +61,6 @@ function useStudentProfileLabels(t: StudentPortalProfileLabels, editAvatarTitle:
       parentName: t.parentName,
       parentEmail: t.parentEmail,
       parentPhone: t.parentPhone,
-      academicInfo: t.academicInfo,
-      teacher: t.teacher,
-      hoursPerWeek: t.hoursPerWeek,
-      classesRemaining: t.classesRemaining,
-      classesTotal: t.classesTotal,
       editProfile: t.editProfile,
       saveChanges: t.saveChanges,
       cancel: t.cancel,
@@ -87,6 +80,7 @@ export interface StudentProfileViewModel {
   readonly loading: boolean;
   readonly saving: boolean;
   readonly isEditing: boolean;
+  readonly isOtherScope: boolean;
   readonly draft: StudentPortalProfileEditDraft;
   readonly formattedDateOfBirth: string;
   readonly snackbarOpen: boolean;
@@ -109,6 +103,7 @@ export interface UseStudentProfileViewModelProps {
   readonly scope: ProfileScope;
   readonly mode: ProfileMode;
   readonly targetUserId: string;
+  readonly studentId?: string;
   readonly activeTab?: string;
 }
 
@@ -128,6 +123,8 @@ function mapStudentProfileFromQuery(
     timezoneOverride: (p.timezoneOverride as string | null) ?? null,
     email: (p.email as string | null) ?? null,
     phone: (p.phone as string | null) ?? null,
+    timezone: (p.timezone as string | null) ?? null,
+    displayCurrency: (p.displayCurrency as string | null) ?? null,
     parentId: (p.parentId as string | null) ?? null,
     parentUserId: (p.parentUserId as string | null) ?? null,
     parentName: (p.parentName as string | null) ?? null,
@@ -150,6 +147,7 @@ export function useStudentProfileViewModel({
   scope,
   mode,
   targetUserId: _targetUserId,
+  studentId,
   activeTab = "profile",
 }: UseStudentProfileViewModelProps): StudentProfileViewModel {
   const t = useAppTranslation(Translation.Dashboard.StudentPortalProfile);
@@ -157,6 +155,7 @@ export function useStudentProfileViewModel({
   const router = useRouter();
   const locale = useAppLocale();
   const labels = useStudentProfileLabels(t, tProfileBase.editAvatarTitle);
+  const isOtherScope = scope === ProfileScope.Other;
 
   const isEditing = useStudentPortalProfileStore(s => s.isEditing);
   const draft = useStudentPortalProfileStore(s => s.draft);
@@ -173,8 +172,14 @@ export function useStudentProfileViewModel({
     loading: profileLoading,
     refetch,
   } = useQuery(studentProfileQueryDocument, {
-    variables: { studentId: null, year: null, month: null },
-    fetchPolicy: "cache-and-network",
+    variables: {
+      studentId: isOtherScope ? (studentId ?? null) : null,
+      year: null,
+      month: null,
+      includeUpcomingClasses: false,
+    },
+    skip: isOtherScope && !studentId,
+    fetchPolicy: "cache-first",
   });
 
   const [recordEdit, { loading: saving }] = useMutation(recordStudentProfileEditMutationDocument);
@@ -193,6 +198,21 @@ export function useStudentProfileViewModel({
     }
   }, [profile?.dateOfBirth, locale]);
 
+  const profileSyncKey = profile ? `${profile.id}:${profile.updatedAt ?? ""}:${profile.version}` : null;
+  const syncedProfileKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (mode !== ProfileMode.Edit || isOtherScope || !profileSyncKey || !profile) {
+      return;
+    }
+    if (syncedProfileKeyRef.current === profileSyncKey) {
+      return;
+    }
+    syncedProfileKeyRef.current = profileSyncKey;
+    setDraft(profileToDraft(profile));
+    setIsEditing(true);
+  }, [mode, profileSyncKey, isOtherScope, profile, setDraft, setIsEditing]);
+
   const onStartEdit = () => {
     if (!profile) return;
     setDraft(profileToDraft(profile));
@@ -209,6 +229,8 @@ export function useStudentProfileViewModel({
         variables: {
           input: {
             phone: draft.phone.trim() || null,
+            timezone: draft.timezone.trim() || null,
+            displayCurrency: draft.displayCurrency || null,
             dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString() : null,
             gender: draft.gender || null,
             language: draft.language || null,
@@ -219,6 +241,10 @@ export function useStudentProfileViewModel({
         },
       });
       await refetch();
+      if (mode === ProfileMode.Edit) {
+        router.push("/profile");
+        return;
+      }
       resetEdit();
       showSnackbar(labels.saveSuccess, "success");
     } catch (error) {
@@ -232,7 +258,8 @@ export function useStudentProfileViewModel({
     labels,
     loading: profileLoading,
     saving,
-    isEditing,
+    isEditing: isOtherScope ? false : isEditing,
+    isOtherScope,
     draft,
     formattedDateOfBirth,
     snackbarOpen: snackbar.open,
@@ -243,7 +270,7 @@ export function useStudentProfileViewModel({
     targetUserId: _targetUserId,
     activeTab,
     onUploadAvatar,
-    onBackToDashboard: () => router.push("/students/me"),
+    onBackToDashboard: () => router.push("/dashboard"),
     onStartEdit,
     onCancelEdit,
     onDraftChange: patchDraft,

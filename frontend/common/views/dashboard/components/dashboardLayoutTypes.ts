@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 
 /**
  * Props shared by both the mobile and desktop DashboardLayout variants.
@@ -11,6 +11,14 @@ import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard"
  */
 export interface DashboardLayoutProps {
   readonly children: ReactNode;
+  /**
+   * Filtered, permission-respecting sidebar groups. Each tier's sidebar shell
+   * renders them as collapsible sections (desktop permanent + mobile drawer);
+   * the mobile bottom nav ignores them entirely. Empty groups are dropped
+   * upstream by `getNavItemsForPermissions` so portals never see empty
+   * headers.
+   */
+  readonly sidebarGroups: readonly NavGroup[];
   readonly sidebarItems: readonly NavItem[];
   readonly bottomNavItems: readonly NavItem[];
   readonly userName: string;
@@ -34,4 +42,6 @@ export interface DashboardLayoutProps {
   readonly sidebarWidth?: string;
   readonly navbarHeight?: string;
   readonly initialSidebarOpen?: boolean;
+  /** When true, hide sidebar, drawer, and bottom nav (teacher profile completion gate). */
+  readonly hideSidebarNavigation?: boolean;
 }

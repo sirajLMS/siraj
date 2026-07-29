@@ -26,7 +26,7 @@ export namespace ParentSocialService {
     userId: string,
     locale?: string
   ): Promise<Pick<ParentProfileResult, "phone" | "facebook" | "whatsapp" | "twitter"> | null> {
-    await assertPermission(userId, AppPermission.PARENT_VIEW_OWN_PROFILE, locale);
+    await assertPermission(userId, AppPermission.PROFILE_PARENT_SOCIAL_VIEW_OWN, locale);
     const parent = await resolveParentForUser(userId, locale);
     const profile = await ParentRepository.getParentProfile(parent.id);
     if (!profile) {
@@ -46,7 +46,7 @@ export namespace ParentSocialService {
     parentId: string,
     locale?: string
   ): Promise<Pick<ParentProfileResult, "phone" | "facebook" | "whatsapp" | "twitter"> | null> {
-    await assertPermission(actorUserId, AppPermission.PARENT_VIEW_PROFILE, locale);
+    await assertPermission(actorUserId, AppPermission.PROFILE_PARENT_SOCIAL_VIEW_OTHER, locale);
     const profile = await ParentRepository.getParentProfile(parentId);
     if (!profile) {
       return null;

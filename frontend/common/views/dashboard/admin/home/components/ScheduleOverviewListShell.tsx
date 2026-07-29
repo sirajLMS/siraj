@@ -64,7 +64,7 @@ export function ScheduleOverviewListShell<Row>({
       ) : rows.length === 0 ? (
         (renderEmptyState?.() ?? <ScheduleOverviewEmptyState message={emptyMessage} />)
       ) : (
-        <Stack spacing={2}>
+        <Stack spacing={0}>
           {rows.map(row => (
             <Fragment key={getKey(row)}>{renderItem(row)}</Fragment>
           ))}

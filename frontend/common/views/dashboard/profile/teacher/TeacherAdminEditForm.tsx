@@ -9,12 +9,16 @@ import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarIm
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
+import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AdminOnlySection";
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/CompensationSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
-import { toTeacherSectionLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
+import {
+  toTeacherPersonalFieldLabels,
+  toTeacherSectionLabels,
+} from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
 import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import {
   type TeacherAdminEditFormData,
@@ -31,6 +35,7 @@ function buildDefaultFormValues(data?: TeacherEditData | null): TeacherAdminEdit
     avatarUrl: data?.avatarUrl ?? null,
     phone: data?.phone ?? "",
     nationalId: data?.nationalId ?? "",
+    nationality: data?.nationality ?? "",
     dateOfBirth: data?.dateOfBirth ?? "",
     gender: data?.gender ?? null,
     address: data?.address ?? "",
@@ -73,6 +78,7 @@ interface SectionsGridProps {
 
 function TeacherFormSectionsGrid({ labels, teacherData, targetUserId, scope, canEdit, form }: SectionsGridProps) {
   const sectionLabels = toTeacherSectionLabels(labels);
+  const personalFieldLabels = toTeacherPersonalFieldLabels(labels);
 
   return (
     <Box
@@ -110,8 +116,22 @@ function TeacherFormSectionsGrid({ labels, teacherData, targetUserId, scope, can
       {canEdit("teacher_professional") ? (
         <CompensationSection labels={labels} mode="edit" register={form.register} control={form.control} />
       ) : null}
+      {canEdit("teacher_identity") || canEdit("teacher_professional") ? (
+        <TeacherExtensionProfileSection
+          mode="edit"
+          scope={scope}
+          labels={{
+            teacher: labels.teacher,
+            personalFieldLabels,
+            baseLabels: sectionLabels.baseLabels,
+          }}
+          sectionTitle={labels.teacher.sections.identity}
+          register={form.register}
+          control={form.control}
+        />
+      ) : null}
       {canEdit("teacher_identity") ? (
-        <AdminOnlySection labels={sectionLabels} mode="edit" register={form.register} control={form.control} />
+        <AdminOnlySection labels={sectionLabels} mode="edit" register={form.register} />
       ) : null}
     </Box>
   );

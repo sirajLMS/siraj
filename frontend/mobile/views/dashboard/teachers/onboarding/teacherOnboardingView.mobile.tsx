@@ -2,16 +2,21 @@
 
 import { Box, Typography } from "@mui/material";
 import { FormProvider } from "react-hook-form";
+import {
+  OnboardingPaymentMethodSection,
+  UserEntityFieldsSection,
+} from "@/frontend/common/components/onboarding/sections";
+import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { MeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
-import { PaymentMethodSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/PaymentMethodSection";
 import { SalaryDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/SalaryDetailsSection";
-import { TeacherInfoSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/TeacherInfoSection";
+import { TeacherExtensionSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/TeacherExtensionSection";
 import type { TeacherOnboardingViewModel } from "@/frontend/common/views/dashboard/teachers/onboarding/useTeacherOnboardingViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 function FormActions({
   isSubmitting,
@@ -61,6 +66,8 @@ export function TeacherOnboardingMobileView({
   onSubmit,
   onDismissSuccess,
 }: Readonly<TeacherOnboardingViewModel>) {
+  const userEntityLabels = useAppTranslation(Translation.Onboarding.UserEntity);
+
   return (
     <MobilePageContainer>
       <MobilePageHeader
@@ -83,14 +90,18 @@ export function TeacherOnboardingMobileView({
           }}
           sx={{ display: "flex", flexDirection: "column", gap: 4, pb: 12 }}
         >
-          <MobileSectionPanel title={labels.sections.teacherInfo}>
-            <TeacherInfoSection
+          <MobileSectionPanel title={userEntityLabels.sectionTitle}>
+            <UserEntityFieldsSection
               register={register}
               control={control}
               errors={errors}
-              labels={labels}
+              labels={userEntityLabels}
               onUploadAvatar={onUploadAvatar}
+              phoneRequired
             />
+          </MobileSectionPanel>
+          <MobileSectionPanel title={labels.sections.teacherInfo}>
+            <TeacherExtensionSection register={register} control={control} errors={errors} labels={labels} />
           </MobileSectionPanel>
           <MobileSectionPanel title={labels.sections.officialDetails}>
             <OfficialDetailsSection register={register} control={control} errors={errors} labels={labels} />
@@ -99,7 +110,13 @@ export function TeacherOnboardingMobileView({
             <SalaryDetailsSection register={register} control={control} errors={errors} labels={labels} />
           </MobileSectionPanel>
           <MobileSectionPanel title={labels.sections.paymentMethod}>
-            <PaymentMethodSection control={control} errors={errors} labels={labels} />
+            <OnboardingPaymentMethodSection
+              control={control}
+              errors={errors}
+              direction={PaymentDirection.Payout}
+              methodFieldName="payoutMethod"
+              addPaymentMethodLabel={labels.sections.addPaymentMethod}
+            />
           </MobileSectionPanel>
           <MobileSectionPanel title={labels.sections.meetingConfig}>
             <MeetingConfigOnboardingSection

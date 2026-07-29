@@ -9,14 +9,13 @@ import { ParentDirectoryService } from "@/backend/services/parent/parent-directo
 import { getErrorMessage } from "@/shared/utils/error";
 
 describe("ParentDirectoryService Permission Gating", () => {
-  const originalHasPermission = PermissionsService.hasPermission;
+  const originalHasAnyPermission = PermissionsService.hasAnyPermission;
   const mockPermissions = new Map<string, boolean>();
   let testUser: typeof users.$inferSelect;
 
   beforeAll(async () => {
-    PermissionsService.hasPermission = async (userId: string, permissionKey: AppPermission) => {
-      const key = `${userId}:${permissionKey}`;
-      return mockPermissions.get(key) ?? false;
+    PermissionsService.hasAnyPermission = async (userId: string, permissionKeys: AppPermission[]) => {
+      return permissionKeys.some(permissionKey => mockPermissions.get(`${userId}:${permissionKey}`) ?? false);
     };
 
     const now = new Date();
@@ -37,7 +36,7 @@ describe("ParentDirectoryService Permission Gating", () => {
   });
 
   afterAll(async () => {
-    PermissionsService.hasPermission = originalHasPermission;
+    PermissionsService.hasAnyPermission = originalHasAnyPermission;
     if (testUser) {
       await db.delete(users).where(eq(users.id, testUser.id));
     }
@@ -51,10 +50,16 @@ describe("ParentDirectoryService Permission Gating", () => {
     expect(error).toBeInstanceOf(Error);
     expect(getErrorMessage(error)).toContain("الصلاحيات");
 
-    // Case 2: Has permission
+    // Case 2: Has parent.view_directory
     mockPermissions.set(`${actorUserId}:${AppPermission.PARENT_VIEW_DIRECTORY}`, true);
     const result = await ParentDirectoryService.getParentDirectory(actorUserId, null, null, null);
     expect(result.id).toBe("parent-directory");
     expect(result.totalCount).toBeGreaterThanOrEqual(0);
+
+    // Case 3: Has parents.list
+    mockPermissions.clear();
+    mockPermissions.set(`${actorUserId}:${AppPermission.PARENTS_LIST}`, true);
+    const listResult = await ParentDirectoryService.getParentDirectory(actorUserId, null, null, null);
+    expect(listResult.id).toBe("parent-directory");
   });
 });

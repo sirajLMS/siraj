@@ -6,7 +6,7 @@ import { TeacherOwnProfileView } from "@/frontend/common/views/dashboard/teacher
 
 export function TeacherOwnProfileContainer() {
   return (
-    <RequirePermission permissions={[AppPermission.TeacherViewOwnProfile]}>
+    <RequirePermission permissions={[AppPermission.ProfileCoreIdentityViewOwn]}>
       <TeacherOwnProfileView />
     </RequirePermission>
   );

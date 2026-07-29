@@ -16,6 +16,7 @@ import {
   DesktopPageHeader,
   DesktopSectionPanel,
   DesktopStatusBadge,
+  desktopSectionContentInsetSx,
 } from "@/frontend/desktop/components/ui";
 import { ExchangeRateHistorySectionDesktop } from "@/frontend/desktop/views/dashboard/admin/billing/exchange-rates/components/exchangeRateHistorySection.desktop";
 
@@ -214,8 +215,8 @@ export function ExchangeRatesDesktopView({
         actionsDisabled={billingActionsDisabled}
       />
 
-      <DesktopSectionPanel title={labels.rateTable.title}>
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+      <DesktopSectionPanel contentPadding={false} title={labels.rateTable.title}>
+        <Box sx={{ ...desktopSectionContentInsetSx, display: "flex", justifyContent: "flex-end", pb: 0 }}>
           {canOverride ? (
             <Button variant="outlined" onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
               {labels.manualOverride.title}
@@ -233,7 +234,7 @@ export function ExchangeRatesDesktopView({
         />
       </DesktopSectionPanel>
 
-      <DesktopSectionPanel title={labels.history.title}>
+      <DesktopSectionPanel contentPadding={false} title={labels.history.title}>
         <ExchangeRateHistorySectionDesktop labels={labels} historyViewModel={historyViewModel} />
       </DesktopSectionPanel>
 

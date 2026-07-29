@@ -36,6 +36,7 @@ export function ParentDashboardDesktopView({
       </Box>
 
       <DesktopSectionPanel
+        contentPadding={false}
         title={labels.schedule.title}
         actions={
           <>

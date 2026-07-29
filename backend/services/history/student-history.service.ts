@@ -1,4 +1,4 @@
-import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db";
+import { StudentRepository } from "@/backend/db";
 import { StudentHistoryRepository } from "@/backend/db/repo/students/student-history.repository";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -6,40 +6,19 @@ import { EffectiveMeetingService } from "@/backend/services/meeting/class-meetin
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace StudentHistoryService {
-  async function resolveIsAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
-    const profile = await StudentRepository.findProfileById(studentId);
-    if (!profile) {
-      return false;
-    }
-
-    // LMS — Student login accounts can view their own history.
-    if (profile.userId === actorUserId) {
-      return true;
-    }
-
-    const parent = await ParentRepository.findByUserId(actorUserId);
-    if (parent?.id === profile.parentId) {
-      return true;
-    }
-
-    const teacher = await TeacherRepository.findByUserId(actorUserId);
-    if (profile.primaryTeacherId === teacher?.id) {
-      return true;
-    }
-
-    return false;
-  }
-
   async function assertCanViewStudentHistory(userId: string, studentId: string, tErrors: ErrorsLabels): Promise<void> {
     const hasLegacy = await PermissionsService.hasPermission(userId, AppPermission.HISTORY_VIEW_CALENDAR);
     if (hasLegacy) {
       return;
     }
 
-    const isAssociatedViewer = await resolveIsAssociatedViewer(userId, studentId);
-    const viewPermission = isAssociatedViewer
-      ? AppPermission.STUDENT_HISTORY_VIEW_OWN
-      : AppPermission.STUDENT_HISTORY_VIEW_OTHER;
+    const profile = await StudentRepository.findProfileById(studentId);
+    if (!profile) {
+      throw new Error(tErrors.studentNotFound(studentId));
+    }
+
+    const viewPermission =
+      profile.userId === userId ? AppPermission.STUDENT_HISTORY_VIEW_OWN : AppPermission.STUDENT_HISTORY_VIEW_OTHER;
 
     const hasGroupPermission = await PermissionsService.hasPermission(userId, viewPermission);
     if (hasGroupPermission) {
@@ -100,6 +79,8 @@ export namespace StudentHistoryService {
     if (!detail) {
       throw new Error(tErrors.notFound);
     }
+
+    await assertCanViewStudentHistory(userId, detail.studentId, tErrors);
 
     const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(classInstanceId, tErrors);
 

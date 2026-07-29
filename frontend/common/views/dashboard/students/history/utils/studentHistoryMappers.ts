@@ -6,6 +6,7 @@ import type {
   StudentHistoryMetrics,
   StudentHistorySessionRow,
 } from "@/frontend/common/views/dashboard/students/history/types";
+import { resolveSessionDateTime } from "@/shared/lib/datetime/resolveSessionDateTime";
 
 export function mapStudentHistoryMetrics(
   metrics:
@@ -28,23 +29,29 @@ export function mapStudentHistorySessions(
   sessions:
     | readonly StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession[]
     | null
-    | undefined
+    | undefined,
+  year: number,
+  month: number
 ): readonly StudentHistorySessionRow[] {
   if (!sessions) return [];
-  return sessions.map(s => ({
-    id: s.id ?? "",
-    title: s.title ?? "",
-    time: s.time ?? "",
-    duration: s.duration ?? 0,
-    status: s.status ?? "",
-    outcome: s.outcome ?? "",
-    isFrozen: s.isFrozen ?? false,
-    instructor: s.instructor ?? "",
-    timeSlot: s.timeSlot ?? "",
-    room: s.room ?? "",
-    notes: s.notes ?? "",
-    dayOfMonth: s.dayOfMonth ?? 0,
-    meetingJoinUrl: s.meetingJoinUrl ?? null,
-    effectiveMeeting: s.effectiveMeeting ?? null,
-  }));
+  return sessions.map(s => {
+    const dayOfMonth = s.dayOfMonth ?? 0;
+    const rawTime = s.time ?? "";
+    return {
+      id: s.id ?? "",
+      title: s.title ?? "",
+      time: resolveSessionDateTime(rawTime, year, month, dayOfMonth),
+      duration: s.duration ?? 0,
+      status: s.status ?? "",
+      outcome: s.outcome ?? "",
+      isFrozen: s.isFrozen ?? false,
+      instructor: s.instructor ?? "",
+      timeSlot: s.timeSlot ?? "",
+      room: s.room ?? "",
+      notes: s.notes ?? "",
+      dayOfMonth,
+      meetingJoinUrl: s.meetingJoinUrl ?? null,
+      effectiveMeeting: s.effectiveMeeting ?? null,
+    };
+  });
 }

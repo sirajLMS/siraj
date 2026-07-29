@@ -14,6 +14,8 @@ import {
 } from "@/frontend/desktop/components/ui/card/MetricCard/styled";
 import { formatValue, type MetricCardVariant } from "@/frontend/desktop/components/ui/card/MetricCard/utils";
 
+export type MetricCardDensity = "default" | "compact";
+
 export interface DesktopMetricCardProps {
   readonly icon: SvgIconComponent;
   readonly label: string;
@@ -24,6 +26,7 @@ export interface DesktopMetricCardProps {
   readonly animationIndex?: number;
   readonly onClick?: () => void;
   readonly sx?: SxProps;
+  readonly density?: MetricCardDensity;
 }
 
 export function DesktopMetricCard({
@@ -36,21 +39,30 @@ export function DesktopMetricCard({
   animationIndex = 0,
   onClick,
   sx,
+  density = "default",
 }: DesktopMetricCardProps) {
   const isError = variant === "error" || variant === "danger";
   const isHighlight = variant === "highlight";
-  const iconSize = 44;
-  const iconFontSize = 22;
+  const isCompact = density === "compact";
+  const iconSize = isCompact ? 36 : 44;
+  const iconFontSize = isCompact ? 18 : 22;
+  const formattedValue = formatValue(value);
+  const isLongValue = typeof formattedValue === "string" && formattedValue.length > 18;
 
   const labelTypography = (
-    <StyledLabel variant="labelUppercase" title={label} isError={isError}>
+    <StyledLabel variant="labelUppercase" title={label} isError={isError} density={density}>
       {label}
     </StyledLabel>
   );
 
   const valueTypography = (
-    <StyledValue variant="headlineLg" metricVariant={variant}>
-      {formatValue(value)}
+    <StyledValue
+      variant={isCompact || isLongValue ? "titleLg" : "headlineLg"}
+      metricVariant={variant}
+      density={density}
+      isLongValue={isLongValue}
+    >
+      {formattedValue}
     </StyledValue>
   );
 
@@ -62,10 +74,14 @@ export function DesktopMetricCard({
 
   const cardContent = (
     <>
-      <StyledDefaultContentRoot>
+      <StyledDefaultContentRoot density={density}>
         {labelTypography}
         {valueTypography}
-        {subLabel ? <StyledSubLabel variant="labelMd">{subLabel}</StyledSubLabel> : null}
+        {subLabel ? (
+          <StyledSubLabel variant="labelMd" density={density}>
+            {subLabel}
+          </StyledSubLabel>
+        ) : null}
       </StyledDefaultContentRoot>
       {iconWrap}
     </>
@@ -79,6 +95,7 @@ export function DesktopMetricCard({
         isHighlight={isHighlight}
         isError={isError}
         isInteractive={Boolean(onClick)}
+        density={density}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
@@ -100,6 +117,7 @@ export function DesktopMetricCard({
       isHighlight={isHighlight}
       isError={isError}
       isInteractive={Boolean(onClick)}
+      density={density}
       sx={sx}
     >
       {cardContent}

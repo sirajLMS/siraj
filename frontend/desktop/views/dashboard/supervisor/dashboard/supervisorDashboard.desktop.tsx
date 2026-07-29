@@ -3,6 +3,7 @@
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Box, Grid, Paper, Stack, Typography } from "@mui/material";
 import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
+import { scheduleOverviewListCanvasSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { RecentApprovalCardLabels } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/RecentApprovalCardList";
 import {
   RecentApprovalCardSkeleton,
@@ -36,13 +37,17 @@ export function SupervisorDashboardDesktopView({
   pendingDuesSummary,
   monthlySnapshot,
   recentApprovals,
+  recentApprovalsPagination,
   labels,
   loading,
+  recentApprovalsLoading,
   onGoToReviews,
   onGoToDues,
   onGoToMonthlyReports,
 }: Readonly<SupervisorDashboardViewModel>) {
   const cardLabels = buildRecentApprovalCardLabels(labels);
+  const { page, pageSize, totalCount, onPageChange } = recentApprovalsPagination;
+  const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
     <DesktopPageContainer>
@@ -77,34 +82,43 @@ export function SupervisorDashboardDesktopView({
         </Stack>
       </DesktopSectionPanel>
 
-      <DesktopSectionPanel title={labels.recentApprovals}>
-        <ScheduleOverviewListShell
-          rows={recentApprovals}
-          getKey={item => item.id}
-          loading={loading}
-          emptyMessage={labels.noRecentApprovals}
-          renderItem={item => <RecentApprovalDesktopCard item={item} labels={cardLabels} />}
-          renderEmptyState={() => (
-            <Box sx={{ p: 2 }}>
-              <RecentApprovalEmptyState message={labels.noRecentApprovals} />
-            </Box>
-          )}
-          renderSkeleton={() => (
-            <Stack spacing={2} sx={{ p: 2 }}>
-              <Paper
-                elevation={0}
-                sx={theme => ({
-                  borderRadius: 2,
-                  border: `1px solid ${theme.palette.border.light}`,
-                  backgroundColor: theme.palette.surfaceContainerLowest,
-                })}
-              >
-                <RecentApprovalCardSkeleton />
-              </Paper>
-            </Stack>
-          )}
-          sx={{ p: 2 }}
-        />
+      <DesktopSectionPanel contentPadding={false} title={labels.recentApprovals}>
+        <Box sx={scheduleOverviewListCanvasSx}>
+          <ScheduleOverviewListShell
+            rows={recentApprovals}
+            getKey={item => item.id}
+            loading={recentApprovalsLoading}
+            emptyMessage={labels.noRecentApprovals}
+            renderItem={item => <RecentApprovalDesktopCard item={item} labels={cardLabels} />}
+            renderEmptyState={() => (
+              <Box sx={{ py: 2 }}>
+                <RecentApprovalEmptyState message={labels.noRecentApprovals} />
+              </Box>
+            )}
+            renderSkeleton={() => (
+              <Stack spacing={2}>
+                <Paper
+                  elevation={0}
+                  sx={theme => ({
+                    borderRadius: 0,
+                    border: "none",
+                    borderBottom: `1px solid ${theme.palette.outlineVariant}`,
+                    backgroundColor: theme.palette.surfaceContainer,
+                  })}
+                >
+                  <RecentApprovalCardSkeleton />
+                </Paper>
+              </Stack>
+            )}
+            pagination={{
+              page,
+              pageCount,
+              rowCount: totalCount,
+              pageSize,
+              onPageChange,
+            }}
+          />
+        </Box>
       </DesktopSectionPanel>
     </DesktopPageContainer>
   );

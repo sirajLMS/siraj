@@ -4,10 +4,17 @@ export const dashboardParentStudentsAr: ParentStudentsLabels = {
   pageTitle: "طلابك",
   pageSubtitle: "الطلاب المرتبطون بحساب عائلتك.",
   noStudents: "لا يوجد طلاب مرتبطون بحسابك بعد.",
-  statusLabel: status => `الحالة: ${status}`,
-  teacherLabel: teacher => `المعلم: ${teacher}`,
-  quotaLabel: (remaining, total) => `الحصص المتبقية: ${remaining} / ${total}`,
-  hoursLabel: hours => `ساعات أسبوعياً: ${hours}`,
+  card: {
+    classesLeft: "الحصص المتبقية",
+    weeklyHours: "الساعات الأسبوعية",
+  },
+  status: {
+    deactivated: "موقوف",
+    regular: "منتظم",
+    onLeave: "في إجازة",
+    suspended: "معلق",
+    onTrial: "تجريبي",
+  },
   errors: {
     failedToLoad: "تعذر تحميل طلابك.",
   },

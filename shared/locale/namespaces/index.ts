@@ -53,6 +53,7 @@ export { DashboardStudentPortalCredits } from "@/shared/locale/namespaces/dashbo
 export { DashboardStudentPortalDashboard } from "@/shared/locale/namespaces/dashboard/studentPortal/dashboard.namespace";
 export { DashboardStudentPortalHistory } from "@/shared/locale/namespaces/dashboard/studentPortal/history.namespace";
 export { DashboardStudentPortalProfile } from "@/shared/locale/namespaces/dashboard/studentPortal/profile.namespace";
+export { DashboardStudentPortalSessions } from "@/shared/locale/namespaces/dashboard/studentPortal/sessions.namespace";
 export { DashboardStudentDirectory } from "@/shared/locale/namespaces/dashboard/students/directory.namespace";
 export { DashboardStudentHistory } from "@/shared/locale/namespaces/dashboard/students/history.namespace";
 export { DashboardStudentOnboarding } from "@/shared/locale/namespaces/dashboard/students/onboarding.namespace";

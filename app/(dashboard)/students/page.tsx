@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { cache } from "react";
-import { AppPermission } from "@/backend/enum";
-import { getCurrentUser } from "@/backend/lib/auth/cached-user";
+import { redirect } from "next/navigation";
+import {
+  getStudentsPagePermissions,
+  resolveStudentsPageAudience,
+} from "@/app/(dashboard)/lib/resolve-students-page-audience";
 import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import type { UserPermissionContext } from "@/backend/services/auth/permissions.service";
+import { isUsersDirectoryEnabled } from "@/backend/lib/features/is-users-directory-enabled";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { StudentsContainer } from "@/frontend/common/views/dashboard/admin/parents/students/StudentsContainer";
 import { ParentStudentsContainer } from "@/frontend/common/views/dashboard/parent/students/ParentStudentsContainer";
@@ -12,59 +14,53 @@ import { TeacherStudentsContainer } from "@/frontend/common/views/dashboard/teac
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale();
-  const t = getTranslations(locale).dashboardTranslations.studentDirectory;
-  return { title: t.pageTitle };
+async function resolveAudienceMetadataTitle(locale: string): Promise<string> {
+  const { userId, context } = await getServerUserContext();
+  if (!userId || !context) {
+    const t = getTranslations(locale).dashboardTranslations.studentDirectory;
+    return t.pageTitle;
+  }
+
+  const audience = resolveStudentsPageAudience(context);
+  const translations = getTranslations(locale).dashboardTranslations;
+
+  if (audience === "teacher") {
+    return translations.teacherStudents.pageTitle;
+  }
+  if (audience === "parent") {
+    return translations.parentStudents.pageTitle;
+  }
+
+  return translations.studentDirectory.pageTitle;
 }
 
-type StudentsAudience = "parent" | "teacher" | "admin";
-
-const resolveStudentsAudience = cache(
-  async (userId: string, permissionContext: UserPermissionContext | null): Promise<StudentsAudience> => {
-    const { permissions } = await getCurrentUser(userId, permissionContext);
-
-    if (
-      permissions.includes(AppPermission.PARENT_VIEW_STUDENTS) &&
-      !permissions.includes(AppPermission.STUDENTS_LIST)
-    ) {
-      return "parent";
-    }
-
-    if (
-      permissions.includes(AppPermission.TEACHER_VIEW_STUDENTS) &&
-      !permissions.includes(AppPermission.STUDENTS_LIST)
-    ) {
-      return "teacher";
-    }
-
-    return "admin";
-  }
-);
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return { title: await resolveAudienceMetadataTitle(locale) };
+}
 
 export default async function StudentsPage() {
+  const locale = await getLocale();
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
     return;
   }
 
-  const locale = await getLocale();
-  const audience = await resolveStudentsAudience(userId, context);
+  await requirePermissionForPage(userId, getStudentsPagePermissions(), locale, context);
 
-  await requirePermissionForPage(
-    userId,
-    [AppPermission.PARENT_VIEW_STUDENTS, AppPermission.TEACHER_VIEW_STUDENTS, AppPermission.STUDENTS_LIST],
-    locale,
-    context
-  );
+  const audience = context ? resolveStudentsPageAudience(context) : null;
 
-  switch (audience) {
-    case "parent":
-      return <ParentStudentsContainer />;
-    case "teacher":
-      return <TeacherStudentsContainer />;
-    default:
-      return <StudentsContainer />;
+  if ((await isUsersDirectoryEnabled()) && audience === "admin") {
+    redirect("/users?tab=students");
   }
+
+  if (audience === "teacher") {
+    return <TeacherStudentsContainer />;
+  }
+  if (audience === "parent") {
+    return <ParentStudentsContainer />;
+  }
+
+  return <StudentsContainer />;
 }

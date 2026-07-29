@@ -184,4 +184,19 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) => string;
   readonly currencyHedges: CurrencyHedgesLabels;
   readonly supportedCurrencies: SupportedCurrenciesLabels;
+  /**
+   * Labels for the `/billing` tabbed parent page (Phase 3 collapse). The
+   * standalone billing sub-pages render inside this parent as tabs; these
+   * labels cover the page chrome (title/subtitle) and the per-tab nav label.
+   */
+  readonly tabsPageTitle: string;
+  readonly tabsPageSubtitle: string;
+  readonly billingTabs: {
+    readonly overview: string;
+    readonly invoices: string;
+    readonly exchangeRates: string;
+    readonly currencies: string;
+    readonly hedges: string;
+    readonly manual: string;
+  };
 }

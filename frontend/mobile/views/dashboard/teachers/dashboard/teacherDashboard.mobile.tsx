@@ -6,7 +6,6 @@ import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
-import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
 import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import {
@@ -16,6 +15,7 @@ import {
 import {
   MobileCardList,
   MobileContentStack,
+  MobileMetricCardGrid,
   MobilePageContainer,
   MobilePrimaryPageAction,
   MobileSectionPanel,
@@ -31,13 +31,17 @@ interface MobileWelcomeHeaderProps {
   readonly userName: string;
   readonly welcomeMobileSummary: string;
   readonly welcomeTitle: (name: string) => string;
+  readonly lastUpdated: string;
 }
 
-function MobileWelcomeHeader({ userName, welcomeMobileSummary, welcomeTitle }: MobileWelcomeHeaderProps) {
+function MobileWelcomeHeader({ userName, welcomeMobileSummary, welcomeTitle, lastUpdated }: MobileWelcomeHeaderProps) {
   return (
     <Stack sx={mergeSx(teacherDashboardContentPaddingSx, { gap: 1 })}>
       <Typography sx={theme => ({ typography: "headlineMd", color: theme.palette.primary.main })}>
         {welcomeTitle(userName)}
+      </Typography>
+      <Typography sx={theme => ({ typography: "bodyLg", color: theme.palette.text.secondary })}>
+        {lastUpdated}
       </Typography>
       <Box
         sx={{
@@ -232,14 +236,10 @@ export function TeacherDashboardMobileView({
             userName={userName}
             welcomeMobileSummary={welcomeMobileSummary}
             welcomeTitle={labels.activeWelcome.title}
+            lastUpdated={lastUpdated}
           />
 
-          <DashboardMetricsSection
-            title={labels.pageTitle}
-            lastUpdated={lastUpdated}
-            metrics={metricItems}
-            gridSize={{ xs: 6, sm: 6, md: 3 }}
-          />
+          <MobileMetricCardGrid metrics={metricItems} />
 
           <MobileScheduleSection
             scheduleRows={scheduleRows}

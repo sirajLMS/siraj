@@ -21,7 +21,7 @@ mock.module("next/navigation", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/students/me/dashboard",
+  usePathname: () => "/dashboard",
   useSearchParams: () => new URLSearchParams(),
   redirect: () => {},
 }));
@@ -37,7 +37,7 @@ mock.module("@/shared/i18n/routing", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/students/me/dashboard",
+  usePathname: () => "/dashboard",
   Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
     <a href={href} {...rest}>
       {children}
@@ -55,7 +55,7 @@ mock.module("@/shared/i18n/navigation", () => ({
     replace: mock(() => {}),
     prefetch: mock(() => {}),
   }),
-  usePathname: () => "/students/me/dashboard",
+  usePathname: () => "/dashboard",
 }));
 
 // Eliminates dependency on the router-backed language switch hook so this file is
@@ -193,9 +193,9 @@ const recentReportsMockData = {
         classInstanceId: "class-instance-1",
         studentId,
         teacherId: "teacher-1",
-        teacherName: null,
+        teacherName: "Default Teacher",
         studentName: null,
-        subjectName: null,
+        subjectName: "Advanced Mathematics",
         classAvatarUrl: null,
         teacherAvatarUrl: null,
         studentAvatarUrl: null,
@@ -255,7 +255,7 @@ function createMocks(): MockLink.MockedResponse[] {
     {
       request: {
         query: studentProfileQueryDocument,
-        variables: { studentId: null, year: null, month: null },
+        variables: { studentId: null, year: null, month: null, includeUpcomingClasses: true },
       },
       result: { data: profileMockData },
     },
@@ -334,7 +334,6 @@ describe("StudentDashboardContainer", () => {
     });
 
     expect(screen.getByText("Recent Lesson Reports")).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "View All History" }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/45\s*min\s*·\s*80%\s*·\s*PRESENT/)).toBeInTheDocument();
     expect(screen.getByText("APPROVED")).toBeInTheDocument();
     expect(screen.getByText(secondLessonDate)).toBeInTheDocument();

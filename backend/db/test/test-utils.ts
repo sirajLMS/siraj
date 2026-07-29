@@ -172,9 +172,6 @@ export async function teardownRlsRole(roleName: string = "test_rls_user"): Promi
   rlsRoleRefCounts.delete(roleName);
 }
 
-const installedPolicies = new Set<string>();
-const rlsEnabledTables = new Map<string, Promise<void>>();
-
 export type RlsPolicyDef = {
   table: string;
   name: string;
@@ -209,31 +206,26 @@ async function installPolicy(policy: RlsPolicyDef): Promise<void> {
   }
 }
 
+async function dropLegacySoftDeletePolicy(table: string): Promise<void> {
+  const tbl = quoteIdent(table);
+  const legacyPolicy = quoteIdent(`${table}_soft_delete_policy`);
+  await db.execute(sql.raw(`DROP POLICY IF EXISTS ${legacyPolicy} ON ${tbl}`));
+}
+
 async function enableRowLevelSecurity(table: string): Promise<void> {
-  const existing = rlsEnabledTables.get(table);
-  if (existing) {
-    await existing;
-    return;
-  }
-
-  const enablePromise = (async () => {
-    const tbl = quoteIdent(table);
-    await retryOnConcurrentConflict(async () => {
-      await db.execute(sql.raw(`ALTER TABLE ${tbl} ENABLE ROW LEVEL SECURITY`));
-      await db.execute(sql.raw(`ALTER TABLE ${tbl} FORCE ROW LEVEL SECURITY`));
-    }, 5);
-  })();
-
-  rlsEnabledTables.set(table, enablePromise);
-  await enablePromise;
+  const tbl = quoteIdent(table);
+  await retryOnConcurrentConflict(async () => {
+    await db.execute(sql.raw(`ALTER TABLE ${tbl} ENABLE ROW LEVEL SECURITY`));
+    await db.execute(sql.raw(`ALTER TABLE ${tbl} FORCE ROW LEVEL SECURITY`));
+  }, 5);
 }
 
 export async function setupRlsPolicies(policies: RlsPolicyDef[]): Promise<void> {
   for (const policy of policies) {
-    const key = `${policy.table}.${policy.name}`;
-    if (installedPolicies.has(key)) continue;
-    installedPolicies.add(key);
     await installPolicy(policy);
+    if (policy.name.endsWith("_update_policy")) {
+      await dropLegacySoftDeletePolicy(policy.table);
+    }
   }
   const tables = [...new Set(policies.map(p => p.table))];
   for (const table of tables) {
@@ -266,6 +258,8 @@ export async function queryAsRlsRole<T>(
   const client = await pool.connect();
   try {
     await client.query(`SELECT set_config('app.current_user_id', $1, false)`, [userId]);
+    // Ensure soft-delete bypass is not leaked across pooled connections.
+    await client.query(`SELECT set_config('app.soft_delete', '', false)`);
     const result = await client.query(querySql, params);
     return result.rows as T[];
   } finally {

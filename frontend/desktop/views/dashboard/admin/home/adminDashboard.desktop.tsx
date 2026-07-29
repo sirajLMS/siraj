@@ -6,10 +6,15 @@ import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import { ScheduleOverviewEmptyState } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
+import {
+  scheduleOverviewFilterBarSx,
+  scheduleOverviewListCanvasSx,
+} from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
+import { desktopSectionContentInsetSx } from "@/frontend/desktop/components/ui/container/desktopSectionContentInsetSx";
 import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { ScheduleOverviewDesktopCard } from "@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.desktop";
 import { useAppLocale } from "@/shared/locale";
@@ -72,23 +77,18 @@ function AdminDashboardScheduleFilters({
   onTeacherChange,
 }: Readonly<AdminDashboardScheduleFiltersProps>) {
   return (
-    <Box sx={{ mb: 2.5 }}>
-      <ScheduleFilters
-        dateLabel={filters.listOfClassesOn}
-        dateValue={dateValue}
-        todayLabel={filters.today}
-        previousDayLabel={filters.previousDay}
-        nextDayLabel={filters.nextDay}
-        onDateChange={onDateChange}
-        teacherSelect={
-          <TeacherAutocompleteDesktop
-            value={selectedTeacher}
-            onChange={onTeacherChange}
-            label={filters.selectTeacher}
-          />
-        }
-      />
-    </Box>
+    <ScheduleFilters
+      centerOnDesktop
+      dateLabel={filters.listOfClassesOn}
+      dateValue={dateValue}
+      todayLabel={filters.today}
+      previousDayLabel={filters.previousDay}
+      nextDayLabel={filters.nextDay}
+      onDateChange={onDateChange}
+      teacherSelect={
+        <TeacherAutocompleteDesktop value={selectedTeacher} onChange={onTeacherChange} label={filters.selectTeacher} />
+      }
+    />
   );
 }
 
@@ -122,7 +122,7 @@ function AdminDashboardScheduleOverview({
   };
 
   return (
-    <>
+    <Box sx={scheduleOverviewListCanvasSx}>
       <ScheduleOverviewListShell
         rows={rows}
         getKey={row => row.id ?? ""}
@@ -146,17 +146,15 @@ function AdminDashboardScheduleOverview({
       />
 
       {totalCount !== undefined ? (
-        <Box sx={{ pt: 2, display: "flex", justifyContent: "flex-end" }}>
-          <PaginationControls
-            page={page}
-            pageCount={pageCount}
-            rowCount={totalCount}
-            pageSize={pageSize}
-            onPageChange={onPageChange}
-          />
-        </Box>
+        <PaginationControls
+          page={page}
+          pageCount={pageCount}
+          rowCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+        />
       ) : null}
-    </>
+    </Box>
   );
 }
 
@@ -206,18 +204,34 @@ export function AdminDashboardDesktopView({
         }
       />
 
-      <DesktopSectionPanel title={shell.scheduleOverview}>
+      <DesktopSectionPanel
+        title={shell.scheduleOverview}
+        contentPadding={false}
+        sx={theme => ({
+          backgroundColor: theme.palette.surfaceContainerLow,
+          border: `1px solid ${theme.palette.outlineVariant}`,
+        })}
+      >
         {canScheduleFilterAdvanced ? (
-          <AdminDashboardScheduleFilters
-            filters={filters}
-            dateValue={dateValue}
-            onDateChange={onDateChange}
-            selectedTeacher={selectedTeacher}
-            onTeacherChange={onTeacherChange}
-          />
+          <Box
+            sx={theme => ({
+              ...scheduleOverviewFilterBarSx(theme),
+              ...desktopSectionContentInsetSx,
+              py: 2.5,
+              width: "100%",
+            })}
+          >
+            <AdminDashboardScheduleFilters
+              filters={filters}
+              dateValue={dateValue}
+              onDateChange={onDateChange}
+              selectedTeacher={selectedTeacher}
+              onTeacherChange={onTeacherChange}
+            />
+          </Box>
         ) : null}
         {selectedMetricLabel ? (
-          <Box sx={{ mb: 1 }}>
+          <Box sx={{ ...desktopSectionContentInsetSx, py: 0, mb: 1 }}>
             <StatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
           </Box>
         ) : null}

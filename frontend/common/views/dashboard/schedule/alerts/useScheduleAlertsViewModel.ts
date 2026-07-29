@@ -188,7 +188,7 @@ function useScheduleAlertsHandlers(setPage: (page: number) => void, router: Retu
 
   const handleLeave = useCallback(
     (id: string) => {
-      router.push(`/reschedule?classInstanceId=${id}`);
+      router.push(`/schedule/tracking/reschedule?classInstanceId=${id}`);
     },
     [router]
   );

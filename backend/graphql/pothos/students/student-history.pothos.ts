@@ -37,6 +37,7 @@ export const StudentHistorySessionPothosObject = StudentHistorySessionRef.implem
     outcome: t.exposeString("outcome", { nullable: true }),
     isFrozen: t.exposeBoolean("isFrozen"),
     instructor: t.exposeString("instructor"),
+    teacherId: t.exposeString("teacherId"),
     timeSlot: t.exposeString("timeSlot"),
     room: t.exposeString("room", { nullable: true }),
     notes: t.exposeString("notes"),

@@ -121,13 +121,26 @@ export namespace LessonReportRepository {
     return rows.map(mapReportWithNames);
   }
 
-  export async function findRecentApproved(limit: number, tx?: DBTransaction): Promise<LessonReportWithNames[]> {
+  export async function findRecentApproved(
+    paginationArgs: PaginationArgs,
+    tx?: DBTransaction
+  ): Promise<LessonReportWithNames[]> {
     const queryDb = tx ?? db;
     const rows = await withReportJoins(queryDb.select(reportSelectFields))
       .where(eq(lessonReports.status, LessonReportStatus.APPROVED))
       .orderBy(desc(lessonReports.reviewedAt))
-      .limit(limit);
+      .limit(paginationArgs.perPage)
+      .offset(paginationArgs.offset);
     return rows.map(mapReportWithNames);
+  }
+
+  export async function countRecentApproved(tx?: DBTransaction): Promise<number> {
+    const queryDb = tx ?? db;
+    const [result] = await queryDb
+      .select({ value: count() })
+      .from(lessonReports)
+      .where(eq(lessonReports.status, LessonReportStatus.APPROVED));
+    return Number(result?.value ?? 0);
   }
 
   /** Student portal: lesson reports for a single student (newest lesson first). */

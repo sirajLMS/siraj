@@ -70,6 +70,7 @@ export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
         description: "Teacher country code",
       }),
       timezone: t.field({ type: IanaTimezonePothosObject, required: true }),
+      displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
       hourlyRate: t.string({ description: "Teacher hourly rate", directives: { constraint: { maxLength: 512 } } }),
       rateCurrency: t.field({
         type: CurrencyCodePothosObject,

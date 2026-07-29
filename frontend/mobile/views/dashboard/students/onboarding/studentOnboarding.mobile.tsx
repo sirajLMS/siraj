@@ -2,6 +2,8 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
+import { UserEntityFieldsSection } from "@/frontend/common/components/onboarding/sections";
+import { StudentExtensionSection } from "@/frontend/common/views/dashboard/students/onboarding/components/StudentExtensionSection";
 import type { StudentOnboardingViewModel } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
 import {
   MobileContentStack,
@@ -9,10 +11,11 @@ import {
   MobilePageContainer,
   MobilePageHeader,
   MobilePrimaryPageAction,
+  MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { ParentAssignmentSection } from "@/frontend/mobile/views/dashboard/students/onboarding/components/parentAssignmentSection.mobile";
-import { StudentInfoSection } from "@/frontend/mobile/views/dashboard/students/onboarding/components/studentInfoSection.mobile";
 import { TeacherAssignmentSection } from "@/frontend/mobile/views/dashboard/students/onboarding/components/teacherAssignmentSection.mobile";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function StudentOnboardingMobileView({
   register,
@@ -28,6 +31,8 @@ export function StudentOnboardingMobileView({
   onCloseSuccess,
   successMessage,
 }: Readonly<StudentOnboardingViewModel>) {
+  const userEntityLabels = useAppTranslation(Translation.Onboarding.UserEntity);
+
   return (
     <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
@@ -56,6 +61,16 @@ export function StudentOnboardingMobileView({
           }}
           sx={{ display: "flex", flexDirection: "column", gap: 3 }}
         >
+          <MobileSectionPanel title={userEntityLabels.sectionTitle}>
+            <UserEntityFieldsSection
+              register={register}
+              control={control}
+              errors={errors}
+              labels={userEntityLabels}
+              onUploadAvatar={onUploadAvatar}
+            />
+          </MobileSectionPanel>
+
           <ParentAssignmentSection
             control={control}
             errors={errors}
@@ -68,29 +83,25 @@ export function StudentOnboardingMobileView({
             }}
           />
 
-          <StudentInfoSection
-            register={register}
-            errors={errors}
-            control={control}
-            onUploadAvatar={onUploadAvatar}
-            labels={{
-              sectionTitle: labels.sections.studentInfo,
-              name: labels.fields.name,
-              namePlaceholder: labels.placeholders.name,
-              nameMinLength: labels.validation.nameMinLength,
-              dateOfBirth: labels.fields.dateOfBirth,
-              dateOfBirthPlaceholder: labels.placeholders.dateOfBirth,
-              gender: labels.fields.gender,
-              male: labels.fields.male,
-              female: labels.fields.female,
-              language: labels.fields.language,
-              languagePlaceholder: labels.placeholders.language,
-              status: labels.fields.status,
-              statusOnTrial: labels.options.status.onTrial,
-              statusRegular: labels.options.status.regular,
-              avatar: labels.fields.avatar,
-            }}
-          />
+          <MobileSectionPanel title={labels.sections.studentInfo}>
+            <StudentExtensionSection
+              register={register}
+              errors={errors}
+              control={control}
+              labels={{
+                dateOfBirth: labels.fields.dateOfBirth,
+                dateOfBirthPlaceholder: labels.placeholders.dateOfBirth,
+                gender: labels.fields.gender,
+                male: labels.fields.male,
+                female: labels.fields.female,
+                language: labels.fields.language,
+                languagePlaceholder: labels.placeholders.language,
+                status: labels.fields.status,
+                statusOnTrial: labels.options.status.onTrial,
+                statusRegular: labels.options.status.regular,
+              }}
+            />
+          </MobileSectionPanel>
 
           <TeacherAssignmentSection
             control={control}
@@ -101,17 +112,20 @@ export function StudentOnboardingMobileView({
             }}
           />
 
-          <MobilePrimaryPageAction
-            type="submit"
-            fullWidth
-            disabled={isSubmitting}
+          <Box
             sx={theme => ({
-              py: 1.5,
-              backgroundColor: theme.palette.primary.main,
+              p: 2,
+              backgroundColor: theme.palette.surfaceContainerLow,
+              borderRadius: 3,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
             })}
           >
-            {isSubmitting ? labels.processing : labels.create}
-          </MobilePrimaryPageAction>
+            <MobilePrimaryPageAction type="submit" disabled={isSubmitting} fullWidth sx={{ py: 2 }}>
+              {isSubmitting ? labels.processing : labels.create}
+            </MobilePrimaryPageAction>
+          </Box>
         </Box>
       </MobileContentStack>
 

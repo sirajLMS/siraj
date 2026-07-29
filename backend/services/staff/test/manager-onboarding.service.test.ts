@@ -2,7 +2,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
-import { AppPermission, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
+import { AppPermission, ManagerAccountType, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   type ManagerOnboardingInput,
@@ -97,7 +97,7 @@ async function expectCreateManagerRejection({ context, name, email, assertError 
         name,
         email,
         password: randomUUID(),
-        accountType: "manager",
+        accountType: ManagerAccountType.manager,
       },
       "en"
     )
@@ -123,7 +123,7 @@ describe("ManagerOnboardingService.createManager", () => {
         name: "Test",
         email: "test@test.com",
         password: randomUUID(),
-        accountType: "manager",
+        accountType: ManagerAccountType.manager,
       })
     );
 
@@ -153,7 +153,7 @@ describe("ManagerOnboardingService.createManager", () => {
         name: "New Admin",
         email: "newadmin@test.com",
         password: randomUUID(),
-        accountType: "admin",
+        accountType: ManagerAccountType.admin,
       },
       SystemPermissionGroupSlug.ACADEMY_ADMIN,
       result => {
@@ -168,7 +168,7 @@ describe("ManagerOnboardingService.createManager", () => {
         name: "New Manager",
         email: "newmanager@test.com",
         password: randomUUID(),
-        accountType: "manager",
+        accountType: ManagerAccountType.manager,
       },
       SystemPermissionGroupSlug.STAFF_DEFAULT
     );
@@ -180,7 +180,7 @@ describe("ManagerOnboardingService.createManager", () => {
         name: "New Supervisor",
         email: "newsupervisor@test.com",
         password: randomUUID(),
-        accountType: "supervisor",
+        accountType: ManagerAccountType.supervisor,
       },
       SystemPermissionGroupSlug.SUPERVISOR_DEFAULT,
       result => {
@@ -200,7 +200,7 @@ describe("ManagerOnboardingService.createManager", () => {
           name: "Dup Manager",
           email: "existing@test.com",
           password: randomUUID(),
-          accountType: "manager",
+          accountType: ManagerAccountType.manager,
         },
         "en"
       )
@@ -225,7 +225,7 @@ describe("ManagerOnboardingService.createManager", () => {
         name: "Rollback Manager",
         email: createdEmail,
         password: randomUUID(),
-        accountType: "manager",
+        accountType: ManagerAccountType.manager,
       })
     );
 

@@ -37,6 +37,7 @@ function buildParentInput(formData: ParentOnboardingFormData): ParentOnboardingI
       : null,
     currency: formData.currency,
     timezone: toGraphqlIanaTimezone(formData.timezone || null),
+    displayCurrency: formData.displayCurrency ?? null,
     password: formData.password,
   };
 }

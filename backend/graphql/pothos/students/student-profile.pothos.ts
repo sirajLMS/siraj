@@ -1,7 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AppLanguagePothosObject,
+  CurrencyCodePothosObject,
   GenderPothosObject,
+  IanaTimezonePothosObject,
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { StudentClassHistoryPothosObject } from "@/backend/graphql/pothos/students/student-history.pothos";
@@ -22,12 +24,15 @@ export const StudentProfilePothosObject = StudentProfileRef.implement({
     timezoneOverride: t.exposeString("timezoneOverride", { nullable: true }),
     email: t.exposeString("email", { nullable: true }),
     phone: t.exposeString("phone", { nullable: true }),
+    timezone: t.expose("timezone", { type: IanaTimezonePothosObject, nullable: true }),
+    displayCurrency: t.expose("displayCurrency", { type: CurrencyCodePothosObject, nullable: true }),
     parentId: t.exposeString("parentId", { nullable: true }),
     parentUserId: t.exposeString("parentUserId", { nullable: true }),
     parentName: t.exposeString("parentName", { nullable: true }),
     parentEmail: t.exposeString("parentEmail", { nullable: true }),
     parentPhone: t.exposeString("parentPhone", { nullable: true }),
     isAssociatedViewer: t.exposeBoolean("isAssociatedViewer"),
+    isOwnStudentProfile: t.exposeBoolean("isOwnStudentProfile"),
     primaryTeacherId: t.exposeString("primaryTeacherId", { nullable: true }),
     teacherUserId: t.exposeString("teacherUserId", { nullable: true }),
     teacherName: t.exposeString("teacherName", { nullable: true }),

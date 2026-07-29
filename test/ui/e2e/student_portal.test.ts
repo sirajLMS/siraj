@@ -71,7 +71,6 @@ describe("Student Portal E2E", () => {
 
     await page.waitForURL("**/dashboard**");
     await expectVisible(page.getByText(/Recent Lesson Reports|تقارير الحصص الأخيرة/i));
-    await expectVisible(page.getByRole("button", { name: /View All History|عرض كل السجل/i }));
   });
 
   test("Student can navigate to credits page via sidebar", async () => {
@@ -81,7 +80,7 @@ describe("Student Portal E2E", () => {
 
     await page.waitForURL("**/dashboard**");
     await page.getByRole("link", { name: /My Credits|رصيدي/i }).click();
-    await page.waitForURL("**/students/me/credits**");
+    await page.waitForURL("**/students/credits**");
     await expectVisible(page.getByRole("heading", { name: /My Credits|رصيدي/i }));
   });
 
@@ -90,8 +89,8 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.goto("/students/me/credits");
-    await page.waitForURL("**/students/me/credits**");
+    await page.goto("/students/credits");
+    await page.waitForURL("**/students/credits**");
     await expectVisible(page.getByRole("heading", { name: /Transaction History|سجل المعاملات/i }));
     await expectVisible(page.getByRole("columnheader", { name: /Date|التاريخ/i }));
     await expectVisible(page.getByRole("columnheader", { name: /Type|النوع/i }));

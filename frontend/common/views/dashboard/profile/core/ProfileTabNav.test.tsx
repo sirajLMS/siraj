@@ -68,7 +68,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Own,
-      permissions: [AppPermission.AuthViewOwnProfile, AppPermission.ProfileMeetingConfigsViewOwn],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn, AppPermission.ProfileMeetingConfigsViewOwn],
     });
 
     expectTabVisible("Meeting");
@@ -78,7 +78,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Own,
-      permissions: [AppPermission.AuthViewOwnProfile, AppPermission.MeetingConfigsManageOwn],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn, AppPermission.MeetingConfigsManageOwn],
     });
 
     expectTabVisible("Meeting");
@@ -90,7 +90,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Own,
-      permissions: [AppPermission.AuthViewOwnProfile],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 
     expectTabHidden("Meeting");
@@ -100,7 +100,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Other,
-      permissions: [AppPermission.AuthViewOwnProfile],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 
     expectTabHidden("Students");
@@ -111,8 +111,8 @@ describe("ProfileTabNav", () => {
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Other,
       permissions: [
-        AppPermission.AuthViewOwnProfile,
-        AppPermission.UserEditProfile,
+        AppPermission.ProfileCoreIdentityViewOwn,
+        AppPermission.ProfileStaffPermissionsEditOther,
         AppPermission.MeetingConfigsManageOther,
       ],
     });
@@ -125,7 +125,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Other,
-      permissions: [AppPermission.AuthViewOwnProfile, AppPermission.UserEditProfile],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn, AppPermission.ProfileStaffPermissionsEditOther],
     });
 
     expectTabHidden("Permissions");
@@ -135,7 +135,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Parent,
       scope: ProfileScope.Own,
-      permissions: [AppPermission.AuthViewOwnProfile, AppPermission.ProfilePaymentMethodsViewOwn],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn, AppPermission.ProfilePaymentMethodsViewOwn],
     });
 
     expectTabVisible("Payment Methods");
@@ -145,7 +145,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Parent,
       scope: ProfileScope.Own,
-      permissions: [AppPermission.AuthViewOwnProfile],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 
     expectTabHidden("Payment Methods");
@@ -155,7 +155,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Staff,
       scope: ProfileScope.Other,
-      permissions: [AppPermission.AuthViewOwnProfile, AppPermission.UserEditProfile],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn, AppPermission.ProfileStaffPermissionsEditOther],
     });
 
     expectTabVisible("Permissions");
@@ -165,7 +165,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Staff,
       scope: ProfileScope.Other,
-      permissions: [AppPermission.AuthViewOwnProfile],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 
     expectTabHidden("Permissions");
@@ -176,7 +176,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Own,
-      permissions: [AppPermission.AuthViewOwnProfile],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn],
       currentTab: "profile",
       onTabChange,
       moduleOverrides: { useSearchParams: () => new URLSearchParams("tab=notifications") },
@@ -190,7 +190,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Own,
-      permissions: [AppPermission.AuthViewOwnProfile],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn],
       currentTab: "notifications",
       moduleOverrides: { useSearchParams: () => new URLSearchParams("tab=notifications") },
     });
@@ -202,7 +202,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Own,
-      permissions: [AppPermission.AuthViewOwnProfile],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn],
       currentTab: "profile",
       moduleOverrides: { useSearchParams: () => new URLSearchParams() },
     });
@@ -214,7 +214,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Own,
-      permissions: [AppPermission.AuthViewOwnProfile],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 
     expect(screen.getAllByText("Notifications")).toHaveLength(2);
@@ -224,7 +224,7 @@ describe("ProfileTabNav", () => {
     renderTabNav({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Own,
-      permissions: [AppPermission.AuthViewOwnProfile],
+      permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 
     expect(screen.getByRole("tablist")).toBeTruthy();

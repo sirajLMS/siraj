@@ -57,9 +57,7 @@ export function UpdatedSessionsSectionDesktop({ labels, sessions, successfulCoun
         </Box>
         <DesktopStatusBadge category="session" status="completed" label={labels.table.sessionsCount(successfulCount)} />
       </Box>
-      <Box sx={{ p: { xs: 2, lg: 0 } }}>
-        <UpdatedSessionsDataGridDesktop labels={labels} sessions={sessions} loading={loading} />
-      </Box>
+      <UpdatedSessionsDataGridDesktop labels={labels} sessions={sessions} loading={loading} />
     </Box>
   );
 }

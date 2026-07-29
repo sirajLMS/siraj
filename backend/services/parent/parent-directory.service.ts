@@ -19,9 +19,20 @@ export type {
 const PARENTS_DIRECTORY_MAX_LIMIT = 100;
 
 export namespace ParentDirectoryService {
+  async function assertDirectoryAccess(actorUserId: string, locale?: string): Promise<void> {
+    const isAuthorized = await PermissionsService.hasAnyPermission(actorUserId, [
+      AppPermission.PARENT_VIEW_DIRECTORY,
+      AppPermission.PARENTS_LIST,
+    ]);
+    if (!isAuthorized) {
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
+    }
+  }
+
   /**
    * Retrieves the parent directory with metrics and rows.
-   * Requires: parent.view_directory permission.
+   * Requires: parent.view_directory or parents.list permission.
    */
   export async function getParentDirectory(
     actorUserId: string,
@@ -30,11 +41,7 @@ export namespace ParentDirectoryService {
     lifecycleStatus: ParentStatus | null,
     locale?: string
   ): Promise<ParentDirectoryResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_VIEW_DIRECTORY);
-    if (!hasPermission) {
-      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(tFunc.insufficientPermissions);
-    }
+    await assertDirectoryAccess(actorUserId, locale);
 
     const {
       metrics,
@@ -81,7 +88,7 @@ export namespace ParentDirectoryService {
 
   /**
    * Lightweight parent list for autocomplete.
-   * Requires: parent.view_directory permission.
+   * Requires: parent.view_directory or parents.list permission.
    */
   export async function getParentsDirectory(
     actorUserId: string,
@@ -89,11 +96,7 @@ export namespace ParentDirectoryService {
     limit: number,
     locale?: string
   ): Promise<ParentDirectoryAutocompleteRow[]> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_VIEW_DIRECTORY);
-    if (!hasPermission) {
-      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(tFunc.insufficientPermissions);
-    }
+    await assertDirectoryAccess(actorUserId, locale);
 
     const cappedLimit = Math.min(Math.max(limit, 1), PARENTS_DIRECTORY_MAX_LIMIT);
     const trimmedSearch = search?.trim() || null;

@@ -52,7 +52,10 @@ export namespace ManagerProfileService {
   ): Promise<ManagerDirectoryRow> {
     const t = getServerTranslations(locale ?? "ar").errorsTranslations;
 
-    const hasEditPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_EDIT_PROFILE);
+    const hasEditPermission = await PermissionsService.hasAnyPermission(actorUserId, [
+      AppPermission.PROFILE_STAFF_ROLE_EDIT_OTHER,
+      AppPermission.PROFILE_STAFF_PERMISSIONS_EDIT_OTHER,
+    ]);
     if (!hasEditPermission) {
       throw new Error(t.unauthorizedAction);
     }

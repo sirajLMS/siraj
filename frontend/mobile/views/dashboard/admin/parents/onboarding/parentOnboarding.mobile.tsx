@@ -3,8 +3,13 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Alert, Box, Button, Stack, Typography } from "@mui/material";
 import { FormProvider } from "react-hook-form";
+import {
+  OnboardingPaymentMethodSection,
+  UserEntityFieldsSection,
+} from "@/frontend/common/components/onboarding/sections";
+import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { FeesContractSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/FeesContractSection";
-import { ParentInfoSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentInfoSection";
+import { ParentExtensionSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentExtensionSection";
 import { ParentMeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentMeetingConfigOnboardingSection";
 import { SocialCommsSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/SocialCommsSection";
 import type {
@@ -21,6 +26,8 @@ import {
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { useRouter } from "@/shared/i18n/navigation";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { ParentOnboardingLabels } from "@/shared/locale/types/dashboard/parents/onboarding";
 
 export function ParentOnboardingMobileView({
   form,
@@ -74,6 +81,7 @@ export function ParentOnboardingMobileView({
             control={control}
             errors={errors}
             onUploadAvatar={onUploadAvatar}
+            t={t}
             meetingConfigLabels={{
               sectionTitle: t.sections.meetingConfig,
               optionalHint: t.optionalHint,
@@ -160,12 +168,35 @@ function OnboardingFormSections({
   errors,
   onUploadAvatar,
   meetingConfigLabels,
-}: Readonly<OnboardingFormSectionsProps>) {
+  t,
+}: Readonly<OnboardingFormSectionsProps & { readonly t: ParentOnboardingLabels }>) {
+  const userEntityLabels = useAppTranslation(Translation.Onboarding.UserEntity);
+
   return (
     <>
-      <ParentInfoSection register={register} control={control} errors={errors} onUploadAvatar={onUploadAvatar} />
+      <MobileSectionPanel title={userEntityLabels.sectionTitle}>
+        <UserEntityFieldsSection
+          register={register}
+          control={control}
+          errors={errors}
+          labels={userEntityLabels}
+          onUploadAvatar={onUploadAvatar}
+        />
+      </MobileSectionPanel>
+      <MobileSectionPanel title={t.sections.parentInfo}>
+        <ParentExtensionSection register={register} control={control} errors={errors} labels={t} />
+      </MobileSectionPanel>
       <SocialCommsSection register={register} control={control} />
       <FeesContractSection register={register} control={control} errors={errors} />
+      <MobileSectionPanel title={t.fields.paymentMethod}>
+        <OnboardingPaymentMethodSection
+          control={control}
+          errors={errors}
+          direction={PaymentDirection.Payin}
+          methodFieldName="payinMethod"
+          addPaymentMethodLabel={t.sections.addPaymentMethod}
+        />
+      </MobileSectionPanel>
       <MobileSectionPanel title={meetingConfigLabels.sectionTitle}>
         <ParentMeetingConfigOnboardingSection
           register={register}

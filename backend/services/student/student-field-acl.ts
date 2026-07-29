@@ -1,4 +1,4 @@
-import { AppPermission } from "@/backend/enum";
+import { StudentRepository } from "@/backend/db";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   canEditStudentFieldGroup,
@@ -8,9 +8,8 @@ import {
 
 /**
  * Build a student field filter context from the actor's effective permissions.
- * The viewer is considered associated when the actor holds the legacy
- * `STUDENT_VIEW_ASSOCIATED` permission (mirrors the standalone
- * `studentById` / profile resolver behavior).
+ * Own vs other scope is derived from whether `actorUserId` matches the
+ * student's LMS user id (`studentUserId`).
  *
  * Prefer Server-side filter APIs (`canViewStudentFieldGroup`,
  * `canEditStudentFieldGroup`) over raw `PermissionsService.hasPermission`
@@ -20,14 +19,18 @@ export async function buildStudentFieldFilterContext(
   actorUserId: string,
   studentId: string
 ): Promise<StudentFieldFilterContext> {
+  const profile = await StudentRepository.findProfileById(studentId);
+  if (!profile) {
+    throw new Error("studentNotFound");
+  }
+
   const permissionContext = await PermissionsService.getUserContext(actorUserId);
-  const permissions = new Set<AppPermission>(permissionContext.permissions);
-  const isAssociatedViewer = permissions.has(AppPermission.STUDENT_VIEW_ASSOCIATED);
+  const permissions = new Set(permissionContext.permissions);
 
   return {
     actorUserId,
     studentId,
-    isAssociatedViewer,
+    studentUserId: profile.userId,
     permissions,
   };
 }

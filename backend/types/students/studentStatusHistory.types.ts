@@ -12,6 +12,7 @@ export type SessionSummary = {
   outcome?: string | null;
   isFrozen: boolean;
   instructor: string;
+  teacherId: string;
   timeSlot: string;
   room: string | null;
   notes: string;

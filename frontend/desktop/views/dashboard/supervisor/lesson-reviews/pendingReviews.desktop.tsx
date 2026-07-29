@@ -4,7 +4,9 @@ import { CancelOutlined, CheckCircleOutlined, RateReviewOutlined } from "@mui/ic
 import { Box, Grid, IconButton, Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { DateTimeTooltipDisplay } from "@/frontend/common/components/intl/DateTimeTooltipDisplay";
 import { getServerPaginationOptions } from "@/frontend/common/components/ui/filter/serverPaginationProps";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   PendingReviewRow,
@@ -53,14 +55,10 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
     rejectReason,
   } = props;
 
+  const locale = useAppLocale();
+
   const columns = useMemo<GridColDef<PendingReviewRow>[]>(
     () => [
-      {
-        field: "lessonDate",
-        headerName: labels.lessonDateColumn,
-        flex: 1,
-        minWidth: 150,
-      },
       {
         field: "subjectName",
         headerName: labels.classColumn,
@@ -113,11 +111,20 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
         valueGetter: (_, row) => `${row.completionPercentage}%`,
       },
       {
+        field: "lessonDate",
+        headerName: labels.lessonDateColumn,
+        flex: 1,
+        minWidth: 130,
+        valueGetter: (_, row) => row.lessonDate,
+        renderCell: params => <DateTimeTooltipDisplay value={params.row.lessonDate} locale={locale} />,
+      },
+      {
         field: "submittedAt",
         headerName: labels.submittedAtColumn,
         flex: 1,
-        minWidth: 150,
+        minWidth: 130,
         valueGetter: (_, row) => row.submittedAt,
+        renderCell: params => <DateTimeTooltipDisplay value={params.row.submittedAt} locale={locale} />,
       },
       {
         field: "status",
@@ -170,7 +177,7 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
         ),
       },
     ],
-    [labels, approving, onSelectReport, onApprove, onOpenRejectDialog]
+    [labels, locale, approving, onSelectReport, onApprove, onOpenRejectDialog]
   );
 
   const paginationOptions = getServerPaginationOptions({ page, pageSize }, totalCount, onPageChange) || {
@@ -205,7 +212,7 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, lg: selectedReport ? 8 : 12 }}>
-          <DesktopSectionPanel sx={{ flex: 1 }}>
+          <DesktopSectionPanel contentPadding={false} sx={{ flex: 1 }}>
             <DesktopAppDataGrid<PendingReviewRow>
               rows={rows}
               columns={columns}

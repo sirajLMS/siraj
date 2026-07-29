@@ -52,8 +52,12 @@ export const PROFILE_FIELD_GROUPS: readonly ProfileFieldGroupDefinition[] = [
   {
     groupKey: "core_contact",
     paths: [
+      "phone",
+      "timezone",
       "teacherOwnProfile.phone",
       "teacherAdminProfile.phone",
+      "teacherOwnProfile.timezone",
+      "teacherAdminProfile.timezone",
       "parentOwnProfile.phone",
       "parentAdminProfile.phone",
       "staffProfile.phone",
@@ -92,7 +96,6 @@ export const PROFILE_FIELD_GROUPS: readonly ProfileFieldGroupDefinition[] = [
       "teacherAdminProfile.dateOfBirth",
       "teacherAdminProfile.gender",
       "teacherAdminProfile.address",
-      "teacherAdminProfile.timezone",
       "teacherAdminProfile.status",
     ],
     audiences: [ProfileAudience.TEACHER],
@@ -121,7 +124,7 @@ export const PROFILE_FIELD_GROUPS: readonly ProfileFieldGroupDefinition[] = [
   },
   {
     groupKey: "parent_identity",
-    paths: ["parentAdminProfile.nationality", "parentAdminProfile.address", "parentAdminProfile.timezone"],
+    paths: ["parentAdminProfile.nationality", "parentAdminProfile.address"],
     audiences: [ProfileAudience.PARENT],
     scopes: [ProfileScope.OTHER],
     viewOwn: profilePerm("parent_identity", "view_own"),

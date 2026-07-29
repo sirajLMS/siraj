@@ -12,7 +12,12 @@ export const resolveProfilePageContext = cache(
     options: { readonly targetUserId?: string; readonly mode: ProfileMode }
   ): Promise<ProfilePageResolution> => {
     await getCurrentUser(actorUserId, permissionContext);
-    return ProfileService.resolvePageContext(actorUserId, options);
+    return ProfileService.resolvePageContext(actorUserId, {
+      ...options,
+      permissionContext: permissionContext
+        ? { permissions: permissionContext.permissions, isSuperAdmin: permissionContext.isSuperAdmin }
+        : undefined,
+    });
   }
 );
 

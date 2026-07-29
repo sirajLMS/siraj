@@ -7,7 +7,7 @@ import {
 
 const ACADEMY_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.AuthLogin,
-  AppPermission.AuthViewOwnProfile,
+  AppPermission.ProfileCoreIdentityViewOwn,
   AppPermission.DashboardViewMetrics,
   AppPermission.DashboardFilterMetrics,
   AppPermission.DashboardSearch,
@@ -26,7 +26,7 @@ const ACADEMY_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.SessionUpdateStatusLeave,
   AppPermission.NotificationViewAlerts,
   AppPermission.BillingViewUnpaidInvoices,
-  AppPermission.UserViewProfile,
+  AppPermission.ProfileCoreIdentityViewOther,
   AppPermission.ScheduleSearchAvailability,
   AppPermission.StaffViewDirectory,
   AppPermission.ScheduleViewWeekly,
@@ -34,9 +34,9 @@ const ACADEMY_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.ScheduleCreateClass,
   AppPermission.ScheduleDeleteClass,
   AppPermission.ScheduleClearWeekly,
-  AppPermission.StaffEditProfile,
+  AppPermission.ProfileStaffRoleEditOther,
   AppPermission.ParentViewDirectory,
-  AppPermission.ParentViewProfile,
+  AppPermission.ProfileParentSocialViewOther,
   AppPermission.ParentManageStatus,
   AppPermission.StudentViewAssociated,
   AppPermission.StudentEditQuota,
@@ -69,11 +69,12 @@ describe("academy admin sidebar navigation", () => {
 
     expect(keys).toContain("home");
     expect(keys).toContain("students");
-    expect(keys).toContain("suggestions-manage");
-    expect(keys).toContain("complaints-manage");
+    expect(keys).toContain("feedback-manage");
+    expect(keys).not.toContain("suggestions-manage");
+    expect(keys).not.toContain("complaints-manage");
     expect(keys).toContain("reports");
     expect(keys).toContain("billing-admin");
-    expect(keys).toContain("logout");
+    expect(keys).not.toContain("logout");
     expect(keys).not.toContain("parent-your-students");
     expect(keys).not.toContain("your-students");
     expect(keys).not.toContain("today-classes");

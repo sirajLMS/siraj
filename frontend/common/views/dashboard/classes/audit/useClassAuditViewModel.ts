@@ -111,7 +111,7 @@ function useClassAuditHandlers({ id, audit, router, resendNotifications, t }: Cl
   }, [audit, id, csvHeaders]);
 
   const onEditClass = useCallback(() => {
-    router.push(`/reschedule?classInstanceId=${id}`);
+    router.push(`/schedule/tracking/reschedule?classInstanceId=${id}`);
   }, [router, id]);
 
   const onExportStudents = useCallback(() => {

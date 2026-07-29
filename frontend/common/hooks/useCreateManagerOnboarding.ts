@@ -4,6 +4,7 @@ import type {
   ManagerOnboardingResult,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useStaffOnboardingStore } from "@/frontend/common/stores/staffOnboardingStore";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
@@ -22,6 +23,8 @@ export function useCreateManagerOnboarding() {
         email: formData.email,
         avatarUrl: formData.avatarUrl ?? null,
         phone: formData.phone || null,
+        timezone: toGraphqlIanaTimezone(formData.timezone),
+        displayCurrency: formData.displayCurrency ?? null,
         accountType: formData.accountType,
         password: formData.password,
       };

@@ -1,19 +1,19 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Stack, TextField } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
-import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
-import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
-import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
-import { toTeacherSectionLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
+import {
+  toTeacherPersonalFieldLabels,
+  toTeacherSectionLabels,
+} from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
 import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { TeacherProfileOwnEditFormBody } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileOwnEditFormBody";
 import {
   type TeacherEditData,
   type TeacherOwnEditFormData,
@@ -38,8 +38,8 @@ export function TeacherProfileEditForm({
   const t = labels.teacher;
   const base = labels.base;
   const sectionLabels = toTeacherSectionLabels(labels);
-  const scope = ProfileScope.Own;
-  const { canEdit } = useProfileFieldAccess({ scope });
+  const personalFieldLabels = toTeacherPersonalFieldLabels(labels);
+  const { canEdit } = useProfileFieldAccess();
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
   const [successOpen, setSuccessOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
@@ -56,6 +56,7 @@ export function TeacherProfileEditForm({
       phone: "",
       nationalId: "",
       nationality: "",
+      timezone: "",
       displayCurrency: null,
     },
   });
@@ -68,6 +69,7 @@ export function TeacherProfileEditForm({
       phone: teacherData.phone ?? "",
       nationalId: teacherData.nationalId ?? "",
       nationality: teacherData.nationality ?? "",
+      timezone: teacherData.timezone ?? "",
       displayCurrency: teacherData.displayCurrency ?? null,
     });
   }, [form, teacherData]);
@@ -85,56 +87,20 @@ export function TeacherProfileEditForm({
     <Stack spacing={3}>
       <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
         <Stack spacing={3}>
-          {canEdit("core_identity") ? (
-            <AvatarImageField
-              control={form.control}
-              name="avatarUrl"
-              label={t.fields.avatar}
-              title={base.editAvatarTitle}
-              onUploadAvatar={onUploadAvatar}
-            />
-          ) : null}
-          <Box
-            sx={{
-              display: "grid",
-              gap: 3,
-              minWidth: 0,
-              width: "100%",
-              gridTemplateColumns: {
-                xs: "minmax(0, 1fr)",
-                lg: "repeat(2, minmax(0, 1fr))",
-              },
-            }}
-          >
-            {canEdit("core_identity") ? (
-              <AccountSection
-                labels={sectionLabels}
-                mode="edit"
-                scope={scope}
-                teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
-                register={form.register}
-                control={form.control}
-              />
-            ) : null}
-            {canEdit("core_contact") || canEdit("teacher_identity") ? (
-              <ContactSection
-                labels={sectionLabels}
-                scope={scope}
-                isAdminScope={false}
-                register={form.register}
-                control={form.control}
-              />
-            ) : null}
-            <TextField
-              {...form.register("nationalId")}
-              label={t.fields.nationalId}
-              required
-              error={Boolean(form.formState.errors.nationalId)}
-              helperText={form.formState.errors.nationalId?.message}
-              fullWidth
-              size="small"
-            />
-          </Box>
+          <TeacherProfileOwnEditFormBody
+            canEdit={canEdit}
+            control={form.control}
+            register={form.register}
+            sectionLabels={sectionLabels}
+            personalFieldLabels={personalFieldLabels}
+            teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
+            identitySectionTitle={t.sections.identity}
+            nationalIdLabel={t.fields.nationalId}
+            nationalIdError={form.formState.errors.nationalId?.message}
+            avatarLabel={t.fields.avatar}
+            editAvatarTitle={base.editAvatarTitle}
+            onUploadAvatar={onUploadAvatar}
+          />
           <PrimaryPageAction type="submit" disabled={isSaving}>
             {isSaving ? t.shell.loading : t.actions.save}
           </PrimaryPageAction>

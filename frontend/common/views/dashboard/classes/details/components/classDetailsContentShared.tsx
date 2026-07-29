@@ -5,10 +5,16 @@ import { ActionFeedbackAlert } from "@/frontend/common/views/dashboard/classes/d
 import { DeleteConfirmationDialog } from "@/frontend/common/views/dashboard/classes/details/components/DeleteConfirmationDialog";
 import type { ClassDetailsContentSharedProps } from "@/frontend/common/views/dashboard/classes/details/components/types/classDetailsContentShared.types";
 import { useLocalizedClassInstance } from "@/frontend/common/views/dashboard/classes/details/hooks/useLocalizedClassInstance";
+import { ClassDetailsStudentView } from "@/frontend/common/views/dashboard/classes/details/student/ClassDetailsStudentView";
 import { ClassDetailsTeacherView } from "@/frontend/common/views/dashboard/classes/details/teacher/ClassDetailsTeacherView";
-import type { AdminViewProps, TeacherViewProps } from "@/frontend/common/views/dashboard/classes/details/types";
+import type {
+  AdminViewProps,
+  StudentViewProps,
+  TeacherViewProps,
+} from "@/frontend/common/views/dashboard/classes/details/types";
 import {
   useAdminViewLabels,
+  useStudentViewLabels,
   useTeacherViewLabels,
 } from "@/frontend/common/views/dashboard/classes/details/useClassDetailsLabels";
 
@@ -24,11 +30,18 @@ const TeacherView = (props: TeacherViewProps) => {
   return <ClassDetailsTeacherView {...props} instance={instance} labels={labels} />;
 };
 
+const StudentView = (props: StudentViewProps) => {
+  const labels = useStudentViewLabels(props.instance.studentTimezone ?? "");
+  const instance = useLocalizedClassInstance(props.instance);
+  return <ClassDetailsStudentView {...props} instance={instance} labels={labels} />;
+};
+
 export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetailsContentSharedProps>) {
   const {
     instance,
     canOverride,
     isParentView,
+    isStudentView,
     canViewSessionDetails,
     isWarningDismissed,
     onDismissWarning,
@@ -66,6 +79,21 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
         />
       );
     }
+    if (isStudentView) {
+      return (
+        <StudentView
+          instance={instance}
+          isWarningDismissed={isWarningDismissed}
+          onDismissWarning={onDismissWarning}
+          onStop={handlers.handleStop}
+          onDelete={() => {}}
+          formattedScheduledDate={formattedScheduledDate}
+          formattedStartTime={formattedStartTime}
+          formattedEndTime={formattedEndTime}
+          {...sessionActionProps}
+        />
+      );
+    }
     if (canViewSessionDetails) {
       return (
         <TeacherView
@@ -89,7 +117,7 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
 
   return (
     <>
-      <Header instance={instance} canOverride={canOverride} labels={headerLabels} />
+      <Header instance={instance} canOverride={canOverride} isStudentView={isStudentView} labels={headerLabels} />
       <ActionFeedbackAlert feedbackState={feedbackState} />
       {viewContent}
       <DeleteConfirmationDialog

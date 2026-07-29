@@ -1,12 +1,15 @@
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { ParentRepository, PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
+import { ParentRepository } from "@/backend/db/repo";
 import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
+import type { ParentCreateResult } from "@/backend/types/parents/parent.types";
+import type {
+  UserCreateCoreInput,
+  UserCreateProfileFieldsInput,
+  UserReturnType,
+} from "@/backend/types/users/user.types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export interface ParentOnboardingInput {
@@ -25,6 +28,7 @@ export interface ParentOnboardingInput {
   readonly initialPayinMethod?: Omit<UserPaymentMethodSubmitInput, "userId"> | null;
   readonly currency?: CurrencyCode | null;
   readonly timezone?: string | null;
+  readonly displayCurrency?: CurrencyCode | null;
   readonly status?: string | null;
 }
 
@@ -45,87 +49,65 @@ export namespace ParentOnboardingService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<ParentOnboardingResult> {
-    // Permission check
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENTS_CREATE);
-    if (hasPermission === false) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
-    // Email uniqueness check
-    const emailExists = await UserRepository.existsByEmail(input.email);
-    if (emailExists) {
-      throw new Error(tErrors.userEmailExists);
-    }
-
-    const run = async (txObj: DBTransaction) => {
-      // Step 1: Create user record
-      const user = await UserRepository.create(
-        {
+    const { user, extension: parent } = await UserOnboardingService.createUserOfType<ParentCreateResult>(
+      {
+        actorUserId,
+        permission: AppPermission.PARENTS_CREATE,
+        coreInput: {
           name: input.name,
-          email: { value: input.email },
+          email: input.email,
           password: input.password,
           ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
+        } satisfies UserCreateCoreInput,
+        profileFields: {
+          phone: input.phone,
+          timezone: input.timezone,
+          displayCurrency: input.displayCurrency ?? undefined,
+        } satisfies UserCreateProfileFieldsInput,
+        // Parent flow writes UTC when no timezone was provided.
+        writeDefaultTimezone: true,
+        groupSlug: SystemPermissionGroupSlug.PARENT_DEFAULT,
+        createExtension: async (createdUser: UserReturnType, txObj: DBTransaction) => {
+          return ParentRepository.create(
+            {
+              userId: createdUser.id,
+              status: input.status ?? "REGULAR",
+              nationality: input.nationality ?? null,
+              address: input.address ?? null,
+              facebook: input.facebook ?? null,
+              whatsapp: input.whatsapp ?? null,
+              twitter: input.twitter ?? null,
+              invoiceType: input.invoiceType ?? null,
+              feeAmount: input.feeAmount ?? null,
+              currency: input.currency ?? null,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            txObj
+          );
         },
-        undefined,
-        txObj
-      );
-
-      await UserRepository.updateTimezone(user.id, input.timezone ?? IanaTimezone.UTC, txObj);
-      if (input.phone != null) {
-        await UserRepository.updateProfileFields(user.id, { phone: input.phone }, undefined, txObj);
-      }
-
-      const parent = await ParentRepository.create(
-        {
-          userId: user.id,
-          status: input.status ?? "REGULAR",
-          nationality: input.nationality ?? null,
-          address: input.address ?? null,
-          facebook: input.facebook ?? null,
-          whatsapp: input.whatsapp ?? null,
-          twitter: input.twitter ?? null,
-          invoiceType: input.invoiceType ?? null,
-          feeAmount: input.feeAmount ?? null,
-          currency: input.currency ?? null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+        afterExtension: async (createdUser: UserReturnType, _parent: ParentCreateResult, txObj: DBTransaction) => {
+          if (input.initialPayinMethod) {
+            await PaymentMethodService.createUserPaymentMethodInternal(
+              { ...input.initialPayinMethod, userId: createdUser.id },
+              txObj
+            );
+          }
         },
-        txObj
-      );
+        tErrors,
+        logTag: "Parent",
+      },
+      tx
+    );
 
-      // Step 3: Assign permission group
-      const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
-      const targetGroup = groups.find(g => g.slug === SystemPermissionGroupSlug.PARENT_DEFAULT);
-      if (targetGroup === undefined) {
-        throw new Error(tErrors.permissionGroup.permissionGroupNotFound);
-      }
-
-      await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], targetGroup.id, actorUserId, txObj);
-
-      if (input.initialPayinMethod) {
-        await PaymentMethodService.createUserPaymentMethodInternal(
-          { ...input.initialPayinMethod, userId: user.id },
-          txObj
-        );
-      }
-
-      logger.info("Parent onboarded successfully", { parentId: parent.id, userId: user.id });
-
-      return {
-        userId: user.id,
-        parentId: parent.id,
-        name: user.name,
-        email: user.email,
-        status: parent.status,
-        invoiceType: parent.invoiceType,
-        currency: parent.currency,
-      };
+    return {
+      userId: user.id,
+      parentId: parent.id,
+      name: user.name,
+      email: user.email,
+      status: parent.status,
+      invoiceType: parent.invoiceType,
+      currency: parent.currency,
     };
-
-    if (tx) {
-      return await run(tx);
-    } else {
-      return await db.transaction(run);
-    }
   }
 }

@@ -35,14 +35,23 @@ export interface RecentApproval {
   readonly reviewedAtRaw: string | null;
 }
 
+export interface RecentApprovalsPagination {
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+  readonly onPageChange: (page: number) => void;
+}
+
 export interface SupervisorDashboardViewModel {
   readonly userName: string | null;
   readonly pendingReviewCount: number;
   readonly pendingDuesSummary: PendingDuesSummary;
   readonly monthlySnapshot: MonthlySnapshot;
   readonly recentApprovals: readonly RecentApproval[];
+  readonly recentApprovalsPagination: RecentApprovalsPagination;
   readonly labels: SupervisorDashboardLabels;
   readonly loading: boolean;
+  readonly recentApprovalsLoading: boolean;
   readonly onGoToReviews: () => void;
   readonly onGoToDues: () => void;
   readonly onGoToMonthlyReports: () => void;

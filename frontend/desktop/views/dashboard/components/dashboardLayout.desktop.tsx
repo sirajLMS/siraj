@@ -6,6 +6,7 @@ import { TopNavbarDesktop } from "@/frontend/desktop/views/dashboard/components/
 
 export function DashboardLayoutDesktop({
   children,
+  sidebarGroups,
   sidebarItems,
   userName,
   userEmail,
@@ -18,6 +19,7 @@ export function DashboardLayoutDesktop({
   sidebarWidth = "260px",
   navbarHeight: _navbarHeight = "64px",
   initialSidebarOpen,
+  hideSidebarNavigation = false,
 }: Readonly<DashboardLayoutProps>) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
@@ -41,9 +43,13 @@ export function DashboardLayoutDesktop({
         })}
       >
         <DashboardLayoutIsland
+          sidebarGroups={sidebarGroups}
           sidebarItems={sidebarItems}
           sidebarWidth={sidebarWidth}
           initialSidebarOpen={initialSidebarOpen}
+          userName={userName}
+          avatarUrl={avatarUrl}
+          hideSidebarNavigation={hideSidebarNavigation}
         >
           {children}
         </DashboardLayoutIsland>

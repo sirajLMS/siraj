@@ -42,7 +42,7 @@ export function useStudentHistoryViewModel(props: Readonly<UseStudentHistoryView
   const labels = resolveStudentHistoryLabels(t);
 
   const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
-    variables: { studentId, year: null, month: null },
+    variables: { studentId, year: null, month: null, includeUpcomingClasses: true },
     fetchPolicy: "cache-and-network",
     skip: !studentId,
   });

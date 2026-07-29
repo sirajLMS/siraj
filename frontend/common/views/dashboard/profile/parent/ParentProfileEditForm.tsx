@@ -19,13 +19,13 @@ import {
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/parent/sections/AccountSection";
 import { BillingSection } from "@/frontend/common/views/dashboard/profile/parent/sections/BillingSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/parent/sections/ContactSection";
-import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
 import {
   type ParentProfileViewLabels,
   toParentSharedBaseLabels,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/sections/SocialSection";
 import { useParentProfileEditFormViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileEditFormViewModel";
+import { ParentExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/ParentExtensionProfileSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
 
@@ -162,7 +162,7 @@ function ParentEditFormSections({
         <SocialSection mode="edit" labels={pt} register={register} control={control} />
       ) : null}
       {canEdit("parent_identity") ? (
-        <IdentitySection mode="edit" labels={pt} register={register} control={control} />
+        <ParentExtensionProfileSection mode="edit" labels={pt} scope={scope} register={register} control={control} />
       ) : null}
 
       {isAdminScope ? (

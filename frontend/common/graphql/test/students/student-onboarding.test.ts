@@ -17,6 +17,7 @@ const createMinimalParentInput = (overrides?: Partial<{ name: string; email: str
   avatarUrl: null,
   password: `Pwd_${randomUUID()}`,
   phone: null,
+  displayCurrency: null,
   invoiceType: null,
   feeAmount: null,
   initialPayinMethod: null,
@@ -45,6 +46,8 @@ const createMinimalStudentInput = (
   classesRemaining: null,
   email: overrides?.email ?? `stu_${Date.now()}_${randomUUID().slice(0, 8)}@test.com`,
   password: overrides?.password ?? `Pwd_${randomUUID()}`,
+  phone: null,
+  displayCurrency: null,
   timezone: null,
 });
 

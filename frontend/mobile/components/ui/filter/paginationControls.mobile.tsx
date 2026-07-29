@@ -37,12 +37,12 @@ const StyledPaginationRoot = styled(Box, {
   paddingBlock: theme.spacing(1),
   ...(embedded
     ? {
-        backgroundColor: "transparent",
-        borderTop: "none",
+        backgroundColor: theme.palette.surfaceContainerLow,
+        borderTop: `1px solid ${theme.palette.outlineVariant}`,
       }
     : {
-        borderTop: `1px solid ${theme.palette.border.light}`,
-        backgroundColor: theme.palette.background.default,
+        borderTop: `1px solid ${theme.palette.outlineVariant}`,
+        backgroundColor: theme.palette.surfaceContainerLow,
       }),
 }));
 
@@ -61,9 +61,10 @@ const StyledPageInput = styled(TextField)({
 });
 
 const StyledPageNavButton = styled(IconButton)(({ theme }) => ({
-  border: `1px solid ${theme.palette.border.light}`,
+  border: `1px solid ${theme.palette.outlineVariant}`,
   borderRadius: Number(theme.shape.borderRadius),
-  backgroundColor: "transparent",
+  backgroundColor: theme.palette.surfaceContainerHigh,
+  color: theme.palette.onSurfaceVariant,
   width: 32,
   height: 32,
   "&.Mui-disabled": {
@@ -111,7 +112,7 @@ export function MobilePaginationControls({
 
   return (
     <StyledPaginationRoot embedded={embedded}>
-      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
         {t.paginationRange(from, to, rowCount)}
       </Typography>
 
@@ -160,7 +161,7 @@ export function MobilePaginationControls({
           </span>
         </Tooltip>
 
-        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
           {t.pageOf(safePageCount === 0 ? 0 : page + 1, safePageCount)}
         </Typography>
       </StyledPaginationActions>

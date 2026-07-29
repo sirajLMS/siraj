@@ -14,6 +14,7 @@ describe("GraphQL Student Profile Integration Tests", () => {
       studentId: provision.studentId,
       year: null,
       month: null,
+      includeUpcomingClasses: true,
     });
 
     expect(data.studentProfile?.id).toBe(provision.studentId);

@@ -168,6 +168,7 @@ export interface TestEntitiesResult {
   studentId: string;
   teacherId: string;
   studentUserId: string;
+  studentUserEmail: string;
   teacherUserId: string;
   parentUserId: string;
   parentId: string;
@@ -185,6 +186,7 @@ export interface LoginAndProvisionResult {
   studentId: string;
   teacherId: string;
   studentUserId: string;
+  studentUserEmail: string;
   teacherUserId: string;
   parentUserId: string;
   parentId: string;
@@ -211,6 +213,7 @@ export async function provisionTestEntities(
   if (!entities) throw new Error("Failed to create test entities");
 
   if (!entities.teacherUserEmail) throw new Error("Teacher email not returned");
+  if (!entities.studentUserEmail) throw new Error("Student email not returned");
   if (!entities.studentId) throw new Error("Student ID not returned");
   if (!entities.teacherId) throw new Error("Teacher ID not returned");
 
@@ -231,6 +234,7 @@ export async function provisionTestEntities(
     studentId: entities.studentId ?? "",
     teacherId: entities.teacherId ?? "",
     studentUserId: entities.studentUserId ?? "",
+    studentUserEmail: entities.studentUserEmail ?? "",
     teacherUserId: entities.teacherUserId ?? "",
     parentUserId: entities.parentUserId ?? "",
     parentId: entities.parentId ?? "",
@@ -266,6 +270,7 @@ export async function loginAndProvision(prefix: string): Promise<LoginAndProvisi
     studentId: result.studentId,
     teacherId: result.teacherId,
     studentUserId: result.studentUserId,
+    studentUserEmail: result.studentUserEmail,
     teacherUserId: result.teacherUserId,
     parentUserId: result.parentUserId,
     parentId: result.parentId,
@@ -509,6 +514,8 @@ export async function provisionTestManager(
         password: TEST_USER_PASSWORD,
         accountType,
         phone: null,
+        displayCurrency: null,
+        timezone: IanaTimezone.Utc,
       },
     },
     context: { headers: { Authorization: `Bearer ${superAdminToken}` } },

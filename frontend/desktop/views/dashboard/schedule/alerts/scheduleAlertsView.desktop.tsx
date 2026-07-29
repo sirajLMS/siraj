@@ -126,6 +126,7 @@ function DesktopAlertsBody({
   }
   return (
     <DesktopSectionPanel
+      contentPadding={false}
       title={labels.sectionTitle}
       subTitle={labels.sectionSubtitle}
       actions={

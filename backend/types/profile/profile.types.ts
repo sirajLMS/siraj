@@ -118,4 +118,6 @@ export type UnifiedProfileReturnType = {
     | null;
   readonly assignedStudents: TeacherAssignedStudentsResult | null;
   readonly displayCurrency: CurrencyCode | null;
+  readonly timezone: IanaTimezone | null;
+  readonly phone: string | null;
 };

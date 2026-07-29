@@ -21,6 +21,8 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
       parentId
       staffProfileId
       displayCurrency
+      timezone
+      phone
       teacherOwnProfile {
         id
         name
@@ -218,6 +220,7 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
       parentId
       staffProfileId
       displayCurrency
+      timezone
       teacherOwnProfile {
         id
         name

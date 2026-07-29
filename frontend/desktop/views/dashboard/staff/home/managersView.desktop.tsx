@@ -21,7 +21,7 @@ export function ManagersViewDesktop({ labels, ...props }: Readonly<ManagersViewP
 
       <ManagersMetrics labels={labels.metrics} metrics={props.metrics} />
 
-      <DesktopSectionPanel>
+      <DesktopSectionPanel contentPadding={false}>
         <ManagersFilterBar
           labels={labels.filters}
           roleFilter={props.roleFilter}

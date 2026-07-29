@@ -13,7 +13,7 @@ import type {
 } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext.types";
 import {
   getVisibleStudentProfileTabs,
-  resolveStudentProfileTab,
+  isStudentProfileTab,
   type StudentProfileTab,
 } from "@/frontend/common/views/dashboard/students/profile/studentProfileTabs";
 import type { StudentProfilePageLabelsBySection } from "@/frontend/common/views/dashboard/students/profile/types/studentProfilePage.types";
@@ -94,23 +94,32 @@ type StudentProfileTranslations = StudentProfileLabels;
 
 function useStudentProfileTabState(
   studentId: string,
-  access: StudentFieldAccess,
+  visibleTabs: readonly StudentProfileTab[],
   tabParam: string | null,
   router: ReturnType<typeof useRouter>
 ): StudentProfileTabState {
-  const { canView } = access;
-  const visibleTabs = useMemo(() => getVisibleStudentProfileTabs(canView), [canView]);
-  const [activeTab, setActiveTab] = useState<StudentProfileTab | null>(() =>
-    resolveStudentProfileTab(tabParam, canView)
+  const resolveTab = useCallback(
+    (requestedTab: string | null): StudentProfileTab | null => {
+      if (visibleTabs.length === 0) {
+        return null;
+      }
+      if (isStudentProfileTab(requestedTab) && visibleTabs.includes(requestedTab)) {
+        return requestedTab;
+      }
+      return visibleTabs[0] ?? null;
+    },
+    [visibleTabs]
   );
 
+  const [activeTab, setActiveTab] = useState<StudentProfileTab | null>(() => resolveTab(tabParam));
+
   useEffect(() => {
-    const nextResolved = resolveStudentProfileTab(tabParam, canView);
-    setActiveTab(nextResolved);
+    const nextResolved = resolveTab(tabParam);
+    setActiveTab(prev => (prev === nextResolved ? prev : nextResolved));
     if (nextResolved && tabParam !== nextResolved) {
       router.replace(`/students/${studentId}/profile?tab=${nextResolved}`);
     }
-  }, [tabParam, canView, studentId, router]);
+  }, [tabParam, resolveTab, studentId, router]);
 
   const handleTabChange = useCallback(
     (_event: React.SyntheticEvent, nextTab: StudentProfileTab) => {
@@ -120,7 +129,7 @@ function useStudentProfileTabState(
     [router, studentId]
   );
 
-  const activeTabForQuery = activeTab ?? resolveStudentProfileTab(tabParam, canView);
+  const activeTabForQuery = activeTab ?? resolveTab(tabParam);
 
   return { activeTab, visibleTabs, onTabChange: handleTabChange, activeTabForQuery };
 }
@@ -134,7 +143,7 @@ function useStudentProfileQueryState(
   const month = activeTabForQuery === "history" ? currentMonth.getMonth() + 1 : undefined;
 
   const { data, loading, refetch } = useQuery(studentProfileQueryDocument, {
-    variables: { studentId, year: year ?? null, month: month ?? null },
+    variables: { studentId, year: year ?? null, month: month ?? null, includeUpcomingClasses: true },
     skip: !studentId,
     fetchPolicy: "cache-and-network",
   });
@@ -204,21 +213,31 @@ export function useStudentProfilePageViewModel(
   const searchParams = useSearchParams();
   const router = useRouter();
   const { currentMonth } = useStudentHistoryStore();
-  const access = useStudentFieldAccess();
-
   const tabParam = searchParams.get("tab");
-  const { activeTab, visibleTabs, onTabChange, activeTabForQuery } = useStudentProfileTabState(
+
+  const { profile, loading, loadingState, refetch } = useStudentProfileQueryState(studentId, null, currentMonth);
+
+  const access = useStudentFieldAccess({
+    isOwnStudentProfileOverride: profile?.isOwnStudentProfile ?? undefined,
+  });
+  const visibleTabs = useMemo(() => getVisibleStudentProfileTabs(access.canView), [access.canView]);
+
+  const { activeTab, onTabChange, activeTabForQuery } = useStudentProfileTabState(
     studentId,
-    access,
+    visibleTabs,
     tabParam,
     router
   );
 
-  const { profile, loading, loadingState, refetch } = useStudentProfileQueryState(
-    studentId,
-    activeTabForQuery,
-    currentMonth
-  );
+  const historyYear = currentMonth.getFullYear();
+  const historyMonth = currentMonth.getMonth() + 1;
+
+  useEffect(() => {
+    if (activeTabForQuery !== "history") {
+      return;
+    }
+    void refetch({ year: historyYear, month: historyMonth });
+  }, [activeTabForQuery, historyYear, historyMonth, refetch]);
 
   useDocumentTitle(profile?.name, Translation.Dashboard.StudentProfile, "title");
 

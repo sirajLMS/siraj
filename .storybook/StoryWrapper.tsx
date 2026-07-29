@@ -89,7 +89,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
   useEffect(() => {
     const adminPermissions: AppPermission[] = [
       AppPermissionEnum.AuthLogin,
-      AppPermissionEnum.AuthViewOwnProfile,
+      AppPermissionEnum.ProfileCoreIdentityViewOwn,
       AppPermissionEnum.DashboardView,
       AppPermissionEnum.DashboardViewMetrics,
       AppPermissionEnum.DashboardFilterMetrics,

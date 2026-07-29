@@ -8,6 +8,7 @@ import type { MetricLabelSources } from "@/frontend/common/components/reports/me
 import { resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard/DesktopMetricCard";
+import type { MetricCardDensity } from "@/frontend/desktop/components/ui/card/MetricCard/utils";
 import { DesktopHorizontalScrollRow } from "@/frontend/desktop/components/ui/container/DesktopHorizontalScrollRow";
 
 type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T | null };
@@ -20,6 +21,7 @@ export interface DesktopMetricCardGridProps {
   readonly selectedKey?: string;
   readonly size?: ResponsiveStyleValue<GridSize>;
   readonly layout?: MetricCardGridLayout;
+  readonly density?: MetricCardDensity;
 }
 
 const defaultSize = { xs: 6, sm: 4, md: 3, lg: 2 };
@@ -30,12 +32,14 @@ function renderMetricCard({
   selectedKey,
   onMetricClick,
   labelSources,
+  density,
 }: {
   metric: MetricItem;
   index: number;
   selectedKey?: string;
   onMetricClick?: (key: string) => void;
   labelSources: MetricLabelSources;
+  density?: MetricCardDensity;
 }) {
   const label = metric.label || resolveMetricLabel(metric.labelKey, labelSources);
   return (
@@ -46,6 +50,8 @@ function renderMetricCard({
       subLabel={metric.subLabel}
       variant={selectedKey === metric.key ? "highlight" : metric.variant}
       animationIndex={index}
+      density={density}
+      sx={{ width: "100%" }}
       onClick={
         onMetricClick
           ? () => {
@@ -63,6 +69,7 @@ export function DesktopMetricCardGrid({
   selectedKey,
   size,
   layout = "grid",
+  density = "default",
 }: DesktopMetricCardGridProps) {
   const labelSources = useMetricLabelSources();
 
@@ -79,7 +86,7 @@ export function DesktopMetricCardGrid({
               borderRadius: 0,
             }}
           >
-            {renderMetricCard({ metric, index, selectedKey, onMetricClick, labelSources })}
+            {renderMetricCard({ metric, index, selectedKey, onMetricClick, labelSources, density })}
           </Box>
         ))}
       </DesktopHorizontalScrollRow>
@@ -87,10 +94,12 @@ export function DesktopMetricCardGrid({
   }
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={2} sx={{ alignItems: "stretch" }}>
       {metrics.map((metric, index) => (
-        <Grid key={metric.key} size={size ?? defaultSize} sx={{ minWidth: 0 }}>
-          {renderMetricCard({ metric, index, selectedKey, onMetricClick, labelSources })}
+        <Grid key={metric.key} size={size ?? defaultSize} sx={{ minWidth: 0, display: "flex" }}>
+          <Box sx={{ display: "flex", width: "100%" }}>
+            {renderMetricCard({ metric, index, selectedKey, onMetricClick, labelSources, density })}
+          </Box>
         </Grid>
       ))}
     </Grid>

@@ -33,9 +33,11 @@ export const dashboardCoreStatusTrackingAr: StatusTrackingLabels = {
     onLeave: "غيابات معتمدة",
   },
   table: {
-    studentClass: "الطالب / الحصة",
+    class: "الحصة",
+    student: "الطالب",
     teacher: "المعلم",
     schedule: "الجدول",
+    duration: "المدة",
     status: "الحالة",
     actions: "الإجراءات",
   },

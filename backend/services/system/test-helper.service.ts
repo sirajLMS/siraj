@@ -210,7 +210,18 @@ export namespace TestHelperService {
     };
   }
 
-  async function assignPermissionGroups(tx: TxType, teacherUserId: string, parentUserId: string, now: Date) {
+  async function assignPermissionGroups(
+    tx: TxType,
+    studentUserId: string,
+    teacherUserId: string,
+    parentUserId: string,
+    now: Date
+  ) {
+    const [studentGroup] = await tx
+      .select()
+      .from(permissionGroups)
+      .where(eq(permissionGroups.slug, "student_default"))
+      .limit(1);
     const [teacherGroup] = await tx
       .select()
       .from(permissionGroups)
@@ -221,6 +232,14 @@ export namespace TestHelperService {
       .from(permissionGroups)
       .where(eq(permissionGroups.slug, "parent_default"))
       .limit(1);
+
+    if (studentGroup) {
+      await tx.insert(userPermissionGroups).values({
+        userId: studentUserId,
+        groupId: studentGroup.id,
+        assignedAt: now,
+      });
+    }
 
     if (teacherGroup) {
       await tx.insert(userPermissionGroups).values({
@@ -311,7 +330,7 @@ export namespace TestHelperService {
       const { studentUserRow, studentEmail, parentUserRow, parentEmail, teacherUserRow, teacherEmail } =
         await createTestUsers(tx, prefix, hashedPassword, now);
 
-      await assignPermissionGroups(tx, teacherUserRow.id, parentUserRow.id, now);
+      await assignPermissionGroups(tx, studentUserRow.id, teacherUserRow.id, parentUserRow.id, now);
 
       const { studentId, parentId, teacherId } = await createProfilesAndAssignment(
         tx,

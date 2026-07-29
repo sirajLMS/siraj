@@ -11,31 +11,6 @@ export const supervisorDashboardQueryDocument: TypedDocumentNode<Operations.Supe
         totalAmount
         currency
       }
-      recentApprovals {
-        id
-        classInstanceId
-        subjectName
-        classAvatarUrl
-        studentId
-        studentName
-        teacherId
-        teacherName
-        studentAvatarUrl
-        teacherAvatarUrl
-        studentUserId
-        teacherUserId
-        lessonDate
-        durationMinutes
-        attendanceEvaluation
-        teacherNotes
-        studentNotes
-        completionPercentage
-        status
-        submittedAt
-        reviewedAt
-        createdAt
-        updatedAt
-      }
       monthlySnapshot {
         year
         month

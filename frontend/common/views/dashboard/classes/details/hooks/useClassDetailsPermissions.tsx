@@ -4,8 +4,9 @@ export function useClassDetailsPermissions(hasPermission: (permission: AppPermis
   const canOverride = hasPermission(AppPermission.SessionOverrideActions);
   const canActivate = hasPermission(AppPermission.SessionActivateClass);
   const isParentView = hasPermission(AppPermission.ScheduleViewFamily) && !canActivate && !canOverride;
-  // NEW FOR PLAN v5: blogated SessionViewDetails check lifted out of tier-wide RequirePermission wrapper (specs.md §6.1, N3).
   const canViewSessionDetails = canOverride || hasPermission(AppPermission.SessionViewDetails);
+  const isStudentView =
+    hasPermission(AppPermission.StudentViewOwnDashboard) && !canOverride && !canActivate && !isParentView;
 
-  return { canOverride, canActivate, isParentView, canViewSessionDetails };
+  return { canOverride, canActivate, isParentView, canViewSessionDetails, isStudentView };
 }

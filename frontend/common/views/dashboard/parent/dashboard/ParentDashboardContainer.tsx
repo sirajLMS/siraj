@@ -12,7 +12,7 @@ export function ParentDashboardContainer(props: UseParentDashboardViewModelProps
   const viewModel = useParentDashboardViewModel(props);
 
   return (
-    <RequirePermission permissions={[AppPermission.StudentViewOwnDashboard]} fallback={null}>
+    <RequirePermission permissions={[AppPermission.ScheduleViewFamily]} fallback={null}>
       <ParentDashboardView {...viewModel} />
     </RequirePermission>
   );

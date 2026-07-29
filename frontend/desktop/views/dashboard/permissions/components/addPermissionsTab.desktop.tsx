@@ -96,7 +96,7 @@ export function AddPermissionsTabDesktop({
         />
       )}
 
-      <DesktopSectionPanel title={t.addPermissions}>
+      <DesktopSectionPanel contentPadding={false} title={t.addPermissions}>
         <DesktopAppDataGrid<Permission>
           rows={filteredAvailablePermissions}
           columns={addPermissionsColumns}

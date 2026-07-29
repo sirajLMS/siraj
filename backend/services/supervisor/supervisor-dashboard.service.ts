@@ -40,10 +40,9 @@ export namespace SupervisorDashboardService {
       throw new Error(tErrors.insufficientPermissions);
     }
 
-    const [user, pendingReview, recentApprovals, pendingDuesSummary] = await Promise.all([
+    const [user, pendingReview, pendingDuesSummary] = await Promise.all([
       UserRepository.findById(actorUserId),
       LessonReportService.getPendingReviewCount(actorUserId, undefined, locale),
-      LessonReportService.getRecentApprovedLessonReports(actorUserId, 5, locale),
       TeacherDueService.getPendingDuesSummary(actorUserId, locale),
     ]);
 
@@ -56,7 +55,6 @@ export namespace SupervisorDashboardService {
       supervisorName: user.name,
       pendingReviewCount: pendingReview.pendingCount,
       pendingDuesSummary,
-      recentApprovals,
       monthlySnapshot: buildMonthlySnapshot(locale),
     };
   }

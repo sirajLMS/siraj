@@ -1,5 +1,6 @@
 import { ParentRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
-import { type AppLanguage, AppPermission, type Gender, StudentStatus } from "@/backend/enum";
+import { type AppLanguage, AppPermission, type CurrencyCode, type Gender, StudentStatus } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { parseAppLanguage, parseGender, parseStudentStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
@@ -16,6 +17,7 @@ import type { ErrorsLabels } from "@/shared/locale";
 type GetProfileOptions = {
   readonly year?: number | null;
   readonly month?: number | null;
+  readonly includeUpcomingClasses?: boolean;
 };
 
 async function hasAnyStudentViewPermission(actorUserId: string): Promise<boolean> {
@@ -72,6 +74,8 @@ function mapProfileRow(
   | "timezoneOverride"
   | "email"
   | "phone"
+  | "timezone"
+  | "displayCurrency"
   | "parentId"
   | "parentUserId"
   | "parentName"
@@ -98,6 +102,8 @@ function mapProfileRow(
     timezoneOverride: row.timezoneOverride,
     email: row.email,
     phone: row.phone,
+    timezone: row.timezone as IanaTimezone,
+    displayCurrency: row.displayCurrency as CurrencyCode | null,
     parentId: row.parentId,
     parentUserId: row.parentUserId,
     parentName: row.parentName,
@@ -130,19 +136,22 @@ export namespace StudentProfileService {
     }
 
     const isAssociatedViewer = await resolveIsAssociatedViewer(actorUserId, studentId);
+    const isOwnStudentProfile = row.userId === actorUserId;
     const permissionContext = await PermissionsService.getUserContext(actorUserId);
     const filterCtx: StudentFieldFilterContext = {
       actorUserId,
       studentId,
-      isAssociatedViewer,
+      studentUserId: row.userId,
       permissions: new Set(permissionContext.permissions),
     };
 
-    let upcomingClasses: Awaited<ReturnType<typeof StudentStatusService.getUpcomingClasses>> | null;
-    try {
-      upcomingClasses = await StudentStatusService.getUpcomingClasses(actorUserId, studentId, tErrors);
-    } catch {
-      upcomingClasses = null;
+    let upcomingClasses: Awaited<ReturnType<typeof StudentStatusService.getUpcomingClasses>> | null = null;
+    if (options.includeUpcomingClasses !== false) {
+      try {
+        upcomingClasses = await StudentStatusService.getUpcomingClasses(actorUserId, studentId, tErrors);
+      } catch {
+        upcomingClasses = null;
+      }
     }
 
     let classHistory = null;
@@ -164,6 +173,7 @@ export namespace StudentProfileService {
       {
         ...mapProfileRow(row),
         isAssociatedViewer,
+        isOwnStudentProfile,
         upcomingClasses,
         classHistory,
       },
@@ -172,11 +182,8 @@ export namespace StudentProfileService {
   }
 
   /**
-   * Lets a student update their own editable profile fields.
-   * Gated by fine-grained student field-group edit_own permissions:
-   * - phone / dateOfBirth / gender / language → `student_identity` (STUDENT_IDENTITY_EDIT_OWN)
-   * - parentPhone (when linked) → `student_parent` (STUDENT_PARENT_EDIT_OWN)
-   * Rejects email, teacher assignment, and quota/credit changes (not accepted on input).
+   * Updates editable student profile fields for own profile (omit studentId) or a target student (studentId).
+   * Gated by fine-grained student field-group edit_own / edit_other permissions.
    */
   export async function recordStudentProfileEdit(
     actorUserId: string,
@@ -184,18 +191,30 @@ export namespace StudentProfileService {
     tErrors: ErrorsLabels,
     locale?: string
   ): Promise<StudentProfileReturnType> {
-    const studentId = await resolveOwnStudentId(actorUserId, tErrors);
-    const profile = await requireOwnStudentProfile(actorUserId, studentId, tErrors);
+    const targetStudentId = input.studentId?.trim()
+      ? input.studentId.trim()
+      : await resolveOwnStudentId(actorUserId, tErrors);
+
+    const profile = await StudentRepository.findProfileById(targetStudentId);
+    if (!profile) {
+      throw new Error(tErrors.studentNotFound(targetStudentId));
+    }
+
+    const isOwnProfile = profile.userId === actorUserId;
+
+    if (!isOwnProfile && !input.studentId?.trim()) {
+      throw new Error(tErrors.insufficientPermissions);
+    }
 
     const submittedGroups = collectStudentProfileEditGroups(input);
     if (submittedGroups.length === 0) {
       throw new Error(tErrors.invalidInput);
     }
 
-    await assertCanEditSubmittedGroups(actorUserId, studentId, submittedGroups, tErrors);
-    await applyStudentProfileEdit(actorUserId, studentId, profile, input, tErrors, locale);
+    await assertCanEditSubmittedGroups(actorUserId, targetStudentId, profile.userId, submittedGroups, tErrors);
+    await applyStudentProfileEdit(profile.userId, targetStudentId, profile, input, tErrors, locale);
 
-    return getProfile(actorUserId, studentId, tErrors, {});
+    return getProfile(actorUserId, targetStudentId, tErrors, {});
   }
 }
 
@@ -207,24 +226,10 @@ async function resolveOwnStudentId(actorUserId: string, tErrors: ErrorsLabels): 
   return studentId;
 }
 
-async function requireOwnStudentProfile(
-  actorUserId: string,
-  studentId: string,
-  tErrors: ErrorsLabels
-): Promise<NonNullable<Awaited<ReturnType<typeof StudentRepository.findProfileById>>>> {
-  const profile = await StudentRepository.findProfileById(studentId);
-  if (!profile) {
-    throw new Error(tErrors.studentNotFound(studentId));
-  }
-  if (profile.userId !== actorUserId) {
-    throw new Error(tErrors.insufficientPermissions);
-  }
-  return profile;
-}
-
 async function assertCanEditSubmittedGroups(
   actorUserId: string,
   studentId: string,
+  studentUserId: string,
   submittedGroups: readonly string[],
   tErrors: ErrorsLabels
 ): Promise<void> {
@@ -232,7 +237,7 @@ async function assertCanEditSubmittedGroups(
   const filterCtx: StudentFieldFilterContext = {
     actorUserId,
     studentId,
-    isAssociatedViewer: true,
+    studentUserId,
     permissions: new Set(permissionContext.permissions),
   };
 
@@ -244,7 +249,7 @@ async function assertCanEditSubmittedGroups(
 }
 
 async function applyStudentProfileEdit(
-  actorUserId: string,
+  studentUserId: string,
   studentId: string,
   profile: NonNullable<Awaited<ReturnType<typeof StudentRepository.findProfileById>>>,
   input: StudentProfileEditInput,
@@ -287,7 +292,15 @@ async function applyStudentProfileEdit(
   }
 
   if (input.phone !== undefined) {
-    await UserRepository.updateProfileFields(actorUserId, { phone: input.phone }, locale);
+    await UserRepository.updateProfileFields(studentUserId, { phone: input.phone }, locale);
+  }
+
+  if (input.timezone !== undefined && input.timezone) {
+    await UserRepository.updateTimezone(studentUserId, input.timezone, undefined, locale);
+  }
+
+  if (input.displayCurrency !== undefined) {
+    await UserRepository.updateProfileFields(studentUserId, { displayCurrency: input.displayCurrency }, locale);
   }
 
   if (input.parentPhone !== undefined) {
@@ -301,8 +314,20 @@ async function applyStudentProfileEdit(
 function collectStudentProfileEditGroups(input: StudentProfileEditInput): string[] {
   const groups: string[] = [];
 
-  // Phone lives on users but is gated with identity edit_own (no separate student contact group).
-  if ("phone" in input || "dateOfBirth" in input || "gender" in input || "language" in input || "avatarUrl" in input) {
+  // Phone, timezone, and displayCurrency live on users but are gated with identity edit_own.
+  if (
+    "phone" in input ||
+    "timezone" in input ||
+    "displayCurrency" in input ||
+    "dateOfBirth" in input ||
+    "gender" in input ||
+    "language" in input ||
+    "avatarUrl" in input
+  ) {
+    groups.push("student_identity");
+  }
+
+  if ("timezoneOverride" in input) {
     groups.push("student_identity");
   }
 

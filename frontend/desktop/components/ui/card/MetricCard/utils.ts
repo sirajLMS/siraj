@@ -1,6 +1,7 @@
 import type { Theme } from "@mui/material";
 
 export type MetricCardVariant = "default" | "error" | "highlight" | "danger";
+export type MetricCardDensity = "default" | "compact";
 
 export function formatValue(value: number | string): string {
   if (typeof value === "number") {

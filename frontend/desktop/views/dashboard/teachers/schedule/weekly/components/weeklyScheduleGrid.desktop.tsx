@@ -11,8 +11,10 @@ import {
   Typography,
 } from "@mui/material";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
+import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
 import {
   isTerminalClassInstance,
+  resolveWeeklyScheduleSlotStatus,
   useDeleteConfirmDialog,
   WEEKLY_SCHEDULE_DAYS,
   WEEKLY_SCHEDULE_TIMES,
@@ -21,9 +23,21 @@ import type {
   ScheduledClass,
   WeeklyScheduleGridProps,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import { DesktopPersonProfileLink } from "@/frontend/desktop/components/ui/display";
+import { Link } from "@/shared/i18n";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
 import type { MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
+
+const TIME_COLUMN_WIDTH = 88;
+const GRID_COLUMNS = `${TIME_COLUMN_WIDTH}px repeat(7, minmax(0, 1fr))`;
+
+const linkTypographySx = {
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  display: "block",
+} as const;
 
 interface SlotItemProps {
   readonly classItem: ScheduledClass;
@@ -36,10 +50,19 @@ interface SlotItemProps {
 function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meetingJoinLabels }: Readonly<SlotItemProps>) {
   const { open, openDialog, closeDialog } = useDeleteConfirmDialog();
   const t = labels;
+  const classInstanceId = classItem.id ?? "";
+  const subjectLabel = classItem.subjectName?.trim() || t.grid.unknownSubject;
+  const statusLabel = resolveWeeklyScheduleSlotStatus(classItem, t.grid.status);
 
   const handleConfirm = () => {
     closeDialog();
-    onRemove(classItem.id ?? "");
+    onRemove(classInstanceId);
+  };
+
+  const handleDeleteClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openDialog();
   };
 
   const canJoin = isJoinableClassInstance(classItem.executionState, classItem.outcome, {
@@ -48,58 +71,91 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meeting
   const isTerminal = isTerminalClassInstance(classItem.executionState, classItem.outcome);
   const showDelete = !classItem.isFrozen && !isTerminal;
 
-  const slotAction = canJoin ? (
-    <MeetingJoinAction
-      variant="icon"
-      joinUrl={classItem.meetingJoinUrl}
-      meeting={classItem.effectiveMeeting}
-      emptyRole="teacher"
-      label={meetingJoinLabels.joinMeeting}
-      setupHref="/profile?tab=meeting"
-    />
-  ) : isTerminal ? (
-    <Typography variant="labelMd" sx={{ opacity: 0.7, color: "inherit", fontSize: 10 }}>
-      {t.grid.sessionEnded}
-    </Typography>
-  ) : null;
-
   return (
     <>
       <Box
         sx={theme => ({
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
+          flex: 1,
+          width: "100%",
+          minHeight: 0,
+          backgroundColor: isTerminal ? theme.palette.surfaceContainerHigh : theme.palette.primaryContainer,
+          color: isTerminal ? theme.palette.onSurface : theme.palette.onPrimaryContainer,
           borderRadius: 1,
-          p: 1,
-          typography: "labelMd",
+          px: 1,
+          py: 0.75,
           display: "flex",
+          flexDirection: "column",
           justifyContent: "space-between",
-          alignItems: "center",
-          height: "100%",
+          gap: 0.5,
+          border: `1px solid ${isTerminal ? theme.palette.outlineVariant : theme.palette.primary.main}`,
+          borderInlineStart: `3px solid ${theme.palette.primary.main}`,
+          opacity: isTerminal ? 0.9 : 1,
         })}
       >
-        <Box>
-          <Typography variant="bodyMd" sx={{ fontWeight: "bold", color: "inherit" }}>
-            {classItem.studentName} ({classItem.duration}m)
+        <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.25 }}>
+          {classInstanceId ? (
+            <Link href={classHref(classInstanceId)} style={{ textDecoration: "none", minWidth: 0 }}>
+              <Typography
+                variant="labelMd"
+                sx={theme => ({
+                  ...linkTypographySx,
+                  fontWeight: 700,
+                  color: theme.palette.primary.main,
+                  lineHeight: 1.25,
+                  "&:hover": { textDecoration: "underline" },
+                })}
+              >
+                {subjectLabel}
+              </Typography>
+            </Link>
+          ) : (
+            <Typography variant="labelMd" sx={{ ...linkTypographySx, fontWeight: 700, lineHeight: 1.25 }}>
+              {subjectLabel}
+            </Typography>
+          )}
+
+          <DesktopPersonProfileLink
+            href={classItem.studentId ? studentHref(classItem.studentId) : undefined}
+            name={classItem.studentName || "—"}
+            showAvatar={false}
+            typographyVariant="caption"
+            fontWeight={500}
+          />
+
+          <Typography variant="caption" sx={{ color: "inherit", opacity: 0.85, lineHeight: 1.2 }}>
+            {classItem.duration}m · {statusLabel}
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          {slotAction}
-          {showDelete && hasScheduleDeleteClass ? (
-            <Box
-              component="span"
-              className="material-symbols-outlined"
-              sx={theme => ({
-                fontSize: 18,
-                cursor: "pointer",
-                "&:hover": { color: theme.palette.error.main },
-              })}
-              onClick={openDialog}
-            >
-              delete
-            </Box>
-          ) : null}
-        </Box>
+
+        {canJoin || (showDelete && hasScheduleDeleteClass) ? (
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.5, minHeight: 20 }}>
+            {canJoin ? (
+              <MeetingJoinAction
+                variant="icon"
+                joinUrl={classItem.meetingJoinUrl}
+                meeting={classItem.effectiveMeeting}
+                emptyRole="teacher"
+                label={meetingJoinLabels.joinMeeting}
+                setupHref="/profile?tab=meeting"
+              />
+            ) : null}
+            {showDelete && hasScheduleDeleteClass ? (
+              <Box
+                component="span"
+                className="material-symbols-outlined"
+                sx={theme => ({
+                  fontSize: 16,
+                  cursor: "pointer",
+                  opacity: 0.7,
+                  "&:hover": { color: theme.palette.error.main, opacity: 1 },
+                })}
+                onClick={handleDeleteClick}
+              >
+                delete
+              </Box>
+            ) : null}
+          </Box>
+        ) : null}
       </Box>
 
       <Dialog open={open} onClose={closeDialog}>
@@ -123,35 +179,42 @@ function GridHeader({ labels }: Readonly<{ labels: TeacherWeeklyScheduleLabels }
   return (
     <Box
       sx={theme => ({
-        gridColumn: "span 8",
+        gridColumn: "1 / -1",
         display: "grid",
-        gridTemplateColumns: "100px repeat(7, 1fr)",
+        gridTemplateColumns: GRID_COLUMNS,
         backgroundColor: theme.palette.sidebar,
         color: theme.palette.onSidebar,
       })}
     >
       <Box
         sx={theme => ({
-          p: 2,
+          px: 1,
+          py: 1.5,
           borderRight: `1px solid ${theme.palette.outlineVariant}`,
-          textAlign: "center",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         })}
       >
-        <Typography variant="labelUppercase">{t.grid.teacherTime}</Typography>
+        <Typography variant="labelUppercase" sx={{ fontSize: 10, textAlign: "center", lineHeight: 1.3 }}>
+          {t.grid.teacherTime}
+        </Typography>
       </Box>
       {WEEKLY_SCHEDULE_DAYS.map(day => (
         <Box
           key={day}
           sx={theme => ({
-            p: 2,
+            px: 1,
+            py: 1.5,
             borderRight: `1px solid ${theme.palette.outlineVariant}`,
             textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            "&:last-child": { borderRight: "none" },
           })}
         >
-          <Typography variant="titleLg" sx={{ color: "inherit" }}>
+          <Typography variant="labelMd" sx={{ color: "inherit", fontWeight: 600 }}>
             {t.days[day]}
           </Typography>
         </Box>
@@ -185,23 +248,25 @@ function GridRow({
   return (
     <Box
       sx={theme => ({
-        gridColumn: "span 8",
+        gridColumn: "1 / -1",
         display: "grid",
-        gridTemplateColumns: "100px repeat(7, 1fr)",
-        borderBottom: `1px solid ${theme.palette.border.light}`,
+        gridTemplateColumns: GRID_COLUMNS,
+        borderTop: `1px solid ${theme.palette.border.light}`,
+        minHeight: 68,
       })}
     >
       <Box
         sx={theme => ({
-          p: 2,
-          backgroundColor: theme.palette.background.default,
+          px: 1,
+          py: 1,
+          backgroundColor: theme.palette.surfaceContainerLow,
           borderRight: `1px solid ${theme.palette.border.light}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         })}
       >
-        <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
+        <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, fontWeight: 600 })}>
           {time}
         </Typography>
       </Box>
@@ -215,21 +280,23 @@ function GridRow({
             key={day}
             sx={theme => ({
               p: 0.5,
-              minHeight: 80,
               borderRight: `1px solid ${theme.palette.border.light}`,
-              position: "relative",
-              backgroundColor: isLunch ? theme.palette.action.hover : "transparent",
+              display: "flex",
+              flexDirection: "column",
+              gap: 0.5,
+              minHeight: 88,
+              backgroundColor: isLunch ? theme.palette.action.hover : theme.palette.background.default,
+              "&:last-child": { borderRight: "none" },
             })}
           >
             {isLunch ? (
               <Box
                 sx={{
-                  height: "100%",
+                  flex: 1,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: 1,
-                  opacity: 0.6,
+                  opacity: 0.5,
                 }}
               >
                 <Typography variant="caption" sx={{ fontStyle: "italic" }}>
@@ -266,11 +333,12 @@ export default function WeeklyScheduleGrid({
     <Box
       sx={theme => ({
         display: "grid",
-        gridTemplateColumns: "100px repeat(7, 1fr)",
+        gridTemplateColumns: GRID_COLUMNS,
         border: `1px solid ${theme.palette.border.light}`,
         borderRadius: theme.layout.radius.card,
         overflow: "hidden",
         backgroundColor: theme.palette.background.paper,
+        width: "100%",
       })}
     >
       <GridHeader labels={labels} />

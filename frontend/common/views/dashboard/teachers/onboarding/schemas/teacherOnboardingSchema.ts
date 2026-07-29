@@ -45,6 +45,7 @@ export const teacherOnboardingSchema = (validationLabels: {
           message: validationLabels.timezoneRequired,
         }
       ),
+      displayCurrency: z.enum(CurrencyCode).optional().nullable(),
       hourlyRate: z.string().min(1, validationLabels.salaryAmountRequired),
       rateCurrency: z.enum(CurrencyCode).refine(v => !!v, { message: validationLabels.currencyRequired }),
       payoutMethod: onboardingPaymentMethodSchema.optional().nullable(),

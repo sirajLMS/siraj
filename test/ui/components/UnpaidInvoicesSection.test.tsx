@@ -117,7 +117,7 @@ describe("UnpaidInvoicesSection", () => {
 
     renderWithWrapper(<UnpaidInvoicesSection />, {
       locale: "en",
-      permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.UserViewProfile],
+      permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.ProfileCoreIdentityViewOther],
       mocks,
     });
 
@@ -138,7 +138,7 @@ describe("UnpaidInvoicesSection", () => {
   test("renders invoice items with user names and amounts", async () => {
     renderWithWrapper(<UnpaidInvoicesSection />, {
       locale: "en",
-      permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.UserViewProfile],
+      permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.ProfileCoreIdentityViewOther],
       mocks: createBillingMock(),
     });
 
@@ -155,7 +155,7 @@ describe("UnpaidInvoicesSection", () => {
   test("shows overdue count badge", async () => {
     renderWithWrapper(<UnpaidInvoicesSection />, {
       locale: "en",
-      permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.UserViewProfile],
+      permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.ProfileCoreIdentityViewOther],
       mocks: createBillingMock(),
     });
 
@@ -171,7 +171,7 @@ describe("UnpaidInvoicesSection", () => {
 
     renderWithWrapper(<UnpaidInvoicesSection />, {
       locale: "en",
-      permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.UserViewProfile],
+      permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.ProfileCoreIdentityViewOther],
       mocks: createBillingMock(),
     });
 
@@ -185,7 +185,7 @@ describe("UnpaidInvoicesSection", () => {
     expect(mockPush).toHaveBeenCalledWith("/users/user-1/billing-profile");
   });
 
-  test("user rows are not clickable without UserViewProfile permission", async () => {
+  test("user rows are not clickable without profile core identity view_other permission", async () => {
     renderWithWrapper(<UnpaidInvoicesSection />, {
       locale: "en",
       permissions: [AppPermission.BillingViewUnpaidInvoices],

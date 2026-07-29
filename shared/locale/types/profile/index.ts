@@ -212,6 +212,7 @@ export interface ProfileStaffLabels {
     readonly fullName: string;
     readonly primaryEmail: string;
     readonly phone: string;
+    readonly timezone: string;
     readonly roleName: string;
     readonly roleSlug: string;
     readonly department: string;

@@ -6,6 +6,11 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 
 function buildCardListLabels(labels: StatusTrackingLabels): StatusTrackingLabelsBySection["cardList"] {
   return {
+    class: labels.class,
+    student: labels.student,
+    teacher: labels.teacher,
+    schedule: labels.schedule,
+    duration: labels.duration,
     joinSession: labels.joinSession,
     activate: labels.activate,
     reschedule: labels.reschedule,
@@ -36,9 +41,11 @@ function buildAnalyticsLabels(labels: StatusTrackingLabels): StatusTrackingLabel
 
 function buildColumnLabels(labels: StatusTrackingLabels): StatusTrackingLabelsBySection["columns"] {
   return {
-    studentClass: labels.studentClass,
+    class: labels.class,
+    student: labels.student,
     teacher: labels.teacher,
     schedule: labels.schedule,
+    duration: labels.duration,
     status: labels.status,
     actions: labels.actions,
     joinSession: labels.joinSession,
@@ -101,9 +108,11 @@ export function useStatusTrackingLabels(): StatusTrackingLabels {
     newReport: t.newReport,
     todaysClassSchedule: t.todaysClassSchedule,
     totalSessions: (total: number) => t.totalSessions(total),
-    studentClass: t.table.studentClass,
+    class: t.table.class,
+    student: t.table.student,
     teacher: t.table.teacher,
     schedule: t.table.schedule,
+    duration: t.table.duration,
     status: t.table.status,
     actions: t.table.actions,
     showingOf: (shown: number, total: number) => t.showingOf(shown, total),

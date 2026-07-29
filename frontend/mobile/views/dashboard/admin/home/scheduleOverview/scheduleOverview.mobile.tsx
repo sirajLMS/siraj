@@ -10,6 +10,11 @@ import {
   ScheduleOverviewCardSkeleton,
   ScheduleOverviewEmptyState,
 } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
+import {
+  scheduleOverviewCardShellSx,
+  scheduleOverviewListCanvasSx,
+  scheduleOverviewMobileChromeSx,
+} from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import type { ScheduleOverviewLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/scheduleOverview.types";
@@ -52,7 +57,7 @@ function renderScheduleOverviewItem(
   const { columns, status, actions } = labelsBySection;
 
   return (
-    <MobileCardListItem variant="edge-to-edge">
+    <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
       <ScheduleOverviewMobileCard
         row={row}
         headers={columns}
@@ -145,7 +150,7 @@ function ScheduleOverviewMobileToolbar({
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
-              backgroundColor: theme.palette.surfaceContainerLowest,
+              backgroundColor: theme.palette.surfaceContainerHigh,
             },
           }}
         />
@@ -178,17 +183,18 @@ function ScheduleOverviewMobileList({
       loading={loading}
       emptyMessage={shell.emptyMessage}
       renderSkeleton={() => (
-        <MobileCardListItem variant="edge-to-edge">
+        <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
           <ScheduleOverviewCardSkeleton />
         </MobileCardListItem>
       )}
       renderEmptyState={msg => (
-        <MobileCardListItem variant="edge-to-edge">
+        <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
           <ScheduleOverviewEmptyState message={msg} />
         </MobileCardListItem>
       )}
-      gap={2}
+      gap={0}
       layout="edge-to-edge"
+      sx={scheduleOverviewListCanvasSx}
       getKey={row => row.id ?? ""}
       renderItem={row => renderScheduleOverviewItem(row, labelsBySection, showTimezones, locale)}
       paginationOptions={buildServerPaginationOptions({
@@ -207,18 +213,20 @@ export function ScheduleOverviewMobileView(props: ScheduleOverviewMobileViewProp
   return (
     <Stack direction="column" sx={{ gap: { xs: 0, md: 2 } }}>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <ScheduleOverviewMobileHeader title={shell.title} selectedMetricLabel={props.selectedMetricLabel} />
-        <ScheduleOverviewMobileToolbar
-          canScheduleFilterAdvanced={props.canScheduleFilterAdvanced}
-          filters={filters}
-          dateValue={props.dateValue}
-          onDateChange={props.onDateChange}
-          selectedTeacher={props.selectedTeacher}
-          onTeacherChange={props.onTeacherChange}
-          canDashboardSearch={props.canDashboardSearch}
-          searchValue={props.searchValue}
-          onSearchChange={props.onSearchChange}
-        />
+        <Box sx={scheduleOverviewMobileChromeSx}>
+          <ScheduleOverviewMobileHeader title={shell.title} selectedMetricLabel={props.selectedMetricLabel} />
+          <ScheduleOverviewMobileToolbar
+            canScheduleFilterAdvanced={props.canScheduleFilterAdvanced}
+            filters={filters}
+            dateValue={props.dateValue}
+            onDateChange={props.onDateChange}
+            selectedTeacher={props.selectedTeacher}
+            onTeacherChange={props.onTeacherChange}
+            canDashboardSearch={props.canDashboardSearch}
+            searchValue={props.searchValue}
+            onSearchChange={props.onSearchChange}
+          />
+        </Box>
         <ScheduleOverviewMobileList
           rows={props.rows}
           loading={props.loading}

@@ -5,7 +5,7 @@ import { Box, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
+import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import { STATUS_LABEL_KEYS } from "@/frontend/common/views/dashboard/classes/status/tracking/constants/statusLabelKeys.constants";
 import { StatusAction } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {
@@ -18,11 +18,9 @@ import {
 import { getStatusIcon } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileAppDataGrid } from "@/frontend/mobile/components/ui/dataGrid/MobileAppDataGrid";
+import { MobileClassProfileLinkCell } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLinkCell.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
-import {
-  MobilePersonProfileLink,
-  MobilePersonProfileLinkCell,
-} from "@/frontend/mobile/components/ui/display/personProfileLink";
+import { MobilePersonProfileLinkCell } from "@/frontend/mobile/components/ui/display/personProfileLink/PersonProfileLinkCell.mobile";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale } from "@/shared/locale";
 
@@ -48,35 +46,36 @@ export function StatusTrackingDataGridMobile({
 
     return [
       {
+        field: "courseName",
+        headerName: labels.class,
+        flex: 1.2,
+        minWidth: 180,
+        renderCell: ({ row }) => (
+          <MobileClassProfileLinkCell
+            href={row.id ? classHref(row.id) : undefined}
+            name={row.courseName?.trim() || "—"}
+            avatarUrl={row.avatarUrl}
+            avatarSize={40}
+            typographyVariant="bodyMd"
+            fontWeight={700}
+          />
+        ),
+      },
+      {
         field: "studentName",
-        headerName: labels.studentClass,
-        flex: 1.3,
-        minWidth: 220,
-        renderCell: ({ row }) => {
-          const studentProfileHref = row.studentId ? studentHref(row.studentId) : undefined;
-          const teacherProfileHref = profileHrefForTeacher({ teacherId: row.teacherId });
-          return (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, justifyContent: "center", height: "100%" }}>
-              <MobilePersonProfileLinkCell
-                href={studentProfileHref}
-                name={row.studentName ?? ""}
-                avatarUrl={row.studentAvatarUrl}
-                avatarSize={40}
-                typographyVariant="bodyMd"
-                fontWeight={700}
-              />
-              <MobilePersonProfileLink
-                href={teacherProfileHref}
-                name={row.teacherName ?? ""}
-                avatarUrl={row.teacherAvatarUrl}
-                showAvatar={false}
-                typographyVariant="labelMd"
-                fontWeight={600}
-                emphasizeLink={Boolean(teacherProfileHref)}
-              />
-            </Box>
-          );
-        },
+        headerName: labels.student,
+        flex: 1.1,
+        minWidth: 160,
+        renderCell: ({ row }) => (
+          <MobilePersonProfileLinkCell
+            href={row.studentId ? studentHref(row.studentId) : undefined}
+            name={row.studentName ?? ""}
+            avatarUrl={row.studentAvatarUrl}
+            avatarSize={40}
+            typographyVariant="bodyMd"
+            fontWeight={700}
+          />
+        ),
       },
       {
         field: "teacherName",

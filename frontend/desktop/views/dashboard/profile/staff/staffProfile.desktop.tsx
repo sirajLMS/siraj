@@ -3,12 +3,14 @@
 import { Alert, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
+import { StaffExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/StaffExtensionProfileSection";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { StaffProfileEditForm } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileEditForm";
 import { PermissionsSection } from "@/frontend/common/views/dashboard/profile/staff/sections/PermissionsSection";
 import type { StaffProfileViewLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
+import { toStaffSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffProfileViewModel } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileViewModel";
-import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 
 type StaffProfileTranslations = StaffProfileViewLabels;
 
@@ -99,6 +101,8 @@ export function StaffProfileDesktopView({
   staffData,
   avatarUrl,
   displayCurrency,
+  profileTimezone,
+  profilePhone,
   targetUserId,
   permissionGroups,
   permissionOverrides,
@@ -125,60 +129,24 @@ export function StaffProfileDesktopView({
     return guard;
   }
 
-  const renderCompensationSection = () => {
-    if (!canView("staff_role")) {
-      return null;
-    }
-    if (isAdminScope) {
-      return (
-        <DesktopSectionPanel title={st.sections.compensation}>
-          <Stack spacing={2}>
-            <Typography variant="bodyLg">
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {st.fields.hourlyRate}
-              </Typography>
-              {staffData?.hourlyRate} {staffData?.rateCurrency}
-            </Typography>
-          </Stack>
-        </DesktopSectionPanel>
-      );
-    }
-    if (staffData?.hourlyRate || staffData?.rateCurrency) {
-      return (
-        <DesktopSectionPanel title={st.sections.compensation}>
-          <Stack spacing={2}>
-            <Typography variant="bodyLg">
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {st.fields.hourlyRate}
-              </Typography>
-              {staffData.hourlyRate} {staffData.rateCurrency}
-            </Typography>
-          </Stack>
-        </DesktopSectionPanel>
-      );
-    }
-    return null;
+  const sectionLabels = {
+    staff: st,
+    baseLabels: toStaffSharedBaseLabels(translations.base),
   };
 
-  const renderContactSection = () => {
-    if (!canView("core_contact")) {
-      return null;
-    }
-    return (
-      <DesktopSectionPanel title={st.sections.contact}>
-        <Stack spacing={1}>
-          {staffData?.phone && (
-            <Typography variant="bodyLg">
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {st.fields.phone}
-              </Typography>
-              {staffData.phone}
-            </Typography>
-          )}
-        </Stack>
-      </DesktopSectionPanel>
-    );
-  };
+  const renderContactSection = () => (
+    <UserDetailsProfileSection
+      scope={scope}
+      sectionTitle={st.sections.contact}
+      phoneLabel={st.fields.phone}
+      timezoneLabel={st.fields.timezone}
+      currencyLabel={st.fields.displayCurrency}
+      phone={profilePhone ?? staffData?.phone}
+      timezone={profileTimezone}
+      displayCurrency={displayCurrency}
+      baseLabels={sectionLabels.baseLabels}
+    />
+  );
 
   if (mode === ProfileMode.View) {
     return (
@@ -191,7 +159,12 @@ export function StaffProfileDesktopView({
               </Typography>
             ) : null}
             {renderContactSection()}
-            {renderCompensationSection()}
+            <StaffExtensionProfileSection
+              scope={scope}
+              labels={sectionLabels}
+              hourlyRate={staffData?.hourlyRate}
+              rateCurrency={staffData?.rateCurrency}
+            />
           </Stack>
         </Grid>
       </Grid>
@@ -204,6 +177,7 @@ export function StaffProfileDesktopView({
         staffData={staffData}
         avatarUrl={avatarUrl}
         displayCurrency={displayCurrency}
+        profileTimezone={profileTimezone}
         targetUserId={targetUserId}
         isAdminScope={isAdminScope}
         isSaving={isSaving}

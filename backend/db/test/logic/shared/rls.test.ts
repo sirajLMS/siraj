@@ -80,18 +80,21 @@ describe("Row Level Security and Soft Delete", () => {
       .returning();
 
     let updateError: unknown = null;
+    let updatedRows: { id: string }[] = [];
     try {
-      await queryAsRlsRole(
+      updatedRows = await queryAsRlsRole<{ id: string }>(
         "test_rls_user",
         "00000000-0000-0000-0000-000000000000",
-        `UPDATE "users" SET deleted_at = $1 WHERE id = $2`,
+        `UPDATE "users" SET deleted_at = $1 WHERE id = $2 RETURNING id`,
         [now.toISOString(), user.id]
       );
     } catch (e) {
       updateError = e;
     }
 
-    expect(updateError).not.toBeNull();
+    const [activeRow] = await db.select().from(users).where(sql`id = ${user.id}`);
+    expect(activeRow?.deletedAt).toBeNull();
+    expect(updateError !== null || updatedRows.length === 0).toBe(true);
 
     await db.delete(users).where(sql`id = ${user.id}`);
   });

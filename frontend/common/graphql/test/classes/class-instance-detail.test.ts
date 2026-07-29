@@ -17,6 +17,7 @@ describe("GraphQL Class Instance Detail Query", () => {
   let adminToken: string | null = null;
   let teacherToken: string | null = null;
   let parentToken: string | null = null;
+  let studentUserEmail: string | null = null;
   let studentId: string | null = null;
   let teacherId: string | null = null;
   let classInstanceId: string | null = null;
@@ -27,6 +28,7 @@ describe("GraphQL Class Instance Detail Query", () => {
     teacherToken = r.teacherToken;
     studentId = r.studentId;
     teacherId = r.teacherId;
+    studentUserEmail = r.studentUserEmail;
 
     if (!adminToken || !teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
     const subjectId = await ensureTestSubjectId(adminToken);
@@ -86,6 +88,17 @@ describe("GraphQL Class Instance Detail Query", () => {
     if (!parentToken || !classInstanceId) throw new Error("Missing parent context");
 
     const data = await authenticatedRequest(parentToken, "query", classInstanceQueryDocument, {
+      id: classInstanceId,
+    });
+
+    expect(data.classInstance?.id).toBe(classInstanceId);
+  });
+
+  test("student can read own class instance detail", async () => {
+    if (!classInstanceId || !studentUserEmail) throw new Error("Missing student context");
+
+    const studentToken = await loginUser(studentUserEmail, "Test_Pass1!");
+    const data = await authenticatedRequest(studentToken, "query", classInstanceQueryDocument, {
       id: classInstanceId,
     });
 

@@ -36,6 +36,7 @@ export const dashboardParentsDirectoryAr: ParentsDirectoryLabels = {
     addParent: "إضافة ولي أمر جديد",
     filter: "تصفية",
     clearFilters: "مسح التصفية",
+    export: "تصدير",
     manageLifecycle: "إدارة دورة الحياة",
   },
   noEntries: "لا يوجد أولياء أمور",

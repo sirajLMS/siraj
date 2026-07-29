@@ -79,15 +79,31 @@ gqlSchemaBuilder.queryField("pendingLessonReports", t =>
 
 gqlSchemaBuilder.queryField("recentApprovedLessonReports", t =>
   t.field({
-    type: [LessonReportPothosObject],
-    description: "Get the most recently approved lesson reports for the supervisor dashboard",
+    type: PendingLessonReportsPayloadPothosObject,
+    description: "Get paginated recently approved lesson reports for the supervisor dashboard",
     authScopes: { loggedIn: true },
     args: {
-      limit: t.arg.int({ required: false }),
+      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return LessonReportService.getRecentApprovedLessonReports(actorUserId, args.limit ?? 5, ctx.locale);
+
+      let pagination: PaginationArgs;
+      if (args.paginationArgs) {
+        pagination = new PaginationArgs({
+          first: args.paginationArgs.first ?? null,
+          skip: args.paginationArgs.skip ?? null,
+          after: args.paginationArgs.after ?? null,
+          before: args.paginationArgs.before ?? null,
+          last: args.paginationArgs.last ?? null,
+          page: args.paginationArgs.page ?? null,
+          maxCount: args.paginationArgs.maxCount ?? null,
+        });
+      } else {
+        pagination = new PaginationArgs();
+      }
+
+      return LessonReportService.getRecentApprovedLessonReports(actorUserId, pagination, ctx.locale);
     },
   })
 );

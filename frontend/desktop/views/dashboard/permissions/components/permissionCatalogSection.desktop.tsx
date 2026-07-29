@@ -29,7 +29,7 @@ export function PermissionCatalogSectionDesktop({
         onSearchChange={setSearchQuery}
         onCategoryChange={setSelectedCategory}
       />
-      <DesktopSectionPanel title={t.catalogTab}>
+      <DesktopSectionPanel contentPadding={false} title={t.catalogTab}>
         <PermissionCatalogDataGridDesktop
           labels={labels}
           permissions={filteredPermissions}

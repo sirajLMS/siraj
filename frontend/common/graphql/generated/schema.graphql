@@ -57,9 +57,7 @@ enum AppLanguage {
 }
 
 enum AppPermission {
-  AUTH_EDIT_OWN_PROFILE
   AUTH_LOGIN
-  AUTH_VIEW_OWN_PROFILE
   BILLING_CREATE_INVOICE
   BILLING_DELETE_INVOICE
   BILLING_MANAGE_CURRENCIES
@@ -111,11 +109,8 @@ enum AppPermission {
   PARENTS_CREATE
   PARENTS_EDIT
   PARENTS_LIST
-  PARENT_EDIT_OWN_PROFILE
   PARENT_MANAGE_STATUS
   PARENT_VIEW_DIRECTORY
-  PARENT_VIEW_OWN_PROFILE
-  PARENT_VIEW_PROFILE
   PARENT_VIEW_STUDENTS
   PAYMENT_METHODS_MANAGE_CATALOGS
   PAYMENT_METHODS_VERIFY_BANK_TRANSFER
@@ -215,7 +210,6 @@ enum AppPermission {
   SETTINGS_VIEW
   STAFF_CREATE
   STAFF_EDIT
-  STAFF_EDIT_PROFILE
   STAFF_LIST
   STAFF_VIEW_DIRECTORY
   STORAGE_MANAGE
@@ -284,16 +278,11 @@ enum AppPermission {
   TEACHERS_MANAGE_SCHEDULE
   TEACHER_DUES_MARK_PAID
   TEACHER_DUES_VIEW
-  TEACHER_EDIT_OWN_PROFILE
   TEACHER_VIEW_DASHBOARD
-  TEACHER_VIEW_OWN_PROFILE
-  TEACHER_VIEW_PROFILE
   TEACHER_VIEW_STUDENTS
   TEST_CUSTOM_ALT
   TEST_CUSTOM_ONLY
   TEST_SYSTEM_ONLY
-  USER_EDIT_PROFILE
-  USER_VIEW_PROFILE
 }
 
 input AssignPermissionGroupToUserInput {
@@ -2269,7 +2258,6 @@ type LoginResponse {
   user: User
 }
 
-"""Account type for new manager"""
 enum ManagerAccountType {
   admin
   manager
@@ -2322,10 +2310,12 @@ type ManagerOnboarding {
 input ManagerOnboardingInput {
   accountType: ManagerAccountType!
   avatarUrl: String
+  displayCurrency: CurrencyCode
   email: String!
   name: String!
   password: String!
   phone: String
+  timezone: IanaTimezone
 }
 
 """Result of manager onboarding operation"""
@@ -2956,6 +2946,7 @@ input ParentOnboardingInput {
   address: String
   avatarUrl: String
   currency: CurrencyCode
+  displayCurrency: CurrencyCode
   email: Email!
   facebook: String
   feeAmount: String
@@ -3316,9 +3307,9 @@ type Query {
   profileByUserId(userId: String!): UnifiedProfile
 
   """
-  Get the most recently approved lesson reports for the supervisor dashboard
+  Get paginated recently approved lesson reports for the supervisor dashboard
   """
-  recentApprovedLessonReports(limit: Int): [LessonReport!]
+  recentApprovedLessonReports(paginationArgs: PaginationArgs): PendingLessonReportsPayload
   recurringMeetingConfigs(recurringScheduleId: ID!): [ClassMeetingConfig!]
   recurringSchedule(id: ID!): RecurringScheduleDetail
   rescheduleTrackingMetrics: RescheduleTrackingMetrics
@@ -3390,7 +3381,7 @@ type Query {
   Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity.
   """
   studentMonthlyReport(month: Int!, studentId: ID!, year: Int!): StudentMonthlyReport
-  studentProfile(month: Int, studentId: String, year: Int): StudentProfile
+  studentProfile(includeUpcomingClasses: Boolean, month: Int, studentId: String, year: Int): StudentProfile
 
   """
   Paginated lesson reports for the logged-in student (student portal dashboard)
@@ -3934,6 +3925,7 @@ type StudentHistorySession {
   outcome: String
   room: String
   status: String
+  teacherId: String
   time: String
   timeSlot: String
   title: String
@@ -3969,6 +3961,9 @@ input StudentOnboardingInput {
   classesTotal: Int
   dateOfBirth: DateTime
 
+  """User display currency"""
+  displayCurrency: CurrencyCode
+
   """Student login email (creates a users row when provided)"""
   email: String
   gender: Gender
@@ -3978,6 +3973,9 @@ input StudentOnboardingInput {
 
   """Student login password (required when email is provided)"""
   password: String
+
+  """Student phone (stored on users row)"""
+  phone: String
   primaryTeacherId: String
   status: StudentStatus
 
@@ -4001,11 +3999,13 @@ type StudentProfile {
   classesTotal: Int
   createdAt: DateTime
   dateOfBirth: DateTime
+  displayCurrency: CurrencyCode
   email: String
   gender: Gender
   hoursPerWeek: Float
   id: String
   isAssociatedViewer: Boolean
+  isOwnStudentProfile: Boolean
   language: AppLanguage
   name: String
   parentEmail: String
@@ -4018,6 +4018,7 @@ type StudentProfile {
   status: StudentStatus
   teacherName: String
   teacherUserId: String
+  timezone: IanaTimezone
   timezoneOverride: String
   upcomingClasses: StudentUpcomingClassesResult
   updatedAt: DateTime
@@ -4027,10 +4028,13 @@ type StudentProfile {
 input StudentProfileEditInput {
   avatarUrl: String
   dateOfBirth: DateTime
+  displayCurrency: CurrencyCode
   gender: Gender
   language: AppLanguage
   parentPhone: String
   phone: String
+  studentId: ID
+  timezone: String
   timezoneOverride: String
 }
 
@@ -4204,7 +4208,6 @@ type SupervisorDashboard {
   monthlySnapshot: SupervisorMonthlySnapshot
   pendingDuesSummary: TeacherPendingDuesSummary
   pendingReviewCount: Int
-  recentApprovals: [LessonReport!]
   supervisorName: String
 }
 
@@ -4648,6 +4651,7 @@ input TeacherOnboardingInput {
 
   """Teacher date of birth (ISO date string)"""
   dateOfBirth: String
+  displayCurrency: CurrencyCode
 
   """Teacher email address"""
   email: Email!
@@ -4838,6 +4842,7 @@ type UnifiedProfile {
   parentOwnProfile: ParentOwnProfile
   paymentMethodDefaults: PaymentMethodDefaults
   paymentMethods: [UserPaymentMethod!]
+  phone: String
   scope: ProfileScope
   staffPermissionGroups: [StaffPermissionGroup!]
   staffPermissionOverrides: [StaffPermissionOverride!]
@@ -4846,6 +4851,7 @@ type UnifiedProfile {
   teacherAdminProfile: TeacherProfileResult
   teacherId: String
   teacherOwnProfile: TeacherOwnProfile
+  timezone: IanaTimezone
   userId: String
 }
 

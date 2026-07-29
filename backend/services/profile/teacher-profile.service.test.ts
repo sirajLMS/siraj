@@ -50,7 +50,7 @@ describe("TeacherPortalService own profile", () => {
   const ownProfileSetup = () => {
     const tErrors = getServerTranslations("en").errorsTranslations;
     spyOn(PermissionsService, "hasPermission").mockImplementation(
-      async (_userId, permission) => permission === AppPermission.TEACHER_VIEW_OWN_PROFILE
+      async (_userId, permission) => permission === AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN
     );
     spyOn(TeacherRepository, "findByUserId").mockResolvedValue({ id: "teacher-1", userId: "user-1" } as never);
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
@@ -78,6 +78,7 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
 
   afterEach(() => {
     spyOn(PermissionsService, "hasPermission").mockRestore();
+    spyOn(PermissionsService, "hasAnyPermission").mockRestore();
     spyOn(TeacherRepository, "findByUserId").mockRestore();
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockRestore();
     spyOn(TeacherRepository, "updateTeacherProfile").mockRestore();
@@ -87,6 +88,7 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
   test("accepts a valid Egyptian national ID with EG nationality", async () => {
     // 2960123 → century 2 (1996), month 01, day 23; check digit computed by Luhn.
     const validEgId = "29601234567818";
+    spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(true);
     spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
     spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
       id: "teacher-1",
@@ -106,7 +108,7 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
   });
 
   test("rejects an invalid national ID format", async () => {
-    spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
+    spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(true);
     spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
       id: "teacher-1",
       userId: "user-1",
@@ -122,6 +124,7 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
 
   test("falls back to the teacher's existing nationality when input omits it", async () => {
     const validEgId = "29601234567818";
+    spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(true);
     spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
     // Existing teacher nationality is EG; input does not pass nationality.
     spyOn(TeacherRepository, "findByUserId").mockResolvedValue({

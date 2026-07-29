@@ -2,12 +2,14 @@
 
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { StaffInfoSection } from "@/frontend/common/views/dashboard/staff/onboarding/StaffInfoSection";
+import { UserEntityFieldsSection } from "@/frontend/common/components/onboarding/sections";
 import { SystemAccessSection } from "@/frontend/common/views/dashboard/staff/onboarding/SystemAccessSection";
 import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/staff/onboarding/types";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/form/snackbar";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const StyledFormWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -39,6 +41,7 @@ export function ManagerOnboardingDesktopView({
   onDismissSuccess,
 }: Readonly<ManagerOnboardingViewProps>) {
   const t = labels;
+  const userEntityLabels = useAppTranslation(Translation.Onboarding.UserEntity);
 
   return (
     <DesktopPageContainer>
@@ -51,13 +54,15 @@ export function ManagerOnboardingDesktopView({
         }}
       >
         <StyledFormWrapper>
-          <StaffInfoSection
-            labels={labels}
-            register={register}
-            control={control}
-            errors={errors}
-            onUploadAvatar={onUploadAvatar}
-          />
+          <DesktopSectionPanel title={userEntityLabels.sectionTitle}>
+            <UserEntityFieldsSection
+              register={register}
+              control={control}
+              errors={errors}
+              labels={userEntityLabels}
+              onUploadAvatar={onUploadAvatar}
+            />
+          </DesktopSectionPanel>
           <SystemAccessSection labels={labels} control={control} />
 
           <StyledFormActions>

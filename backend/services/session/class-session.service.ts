@@ -8,6 +8,7 @@ import {
 } from "@/backend/db/repo/scheduling";
 import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-status-events.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
+import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { AppPermission, type CurrencyCode, NotificationEventType } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
 import { logger } from "@/backend/lib/logger";
@@ -70,6 +71,42 @@ export namespace ClassSessionService {
     const parent = await ParentRepository.findByUserId(userId);
     if (parent?.id === instance.student?.parentId) {
       return;
+    }
+
+    const studentId = await StudentRepository.getStudentIdByUserId(userId);
+    if (studentId && studentId === instance.studentId) {
+      return;
+    }
+
+    throw new Error(tErrors.unauthorizedAction);
+  }
+
+  type ClassInstanceForViewAccess = NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>;
+
+  /**
+   * Detail reads: staff/parents use `session.view_details` + relationship check;
+   * students use `student.view_own_dashboard` for their own enrolled instances only.
+   */
+  async function assertClassInstanceDetailViewAuth(
+    userId: string,
+    instance: ClassInstanceForViewAccess,
+    tErrors: ErrorsLabels
+  ): Promise<void> {
+    const hasSessionViewDetails = await PermissionsService.hasPermission(userId, AppPermission.SESSION_VIEW_DETAILS);
+    if (hasSessionViewDetails) {
+      await assertClassInstanceViewAccess(userId, instance, tErrors);
+      return;
+    }
+
+    const studentId = await StudentRepository.getStudentIdByUserId(userId);
+    if (studentId && studentId === instance.studentId) {
+      const canViewOwnDashboard = await PermissionsService.hasPermission(
+        userId,
+        AppPermission.STUDENT_VIEW_OWN_DASHBOARD
+      );
+      if (canViewOwnDashboard) {
+        return;
+      }
     }
 
     throw new Error(tErrors.unauthorizedAction);
@@ -195,9 +232,8 @@ export namespace ClassSessionService {
     tSession: SessionLabels,
     tErrors: ErrorsLabels
   ): Promise<ClassInstanceDetailReturnType> {
-    await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
-    await assertClassInstanceViewAccess(userId, instance, tErrors);
+    await assertClassInstanceDetailViewAuth(userId, instance, tErrors);
     const perf = await ClassPerformanceService.getPerformanceForClass(classInstanceId);
     return buildClassInstanceDetail(instance, perf, tSession, tErrors);
   }
@@ -207,9 +243,8 @@ export namespace ClassSessionService {
     classInstanceId: string,
     tErrors: ErrorsLabels
   ): Promise<ClassStatusEventReturnType[]> {
-    await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
-    await assertClassInstanceViewAccess(userId, instance, tErrors);
+    await assertClassInstanceDetailViewAuth(userId, instance, tErrors);
     return SchedulingRepository.getClassStatusEvents(classInstanceId);
   }
 

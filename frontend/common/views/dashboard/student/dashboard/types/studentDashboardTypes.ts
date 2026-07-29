@@ -22,7 +22,11 @@ export interface UpcomingLessonRow {
 export interface RecentLessonReportRow {
   readonly id: string;
   readonly classInstanceId: string | null;
+  readonly subjectName: string | null;
+  readonly classAvatarUrl: string | null;
+  readonly teacherId: string | null;
   readonly teacherName: string | null;
+  readonly teacherAvatarUrl: string | null;
   readonly lessonDate: string | null;
   readonly durationMinutes: number;
   readonly status: LessonReportStatus | null;

@@ -56,6 +56,7 @@ export function StudentCreditsDesktopView({
       </Box>
 
       <DesktopSectionPanel
+        contentPadding={false}
         title={labels.transactionHistory}
         actions={
           <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>

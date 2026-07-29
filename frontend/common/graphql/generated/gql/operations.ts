@@ -21,9 +21,7 @@ export type AppLanguage =
   | 'en';
 
 export type AppPermission =
-  | 'AUTH_EDIT_OWN_PROFILE'
   | 'AUTH_LOGIN'
-  | 'AUTH_VIEW_OWN_PROFILE'
   | 'BILLING_CREATE_INVOICE'
   | 'BILLING_DELETE_INVOICE'
   | 'BILLING_MANAGE_CURRENCIES'
@@ -75,11 +73,8 @@ export type AppPermission =
   | 'PARENTS_CREATE'
   | 'PARENTS_EDIT'
   | 'PARENTS_LIST'
-  | 'PARENT_EDIT_OWN_PROFILE'
   | 'PARENT_MANAGE_STATUS'
   | 'PARENT_VIEW_DIRECTORY'
-  | 'PARENT_VIEW_OWN_PROFILE'
-  | 'PARENT_VIEW_PROFILE'
   | 'PARENT_VIEW_STUDENTS'
   | 'PAYMENT_METHODS_MANAGE_CATALOGS'
   | 'PAYMENT_METHODS_VERIFY_BANK_TRANSFER'
@@ -179,7 +174,6 @@ export type AppPermission =
   | 'SETTINGS_VIEW'
   | 'STAFF_CREATE'
   | 'STAFF_EDIT'
-  | 'STAFF_EDIT_PROFILE'
   | 'STAFF_LIST'
   | 'STAFF_VIEW_DIRECTORY'
   | 'STORAGE_MANAGE'
@@ -248,16 +242,11 @@ export type AppPermission =
   | 'TEACHERS_MANAGE_SCHEDULE'
   | 'TEACHER_DUES_MARK_PAID'
   | 'TEACHER_DUES_VIEW'
-  | 'TEACHER_EDIT_OWN_PROFILE'
   | 'TEACHER_VIEW_DASHBOARD'
-  | 'TEACHER_VIEW_OWN_PROFILE'
-  | 'TEACHER_VIEW_PROFILE'
   | 'TEACHER_VIEW_STUDENTS'
   | 'TEST_CUSTOM_ALT'
   | 'TEST_CUSTOM_ONLY'
-  | 'TEST_SYSTEM_ONLY'
-  | 'USER_EDIT_PROFILE'
-  | 'USER_VIEW_PROFILE';
+  | 'TEST_SYSTEM_ONLY';
 
 export type AssignPermissionGroupToUserInput = {
   groupId: string;
@@ -1315,7 +1304,6 @@ export type LoginInput = {
   password: string;
 };
 
-/** Account type for new manager */
 export type ManagerAccountType =
   | 'admin'
   | 'manager'
@@ -1325,10 +1313,12 @@ export type ManagerAccountType =
 export type ManagerOnboardingInput = {
   accountType: ManagerAccountType;
   avatarUrl: string | null | undefined;
+  displayCurrency: CurrencyCode | null | undefined;
   email: string;
   name: string;
   password: string;
   phone: string | null | undefined;
+  timezone: IanaTimezone | null | undefined;
 };
 
 /** Input for marking a suggestion as a duplicate of another suggestion. */
@@ -1448,6 +1438,7 @@ export type ParentOnboardingInput = {
   address: string | null | undefined;
   avatarUrl: string | null | undefined;
   currency: CurrencyCode | null | undefined;
+  displayCurrency: CurrencyCode | null | undefined;
   email: string;
   facebook: string | null | undefined;
   feeAmount: string | null | undefined;
@@ -1646,6 +1637,8 @@ export type StudentOnboardingInput = {
   classesRemaining: number | null | undefined;
   classesTotal: number | null | undefined;
   dateOfBirth: string | null | undefined;
+  /** User display currency */
+  displayCurrency: CurrencyCode | null | undefined;
   /** Student login email (creates a users row when provided) */
   email: string | null | undefined;
   gender: Gender | null | undefined;
@@ -1654,6 +1647,8 @@ export type StudentOnboardingInput = {
   parentId: string | null | undefined;
   /** Student login password (required when email is provided) */
   password: string | null | undefined;
+  /** Student phone (stored on users row) */
+  phone: string | null | undefined;
   primaryTeacherId: string | null | undefined;
   status: StudentStatus | null | undefined;
   /** Student timezone (applied to the created user record) */
@@ -1663,10 +1658,13 @@ export type StudentOnboardingInput = {
 export type StudentProfileEditInput = {
   avatarUrl: string | null | undefined;
   dateOfBirth: string | null | undefined;
+  displayCurrency: CurrencyCode | null | undefined;
   gender: Gender | null | undefined;
   language: AppLanguage | null | undefined;
   parentPhone: string | null | undefined;
   phone: string | null | undefined;
+  studentId: string | number | null | undefined;
+  timezone: string | null | undefined;
   timezoneOverride: string | null | undefined;
 };
 
@@ -1842,6 +1840,7 @@ export type TeacherOnboardingInput = {
   countryCode: CountryCode | null | undefined;
   /** Teacher date of birth (ISO date string) */
   dateOfBirth: string | null | undefined;
+  displayCurrency: CurrencyCode | null | undefined;
   /** Teacher email address */
   email: string;
   /** Teacher gender */
@@ -2003,7 +2002,7 @@ export type UserPaymentMethodUpdateInput = {
   label: string | null | undefined;
 };
 
-export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null, displayCurrency: Types.CurrencyCode | null };
+export type MeQuery_me_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type MeQuery_Query = { me: MeQuery_me_User | null };
 
@@ -2013,7 +2012,7 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = MeQuery_Query;
 
-export type UserQuery_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null, displayCurrency: Types.CurrencyCode | null };
+export type UserQuery_user_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type UserQuery_Query = { user: UserQuery_user_User | null };
 
@@ -2025,7 +2024,7 @@ export type UserQueryVariables = Exact<{
 
 export type UserQuery = UserQuery_Query;
 
-export type UsersQuery_users_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null };
+export type UsersQuery_users_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type UsersQuery_Query = { users: Array<UsersQuery_users_User> | null };
 
@@ -2039,7 +2038,7 @@ export type UsersQueryVariables = Exact<{
 
 export type UsersQuery = UsersQuery_Query;
 
-export type LoginMutation_login_LoginResponse_user_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null };
+export type LoginMutation_login_LoginResponse_user_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type LoginMutation_login_LoginResponse = { token: string | null, user: LoginMutation_login_LoginResponse_user_User | null };
 
@@ -2053,7 +2052,7 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = LoginMutation_Mutation;
 
-export type DemoLoginMutation_demoLogin_LoginResponse_user_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null };
+export type DemoLoginMutation_demoLogin_LoginResponse_user_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type DemoLoginMutation_demoLogin_LoginResponse = { token: string | null, user: DemoLoginMutation_demoLogin_LoginResponse_user_User | null };
 
@@ -2075,7 +2074,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type LogoutMutation = LogoutMutation_Mutation;
 
-export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null };
+export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type RefreshTokenMutation_refreshToken_RefreshTokenResponse = { token: string | null, user: RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User | null };
 
@@ -3131,13 +3130,15 @@ export type PendingLessonReportsQueryVariables = Exact<{
 
 export type PendingLessonReportsQuery = PendingLessonReportsQuery_Query;
 
-export type RecentApprovedLessonReportsQuery_recentApprovedLessonReports_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+export type RecentApprovedLessonReportsQuery_recentApprovedLessonReports_PendingLessonReportsPayload_rows_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type RecentApprovedLessonReportsQuery_Query = { recentApprovedLessonReports: Array<RecentApprovedLessonReportsQuery_recentApprovedLessonReports_LessonReport> | null };
+export type RecentApprovedLessonReportsQuery_recentApprovedLessonReports_PendingLessonReportsPayload = { totalCount: number | null, rows: Array<RecentApprovedLessonReportsQuery_recentApprovedLessonReports_PendingLessonReportsPayload_rows_LessonReport> | null };
+
+export type RecentApprovedLessonReportsQuery_Query = { recentApprovedLessonReports: RecentApprovedLessonReportsQuery_recentApprovedLessonReports_PendingLessonReportsPayload | null };
 
 
 export type RecentApprovedLessonReportsQueryVariables = Exact<{
-  limit: number | null | undefined;
+  paginationArgs: Types.PaginationArgs | null | undefined;
 }>;
 
 
@@ -4075,7 +4076,7 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult = { id: string | null, totalCount: number | null, rows: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent> | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, teacherOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, teacherAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, parentAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile | null, paymentMethods: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_paymentMethods_UserPaymentMethod> | null, paymentMethodDefaults: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_paymentMethodDefaults_PaymentMethodDefaults | null, associatedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult | null, staffProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow | null, staffPermissionGroups: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionGroups_StaffPermissionGroup> | null, staffPermissionOverrides: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionOverrides_StaffPermissionOverride> | null, meetingConfigs: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_meetingConfigs_UserMeetingConfig> | null, assignedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, phone: string | null, teacherOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, teacherAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, parentAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile | null, paymentMethods: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_paymentMethods_UserPaymentMethod> | null, paymentMethodDefaults: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_paymentMethodDefaults_PaymentMethodDefaults | null, associatedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult | null, staffProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow | null, staffPermissionGroups: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionGroups_StaffPermissionGroup> | null, staffPermissionOverrides: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionOverrides_StaffPermissionOverride> | null, meetingConfigs: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_meetingConfigs_UserMeetingConfig> | null, assignedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult | null };
 
 export type ProfileByUserIdQuery_Query = { profileByUserId: ProfileByUserIdQuery_profileByUserId_UnifiedProfile | null };
 
@@ -4095,7 +4096,7 @@ export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfil
 
 export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
 
-export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, teacherOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, parentOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, staffProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
+export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, teacherOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, parentOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, staffProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
 
 export type UpdateOwnProfileMutation_Mutation = { updateOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile | null };
 
@@ -4983,7 +4984,7 @@ export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_met
 
 export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
 
-export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession_effectiveMeeting_EffectiveMeeting | null };
+export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, teacherId: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession_effectiveMeeting_EffectiveMeeting | null };
 
 export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory = { id: string | null, studentName: string | null, metrics: StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics | null, sessions: Array<StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession> | null };
 
@@ -5061,7 +5062,7 @@ export type StudentHistoryMetricsFieldsFragment = { totalClasses: number | null,
 
 export type StudentHistorySessionFieldsFragment_StudentHistorySession_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
 
-export type StudentHistorySessionFieldsFragment = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, instructor: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: StudentHistorySessionFieldsFragment_StudentHistorySession_effectiveMeeting_EffectiveMeeting | null };
+export type StudentHistorySessionFieldsFragment = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, teacherId: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: StudentHistorySessionFieldsFragment_StudentHistorySession_effectiveMeeting_EffectiveMeeting | null };
 
 export type StudentProfileQuery_studentProfile_StudentProfile_upcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass = { id: string | null, instructor: string | null, teacherId: string | null, teacherAvatarUrl: string | null, subjectId: string | null, subjectName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: StudentUpcomingClassFieldsFragment_StudentUpcomingClass_effectiveMeeting_EffectiveMeeting | null };
 
@@ -5069,11 +5070,11 @@ export type StudentProfileQuery_studentProfile_StudentProfile_upcomingClasses_St
 
 export type StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory_metrics_StudentHistoryMetrics = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
 
-export type StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory_sessions_StudentHistorySession = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, instructor: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: StudentHistorySessionFieldsFragment_StudentHistorySession_effectiveMeeting_EffectiveMeeting | null };
+export type StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory_sessions_StudentHistorySession = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, teacherId: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: StudentHistorySessionFieldsFragment_StudentHistorySession_effectiveMeeting_EffectiveMeeting | null };
 
 export type StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory = { id: string | null, studentName: string | null, metrics: StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory_metrics_StudentHistoryMetrics | null, sessions: Array<StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory_sessions_StudentHistorySession> | null };
 
-export type StudentProfileQuery_studentProfile_StudentProfile = { id: string | null, name: string | null, status: Types.StudentStatus | null, avatarUrl: string | null, dateOfBirth: string | null, gender: Types.Gender | null, language: Types.AppLanguage | null, timezoneOverride: string | null, email: string | null, phone: string | null, parentId: string | null, parentUserId: string | null, parentName: string | null, parentEmail: string | null, parentPhone: string | null, isAssociatedViewer: boolean | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null, version: number | null, createdAt: string | null, updatedAt: string | null, upcomingClasses: StudentProfileQuery_studentProfile_StudentProfile_upcomingClasses_StudentUpcomingClassesResult | null, classHistory: StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory | null };
+export type StudentProfileQuery_studentProfile_StudentProfile = { id: string | null, name: string | null, status: Types.StudentStatus | null, avatarUrl: string | null, dateOfBirth: string | null, gender: Types.Gender | null, language: Types.AppLanguage | null, timezoneOverride: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, displayCurrency: Types.CurrencyCode | null, parentId: string | null, parentUserId: string | null, parentName: string | null, parentEmail: string | null, parentPhone: string | null, isAssociatedViewer: boolean | null, isOwnStudentProfile: boolean | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null, version: number | null, createdAt: string | null, updatedAt: string | null, upcomingClasses: StudentProfileQuery_studentProfile_StudentProfile_upcomingClasses_StudentUpcomingClassesResult | null, classHistory: StudentProfileQuery_studentProfile_StudentProfile_classHistory_StudentClassHistory | null };
 
 export type StudentProfileQuery_Query = { studentProfile: StudentProfileQuery_studentProfile_StudentProfile | null };
 
@@ -5082,6 +5083,7 @@ export type StudentProfileQueryVariables = Exact<{
   studentId: string | null | undefined;
   year: number | null | undefined;
   month: number | null | undefined;
+  includeUpcomingClasses: boolean | null | undefined;
 }>;
 
 
@@ -5248,11 +5250,9 @@ export type SuggestionContributorStatsQuery = SuggestionContributorStatsQuery_Qu
 
 export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_pendingDuesSummary_TeacherPendingDuesSummary = { totalCount: number | null, totalAmount: number | null, currency: Types.CurrencyCode | null };
 
-export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_recentApprovals_LessonReport = { id: string | null, classInstanceId: string | null, subjectName: string | null, classAvatarUrl: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, studentAvatarUrl: string | null, teacherAvatarUrl: string | null, studentUserId: string | null, teacherUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedAt: string | null, reviewedAt: string | null, createdAt: string | null, updatedAt: string | null };
-
 export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_monthlySnapshot_SupervisorMonthlySnapshot = { year: number | null, month: number | null, label: string | null };
 
-export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard = { supervisorName: string | null, pendingReviewCount: number | null, pendingDuesSummary: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_pendingDuesSummary_TeacherPendingDuesSummary | null, recentApprovals: Array<SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_recentApprovals_LessonReport> | null, monthlySnapshot: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_monthlySnapshot_SupervisorMonthlySnapshot | null };
+export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard = { supervisorName: string | null, pendingReviewCount: number | null, pendingDuesSummary: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_pendingDuesSummary_TeacherPendingDuesSummary | null, monthlySnapshot: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_monthlySnapshot_SupervisorMonthlySnapshot | null };
 
 export type SupervisorDashboardQuery_Query = { supervisorDashboard: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard | null };
 
@@ -5602,3 +5602,5 @@ export type TeachersQueryVariables = Exact<{
 
 
 export type TeachersQuery = TeachersQuery_Query;
+
+export type UserFieldsFragmentFragment = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };

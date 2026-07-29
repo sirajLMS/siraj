@@ -54,7 +54,9 @@ const STUDENT_HISTORY_SESSION_FIELDS = gql`
     duration
     status
     outcome
+    isFrozen
     instructor
+    teacherId
     timeSlot
     room
     notes
@@ -73,8 +75,13 @@ export const studentProfileQueryDocument: TypedDocumentNode<
   ${STUDENT_UPCOMING_CLASS_FIELDS}
   ${STUDENT_HISTORY_METRICS_FIELDS}
   ${STUDENT_HISTORY_SESSION_FIELDS}
-  query StudentProfile($studentId: String, $year: Int, $month: Int) {
-    studentProfile(studentId: $studentId, year: $year, month: $month) {
+  query StudentProfile($studentId: String, $year: Int, $month: Int, $includeUpcomingClasses: Boolean) {
+    studentProfile(
+      studentId: $studentId
+      year: $year
+      month: $month
+      includeUpcomingClasses: $includeUpcomingClasses
+    ) {
       id
       name
       status
@@ -85,12 +92,15 @@ export const studentProfileQueryDocument: TypedDocumentNode<
       timezoneOverride
       email
       phone
+      timezone
+      displayCurrency
       parentId
       parentUserId
       parentName
       parentEmail
       parentPhone
       isAssociatedViewer
+      isOwnStudentProfile
       primaryTeacherId
       teacherUserId
       teacherName
@@ -143,7 +153,10 @@ interface RecordStudentProfileEditMutationShape {
 
 interface RecordStudentProfileEditMutationArgs {
   input: {
+    studentId?: string | null;
     phone?: string | null;
+    timezone?: string | null;
+    displayCurrency?: string | null;
     dateOfBirth?: string | null;
     gender?: string | null;
     language?: string | null;

@@ -54,3 +54,26 @@ export const FlushContent: Story = {
     ),
   },
 };
+
+export const GridWithTitleBar: Story = {
+  args: {
+    title: "Parent Records",
+    contentPadding: false,
+    actions: <Button variant="text">Export</Button>,
+    children: (
+      <Box
+        sx={theme => ({
+          minHeight: 200,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderTop: `1px solid ${theme.palette.outlineVariant}`,
+          typography: "bodyMd",
+          color: theme.palette.text.secondary,
+        })}
+      >
+        Data grid renders flush here (no side/bottom padding).
+      </Box>
+    ),
+  },
+};

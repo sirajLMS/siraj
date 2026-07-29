@@ -160,7 +160,7 @@ function InvoiceItemRow({ item, fxMessages, onUserClick }: InvoiceItemRowProps) 
   return (
     <ListItem key={item.id ?? undefined} disablePadding>
       <RequirePermission
-        permissions={AppPermission.UserViewProfile}
+        permissions={AppPermission.ProfileCoreIdentityViewOther}
         fallback={<Box sx={{ px: 2, py: 0.75, width: "100%" }}>{itemText}</Box>}
       >
         <ListItemButton onClick={() => item.userId && onUserClick(item.userId)} sx={{ py: 0.75 }}>

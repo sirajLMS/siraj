@@ -21,7 +21,8 @@ export type FieldFilterContext = {
 export type StudentFieldFilterContext = {
   readonly actorUserId: string;
   readonly studentId: string;
-  readonly isAssociatedViewer: boolean;
+  /** LMS user id of the student whose profile is being viewed or edited. */
+  readonly studentUserId: string;
   readonly permissions: ReadonlySet<AppPermission>;
 };
 
@@ -78,7 +79,7 @@ export function filterProfileByFieldGroups<T extends Record<string, unknown>>(pa
 }
 
 function getStudentScope(ctx: StudentFieldFilterContext): ProfileScope {
-  return ctx.isAssociatedViewer ? ProfileScope.OWN : ProfileScope.OTHER;
+  return ctx.actorUserId === ctx.studentUserId ? ProfileScope.OWN : ProfileScope.OTHER;
 }
 
 export function getStudentEditPermission(
@@ -151,7 +152,7 @@ function collectCoreGroups(core: Record<string, unknown>, groups: Set<string>): 
   if (["name", "email", "avatarUrl", "displayCurrency"].some(key => key in core)) {
     groups.add("core_identity");
   }
-  if ("phone" in core) {
+  if (["phone", "timezone"].some(key => key in core)) {
     groups.add("core_contact");
   }
 }

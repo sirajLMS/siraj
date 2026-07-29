@@ -1,80 +1,50 @@
 "use client";
 
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useCallback } from "react";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import type { StudentFieldGroupKey } from "@/shared/constants/profile-field-groups";
 import { studentFieldGroupGraphqlPermission } from "@/shared/lib/field-group-permission-key";
 
-const LEGACY_VIEW_GROUPS: Partial<Record<StudentFieldGroupKey, AppPermission>> = {
-  student_history: AppPermission.HistoryViewCalendar,
-  student_quota_edit: AppPermission.StudentEditQuota,
-};
-
-const LEGACY_EDIT_GROUPS: Partial<Record<StudentFieldGroupKey, AppPermission>> = {
-  student_academic: AppPermission.StudentManageStatus,
-  student_quota_edit: AppPermission.StudentEditQuota,
-};
-
 export type UseStudentFieldAccessOptions = {
   /**
-   * Optional override to force the viewer-scope verdict used by the hook.
-   * Defaults to the server-driven `isAssociatedViewer` flag from
-   * `StudentProfileContext`. Use this only in standalone views where the
-   * unified profile context is unavailable (e.g., the legacy standalone
-   * quota edit route): pass the server-supplied association verdict, or
-   * true when the legacy `STUDENT_VIEW_ASSOCIATED` permission is granted
-   * and the caller knows the student is associated to the actor.
+   * Optional override for whether the actor is viewing their own student profile.
+   * Defaults to the server-driven `isOwnStudentProfile` flag from
+   * `StudentProfileContext`.
    */
-  readonly isAssociatedViewerOverride?: boolean;
+  readonly isOwnStudentProfileOverride?: boolean;
 };
 
 export function useStudentFieldAccess(options: UseStudentFieldAccessOptions = {}) {
   const hasPermission = useUserStore(state => state.hasPermission);
   const profileContext = useStudentProfileContext();
 
-  const isAssociatedViewer =
-    options.isAssociatedViewerOverride ??
-    profileContext?.profile?.isAssociatedViewer ??
-    (profileContext == null && hasPermission(AppPermission.StudentViewAssociated));
+  const isOwnStudentProfile =
+    options.isOwnStudentProfileOverride ?? profileContext?.profile?.isOwnStudentProfile ?? false;
 
-  const resolvePermission = (
-    groupKey: StudentFieldGroupKey,
-    action: "view_own" | "view_other" | "edit_own" | "edit_other"
-  ): AppPermission => studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission;
+  const canView = useCallback(
+    (groupKey: StudentFieldGroupKey): boolean => {
+      const action = isOwnStudentProfile ? "view_own" : "view_other";
+      return hasPermission(studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission);
+    },
+    [hasPermission, isOwnStudentProfile]
+  );
 
-  const hasLegacyView = (groupKey: StudentFieldGroupKey): boolean => {
-    const legacyPermission = LEGACY_VIEW_GROUPS[groupKey];
-    return legacyPermission != null && hasPermission(legacyPermission);
-  };
+  const canEdit = useCallback(
+    (groupKey: StudentFieldGroupKey): boolean => {
+      const action = isOwnStudentProfile ? "edit_own" : "edit_other";
+      return hasPermission(studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission);
+    },
+    [hasPermission, isOwnStudentProfile]
+  );
 
-  const canView = (groupKey: StudentFieldGroupKey): boolean => {
-    const action = isAssociatedViewer ? "view_own" : "view_other";
-    if (hasPermission(resolvePermission(groupKey, action))) {
-      return true;
-    }
-    return hasLegacyView(groupKey);
-  };
+  const canViewField = useCallback((groupKey: StudentFieldGroupKey): boolean => canView(groupKey), [canView]);
 
-  const hasLegacyEdit = (groupKey: StudentFieldGroupKey): boolean => {
-    const legacyPermission = LEGACY_EDIT_GROUPS[groupKey];
-    return legacyPermission != null && hasPermission(legacyPermission);
-  };
+  const showField = useCallback(
+    (_value: unknown, groupKey: StudentFieldGroupKey): boolean => canViewField(groupKey),
+    [canViewField]
+  );
 
-  const canEdit = (groupKey: StudentFieldGroupKey): boolean => {
-    const action = isAssociatedViewer ? "edit_own" : "edit_other";
-    if (hasPermission(resolvePermission(groupKey, action))) {
-      return true;
-    }
-    return hasLegacyEdit(groupKey);
-  };
-
-  const showField = (value: unknown, groupKey: StudentFieldGroupKey): boolean => {
-    if (!canView(groupKey)) {
-      return false;
-    }
-    return value != null;
-  };
-
-  return { canView, canEdit, showField };
+  return { canView, canEdit, canViewField, showField };
 }

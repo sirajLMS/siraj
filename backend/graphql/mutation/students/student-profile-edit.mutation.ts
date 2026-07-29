@@ -1,5 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { AppLanguagePothosObject, GenderPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import {
+  AppLanguagePothosObject,
+  CurrencyCodePothosObject,
+  GenderPothosObject,
+} from "@/backend/graphql/pothos/shared/enum.pothos";
 import { StudentProfilePothosObject } from "@/backend/graphql/pothos/students/student-profile.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { StudentProfileService } from "@/backend/services/student/student-profile.service";
@@ -9,7 +13,10 @@ const StudentProfileEditInputPothosObject = gqlSchemaBuilder
   .inputRef<StudentProfileEditInput>("StudentProfileEditInput")
   .implement({
     fields: t => ({
+      studentId: t.id({ required: false }),
       phone: t.string({ required: false }),
+      timezone: t.string({ required: false }),
+      displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
       dateOfBirth: t.field({ type: "DateTime", required: false }),
       gender: t.field({ type: GenderPothosObject, required: false }),
       language: t.field({ type: AppLanguagePothosObject, required: false }),

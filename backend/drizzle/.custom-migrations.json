@@ -1,5 +1,5 @@
 {
-  "manifestHash": "579dde074cb76d333c00756c72e9717a629e3aadd8dfaa3dba9d23a2e80e2ecb",
+  "manifestHash": "2f060dc4f1651f9c5e3d86b9f7e200da2964cdb469e0ae3004c17cec9bfe38c4",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -7,7 +7,7 @@
     },
     {
       "file": "3-system_permissions_and_groups.sql",
-      "sha256": "66375a575b826d04f72ef6c2e5ad7fdf46d3c3313ed0e7c8672369d3a53148d5"
+      "sha256": "ceebaa72441610105f300e3ce7c93e7d1fab49f08dcb5ecb6be397fd07990e1f"
     },
     {
       "file": "30-a-class_instances_rls_policies.sql",
@@ -72,6 +72,10 @@
     {
       "file": "6c-payment-method-permissions.sql",
       "sha256": "1f6cee0c26f97440b46c21978ad34bb3237c5db0f80f559e7d80d7f00c9024ee"
+    },
+    {
+      "file": "6d-profile-fine-grained-only.sql",
+      "sha256": "aa70fa521f16f50b0151b3d16d2fe6adcb68c0d8e5af664a8207210547327d6c"
     },
     {
       "file": "7a-settings-permissions-enum.sql",
@@ -192,6 +196,11 @@
     "20260729030011_custom_student_progress_rls",
     "20260729030012_custom_student_status_transition_trigger",
     "20260729030013_custom_timezone_dst_logic",
-    "20260729030014_custom_user_notification_preferences"
+    "20260729030014_custom_user_notification_preferences",
+    "20260729073854_custom_6d-profile-fine-grained-only",
+    "20260729150220_custom_3-system_permissions_and_groups",
+    "20260729152150_custom_6d-profile-fine-grained-only",
+    "20260729153127_custom_6d-profile-fine-grained-only",
+    "20260729155331_custom_6d-profile-fine-grained-only"
   ]
 }

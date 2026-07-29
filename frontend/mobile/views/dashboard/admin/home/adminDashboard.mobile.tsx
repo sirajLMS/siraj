@@ -11,6 +11,11 @@ import {
   ScheduleOverviewCardSkeleton,
   ScheduleOverviewEmptyState,
 } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
+import {
+  scheduleOverviewCardShellSx,
+  scheduleOverviewListCanvasSx,
+  scheduleOverviewMobileChromeSx,
+} from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
@@ -134,7 +139,7 @@ function AdminDashboardMobileToolbar({
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
-              backgroundColor: theme.palette.surfaceContainerLowest,
+              backgroundColor: theme.palette.surfaceContainerHigh,
             },
           }}
         />
@@ -166,7 +171,7 @@ function AdminDashboardMobileScheduleList({
   const { columns, status, shell } = labelsBySection;
 
   const renderItem = (row: DailyScheduleRow): ReactNode => (
-    <MobileCardListItem variant="edge-to-edge">
+    <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
       <ScheduleOverviewMobileCard
         row={row}
         headers={columns}
@@ -184,17 +189,18 @@ function AdminDashboardMobileScheduleList({
       loading={loading}
       emptyMessage={emptyMessage}
       renderSkeleton={() => (
-        <MobileCardListItem variant="edge-to-edge">
+        <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
           <ScheduleOverviewCardSkeleton />
         </MobileCardListItem>
       )}
       renderEmptyState={msg => (
-        <MobileCardListItem variant="edge-to-edge">
+        <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
           <ScheduleOverviewEmptyState message={msg} />
         </MobileCardListItem>
       )}
-      gap={2}
+      gap={0}
       layout="edge-to-edge"
+      sx={scheduleOverviewListCanvasSx}
       getKey={row => row.id ?? ""}
       renderItem={renderItem}
       paginationOptions={buildServerPaginationOptions({
@@ -215,27 +221,29 @@ export function AdminDashboardMobileView(props: AdminDashboardMobileViewProps) {
   return (
     <Stack direction="column" sx={{ gap: { xs: 0, md: 2 } }}>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <AdminDashboardMobileHeader
-          scheduleTitle={shell.scheduleOverview}
-          selectedMetricLabel={props.selectedMetricLabel}
-        />
-        <MobileMetricCardGrid
-          metrics={props.metrics}
-          onMetricClick={props.onMetricClick}
-          selectedKey={props.selectedMetricKey}
-        />
-        <AdminDashboardMobileToolbar
-          canScheduleFilterAdvanced={props.canScheduleFilterAdvanced}
-          filters={filters}
-          dateValue={props.dateValue}
-          onDateChange={props.onDateChange}
-          selectedTeacher={props.selectedTeacher}
-          onTeacherChange={props.onTeacherChange}
-          canDashboardSearch={props.canDashboardSearch}
-          searchPlaceholder={shell.searchPlaceholder}
-          searchValue={props.searchValue}
-          onSearchChange={props.onSearchChange}
-        />
+        <Box sx={scheduleOverviewMobileChromeSx}>
+          <AdminDashboardMobileHeader
+            scheduleTitle={shell.scheduleOverview}
+            selectedMetricLabel={props.selectedMetricLabel}
+          />
+          <MobileMetricCardGrid
+            metrics={props.metrics}
+            onMetricClick={props.onMetricClick}
+            selectedKey={props.selectedMetricKey}
+          />
+          <AdminDashboardMobileToolbar
+            canScheduleFilterAdvanced={props.canScheduleFilterAdvanced}
+            filters={filters}
+            dateValue={props.dateValue}
+            onDateChange={props.onDateChange}
+            selectedTeacher={props.selectedTeacher}
+            onTeacherChange={props.onTeacherChange}
+            canDashboardSearch={props.canDashboardSearch}
+            searchPlaceholder={shell.searchPlaceholder}
+            searchValue={props.searchValue}
+            onSearchChange={props.onSearchChange}
+          />
+        </Box>
         <AdminDashboardMobileScheduleList
           rows={props.rows}
           loading={props.loading}

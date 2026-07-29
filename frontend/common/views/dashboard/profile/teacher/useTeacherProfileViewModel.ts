@@ -16,13 +16,16 @@ import {
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import { isTeacherNationalIdComplete } from "@/frontend/common/lib/profileCompletion";
 import { logger } from "@/frontend/common/utils/logger";
+import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import type {
   TeacherAdminData,
   TeacherOwnData,
   TeacherProfileViewLabels,
   TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { useRouter } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
@@ -39,6 +42,7 @@ export type TeacherOwnSubmitData = {
   nationality: string;
   avatarUrl?: string | null;
   displayCurrency: CurrencyCode | null;
+  timezone?: string;
 };
 
 export type TeacherAdminSubmitData = {
@@ -47,6 +51,7 @@ export type TeacherAdminSubmitData = {
   phone: string;
   avatarUrl?: string | null;
   nationalId: string;
+  nationality: string;
   dateOfBirth: string;
   gender: string | null;
   address: string;
@@ -63,6 +68,8 @@ export interface TeacherProfileViewModel {
   readonly teacherData: TeacherViewData;
   readonly avatarUrl: string | null | undefined;
   readonly displayCurrency: CurrencyCode | null | undefined;
+  readonly profilePhone: string | null | undefined;
+  readonly profileTimezone: string | null | undefined;
   readonly isAdminScope: boolean;
   readonly targetUserId: string;
   readonly meetingTabHref: string;
@@ -83,6 +90,7 @@ export interface UseTeacherProfileViewModelProps {
   readonly mode: ProfileMode;
   readonly targetUserId: string;
   readonly activeTab?: string;
+  readonly forceComplete?: boolean;
 }
 
 export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileViewModelProps>): TeacherProfileViewModel {
@@ -92,10 +100,11 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
   const errors = useAppTranslation(Translation.Errors);
   const labels: TeacherProfileViewLabels = { base, teacher, dashboard, errors };
 
-  const { scope, mode, targetUserId, activeTab: _activeTab = "profile" } = props;
+  const { scope, mode, targetUserId, activeTab: _activeTab = "profile", forceComplete = false } = props;
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
 
   const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
@@ -109,6 +118,8 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
   const teacherData = buildEditSource(scope, profile ?? ({} as ProfileData));
   const avatarUrl = profile?.avatarUrl;
   const displayCurrency = profile?.displayCurrency;
+  const profilePhone = profile?.phone;
+  const profileTimezone = profile?.timezone;
 
   const onSubmitOwn = async (formData: TeacherOwnSubmitData) => {
     setIsSaving(true);
@@ -126,10 +137,18 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
               phone: formData.phone || null,
               nationalId: formData.nationalId || null,
               nationality: formData.nationality || null,
+              timezone: (formData.timezone || null) as IanaTimezone | null,
             },
           },
         },
       });
+
+      if (forceComplete && isTeacherNationalIdComplete(formData.nationalId)) {
+        router.replace(ownProfileHref());
+        router.refresh();
+        return;
+      }
+
       await refetch();
     } catch (submitError) {
       logger.error("Failed to update own teacher profile", { error: submitError });
@@ -155,6 +174,7 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
             teacher: {
               phone: formData.phone || null,
               nationalId: formData.nationalId || null,
+              nationality: formData.nationality || null,
               dateOfBirth: formData.dateOfBirth || null,
               gender: (formData.gender as Gender | null) ?? null,
               address: formData.address || null,
@@ -185,6 +205,8 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
     teacherData: teacherData as TeacherViewData,
     avatarUrl,
     displayCurrency,
+    profilePhone,
+    profileTimezone,
     isAdminScope,
     targetUserId,
     meetingTabHref: "?tab=meeting",

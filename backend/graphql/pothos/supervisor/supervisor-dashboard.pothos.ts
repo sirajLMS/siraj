@@ -1,5 +1,4 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { LessonReportPothosObject } from "@/backend/graphql/pothos/classes/lesson-report.pothos";
 import { TeacherPendingDuesSummaryPothosObject } from "@/backend/graphql/pothos/teachers/teacher-due.pothos";
 import type { SupervisorDashboardReturnType, SupervisorMonthlySnapshotReturnType } from "@/backend/types";
 
@@ -25,7 +24,6 @@ export const SupervisorDashboardPothosObject = SupervisorDashboardRef.implement(
     pendingDuesSummary: t.expose("pendingDuesSummary", {
       type: TeacherPendingDuesSummaryPothosObject,
     }),
-    recentApprovals: t.expose("recentApprovals", { type: [LessonReportPothosObject] }),
     monthlySnapshot: t.expose("monthlySnapshot", {
       type: SupervisorMonthlySnapshotPothosObject,
     }),

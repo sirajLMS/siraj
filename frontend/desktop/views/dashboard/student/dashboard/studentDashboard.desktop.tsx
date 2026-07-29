@@ -1,14 +1,14 @@
 "use client";
 
 import { HistoryOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
-import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+import { DesktopSectionPanel, desktopSectionContentInsetSx } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { NextClassJoinCard } from "@/frontend/desktop/views/dashboard/student/dashboard/components/nextClassJoinCard.desktop";
-import { StudentRecentReportsDataGrid } from "@/frontend/desktop/views/dashboard/student/dashboard/components/studentRecentReportsDataGrid.desktop";
+import { StudentRecentReportsCardListDesktop } from "@/frontend/desktop/views/dashboard/student/dashboard/components/studentRecentReportsCardList.desktop";
 
 export function StudentDashboardDesktopView({
   userName,
@@ -19,9 +19,9 @@ export function StudentDashboardDesktopView({
   recentLessonReports,
   reportsPagination,
   labels,
+  lessonReportStatusLabels,
   loading,
   onJoinLesson,
-  onViewHistory,
   onViewCredits,
   onAddReflection,
 }: Readonly<StudentDashboardViewModel>) {
@@ -39,9 +39,11 @@ export function StudentDashboardDesktopView({
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.welcomeMessage(userName ?? "")} subtitle={labels.pageTitle} />
 
-      <Box sx={{ mb: 3 }}>
-        <NextClassJoinCard lesson={nextLesson} labels={labels} locale={locale} onJoin={onJoinLesson} />
-      </Box>
+      {nextLesson ? (
+        <Box sx={{ mb: 3 }}>
+          <NextClassJoinCard lesson={nextLesson} labels={labels} locale={locale} onJoin={onJoinLesson} />
+        </Box>
+      ) : null}
 
       <Box sx={{ mb: 3 }}>
         <DesktopMetricCardGrid
@@ -80,38 +82,35 @@ export function StudentDashboardDesktopView({
         />
       </Box>
 
-      <DesktopSectionPanel
-        title={labels.recentLessonReports}
-        actions={
-          <Button variant="text" sx={theme => ({ color: theme.palette.primary.main })} onClick={onViewHistory}>
-            {labels.viewAllHistory}
-          </Button>
-        }
-        sx={{ mb: 3 }}
-      >
-        <StudentRecentReportsDataGrid
+      {!nextLesson ? (
+        <Box sx={{ ...desktopSectionContentInsetSx, py: 0, mb: 3 }}>
+          <Box
+            sx={theme => ({
+              px: 1.5,
+              py: 1.25,
+              borderRadius: 2,
+              backgroundColor: theme.palette.surfaceContainer,
+              border: `1px solid ${theme.palette.outlineVariant}`,
+            })}
+          >
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {labels.noUpcomingClasses}
+            </Typography>
+          </Box>
+        </Box>
+      ) : null}
+
+      <DesktopSectionPanel contentPadding={false} title={labels.recentLessonReports} sx={{ mb: 3 }}>
+        <StudentRecentReportsCardListDesktop
           rows={recentLessonReports}
           labels={labels}
+          lessonReportStatusLabels={lessonReportStatusLabels}
           locale={locale}
           loading={loading}
           pagination={reportsPagination}
           onAddReflection={onAddReflection}
         />
       </DesktopSectionPanel>
-
-      <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", gap: 1 }}>
-        <Button
-          variant="outlined"
-          startIcon={<HistoryOutlined />}
-          sx={theme => ({ color: theme.palette.primary.main, borderColor: theme.palette.primary.main })}
-          onClick={onViewHistory}
-        >
-          {labels.viewAllHistory}
-        </Button>
-        <Button variant="text" sx={theme => ({ color: theme.palette.primary.main })} onClick={onViewCredits}>
-          {labels.viewCredits}
-        </Button>
-      </Stack>
     </DesktopPageContainer>
   );
 }

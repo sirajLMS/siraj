@@ -19,7 +19,9 @@ export function usePaymentMethodsTabViewModel(
   const { user, hasPermission } = useUserStore();
 
   const canManage =
-    scope === ProfileScope.Own ? user?.id === targetUserId : hasPermission(AppPermission.UserEditProfile);
+    scope === ProfileScope.Own
+      ? user?.id === targetUserId
+      : hasPermission(AppPermission.ProfilePaymentMethodsEditOther);
 
   return {
     targetUserId,

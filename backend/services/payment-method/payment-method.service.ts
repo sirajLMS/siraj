@@ -110,7 +110,7 @@ async function assertCatalogActive(
 }
 
 async function hasAdminPaymentAccess(actorUserId: string): Promise<boolean> {
-  return PermissionsService.hasPermission(actorUserId, AppPermission.USER_EDIT_PROFILE);
+  return PermissionsService.hasPermission(actorUserId, AppPermission.PROFILE_PAYMENT_METHODS_EDIT_OTHER);
 }
 
 async function assertActorCanManageTarget(
@@ -180,7 +180,10 @@ export namespace PaymentMethodService {
 
     const revealSensitive = actorUserId === targetUserId;
     if (!revealSensitive) {
-      const canView = await PermissionsService.hasPermission(actorUserId, AppPermission.USER_VIEW_PROFILE);
+      const canView = await PermissionsService.hasPermission(
+        actorUserId,
+        AppPermission.PROFILE_PAYMENT_METHODS_VIEW_OTHER
+      );
       if (!canView) {
         return null;
       }

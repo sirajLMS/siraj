@@ -14,7 +14,9 @@ gqlSchemaBuilder.queryField("profileByUserId", t =>
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       await setBillingFxDisplayCurrencyForSubject(ctx, args.userId, actorUserId);
-      return ProfileService.getProfileByUserId(actorUserId, args.userId, ctx.locale);
+      return ProfileService.getProfileByUserId(actorUserId, args.userId, ctx.locale, {
+        permissionContext: { permissions: ctx.permissions, isSuperAdmin: ctx.isSuperAdmin },
+      });
     },
   })
 );

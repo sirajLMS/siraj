@@ -5,7 +5,7 @@ import { Box, Button, TextField } from "@mui/material";
 import type { ParentBillingViewModel } from "@/frontend/common/views/dashboard/billing/useParentBillingViewModel";
 import { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
-import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
 import { ParentInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/billing/components/parentInvoicesDataGrid.desktop";
 
@@ -36,10 +36,10 @@ export function ParentBillingDesktopView({
   const listLoading = isSearchPending || (loading && invoices.length === 0);
 
   return (
-    <DesktopPageContainer>
-      <DesktopPageHeader title={labels.parentPageTitle} subtitle={labels.parentPageSubtitle} />
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <BillingMetricsRowDesktop metrics={parentMetrics} loading={summaryLoading} />
       <DesktopSectionPanel
+        contentPadding={false}
         title={labels.sections.invoiceHistory}
         subTitle={labels.sections.invoiceHistorySubtitle}
         actions={
@@ -88,6 +88,6 @@ export function ParentBillingDesktopView({
           loading={listLoading}
         />
       </DesktopSectionPanel>
-    </DesktopPageContainer>
+    </Box>
   );
 }

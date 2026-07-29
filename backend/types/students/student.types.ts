@@ -74,6 +74,8 @@ export interface StudentOnboardingInput {
   readonly timezone?: string | null;
   readonly timezoneOverride?: string | null;
   readonly avatarUrl?: string | null;
+  readonly phone?: string | null;
+  readonly displayCurrency?: string | null;
 }
 
 export interface StudentOnboardingResult {
@@ -167,6 +169,7 @@ export type StudentHistorySession = {
   outcome?: string | null;
   isFrozen: boolean;
   instructor: string;
+  teacherId: string;
   timeSlot: string;
   room: string | null;
   notes: string;

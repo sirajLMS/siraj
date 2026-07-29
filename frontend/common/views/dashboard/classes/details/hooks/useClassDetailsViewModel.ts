@@ -41,6 +41,7 @@ function buildClassDetailsHeaderLabels(
   return {
     pageSubtitleAdmin: t.pageSubtitleAdmin,
     pageSubtitleTeacher: t.pageSubtitleTeacher,
+    pageSubtitleStudent: t.pageSubtitleStudent,
     classTypes,
     breadcrumbs: {
       dashboard: t.breadcrumbs.dashboard,
@@ -72,6 +73,7 @@ function formatClassInstanceSchedule(instance: ClassInstanceDetail, locale: stri
 type CommonViewModelFields = {
   readonly canOverride: boolean;
   readonly isParentView: boolean;
+  readonly isStudentView: boolean;
   readonly canViewSessionDetails: boolean;
   readonly isWarningDismissed: boolean;
   readonly setIsWarningDismissed: (value: boolean) => void;
@@ -117,6 +119,7 @@ function buildEarlyReturnViewModel(status: EarlyReturnStatus, shared: EarlyRetur
     instance: null,
     canOverride: false,
     isParentView: false,
+    isStudentView: false,
     canViewSessionDetails: shared.canViewSessionDetails,
     isWarningDismissed: shared.isWarningDismissed,
     setIsWarningDismissed: shared.setIsWarningDismissed,
@@ -162,6 +165,7 @@ type ReadyInputs = {
   readonly instance: ClassInstanceDetail;
   readonly canOverride: boolean;
   readonly isParentView: boolean;
+  readonly isStudentView: boolean;
   readonly canViewSessionDetails: boolean;
   readonly isWarningDismissed: boolean;
   readonly setIsWarningDismissed: (value: boolean) => void;
@@ -183,6 +187,7 @@ function buildReadyViewModel(inputs: ReadyInputs): ClassDetailsViewModel {
     instance: inputs.instance,
     canOverride: inputs.canOverride,
     isParentView: inputs.isParentView,
+    isStudentView: inputs.isStudentView,
     canViewSessionDetails: inputs.canViewSessionDetails,
     isWarningDismissed: inputs.isWarningDismissed,
     setIsWarningDismissed: inputs.setIsWarningDismissed,
@@ -204,6 +209,7 @@ export interface ClassDetailsViewModel {
   readonly instance: ClassInstanceDetail | null;
   readonly canOverride: boolean;
   readonly isParentView: boolean;
+  readonly isStudentView: boolean;
   readonly canViewSessionDetails: boolean;
   readonly isWarningDismissed: boolean;
   readonly setIsWarningDismissed: (value: boolean) => void;
@@ -256,7 +262,7 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
   });
 
   const handlers = useClassActionHandlers(id, mutations, router, setFeedbackState, t);
-  const { canOverride, isParentView, canViewSessionDetails } = useClassDetailsPermissions(hasPermission);
+  const { canOverride, isParentView, isStudentView, canViewSessionDetails } = useClassDetailsPermissions(hasPermission);
 
   const earlyReturnShared = {
     isWarningDismissed,
@@ -292,6 +298,7 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
     instance,
     canOverride,
     isParentView,
+    isStudentView,
     canViewSessionDetails,
     isWarningDismissed,
     setIsWarningDismissed,

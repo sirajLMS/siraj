@@ -61,7 +61,10 @@ export namespace ScheduleService {
     options: { search?: string; metricFilter?: string },
     tErrors: ErrorsLabels
   ) {
-    const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_LIST);
+    const isAuthorized = await PermissionsService.hasAnyPermission(userId, [
+      AppPermission.SCHEDULE_VIEW_LIST,
+      AppPermission.SCHEDULE_VIEW_ALL,
+    ]);
     if (!isAuthorized) {
       logger.warn("Unauthorized access to daily schedule", { userId });
       throw new Error(tErrors.unauthorizedViewList);

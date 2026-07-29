@@ -28,17 +28,20 @@ const StyledRemarksQuoteBlock = styled(Box)(() => ({
 export function RemarksCard({ remarks, labels }: RemarksCardProps) {
   return (
     <BaseCard edgeToEdge>
-      <StyledRemarksTitle variant="caption" sx={theme => ({ mb: 1.5, color: theme.palette.header })}>
+      <StyledRemarksTitle variant="caption" sx={theme => ({ mb: 1.5, color: theme.palette.onSurfaceVariant })}>
         {labels.remarksTitle}
       </StyledRemarksTitle>
       <StyledRemarksQuoteBlock
         sx={theme => ({
-          backgroundColor: theme.palette.background.default,
-          borderColor: theme.palette.header,
-          color: theme.palette.text.secondary,
+          backgroundColor: theme.palette.surfaceContainerLow,
+          borderColor: theme.palette.outlineVariant,
+          borderLeftColor: theme.palette.primary.main,
+          color: theme.palette.onSurface,
         })}
       >
-        <Typography variant="body2">&ldquo;{remarks}&rdquo;</Typography>
+        <Typography variant="body2" sx={theme => ({ color: theme.palette.onSurface })}>
+          &ldquo;{remarks}&rdquo;
+        </Typography>
       </StyledRemarksQuoteBlock>
     </BaseCard>
   );

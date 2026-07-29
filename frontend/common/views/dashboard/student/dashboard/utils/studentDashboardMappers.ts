@@ -48,7 +48,11 @@ export function mapRecentLessonReport(raw: RecentReportItem): RecentLessonReport
   return {
     id: raw.id ?? "",
     classInstanceId: raw.classInstanceId ?? null,
+    subjectName: raw.subjectName ?? null,
+    classAvatarUrl: raw.classAvatarUrl ?? null,
+    teacherId: raw.teacherId ?? null,
     teacherName: raw.teacherName ?? null,
+    teacherAvatarUrl: raw.teacherAvatarUrl ?? null,
     lessonDate: raw.lessonDate ?? null,
     durationMinutes: raw.durationMinutes ?? 0,
     status: raw.status ?? null,

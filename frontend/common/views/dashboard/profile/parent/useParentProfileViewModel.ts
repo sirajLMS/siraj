@@ -35,7 +35,8 @@ function buildParentSource(scope: ProfileScope, profile: ProfileData | null | un
 function toEditData(
   parentData: ParentViewData | null,
   avatarUrl: string | null | undefined,
-  displayCurrency: CurrencyCode | null | undefined
+  displayCurrency: CurrencyCode | null | undefined,
+  profileTimezone: string | null | undefined
 ): ParentAdminEditFormData {
   const adminData = parentData && "invoiceType" in parentData ? parentData : null;
   return {
@@ -52,7 +53,7 @@ function toEditData(
     invoiceType: adminData?.invoiceType ?? "",
     feeAmount: adminData?.feeAmount ?? "",
     currency: adminData?.currency ?? undefined,
-    timezone: adminData?.timezone ?? "",
+    timezone: adminData?.timezone ?? profileTimezone ?? "",
     lifecycleStatus: (adminData?.lifecycleStatus as ParentStatus | undefined) ?? ParentStatus.Regular,
   };
 }
@@ -73,6 +74,8 @@ export interface ParentProfileViewModel {
   readonly editData: ParentAdminEditFormData;
   readonly avatarUrl: string | null;
   readonly displayCurrency: CurrencyCode | null;
+  readonly profileTimezone: string | null;
+  readonly profilePhone: string | null;
   readonly parentId: string | null;
   readonly meetingTabHref: string;
   readonly associatedStudents: AssociatedStudents | null;
@@ -108,10 +111,12 @@ export function useParentProfileViewModel(
   const parentData = buildParentSource(scope, profile);
   const avatarUrl = profile?.avatarUrl ?? null;
   const displayCurrency = profile?.displayCurrency ?? null;
+  const profileTimezone = profile?.timezone ?? null;
+  const profilePhone = profile?.phone ?? null;
 
   const editData = useMemo(
-    () => toEditData(parentData, avatarUrl, displayCurrency),
-    [parentData, avatarUrl, displayCurrency]
+    () => toEditData(parentData, avatarUrl, displayCurrency, profileTimezone),
+    [parentData, avatarUrl, displayCurrency, profileTimezone]
   );
 
   const onSubmit = async (formData: ParentAdminEditFormData) => {
@@ -135,7 +140,10 @@ export function useParentProfileViewModel(
           variables: {
             input: {
               core,
-              parent: parentOwn,
+              parent: {
+                ...parentOwn,
+                timezone: (formData.timezone || null) as IanaTimezone | null,
+              },
             },
           },
         });
@@ -185,6 +193,8 @@ export function useParentProfileViewModel(
     editData,
     avatarUrl,
     displayCurrency,
+    profileTimezone,
+    profilePhone,
     parentId: profile?.parentId ?? null,
     meetingTabHref: "?tab=meeting",
     associatedStudents: profile?.associatedStudents ?? null,

@@ -195,7 +195,7 @@ export function TeacherDuesDesktopView({
 
       {loading ? <LinearProgress /> : null}
 
-      <DesktopSectionPanel sx={{ flex: 1 }}>
+      <DesktopSectionPanel contentPadding={false} sx={{ flex: 1 }}>
         <DesktopAppDataGrid<TeacherDueRow>
           rows={rows}
           columns={columns}

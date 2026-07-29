@@ -14,7 +14,7 @@ import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/classes
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type ClassDetailsToolbarViewMode = "teacher" | "parent" | "admin";
+export type ClassDetailsToolbarViewMode = "teacher" | "parent" | "admin" | "student";
 
 export interface ClassDetailsToolbarAreaProps {
   readonly instance: ClassInstanceDetail;
@@ -44,6 +44,9 @@ function resolveJoinEmptyState(
 ): { emptyRole: MeetingJoinEmptyRole; setupHref?: string } {
   if (viewMode === "parent") {
     return { emptyRole: "parent" };
+  }
+  if (viewMode === "student") {
+    return { emptyRole: "class" };
   }
   if (viewMode === "teacher") {
     return { emptyRole: "teacher", setupHref: "/profile?tab=meeting" };
@@ -103,7 +106,7 @@ export function ClassDetailsToolbarArea({
         </Stack>
       ) : null}
 
-      {viewMode === "parent" ? null : (
+      {viewMode === "parent" || viewMode === "student" ? null : (
         <Box sx={classDetailsContentPaddingSx}>
           <LiveSessionToolbar
             classInstanceId={instanceId}

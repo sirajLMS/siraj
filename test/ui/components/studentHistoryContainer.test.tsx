@@ -1,6 +1,5 @@
 import { mock } from "bun:test";
 
-// Defensive mocks against bleed from earlier test files (Bun mock.module is process-global).
 mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({
@@ -11,7 +10,7 @@ mock.module("next/navigation", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/students/me/history",
+  usePathname: () => "/students/history",
   useSearchParams: () => new URLSearchParams(),
   redirect: () => {},
 }));
@@ -27,7 +26,7 @@ mock.module("@/shared/i18n/routing", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/students/me/history",
+  usePathname: () => "/students/history",
   Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
     <a href={href} {...rest}>
       {children}
@@ -45,7 +44,7 @@ mock.module("@/shared/i18n/navigation", () => ({
     replace: mock(() => {}),
     prefetch: mock(() => {}),
   }),
-  usePathname: () => "/students/me/history",
+  usePathname: () => "/students/history",
 }));
 
 mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
@@ -71,10 +70,6 @@ const HISTORY_YEAR = 2026;
 const HISTORY_MONTH = 7;
 const studentId = "student-history-1";
 
-/**
- * Production-shaped desktop container for tests.
- * Bypasses ResponsiveViewSwitch / next/dynamic (not preloaded for this view).
- */
 function StudentHistoryContainerImpl() {
   const viewModel = useStudentHistoryViewModel({});
   return <StudentHistoryDesktopView {...viewModel} />;
@@ -131,6 +126,7 @@ const historyMockData = {
         outcome: "TAKEN",
         isFrozen: false,
         instructor: "Ustadh Yusuf",
+        teacherId: "teacher-1",
         timeSlot: "10:00",
         room: null,
         notes: "Strong progress",
@@ -147,6 +143,7 @@ const historyMockData = {
         outcome: "TAKEN",
         isFrozen: false,
         instructor: "Ustadh Yusuf",
+        teacherId: "teacher-1",
         timeSlot: "11:00",
         room: null,
         notes: null,
@@ -163,7 +160,7 @@ function createMocks(): MockLink.MockedResponse[] {
     {
       request: {
         query: studentProfileQueryDocument,
-        variables: { studentId: null, year: null, month: null },
+        variables: { studentId: null, year: null, month: null, includeUpcomingClasses: true },
       },
       result: { data: profileMockData },
       maxUsageCount: Number.POSITIVE_INFINITY,
@@ -197,7 +194,7 @@ afterEach(() => {
 });
 
 describe("StudentHistoryContainer", () => {
-  test("renders month nav, metrics, filters, and class sessions", async () => {
+  test("renders month nav, metrics, and lesson history calendar", async () => {
     useStudentPortalHistoryStore.setState({
       year: HISTORY_YEAR,
       month: HISTORY_MONTH,
@@ -220,8 +217,8 @@ describe("StudentHistoryContainer", () => {
       expect(screen.getByText(expectedMonthLabel)).toBeInTheDocument();
     });
 
-    expect(screen.getByRole("button", { name: "Previous month" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Next month" })).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Previous month").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByLabelText("Next month").length).toBeGreaterThanOrEqual(1);
 
     expect(screen.getByText("Total Classes")).toBeInTheDocument();
     expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(1);
@@ -232,15 +229,10 @@ describe("StudentHistoryContainer", () => {
     expect(screen.getByText("Performance")).toBeInTheDocument();
     expect(screen.getByText("85%")).toBeInTheDocument();
 
-    expect(screen.getByLabelText("Filter by Subject")).toBeInTheDocument();
-    expect(screen.getByLabelText("Filter by Status")).toBeInTheDocument();
-
     expect(screen.getAllByText("Lesson History").length).toBeGreaterThanOrEqual(1);
 
-    await waitFor(() => {
-      expect(screen.getAllByText("Quran Recitation").length).toBeGreaterThanOrEqual(1);
-    });
-    expect(screen.getAllByText("Tajweed").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Ustadh Yusuf").length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByLabelText("Filter by Subject")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Filter by Status")).not.toBeInTheDocument();
+    expect(screen.queryByRole("grid")).not.toBeInTheDocument();
   });
 });

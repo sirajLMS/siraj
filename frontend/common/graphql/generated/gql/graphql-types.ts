@@ -85,9 +85,7 @@ export enum AppLanguage {
 }
 
 export enum AppPermission {
-  AuthEditOwnProfile = 'AUTH_EDIT_OWN_PROFILE',
   AuthLogin = 'AUTH_LOGIN',
-  AuthViewOwnProfile = 'AUTH_VIEW_OWN_PROFILE',
   BillingCreateInvoice = 'BILLING_CREATE_INVOICE',
   BillingDeleteInvoice = 'BILLING_DELETE_INVOICE',
   BillingManageCurrencies = 'BILLING_MANAGE_CURRENCIES',
@@ -139,11 +137,8 @@ export enum AppPermission {
   ParentsCreate = 'PARENTS_CREATE',
   ParentsEdit = 'PARENTS_EDIT',
   ParentsList = 'PARENTS_LIST',
-  ParentEditOwnProfile = 'PARENT_EDIT_OWN_PROFILE',
   ParentManageStatus = 'PARENT_MANAGE_STATUS',
   ParentViewDirectory = 'PARENT_VIEW_DIRECTORY',
-  ParentViewOwnProfile = 'PARENT_VIEW_OWN_PROFILE',
-  ParentViewProfile = 'PARENT_VIEW_PROFILE',
   ParentViewStudents = 'PARENT_VIEW_STUDENTS',
   PaymentMethodsManageCatalogs = 'PAYMENT_METHODS_MANAGE_CATALOGS',
   PaymentMethodsVerifyBankTransfer = 'PAYMENT_METHODS_VERIFY_BANK_TRANSFER',
@@ -243,7 +238,6 @@ export enum AppPermission {
   SettingsView = 'SETTINGS_VIEW',
   StaffCreate = 'STAFF_CREATE',
   StaffEdit = 'STAFF_EDIT',
-  StaffEditProfile = 'STAFF_EDIT_PROFILE',
   StaffList = 'STAFF_LIST',
   StaffViewDirectory = 'STAFF_VIEW_DIRECTORY',
   StorageManage = 'STORAGE_MANAGE',
@@ -312,16 +306,11 @@ export enum AppPermission {
   TeachersManageSchedule = 'TEACHERS_MANAGE_SCHEDULE',
   TeacherDuesMarkPaid = 'TEACHER_DUES_MARK_PAID',
   TeacherDuesView = 'TEACHER_DUES_VIEW',
-  TeacherEditOwnProfile = 'TEACHER_EDIT_OWN_PROFILE',
   TeacherViewDashboard = 'TEACHER_VIEW_DASHBOARD',
-  TeacherViewOwnProfile = 'TEACHER_VIEW_OWN_PROFILE',
-  TeacherViewProfile = 'TEACHER_VIEW_PROFILE',
   TeacherViewStudents = 'TEACHER_VIEW_STUDENTS',
   TestCustomAlt = 'TEST_CUSTOM_ALT',
   TestCustomOnly = 'TEST_CUSTOM_ONLY',
-  TestSystemOnly = 'TEST_SYSTEM_ONLY',
-  UserEditProfile = 'USER_EDIT_PROFILE',
-  UserViewProfile = 'USER_VIEW_PROFILE'
+  TestSystemOnly = 'TEST_SYSTEM_ONLY'
 }
 
 export type AssignPermissionGroupToUserInput = {
@@ -2341,7 +2330,6 @@ export type LoginResponse = {
   user: Maybe<User>;
 };
 
-/** Account type for new manager */
 export enum ManagerAccountType {
   Admin = 'admin',
   Manager = 'manager',
@@ -2398,10 +2386,12 @@ export type ManagerOnboarding = {
 export type ManagerOnboardingInput = {
   accountType: ManagerAccountType;
   avatarUrl: InputMaybe<Scalars['String']['input']>;
+  displayCurrency: InputMaybe<CurrencyCode>;
   email: Scalars['String']['input'];
   name: Scalars['String']['input'];
   password: Scalars['String']['input'];
   phone: InputMaybe<Scalars['String']['input']>;
+  timezone: InputMaybe<IanaTimezone>;
 };
 
 /** Result of manager onboarding operation */
@@ -3842,6 +3832,7 @@ export type ParentOnboardingInput = {
   address: InputMaybe<Scalars['String']['input']>;
   avatarUrl: InputMaybe<Scalars['String']['input']>;
   currency: InputMaybe<CurrencyCode>;
+  displayCurrency: InputMaybe<CurrencyCode>;
   email: Scalars['Email']['input'];
   facebook: InputMaybe<Scalars['String']['input']>;
   feeAmount: InputMaybe<Scalars['String']['input']>;
@@ -4177,8 +4168,8 @@ export type Query = {
   /** List all permission catalog entries. */
   permissions: Maybe<Array<Permission>>;
   profileByUserId: Maybe<UnifiedProfile>;
-  /** Get the most recently approved lesson reports for the supervisor dashboard */
-  recentApprovedLessonReports: Maybe<Array<LessonReport>>;
+  /** Get paginated recently approved lesson reports for the supervisor dashboard */
+  recentApprovedLessonReports: Maybe<PendingLessonReportsPayload>;
   recurringMeetingConfigs: Maybe<Array<ClassMeetingConfig>>;
   recurringSchedule: Maybe<RecurringScheduleDetail>;
   rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
@@ -4509,7 +4500,7 @@ export type QueryProfileByUserIdArgs = {
 
 
 export type QueryRecentApprovedLessonReportsArgs = {
-  limit: InputMaybe<Scalars['Int']['input']>;
+  paginationArgs: InputMaybe<PaginationArgs>;
 };
 
 
@@ -4636,6 +4627,7 @@ export type QueryStudentMonthlyReportArgs = {
 
 
 export type QueryStudentProfileArgs = {
+  includeUpcomingClasses: InputMaybe<Scalars['Boolean']['input']>;
   month: InputMaybe<Scalars['Int']['input']>;
   studentId: InputMaybe<Scalars['String']['input']>;
   year: InputMaybe<Scalars['Int']['input']>;
@@ -5297,6 +5289,7 @@ export type StudentHistorySession = {
   outcome: Maybe<Scalars['String']['output']>;
   room: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
   time: Maybe<Scalars['String']['output']>;
   timeSlot: Maybe<Scalars['String']['output']>;
   title: Maybe<Scalars['String']['output']>;
@@ -5330,6 +5323,8 @@ export type StudentOnboardingInput = {
   classesRemaining: InputMaybe<Scalars['Int']['input']>;
   classesTotal: InputMaybe<Scalars['Int']['input']>;
   dateOfBirth: InputMaybe<Scalars['DateTime']['input']>;
+  /** User display currency */
+  displayCurrency: InputMaybe<CurrencyCode>;
   /** Student login email (creates a users row when provided) */
   email: InputMaybe<Scalars['String']['input']>;
   gender: InputMaybe<Gender>;
@@ -5338,6 +5333,8 @@ export type StudentOnboardingInput = {
   parentId: InputMaybe<Scalars['String']['input']>;
   /** Student login password (required when email is provided) */
   password: InputMaybe<Scalars['String']['input']>;
+  /** Student phone (stored on users row) */
+  phone: InputMaybe<Scalars['String']['input']>;
   primaryTeacherId: InputMaybe<Scalars['String']['input']>;
   status: InputMaybe<StudentStatus>;
   /** Student timezone (applied to the created user record) */
@@ -5362,11 +5359,13 @@ export type StudentProfile = {
   classesTotal: Maybe<Scalars['Int']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   dateOfBirth: Maybe<Scalars['DateTime']['output']>;
+  displayCurrency: Maybe<CurrencyCode>;
   email: Maybe<Scalars['String']['output']>;
   gender: Maybe<Gender>;
   hoursPerWeek: Maybe<Scalars['Float']['output']>;
   id: Maybe<Scalars['String']['output']>;
   isAssociatedViewer: Maybe<Scalars['Boolean']['output']>;
+  isOwnStudentProfile: Maybe<Scalars['Boolean']['output']>;
   language: Maybe<AppLanguage>;
   name: Maybe<Scalars['String']['output']>;
   parentEmail: Maybe<Scalars['String']['output']>;
@@ -5379,6 +5378,7 @@ export type StudentProfile = {
   status: Maybe<StudentStatus>;
   teacherName: Maybe<Scalars['String']['output']>;
   teacherUserId: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<IanaTimezone>;
   timezoneOverride: Maybe<Scalars['String']['output']>;
   upcomingClasses: Maybe<StudentUpcomingClassesResult>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
@@ -5388,10 +5388,13 @@ export type StudentProfile = {
 export type StudentProfileEditInput = {
   avatarUrl: InputMaybe<Scalars['String']['input']>;
   dateOfBirth: InputMaybe<Scalars['DateTime']['input']>;
+  displayCurrency: InputMaybe<CurrencyCode>;
   gender: InputMaybe<Gender>;
   language: InputMaybe<AppLanguage>;
   parentPhone: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
+  studentId: InputMaybe<Scalars['ID']['input']>;
+  timezone: InputMaybe<Scalars['String']['input']>;
   timezoneOverride: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -5575,7 +5578,6 @@ export type SupervisorDashboard = {
   monthlySnapshot: Maybe<SupervisorMonthlySnapshot>;
   pendingDuesSummary: Maybe<TeacherPendingDuesSummary>;
   pendingReviewCount: Maybe<Scalars['Int']['output']>;
-  recentApprovals: Maybe<Array<LessonReport>>;
   supervisorName: Maybe<Scalars['String']['output']>;
 };
 
@@ -6035,6 +6037,7 @@ export type TeacherOnboardingInput = {
   countryCode: InputMaybe<CountryCode>;
   /** Teacher date of birth (ISO date string) */
   dateOfBirth: InputMaybe<Scalars['String']['input']>;
+  displayCurrency: InputMaybe<CurrencyCode>;
   /** Teacher email address */
   email: Scalars['Email']['input'];
   /** Teacher gender */
@@ -6224,6 +6227,7 @@ export type UnifiedProfile = {
   parentOwnProfile: Maybe<ParentOwnProfile>;
   paymentMethodDefaults: Maybe<PaymentMethodDefaults>;
   paymentMethods: Maybe<Array<UserPaymentMethod>>;
+  phone: Maybe<Scalars['String']['output']>;
   scope: Maybe<ProfileScope>;
   staffPermissionGroups: Maybe<Array<StaffPermissionGroup>>;
   staffPermissionOverrides: Maybe<Array<StaffPermissionOverride>>;
@@ -6232,6 +6236,7 @@ export type UnifiedProfile = {
   teacherAdminProfile: Maybe<TeacherProfileResult>;
   teacherId: Maybe<Scalars['String']['output']>;
   teacherOwnProfile: Maybe<TeacherOwnProfile>;
+  timezone: Maybe<IanaTimezone>;
   userId: Maybe<Scalars['String']['output']>;
 };
 

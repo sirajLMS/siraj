@@ -106,7 +106,9 @@ export function ParentsViewMobile({
               <MobileFilterButton size="small" onClick={onFilter}>
                 {filters.filterLabel}
               </MobileFilterButton>
-              <MobileExportButton size="small" onClick={onExport} />
+              <MobileExportButton size="small" onClick={onExport}>
+                {actions.export}
+              </MobileExportButton>
             </Stack>
           }
         >

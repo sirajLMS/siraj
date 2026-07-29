@@ -23,6 +23,7 @@ export interface MobileStatusBadgeProps {
   readonly status: string;
   readonly label: string;
   readonly size?: "small" | "medium";
+  readonly typographyVariant?: "labelUppercase" | "labelSm";
   readonly icon?: ReactNode;
 }
 
@@ -222,9 +223,18 @@ function getStatusColors(theme: Theme, category: MobileStatusBadgeCategory, stat
  * 24/28), and a smaller typography size pill so badges stay legible in
  * dense card lists without taking too much vertical space.
  */
-export function MobileStatusBadge({ category, status, label, size = "small", icon }: Readonly<MobileStatusBadgeProps>) {
+export function MobileStatusBadge({
+  category,
+  status,
+  label,
+  size = "small",
+  typographyVariant = "labelUppercase",
+  icon,
+}: Readonly<MobileStatusBadgeProps>) {
   const chipHeight = size === "small" ? 20 : 24;
   const chipMinWidth = size === "small" ? 72 : 84;
+  const chipTypography = typographyVariant === "labelSm" ? "labelSm" : "labelUppercase";
+  const chipFontSize = typographyVariant === "labelSm" ? undefined : "0.7rem";
 
   if (icon) {
     return (
@@ -234,15 +244,18 @@ export function MobileStatusBadge({ category, status, label, size = "small", ico
         size={size}
         sx={theme => {
           const { backgroundColor, color } = getStatusColors(theme, category, status);
+          const typography =
+            typographyVariant === "labelSm" ? theme.typography.labelSm : theme.typography.labelUppercase;
           return {
             backgroundColor,
             color,
             whiteSpace: "normal",
             overflowWrap: "break-word",
-            fontFamily: theme.typography.labelUppercase.fontFamily,
-            fontSize: theme.typography.labelUppercase.fontSize,
-            fontWeight: theme.typography.labelUppercase.fontWeight,
-            letterSpacing: theme.typography.labelUppercase.letterSpacing,
+            fontFamily: typography.fontFamily,
+            fontSize: chipFontSize ?? typography.fontSize,
+            fontWeight: typography.fontWeight,
+            letterSpacing: typography.letterSpacing,
+            textTransform: typographyVariant === "labelUppercase" ? "uppercase" : undefined,
             borderRadius: theme.layout.radius.badge,
             height: chipHeight,
             minWidth: chipMinWidth,
@@ -271,7 +284,14 @@ export function MobileStatusBadge({ category, status, label, size = "small", ico
         };
       }}
     >
-      <Typography variant="labelUppercase" sx={{ lineHeight: 1, fontSize: "0.7rem" }}>
+      <Typography
+        variant={chipTypography}
+        sx={{
+          lineHeight: 1,
+          ...(chipFontSize ? { fontSize: chipFontSize } : {}),
+          ...(typographyVariant === "labelUppercase" ? { textTransform: "uppercase" } : {}),
+        }}
+      >
         {label}
       </Typography>
     </Box>

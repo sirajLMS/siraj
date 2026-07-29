@@ -1,0 +1,31 @@
+import type { StudentPortalSessionsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentSessions";
+
+export const dashboardStudentPortalSessionsAr: StudentPortalSessionsLabels = {
+  pageTitle: "الحصص",
+  sessionDate: "التاريخ",
+  subject: "المادة",
+  instructor: "المعلم",
+  duration: "المدة",
+  status: "الحالة",
+  notes: "ملاحظات",
+  noHistory: "لا يوجد سجل دروس بعد",
+  loadingMessage: "جاري التحميل...",
+  filterBySubject: "تصفية حسب المادة",
+  filterByStatus: "تصفية حسب الحالة",
+  allSubjects: "جميع المواد",
+  allStatuses: "جميع الحالات",
+  previousMonth: "الشهر السابق",
+  nextMonth: "الشهر التالي",
+  statusLabels: {
+    ended: "انتهت",
+    present: "حاضر",
+    absent: "غائب",
+    late: "متأخر",
+    scheduled: "مجدولة",
+    pending: "قيد الانتظار",
+    cancelled: "ملغاة",
+  },
+  minutesShort: minutes => `${minutes} د`,
+  viewClass: "عرض الحصة",
+  joinSession: "انضم للحصة",
+};

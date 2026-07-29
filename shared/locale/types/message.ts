@@ -27,6 +27,7 @@ import type { ParentDashboardLabels } from "@/shared/locale/types/dashboard/core
 import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core/scheduleAlerts.ts";
 import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule.ts";
 import type { StatusTrackingLabels } from "@/shared/locale/types/dashboard/core/statusTracking.ts";
+import type { FeedbackManageParentLabels } from "@/shared/locale/types/dashboard/feedback/main.ts";
 import type { CreditLabels } from "@/shared/locale/types/dashboard/lms/credit.ts";
 import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports.ts";
 import type { MonthlyReportLabels } from "@/shared/locale/types/dashboard/lms/monthlyReports.ts";
@@ -40,9 +41,11 @@ import type { ParentRulesLabels } from "@/shared/locale/types/dashboard/parents/
 import type { ParentSocialLabels } from "@/shared/locale/types/dashboard/parents/social.ts";
 import type { ParentStudentsLabels } from "@/shared/locale/types/dashboard/parents/students.ts";
 import type { PaymentCatalogsLabels } from "@/shared/locale/types/dashboard/payment-catalogs/main.ts";
+import type { PaymentCatalogsParentLabels } from "@/shared/locale/types/dashboard/payment-catalogs/parent.ts";
 import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions/main.ts";
 import type { ReportsLabels } from "@/shared/locale/types/dashboard/reports/main.ts";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
+import type { ScheduleTrackingParentLabels } from "@/shared/locale/types/dashboard/schedule-tracking/main.ts";
 import type { SettingsLabels } from "@/shared/locale/types/dashboard/settings/main.ts";
 import type { StaffDirectoryLabels } from "@/shared/locale/types/dashboard/staff/directory.ts";
 import type { StaffOnboardingLabels } from "@/shared/locale/types/dashboard/staff/onboarding.ts";
@@ -50,6 +53,7 @@ import type { StudentPortalCreditsLabels } from "@/shared/locale/types/dashboard
 import type { StudentPortalDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard.ts";
 import type { StudentPortalHistoryLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory.ts";
 import type { StudentPortalProfileLabels } from "@/shared/locale/types/dashboard/studentPortal/studentProfile.ts";
+import type { StudentPortalSessionsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentSessions.ts";
 import type { StudentDirectoryLabels } from "@/shared/locale/types/dashboard/students/directory.ts";
 import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/students/history.ts";
 import type { StudentOnboardingLabels } from "@/shared/locale/types/dashboard/students/onboarding.ts";
@@ -75,6 +79,7 @@ import type { TeacherProfileLabels } from "@/shared/locale/types/dashboard/teach
 import type { TeacherReassignmentLabels } from "@/shared/locale/types/dashboard/teachers/reassignment.ts";
 import type { TeacherStudentsLabels } from "@/shared/locale/types/dashboard/teachers/students.ts";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule.ts";
+import type { UsersDirectoryParentLabels } from "@/shared/locale/types/dashboard/users/directory.ts";
 import type { EmailsLabels } from "@/shared/locale/types/emails";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { NotificationsLabels } from "@/shared/locale/types/notifications";
@@ -163,7 +168,11 @@ export interface DashboardTranslations {
   parentProfile: ParentProfileLabels;
   parentRules: ParentRulesLabels;
   parentSocial: ParentSocialLabels;
+  feedbackManageParent: FeedbackManageParentLabels;
+  usersDirectoryParent: UsersDirectoryParentLabels;
   paymentCatalogs: PaymentCatalogsLabels;
+  paymentCatalogsParent: PaymentCatalogsParentLabels;
+  scheduleTrackingParent: ScheduleTrackingParentLabels;
   permissions: PermissionsLabels;
   settings: SettingsLabels;
   reports: ReportsLabels;
@@ -172,6 +181,7 @@ export interface DashboardTranslations {
   studentPortalDashboard: StudentPortalDashboardLabels;
   studentPortalCredits: StudentPortalCreditsLabels;
   studentPortalHistory: StudentPortalHistoryLabels;
+  studentPortalSessions: StudentPortalSessionsLabels;
   studentPortalProfile: StudentPortalProfileLabels;
   studentDirectory: StudentDirectoryLabels;
   studentHistory: StudentHistoryLabels;

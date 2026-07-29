@@ -437,21 +437,20 @@ export namespace LessonReportService {
   }
 
   /**
-   * Return the most-recently APPROVED lesson reports for the supervisor
-   * dashboard's "Recent Approvals" panel. Supervisors need
-   * LESSON_REPORTS_REVIEW permission (already covers read access). Limited to
-   * a small `limit` (defaults to 5) — callers should never request more than
-   * 50 to keep the response payload small.
+   * Return recently APPROVED lesson reports for the supervisor dashboard's
+   * "Recent Approvals" panel. Supervisors need LESSON_REPORTS_REVIEW permission.
    */
   export async function getRecentApprovedLessonReports(
     actorUserId: string,
-    limit = 5,
+    paginationArgs: PaginationArgs,
     locale?: string
-  ): Promise<LessonReportReturnType[]> {
+  ): Promise<{ rows: LessonReportReturnType[]; totalCount: number }> {
     await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_REVIEW, locale);
-    const safeLimit = Math.min(Math.max(1, limit), 50);
-    const rows = await LessonReportRepository.findRecentApproved(safeLimit);
-    return rows.map(toReturnType);
+    const [rows, totalCount] = await Promise.all([
+      LessonReportRepository.findRecentApproved(paginationArgs),
+      LessonReportRepository.countRecentApproved(),
+    ]);
+    return { rows: rows.map(toReturnType), totalCount };
   }
 
   /**

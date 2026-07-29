@@ -100,7 +100,7 @@ interface UseCreditQueriesState {
 
 function useStudentCreditQueries(): UseCreditQueriesState {
   const { data: profileData, loading: profileLoading } = useQuery(studentProfileQueryDocument, {
-    variables: { studentId: null, year: null, month: null },
+    variables: { studentId: null, year: null, month: null, includeUpcomingClasses: true },
     fetchPolicy: "cache-first",
   });
   const studentId = profileData?.studentProfile?.id ?? null;
@@ -269,7 +269,7 @@ export function useStudentCreditsViewModel(): StudentCreditsViewModel {
     onReasonFilterChange: setReasonFilter,
     onPageChange: setPage,
     onPageSizeChange: setPageSize,
-    onBackToDashboard: () => router.push("/students/me"),
+    onBackToDashboard: () => router.push("/dashboard"),
     reasonLabel,
   };
 }

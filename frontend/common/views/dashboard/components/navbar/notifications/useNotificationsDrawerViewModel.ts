@@ -296,7 +296,7 @@ function useNavigationHandlers(permissions: readonly AppPermission[]): {
 
   const handleReschedule = useCallback(
     (classInstanceId: string) => {
-      router.push(`/reschedule?classInstanceId=${classInstanceId}`);
+      router.push(`/schedule/tracking/reschedule?classInstanceId=${classInstanceId}`);
     },
 
     [router]

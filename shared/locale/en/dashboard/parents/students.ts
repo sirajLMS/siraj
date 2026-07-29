@@ -4,10 +4,17 @@ export const dashboardParentStudentsEn: ParentStudentsLabels = {
   pageTitle: "Associated Students",
   pageSubtitle: "View and manage your associated students",
   noStudents: "No students associated with this account.",
-  statusLabel: status => `Status: ${status}`,
-  teacherLabel: teacher => `Teacher: ${teacher}`,
-  quotaLabel: (remaining, total) => `Remaining: ${remaining}/${total} classes`,
-  hoursLabel: hours => `${hours} Hours/Week`,
+  card: {
+    classesLeft: "Classes Left",
+    weeklyHours: "Weekly Hours",
+  },
+  status: {
+    deactivated: "Deactivated",
+    regular: "Regular",
+    onLeave: "On Leave",
+    suspended: "Suspended",
+    onTrial: "On Trial",
+  },
   errors: {
     failedToLoad: "Failed to load students. Please try again later.",
   },

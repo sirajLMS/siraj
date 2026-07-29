@@ -7,6 +7,7 @@ export interface DashboardNavigationLabels {
   readonly home: string;
   readonly scheduleSearch: string;
   readonly scheduleTracking: string;
+  readonly scheduleTrackingParent: string;
   readonly statusTracking: string;
   readonly scheduleAlerts: string;
   readonly teachers: string;
@@ -41,6 +42,8 @@ export interface DashboardNavigationLabels {
   readonly supportedCurrencies: string;
   readonly currencyHedges: string;
   readonly paymentCatalogs: string;
+  readonly feedbackManage: string;
+  readonly usersDirectory: string;
   readonly meetingProviders: string;
   readonly billingParent: string;
   readonly billingManual: string;
@@ -53,6 +56,7 @@ export interface DashboardNavigationLabels {
   readonly todayClasses: string;
   readonly regularSchedule: string;
   readonly yourStudents: string;
+  readonly teacherClassList: string;
   readonly yourProfile: string;
   readonly salaryDetails: string;
   readonly teacherRules: string;
@@ -65,6 +69,8 @@ export interface DashboardNavigationLabels {
   readonly booksAndBags: string;
   readonly studentTodayClasses: string;
   readonly studentSchedule: string;
+  readonly studentLessonHistory: string;
+  readonly studentSessions: string;
   readonly studentCredits: string;
   readonly studentProfile: string;
   readonly lessonReports: string;
@@ -73,6 +79,26 @@ export interface DashboardNavigationLabels {
   readonly teacherDues: string;
   readonly monthlyReports: string;
   readonly supervisorProfile: string;
+  /**
+   * Sidebar group labels. Each maps to a `NavGroup.labelKey` in
+   * `frontend/common/views/dashboard/config/navigationConfig.ts`. Portal
+   * users generally have few nav items so they don't see group headers —
+   * the labels are admin/supervisor-facing.
+   */
+  readonly navGroupHome: string;
+  readonly navGroupPeople: string;
+  readonly navGroupUsers: string;
+  readonly navGroupContent: string;
+  readonly navGroupFinance: string;
+  readonly navGroupSchedule: string;
+  readonly navGroupBilling: string;
+  readonly navGroupCatalogs: string;
+  readonly navGroupFeedback: string;
+  readonly navGroupReports: string;
+  readonly navGroupAdmin: string;
+  readonly navGroupResources: string;
+  readonly navGroupClasses: string;
+  readonly navGroupAccount: string;
   readonly nav: {
     readonly logout: string;
     readonly impersonation: {

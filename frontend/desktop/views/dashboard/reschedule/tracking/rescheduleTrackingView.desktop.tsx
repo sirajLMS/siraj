@@ -88,6 +88,7 @@ export function RescheduleTrackingViewDesktop({
       <DesktopMetricCardGrid metrics={metrics} size={{ md: 4, lg: "grow" }} />
 
       <DesktopSectionPanel
+        contentPadding={false}
         title={labels.sectionTitle}
         actions={
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>

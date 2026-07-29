@@ -21,19 +21,21 @@ export interface PaginationControlsProps {
   readonly rowCount: number;
   readonly pageSize: number;
   readonly embedded?: boolean;
+  /** When true, removes horizontal padding so the bar sits flush with its container edges. */
+  readonly flush?: boolean;
   readonly onPageChange: (page: number) => void;
 }
 
 const StyledPaginationRoot = styled(Box, {
-  shouldForwardProp: prop => prop !== "embedded",
-})<{ embedded?: boolean }>(({ theme, embedded }) => ({
+  shouldForwardProp: prop => prop !== "embedded" && prop !== "flush",
+})<{ embedded?: boolean; flush?: boolean }>(({ theme, embedded, flush }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   flexWrap: "wrap",
   gap: theme.spacing(1.5),
   width: "100%",
-  paddingInline: theme.spacing(2),
+  paddingInline: flush ? 0 : theme.spacing(2),
   paddingBlock: theme.spacing(1.5),
   ...(embedded
     ? {
@@ -41,8 +43,8 @@ const StyledPaginationRoot = styled(Box, {
         borderTop: "none",
       }
     : {
-        borderTop: `1px solid ${theme.palette.border.light}`,
-        backgroundColor: theme.palette.background.default,
+        borderTop: `1px solid ${theme.palette.outlineVariant}`,
+        backgroundColor: theme.palette.surfaceContainerLow,
       }),
 }));
 
@@ -61,9 +63,10 @@ const StyledPageInput = styled(TextField)({
 });
 
 const StyledPageNavButton = styled(IconButton)(({ theme }) => ({
-  border: `1px solid ${theme.palette.border.light}`,
+  border: `1px solid ${theme.palette.outlineVariant}`,
   borderRadius: Number(theme.shape.borderRadius),
-  backgroundColor: "transparent",
+  backgroundColor: theme.palette.surfaceContainerHigh,
+  color: theme.palette.onSurfaceVariant,
   "&.Mui-disabled": {
     opacity: 0.5,
   },
@@ -82,6 +85,7 @@ export function PaginationControls({
   rowCount,
   pageSize,
   embedded = false,
+  flush = false,
   onPageChange,
 }: PaginationControlsProps) {
   const t = useAppTranslation(Translation.Dashboard.Admin);
@@ -108,8 +112,8 @@ export function PaginationControls({
   };
 
   return (
-    <StyledPaginationRoot embedded={embedded}>
-      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+    <StyledPaginationRoot embedded={embedded} flush={flush}>
+      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
         {t.paginationRange(from, to, rowCount)}
       </Typography>
 
@@ -158,7 +162,7 @@ export function PaginationControls({
           </span>
         </Tooltip>
 
-        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
           {t.pageOf(safePageCount === 0 ? 0 : page + 1, safePageCount)}
         </Typography>
       </StyledPaginationActions>

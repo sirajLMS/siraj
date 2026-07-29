@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { isUsersDirectoryEnabled } from "@/backend/lib/features/is-users-directory-enabled";
 import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { DashboardClientProviders } from "@/frontend/common/providers/DashboardClientProviders";
 import { DashboardClientBridge } from "@/frontend/common/views/dashboard/components/DashboardClientBridge";
@@ -10,6 +11,7 @@ interface DashboardLayoutContainerProps {
   readonly userProfile: User;
   readonly isSuperAdmin: boolean;
   readonly initialSidebarOpen?: boolean;
+  readonly hideSidebarNavigation?: boolean;
 }
 
 export async function DashboardLayoutContainer({
@@ -17,11 +19,13 @@ export async function DashboardLayoutContainer({
   userProfile,
   isSuperAdmin,
   initialSidebarOpen,
+  hideSidebarNavigation = false,
 }: DashboardLayoutContainerProps) {
   const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations;
   const adminT = t.admin;
   const coreLayoutT = t.coreLayout;
+  const enableUsersDirectory = await isUsersDirectoryEnabled();
 
   return (
     <DashboardClientProviders>
@@ -32,6 +36,8 @@ export async function DashboardLayoutContainer({
         appTitle={coreLayoutT.appTitle}
         logoAriaLabel={coreLayoutT.appTitle}
         initialSidebarOpen={initialSidebarOpen}
+        enableUsersDirectory={enableUsersDirectory}
+        hideSidebarNavigation={hideSidebarNavigation}
       >
         {children}
       </DashboardClientBridge>

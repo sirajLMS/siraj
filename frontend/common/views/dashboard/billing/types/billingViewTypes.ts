@@ -24,7 +24,7 @@ export interface AdminBillingSummary {
   readonly totalOutstanding: string;
   readonly totalOutstandingSubLabel?: string;
   readonly pendingInvoices: number;
-  readonly negativeBalanceCount: string;
+  readonly negativeBalanceCount: number;
   readonly mtdRevenue: string;
   readonly mtdRevenueSubLabel?: string;
 }

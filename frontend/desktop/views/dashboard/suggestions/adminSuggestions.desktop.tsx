@@ -31,6 +31,7 @@ export function AdminSuggestionsDesktopView({
       <SuggestionsMetricsRowDesktop summary={summary} labels={labels} />
 
       <DesktopSectionPanel
+        contentPadding={false}
         actions={
           <SuggestionsSearchBarDesktop
             value={searchQuery}

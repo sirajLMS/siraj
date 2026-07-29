@@ -24,6 +24,7 @@ import { dashboardCoreParentDashboardAr } from "@/shared/locale/ar/dashboard/cor
 import { dashboardCoreScheduleAlertsAr } from "@/shared/locale/ar/dashboard/core/scheduleAlerts.ts";
 import { dashboardCoreSearchScheduleAr } from "@/shared/locale/ar/dashboard/core/searchSchedule.ts";
 import { dashboardCoreStatusTrackingAr } from "@/shared/locale/ar/dashboard/core/statusTracking.ts";
+import { dashboardFeedbackManageParentAr } from "@/shared/locale/ar/dashboard/feedback/main.ts";
 import { dashboardLmsCreditAr } from "@/shared/locale/ar/dashboard/lms/credit.ts";
 import { dashboardLmsLessonReportsAr } from "@/shared/locale/ar/dashboard/lms/lessonReports.ts";
 import { dashboardLmsMonthlyReportsAr } from "@/shared/locale/ar/dashboard/lms/monthlyReports.ts";
@@ -37,10 +38,12 @@ import { dashboardParentRulesAr } from "@/shared/locale/ar/dashboard/parents/rul
 import { dashboardParentSocialAr } from "@/shared/locale/ar/dashboard/parents/social.ts";
 import { dashboardParentStudentsAr } from "@/shared/locale/ar/dashboard/parents/students.ts";
 import { dashboardPaymentCatalogsAr } from "@/shared/locale/ar/dashboard/payment-catalogs/main.ts";
+import { dashboardPaymentCatalogsParentAr } from "@/shared/locale/ar/dashboard/payment-catalogs/parent.ts";
 import { dashboardPermissionsAr } from "@/shared/locale/ar/dashboard/permissions/main.ts";
 import { dashboardReportsAr } from "@/shared/locale/ar/dashboard/reports/main.ts";
 import { dashboardBooksAndBagsAr } from "@/shared/locale/ar/dashboard/resources/booksAndBags.ts";
 import { dashboardResourcesAr } from "@/shared/locale/ar/dashboard/resources/main.ts";
+import { dashboardScheduleTrackingParentAr } from "@/shared/locale/ar/dashboard/schedule-tracking/main.ts";
 import { dashboardSettingsAr } from "@/shared/locale/ar/dashboard/settings/main.ts";
 import { dashboardStaffDirectoryAr } from "@/shared/locale/ar/dashboard/staff/directory.ts";
 import { dashboardStaffOnboardingAr } from "@/shared/locale/ar/dashboard/staff/onboarding.ts";
@@ -48,6 +51,7 @@ import { dashboardStudentPortalCreditsAr } from "@/shared/locale/ar/dashboard/st
 import { dashboardStudentPortalDashboardAr } from "@/shared/locale/ar/dashboard/studentPortal/studentDashboard.ts";
 import { dashboardStudentPortalHistoryAr } from "@/shared/locale/ar/dashboard/studentPortal/studentHistory.ts";
 import { dashboardStudentPortalProfileAr } from "@/shared/locale/ar/dashboard/studentPortal/studentProfile.ts";
+import { dashboardStudentPortalSessionsAr } from "@/shared/locale/ar/dashboard/studentPortal/studentSessions.ts";
 import { dashboardStudentDirectoryAr } from "@/shared/locale/ar/dashboard/students/directory.ts";
 import { dashboardStudentHistoryAr } from "@/shared/locale/ar/dashboard/students/history.ts";
 import { dashboardStudentOnboardingAr } from "@/shared/locale/ar/dashboard/students/onboarding.ts";
@@ -73,6 +77,7 @@ import { dashboardTeacherProfileAr } from "@/shared/locale/ar/dashboard/teachers
 import { dashboardTeacherReassignmentAr } from "@/shared/locale/ar/dashboard/teachers/reassignment.ts";
 import { dashboardTeacherStudentsAr } from "@/shared/locale/ar/dashboard/teachers/students.ts";
 import { dashboardTeacherWeeklyScheduleAr } from "@/shared/locale/ar/dashboard/teachers/weeklySchedule.ts";
+import { dashboardUsersDirectoryParentAr } from "@/shared/locale/ar/dashboard/users/directory.ts";
 import { emailsAr } from "@/shared/locale/ar/emails";
 import { errorsAr } from "@/shared/locale/ar/errors";
 import { notificationsAr } from "@/shared/locale/ar/notifications";
@@ -170,7 +175,9 @@ export const arMessages: Translations = {
     createRecurringClass: dashboardCreateRecurringClassAr,
     rescheduleForm: dashboardRescheduleFormAr,
     rescheduleTracking: dashboardRescheduleTrackingAr,
+    scheduleTrackingParent: dashboardScheduleTrackingParentAr,
     complaints: dashboardComplaintsAr,
+    feedbackManageParent: dashboardFeedbackManageParentAr,
     coreLayout: dashboardCoreLayoutAr,
     coreNav: dashboardCoreNavAr,
     coreNotifications: dashboardCoreNotificationsAr,
@@ -193,6 +200,8 @@ export const arMessages: Translations = {
     parentRules: dashboardParentRulesAr,
     parentSocial: dashboardParentSocialAr,
     paymentCatalogs: dashboardPaymentCatalogsAr,
+    paymentCatalogsParent: dashboardPaymentCatalogsParentAr,
+    usersDirectoryParent: dashboardUsersDirectoryParentAr,
     permissions: dashboardPermissionsAr,
     settings: dashboardSettingsAr,
     reports: dashboardReportsAr,
@@ -201,6 +210,7 @@ export const arMessages: Translations = {
     studentPortalDashboard: dashboardStudentPortalDashboardAr,
     studentPortalCredits: dashboardStudentPortalCreditsAr,
     studentPortalHistory: dashboardStudentPortalHistoryAr,
+    studentPortalSessions: dashboardStudentPortalSessionsAr,
     studentPortalProfile: dashboardStudentPortalProfileAr,
     studentDirectory: dashboardStudentDirectoryAr,
     studentHistory: dashboardStudentHistoryAr,

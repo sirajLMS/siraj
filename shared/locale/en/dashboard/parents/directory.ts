@@ -36,6 +36,7 @@ export const dashboardParentsDirectoryEn: ParentsDirectoryLabels = {
     addParent: "Add New Parent",
     filter: "Filter",
     clearFilters: "Clear Filters",
+    export: "Export",
     manageLifecycle: "Manage lifecycle",
   },
   noEntries: "No parents found",

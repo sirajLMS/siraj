@@ -20,14 +20,21 @@ export function hasTeacherStatsData(teacherData: TeacherViewData): boolean {
   return teacherData.totalClasses != null || adminData?.avgEngagementScore != null;
 }
 
-export function hasTeacherIdentityData(adminData: TeacherAdminData): boolean {
+export function hasTeacherPersonalData(teacherData: TeacherViewData): boolean {
+  const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
   return Boolean(
-    adminData.nationalId?.trim() ||
-      adminData.dateOfBirth?.trim() ||
-      adminData.gender ||
-      adminData.address?.trim() ||
-      adminData.qualifications?.trim() ||
-      adminData.timezone?.trim() ||
-      adminData.status
+    teacherData.nationality?.trim() ||
+      adminData?.address?.trim() ||
+      adminData?.dateOfBirth?.trim() ||
+      adminData?.gender ||
+      adminData?.qualifications?.trim()
   );
+}
+
+export function hasTeacherAdminOnlyData(adminData: TeacherAdminData): boolean {
+  return Boolean(adminData.nationalId?.trim() || adminData.status);
+}
+
+export function hasTeacherIdentityData(adminData: TeacherAdminData): boolean {
+  return hasTeacherPersonalData(adminData) || hasTeacherAdminOnlyData(adminData) || Boolean(adminData.timezone?.trim());
 }

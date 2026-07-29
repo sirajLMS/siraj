@@ -7,7 +7,7 @@ import {
 
 const SUPER_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.AuthLogin,
-  AppPermission.AuthViewOwnProfile,
+  AppPermission.ProfileCoreIdentityViewOwn,
   AppPermission.DashboardView,
   AppPermission.DashboardViewMetrics,
   AppPermission.DashboardFilterMetrics,
@@ -35,7 +35,7 @@ const SUPER_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.HistoryViewDetails,
   AppPermission.TeacherViewDashboard,
   AppPermission.TeacherViewStudents,
-  AppPermission.TeacherViewOwnProfile,
+  AppPermission.ProfileCoreIdentityViewOwn,
   AppPermission.TeachersList,
   AppPermission.TeachersCreate,
   AppPermission.TeachersEdit,
@@ -67,19 +67,19 @@ const SUPER_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.PermissionGroupsAssign,
   AppPermission.NotificationViewAlerts,
   AppPermission.BillingViewUnpaidInvoices,
-  AppPermission.UserViewProfile,
+  AppPermission.ProfileCoreIdentityViewOther,
   AppPermission.StaffViewDirectory,
   AppPermission.ScheduleViewWeekly,
   AppPermission.ScheduleViewWorkload,
   AppPermission.ScheduleCreateClass,
   AppPermission.ScheduleDeleteClass,
   AppPermission.ScheduleClearWeekly,
-  AppPermission.StaffEditProfile,
+  AppPermission.ProfileStaffRoleEditOther,
   AppPermission.SystemBulkUpdateDst,
   AppPermission.ParentViewDirectory,
-  AppPermission.ParentViewProfile,
+  AppPermission.ProfileParentSocialViewOther,
   AppPermission.ParentViewStudents,
-  AppPermission.ParentViewOwnProfile,
+  AppPermission.ProfileCoreIdentityViewOwn,
   AppPermission.ParentManageStatus,
   AppPermission.StudentViewAssociated,
   AppPermission.StudentEditQuota,
@@ -109,13 +109,14 @@ describe("super admin sidebar navigation", () => {
     expect(keys).toContain("teachers");
     expect(keys).toContain("parents");
     expect(keys).toContain("students");
-    expect(keys).toContain("suggestions-manage");
-    expect(keys).toContain("complaints-manage");
+    expect(keys).toContain("feedback-manage");
+    expect(keys).not.toContain("suggestions-manage");
+    expect(keys).not.toContain("complaints-manage");
     expect(keys).toContain("permissions");
     expect(keys).toContain("dst-migration");
     expect(keys).toContain("reports");
     expect(keys).toContain("billing-admin");
-    expect(keys).toContain("logout");
+    expect(keys).not.toContain("logout");
 
     expect(keys).not.toContain("today-classes");
     expect(keys).not.toContain("regular-schedule");

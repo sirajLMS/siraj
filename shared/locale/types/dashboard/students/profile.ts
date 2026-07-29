@@ -7,6 +7,7 @@ export interface StudentProfileLabels {
   readonly notFoundTitle: string;
   readonly notFoundDescription: string;
   readonly tabs: {
+    readonly profile: string;
     readonly status: string;
     readonly classes: string;
     readonly quota: string;

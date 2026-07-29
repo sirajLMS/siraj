@@ -3,7 +3,11 @@
 import { Box } from "@mui/material";
 import { type ReactNode, useEffect, useRef } from "react";
 import { useFxLiveRefresh } from "@/frontend/common/hooks/useFxLiveRefresh";
-import { SidebarShell, type TranslatedNavItem } from "@/frontend/common/views/dashboard/components/client/SidebarShell";
+import {
+  SidebarShell,
+  type TranslatedNavGroup,
+  type TranslatedNavItem,
+} from "@/frontend/common/views/dashboard/components/client/SidebarShell";
 import type { DashboardLayoutProps } from "@/frontend/common/views/dashboard/components/dashboardLayoutTypes";
 import { FxStaleBanner } from "@/frontend/common/views/dashboard/components/FxStaleBanner";
 import {
@@ -15,13 +19,20 @@ import {
 } from "@/frontend/common/views/dashboard/components/navbar";
 import { useNavLabels } from "@/frontend/common/views/dashboard/components/useNavLabels";
 import { getActiveNavKey } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
-import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { BottomNavbarMobile } from "@/frontend/mobile/views/dashboard/components/bottomNavbar.mobile";
 import { MobileMenuButton } from "@/frontend/mobile/views/dashboard/components/mobileMenuButton.mobile";
 import { usePathname } from "@/shared/i18n/navigation";
+import { Translation, useAppTranslation } from "@/shared/locale";
 import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/core/nav";
 
-function MobileMainScrollArea({ children }: { readonly children: ReactNode }) {
+function MobileMainScrollArea({
+  children,
+  hideBottomNav,
+}: {
+  readonly children: ReactNode;
+  readonly hideBottomNav: boolean;
+}) {
   const mainRef = useRef<HTMLElement>(null);
   useFxLiveRefresh();
 
@@ -40,7 +51,9 @@ function MobileMainScrollArea({ children }: { readonly children: ReactNode }) {
         overflowY: "auto",
         overscrollBehavior: "contain",
         backgroundColor: theme.palette.background.default,
-        pb: `calc(${theme.layout.bottomNavHeight} + env(safe-area-inset-bottom, 0px) + ${theme.spacing(2)})`,
+        pb: hideBottomNav
+          ? theme.spacing(2)
+          : `calc(${theme.layout.bottomNavHeight} + env(safe-area-inset-bottom, 0px) + ${theme.spacing(2)})`,
       })}
     >
       <Box
@@ -56,6 +69,13 @@ function MobileMainScrollArea({ children }: { readonly children: ReactNode }) {
   );
 }
 
+function buildTranslatedNavGroups(
+  navGroups: readonly NavGroup[],
+  t: (key: keyof DashboardNavigationLabels) => string
+): TranslatedNavGroup[] {
+  return navGroups.map(group => ({ ...group, label: t(group.labelKey) }));
+}
+
 function buildTranslatedNavItems(
   navItems: readonly NavItem[],
   t: (key: keyof DashboardNavigationLabels) => string
@@ -65,6 +85,7 @@ function buildTranslatedNavItems(
 
 export function DashboardLayoutMobile({
   children,
+  sidebarGroups,
   sidebarItems,
   bottomNavItems,
   userName,
@@ -75,17 +96,20 @@ export function DashboardLayoutMobile({
   avatarUrl,
   notificationCount,
   sidebarWidth = "260px",
+  hideSidebarNavigation = false,
 }: Readonly<DashboardLayoutProps>) {
   const pathname = usePathname();
   const t = useNavLabels();
+  const navLabels = useAppTranslation(Translation.Dashboard.CoreNav);
   const activeNavKey = getActiveNavKey(pathname, sidebarItems);
+  const translatedNavGroups = buildTranslatedNavGroups(sidebarGroups, t);
   const translatedNavItems = buildTranslatedNavItems(sidebarItems, t);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
       <NavbarChrome
         roleLabel={roleLabel}
-        leftSlot={<MobileMenuButton />}
+        leftSlot={hideSidebarNavigation ? null : <MobileMenuButton />}
         rightSlot={
           <>
             <ThemeSwitcher />
@@ -96,7 +120,17 @@ export function DashboardLayoutMobile({
         }
       />
 
-      <SidebarShell navItems={translatedNavItems} activeKey={activeNavKey} sidebarWidth={sidebarWidth} />
+      {hideSidebarNavigation ? null : (
+        <SidebarShell
+          navGroups={translatedNavGroups}
+          navItems={translatedNavItems}
+          activeKey={activeNavKey}
+          sidebarWidth={sidebarWidth}
+          userName={userName}
+          avatarUrl={avatarUrl}
+          logoutLabel={navLabels.nav.logout}
+        />
+      )}
 
       {/* NavbarChrome is position:fixed — offset content like desktop (pt: navbarHeight) */}
       <Box
@@ -110,10 +144,10 @@ export function DashboardLayoutMobile({
           boxSizing: "border-box",
         })}
       >
-        <MobileMainScrollArea>{children}</MobileMainScrollArea>
+        <MobileMainScrollArea hideBottomNav={hideSidebarNavigation}>{children}</MobileMainScrollArea>
       </Box>
 
-      <BottomNavbarMobile items={bottomNavItems} activeKey={activeNavKey} />
+      {hideSidebarNavigation ? null : <BottomNavbarMobile items={bottomNavItems} activeKey={activeNavKey} />}
     </Box>
   );
 }
