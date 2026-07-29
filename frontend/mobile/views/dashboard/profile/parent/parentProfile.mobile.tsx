@@ -4,13 +4,12 @@ import { Alert, Box, Button, Stack, Typography } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ParentProfileEditForm } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileEditForm";
+import { ContactSection } from "@/frontend/common/views/dashboard/profile/parent/sections/ContactSection";
+import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
 import type { ParentAdminData } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { toParentSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
-import {
-  hasParentBillingData,
-  hasParentIdentityData,
-  hasParentSocialData,
-} from "@/frontend/common/views/dashboard/profile/parent/utils";
+import { hasParentBillingData, hasParentSocialData } from "@/frontend/common/views/dashboard/profile/parent/utils";
 import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { MeetingConfigsTab } from "@/frontend/common/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
@@ -125,31 +124,7 @@ export function ParentProfileMobileView({
     if (!isAdminScope || !adminData || !canView("parent_identity")) {
       return null;
     }
-    if (!hasParentIdentityData(adminData)) {
-      return <ProfileRestrictedSection title={pt.sections.identity} />;
-    }
-    return (
-      <MobileSectionPanel title={pt.sections.identity}>
-        <Stack spacing={2}>
-          {adminData.nationality && (
-            <Typography variant="bodyMd">
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {pt.fields.nationality}
-              </Typography>
-              {adminData.nationality}
-            </Typography>
-          )}
-          {adminData.address && (
-            <Typography variant="bodyMd">
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {pt.fields.address}
-              </Typography>
-              {adminData.address}
-            </Typography>
-          )}
-        </Stack>
-      </MobileSectionPanel>
-    );
+    return <IdentitySection mode="view" labels={pt} scope={scope} adminData={adminData} />;
   };
 
   const renderBillingSection = () => {
@@ -199,19 +174,13 @@ export function ParentProfileMobileView({
     );
   };
 
+  const sectionLabels = {
+    parent: pt,
+    baseLabels: toParentSharedBaseLabels(t),
+  };
+
   const renderContactSection = () => (
-    <MobileSectionPanel title={pt.sections.contact}>
-      <Stack spacing={1}>
-        {parentData?.phone && (
-          <Typography variant="bodyMd">
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {pt.fields.phone}
-            </Typography>
-            {parentData.phone}
-          </Typography>
-        )}
-      </Stack>
-    </MobileSectionPanel>
+    <ContactSection mode="view" labels={sectionLabels} scope={scope} parentData={parentData} />
   );
 
   const renderStudentsSection = () => {

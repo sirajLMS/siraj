@@ -56,6 +56,32 @@ export type UserCreateInput = {
   avatarUrl?: string | null;
 };
 
+/**
+ * Shared core user-entity input collected by every create-user onboarding flow
+ * (teacher / parent / student / manager). These are the fields that live on the
+ * `users` table and are required to provision a login account.
+ *
+ * Per-type onboarding inputs compose this base and add their own type-specific
+ * fields (e.g. teacher qualifications, parent invoice settings, student parent
+ * assignment, manager account type).
+ */
+export type UserCreateCoreInput = {
+  readonly name: string;
+  readonly email: string;
+  readonly password: string;
+  readonly avatarUrl?: string | null;
+};
+
+/**
+ * Optional user-entity profile fields that some onboarding flows write back to
+ * the `users` row (timezone always lives on `users`; phone lives on `users` for
+ * parents/managers but on the type-extension row for teachers/students).
+ */
+export type UserCreateProfileFieldsInput = {
+  readonly phone?: string | null;
+  readonly timezone?: string | null;
+};
+
 export type PaginatedUsersResponseSelectType = {
   data: UserReturnType[];
   pageInfo: PageInfo;

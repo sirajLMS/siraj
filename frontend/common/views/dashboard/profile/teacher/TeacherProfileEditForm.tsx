@@ -9,10 +9,14 @@ import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarIm
 import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
+import { ProfilePersonalSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
-import { toTeacherSectionLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
+import {
+  toTeacherPersonalFieldLabels,
+  toTeacherSectionLabels,
+} from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
 import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import {
   type TeacherEditData,
@@ -38,6 +42,7 @@ export function TeacherProfileEditForm({
   const t = labels.teacher;
   const base = labels.base;
   const sectionLabels = toTeacherSectionLabels(labels);
+  const personalFieldLabels = toTeacherPersonalFieldLabels(labels);
   const scope = ProfileScope.Own;
   const { canEdit } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
@@ -121,6 +126,19 @@ export function TeacherProfileEditForm({
                 labels={sectionLabels}
                 scope={scope}
                 isAdminScope={false}
+                register={form.register}
+                control={form.control}
+              />
+            ) : null}
+            {canEdit("teacher_professional") ? (
+              <ProfilePersonalSection
+                mode="edit"
+                scope={scope}
+                fieldGroupKey="teacher_professional"
+                sectionTitle={t.sections.identity}
+                fieldLabels={personalFieldLabels}
+                baseLabels={sectionLabels.baseLabels}
+                fields={{ nationality: true }}
                 register={form.register}
                 control={form.control}
               />

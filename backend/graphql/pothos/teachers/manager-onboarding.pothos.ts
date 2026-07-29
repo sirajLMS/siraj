@@ -1,14 +1,10 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { ManagerAccountTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
   ManagerOnboardingInput,
   ManagerOnboardingResult,
 } from "@/backend/services/staff/manager-onboarding.service";
 import type { ManagerOnboardingReturnType } from "@/backend/types";
-
-export const ManagerAccountTypePothosEnum = gqlSchemaBuilder.enumType(
-  { admin: "admin" as const, manager: "manager" as const, supervisor: "supervisor" as const },
-  { name: "ManagerAccountType", description: "Account type for new manager" }
-);
 
 const ManagerOnboardingRef = gqlSchemaBuilder.objectRef<ManagerOnboardingReturnType>("ManagerOnboarding");
 
@@ -29,12 +25,7 @@ export const ManagerOnboardingPothosObject = ManagerOnboardingRef.implement({
 });
 
 export const ManagerOnboardingInputPothosObject = gqlSchemaBuilder
-  .inputRef<
-    Omit<ManagerOnboardingInput, "email" | "accountType"> & {
-      email: string;
-      accountType: "admin" | "manager" | "supervisor";
-    }
-  >("ManagerOnboardingInput")
+  .inputRef<Omit<ManagerOnboardingInput, "email"> & { email: string }>("ManagerOnboardingInput")
   .implement({
     description: "Input for creating a new manager/staff account with RBAC assignment",
     fields: t => ({

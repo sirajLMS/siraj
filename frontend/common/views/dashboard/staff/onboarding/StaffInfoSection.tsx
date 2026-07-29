@@ -2,9 +2,9 @@
 
 import { Grid } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
+import { UserIdentityFields } from "@/frontend/common/components/onboarding/sections";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
-import { OnboardingIdentityFields } from "@/frontend/common/views/dashboard/components/onboarding/OnboardingIdentityFields";
 import type { StaffOnboardingLabels } from "@/shared/locale";
 
 interface Props {
@@ -38,7 +38,7 @@ export function StaffInfoSection({ labels, register, control, errors, onUploadAv
   return (
     <SectionPanel title={t.sections.staffInfo}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
-        <OnboardingIdentityFields
+        <UserIdentityFields
           register={register}
           control={control}
           errors={errors}

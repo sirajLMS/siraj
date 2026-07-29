@@ -32,5 +32,6 @@ export * from "./shared/timezone.enum";
 export * from "./students/student-lifecycle.enum";
 export * from "./teachers/teacher-availability.enum";
 export * from "./teachers/teacher-due.enum";
+export * from "./users/account-type.enum";
 export * from "./users/user.enum";
 export * from "./users/userDeviceTokens.enum";

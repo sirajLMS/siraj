@@ -99,6 +99,7 @@ export function TeacherProfileEditBody({
           phone: values.phone ?? "",
           avatarUrl: values.avatarUrl,
           nationalId: values.nationalId ?? "",
+          nationality: values.nationality ?? "",
           dateOfBirth: values.dateOfBirth ?? "",
           gender: values.gender ?? null,
           address: values.address ?? "",

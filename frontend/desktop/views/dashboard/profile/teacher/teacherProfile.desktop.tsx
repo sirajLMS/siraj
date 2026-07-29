@@ -2,14 +2,19 @@
 
 import { Box, Grid, Stack } from "@mui/material";
 import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ProfilePersonalSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AdminOnlySection";
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/CompensationSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
 import { StatsSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/StatsSection";
-import { toTeacherSectionLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
 import {
+  toTeacherPersonalFieldLabels,
+  toTeacherSectionLabels,
+} from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
+import {
+  hasTeacherAdminOnlyData,
   hasTeacherCompensationData,
-  hasTeacherIdentityData,
+  hasTeacherPersonalData,
   hasTeacherStatsData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileSectionPredicates";
 import { isTeacherAdminData } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
@@ -32,6 +37,7 @@ export function TeacherProfileDesktopView({
   onSubmitAdmin,
 }: Readonly<TeacherProfileViewModel>) {
   const sectionLabels = toTeacherSectionLabels(labels);
+  const personalFieldLabels = toTeacherPersonalFieldLabels(labels);
 
   if (activeTab !== "profile") {
     return <TeacherNonProfileTabContent activeTab={activeTab} scope={scope} targetUserId={targetUserId} />;
@@ -59,7 +65,8 @@ export function TeacherProfileDesktopView({
 
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
   const showCompensation = hasTeacherCompensationData(teacherData);
-  const showAdminOnly = isAdminScope && adminData != null && hasTeacherIdentityData(adminData);
+  const showPersonal = isAdminScope && adminData != null && hasTeacherPersonalData(teacherData);
+  const showAdminOnly = isAdminScope && adminData != null && hasTeacherAdminOnlyData(adminData);
   const showStats = hasTeacherStatsData(teacherData);
 
   return (
@@ -72,6 +79,29 @@ export function TeacherProfileDesktopView({
           <Stack spacing={3}>
             {showCompensation ? (
               <CompensationSection labels={labels} mode="view" teacherData={teacherData} subjectUserId={targetUserId} />
+            ) : null}
+            {showPersonal && adminData ? (
+              <ProfilePersonalSection
+                mode="view"
+                scope={scope}
+                fieldGroupKey="teacher_identity"
+                qualificationsFieldGroupKey="teacher_professional"
+                sectionTitle={labels.teacher.sections.identity}
+                fieldLabels={personalFieldLabels}
+                baseLabels={sectionLabels.baseLabels}
+                fields={{
+                  nationality: true,
+                  address: true,
+                  dateOfBirth: true,
+                  gender: true,
+                  qualifications: true,
+                }}
+                nationality={teacherData.nationality}
+                address={adminData.address}
+                dateOfBirth={adminData.dateOfBirth}
+                gender={adminData.gender}
+                qualifications={adminData.qualifications}
+              />
             ) : null}
             {showAdminOnly && adminData ? (
               <AdminOnlySection labels={sectionLabels} mode="view" adminData={adminData} />

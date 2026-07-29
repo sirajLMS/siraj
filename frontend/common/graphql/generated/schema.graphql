@@ -2269,7 +2269,6 @@ type LoginResponse {
   user: User
 }
 
-"""Account type for new manager"""
 enum ManagerAccountType {
   admin
   manager

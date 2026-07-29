@@ -1,93 +1,42 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import { UserFieldsFragmentDoc } from "@/frontend/common/graphql/sharedDocuments/users/userFields.documents";
 
 export const meQueryDocument: TypedDocumentNode<Operations.MeQuery> = gql`
+  ${UserFieldsFragmentDoc}
   query me {
     me {
-      createdAt
-      email
-      emailVerifiedAt
-      id
-      name
-      updatedAt
-      permissions
-      role
-      avatarUrl
-      notificationCount
-      teacherId
-      parentId
-      phone
-      status
-      displayCurrency
+      ...UserFieldsFragment
     }
   }
 `;
 
 export const userQueryDocument: TypedDocumentNode<Operations.UserQuery, Types.QueryUserArgs> = gql`
+  ${UserFieldsFragmentDoc}
   query user($id: String!) {
     user(id: $id) {
-      createdAt
-      email
-      emailVerifiedAt
-      id
-      name
-      updatedAt
-      permissions
-      role
-      avatarUrl
-      notificationCount
-      teacherId
-      parentId
-      phone
-      status
-      displayCurrency
+      ...UserFieldsFragment
     }
   }
 `;
 
 export const usersQueryDocument: TypedDocumentNode<Operations.UsersQuery, Types.QueryUsersArgs> = gql`
+  ${UserFieldsFragmentDoc}
   query users($search: String, $limit: Int, $offset: Int) {
     users(search: $search, limit: $limit, offset: $offset) {
-      createdAt
-      displayCurrency
-      email
-      emailVerifiedAt
-      id
-      name
-      updatedAt
-      permissions
-      role
-      avatarUrl
-      notificationCount
-      teacherId
-      parentId
-      phone
-      status
+      ...UserFieldsFragment
     }
   }
 `;
 
 export const loginMutationDocument: TypedDocumentNode<Operations.LoginMutation, Types.MutationLoginArgs> = gql`
+  ${UserFieldsFragmentDoc}
   mutation login($input: LoginInput!) {
     login(input: $input) {
       token
       user {
-        createdAt
-        displayCurrency
-        email
-        emailVerifiedAt
-        id
-        name
-        updatedAt
-        permissions
-        role
-        avatarUrl
-        notificationCount
-        teacherId
-        parentId
-      phone
-      status
+        ...UserFieldsFragment
       }
     }
   }
@@ -95,29 +44,16 @@ export const loginMutationDocument: TypedDocumentNode<Operations.LoginMutation, 
 
 export const demoLoginMutationDocument: TypedDocumentNode<Operations.DemoLoginMutation, Types.MutationDemoLoginArgs> =
   gql`
-  mutation demoLogin($input: DemoLoginInput!) {
-    demoLogin(input: $input) {
-      token
-      user {
-        createdAt
-        displayCurrency
-        email
-        emailVerifiedAt
-        id
-        name
-        updatedAt
-        permissions
-        role
-        avatarUrl
-        notificationCount
-        teacherId
-        parentId
-      phone
-      status
+    ${UserFieldsFragmentDoc}
+    mutation demoLogin($input: DemoLoginInput!) {
+      demoLogin(input: $input) {
+        token
+        user {
+          ...UserFieldsFragment
+        }
       }
     }
-  }
-`;
+  `;
 
 export const logoutMutationDocument: TypedDocumentNode<Operations.LogoutMutation> = gql`
   mutation logout {
@@ -126,25 +62,12 @@ export const logoutMutationDocument: TypedDocumentNode<Operations.LogoutMutation
 `;
 
 export const refreshTokenMutationDocument: TypedDocumentNode<Operations.RefreshTokenMutation> = gql`
+  ${UserFieldsFragmentDoc}
   mutation refreshToken {
     refreshToken {
       token
       user {
-        createdAt
-        displayCurrency
-        email
-        emailVerifiedAt
-        id
-        name
-        updatedAt
-        permissions
-        role
-        avatarUrl
-        notificationCount
-        teacherId
-        parentId
-      phone
-      status
+        ...UserFieldsFragment
       }
     }
   }
@@ -190,8 +113,8 @@ export const startImpersonationMutationDocument: TypedDocumentNode<
         notificationCount
         teacherId
         parentId
-      phone
-      status
+        phone
+        status
         displayCurrency
       }
     }

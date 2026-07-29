@@ -1,10 +1,15 @@
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { PermissionManagementRepository, StaffProfileRepository, UserRepository } from "@/backend/db/repo";
-import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
-import { logger } from "@/backend/lib/logger";
+import { StaffProfileRepository } from "@/backend/db/repo";
+import { AppPermission, ManagerAccountType, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { getServerTranslations } from "@/shared/locale";
+import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
+import type { StaffProfileCreateResult } from "@/backend/types/staff/staff-profile.types";
+import type {
+  UserCreateCoreInput,
+  UserCreateProfileFieldsInput,
+  UserReturnType,
+} from "@/backend/types/users/user.types";
+import type { ErrorsLabels } from "@/shared/locale";
 
 export interface ManagerOnboardingInput {
   readonly name: string;
@@ -12,7 +17,7 @@ export interface ManagerOnboardingInput {
   readonly password: string;
   readonly avatarUrl?: string | null;
   readonly phone?: string | null;
-  readonly accountType: "admin" | "manager" | "supervisor";
+  readonly accountType: ManagerAccountType;
 }
 
 export interface ManagerOnboardingResult {
@@ -25,11 +30,11 @@ export interface ManagerOnboardingResult {
   readonly assignedGroupSlug: string;
 }
 
-function resolveTargetGroupSlug(accountType: ManagerOnboardingInput["accountType"]): SystemPermissionGroupSlug {
-  if (accountType === "admin") {
+function resolveTargetGroupSlug(accountType: ManagerAccountType): SystemPermissionGroupSlug {
+  if (accountType === ManagerAccountType.admin) {
     return SystemPermissionGroupSlug.ACADEMY_ADMIN;
   }
-  if (accountType === "supervisor") {
+  if (accountType === ManagerAccountType.supervisor) {
     return SystemPermissionGroupSlug.SUPERVISOR_DEFAULT;
   }
   return SystemPermissionGroupSlug.STAFF_DEFAULT;
@@ -42,88 +47,63 @@ export namespace ManagerOnboardingService {
     locale?: string,
     tx?: DBTransaction
   ): Promise<ManagerOnboardingResult> {
-    const tErrors = getServerTranslations(locale ?? "ar").errorsTranslations;
+    const tErrors: ErrorsLabels = (await import("@/shared/locale")).getServerTranslations(
+      locale ?? "ar"
+    ).errorsTranslations;
 
-    // Permission check (must have staff.create)
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_CREATE);
-    if (!hasPermission) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
-    // Secondary check: actor must be super_admin
-    const actorContext = await PermissionsService.getUserContext(actorUserId);
-    if (!actorContext.isSuperAdmin && !actorContext.permissionGroups.includes(SystemPermissionGroupSlug.SUPER_ADMIN)) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
-    // Email uniqueness check
-    const emailExists = await UserRepository.existsByEmail(input.email);
-    if (emailExists) {
-      throw new Error(tErrors.user.userEmailExists);
-    }
-
-    // Determine permission group based on account type
     const targetGroupSlug = resolveTargetGroupSlug(input.accountType);
 
-    const run = async (txObj: DBTransaction) => {
-      // Step 1: Create user record
-      const user = await UserRepository.create(
-        {
+    const { user, extension: staffProfile } = await UserOnboardingService.createUserOfType<StaffProfileCreateResult>(
+      {
+        actorUserId,
+        permission: AppPermission.STAFF_CREATE,
+        coreInput: {
           name: input.name,
-          email: { value: input.email },
+          email: input.email,
           password: input.password,
           ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
+        } satisfies UserCreateCoreInput,
+        profileFields: {
+          // Manager phone lives on the `users` row.
+          phone: input.phone,
+        } satisfies UserCreateProfileFieldsInput,
+        groupSlug: targetGroupSlug,
+        preChecks: async () => {
+          // Secondary check: actor must be a super-admin or hold the SUPER_ADMIN group.
+          const actorContext = await PermissionsService.getUserContext(actorUserId);
+          if (
+            !actorContext.isSuperAdmin &&
+            !actorContext.permissionGroups.includes(SystemPermissionGroupSlug.SUPER_ADMIN)
+          ) {
+            throw new Error(tErrors.insufficientPermissions);
+          }
+        },
+        createExtension: async (createdUser: UserReturnType, txObj: DBTransaction) => {
+          return StaffProfileRepository.create(
+            {
+              userId: createdUser.id,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            txObj,
+            locale
+          );
         },
         locale,
-        txObj
-      );
+        tErrors,
+        logTag: "Manager",
+      },
+      tx
+    );
 
-      if (input.phone != null) {
-        await UserRepository.updateProfileFields(user.id, { phone: input.phone }, locale, txObj);
-      }
-
-      // Step 2: Create thin staff profile marker
-      const staffProfile = await StaffProfileRepository.create(
-        {
-          userId: user.id,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        txObj,
-        locale
-      );
-
-      // Step 3: Assign to target permission group
-      const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
-      const targetGroup = groups.find(g => g.slug === targetGroupSlug);
-      if (!targetGroup) {
-        throw new Error(tErrors.permissionGroup.permissionGroupNotFound);
-      }
-
-      await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], targetGroup.id, actorUserId, txObj);
-
-      logger.info("Manager onboarded successfully", {
-        staffProfileId: staffProfile.id,
-        userId: user.id,
-        accountType: input.accountType,
-        assignedGroup: targetGroupSlug,
-      });
-
-      return {
-        id: staffProfile.id,
-        userId: user.id,
-        staffProfileId: staffProfile.id,
-        name: user.name,
-        email: user.email,
-        status: staffProfile.status,
-        assignedGroupSlug: targetGroupSlug,
-      };
+    return {
+      id: staffProfile.id,
+      userId: user.id,
+      staffProfileId: staffProfile.id,
+      name: user.name,
+      email: user.email,
+      status: staffProfile.status,
+      assignedGroupSlug: targetGroupSlug,
     };
-
-    if (tx) {
-      return await run(tx);
-    } else {
-      return await db.transaction(run);
-    }
   }
 }
