@@ -16,9 +16,7 @@ export function isTeacherNationalIdComplete(nationalId: string | null | undefine
   return Boolean(nationalId?.trim());
 }
 
-type ForceCompleteSearchParams =
-  | URLSearchParams
-  | Readonly<Record<string, string | string[] | undefined>>;
+type ForceCompleteSearchParams = URLSearchParams | Readonly<Record<string, string | string[] | undefined>>;
 
 export function hasForceCompleteSearchParam(searchParams: ForceCompleteSearchParams): boolean {
   if (searchParams instanceof URLSearchParams) {

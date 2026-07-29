@@ -13,11 +13,11 @@ import {
   type CurrencyCode,
   type User,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { DashboardLayoutContainer } from "@/frontend/common/views/dashboard/components/DashboardLayoutContainer";
 import {
   isTeacherProfileCompletionPath,
   TEACHER_PROFILE_COMPLETION_EDIT_HREF,
 } from "@/frontend/common/lib/profileCompletion";
+import { DashboardLayoutContainer } from "@/frontend/common/views/dashboard/components/DashboardLayoutContainer";
 import { stripLocaleFromPath } from "@/frontend/common/views/dashboard/lib/stripLocaleFromPath";
 import { redirect } from "@/shared/i18n/routing";
 
@@ -36,8 +36,7 @@ export async function DashboardProfileShell({
 }: Readonly<DashboardProfileShellProps>) {
   const userProfile = await getCurrentUser(userId, context);
 
-  const teacherProfileCompletionRequired =
-    userProfile.role === UserRole.TEACHER && !userProfile.nationalIdComplete;
+  const teacherProfileCompletionRequired = userProfile.role === UserRole.TEACHER && !userProfile.nationalIdComplete;
 
   if (teacherProfileCompletionRequired) {
     const headersList = await headers();

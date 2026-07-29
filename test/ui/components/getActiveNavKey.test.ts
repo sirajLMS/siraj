@@ -7,6 +7,7 @@ import {
 import {
   getActiveNavKey,
   isProfileRouteActive,
+  PROFILE_NAV_KEY,
 } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
 
 const TEACHER_PERMISSIONS: AppPermission[] = [
@@ -76,6 +77,13 @@ describe("getActiveNavKey", () => {
   test("returns null when no items match a deep dynamic segment without a parent nav item", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, ADMIN_PERMISSIONS);
     expect(getActiveNavKey("/some/orphan/route", items)).toBeNull();
+  });
+
+  test("returns own-profile key on profile routes", () => {
+    const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, TEACHER_PERMISSIONS);
+    expect(getActiveNavKey("/profile", items)).toBe(PROFILE_NAV_KEY);
+    expect(getActiveNavKey("/profile/edit", items)).toBe(PROFILE_NAV_KEY);
+    expect(getActiveNavKey("/ar/profile", items)).toBe(PROFILE_NAV_KEY);
   });
 });
 

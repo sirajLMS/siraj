@@ -29,7 +29,7 @@ const METRIC_DEFINITIONS = [
   { key: "on_trial" as const, icon: TimerOutlined },
 ];
 
-function mapStatus(status: string | null | undefined): StudentAccountStatus {
+export function mapStudentAccountStatus(status: string | null | undefined): StudentAccountStatus {
   if (!status) return "regular";
   const enumValue = Object.values(StudentStatus).find(v => v === status.toUpperCase());
   if (enumValue) {
@@ -57,7 +57,7 @@ type RawStudentRow = NonNullable<NonNullable<StudentDirectoryQuery["studentDirec
 export function buildStudentRows(data: StudentDirectoryQuery | undefined): StudentDirectoryRowExtended[] {
   if (!data?.studentDirectory?.rows) return [];
   return data.studentDirectory.rows.map((row: RawStudentRow, index: number) => {
-    const accountStatus = mapStatus(row.status);
+    const accountStatus = mapStudentAccountStatus(row.status);
     return {
       ...row,
       id: row.id ?? "",

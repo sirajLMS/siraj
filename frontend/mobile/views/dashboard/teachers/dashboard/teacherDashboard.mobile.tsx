@@ -34,12 +34,7 @@ interface MobileWelcomeHeaderProps {
   readonly lastUpdated: string;
 }
 
-function MobileWelcomeHeader({
-  userName,
-  welcomeMobileSummary,
-  welcomeTitle,
-  lastUpdated,
-}: MobileWelcomeHeaderProps) {
+function MobileWelcomeHeader({ userName, welcomeMobileSummary, welcomeTitle, lastUpdated }: MobileWelcomeHeaderProps) {
   return (
     <Stack sx={mergeSx(teacherDashboardContentPaddingSx, { gap: 1 })}>
       <Typography sx={theme => ({ typography: "headlineMd", color: theme.palette.primary.main })}>

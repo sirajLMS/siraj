@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireTeacherIdForPage } from "@/backend/lib/auth/require-teacher-id";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { TeacherClassListContainer } from "@/frontend/common/views/dashboard/teachers/classes/TeacherClassListContainer";
@@ -12,11 +13,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ClassesPage() {
-  const { userId } = await getServerUserContext();
+  const locale = await getLocale();
+  const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
     return;
   }
+
+  await requireTeacherIdForPage(userId, locale, context);
 
   return <TeacherClassListContainer />;
 }

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
-import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { isUsersDirectoryEnabled } from "@/backend/lib/features/is-users-directory-enabled";
 import {
   getStudentsPagePermissions,
   resolveStudentsPageAudience,
 } from "@/app/(dashboard)/lib/resolve-students-page-audience";
+import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
+import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { isUsersDirectoryEnabled } from "@/backend/lib/features/is-users-directory-enabled";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { StudentsContainer } from "@/frontend/common/views/dashboard/admin/parents/students/StudentsContainer";
 import { ParentStudentsContainer } from "@/frontend/common/views/dashboard/parent/students/ParentStudentsContainer";
@@ -51,7 +51,7 @@ export default async function StudentsPage() {
 
   const audience = context ? resolveStudentsPageAudience(context) : null;
 
-  if (await isUsersDirectoryEnabled() && audience === "admin") {
+  if ((await isUsersDirectoryEnabled()) && audience === "admin") {
     redirect("/users?tab=students");
   }
 

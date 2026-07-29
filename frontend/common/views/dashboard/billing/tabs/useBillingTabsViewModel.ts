@@ -43,8 +43,8 @@ export function useBillingTabsViewModel(): BillingTabsViewModel {
     () =>
       buildTabNavItems<BillingTabId, BillingTabLabelKey, BillingViewLabels>({
         labels: {
-          title: labels.adminPageTitle,
-          subtitle: labels.adminPageSubtitle,
+          title: labels.tabsPageTitle,
+          subtitle: labels.tabsPageSubtitle,
           tabs: {
             overview: labels.billingTabs.overview,
             invoices: labels.billingTabs.invoices,
@@ -63,8 +63,8 @@ export function useBillingTabsViewModel(): BillingTabsViewModel {
     [
       visibleTabs,
       labels.billingTabs,
-      labels.adminPageTitle,
-      labels.adminPageSubtitle,
+      labels.tabsPageTitle,
+      labels.tabsPageSubtitle,
       resolvedActiveTab,
       pathname,
       searchParams,
@@ -73,8 +73,8 @@ export function useBillingTabsViewModel(): BillingTabsViewModel {
 
   return {
     labels: {
-      title: labels.adminPageTitle,
-      subtitle: labels.adminPageSubtitle,
+      title: labels.tabsPageTitle,
+      subtitle: labels.tabsPageSubtitle,
       tabs: {
         overview: labels.billingTabs.overview,
         invoices: labels.billingTabs.invoices,

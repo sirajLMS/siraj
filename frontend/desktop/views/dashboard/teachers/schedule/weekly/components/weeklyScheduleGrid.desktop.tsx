@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
+import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
 import {
   isTerminalClassInstance,
   resolveWeeklyScheduleSlotStatus,
@@ -22,10 +23,9 @@ import type {
   ScheduledClass,
   WeeklyScheduleGridProps,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
-import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
 import { DesktopPersonProfileLink } from "@/frontend/desktop/components/ui/display";
-import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { Link } from "@/shared/i18n";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
 import type { MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
 
@@ -127,7 +127,7 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meeting
           </Typography>
         </Box>
 
-        {(canJoin || (showDelete && hasScheduleDeleteClass)) ? (
+        {canJoin || (showDelete && hasScheduleDeleteClass) ? (
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.5, minHeight: 20 }}>
             {canJoin ? (
               <MeetingJoinAction

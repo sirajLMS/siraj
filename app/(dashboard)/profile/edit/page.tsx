@@ -5,9 +5,9 @@ import { resolveProfilePageContext } from "@/backend/lib/auth/cached-profile";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import type {
+  ProfileAudience as GqlProfileAudience,
   ProfileMode as GqlProfileMode,
   ProfileScope as GqlProfileScope,
-  ProfileAudience as GqlProfileAudience,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   buildTeacherProfileEditHref,

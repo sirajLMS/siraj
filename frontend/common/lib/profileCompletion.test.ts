@@ -39,9 +39,7 @@ describe("hasForceCompleteSearchParam", () => {
 describe("buildTeacherProfileEditHref", () => {
   test("adds forceComplete when requested", () => {
     expect(buildTeacherProfileEditHref(true)).toBe(`${TEACHER_PROFILE_EDIT_PATH}?${FORCE_COMPLETE_SEARCH_PARAM}=1`);
-    expect(TEACHER_PROFILE_COMPLETION_EDIT_HREF).toBe(
-      `${TEACHER_PROFILE_EDIT_PATH}?${FORCE_COMPLETE_SEARCH_PARAM}=1`
-    );
+    expect(TEACHER_PROFILE_COMPLETION_EDIT_HREF).toBe(`${TEACHER_PROFILE_EDIT_PATH}?${FORCE_COMPLETE_SEARCH_PARAM}=1`);
   });
 
   test("strips forceComplete while preserving other query params", () => {

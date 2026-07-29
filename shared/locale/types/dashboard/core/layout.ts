@@ -21,6 +21,9 @@ export interface DashboardCoreLayoutLabels {
   readonly teacherDues: string;
   readonly monthlyReports: string;
   readonly supervisorProfile: string;
+  readonly pageNotFoundTitle: string;
+  readonly pageNotFoundDescription: string;
+  readonly pageNotFoundBackToDashboard: string;
 
   // ─── Interpolated → typed functions ────────────────────────────────
   readonly welcomeUser: (name: string) => string;

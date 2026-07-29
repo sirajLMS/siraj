@@ -9,6 +9,7 @@ import {
   filledIconWrapSx,
   interactiveIconActiveSx,
   interactiveIconHoverSx,
+  type MetricCardDensity,
   type MetricCardVariant,
   valueColor,
 } from "@/frontend/desktop/components/ui/card/MetricCard/utils";
@@ -17,13 +18,15 @@ export interface StyledCardProps {
   readonly isHighlight: boolean;
   readonly isError: boolean;
   readonly isInteractive: boolean;
+  readonly density?: MetricCardDensity;
 }
 
 /** Desktop layout: horizontal row chrome. */
 export const StyledCard = styled(BaseCard, {
-  shouldForwardProp: prop => prop !== "isHighlight" && prop !== "isError" && prop !== "isInteractive",
-})<StyledCardProps>(({ theme, isHighlight, isError, isInteractive }) => ({
-  padding: theme.spacing(2.5),
+  shouldForwardProp: prop =>
+    prop !== "isHighlight" && prop !== "isError" && prop !== "isInteractive" && prop !== "density",
+})<StyledCardProps>(({ theme, isHighlight, isError, isInteractive, density = "default" }) => ({
+  padding: theme.spacing(density === "compact" ? 2 : 2.5),
   display: "flex",
   flexDirection: "row",
   alignItems: "center",
@@ -53,13 +56,14 @@ export const MotionStyledCard = motion.create(StyledCard);
 
 export interface StyledLabelProps {
   readonly isError: boolean;
+  readonly density?: MetricCardDensity;
 }
 
 export const StyledLabel = styled(Typography, {
-  shouldForwardProp: prop => prop !== "isError",
-})<StyledLabelProps>(({ theme, isError }) => ({
+  shouldForwardProp: prop => prop !== "isError" && prop !== "density",
+})<StyledLabelProps>(({ theme, isError, density = "default" }) => ({
   color: isError ? theme.palette.error.main : theme.palette.primary.main,
-  marginBottom: theme.spacing(0.5),
+  marginBottom: theme.spacing(density === "compact" ? 0.25 : 0.5),
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
@@ -67,14 +71,23 @@ export const StyledLabel = styled(Typography, {
 
 export interface StyledValueProps {
   readonly metricVariant: MetricCardVariant;
+  readonly density?: MetricCardDensity;
+  readonly isLongValue?: boolean;
 }
 
 export const StyledValue = styled(Typography, {
-  shouldForwardProp: prop => prop !== "metricVariant",
-})<StyledValueProps>(({ theme, metricVariant }) => ({
+  shouldForwardProp: prop => prop !== "metricVariant" && prop !== "density" && prop !== "isLongValue",
+})<StyledValueProps>(({ theme, metricVariant, density = "default", isLongValue = false }) => ({
   fontWeight: 700,
   color: valueColor({ variant: metricVariant, theme }),
-  lineHeight: 1,
+  lineHeight: density === "compact" || isLongValue ? 1.25 : 1,
+  ...(isLongValue && {
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+    wordBreak: "break-word",
+  }),
 }));
 
 export interface StyledIconWrapProps {
@@ -116,17 +129,31 @@ export const StyledIcon = styled(
   transition: "color 0.2s ease",
 }));
 
-export const StyledSubLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.primary.dark,
-  marginTop: theme.spacing(0.5),
+export const StyledSubLabel = styled(Typography, {
+  shouldForwardProp: prop => prop !== "density",
+})<{ readonly density?: MetricCardDensity }>(({ theme, density = "default" }) => ({
+  color: theme.palette.text.secondary,
+  marginTop: theme.spacing(density === "compact" ? 0.25 : 0.5),
+  display: "-webkit-box",
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: "vertical",
+  overflow: "hidden",
+  wordBreak: "break-word",
+  lineHeight: 1.3,
 }));
 
-export const StyledDefaultContentRoot = styled(Box)(({ theme }) => ({
+export const StyledDefaultContentRoot = styled(Box, {
+  shouldForwardProp: prop => prop !== "density",
+})<{ readonly density?: MetricCardDensity }>(({ theme, density = "default" }) => ({
   marginLeft: theme.spacing(0.5),
   flex: 1,
   minWidth: 0,
   display: "flex",
   flexDirection: "column",
-  justifyContent: "space-around",
-  height: "100%",
+  justifyContent: density === "compact" ? "flex-start" : "space-around",
+  ...(density === "compact"
+    ? { gap: theme.spacing(0.25) }
+    : {
+        height: "100%",
+      }),
 }));

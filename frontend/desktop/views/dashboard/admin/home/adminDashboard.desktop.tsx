@@ -6,12 +6,15 @@ import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import { ScheduleOverviewEmptyState } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
-import { scheduleOverviewFilterBarSx, scheduleOverviewListCanvasSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
+import {
+  scheduleOverviewFilterBarSx,
+  scheduleOverviewListCanvasSx,
+} from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
-import { desktopSectionContentInsetSx } from "@/frontend/desktop/components/ui/container/desktopSectionContentInsetSx";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
+import { desktopSectionContentInsetSx } from "@/frontend/desktop/components/ui/container/desktopSectionContentInsetSx";
 import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { ScheduleOverviewDesktopCard } from "@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.desktop";
 import { useAppLocale } from "@/shared/locale";
@@ -83,11 +86,7 @@ function AdminDashboardScheduleFilters({
       nextDayLabel={filters.nextDay}
       onDateChange={onDateChange}
       teacherSelect={
-        <TeacherAutocompleteDesktop
-          value={selectedTeacher}
-          onChange={onTeacherChange}
-          label={filters.selectTeacher}
-        />
+        <TeacherAutocompleteDesktop value={selectedTeacher} onChange={onTeacherChange} label={filters.selectTeacher} />
       }
     />
   );
@@ -214,7 +213,14 @@ export function AdminDashboardDesktopView({
         })}
       >
         {canScheduleFilterAdvanced ? (
-          <Box sx={[scheduleOverviewFilterBarSx, desktopSectionContentInsetSx, { py: 2.5, width: "100%" }]}>
+          <Box
+            sx={theme => ({
+              ...scheduleOverviewFilterBarSx(theme),
+              ...desktopSectionContentInsetSx,
+              py: 2.5,
+              width: "100%",
+            })}
+          >
             <AdminDashboardScheduleFilters
               filters={filters}
               dateValue={dateValue}

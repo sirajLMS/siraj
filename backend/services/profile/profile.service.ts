@@ -12,9 +12,9 @@ import {
   ParentPortalService,
   ParentProfileService,
   PermissionsService,
-  type UserPermissionContext,
   StaffProfileService,
   TeacherPortalService,
+  type UserPermissionContext,
 } from "@/backend/services";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
@@ -218,14 +218,7 @@ async function assertCanViewProfile(
       return;
     }
     if (actorUserId === targetUserId) {
-      return assertCanViewProfile(
-        actorUserId,
-        targetUserId,
-        ProfileScope.OWN,
-        audience,
-        locale,
-        permissionContext
-      );
+      return assertCanViewProfile(actorUserId, targetUserId, ProfileScope.OWN, audience, locale, permissionContext);
     }
     await throwInsufficientPermissions(locale);
     return;
@@ -236,14 +229,7 @@ async function assertCanViewProfile(
     return;
   }
   if (actorUserId === targetUserId) {
-    return assertCanViewProfile(
-      actorUserId,
-      targetUserId,
-      ProfileScope.OTHER,
-      audience,
-      locale,
-      permissionContext
-    );
+    return assertCanViewProfile(actorUserId, targetUserId, ProfileScope.OTHER, audience, locale, permissionContext);
   }
   await throwInsufficientPermissions(locale);
 }
@@ -396,23 +382,9 @@ export namespace ProfileService {
 
     try {
       if (options.mode === ProfileMode.VIEW) {
-        await assertCanViewProfile(
-          actorUserId,
-          targetUserId,
-          scope,
-          roleIds.audience,
-          locale,
-          permissionContext
-        );
+        await assertCanViewProfile(actorUserId, targetUserId, scope, roleIds.audience, locale, permissionContext);
       } else {
-        await assertCanEditProfile(
-          actorUserId,
-          targetUserId,
-          scope,
-          roleIds.audience,
-          locale,
-          permissionContext
-        );
+        await assertCanEditProfile(actorUserId, targetUserId, scope, roleIds.audience, locale, permissionContext);
       }
     } catch {
       if (options.mode === ProfileMode.EDIT && scope === ProfileScope.OWN) {
@@ -502,14 +474,7 @@ export namespace ProfileService {
       throw new Error(errorsTranslations.notFound);
     }
 
-    await assertCanViewProfile(
-      actorUserId,
-      targetUserId,
-      scope,
-      roleIds.audience,
-      locale,
-      permissionContext
-    );
+    await assertCanViewProfile(actorUserId, targetUserId, scope, roleIds.audience, locale, permissionContext);
 
     const effectiveScope = await resolveEffectiveProfileScope(
       actorUserId,
@@ -537,13 +502,7 @@ export namespace ProfileService {
 
     const [paymentMethods, filterCtx] = await Promise.all([
       PaymentMethodService.listForProfile(actorUserId, targetUserId, effectiveScope, locale),
-      buildProfileFilterContext(
-        actorUserId,
-        targetUserId,
-        effectiveScope,
-        roleIds.audience,
-        permissionContext
-      ),
+      buildProfileFilterContext(actorUserId, targetUserId, effectiveScope, roleIds.audience, permissionContext),
     ]);
     const paymentMethodDefaults = await PaymentMethodService.getDefaultsForProfile(
       actorUserId,

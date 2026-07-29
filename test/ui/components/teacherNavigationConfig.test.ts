@@ -42,4 +42,19 @@ describe("teacher sidebar navigation", () => {
     expect(classListItem?.href).toBe("/classes");
     expect(classListItem?.labelKey).toBe("teacherClassList");
   });
+
+  test("keeps classes nav when teacher-class-details is unavailable", () => {
+    const permissions: AppPermission[] = [
+      AppPermission.DashboardView,
+      AppPermission.TeacherViewDashboard,
+      AppPermission.ScheduleManageRecurring,
+      AppPermission.ProfileCoreIdentityViewOwn,
+    ];
+    const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, permissions);
+    const keys = items.map(item => item.key);
+
+    expect(keys).toContain("classes");
+    expect(keys).not.toContain("teacher-class-details");
+    expect(keys).not.toContain("home");
+  });
 });

@@ -1,9 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { resolveStudentsPageAudience } from "@/app/(dashboard)/lib/resolve-students-page-audience";
 import { AppPermission, UserRole } from "@/backend/enum";
 import type { UserPermissionContext } from "@/backend/services/auth/permissions.service";
-import {
-  resolveStudentsPageAudience,
-} from "@/app/(dashboard)/lib/resolve-students-page-audience";
 
 function buildContext(permissions: AppPermission[], isSuperAdmin = false): UserPermissionContext {
   return {
@@ -33,9 +31,7 @@ describe("resolveStudentsPageAudience", () => {
 
   test("prefers admin when multiple student permissions are present", () => {
     expect(
-      resolveStudentsPageAudience(
-        buildContext([AppPermission.STUDENTS_LIST, AppPermission.TEACHER_VIEW_STUDENTS])
-      )
+      resolveStudentsPageAudience(buildContext([AppPermission.STUDENTS_LIST, AppPermission.TEACHER_VIEW_STUDENTS]))
     ).toBe("admin");
   });
 

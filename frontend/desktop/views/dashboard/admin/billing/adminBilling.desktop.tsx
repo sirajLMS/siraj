@@ -10,12 +10,7 @@ import {
   getAdminInvoiceGridLabels,
   getStudentCreditGridLabels,
 } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
-import {
-  DesktopPageContainer,
-  DesktopPageHeader,
-  DesktopPrimaryPageAction,
-  DesktopSectionPanel,
-} from "@/frontend/desktop/components/ui";
+import { DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { AdminInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/admin/billing/components/adminInvoicesDataGrid.desktop";
 import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
 import { StudentCreditDataGridDesktop } from "@/frontend/desktop/views/dashboard/billing/components/studentCreditDataGrid.desktop";
@@ -155,19 +150,17 @@ export function AdminBillingDesktopView({
   const adminMetrics = buildAdminMetrics(summary, labels);
 
   return (
-    <DesktopPageContainer>
-      <DesktopPageHeader
-        title={labels.adminPageTitle}
-        subtitle={labels.adminPageSubtitle}
-        actions={
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      {canViewExchangeRates || canCreate ? (
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5, flexWrap: "wrap" }}>
           <AdminBillingHeaderActions
             labels={labels}
             canViewExchangeRates={canViewExchangeRates}
             canCreate={canCreate}
             onManualInvoice={onManualInvoice}
           />
-        }
-      />
+        </Box>
+      ) : null}
 
       <BillingMetricsRowDesktop metrics={adminMetrics} loading={summaryLoading} />
 
@@ -215,6 +208,6 @@ export function AdminBillingDesktopView({
           sendingReminderId={sendingReminderId}
         />
       )}
-    </DesktopPageContainer>
+    </Box>
   );
 }

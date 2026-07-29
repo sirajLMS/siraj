@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
-import { logger } from "@/backend/lib";
+// import { logger } from "@/backend/lib";
 import { type AppLocale, defaultLocale, locales } from "@/shared/locale/AppLocale";
 
 function resolveLocale(request: NextRequest): AppLocale {
@@ -31,10 +31,10 @@ export default function proxy(request: NextRequest) {
   requestHeaders.set("x-search", search);
   requestHeaders.set("x-nonce", nonce);
 
-  logger.log(`[proxy.ts] URL: ${request.url}`);
-  logger.log(`[proxy.ts] Cookie header in request.headers: ${request.headers.get("cookie")}`);
-  logger.log(`[proxy.ts] Cookie header in cloned requestHeaders: ${requestHeaders.get("cookie")}`);
-  logger.log(`[proxy.ts] request.cookies session_id: ${request.cookies.get("session_id")?.value}`);
+  // logger.log(`[proxy.ts] URL: ${request.url}`);
+  // logger.log(`[proxy.ts] Cookie header in request.headers: ${request.headers.get("cookie")}`);
+  // logger.log(`[proxy.ts] Cookie header in cloned requestHeaders: ${requestHeaders.get("cookie")}`);
+  // logger.log(`[proxy.ts] request.cookies session_id: ${request.cookies.get("session_id")?.value}`);
 
   const locale = resolveLocale(request);
 

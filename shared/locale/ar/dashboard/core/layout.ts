@@ -17,6 +17,9 @@ export const dashboardCoreLayoutAr: DashboardCoreLayoutLabels = {
   teacherDues: "مستحقات المعلمين",
   monthlyReports: "التقارير الشهرية",
   supervisorProfile: "ملفي",
+  pageNotFoundTitle: "الصفحة غير موجودة",
+  pageNotFoundDescription: "الصفحة التي تبحث عنها غير موجودة أو قد لا تملك صلاحية الوصول إليها.",
+  pageNotFoundBackToDashboard: "العودة إلى لوحة التحكم",
 
   // ─── Interpolated → typed functions ────────────────────────────────
   welcomeUser: name => `مرحبًا ${name}`,

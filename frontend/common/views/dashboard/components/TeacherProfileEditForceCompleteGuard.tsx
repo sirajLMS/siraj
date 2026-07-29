@@ -2,10 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import {
-  buildTeacherProfileEditHref,
-  hasForceCompleteSearchParam,
-} from "@/frontend/common/lib/profileCompletion";
+import { buildTeacherProfileEditHref, hasForceCompleteSearchParam } from "@/frontend/common/lib/profileCompletion";
 import { useRouter } from "@/shared/i18n/navigation";
 
 interface TeacherProfileEditForceCompleteGuardProps {

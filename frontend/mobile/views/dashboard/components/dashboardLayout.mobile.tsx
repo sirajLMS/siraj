@@ -147,9 +147,7 @@ export function DashboardLayoutMobile({
         <MobileMainScrollArea hideBottomNav={hideSidebarNavigation}>{children}</MobileMainScrollArea>
       </Box>
 
-      {hideSidebarNavigation ? null : (
-        <BottomNavbarMobile items={bottomNavItems} activeKey={activeNavKey} />
-      )}
+      {hideSidebarNavigation ? null : <BottomNavbarMobile items={bottomNavItems} activeKey={activeNavKey} />}
     </Box>
   );
 }

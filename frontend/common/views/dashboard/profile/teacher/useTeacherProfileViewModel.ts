@@ -2,8 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
-import { isTeacherNationalIdComplete } from "@/frontend/common/lib/profileCompletion";
-import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import {
   type AccountStatus,
   type CurrencyCode,
@@ -18,15 +16,17 @@ import {
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import { isTeacherNationalIdComplete } from "@/frontend/common/lib/profileCompletion";
 import { logger } from "@/frontend/common/utils/logger";
+import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import type {
   TeacherAdminData,
   TeacherOwnData,
   TeacherProfileViewLabels,
   TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
-import { Translation, useAppTranslation } from "@/shared/locale";
 import { useRouter } from "@/shared/i18n/navigation";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 

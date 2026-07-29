@@ -65,6 +65,47 @@ async function resolveUserFromRefreshToken(
   return { session, user };
 }
 
+function parseSessionPayload(payload: string): Record<string, unknown> | null {
+  try {
+    return JSON.parse(payload) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function logStaleRefreshTokenJti(sessionJti: string, cookieJti: string): void {
+  logger.warn("[RefreshToken] Stale refresh_token JTI with valid session_id; allowing rotation", {
+    sessionJti,
+    cookieJti,
+  });
+}
+
+function warnIfStaleRefreshTokenJti(
+  refreshToken: string | undefined,
+  refreshPayload: Awaited<ReturnType<typeof verifyToken>> | null,
+  session: SessionSelectType
+): void {
+  if (!refreshToken || !refreshPayload?.jti || !session.payload) return;
+
+  const sessionData = parseSessionPayload(session.payload);
+  const sessionJti = sessionData?.refreshTokenJti;
+  if (typeof sessionJti === "string" && sessionJti !== refreshPayload.jti) {
+    logStaleRefreshTokenJti(sessionJti, refreshPayload.jti);
+  }
+}
+
+function jtiMatchesSession(
+  refreshPayload: Awaited<ReturnType<typeof verifyToken>> | null,
+  session: SessionSelectType
+): boolean {
+  if (!refreshPayload?.jti && !session.payload) return true;
+  if (!refreshPayload?.jti || !session.payload) return false;
+
+  const sessionData = parseSessionPayload(session.payload);
+  const sessionJti = sessionData?.refreshTokenJti;
+  return !(typeof sessionJti === "string" && sessionJti !== refreshPayload.jti);
+}
+
 async function validateRefreshTokenJti(
   refreshToken: string | undefined,
   session: SessionSelectType,
@@ -78,38 +119,12 @@ async function validateRefreshTokenJti(
 
   const refreshPayload = refreshToken ? await verifyToken(refreshToken) : null;
 
-  // A valid session_id cookie is authoritative. Stale refresh_token cookies can linger
-  // after rotation (e.g. client still holds pre-refresh cookie while session JTI updated).
   if (resolvedViaSessionId) {
-    if (refreshToken && refreshPayload?.jti && session.payload) {
-      try {
-        const sessionData = JSON.parse(session.payload);
-        if (sessionData.refreshTokenJti && sessionData.refreshTokenJti !== refreshPayload.jti) {
-          logger.warn("[RefreshToken] Stale refresh_token JTI with valid session_id; allowing rotation", {
-            sessionJti: sessionData.refreshTokenJti,
-            cookieJti: refreshPayload.jti,
-          });
-        }
-      } catch {
-        /* ignore parse error */
-      }
-    }
+    warnIfStaleRefreshTokenJti(refreshToken, refreshPayload, session);
     return true;
   }
 
-  // If no refresh token is present and no JTI is stored in session, there's nothing to validate
-  if (!refreshPayload?.jti && !session.payload) return true;
-  // If refresh token is missing but session expects one, or vice versa, reject
-  if (!refreshPayload?.jti || !session.payload) return false;
-  try {
-    const sessionData = JSON.parse(session.payload);
-    if (sessionData.refreshTokenJti && sessionData.refreshTokenJti !== refreshPayload.jti) {
-      return false;
-    }
-  } catch {
-    /* ignore parse error */
-  }
-  return true;
+  return jtiMatchesSession(refreshPayload, session);
 }
 
 async function rotateTokensAndSession(

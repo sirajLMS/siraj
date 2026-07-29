@@ -18,6 +18,9 @@ import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/
  * every orphan page. Callers should pass `null` straight to the renderer
  * (no item highlighted) rather than substituting a default.
  */
+/** Stable nav key for account-footer profile routes (not present in filtered sidebar items). */
+export const PROFILE_NAV_KEY = "own-profile";
+
 /** True when the pathname is the account footer profile route (`/profile` or a sub-route). */
 export function isProfileRouteActive(pathname: string): boolean {
   const stripped = stripLocaleFromPath(pathname);
@@ -25,6 +28,10 @@ export function isProfileRouteActive(pathname: string): boolean {
 }
 
 export function getActiveNavKey(pathname: string, sidebarItems: readonly NavItem[]): string | null {
+  if (isProfileRouteActive(pathname)) {
+    return PROFILE_NAV_KEY;
+  }
+
   const stripped = stripLocaleFromPath(pathname);
   if (stripped === "/dashboard") {
     // The home/supervisor-home/teacher-today/etc. items all share

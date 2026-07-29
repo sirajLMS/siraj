@@ -10,9 +10,7 @@ import {
   ScheduleOverviewEmptyState,
 } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
-import {
-  scheduleOverviewListCanvasSx,
-} from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
+import { scheduleOverviewListCanvasSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { ScheduleOverviewLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/scheduleOverview.types";
 import { DesktopSectionPanel, DesktopStatusBadge } from "@/frontend/desktop/components/ui";

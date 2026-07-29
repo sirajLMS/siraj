@@ -10,14 +10,14 @@ import {
   ScheduleOverviewCardSkeleton,
   ScheduleOverviewEmptyState,
 } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
-import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
-import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
-import type { ScheduleOverviewLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/scheduleOverview.types";
 import {
   scheduleOverviewCardShellSx,
   scheduleOverviewListCanvasSx,
   scheduleOverviewMobileChromeSx,
 } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
+import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
+import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
+import type { ScheduleOverviewLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/scheduleOverview.types";
 import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { ScheduleOverviewMobileCard } from "@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.mobile";

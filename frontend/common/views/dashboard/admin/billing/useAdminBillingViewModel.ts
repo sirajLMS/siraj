@@ -306,11 +306,11 @@ export function useAdminBillingViewModel(_props: Readonly<UseAdminBillingViewMod
       totalOutstanding: outstandingTotals.primary,
       totalOutstandingSubLabel: outstandingTotals.breakdown,
       pendingInvoices: summaryData?.adminBillingSummary?.pendingCount ?? 0,
-      negativeBalanceCount: t.adminMetrics.negativeBalance(summaryData?.adminBillingSummary?.negativeBalanceCount ?? 0),
+      negativeBalanceCount: summaryData?.adminBillingSummary?.negativeBalanceCount ?? 0,
       mtdRevenue: mtdRevenueTotals.primary,
       mtdRevenueSubLabel: mtdRevenueTotals.breakdown,
     };
-  }, [summaryData, locale, fxMessages, t]);
+  }, [summaryData, locale, fxMessages]);
 
   const creditRows: StudentCreditRow[] = useMemo(
     () =>

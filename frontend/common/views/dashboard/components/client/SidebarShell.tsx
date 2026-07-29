@@ -24,12 +24,11 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
-import { SIDEBAR_END_NAV_ITEM_KEYS } from "@/frontend/common/views/dashboard/config/navigationConfig";
 import { NavIcon } from "@/frontend/common/views/dashboard/config/navIconRegistry";
-import { isProfileRouteActive } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
+import { SIDEBAR_END_NAV_ITEM_KEYS } from "@/frontend/common/views/dashboard/config/navigationConfig";
+import { PROFILE_NAV_KEY } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
 import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { Link } from "@/shared/i18n";
-import { usePathname } from "@/shared/i18n/navigation";
 
 export interface TranslatedNavItem extends NavItem {
   readonly label: string;
@@ -408,14 +407,15 @@ function SidebarAccountFooter({
   avatarUrl,
   logoutLabel,
   isCollapsed,
+  activeKey,
 }: {
   readonly userName: string;
   readonly avatarUrl: string;
   readonly logoutLabel: string;
   readonly isCollapsed: boolean;
+  readonly activeKey: string | null;
 }) {
-  const pathname = usePathname();
-  const isProfileActive = isProfileRouteActive(pathname);
+  const isProfileActive = activeKey === PROFILE_NAV_KEY;
 
   const profileButton = (
     <ListItemButton
@@ -549,6 +549,7 @@ function SidebarContent({
         avatarUrl={avatarUrl}
         logoutLabel={logoutLabel}
         isCollapsed={isCollapsed}
+        activeKey={activeKey}
       />
     </Box>
   );
@@ -654,7 +655,13 @@ function SidebarMobileDrawer({
         >
           <SidebarMobileNav navGroups={navGroups} navItems={navItems} activeKey={activeKey} />
         </Box>
-        <SidebarAccountFooter userName={userName} avatarUrl={avatarUrl} logoutLabel={logoutLabel} isCollapsed={false} />
+        <SidebarAccountFooter
+          userName={userName}
+          avatarUrl={avatarUrl}
+          logoutLabel={logoutLabel}
+          isCollapsed={false}
+          activeKey={activeKey}
+        />
       </Box>
     </Drawer>
   );

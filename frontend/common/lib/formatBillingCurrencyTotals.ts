@@ -1,5 +1,6 @@
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { FxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { formatLockedAmount } from "@/frontend/common/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 
 export interface BillingCurrencyBucket {
@@ -45,6 +46,54 @@ export interface BillingCurrencyTotalsDisplay {
   readonly breakdown?: string;
 }
 
+function formatSingleBucketForMetric(
+  bucket: BillingCurrencyBucket,
+  locale: string,
+  messages: FxDisplayMessages
+): BillingCurrencyTotalsDisplay {
+  const lockedFormatted = formatLockedAmount(bucket.amount, bucket.currency, locale);
+  const displayAmount = bucket.displayAmount;
+
+  if (!displayAmount?.amount || !displayAmount.currency || displayAmount.stale) {
+    return {
+      primary: lockedFormatted,
+      breakdown: formatCurrencyForDisplay(
+        bucket.amount,
+        bucket.currency,
+        displayAmount
+          ? {
+              amount: displayAmount.amount,
+              currency: displayAmount.currency ?? bucket.currency,
+              stale: displayAmount.stale ?? true,
+            }
+          : null,
+        locale,
+        messages
+      ),
+    };
+  }
+
+  if (bucket.currency === displayAmount.currency) {
+    return { primary: lockedFormatted };
+  }
+
+  const convertedFormatted = formatLockedAmount(displayAmount.amount, displayAmount.currency, locale);
+  return {
+    primary: convertedFormatted,
+    breakdown: formatCurrencyForDisplay(
+      bucket.amount,
+      bucket.currency,
+      {
+        amount: displayAmount.amount,
+        currency: displayAmount.currency,
+        stale: displayAmount.stale ?? false,
+      },
+      locale,
+      messages
+    ),
+  };
+}
+
 export function formatBillingCurrencyTotals(
   buckets: readonly BillingCurrencyBucket[],
   locale: string,
@@ -52,6 +101,10 @@ export function formatBillingCurrencyTotals(
 ): BillingCurrencyTotalsDisplay {
   if (buckets.length === 0) {
     return { primary: "—" };
+  }
+
+  if (buckets.length === 1) {
+    return formatSingleBucketForMetric(buckets[0], locale, messages);
   }
 
   const formattedBuckets = buckets.map(bucket =>

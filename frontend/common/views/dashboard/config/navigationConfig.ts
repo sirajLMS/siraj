@@ -200,6 +200,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     audience: "parent",
   },
   {
+    key: "billing-parent",
+    labelKey: "invoices",
+    iconKey: "receiptLong",
+    href: "/billing/invoices",
+    section: "main",
+    permission: PAGE_PERMISSIONS.billingParent,
+    audience: "parent",
+  },
+  {
     key: "parent-suggest",
     labelKey: "suggest",
     iconKey: "lightbulb",
@@ -888,7 +897,14 @@ export function applyParentNavOverrides(items: readonly NavItem[], permissions: 
     return [...items];
   }
 
-  const hiddenKeys = new Set(["home", "teacher-class-details", "suggestions-submit", "schedule"]);
+  const hiddenKeys = new Set([
+    "home",
+    "teacher-class-details",
+    "classes",
+    "billing-admin",
+    "suggestions-submit",
+    "schedule",
+  ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }
 
@@ -904,7 +920,12 @@ export function applyTeacherNavOverrides(items: readonly NavItem[], permissions:
     return [...items];
   }
 
-  const hiddenKeys = new Set(["home", "books-and-bags", "classes"]);
+  const hiddenKeys = new Set(["home", "books-and-bags"]);
+  // Hide the admin grouped "classes" item only when the teacher-portal
+  // "teacher-class-details" entry is also available (same /classes route).
+  if (items.some(item => item.key === "teacher-class-details")) {
+    hiddenKeys.add("classes");
+  }
   return items.filter(item => !hiddenKeys.has(item.key));
 }
 

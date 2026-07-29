@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
-import { AppPermission, CurrencyCode, ProfileAudience, ProfileMode, ProfileScope, UserRole } from "@/backend/enum";
-import type { ProfilePageContext } from "@/backend/types";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { ParentRepository, StaffProfileRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { AppPermission, CurrencyCode, ProfileAudience, ProfileMode, ProfileScope, UserRole } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { isRedirect, ProfileService, toParentRepoInput } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { ProfilePageContext } from "@/backend/types";
 
 afterEach(() => {
   spyOn(TeacherRepository, "findByUserId").mockRestore();

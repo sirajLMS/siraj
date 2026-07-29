@@ -140,10 +140,7 @@ export function ProfilePageClient(props: Readonly<ProfilePageClientProps>) {
   return (
     <ProfileShell {...shellProps}>
       {showTeacherForceCompleteGuard ? (
-        <TeacherProfileEditForceCompleteGuard
-          active
-          nationalIdComplete={props.nationalIdComplete ?? true}
-        />
+        <TeacherProfileEditForceCompleteGuard active nationalIdComplete={props.nationalIdComplete ?? true} />
       ) : null}
       {scope === ProfileScope.Own && mode === ProfileMode.View ? <DisplayCurrencyHint /> : null}
       {forceComplete && audience === ProfileAudience.Teacher ? (

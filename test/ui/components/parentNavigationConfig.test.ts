@@ -30,9 +30,10 @@ describe("parent sidebar navigation", () => {
     expect(keys).toContain("parent-rules");
     expect(keys).toContain("complaints-submit");
     expect(keys).toContain("parent-social");
-    expect(keys).toContain("logout");
     expect(keys).not.toContain("home");
     expect(keys).not.toContain("teacher-class-details");
+    expect(keys).not.toContain("classes");
+    expect(keys).not.toContain("billing-admin");
     expect(keys).not.toContain("suggestions-submit");
   });
 });
