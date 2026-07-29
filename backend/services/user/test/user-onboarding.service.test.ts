@@ -5,7 +5,10 @@ import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
+import {
+  type UserOnboardingService,
+  UserOnboardingService as UserOnboardingServiceImpl,
+} from "@/backend/services/user/user-onboarding.service";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
@@ -19,85 +22,99 @@ function generateTestPassword(): string {
   return `TestPass-${randomUUID().slice(0, 8)}!`;
 }
 
+type CreateUserOptions<TExtension = { id: string; status: string }> =
+  UserOnboardingService.CreateUserOfTypeOptions<TExtension>;
+
+function buildCreateUserOptions<TExtension>(
+  overrides: Partial<CreateUserOptions<TExtension>> = {}
+): CreateUserOptions<TExtension> {
+  return {
+    actorUserId: randomUUID(),
+    permission: AppPermission.TEACHERS_CREATE,
+    coreInput: {
+      name: "X",
+      email: `test-${randomUUID()}@example.com`,
+      password: generateTestPassword(),
+    },
+    groupSlug: SystemPermissionGroupSlug.TEACHER_DEFAULT,
+    createExtension: async () => ({ id: "fake", status: "ACTIVATED" }) as TExtension,
+    tErrors,
+    logTag: "Test",
+    ...overrides,
+  };
+}
+
+async function expectCreateUserOfTypeError(
+  overrides: Partial<CreateUserOptions>,
+  assertMessage: (message: string) => void,
+  spies?: {
+    readonly hasPermission?: boolean;
+    readonly existsByEmail?: boolean;
+    readonly listAllGroups?: Array<{ id: string; slug: SystemPermissionGroupSlug }>;
+  }
+): Promise<void> {
+  const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(
+    spies?.hasPermission ?? true
+  );
+  const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(spies?.existsByEmail ?? false);
+  const listAllGroupsSpy =
+    spies?.listAllGroups === undefined
+      ? null
+      : spyOn(PermissionManagementRepository, "listAllGroups").mockResolvedValue(spies.listAllGroups as never);
+
+  let error: unknown = null;
+  try {
+    await UserOnboardingServiceImpl.createUserOfType(buildCreateUserOptions(overrides));
+  } catch (e) {
+    error = e;
+  }
+
+  expect(error).not.toBeNull();
+  assertMessage((error as Error).message);
+
+  hasPermissionSpy.mockRestore();
+  existsByEmailSpy.mockRestore();
+  listAllGroupsSpy?.mockRestore();
+}
+
+function mockCreateUserSpies() {
+  return {
+    hasPermissionSpy: spyOn(PermissionsService, "hasPermission").mockResolvedValue(true),
+    existsByEmailSpy: spyOn(UserRepository, "existsByEmail").mockResolvedValue(false),
+  };
+}
+
 describe("UserOnboardingService.createUserOfType", () => {
   test("rejects when actor lacks permission", async () => {
-    const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(false);
-    let error: unknown = null;
-    try {
-      await UserOnboardingService.createUserOfType({
-        actorUserId: "[CC_REDACTED]-[CC_REDACTED]",
-        permission: AppPermission.TEACHERS_CREATE,
-        coreInput: {
-          name: "X",
-          email: "x-" + randomUUID() + "@example.com",
-          password: generateTestPassword(),
-        },
-        groupSlug: SystemPermissionGroupSlug.TEACHER_DEFAULT,
-        createExtension: async () => ({ id: "fake", status: "ACTIVATED" }),
-        tErrors,
-        logTag: "Test",
-      });
-    } catch (e) {
-      error = e;
-    }
-    expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("permission");
-    hasPermissionSpy.mockRestore();
+    await expectCreateUserOfTypeError({}, message => expect(message).toContain("permission"), {
+      hasPermission: false,
+    });
   });
 
   test("rejects duplicate email", async () => {
-    const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
-    const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(true);
-    let error: unknown = null;
-    try {
-      await UserOnboardingService.createUserOfType({
-        actorUserId: "[CC_REDACTED]-[CC_REDACTED]",
-        permission: AppPermission.TEACHERS_CREATE,
-        coreInput: {
-          name: "X",
-          email: "dup-" + randomUUID() + "@example.com",
-          password: generateTestPassword(),
-        },
-        groupSlug: SystemPermissionGroupSlug.TEACHER_DEFAULT,
-        createExtension: async () => ({ id: "fake", status: "ACTIVATED" }),
-        tErrors,
-        logTag: "Test",
-      });
-    } catch (e) {
-      error = e;
-    }
-    expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("email");
-    hasPermissionSpy.mockRestore();
-    existsByEmailSpy.mockRestore();
+    await expectCreateUserOfTypeError({}, message => expect(message).toContain("email"), {
+      existsByEmail: true,
+    });
   });
 
   test("runs preChecks before the transaction", async () => {
-    const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
-    const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(false);
     let preChecksRan = false;
     let error: unknown = null;
+    const { hasPermissionSpy, existsByEmailSpy } = mockCreateUserSpies();
+
     try {
-      await UserOnboardingService.createUserOfType({
-        actorUserId: "[CC_REDACTED]-[CC_REDACTED]",
-        permission: AppPermission.TEACHERS_CREATE,
-        coreInput: {
-          name: "X",
-          email: "pc-" + randomUUID() + "@example.com",
-          password: generateTestPassword(),
-        },
-        groupSlug: SystemPermissionGroupSlug.TEACHER_DEFAULT,
-        preChecks: async () => {
-          preChecksRan = true;
-          throw new Error("pre-check-boom");
-        },
-        createExtension: async () => ({ id: "fake", status: "ACTIVATED" }),
-        tErrors,
-        logTag: "Test",
-      });
+      await UserOnboardingServiceImpl.createUserOfType(
+        buildCreateUserOptions({
+          preChecks: async () => {
+            preChecksRan = true;
+            throw new Error("pre-check-boom");
+          },
+        })
+      );
     } catch (e) {
       error = e;
     }
+
     expect(preChecksRan).toBeTrue();
     expect((error as Error).message).toBe("pre-check-boom");
     hasPermissionSpy.mockRestore();
@@ -107,19 +124,17 @@ describe("UserOnboardingService.createUserOfType", () => {
   test("supports dynamic groupSlug based on the extension", async () => {
     await runInRollback(async txContext => {
       const actor = await createTestUser(txContext);
-      const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
-      const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(false);
+      const { hasPermissionSpy, existsByEmailSpy } = mockCreateUserSpies();
 
       type MyExtension = { kind: "admin" | "supervisor" };
       const extension: MyExtension = { kind: "admin" };
 
-      const result = await UserOnboardingService.createUserOfType<MyExtension>(
-        {
+      const result = await UserOnboardingServiceImpl.createUserOfType<MyExtension>(
+        buildCreateUserOptions({
           actorUserId: actor.id,
-          permission: AppPermission.TEACHERS_CREATE,
           coreInput: {
             name: "John Smith",
-            email: "dyn-" + randomUUID() + "@example.com",
+            email: `dyn-${randomUUID()}@example.com`,
             password: generateTestPassword(),
           },
           groupSlug: ext =>
@@ -127,9 +142,8 @@ describe("UserOnboardingService.createUserOfType", () => {
               ? SystemPermissionGroupSlug.ACADEMY_ADMIN
               : SystemPermissionGroupSlug.SUPERVISOR_DEFAULT,
           createExtension: async () => extension,
-          tErrors,
           logTag: "Dynamic",
-        },
+        }),
         txContext
       );
 
@@ -142,16 +156,15 @@ describe("UserOnboardingService.createUserOfType", () => {
   test("writes optional profile fields (timezone + phone) to the users row", async () => {
     await runInRollback(async txContext => {
       const actor = await createTestUser(txContext);
-      const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
-      const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(false);
+      const { hasPermissionSpy, existsByEmailSpy } = mockCreateUserSpies();
 
-      const result = await UserOnboardingService.createUserOfType<{ id: string; status: string }>(
-        {
+      const result = await UserOnboardingServiceImpl.createUserOfType<{ id: string; status: string }>(
+        buildCreateUserOptions({
           actorUserId: actor.id,
           permission: AppPermission.PARENTS_CREATE,
           coreInput: {
             name: "Profiled",
-            email: "pf-" + randomUUID() + "@example.com",
+            email: `pf-${randomUUID()}@example.com`,
             password: generateTestPassword(),
           },
           profileFields: {
@@ -160,48 +173,30 @@ describe("UserOnboardingService.createUserOfType", () => {
           },
           groupSlug: SystemPermissionGroupSlug.PARENT_DEFAULT,
           createExtension: async (user: UserReturnType) => ({ id: user.id, status: "ACTIVATED" }),
-          tErrors,
           logTag: "Profile",
-        },
+        }),
         txContext
       );
 
       expect(result.user.id).toBeDefined();
-      // Timezone update + phone update should have run inside the transaction — no throw, user row present.
       hasPermissionSpy.mockRestore();
       existsByEmailSpy.mockRestore();
     });
   });
 
   test("throws permissionGroupNotFound when the slug is missing", async () => {
-    const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
-    const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(false);
-    const listAllGroupsSpy = spyOn(PermissionManagementRepository, "listAllGroups").mockResolvedValue([
-      { id: "g1", slug: SystemPermissionGroupSlug.PARENT_DEFAULT } as never,
-    ]);
-
-    let error: unknown = null;
-    try {
-      await UserOnboardingService.createUserOfType({
-        actorUserId: "[CC_REDACTED]-[CC_REDACTED]",
-        permission: AppPermission.TEACHERS_CREATE,
+    await expectCreateUserOfTypeError(
+      {
         coreInput: {
           name: "Missing Group",
-          email: "miss-" + randomUUID() + "@example.com",
+          email: `miss-${randomUUID()}@example.com`,
           password: generateTestPassword(),
         },
-        groupSlug: SystemPermissionGroupSlug.TEACHER_DEFAULT,
-        createExtension: async () => ({ id: "fake", status: "ACTIVATED" }),
-        tErrors,
-        logTag: "Test",
-      });
-    } catch (e) {
-      error = e;
-    }
-    expect(error).not.toBeNull();
-    expect((error as Error).message).toBe(tErrors.permissionGroup.permissionGroupNotFound);
-    hasPermissionSpy.mockRestore();
-    existsByEmailSpy.mockRestore();
-    listAllGroupsSpy.mockRestore();
+      },
+      message => expect(message).toBe(tErrors.permissionGroup.permissionGroupNotFound),
+      {
+        listAllGroups: [{ id: "g1", slug: SystemPermissionGroupSlug.PARENT_DEFAULT }],
+      }
+    );
   });
 });

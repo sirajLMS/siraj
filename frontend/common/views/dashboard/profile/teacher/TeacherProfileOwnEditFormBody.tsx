@@ -1,0 +1,113 @@
+"use client";
+
+import { Box, Stack, TextField } from "@mui/material";
+import type { Control, UseFormRegister } from "react-hook-form";
+import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
+import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ProfilePersonalSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection";
+import type { ProfilePersonalFieldLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
+import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
+import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
+import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
+import type { toTeacherSectionLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
+import type { TeacherOwnEditFormData } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
+
+type TeacherProfileOwnEditFormBodyProps = {
+  readonly canEdit: (groupKey: ProfileFieldGroupKey) => boolean;
+  readonly control: Control<TeacherOwnEditFormData>;
+  readonly register: UseFormRegister<TeacherOwnEditFormData>;
+  readonly sectionLabels: ReturnType<typeof toTeacherSectionLabels>;
+  readonly personalFieldLabels: ProfilePersonalFieldLabels;
+  readonly teacherData: { name: string | null; email: string | null };
+  readonly identitySectionTitle: string;
+  readonly nationalIdLabel: string;
+  readonly nationalIdError?: string;
+  readonly avatarLabel: string;
+  readonly editAvatarTitle: string;
+  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
+};
+
+export function TeacherProfileOwnEditFormBody({
+  canEdit,
+  control,
+  register,
+  sectionLabels,
+  personalFieldLabels,
+  teacherData,
+  identitySectionTitle,
+  nationalIdLabel,
+  nationalIdError,
+  avatarLabel,
+  editAvatarTitle,
+  onUploadAvatar,
+}: Readonly<TeacherProfileOwnEditFormBodyProps>) {
+  const scope = ProfileScope.Own;
+
+  return (
+    <Stack spacing={3}>
+      {canEdit("core_identity") ? (
+        <AvatarImageField
+          control={control}
+          name="avatarUrl"
+          label={avatarLabel}
+          title={editAvatarTitle}
+          onUploadAvatar={onUploadAvatar}
+        />
+      ) : null}
+      <Box
+        sx={{
+          display: "grid",
+          gap: 3,
+          minWidth: 0,
+          width: "100%",
+          gridTemplateColumns: {
+            xs: "minmax(0, 1fr)",
+            lg: "repeat(2, minmax(0, 1fr))",
+          },
+        }}
+      >
+        {canEdit("core_identity") ? (
+          <AccountSection
+            labels={sectionLabels}
+            mode="edit"
+            scope={scope}
+            teacherData={teacherData}
+            register={register}
+            control={control}
+          />
+        ) : null}
+        {canEdit("core_contact") || canEdit("teacher_identity") ? (
+          <ContactSection
+            labels={sectionLabels}
+            scope={scope}
+            isAdminScope={false}
+            register={register}
+            control={control}
+          />
+        ) : null}
+        {canEdit("teacher_professional") ? (
+          <ProfilePersonalSection
+            mode="edit"
+            scope={scope}
+            fieldGroupKey="teacher_professional"
+            sectionTitle={identitySectionTitle}
+            fieldLabels={personalFieldLabels}
+            baseLabels={sectionLabels.baseLabels}
+            fields={{ nationality: true }}
+            register={register}
+            control={control}
+          />
+        ) : null}
+        <TextField
+          {...register("nationalId")}
+          label={nationalIdLabel}
+          required
+          error={Boolean(nationalIdError)}
+          helperText={nationalIdError}
+          fullWidth
+          size="small"
+        />
+      </Box>
+    </Stack>
+  );
+}
